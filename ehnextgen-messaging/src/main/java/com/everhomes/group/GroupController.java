@@ -897,13 +897,30 @@ public class GroupController extends ControllerBase {
 		return new RestResponse();
 	}
 
+    /**
+     * <p>申请加入行业协会</p>
+     * <b>URL: /group/newGuildApply</b>
+     */
+    @RequestMapping("newGuildApply")
+    @RestReturn(String.class)
+    public RestResponse newGuildApply(NewGuildApplyCommand cmd){
 
+        groupService.newGuildApply(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
-    @RequestMapping("findGuildApplyById")
+    /**
+     * <p>获取行业协会申请信息</p>
+     * <b>URL: /group/findGuildApply</b>
+     */
+    @RequestMapping("findGuildApply")
     @RestReturn(GuildApplyDTO.class)
-    public GuildApplyDTO findGuildApply(FindGuildApplyCommand cmd){
+    public RestResponse findGuildApply(FindGuildApplyCommand cmd){
 
-        ListGroupCommandResponse cmdResponse = this.groupService.searchGroup(cmd);
+        GuildApplyDTO cmdResponse = groupService.findGuildApply(cmd);
 
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -911,11 +928,31 @@ public class GroupController extends ControllerBase {
         return response;
     }
 
-    @RequestMapping("findIndustryTypeById")
+    /**
+     * <p>获取行业协会申请信息</p>
+     * <b>URL: /group/listGuildApplies</b>
+     */
+    @RequestMapping("listGuildApplies")
+    @RestReturn(ListGuildAppliesResponse.class)
+    public RestResponse listGuildApplies(ListGuildAppliesCommand cmd){
+
+        ListGuildAppliesResponse cmdResponse = groupService.listGuildApplies(cmd);
+
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <p>获取所述行业类型</p>
+     * <b>URL: /group/findIndustryType</b>
+     */
+    @RequestMapping("findIndustryType")
     @RestReturn(IndustryTypeDTO.class)
-    public IndustryTypeDTO findIndustryType(ListIndustryTypesCommand cmd){
+    public RestResponse findIndustryType(FindIndustryTypeCommand cmd){
 
-        ListGroupCommandResponse cmdResponse = this.groupService.searchGroup(cmd);
+        IndustryTypeDTO cmdResponse = groupService.findIndustryType(cmd);
 
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -923,27 +960,20 @@ public class GroupController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <p>获取所述行业类型</p>
+     * <b>URL: /group/listIndustryTypes</b>
+     */
     @RequestMapping("listIndustryTypes")
-    @RestReturn(String.class)
-    List<IndustryTypeDTO> listIndustryTypes(FindIndustryTypeCommand cmd){
+    @RestReturn(ListIndustryTypesResponse.class)
+    public RestResponse listIndustryTypes(ListIndustryTypesCommand cmd){
 
-        ListGroupCommandResponse cmdResponse = this.groupService.searchGroup(cmd);
-
-        RestResponse response = new RestResponse(cmdResponse);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    @RequestMapping("cancelGroupRequest")
-    @RestReturn(String.class)
-    List<GuildApplyDTO> listGuildApplies(ListGuildAppliesCommand cmd){
-
-        ListGroupCommandResponse cmdResponse = this.groupService.searchGroup(cmd);
+        ListIndustryTypesResponse cmdResponse = groupService.listIndustryTypes(cmd);
 
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
+
 }

@@ -170,11 +170,13 @@ public interface GroupService {
 
     public String getGroupAlias(Long groupId);
 
-    GuildApplyDTO findGuildApplyById(Long id);
+    void newGuildApply(NewGuildApplyCommand cmd);
 
-    IndustryTypeDTO findIndustryTypeById(Long id);
+    GuildApplyDTO findGuildApply(FindGuildApplyCommand cmd);
 
-    List<IndustryTypeDTO> listIndustryTypes(Integer namespaceId);
+    IndustryTypeDTO findIndustryType(FindIndustryTypeCommand cmd);
 
-    List<GuildApplyDTO> listGuildApplies(Integer namespaceId, Long groupId, Long applicantUid);
+    ListIndustryTypesResponse listIndustryTypes(ListIndustryTypesCommand cmd);
+
+    ListGuildAppliesResponse listGuildApplies(ListGuildAppliesCommand cmd);
 }

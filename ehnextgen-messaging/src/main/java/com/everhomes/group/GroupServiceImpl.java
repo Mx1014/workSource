@@ -5515,4 +5515,45 @@ public class GroupServiceImpl implements GroupService {
             broadcastProvider.deleteBroadcast(broadcast);
         }
     }
+
+    @Override
+    public GuildApplyDTO findGuildApply(FindGuildApplyCommand cmd) {
+        GuildApply guildApply = groupProvider.findGuildApplyById(cmd.getId());
+        return ConvertHelper.convert(guildApply, GuildApplyDTO.class);
+    }
+
+    @Override
+    public IndustryTypeDTO findIndustryType(FindIndustryTypeCommand cmd) {
+        IndustryType industryType = groupProvider.findIndustryTypeById(cmd.getId());
+        return ConvertHelper.convert(industryType, IndustryTypeDTO.class);
+    }
+
+    @Override
+    public ListIndustryTypesResponse listIndustryTypes(ListIndustryTypesCommand cmd) {
+        ListIndustryTypesResponse response = new ListIndustryTypesResponse();
+        List<IndustryType> list = groupProvider.listIndustryTypes(cmd.getNamespaceId());
+        if(list != null){
+            List<IndustryTypeDTO> dtos =  list.stream().map(r-> ConvertHelper.convert(r, IndustryTypeDTO.class))
+                    .collect(Collectors.toList());
+            response.setDtos(dtos);
+        }
+        return response;
+    }
+
+    @Override
+    public ListGuildAppliesResponse listGuildApplies(ListGuildAppliesCommand cmd) {
+        ListGuildAppliesResponse response = new ListGuildAppliesResponse();
+        List<GuildApply> list = groupProvider.listGuildApplies(cmd.getNamespaceId(), cmd.getGroupId(), cmd.getApplicantUid());
+        if(list != null){
+            List<GuildApplyDTO> dtos =  list.stream().map(r-> ConvertHelper.convert(r, GuildApplyDTO.class))
+                    .collect(Collectors.toList());
+            response.setDtos(dtos);
+        }
+        return response;
+    }
+
+    @Override
+    public void newGuildApply(NewGuildApplyCommand cmd) {
+        
+    }
 }
