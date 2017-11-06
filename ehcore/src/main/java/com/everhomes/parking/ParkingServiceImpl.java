@@ -2025,7 +2025,7 @@ public class ParkingServiceImpl implements ParkingService {
 		Long userId = UserContext.currentUserId();
 
 		List<ParkingCarVerification> verifications = parkingProvider.listParkingCarVerifications(cmd.getOwnerType(), cmd.getOwnerId(),
-				cmd.getParkingLotId(), userId, ParkingCarVerificationSourceType.CAR_VERIFICATION.getCode(), cmd.getPageAnchor(), pageSize);
+				cmd.getParkingLotId(), userId, null, cmd.getPageAnchor(), pageSize);
 
 		ListParkingCarVerificationsResponse response = new ListParkingCarVerificationsResponse();
 
