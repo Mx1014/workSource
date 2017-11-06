@@ -362,7 +362,15 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 	}
 
 	private void createCarVerification(ParkingCardRequest parkingCardRequest) {
-		ParkingCarVerification verification = new ParkingCarVerification();
+
+		ParkingCarVerification verification = parkingProvider.findParkingCarVerificationByUserId(parkingCardRequest.getOwnerType(),
+				parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), parkingCardRequest.getCreatorUid());
+
+		if (null != verification) {
+			return;
+		}
+
+		verification = new ParkingCarVerification();
 		verification.setOwnerType(parkingCardRequest.getOwnerType());
 		verification.setOwnerId(parkingCardRequest.getOwnerId());
 		verification.setParkingLotId(parkingCardRequest.getParkingLotId());

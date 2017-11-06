@@ -2107,10 +2107,20 @@ public class ParkingServiceImpl implements ParkingService {
 	public ParkingCarVerificationDTO requestCarVerification(RequestCarVerificationCommand cmd) {
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
-		ParkingCarVerification verification = ConvertHelper.convert(cmd, ParkingCarVerification.class);
+		Long userId = UserContext.currentUserId();
+
+		ParkingCarVerification verification = parkingProvider.findParkingCarVerificationByUserId(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getParkingLotId(), userId);
+
+		if (null != verification) {
+			LOGGER.error("PlateNumber has been add, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_REPEAT_ADD,
+					"PlateNumber has been add");
+		}
+
+		verification = ConvertHelper.convert(cmd, ParkingCarVerification.class);
 		verification.setSourceType(ParkingCarVerificationSourceType.CAR_VERIFICATION.getCode());
 
-		Long userId = UserContext.currentUserId();
 		verification.setRequestorUid(userId);
 		verification.setCreatorUid(userId);
 		verification.setCreateTime(new Timestamp(System.currentTimeMillis()));
