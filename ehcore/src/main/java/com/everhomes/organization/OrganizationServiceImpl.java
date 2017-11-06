@@ -6,6 +6,7 @@ import com.everhomes.acl.*;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.archives.ArchivesService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -270,6 +271,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Autowired
     private UserOrganizationProvider userOrganizationProvider;
+
+    @Autowired
+    private ArchivesService archivesService;
 
     private int getPageCount(int totalCount, int pageSize) {
         int pageCount = totalCount / pageSize;
@@ -6811,9 +6815,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                 OrganizationMemberDetails detail =  organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
                 detail.setContactName(contactName);
                 organizationProvider.updateOrganizationMemberDetails(detail, member.getDetailId());
+                // 删除离职Log表中的记录
+                this.archivesService.deleteArchivesDismissEmployees(detail.getId(),detail.getOrganizationId());
             }
-
         }
+
 
         //是注册用户或者从加入公司待审核的注册用户 则需要发送消息等等操作
         if (sendMsgFlag) {
