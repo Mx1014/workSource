@@ -109,4 +109,6 @@ public interface ParkingService {
     ParkingCarVerificationDTO requestCarVerification(RequestCarVerificationCommand cmd);
 
     void deleteCarVerification(DeleteCarVerificationCommand cmd);
+
+    ListParkingCarsResponse listParkingCars(ListParkingCarsCommand cmd);
 }

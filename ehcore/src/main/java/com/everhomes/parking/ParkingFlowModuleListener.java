@@ -98,6 +98,8 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 			ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(flowCase.getReferId());
 			parkingCardRequest.setStatus(ParkingCardRequestStatus.INACTIVE.getCode());
 			parkingCardRequest.setCancelTime(new Timestamp(System.currentTimeMillis()));
+
+
 			parkingProvider.updateParkingCardRequest(parkingCardRequest);
 		}
 	}
@@ -105,12 +107,48 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 	@Override
 	public void onFlowCaseStateChanged(FlowCaseState ctx) {
 		// TODO Auto-generated method stub
-		
+		FlowGraphNode currentNode = ctx.getCurrentNode();
+		FlowNode flowNode = currentNode.getFlowNode();
+		FlowCase flowCase = ctx.getFlowCase();
+
+		if (flowCase.getReferType().equals(EntityType.PARKING_CAR_VERIFICATION.getCode())) {
+			ParkingCarVerification verification = parkingProvider.findParkingCarVerificationById(flowCase.getReferId());
+
+			if (verification.getFlowCaseId() == null || verification.getFlowCaseId() == 0L) {
+				verification.setFlowCaseId(flowCase.getId());
+			}
+
+			verification.setStatus(convertStatus(flowCase.getStatus()));
+
+			parkingProvider.updateParkingCarVerification(verification);
+		}
+	}
+
+	private Byte convertStatus(Byte flowCaseStatus) {
+
+		FlowCaseStatus status = FlowCaseStatus.fromCode(flowCaseStatus);
+
+		switch (status) {
+			case PROCESS: return ParkingCarVerificationStatus.AUDITING.getCode();
+			case ABSORTED: return ParkingCarVerificationStatus.FAILED.getCode();
+			case FINISHED: return ParkingCarVerificationStatus.SUCCEED.getCode();
+			default: return ParkingCarVerificationStatus.AUDITING.getCode();
+		}
 	}
 
 	@Override
 	public void onFlowCaseEnd(FlowCaseState ctx) {
-		// TODO Auto-generated method stub
+		FlowGraphNode currentNode = ctx.getCurrentNode();
+		FlowNode flowNode = currentNode.getFlowNode();
+		FlowCase flowCase = ctx.getFlowCase();
+
+		if (flowCase.getReferType().equals(EntityType.PARKING_CAR_VERIFICATION.getCode())) {
+			ParkingCarVerification verification = parkingProvider.findParkingCarVerificationById(flowCase.getReferId());
+
+			verification.setStatus(convertStatus(flowCase.getStatus()));
+
+			parkingProvider.updateParkingCarVerification(verification);
+		}
 		
 	}
 
@@ -189,6 +227,11 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 			}
 
 			flowCase.setCustomObject(JSONObject.toJSONString(dto));//StringHelper.toJsonString(dto)
+		}else {
+			GetParkingCarVerificationByIdCommand cmd = new GetParkingCarVerificationByIdCommand();
+			cmd.setId(flowCase.getReferId());
+			ParkingCarVerificationDTO dto = parkingService.getParkingCarVerificationById(cmd);
+			flowCase.setCustomObject(JSONObject.toJSONString(dto));//StringHelper.toJsonString(dto)
 		}
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		return entities;
@@ -263,7 +306,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 									"surplusCount is 0.");
 						}
 					}
-
+					//智能模式，排队中 -》办理成功
 					if (ParkingRequestFlowType.INTELLIGENT.getCode().equals(Integer.valueOf(tag1))) {
 						LOGGER.debug("update parking request, stepType={}, tag1={}", stepType, tag1);
 						parkingCardRequest.setStatus(ParkingCardRequestStatus.SUCCEED.getCode());
@@ -298,6 +341,8 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 						parkingCardRequest.setStatus(ParkingCardRequestStatus.SUCCEED.getCode());
 						parkingCardRequest.setProcessSucceedTime(new Timestamp(now));
 						parkingProvider.updateParkingCardRequest(parkingCardRequest);
+
+						createCarVerification(parkingCardRequest);
 					}
 				}
 			} else if (FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
@@ -305,6 +350,8 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.OPENED.getCode());
 					parkingCardRequest.setOpenCardTime(new Timestamp(now));
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
+
+					createCarVerification(parkingCardRequest);
 				} else {
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.INACTIVE.getCode());
 					parkingCardRequest.setCancelTime(new Timestamp(now));
@@ -312,6 +359,20 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 				}
 			}
 		}
+	}
+
+	private void createCarVerification(ParkingCardRequest parkingCardRequest) {
+		ParkingCarVerification verification = new ParkingCarVerification();
+		verification.setOwnerType(parkingCardRequest.getOwnerType());
+		verification.setOwnerId(parkingCardRequest.getOwnerId());
+		verification.setParkingLotId(parkingCardRequest.getParkingLotId());
+		verification.setPlateNumber(parkingCardRequest.getPlateNumber());
+		verification.setSourceType(ParkingCarVerificationSourceType.CARD_REQUEST.getCode());
+		verification.setStatus(ParkingCarVerificationStatus.SUCCEED.getCode());
+		verification.setRequestorUid(parkingCardRequest.getCreatorUid());
+		verification.setCreatorUid(parkingCardRequest.getCreatorUid());
+		verification.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		parkingProvider.createParkingCarVerification(verification);
 	}
 
 	@Override

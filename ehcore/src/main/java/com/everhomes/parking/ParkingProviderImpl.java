@@ -873,6 +873,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.OWNER_TYPE.eq(ownerType));
 		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.PARKING_LOT_ID.eq(parkingLotId));
+		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.SOURCE_TYPE.eq(ParkingCarVerificationSourceType.CAR_VERIFICATION.getCode()));
 
 		if (null != pageAnchor && pageAnchor != 0L) {
 			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.le(new Timestamp(pageAnchor)));
@@ -896,7 +897,8 @@ public class ParkingProviderImpl implements ParkingProvider {
 		if (null != status) {
 			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.STATUS.eq(status));
 		}else {
-			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.STATUS.ne(ParkingCarVerificationStatus.INACTIVE.getCode()));
+			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.STATUS.ne(ParkingCarVerificationStatus.INACTIVE.getCode())
+				.and(Tables.EH_PARKING_CAR_VERIFICATIONS.STATUS.ne(ParkingCarVerificationStatus.UN_AUTHORIZED.getCode())));
 		}
 
 		if (StringUtils.isNotBlank(requestorEnterpriseName)) {
@@ -912,7 +914,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 
 	@Override
 	public List<ParkingCarVerification> listParkingCarVerifications(String ownerType, Long ownerId, Long parkingLotId,
-																	  Long requestorUid, Long pageAnchor, Integer pageSize) {
+																	  Long requestorUid, Byte sourceType, Long pageAnchor, Integer pageSize) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCarVerifications.class));
 		SelectQuery<EhParkingCarVerificationsRecord> query = context.selectQuery(Tables.EH_PARKING_CAR_VERIFICATIONS);
 
@@ -925,6 +927,9 @@ public class ParkingProviderImpl implements ParkingProvider {
 		}
 		if (requestorUid != null) {
 			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.REQUESTOR_UID.eq(requestorUid));
+		}
+		if (null != sourceType) {
+			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.SOURCE_TYPE.eq(sourceType));
 		}
 
 		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.STATUS.ne(ParkingCarVerificationStatus.INACTIVE.getCode()));
@@ -980,10 +985,6 @@ public class ParkingProviderImpl implements ParkingProvider {
 		EhParkingCarVerificationsDao dao = new EhParkingCarVerificationsDao(context.configuration());
 
 		parkingCarVerification.setId(id);
-		Long userId = UserContext.currentUserId();
-		parkingCarVerification.setRequestorUid(userId);
-		parkingCarVerification.setCreatorUid(userId);
-		parkingCarVerification.setCreateTime(new Timestamp(System.currentTimeMillis()));
 
 		dao.insert(parkingCarVerification);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhParkingCarVerifications.class, null);

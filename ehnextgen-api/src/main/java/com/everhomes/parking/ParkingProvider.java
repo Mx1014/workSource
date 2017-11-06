@@ -120,7 +120,7 @@ public interface ParkingProvider {
                                                                String requestorEnterpriseName, Long pageAnchor, Integer pageSize);
 
     List<ParkingCarVerification> listParkingCarVerifications(String ownerType, Long ownerId, Long parkingLotId,
-                                                             Long requestorUid, Long pageAnchor, Integer pageSize);
+                                                             Long requestorUid, Byte sourceType, Long pageAnchor, Integer pageSize);
 
     ParkingCarVerification findParkingCarVerificationByUserId(String ownerType, Long ownerId, Long parkingLotId, Long userId);
 }

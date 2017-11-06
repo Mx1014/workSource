@@ -2025,7 +2025,7 @@ public class ParkingServiceImpl implements ParkingService {
 		Long userId = UserContext.currentUserId();
 
 		List<ParkingCarVerification> verifications = parkingProvider.listParkingCarVerifications(cmd.getOwnerType(), cmd.getOwnerId(),
-				cmd.getParkingLotId(), userId, cmd.getPageAnchor(), pageSize);
+				cmd.getParkingLotId(), userId, ParkingCarVerificationSourceType.CAR_VERIFICATION.getCode(), cmd.getPageAnchor(), pageSize);
 
 		ListParkingCarVerificationsResponse response = new ListParkingCarVerificationsResponse();
 
@@ -2048,8 +2048,39 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public ParkingCarVerificationDTO getParkingCarVerificationById(GetParkingCarVerificationByIdCommand cmd) {
+	public ListParkingCarsResponse listParkingCars(ListParkingCarsCommand cmd) {
 		checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		Long userId = UserContext.currentUserId();
+
+		List<ParkingCarVerification> verifications = parkingProvider.listParkingCarVerifications(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getParkingLotId(), userId, null, cmd.getPageAnchor(), pageSize);
+
+		ListParkingCarsResponse response = new ListParkingCarsResponse();
+
+		int size = verifications.size();
+		if(size > 0){
+			response.setRequests(verifications.stream().map(r -> {
+				ParkingCarBriefDTO dto = ConvertHelper.convert(r, ParkingCarBriefDTO.class);
+
+				return dto;
+			}).collect(Collectors.toList()));
+
+			if(size != pageSize){
+				response.setNextPageAnchor(null);
+			}else{
+				response.setNextPageAnchor(verifications.get(size-1).getCreateTime().getTime());
+			}
+		}
+
+		return response;
+	}
+
+	@Override
+	public ParkingCarVerificationDTO getParkingCarVerificationById(GetParkingCarVerificationByIdCommand cmd) {
+//		checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		ParkingCarVerification verification = parkingProvider.findParkingCarVerificationById(cmd.getId());
 
@@ -2077,32 +2108,41 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		ParkingCarVerification verification = ConvertHelper.convert(cmd, ParkingCarVerification.class);
-		if (parkingLot.getLockCarFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
-			verification.setStatus(ParkingCarVerificationStatus.AUDITING.getCode());
-			parkingProvider.createParkingCarVerification(verification);
+		verification.setSourceType(ParkingCarVerificationSourceType.CAR_VERIFICATION.getCode());
 
-			String ownerType = FlowOwnerType.PARKING_CAR_VERIFICATION.getCode();
-			Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
-					FlowModuleType.NO_MODULE.getCode(), parkingLot.getId(), ownerType);
+		Long userId = UserContext.currentUserId();
+		verification.setRequestorUid(userId);
+		verification.setCreatorUid(userId);
+		verification.setCreateTime(new Timestamp(System.currentTimeMillis()));
 
-			if(null == flow) {
-				LOGGER.error("Enable flow not found, moduleId={}", ParkingFlowConstant.PARKING_RECHARGE_MODULE);
-				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
-						"Enable flow not found.");
+		if (ParkingCarVerificationType.AUTHORIZED.getCode() == cmd.getRequestType()) {
+			if (parkingLot.getLockCarFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
+//				verification.setStatus(ParkingCarVerificationStatus.AUDITING.getCode());
+				parkingProvider.createParkingCarVerification(verification);
+
+				String ownerType = FlowOwnerType.PARKING_CAR_VERIFICATION.getCode();
+				Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
+						FlowModuleType.NO_MODULE.getCode(), parkingLot.getId(), ownerType);
+
+				if(null == flow) {
+					LOGGER.error("Enable flow not found, moduleId={}", ParkingFlowConstant.PARKING_RECHARGE_MODULE);
+					throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
+							"Enable flow not found.");
+				}
+
+				FlowCase flowCase = createFlowCase(verification, flow, UserContext.currentUserId());
+//				if (null != flowCase) {
+//					verification.setFlowCaseId(flowCase.getId());
+//					parkingProvider.updateParkingCarVerification(verification);
+//				}
 			}
 
-			FlowCase flowCase = createFlowCase(verification, flow, UserContext.currentUserId());
-			if (null != flowCase) {
-				verification.setFlowCaseId(flowCase.getId());
-				parkingProvider.updateParkingCarVerification(verification);
-			}
+			addAttachments(cmd.getAttachments(), UserContext.currentUserId(), verification.getId(),
+					ParkingAttachmentType.PARKING_CAR_VERIFICATION.getCode());
 		}else {
-			verification.setStatus(ParkingCarVerificationStatus.SUCCEED.getCode());
+			verification.setStatus(ParkingCarVerificationStatus.UN_AUTHORIZED.getCode());
 			parkingProvider.createParkingCarVerification(verification);
 		}
-
-		addAttachments(cmd.getAttachments(), UserContext.currentUserId(), verification.getId(),
-				ParkingAttachmentType.PARKING_CAR_VERIFICATION.getCode());
 
 		return ConvertHelper.convert(verification, ParkingCarVerificationDTO.class);
 	}
