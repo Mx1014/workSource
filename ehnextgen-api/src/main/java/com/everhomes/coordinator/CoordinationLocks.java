@@ -102,7 +102,7 @@ public enum CoordinationLocks {
 
     ADD_ORGANIZATION_PERSONEL("add.organization.personel"),
 
-    ORGANIZATION_ORDER_LOCK("organization.order.lock");
+    ORGANIZATION_ORDER_LOCK("organization.order.lock"),
 
     FLOW_LANE("flow.lane"),
     FLOW("flow"),
