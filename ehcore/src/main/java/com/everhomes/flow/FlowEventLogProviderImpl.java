@@ -636,6 +636,8 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
                 .join(flowCase).on(log.FLOW_CASE_ID.eq(flowCase.ID))
                 .getQuery();
 
+        query.addConditions(flowCase.STATUS.ne(FlowCaseStatus.INVALID.getCode()));// 无效状态的flowCase不要显示
+
         if (flowCaseId != null) {
             query.addConditions(flowCase.ID.eq(flowCaseId));
         }
