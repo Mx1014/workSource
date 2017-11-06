@@ -509,7 +509,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             log.setErrorLog("Contact name is empty.");
             log.setCode(ArchivesServiceErrorCode.ERROR_NAME_ISEMPTY);
             return log;
-        } else if (data.getContactEnName().length() > 20) {
+        } else if (data.getContactName().length() > 20) {
             LOGGER.warn("Contact name is too long. data = {}", data);
             log.setData(data);
             log.setErrorLog("Contact name too long.");
