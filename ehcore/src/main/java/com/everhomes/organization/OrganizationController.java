@@ -1123,8 +1123,7 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("updateOrganizationJobPosition")
     @RestReturn(value = String.class)
     public RestResponse updateOrganizationJobPosition(@Valid UpdateOrganizationJobPositionCommand cmd) {
-        organizationService.updateOrganizationJobPosition(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(organizationService.updateOrganizationJobPosition(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

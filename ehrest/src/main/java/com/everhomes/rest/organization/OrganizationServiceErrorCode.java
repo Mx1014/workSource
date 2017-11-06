@@ -93,5 +93,6 @@ public interface OrganizationServiceErrorCode {
     int ERROR_UNIFIEDSOCIALCREDITCODE_EXIST = 900026;    //  unifiedSocialCreditCode唯一性
 
     static final int ERROR_DEPARTMENT_EXISTS = 300002; //部门已存在
+    static final int ERROR_JOB_POSITION_EXISTS = 300003; //通用岗位已存在
 
 }
