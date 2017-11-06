@@ -17,9 +17,18 @@ public class RequestCarVerificationCommand {
     private String plateNumber;
     private String plateOwnerName;
     private String plateOwnerPhone;
+    private Byte requestType;
 
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
+
+    public Byte getRequestType() {
+        return requestType;
+    }
+
+    public void setRequestType(Byte requestType) {
+        this.requestType = requestType;
+    }
 
     public List<AttachmentDescriptor> getAttachments() {
         return attachments;
