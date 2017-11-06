@@ -2,6 +2,7 @@
 package com.everhomes.rest.organization;
 
 import java.sql.Date;
+import java.sql.Time;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -120,8 +121,15 @@ public class OrganizationMemberDTO {
     private String operatorName;
     private String operatorPhone;
 
+    //  added for archives-2.0
+    private String email;
+    private String workEmail;
+    private String regionCode;
+    private String contactEnName;
+    private Date contractEndTime;
+    private String contactShortToken;
     private String departmentName;
-
+	
     public OrganizationMemberDTO() {
     }
 
@@ -488,11 +496,60 @@ public class OrganizationMemberDTO {
         this.salaryGroupId = salaryGroupId;
     }
 
-    public String getDepartmentName() {
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getWorkEmail() {
+        return workEmail;
+    }
+
+    public void setWorkEmail(String workEmail) {
+        this.workEmail = workEmail;
+    }
+
+    public String getRegionCode() {
+        return regionCode;
+    }
+
+    public void setRegionCode(String regionCode) {
+        this.regionCode = regionCode;
+    }
+
+    public String getContactEnName() {
+        return contactEnName;
+    }
+
+    public void setContactEnName(String contactEnName) {
+        this.contactEnName = contactEnName;
+    }
+
+    public Date getContractEndTime() {
+        return contractEndTime;
+    }
+
+    public void setContractEndTime(Date contractEndTime) {
+        this.contractEndTime = contractEndTime;
+    }
+
+    public String getContactShortToken() {
+        return contactShortToken;
+    }
+
+    public void setContactShortToken(String contactShortToken) {
+        this.contactShortToken = contactShortToken;
+    }
+
+	public String getDepartmentName() {
         return departmentName;
     }
 
     public void setDepartmentName(String departmentName) {
         this.departmentName = departmentName;
     }
+
 }

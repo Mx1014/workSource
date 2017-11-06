@@ -20,6 +20,7 @@ import com.everhomes.userOrganization.UserOrganizations;
 
 import org.jooq.Condition;
 
+import javax.validation.constraints.Null;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
@@ -139,7 +140,8 @@ public interface OrganizationProvider {
 
 
 	Integer countOrganizationPersonnels(Integer namespaceId, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag);
-	
+
+	List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand);
 
 	OrganizationMember findOrganizationPersonnelByPhone(Long id, String phone);
 
@@ -334,6 +336,10 @@ public interface OrganizationProvider {
 
 	Organization findOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId);
 
+	List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId);
+
+	List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId, Long enterpriseId);
+
 	void createImportFileTask(ImportFileTask importFileTask);
 
 	void updateImportFileTask(ImportFileTask importFileTask);
@@ -363,6 +369,7 @@ public interface OrganizationProvider {
 	OrganizationMemberDetails findOrganizationMemberDetailsByDetailId(Long detailId);
 	Long createOrganizationMemberDetails(OrganizationMemberDetails memberDetails);
 	void updateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails, Long detailId);
+	void deleteOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails);
 	void createOrganizationMemberV2(OrganizationMember organizationMember, Long detailId);
 
 
@@ -477,6 +484,13 @@ public interface OrganizationProvider {
 	List<TargetDTO> findOrganizationIdByNameAndAddressId(String targetName, List<Long> ids);
 
 	List<UserOrganizations> listUserOrganizationByUserId(Long userId);
+	
+	// 通讯录查询最新方法
+	List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand, String filterScopeTypes);
+	// path查询接口
+	List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, List<String> tokens);
+
+	void updateOrganizationMemberByDetailId(Long detailId, String contactToken, String contactName, Byte gender);
 
 	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType);
 
@@ -492,7 +506,17 @@ public interface OrganizationProvider {
 			Long orgId, String memberGroup, Long userId);
 
 	List<Organization> findNamespaceUnifiedSocialCreditCode(String unifiedSocialCreditCode, Integer namespaceId);
- 
+
+	void deleteOrganizationPersonelByJobPositionIdsAndDetailIds(List<Long> jobPositionIds, List<Long> detailIds);
+
+	void deleteOrganizationMembersByGroupTypeWithDetailIds(Integer namespaceId, List<Long> detailIds, String groupType);
+
+	List<Long> listDetailsByEnterpriseId(Integer namespaceId, Long enterpriseId);
+
+	List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize);
+
+	void updateOrganizationDefaultOrder(Integer namespaceId, Long orgId, Integer order);
+
     List listLapseOrganizations(Integer namespaceId);
 
 	Integer updateOrganizationMembersToInactiveByPath(String path,Timestamp now); 

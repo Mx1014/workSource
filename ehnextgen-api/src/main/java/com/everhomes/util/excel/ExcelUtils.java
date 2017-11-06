@@ -36,6 +36,10 @@ public class ExcelUtils {
     private String fileDir;
     //sheet名
     private String sheetName = "sheet1";
+    //备注内容
+    private String titleRemark;
+    //必填项设置列表
+    private List<Integer> mandatoryTitle;
     //表头字体
     private String titleFontType = "Arial Unicode MS";
     //表头字号
@@ -44,8 +48,18 @@ public class ExcelUtils {
     private String contentFontType = "Arial Unicode MS";
     //正文字号
     private short contentFontSize = 12;
-    // 是否需要序号列
+    //首行备注字体
+    private String titleRemarkFontType = "宋体";
+    //首行备注字号
+    private short titleRemarkFontSize = 18;
+    //首行备注高度
+    private short titleRemarkCellHeight = 18;
+    //是否需要序号列
     private boolean needSequenceColumn = true;
+    //是否需要首行备注
+    private boolean needTitleRemark = false;
+    //是否需要标注必填项
+    private boolean needMandatoryTitle = false;
 
     private XSSFWorkbook workbook = null;
 
@@ -77,6 +91,16 @@ public class ExcelUtils {
         return this;
     }
 
+    public ExcelUtils setNeedTitleRemark(boolean needTitleRemark) {
+        this.needTitleRemark = needTitleRemark;
+        return this;
+    }
+
+    public ExcelUtils setNeedMandatoryTitle(boolean needMandatoryTitle) {
+        this.needMandatoryTitle = needMandatoryTitle;
+        return this;
+    }
+
     /**
      * 设置表头字体大小.
      *
@@ -104,6 +128,22 @@ public class ExcelUtils {
      */
     public ExcelUtils setContentFontSize(short contentFontSize) {
         this.contentFontSize = contentFontSize;
+        return this;
+    }
+
+    /**
+     * 设置首行备注信息
+     *
+     */
+    public ExcelUtils setTitleRemark(String titleRemark, short titleRemarkFontSize, short titleRemarkCellHeight) {
+        this.titleRemark = titleRemark;
+        this.titleRemarkFontSize = titleRemarkFontSize;
+        this.titleRemarkCellHeight = titleRemarkCellHeight;
+        return this;
+    }
+
+    public ExcelUtils setMandatoryTitle(List<Integer> mandatoryTitle) {
+        this.mandatoryTitle = mandatoryTitle;
         return this;
     }
 
@@ -151,9 +191,12 @@ public class ExcelUtils {
         Sheet sheet = workbook.createSheet(this.sheetName);
         // 表头
         Row titleNameRow = sheet.createRow(0);
-        //设置样式
+        // 设置样式
         XSSFCellStyle titleStyle = workbook.createCellStyle();
         setTitleFont(titleStyle);
+        // 若含有必填项的样式
+        XSSFCellStyle mandatoryTitleStyle = workbook.createCellStyle();
+        setMandatoryTitleFont(mandatoryTitleStyle);
 
         if (needSequenceColumn) {
             Cell numberColumn = titleNameRow.createCell(0);
@@ -164,7 +207,11 @@ public class ExcelUtils {
         for (int i = 0; i < titleNames.length; i++) {
             sheet.setColumnWidth(needSequenceColumn ? i + 1 : i, titleSize[i] * 256);    //设置宽度
             Cell cell = titleNameRow.createCell(needSequenceColumn ? i + 1 : i);
-            cell.setCellStyle(titleStyle);
+            if (needMandatoryTitle) {
+                if (mandatoryTitle.get(i) == 1)
+                    cell.setCellStyle(mandatoryTitleStyle);
+            } else
+                cell.setCellStyle(titleStyle);
             cell.setCellValue(titleNames[i]);
         }
 
@@ -220,8 +267,36 @@ public class ExcelUtils {
             }
         }
         ByteArrayOutputStream out = new ByteArrayOutputStream();
+        if(needTitleRemark)
+            addTitleRemark(workbook,titleRemarkCellHeight);
         workbook.write(out);
         return out;
+    }
+
+    /**
+     * 设置首行备注
+     */
+    private void addTitleRemark(XSSFWorkbook workbook,short titleRemarkCellHeight){
+        Sheet sheet = workbook.getSheet(this.sheetName);
+        sheet.shiftRows(0,sheet.getLastRowNum(),1,true,false);
+        // 合并首行单元格
+        sheet.addMergedRegion(new CellRangeAddress(0,0,0,12));
+        // 表头
+        Row titleRemarkRow = sheet.createRow(0);
+        titleRemarkRow.setHeight(titleRemarkCellHeight);
+        // 设置样式
+        XSSFCellStyle titleRemarkStyle = workbook.createCellStyle();
+        setTitleRemarkFont(titleRemarkStyle);
+        // 加入内容
+        Cell cell = titleRemarkRow.createCell(0);
+        cell.setCellStyle(titleRemarkStyle);
+        cell.setCellValue(titleRemark);
+/*        for (int i = 0; i < titleNames.length; i++) {
+            sheet.setColumnWidth(needSequenceColumn ? i + 1 : i, titleSize[i] * 256);    //设置宽度
+            Cell cell = titleNameRow.createCell(needSequenceColumn ? i + 1 : i);
+            cell.setCellStyle(titleStyle);
+            cell.setCellValue(titleNames[i]);
+        }*/
     }
 
     /**
@@ -246,6 +321,31 @@ public class ExcelUtils {
         font.setBold(true);
         style.setAlignment(CellStyle.ALIGN_CENTER);
         style.setFont(font);
+    }
+
+    /**
+     * 设置表头字体（包含必填项）
+     */
+    private void setMandatoryTitleFont(CellStyle style) {
+        XSSFFont font = workbook.createFont();
+        font.setFontHeightInPoints(this.titleFontSize);
+        font.setFontName(this.titleFontType);
+        font.setColor(IndexedColors.RED.index);
+        font.setBold(true);
+        style.setAlignment(CellStyle.ALIGN_CENTER);
+        style.setFont(font);
+    }
+
+    /**
+     * 设置首行备注字体
+     */
+    private void setTitleRemarkFont(CellStyle style) {
+        XSSFFont font = workbook.createFont();
+        font.setFontHeightInPoints(this.titleRemarkFontSize);
+        font.setFontName(this.titleRemarkFontType);
+        font.setBold(true);
+        style.setFont(font);
+        style.setWrapText(true);
     }
 
     /*public static void main(String[] args) {
