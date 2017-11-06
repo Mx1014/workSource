@@ -1987,9 +1987,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
 
         condition = condition.and(cond);
-        if (null != locator && null != locator.getAnchor())
-            condition.and(t1.field("id").lt(locator.getAnchor()));
-
+        if (null != locator && null != locator.getAnchor()){
+			condition = condition.and(t1.field("id").lt(locator.getAnchor()));
+		}
+			
         List<OrganizationMember> records = step.where(condition).groupBy(t1.field("contact_token")).orderBy(t1.field("id").desc()).limit(pageSize).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
             records.stream().map(r -> {
