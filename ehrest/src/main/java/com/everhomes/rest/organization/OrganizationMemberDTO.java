@@ -124,6 +124,7 @@ public class OrganizationMemberDTO {
     private String email;
     private String workEmail;
     private String regionCode;
+    private String contactEnName;
     private Date contractEndTime;
     private String contactShortToken;
 
@@ -515,6 +516,14 @@ public class OrganizationMemberDTO {
 
     public void setRegionCode(String regionCode) {
         this.regionCode = regionCode;
+    }
+
+    public String getContactEnName() {
+        return contactEnName;
+    }
+
+    public void setContactEnName(String contactEnName) {
+        this.contactEnName = contactEnName;
     }
 
     public Date getContractEndTime() {
