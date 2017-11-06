@@ -934,7 +934,12 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		Long organizationId = cmd.getOrganizationId();
 		List<QuestionnaireDTO> questionnaires = questionnaireProvider.listTargetQuestionnaireByOwner(namespaceId,cmd.getNowTime(),
 				cmd.getCollectFlag(),cmd.getTargetType(),userId,organizationId,answeredFlagAnchor,publishTimeAnchor,questionnariePageSize);
-		return new ListTargetQuestionnairesResponse(generateNextPageAnchor(cmd,questionnaires,pageSize,answeredFlagAnchor,publishTimeAnchor), questionnaires);
+		return new ListTargetQuestionnairesResponse(generateNextPageAnchor(cmd,questionnaires,pageSize,answeredFlagAnchor,publishTimeAnchor), questionnaires.stream().map(r->{
+			if(r.getPosterUri()!=null) {
+				r.setPosterUrl(contentServerService.parserUri(r.getPosterUri()));
+			}
+			return r;
+		}).collect(Collectors.toList()));
 	}
 
 	//业务层分页
