@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.flow.*;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.parking.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -23,15 +25,6 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseState;
-import com.everhomes.flow.FlowGraphNode;
-import com.everhomes.flow.FlowModuleInfo;
-import com.everhomes.flow.FlowModuleListener;
-import com.everhomes.flow.FlowNode;
-import com.everhomes.flow.FlowProvider;
-import com.everhomes.flow.FlowService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
@@ -58,6 +51,8 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 	private AddressProvider addressProvider;
 	@Autowired
 	private ParkingService parkingService;
+	@Autowired
+	private FlowCaseProvider flowCaseProvider;
 
 	@Override
 	public FlowModuleInfo initModule() {
@@ -342,7 +337,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 						parkingCardRequest.setProcessSucceedTime(new Timestamp(now));
 						parkingProvider.updateParkingCardRequest(parkingCardRequest);
 
-						createCarVerification(parkingCardRequest);
+						createCarVerification(parkingCardRequest, flowCase);
 					}
 				}
 			} else if (FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
@@ -351,7 +346,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 					parkingCardRequest.setOpenCardTime(new Timestamp(now));
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
 
-					createCarVerification(parkingCardRequest);
+					createCarVerification(parkingCardRequest, flowCase);
 				} else {
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.INACTIVE.getCode());
 					parkingCardRequest.setCancelTime(new Timestamp(now));
@@ -361,23 +356,33 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		}
 	}
 
-	private void createCarVerification(ParkingCardRequest parkingCardRequest) {
+	private void createCarVerification(ParkingCardRequest parkingCardRequest, FlowCase flowCase) {
 
 		ParkingCarVerification verification = parkingProvider.findParkingCarVerificationByUserId(parkingCardRequest.getOwnerType(),
 				parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), parkingCardRequest.getPlateNumber(),
 				parkingCardRequest.getCreatorUid());
 
 		if (null != verification) {
-			return;
+			if (verification.getStatus() == ParkingCarVerificationStatus.SUCCEED.getCode()) {
+				return;
+			}else if (verification.getStatus() == ParkingCarVerificationStatus.AUDITING.getCode()) {
+				flowCase.setStatus(FlowCaseStatus.INVALID.getCode());
+				flowCase.setDeleteFlag(TrueOrFalseFlag.TRUE.getCode());
+				flowCaseProvider.updateFlowCase(flowCase);
+			}else if (verification.getStatus() == ParkingCarVerificationStatus.UN_AUTHORIZED.getCode()) {
+
+			}
+		}else {
+			verification = new ParkingCarVerification();
+			verification.setOwnerType(parkingCardRequest.getOwnerType());
+			verification.setOwnerId(parkingCardRequest.getOwnerId());
+			verification.setParkingLotId(parkingCardRequest.getParkingLotId());
+			verification.setPlateNumber(parkingCardRequest.getPlateNumber());
+
 		}
 
-		verification = new ParkingCarVerification();
-		verification.setOwnerType(parkingCardRequest.getOwnerType());
-		verification.setOwnerId(parkingCardRequest.getOwnerId());
-		verification.setParkingLotId(parkingCardRequest.getParkingLotId());
 		verification.setPlateOwnerName(parkingCardRequest.getPlateOwnerName());
 		verification.setPlateOwnerPhone(parkingCardRequest.getPlateOwnerPhone());
-		verification.setPlateNumber(parkingCardRequest.getPlateNumber());
 		verification.setRequestorEnterpriseId(parkingCardRequest.getRequestorEnterpriseId());
 		verification.setRequestorEnterpriseName(parkingCardRequest.getPlateOwnerEntperiseName());
 		verification.setSourceType(ParkingCarVerificationSourceType.CARD_REQUEST.getCode());

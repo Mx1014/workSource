@@ -953,6 +953,9 @@ public class ParkingProviderImpl implements ParkingProvider {
 		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_NUMBER.eq(plateNumber));
 		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.REQUESTOR_UID.eq(userId));
 
+		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.STATUS.ne(ParkingCarVerificationStatus.INACTIVE.getCode()));
+		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.STATUS.ne(ParkingCarVerificationStatus.FAILED.getCode()));
+
 		return ConvertHelper.convert(query.fetchOne(), ParkingCarVerification.class);
 
 	}
