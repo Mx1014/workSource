@@ -2083,22 +2083,16 @@ public class ParkingServiceImpl implements ParkingService {
 				cmd.getParkingLotId(), cmd.getPlateNumber(), userId);
 
 		if (null != verification) {
-			LOGGER.error("PlateNumber has been add, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_REPEAT_ADD,
-					"PlateNumber has been add");
-		}
+			if (verification.getStatus() == ParkingCarVerificationStatus.UN_AUTHORIZED.getCode()
+					&& ParkingCarVerificationType.AUTHORIZED.getCode() == cmd.getRequestType()
+					&& parkingLot.getLockCarFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
 
-		verification = ConvertHelper.convert(cmd, ParkingCarVerification.class);
-		verification.setSourceType(ParkingCarVerificationSourceType.CAR_VERIFICATION.getCode());
-
-		verification.setRequestorUid(userId);
-		verification.setCreatorUid(userId);
-		verification.setCreateTime(new Timestamp(System.currentTimeMillis()));
-
-		if (ParkingCarVerificationType.AUTHORIZED.getCode() == cmd.getRequestType()) {
-			if (parkingLot.getLockCarFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
+				BeanUtils.copyProperties(cmd, verification);
+				verification.setRequestorUid(userId);
+				verification.setCreatorUid(userId);
+				verification.setCreateTime(new Timestamp(System.currentTimeMillis()));
 //				verification.setStatus(ParkingCarVerificationStatus.AUDITING.getCode());
-				parkingProvider.createParkingCarVerification(verification);
+				parkingProvider.updateParkingCarVerification(verification);
 
 				String ownerType = FlowOwnerType.PARKING_CAR_VERIFICATION.getCode();
 				Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
@@ -2115,13 +2109,51 @@ public class ParkingServiceImpl implements ParkingService {
 //					verification.setFlowCaseId(flowCase.getId());
 //					parkingProvider.updateParkingCarVerification(verification);
 //				}
-			}
+				addAttachments(cmd.getAttachments(), UserContext.currentUserId(), verification.getId(),
+						ParkingAttachmentType.PARKING_CAR_VERIFICATION.getCode());
 
-			addAttachments(cmd.getAttachments(), UserContext.currentUserId(), verification.getId(),
-					ParkingAttachmentType.PARKING_CAR_VERIFICATION.getCode());
+			}else {
+				LOGGER.error("PlateNumber has been add, cmd={}", cmd);
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_REPEAT_ADD,
+						"PlateNumber has been add");
+			}
 		}else {
-			verification.setStatus(ParkingCarVerificationStatus.UN_AUTHORIZED.getCode());
-			parkingProvider.createParkingCarVerification(verification);
+			verification = ConvertHelper.convert(cmd, ParkingCarVerification.class);
+			verification.setSourceType(ParkingCarVerificationSourceType.CAR_VERIFICATION.getCode());
+
+			verification.setRequestorUid(userId);
+			verification.setCreatorUid(userId);
+			verification.setCreateTime(new Timestamp(System.currentTimeMillis()));
+
+			if (ParkingCarVerificationType.AUTHORIZED.getCode() == cmd.getRequestType()) {
+				if (parkingLot.getLockCarFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
+//				verification.setStatus(ParkingCarVerificationStatus.AUDITING.getCode());
+					parkingProvider.createParkingCarVerification(verification);
+
+					String ownerType = FlowOwnerType.PARKING_CAR_VERIFICATION.getCode();
+					Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
+							FlowModuleType.NO_MODULE.getCode(), parkingLot.getId(), ownerType);
+
+					if(null == flow) {
+						LOGGER.error("Enable flow not found, moduleId={}", ParkingFlowConstant.PARKING_RECHARGE_MODULE);
+						throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
+								"Enable flow not found.");
+					}
+
+					FlowCase flowCase = createFlowCase(verification, flow, UserContext.currentUserId());
+//				if (null != flowCase) {
+//					verification.setFlowCaseId(flowCase.getId());
+//					parkingProvider.updateParkingCarVerification(verification);
+//				}
+					addAttachments(cmd.getAttachments(), UserContext.currentUserId(), verification.getId(),
+							ParkingAttachmentType.PARKING_CAR_VERIFICATION.getCode());
+				}
+
+
+			}else {
+				verification.setStatus(ParkingCarVerificationStatus.UN_AUTHORIZED.getCode());
+				parkingProvider.createParkingCarVerification(verification);
+			}
 		}
 
 		return ConvertHelper.convert(verification, ParkingCarVerificationDTO.class);
