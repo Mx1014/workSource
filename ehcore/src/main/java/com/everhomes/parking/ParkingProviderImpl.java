@@ -876,7 +876,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.SOURCE_TYPE.eq(ParkingCarVerificationSourceType.CAR_VERIFICATION.getCode()));
 
 		if (null != pageAnchor && pageAnchor != 0L) {
-			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.le(new Timestamp(pageAnchor)));
+			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
 		}
 		if (StringUtils.isNotBlank(plateNumber)) {
 			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_NUMBER.like("%" + plateNumber + "%"));
@@ -923,7 +923,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.PARKING_LOT_ID.eq(parkingLotId));
 
 		if (null != pageAnchor && pageAnchor != 0L) {
-			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.le(new Timestamp(pageAnchor)));
+			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
 		}
 		if (requestorUid != null) {
 			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.REQUESTOR_UID.eq(requestorUid));

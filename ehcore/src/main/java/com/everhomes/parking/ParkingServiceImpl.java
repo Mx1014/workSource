@@ -2048,37 +2048,6 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public ListParkingCarsResponse listParkingCars(ListParkingCarsCommand cmd) {
-		checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-
-		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-
-		Long userId = UserContext.currentUserId();
-
-		List<ParkingCarVerification> verifications = parkingProvider.listParkingCarVerifications(cmd.getOwnerType(), cmd.getOwnerId(),
-				cmd.getParkingLotId(), userId, null, cmd.getPageAnchor(), pageSize);
-
-		ListParkingCarsResponse response = new ListParkingCarsResponse();
-
-		int size = verifications.size();
-		if(size > 0){
-			response.setRequests(verifications.stream().map(r -> {
-				ParkingCarBriefDTO dto = ConvertHelper.convert(r, ParkingCarBriefDTO.class);
-
-				return dto;
-			}).collect(Collectors.toList()));
-
-			if(size != pageSize){
-				response.setNextPageAnchor(null);
-			}else{
-				response.setNextPageAnchor(verifications.get(size-1).getCreateTime().getTime());
-			}
-		}
-
-		return response;
-	}
-
-	@Override
 	public ParkingCarVerificationDTO getParkingCarVerificationById(GetParkingCarVerificationByIdCommand cmd) {
 //		checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 

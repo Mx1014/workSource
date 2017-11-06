@@ -375,9 +375,14 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		verification.setOwnerType(parkingCardRequest.getOwnerType());
 		verification.setOwnerId(parkingCardRequest.getOwnerId());
 		verification.setParkingLotId(parkingCardRequest.getParkingLotId());
+		verification.setPlateOwnerName(parkingCardRequest.getPlateOwnerName());
+		verification.setPlateOwnerPhone(parkingCardRequest.getPlateOwnerPhone());
 		verification.setPlateNumber(parkingCardRequest.getPlateNumber());
+		verification.setRequestorEnterpriseId(parkingCardRequest.getRequestorEnterpriseId());
+		verification.setRequestorEnterpriseName(parkingCardRequest.getPlateOwnerEntperiseName());
 		verification.setSourceType(ParkingCarVerificationSourceType.CARD_REQUEST.getCode());
 		verification.setStatus(ParkingCarVerificationStatus.SUCCEED.getCode());
+		verification.setFlowCaseId(parkingCardRequest.getFlowCaseId());
 		verification.setRequestorUid(parkingCardRequest.getCreatorUid());
 		verification.setCreatorUid(parkingCardRequest.getCreatorUid());
 		verification.setCreateTime(new Timestamp(System.currentTimeMillis()));

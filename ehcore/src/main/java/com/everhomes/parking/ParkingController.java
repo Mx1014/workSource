@@ -667,20 +667,6 @@ public class ParkingController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /parking/listParkingCars</b>
-     * <p>获取车牌列表</p>
-     */
-    @RequestMapping("listParkingCars")
-    @RestReturn(value=ListParkingCarsResponse.class)
-    public RestResponse listParkingCars(ListParkingCarsCommand cmd) {
-
-        RestResponse response = new RestResponse(parkingService.listParkingCars(cmd));
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
      * <b>URL: /parking/getParkingCarVerificationById</b>
      * <p>获取车辆认证申请</p>
      */

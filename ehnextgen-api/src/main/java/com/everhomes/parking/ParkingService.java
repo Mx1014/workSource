@@ -110,5 +110,4 @@ public interface ParkingService {
 
     void deleteCarVerification(DeleteCarVerificationCommand cmd);
 
-    ListParkingCarsResponse listParkingCars(ListParkingCarsCommand cmd);
 }
