@@ -142,9 +142,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             }
 
             //  3.查询若存在于离职列表则删除
-            ArchivesDismissEmployees dismissEmployee = archivesProvider.getArchivesDismissEmployeesByDetailId(cmd.getOrganizationId(), detailId);
-            if(dismissEmployee !=null)
-                archivesProvider.deleteArchivesDismissEmployees(dismissEmployee);
+            deleteArchivesDismissEmployees(detailId,cmd.getOrganizationId());
 
             //  4.增加入职记录
             checkInArchivesEmployeesLogs(cmd.getOrganizationId(), detailId, ArchivesUtil.currentDate());
@@ -836,9 +834,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             }
 
             //  3.查询若存在于离职列表则删除
-            ArchivesDismissEmployees dismissEmployee = archivesProvider.getArchivesDismissEmployeesByDetailId(cmd.getOrganizationId(), detailId);
-            if(dismissEmployee !=null)
-                archivesProvider.deleteArchivesDismissEmployees(dismissEmployee);
+            deleteArchivesDismissEmployees(detailId,cmd.getOrganizationId());
 
             //  4.增加入职记录
             checkInArchivesEmployeesLogs(cmd.getOrganizationId(), detailId, cmd.getCheckInTime());
@@ -1650,6 +1646,16 @@ public class ArchivesServiceImpl implements ArchivesService {
             }
             return null;
         });
+    }
+
+    /**
+     * 删除离职表中的员工
+     */
+    @Override
+    public void deleteArchivesDismissEmployees(Long detailId, Long organizationId){
+        ArchivesDismissEmployees dismissEmployee = archivesProvider.getArchivesDismissEmployeesByDetailId(organizationId, detailId);
+        if(dismissEmployee !=null)
+            archivesProvider.deleteArchivesDismissEmployees(dismissEmployee);
     }
 
     @Override
