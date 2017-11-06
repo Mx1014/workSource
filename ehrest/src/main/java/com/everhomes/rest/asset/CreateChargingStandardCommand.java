@@ -2,23 +2,33 @@
 package com.everhomes.rest.asset;
 
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.util.List;
 
 /**
  *<ul>
+ * <li>namespaceId:域空间id</li>
  * <li>ownerId:所属者id</li>
  * <li>ownerType:所属者类型</li>
  * <li>chargingItemId:收费项目id</li>
  * <li>chargingStandardName:收费标准名称</li>
- * <li>formulaType:公式类型,1:固定金额;2:普通公式;3:斜率跟着变量区间总体变化;4:斜率在不同变量区间取值不同;</li>
+ * <li>formulaType:公式类型,1:固定金额;2:普通公式;3:斜率跟着变量区间总体变化(斜面);4:斜率在不同变量区间取值不同（阶梯）（楼梯）;</li>
  * <li>billingCycle:计费周期,1:按天;2:按月;3:按季度;4:按年;</li>
  * <li>priceUnitType:价格单位类型,1:日单价;2:月单价;</li>
+ * <li>formulaJson:公式的json</li>
  * <li>formula:公式</li>
+ * <li>instruction:说明</li>
+ * <li>suggestUnitPrice:建议单价</li>
+ * <li>areaSizeType:计费面积类型,1：合同面积；2.建筑面积；3：使用面积；4：出租面积</li>
  *</ul>
  */
 public class CreateChargingStandardCommand {
+    @NotNull
+    private Integer namespaceId;
     @NotNull
     private Long ownerId;
     @NotNull
@@ -33,8 +43,51 @@ public class CreateChargingStandardCommand {
     private Byte billingCycle;
     @NotNull
     private Byte priceUnitType;
-    @NotNull
     private String formula;
+    @NotNull
+    private String formulaJson;
+    private String instruction;
+
+    private BigDecimal suggestUnitPrice;
+    private Integer areaSizeType;
+
+    @ItemType(VariableConstraints.class)
+    private List<VariableConstraints> stepValuePairs;
+    private Long chargingStandardId;
+
+
+    public BigDecimal getSuggestUnitPrice() {
+        return suggestUnitPrice;
+    }
+
+    public void setSuggestUnitPrice(BigDecimal suggestUnitPrice) {
+        this.suggestUnitPrice = suggestUnitPrice;
+    }
+
+    public Integer getAreaSizeType() {
+        return areaSizeType;
+    }
+
+    public void setAreaSizeType(Integer areaSizeType) {
+        this.areaSizeType = areaSizeType;
+    }
+
+    public List<VariableConstraints> getStepValuePairs() {
+        return stepValuePairs;
+    }
+
+    public void setStepValuePairs(List<VariableConstraints> stepValuePairs) {
+        this.stepValuePairs = stepValuePairs;
+    }
+
+    public Long getChargingStandardId() {
+        return chargingStandardId;
+    }
+
+    public void setChargingStandardId(Long chargingStandardId) {
+        this.chargingStandardId = chargingStandardId;
+    }
+
 
     @Override
     public String toString() {
@@ -51,6 +104,14 @@ public class CreateChargingStandardCommand {
 
     public Long getOwnerId() {
         return ownerId;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public void setOwnerId(Long ownerId) {
@@ -97,6 +158,14 @@ public class CreateChargingStandardCommand {
         this.priceUnitType = priceUnitType;
     }
 
+    public String getFormulaJson() {
+        return formulaJson;
+    }
+
+    public void setFormulaJson(String formulaJson) {
+        this.formulaJson = formulaJson;
+    }
+
     public String getFormula() {
         return formula;
     }
@@ -107,5 +176,13 @@ public class CreateChargingStandardCommand {
 
     public CreateChargingStandardCommand() {
 
+    }
+
+    public String getInstruction() {
+        return instruction;
+    }
+
+    public void setInstruction(String instruction) {
+        this.instruction = instruction;
     }
 }

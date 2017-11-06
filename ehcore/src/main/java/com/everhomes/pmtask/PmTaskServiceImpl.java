@@ -2653,13 +2653,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 				Byte flowCaseStatus = FlowCaseStatus.PROCESS.getCode();
 				switch (state){
 					case UNPROCESSED: flowCaseStatus = FlowCaseStatus.INITIAL.getCode();break;
-					case PROCESSING: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();break;
-					case INACTIVE: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break;
-                    case REVISITED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break; //已关闭
-                    case PROCESSED: flowCaseStatus = FlowCaseStatus.FINISHED.getCode();break;
+					case PROCESSING: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();task.setStatus(PmTaskFlowStatus.PROCESSING.getCode());break;
+					case INACTIVE: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();task.setStatus(PmTaskFlowStatus.INACTIVE.getCode());break;
+                    case REVISITED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();task.setStatus(PmTaskFlowStatus.INACTIVE.getCode());break; //已关闭
+                    case PROCESSED: flowCaseStatus = FlowCaseStatus.FINISHED.getCode();task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());break;
 					default: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();
 				}
-
+				pmTaskProvider.updateTask(task);
 				if (flowCaseStatus == FlowCaseStatus.ABSORTED.getCode() && flowCase.getStatus() == FlowCaseStatus.PROCESS.getCode())
 					cancelTask(task.getId());
 				else if (flowCaseStatus == FlowCaseStatus.FINISHED.getCode() && flowCase.getStatus() == FlowCaseStatus.PROCESS.getCode())
@@ -2673,6 +2673,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 	private void cancelTask(Long id){
 		PmTask task = checkPmTask(id);
+
 		//更新工作流case状态
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
 		flowCase.setStatus(FlowCaseStatus.ABSORTED.getCode());
@@ -2688,6 +2689,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	private void finishTask(Long id){
 		PmTask task = checkPmTask(id);
+
 		//更新工作流case状态
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
 		flowCase.setStatus(FlowCaseStatus.FINISHED.getCode());

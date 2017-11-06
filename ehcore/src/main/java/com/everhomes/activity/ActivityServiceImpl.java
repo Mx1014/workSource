@@ -4460,6 +4460,9 @@ public class ActivityServiceImpl implements ActivityService {
 				dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
 			}
 			fixupVideoInfo(dto);
+
+			Byte flag = forumService.getInteractFlag(post);
+			dto.setInteractFlag(flag);
 			return dto;
 		}).filter(r -> r != null).collect(Collectors.toList());
 

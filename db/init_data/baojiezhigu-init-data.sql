@@ -1072,8 +1072,8 @@ DELETE FROM eh_web_menu_scopes WHERE `menu_id`=20160 AND  `owner_id` =  999973 	
 UPDATE eh_app_urls SET logo_url = 'cs://1/image/aW1hZ2UvTVRvMVptWTNNVEpoWmpjMlpqaGhOV00xWVRRMVlXSXlPR1poTUdNeVpEUm1aUQ' WHERE namespace_id = 999973;
 
 -- add by xq.tian 2017/10/27
-update eh_lease_configs set config_value='楼幢介绍,虚位以待' where namespace_id=999973 and config_name='displayNameStr';
-set @id  = (select max(id) from eh_lease_configs);
+UPDATE eh_lease_configs SET config_value='楼幢介绍,虚位以待' WHERE namespace_id=999973 AND config_name='displayNameStr';
+SET @id  = (SELECT MAX(id) FROM eh_lease_configs);
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
 VALUES ((@id := @id + 1), '999973', NULL, NULL, 'rentAmountUnit', 'DAY_UNIT', NULL, NULL);
 
@@ -1126,3 +1126,19 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
   FROM eh_launch_pad_items WHERE namespace_id = 999973 AND item_label='预订中心';
 
 UPDATE eh_launch_pad_items SET action_type = 2, action_data = '{"itemLocation":"/home/resource","layoutName":"ResourceLayout","title":"预订中心","entityTag":"RES"}' WHERE namespace_id = 999973 AND item_label='预订中心';
+ 
+
+-- 执行SQL【保集e智谷】增加蒙层提示
+INSERT INTO `eh_configurations` (`name`,`value`,`description`,`namespace_id`,`display_name`) VALUES ( 'mask.key', '1', '默认启用蒙版', '999973', '');
+
+ -- 【保集e智谷】预订中心门户里面，配置的三个icon，icon排列一列，按照如下顺序
+UPDATE eh_launch_pad_layouts SET layout_json = 
+'{"versionCode":"2017110202","versionName":"3.0.0","layoutName":"ResourceLayout","displayName":"预订中心","groups":[{"groupName":"预订中心","widget":"Navigator","instanceConfig":{"itemGroup":"ResGroup"},"style":"Gallery","defaultOrder":10,"separatorFlag":0,"separatorHeight":0,"columnCount":1,"paddingTop":20,"paddingLeft":20,"paddingBottom":0,"paddingRight":20,"lineSpacing":16,"columnSpacing":16,"backgroundColor":"#EFEFF4"}]}',
+version_code = 2017110202 WHERE namespace_id = 999973  AND NAME = 'ResourceLayout';
+UPDATE  eh_launch_pad_items  SET icon_uri ='cs://1/image/aW1hZ2UvTVRwaU9Ea3dNbVV4TkRsak9XVmhaams0TmpsbE1tWXpNVEkwTjJVelkyWmpPQQ' WHERE namespace_id = 999973 AND item_group = 'ResGroup' AND item_label='场地预订';
+UPDATE  eh_launch_pad_items  SET icon_uri ='cs://1/image/aW1hZ2UvTVRvME5qRTBORE13WVRZeFlXTmxaRE00TVdJeU1HSmhNamhtWVROa1pXWmhNdw'  WHERE namespace_id = 999973 AND item_group = 'ResGroup' AND item_label='电子屏预订';
+UPDATE  eh_launch_pad_items  SET icon_uri ='cs://1/image/aW1hZ2UvTVRvNFl6bGtNRFEwTlRFNE1tSXdNamN4T1dRd09EazROelF3TVRkbVlXUTNNUQ'  ,item_label='会议室预订'  WHERE namespace_id = 999973 AND item_group = 'ResGroup' AND item_label='会议中心';
+
+UPDATE eh_rentalv2_resource_types SET NAME = '会议室预订' WHERE NAME = '会议中心' AND namespace_id = 999973;
+
+UPDATE eh_rentalv2_resource_types SET NAME = '场地预订' WHERE NAME = '场地预定' AND namespace_id = 999973;

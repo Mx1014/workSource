@@ -12,7 +12,10 @@ import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.organization.*;
-
+ 
+import com.everhomes.rest.user.InvitationRoster;
+import com.everhomes.server.schema.tables.pojos.EhOrganizations;
+import com.everhomes.uniongroup.UniongroupMemberDetail; 
 import com.everhomes.userOrganization.UserOrganizations;
 
 import org.jooq.Condition;
@@ -460,7 +463,7 @@ public interface OrganizationProvider {
 	 */
 	List<Long> listOrganizationMemberDetailIdsInActiveStatus(Long organizationId); 
 	List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId,
-			CrossShardListingLocator locator, Integer pageSize);
+													List<Long> orgIds, String groupName, CrossShardListingLocator locator, Integer pageSize);
 
 
 	List listOrganizationMembersGroupByToken();
@@ -489,8 +492,8 @@ public interface OrganizationProvider {
 			Long orgId, String memberGroup, Long userId);
 
 	List<Organization> findNamespaceUnifiedSocialCreditCode(String unifiedSocialCreditCode, Integer namespaceId);
-
+ 
     List listLapseOrganizations(Integer namespaceId);
 
-	Integer updateOrganizationMembersToInactiveByPath(String path,Timestamp now);
+	Integer updateOrganizationMembersToInactiveByPath(String path,Timestamp now); 
 }

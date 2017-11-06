@@ -1449,8 +1449,9 @@ public class UserServiceImpl implements UserService {
 		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
 		Object maxLoginId = accessor.getMapValueObject(hkeyIndex);
 		if(maxLoginId != null) {
-			LOGGER.debug("maxLoginId: "+maxLoginId);
-			LOGGER.debug("maxLoginId.toString: "+maxLoginId.toString());
+		    // 日志太多，先注释掉 by lqs 20171102
+			// LOGGER.debug("maxLoginId: "+maxLoginId);
+			// LOGGER.debug("maxLoginId.toString: "+maxLoginId.toString());
 			for(int i = 1; i <= Integer.parseInt(maxLoginId.toString()); i++) {
 				String hkeyLogin = String.valueOf(i);
 				Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
@@ -2109,10 +2110,10 @@ public class UserServiceImpl implements UserService {
 			break;
 		}
 
-		if(LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Gen the default avatar for user by gender, userId=" + userId 
-					+ ", namespaceId=" + namespaceId + ", gener=" + gener + ", avatarUri=" + avatarUri);
-		}
+//		if(LOGGER.isDebugEnabled()) {
+//			LOGGER.debug("Gen the default avatar for user by gender, userId=" + userId
+//					+ ", namespaceId=" + namespaceId + ", gener=" + gener + ", avatarUri=" + avatarUri);
+//		}
 
 		return avatarUri;
 	}

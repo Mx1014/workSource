@@ -1,5 +1,6 @@
 package com.everhomes.pusher;
 
+import com.everhomes.appurl.AppUrlService;
 import com.everhomes.cert.Cert;
 import com.everhomes.cert.CertProvider;
 import com.everhomes.device.DeviceProvider;
@@ -7,10 +8,14 @@ import com.everhomes.messaging.PusherVender;
 import com.everhomes.messaging.PusherVenderType;
 import com.everhomes.messaging.PusherVendorData;
 import com.everhomes.messaging.PusherVendorService;
+import com.everhomes.rest.appurl.AppUrlDTO;
+import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.messaging.DeviceMessage;
+import com.everhomes.rest.user.OSType;
 import com.everhomes.user.UserLogin;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.ThreadUtil;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +34,9 @@ public class PusherVendorServiceImpl implements PusherVendorService {
 
     @Autowired
     DeviceProvider deviceProvider;
+    
+    @Autowired
+    AppUrlService appUrlService;
     
     ConcurrentMap<String, PusherVender> pusherMap = new ConcurrentHashMap<String, PusherVender>();
     private static ScheduledExecutorService schExecutor = ThreadUtil.newScheduledExecutorService(3, "pushervendor");
@@ -56,6 +64,16 @@ public class PusherVendorServiceImpl implements PusherVendorService {
         int namespaceId = destLogin.getNamespaceId();
         String name = String.format("namespaceId:%d:%s", namespaceId, venderType.getCode());
         PusherVender pusher = pusherMap.get(name);
+        
+        GetAppInfoCommand cmd = new GetAppInfoCommand();
+        cmd.setNamespaceId(namespaceId);
+        cmd.setOsType(OSType.Android.getCode());
+        AppUrlDTO dto = appUrlService.getAppInfo(cmd);
+        if(dto != null) {
+            devMessage.setTitle(dto.getName());
+            devMessage.setIcon(dto.getLogoUrl());
+        }
+        
         if(pusher == null) {
             Cert cert = certProvider.findCertByName(name);
             if (cert == null || cert.getData() == null) {

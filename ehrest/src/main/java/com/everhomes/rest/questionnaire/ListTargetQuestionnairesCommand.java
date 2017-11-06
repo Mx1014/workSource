@@ -3,19 +3,24 @@ package com.everhomes.rest.questionnaire;
 
 import com.everhomes.util.StringHelper;
 
+import java.sql.Timestamp;
+
 /**
  * 
  * <ul>参数:
  * <li>namespaceId: 域空间id</li>
  * <li>ownerType: 所属类型，community</li>
  * <li>ownerId: 所属id，communityId</li>
- * <li>targetType: 目标类型，organization</li>
- * <li>targetId: 目标id，organization</li>
+ * <li>targetType: 目标类型，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireTargetType}</li>
+ * <li>targetId: 目标id</li>
+ * <li>collectFlag: 问卷状态（进行中，已结束），参考{@link com.everhomes.rest.questionnaire.QuestionnaireCollectFlagType}</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
  */
 public class ListTargetQuestionnairesCommand {
+//	 * <li>answerTimeAnchor: 回答时间的锚点</li>
+// * <li>publishTimeAnchor: 发布时间的锚点</li>
 
 	private Integer namespaceId;
 
@@ -27,7 +32,14 @@ public class ListTargetQuestionnairesCommand {
 
 	private Long targetId;
 
-	private Long pageAnchor;
+	private Byte collectFlag;
+
+	private Timestamp nowTime = new Timestamp(System.currentTimeMillis());//用于和截止日期比较,定一个状态而已。
+
+//	private Long answerTimeAnchor;
+
+//	private Long publishTimeAnchor;
+	private String pageAnchor;
 
 	private Integer pageSize;
 
@@ -35,15 +47,24 @@ public class ListTargetQuestionnairesCommand {
 
 	}
 
-	public ListTargetQuestionnairesCommand(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, Long pageAnchor, Integer pageSize) {
-		super();
+	public ListTargetQuestionnairesCommand(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, Byte collectFlag, Timestamp nowTime, String pageAnchor, Integer pageSize) {
 		this.namespaceId = namespaceId;
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
 		this.targetType = targetType;
 		this.targetId = targetId;
+		this.collectFlag = collectFlag;
+		this.nowTime = nowTime;
 		this.pageAnchor = pageAnchor;
 		this.pageSize = pageSize;
+	}
+
+	public String getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(String pageAnchor) {
+		this.pageAnchor = pageAnchor;
 	}
 
 	public Integer getNamespaceId() {
@@ -86,12 +107,20 @@ public class ListTargetQuestionnairesCommand {
 		this.targetId = targetId;
 	}
 
-	public Long getPageAnchor() {
-		return pageAnchor;
+	public Timestamp getNowTime() {
+		return nowTime;
 	}
 
-	public void setPageAnchor(Long pageAnchor) {
-		this.pageAnchor = pageAnchor;
+	public void setNowTime(Timestamp nowTime) {
+		this.nowTime = nowTime;
+	}
+
+	public Byte getCollectFlag() {
+		return collectFlag;
+	}
+
+	public void setCollectFlag(Byte collectFlag) {
+		this.collectFlag = collectFlag;
 	}
 
 	public Integer getPageSize() {

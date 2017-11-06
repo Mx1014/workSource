@@ -394,7 +394,27 @@ public class UserProviderImpl implements UserProvider {
         
         return result;
     }
-    
+
+    @Override
+    public List<UserIdentifier> listClaimedIdentifiersByTokens(Integer namespaceId, List<String> identifiers) {
+        final List<UserIdentifier> result = new ArrayList<>();
+
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), result, (DSLContext context, Object reducingContext) -> {
+            context.select().from(EH_USER_IDENTIFIERS)
+                    .where(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.in(identifiers))
+                    .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()))
+                    .and(EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId))
+                    .fetch().map((r) -> {
+                result.add(ConvertHelper.convert(r, UserIdentifier.class));
+                return null;
+            });
+
+            return true;
+        });
+
+        return result;
+    }
+
     @Override
     public UserIdentifier findClaimedIdentifierByToken(String identifierToken) {
         final List<UserIdentifier> result = new ArrayList<>();

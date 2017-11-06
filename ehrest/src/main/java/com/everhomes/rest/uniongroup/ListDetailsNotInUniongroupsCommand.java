@@ -13,17 +13,13 @@ public class ListDetailsNotInUniongroupsCommand {
 
     }
 
-    private Long organizaitonId;
+    private Long organizationId;
     private Integer namespaceId;
     private String contactName;
-
-    public Long getOrganizaitonId() {
-        return organizaitonId;
-    }
-
-    public void setOrganizaitonId(Long organizaitonId) {
-        this.organizaitonId = organizaitonId;
-    }
+    private Integer versionCode;
+    private Long departmentId;
+    private Integer pageSize;
+    private Long pageAnchor;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -44,5 +40,45 @@ public class ListDetailsNotInUniongroupsCommand {
 
     public void setContactName(String contactName) {
         this.contactName = contactName;
+    }
+
+    public Integer getVersionCode() {
+        return versionCode;
+    }
+
+    public void setVersionCode(Integer versionCode) {
+        this.versionCode = versionCode;
+    }
+
+    public Long getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
     }
 }

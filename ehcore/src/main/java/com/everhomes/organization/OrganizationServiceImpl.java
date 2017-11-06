@@ -122,7 +122,6 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.*;
 import org.jooq.Condition;
@@ -139,7 +138,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.*;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -1966,6 +1964,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     	    forumCmd.setExcludeCategories(cmd.getExcludeCategories());
     	    forumCmd.setCategoryId(cmd.getCategoryId());
             forumCmd.setTag(cmd.getTag());
+            forumCmd.setForumEntryId(cmd.getForumEntryId());
     	    response = forumService.listTopicsByForums(forumCmd);
 	        break;
 	    case COMMUNITY_ALL:
@@ -9788,6 +9787,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                 //添加除公司之外的机构成员
                 departments.addAll(repeatCreateOrganizationmembers(departmentIds, cmd.getContactToken(), enterpriseIds, organizationMember));
+                
+                //：todo 自动加入薪酬组
+                this.uniongroupService.reallocatedUnion(org.getId(), departmentIds, organizationMember);
+
                 groups.addAll(repeatCreateOrganizationmembers(groupIds, cmd.getContactToken(), enterpriseIds, organizationMember));
                 jobPositions.addAll(repeatCreateOrganizationmembers(jobPositionIds, cmd.getContactToken(), enterpriseIds, organizationMember));
                 jobLevels.addAll(repeatCreateOrganizationmembers(jobLevelIds, cmd.getContactToken(), enterpriseIds, organizationMember));
