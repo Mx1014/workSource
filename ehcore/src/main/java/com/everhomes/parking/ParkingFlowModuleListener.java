@@ -372,26 +372,35 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 			}else if (verification.getStatus() == ParkingCarVerificationStatus.UN_AUTHORIZED.getCode()) {
 
 			}
+			verification.setPlateOwnerName(parkingCardRequest.getPlateOwnerName());
+			verification.setPlateOwnerPhone(parkingCardRequest.getPlateOwnerPhone());
+			verification.setRequestorEnterpriseId(parkingCardRequest.getRequestorEnterpriseId());
+			verification.setRequestorEnterpriseName(parkingCardRequest.getPlateOwnerEntperiseName());
+			verification.setSourceType(ParkingCarVerificationSourceType.CARD_REQUEST.getCode());
+			verification.setStatus(ParkingCarVerificationStatus.SUCCEED.getCode());
+			verification.setFlowCaseId(parkingCardRequest.getFlowCaseId());
+			verification.setRequestorUid(parkingCardRequest.getCreatorUid());
+			verification.setCreatorUid(parkingCardRequest.getCreatorUid());
+			verification.setCreateTime(new Timestamp(System.currentTimeMillis()));
+			parkingProvider.updateParkingCarVerification(verification);
 		}else {
 			verification = new ParkingCarVerification();
 			verification.setOwnerType(parkingCardRequest.getOwnerType());
 			verification.setOwnerId(parkingCardRequest.getOwnerId());
 			verification.setParkingLotId(parkingCardRequest.getParkingLotId());
 			verification.setPlateNumber(parkingCardRequest.getPlateNumber());
-
+			verification.setPlateOwnerName(parkingCardRequest.getPlateOwnerName());
+			verification.setPlateOwnerPhone(parkingCardRequest.getPlateOwnerPhone());
+			verification.setRequestorEnterpriseId(parkingCardRequest.getRequestorEnterpriseId());
+			verification.setRequestorEnterpriseName(parkingCardRequest.getPlateOwnerEntperiseName());
+			verification.setSourceType(ParkingCarVerificationSourceType.CARD_REQUEST.getCode());
+			verification.setStatus(ParkingCarVerificationStatus.SUCCEED.getCode());
+			verification.setFlowCaseId(parkingCardRequest.getFlowCaseId());
+			verification.setRequestorUid(parkingCardRequest.getCreatorUid());
+			verification.setCreatorUid(parkingCardRequest.getCreatorUid());
+			verification.setCreateTime(new Timestamp(System.currentTimeMillis()));
+			parkingProvider.createParkingCarVerification(verification);
 		}
-
-		verification.setPlateOwnerName(parkingCardRequest.getPlateOwnerName());
-		verification.setPlateOwnerPhone(parkingCardRequest.getPlateOwnerPhone());
-		verification.setRequestorEnterpriseId(parkingCardRequest.getRequestorEnterpriseId());
-		verification.setRequestorEnterpriseName(parkingCardRequest.getPlateOwnerEntperiseName());
-		verification.setSourceType(ParkingCarVerificationSourceType.CARD_REQUEST.getCode());
-		verification.setStatus(ParkingCarVerificationStatus.SUCCEED.getCode());
-		verification.setFlowCaseId(parkingCardRequest.getFlowCaseId());
-		verification.setRequestorUid(parkingCardRequest.getCreatorUid());
-		verification.setCreatorUid(parkingCardRequest.getCreatorUid());
-		verification.setCreateTime(new Timestamp(System.currentTimeMillis()));
-		parkingProvider.createParkingCarVerification(verification);
 	}
 
 	@Override
