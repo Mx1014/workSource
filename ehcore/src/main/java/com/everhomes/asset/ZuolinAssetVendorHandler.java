@@ -605,7 +605,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 //            return null;
 //        }
         //如果账单为新的，则进行存储
-        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),String.valueOf(amountsInCents/100l),cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, cmd.getNamespaceId());
+        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),String.valueOf(amountsInCents/100l),cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, cmd.getNamespaceId(),OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
         assetProvider.saveOrderBills(bills,orderId);
         Long payerId = Long.parseLong(cmd.getPayerId());
         //检查下单人的类型和id，不能为空

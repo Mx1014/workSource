@@ -333,6 +333,9 @@ public class AssetController extends ControllerBase {
         return response;
     }
     //左邻管理员可以进入，点击收费项目，传递所在园区，点击保存，其园区可以看到此收费项目          ---   4
+    // 查看时，全部情况是查看域空间为namespaceid的，(接口为listAllChargingItems)
+    // 修改时(此修改支持删除,增加)，只使用此接口，全部：储存到namespaceid，同步到下面的communityid； 单个：修改单个的并且修改decoupleFlag
+    //
     /**
      * <p>园区收费项权限配置</p>
      * <b>URL: /asset/configChargingItems</b>

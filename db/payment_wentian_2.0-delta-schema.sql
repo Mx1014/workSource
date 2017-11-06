@@ -54,11 +54,12 @@ ALTER TABLE `eh_payment_bills` ADD COLUMN `next_switch` TINYINT DEFAULT NULL COM
 
 ALTER TABLE `eh_payment_charging_item_scopes` ADD COLUMN `decoupling_flag` TINYINT DEFAULT 0 COMMENT '解耦标志，0:耦合中，收到域名下全部设置的影响;1:副本解耦';
 -- 分割线
--- payment_wentian_v2 new sql
+-- payment_wentian_v2 new sql after 4.10.4
 
-ALTER TABLE `eh_payment_charging_standards_scopes` ADD COLUMN namespace_id INTEGER DEFAULT 0;
-ALTER TABLE `eh_payment_contract_receiver` ADD COLUMN bill_group_rule_id BIGINT DEFAULT NULL;
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN bill_group_rule_id BIGINT DEFAULT NULL;
+ALTER TABLE `eh_payment_charging_standards_scopes` ADD COLUMN `namespace_id` INTEGER DEFAULT 0;
+ALTER TABLE `eh_payment_contract_receiver` ADD COLUMN `bill_group_rule_id` BIGINT DEFAULT NULL;
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `bill_group_rule_id` BIGINT DEFAULT NULL;
+ALTER TABLE `eh_payment_charging_standards_scopes` ADD COLUMN  `decoupling_flag` TINYINT DEFAULT 0 COMMENT '解耦标志，0:耦合中，收到域名下全部设置的影响;1:副本解耦';
 
 
 -- 4.10.3，合并记得删

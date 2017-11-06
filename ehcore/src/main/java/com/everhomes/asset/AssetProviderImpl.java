@@ -62,6 +62,7 @@ import org.apache.log4j.spi.ErrorCode;
 import org.jooq.*;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
+import org.jooq.impl.TableImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1323,7 +1324,24 @@ public class AssetProviderImpl implements AssetProvider {
                 dto.setVariables(null);
             }
         }
-            return list;
+        //把水费和电费的用量干掉
+        String itemName = context.select(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME)
+                .from(Tables.EH_PAYMENT_CHARGING_ITEMS)
+                .where(Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(chargingItemId))
+                .fetchOne(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME);
+        if(itemName.equals(AssetPaymentStrings.CHARGING_ITEM_NAME_WATER) || itemName.equals(AssetPaymentStrings.CHARGING_ITEM_NAME_ELECTRICITY)) {
+            for( int i = 0; i < list.size(); i ++){
+                ListChargingStandardsDTO dto = list.get(i);
+                List<PaymentVariable> variables = dto.getVariables();
+                for(int j = 0; j < variables.size(); j ++){
+                    PaymentVariable variable = variables.get(j);
+                    if(variable.getVariableName().equals(AssetPaymentStrings.VARIABLE_YJ)){
+                        variables.remove(j);
+                    }
+                }
+            }
+        }
+        return list;
     }
 
     private String getNameByVariableIdenfitier(String varIden) {
@@ -1926,7 +1944,7 @@ public class AssetProviderImpl implements AssetProvider {
 
 
     @Override
-    public Long saveAnOrderCopy(String payerType, String payerId, String amountOwed, String clientAppName, Long communityId, String contactNum, String openid, String payerName,Long expireTimePeriod,Integer namespaceId) {
+    public Long saveAnOrderCopy(String payerType, String payerId, String amountOwed, String clientAppName, Long communityId, String contactNum, String openid, String payerName,Long expireTimePeriod,Integer namespaceId,String orderType) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         //TO SAVE A PRE ORDER COPY IN THE ORDER TABLE WITH STATUS BEING NOT BEING PAID YET
         long nextOrderId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrder.class));
@@ -1947,7 +1965,7 @@ public class AssetProviderImpl implements AssetProvider {
         order.setOrderStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
         order.setOrderExpireTime(endTime);
-        order.setOrderType(OrderType.OrderTypeEnum.ZJGK_RENTAL_CODE.getPycode());
+        order.setOrderType(orderType);
 
         Random r = new Random();
         StringBuilder sb = new StringBuilder();
@@ -2015,13 +2033,11 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public List<AssetPaymentOrderBills> findBillsById(Long orderId) {
-        List<AssetPaymentOrderBills> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t");
-        context.selectFrom(t)
+        return context.selectFrom(t)
                 .where(t.ORDER_ID.eq(orderId))
                 .fetchInto(AssetPaymentOrderBills.class);
-        return list;
     }
 
     @Override
@@ -2104,15 +2120,18 @@ public class AssetProviderImpl implements AssetProvider {
             for(int i = 0; i < communityIds.size(); i ++){
                 Long cid = communityIds.get(i);
 //                只要园区还有自己的scope，且一个scope的独立权得到承认，那么不能修改
-                Boolean coupled = checkCoupling(communityId,ownerType);
+                Boolean coupled = true;
+                if(cid.longValue() != namespaceId.longValue()){
+                    coupled = checkCoupling(cid,ownerType);
+                }
                 if(coupled){
                     de_coupling = 0;
-                    configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, cid, de_coupling);
+                    configChargingItemForOneCommunity(configChargingItems, cid, ownerType, namespaceId, de_coupling);
                 }
             }
         }else{
             //只有一个园区,不是list过来的
-            configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, communityId, de_coupling);
+            configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, de_coupling);
         }
     }
 
@@ -2131,7 +2150,7 @@ public class AssetProviderImpl implements AssetProvider {
         return true;
     }
 
-    private void configChargingItemForOneCommunity(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType, Integer namespaceId, Long cid, Byte decouplingFlag) {
+    private void configChargingItemForOneCommunity(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType, Integer namespaceId, Byte decouplingFlag) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPaymentChargingItemScopes t = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t");
         EhPaymentChargingItemScopesDao dao = new EhPaymentChargingItemScopesDao(context.configuration());
@@ -2159,7 +2178,7 @@ public class AssetProviderImpl implements AssetProvider {
         this.dbProvider.execute((TransactionStatus status) -> {
             context.delete(t)
                     .where(t.OWNER_TYPE.eq(ownerType))
-                    .and(t.OWNER_ID.eq(cid))
+                    .and(t.OWNER_ID.eq(communityId))
                     .execute();
             if(list.size()>0){
                 dao.insert(list);

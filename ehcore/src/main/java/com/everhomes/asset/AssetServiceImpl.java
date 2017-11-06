@@ -606,6 +606,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd) {
+        if(cmd.getOwnerId() == null){
+            cmd.setOwnerId(cmd.getNamespaceId().longValue());
+        }
         return assetProvider.listChargingItems(cmd.getOwnerType(),cmd.getOwnerId());
     }
 
@@ -1267,6 +1270,7 @@ public class AssetServiceImpl implements AssetService {
                 d_assist.setTime(d2.getTime());
 //                d_assist.set(Calendar.MONTH,d_assist.get(Calendar.MONTH)+cycle+1);
                 d_assist.add(Calendar.MONTH,cycle+1);
+                d_assist.set(Calendar.DAY_OF_MONTH,d2.get(Calendar.DAY_OF_MONTH)-1);
                 float divided = daysBetween(d2,d_assist);
                 r = divider/divided;
             }
@@ -2145,6 +2149,7 @@ public class AssetServiceImpl implements AssetService {
             for(int i = 0; i < communities.size(); i++){
                 communityIds.add(communities.get(i).getId());
             }
+            communityIds.add(cmd.getNamespaceId().longValue());
         }
         assetProvider.configChargingItems(cmd.getChargingItemConfigs(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId(),communityIds);
     }
@@ -2358,6 +2363,7 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getPageAnchor() == null){
             cmd.setPageAnchor(0l);
         }
+        List<Long> communityIds = new ArrayList<>();
         List<ListChargingStandardsDTO> list =  assetProvider.listOnlyChargingStandards(cmd);
         if(list.size() > cmd.getPageSize()){
             response.setNextPageAnchor(cmd.getPageAnchor()+cmd.getPageSize().longValue());

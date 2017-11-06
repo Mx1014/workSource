@@ -21,5 +21,9 @@ public interface AssetPaymentStrings {
     public static final String MODIFY_GROUP_RULE_UNSAFE = "修改失败，该账单组的计价条款已经关联合同，或者产生了账单";
     public static final String DELTE_GROUP_UNSAFE = "修改失败，该账单组已经关联合同，或者产生了账单";
 
+    public static final String CHARGING_ITEM_NAME_WATER = "水费";
+    public static final String CHARGING_ITEM_NAME_ELECTRICITY = "电费";
+    public static final String VARIABLE_YJ = "用量";
+
 
 }
