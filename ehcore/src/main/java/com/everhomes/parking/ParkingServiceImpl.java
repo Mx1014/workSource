@@ -1625,9 +1625,10 @@ public class ParkingServiceImpl implements ParkingService {
 				parkingLotId, cmd.getPlateNumber(), userId);
 
 		if (null == verification || verification.getStatus() == ParkingCarVerificationStatus.INACTIVE.getCode()
-				|| verification.getStatus() == ParkingCarVerificationStatus.FAILED.getCode()) {
+				|| verification.getStatus() == ParkingCarVerificationStatus.FAILED.getCode()
+				|| verification.getStatus() == ParkingCarVerificationStatus.UN_AUTHORIZED.getCode()) {
 			ParkingCarLockInfoDTO dto = new ParkingCarLockInfoDTO();
-			dto.setCarVerificationFlag(ParkingCarVerificationStatus.INACTIVE.getCode());
+			dto.setCarVerificationFlag(ParkingCarVerificationStatus.UN_AUTHORIZED.getCode());
 			return dto;
 		}else if (verification.getStatus() == ParkingCarVerificationStatus.AUDITING.getCode()) {
 			ParkingCarLockInfoDTO dto = new ParkingCarLockInfoDTO();
