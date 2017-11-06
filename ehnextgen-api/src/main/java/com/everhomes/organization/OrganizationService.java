@@ -8,14 +8,10 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
-import com.everhomes.rest.archives.UpdateArchivesEmployeeCommand;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.community_map.SearchCommunityMapContentsCommand;
-import com.everhomes.rest.community_map.SearchCommunityMapContentsResponse;
 import com.everhomes.rest.organization.*;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -373,7 +369,7 @@ public interface OrganizationService {
 	
 	void createOrganizationJobPosition(CreateOrganizationJobPositionCommand cmd);
 	
-	void updateOrganizationJobPosition(UpdateOrganizationJobPositionCommand cmd);
+	Long updateOrganizationJobPosition(UpdateOrganizationJobPositionCommand cmd);
 	
 	Boolean deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd);
 	

@@ -10637,13 +10637,21 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public void updateOrganizationJobPosition(UpdateOrganizationJobPositionCommand cmd) {
+    public Long updateOrganizationJobPosition(UpdateOrganizationJobPositionCommand cmd) {
         checkId(cmd.getId());
 
         OrganizationJobPosition organizationJobPosition = checkOrganizationJobPositionIsNull(cmd.getId());
+
+        OrganizationJobPosition organizationJobPosition_sameName = organizationProvider.findOrganizationJobPositionByName(
+                organizationJobPosition.getOwnerType(), organizationJobPosition.getOwnerId(), cmd.getName());
+
+        if(organizationJobPosition_sameName != null){
+            return Long.valueOf(OrganizationServiceErrorCode.ERROR_JOB_POSITION_EXISTS);
+        }
+
         organizationJobPosition.setName(cmd.getName());
         organizationProvider.updateOrganizationJobPosition(organizationJobPosition);
-
+        return organizationJobPosition.getId();
     }
 
     @Override
@@ -11090,6 +11098,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
             }
             dto.setDepartmentName(departmentName.toString());
+
+            //todo 查找工号
+            OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
+            if(detail != null)
+                dto.setEmployeeNo(detail.getEmployeeNo());
             dtos.add(dto);
         }
         return dtos;

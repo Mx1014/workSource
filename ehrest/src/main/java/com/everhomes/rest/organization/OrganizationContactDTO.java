@@ -34,7 +34,7 @@ public class OrganizationContactDTO {
     private String fullInitial;
     private String nickName;
     private String avatar;
-    private Long employeeNo;
+    private String employeeNo;
     private Byte gender;
     private Long targetId;
 
@@ -146,13 +146,6 @@ public class OrganizationContactDTO {
         this.avatar = avatar;
     }
 
-    public Long getEmployeeNo() {
-        return employeeNo;
-    }
-
-    public void setEmployeeNo(Long employeeNo) {
-        this.employeeNo = employeeNo;
-    }
 
     public Byte getGender() {
         return gender;
@@ -213,5 +206,13 @@ public class OrganizationContactDTO {
 
     public void setDepartmentName(String departmentName) {
         this.departmentName = departmentName;
+    }
+
+    public String getEmployeeNo() {
+        return employeeNo;
+    }
+
+    public void setEmployeeNo(String employeeNo) {
+        this.employeeNo = employeeNo;
     }
 }
