@@ -122,5 +122,6 @@ public interface ParkingProvider {
     List<ParkingCarVerification> listParkingCarVerifications(String ownerType, Long ownerId, Long parkingLotId,
                                                              Long requestorUid, Byte sourceType, Long pageAnchor, Integer pageSize);
 
-    ParkingCarVerification findParkingCarVerificationByUserId(String ownerType, Long ownerId, Long parkingLotId, Long userId);
+    ParkingCarVerification findParkingCarVerificationByUserId(String ownerType, Long ownerId, Long parkingLotId, String plateNumber,
+                                                              Long userId);
 }

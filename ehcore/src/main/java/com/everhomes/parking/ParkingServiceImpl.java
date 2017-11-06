@@ -1622,7 +1622,7 @@ public class ParkingServiceImpl implements ParkingService {
 		Long userId = user.getId();
 
 		ParkingCarVerification verification = parkingProvider.findParkingCarVerificationByUserId(cmd.getOwnerType(), cmd.getOwnerId(),
-				parkingLotId, userId);
+				parkingLotId, cmd.getPlateNumber(), userId);
 
 		if (null == verification || verification.getStatus() == ParkingCarVerificationStatus.INACTIVE.getCode()
 				|| verification.getStatus() == ParkingCarVerificationStatus.FAILED.getCode()) {
@@ -2110,7 +2110,7 @@ public class ParkingServiceImpl implements ParkingService {
 		Long userId = UserContext.currentUserId();
 
 		ParkingCarVerification verification = parkingProvider.findParkingCarVerificationByUserId(cmd.getOwnerType(), cmd.getOwnerId(),
-				cmd.getParkingLotId(), userId);
+				cmd.getParkingLotId(), cmd.getPlateNumber(), userId);
 
 		if (null != verification) {
 			LOGGER.error("PlateNumber has been add, cmd={}", cmd);

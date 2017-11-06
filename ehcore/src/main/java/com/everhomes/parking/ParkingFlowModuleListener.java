@@ -364,7 +364,8 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 	private void createCarVerification(ParkingCardRequest parkingCardRequest) {
 
 		ParkingCarVerification verification = parkingProvider.findParkingCarVerificationByUserId(parkingCardRequest.getOwnerType(),
-				parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), parkingCardRequest.getCreatorUid());
+				parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), parkingCardRequest.getPlateNumber(),
+				parkingCardRequest.getCreatorUid());
 
 		if (null != verification) {
 			return;
