@@ -178,6 +178,7 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 			dto.setDescription(r.getValue(Tables.EH_QUESTIONNAIRES.DESCRIPTION));
 			dto.setAnsweredFlag(Byte.valueOf(r.getValue(getAnsweredFlagField()).toString()));
 			dto.setTargetType(r.getValue(Tables.EH_QUESTIONNAIRES.TARGET_TYPE));
+			dto.setPosterUri(r.getValue(Tables.EH_QUESTIONNAIRES.POSTER_URI));
 			if(QuestionnaireCommonStatus.TRUE == QuestionnaireCommonStatus.fromCode(dto.getAnsweredFlag())){
 				dto.setCreateTime(((Timestamp)r.getValue(getAnsweredTimeField())).getTime());
 			}
