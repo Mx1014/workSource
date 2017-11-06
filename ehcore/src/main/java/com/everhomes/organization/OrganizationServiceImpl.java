@@ -11098,6 +11098,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
             }
             dto.setDepartmentName(departmentName.toString());
+
+            //todo 查找工号
+            OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
+            if(detail != null)
+                dto.setEmployeeNo(detail.getEmployeeNo());
             dtos.add(dto);
         }
         return dtos;
