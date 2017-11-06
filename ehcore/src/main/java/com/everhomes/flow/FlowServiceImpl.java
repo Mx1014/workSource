@@ -1931,7 +1931,7 @@ public class FlowServiceImpl implements FlowService {
         if (flowVer.equals(0)) {
             return getConfigGraph(flowId);
         }
-        graphMap.clear();
+        // graphMap.clear();
         String fmt = String.format("%d:%d", flowId, flowVer);
         return graphMap.computeIfAbsent(fmt, k -> getSnapshotGraph(flowId, flowVer));
     }
@@ -2854,6 +2854,9 @@ public class FlowServiceImpl implements FlowService {
 
         if (!cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.ADMIN.getCode()) && cmd.getUserId() == null) {
             cmd.setUserId(UserContext.current().getUser().getId());
+        }
+        if (cmd.getModuleId() != null && cmd.getModuleId() == 0L) {
+            cmd.setModuleId(null);
         }
 
         int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
