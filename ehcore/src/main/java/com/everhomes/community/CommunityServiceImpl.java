@@ -2268,12 +2268,18 @@ public class CommunityServiceImpl implements CommunityService {
 			CommunityUserDto dto = dtos.get(i);
 			List<OrganizationDetailDTO> organizations = dto.getOrganizations();
 
+			String name = "";
 			StringBuilder enterprises = new StringBuilder();
 			StringBuilder executiveFlag = new StringBuilder();
 			StringBuilder positionFlag = new StringBuilder();
             if (organizations != null) {
                 for (int k = 0; k < organizations.size(); k++) {
 					OrganizationDetailDTO org = organizations.get(k);
+
+					if(StringUtils.isNotEmpty(org.getOrganizationMemberName()) && StringUtils.isEmpty(name)){
+						name = org.getOrganizationMemberName();
+					}
+
 					enterprises.append(organizations.get(k).getDisplayName() + ",");
 
 					//是否高管、职位
@@ -2303,7 +2309,7 @@ public class CommunityServiceImpl implements CommunityService {
 				positionFlag.deleteCharAt(positionFlag.length() - 1);
 			}
 
-			tempRow.createCell(0).setCellValue(dto.getUserName());
+			tempRow.createCell(0).setCellValue(name);
 			tempRow.createCell(1).setCellValue(dto.getNickName());
 			tempRow.createCell(2).setCellValue(dto.getPhone());
 			tempRow.createCell(3).setCellValue(UserGender.fromCode(dto.getGender()).getText());
