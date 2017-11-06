@@ -18,7 +18,7 @@ public interface UniongroupSearcher {
 
     void syncUniongroupDetailsIndexs();
 
-    void syncUniongroupDetailsAtOrg(Organization org, String groupType);
+    void syncUniongroupDetailsAtOrg(Organization org, String groupType, Integer versionCode);
 
     List query(SearchUniongroupDetailCommand cmd);
 

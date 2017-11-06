@@ -22,7 +22,7 @@ INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `ban
     VALUES ((@eh_banners_id:=@eh_banners_id+1), 999965, 0, '/home', 'Default', '0', '0', '/home', 'Default', 'cs://1/image/aW1hZ2UvTVRvME9HVTBPV013WldFMVlqSm1PR0prTlRZMlpUaGxZMkU0WTJRMlltSTNaZw', '0', '', NULL, NULL, '2', '10', '0', UTC_TIMESTAMP(), NULL, 'default');
 -- 服务广场
 SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
-set @homeurl = (select VALUE from eh_configurations WHERE NAME = 'home.url' LIMIT 1);
+SET @homeurl = (SELECT VALUE FROM eh_configurations WHERE NAME = 'home.url' LIMIT 1);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES
 	((@item_id := @item_id + 1),999965,0,0,0,'/home','GovAgencies','园区介绍','园区介绍','cs://1/image/aW1hZ2UvTVRveE9XUXpOREZqWkRRM1pXTXlZemhsTVdSaFlUQmxOalkwWm1FNU5tTXhOUQ',1,1,13,CONCAT('{"url":"',@homeurl,'/park-introduction/index.html?hideNavigationBar=1#/#sign_suffix"}'),0,0,1,1,'1',0,NULL,NULL,NULL,0,'pm_admin',0,NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES
@@ -61,7 +61,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 -- 服务广场
 SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
-set @homeurl = (select VALUE from eh_configurations WHERE NAME = 'home.url' LIMIT 1);
+SET @homeurl = (SELECT VALUE FROM eh_configurations WHERE NAME = 'home.url' LIMIT 1);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES
 	((@item_id := @item_id + 1),999965,0,0,0,'/home','GovAgencies','园区介绍','园区介绍','cs://1/image/aW1hZ2UvTVRveE9XUXpOREZqWkRRM1pXTXlZemhsTVdSaFlUQmxOalkwWm1FNU5tTXhOUQ',1,1,13,CONCAT('{"url":"',@homeurl,'/park-introduction/index.html?hideNavigationBar=1#/#sign_suffix"}'),0,0,1,1,'1',0,NULL,NULL,NULL,0,'park_tourist',0,NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES
@@ -432,7 +432,7 @@ INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `
 INSERT INTO `eh_community_geopoints` (`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`)
 	VALUES (240111044331092703,240111044332059898,'',113.1011,23.336,'ws0kv8jwn9sw');
 
-set @homeurl = (select VALUE from eh_configurations WHERE NAME = 'home.url' LIMIT 1);
+SET @homeurl = (SELECT VALUE FROM eh_configurations WHERE NAME = 'home.url' LIMIT 1);
 INSERT INTO `eh_configurations` ( `id`, `name`, `value`, `description`, `namespace_id`, `display_name` )
 	VALUES (1775,'app.agreements.url',CONCAT(@homeurl,'/mobile/static/app_agreements/agreements.html?ns=999965'),'the relative path for cshidai app agreements',999965,NULL);
 INSERT INTO `eh_configurations` ( `id`, `name`, `value`, `description`, `namespace_id`, `display_name` )
@@ -749,12 +749,12 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
 	VALUES (40775,1024525,240111044332059898,239825274387458782,'盈创大厦-703',2);
 
-SET @req_id = (SELECT  MAX(id) from eh_organization_community_requests);
+SET @req_id = (SELECT  MAX(id) FROM eh_organization_community_requests);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
 	VALUES ((@req_id := @req_id + 1),240111044332059898,'organization',1024525,3,0,UTC_TIMESTAMP());
 
-SET @member_id = (SELECT  MAX(id) from eh_organization_members);
-INSERT INTO `eh_organization_members` (id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
+SET @member_id = (SELECT  MAX(id) FROM eh_organization_members);
+INSERT INTO `eh_organization_members` (id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, STATUS, `namespace_id`)
 	VALUES ((@member_id := @member_id + 1),1024525,'USER',350687,'manager','孔文豪',0,'15815656103',3,999965);
 
 INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`)
@@ -769,7 +769,7 @@ INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, 
 
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `comment_tag1`, `comment_tag2`, `comment_tag3`, `comment_tag4`, `comment_tag5`)
-VALUES((@acl_id := @acl_id + 1),'EhOrganizations','1024525','1','10','350687','0','350687',now(),'999965','EhUsers','admin',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+VALUES((@acl_id := @acl_id + 1),'EhOrganizations','1024525','1','10','350687','0','350687',NOW(),'999965','EhUsers','admin',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
 	VALUES (323210,350687,0,'15815656103',NULL,3,UTC_TIMESTAMP(),999965);
@@ -937,7 +937,7 @@ INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_ur
 	VALUES ((@eh_app_id := @eh_app_id+1), '999965', '凯泰C时代', '2', '', '', '移动平台聚合服务，助力园区效能提升');
 
 --更新小站连接
-update eh_configurations SET VALUE = 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&mallId=1999964&sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fapp%2fuser%2findex.html%23%2fmicroshop%2fhome#sign_suffix' WHERE NAME = 'business.url' AND namespace_id = 999965;
+UPDATE eh_configurations SET VALUE = 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&mallId=1999964&sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fapp%2fuser%2findex.html%23%2fmicroshop%2fhome#sign_suffix' WHERE NAME = 'business.url' AND namespace_id = 999965;
 
 -- 仅仅beta执行
 -- set @group_id = 1004280; -- 1042112
@@ -948,3 +948,8 @@ update eh_configurations SET VALUE = 'https://biz.zuolin.com/zl-ec/rest/service/
 -- update eh_acl_role_assignments SET owner_id = @organization_id WHERE id = 114821;
 -- update eh_organization_address_mappings SET organization_id = @organization_id WHERE id in (40680,40712,40744,40776,40681,40713,40745,40777,40682,40714,40746,40778,40683,40715,40747,40779,40684,40716,40748,40780,40685,40717,40749,40781,40686,40718,40750,40782,40687,40719,40751,40783,40688,40720,40752,40784,40689,40721,40753,40785,40690,40722,40754,40786,40691,40723,40755,40787,40660,40692,40724,40756,40788,40661,40693,40725,40757,40789,40662,40694,40726,40758,40790,40663,40695,40727,40759,40791,40664,40696,40728,40760,40792,40665,40697,40729,40761,40793,40666,40698,40730,40762,40794,40667,40699,40731,40763,40795,40668,40700,40732,40764,40796,40669,40701,40733,40765,40797,40670,40702,40734,40766,40798,40671,40703,40735,40767,40799,40672,40704,40736,40768,40800,40673,40705,40737,40769,40801,40674,40706,40738,40770,40802,40675,40707,40739,40771,40676,40708,40740,40772,40677,40709,40741,40773,40678,40710,40742,40774,40679,40711,40743,40775);
 -- update eh_configurations SET `value` = REPLACE(`value`,'biz.zuolin.com','biz-beta.zuolin.com') WHERE `name` = 'business.url' AND namespace_id = 999965;
+
+-- 图标配置错误,修改modify by 吴寒 2017-11-6
+UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvMVl6YzFNek5qWmpCak1UZGhZbUU1T1dZeE5HSTJObVkxT1Rrd01qSTJaUQ' WHERE namespace_id =999965 AND item_label = '一键wifi';
+UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwaE5qUTJOMlkyT0dObE1tUmpNMlkxWW1JNU1EUTNOakE1WlRCalptWmpZdw' WHERE namespace_id =999965 AND item_label = '店铺管理';
+UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRveU5qQTJaV1JrT1dSaFlUaGhOMlF6TlROaVpqVXdPV0kwTUdRek9XSXlNZw' WHERE namespace_id =999965 AND item_label = '服务热线';

@@ -29,6 +29,7 @@ import com.everhomes.family.FamilyProvider;
 import com.everhomes.flow.*;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.namespace.*;
+import com.everhomes.organization.*;
 import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.pmtask.ebei.EbeiPmTaskDTO;
 import com.everhomes.pmtask.ebei.EbeiPmtaskLogDTO;
@@ -88,11 +89,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyService;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationAddress;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.category.CategoryAdminStatus;
@@ -1937,6 +1933,51 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 
 	@Override
+	public ListAuthorizationCommunityByUserResponse listOrganizationCommunityByUser(ListOrganizationCommunityByUserCommand cmd) {
+
+		ListAuthorizationCommunityByUserResponse response = new ListAuthorizationCommunityByUserResponse();
+
+		long userId = UserContext.currentUserId();
+		List<OrganizationMember> orgMembers = organizationService.listOrganizationMemberByOrganizationPathAndUserId(
+				"/" + cmd.getOrganizationId() + "/", userId);
+
+		List<CommunityDTO> result = new ArrayList<>();
+		if (null != orgMembers) {
+			orgMembers.stream().filter(r->
+				r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()) || r.getGroupType().equals(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode())
+			).forEach(m -> {
+				OrganizationCommunityRequest request = organizationProvider.getOrganizationCommunityRequestByOrganizationId(m.getOrganizationId());
+				if (null != request) {
+					Community community = communityProvider.findCommunityById(request.getCommunityId());
+					if (null != community) {
+						boolean flag = true;
+						for (CommunityDTO d: result) {
+							if (d.getUuid().equals(community.getUuid())) {
+								flag = false;
+								break;
+							}
+						}
+						if (flag) {
+							result.add(ConvertHelper.convert(community, CommunityDTO.class));
+						}
+					}
+				}
+			});
+		}
+		if (result.size() == 0) {
+			OrganizationCommunityRequest request = organizationProvider.getOrganizationCommunityRequestByOrganizationId(cmd.getOrganizationId());
+			if (null != request) {
+				Community community = communityProvider.findCommunityById(request.getCommunityId());
+				if (null != community) {
+					result.add(ConvertHelper.convert(community, CommunityDTO.class));
+				}
+			}
+		}
+		response.setCommunities(result);
+		return response;
+	}
+
+	@Override
 	public GetUserRelatedAddressByCommunityResponse getUserRelatedAddressesByCommunity(GetUserRelatedAddressesByCommunityCommand cmd) {
 
 		GetUserRelatedAddressByCommunityResponse response = new GetUserRelatedAddressByCommunityResponse();
@@ -2594,27 +2635,31 @@ public class PmTaskServiceImpl implements PmTaskService {
         if(list==null || list.size()==0)
             throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ORDER_ID,
                     "OrderId does not exist.");
+        if (cmd.getStateId()==null || cmd.getStateId()<1 || cmd.getStateId()>6)
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_STATE_ID,
+					"Illegal stateId");
 		PmTask task = list.get(0);
 
-		PmTaskDTO dto = ConvertHelper.convert(task, PmTaskDTO.class);
-		//TODO  枚举值更新
-		Byte state = cmd.getStateId()==6?PmTaskStatus.INACTIVE.getCode():cmd.getStateId();
+
+		EbeiPmTaskStatus state = EbeiPmTaskStatus.fromCode(cmd.getStateId());
 
 		dbProvider.execute((TransactionStatus status) -> {
 
-			task.setStatus(state > PmTaskStatus.PROCESSED.getCode()
-					? PmTaskStatus.PROCESSED.getCode(): state );
-			pmTaskProvider.updateTask(task);
-			dto.setStatus(task.getStatus());
 
 			//更新工作流case状态
 			FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
 
 			if (FlowCaseStatus.INVALID.getCode() != flowCase.getStatus()) {
-				Byte flowCaseStatus = state >= PmTaskStatus.PROCESSED.getCode() ? FlowCaseStatus.FINISHED.getCode() :
-						(state == PmTaskStatus.INACTIVE.getCode() ? FlowCaseStatus.ABSORTED.getCode() :
-								FlowCaseStatus.PROCESS.getCode());
-
+				Byte flowCaseStatus = FlowCaseStatus.PROCESS.getCode();
+				switch (state){
+					case UNPROCESSED: flowCaseStatus = FlowCaseStatus.INITIAL.getCode();break;
+					case PROCESSING: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();task.setStatus(PmTaskFlowStatus.PROCESSING.getCode());break;
+					case INACTIVE: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();task.setStatus(PmTaskFlowStatus.INACTIVE.getCode());break;
+                    case REVISITED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();task.setStatus(PmTaskFlowStatus.INACTIVE.getCode());break; //已关闭
+                    case PROCESSED: flowCaseStatus = FlowCaseStatus.FINISHED.getCode();task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());break;
+					default: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();
+				}
+				pmTaskProvider.updateTask(task);
 				if (flowCaseStatus == FlowCaseStatus.ABSORTED.getCode() && flowCase.getStatus() == FlowCaseStatus.PROCESS.getCode())
 					cancelTask(task.getId());
 				else if (flowCaseStatus == FlowCaseStatus.FINISHED.getCode() && flowCase.getStatus() == FlowCaseStatus.PROCESS.getCode())
@@ -2628,6 +2673,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 	private void cancelTask(Long id){
 		PmTask task = checkPmTask(id);
+
 		//更新工作流case状态
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
 		flowCase.setStatus(FlowCaseStatus.ABSORTED.getCode());
@@ -2643,6 +2689,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	private void finishTask(Long id){
 		PmTask task = checkPmTask(id);
+
 		//更新工作流case状态
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
 		flowCase.setStatus(FlowCaseStatus.FINISHED.getCode());
@@ -2654,4 +2701,5 @@ public class PmTaskServiceImpl implements PmTaskService {
 		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
 		flowService.processAutoStep(stepDTO);
 	}
+
 }

@@ -142,4 +142,5 @@ public interface DoorAccessService {
     
     void deleteDoorAuthLevel(Long id);
     
+    String faceTest();
 }

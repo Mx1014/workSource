@@ -427,5 +427,5 @@ public class EnterpriseContactController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+
 }

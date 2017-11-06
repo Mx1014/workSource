@@ -411,6 +411,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
             // flowCase摘要内容
             flowCaseCmd.setContent(this.getBriefContent(log));
 
+            flowCaseCmd.setServiceType("车辆放行");
             FlowCase flowCase = flowService.createFlowCase(flowCaseCmd);
             return flowCase.getId();
         } else {

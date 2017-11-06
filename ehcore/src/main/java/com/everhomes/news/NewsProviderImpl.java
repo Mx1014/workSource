@@ -70,6 +70,13 @@ public class NewsProviderImpl implements NewsProvider {
 	}
 
 	@Override
+	public void deletNewsTagVals(Long newsId) {
+		DeleteQuery query = getContext(AccessSpec.readWrite()).deleteQuery(Tables.EH_NEWS_TAG_VALS);
+		query.addConditions(Tables.EH_NEWS_TAG_VALS.NEWS_ID.eq(newsId));
+		query.execute();
+	}
+
+	@Override
 	public List<NewsTagVals> listNewsTagVals(Long newsId) {
 		return dbProvider.getDslContext(AccessSpec.readOnlyWith(EhNewsTagVals.class)).select().from(Tables.EH_NEWS_TAG_VALS)
 				.where(Tables.EH_NEWS_TAG_VALS.NEWS_ID.eq(newsId)).fetch().map(r->ConvertHelper.convert(r, NewsTagVals.class));
@@ -257,9 +264,10 @@ public class NewsProviderImpl implements NewsProvider {
 	}
 
 	@Override
-	public void increaseViewCount(Long newsId) {
-		dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_NEWS).set(Tables.EH_NEWS.VIEW_COUNT,Tables.EH_NEWS.VIEW_COUNT.add(1))
-				.where(Tables.EH_NEWS.ID.eq(newsId));
+	public void increaseViewCount(Long newsId, Long nViewCount) {
+		Long newViewCount = (nViewCount==null?0:nViewCount)+1;
+		dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_NEWS).set(Tables.EH_NEWS.VIEW_COUNT,newViewCount)
+				.where(Tables.EH_NEWS.ID.eq(newsId)).execute();
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhNews.class, null);
 	}
 

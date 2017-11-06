@@ -1,68 +1,28 @@
 package com.everhomes.techpark.punch;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.everhomes.approval.ApprovalRequest;
 import com.everhomes.approval.ApprovalRequestHandler;
 import com.everhomes.approval.ApprovalRequestProvider;
 import com.everhomes.approval.ApprovalService;
-import com.everhomes.contentserver.ResourceType;
-
-import org.elasticsearch.common.lang3.StringUtils;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.flow.*;
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.flow.FlowModuleDTO;
+import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSON;
-import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.entity.EntityType;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseState;
-import com.everhomes.flow.FlowEventLog;
-import com.everhomes.flow.FlowEventLogProvider;
-import com.everhomes.flow.FlowGraphNode;
-import com.everhomes.flow.FlowModuleInfo;
-import com.everhomes.flow.FlowModuleListener;
-import com.everhomes.flow.FlowNode;
-import com.everhomes.flow.FlowProvider;
-import com.everhomes.flow.FlowService;
-import com.everhomes.flow.FlowUserSelection;
-import com.everhomes.flow.FlowUserSelectionProvider;
-import com.everhomes.locale.LocaleStringService;
-import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.approval.ApproveApprovalRequestCommand;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseEntityType;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowEntityType;
-import com.everhomes.rest.flow.FlowLogType;
-import com.everhomes.rest.flow.FlowModuleDTO;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
-import com.everhomes.rest.organization.OrganizationSimpleDTO;
-import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.rest.rentalv2.RentalFlowNodeParams;
-import com.everhomes.rest.rentalv2.admin.AttachmentType;
-import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.server.schema.tables.pojos.EhFlowCases;
-import com.everhomes.sms.SmsProvider;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
- 
-import com.everhomes.util.ConvertHelper; 
-import com.everhomes.util.Tuple;
+import java.util.List;
 
 @Component
 public class PunchFlowModuleListener implements FlowModuleListener {
@@ -138,7 +98,7 @@ public class PunchFlowModuleListener implements FlowModuleListener {
 	}
 
 	@Override
-	public String onFlowCaseBriefRender(FlowCase flowCase) {
+	public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
 		// TODO Auto-generated method stub
 		return null;
 	}

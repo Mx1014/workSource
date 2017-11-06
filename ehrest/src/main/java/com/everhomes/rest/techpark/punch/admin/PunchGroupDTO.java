@@ -29,6 +29,7 @@ import com.everhomes.util.StringHelper;
  * <li>operatorUid: 最后操作人id </li>
  * <li>operatorName: 最后操作人姓名 </li>
  * <li>operateTime: 最后操作时间 </li>
+ * <li>status: 2-正常  3-修改次日生效 4-新增次日生效 </li>
  * </ul>
  */
 public class PunchGroupDTO {
@@ -76,6 +77,7 @@ public class PunchGroupDTO {
     private String operatorName; 
     
     private Long operateTime;
+    private Byte status;
 	
 	@Override
 	public String toString() {
@@ -233,5 +235,13 @@ public class PunchGroupDTO {
 
 	public void setEmployees(List<UniongroupTarget> employees) {
 		this.employees = employees;
+	}
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
 	}
 }

@@ -21,16 +21,19 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService, ApplicationLi
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowTimeoutServiceImpl.class);
 	
     @Autowired
+    private
     WorkerPoolFactory workerPoolFactory;
     
     @Autowired
     JesqueClientFactory jesqueClientFactory;
     
 	@Autowired
-	FlowTimeoutProvider flowTimeoutProvider;
+    private
+    FlowTimeoutProvider flowTimeoutProvider;
 	
 	@Autowired
-	FlowService flowService;
+    private
+    FlowService flowService;
 
     @Autowired
     private ScheduleProvider scheduleProvider;

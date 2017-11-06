@@ -5,18 +5,15 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.pmtask.PmTask;
-import com.everhomes.rest.techpark.expansion.ApplyEntryStatus;
 import com.everhomes.rest.techpark.expansion.LeaseIssuerStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhLeaseConfigsDao;
 import com.everhomes.server.schema.tables.daos.EhLeaseIssuerAddressesDao;
 import com.everhomes.server.schema.tables.daos.EhLeaseIssuersDao;
 import com.everhomes.server.schema.tables.pojos.EhLeaseConfigs;
-import com.everhomes.server.schema.tables.pojos.EhLeaseConfigs2;
 import com.everhomes.server.schema.tables.pojos.EhLeaseIssuerAddresses;
 import com.everhomes.server.schema.tables.pojos.EhLeaseIssuers;
-import com.everhomes.server.schema.tables.records.EhLeaseConfigs2Record;
 import com.everhomes.server.schema.tables.records.EhLeaseConfigsRecord;
 import com.everhomes.server.schema.tables.records.EhLeaseIssuerAddressesRecord;
 import com.everhomes.server.schema.tables.records.EhLeaseIssuersRecord;
@@ -159,13 +156,62 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 	}
 
 	@Override
-	public List<LeasePromotionConfig2> listLeasePromotionConfigByNamespaceId(Integer namespaceId) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseConfigs2.class));
+	public List<LeasePromotionConfig> listLeasePromotionConfigByNamespaceId(Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseConfigs.class));
 
-		SelectQuery<EhLeaseConfigs2Record> query = context.selectQuery(Tables.EH_LEASE_CONFIGS2);
-		query.addConditions(Tables.EH_LEASE_CONFIGS2.NAMESPACE_ID.eq(namespaceId));
+		SelectQuery<EhLeaseConfigsRecord> query = context.selectQuery(Tables.EH_LEASE_CONFIGS);
+		query.addConditions(Tables.EH_LEASE_CONFIGS.NAMESPACE_ID.eq(namespaceId));
 
-		return query.fetch().map(r -> ConvertHelper.convert(r, LeasePromotionConfig2.class));
+		return query.fetch().map(r -> ConvertHelper.convert(r, LeasePromotionConfig.class));
+	}
+
+	@Override
+	public void createLeasePromotionConfig(LeasePromotionConfig config) {
+
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhLeaseConfigs.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		config.setId(id);
+		config.setCreatorUid(UserContext.current().getUser().getId());
+		config.setCreateTime(new Timestamp(System.currentTimeMillis()));
+
+		EhLeaseConfigsDao dao = new EhLeaseConfigsDao(context.configuration());
+		dao.insert(config);
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhLeaseConfigs.class, null);
+	}
+
+	@Override
+	public void updateLeasePromotionConfig(LeasePromotionConfig config) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		EhLeaseConfigsDao dao = new EhLeaseConfigsDao(context.configuration());
+		dao.update(config);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhLeaseConfigs.class, null);
+	}
+
+	@Override
+	public LeasePromotionConfig findLeasePromotionConfig(Integer namespaceId, String configName) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseConfigs.class));
+
+		SelectQuery<EhLeaseConfigsRecord> query = context.selectQuery(Tables.EH_LEASE_CONFIGS);
+		query.addConditions(Tables.EH_LEASE_CONFIGS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_LEASE_CONFIGS.CONFIG_NAME.eq(configName));
+
+		return ConvertHelper.convert(query.fetchOne(), LeasePromotionConfig.class);
+	}
+
+	@Override
+	public void deleteLeasePromotionConfig(Integer namespaceId, String configName) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		DeleteQuery<EhLeaseConfigsRecord> query = context.deleteQuery(Tables.EH_LEASE_CONFIGS);
+		query.addConditions(Tables.EH_LEASE_CONFIGS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_LEASE_CONFIGS.CONFIG_NAME.eq(configName));
+
+		query.execute();
 	}
 
 	@Override

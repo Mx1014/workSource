@@ -571,4 +571,6 @@ public interface OrganizationService {
 
 	/**通过通用岗位和details删除岗位**/
 	void deleteOrganizationJobPositionsByPositionIdAndDetails(DeleteOrganizationJobPositionsByPositionIdAndDetailsCommand cmd);
+	
+	Integer cleanWrongStatusOrganizationMembers(Integer namespaceId);
 }

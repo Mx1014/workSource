@@ -15,6 +15,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class BuildingDTO {
+
+    private Long buildingId;
     private java.lang.String   buildingName;
     private java.lang.String   buildingAliasName;
     private java.lang.String   businessBuildingnName;
@@ -29,6 +31,14 @@ public class BuildingDTO {
 	}
 
 	public BuildingDTO() {
+    }
+
+    public Long getBuildingId() {
+        return buildingId;
+    }
+
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
     }
 
     public java.lang.String getBuildingName() {

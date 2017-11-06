@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by zhengsiting on 2017/7/20.
@@ -93,7 +94,7 @@ public class CommunityApproveFlowMoudleListener implements FlowModuleListener {
     }
 
     @Override
-    public String onFlowCaseBriefRender(FlowCase flowCase) {
+    public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
         return null;
     }
 
@@ -321,5 +322,18 @@ public class CommunityApproveFlowMoudleListener implements FlowModuleListener {
     @Override
     public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId, List<Tuple<String, Object>> variables) {
 
+    }
+
+    @Override
+    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+        List<CommunityApprove> list = communityApproveProvider.queryCommunityApprovesByNamespaceId(namespaceId);
+        List<FlowServiceTypeDTO> dtos = list.stream().map(r->{
+            FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+            dto.setId(r.getId());
+            dto.setNamespaceId(r.getNamespaceId());
+            dto.setServiceName(r.getApproveName());
+            return dto;
+        }).collect(Collectors.toList());
+        return dtos ;
     }
 }

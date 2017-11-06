@@ -493,6 +493,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
 		//:todo 解决重复
+		// updated by Janson 20171018 错误的公司成员会覆盖正确的公司成员 #17284
 //		query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
 		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
 		query.fetch().map((r) -> {
@@ -5108,6 +5109,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.DEPARTMENT.getCode()));
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
 		//added by wh 2016-10-13 把被拒绝的过滤掉
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
@@ -5244,7 +5246,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType));
 		if(null != organizationId)
 			step.and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(organizationId));
-		return step.fetch().map(r -> ConvertHelper.convert(r, Organization.class));
+		return step.orderBy(Tables.EH_ORGANIZATIONS.ID.desc()).fetch().map(r -> ConvertHelper.convert(r, Organization.class));
 	}
 
 	@Override
@@ -5341,10 +5343,16 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	@Override
 	public List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId,
-			CrossShardListingLocator locator, Integer pageSize) {
+														   List<Long> orgIds, String groupName, CrossShardListingLocator locator, Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectConditionStep<Record> step = context.select().from(Tables.EH_ORGANIZATIONS)
 				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType));
+		if (null != orgIds) {
+			step.and(Tables.EH_ORGANIZATIONS.ID.in(orgIds));
+		}
+		if (!StringUtils.isEmpty(groupName)) {
+			step.and(Tables.EH_ORGANIZATIONS.NAME.like("%" + groupName + "%"));
+		}
 		if(null != organizationId)
 			step.and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(organizationId));
 		if (null != locator) {
@@ -5656,5 +5664,26 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(detailId));
 		query.execute();
 
+	}
+
+
+	@Override
+	public List listLapseOrganizations(Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.in(OrganizationStatus.INACTIVE.getCode(),OrganizationStatus.DELETED.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		List list = query.fetch();
+		return list;
+	}
+
+	@Override
+	public Integer updateOrganizationMembersToInactiveByPath(String path, Timestamp now) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
+		int count = context.update(Tables.EH_ORGANIZATION_MEMBERS).set(Tables.EH_ORGANIZATION_MEMBERS.STATUS, OrganizationMemberStatus.INACTIVE.getCode())
+				.set(Tables.EH_ORGANIZATION_MEMBERS.UPDATE_TIME, now)
+				.where(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(path)).execute();
+		return count;
 	}
 }

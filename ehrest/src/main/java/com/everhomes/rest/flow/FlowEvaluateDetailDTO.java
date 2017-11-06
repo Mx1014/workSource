@@ -16,6 +16,7 @@ import java.util.List;
  *     <li>evaluateStep: 评价完成后的动作</li>
  *     <li>messageAction: 消息信息{@link com.everhomes.rest.flow.FlowActionInfo}</li>
  *     <li>smsAction: 短信信息{@link com.everhomes.rest.flow.FlowActionInfo}</li>
+ *     <li>allowFlowCaseEndEvaluate: 允许结束后评价开关</li>
  *     <li>items: 评价项列表{@link com.everhomes.rest.flow.FlowEvaluateItemDTO}</li>
  * </ul>
  */
@@ -28,6 +29,8 @@ public class FlowEvaluateDetailDTO {
     private String evaluateStep;
     private FlowActionDTO messageAction;
     private FlowActionDTO smsAction;
+
+    private Byte allowFlowCaseEndEvaluate;
 
     @ItemType(FlowEvaluateItemDTO.class)
     private List<FlowEvaluateItemDTO> items = new ArrayList<>();
@@ -94,6 +97,14 @@ public class FlowEvaluateDetailDTO {
 
     public void setItems(List<FlowEvaluateItemDTO> items) {
         this.items = items;
+    }
+
+    public Byte getAllowFlowCaseEndEvaluate() {
+        return allowFlowCaseEndEvaluate;
+    }
+
+    public void setAllowFlowCaseEndEvaluate(Byte allowFlowCaseEndEvaluate) {
+        this.allowFlowCaseEndEvaluate = allowFlowCaseEndEvaluate;
     }
 
     @Override

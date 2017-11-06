@@ -73,6 +73,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberFullDTO;
@@ -103,9 +104,12 @@ import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.*;
 import com.everhomes.util.*;
+
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.geo.GeoHashUtils;
+
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.slf4j.Logger;
@@ -129,6 +133,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -1444,8 +1449,9 @@ public class UserServiceImpl implements UserService {
 		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
 		Object maxLoginId = accessor.getMapValueObject(hkeyIndex);
 		if(maxLoginId != null) {
-			LOGGER.debug("maxLoginId: "+maxLoginId);
-			LOGGER.debug("maxLoginId.toString: "+maxLoginId.toString());
+		    // 日志太多，先注释掉 by lqs 20171102
+			// LOGGER.debug("maxLoginId: "+maxLoginId);
+			// LOGGER.debug("maxLoginId.toString: "+maxLoginId.toString());
 			for(int i = 1; i <= Integer.parseInt(maxLoginId.toString()); i++) {
 				String hkeyLogin = String.valueOf(i);
 				Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
@@ -2104,10 +2110,10 @@ public class UserServiceImpl implements UserService {
 			break;
 		}
 
-		if(LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Gen the default avatar for user by gender, userId=" + userId 
-					+ ", namespaceId=" + namespaceId + ", gener=" + gener + ", avatarUri=" + avatarUri);
-		}
+//		if(LOGGER.isDebugEnabled()) {
+//			LOGGER.debug("Gen the default avatar for user by gender, userId=" + userId
+//					+ ", namespaceId=" + namespaceId + ", gener=" + gener + ", avatarUri=" + avatarUri);
+//		}
 
 		return avatarUri;
 	}
@@ -2968,6 +2974,13 @@ public class UserServiceImpl implements UserService {
 		}else{
 			communityName = organizationDto.getCommunityName();
 		}
+
+		String organizaitonName = "";
+		if(organizationDto.getDisplayName() != null && !organizationDto.getDisplayName().equals("")){
+			organizaitonName = organizationDto.getDisplayName();
+		}else {
+			organizaitonName = organizationDto.getName();
+		}
 		// 处理名称
 		GetNamespaceDetailCommand cmd = new GetNamespaceDetailCommand();
 		cmd.setNamespaceId(namespaceId);
@@ -2975,13 +2988,13 @@ public class UserServiceImpl implements UserService {
 		NamespaceNameType namespaceNameType = NamespaceNameType.fromCode(namespaceDetail.getNameType());
 		switch (namespaceNameType){
 			case ONLY_COMPANY_NAME:
-				titlieName.append(organizationDto.getName());
+				titlieName.append(organizaitonName);
 				break;
 			case ONLY_COMMUNITY_NAME:
 				titlieName.append(communityName);
 				break;
 			case COMMUNITY_COMPANY_NAME:
-				titlieName.append(communityName).append(organizationDto.getName());
+				titlieName.append(communityName).append(organizaitonName);
 				break;
 		}
 //		sceneDto.setName(organizationDto.getName().trim());
@@ -3001,7 +3014,7 @@ public class UserServiceImpl implements UserService {
 //        }
 		sceneDto.setTitleName(titlieName.toString());
 		sceneDto.setName(fullName);
-        sceneDto.setAliasName(aliasName);
+        sceneDto.setAliasName(organizaitonName);
 		sceneDto.setAvatar(organizationDto.getAvatarUri());
 		sceneDto.setAvatarUrl(organizationDto.getAvatarUrl());
 		sceneDto.setCommunityName(communityName);
@@ -3202,7 +3215,7 @@ public class UserServiceImpl implements UserService {
 		sceneDto.setSceneType(sceneType.getCode());
 		sceneDto.setEntityType(UserCurrentEntityType.COMMUNITY.getCode());
 		sceneDto.setName(fullName);
-		sceneDto.setAliasName(aliasName);
+		sceneDto.setAliasName(communityName);
 
 		String entityContent = StringHelper.toJsonString(community);
 		sceneDto.setEntityContent(entityContent);
@@ -4839,6 +4852,13 @@ public class UserServiceImpl implements UserService {
 	private List<SceneDTO> addOrganizationSceneToList(Long userId, Integer namespaceId, List<SceneDTO> sceneList){
 		// 处于某个公司对应的场景
 		OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;
+
+		//:todo 校验
+ 		if(userId < User.MAX_SYSTEM_USER_ID){
+			LOGGER.error("userId is not legal! userId: {}", userId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "userId is not legal! userId: {}", userId);
+		}
+
 		List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
 		for(OrganizationDTO orgDto : organizationList) {
 			String orgType = orgDto.getOrganizationType();
@@ -5218,5 +5238,111 @@ public class UserServiceImpl implements UserService {
 			response.setIsAdmin(ContactAdminFlag.NO.getCode());
 		return response;
 	}
+	
+	/**
+	 * 用于测试服务器状态，不要用于业务使用 by lqs 20171019
+	 */
+	@Override
+	public String checkServerStatus() {
+	    Map<String, String> result = new HashMap<String, String>();
+	    int flag = 0x00;
+	    
+	    // 检查是否可以申请内存创建对象
+	    Object obj = new Object();
+	    result.put("objectCreated", "OK");
+        flag = flag | 0x01;
+
+	    // 检查redis storage 连接是否正常（可读可写）
+	    try {
+            String key = "check.server.status";
+            String heartbeat = "server.heartbeat.check";
+    	    RedisTemplate template = bigCollectionProvider.getMapAccessor(key, "").getTemplate(new StringRedisSerializer());
+            ValueOperations op = template.opsForValue();
+            Object times = op.get(heartbeat);
+            op.set(heartbeat, String.valueOf(System.currentTimeMillis()));
+
+            result.put("redisStorageStatus", "OK");
+            flag = flag | 0x02;
+	    } catch (Exception e) {
+	        LOGGER.error("Redis storage invalid state", e);
+	        result.put("redisStorageStatus", e.getMessage());
+        }
+        
+	    // 检查redis cache是否可以正常evict缓存和缓存内容
+	    try {
+            userProvider.updateCacheStatus();
+            userProvider.checkCacheStatus();
+            result.put("redisCacheStatus", "OK");
+            flag = flag | 0x04;
+	    } catch (Exception e) {
+	        LOGGER.error("Redis cache invalid state", e);
+	        result.put("redisCacheStatus", e.getMessage());
+        }
+	    
+	    // 检查数据库查询是否正常
+	    try {
+	        namespaceResourceProvider.checkDbStatus();
+            result.put("dbStatus", "OK");
+            flag = flag | 0x08;
+	    }  catch (Exception e) {
+            LOGGER.error("Db invalid state", e);
+            result.put("dbStatus", e.getMessage());
+        }
+	    
+	    if(flag == 0x0f) {
+	        result.put("coreStatus", "OK");
+	    } else {
+	        result.put("coreStatus", String.valueOf(flag));
+	    }
+	    
+	    return StringHelper.toJsonString(result);
+	}
+
+    @Override
+    public SystemInfoResponse updateUserBySystemInfo(SystemInfoCommand cmd,
+            HttpServletRequest request, HttpServletResponse response) {
+        User user = UserContext.current().getUser();
+        UserLogin login = UserContext.current().getLogin();
+        SystemInfoResponse resp = new SystemInfoResponse();
+        resp.setUploadUrlInBrowser("https://upload.zuolin.com");
+        
+        if(user != null && user.getId() >= User.MAX_SYSTEM_USER_ID && login != null) {
+            String userKey = NameMapper.getCacheKey("user", user.getId(), null);
+            Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, String.valueOf(login.getLoginId()));
+            UserLogin newLogin = accessor.getMapValueObject(String.valueOf(login.getLoginId()));
+            if(newLogin != null 
+                    && newLogin.getLoginId() == login.getLoginId() 
+                    && newLogin.getLoginInstanceNumber() == newLogin.getLoginInstanceNumber()
+                    ) {
+              //update device info
+                login.setPusherIdentify(cmd.getPusherIdentify());
+                login.setDeviceIdentifier(cmd.getDeviceIdentifier());
+                
+                if(!(newLogin.getPusherIdentify() != null 
+                        && newLogin.getPusherIdentify().equals(cmd.getPusherIdentify())
+                        && newLogin.getDeviceIdentifier() != null
+                        && newLogin.getDeviceIdentifier().equals(cmd.getPusherIdentify()))) {
+                    //not equal, set the newLogin
+                    newLogin.setPusherIdentify(cmd.getPusherIdentify());
+                    newLogin.setDeviceIdentifier(cmd.getDeviceIdentifier());
+                    accessor.putMapValueObject(String.valueOf(newLogin.getLoginId()), newLogin);    
+                }
+                
+            }
+            
+            List<Border> borders = this.borderProvider.listAllBorders();
+            List<String> borderStrs = borders.stream().map((Border border) -> {
+                return String.format("%s:%d", border.getPublicAddress(), border.getPublicPort());
+            }).collect(Collectors.toList());
+            
+            resp.setAccessPoints(borderStrs);
+            resp.setContentServer(contentServerService.getContentServer());
+        }
+
+        Long l = configurationProvider.getLongValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.PAY_PLATFORM, 0l);
+        resp.setPaymentPlatform(l);
+        
+        return resp;
+    }
 
 }

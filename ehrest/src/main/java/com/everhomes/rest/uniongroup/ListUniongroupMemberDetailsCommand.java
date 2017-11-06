@@ -10,6 +10,8 @@ public class ListUniongroupMemberDetailsCommand {
 
     private Long ownerId;
 
+    private Integer versionCode;
+
     public ListUniongroupMemberDetailsCommand() {
 
     }
@@ -46,5 +48,13 @@ public class ListUniongroupMemberDetailsCommand {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Integer getVersionCode() {
+        return versionCode;
+    }
+
+    public void setVersionCode(Integer versionCode) {
+        this.versionCode = versionCode;
     }
 }

@@ -112,6 +112,7 @@ import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
+import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.sms.SmsProvider;
@@ -1133,8 +1134,6 @@ public class OrganizationServiceImpl implements OrganizationService {
             organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organization.setGroupId(group.getId());
             organization.setEmailDomain(cmd.getEmailDomain());
-            organization.setWebsite(cmd.getWebsite());
-            organization.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
             organizationProvider.createOrganization(organization);
 
             OrganizationDetail enterprise = new OrganizationDetail();
@@ -1283,8 +1282,6 @@ public class OrganizationServiceImpl implements OrganizationService {
             organization.setName(cmd.getName());
             organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organization.setEmailDomain(cmd.getEmailDomain());
-            organization.setWebsite(cmd.getWebsite());
-            organization.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
             organizationProvider.updateOrganization(organization);
 
             OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
@@ -1990,6 +1987,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 forumCmd.setExcludeCategories(cmd.getExcludeCategories());
                 forumCmd.setCategoryId(cmd.getCategoryId());
                 forumCmd.setTag(cmd.getTag());
+            	forumCmd.setForumEntryId(cmd.getForumEntryId());
                 response = forumService.listTopicsByForums(forumCmd);
                 break;
             case COMMUNITY_ALL:
@@ -2674,6 +2672,10 @@ public class OrganizationServiceImpl implements OrganizationService {
             OrganizationDTO dto = toOrganizationDTO(userId, org);
             dtos.add(dto);
         }
+
+        //：todo 去重
+        dtos = new ArrayList<>(new HashSet<>(dtos));
+
         Long endTime = System.currentTimeMillis();
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("TrackUserRelatedCost:listUserRelateOrganizations:elapse:{}", endTime - startTime);
@@ -2782,16 +2784,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                 organizationIds.add(member.getOrganizationId());
             }
         }
-
-//        /* 人员在新的管理员数据里没有 则去查老的管理员是角色的时候数据（之前添加的管理员可以不在公司，所以在organizationMember里面查询不到）,如果打算去掉老的，需要迁移数据把创建管理员没有添加到公司的数据给补上 */
-//        if(organizationIds.size() == 0){
-//            List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByTarget(EntityType.USER.getCode(), userId);
-//            for (RoleAssignment roleAssignment: roleAssignments) {
-//                if(EntityType.ORGANIZATIONS == EntityType.fromCode(roleAssignment.getOwnerType()) && (roleAssignment.getRoleId() == RoleConstants.PM_SUPER_ADMIN || roleAssignment.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN)){
-//                    organizationIds.add(roleAssignment.getOwnerId());
-//                }
-//            }
-//        }
 
         /* 人员在新的管理员数据里没有 则去查老的管理员是角色的时候数据（之前添加的管理员可以不在公司，所以在organizationMember里面查询不到）,如果打算去掉老的，需要迁移数据把创建管理员没有添加到公司的数据给补上 */
         if(organizationIds.size() == 0){
@@ -5031,6 +5023,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public OrganizationDTO applyForEnterpriseContact(CreateOrganizationMemberCommand cmd) {
         User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         if (StringUtils.isEmpty(cmd.getTargetId())) {
             cmd.setTargetId(user.getId());
         }
@@ -5076,6 +5069,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     IdentifierType.MOBILE.getCode());
 
             OrganizationMember member = new OrganizationMember();
+            member.setNamespaceId(namespaceId);
             member.setContactToken(identifier.getIdentifierToken());
             member.setContactType(identifier.getIdentifierType());
             member.setContactName(StringUtils.isEmpty(cmd.getContactName()) ? user.getNickName() : cmd.getContactName());
@@ -6872,6 +6866,24 @@ public class OrganizationServiceImpl implements OrganizationService {
         return response;
     }
 
+    @Override
+    public Integer cleanWrongStatusOrganizationMembers(Integer namespaceId) {
+        Tuple tuple = this.coordinationProvider.getNamedLock(CoordinationLocks.CLEANWRONGSTATUS_ORGANIZATIONMEMBERS.getCode() + namespaceId).enter(() -> {
+            Integer count = 0;
+            List<EhOrganizationsRecord> orgs = this.organizationProvider.listLapseOrganizations(namespaceId);
+            Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+            if (orgs != null && orgs.size() > 0) {
+                for (EhOrganizationsRecord r : orgs) {
+                    int i = this.organizationProvider.updateOrganizationMembersToInactiveByPath(r.getPath(), now);
+                    LOGGER.debug("cleanWrongStatusOrganizationMembers queue organizaitonId:" + r.getId() + " count: " + i);
+                    count += i;
+                };
+            }
+            return count;
+        });
+        return (Integer) tuple.first();
+    }
+
 
     private UserIdentifier createUserAndIdentifier(Integer namespaceId, String nickName, String identifierToken) {
         User user = new User();
@@ -7149,7 +7161,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     org.apache.commons.lang.StringUtils.isNotBlank(r.getE()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getF()) ||
                     org.apache.commons.lang.StringUtils.isNotBlank(r.getG()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getH()) ||
                     org.apache.commons.lang.StringUtils.isNotBlank(r.getI()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getJ()) ||
-                    org.apache.commons.lang.StringUtils.isNotBlank(r.getK()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getL())) {
+                    org.apache.commons.lang.StringUtils.isNotBlank(r.getK())) {
                 ImportEnterpriseDataDTO data = new ImportEnterpriseDataDTO();
                 if (null != r.getA())
                     data.setName(r.getA().trim());
@@ -7173,8 +7185,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                     data.setCheckinDate(r.getJ().trim());
                 if (null != r.getK())
                     data.setDescription(r.getK().trim());
-                if (null != r.getL())
-                    data.setUnifiedSocialCreditCode(r.getL().trim());
                 datas.add(data);
             }
         }
@@ -7284,7 +7294,6 @@ public class OrganizationServiceImpl implements OrganizationService {
             enterpriseCommand.setNamespaceId(namespaceId);
             enterpriseCommand.setCommunityId(cmd.getCommunityId());
             enterpriseCommand.setEmailDomain(data.getEmail());
-            enterpriseCommand.setUnifiedSocialCreditCode(data.getUnifiedSocialCreditCode());
             enterpriseCommand.setCheckinDate(data.getCheckinDate());
             if (!StringUtils.isEmpty(data.getNumber())) {
                 enterpriseCommand.setMemberCount(Long.parseLong(data.getNumber().toString()));
@@ -10030,7 +10039,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         organizationMember.setGroupPath(org.getPath());
         organizationMember.setGroupType(org.getGroupType());
         organizationMember.setOperatorUid(user.getId());
-        organizationMember.setVisibleFlag(cmd.getVisibleFlag());
+        Byte visibleFlag = cmd.getVisibleFlag() != null ? cmd.getVisibleFlag() : Byte.valueOf("0");
+        organizationMember.setVisibleFlag(visibleFlag);
         organizationMember.setGroupId(0l);
         /**Modify by lei.lv**/
 /*        java.util.Date nDate = DateHelper.currentGMTTime();
@@ -10169,6 +10179,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                 //添加除公司之外的机构成员
                 departments.addAll(repeatCreateOrganizationmembers(departmentIds, cmd.getContactToken(), enterpriseIds, organizationMember));
+                
+                //：todo 自动加入薪酬组
+                this.uniongroupService.reallocatedUnion(org.getId(), departmentIds, organizationMember);
+
                 groups.addAll(repeatCreateOrganizationmembers(groupIds, cmd.getContactToken(), enterpriseIds, organizationMember));
                 jobPositions.addAll(repeatCreateOrganizationmembers(jobPositionIds, cmd.getContactToken(), enterpriseIds, organizationMember));
                 jobLevels.addAll(repeatCreateOrganizationmembers(jobLevelIds, cmd.getContactToken(), enterpriseIds, organizationMember));

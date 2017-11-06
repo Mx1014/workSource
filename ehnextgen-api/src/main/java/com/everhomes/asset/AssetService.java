@@ -5,6 +5,7 @@ import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -101,6 +102,44 @@ public interface AssetService {
 
     void updateBillSwitchOnTime();
 
+    ListChargingStandardsResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd);
+
+
+    void configChargingItems(ConfigChargingItemsCommand cmd);
+
+    void createChargingStandard(CreateChargingStandardCommand cmd);
+
+    void modifyChargingStandard(ModifyChargingStandardCommand cmd);
+
+    GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
+
+    DeleteChargingStandardDTO deleteChargingStandard(DeleteChargingStandardCommand cmd);
+
+    List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd);
+
+    List<EhPaymentFormula> createFormula(CreateFormulaCommand cmd);
+
+    void createBillGroup(CreateBillGroupCommand cmd);
+
+    void modifyBillGroup(ModifyBillGroupCommand cmd);
+
+
+
+    void adjustBillGroupOrder(AdjustBillGroupOrderCommand cmd);
+
+    ListChargingItemsForBillGroupResponse listChargingItemsForBillGroup(BillGroupIdCommand cmd);
+
+    AddOrModifyRuleForBillGroupResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
+
+    DeleteChargingItemForBillGroupResponse deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd);
+
+    void deleteBillGroup(DeleteBillGroupCommand cmd);
+
+    ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(BillGroupRuleIdCommand cmd);
+
     PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd);
 
+    List<ListChargingItemsDTO> listAvailableChargingItems(OwnerIdentityCommand cmd);
+
+    void paymentExpectancies_re_struct(PaymentExpectanciesCommand cmd);
 }

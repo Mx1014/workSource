@@ -43,6 +43,8 @@ public interface EnterpriseApplyEntryService {
 
 	LeasePromotionConfigDTO getLeasePromotionConfig(GetLeasePromotionConfigCommand cmd);
 
+	void setLeasePromotionConfig(SetLeasePromotionConfigCommand cmd);
+
 	CheckIsLeaseIssuerDTO checkIsLeaseIssuer(CheckIsLeaseIssuerCommand cmd);
 
 	ListLeaseIssuerBuildingsResponse listBuildings(ListLeaseIssuerBuildingsCommand cmd);

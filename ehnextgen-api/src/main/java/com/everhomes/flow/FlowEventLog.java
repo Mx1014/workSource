@@ -33,11 +33,11 @@ public class FlowEventLog extends EhFlowEventLogs {
 	}
 
 	public Long getTrackerApplier() {
-		return FlowEventCustomField.TRACKER_APLIER.getIntegralValue(this);
+		return FlowEventCustomField.TRACKER_APPLIER.getIntegralValue(this);
 	}
 
 	public void setTrackerApplier(Long trackerApplier) {
-		FlowEventCustomField.TRACKER_APLIER.setIntegralValue(this, trackerApplier);
+		FlowEventCustomField.TRACKER_APPLIER.setIntegralValue(this, trackerApplier);
 	}
 
 	public Long getButtonFiredCount() {

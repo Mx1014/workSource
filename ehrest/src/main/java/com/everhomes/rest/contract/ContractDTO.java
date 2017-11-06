@@ -64,6 +64,7 @@ public class ContractDTO {
     private String serviceUserName;
     
     private String serviceUserPhone;
+    private String settled;
 
 	private Byte contractType;
 	private Byte status;
@@ -71,6 +72,14 @@ public class ContractDTO {
     @ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> buildings;
 	private BigDecimal rent;
+
+	public String getSettled() {
+		return settled;
+	}
+
+	public void setSettled(String settled) {
+		this.settled = settled;
+	}
 
 	public String getCustomerName() {
 		return customerName;
