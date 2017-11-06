@@ -2160,6 +2160,7 @@ public class AssetProviderImpl implements AssetProvider {
                     .where(t.OWNER_TYPE.eq(ownerType))
                     .and(t.OWNER_ID.eq(communityId))
                     .execute();
+            return;
         }
         for(int i = 0; i < configChargingItems.size(); i ++) {
             ConfigChargingItems vo = configChargingItems.get(i);

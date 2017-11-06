@@ -614,6 +614,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd) {
+        if(cmd.getOwnerId()==null){
+            cmd.setOwnerId(cmd.getNamespaceId().longValue());
+        }
         return assetProvider.listChargingStandards(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getChargingItemId());
     }
 
@@ -2136,26 +2139,42 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void configChargingItems(ConfigChargingItemsCommand cmd) {
+        Long communityId = cmd.getOwnerId();
+        Integer namespaceId = cmd.getNamespaceId();
         List<Long> communityIds = new ArrayList<>();
-        if(cmd.getOwnerId() == null){
-            //全部的情况
-            ListCommunityByNamespaceCommand cmd1 = new ListCommunityByNamespaceCommand();
-            cmd1.setNamespaceId(cmd.getNamespaceId());
-            ListCommunityByNamespaceCommandResponse communitResponse = namespaceResourceService.listCommunityByNamespace(cmd1);
-            List<CommunityDTO> communities = communitResponse.getCommunities();
-            if(communities == null || communities.size() < 1){
-                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.NO_COMMUNITY_CHOSE,"no communities is available");
-            }
-            for(int i = 0; i < communities.size(); i++){
-                communityIds.add(communities.get(i).getId());
-            }
-            communityIds.add(cmd.getNamespaceId().longValue());
+        if(communityId == null){
+            communityIds = getAllCommunity(namespaceId);
         }
         assetProvider.configChargingItems(cmd.getChargingItemConfigs(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId(),communityIds);
     }
 
+    private List<Long> getAllCommunity(Integer namespaceId) {
+        List<Long> communityIds = new ArrayList<>();
+        //全部的情况
+        ListCommunityByNamespaceCommand cmd1 = new ListCommunityByNamespaceCommand();
+        cmd1.setNamespaceId(namespaceId);
+        ListCommunityByNamespaceCommandResponse communitResponse = namespaceResourceService.listCommunityByNamespace(cmd1);
+        List<CommunityDTO> communities = communitResponse.getCommunities();
+        if(communities == null || communities.size() < 1){
+            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.NO_COMMUNITY_CHOSE,"no communities is available");
+        }
+        for(int i = 0; i < communities.size(); i++){
+            communityIds.add(communities.get(i).getId());
+        }
+        communityIds.add(namespaceId.longValue());
+        return communityIds;
+    }
+
     @Override
     public void createChargingStandard(CreateChargingStandardCommand cmd) {
+        if(cmd.getOwnerId() == null){
+            List<Long> allCommunityIds = getAllCommunity(cmd.getNamespaceId());
+        }
+        /**
+         * 对全部进行修改时，修改域空间和下面的园区者
+         * 对单个进行修改（增，删，改）时，修改 + 收费项目和 收费标准均不再耦合
+         * ps：对于账单组，耦合联动不涉及 收费标准，好像也无需涉及到收费项目
+         */
         if(cmd.getFormulaType() == 1 || cmd.getFormulaType() == 2){
             String formula_no_quote = cmd.getFormula();
             formula_no_quote = formula_no_quote.replace("[[","");
