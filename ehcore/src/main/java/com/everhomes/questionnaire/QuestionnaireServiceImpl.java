@@ -1223,8 +1223,8 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		QuestionnaireAnswer answer = questionnaireAnswerProvider.findAnyAnswerByTarget(questionnaireDTO.getId(), cmd.getTargetType(), cmd.getTargetId());
 		if (answer != null) {
 			if(QuestionnaireTargetType.ORGANIZATION == QuestionnaireTargetType.fromCode(cmd.getTargetType())) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-							"提交失败，其他管理员已填写问卷！");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 201,
+							"其他企业管理员已提交问卷");
 			}else{
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"提交失败，已填写问卷！");
