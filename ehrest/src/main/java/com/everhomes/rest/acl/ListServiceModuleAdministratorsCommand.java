@@ -26,7 +26,6 @@ public class ListServiceModuleAdministratorsCommand {
     @NotNull
     private Long ownerId;
 
-    @NotNull
     private Long moduleId;
 
     private String keywords;
