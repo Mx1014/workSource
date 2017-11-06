@@ -2,6 +2,8 @@ package com.everhomes.techpark.punch;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -2745,6 +2747,54 @@ long id = sequenceProvider.getNextSequence(key);
 				.and(Tables.EH_PUNCH_LOGS.PUNCH_INTERVAL_NO.eq(punchIntervalNo))
 				.and(Tables.EH_PUNCH_LOGS.PUNCH_TYPE.eq(punchType))
 				.and(Tables.EH_PUNCH_LOGS.USER_ID.eq(userId)).execute();
+	}
+
+	@Override
+	public List<PunchExceptionRequest> listPunchExceptionRequestBetweenBeginAndEndTime(Long userId, Long enterpriseId, Date punchDate) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
+		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(enterpriseId));
+		SimpleDateFormat dateSF = new SimpleDateFormat("YYYY-MM-DD");
+		Timestamp dayStart = Timestamp.valueOf(dateSF.format(punchDate)+" 00:00:00");
+		Timestamp dayEnd = Timestamp.valueOf(dateSF.format(punchDate)+" 23:59:59");
+		condition = condition.and((Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lessOrEqual(dayStart)
+				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(dayStart)))
+				.or(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lessOrEqual(dayEnd)
+						.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(dayEnd))));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
+
+		List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
+				.orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
+				.map(new EhPunchExceptionRequestMapper());
+
+		List<PunchExceptionRequest> result = resultRecord.stream().map((r) -> {
+			return ConvertHelper.convert(r, PunchExceptionRequest.class);
+		}).collect(Collectors.toList());
+		if (result == null || result.size() == 0) {
+			return null;
+		}
+		return result;
+	}
+
+	@Override
+	public List<PunchExceptionRequest> listpunchexceptionRequestByDate(Long userId, Long enterpriseId, Date punchDate) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
+		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(enterpriseId));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.eq(punchDate));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
+
+		List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
+				.orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
+				.map(new EhPunchExceptionRequestMapper());
+
+		List<PunchExceptionRequest> result = resultRecord.stream().map((r) -> {
+			return ConvertHelper.convert(r, PunchExceptionRequest.class);
+		}).collect(Collectors.toList());
+		if (result == null || result.size() == 0) {
+			return null;
+		}
+		return result;
 	}
 
 

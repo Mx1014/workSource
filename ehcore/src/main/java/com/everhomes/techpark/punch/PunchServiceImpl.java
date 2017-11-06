@@ -848,18 +848,10 @@ public class PunchServiceImpl implements PunchService {
         String[] statusArrary = pdl.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
         String statusList = "";
 		if (statusArrary == null) {
-			return pdl;
-		}
-//		else if (statusArrary.length == 1) {
-//			if (statusArrary[0].equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
-//				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
-//			} else {
-//				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-//			}
-//		}
-		else if (statusArrary.length > 1) {
+			// TODO: 2017/11/3  什么情况下这里是null,只有一个状态?那就要计算approvalStatus了
+//			return pdl;
+		}else if (statusArrary.length > 1) {
 			for (int i = 0; i < statusArrary.length / 2; i++) {
-
 				String status = processIntevalStatus(statusArrary[2 * i], statusArrary[2 * i + 1]);
 				if (!status.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
 					pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
@@ -869,12 +861,59 @@ public class PunchServiceImpl implements PunchService {
 				} else {
 					statusList = statusList + PunchConstants.STATUS_SEPARATOR + status;
 				}
+			}
+			pdl.setStatusList(statusList);
+		}
+
+		String asList = "";
+		if (null != pdl.getApprovalStatus()) {
+			String[] asArrary = pdl.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
+
+			for (int i = 0; i < statusArrary.length / 2; i++) {
+				String status = "";
+				String a1 = asArrary[2 * i];
+				String a2 = asArrary[2 * i + 1];
+				if (StringUtils.isEmpty(a1) && StringUtils.isEmpty(a2)) {
+					//俩都是空,那就空
+					a1 = "";
+					a2 = "";
+				}else if(StringUtils.isEmpty(a1)||StringUtils.isEmpty(a2)){
+					//2个有一个为空就要拿status来匹配
+					if (StringUtils.isEmpty(a1)) {
+						a1 = findPunchStatus(2 * i, statusArrary, pdl.getStatusList());
+					}else{
+						a2 = findPunchStatus(2 * i + 1, statusArrary, pdl.getStatusList());
+					}
+				}else{
+					//两个都有审批结果那就用审批结果这里不用动
+				}
+				status = processIntevalStatus(a1,a2);
+				if (!status.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
+					pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+				}
+				if (i == 0) {
+					asList = status;
+				} else {
+					asList = asList + PunchConstants.STATUS_SEPARATOR + status;
+				}
 
 			}
 			pdl.setStatusList(statusList);
 		}
 		return  pdl;
     }
+
+	private String findPunchStatus(int i, String[] statusArrary, String statusList) {
+		if (null == statusArrary || statusArrary.length == 0) {
+			return statusList;
+		}else{
+			if (i >= statusArrary.length ) {
+				LOGGER.error("数组越界~ 状态列表是[" + statusArrary + "] 现在计算的是第[" + i + "]次打卡");
+				return PunchStatus.UNPUNCH.getCode() + "";
+			}
+			return statusArrary[i];
+		}
+	}
 
 	private String processIntevalStatus(String arrStatus, String leaveStatus) {
 		String status = "";
@@ -983,30 +1022,33 @@ public class PunchServiceImpl implements PunchService {
 			}
 		}
 
-		// 如果有排班 而且 零次打卡记录
-		if (null == punchLogs || punchLogs.size() == 0) {
-//			if (!isWorkDay(logDay.getTime(),pr)|| dateSF.get().format(now).equals(dateSF.get().format(logDay.getTime()))) {
-//				// 如果非工作日或者当天，不增pdl直接下一天
-//				return null;
+//		if (null == punchLogs || punchLogs.size() == 0) {
+//
+//			for(int i = 1; i<= (int) punchTimeRule.getPunchTimesPerDay();i++){
+//				if(null == pdl.getStatusList()){
+//					pdl.setStatusList(PunchStatus.UNPUNCH.getCode()+"");
+//				}else{
+//					pdl.setStatusList(pdl.getStatusList()+PunchConstants.STATUS_SEPARATOR+PunchStatus.UNPUNCH.getCode());
+//				}
+//
+//
 //			}
-			for(int i = 1; i<= (int) punchTimeRule.getPunchTimesPerDay();i++){
-				if(null == pdl.getStatusList()){
-					pdl.setStatusList(PunchStatus.UNPUNCH.getCode()+"");
-				}else{
-					pdl.setStatusList(pdl.getStatusList()+PunchConstants.STATUS_SEPARATOR+PunchStatus.UNPUNCH.getCode());
-				}
-			}
-			pdl.setPunchStatus(PunchStatus.UNPUNCH.getCode());
-			pdl.setMorningPunchStatus(PunchStatus.UNPUNCH.getCode());
-			pdl.setAfternoonPunchStatus(PunchStatus.UNPUNCH.getCode());
-			pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-			makeExceptionForDayList(userId, companyId, logDay, pdl);
-			return pdl;
-		}
+//			pdl.setPunchStatus(PunchStatus.UNPUNCH.getCode());
+//			pdl.setMorningPunchStatus(PunchStatus.UNPUNCH.getCode());
+//			pdl.setAfternoonPunchStatus(PunchStatus.UNPUNCH.getCode());
+//			pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//			makeExceptionForDayList(userId, companyId, logDay, pdl);
+//			return pdl;
+//		}
+
+		//请假的汇总interval
+		List<TimeInterval> tiDTOs = null;
+		tiDTOs = processTimeRuleDTO(tiDTOs, userId, companyId, new java.sql.Date(logDay.getTimeInMillis()));
 
 		List<PunchLog> efficientLogs = new ArrayList<>();
 		//2次打卡的计算
 		if(PunchTimesPerDay.TWICE.getCode().equals(punchTimeRule.getPunchTimesPerDay())){
+
 			PunchLog onDutyLog = findPunchLog(punchLogs, PunchType.ON_DUTY.getCode(), 1);
 			if(onDutyLog == null){
 				onDutyLog = new PunchLog();
@@ -1019,6 +1061,25 @@ public class PunchServiceImpl implements PunchService {
 				offDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 			}
+
+			//算请假对上班打卡的影响
+			HommizationType ht=HommizationType.fromCode(punchTimeRule.getHommizationType());
+			Long flexTimeLong = 0L;
+			if(ht == HommizationType.FLEX|| ht == HommizationType.LATEARRIVE){
+				flexTimeLong = punchTimeRule.getFlexTimeLong();
+			}
+			Long beginTimeLong = onDutyLog.getPunchDate().getTime()+onDutyLog.getRuleTime()+flexTimeLong;
+			calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,punchTimeRule.getWorkTimeLong(),beginTimeLong);
+			//算请假对下班打卡的影响
+			Long offDutyTimeLong = onDutyLog.getPunchDate().getTime()+ punchTimeRule.getStartEarlyTimeLong() + punchTimeRule.getWorkTimeLong();
+			if (HommizationType.fromCode(punchTimeRule.getHommizationType()) == HommizationType.LATEARRIVE){
+				if (onDutyLog.getStatus().equals(PunchStatus.NORMAL.getCode())) {
+					offDutyTimeLong =offDutyTimeLong +(onDutyLog.getPunchDate().getTime()-onDutyLog.getRuleTime());
+				}else{
+					offDutyTimeLong += flexTimeLong;
+				}
+			}
+			calculateOffDutyApprovalStatus(offDutyLog,tiDTOs,beginTimeLong,offDutyTimeLong);
 			efficientLogs.add(onDutyLog);
 			efficientLogs.add(offDutyLog);
 			if(null == onDutyLog.getPunchTime() || null == offDutyLog.getPunchTime()){
@@ -1060,12 +1121,34 @@ public class PunchServiceImpl implements PunchService {
 				onDutyLog = new PunchLog();
 				onDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 			}
-			efficientLogs.add(onDutyLog);
 			PunchLog offDutyLog = findPunchLog(punchLogs, PunchType.OFF_DUTY.getCode(), 1);
 			if(offDutyLog == null){
 				offDutyLog = new PunchLog();
 				offDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 			}
+			//算请假对上班打卡的影响
+			HommizationType ht=HommizationType.fromCode(punchTimeRule.getHommizationType());
+			Long flexTimeLong = 0L;
+			if(ht == HommizationType.FLEX|| ht == HommizationType.LATEARRIVE){
+				flexTimeLong = punchTimeRule.getFlexTimeLong();
+			}
+			Long beginTimeLong = onDutyLog.getPunchDate().getTime()+onDutyLog.getRuleTime()+flexTimeLong;
+			calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,punchTimeRule.getWorkTimeLong(),beginTimeLong);
+			//算请假对下班打卡的影响
+			Long offDutyTimeLong = onDutyLog.getPunchDate().getTime()+ punchTimeRule.getNoonLeaveTimeLong();
+			Long punchLateTime = 0L;
+//			Long offDutyTimeLong = onDutyLog.getPunchDate().getTime()+ punchTimeRule.getStartEarlyTimeLong() + punchTimeRule.getWorkTimeLong();
+//			if (HommizationType.fromCode(punchTimeRule.getHommizationType()) == HommizationType.LATEARRIVE){
+//				if (onDutyLog.getStatus().equals(PunchStatus.NORMAL.getCode())) {
+//					punchLateTime =(onDutyLog.getPunchDate().getTime()-onDutyLog.getRuleTime());
+// 					offDutyTimeLong =offDutyTimeLong + punchLateTime;
+//				}else{
+//					offDutyTimeLong += flexTimeLong;
+//				}
+//			}
+			calculateOffDutyApprovalStatus(offDutyLog,tiDTOs,beginTimeLong,offDutyTimeLong);
+
+			efficientLogs.add(onDutyLog);
 			efficientLogs.add(offDutyLog);
 			if(onDutyLog.getPunchTime() != null && offDutyLog.getPunchTime()!=null){
 				workTimeLong += offDutyLog.getPunchTime().getTime() - onDutyLog.getPunchTime().getTime();
@@ -1083,6 +1166,26 @@ public class PunchServiceImpl implements PunchService {
 				offDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 			}
 			efficientLogs.add(offDutyLog);
+
+			//算请假对上班打卡的影响
+//			HommizationType ht=HommizationType.fromCode(punchTimeRule.getHommizationType());
+//			Long flexTimeLong = 0L;
+//			if(ht == HommizationType.FLEX|| ht == HommizationType.LATEARRIVE){
+//				flexTimeLong = punchTimeRule.getFlexTimeLong();
+//			}
+			beginTimeLong = onDutyLog.getPunchDate().getTime()+punchTimeRule.getAfternoonArriveTimeLong();
+			calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,punchTimeRule.getWorkTimeLong(),beginTimeLong);
+			//算请假对下班打卡的影响
+			offDutyTimeLong = onDutyLog.getPunchDate().getTime()+ punchTimeRule.getStartEarlyTimeLong() + punchTimeRule.getWorkTimeLong();
+			if (HommizationType.fromCode(punchTimeRule.getHommizationType()) == HommizationType.LATEARRIVE){
+				if (onDutyLog.getStatus().equals(PunchStatus.NORMAL.getCode())) {
+					punchLateTime =(onDutyLog.getPunchDate().getTime()-onDutyLog.getRuleTime());
+ 					offDutyTimeLong =offDutyTimeLong + punchLateTime;
+				}else{
+					offDutyTimeLong += flexTimeLong;
+				}
+			}
+			calculateOffDutyApprovalStatus(offDutyLog,tiDTOs,beginTimeLong,offDutyTimeLong);
 
 			if(onDutyLog.getPunchTime() != null && offDutyLog.getPunchTime()!=null){
 				workTimeLong += offDutyLog.getPunchTime().getTime() - onDutyLog.getPunchTime().getTime();
@@ -1112,6 +1215,33 @@ public class PunchServiceImpl implements PunchService {
 				}
 				efficientLogs.add(offDutyLog);
 
+				//算请假对上班打卡的影响
+				HommizationType ht=HommizationType.fromCode(punchTimeRule.getHommizationType());
+				Long flexTimeLong = 0L;
+				if(ht == HommizationType.FLEX|| ht == HommizationType.LATEARRIVE){
+					flexTimeLong = punchTimeRule.getFlexTimeLong();
+				}
+
+				Long beginTimeLong = onDutyLog.getPunchDate().getTime() + onDutyLog.getRuleTime();
+				if (punchIntervalNo == 1) {
+					//只有第一次上班有弹性时间
+					beginTimeLong += flexTimeLong;
+				}
+				calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,punchTimeRule.getWorkTimeLong(),beginTimeLong);
+				//算请假对下班打卡的影响
+				Long offDutyTimeLong = onDutyLog.getPunchDate().getTime() + offDutyLog.getRuleTime();
+				Long punchLateTime = 0L;
+				//只有最后一次打卡要计算晚到晚走
+				if (punchIntervalNo == intervals.size() && HommizationType.fromCode(punchTimeRule.getHommizationType()) == HommizationType.LATEARRIVE) {
+					if (onDutyLog.getStatus().equals(PunchStatus.NORMAL.getCode())) {
+						punchLateTime = (onDutyLog.getPunchDate().getTime() - onDutyLog.getRuleTime());
+						offDutyTimeLong = offDutyTimeLong + punchLateTime;
+					} else {
+						offDutyTimeLong += flexTimeLong;
+					}
+				}
+				calculateOffDutyApprovalStatus(offDutyLog,tiDTOs,beginTimeLong,offDutyTimeLong);
+
 				if(onDutyLog.getPunchTime() != null && offDutyLog.getPunchTime()!=null){
 					workTimeLong += offDutyLog.getPunchTime().getTime() - onDutyLog.getPunchTime().getTime();
 				}
@@ -1120,16 +1250,82 @@ public class PunchServiceImpl implements PunchService {
 			}
 			punchDayLog.setWorkTime(convertTime(workTimeLong));
 		}
+		// TODO: 2017/11/3  现在只有异常审批处理的approvalStatus,以后要加入请假修改的逻辑
+
 		for(PunchLog log : efficientLogs){
 			if(null == pdl.getStatusList()){
 				pdl.setStatusList(log.getStatus()+"");
 			}else{
 				pdl.setStatusList(pdl.getStatusList()+PunchConstants.STATUS_SEPARATOR+log.getStatus());
 			}
+			String approvalStatus = log.getApprovalStatus() == null ? "" : log.getApprovalStatus()+"";
+			if(null == pdl.getApprovalStatus()){
+				pdl.setStatusList(approvalStatus);
+			}else{
+				pdl.setStatusList(pdl.getStatusList()+PunchConstants.STATUS_SEPARATOR+approvalStatus);
+			}
+
 		}
 		makeExceptionForDayList(userId, companyId, logDay, pdl);
 		return pdl;
 	}
+
+
+	/**
+	 * 请假对下班打卡的影响
+	 * */
+	private void calculateOffDutyApprovalStatus(PunchLog offDutyLog, List<TimeInterval> tiDTOs, Long beginTimeLong, Long offDutyTimeLong) {
+		if (null == tiDTOs) {
+			return;
+		}
+		// 用punchLog的ruletime和ptr的flex 计算上班结束时间
+		Date offDutyTime = new Date(offDutyTimeLong);
+		for (TimeInterval interval : tiDTOs) {
+			//下班时间时间包含在interval中会对上班打卡造成影响
+			if (!interval.getBeginTime().after(offDutyTime) && !interval.getEndTime().before(offDutyTime)) {
+				//如果整个时段请假,打卡状态为正常
+				if (!interval.getBeginTime().after(new Date(beginTimeLong))) {
+					offDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
+					return ;
+				}else if(!interval.getBeginTime().after(offDutyLog.getPunchTime())){
+					//如果请假的结束时间不早于打卡时间 也是正常
+					offDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
+					return ;
+				}
+
+			}
+		}
+
+	}
+
+	/**
+	 * 请假对上班打卡的影响
+	 * */
+	private void calculateOnDutyApprovalStatus(PunchLog onDutyLog, List<TimeInterval> tiDTOs,
+											   Long workTimeLong,Long beginTimeLong) {
+		if (null == tiDTOs) {
+			return;
+		}
+		// 用punchLog的ruletime和ptr的flex 计算上班结束时间
+		Date ruleBeginTime = new Date(beginTimeLong);
+		for (TimeInterval interval : tiDTOs) {
+			//最晚上班时间包含在interval中会对上班打卡造成影响
+			if (!interval.getBeginTime().after(ruleBeginTime) && !interval.getEndTime().before(ruleBeginTime)) {
+				//如果全天请假,打卡状态为正常
+				if (!interval.getEndTime().before(new Date(beginTimeLong + workTimeLong))) {
+					onDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
+					return ;
+				}else if(!interval.getEndTime().before(onDutyLog.getPunchTime())){
+					//如果请假的结束时间不早于打卡时间 也是正常
+					onDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
+					return ;
+				}
+
+			}
+		}
+
+	}
+
 	private void calculateArriveStatus(Calendar arriveCalendar, Calendar startTime, PunchLogsDay pdl) {
 		if(arriveCalendar.before(startTime)){
 			pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
@@ -4516,7 +4712,7 @@ public class PunchServiceImpl implements PunchService {
 						pdl.setAfternoonPunchStatus(dayLog.getAfternoonStatus());
 						pdl.setMorningPunchStatus(dayLog.getMorningStatus());
 						//TODO: 对于请假
-						pdl.setStatuString( processStatus(dayLog.getStatusList()));
+						pdl.setStatuString( processStatus(dayLog.getStatusList(), null));
 						userMonthLogsDTO.getPunchLogsDayList().add(pdl);
 						if (dayLog.getExceptionStatus() != null && ExceptionStatus.EXCEPTION.equals(ExceptionStatus.fromCode(dayLog.getExceptionStatus()))){
 							exceptionStatus = ExceptionStatus.EXCEPTION;
@@ -4678,19 +4874,36 @@ public class PunchServiceImpl implements PunchService {
 		LOGGER.debug("process pdls   "+  t3 + "cost: "+ (t3-t2));
 		return response;
 	}
-	String processStatus(String statuList ){
-		if (StringUtils.isEmpty(statuList)) {
+	String processStatus(String statuList, String approvalStatusList){
+		if (StringUtils.isEmpty(statuList)&& StringUtils.isEmpty(approvalStatusList)) {
 			return "";
 		}
 		String result = "";
 		if(statuList.contains(PunchConstants.STATUS_SEPARATOR)){
 			String[] statulist = statuList.split(PunchConstants.STATUS_SEPARATOR);
-			for(int i = 0 ;i<statulist.length;i++ ){
-				if(i ==0){
-					result = statusToString( Byte.valueOf(statulist[i]));
-				}else{
-					result = result + PunchConstants.STATUS_SEPARATOR + statusToString( Byte.valueOf(statulist[i]));
+			String[] approvalStatuArray = null;
+			if (null != approvalStatusList) {
+				approvalStatuArray = approvalStatusList.split(PunchConstants.STATUS_SEPARATOR);
+			}
+			int arrayLength = approvalStatuArray != null ? approvalStatuArray.length : statulist.length;
+			for (int i = 0; i < arrayLength; i++) {
+				Byte statusByte = null;
+				if (null != statulist) {
+					if (statulist.length > i && statulist[i] != null) {
+						statusByte = Byte.valueOf(statulist[i]);
+					}
 				}
+				if (null != approvalStatuArray) {
+					if (approvalStatuArray.length > i && approvalStatuArray[i] != null) {
+						statusByte = Byte.valueOf(approvalStatuArray[i]);
+					}
+				}
+				if (null != approvalStatuArray)
+					if (i == 0) {
+						result = statusToString(statusByte);
+					} else {
+						result = result + PunchConstants.STATUS_SEPARATOR + statusToString(statusByte);
+					}
 			}
 		}
 		else{
@@ -4709,15 +4922,31 @@ public class PunchServiceImpl implements PunchService {
 				dto.setPunchOrgName(org.getName());
 			}
 		}
-		dto.setStatuString(processStatus(r.getStatusList()));
+		dto.setStatuString(processStatus(r.getStatusList(), null));
+		dto.setApprovalStatuString(processStatus(r.getStatusList(),r.getApprovalStatusList()));
 		if(null != r.getPunchOrganizationId()) {
 			Organization punchGroup = organizationProvider.findOrganizationById(r.getPunchOrganizationId());
 			if (null != punchGroup)
 				dto.setPunchOrgName(punchGroup.getName());
 		}
-
-
-
+		//审批单
+		//请假之类的审批单
+		List<PunchExceptionRequest> exceptionRequests = punchProvider.listPunchExceptionRequestBetweenBeginAndEndTime(r.getUserId(),
+				r.getEnterpriseId(), r.getPunchDate());
+		if (null == exceptionRequests) {
+			exceptionRequests = new ArrayList<>();
+		}
+		List<PunchExceptionRequest> requests2 = punchProvider.listpunchexceptionRequestByDate(r.getUserId(), r.getEnterpriseId(), r.getPunchDate());
+		if (null != requests2) {
+			exceptionRequests.addAll(requests2);
+		}
+		if (exceptionRequests.size() > 0) {
+			for (PunchExceptionRequest request : exceptionRequests) {
+				// TODO: 2017/11/6 等荣男的接口
+				request.getRequestId();
+			}
+		}
+		
 		if(null!= r.getArriveTime())
 			dto.setArriveTime(  convertTimeToGMTMillisecond(r.getArriveTime())  );
 
@@ -4763,22 +4992,22 @@ public class PunchServiceImpl implements PunchService {
 
 //				dto.setUserPhoneNumber(member.getContactToken());
 			// dto.setUserDepartment(enterpriseContact.get);
-			PunchExceptionApproval approval = punchProvider
-					.getExceptionApproval(dto.getUserId(),
-							 r.getEnterpriseId() ,
-							new java.sql.Date(dto.getPunchDate()));
-			if (approval != null) {
-				dto.setApprovalStatus(approval
-						.getApprovalStatus());
-				dto.setMorningApprovalStatus(approval.getMorningApprovalStatus());
-				dto.setAfternoonApprovalStatus(approval.getAfternoonApprovalStatus());
-//					OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(approval.getOperatorUid(), cmd.getEnterpriseId());
-//					if(null != operator )
-//						dto.setOperatorName(operator.getContactName());
-			} else {
-				//do nothing
-//					dto.setApprovalStatus((byte) 0);
-			}
+//			PunchExceptionApproval approval = punchProvider
+//					.getExceptionApproval(dto.getUserId(),
+//							 r.getEnterpriseId() ,
+//							new java.sql.Date(dto.getPunchDate()));
+//			if (approval != null) {
+//				dto.setApprovalStatus(approval
+//						.getApprovalStatus());
+//				dto.setMorningApprovalStatus(approval.getMorningApprovalStatus());
+//				dto.setAfternoonApprovalStatus(approval.getAfternoonApprovalStatus());
+////					OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(approval.getOperatorUid(), cmd.getEnterpriseId());
+////					if(null != operator )
+////						dto.setOperatorName(operator.getContactName());
+//			} else {
+//				//do nothing
+////					dto.setApprovalStatus((byte) 0);
+//			}
 		}
 		return dto;
 	}
@@ -7177,6 +7406,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	static final Long ONE_DAY_MS = 24*3600*1000L;
+
 	/**
 	 * 获取打卡状态:
 	 * list: 元素0 : 上班打卡/下班打卡/不用打卡 元素1:第几次排班的打卡
@@ -7221,17 +7451,94 @@ public class PunchServiceImpl implements PunchService {
 		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,enterpriseId, dateSF.get().format(punchDate),
 				ClockCode.SUCESS.getCode());
 		int PunchIntervalNo = 1;
+		//请假的汇总interval
+		List<TimeInterval> tiDTOs = null;
+		tiDTOs = processTimeRuleDTO(tiDTOs, userId, enterpriseId, punchDate);
 		if(ptr.getPunchTimesPerDay().equals((byte)2)){
 			//对于2次打卡:
-			return calculate2timePunchStatus(ptr,punchTimeLong,punchLogs,result,punchDate);
+			return calculate2timePunchStatus(ptr,punchTimeLong,punchLogs,result,punchDate,tiDTOs);
 		}else if(ptr.getPunchTimesPerDay().equals((byte)4)){
-			return calculate4timePunchStatus(ptr, punchTimeLong, punchLogs, result, PunchIntervalNo,punchDate);
+			return calculate4timePunchStatus(ptr, punchTimeLong, punchLogs, result, PunchIntervalNo,punchDate,tiDTOs);
 		}else{
 			//对于多次打卡
 			return calculateMoretimePunchStatus(ptr, punchTimeLong, punchLogs, result, PunchIntervalNo,punchDate);
 		}
 	}
-    private Long getTimeLong(Calendar punCalendar, java.sql.Date punchDate) {
+	class TimeInterval{
+
+		private Date beginTime;
+		private Date endTime;
+
+		public Date getBeginTime() {
+			return beginTime;
+		}
+
+		public void setBeginTime(Date beginTime) {
+			this.beginTime = beginTime;
+		}
+
+		public Date getEndTime() {
+			return endTime;
+		}
+
+		public void setEndTime(Date endTime) {
+			this.endTime = endTime;
+		}
+
+
+	}
+
+	private List<TimeInterval> processTimeRuleDTO(List<TimeInterval> tiDTOs, Long userId, Long enterpriseId, java.sql.Date punchDate) {
+		List<PunchExceptionRequest> exceptionRequests = punchProvider.listPunchExceptionRequestBetweenBeginAndEndTime(userId, enterpriseId,
+                        punchDate);
+		if (null == exceptionRequests) {
+			return null;
+		}
+		for (PunchExceptionRequest request : exceptionRequests) {
+			if (timeIntervalApprovalAttribute.contains(request.getApprovalAttribute())) {
+				tiDTOs = addExceptionRequest2TimeIntervals(request, tiDTOs);
+			}
+		}
+		return tiDTOs;
+	}
+
+	private List<TimeInterval> addExceptionRequest2TimeIntervals(PunchExceptionRequest request, List<TimeInterval> tiDTOs) {
+		if (null == tiDTOs) {
+			tiDTOs = new ArrayList<>();
+			TimeInterval dto = new TimeInterval();
+			dto.setBeginTime(request.getBeginTime());
+			dto.setEndTime(request.getEndTime());
+			tiDTOs.add(dto);
+		}
+		else{
+			for (TimeInterval ti : tiDTOs) {
+				//如果request开始和结束时间都在ti时间区间内,直接return
+				if (request.getBeginTime().after(ti.getBeginTime()) && request.getBeginTime().before(ti.getEndTime())
+						&& request.getEndTime().after(ti.getBeginTime()) && request.getEndTime().before(ti.getEndTime())) {
+					return tiDTOs;
+				}
+				//如果request有开始时间在ti时间区间内,把request的结束时间代替ti的结束时间
+				else if (request.getBeginTime().after(ti.getBeginTime()) && request.getBeginTime().before(ti.getEndTime())) {
+					ti.setEndTime(request.getEndTime());
+					return tiDTOs;
+				}
+				//如果request的结束时间在ti时间区间,把request的开始时间代替ti的开始时间
+				else if (request.getEndTime().after(ti.getBeginTime()) && request.getEndTime().before(ti.getEndTime())) {
+					ti.setBeginTime(request.getBeginTime());
+
+					return tiDTOs;
+				}
+				//循环过后request和tiDTOs没有什么重合,就把request加入tiDTOs
+				TimeInterval dto = new TimeInterval();
+				dto.setBeginTime(request.getBeginTime());
+				dto.setEndTime(request.getEndTime());
+				tiDTOs.add(dto);
+			}
+		}
+		return tiDTOs;
+	}
+
+	private Long getTimeLong(Calendar punCalendar, java.sql.Date punchDate) {
 
         Long punchTimeLong = punCalendar.get(Calendar.HOUR_OF_DAY)*3600*1000L; //hour
         punchTimeLong += punCalendar.get(Calendar.MINUTE)*60*1000L; //min
@@ -7382,7 +7689,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	private PunchLogDTO calculate4timePunchStatus(PunchTimeRule ptr, Long punchTimeLong,
-												  List<PunchLog> punchLogs, PunchLogDTO result, Integer PunchIntervalNo, java.sql.Date punchDate) {
+												  List<PunchLog> punchLogs, PunchLogDTO result, Integer PunchIntervalNo, java.sql.Date punchDate, List<TimeInterval> tiDTOs) {
 		//对于4次打卡:
 		//如果在最早上班打卡之前,或者  最晚下班打卡之后. 那就是非打卡时间
 		if((punchTimeLong < (ptr.getStartEarlyTimeLong()-(timeIsNull(ptr.getBeginPunchTime(),ONE_DAY_MS)))) ||
@@ -7476,17 +7783,21 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	private PunchLogDTO calculate2timePunchStatus(PunchTimeRule ptr, Long punchTimeLong,
-												  List<PunchLog> punchLogs, PunchLogDTO result, java.sql.Date punchDate) {
+												  List<PunchLog> punchLogs, PunchLogDTO result, java.sql.Date punchDate, List<TimeInterval> tiDTOs) {
 		result.setPunchIntervalNo(1);
-		//如果时间在最早上班打卡之后,,如果有上班打卡
+
+		//如果时间在最早上班打卡之后,
 		if(punchTimeLong > (ptr.getStartEarlyTimeLong()-(timeIsNull(ptr.getBeginPunchTime(),ONE_DAY_MS)))
 				//在最晚下班打卡之前
 				&& punchTimeLong < (ptr.getStartLateTimeLong()+ptr.getWorkTimeLong()+timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS))){
+			//这里是有效时间范围内的打卡
 			PunchLog onDutyPunch = findPunchLog(punchLogs,PunchType.ON_DUTY.getCode(),1);
 			// 没有上班打卡  则是上班打卡
 			if(null == onDutyPunch){
 				result.setPunchType(PunchType.ON_DUTY.getCode());
 				result.setRuleTime(ptr.getStartEarlyTimeLong());
+				//最晚上班时间_结合请假时间进行计算
+//				Long startlateTime = calculateStartlateTime(ptr, tiDTOs);
 				if(punchTimeLong < ptr.getStartLateTimeLong()){
 					result.setClockStatus(PunchStatus.NORMAL.getCode());
 					result.setExpiryTime(ptr.getStartLateTimeLong());

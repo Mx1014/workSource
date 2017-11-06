@@ -309,7 +309,7 @@ public class PunchController extends ControllerBase {
 //	}
 	
 	/**
-	 * <b>URL: /techpark/punch/listPunchExceptionRequest</b>
+	 * <b>URL: /techpark/punch/listPunchExceptionRequestBetweenBeginAndEndTime</b>
 	 * <p>
 	 * 查询公司打卡异常申请列表
 	 * </p>
