@@ -52,6 +52,7 @@ public class OrganizationMemberRecordMapper implements RecordMapper<Record, Orga
         member.setTargetId(r.getValue(t2.TARGET_ID));
         member.setTargetType(r.getValue(t2.TARGET_TYPE));
         member.setContactName(r.getValue(t2.CONTACT_NAME));
+        member.setContactEnName(r.getValue(t2.EN_NAME));
         member.setContactType(r.getValue(t2.CONTACT_TYPE));
         member.setContactToken(r.getValue(t2.CONTACT_TOKEN));
         member.setContactDescription(r.getValue(t2.CONTACT_DESCRIPTION));

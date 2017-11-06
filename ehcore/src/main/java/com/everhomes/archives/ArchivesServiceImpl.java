@@ -252,7 +252,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         ListArchivesContactsResponse response = new ListArchivesContactsResponse();
-        final Integer stickCount = 10;  //  置顶数为10,表示一页最多显示10个置顶人员
+        final Integer stickCount = 20;  //  置顶数为20,表示一页最多显示20个置顶人员 at 11/06/2017
         if (cmd.getPageSize() != null)
             cmd.setPageSize(cmd.getPageSize());
         else
@@ -302,6 +302,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         dto.setTargetType(detail.getTargetType());
         dto.setRegionCode(detail.getRegionCode());
         dto.setContactShortToken(detail.getContactShortToken());
+        dto.setContactEnName(detail.getEnName());
 
         //  查询部门
         List<String> groupTypes = new ArrayList<>();
@@ -348,6 +349,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 dto.setRegionCode(r.getRegionCode());
                 dto.setContactToken(r.getContactToken());
                 dto.setContactShortToken(r.getContactShortToken());
+                dto.setContactEnName(r.getContactEnName());
                 dto.setWorkEmail(r.getWorkEmail());
                 dto.setVisibleFlag(r.getVisibleFlag());
                 dto.setStick("0");

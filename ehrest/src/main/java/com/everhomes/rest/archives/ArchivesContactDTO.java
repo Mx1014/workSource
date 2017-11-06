@@ -13,6 +13,7 @@ import java.util.List;
  * <li>targetId: 用户id</li>
  * <li>targetType: 用户类型</li>
  * <li>contactName: 姓名</li>
+ * <li>contactEnName: 英文名</li>
  * <li>gender: 性别: 1-男, 2-女</li>
  * <li>jobPositions: 职务</li>
  * <li>departments: 部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
@@ -34,6 +35,8 @@ public class ArchivesContactDTO {
     private String targetType;
 
     private String contactName;
+
+    private String contactEnName;
 
     private Byte gender;
 
@@ -104,6 +107,14 @@ public class ArchivesContactDTO {
 
     public void setContactName(String contactName) {
         this.contactName = contactName;
+    }
+
+    public String getContactEnName() {
+        return contactEnName;
+    }
+
+    public void setContactEnName(String contactEnName) {
+        this.contactEnName = contactEnName;
     }
 
     public Byte getGender() {
