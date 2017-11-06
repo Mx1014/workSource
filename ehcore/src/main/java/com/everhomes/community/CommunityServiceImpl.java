@@ -1577,6 +1577,8 @@ public class CommunityServiceImpl implements CommunityService {
 			if(!StringUtils.isEmpty(cmd.getKeywords())){
 				Condition cond = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%" + cmd.getKeywords() + "%");
 				cond = cond.or(Tables.EH_USERS.NICK_NAME.like("%" + cmd.getKeywords() + "%"));
+				cond = cond.or(Tables.EH_ADDRESSES.CITY_NAME.like("%" + cmd.getKeywords() + "%"));
+				cond = cond.or(Tables.EH_ADDRESSES.AREA_NAME.like("%" + cmd.getKeywords() + "%"));
 				cond = cond.or(Tables.EH_ADDRESSES.BUILDING_NAME.like("%" + cmd.getKeywords() + "%"));
 				cond = cond.or(Tables.EH_ADDRESSES.APARTMENT_NAME.like("%" + cmd.getKeywords() + "%"));
 				query.addConditions(cond);
