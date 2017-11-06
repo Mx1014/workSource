@@ -220,6 +220,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			dto.setTargetUserNum(0);
 		}
 		generateShareUrl(dto);
+		generatePosterUrl(dto);
 		return dto;
 	}
 	
@@ -934,12 +935,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		Long organizationId = cmd.getOrganizationId();
 		List<QuestionnaireDTO> questionnaires = questionnaireProvider.listTargetQuestionnaireByOwner(namespaceId,cmd.getNowTime(),
 				cmd.getCollectFlag(),cmd.getTargetType(),userId,organizationId,answeredFlagAnchor,publishTimeAnchor,questionnariePageSize);
-		return new ListTargetQuestionnairesResponse(generateNextPageAnchor(cmd,questionnaires,pageSize,answeredFlagAnchor,publishTimeAnchor), questionnaires.stream().map(r->{
-			if(r.getPosterUri()!=null) {
-				r.setPosterUrl(contentServerService.parserUri(r.getPosterUri()));
-			}
-			return r;
-		}).collect(Collectors.toList()));
+		return new ListTargetQuestionnairesResponse(generateNextPageAnchor(cmd,questionnaires,pageSize,answeredFlagAnchor,publishTimeAnchor), questionnaires.stream().map(r->generatePosterUrl(r)).collect(Collectors.toList()));
 	}
 
 	//业务层分页
@@ -1047,6 +1043,14 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		});
 		QuestionnaireDTO dto =  questionnaireDTOs.get(0);
 		generateShareUrl(dto);
+		generatePosterUrl(dto);
+		return dto;
+	}
+
+	private QuestionnaireDTO generatePosterUrl(QuestionnaireDTO dto) {
+		if(dto!=null && dto.getPosterUri()!=null){
+			dto.setPosterUrl(contentServerService.parserUri(dto.getPosterUri()));
+		}
 		return dto;
 	}
 
