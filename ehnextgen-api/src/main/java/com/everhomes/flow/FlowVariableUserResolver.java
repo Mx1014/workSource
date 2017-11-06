@@ -34,6 +34,10 @@ public interface FlowVariableUserResolver {
     String APPLIER_ORGANIZATION_MANAGER = "flow-variable-applier-organization-manager";// 发起人公司管理员
     String APPLIER_DEPARTMENT_MANAGER = "flow-variable-applier-department-manager";// 发起人部门经理
 
+    String APPLIER_DEPARTMENT_MANAGER_LEVEL_1 = "flow-variable-applier-department-manager-level-1";// 发起人部门经理level-1
+    String APPLIER_DEPARTMENT_MANAGER_LEVEL_2 = "flow-variable-applier-department-manager-level-2";// 发起人部门经理level-2
+    String APPLIER_DEPARTMENT_MANAGER_LEVEL_3 = "flow-variable-applier-department-manager-level-3";// 发起人部门经理level-3
+
     String ALL_CURRENT_NODE_PROCESSORS = "all_current_node_processors";// 全部节点的当前处理人
 
     List<Long> variableUserResolve(FlowCaseState ctx, Map<String, Long> processedEntities, FlowEntityType fromEntity,

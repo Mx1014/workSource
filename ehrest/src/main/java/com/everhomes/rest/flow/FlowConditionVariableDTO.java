@@ -1,5 +1,6 @@
 package com.everhomes.rest.flow;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.util.ArrayList;
@@ -7,8 +8,8 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>name: 显示名称</li>
- *     <li>value: 传给后台的参数值</li>
+ *     <li>displayName: 显示名称</li>
+ *     <li>name: 传给后台的参数值</li>
  *     <li>fieldType: 字段类型 {@link com.everhomes.rest.general_approval.GeneralFormFieldType}</li>
  *     <li>operators: 运算符列表</li>
  *     <li>options: 如果是选项的话就是选项列表</li>
@@ -16,11 +17,13 @@ import java.util.List;
  */
 public class FlowConditionVariableDTO {
 
+    private String displayName;
     private String name;
-    private String value;
     private String fieldType;
 
+    @ItemType(String.class)
     private List<String> operators = new ArrayList<>();
+    @ItemType(String.class)
     private List<String> options = new ArrayList<>();
 
     public String getName() {
@@ -31,12 +34,12 @@ public class FlowConditionVariableDTO {
         this.name = name;
     }
 
-    public String getValue() {
-        return value;
+    public String getDisplayName() {
+        return displayName;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getFieldType() {

@@ -562,10 +562,10 @@ public class FlowAdminController extends ControllerBase {
      * <p>保存或修改条件</p>
      */
     @RequestMapping("createOrUpdateFlowCondition")
-    @RestReturn(value=FlowConditionDTO.class)
+    @RestReturn(value=FlowGraphDTO.class)
     public RestResponse createOrUpdateFlowCondition(@Valid CreateFlowConditionCommand cmd) {
-        FlowConditionDTO conditionDTO = flowService.createOrUpdateFlowCondition(cmd);
-        RestResponse response = new RestResponse(conditionDTO);
+        FlowGraphDTO flowGraphDTO = flowService.createOrUpdateFlowCondition(cmd);
+        RestResponse response = new RestResponse(flowGraphDTO);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -720,6 +720,20 @@ public class FlowAdminController extends ControllerBase {
     public RestResponse deleteFlowForm(@Valid UpdateFlowFormCommand cmd) {
         flowService.deleteFlowForm(cmd);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/getFlowForm</b>
+     * <p>获取工作流关联的表单</p>
+     */
+    @RequestMapping("getFlowForm")
+    @RestReturn(value=FlowFormDTO.class)
+    public RestResponse getFlowForm(@Valid FlowIdCommand cmd) {
+        FlowFormDTO flowFormDTO = flowService.getFlowForm(cmd);
+        RestResponse response = new RestResponse(flowFormDTO);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

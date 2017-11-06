@@ -45,8 +45,8 @@ public class FormFieldNumberTextProcessor implements FormFieldProcessor {
         FlowConditionVariableDTO dto = new FlowConditionVariableDTO();
 
         dto.setFieldType(fieldDTO.getFieldType());
+        dto.setDisplayName(fieldDTO.getFieldDisplayName());
         dto.setName(fieldDTO.getFieldName());
-        dto.setValue(fieldDTO.getFieldValue());
 
         dto.setOperators(getSupportOperatorList().stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
 

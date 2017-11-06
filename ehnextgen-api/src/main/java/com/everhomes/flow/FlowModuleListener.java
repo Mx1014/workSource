@@ -121,4 +121,9 @@ public interface FlowModuleListener {
      * @return
      */
     default FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable) { return null;}
+
+    /**
+     * 需要在工作流里使用表单功能，需要实现此方法
+     */
+    default List<FlowFormDTO> listFlowForms(Flow flow) {return null;}
 }

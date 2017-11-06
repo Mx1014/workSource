@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.flow;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
@@ -20,11 +21,10 @@ import com.everhomes.flow.node.FlowGraphNodeCondition;
 import com.everhomes.flow.node.FlowGraphNodeEnd;
 import com.everhomes.flow.node.FlowGraphNodeNormal;
 import com.everhomes.flow.node.FlowGraphNodeStart;
-import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
-import com.everhomes.general_form.GeneralFormVal;
+import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -47,6 +47,7 @@ import com.everhomes.rest.common.FlowCaseDetailActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
+import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -218,6 +219,9 @@ public class FlowServiceImpl implements FlowService {
     @Autowired
     private FormFieldProcessorManager formFieldProcessorManager;
 
+    @Autowired
+    private GeneralFormService generalFormService;
+
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
@@ -258,6 +262,7 @@ public class FlowServiceImpl implements FlowService {
         obj.setModuleType(cmd.getModuleType());
         obj.setFlowName(cmd.getFlowName());
         obj.setFlowVersion(FlowConstants.FLOW_CONFIG_START);
+        obj.setValidationStatus(FlowValidationStatus.UNKNOWN.getCode());
         obj.setStatus(FlowStatusType.CONFIG.getCode());
         obj.setOrganizationId(cmd.getOrgId());
         obj.setNamespaceId(cmd.getNamespaceId());
@@ -398,17 +403,34 @@ public class FlowServiceImpl implements FlowService {
         int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         cmd.setPageSize(count);
         ListFlowBriefResponse resp = new ListFlowBriefResponse();
-        List<FlowDTO> dtos = new ArrayList<FlowDTO>();
+        List<FlowDTO> dtos = new ArrayList<>();
         resp.setFlows(dtos);
 
         ListingLocator locator = new ListingLocator();
         List<Flow> flows = flowProvider.findFlowsByModule(locator, cmd);
+
+        Byte needFormFlag = getNeedFormFlag(cmd.getModuleId());
+
         for (Flow flow : flows) {
-            dtos.add(ConvertHelper.convert(flow, FlowDTO.class));
+            FlowDTO flowDTO = ConvertHelper.convert(flow, FlowDTO.class);
+            flowDTO.setNeedFormFlag(needFormFlag);
+            dtos.add(flowDTO);
         }
 
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
+    }
+
+    private Byte getNeedFormFlag(Long moduleId) {
+        FlowModuleInfo module = flowListenerManager.getModule(moduleId);
+        Byte needFormFlag = TrueOrFalseFlag.FALSE.getCode();
+        if (module != null) {
+            Object formFlag = module.getMeta().get(FlowModuleInfo.META_KEY_FORM_FLAG);
+            if (formFlag != null) {
+                needFormFlag = Byte.valueOf(formFlag.toString());
+            }
+        }
+        return needFormFlag;
     }
 
     @Override
@@ -1232,7 +1254,7 @@ public class FlowServiceImpl implements FlowService {
             action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
             action.setTrackerApplier(actionInfo.getTrackerApplier());
             action.setTrackerProcessor(actionInfo.getTrackerProcessor());
-            action.setStatus(FlowActionStatus.ENABLED.getCode());
+            action.setStatus(actionInfo.getEnabled() != null ? actionInfo.getEnabled() : FlowActionStatus.ENABLED.getCode());
             action.setRenderText(actionInfo.getRenderText());
             flowActionProvider.createFlowAction(action);
 
@@ -1950,8 +1972,16 @@ public class FlowServiceImpl implements FlowService {
         if (flowVer.equals(0)) {
             return getConfigGraph(flowId);
         }
+
+        graphMap.clear();
+
         String fmt = String.format("%d:%d", flowId, flowVer);
-        return graphMap.computeIfAbsent(fmt, k -> getSnapshotGraph(flowId, flowVer));
+        FlowGraph snapshotGraph = graphMap.get(fmt);
+        if (snapshotGraph == null) {
+            snapshotGraph = getSnapshotGraph(flowId, flowVer);
+            graphMap.put(fmt, snapshotGraph);
+        }
+        return snapshotGraph;
     }
 
     private void clearSnapshotGraph(Flow snapshotFlow) {
@@ -2081,6 +2111,7 @@ public class FlowServiceImpl implements FlowService {
                 lane.setId(0L);
                 lane.setLaneLevel(flowNode.getNodeLevel());
                 lane.setDisplayName(flowNode.getNodeName());
+                lane.setDisplayNameAbsort(buttonDefName(Namespace.DEFAULT_NAMESPACE, FlowStepType.ABSORT_STEP));
                 lane.setFlowNodeLevel(flowNode.getNodeLevel());
                 graphLane.setFlowLane(lane);
                 flowNode.setFlowLaneId(0L);
@@ -3866,7 +3897,9 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public FlowDTO getFlowById(Long flowId) {
         Flow flow = flowProvider.getFlowById(flowId);
-        return ConvertHelper.convert(flow, FlowDTO.class);
+        FlowDTO dto = ConvertHelper.convert(flow, FlowDTO.class);
+        dto.setNeedFormFlag(getNeedFormFlag(flow.getModuleId()));
+        return dto;
     }
 
     @Override
@@ -4632,35 +4665,27 @@ public class FlowServiceImpl implements FlowService {
 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-        // 先去listener获取
-        Flow flow = flowProvider.getFlowById(cmd.getFlowId());
-        if (flow == null) {
-            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
-                    "Flow not exist, flowId = %s", cmd.getFlowId());
-        }
-
-        List<FlowPredefinedParamDTO> dtoList = flowListenerManager.listFlowPredefinedParam(
-                flow, FlowEntityType.fromCode(cmd.getEntityType()), cmd.getOwnerType(), cmd.getOwnerId());
-
         List<FlowPredefinedParam> paramList = flowPredefinedParamProvider.listPredefinedParam(namespaceId,
-                flow.getModuleType(), flow.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
+                cmd.getModuleType(), cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
 
         if (paramList.isEmpty()) {
             paramList = flowPredefinedParamProvider.listPredefinedParam(namespaceId,
-                    FlowModuleType.NO_MODULE.getCode(), flow.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
+                    FlowModuleType.NO_MODULE.getCode(), cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
         }
         if (paramList.isEmpty()) {
             paramList = flowPredefinedParamProvider.listPredefinedParam(Namespace.DEFAULT_NAMESPACE,
-                    flow.getModuleType(), flow.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
+                    cmd.getModuleType(), cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
         }
         if (paramList.isEmpty()) {
             paramList = flowPredefinedParamProvider.listPredefinedParam(Namespace.DEFAULT_NAMESPACE,
-                    FlowModuleType.NO_MODULE.getCode(), flow.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
+                    FlowModuleType.NO_MODULE.getCode(), cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
         }
 
-        dtoList.addAll(paramList.stream().map(this::toPredefinedParamDTO).collect(Collectors.toList()));
+        List<FlowPredefinedParamDTO> dtoList = paramList.stream().map(this::toPredefinedParamDTO).collect(Collectors.toList());
 
-        return new ListFlowPredefinedParamResponse(dtoList);
+        ListFlowPredefinedParamResponse response = new ListFlowPredefinedParamResponse();
+        response.setParams(dtoList);
+        return response;
     }
 
     private FlowPredefinedParamDTO toPredefinedParamDTO(FlowPredefinedParam param) {
@@ -4671,25 +4696,51 @@ public class FlowServiceImpl implements FlowService {
     public void updateFlowButtonOrder(UpdateFlowButtonOrderCommand cmd) {
         ValidatorUtil.validate(cmd);
 
-        FlowButton button1 = flowButtonProvider.getFlowButtonById(cmd.getId());
-        FlowButton button2 = flowButtonProvider.getFlowButtonById(cmd.getExchangeId());
+        dbProvider.execute(status -> {
+            FlowButton button1 = flowButtonProvider.getFlowButtonById(cmd.getId());
+            FlowButton button2 = flowButtonProvider.getFlowButtonById(cmd.getExchangeId());
 
-        if (button1 != null && button2 != null) {
             Integer button1DefaultOrder = button1.getDefaultOrder();
             Integer button2DefaultOrder = button2.getDefaultOrder();
+
+            // 用于给没有order值的按钮做重排序
+            if (Objects.equals(button1DefaultOrder, button2DefaultOrder)) {
+                List<FlowButton> applierButtons = flowButtonProvider.findFlowButtonsByUserType(
+                        button1.getFlowNodeId(), button1.getFlowVersion(), FlowUserType.APPLIER.getCode());
+
+                int order = 1;
+                for (FlowButton button : applierButtons) {
+                    button.setDefaultOrder(order * 10);
+                    flowButtonProvider.updateFlowButton(button);
+                    order++;
+                }
+
+                List<FlowButton> processorButtons = flowButtonProvider.findFlowButtonsByUserType(
+                        button1.getFlowNodeId(), button1.getFlowVersion(), FlowUserType.PROCESSOR.getCode());
+                order = 1;
+                for (FlowButton button : processorButtons) {
+                    button.setDefaultOrder(order * 10);
+                    flowButtonProvider.updateFlowButton(button);
+                    order++;
+                }
+
+                button1 = flowButtonProvider.getFlowButtonById(cmd.getId());
+                button2 = flowButtonProvider.getFlowButtonById(cmd.getExchangeId());
+
+                button1DefaultOrder = button1.getDefaultOrder();
+                button2DefaultOrder = button2.getDefaultOrder();
+            }
 
             Flow flow = flowProvider.getFlowById(button1.getFlowMainId());
 
             button1.setDefaultOrder(button2DefaultOrder);
             button2.setDefaultOrder(button1DefaultOrder);
 
-            dbProvider.execute(status -> {
-                flowMarkUpdated(flow);
-                flowButtonProvider.updateFlowButton(button1);
-                flowButtonProvider.updateFlowButton(button2);
-                return true;
-            });
-        }
+            flowMarkUpdated(flow);
+            flowButtonProvider.updateFlowButton(button1);
+            flowButtonProvider.updateFlowButton(button2);
+            return true;
+        });
     }
 
     @Override
@@ -4902,28 +4953,44 @@ public class FlowServiceImpl implements FlowService {
     }
 
     @Override
-    public FlowConditionDTO createOrUpdateFlowCondition(CreateFlowConditionCommand cmd) {
+    public FlowGraphDTO createOrUpdateFlowCondition(CreateFlowConditionCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
         Flow flow = flowProvider.getFlowById(cmd.getFlowId());
         if (flow == null) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
                     "flow not exist flowId=%s", cmd.getFlowId());
         }
+
+        FlowNode flowNode = flowNodeProvider.getFlowNodeById(cmd.getFlowNodeId());
         dbProvider.execute(status -> {
             flowMarkUpdated(flow);
 
+            if (cmd.getBranch() != null) {
+                FlowBranch flowBranch = flowBranchProvider.findBranchByOriginalNodeId(flow.getId(), FlowConstants.FLOW_CONFIG_VER, cmd.getFlowNodeId());
+                if (flowBranch != null) {
+                    FlowBranchCommand branchCmd = cmd.getBranch();
+                    flowBranch.setProcessMode(branchCmd.getProcessMode());
+                    flowBranch.setBranchDecider(branchCmd.getBranchDecider());
+                    flowBranchProvider.updateFlowBranch(flowBranch);
+                }
+            } else {
+                throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR,
+                        "param error");
+            }
+
             // 创建condition
             if (cmd.getConditions() != null) {
-                flowConditionProvider.deleteFlowCondition(flow.getId(), FlowConstants.FLOW_CONFIG_VER);
+                flowConditionProvider.deleteFlowCondition(flow.getId(), cmd.getFlowNodeId(), FlowConstants.FLOW_CONFIG_VER);
                 for (FlowConditionCommand conditionCmd : cmd.getConditions()) {
-                    // conditionCmd.setFlowNodeId(nodeLevelToNodeIdMap.get(conditionCmd.getFlowNodeLevel()));
-                    // conditionCmd.setNextNodeId(nodeLevelToNodeIdMap.get(conditionCmd.getNextNodeLevel()));
-                    // conditionCmd.setFlowLinkId(linkLevelToLinkIdMap.get(conditionCmd.getFlowLinkLevel()));
+                    conditionCmd.setFlowNodeId(cmd.getFlowNodeId());
+                    conditionCmd.setFlowNodeLevel(flowNode.getNodeLevel());
                     createFlowCondition(flow, conditionCmd);
                 }
             }
             return true;
         });
-        return null;
+        return toFlowGraphDTO(flow);
     }
 
     @Override
@@ -4942,39 +5009,18 @@ public class FlowServiceImpl implements FlowService {
 
     @Override
     public FlowConditionVariable getFormFieldValueByVariable(FlowCaseState ctx, String variable) {
-        GeneralFormFieldDTO fieldDTO = getFromFieldValue(ctx, variable);
+        FlowCase flowCase = ctx.getFlowCase();
+        GeneralFormFieldDTO fieldDTO = generalFormService.getGeneralFormValueByOwner(
+                flowCase.getModuleType(),
+                flowCase.getModuleId(),
+                EhFlowCases.class.getSimpleName(),
+                flowCase.getId(),
+                variable
+        );
         if (fieldDTO != null) {
             return formFieldProcessorManager.getFlowConditionVariable(fieldDTO);
         }
         return null;
-    }
-
-    private GeneralFormFieldDTO getFromFieldValue(FlowCaseState ctx, String variable) {
-        // Long flowCaseId = ctx.getGrantParentState().getFlowCase().getId();
-        // GeneralFormFieldDTO dto = null;
-
-        GeneralFormFieldDTO fieldDTO = flowListenerManager.onFlowFormConditionVariableRender(ctx, variable);
-
-        /*// 先从审批那里获取数据
-        GeneralApprovalVal approvalVal = generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCaseId, variable);
-        if (approvalVal != null) {
-            dto = new GeneralFormFieldDTO();
-            dto.setFieldType(approvalVal.getFieldType());
-            dto.setFieldValue(approvalVal.getFieldStr3());
-            dto.setFieldName(approvalVal.getFieldName());
-        }
-
-        // 再从表单那里获取数据
-        if (dto == null) {
-            GeneralFormVal formVal = generalFormValProvider.getGeneralFormValBySourceAndField(EhFlowCases.class.getSimpleName(), flowCaseId, variable);
-            if (formVal != null) {
-                dto = new GeneralFormFieldDTO();
-                dto.setFieldType(formVal.getFieldType());
-                dto.setFieldValue(formVal.getFieldValue());
-                dto.setFieldName(formVal.getFieldName());
-            }
-        }*/
-        return fieldDTO;
     }
 
     @Override
@@ -5007,12 +5053,14 @@ public class FlowServiceImpl implements FlowService {
     private List<FlowConditionVariableDTO> getConditionVariableFromForm(Flow flow) {
         List<FlowConditionVariableDTO> variables = new ArrayList<>();
         GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(flow.getFormOriginId(), flow.getFormVersion());
-        List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+        if (form != null) {
+            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
 
-        for (GeneralFormFieldDTO fieldDTO : fieldDTOs) {
-            List<FlowConditionVariableDTO> dtoList = formFieldProcessorManager.convertFieldDtoToFlowConditionVariableDto(flow, fieldDTO);
-            if (dtoList != null) {
-                variables.addAll(dtoList);
+            for (GeneralFormFieldDTO fieldDTO : fieldDTOs) {
+                List<FlowConditionVariableDTO> dtoList = formFieldProcessorManager.convertFieldDtoToFlowConditionVariableDto(flow, fieldDTO);
+                if (dtoList != null) {
+                    variables.addAll(dtoList);
+                }
             }
         }
         return variables;
@@ -5076,13 +5124,63 @@ public class FlowServiceImpl implements FlowService {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
                     "flow not exist flowId=%s", cmd.getFlowId());
         }
-        GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(cmd.getFormOriginId());
-        if (form != null) {
-            flow.setFormOriginId(form.getFormOriginId());
-            flow.setFormVersion(form.getFormVersion());
-            flowMarkUpdated(flow);
+
+        GeneralForm oldForm = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(flow.getFormOriginId(), flow.getFormVersion());
+        GeneralForm newForm = generalFormProvider.getActiveGeneralFormByOriginId(flow.getFormOriginId());
+
+        if (newForm != null) {
+            dbProvider.execute(status -> {
+                flow.setFormOriginId(newForm.getFormOriginId());
+                flow.setFormVersion(newForm.getFormVersion());
+                flow.setFormUpdateTime(DateUtils.currentTimestamp());
+                flowMarkUpdated(flow);
+
+                // 因为这时候工作流记住了表单的字段，所以为了让表单修改后版本号增加，所以改成RUNNING状态
+                newForm.setStatus(GeneralFormStatus.RUNNING.getCode());
+                generalFormProvider.updateGeneralForm(newForm);
+
+                updateFlowConditionExpressionAfterFlowFormUpdate(flow, oldForm, newForm);
+                return true;
+            });
+            return toFlowFormDTO(newForm);
         }
-        return toFlowFormDTO(form);
+        return null;
+    }
+
+    private void updateFlowConditionExpressionAfterFlowFormUpdate(Flow flow, GeneralForm oldForm, GeneralForm newForm) {
+        List<GeneralFormFieldDTO> newFormField = new ArrayList<>();
+        if (newForm != null) {
+            newFormField = JSON.parseArray(newForm.getTemplateText(), GeneralFormFieldDTO.class);
+        }
+
+        List<String> newFieldNameList = newFormField.stream().map(GeneralFormFieldDTO::getFieldName).collect(Collectors.toList());
+
+        List<FlowConditionExpression> expressions = flowConditionExpressionProvider.listFlowConditionExpressionByFlow(
+                flow.getId(), FlowConstants.FLOW_CONFIG_VER);
+
+        boolean needUpdate = false;
+        for (FlowConditionExpression exp : expressions) {
+            FlowConditionExpressionVarType varType1 = FlowConditionExpressionVarType.fromCode(exp.getVariableType1());
+            if (varType1 == FlowConditionExpressionVarType.FORM && !newFieldNameList.contains(exp.getVariable1())) {
+                needUpdate = true;
+                exp.setVariable1("");
+                exp.setVariable2("");
+                exp.setRelationalOperator(FlowConditionRelationalOperatorType.EQUAL.getCode());
+                exp.setVariableType1(FlowConditionExpressionVarType.FORM.getCode());
+                exp.setVariableType2(FlowConditionExpressionVarType.CONST.getCode());
+                continue;
+            }
+
+            FlowConditionExpressionVarType varType2 = FlowConditionExpressionVarType.fromCode(exp.getVariableType2());
+            if (varType2 == FlowConditionExpressionVarType.FORM && !newFieldNameList.contains(exp.getVariable2())) {
+                needUpdate = true;
+                exp.setVariable2("");
+            }
+        }
+
+        if (needUpdate) {
+            flowConditionExpressionProvider.updateFlowConditionExpressions(expressions);
+        }
     }
 
     @Override
@@ -5094,11 +5192,20 @@ public class FlowServiceImpl implements FlowService {
         }
         GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(cmd.getFormOriginId(), cmd.getFormVersion());
         if (form != null) {
-            flow.setFormOriginId(form.getFormOriginId());
-            flow.setFormVersion(form.getFormVersion());
-            flowMarkUpdated(flow);
+            dbProvider.execute(status -> {
+                flow.setFormOriginId(form.getFormOriginId());
+                flow.setFormVersion(form.getFormVersion());
+                flow.setFormUpdateTime(DateUtils.currentTimestamp());
+                flowMarkUpdated(flow);
+
+                // 因为这时候工作流记住了表单的字段，所以为了让表单修改后版本号增加，所以改成RUNNING状态
+                form.setStatus(GeneralFormStatus.RUNNING.getCode());
+                generalFormProvider.updateGeneralForm(form);
+                return true;
+            });
+            return toFlowFormDTO(form);
         }
-        return toFlowFormDTO(form);
+        return null;
     }
 
     @Override
@@ -5108,9 +5215,40 @@ public class FlowServiceImpl implements FlowService {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
                     "flow not exist flowId=%s", cmd.getFlowId());
         }
-        flow.setFormOriginId(0L);
-        flow.setFormVersion(0L);
-        flowMarkUpdated(flow);
+
+        GeneralForm oldForm = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(flow.getFormOriginId(), flow.getFormVersion());
+
+        dbProvider.execute(status -> {
+            flow.setFormOriginId(0L);
+            flow.setFormVersion(0L);
+            flow.setFormUpdateTime(DateUtils.currentTimestamp());
+            flowMarkUpdated(flow);
+
+            updateFlowConditionExpressionAfterFlowFormUpdate(flow, oldForm, null);
+            return true;
+        });
+    }
+
+    @Override
+    public FlowFormDTO getFlowForm(FlowIdCommand cmd) {
+        Flow flow = flowProvider.getFlowById(cmd.getFlowId());
+        if (flow == null) {
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
+                    "flow not exist flowId=%s", cmd.getFlowId());
+        }
+        GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(flow.getFormOriginId(), flow.getFormVersion());
+        GeneralForm newVersionForm = generalFormProvider.getActiveGeneralFormByOriginId(flow.getFormOriginId());
+        if (form != null) {
+            FlowFormDTO formDTO = toFlowFormDTO(form);
+            if (newVersionForm != null && !newVersionForm.getFormVersion().equals(form.getFormVersion())) {
+                formDTO.setUpdateFlag(TrueOrFalseFlag.TRUE.getCode());
+            } else {
+                formDTO.setUpdateFlag(TrueOrFalseFlag.FALSE.getCode());
+            }
+            formDTO.setUpdateTime(flow.getFormUpdateTime() != null ? flow.getFormUpdateTime().getTime() : 0L);
+            return formDTO;
+        }
+        return null;
     }
 
     @Override
@@ -5304,9 +5442,9 @@ public class FlowServiceImpl implements FlowService {
         nodes.sort(Comparator.comparingInt(FlowNode::getNodeLevel));
 
         List<FlowLane> laneList = flowGraph.getLanes().stream().map(FlowGraphLane::getFlowLane).collect(Collectors.toList());
-        if (laneList.size() < 3) {
-            return dto;
-        }
+        // if (laneList.size() < 3) {
+        //     return dto;
+        // }
         laneList.sort(Comparator.comparingInt(FlowLane::getLaneLevel));
 
         if (userId == null) {
@@ -5468,9 +5606,9 @@ public class FlowServiceImpl implements FlowService {
         nodes.sort(Comparator.comparingInt(FlowNode::getNodeLevel));
 
         List<FlowLane> laneList = flowGraph.getLanes().stream().map(FlowGraphLane::getFlowLane).collect(Collectors.toList());
-        if (laneList.size() < 3) {
-            return dto;
-        }
+        // if (laneList.size() < 3) {
+        //     return dto;
+        // }
         laneList.sort(Comparator.comparingInt(FlowLane::getLaneLevel));
 
         Long userId = UserContext.currentUserId();

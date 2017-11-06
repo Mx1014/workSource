@@ -27,18 +27,15 @@ public class FlowGraphConditionNormal extends FlowGraphCondition {
         if (expressions == null) {
             return false;
         }
-
         if (expressions.size() == 0) {
             return true;
         }
 
         boolean conditionSuccess = false;
         for (FlowConditionExpression exp : expressions) {
-
             FlowConditionRelationalOperatorType relationalOperatorType = FlowConditionRelationalOperatorType.fromCode(exp.getRelationalOperator());
 
             boolean expRetVal = evaluateFlowConditionVariableRelational(ctx, relationalOperatorType, exp);
-
             FlowConditionLogicOperatorType logicOperatorType = FlowConditionLogicOperatorType.fromCode(exp.getLogicOperator());
             if (logicOperatorType == FlowConditionLogicOperatorType.OR && expRetVal) {
                 conditionSuccess = true;
@@ -82,6 +79,7 @@ public class FlowGraphConditionNormal extends FlowGraphCondition {
         FlowConditionVariable value = null;
         switch (varType) {
             case CONST:
+            case OPTION:
                 value = new FlowConditionStringVariable(variable);
                 break;
             case FORM:

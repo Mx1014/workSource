@@ -9,13 +9,10 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.general_approval.GeneralApprovalVal;
+import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseEntityType;
-import com.everhomes.rest.flow.FlowCaseFileDTO;
-import com.everhomes.rest.flow.FlowCaseFileValue;
-import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.server.schema.Tables;
@@ -23,7 +20,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
-
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -54,6 +50,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 	private GeneralFormValProvider generalFormValProvider;
 	@Autowired
 	private ContentServerService contentServerService;
+
+    @Autowired
+    private GeneralApprovalValProvider generalApprovalValProvider;
 
 	@Override
 	public GeneralFormDTO getTemplateByFormId(GetTemplateByFormIdCommand cmd) {
@@ -312,7 +311,33 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 		return entities;
 	}
 
-	@Override
+    @Override
+    public GeneralFormFieldDTO getGeneralFormValueByOwner(String moduleType, Long moduleId, String ownerType, Long ownerId, String fieldName) {
+        GeneralFormFieldDTO dto = null;
+        // 审批的值是在一张表
+        if (moduleId == 52000L) {
+            GeneralApprovalVal approvalVal = generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(ownerId, fieldName);
+            if (approvalVal != null) {
+                dto = new GeneralFormFieldDTO();
+                dto.setFieldType(approvalVal.getFieldType());
+                dto.setFieldValue(approvalVal.getFieldStr3());
+                dto.setFieldName(approvalVal.getFieldName());
+            }
+        }
+        // 其他表单的值是在另一张表
+        else {
+            GeneralFormVal formVal = generalFormValProvider.getGeneralFormValBySourceAndField(ownerType, ownerId, fieldName);
+            if (formVal != null) {
+                dto = new GeneralFormFieldDTO();
+                dto.setFieldType(formVal.getFieldType());
+                dto.setFieldValue(formVal.getFieldValue());
+                dto.setFieldName(formVal.getFieldName());
+            }
+        }
+        return dto;
+    }
+
+    @Override
 	public void processFlowEntities(List<FlowCaseEntity> entities, List<GeneralFormVal> vals, List<GeneralFormFieldDTO> fieldDTOs) {
 		processFlowEntities(entities, vals, fieldDTOs, false);
 	}

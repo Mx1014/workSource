@@ -239,6 +239,16 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     }
 
     @Override
+    public List<FlowFormDTO> listFlowForms(Flow flow) {
+        FlowModuleInst inst = moduleMap.get(flow.getModuleId());
+        if (inst != null) {
+            FlowModuleListener listener = inst.getListener();
+            return listener.listFlowForms(flow);
+        }
+        return null;
+    }
+
+    @Override
     public void onApplicationEvent(ContextRefreshedEvent arg0) {
         for (FlowModuleListener listener : allListeners) {
             try {

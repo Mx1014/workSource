@@ -6,14 +6,19 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>formOriginId: formOriginId</li>
  *     <li>formVersion: formVersion</li>
+ *     <li>updateTime: updateTime</li>
  *     <li>name: name</li>
+ *     <li>updateFlag: updateFlag</li>
  * </ul>
  */
 public class FlowFormDTO {
 
     private Long formOriginId;
     private Long formVersion;
+    private Long updateTime;
     private String name;
+
+    private Byte updateFlag;
 
     public Long getFormOriginId() {
         return formOriginId;
@@ -39,9 +44,26 @@ public class FlowFormDTO {
         this.name = name;
     }
 
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Long getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Long updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public Byte getUpdateFlag() {
+        return updateFlag;
+    }
+
+    public void setUpdateFlag(Byte updateFlag) {
+        this.updateFlag = updateFlag;
     }
 }
 

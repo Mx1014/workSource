@@ -22,17 +22,17 @@ public class FlowConditionDateVariable implements FlowConditionVariable<Date> {
 
     @Override
     public boolean isEqual(FlowConditionVariable variable) {
-        return doCompare(this, variable, (date1, date2) -> date1.compareTo(date2) == 0);
+        return doCompare(this, variable, Date::equals);
     }
 
     @Override
     public boolean isGreaterThen(FlowConditionVariable variable) {
-        return doCompare(this, variable, (date1, date2) -> date1.compareTo(date2) > 0);
+        return doCompare(this, variable, Date::after);
     }
 
     @Override
     public boolean isLessThen(FlowConditionVariable variable) {
-        return doCompare(this, variable, (date1, date2) -> date1.compareTo(date2) < 0);
+        return doCompare(this, variable, Date::before);
     }
 
     interface CompareCallback {
