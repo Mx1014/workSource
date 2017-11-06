@@ -13,6 +13,7 @@ CREATE TABLE `eh_parking_car_verifications` (
   `creator_uid` bigint(20) NOT NULL DEFAULT '0',
   `create_time` datetime DEFAULT NULL,
   `flow_case_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'flow case id',
+  `source_type` tinyint(4) DEFAULT NULL COMMENT '1: card request, 2: car verify',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
