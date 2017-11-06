@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PayService;
+import com.everhomes.pay.order.PaymentType;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.rentalv2.*;
