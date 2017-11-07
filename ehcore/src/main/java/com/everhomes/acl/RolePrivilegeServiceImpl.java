@@ -1525,9 +1525,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		OrganizationContactDTO dto = new OrganizationContactDTO();
 		if(OrganizationMemberTargetType.USER.getCode().equals(member.getTargetType())){
 			User user = userProvider.findUserById(member.getTargetId());
-			if(null != user)
+			if(null != user) {
 				dto.setNickName(user.getNickName());
 				dto.setAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
+			}
 		}
 
 //		//	added by R. 添加头像
