@@ -52,6 +52,7 @@ public class EnergyMeterDTO {
     private String status;
     private Timestamp lastReadTime;
     private BigDecimal lastReading;
+    private BigDecimal lastTaskReading;
 
     private Byte todayReadStatus;
     private BigDecimal dayPrompt;
@@ -62,6 +63,14 @@ public class EnergyMeterDTO {
     private EnergyMeterPriceConfigDTO priceConfig;
     @ItemType(EnergyMeterAddressDTO.class)
     private List<EnergyMeterAddressDTO> addresses;
+
+    public BigDecimal getLastTaskReading() {
+        return lastTaskReading;
+    }
+
+    public void setLastTaskReading(BigDecimal lastTaskReading) {
+        this.lastTaskReading = lastTaskReading;
+    }
 
     public Boolean getAssignedPlan() {
         return assignedPlan;

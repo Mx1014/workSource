@@ -528,6 +528,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     assignFlag = true;
                 }
             }
+            List<EnergyMeterTask> tasks = energyMeterTaskProvider.listActiveEnergyMeterTasks(meter.getId());
+            if(tasks != null && tasks.size() > 0) {
+                dto.setLastTaskReading(tasks.get(0).getLastTaskReading());
+            }
         }
         dto.setAssignedPlan(assignFlag);
         return dto;
@@ -1138,7 +1142,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         ArrayList list = processorExcel(file);
         for (int i = 2; i < list.size(); i++) {
             RowResult result = (RowResult) list.get(i);
-            if (Stream.of(result.getA(), result.getB(), result.getC(), result.getD(), result.getE(), result.getF()).anyMatch(StringUtils::isEmpty)) {
+            if (Stream.of(result.getA(), result.getB(), result.getC(), result.getD(), result.getE(), result.getH()).anyMatch(StringUtils::isEmpty)) {
                 continue;
             }
             EnergyMeter meter = new EnergyMeter();
@@ -1154,21 +1158,21 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 meter.setMeterType(Byte.valueOf(meterTypeLocale.getCode()));
             } else {
                 LOGGER.error("Import energy meter error, error field meterType");
-                throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field meterType");
+                throw errorWith(SCOPE, ERR_METER_TYPE_NOT_EXIST, "Import energy meter error, error field meterType");
             }
             EnergyMeterCategory category = meterCategoryProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), result.getD());
             if (category != null) {
                 meter.setBillCategoryId(category.getId());
             } else {
                 LOGGER.error("Import energy meter error, error field category");
-                throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field category");
+                throw errorWith(SCOPE, ERR_BILL_CATEGORY_NOT_EXIST, "Import energy meter error, error field category");
             }
             category = meterCategoryProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), result.getE());
             if (category != null) {
                 meter.setServiceCategoryId(category.getId());
             } else {
                 LOGGER.error("Import energy meter error, error field category");
-                throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field category");
+                throw errorWith(SCOPE, ERR_SERVICE_CATEGORY_NOT_EXIST, "Import energy meter error, error field category");
             }
 
 
@@ -1176,7 +1180,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 meter.setMaxReading(new BigDecimal(result.getH()));
             } else {
                 LOGGER.error("Import energy meter error, error field MaxReading");
-                throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field MaxReading");
+                throw errorWith(SCOPE, ERR_MAX_READING_NOT_EXIST, "Import energy meter error, error field MaxReading");
             }
             if (NumberUtils.isNumber(result.getI())) {
                 meter.setStartReading(new BigDecimal(result.getI()));
@@ -1238,6 +1242,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 readEnergyMeterCmd.setResetMeterFlag(TrueOrFalseFlag.FALSE.getCode());
                 readEnergyMeterCmd.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
                 this.readEnergyMeter(readEnergyMeterCmd);
+
+//                meterSearcher.feedDoc(meter);
                 return true;
             });
             meterList.add(meter);
@@ -2808,7 +2814,31 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public void batchReadEnergyMeter(BatchReadEnergyMeterCommand cmd) {
         if(cmd.getReadList() != null && cmd.getReadList().size() > 0) {
             cmd.getReadList().forEach(read -> {
-                readEnergyMeter(read);
+                List<EnergyMeterTask> tasks = energyMeterTaskProvider.listActiveEnergyMeterTasks(read.getMeterId());
+                if(tasks != null && tasks.size() > 0) {
+                    Boolean readTask = false;
+                    for(EnergyMeterTask task : tasks) {
+                        if(task.getExecutiveExpireTime().before(new Timestamp(DateHelper.currentGMTTime().getTime()))
+                                || EnergyTaskStatus.INACTIVE.equals(EnergyTaskStatus.fromCode(task.getStatus()))) {
+                            continue;
+                        }
+
+                        EnergyMeter meter = meterProvider.findById(task.getNamespaceId(), task.getMeterId());
+                        if(!EnergyMeterStatus.ACTIVE.equals(EnergyMeterStatus.fromCode(meter.getStatus()))) {
+                            continue;
+                        }
+                        task.setReading(read.getCurrReading());
+                        task.setStatus(EnergyTaskStatus.READ.getCode());
+                        task.setOperatorUid(UserContext.currentUserId());
+                        task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        energyMeterTaskProvider.updateEnergyMeterTask(task);
+                        energyMeterTaskSearcher.feedDoc(task);
+                        readTask = true;
+                    }
+                    if(readTask) {
+                        readEnergyMeter(read);
+                    }
+                }
             });
         }
     }
@@ -2992,6 +3022,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             LOGGER.error("EnergyTask already close, id = {}, expire time: {}", cmd.getTaskId(), task.getExecutiveExpireTime());
             throw errorWith(SCOPE, ERR_METER_TASK_ALREADY_CLOSE, "The meter task is already close id = %s", cmd.getTaskId());
 
+        }
+
+        EnergyMeter meter = meterProvider.findById(task.getNamespaceId(), task.getMeterId());
+        if(!EnergyMeterStatus.ACTIVE.equals(EnergyMeterStatus.fromCode(meter.getStatus()))) {
+            LOGGER.error("EnergyTask meter status is not active, meter = {}", meter);
+            throw errorWith(SCOPE, ERR_METER_NOT_EXIST, "The meter status is not active meter id = %s", meter.getId());
         }
         task.setReading(cmd.getCurrReading());
         task.setStatus(EnergyTaskStatus.READ.getCode());
