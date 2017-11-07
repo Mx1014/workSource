@@ -19,3 +19,7 @@ CREATE TABLE `eh_authorization_control_configs` (
   `include_child_flag` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 应用表改造 by lei.lv
+ALTER TABLE `eh_service_module_apps` ADD COLUMN `custom_tag` varchar(64)  DEFAULT '';
+ALTER TABLE `eh_service_module_apps` ADD COLUMN `custom_path` varchar(128) DEFAULT '';
