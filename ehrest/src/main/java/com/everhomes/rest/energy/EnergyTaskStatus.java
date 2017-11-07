@@ -2,12 +2,12 @@ package com.everhomes.rest.energy;
 
 /**
  * <ul>
- *     <li>0:未抄；1：已抄</li>
+ *     <li>0:未抄；1：已抄; 2: 无效</li>
  * </ul>
  * Created by ying.xiong on 2017/10/27.
  */
 public enum EnergyTaskStatus {
-    NON_READ((byte)0), READ((byte)1);
+    NON_READ((byte)0), READ((byte)1), INACTIVE((byte)2);
 
     private Byte code;
 

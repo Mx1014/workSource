@@ -15,4 +15,5 @@ public interface EnergyMeterTaskProvider {
     List<EnergyMeterTask> listEnergyMeterTasksByPlan(List<Long> planIds, Long targetId, Long ownerId, long pageAnchor, int pageSize);
 
     Map<Long, EnergyMeterTask> listEnergyMeterTasks(List<Long> ids);
+    List<EnergyMeterTask> listActiveEnergyMeterTasks(Long meterId);
 }

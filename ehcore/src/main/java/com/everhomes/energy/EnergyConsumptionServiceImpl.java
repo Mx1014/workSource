@@ -349,7 +349,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 //        checkCurrentUserNotInOrg(cmd.getOwnerId());
         userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.METER_CREATE);
 
-        checkEnergyMeterUnique(null, cmd.getCommunityId(), cmd.getName(), cmd.getMeterNumber());
+        checkEnergyMeterUnique(null, cmd.getCommunityId(), cmd.getMeterNumber(), cmd.getName());
 
         EnergyMeterType meterType = EnergyMeterType.fromCode(cmd.getMeterType());
         if (meterType == null) {
@@ -423,6 +423,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     private void processEnergyMeterAddresses(Long meterId, List<EnergyMeterAddressDTO> addresses) {
+        if(addresses == null) {
+            return ;
+        }
         //取出表记关联的所有门牌；传入的参数有id的从exist中去掉，没有id的增加，最后将exist中剩下的门牌关联关系置为inactive
         Map<Long, EnergyMeterAddress> existAddress = energyMeterAddressProvider.findByMeterId(meterId);
         if(addresses != null && addresses.size() > 0) {
@@ -651,7 +654,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         Tuple<EnergyMeter, Boolean> result = coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_METER.getCode() + cmd.getMeterId()).enter(() -> {
             EnergyMeter meter = this.findMeterById(cmd.getMeterId(),cmd.getNamespaceId());
             userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), meter.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_CREATE);
-            checkEnergyMeterUnique(meter.getId(), meter.getCommunityId(), cmd.getName(), cmd.getMeterNumber());
+            checkEnergyMeterUnique(meter.getId(), meter.getCommunityId(), cmd.getMeterNumber(), cmd.getName());
             if (cmd.getName() != null) {
                 meter.setName(cmd.getName());
             }
@@ -798,6 +801,17 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             dbProvider.execute(s -> {
                 // 1.更新表记状态
                 meterProvider.updateEnergyMeter(meter);
+                //报废表把对应的任务给置为无效
+                if(EnergyMeterStatus.OBSOLETE.equals(EnergyMeterStatus.fromCode(cmd.getStatus()))) {
+                    List<EnergyMeterTask> tasks = energyMeterTaskProvider.listActiveEnergyMeterTasks(meter.getId());
+                    if(tasks != null && tasks.size() > 0) {
+                        tasks.forEach(task -> {
+                            task.setStatus(EnergyTaskStatus.INACTIVE.getCode());
+                            energyMeterTaskProvider.updateEnergyMeterTask(task);
+                            energyMeterTaskSearcher.deleteById(task.getId());
+                        });
+                    }
+                }
                 if (EnergyMeterStatus.fromCode(cmd.getStatus()) == EnergyMeterStatus.INACTIVE) {
                     // 2.删除表记对应的读表记录
                     List<EnergyMeterReadingLog> logs = meterReadingLogProvider.listMeterReadingLogsByMeterId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), meter.getId());
@@ -2828,6 +2842,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     meterDTO.setMeterName(energyMeter.getName());
                     meterDTO.setMeterNumber(energyMeter.getMeterNumber());
                     meterDTO.setMeterType(energyMeter.getMeterType());
+                    // 表的状态
+                    String meterStatus = localeStringService.getLocalizedString(EnergyLocalStringCode.SCOPE_METER_STATUS, String.valueOf(energyMeter.getStatus()), currLocale(), "");
+                    meterDTO.setStatus(meterStatus);
                 }
 
                 meterDTO.setAddresses(populateEnergyMeterAddresses(meter.getMeterId()));
@@ -3074,6 +3091,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     meterDTO.setMeterName(meter.getName());
                     meterDTO.setMeterNumber(meter.getMeterNumber());
                     meterDTO.setMeterType(meter.getMeterType());
+                    // 表的状态
+                    String meterStatus = localeStringService.getLocalizedString(EnergyLocalStringCode.SCOPE_METER_STATUS, String.valueOf(meter.getStatus()), currLocale(), "");
+                    meterDTO.setStatus(meterStatus);
                 }
 
                 meterDTO.setAddresses(populateEnergyMeterAddresses(meterMap.getMeterId()));

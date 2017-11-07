@@ -51,6 +51,9 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
     private EnergyMeterProvider meterProvider;
 
     @Autowired
+    private EnergyMeterAddressProvider energyMeterAddressProvider;
+
+    @Autowired
     private EnergyMeterReadingLogProvider readingLogProvider;
 
     @Autowired
@@ -109,11 +112,20 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
                 builder.field("serviceCategoryId", meter.getServiceCategoryId());
                 builder.field("meterName", meter.getName());
                 builder.field("meterNumber", meter.getMeterNumber());
+
+                List<EnergyMeterAddress> existAddress = energyMeterAddressProvider.listByMeterId(meter.getId());
+                if(existAddress != null && existAddress.size() > 0) {
+                    builder.field("buildingId", existAddress.get(0).getBuildingId());
+                    builder.field("addressId", existAddress.get(0).getAddressId());
+                    builder.field("address", existAddress.get(0).getBuildingName()+"-"+existAddress.get(0).getApartmentName());
+                }
             }
 
             if(operator != null) {
                 builder.field("operatorName", operator.getNickName());
             }
+
+
 
             builder.endObject();
             return builder;
@@ -181,6 +193,16 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             TermFilterBuilder meterIdTerm = FilterBuilders.termFilter("meterId", cmd.getMeterId());
             filterBuilders.add(meterIdTerm);
         }
+
+        if (cmd.getBuildingId() != null) {
+            TermFilterBuilder buildingIdFilter = FilterBuilders.termFilter("buildingId", cmd.getBuildingId());
+            filterBuilders.add(buildingIdFilter);
+        }
+
+        if (cmd.getAddressId() != null) {
+            TermFilterBuilder addressIdFilter = FilterBuilders.termFilter("addressId", cmd.getAddressId());
+            filterBuilders.add(addressIdFilter);
+        }
         RangeFilterBuilder rangeTimeTerm = new RangeFilterBuilder("operateTime");
         if (cmd.getStartTime() != null) {
             rangeTimeTerm.gte(cmd.getStartTime());
@@ -235,6 +257,8 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             }
             dto.setId(Long.valueOf(hit.getId()));
             dto.setMeterName((String) source.get("meterName"));
+            Object meterType = source.get("meterType");
+            dto.setMeterType(meterType != null ? Byte.valueOf(meterType.toString()) : null);
             Object resetFlag = source.get("resetFlag");
             dto.setResetMeterFlag(resetFlag != null ? Byte.valueOf(resetFlag.toString()) : null);
             Object changeFlag = source.get("changeFlag");
@@ -243,6 +267,7 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             dto.setOperateTime(operateTime != null ? new Timestamp(Long.valueOf(operateTime.toString())) : null);
             dto.setOperatorName((String)source.get("operatorName"));
             dto.setMeterNumber((String)source.get("meterNumber"));
+            dto.setMeterAddress(String.valueOf(source.get("address")));
 
             dtoList.add(dto);
         }

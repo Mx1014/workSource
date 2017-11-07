@@ -104,7 +104,7 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
             builder.field("status", status);
             EnergyMeter meter = energyMeterProvider.findById(task.getNamespaceId(), task.getMeterId());
             if(meter != null) {
-                builder.field("meter", meter.getName());
+                builder.field("meterName", meter.getName());
             }
 
             builder.endObject();
@@ -139,12 +139,11 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
             qb = QueryBuilders.matchAllQuery();
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeywords())
-                    .field("planName", 1.5f)
-                    .field("groupName", 1.0f);
+                    .field("meterName", 1.5f);
 
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("planName").addHighlightedField("groupName");
+            builder.addHighlightedField("meterName");
         }
 
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
