@@ -30,6 +30,7 @@ import com.everhomes.rest.uniongroup.UniongroupType;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhUserOrganizations;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
@@ -110,6 +111,16 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		dao.update(department);
 
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, department.getId());
+	}
+
+	@Override
+	public void updateUserOrganization(UserOrganizations userOrganization){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhUserOrganizationsDao dao = new EhUserOrganizationsDao(context.configuration());
+		userOrganization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		dao.update(userOrganization);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserOrganizations.class, userOrganization.getId());
 	}
 
 	@Override
@@ -5022,6 +5033,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 					query.addJoin(context.select().from(Tables.EH_USER_ORGANIZATIONS).where(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(UserOrganizationStatus.ACTIVE.getCode()).or(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(UserOrganizationStatus.WAITING_FOR_APPROVAL.getCode()))).asTable(Tables.EH_USER_ORGANIZATIONS.getName()),
 							JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_ORGANIZATIONS.USER_ID));
 					query.addJoin(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID).and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode())));
+					//用于按企业名称查询
+					query.addJoin(Tables.EH_ORGANIZATIONS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID));
+
+					//按照用户在企业的中的姓名查询
+					query.addJoin(Tables.EH_ORGANIZATION_MEMBERS, JoinType.LEFT_OUTER_JOIN, Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID), Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID));
+
 					if(null != callback){
 						callback.buildCondition(locator, query);
 					}
@@ -5062,16 +5079,16 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	@Override
 	public Integer countUserOrganization(Integer namespaceId, Long communityId){
-		return countUserOrganization(namespaceId, communityId, null, null);
+		return countUserOrganization(namespaceId, communityId, null, null, null);
 	}
 
 	@Override
 	public Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus){
-		return countUserOrganization(namespaceId, communityId, userOrganizationStatus, null);
+		return countUserOrganization(namespaceId, communityId, userOrganizationStatus, null, null);
 	}
 
 	@Override
-	public Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus, String namespaceUserType){
+	public Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus, String namespaceUserType, Byte gender){
 		List<Long> result = new ArrayList<>();
 		dbProvider.mapReduce(AccessSpec.readOnly(), null,
 				(DSLContext context, Object reducingContext) -> {
@@ -5083,14 +5100,22 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 							JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_ORGANIZATIONS.USER_ID));
 					query.addJoin(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID).and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode())));
 					query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
-					if(null != userOrganizationStatus)
+					if(null == userOrganizationStatus){
+						query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.notIn(UserOrganizationStatus.REJECT.getCode(), UserOrganizationStatus.INACTIVE.getCode()));
+					}else{
 						query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(userOrganizationStatus));
+					}
+
 					query.addConditions(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()));
 					if(null != communityId){
 						query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId));
 					}
 					if(!StringUtils.isEmpty(namespaceUserType)){
 						query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(namespaceUserType));
+					}
+
+					if(gender != null){
+						query.addConditions(Tables.EH_USERS.GENDER.eq(gender));
 					}
 					query.addGroupBy(Tables.EH_USERS.ID);
 					LOGGER.debug("query sql:{}", query.getSQL());
@@ -5458,6 +5483,44 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		});
 		return list;
 	}
+
+	@Override
+	public UserOrganizations findUserOrganizationByUserIdAndOrgId(Long userId, Long orgId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select().from(Tables.EH_USER_ORGANIZATIONS)
+				.where(Tables.EH_USER_ORGANIZATIONS.USER_ID.eq(userId)
+						.and(Tables.EH_USER_ORGANIZATIONS.STATUS.in(UserOrganizationStatus.ACTIVE.getCode()))
+				.and(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(orgId)))
+				.fetchOne();
+		if (record != null)
+			return ConvertHelper.convert(record, UserOrganizations.class);
+		return null;
+	}
+
+	@Override
+	public UserOrganizations findActiveAndWaitUserOrganizationByUserIdAndOrgId(Long userId, Long orgId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select().from(Tables.EH_USER_ORGANIZATIONS)
+				.where(Tables.EH_USER_ORGANIZATIONS.USER_ID.eq(userId)
+						.and(Tables.EH_USER_ORGANIZATIONS.STATUS.in(UserOrganizationStatus.ACTIVE.getCode(), UserOrganizationStatus.WAITING_FOR_APPROVAL.getCode()))
+						.and(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(orgId)))
+				.fetchOne();
+		if (record != null)
+			return ConvertHelper.convert(record, UserOrganizations.class);
+		return null;
+	}
+
+	@Override
+	public UserOrganizations findUserOrganizationById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select().from(Tables.EH_USER_ORGANIZATIONS)
+				.where(Tables.EH_USER_ORGANIZATIONS.ID.eq(id))
+				.fetchOne();
+		if (record != null)
+			return ConvertHelper.convert(record, UserOrganizations.class);
+		return null;
+	}
+
 	@Override
 	public void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent) {
 
