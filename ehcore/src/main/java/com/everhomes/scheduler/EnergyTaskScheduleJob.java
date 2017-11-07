@@ -328,6 +328,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                 }
             }
         }
+        LOGGER.debug("paymentExpectancies_re_struct command: {}", command);
         assetService.paymentExpectancies_re_struct(command);
     }
 
