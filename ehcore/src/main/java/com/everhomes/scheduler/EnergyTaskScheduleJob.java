@@ -238,14 +238,16 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
             List<ContractChargingItemAddress> contractChargingItemAddresses = contractChargingItemAddressProvider.findByAddressId(address.getAddressId(), meter.getMeterType());
             if(contractChargingItemAddresses != null && contractChargingItemAddresses.size() > 0) {
                 List<FeeRules> feeRules = new ArrayList<>();
+                List<Long> contractId = new ArrayList<>();
                 contractChargingItemAddresses.forEach(contractChargingItemAddress -> {
                     ContractChargingItem item = contractChargingItemProvider.findById(contractChargingItemAddress.getContractChargingItemId());
                     FeeRules feeRule = generateChargingItemsFeeRule(amount, item.getChargingItemId(), item.getChargingStandardId(),
                             item.getChargingStartTime().getTime(), item.getChargingExpiredTime().getTime(), item.getChargingVariables(), address);
                     feeRules.add(feeRule);
+                    contractId.add(item.getContractId());
                 });
                 //suanqian paymentExpectancies_re_struct();
-                paymentExpectancies_re_struct(task, address, feeRules);
+                paymentExpectancies_re_struct(task, address, feeRules, contractId.get(0));
                 generateFlag = true;
             } else {//门牌有没有默认计价条款、所属楼栋有没有默认计价条款、所属园区有没有默认计价条款 eh_default_charging_item_properties
                 List<DefaultChargingItemProperty> properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.APARTMENT.getCode(), address.getAddressId(), meter.getMeterType());
@@ -258,7 +260,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                         feeRules.add(feeRule);
                     });
                     //suanqian paymentExpectancies_re_struct();
-                    paymentExpectancies_re_struct(task, address, feeRules);
+                    paymentExpectancies_re_struct(task, address, feeRules, null);
                     generateFlag = true;
                 } else {
                     properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.BUILDING.getCode(), address.getBuildingId(), meter.getMeterType());
@@ -271,7 +273,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                             feeRules.add(feeRule);
                         });
                         //suanqian paymentExpectancies_re_struct();
-                        paymentExpectancies_re_struct(task, address, feeRules);
+                        paymentExpectancies_re_struct(task, address, feeRules, null);
                         generateFlag = true;
                     } else {
                         properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.BUILDING.getCode(), meter.getCommunityId(), meter.getMeterType());
@@ -284,7 +286,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                                 feeRules.add(feeRule);
                             });
                             //suanqian paymentExpectancies_re_struct();
-                            paymentExpectancies_re_struct(task, address, feeRules);
+                            paymentExpectancies_re_struct(task, address, feeRules, null);
                             generateFlag = true;
                         }
                     }
@@ -300,9 +302,9 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         taskProvider.updateEnergyMeterTask(task);
     }
 
-    private void paymentExpectancies_re_struct(EnergyMeterTask task, EnergyMeterAddress address, List<FeeRules> feeRules) {
+    private void paymentExpectancies_re_struct(EnergyMeterTask task, EnergyMeterAddress address, List<FeeRules> feeRules, Long contractId) {
         PaymentExpectanciesCommand command = new PaymentExpectanciesCommand();
-
+        command.setContractId(contractId);
         command.setFeesRules(feeRules);
         command.setNamesapceId(task.getNamespaceId());
         command.setOwnerId(task.getTargetId());
@@ -353,12 +355,14 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         List<VariableIdAndValue> vv = new ArrayList<>();
         if(pvs != null && pvs.size() > 0) {
             pvs.forEach(pv -> {
-                VariableIdAndValue variableIdAndValue = new VariableIdAndValue();
-                variableIdAndValue.setVaribleIdentifier(pv.getVariableIdentifier());
-                //用量
-                variableIdAndValue.setVariableValue(amount);
+                VariableIdAndValue variableIdAndValue = ConvertHelper.convert(pv, VariableIdAndValue.class);
                 vv.add(variableIdAndValue);
             });
+            VariableIdAndValue variableIdAndValue = new VariableIdAndValue();
+            //用量的identifier在eh_payment_variables为yl
+            variableIdAndValue.setVaribleIdentifier("yl");
+            //用量
+            variableIdAndValue.setVariableValue(amount);
         }
         feeRule.setVariableIdAndValueList(vv);
 

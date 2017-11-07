@@ -22,6 +22,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.JoinType;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/8/16.
@@ -106,7 +108,12 @@ public class ContractChargingItemAddressProviderImpl implements ContractCharging
     public List<ContractChargingItemAddress> findByAddressId(Long addressId, Byte meterType) {
         Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime());
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhContractChargingItemAddressesRecord> query = context.selectQuery(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES);
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.ID,Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.NAMESPACE_ID,
+                Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.CONTRACT_CHARGING_ITEM_ID, Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.ADDRESS_ID,
+                Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.STATUS, Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.CREATE_UID,
+                Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.CREATE_TIME);
+        query.addFrom(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES);
         query.addJoin(Tables.EH_CONTRACT_CHARGING_ITEMS, JoinType.LEFT_OUTER_JOIN,
                 Tables.EH_CONTRACT_CHARGING_ITEMS.ID.eq(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.CONTRACT_CHARGING_ITEM_ID));
         query.addJoin(Tables.EH_CONTRACTS, JoinType.LEFT_OUTER_JOIN,
@@ -129,12 +136,23 @@ public class ContractChargingItemAddressProviderImpl implements ContractCharging
             }
         }
 
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("findByAddressId, sql=" + query.getSQL());
+            LOGGER.debug("findByAddressId, bindValues=" + query.getBindValues());
+        }
         List<ContractChargingItemAddress> result = new ArrayList<>();
         query.fetch().map((r) -> {
-            result.add(ConvertHelper.convert(r, ContractChargingItemAddress.class));
+            ContractChargingItemAddress itemAddress = new ContractChargingItemAddress();
+            itemAddress.setId(r.getValue(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.ID));
+            itemAddress.setNamespaceId(r.getValue(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.NAMESPACE_ID));
+            itemAddress.setContractChargingItemId(r.getValue(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.CONTRACT_CHARGING_ITEM_ID));
+            itemAddress.setAddressId(r.getValue(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.ADDRESS_ID));
+            itemAddress.setStatus(r.getValue(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.STATUS));
+            itemAddress.setCreateTime(r.getValue(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.CREATE_TIME));
+            itemAddress.setCreateUid(r.getValue(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.CREATE_UID));
+            result.add(itemAddress);
             return null;
         });
-
         return result;
     }
 }
