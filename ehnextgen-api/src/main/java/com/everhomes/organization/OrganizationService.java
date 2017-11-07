@@ -573,4 +573,6 @@ public interface OrganizationService {
 	void deleteOrganizationJobPositionsByPositionIdAndDetails(DeleteOrganizationJobPositionsByPositionIdAndDetailsCommand cmd);
 	
 	Integer cleanWrongStatusOrganizationMembers(Integer namespaceId);
+
+	Long modifyPhoneNumberByDetailId(Long detailId, String contactToken);
 }

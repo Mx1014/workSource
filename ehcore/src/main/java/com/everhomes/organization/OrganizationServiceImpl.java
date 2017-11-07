@@ -567,7 +567,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         Organization parOrg = this.checkOrganization(cmd.getId());
 
         parOrg.setShowFlag(cmd.getNaviFlag());
-        parOrg.setName(cmd.getName());
+        if(!StringUtils.isEmpty(cmd.getName()))
+            parOrg.setName(cmd.getName());
 
         Organization org = dbProvider.execute((TransactionStatus status) -> {
             if (OrganizationGroupType.fromCode(parOrg.getGroupType()) == OrganizationGroupType.ENTERPRISE) {
@@ -6883,6 +6884,41 @@ public class OrganizationServiceImpl implements OrganizationService {
             return count;
         });
         return (Integer) tuple.first();
+    }
+
+    @Override
+    public Long modifyPhoneNumberByDetailId(Long detailId, String contactToken) {
+        OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+        if(detail == null || detail.getTargetType().equals(OrganizationMemberTargetType.UNTRACK.getCode())){
+            return 0L;
+        }
+        List<String> groupTypes = new ArrayList<>();
+        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+        groupTypes.add(OrganizationGroupType.GROUP.getCode());
+        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
+        groupTypes.add(OrganizationGroupType.JOB_LEVEL.getCode());
+        groupTypes.add(OrganizationGroupType.MANAGER.getCode());
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByDetailId(detailId, groupTypes);
+        if (members != null) {
+            members.stream().filter(r ->
+                    r.getContactType() != null && r.getContactType() == IdentifierType.MOBILE.getCode()
+            ).forEach(r -> {
+                r.setContactToken(contactToken);
+                organizationProvider.updateOrganizationMember(r);
+            });
+
+            List<Long> detailIds = members.stream().map(OrganizationMember::getDetailId).collect(Collectors.toList());
+            List<OrganizationMemberDetails> details = organizationProvider.findDetailInfoListByIdIn(detailIds);
+            if (details != null) {
+                details.forEach(r -> {
+                    r.setContactToken(contactToken);
+                    organizationProvider.updateOrganizationMemberDetails(r, r.getId());
+                });
+            }
+        }
+        return detailId;
     }
 
 
