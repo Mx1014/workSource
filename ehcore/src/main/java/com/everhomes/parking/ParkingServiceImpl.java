@@ -2189,10 +2189,7 @@ public class ParkingServiceImpl implements ParkingService {
 		createFlowCaseCommand.setReferType(EntityType.PARKING_CAR_VERIFICATION.getCode());
 		createFlowCaseCommand.setContent("车牌号码：" + verification.getPlateNumber());
 		createFlowCaseCommand.setCurrentOrganizationId(verification.getRequestorEnterpriseId());
-
-		if (UserContext.getCurrentNamespaceId().equals(999983)) {
-			createFlowCaseCommand.setTitle("车辆认证申请");
-		}
+		createFlowCaseCommand.setTitle("车辆认证申请");
 
 		FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
 
