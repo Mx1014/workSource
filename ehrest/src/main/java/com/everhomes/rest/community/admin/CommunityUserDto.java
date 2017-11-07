@@ -66,6 +66,8 @@ public class CommunityUserDto {
 
 	private Long recentlyActiveTime;
 
+	private Byte userSourceType;
+
 	@ItemType(OrganizationDetailDTO.class)
 	private List<OrganizationDetailDTO> organizations;
 
@@ -221,14 +223,14 @@ public class CommunityUserDto {
 		this.recentlyActiveTime = recentlyActiveTime;
 	}
 
-	public String getOrganizationMemberName() {
-		return organizationMemberName;
-	}
-
-	public void setOrganizationMemberName(String organizationMemberName) {
-		this.organizationMemberName = organizationMemberName;
-	}
-
+//	public String getOrganizationMemberName() {
+//		return organizationMemberName;
+//	}
+//
+//	public void setOrganizationMemberName(String organizationMemberName) {
+//		this.organizationMemberName = organizationMemberName;
+//	}
+//
 	public Byte getUserSourceType() {
 		return userSourceType;
 	}
