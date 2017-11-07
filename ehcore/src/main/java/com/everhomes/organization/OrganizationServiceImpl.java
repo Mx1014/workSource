@@ -5394,7 +5394,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     repeatCreateOrganizationmembers(departmentIds, token, enterpriseIds, enterprise_member);
                     OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
                     // todo:去掉公司id
-                    departmentIds.remove(enterprise_member.getOrganizationId());
+                    departmentIds.remove(getEnableEnterprisePersonel(org, detailId).getOrganizationId());
                     if (departmentIds != null && departmentIds.size() > 0)
                         memberDetail.setDepartmentIds(JSON.toJSONString(departmentIds));
                     memberDetail.setDepartment(convertToOrganizationName(departmentIds));
@@ -5664,6 +5664,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             Organization org = listUnderOrganizations(0, null, namespaceId, list);
             if(org != null){
                 System.out.println(org.getName());
+                return org.getId();
             }
         }
         return null;

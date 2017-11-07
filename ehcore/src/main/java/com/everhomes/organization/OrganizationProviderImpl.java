@@ -145,7 +145,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, id);
 	}
 
-	@Cacheable(value="OrganizationById", key="#id")
+//	@Cacheable(value="OrganizationById", key="#id")
 	@Override
 	public Organization findOrganizationById(Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
