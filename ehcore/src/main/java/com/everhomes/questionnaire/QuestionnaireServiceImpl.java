@@ -782,9 +782,14 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 				contents.add(resultTargetDTO.getTargetPhone());
 			}
 			List<QuestionnaireAnswer> answers = questionnaireAnswerProvider.listQuestionnaireAnswerByQuestionnaireId(cmd.getQuestionnaireId(),resultTargetDTO.getTargetType(),resultTargetDTO.getTargetId());
-			long questionId = Long.MAX_VALUE;
+			long questionId = (answers==null || answers.size()==0)?Long.MAX_VALUE:answers.get(0).getQuestionId();
 			String content = "";
 			for (QuestionnaireAnswer answer : answers) {
+				if(questionId != answer.getQuestionId().longValue()){
+					contents.add(content);
+					content = "";
+					questionId = answer.getQuestionId().longValue();
+				}
 				QuestionType type = QuestionType.fromCode(answer.getQuestionType());
 				switch (type) {
 					case BLANK:
@@ -799,13 +804,8 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 					default:
 						break;
 				}
-				if(questionId != answer.getQuestionId().longValue()){
-					contents.add(content);
-					content = "";
-					questionId = answer.getQuestionId().longValue();
-				}
 			}
-
+			contents.add(content);
 			createRow(sheet,style,contents,startrow++);
 		}
 
