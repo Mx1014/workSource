@@ -7261,13 +7261,13 @@ public class PunchServiceImpl implements PunchService {
             ptr = getPunchTimeRuleByRuleIdAndDate(pr, punchTime, userId);
         }
         String[] statusList =null;
+        String[] approvalStatus = null;
         if(null != pdl) {
             if(pdl.getTimeRuleId() != null && pdl.getTimeRuleId()>0L){
                 ptr = punchProvider.getPunchTimeRuleById(pdl.getTimeRuleId());
             }
             response.setStatusList(pdl.getStatusList());
             if (null != pdl.getStatusList()) {
-                String[] approvalStatus = null;
                 if (null != pdl.getApprovalStatusList())
                     approvalStatus = pdl.getApprovalStatusList().split(PunchConstants.STATUS_SEPARATOR);
                 statusList = pdl.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
@@ -7282,8 +7282,8 @@ public class PunchServiceImpl implements PunchService {
                 }
                 for (int i = 0; i < pdl.getPunchTimesPerDay() / 2; i++) {
                     try {
-                        if (approvalStatus != null && approvalStatus[i].equals(ExceptionStatus.NORMAL.getCode())) {
-                            statusList[i] = PunchStatus.NORMAL.getCode() + "";
+                        if (approvalStatus != null  ) {
+                            statusList[i] = approvalStatus[i] + "";
                         }
                     } catch (Exception e) {
                         LOGGER.error("approval status error", e);
@@ -7328,6 +7328,8 @@ public class PunchServiceImpl implements PunchService {
                     intervalDTO.setStatus(processIntevalStatus(String.valueOf(dto1.getClockStatus()),String.valueOf(dto2.getClockStatus())));
                 }else{
                     intervalDTO.setStatus(statusList[punchIntervalNo-1]);
+                    if(approvalStatus!=null && approvalStatus.length>punchIntervalNo && approvalStatus[punchIntervalNo-1]!=null)
+                    	intervalDTO.setSmartAlignment(NormalFlag.YES.getCode());
                 }
 //                PunchExceptionRequest exceptionRequest = punchProvider.findPunchExceptionRequest(userId, cmd.getEnterpriseId(),
 //                        cmd.getQueryTime(), punchIntervalNo);
