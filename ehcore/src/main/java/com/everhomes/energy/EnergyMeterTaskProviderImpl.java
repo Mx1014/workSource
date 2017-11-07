@@ -75,6 +75,7 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_ENERGY_METER_TASKS)
                 .where(Tables.EH_ENERGY_METER_TASKS.ID.ge(pageAnchor))
+                .and(Tables.EH_ENERGY_METER_TASKS.STATUS.ne(EnergyTaskStatus.INACTIVE.getCode()))
                 .limit(pageSize).fetchInto(EnergyMeterTask.class);
     }
 
@@ -83,6 +84,7 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_ENERGY_METER_TASKS)
                 .where(Tables.EH_ENERGY_METER_TASKS.EXECUTIVE_EXPIRE_TIME.le(new Timestamp(DateHelper.currentGMTTime().getTime())))
+                .and(Tables.EH_ENERGY_METER_TASKS.STATUS.ne(EnergyTaskStatus.INACTIVE.getCode()))
                 .and(Tables.EH_ENERGY_METER_TASKS.GENERATE_PAYMENT_FLAG.eq(TaskGeneratePaymentFlag.NON_GENERATE.getCode()))
                 .fetchInto(EnergyMeterTask.class);
     }
@@ -93,6 +95,7 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
         return context.selectFrom(Tables.EH_ENERGY_METER_TASKS)
                 .where(Tables.EH_ENERGY_METER_TASKS.ID.ge(pageAnchor))
                 .and(Tables.EH_ENERGY_METER_TASKS.PLAN_ID.in(planIds))
+                .and(Tables.EH_ENERGY_METER_TASKS.STATUS.ne(EnergyTaskStatus.INACTIVE.getCode()))
 //                .and(Tables.EH_ENERGY_METER_TASKS.OWNER_ID.eq(ownerId))
                 .and(Tables.EH_ENERGY_METER_TASKS.TARGET_ID.eq(targetId))
                 .orderBy(Tables.EH_ENERGY_METER_TASKS.PLAN_ID, Tables.EH_ENERGY_METER_TASKS.DEFAULT_ORDER)
@@ -105,6 +108,7 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEnergyMeterTasksRecord> query = context.selectQuery(Tables.EH_ENERGY_METER_TASKS);
         query.addConditions(Tables.EH_ENERGY_METER_TASKS.ID.in(ids));
+        query.addConditions(Tables.EH_ENERGY_METER_TASKS.STATUS.ne(EnergyTaskStatus.INACTIVE.getCode()));
 
         Map<Long, EnergyMeterTask> result = new HashMap<>();
         query.fetch().map((r) -> {
