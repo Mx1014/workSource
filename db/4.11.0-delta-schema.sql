@@ -1,5 +1,9 @@
 -- by dengs,问卷调查添加属性。2017.11.06
 ALTER TABLE `eh_questionnaires` ADD COLUMN `organization_scope` TEXT COMMENT 'targetType是organization的时候，发布公司的列表' AFTER `user_scope`;
+ALTER TABLE `eh_questionnaires` MODIFY COLUMN user_scope MEDIUMTEXT;
+ALTER TABLE `eh_questionnaires` MODIFY COLUMN scope_sent_message_users MEDIUMTEXT;
+ALTER TABLE `eh_questionnaires` MODIFY COLUMN scope_resent_message_users MEDIUMTEXT;
+ALTER TABLE `eh_questionnaires` MODIFY COLUMN organization_scope MEDIUMTEXT;
 
 DROP TABLE IF EXISTS `eh_archives_sticky_contacts`;
 CREATE TABLE `eh_archives_sticky_contacts` (
