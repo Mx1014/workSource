@@ -281,6 +281,10 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
                     }
                 }
             }
+        }else if (ApplyEntrySourceType.LEASE_PROJECT.getCode().equals(applyEntry.getSourceType())) {
+            //如果是项目介绍的申请，产品定义buildingName 值显示项目名称
+            Community community = communityProvider.findCommunityById(applyEntry.getSourceId());
+            buildingName = community.getName();
         }
 
         return buildingName;
