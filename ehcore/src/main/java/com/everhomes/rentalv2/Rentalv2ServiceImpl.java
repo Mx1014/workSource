@@ -201,6 +201,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Autowired
 	private Rentalv2PriceRuleProvider rentalv2PriceRuleProvider;
 	@Autowired
+	private  Rentalv2PricePackageProvider rentalv2PricePackageProvider;
+	@Autowired
 	private PayService payService;
 	@Autowired
 	private DoorAccessService doorAccessService;
@@ -330,12 +332,25 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			priceRules.forEach(p->createPriceRule(priceRuleType, ruleId, p));
 		}
 	}
-	
+	private void createPricePackages(PriceRuleType priceRuleType, Long ruleId,List<PricePackageDTO> pricePackages){
+		LOGGER.debug("test enter cerate resource price packages, defaultRule={}", JSON.toJSON(pricePackages));
+
+		if (pricePackages!=null && !pricePackages.isEmpty()){
+			pricePackages.forEach(p->createPricePackage(priceRuleType,ruleId,p));
+		}
+	}
 	private void createPriceRule(PriceRuleType priceRuleType, Long ruleId, PriceRuleDTO priceRule) {
 		Rentalv2PriceRule rentalv2PriceRule = ConvertHelper.convert(priceRule, Rentalv2PriceRule.class);
 		rentalv2PriceRule.setOwnerType(priceRuleType.getCode());
 		rentalv2PriceRule.setOwnerId(ruleId);
 		rentalv2PriceRuleProvider.createRentalv2PriceRule(rentalv2PriceRule);
+	}
+
+	private void createPricePackage(PriceRuleType priceRuleType, Long ruleId,PricePackageDTO pricePackage){
+		Rentalv2PricePackage rentalv2PricePackage = ConvertHelper.convert(pricePackage,Rentalv2PricePackage.class);
+		rentalv2PricePackage.setOwnerType(priceRuleType.getCode());
+		rentalv2PricePackage.setOwnerId(ruleId);
+		rentalv2PricePackageProvider.createRentalv2PricePackage(rentalv2PricePackage);
 	}
 
 	private String convertOpenWeekday(List<Integer> openWeekdays) {
@@ -409,6 +424,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			response.setFullPrice(priceRule.getFullPrice());
 			response.setCutPrice(priceRule.getCutPrice());
 		}
+
+		List<Rentalv2PricePackage> pricePackages = rentalv2PricePackageProvider.listPricePackageByOwner(PriceRuleType.DEFAULT.getCode(), defaultRule.getId());
+		response.setPricePackages(pricePackages.stream().map(r->ConvertHelper.convert(r,PricePackageDTO.class)).collect(Collectors.toList()));
 		return response;
 	}
 	
@@ -634,6 +652,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			//先删除后添加
 			rentalv2PriceRuleProvider.deletePriceRuleByOwnerId(PriceRuleType.DEFAULT.getCode(), newDefaultRule.getId());
 			createPriceRules(PriceRuleType.DEFAULT, newDefaultRule.getId(), cmd.getPriceRules());
+
+			//先删除后添加
+			rentalv2PricePackageProvider.deletePricePackageByOwnerId(PriceRuleType.DEFAULT.getCode(), newDefaultRule.getId());
+			createPricePackages(PriceRuleType.DEFAULT, newDefaultRule.getId(),cmd.getPricePackages());
 			
 			//先删除
 			rentalv2Provider.deleteRentalResourceNumbersByOwnerId(EhRentalv2DefaultRules.class.getSimpleName(), defaultRule.getId());

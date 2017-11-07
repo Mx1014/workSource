@@ -47,6 +47,7 @@ import com.everhomes.util.StringHelper;
  * <li>halfDayTimeIntervals: 半天时间设置 {@link com.everhomes.rest.rentalv2.admin.TimeIntervalDTO}</li>
  * <li>rentalTypes: 时间单元类型列表 {@link com.everhomes.rest.rentalv2.RentalType}</li>
  * <li>priceRules: 价格策略列表 {@link com.everhomes.rest.rentalv2.admin.PriceRuleDTO}</li>
+ * <li>pricePackages: 套餐价格表{@link com.everhomes.rest.rentalv2.admin.PricePackageDTO}</li>
  * </ul>
  */
 public class UpdateDefaultRuleAdminCommand {
@@ -90,6 +91,8 @@ public class UpdateDefaultRuleAdminCommand {
 	private List<Byte> rentalTypes;
 	@ItemType(PriceRuleDTO.class)
 	private List<PriceRuleDTO> priceRules;
+	@ItemType(PricePackageDTO.class)
+	private List<PricePackageDTO> pricePackages;
 //	
 //	@Deprecated
 //	private Byte rentalType;
@@ -343,7 +346,16 @@ public class UpdateDefaultRuleAdminCommand {
 	public void setRentalEndTimeFlag(Byte rentalEndTimeFlag) {
 		this.rentalEndTimeFlag = rentalEndTimeFlag;
 	}
-//
+
+	public List<PricePackageDTO> getPricePackages() {
+		return pricePackages;
+	}
+
+	public void setPricePackages(List<PricePackageDTO> pricePackages) {
+		this.pricePackages = pricePackages;
+	}
+
+	//
 //	public BigDecimal getOrgMemberWorkdayPrice() {
 //		return orgMemberWorkdayPrice;
 //	}
