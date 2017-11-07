@@ -1550,7 +1550,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 
 		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType());
+				null, null, cmd.getSourceType());
 
 		if (null == request) {
 			if (null != cmd.getSourceId()) {
@@ -1578,7 +1578,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 
 		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType());
+				null, null, cmd.getSourceType());
 
 		LeaseFormRequestDTO dto = ConvertHelper.convert(request, LeaseFormRequestDTO.class);
 
