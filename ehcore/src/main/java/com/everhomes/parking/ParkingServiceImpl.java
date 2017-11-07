@@ -1665,6 +1665,9 @@ public class ParkingServiceImpl implements ParkingService {
 					dto.setPlateOwnerName(plateOwnerName);
 				}
 			}
+
+			dto.setCarVerificationFlag(ParkingCarVerificationStatus.SUCCEED.getCode());
+
 			return dto;
 		}
 		return null;
@@ -2035,6 +2038,9 @@ public class ParkingServiceImpl implements ParkingService {
 			response.setRequests(verifications.stream().map(r -> {
 				ParkingCarVerificationDTO dto = ConvertHelper.convert(r, ParkingCarVerificationDTO.class);
 
+//				String flowCaseUrl = configProvider.getValue(ConfigConstants.PARKING_CAR_VERIFICATION_FLOWCASE_URL, "");
+//
+//				dto.setFlowCaseUrl(String.format(flowCaseUrl, verification.getFlowCaseId()));
 				return dto;
 			}).collect(Collectors.toList()));
 
