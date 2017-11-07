@@ -799,10 +799,10 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 					default:
 						break;
 				}
-				if(questionId != answer.getQuestionId()){
+				if(questionId != answer.getQuestionId().longValue()){
 					contents.add(content);
 					content = "";
-					questionId = answer.getQuestionId();
+					questionId = answer.getQuestionId().longValue();
 				}
 			}
 
