@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>pageAnchor: 锚点</li>
  *     <li>pageSize: 每页大小</li>
- *     <li>clubType: clubType</li>
+ *     <li>clubType: clubType  NORMAL-0, Guild(行业协会)-1 参考{@link ClubType}</li>
  * </ul>
  */
 public class ListUserGroupPostCommand {

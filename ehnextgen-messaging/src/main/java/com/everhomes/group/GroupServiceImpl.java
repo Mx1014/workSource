@@ -5305,6 +5305,11 @@ public class GroupServiceImpl implements GroupService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters");
 		}
+
+        //妹的，老客户有没有参数，满世界都要写这种判断 add by yanjun 20171107
+        if(cmd.getClubType() == null){
+            cmd.setClubType(ClubType.NORMAL.getCode());
+        }
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -5325,7 +5330,9 @@ public class GroupServiceImpl implements GroupService {
 				query.addConditions(Tables.EH_GROUPS.APPROVAL_STATUS.eq(ApprovalStatus.REJECTION.getCode()));
            		query.addConditions(Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.INACTIVE.getCode()));
 			}
-            
+
+			query.addConditions(Tables.EH_GROUPS.CLUB_TYPE.eq(cmd.getClubType()));
+
             return query;
         });
         
