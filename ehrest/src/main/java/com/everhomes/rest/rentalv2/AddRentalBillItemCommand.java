@@ -29,7 +29,7 @@ public class AddRentalBillItemCommand {
 	private List<AttachmentDTO> rentalAttachments;
 
 	private String clientAppName;
-
+	private Integer paymentType;
 	public String getClientAppName() {
 		return clientAppName;
 	}
@@ -86,4 +86,11 @@ public class AddRentalBillItemCommand {
 		this.rentalAttachments = rentalAttachments;
 	}
 
+	public Integer getPaymentType() {
+		return paymentType;
+	}
+
+	public void setPaymentType(Integer paymentType) {
+		this.paymentType = paymentType;
+	}
 }

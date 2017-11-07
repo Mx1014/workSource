@@ -2110,10 +2110,10 @@ public class UserServiceImpl implements UserService {
 			break;
 		}
 
-		if(LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Gen the default avatar for user by gender, userId=" + userId
-					+ ", namespaceId=" + namespaceId + ", gener=" + gener + ", avatarUri=" + avatarUri);
-		}
+//		if(LOGGER.isDebugEnabled()) {
+//			LOGGER.debug("Gen the default avatar for user by gender, userId=" + userId
+//					+ ", namespaceId=" + namespaceId + ", gener=" + gener + ", avatarUri=" + avatarUri);
+//		}
 
 		return avatarUri;
 	}
@@ -4955,7 +4955,6 @@ public class UserServiceImpl implements UserService {
 		default_communityScene.setStatus(SCENE_EXAMPLE);
 		return default_communityScene;
 	}
-
 	@Override
 	public UserIdentifier getUserIdentifier(Long userId) {
 		if(userId == null){

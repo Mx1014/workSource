@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>questionnaireId: 问卷id</li>
  * <li>targetType: 目标类型，参考{@link com.everhomes.rest.questionnaire.QuestionnaireTargetType}</li>
  * <li>targetId: 目标id</li>
+ * <li>organizationId: 当前场景的公司Id</li>
  * </ul>
  */
 public class GetTargetQuestionnaireDetailCommand {
@@ -22,6 +23,8 @@ public class GetTargetQuestionnaireDetailCommand {
 
 	private Long targetId;
 
+	private Long organizationId;
+
 	public GetTargetQuestionnaireDetailCommand() {
 
 	}
@@ -32,6 +35,22 @@ public class GetTargetQuestionnaireDetailCommand {
 		this.questionnaireId = questionnaireId;
 		this.targetType = targetType;
 		this.targetId = targetId;
+	}
+
+	public GetTargetQuestionnaireDetailCommand(Integer namespaceId, Long questionnaireId, String targetType, Long targetId, Long organizationId) {
+		this.namespaceId = namespaceId;
+		this.questionnaireId = questionnaireId;
+		this.targetType = targetType;
+		this.targetId = targetId;
+		this.organizationId = organizationId;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	public Integer getNamespaceId() {

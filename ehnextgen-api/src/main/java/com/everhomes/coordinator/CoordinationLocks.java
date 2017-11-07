@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.coordinator;
 
+import com.everhomes.organization.Organization;
+
 public enum CoordinationLocks {
     CREATE_FAMILY("family.create"),
     LEAVE_FAMILY("family.leave"),
@@ -99,6 +101,8 @@ public enum CoordinationLocks {
     EVENT_STAT_SCHEDULE("event.stat.schedule"),
 
     ADD_ORGANIZATION_PERSONEL("add.organization.personel"),
+
+    ORGANIZATION_ORDER_LOCK("organization.order.lock"),
 
     FLOW_LANE("flow.lane"),
     FLOW("flow"),

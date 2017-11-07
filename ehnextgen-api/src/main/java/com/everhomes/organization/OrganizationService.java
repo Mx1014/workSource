@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.*;
@@ -62,7 +63,7 @@ public interface OrganizationService {
 	OrganizationDTO getUserCurrentOrganization();
 
 	OrganizationDTO createChildrenOrganization(CreateOrganizationCommand cmd);
-	void deleteOrganization(DeleteOrganizationIdCommand cmd);
+	Boolean deleteOrganization(DeleteOrganizationIdCommand cmd);
 	void createOrganizationMember(CreateOrganizationMemberCommand cmd);
 	void deleteOrganizationMember(DeleteOrganizationIdCommand cmd);
 	void createOrganizationCommunity(CreateOrganizationCommunityCommand cmd);
@@ -368,25 +369,26 @@ public interface OrganizationService {
 	
 	void createOrganizationJobPosition(CreateOrganizationJobPositionCommand cmd);
 	
-	void updateOrganizationJobPosition(UpdateOrganizationJobPositionCommand cmd);
+	Long updateOrganizationJobPosition(UpdateOrganizationJobPositionCommand cmd);
 	
-	void deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd);
+	Boolean deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd);
 	
 	ListOrganizationJobPositionResponse listOrganizationJobPositions(ListOrganizationJobPositionCommand cmd);
 	
 	void updateChildrenOrganizationJobPosition(UpdateOrganizationsCommand cmd);
 	
-	void deleteChildrenOrganizationJobPosition(DeleteOrganizationIdCommand cmd);
+	Boolean deleteChildrenOrganizationJobPosition(DeleteOrganizationIdCommand cmd);
 	
 	void createChildrenOrganizationJobLevel(CreateOrganizationCommand cmd);
 	
 	void updateChildrenOrganizationJobLevel(UpdateOrganizationsCommand cmd);
 
-	void deleteChildrenOrganizationJobLevel(DeleteOrganizationIdCommand cmd);
+	Boolean deleteChildrenOrganizationJobLevel(DeleteOrganizationIdCommand cmd);
 	
 	ListChildrenOrganizationJobLevelResponse listChildrenOrganizationJobLevels(ListAllChildrenOrganizationsCommand cmd);
 	
 	ListChildrenOrganizationJobPositionResponse listChildrenOrganizationJobPositions(ListAllChildrenOrganizationsCommand cmd);
+
 	List<OrganizationMemberDTO> listOrganizationMemberDTOs(Long orgId,
 			List<Long> memberUids);
 
@@ -445,7 +447,7 @@ public interface OrganizationService {
 	 */
 	ListOrganizationContactCommandResponse listUsersOfEnterprise(listUsersOfEnterpriseCommand cmd);
 
-    /****** new interface ******/
+    /****** new interfac for archives-1.0  START******/
 
     ListPersonnelsV2CommandResponse listOrganizationPersonnelsV2(ListPersonnelsV2Command cmd);
 
@@ -504,6 +506,10 @@ public interface OrganizationService {
 
     void exportOrganizationPersonnelFiles(ExcelOrganizationPersonnelCommand cmd, HttpServletResponse httpResponse);
 
+	/****** new interfac for archives-1.0 END******/
+
+
+
 	ImportFileTaskDTO importEnterpriseData(ImportEnterpriseDataCommand cmd, MultipartFile multipartFile, Long userId);
 	void exportEnterprises(ListEnterprisesCommand cmd, HttpServletResponse response);
 	ListEnterprisesCommandResponse listNewEnterprises(ListEnterprisesCommand cmd);
@@ -539,8 +545,32 @@ public interface OrganizationService {
 	OrganizationDetailDTO getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd);
 
 	OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName, String contactToken);
- 
-	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByOrgIds(ListOrganizationPersonnelsByOrgIdsCommand cmd);
 
+	/**组织架构批量调整**/
+	void transferOrganizationPersonels(TransferArchivesEmployeesCommand cmd);
+
+	/**通讯录查询接口**/
+	ListOrganizationMemberCommandResponse listOrganizationPersonnelsWithDownStream(ListOrganizationContactCommand cmd);
+	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByOrgIds(ListOrganizationPersonnelsByOrgIdsCommand cmd);
+	
+	/**根据detailId更新通用信息**/
+	Long updateOrganizationMemberInfoByDetailId(Long detailId, String contactToken, String contactName, Byte gender);
+
+	void sortOrganizationsAtSameLevel(SortOrganizationsAtSameLevelCommand cmd);
+
+	FindOrgPersonelCommandResponse findOrgPersonel(FindOrgPersonelCommand cmd);
+
+	/**根据总公司id快速拿到所有公司人员的档案id**/
+	List<Long> ListDetailsByEnterpriseId(Long enterpriseId);
+
+	/**通过机构类型和名称获取机构id**/
+	Long getOrganizationNameByNameAndType(String name, String groupType);
+
+	/**批量删除子机构(职级或部门岗位)**/
+	Boolean deleteChildrenOrganizationAsList(DeleteChildrenOrganizationAsListCommand cmd);
+
+	/**通过通用岗位和details删除岗位**/
+	void deleteOrganizationJobPositionsByPositionIdAndDetails(DeleteOrganizationJobPositionsByPositionIdAndDetailsCommand cmd);
+	
 	Integer cleanWrongStatusOrganizationMembers(Integer namespaceId);
 }

@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  *     <li>buildingAliasName: 楼栋别名</li>
  *     <li>apartmentName: 门牌名称</li>
  *     <li>apartmentFloor: 楼层</li>
+ *     <li>userAuth: 附加信息，指定的用户是否已经认证</li>
  * </ul>
  */
 public class AddressDTO {
@@ -51,6 +52,8 @@ public class AddressDTO {
     private String communityName;
 
     private String provinceName;
+
+    private Byte userAuth;
 
     public Long getBuildingId() {
         return buildingId;
@@ -262,6 +265,14 @@ public class AddressDTO {
 
     public void setProvinceName(String provinceName) {
         this.provinceName = provinceName;
+    }
+
+    public Byte getUserAuth() {
+        return userAuth;
+    }
+
+    public void setUserAuth(Byte userAuth) {
+        this.userAuth = userAuth;
     }
 
     @Override

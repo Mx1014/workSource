@@ -801,7 +801,8 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
 
     @Override
     public List listDetailNotInUniongroup(Integer namespaceId, Long organizationId, String contactName, Integer versionCode, Long departmentId) {
-        CrossShardListingLocator locator = new CrossShardListingLocator(0L);
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(0L);
         return listDetailNotInUniongroup(namespaceId, organizationId, contactName, versionCode, departmentId, 99999,locator);
     }
 

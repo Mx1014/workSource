@@ -2872,8 +2872,12 @@ public class FlowServiceImpl implements FlowService {
                 if (flowNode != null) {
                     updateCaseDTO(detail, flowNode, dto, type);
                 }
-                if (dto.getTitle() != null && dto.getModuleName() == null) {
-                    dto.setModuleName(dto.getTitle());
+                if (dto.getTitle() == null || dto.getTitle().isEmpty()) {
+                    if (detail.getServiceType() != null && detail.getServiceType().length() > 0) {
+                        dto.setTitle(detail.getServiceType());
+                    } else {
+                        dto.setTitle(detail.getModuleName());
+                    }
                 }
                 dtos.add(dto);
             }

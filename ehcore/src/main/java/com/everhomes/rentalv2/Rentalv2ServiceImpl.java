@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PayService;
+import com.everhomes.pay.order.PaymentType;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.rentalv2.*;
@@ -2870,7 +2871,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return (AddRentalBillItemV2Response) actualAddRentalItemBill(cmd, ActivityRosterPayVersionFlag.V2);
 	}
 
-	private AddRentalBillItemV2Response convertOrderDTOForV2(RentalOrder order, String clientAppName, String flowCaseUrl) {
+	private AddRentalBillItemV2Response convertOrderDTOForV2(RentalOrder order, String clientAppName,Integer paymentType,
+															 String flowCaseUrl) {
 		PreOrderCommand preOrderCommand = new PreOrderCommand();
 
 		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
@@ -2884,6 +2886,22 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //        preOrderCommand.setExpiration(expiredTime);
 
 		preOrderCommand.setClientAppName(clientAppName);
+
+		//微信公众号支付，重新设置ClientName，设置支付方式和参数
+		if(paymentType != null && paymentType.intValue() == PaymentType.WECHAT_JS_PAY.getCode()){
+
+//			if(preOrderCommand.getClientAppName() == null){
+//				Integer namespaceId = UserContext.getCurrentNamespaceId();
+//				preOrderCommand.setClientAppName("wechat_" + namespaceId);
+//			}
+			preOrderCommand.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
+			PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+			paymentParamsDTO.setPayType("no_credit");
+			User user = UserContext.current().getUser();
+			paymentParamsDTO.setAcct(user.getNamespaceUserToken());
+			preOrderCommand.setPaymentParams(paymentParamsDTO);
+
+		}
 
 		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
 
@@ -3093,7 +3111,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if (ActivityRosterPayVersionFlag.V1 == version) {
 			return response;
 		}else {
-			return convertOrderDTOForV2(bill, cmd.getClientAppName(), response.getFlowCaseUrl());
+			return convertOrderDTOForV2(bill, cmd.getClientAppName(),cmd.getPaymentType(), response.getFlowCaseUrl());
 		}
 	}
 

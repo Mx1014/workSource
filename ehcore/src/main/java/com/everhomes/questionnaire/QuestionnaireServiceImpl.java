@@ -34,6 +34,7 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
+import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,15 +173,15 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	@Override
 	public GetQuestionnaireDetailResponse getQuestionnaireDetail(GetQuestionnaireDetailCommand cmd) {
 		List<QuestionnaireOption> questionnaireOptions = questionnaireOptionProvider.listOptionsByQuestionnaireId(cmd.getQuestionnaireId());
-		return new GetQuestionnaireDetailResponse(convertToQuestionnaireDTO(questionnaireOptions));
+		return new GetQuestionnaireDetailResponse(convertToQuestionnaireDTO(cmd.getQuestionnaireId(),questionnaireOptions));
 	}
 
-	private QuestionnaireDTO convertToQuestionnaireDTO(List<QuestionnaireOption> questionnaireOptions) {
-		return convertToQuestionnaireDTO(questionnaireOptions, false, null);
+	private QuestionnaireDTO convertToQuestionnaireDTO(Long questionnaireId,List<QuestionnaireOption> questionnaireOptions) {
+		return convertToQuestionnaireDTO(questionnaireId,questionnaireOptions, false, null);
 	}
 	
 	// 是否包含填空题，统计时用
-	private QuestionnaireDTO convertToQuestionnaireDTO(List<QuestionnaireOption> questionnaireOptions, boolean containBlank, Integer pageSize) {
+	private QuestionnaireDTO convertToQuestionnaireDTO(Long questionnaireId,List<QuestionnaireOption> questionnaireOptions, boolean containBlank, Integer pageSize) {
 		List<QuestionnaireDTO> questionnaireDTOs = new ArrayList<>();
 		// k1为问卷的id，k2为问题的id
 		Map<Long, Map<Long, List<QuestionnaireOption>>> map = questionnaireOptions.parallelStream().collect(Collectors.groupingBy(QuestionnaireOption::getQuestionnaireId,Collectors.groupingBy(QuestionnaireOption::getQuestionId)));
@@ -205,7 +206,12 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			sortQuestions(questionDTOs);
 			questionnaireDTOs.add(convertToQuestionnaireDTO(questionnaire, questionDTOs));
 		});
-		QuestionnaireDTO dto = questionnaireDTOs.get(0);
+		QuestionnaireDTO dto = null;
+		if(questionnaireDTOs.size()>0) {
+			dto = questionnaireDTOs.get(0);
+		}else{
+			dto = convertToQuestionnaireDTO(findQuestionnaireById(questionnaireId),(List<QuestionnaireQuestionDTO>)null);
+		}
 		dto.setPercentComplete(generatePercentComplete(dto.getTargetUserNum(),dto.getCollectionCount()));
 		if(dto.getCollectionCount() == null){
 			dto.setCollectionCount(0);
@@ -213,6 +219,8 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		if(dto.getTargetUserNum()==null){
 			dto.setTargetUserNum(0);
 		}
+		generateShareUrl(dto);
+		generatePosterUrl(dto);
 		return dto;
 	}
 	
@@ -220,6 +228,15 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		QuestionnaireOptionDTO optionDTO = new QuestionnaireOptionDTO();
 		optionDTO.setOptionName(answer.getTargetName());
 		optionDTO.setOptionContent(answer.getOptionContent());
+		optionDTO.setTargetPhone(answer.getTargetPhone());
+		if(QuestionnaireCommonStatus.fromCode(answer.getAnonymousFlag()) == QuestionnaireCommonStatus.TRUE){
+			if(QuestionnaireTargetType.fromCode(answer.getTargetType()) == QuestionnaireTargetType.ORGANIZATION) {
+				optionDTO.setOptionName(stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE,QuestionnaireServiceErrorCode.UNKNOWN3,"zh_CN","匿名企业"));
+			}else{
+				optionDTO.setOptionName(stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE,QuestionnaireServiceErrorCode.UNKNOWN4,"zh_CN","匿名用户"));
+			}
+			optionDTO.setTargetPhone(null);
+		}
 		return optionDTO;
 	}
 	
@@ -291,27 +308,38 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	}
 
 	private void createRanges(Long questionnaireId, List<QuestionnaireRangeDTO> ranges) {
-		ranges.forEach(r->{
-			QuestionnaireRange questionnaireRange = ConvertHelper.convert(r,QuestionnaireRange.class);
-			questionnaireRange.setQuestionnaireId(questionnaireId);
-			questionnaireRange.setStatus(CommonStatus.ACTIVE.getCode());
-			questionnaireRangeProvider.createQuestionnaireRange(questionnaireRange);
-		});
+		if(ranges!=null) {
+			ranges.forEach(r -> {
+				QuestionnaireRange questionnaireRange = ConvertHelper.convert(r, QuestionnaireRange.class);
+				questionnaireRange.setQuestionnaireId(questionnaireId);
+				questionnaireRange.setStatus(CommonStatus.ACTIVE.getCode());
+				questionnaireRange.setNamespaceId(UserContext.getCurrentNamespaceId());
+				QuestionnaireRangeType rangeType = QuestionnaireRangeType.fromCode(r.getRangeType());
+				if (rangeType == QuestionnaireRangeType.NAMESPACE_ALL ||
+						rangeType == QuestionnaireRangeType.NAMESPACE_AUTHENTICATED ||
+						rangeType == QuestionnaireRangeType.NAMESPACE_UNAUTHORIZED) {
+					questionnaireRange.setRange("" + UserContext.getCurrentNamespaceId());
+				}
+				questionnaireRangeProvider.createQuestionnaireRange(questionnaireRange);
+			});
+		}
 	}
 
 	private List<QuestionnaireQuestionDTO> createQuestions(Long questionnaireId, List<QuestionnaireQuestionDTO> questions) {
 		List<QuestionnaireQuestionDTO> resultDTOs = new ArrayList<>();
-		for (QuestionnaireQuestionDTO questionDTO : questions) {
-			QuestionnaireQuestion question = ConvertHelper.convert(questionDTO, QuestionnaireQuestion.class);
-			question.setQuestionnaireId(questionnaireId);
-			questionnaireQuestionProvider.createQuestionnaireQuestion(question);
-			List<QuestionnaireOptionDTO> optionDTOs = null;
-			if (QuestionType.fromCode(questionDTO.getQuestionType()) != QuestionType.BLANK) {
-				optionDTOs = createOptions(questionnaireId, question.getId(), questionDTO.getOptions());
-			}else {
-				optionDTOs = createBlankOption(questionnaireId, question.getId());
+		if(questions!=null) {
+			for (QuestionnaireQuestionDTO questionDTO : questions) {
+				QuestionnaireQuestion question = ConvertHelper.convert(questionDTO, QuestionnaireQuestion.class);
+				question.setQuestionnaireId(questionnaireId);
+				questionnaireQuestionProvider.createQuestionnaireQuestion(question);
+				List<QuestionnaireOptionDTO> optionDTOs = null;
+				if (QuestionType.fromCode(questionDTO.getQuestionType()) != QuestionType.BLANK) {
+					optionDTOs = createOptions(questionnaireId, question.getId(), questionDTO.getOptions());
+				} else {
+					optionDTOs = createBlankOption(questionnaireId, question.getId());
+				}
+				resultDTOs.add(convertToQuestionDTO(question, optionDTOs));
 			}
-			resultDTOs.add(convertToQuestionDTO(question, optionDTOs));
 		}
 		
 		return resultDTOs;
@@ -390,6 +418,10 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		questionnaireDTO.setPublishTime(questionnaire.getPublishTime()==null?null:questionnaire.getPublishTime().getTime());
 		List<QuestionnaireRange> listRanges = questionnaireRangeProvider.listQuestionnaireRangeByQuestionnaireId(questionnaire.getId());
 		questionnaireDTO.setRanges(listRanges.stream().map(r->ConvertHelper.convert(r,QuestionnaireRangeDTO.class)).collect(Collectors.toList()));
+		if(questionnaire.getPosterUri()!=null){
+			String url = contentServerService.parserUri(questionnaire.getPosterUri());
+			questionnaireDTO.setPosterUrl(url);
+		}
 		return questionnaireDTO;
 	}
 	
@@ -585,6 +617,11 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 				if(rangeType==null){
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 							"Invalid parameters,rangeType = "+dto.getRangeType());
+				}
+
+				if(targetType == QuestionnaireTargetType.ORGANIZATION && rangeType!=QuestionnaireRangeType.ENTERPRISE){
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"Invalid parameters,rangeType = "+dto.getRangeType()+", targetType = "+targetType.getCode());
 				}
 
 				switch (rangeType){
@@ -854,6 +891,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			}else{
 				dto.setTargetName(stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE,QuestionnaireServiceErrorCode.UNKNOWN4,"zh_CN","匿名用户"));
 			}
+			dto.setTargetPhone(null);
 		}
 		return dto;
 	}
@@ -861,7 +899,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	@Override
 	public GetQuestionnaireResultSummaryResponse getQuestionnaireResultSummary(GetQuestionnaireResultSummaryCommand cmd) {
 		List<QuestionnaireOption> questionnaireOptions = questionnaireOptionProvider.listOptionsByQuestionnaireId(cmd.getQuestionnaireId());
-		return new GetQuestionnaireResultSummaryResponse(convertToQuestionnaireDTO(questionnaireOptions, true, cmd.getPageSize()));
+		return new GetQuestionnaireResultSummaryResponse(convertToQuestionnaireDTO(cmd.getQuestionnaireId(),questionnaireOptions, true, cmd.getPageSize()));
 	}
 
 	@Override
@@ -893,9 +931,11 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		if(namespaceId == null){
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
+		Long userId = UserContext.current().getUser().getId();
+		Long organizationId = cmd.getOrganizationId();
 		List<QuestionnaireDTO> questionnaires = questionnaireProvider.listTargetQuestionnaireByOwner(namespaceId,cmd.getNowTime(),
-				cmd.getCollectFlag(),UserContext.current().getUser().getId(),cmd.getTargetId(),answeredFlagAnchor,publishTimeAnchor,questionnariePageSize);
-		return new ListTargetQuestionnairesResponse(generateNextPageAnchor(cmd,questionnaires,pageSize,answeredFlagAnchor,publishTimeAnchor), questionnaires);
+				cmd.getCollectFlag(),cmd.getTargetType(),userId,organizationId,answeredFlagAnchor,publishTimeAnchor,questionnariePageSize);
+		return new ListTargetQuestionnairesResponse(generateNextPageAnchor(cmd,questionnaires,pageSize,answeredFlagAnchor,publishTimeAnchor), questionnaires.stream().map(r->generatePosterUrl(r)).collect(Collectors.toList()));
 	}
 
 	//业务层分页
@@ -962,43 +1002,68 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 	@Override
 	public GetTargetQuestionnaireDetailResponse getTargetQuestionnaireDetail(GetTargetQuestionnaireDetailCommand cmd) {
-		return new GetTargetQuestionnaireDetailResponse(getTargetQuestionnaireDetail(cmd.getQuestionnaireId(), cmd.getTargetType(), cmd.getTargetId()));
+		return new GetTargetQuestionnaireDetailResponse(getTargetQuestionnaireDetail(cmd.getQuestionnaireId(), cmd.getOrganizationId()));
 	}
 	
-	private QuestionnaireDTO getTargetQuestionnaireDetail(Long questionnaireId, String targetType, Long targetId){
+	private QuestionnaireDTO getTargetQuestionnaireDetail(Long questionnaireId, Long organizationId){
 		List<QuestionnaireOption> questionnaireOptions = questionnaireOptionProvider.listOptionsByQuestionnaireId(questionnaireId);
-		return convertToQuestionnaireDTO(questionnaireOptions, targetType, targetId);
+		return convertToQuestionnaireDTO(questionnaireOptions, organizationId, UserContext.current().getUser().getId());
 	}
 
-	private QuestionnaireDTO convertToQuestionnaireDTO(List<QuestionnaireOption> questionnaireOptions,
-			String targetType, Long targetId) {
+	private QuestionnaireDTO convertToQuestionnaireDTO(List<QuestionnaireOption> questionnaireOptions, Long organizationId, Long userId) {
 		List<QuestionnaireDTO> questionnaireDTOs = new ArrayList<>();
 		// k1为问卷的id，k2为问题的id
 		Map<Long, Map<Long, List<QuestionnaireOption>>> map = questionnaireOptions.parallelStream().collect(Collectors.groupingBy(QuestionnaireOption::getQuestionnaireId,Collectors.groupingBy(QuestionnaireOption::getQuestionId)));
 		map.forEach((k1, v1)->{
 			Questionnaire questionnaire = findQuestionnaireById(k1);
 			List<QuestionnaireQuestionDTO> questionDTOs = new ArrayList<>();
+			Long sTargetId = null;
+			if(QuestionnaireTargetType.ORGANIZATION == QuestionnaireTargetType.fromCode(questionnaire.getTargetType())){
+				sTargetId = organizationId;
+			}else {
+				sTargetId = userId;
+			}
+			final Long targetId = sTargetId;
+			Byte[] answersFlag = new Byte[1];
+			answersFlag[0] = QuestionnaireCommonStatus.FALSE.getCode();
 			v1.forEach((k2, v2)->{
 				QuestionnaireQuestion question = questionnaireQuestionProvider.findQuestionnaireQuestionById(k2);
-				List<QuestionnaireAnswer> questionnaireAnswers = questionnaireAnswerProvider.listTargetQuestionnaireAnswerByQuestionId(question.getId(), targetType, UserContext.current().getUser().getId());
+				List<QuestionnaireAnswer> questionnaireAnswers = questionnaireAnswerProvider.listTargetQuestionnaireAnswerByQuestionId(question.getId(), questionnaire.getTargetType(), targetId);
+				if(questionnaireAnswers!=null && questionnaireAnswers.size()>0){
+					answersFlag[0] = QuestionnaireCommonStatus.TRUE.getCode();
+				}
 				List<QuestionnaireOptionDTO> optionDTOs =  v2.stream().map(o->convertToOptionDTO(o, questionnaireAnswers)).collect(Collectors.toList());
 				questionDTOs.add(convertToQuestionDTO(question, optionDTOs));
 			});
 			// 经过map处理后顺序会乱，所以要重新排序下
 			sortQuestions(questionDTOs);
-			questionnaireDTOs.add(convertToQuestionnaireDTO(questionnaire, questionDTOs));
+			QuestionnaireDTO e = convertToQuestionnaireDTO(questionnaire, questionDTOs);
+			e.setAnsweredFlag(answersFlag[0]);
+			questionnaireDTOs.add(e);
 		});
 		QuestionnaireDTO dto =  questionnaireDTOs.get(0);
 		generateShareUrl(dto);
+		generatePosterUrl(dto);
+		return dto;
+	}
+
+	private QuestionnaireDTO generatePosterUrl(QuestionnaireDTO dto) {
+		if(dto!=null && dto.getPosterUri()!=null){
+			dto.setPosterUrl(contentServerService.parserUri(dto.getPosterUri()));
+		}
 		return dto;
 	}
 
 	private void generateShareUrl(QuestionnaireDTO dto) {
+		if(QuestionnaireCommonStatus.FALSE == QuestionnaireCommonStatus.fromCode(dto.getAnonymousFlag())){
+			return;
+		}
 		try {
 			String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL,"https://core.zuolin.com");
-			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question/%s/0");
+			homeUrl = homeUrl.endsWith("/")?homeUrl.substring(0,homeUrl.length()-1):homeUrl;
+			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question/%s");
 			String srcUrl = String.format(homeUrl+contextUrl, dto.getId());
-			String shareContext = String.format("evh/wxauth/authReq?ns=%s&src_url=%s",dto.getNamespaceId(), URLEncoder.encode(srcUrl,"utf-8"));
+			String shareContext = String.format("/evh/wxauth/authReq?ns=%s&src_url=%s",dto.getNamespaceId(), URLEncoder.encode(srcUrl,"utf-8"));
 			dto.setShareUrl(homeUrl+shareContext);
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.warn("generate share url = "+dto);
@@ -1032,8 +1097,8 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			});
 			return null;
 		});
-		
-		return new CreateTargetQuestionnaireResponse(getTargetQuestionnaireDetail(cmd.getQuestionnaire().getId(), cmd.getTargetType(), cmd.getTargetId()));
+		Long organizationId = QuestionnaireTargetType.ORGANIZATION == QuestionnaireTargetType.fromCode(cmd.getTargetType())?cmd.getTargetId():null;
+		return new CreateTargetQuestionnaireResponse(getTargetQuestionnaireDetail(cmd.getQuestionnaire().getId(), organizationId));
 	}
 
 	private void updateQuestionnaireCollectionCount(Long questionnaireId) {
@@ -1124,6 +1189,11 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		if(!targetType.getCode().equals(questionnaire.getTargetType())){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"questionnaire type = " + questionnaire.getTargetType() + " summit type = "+cmd.getTargetType());
+		}
+
+		if(questionnaire.getCutOffTime().before(new Timestamp(System.currentTimeMillis()))){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"提交失败，问卷已结束！" + questionnaire.getStatus());
 		}
 
 		if(targetType == QuestionnaireTargetType.ORGANIZATION){
@@ -1250,5 +1320,15 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public GetTargetQuestionnaireDetailResponse getAnsweredQuestionnaireDetail(GetTargetQuestionnaireDetailCommand cmd) {
+		List<QuestionnaireOption> questionnaireOptions = questionnaireOptionProvider.listOptionsByQuestionnaireId(cmd.getQuestionnaireId());
+		if(QuestionnaireTargetType.ORGANIZATION == QuestionnaireTargetType.fromCode(cmd.getTargetType())){
+			return new GetTargetQuestionnaireDetailResponse(convertToQuestionnaireDTO(questionnaireOptions,cmd.getTargetId(),null));
+		}
+		return new GetTargetQuestionnaireDetailResponse(convertToQuestionnaireDTO(questionnaireOptions,null,cmd.getTargetId()));
+
 	}
 }
