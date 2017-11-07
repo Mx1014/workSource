@@ -2191,25 +2191,40 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public void createChargingStandard(com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards c, com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        EhPaymentChargingStandardsDao ChargingStandardsDao = new EhPaymentChargingStandardsDao(context.configuration());
-        EhPaymentChargingStandardsScopesDao chargingStandardsScopesDao = new EhPaymentChargingStandardsScopesDao(context.configuration());
-        EhPaymentFormulaDao paymentFormulaDao = new EhPaymentFormulaDao(context.configuration());
-        ChargingStandardsDao.insert(c);
-        chargingStandardsScopesDao.insert(s);
-        paymentFormulaDao.insert(f);
+        if(c!=null){
+            EhPaymentChargingStandardsDao ChargingStandardsDao = new EhPaymentChargingStandardsDao(context.configuration());
+            ChargingStandardsDao.insert(c);
+        }
+        if(s != null){
+            EhPaymentChargingStandardsScopesDao chargingStandardsScopesDao = new EhPaymentChargingStandardsScopesDao(context.configuration());
+            chargingStandardsScopesDao.insert(s);
+        }
+        if(f!=null){
+            EhPaymentFormulaDao paymentFormulaDao = new EhPaymentFormulaDao(context.configuration());
+            paymentFormulaDao.insert(f);
+        }
     }
 
     @Override
-    public void modifyChargingStandard(ModifyChargingStandardCommand cmd) {
+    public void modifyChargingStandard(Long chargingStandardId,String chargingStandardName,String instruction,byte deCouplingFlag) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPaymentChargingStandards t = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("t");
-        context.update(t)
-                .set(t.NAME,cmd.getChargingStandardName())
-                .set(t.INSTRUCTION,cmd.getInstruction())
-                .set(t.AREA_SIZE_TYPE,cmd.getAreaSizeType())
-                .set(t.SUGGEST_UNIT_PRICE,cmd.getSuggestUnitPrice())
-                .where(t.ID.eq(cmd.getChargingStandardId()))
-                .execute();
+        if(deCouplingFlag == (byte)1){
+            //去解耦
+            context.update(t)
+                    .set(t.NAME,chargingStandardName)
+                    .set(t.BROTHER_STANDARD_ID,null)
+                    .set(t.INSTRUCTION,instruction)
+                    .where(t.ID.eq(chargingStandardId))
+                    .execute();
+        }else if(deCouplingFlag == (byte)0 ) {
+            context.update(t)
+                    .set(t.NAME,chargingStandardName)
+                    .set(t.INSTRUCTION,instruction)
+                    .where(t.ID.eq(chargingStandardId))
+                    .or(t.BROTHER_STANDARD_ID.eq(chargingStandardId))
+                    .execute();
+        }
     }
 
     @Override
@@ -2235,14 +2250,50 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void deleteChargingStandard(Long chargingStandardId, Long ownerId, String ownerType) {
+    public void deleteChargingStandard(Long chargingStandardId, Long ownerId, String ownerType, byte deCouplingFlag) {
         DSLContext context = getReadWriteContext();
-        EhPaymentChargingStandardsScopes t = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t");
-        context.delete(t)
-                .where(t.CHARGING_STANDARD_ID.eq(chargingStandardId))
-                .and(t.OWNER_ID.eq(ownerId))
-                .and(t.OWNER_TYPE.eq(ownerType))
-                .execute();
+        EhPaymentChargingStandardsScopes standardScope = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScope");
+        com.everhomes.server.schema.tables.EhPaymentFormula formula = Tables.EH_PAYMENT_FORMULA.as("formula");
+        if(deCouplingFlag == (byte)1){
+            //去解耦
+            context.delete(standard)
+                    .where(standard.ID.eq(chargingStandardId))
+                    .execute();
+            Long bro = context.select(standardScope.BROTHER_STANDARD_ID)
+                    .from(standardScope)
+                    .where(standardScope.CHARGING_STANDARD_ID.eq(chargingStandardId))
+                    .fetchOne(standardScope.BROTHER_STANDARD_ID);
+            if(bro!=null){
+                context.update(standardScope)
+                        .set(standardScope.BROTHER_STANDARD_ID,null)
+                        .where(standardScope.OWNER_ID.eq(ownerId))
+                        .and(standardScope.OWNER_TYPE.eq(ownerType))
+                        .execute();
+            }
+            context.delete(standardScope)
+                    .where(standardScope.CHARGING_STANDARD_ID.eq(chargingStandardId))
+                    .execute();
+            context.delete(formula)
+                    .where(formula.CHARGING_STANDARD_ID.eq(chargingStandardId))
+                    .execute();
+        }else if(deCouplingFlag == (byte)0){
+            //耦合
+            List<Long> standardIds = context.select(standard.ID)
+                    .from(standard)
+                    .where(standard.BROTHER_STANDARD_ID.eq(chargingStandardId))
+                    .fetch(standard.BROTHER_STANDARD_ID);
+            standardIds.add(chargingStandardId);
+            context.delete(standard)
+                    .where(standard.ID.eq(chargingStandardId))
+                    .or(standard.BROTHER_STANDARD_ID.eq(chargingStandardId))
+                    .execute();
+            context.delete(standardScope)
+                    .where(standardScope.CHARGING_STANDARD_ID.in(standardIds))
+                    .execute();
+            context.delete(formula)
+                    .where(formula.CHARGING_STANDARD_ID.in(standardIds))
+                    .execute();
+        }
     }
 
     @Override
@@ -2287,16 +2338,38 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void createBillGroup(CreateBillGroupCommand cmd) {
+    public Long createBillGroup(CreateBillGroupCommand cmd,byte deCouplingFlag,Long brotherGroupId) {
         DSLContext context = getReadWriteContext();
-        com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups group = new PaymentBillGroup();
-        Long nextGroupId = getNextSequence(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups.class);
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
+        if(deCouplingFlag == (byte) 1){
+            //去解耦
+            //添加
+            Long nextGroupId = getNextSequence(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups.class);
+            InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
+            //去解耦同伴
+            context.update(t)
+                    .set(t.BROTHER_GROUP_ID,null)
+                    .where(t.OWNER_ID.eq(cmd.getOwnerId()))
+                    .and(t.OWNER_TYPE.eq(cmd.getOwnerType()))
+                    .execute();
+            return nextGroupId;
+        }else if(deCouplingFlag == (byte)0){
+            //添加
+            Long nextGroupId = getNextSequence(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups.class);
+            InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
+            return nextGroupId;
+        }
+        return null;
+    }
+
+    private void InsertBillGroup(CreateBillGroupCommand cmd, Long brotherGroupId, DSLContext context, EhPaymentBillGroups t, Long nextGroupId) {
+        com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups group = new PaymentBillGroup();
         group.setId(nextGroupId);
         group.setBalanceDateType(cmd.getBillingCycle());
         group.setBillsDay(cmd.getBillDay());
         group.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         group.setCreatorUid(UserContext.currentUserId());
+        group.setBrotherGroupId(brotherGroupId);
         Integer nextOrder = context.select(DSL.max(t.DEFAULT_ORDER))
                 .from(t)
                 .where(t.OWNER_ID.eq(cmd.getOwnerId()))
@@ -2441,24 +2514,44 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public AddOrModifyRuleForBillGroupResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
-        AddOrModifyRuleForBillGroupResponse response = new AddOrModifyRuleForBillGroupResponse();
-        Long ruleId = cmd.getBillGroupRuleId();
+    public Long addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd,Long brotherRuleId,byte deCouplingFlag) {
         EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
-        com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule = new PaymentBillGroupRule();
+        EhPaymentBillGroups group = Tables.EH_PAYMENT_BILL_GROUPS.as("group");
         DSLContext readOnlyContext = getReadOnlyContext();
         DSLContext writeContext = getReadWriteContext();
         EhPaymentBillGroupsRulesDao dao = new EhPaymentBillGroupsRulesDao(writeContext.configuration());
+        if(deCouplingFlag == (byte) 0){
+            //耦合中
+            return insertOrUpdateBillGroupRule(cmd, brotherRuleId, t, readOnlyContext, dao);
+        }else if(deCouplingFlag == (byte) 1){
+            //解耦合
+            insertOrUpdateBillGroupRule(cmd, brotherRuleId, t, readOnlyContext, dao);
+            writeContext.update(t)
+                    .set(t.BROTHER_RULE_ID,null)
+                    .where(t.OWNERID.eq(cmd.getOwnerId()))
+                    .and(t.OWNERTYPE.eq(cmd.getOwnerType()))
+                    .execute();
+            writeContext.update(group)
+                    .set(group.BROTHER_GROUP_ID,null)
+                    .where(group.OWNER_ID.eq(cmd.getOwnerId()))
+                    .and(group.OWNER_TYPE.eq(cmd.getOwnerType()))
+                    .execute();
+        }
+        return null;
+    }
+
+    private Long insertOrUpdateBillGroupRule(AddOrModifyRuleForBillGroupCommand cmd, Long brotherRuleId, EhPaymentBillGroupsRules t, DSLContext readOnlyContext, EhPaymentBillGroupsRulesDao dao) {
+        Long ruleId = cmd.getBillGroupRuleId();
         com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups group = readOnlyContext.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS)
                 .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(cmd.getBillGroupId())).fetchOneInto(PaymentBillGroup.class);
 
         List<Long> fetch = readOnlyContext.select(t.CHARGING_ITEM_ID).from(t).where(t.OWNERID.eq(group.getOwnerId()))
                 .and(t.OWNERTYPE.eq(group.getOwnerType()))
                 .fetch(t.CHARGING_ITEM_ID);
+        com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule = new PaymentBillGroupRule();
         if(ruleId == null){
             if(fetch.contains(cmd.getChargingItemId())){
-                response.setFailCause(AssetPaymentStrings.CREATE_CHARGING_ITEM_FAIL);
-                return response;
+                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.UNIQUE_BILL_ITEM_CHECK,"a bill item can only exists in one bill group for a specific community");
             }
             //新增 一条billGroupRule
             long nextRuleId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules.class));
@@ -2472,16 +2565,25 @@ public class AssetProviderImpl implements AssetProvider {
             rule.setOwnertype(group.getOwnerType());
             rule.setBillItemMonthOffset(cmd.getBillItemMonthOffset());
             rule.setBillItemDayOffset(cmd.getBillItemDayOffset());
+            rule.setBrotherRuleId(brotherRuleId);
             dao.insert(rule);
 //            response.setFailCause(AssetPaymentStrings.SAVE_SUCCESS);
         }else{
-            rule = readOnlyContext.selectFrom(t)
-                    .where(t.ID.eq(ruleId))
-                    .fetchOneInto(PaymentBillGroupRule.class);
+            //拿到正确的rule
+            if(cmd.getOwnerId().longValue() == cmd.getNamespaceId().longValue()){
+                rule = readOnlyContext.selectFrom(t)
+                        .where(t.ID.eq(ruleId))
+                        .fetchOneInto(PaymentBillGroupRule.class);
+            }else{
+                rule = readOnlyContext.selectFrom(t)
+                        .where(t.OWNERID.eq(group.getOwnerId()))
+                        .and(t.OWNERTYPE.eq(group.getOwnerType()))
+                        .and(t.BROTHER_RULE_ID.eq(ruleId))
+                        .fetchOneInto(PaymentBillGroupRule.class);
+            }
             boolean workFlag = isInWorkGroupRule(rule);
             if(workFlag){
-                response.setFailCause(AssetPaymentStrings.MODIFY_GROUP_RULE_UNSAFE);
-                return response;
+                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.CHANGE_SAFE_CHECK,"object is on work, modify or delete is not allowed.");
             }
             //如果没有关联则不修改
             rule.setBillGroupId(cmd.getBillGroupId());
@@ -2493,10 +2595,11 @@ public class AssetProviderImpl implements AssetProvider {
             rule.setOwnertype(group.getOwnerType());
             rule.setBillItemMonthOffset(cmd.getBillItemMonthOffset());
             rule.setBillItemDayOffset(cmd.getBillItemDayOffset());
+            rule.setBrotherRuleId(brotherRuleId);
             dao.update(rule);
 //            response.setFailCause(AssetPaymentStrings.MODIFY_SUCCESS);
         }
-        return response;
+        return ruleId;
     }
 
     @Override
@@ -2508,6 +2611,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
     @Override
     public boolean isInWorkGroupRule(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule) {
+        ssss
         DSLContext context = getReadOnlyContext();
         EhPaymentContractReceiver t = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("t");
         EhPaymentBills bills = Tables.EH_PAYMENT_BILLS.as("bills");
@@ -2664,9 +2768,13 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public boolean cheackGroupRuleExistByChargingStandard(Long chargingStandardId) {
         DSLContext context = getReadOnlyContext();
+        Long itemId = context.select(Tables.EH_PAYMENT_CHARGING_STANDARDS.CHARGING_ITEMS_ID)
+                .from(Tables.EH_PAYMENT_CHARGING_STANDARDS)
+                .where(Tables.EH_PAYMENT_CHARGING_STANDARDS.ID.eq(chargingStandardId))
+                .fetchOne(Tables.EH_PAYMENT_CHARGING_STANDARDS.CHARGING_ITEMS_ID);
         List<Long> fetch = context.select(Tables.EH_PAYMENT_BILL_GROUPS_RULES.ID)
                 .from(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
-                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_STANDARDS_ID.eq(chargingStandardId))
+                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID.eq(itemId))
                 .fetch(Tables.EH_PAYMENT_BILL_GROUPS_RULES.ID);
         if(fetch.size()>0){
             return true;
@@ -2716,6 +2824,104 @@ public class AssetProviderImpl implements AssetProvider {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public List<Long> deleteAllChargingStandardScope(Long ownerId, String ownerType) {
+        DSLContext context = getReadWriteContext();
+        EhPaymentChargingStandardsScopes standardScope = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScope");
+        List<Long> standardIds = context.select(standardScope.CHARGING_STANDARD_ID)
+                .from(standardScope)
+                .where(standardScope.OWNER_TYPE.eq(ownerType))
+                .and(standardScope.OWNER_ID.eq(ownerId))
+                .fetch(standardScope.CHARGING_STANDARD_ID);
+        context.delete(standardScope)
+                .where(standardScope.OWNER_TYPE.eq(ownerType))
+                .and(standardScope.OWNER_ID.eq(ownerId))
+                .execute();
+        return standardIds;
+    }
+
+    @Override
+    public void updateChargingStandardByCreating(String standardName,String instruction,Long chargingStandardId, Long ownerId, String ownerType) {
+        //个体园区点击修改时的操作
+        DSLContext context = getReadWriteContext();
+        EhPaymentChargingStandardsScopes standardScope = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScope");
+        com.everhomes.server.schema.tables.EhPaymentFormula formulaSchema = Tables.EH_PAYMENT_FORMULA.as("formulaSchema");
+        //拿到所有的standard的id
+        List<Long> standardIds = context.select(standardScope.CHARGING_STANDARD_ID)
+                .from(standardScope)
+                .where(standardScope.OWNER_TYPE.eq(ownerType))
+                .and(standardScope.OWNER_ID.eq(ownerId))
+                .fetch(standardScope.CHARGING_STANDARD_ID);
+        //拿到原来的所有的standard
+        List<com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards> standards = context.selectFrom(standard)
+                .where(standard.ID.in(standardIds))
+                .fetchInto(PaymentChargingStandards.class);
+        //公式和scope都要存一份
+        List<com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes> scopes = new ArrayList<>();
+        List<EhPaymentFormula> formulas = new ArrayList<>();
+        for(int i = 0; i < standards.size(); i ++){
+            com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards origin = standards.get(i);
+            //如果是需要修改的那个standard，修改之
+            if(origin.getId().longValue() == chargingStandardId.longValue()){
+                origin.setName(standardName);
+                origin.setInstruction(instruction);
+            }
+            //standard的公式
+            EhPaymentFormula formula = context.selectFrom(formulaSchema)
+                    .where(formulaSchema.CHARGING_STANDARD_ID.eq(origin.getId()))
+                    .fetchOneInto(PaymentFormula.class);
+            //standard的scope
+            com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes scope = context.selectFrom(standardScope).
+                    where(standardScope.CHARGING_STANDARD_ID.eq(origin.getId()))
+                    .and(standardScope.OWNER_ID.eq(ownerId))
+                    .and(standardScope.OWNER_TYPE.eq(ownerType))
+                    .fetchOneInto(PaymentChargingStandardScope.class);
+            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards.class));
+            //c，s，f均修改id
+            formula.setChargingStandardId(nextSequence);
+            formulas.add(formula);
+            scope.setChargingStandardId(nextSequence);
+            scopes.add(scope);
+            origin.setId(nextSequence);
+        }
+        //删除个体园区所有的scope
+        context.delete(standardScope)
+                .where(standardScope.OWNER_TYPE.eq(ownerType))
+                .and(standardScope.OWNER_ID.eq(ownerId))
+                .execute();
+        EhPaymentChargingStandardsDao dao = new EhPaymentChargingStandardsDao(context.configuration());
+        EhPaymentFormulaDao dao1 = new EhPaymentFormulaDao(context.configuration());
+        EhPaymentChargingStandardsScopesDao dao2 = new EhPaymentChargingStandardsScopesDao(context.configuration());
+        //插入新的c，s，f
+        dao.insert(standards);
+        dao1.insert(formulas);
+        dao2.insert(scopes);
+    }
+
+    @Override
+    public boolean checkCoupledChargingStandard(Long cid) {
+        DSLContext context = getReadWriteContext();
+        Long bro = context.select(Tables.EH_PAYMENT_CHARGING_STANDARDS.BROTHER_STANDARD_ID)
+                .from(Tables.EH_PAYMENT_CHARGING_STANDARDS)
+                .where(Tables.EH_PAYMENT_CHARGING_STANDARDS.ID.eq(cid))
+                .fetchOne(Tables.EH_PAYMENT_CHARGING_STANDARDS.BROTHER_STANDARD_ID);
+        if(bro == null){
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+    @Override
+    public void deCoupledForChargingItem(Long ownerId, String ownerType) {
+        DSLContext context = getReadWriteContext();
+        context.update(itemScope)
+                .set(itemScope.DECOUPLING_FLAG,(byte)1)
+                .where(itemScope.OWNER_TYPE.eq(ownerType))
+                .and(itemScope.OWNER_ID.eq(ownerId))
+                .execute();
     }
 
 
