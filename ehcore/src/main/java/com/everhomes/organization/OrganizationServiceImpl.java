@@ -6816,6 +6816,12 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
 
+        // 删除离职Log表中的记录
+        OrganizationMemberDetails old_detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(org.getId(), contactToken);
+        if(old_detail != null){
+            this.archivesService.deleteArchivesDismissEmployees(old_detail.getId(), old_detail.getOrganizationId());
+        }
+
 
         //是注册用户或者从加入公司待审核的注册用户 则需要发送消息等等操作
         if (sendMsgFlag) {
