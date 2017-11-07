@@ -6388,7 +6388,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         organizationMember.setGroupPath(org.getPath());
         organizationMember.setGender(cmd.getGender());
         if (StringUtils.isEmpty(organizationMember.getTargetId())) {
-            organizationMember.setTargetType(contactToken.UNTRACK.getCode());
+            organizationMember.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
             organizationMember.setTargetId(0l);
         }
 
