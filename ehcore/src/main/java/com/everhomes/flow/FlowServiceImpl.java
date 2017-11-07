@@ -870,8 +870,8 @@ public class FlowServiceImpl implements FlowService {
                 action.setTrackerProcessor(actionInfo.getTrackerProcessor());
             }
 
-            if (actionInfo.getEnabled() == null || actionInfo.getEnabled() > 0) {
-                action.setStatus(FlowActionStatus.ENABLED.getCode());
+            if (actionInfo.getEnabled() != null) {
+                action.setStatus(actionInfo.getEnabled());
             } else {
                 action.setStatus(FlowActionStatus.DISABLED.getCode());
             }
@@ -881,8 +881,8 @@ public class FlowServiceImpl implements FlowService {
             flowActionProvider.createFlowAction(action);
 
         } else {
-            if (actionInfo.getEnabled() == null || actionInfo.getEnabled() > 0) {
-                action.setStatus(FlowActionStatus.ENABLED.getCode());
+            if (actionInfo.getEnabled() != null) {
+                action.setStatus(actionInfo.getEnabled());
             } else {
                 action.setStatus(FlowActionStatus.DISABLED.getCode());
             }
@@ -1021,10 +1021,6 @@ public class FlowServiceImpl implements FlowService {
         Flow flow = getFlowByEntity(cmd.getBelongTo(), FlowEntityType.fromCode(cmd.getFlowEntityType()));
         flowMarkUpdated(flow);
 
-        ListFlowUserSelectionResponse resp = new ListFlowUserSelectionResponse();
-        List<FlowUserSelectionDTO> selections = new ArrayList<>();
-        resp.setSelections(selections);
-
         List<FlowSingleUserSelectionCommand> cmds = cmd.getSelections();
         if (cmds != null && cmds.size() > 0) {
             for (FlowSingleUserSelectionCommand sCmd : cmds) {
@@ -1045,6 +1041,15 @@ public class FlowServiceImpl implements FlowService {
             }
         }
 
+        List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(
+                cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType());
+
+        ListFlowUserSelectionResponse resp = new ListFlowUserSelectionResponse();
+        resp.setSelections(
+                selections.stream()
+                        .map(r -> ConvertHelper.convert(r, FlowUserSelectionDTO.class))
+                .collect(Collectors.toList())
+        );
         return resp;
     }
 
