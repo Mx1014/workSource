@@ -1664,10 +1664,9 @@ public class ParkingServiceImpl implements ParkingService {
 				if(StringUtils.isBlank(dto.getPlateOwnerName())) {
 					dto.setPlateOwnerName(plateOwnerName);
 				}
+				dto.setCarVerificationFlag(ParkingCarVerificationStatus.SUCCEED.getCode());
+
 			}
-
-			dto.setCarVerificationFlag(ParkingCarVerificationStatus.SUCCEED.getCode());
-
 			return dto;
 		}
 		return null;
