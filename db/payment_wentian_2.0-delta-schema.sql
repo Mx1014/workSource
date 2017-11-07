@@ -61,7 +61,7 @@ ALTER TABLE `eh_payment_contract_receiver` ADD COLUMN `bill_group_rule_id` BIGIN
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `bill_group_rule_id` BIGINT DEFAULT NULL;
 ALTER TABLE `eh_payment_charging_standards_scopes` ADD COLUMN  `brother_standard_id` BIGINT DEFAULT NULL COMMENT '兄弟收费标准id，联动效果';
 ALTER TABLE `eh_payment_bill_groups` ADD COLUMN  `brother_group_id` BIGINT DEFAULT NULL COMMENT '兄弟账单组id，联动效果';
-ALTER TABLE `eh_payment_bill_group_rules` ADD COLUMN  `brother_rule_id` BIGINT DEFAULT NULL COMMENT '兄弟账单组id，联动效果';
+ALTER TABLE `eh_payment_bill_groups_rules` ADD COLUMN  `brother_rule_id` BIGINT DEFAULT NULL COMMENT '兄弟账单组id，联动效果';
 
 
 -- 4.10.3，合并记得删
