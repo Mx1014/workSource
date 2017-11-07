@@ -2084,34 +2084,36 @@ public class ParkingServiceImpl implements ParkingService {
 
 		if (null != verification) {
 			if (verification.getStatus() == ParkingCarVerificationStatus.UN_AUTHORIZED.getCode()
-					&& ParkingCarVerificationType.AUTHORIZED.getCode() == cmd.getRequestType()
-					&& parkingLot.getLockCarFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
-
-				BeanUtils.copyProperties(cmd, verification);
-				verification.setRequestorUid(userId);
-				verification.setCreatorUid(userId);
-				verification.setCreateTime(new Timestamp(System.currentTimeMillis()));
+					&& ParkingCarVerificationType.AUTHORIZED.getCode() == cmd.getRequestType()) {
+				if (parkingLot.getLockCarFlag() == ParkingConfigFlag.SUPPORT.getCode()){
+					BeanUtils.copyProperties(cmd, verification);
+					verification.setRequestorUid(userId);
+					verification.setCreatorUid(userId);
+					verification.setCreateTime(new Timestamp(System.currentTimeMillis()));
 //				verification.setStatus(ParkingCarVerificationStatus.AUDITING.getCode());
-				parkingProvider.updateParkingCarVerification(verification);
+					parkingProvider.updateParkingCarVerification(verification);
 
-				String ownerType = FlowOwnerType.PARKING_CAR_VERIFICATION.getCode();
-				Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
-						FlowModuleType.NO_MODULE.getCode(), parkingLot.getId(), ownerType);
+					String ownerType = FlowOwnerType.PARKING_CAR_VERIFICATION.getCode();
+					Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
+							FlowModuleType.NO_MODULE.getCode(), parkingLot.getId(), ownerType);
 
-				if(null == flow) {
-					LOGGER.error("Enable flow not found, moduleId={}", ParkingFlowConstant.PARKING_RECHARGE_MODULE);
-					throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
-							"Enable flow not found.");
-				}
+					if(null == flow) {
+						LOGGER.error("Enable flow not found, moduleId={}", ParkingFlowConstant.PARKING_RECHARGE_MODULE);
+						throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
+								"Enable flow not found.");
+					}
 
-				FlowCase flowCase = createFlowCase(verification, flow, UserContext.currentUserId());
+					FlowCase flowCase = createFlowCase(verification, flow, UserContext.currentUserId());
 //				if (null != flowCase) {
 //					verification.setFlowCaseId(flowCase.getId());
 //					parkingProvider.updateParkingCarVerification(verification);
 //				}
-				addAttachments(cmd.getAttachments(), UserContext.currentUserId(), verification.getId(),
-						ParkingAttachmentType.PARKING_CAR_VERIFICATION.getCode());
-
+					addAttachments(cmd.getAttachments(), UserContext.currentUserId(), verification.getId(),
+							ParkingAttachmentType.PARKING_CAR_VERIFICATION.getCode());
+				}else {
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"Not support AUTHORIZED request");
+				}
 			}else {
 				LOGGER.error("PlateNumber has been add, cmd={}", cmd);
 				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_REPEAT_ADD,
@@ -2147,9 +2149,10 @@ public class ParkingServiceImpl implements ParkingService {
 //				}
 					addAttachments(cmd.getAttachments(), UserContext.currentUserId(), verification.getId(),
 							ParkingAttachmentType.PARKING_CAR_VERIFICATION.getCode());
+				}else {
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"Not support AUTHORIZED request");
 				}
-
-
 			}else {
 				verification.setStatus(ParkingCarVerificationStatus.UN_AUTHORIZED.getCode());
 				parkingProvider.createParkingCarVerification(verification);
