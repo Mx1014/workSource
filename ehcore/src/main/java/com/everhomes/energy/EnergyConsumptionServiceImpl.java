@@ -3080,8 +3080,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     meterDTO.setMeterName(meter.getName());
                     meterDTO.setMeterNumber(meter.getMeterNumber());
                     meterDTO.setMeterType(meter.getMeterType());
-                    meter.getStatus()
-                    meterDTO.sets
+                    // 表的状态
+                    String meterStatus = localeStringService.getLocalizedString(EnergyLocalStringCode.SCOPE_METER_STATUS, String.valueOf(meter.getStatus()), currLocale(), "");
+                    meterDTO.setStatus(meterStatus);
                 }
 
                 meterDTO.setAddresses(populateEnergyMeterAddresses(meterMap.getMeterId()));
