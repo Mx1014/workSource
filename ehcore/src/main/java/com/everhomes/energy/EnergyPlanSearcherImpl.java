@@ -241,13 +241,14 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
                 String[] groupNames = String.valueOf(source.get("groupName")).split(",");
                 if(groupNames != null && groupNames.length > 0) {
                     List<EnergyPlanGroupDTO> groups = new ArrayList<>();
+                    LOGGER.debug("EnergyPlanDTO getDTOs groupNames: {}", groupNames);
                     for(String groupName : groupNames) {
+                        LOGGER.debug("EnergyPlanDTO getDTOs groupName: {}", groupName);
                         EnergyPlanGroupDTO groupDTO = new EnergyPlanGroupDTO();
-                        groupName.replace("[","");
-                        groupName.replace("]","");
                         groupDTO.setGroupName(groupName);
                         groups.add(groupDTO);
                     }
+                    LOGGER.debug("EnergyPlanDTO getDTOs groups: {}", groups);
                     dto.setGroups(groups);
                 }
                 dtos.add(dto);
