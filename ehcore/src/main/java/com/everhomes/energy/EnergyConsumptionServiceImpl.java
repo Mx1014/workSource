@@ -2832,7 +2832,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     meterDTO.setMeterNumber(energyMeter.getMeterNumber());
                     meterDTO.setMeterType(energyMeter.getMeterType());
                     // 表的状态
-                    String meterStatus = localeStringService.getLocalizedString(EnergyLocalStringCode.SCOPE_METER_STATUS, String.valueOf(meter.getStatus()), currLocale(), "");
+                    String meterStatus = localeStringService.getLocalizedString(EnergyLocalStringCode.SCOPE_METER_STATUS, String.valueOf(energyMeter.getStatus()), currLocale(), "");
                     meterDTO.setStatus(meterStatus);
                 }
 
