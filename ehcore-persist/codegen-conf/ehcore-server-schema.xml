@@ -225,6 +225,7 @@
             eh_payment_users | eh_payment_accounts | eh_payment_service_configs | eh_payment_order_records | eh_payment_types | eh_asset_payment_order | eh_asset_payment_order_bills |
             eh_news_tag | eh_news_tag_vals|
             eh_flow_conditions|eh_flow_condition_expressions|eh_flow_lanes|eh_flow_links|eh_flow_predefined_params|eh_flow_branches|eh_flow_service_types|
+            |eh_rentalv2_price_packages
         </includes>
 
             <!-- All elements that are excluded from your schema
