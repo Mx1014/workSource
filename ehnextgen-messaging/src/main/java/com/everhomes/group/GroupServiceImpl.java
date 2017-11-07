@@ -641,6 +641,11 @@ public class GroupServiceImpl implements GroupService {
          int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
          CrossShardListingLocator locator = new CrossShardListingLocator();
          locator.setAnchor(cmd.getPageAnchor());
+
+        //妹的，老客户有没有参数，满世界都要写这种判断 add by yanjun 20171107
+        if(cmd.getClubType() == null){
+            cmd.setClubType(ClubType.NORMAL.getCode());
+        }
          
          List<Group> groups = this.groupProvider.queryGroups(locator, pageSize + 1, (loc, query)-> {
              query.addConditions(Tables.EH_GROUPS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
@@ -658,6 +663,8 @@ public class GroupServiceImpl implements GroupService {
              }
              if(!StringUtils.isEmpty(cmd.getPrivateFlag()))
             	 query.addConditions(Tables.EH_GROUPS.PRIVATE_FLAG.eq(cmd.getPrivateFlag()));
+
+             query.addConditions(Tables.EH_GROUPS.CLUB_TYPE.eq(cmd.getClubType()));
              
              return query;
          });
@@ -914,6 +921,11 @@ public class GroupServiceImpl implements GroupService {
         
         User operator = UserContext.current().getUser();
         long operatorId = operator.getId();
+
+        //妹的，老客户有没有参数，满世界都要写这种判断 add by yanjun 20171107
+        if(cmd.getClubType() == null){
+            cmd.setClubType(ClubType.NORMAL.getCode());
+        }
         
         List<GroupDTO> groupDtoList = new ArrayList<GroupDTO>();
         
@@ -934,10 +946,12 @@ public class GroupServiceImpl implements GroupService {
                 	groupDtoList.add(toGroupDTO(operatorId, tmpGroup));
                 } 
                 // 审核中的俱乐部也要显示，add by tt, 20161103
+                // 加上一个行业协会或者俱乐部的判断  add by yanjun 20171107
                 else if (tmpGroup != null && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(tmpGroup.getPrivateFlag()) 
                 		&& GroupAdminStatus.INACTIVE == GroupAdminStatus.fromCode(tmpGroup.getStatus()) 
                 		&& ApprovalStatus.WAITING_FOR_APPROVING == ApprovalStatus.fromCode(tmpGroup.getApprovalStatus())
-                		&& operatorId == tmpGroup.getCreatorUid().longValue()) {
+                		&& operatorId == tmpGroup.getCreatorUid().longValue()
+                        && ClubType.fromCode(cmd.getClubType()) == ClubType.fromCode(tmpGroup.getClubType())) {
                 	groupDtoList.add(toGroupDTO(operatorId, tmpGroup));
 				}
                 else {
@@ -4897,8 +4911,16 @@ public class GroupServiceImpl implements GroupService {
 		if (user == null || user.getId() == null || user.getId().longValue() == 0L) {
 			return new ListUserGroupPostResponse();
 		}
+
+        //妹的，老客户有没有参数，满世界都要写这种判断 add by yanjun 20171107
+        if(cmd.getClubType() == null){
+            cmd.setClubType(ClubType.NORMAL.getCode());
+        }
 		
 		List<GroupDTO> groupList = listUserRelatedGroups();
+
+        groupList = groupList.stream().filter( r  -> ClubType.fromCode(r.getClubType()) == ClubType.fromCode(cmd.getClubType())).collect(Collectors.toList());
+
 		List<Long> forumIdList = groupList.stream().map(g->g.getOwningForumId()).collect(Collectors.toList());
 		
 		ListUserGroupPostResponse response = forumService.listUserGroupPost(VisibilityScope.COMMUNITY, 0L, forumIdList, user.getId(), cmd.getPageAnchor(), cmd.getPageSize());
@@ -5113,7 +5135,7 @@ public class GroupServiceImpl implements GroupService {
 	public GroupParametersResponse setGroupParameters(SetGroupParametersCommand cmd) {
 		if (cmd.getNamespaceId() == null || TrueOrFalseFlag.fromCode(cmd.getCreateFlag()) == null || TrueOrFalseFlag.fromCode(cmd.getVerifyFlag()) == null
 				|| TrueOrFalseFlag.fromCode(cmd.getMemberPostFlag()) == null || TrueOrFalseFlag.fromCode(cmd.getMemberCommentFlag()) == null
-				|| TrueOrFalseFlag.fromCode(cmd.getAdminBroadcastFlag()) == null || cmd.getBroadcastCount() == null || cmd.getClubType() == null) {
+				|| TrueOrFalseFlag.fromCode(cmd.getAdminBroadcastFlag()) == null || cmd.getBroadcastCount() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters");
 		}
@@ -5124,6 +5146,11 @@ public class GroupServiceImpl implements GroupService {
 		groupSetting.setCreatorUid(UserContext.current().getUser().getId());
 		groupSetting.setUpdateTime(groupSetting.getCreateTime());
 		groupSetting.setOperatorUid(groupSetting.getCreatorUid());
+
+		//妹的，老客户有没有参数，满世界都要写这种判断 add by yanjun 20171107
+		if(cmd.getClubType() == null){
+		    cmd.setClubType(ClubType.NORMAL.getCode());
+        }
 		GroupSetting old = null;
 		if ((old = getGroupSetting(cmd.getNamespaceId(), cmd.getClubType())) == null) {
 			groupSettingProvider.createGroupSetting(groupSetting);
@@ -5144,9 +5171,9 @@ public class GroupServiceImpl implements GroupService {
 					"Invalid parameters");
 		}
 
-		//老客户端只有普通俱乐部，并且不会传这个参数
-		if(cmd.getClubType() == null){
-		    cmd.setClubType((byte) 0);
+        //妹的，老客户有没有参数，满世界都要写这种判断 add by yanjun 20171107
+        if(cmd.getClubType() == null){
+            cmd.setClubType(ClubType.NORMAL.getCode());
         }
 		return getGroupParameters(cmd.getNamespaceId(), cmd.getClubType());
 	}
