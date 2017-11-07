@@ -13,6 +13,8 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.Timestamp;
@@ -53,11 +55,14 @@ public class Rentalv2PricePackageProviderImpl implements  Rentalv2PricePackagePr
     }
 
     @Override
-    public List<Rentalv2PricePackage> listPricePackageByOwner(String ownerType, Long ownerId) {
-        return getReadOnlyContext().select().from(Tables.EH_RENTALV2_PRICE_PACKAGES)
+    public List<Rentalv2PricePackage> listPricePackageByOwner(String ownerType, Long ownerId, Byte rentalType) {
+        SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_RENTALV2_PRICE_PACKAGES)
                 .where(Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_TYPE.eq(ownerType))
-                .and(Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_ID.eq(ownerId))
-                .orderBy(Tables.EH_RENTALV2_PRICE_PACKAGES.RENTAL_TYPE.asc())
+                .and(Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_ID.eq(ownerId));
+        if (rentalType!=null)
+            step.and(Tables.EH_RENTALV2_PRICE_PACKAGES.RENTAL_TYPE.eq(rentalType));
+
+        return step.orderBy(Tables.EH_RENTALV2_PRICE_PACKAGES.RENTAL_TYPE.asc())
                 .fetch().map(r -> ConvertHelper.convert(r, Rentalv2PricePackage.class));
     }
 

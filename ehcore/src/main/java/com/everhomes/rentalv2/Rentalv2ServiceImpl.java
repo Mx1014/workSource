@@ -425,7 +425,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			response.setCutPrice(priceRule.getCutPrice());
 		}
 
-		List<Rentalv2PricePackage> pricePackages = rentalv2PricePackageProvider.listPricePackageByOwner(PriceRuleType.DEFAULT.getCode(), defaultRule.getId());
+		List<Rentalv2PricePackage> pricePackages = rentalv2PricePackageProvider.listPricePackageByOwner(PriceRuleType.DEFAULT.getCode(), defaultRule.getId(),null);
 		response.setPricePackages(pricePackages.stream().map(r->ConvertHelper.convert(r,PricePackageDTO.class)).collect(Collectors.toList()));
 		return response;
 	}
@@ -2348,7 +2348,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			rentalv2PriceRuleProvider.deletePriceRuleByOwnerId(PriceRuleType.RESOURCE.getCode(), rs.getId());
 			createPriceRules(PriceRuleType.RESOURCE, rs.getId(), cmd.getPriceRules());
-			
+			rentalv2PricePackageProvider.deletePricePackageByOwnerId(PriceRuleType.RESOURCE.getCode(), rs.getId());
+			createPricePackages(PriceRuleType.RESOURCE, rs.getId(),cmd.getPricePackages());
 			this.rentalv2Provider.updateRentalSite(rs);
 			
 			return null;
@@ -3743,6 +3744,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			sceneTokenDTO = userService.checkSceneToken(user.getId(), sceneToken);
 		}
 		List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rs.getId());
+		List <Rentalv2PricePackage> pricePackages = rentalv2PricePackageProvider.listPricePackageByOwner(PriceRuleType.RESOURCE.getCode(), rs.getId(), rentalType);
+
 		for(;start.before(end);start.add(Calendar.DAY_OF_YEAR, 1)){
 			RentalSiteDayRulesDTO dayDto = new RentalSiteDayRulesDTO();
 			dtos.add(dayDto);
@@ -4887,7 +4890,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			LOGGER.debug("test enter cerate resource price rules, defaultRule={}", defaultRule);
 			createPriceRules(PriceRuleType.RESOURCE, resource.getId(), defaultRule.getPriceRules());
-
+			createPricePackages(PriceRuleType.RESOURCE,resource.getId(),defaultRule.getPricePackages());
 			createRentalConfigAttachment(defaultRule.getAttachments(), resource.getId(), EhRentalv2Resources.class.getSimpleName());
 
 			//close dates

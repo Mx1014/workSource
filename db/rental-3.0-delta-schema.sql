@@ -28,3 +28,6 @@ CREATE TABLE `eh_rentalv2_price_packages` (
   `creator_uid` BIGINT(20) NULL DEFAULT NULL,
   `create_time` DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (`id`));
+
+ALTER TABLE `eh_rentalv2_cells`
+ADD COLUMN `price_package_id` BIGINT(20) NULL DEFAULT NULL AFTER `half_approving_user_price`;

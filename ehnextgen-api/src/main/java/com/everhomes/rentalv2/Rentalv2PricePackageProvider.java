@@ -11,5 +11,5 @@ public interface Rentalv2PricePackageProvider {
 
     void createRentalv2PricePackage(Rentalv2PricePackage rentalv2PricePackage);
 
-    List<Rentalv2PricePackage> listPricePackageByOwner(String ownerType, Long ownerId);
+    List<Rentalv2PricePackage> listPricePackageByOwner(String ownerType, Long ownerId, Byte rentalType);
 }
