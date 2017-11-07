@@ -243,6 +243,8 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
                     List<EnergyPlanGroupDTO> groups = new ArrayList<>();
                     for(String groupName : groupNames) {
                         EnergyPlanGroupDTO groupDTO = new EnergyPlanGroupDTO();
+                        groupName.replace("[","");
+                        groupName.replace("]","");
                         groupDTO.setGroupName(groupName);
                         groups.add(groupDTO);
                     }

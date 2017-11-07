@@ -26,11 +26,20 @@ public class EnergyPlanMeterDTO {
     private String meterNumber;
     private String meterName;
     private Integer defaultOrder;
+    private String status;
     @ItemType(EnergyMeterAddressDTO.class)
     private List<EnergyMeterAddressDTO> addresses;
 
     public List<EnergyMeterAddressDTO> getAddresses() {
         return addresses;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public void setAddresses(List<EnergyMeterAddressDTO> addresses) {

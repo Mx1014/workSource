@@ -423,6 +423,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     private void processEnergyMeterAddresses(Long meterId, List<EnergyMeterAddressDTO> addresses) {
+        if(addresses == null) {
+            return ;
+        }
         //取出表记关联的所有门牌；传入的参数有id的从exist中去掉，没有id的增加，最后将exist中剩下的门牌关联关系置为inactive
         Map<Long, EnergyMeterAddress> existAddress = energyMeterAddressProvider.findByMeterId(meterId);
         if(addresses != null && addresses.size() > 0) {
@@ -2828,6 +2831,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     meterDTO.setMeterName(energyMeter.getName());
                     meterDTO.setMeterNumber(energyMeter.getMeterNumber());
                     meterDTO.setMeterType(energyMeter.getMeterType());
+                    // 表的状态
+                    String meterStatus = localeStringService.getLocalizedString(EnergyLocalStringCode.SCOPE_METER_STATUS, String.valueOf(meter.getStatus()), currLocale(), "");
+                    meterDTO.setStatus(meterStatus);
                 }
 
                 meterDTO.setAddresses(populateEnergyMeterAddresses(meter.getMeterId()));
@@ -3074,6 +3080,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     meterDTO.setMeterName(meter.getName());
                     meterDTO.setMeterNumber(meter.getMeterNumber());
                     meterDTO.setMeterType(meter.getMeterType());
+                    meter.getStatus()
+                    meterDTO.sets
                 }
 
                 meterDTO.setAddresses(populateEnergyMeterAddresses(meterMap.getMeterId()));
