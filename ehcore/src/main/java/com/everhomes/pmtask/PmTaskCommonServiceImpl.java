@@ -257,6 +257,7 @@ class PmTaskCommonServiceImpl {
         task.setOrganizationId(cmd.getOrganizationId());
         task.setRequestorName(requestorName);
         task.setRequestorPhone(requestorPhone);
+        task.setOrganizationName(cmd.getOrganizationName());
 
         //设置门牌地址,楼栋地址,服务地点
         setPmTaskAddressInfo(cmd, task);
