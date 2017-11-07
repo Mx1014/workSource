@@ -48,6 +48,7 @@ import com.everhomes.util.StringHelper;
  *     <li>approvalStatus: 审核的状态，针对需要验证的才有此标记，参考{@link com.everhomes.rest.group.ApprovalStatus}</li>
  *     <li>touristPostPolicy: touristPostPolicy 参考{@link TouristPostPolicyFlag}</li>
  *     <li>clubType: clubType 参考{@link ClubType}</li>
+ *     <li>contentUrl: 详情页面的url</li>
  * </ul>
  */
 public class GroupDTO {
@@ -99,6 +100,8 @@ public class GroupDTO {
     private Byte touristPostPolicy;
 
     private Byte clubType;
+
+    private String contentUrl;
 
     public String getShareUrl() {
         return shareUrl;
@@ -413,6 +416,14 @@ public class GroupDTO {
 
     public void setClubType(Byte clubType) {
         this.clubType = clubType;
+    }
+
+    public String getContentUrl() {
+        return contentUrl;
+    }
+
+    public void setContentUrl(String contentUrl) {
+        this.contentUrl = contentUrl;
     }
 
     @Override

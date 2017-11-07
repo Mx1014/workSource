@@ -2820,8 +2820,18 @@ public class GroupServiceImpl implements GroupService {
         memberInfoToGroupDTO(operatorId, groupDto, group);
 
         populateGroupDTO(operatorId, groupDto);
+
+        groupDto.setContentUrl(getGroupContentUrl(group.getId()));
         
         return groupDto;
+    }
+
+
+    private String getGroupContentUrl(Long id){
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String homeUrl = configProvider.getValue(namespaceId, ConfigConstants.HOME_URL, "");
+        String contentUrl = configProvider.getValue(namespaceId, ConfigConstants.GROUP_CONTENT_URL, "");
+        return homeUrl + contentUrl + "?id=" + id;
     }
     
     private String getShareUrl(Group group) {
