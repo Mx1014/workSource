@@ -140,3 +140,6 @@ ALTER TABLE eh_organization_member_details ADD COLUMN contract_certificate TEXT 
 
 -- lei.lv 机构表加排序
 ALTER TABLE `eh_organizations` ADD COLUMN `order` int(11) NULL DEFAULT '0' COMMENT 'order';
+
+-- 用户管理1.4 add by yanjun 201711071007
+ALTER TABLE `eh_user_organizations` ADD COLUMN `executive_tag`  tinyint(4) NULL, ADD COLUMN `position_tag`  varchar(128) NULL;
