@@ -406,6 +406,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<ListBillGroupsDTO> listBillGroups(OwnerIdentityCommand cmd) {
+        if(cmd.getOwnerId() == null){
+            cmd.setOwnerId(cmd.getNamespaceId().longValue());
+        }
         return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType());
     }
 
@@ -2174,13 +2177,6 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public void createChargingStandard(CreateChargingStandardCommand cmd) {
         if(cmd.getOwnerId() == null){
-            if(cmd.getFormulaType() == 1 || cmd.getFormulaType() == 2){
-                String formula_no_quote = cmd.getFormula();
-                formula_no_quote = formula_no_quote.replace("[[","");
-                formula_no_quote = formula_no_quote.replace("]]","");
-                cmd.setFormula(formula_no_quote);
-            }
-
             List<Long> allCommunityIds = getAllCommunity(cmd.getNamespaceId(),false);
             Long brotherStandardId = null;
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
@@ -2260,12 +2256,12 @@ public class AssetServiceImpl implements AssetService {
         // 对于单个园区要求修改，则 删除原来的scope和，拿到原来的standard，删除原来的standard，修改后新建一个standard和同一个scope
         byte deCouplingFlag = 1;
         if(cmd.getOwnerId() == null) {
-            deCouplingFlag = 1;
-            //全部的情况,直接修改即可
-            assetProvider.modifyChargingStandard(cmd.getChargingStandardId(),cmd.getChargingStandardName(),cmd.getInstruction(),deCouplingFlag);
+            deCouplingFlag = 0;
+            //修改未耦合的
+            assetProvider.modifyChargingStandard(cmd.getChargingStandardId(),cmd.getChargingStandardName(),cmd.getInstruction(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId());
         }else{
             //单个园区的情况
-            assetProvider.modifyChargingStandard(cmd.getChargingStandardId(),cmd.getChargingStandardName(),cmd.getInstruction(),deCouplingFlag);
+            assetProvider.modifyChargingStandard(cmd.getChargingStandardId(),cmd.getChargingStandardName(),cmd.getInstruction(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId());
 //            List<Long> standardIds = assetProvider.deleteAllChargingStandardScope(cmd.getOwnerId(),cmd.getOwnerType());
 //            //有耦合时，使用此. 耦合的情况指的是，同一个standardId，域名和域空间均有scope
 //            boolean coupled = checkCoupledForStandard(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getChargingStandardId(),cmd.getNamespaceId());
@@ -2298,7 +2294,7 @@ public class AssetServiceImpl implements AssetService {
             return dto;
         }
         // 各个：在工作的standard不能删除，不在工作的可以，并且查看是否有bro，有则干掉
-        boolean safe = checkSafeDeleteId(Tables.EH_PAYMENT_CHARGING_STANDARDS.getName(),cmd.getChargingStandardId());
+        boolean safe = checkSafeDeleteId(Tables.EH_PAYMENT_CHARGING_STANDARDS.getName(),cmd.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
         if(!safe){
             dto.setFailCause(AssetPaymentStrings.DELETE_CHARGING_STANDARD_UNSAFE);
             return dto;
@@ -2309,10 +2305,10 @@ public class AssetServiceImpl implements AssetService {
         return dto;
     }
 
-    private boolean checkSafeDeleteId(String name, Long chargingStandardId) {
+    private boolean checkSafeDeleteId(String name, Long chargingStandardId,String ownerType,Long ownerId) {
         Boolean safe = false;
         if(Tables.EH_PAYMENT_CHARGING_STANDARDS.getName().equals(name)){
-            boolean exist = assetProvider.cheackGroupRuleExistByChargingStandard(chargingStandardId);
+            boolean exist = assetProvider.cheackGroupRuleExistByChargingStandard(chargingStandardId,ownerType,ownerId);
             if(!exist) safe = true;
         }
         return safe;
@@ -2459,7 +2455,9 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getPageAnchor() == null){
             cmd.setPageAnchor(0l);
         }
-        List<Long> communityIds = new ArrayList<>();
+        if(cmd.getOwnerId() == null){
+            cmd.setOwnerId(cmd.getNamespaceId().longValue());
+        }
         List<ListChargingStandardsDTO> list =  assetProvider.listOnlyChargingStandards(cmd);
         if(list.size() > cmd.getPageSize()){
             response.setNextPageAnchor(cmd.getPageAnchor()+cmd.getPageSize().longValue());
@@ -2499,23 +2497,36 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public AddOrModifyRuleForBillGroupResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
-        byte deCouplingFlag = 1;
-        Long brotherRuleId = null;
-        if(cmd.getOwnerId() == null){
-            deCouplingFlag = 0;
-            cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            brotherRuleId = assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
-            //耦合中
-            List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), false);
-            for(int i = 0; i < allCommunity.size(); i ++){
-//是否耦合（必须检查，否则不耦合的会导致新增失败）
 
-                assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
-            }
-        }else if(cmd.getOwnerId() != null){
-            //添加+解耦，判断safe+修改+解耦group和rule
-            return assetProvider.addOrModifyRuleForBillGroup(cmd);
+//        byte deCouplingFlag = 1;
+//        Long brotherRuleId = null;
+//        if(cmd.getOwnerId() == null){
+//            deCouplingFlag = 0;
+//            cmd.setOwnerId(cmd.getNamespaceId().longValue());
+//            brotherRuleId = assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
+//            //耦合中
+//            List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), false);
+//            for(int i = 0; i < allCommunity.size(); i ++){
+////是否耦合（必须检查，否则不耦合的会导致新增失败）
+//                boolean coupled = checkCoupledForGroupRule(cmd.getOwnerId(),cmd.getOwnerType());
+//                if(coupled){
+//                    assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
+//                }
+//            }
+//        }else if(cmd.getOwnerId() != null){
+//            //添加+解耦，判断safe+修改+解耦group和rule
+//            assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
+//        }
+        return assetProvider.addOrModifyRuleForBillGroup(cmd);
+
+    }
+
+    private boolean checkCoupledForGroupRule(Long ownerId, String ownerType) {
+        List<EhPaymentBillGroupsRules> list = assetProvider.getBillGroupRuleByCommunity(ownerId,ownerType);
+        if(list.size() > 0){
+            return true;
         }
+        return false;
     }
 
     @Override

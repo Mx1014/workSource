@@ -169,7 +169,7 @@ public interface AssetProvider {
 
     void createChargingStandard(EhPaymentChargingStandards c, EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f);
 
-    void modifyChargingStandard(Long chargingStandardId,String chargingStandardName,String instruction,byte deCouplingFlag);
+    void modifyChargingStandard(Long chargingStandardId,String chargingStandardName,String instruction,byte deCouplingFlag,String ownerType,Long ownerId);
 
     GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
 
@@ -191,7 +191,7 @@ public interface AssetProvider {
 
     List<ListChargingItemsForBillGroupDTO> listChargingItemsForBillGroup(Long billGroupId,Long pageAnchor,Integer pageSize);
 
-    Long addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd,Long brotherRuleId,byte deCouplingFlag);
+    AddOrModifyRuleForBillGroupResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
 
     EhPaymentBillGroupsRules findBillGroupRuleById(Long billGroupRuleId);
 
@@ -213,7 +213,7 @@ public interface AssetProvider {
 
     List<PaymentFormula> getFormulas(Long id);
 
-    boolean cheackGroupRuleExistByChargingStandard(Long chargingStandardId);
+    boolean cheackGroupRuleExistByChargingStandard(Long chargingStandardId,String ownerType,Long ownerId);
 
     void setInworkFlagInContractReceiver(Long contractId,String contractNum);
 
@@ -226,4 +226,6 @@ public interface AssetProvider {
     boolean checkCoupledChargingStandard(Long cid);
 
     void deCoupledForChargingItem(Long ownerId, String ownerType);
+
+    List<EhPaymentBillGroupsRules> getBillGroupRuleByCommunity(Long ownerId, String ownerType);
 }
