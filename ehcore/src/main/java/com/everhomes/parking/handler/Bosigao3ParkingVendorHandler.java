@@ -285,6 +285,24 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 
 	@Override
 	public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
+		//TODO:ceshi
+		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+		if (flag) {
+			if (plateNumber.startsWith("粤B")) {
+				ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
+
+				dto.setPlateNumber(plateNumber);
+				dto.setEntryTime(strToLong("2017-11-06 00:00:00"));
+				dto.setPayTime(System.currentTimeMillis());
+				dto.setParkingTime(200);
+				dto.setDelayTime(15);
+				dto.setPrice(new BigDecimal(1000));
+
+				dto.setOrderToken("100");
+				return dto;
+			}
+		}
+
 		BosigaoTempFee tempFee = getTempFee(plateNumber);
 
 		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
