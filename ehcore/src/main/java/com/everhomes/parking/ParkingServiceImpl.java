@@ -2110,10 +2110,10 @@ public class ParkingServiceImpl implements ParkingService {
 					}
 
 					FlowCase flowCase = createFlowCase(verification, flow, UserContext.currentUserId());
-//				if (null != flowCase) {
-//					verification.setFlowCaseId(flowCase.getId());
+					if (null != flowCase) {
+						verification.setFlowCaseId(flowCase.getId());
 //					parkingProvider.updateParkingCarVerification(verification);
-//				}
+					}
 					addAttachments(cmd.getAttachments(), UserContext.currentUserId(), verification.getId(),
 							ParkingAttachmentType.PARKING_CAR_VERIFICATION.getCode());
 				}else {
@@ -2149,10 +2149,10 @@ public class ParkingServiceImpl implements ParkingService {
 					}
 
 					FlowCase flowCase = createFlowCase(verification, flow, UserContext.currentUserId());
-//				if (null != flowCase) {
-//					verification.setFlowCaseId(flowCase.getId());
+					if (null != flowCase) {
+						verification.setFlowCaseId(flowCase.getId());
 //					parkingProvider.updateParkingCarVerification(verification);
-//				}
+					}
 					addAttachments(cmd.getAttachments(), UserContext.currentUserId(), verification.getId(),
 							ParkingAttachmentType.PARKING_CAR_VERIFICATION.getCode());
 				}else {
