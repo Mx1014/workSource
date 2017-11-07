@@ -123,6 +123,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		}
 		questionnaire.setUserScope(StringHelper.toJsonString(userLevelRanges));
 		//发送消息
+		questionnaireProvider.updateQuestionnaire(questionnaire);
 		questionnaire.setScopeSentMessageUsers(StringHelper.toJsonString(sendMessage(questionnaire)));
 		questionnaireProvider.updateQuestionnaire(questionnaire);
 	}
@@ -252,6 +253,9 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 					}
 				}
 			}
+		}catch (Exception e){
+			LOGGER.warn(e.getMessage());
+			e.printStackTrace();
 		}finally {
 			return sendedranges;
 		}
