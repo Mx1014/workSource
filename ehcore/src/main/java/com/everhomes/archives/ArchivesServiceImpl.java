@@ -142,7 +142,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             }
 
             //  3.查询若存在于离职列表则删除
-            deleteArchivesDismissEmployees(detailId,cmd.getOrganizationId());
+            deleteArchivesDismissEmployees(detailId, cmd.getOrganizationId());
 
             //  4.增加入职记录
             checkInArchivesEmployeesLogs(cmd.getOrganizationId(), detailId, ArchivesUtil.currentDate());
@@ -333,7 +333,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (!StringUtils.isEmpty(cmd.getKeywords()))
             orgCommand.setKeywords(cmd.getKeywords());
         ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
-        if(members != null && members.getMembers() != null){
+        if (members != null && members.getMembers() != null) {
             members.getMembers().forEach(r -> {
                 ArchivesContactDTO dto = new ArchivesContactDTO();
                 dto.setDetailId(r.getDetailId());
@@ -529,25 +529,25 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
 
         //  部门
-        if(!StringUtils.isEmpty(data.getDepartment())){
-           if(organizationService.getOrganizationNameByNameAndType(data.getDepartment(), OrganizationGroupType.DEPARTMENT.getCode()) == null){
-               LOGGER.warn("Department not found. data = {}", data);
-               log.setData(data);
-               log.setErrorLog("Department not found");
-               log.setCode(ArchivesServiceErrorCode.ERROR_DEPARTMENT_NOT_FOUND);
-               return log;
-           }
+        if (!StringUtils.isEmpty(data.getDepartment())) {
+            if (organizationService.getOrganizationNameByNameAndType(data.getDepartment(), OrganizationGroupType.DEPARTMENT.getCode()) == null) {
+                LOGGER.warn("Department not found. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Department not found");
+                log.setCode(ArchivesServiceErrorCode.ERROR_DEPARTMENT_NOT_FOUND);
+                return log;
+            }
         }
 
         //  职务
-        if(!StringUtils.isEmpty(data.getJobPosition())){
-           if(organizationService.getOrganizationNameByNameAndType(data.getJobPosition(), OrganizationGroupType.JOB_POSITION.getCode()) == null){
-               LOGGER.warn("JobPosition not found. data = {}", data);
-               log.setData(data);
-               log.setErrorLog("JobPosition not found");
-               log.setCode(ArchivesServiceErrorCode.ERROR_JOB_POSITION_NOT_FOUND);
-               return log;
-           }
+        if (!StringUtils.isEmpty(data.getJobPosition())) {
+            if (organizationService.getOrganizationNameByNameAndType(data.getJobPosition(), OrganizationGroupType.JOB_POSITION.getCode()) == null) {
+                LOGGER.warn("JobPosition not found. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("JobPosition not found");
+                log.setCode(ArchivesServiceErrorCode.ERROR_JOB_POSITION_NOT_FOUND);
+                return log;
+            }
         }
 
 
@@ -834,7 +834,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             }
 
             //  3.查询若存在于离职列表则删除
-            deleteArchivesDismissEmployees(detailId,cmd.getOrganizationId());
+            deleteArchivesDismissEmployees(detailId, cmd.getOrganizationId());
 
             //  4.增加入职记录
             checkInArchivesEmployeesLogs(cmd.getOrganizationId(), detailId, cmd.getCheckInTime());
@@ -1652,9 +1652,9 @@ public class ArchivesServiceImpl implements ArchivesService {
      * 删除离职表中的员工
      */
     @Override
-    public void deleteArchivesDismissEmployees(Long detailId, Long organizationId){
+    public void deleteArchivesDismissEmployees(Long detailId, Long organizationId) {
         ArchivesDismissEmployees dismissEmployee = archivesProvider.getArchivesDismissEmployeesByDetailId(organizationId, detailId);
-        if(dismissEmployee !=null)
+        if (dismissEmployee != null)
             archivesProvider.deleteArchivesDismissEmployees(dismissEmployee);
     }
 
@@ -1723,10 +1723,10 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
     }
 
-    private GeneralFormDTO updateGeneralFormForArchives(UpdateArchivesFormCommand cmd){
+    private GeneralFormDTO updateGeneralFormForArchives(UpdateArchivesFormCommand cmd) {
         GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(cmd
                 .getFormOriginId());
-        if (null == form )
+        if (null == form)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "form not found");
         form.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -2263,8 +2263,10 @@ public class ArchivesServiceImpl implements ArchivesService {
         Calendar c = Calendar.getInstance();
         int weekDay = c.get(Calendar.DAY_OF_WEEK);
         List<ArchivesNotifications> results = archivesProvider.listArchivesNotificationsByWeek(weekDay);
-        for (int i = 0; i < results.size(); i++) {
-            //TODO:每半个小时来执行
+        if (results != null && results.size() > 0) {
+            for (int i = 0; i < results.size(); i++) {
+                //TODO:每半个小时来执行
+            }
         }
     }
 }
