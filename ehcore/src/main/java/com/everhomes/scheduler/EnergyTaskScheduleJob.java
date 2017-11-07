@@ -355,7 +355,9 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         List<VariableIdAndValue> vv = new ArrayList<>();
         if(pvs != null && pvs.size() > 0) {
             pvs.forEach(pv -> {
-                VariableIdAndValue variableIdAndValue = ConvertHelper.convert(pv, VariableIdAndValue.class);
+                VariableIdAndValue variableIdAndValue = new VariableIdAndValue();
+                variableIdAndValue.setVaribleIdentifier(pv.getVariableIdentifier());
+                variableIdAndValue.setVariableValue(pv.getVariableValue());
                 vv.add(variableIdAndValue);
             });
             VariableIdAndValue variableIdAndValue = new VariableIdAndValue();
@@ -363,6 +365,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
             variableIdAndValue.setVaribleIdentifier("yl");
             //用量
             variableIdAndValue.setVariableValue(amount);
+            vv.add(variableIdAndValue);
         }
         feeRule.setVariableIdAndValueList(vv);
 
