@@ -206,7 +206,6 @@
             eh_lease_projects | eh_lease_project_communities |
             eh_customer_events  | eh_customer_tracking_plans  | eh_customer_trackings  |   eh_tracking_notify_logs  | 
             eh_address_attachments | eh_contract_charging_changes | eh_contract_charging_change_addresses |
-
             eh_parking_car_verifications |
         eh_siyin_print_settings | eh_siyin_print_printers | eh_siyin_print_orders | eh_siyin_print_records | eh_siyin_print_emails |eh_community_approve |
         eh_community_approve_requests |
