@@ -169,11 +169,11 @@ public interface AssetProvider {
 
     void createChargingStandard(EhPaymentChargingStandards c, EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f);
 
-    void modifyChargingStandard(ModifyChargingStandardCommand cmd);
+    void modifyChargingStandard(Long chargingStandardId,String chargingStandardName,String instruction,byte deCouplingFlag);
 
     GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
 
-    void deleteChargingStandard(Long chargingStandardId, Long ownerId, String ownerType);
+    void deleteChargingStandard(Long chargingStandardId, Long ownerId, String ownerType,byte deCouplingFlag);
 
     List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd);
 
@@ -181,7 +181,7 @@ public interface AssetProvider {
 
     String getVariableIdenfitierByName(String targetStr);
 
-    void createBillGroup(CreateBillGroupCommand cmd);
+    Long createBillGroup(CreateBillGroupCommand cmd,byte deCouplingFlag,Long brotherGroupId);
 
     void modifyBillGroup(ModifyBillGroupCommand cmd);
 
@@ -191,7 +191,7 @@ public interface AssetProvider {
 
     List<ListChargingItemsForBillGroupDTO> listChargingItemsForBillGroup(Long billGroupId,Long pageAnchor,Integer pageSize);
 
-    AddOrModifyRuleForBillGroupResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
+    Long addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd,Long brotherRuleId,byte deCouplingFlag);
 
     EhPaymentBillGroupsRules findBillGroupRuleById(Long billGroupRuleId);
 
@@ -220,4 +220,10 @@ public interface AssetProvider {
     void setInworkFlagInContractReceiverWell(Long contractId, String contractNum);
 
     Boolean checkContractInWork(String contractNum);
+
+    void updateChargingStandardByCreating(String standardName,String instruction, Long chargingStandardId, Long ownerId, String ownerType);
+
+    boolean checkCoupledChargingStandard(Long cid);
+
+    void deCoupledForChargingItem(Long ownerId, String ownerType);
 }
