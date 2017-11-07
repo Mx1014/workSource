@@ -945,7 +945,7 @@ public class GroupProviderImpl implements GroupProvider {
     }
 
     @Override
-    public GuildApply FindGuildApplyByGroupMemberId(Long groupMemberId) {
+    public GuildApply findGuildApplyByGroupMemberId(Long groupMemberId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhGuildAppliesRecord> query = context.selectQuery(Tables.EH_GUILD_APPLIES);
 

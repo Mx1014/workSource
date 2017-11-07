@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.group;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
@@ -27,6 +28,7 @@ import java.sql.Timestamp;
  * <li>phonePrivateFlag: group成员是否显示手机号标记，{@link com.everhomes.rest.group.GroupMemberPhonePrivacy}</li>
  * <li>cellPhone: group成员手机码，当<code>phonePrivateFlag</code>设置为公开手机号时才有效</li>
  * <li>muteNotificationFlag: group成员是否免打扰标记，{@link com.everhomes.rest.group.GroupMemberMuteNotificationFlag}</li>
+ * <li>guildApplyDTO: guildApplyDTO 行业协会公司相关信息 {@link GuildApplyDTO}</li>
  * </ul>
  */
 public class GroupMemberDTO {
@@ -61,6 +63,9 @@ public class GroupMemberDTO {
     private String communityName;
     private String areaName;
     private String cityName;
+
+    @ItemType(GuildApplyDTO.class)
+    private GuildApplyDTO guildApplyDTO;
 
     public GroupMemberDTO() {
     }
@@ -305,7 +310,15 @@ public class GroupMemberDTO {
 		this.apartmentName = apartmentName;
 	}
 
-	@Override
+    public GuildApplyDTO getGuildApplyDTO() {
+        return guildApplyDTO;
+    }
+
+    public void setGuildApplyDTO(GuildApplyDTO guildApplyDTO) {
+        this.guildApplyDTO = guildApplyDTO;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

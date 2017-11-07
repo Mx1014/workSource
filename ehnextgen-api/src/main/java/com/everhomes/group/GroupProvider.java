@@ -92,7 +92,7 @@ public interface GroupProvider {
 
     GuildApply findGuildApplyById(Long id);
 
-    GuildApply FindGuildApplyByGroupMemberId(Long groupMemberId);
+    GuildApply findGuildApplyByGroupMemberId(Long groupMemberId);
 
     IndustryType findIndustryTypeById(Long id);
 

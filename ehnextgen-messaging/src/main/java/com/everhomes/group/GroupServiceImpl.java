@@ -2725,6 +2725,12 @@ public class GroupServiceImpl implements GroupService {
                 }
             }
         }
+
+        //行业协会加入申请时的信息，包括企业等  add by yanjun 20171107
+        if(ClubType.fromCode(group.getClubType()) == ClubType.GUILD){
+            GuildApply guildApply = groupProvider.findGuildApplyByGroupMemberId(groupMember.getId());
+            groupMember.setGuildApplyDTO(ConvertHelper.convert(guildApply, GuildApplyDTO.class));
+        }
     }
     
     private void populateGroupOpRequestDTO(long userId, Group group, GroupOpRequestDTO request) {
@@ -5582,7 +5588,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public GuildApplyDTO findGuildApplyByGroupMemberId(FindGuildApplyByGroupMemberIdCommand cmd) {
-        GuildApply guildApply = groupProvider.FindGuildApplyByGroupMemberId(cmd.getGroupMemberId());
+        GuildApply guildApply = groupProvider.findGuildApplyByGroupMemberId(cmd.getGroupMemberId());
         return ConvertHelper.convert(guildApply, GuildApplyDTO.class);
     }
 
