@@ -5652,7 +5652,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 			//合同结束日期
 			if(listCommand.getContractEndTimeStart() != null && listCommand.getContractEndTimeStart() != null){
-				cond = cond.and(t2.field("contract_end_time").between(listCommand.getContractEndTimeStart(), listCommand.getContractEndTimeStart()));
+				cond = cond.and(t2.field("contract_end_time").between(listCommand.getContractEndTimeStart(), listCommand.getContractEndTimeEnd()));
 			}
 
 			if(listCommand.getExceptIds() != null){
