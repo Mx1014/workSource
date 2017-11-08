@@ -6895,7 +6895,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public Long modifyPhoneNumberByDetailId(Long detailId, String contactToken) {
         OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-        if(detail == null || detail.getTargetType().equals(OrganizationMemberTargetType.UNTRACK.getCode())){
+        if(detail == null || !detail.getTargetType().equals(OrganizationMemberTargetType.UNTRACK.getCode())){
             return 0L;
         }
         List<String> groupTypes = new ArrayList<>();
