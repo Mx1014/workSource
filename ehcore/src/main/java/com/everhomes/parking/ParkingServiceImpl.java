@@ -1314,6 +1314,12 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 		}
 
+//		if (null != dto && null != dto.getPrice() && dto.getPrice().compareTo(new BigDecimal(0)) == 0) {
+//    		long now = System.currentTimeMillis();
+//    		long pastTime = now - dto.getPayTime();
+//    		dto.setRemainingTime();
+//		}
+
 		return dto;
 	}
 
