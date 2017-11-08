@@ -1052,5 +1052,18 @@ public class AssetController extends ControllerBase {
          assetService.paymentExpectancies_re_struct(cmd);
          return "ROU ARE WA GA DEKI ROU KU ROU!";
     }
+    /**
+     * <b>URL: /asset/autoNoticeConfig</b>
+     * <p></p>
+     */
+    @RequestMapping("autoNoticeConfig")
+    @RestReturn(String.class)
+    public RestResponse autoNoticeConfig(AutoNoticeConfigCommand cmd){
+//        assetService.autoNoticeConfig(cmd);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
 
 }
