@@ -165,3 +165,7 @@ INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owne
 	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 20100, 'any-module', 'flow_node', '转交第三方', '转交第三方', '{"nodeType":"HANDOVER"}', 2, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
 	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 20100, 'repair', 'flow_node', '转交第三方', '转交第三方', '{"nodeType":"HANDOVER"}', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 20100, 'any-module', 'flow_node', '直接跳至完成', '直接跳至完成', '{"nodeType":"FLOWCOMPLETED"}', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 20100, 'repair', 'flow_node', '直接跳至完成', '直接跳至完成', '{"nodeType":"FLOWCOMPLETED"}', 2, NULL, NULL, NULL, NULL);
