@@ -90,6 +90,8 @@ public interface GroupProvider {
 
     void createGuildApply(GuildApply guildApply);
 
+    void updateGuildApply(GuildApply guildApply);
+
     GuildApply findGuildApplyById(Long id);
 
     GuildApply findGuildApplyByGroupMemberId(Long groupMemberId);

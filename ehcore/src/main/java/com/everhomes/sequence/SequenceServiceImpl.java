@@ -2345,6 +2345,13 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_INTERACT_SETTINGS.ID.max()).from(Tables.EH_INTERACT_SETTINGS).fetchOne().value1();
         });
 
+        syncTableSequence(null, EhGuildApplies.class, Tables.EH_GUILD_APPLIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_GUILD_APPLIES.ID.max()).from(Tables.EH_GUILD_APPLIES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhIndustryTypes.class, Tables.EH_INDUSTRY_TYPES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_INDUSTRY_TYPES.ID.max()).from(Tables.EH_INDUSTRY_TYPES).fetchOne().value1();
+        });
+
     }
 
     @SuppressWarnings("rawtypes")

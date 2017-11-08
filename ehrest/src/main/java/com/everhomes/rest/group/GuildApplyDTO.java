@@ -22,7 +22,6 @@ import java.sql.Timestamp;
  *     <li>createTime: createTime</li>
  *     <li>updateTime: updateTime</li>
  *     <li>updateUid: updateUid</li>
- *     <li>status: 申请状态 0-applying,1-reject,2-agree 参考 {@link GuildApplyStatus}</li>
  * </ul>
  */
 public class GuildApplyDTO {
@@ -40,7 +39,6 @@ public class GuildApplyDTO {
     private Timestamp createTime;
     private Timestamp updateTime;
     private Long updateUid;
-    private Byte status;
 
     public Long getId() {
         return id;
@@ -152,14 +150,6 @@ public class GuildApplyDTO {
 
     public void setUpdateUid(Long updateUid) {
         this.updateUid = updateUid;
-    }
-
-    public Byte getStatus() {
-        return status;
-    }
-
-    public void setStatus(Byte status) {
-        this.status = status;
     }
 
     @Override

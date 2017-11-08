@@ -1230,11 +1230,19 @@ public class GroupServiceImpl implements GroupService {
 
         //行业协会需要增加额外表单
         if(GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && ClubType.fromCode(group.getClubType()) == ClubType.GUILD){
+
             GuildApply guildApply = ConvertHelper.convert(cmd, GuildApply.class);
             guildApply.setNamespaceId(UserContext.getCurrentNamespaceId());
             guildApply.setApplicantUid(userId);
             guildApply.setGroupMemberId(member.getId());
-            groupProvider.createGuildApply(guildApply);
+
+            GuildApply oldGuildApply = groupProvider.findGuildApplyByGroupMemberId(member.getId());
+            if(oldGuildApply != null){
+                guildApply.setId(oldGuildApply.getId());
+                groupProvider.updateGuildApply(guildApply);
+            }else {
+                groupProvider.createGuildApply(guildApply);
+            }
         }
     }
     
@@ -1625,7 +1633,7 @@ public class GroupServiceImpl implements GroupService {
             break;
         }
     }
-    
+
     @Override
     public void rejectJoinGroupRequest(RejectJoinGroupRequestCommand cmd) {
     	User operator = UserContext.current().getUser();
@@ -3483,6 +3491,10 @@ public class GroupServiceImpl implements GroupService {
 
                 QuestionMetaObject metaObject = createGroupQuestionMetaObject(group, member, null);
                 metaObject.setRequestInfo(notifyTextForAdmin);
+
+                //在信息中增加审批信息 add by yanjun 20171108
+                GuildApply guildApply = groupProvider.findGuildApplyByGroupMemberId(member.getMemberId());
+                metaObject.setJsonInfo(StringHelper.toJsonString(guildApply));
 
                 // 下面的应该写错了，这里不影响以前逻辑的情况下，把俱乐部的metaObjectType换成GROUP_REQUEST_TO_JOIN，add by tt, 20161104
                 if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
@@ -5466,7 +5478,7 @@ public class GroupServiceImpl implements GroupService {
 
 		Group group = groupProvider.findGroupById(cmd.getGroupId());
 		
-		return new GetRemainBroadcastCountResponse(getRemainBroadcastCount(cmd.getNamespaceId(), cmd.getGroupId(), group.getClubType()));
+		return new GetRemainBroadcastCountResponse(getRemainBroadcastCount(cmd.getNamespaceId(), cmd.getGroupId(), ClubType.fromCode(group.getClubType()).getCode()));
 	}
 
 	private Integer getRemainBroadcastCount(Integer namespaceId, Long groupId, Byte clubType) {
