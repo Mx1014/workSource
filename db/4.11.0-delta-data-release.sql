@@ -40,3 +40,7 @@ INSERT INTO `ehcore`.`eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text
 INSERT INTO `ehcore`.`eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100006', 'zh_CN', '入职时间不能为空');
 INSERT INTO `ehcore`.`eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100007', 'zh_CN', '员工类型不能为空');
 -- R ended --
+
+-- dengs,2017.11.08 配置发送消息的cron
+update eh_configurations SET value = '/questionnaire-survey/build/index.html#/question/%s' WHERE name = 'questionnaire.detail.url';
+update eh_configurations SET value = '0 0 1 * * ? *' WHERE name = 'questionnaire.send.message.express';
