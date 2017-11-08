@@ -15,6 +15,13 @@ public class ListFlowPredefinedParamResponse {
     @ItemType(FlowPredefinedParamDTO.class)
     private List<FlowPredefinedParamDTO> params;
 
+    public ListFlowPredefinedParamResponse() {
+    }
+
+    public ListFlowPredefinedParamResponse(List<FlowPredefinedParamDTO> params) {
+        this.params = params;
+    }
+
     public List<FlowPredefinedParamDTO> getParams() {
         return params;
     }

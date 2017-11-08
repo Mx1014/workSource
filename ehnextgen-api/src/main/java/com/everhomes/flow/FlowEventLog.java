@@ -48,6 +48,14 @@ public class FlowEventLog extends EhFlowEventLogs {
 		FlowEventCustomField.BUTTON_FIRED_COUNT.setIntegralValue(this, buttonFiredCount);
 	}
 
+	public Long getCrossLaneRejectFlag() {
+		return FlowEventCustomField.CROSS_LANE_REJECT_FLAG.getIntegralValue(this);
+	}
+
+	public void setCrossLaneRejectFlag(Long flag) {
+		FlowEventCustomField.CROSS_LANE_REJECT_FLAG.setIntegralValue(this, flag);
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

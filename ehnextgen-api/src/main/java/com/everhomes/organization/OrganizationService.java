@@ -575,4 +575,7 @@ public interface OrganizationService {
 	Integer cleanWrongStatusOrganizationMembers(Integer namespaceId);
 
 	Long modifyPhoneNumberByDetailId(Long detailId, String contactToken);
+
+	// todo 0:本部门；1:上级部门; 2:上上级部门; 3:上上上级部门
+	List<OrganizationManagerDTO> getManagerByTargetIdAndOrgId(Long orgId, Long targetId, Integer level);
 }
