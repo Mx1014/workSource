@@ -11172,7 +11172,10 @@ public class OrganizationServiceImpl implements OrganizationService {
             //:todo 寻找部门名
             StringBuffer departmentName = new StringBuffer();
             OrganizationContactDTO dto = ConvertHelper.convert(member, OrganizationContactDTO.class);
-            List<OrganizationMember> departs = this.organizationProvider.listOrganizationMembersByDetailId(dto.getDetailId(), Collections.singletonList(OrganizationGroupType.DEPARTMENT.getCode()));
+            List<String> groupTypes = new ArrayList<>();
+            groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+            groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+            List<OrganizationMember> departs = this.organizationProvider.listOrganizationMembersByDetailId(dto.getDetailId(), groupTypes);
             if(departs != null && departs.size() > 0){
                 for (OrganizationMember depart:departs){
                     Organization org = this.organizationProvider.findOrganizationById(depart.getOrganizationId());
