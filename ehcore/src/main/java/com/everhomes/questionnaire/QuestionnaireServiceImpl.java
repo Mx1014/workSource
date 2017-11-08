@@ -108,8 +108,14 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		String triggerName = "questionnarieSendMessage";
 		String jobName= "questionnarieSendMessage_"+System.currentTimeMillis();
 		//每天一点查询即将到期的问卷，发消息给没有填的用户。
-		String cronExpression = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_SEND_MESSAGE_EXPRESS,"0 0 1 * * ?");
-		scheduleProvider.scheduleCronJob(triggerName,jobName,cronExpression,QuestionnaireSendMessageJob.class , null);
+		String cronExpression = "0 0 1 * * ?";
+		try {
+			configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_SEND_MESSAGE_EXPRESS, "0 0 1 * * ?");
+		}catch (Exception e){
+			e.printStackTrace();
+		}finally {
+			scheduleProvider.scheduleCronJob(triggerName,jobName,cronExpression,QuestionnaireSendMessageJob.class , null);
+		}
 	}
 	@Override
 	public ListQuestionnairesResponse listQuestionnaires(ListQuestionnairesCommand cmd) {
@@ -1061,7 +1067,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		try {
 			String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL,"https://core.zuolin.com");
 			homeUrl = homeUrl.endsWith("/")?homeUrl.substring(0,homeUrl.length()-1):homeUrl;
-			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question/%s");
+			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question/%s#sign_suffix");
 			String srcUrl = String.format(homeUrl+contextUrl, dto.getId());
 			String shareContext = String.format("/evh/wxauth/authReq?ns=%s&src_url=%s",dto.getNamespaceId(), URLEncoder.encode(srcUrl,"utf-8"));
 			dto.setShareUrl(homeUrl+shareContext);

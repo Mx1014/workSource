@@ -1,44 +1,41 @@
 package com.everhomes.rest.parking;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
+import java.util.List;
+
 /**
- * Created by Administrator on 2017/4/10.
+ * @author sw on 2017/10/31.
  */
-public class ParkingCarLockInfoDTO {
+public class RequestCarVerificationCommand {
     private String ownerType;
     private Long ownerId;
     private Long parkingLotId;
-    private String parkingLotName;
+    private Long requestorEnterpriseId;
+    private String requestorEnterpriseName;
     private String plateNumber;
     private String plateOwnerName;
     private String plateOwnerPhone;
-    private Long entryTime;
-    private Long lockCarTime;
-    private Byte lockStatus;
-    private Byte carVerificationFlag;
-    private String flowCaseUrl;
+    private Byte requestType;
 
-    public String getFlowCaseUrl() {
-        return flowCaseUrl;
+    @ItemType(AttachmentDescriptor.class)
+    private List<AttachmentDescriptor> attachments;
+
+    public Byte getRequestType() {
+        return requestType;
     }
 
-    public void setFlowCaseUrl(String flowCaseUrl) {
-        this.flowCaseUrl = flowCaseUrl;
+    public void setRequestType(Byte requestType) {
+        this.requestType = requestType;
     }
 
-    public Byte getCarVerificationFlag() {
-        return carVerificationFlag;
+    public List<AttachmentDescriptor> getAttachments() {
+        return attachments;
     }
 
-    public void setCarVerificationFlag(Byte carVerificationFlag) {
-        this.carVerificationFlag = carVerificationFlag;
-    }
-
-    public Byte getLockStatus() {
-        return lockStatus;
-    }
-
-    public void setLockStatus(Byte lockStatus) {
-        this.lockStatus = lockStatus;
+    public void setAttachments(List<AttachmentDescriptor> attachments) {
+        this.attachments = attachments;
     }
 
     public String getOwnerType() {
@@ -65,12 +62,20 @@ public class ParkingCarLockInfoDTO {
         this.parkingLotId = parkingLotId;
     }
 
-    public String getParkingLotName() {
-        return parkingLotName;
+    public Long getRequestorEnterpriseId() {
+        return requestorEnterpriseId;
     }
 
-    public void setParkingLotName(String parkingLotName) {
-        this.parkingLotName = parkingLotName;
+    public void setRequestorEnterpriseId(Long requestorEnterpriseId) {
+        this.requestorEnterpriseId = requestorEnterpriseId;
+    }
+
+    public String getRequestorEnterpriseName() {
+        return requestorEnterpriseName;
+    }
+
+    public void setRequestorEnterpriseName(String requestorEnterpriseName) {
+        this.requestorEnterpriseName = requestorEnterpriseName;
     }
 
     public String getPlateNumber() {
@@ -97,19 +102,8 @@ public class ParkingCarLockInfoDTO {
         this.plateOwnerPhone = plateOwnerPhone;
     }
 
-    public Long getEntryTime() {
-        return entryTime;
-    }
-
-    public void setEntryTime(Long entryTime) {
-        this.entryTime = entryTime;
-    }
-
-    public Long getLockCarTime() {
-        return lockCarTime;
-    }
-
-    public void setLockCarTime(Long lockCarTime) {
-        this.lockCarTime = lockCarTime;
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

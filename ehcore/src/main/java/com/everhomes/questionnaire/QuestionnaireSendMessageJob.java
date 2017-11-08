@@ -8,7 +8,10 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.quartz.QuartzJobBean;
+import org.springframework.stereotype.Component;
 
 /**
  * @Author dengs[shuang.deng@zuolin.com]
@@ -16,6 +19,8 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
  *
  * 每天晚上一点钟，查询问卷即将一天到期的问卷，然后发送消息给目标用户，让这个人填写。
  */
+@Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class QuestionnaireSendMessageJob extends QuartzJobBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(QuestionnaireSendMessageJob.class);
     @Autowired
