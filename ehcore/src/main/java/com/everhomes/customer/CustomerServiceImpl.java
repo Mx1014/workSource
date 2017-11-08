@@ -1542,7 +1542,8 @@ public class CustomerServiceImpl implements CustomerService {
             locator.setAnchor(cmd.getPageAnchor());
         }
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        List<CustomerAnnualStatisticDTO> dtos = enterpriseCustomerProvider.listCustomerAnnualStatistics(cmd.getCommunityId(), now, locator, pageSize);
+        List<CustomerAnnualStatisticDTO> dtos = enterpriseCustomerProvider.listCustomerAnnualStatistics(cmd.getCommunityId(), now, locator, pageSize,
+                cmd.getTurnoverMinimum(), cmd.getTurnoverMaximum(), cmd.getTaxPaymentMinimum(), cmd.getTaxPaymentMaximum());
         response.setStatisticDTOs(dtos);
         response.setNextPageAnchor(locator.getAnchor());
         return response;

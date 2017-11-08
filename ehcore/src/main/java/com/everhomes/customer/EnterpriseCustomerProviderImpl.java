@@ -770,7 +770,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
-    public List<CustomerAnnualStatisticDTO> listCustomerAnnualStatistics(Long communityId, Timestamp now, CrossShardListingLocator locator, Integer pageSize) {
+    public List<CustomerAnnualStatisticDTO> listCustomerAnnualStatistics(Long communityId, Timestamp now, CrossShardListingLocator locator, Integer pageSize,
+               BigDecimal turnoverMinimum, BigDecimal turnoverMaximum, BigDecimal taxPaymentMinimum, BigDecimal taxPaymentMaximum) {
         Integer size = pageSize + 1;
         List<CustomerAnnualStatisticDTO> result = new ArrayList<>();
         dbProvider.mapReduce(AccessSpec.readOnly(), null,
@@ -788,6 +789,18 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                     query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.START_TIME.le(now));
                     query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.END_TIME.ge(now));
 
+                    if(turnoverMinimum != null) {
+                        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.TURNOVER.ge(turnoverMinimum));
+                    }
+                    if(turnoverMaximum != null) {
+                        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.TURNOVER.le(turnoverMaximum));
+                    }
+                    if(taxPaymentMinimum != null) {
+                        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.TAX_PAYMENT.ge(taxPaymentMinimum));
+                    }
+                    if(taxPaymentMaximum != null) {
+                        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.TAX_PAYMENT.le(taxPaymentMaximum));
+                    }
                     if (null != locator && null != locator.getAnchor())
                         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.ID.lt(locator.getAnchor()));
 

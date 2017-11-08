@@ -2344,6 +2344,9 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhInteractSettings.class, Tables.EH_INTERACT_SETTINGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_INTERACT_SETTINGS.ID.max()).from(Tables.EH_INTERACT_SETTINGS).fetchOne().value1();
         });
+        syncTableSequence(null, EhCustomerEconomicIndicatorStatistics.class, Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.ID.max()).from(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS).fetchOne().value1();
+        });
 
     }
 
