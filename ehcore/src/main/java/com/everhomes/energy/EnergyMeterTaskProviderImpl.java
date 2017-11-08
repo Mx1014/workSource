@@ -125,6 +125,7 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
         return context.selectFrom(Tables.EH_ENERGY_METER_TASKS)
                 .where(Tables.EH_ENERGY_METER_TASKS.METER_ID.eq(meterId))
                 .and(Tables.EH_ENERGY_METER_TASKS.STATUS.ne(EnergyTaskStatus.INACTIVE.getCode()))
+                .orderBy(Tables.EH_ENERGY_METER_TASKS.CREATE_TIME.desc())
                 .fetchInto(EnergyMeterTask.class);
 
     }

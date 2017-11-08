@@ -32,4 +32,9 @@ public interface EnergyConsumptionServiceErrorCode {
     int ERR_METER_PLAN_NOT_ACTIVE = 10020;//计划不存在
     int ERR_METER_TASK_ALREADY_CLOSE = 10021;//任务已关闭
     int ERR_METER_HAS_ASSIGN_PLAN = 10022;//表计已关联计划
+
+    int ERR_METER_TYPE_NOT_EXIST = 10023;//表计类型不存在
+    int ERR_BILL_CATEGORY_NOT_EXIST = 10024;//范围不存在
+    int ERR_SERVICE_CATEGORY_NOT_EXIST = 10025;//性质不存在
+    int ERR_MAX_READING_NOT_EXIST = 10026;//最大量程错误
 }
