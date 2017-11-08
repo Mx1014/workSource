@@ -8158,6 +8158,10 @@ public class PunchServiceImpl implements PunchService {
 		GeneralApproval approval = generalApprovalService.getGeneralApprovalByAttribute(cmd.getOrganizationId(), GeneralApprovalAttribute.ABNORMAL_PUNCH.getCode());
 		if(null != approval){
 			response.setAbnormalStatus(approval.getStatus());
+			String approvalRoute = "zl://form/create?sourceType={GENERAL_APPROVAL}&sourceId={"
+					+ approval.getId() + "}&ownerType={" + approval.getOwnerType() + "}&ownerId={"
+					+ approval.getOwnerId() + "}&displayName={打卡异常}&metaObject={}";
+			response.setApprovalRoute(approvalRoute);
 		}
 		return response;
 	}
