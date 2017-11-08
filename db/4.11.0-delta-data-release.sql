@@ -74,3 +74,15 @@ VALUES ((@locale_strings_id := @locale_strings_id + 1), 'flow', '100017', 'zh_CN
 -- dengs,2017.11.08 配置发送消息的cron
 update eh_configurations SET value = '/questionnaire-survey/build/index.html#/question/%s#sign_suffix' WHERE name = 'questionnaire.detail.url';
 update eh_configurations SET value = '0 0 1 * * ? *' WHERE name = 'questionnaire.send.message.express';
+
+-- 停车6.1 add by sw 20171108
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`)
+	VALUES ('parking', '10021', 'zh_CN', '该车辆已存在，请重新输入');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('40835', '车辆认证申请', '40800', NULL, 'react:/vehicle-certification/certification-list', '0', '2', '/40000/40800/40835', 'park', '472', '40800', '3', NULL, 'module');
+set @id = (select MAX(id) FROM eh_web_menu_scopes);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES ((@id := @id + 1), '40835', '', 'EhNamespaces', '1000000', '2');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.car.verification.flowCase.url', 'zl://workflow/detail?flowCaseId=%s&flowUserType=node_applier&moduleId=40800', NULL, '0', NULL);
+
+
