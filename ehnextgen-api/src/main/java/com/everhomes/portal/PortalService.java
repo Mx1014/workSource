@@ -11,6 +11,8 @@ interface PortalService {
 	//todo
 	ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd);
 
+	ListServiceModuleAppsResponse listServiceModuleAppsWithConditon(ListServiceModuleAppsCommand cmd);
+
 	ServiceModuleAppDTO createServiceModuleApp(CreateServiceModuleAppCommand cmd);
 
 	List<ServiceModuleAppDTO> batchCreateServiceModuleApp(BatchCreateServiceModuleAppCommand cmd);

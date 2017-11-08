@@ -16,4 +16,6 @@ public interface ServiceModuleAppProvider {
 	List<ServiceModuleApp> listServiceModuleAppByActionType(Integer namespaceId, Byte actionType);
 
 	void createServiceModuleApps(List<ServiceModuleApp> serviceModuleApps);
+
+	List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String customPath);
 }

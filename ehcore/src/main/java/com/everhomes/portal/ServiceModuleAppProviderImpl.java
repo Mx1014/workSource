@@ -84,15 +84,16 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 	@Override
 	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId){
-		return listServiceModuleApp(namespaceId, moduleId, null);
+		return listServiceModuleApp(namespaceId, moduleId, null, null, null);
 	}
 
 	@Override
 	public List<ServiceModuleApp> listServiceModuleAppByActionType(Integer namespaceId, Byte actionType){
-		return listServiceModuleApp(namespaceId, null, actionType);
+		return listServiceModuleApp(namespaceId, null, actionType, null, null);
 	}
 
-	private List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String customPath) {
+	@Override
+	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String customPath) {
 		Condition cond = Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId);
 		if(null != moduleId)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.eq(moduleId));
