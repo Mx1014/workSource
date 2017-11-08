@@ -47,7 +47,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'assetv2', '10004', 'zh_CN', '添加失败，一个收费项目只能存在一个账单组中');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'assetv2', '10005', 'zh_CN', '对象已经或正在正常工作中，不能删除或修改');
-UPDATE `eh_locale_strings` SET `text` = '生成失败!' WHERE `scope` = 'assetv2' AND `code` = '1003';
+UPDATE `eh_locale_strings` SET `text` = '还未进行生成' WHERE `scope` = 'assetv2' AND `code` = '10003';
 
 
 -- merge from energy3.0 by xiongying20171030
