@@ -7,6 +7,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.GeneralForm;
+import com.everhomes.general_form.GeneralFormGroup;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.locale.LocaleTemplateService;
@@ -1235,13 +1236,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         valueMap.put(ArchivesParameter.PROVIDENT_FUND_NUMBER, employee.getProvidentFundNumber());
         valueMap.put(ArchivesParameter.REG_RESIDENCE_TYPE, employee.getRegResidenceType());
         valueMap.put(ArchivesParameter.REG_RESIDENCE, employee.getRegResidence());
-        valueMap.put(ArchivesParameter.ID_PHOTO, contentServerService.parserUri(employee.getIdPhoto()));
-        valueMap.put(ArchivesParameter.VISA_PHOTO, contentServerService.parserUri(employee.getVisaPhoto()));
-        valueMap.put(ArchivesParameter.LIFE_PHOTO, contentServerService.parserUri(employee.getLifePhoto()));
-        valueMap.put(ArchivesParameter.ENTRY_FORM, contentServerService.parserUri(employee.getEntryForm()));
-        valueMap.put(ArchivesParameter.GRADUATION_CERTIFICATE, contentServerService.parserUri(employee.getGraduationCertificate()));
-        valueMap.put(ArchivesParameter.DEGREE_CERTIFICATE, contentServerService.parserUri(employee.getDegreeCertificate()));
-        valueMap.put(ArchivesParameter.CONTRACT_CERTIFICATE, contentServerService.parserUri(employee.getContractCertificate()));
         return valueMap;
     }
 
@@ -1703,19 +1697,10 @@ public class ArchivesServiceImpl implements ArchivesService {
             });
             return form;
         } else {
-            //  1.先在组织架构修改表单
-            /*UpdateApprovalFormCommand updateCommand = new UpdateApprovalFormCommand();
-            updateCommand.setFormOriginId(cmd.getFormOriginId());
-            updateCommand.setOwnerId(cmd.getOrganizationId());
-            updateCommand.setOwnerType(ARCHIVE_OWNER_TYPE);
-            updateCommand.setOrganizationId(cmd.getOrganizationId());
-            updateCommand.setFormFields(cmd.getFormFields());
-            updateCommand.setFormGroups(cmd.getFormGroups());
-            updateCommand.setFormName(ARCHIVES_FORM);*/
             GeneralFormDTO form = dbProvider.execute((TransactionStatus status) -> {
-                //  2.为人事档案单独做一个表单的更新处理
+                //  1.为人事档案单独做一个表单的更新处理
                 GeneralFormDTO dto = updateGeneralFormForArchives(cmd);
-                //  3.在业务表单同步记录
+                //  2.在业务表单同步记录
                 ArchivesFroms archivesFroms = archivesProvider.findArchivesFormOriginId(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId());
                 archivesFroms.setFormOriginId(dto.getFormOriginId());
                 archivesFroms.setFormVersion(dto.getFormVersion());
@@ -1727,6 +1712,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     private GeneralFormDTO updateGeneralFormForArchives(UpdateArchivesFormCommand cmd) {
+        //  1.更新表单的字段
         GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(cmd
                 .getFormOriginId());
         if (null == form)
@@ -1735,6 +1721,15 @@ public class ArchivesServiceImpl implements ArchivesService {
         form.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
         generalFormProvider.updateGeneralForm(form);
+        //  2.更新表单的字段组
+        GeneralFormGroup group = generalFormProvider.findGeneralFormGroupByFormOriginId(form.getFormOriginId());
+        if (group == null) {
+            //  若为空说明之前的表单建立并未建字段组
+            generalFormService.createGeneralFormGroup(form, cmd.getFormGroups());
+        } else {
+            //  不为空则说明之前的表单建立过字段组
+            generalFormService.updateGeneralFormGroupByFormId(group, form, cmd.getFormGroups());
+        }
         return ConvertHelper.convert(form, GeneralFormDTO.class);
     }
 

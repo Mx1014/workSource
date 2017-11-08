@@ -12,10 +12,6 @@ public class OrganizationDetail extends EhOrganizationDetails {
 	
 	private String enterpriseName;
 	
-	private String avatar;
-	
-	
-
 	public String getBuildingName() {
 		return buildingName;
 	}
@@ -36,18 +32,6 @@ public class OrganizationDetail extends EhOrganizationDetails {
 
 	public void setEnterpriseName(String enterpriseName) {
 		this.enterpriseName = enterpriseName;
-	}
-
-
-
-	public String getAvatar() {
-		return avatar;
-	}
-
-
-
-	public void setAvatar(String avatar) {
-		this.avatar = avatar;
 	}
 
 

@@ -2,15 +2,13 @@ package com.everhomes.flow;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.flow.FlowConditionExpressionVarType;
+import com.everhomes.rest.flow.FlowConditionLogicOperatorType;
+import com.everhomes.rest.flow.FlowConditionRelationalOperatorType;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
-import javax.script.ScriptException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,23 +27,47 @@ public class FlowGraphConditionNormal extends FlowGraphCondition {
     }
 
     public boolean isTrue(FlowCaseState ctx) throws FlowStepErrorException {
-        if (expressions != null && expressions.size() == 0) {
+        if (expressions == null) {
+            return false;
+        }
+
+        if (expressions.size() == 0) {
             return true;
         }
 
-        List<String> vars = new ArrayList<>();
+        // List<String> vars = new ArrayList<>();
+
+        boolean conditionSuccess = false;
         for (FlowConditionExpression exp : expressions) {
-            FlowConditionExpressionVarType expVarType = FlowConditionExpressionVarType.fromCode(exp.getVariableType1());
+
+            FlowConditionRelationalOperatorType relationalOperatorType = FlowConditionRelationalOperatorType.fromCode(exp.getRelationalOperator());
+            boolean expRetVal = listenerManager.evaluateFlowConditionVariableRelational(ctx, relationalOperatorType, exp);
+
+            FlowConditionLogicOperatorType logicOperatorType = FlowConditionLogicOperatorType.fromCode(exp.getLogicOperator());
+            if (logicOperatorType == FlowConditionLogicOperatorType.OR && expRetVal) {
+                conditionSuccess = true;
+                break;
+            } else if (logicOperatorType == FlowConditionLogicOperatorType.AND && !expRetVal){
+                conditionSuccess = false;
+                break;
+            }
+            conditionSuccess = expRetVal;
+
+            // if (FlowLog)
+
+            /*FlowConditionExpressionVarType expVarType = FlowConditionExpressionVarType.fromCode(exp.getVariableType1());
             if (expVarType == FlowConditionExpressionVarType.VARIABLE) {
                 vars.add(exp.getVariable1());
             }
             expVarType = FlowConditionExpressionVarType.fromCode(exp.getVariableType2());
             if (expVarType == FlowConditionExpressionVarType.VARIABLE) {
                 vars.add(exp.getVariable2());
-            }
+            }*/
         }
 
-        Map<String, String> varNameToValueMap = null;
+        return conditionSuccess;
+
+       /* Map<String, String> varNameToValueMap = null;
         if (vars.size() > 0) {
             varNameToValueMap = listenerManager.onFlowVariableRender(ctx, vars);
         }
@@ -73,7 +95,7 @@ public class FlowGraphConditionNormal extends FlowGraphCondition {
         } catch (ScriptException e) {
             LOGGER.error("flow condition expression isTrue error, cond = {}", condition);
         }
-        return false;
+        return false;*/
     }
 
     private String getVarValue(String varType, String variable, Map<String, String> varNameToValueMap) {

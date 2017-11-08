@@ -6895,7 +6895,11 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public Long modifyPhoneNumberByDetailId(Long detailId, String contactToken) {
         OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+<<<<<<< HEAD
         if(detail == null || !detail.getTargetType().equals(OrganizationMemberTargetType.UNTRACK.getCode())){
+=======
+        if (detail == null || detail.getTargetType().equals(OrganizationMemberTargetType.UNTRACK.getCode())) {
+>>>>>>> bef46e82e54f9fbf6922eb8c5332a50fb38c329c
             return 0L;
         }
         List<String> groupTypes = new ArrayList<>();
@@ -6927,6 +6931,27 @@ public class OrganizationServiceImpl implements OrganizationService {
         return detailId;
     }
 
+    public List<OrganizationManagerDTO> getManagerByTargetIdAndOrgId(Long orgId, Long targetId, Integer level) {
+        OrganizationMember member  = this.organizationProvider.findDepartmentMemberByTargetIdAndOrgId(targetId, orgId);
+        List<OrganizationManagerDTO> managers =  new ArrayList<>();
+        if(member != null){
+            // todo 本部门
+            Long org_id = member.getOrganizationId();
+            int i = 0;
+            while (i < level){
+                Long temp_org_id = checkOrganization(org_id).getParentId();
+                if (temp_org_id != 0) {
+                    org_id = temp_org_id;
+                    i++;
+                } else {
+                    return new ArrayList<>();
+                }
+            }
+            managers = getOrganizationManagers(org_id);
+        }
+
+        return managers;
+    }
 
     private UserIdentifier createUserAndIdentifier(Integer namespaceId, String nickName, String identifierToken) {
         User user = new User();

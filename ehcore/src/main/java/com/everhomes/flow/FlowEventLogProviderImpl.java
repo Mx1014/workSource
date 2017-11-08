@@ -624,7 +624,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     }
 
     @Override
-    public List<FlowOperateLogDTO> searchOperateLogs(Long flowCaseId, Long userId, String serviceType, String keyword, Integer pageSize, ListingLocator locator) {
+    public List<FlowOperateLogDTO> searchOperateLogs(Long moduleId, Long flowCaseId, Long userId, String serviceType, String keyword, Integer pageSize, ListingLocator locator) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         com.everhomes.server.schema.tables.EhFlowEventLogs log = Tables.EH_FLOW_EVENT_LOGS;
@@ -638,17 +638,20 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 
         query.addConditions(flowCase.STATUS.ne(FlowCaseStatus.INVALID.getCode()));// 无效状态的flowCase不要显示
 
-        if (flowCaseId != null) {
+        if (moduleId != null && moduleId != 0) {
+            query.addConditions(flowCase.MODULE_ID.eq(moduleId));
+        }
+        if (flowCaseId != null && flowCaseId != 0) {
             query.addConditions(flowCase.ID.eq(flowCaseId));
         }
-        if (userId != null) {
+        if (userId != null && userId != 0) {
             query.addConditions(log.FLOW_USER_ID.eq(userId));
         }
 
         query.addConditions(log.LOG_TYPE.eq(FlowLogType.BUTTON_FIRED.getCode()));
 
         if (serviceType != null) {
-            query.addConditions(flowCase.TITLE.eq(serviceType));
+            query.addConditions(flowCase.SERVICE_TYPE.eq(serviceType));
         }
         if (keyword != null && keyword.length() > 0) {
             String kw = "%" + keyword + "%";
@@ -698,5 +701,16 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
             return objs.get(0);
         }
         return null;
+    }
+
+    @Override
+    public List<FlowEventLog> findRejectEventLogsByNodeId(Long nodeId, Long flowCaseId, Long stepCount) {
+        return this.queryFlowEventLogs(new ListingLocator(), 1, (locator, query) -> {
+            query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_NODE_ID.eq(nodeId));
+            query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(flowCaseId));
+            query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.REJECT_TRACKER.getCode()));
+            query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.eq(stepCount));
+            return query;
+        });
     }
 }
