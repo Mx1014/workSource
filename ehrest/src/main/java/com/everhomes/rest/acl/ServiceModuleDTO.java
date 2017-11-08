@@ -16,6 +16,7 @@ import java.util.List;
  * <li>path: 层次关系</li>
  * <li>level: 级别</li>
  * <li>serviceModules: 子业务模块</li>
+ * <li>serviceModuleApps: 模块关联应用</li>
  * <li>description: 描述</li>
  * <li>updateTime: 更新时间</li>
  * <li>createTime: 创建时间</li>
