@@ -105,8 +105,7 @@ public class ContractChargingItemAddressProviderImpl implements ContractCharging
     }
 
     @Override
-    public List<ContractChargingItemAddress> findByAddressId(Long addressId, Byte meterType) {
-        Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime());
+    public List<ContractChargingItemAddress> findByAddressId(Long addressId, Byte meterType, Timestamp startDate, Timestamp endDate) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.ID,Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.NAMESPACE_ID,
@@ -119,8 +118,8 @@ public class ContractChargingItemAddressProviderImpl implements ContractCharging
         query.addJoin(Tables.EH_CONTRACTS, JoinType.LEFT_OUTER_JOIN,
                 Tables.EH_CONTRACTS.ID.eq(Tables.EH_CONTRACT_CHARGING_ITEMS.CONTRACT_ID));
         query.addConditions(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()));
-        query.addConditions(Tables.EH_CONTRACTS.CONTRACT_START_DATE.le(current));
-        query.addConditions(Tables.EH_CONTRACTS.CONTRACT_END_DATE.ge(current));
+        query.addConditions(Tables.EH_CONTRACTS.CONTRACT_START_DATE.le(startDate));
+        query.addConditions(Tables.EH_CONTRACTS.CONTRACT_END_DATE.ge(endDate));
         query.addConditions(Tables.EH_CONTRACT_CHARGING_ITEMS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
         query.addConditions(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.ADDRESS_ID.eq(addressId));
         query.addConditions(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()));

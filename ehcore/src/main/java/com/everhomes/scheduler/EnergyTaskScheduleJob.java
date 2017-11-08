@@ -223,6 +223,32 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         return realAmount;
     }
 
+    private Timestamp getEndDate(Timestamp date, Timestamp startDate) {
+        Calendar cal = Calendar.getInstance();
+        Calendar startCal = Calendar.getInstance();
+        cal.setTime(date);
+        startCal.setTime(startDate);
+        if(cal.get(Calendar.MONTH) == startCal.get(Calendar.MONTH)) {
+            //开始结束同月则直接取月末
+            cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+            Timestamp monthEnd = getDayBegin(cal);
+            return monthEnd;
+        }
+        //减一个月取月末
+        cal.add(Calendar.MONTH, -1);
+        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+        Timestamp monthEnd = getDayBegin(cal);
+        return monthEnd;
+    }
+
+    private Timestamp getDayBegin(Calendar cal) {
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.MILLISECOND, 001);
+        return new Timestamp(cal.getTimeInMillis());
+    }
+
     private void generateTaskPaymentExpectancies(EnergyMeterTask task) {
         Boolean generateFlag = false;
         EnergyMeter meter = energyMeterProvider.findById(task.getNamespaceId(), task.getMeterId());
@@ -235,14 +261,15 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
             BigDecimal amount = calculateAmount(task, meter);
             EnergyMeterAddress address = addresses.get(0);
             //eh_contract_charging_item_addresses
-            List<ContractChargingItemAddress> contractChargingItemAddresses = contractChargingItemAddressProvider.findByAddressId(address.getAddressId(), meter.getMeterType());
+            Timestamp endDate = getEndDate(task.getExecutiveExpireTime(), task.getExecutiveStartTime());
+            List<ContractChargingItemAddress> contractChargingItemAddresses = contractChargingItemAddressProvider.findByAddressId(address.getAddressId(), meter.getMeterType(), task.getExecutiveStartTime(), endDate);
             if(contractChargingItemAddresses != null && contractChargingItemAddresses.size() > 0) {
                 List<FeeRules> feeRules = new ArrayList<>();
                 List<Long> contractId = new ArrayList<>();
                 contractChargingItemAddresses.forEach(contractChargingItemAddress -> {
                     ContractChargingItem item = contractChargingItemProvider.findById(contractChargingItemAddress.getContractChargingItemId());
                     FeeRules feeRule = generateChargingItemsFeeRule(amount, item.getChargingItemId(), item.getChargingStandardId(),
-                            item.getChargingStartTime().getTime(), item.getChargingExpiredTime().getTime(), item.getChargingVariables(), address);
+                            task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address);
                     feeRules.add(feeRule);
                     contractId.add(item.getContractId());
                 });
@@ -256,7 +283,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                     properties.forEach(property -> {
                         DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
                         FeeRules feeRule = generateChargingItemsFeeRule(amount, item.getChargingItemId(), item.getChargingStandardId(),
-                                item.getChargingStartTime().getTime(), item.getChargingExpiredTime().getTime(), item.getChargingVariables(), address);
+                                task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address);
                         feeRules.add(feeRule);
                     });
                     //suanqian paymentExpectancies_re_struct();
@@ -269,7 +296,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                         properties.forEach(property -> {
                             DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
                             FeeRules feeRule = generateChargingItemsFeeRule(amount, item.getChargingItemId(), item.getChargingStandardId(),
-                                    item.getChargingStartTime().getTime(), item.getChargingExpiredTime().getTime(), item.getChargingVariables(), address);
+                                    task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address);
                             feeRules.add(feeRule);
                         });
                         //suanqian paymentExpectancies_re_struct();
@@ -282,7 +309,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                             properties.forEach(property -> {
                                 DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
                                 FeeRules feeRule = generateChargingItemsFeeRule(amount, item.getChargingItemId(), item.getChargingStandardId(),
-                                        item.getChargingStartTime().getTime(), item.getChargingExpiredTime().getTime(), item.getChargingVariables(), address);
+                                        task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address);
                                 feeRules.add(feeRule);
                             });
                             //suanqian paymentExpectancies_re_struct();
@@ -305,6 +332,9 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
     private void paymentExpectancies_re_struct(EnergyMeterTask task, EnergyMeterAddress address, List<FeeRules> feeRules, Long contractId) {
         PaymentExpectanciesCommand command = new PaymentExpectanciesCommand();
         command.setContractId(contractId);
+        if(command.getContractId() == null) {
+            command.setContractId(task.getId());
+        }
         command.setFeesRules(feeRules);
         command.setNamesapceId(task.getNamespaceId());
         command.setOwnerId(task.getTargetId());
