@@ -239,6 +239,8 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 				messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
 				messageDto.setMeta(meta);
 
+				Thread.sleep(50);//不要发太快了。
+
 				if(QuestionnaireTargetType.fromCode(questionnaire.getTargetType()) == QuestionnaireTargetType.USER) {
 					messageDto.setBody(String.format(body,"您"));
 					messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
