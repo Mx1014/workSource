@@ -108,8 +108,14 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		String triggerName = "questionnarieSendMessage";
 		String jobName= "questionnarieSendMessage_"+System.currentTimeMillis();
 		//每天一点查询即将到期的问卷，发消息给没有填的用户。
-		String cronExpression = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_SEND_MESSAGE_EXPRESS,"0 0 1 * * ?");
-		scheduleProvider.scheduleCronJob(triggerName,jobName,cronExpression,QuestionnaireSendMessageJob.class , null);
+		String cronExpression = "0 0 1 * * ?";
+		try {
+			configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_SEND_MESSAGE_EXPRESS, "0 0 1 * * ?");
+		}catch (Exception e){
+			e.printStackTrace();
+		}finally {
+			scheduleProvider.scheduleCronJob(triggerName,jobName,cronExpression,QuestionnaireSendMessageJob.class , null);
+		}
 	}
 	@Override
 	public ListQuestionnairesResponse listQuestionnaires(ListQuestionnairesCommand cmd) {
@@ -782,9 +788,14 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 				contents.add(resultTargetDTO.getTargetPhone());
 			}
 			List<QuestionnaireAnswer> answers = questionnaireAnswerProvider.listQuestionnaireAnswerByQuestionnaireId(cmd.getQuestionnaireId(),resultTargetDTO.getTargetType(),resultTargetDTO.getTargetId());
-			long questionId = Long.MAX_VALUE;
+			long questionId = (answers==null || answers.size()==0)?Long.MAX_VALUE:answers.get(0).getQuestionId();
 			String content = "";
 			for (QuestionnaireAnswer answer : answers) {
+				if(questionId != answer.getQuestionId().longValue()){
+					contents.add(content);
+					content = "";
+					questionId = answer.getQuestionId().longValue();
+				}
 				QuestionType type = QuestionType.fromCode(answer.getQuestionType());
 				switch (type) {
 					case BLANK:
@@ -799,13 +810,8 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 					default:
 						break;
 				}
-				if(questionId != answer.getQuestionId()){
-					contents.add(content);
-					content = "";
-					questionId = answer.getQuestionId();
-				}
 			}
-
+			contents.add(content);
 			createRow(sheet,style,contents,startrow++);
 		}
 
@@ -1061,7 +1067,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		try {
 			String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL,"https://core.zuolin.com");
 			homeUrl = homeUrl.endsWith("/")?homeUrl.substring(0,homeUrl.length()-1):homeUrl;
-			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question/%s");
+			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question/%s#sign_suffix");
 			String srcUrl = String.format(homeUrl+contextUrl, dto.getId());
 			String shareContext = String.format("/evh/wxauth/authReq?ns=%s&src_url=%s",dto.getNamespaceId(), URLEncoder.encode(srcUrl,"utf-8"));
 			dto.setShareUrl(homeUrl+shareContext);
@@ -1223,8 +1229,8 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		QuestionnaireAnswer answer = questionnaireAnswerProvider.findAnyAnswerByTarget(questionnaireDTO.getId(), cmd.getTargetType(), cmd.getTargetId());
 		if (answer != null) {
 			if(QuestionnaireTargetType.ORGANIZATION == QuestionnaireTargetType.fromCode(cmd.getTargetType())) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-							"提交失败，其他管理员已填写问卷！");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 201,
+							"其他企业管理员已提交问卷");
 			}else{
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"提交失败，已填写问卷！");

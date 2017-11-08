@@ -20,8 +20,6 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
     private String fullPinyin;
     private String fullInitial;
 
-    private java.lang.Long creatorUid;
-
     private Boolean isCreate;
 
     // private String applyDescription;// 申请加入公司时填写的描述信息   add by xq.tian  2017/05/02
@@ -35,8 +33,6 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
     private Integer profileIntegrity;
 
     private Date checkInTime;
-
-	private String employeeNo;
 
 	private Byte employeeType;
 
@@ -56,21 +52,9 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
         return nickName;
     }
 
-
     public void setNickName(java.lang.String nickName) {
         this.nickName = nickName;
     }
-
-
-    public java.lang.Long getCreatorUid() {
-        return creatorUid;
-    }
-
-
-    public void setCreatorUid(java.lang.Long creatorUid) {
-        this.creatorUid = creatorUid;
-    }
-
 
     public String getInitial() {
         return initial;
@@ -162,15 +146,6 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
     public void setProfileIntegrity(Integer profileIntegrity) {
         this.profileIntegrity = profileIntegrity;
     }
-
-
-	public String getEmployeeNo() {
-		return employeeNo;
-	}
-
-	public void setEmployeeNo(String employeeNo) {
-		this.employeeNo = employeeNo;
-	}
 
 	public Byte getEmployeeType() {
 		return employeeType;

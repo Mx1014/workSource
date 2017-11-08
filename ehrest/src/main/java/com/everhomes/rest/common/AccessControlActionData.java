@@ -12,7 +12,7 @@ public class AccessControlActionData {
     private int isSupportQR; 		//是否支持二维码门禁，0不支持，1支持
 
     private String doorId;
-    
+
     private int isSupportKeyShowing; //是否显示我的钥匙
     
     private int isHighlight; // 0: 不支持高亮，1 支持高亮
@@ -50,14 +50,14 @@ public class AccessControlActionData {
     }
 
     public int getIsSupportKeyShowing() {
-		return isSupportKeyShowing;
-	}
+        return isSupportKeyShowing;
+    }
 
-	public void setIsSupportKeyShowing(int isSupportKeyShowing) {
-		this.isSupportKeyShowing = isSupportKeyShowing;
-	}
+    public void setIsSupportKeyShowing(int isSupportKeyShowing) {
+        this.isSupportKeyShowing = isSupportKeyShowing;
+    }
 
-	public int getIsHighlight() {
+    public int getIsHighlight() {
         return isHighlight;
     }
 

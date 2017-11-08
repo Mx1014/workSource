@@ -23,6 +23,8 @@ public class UpdateArchivesEmployeeCommand {
 
     private Long organizationId;
 
+    private String contactToken;
+
     /*private String contactName;
 
     private String enName;
@@ -166,5 +168,13 @@ public class UpdateArchivesEmployeeCommand {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public String getContactToken() {
+        return contactToken;
+    }
+
+    public void setContactToken(String contactToken) {
+        this.contactToken = contactToken;
     }
 }

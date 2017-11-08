@@ -157,3 +157,15 @@ UPDATE eh_launch_pad_items set action_data = '{"tag":"招聘与求职","forumEnt
 
 -- 停车 add by sw 20171102
 UPDATE eh_parking_card_requests set card_type_id = '2' where owner_id = 240111044331055940 and card_type_id is NULL;
+
+-- 物业报修 add by xiongying20171107
+SET @ns_id = 0;
+SET @flow_predefined_params_id = IFNULL((SELECT MAX(id) FROM `eh_flow_predefined_params`), 1);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 20100, 'any-module', 'flow_node', '转交第三方', '转交第三方', '{"nodeType":"HANDOVER"}', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 20100, 'repair', 'flow_node', '转交第三方', '转交第三方', '{"nodeType":"HANDOVER"}', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 20100, 'any-module', 'flow_node', '直接跳至完成', '直接跳至完成', '{"nodeType":"FLOWCOMPLETED"}', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 20100, 'repair', 'flow_node', '直接跳至完成', '直接跳至完成', '{"nodeType":"FLOWCOMPLETED"}', 2, NULL, NULL, NULL, NULL);

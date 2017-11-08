@@ -567,7 +567,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         Organization parOrg = this.checkOrganization(cmd.getId());
 
         parOrg.setShowFlag(cmd.getNaviFlag());
-        parOrg.setName(cmd.getName());
+        if(!StringUtils.isEmpty(cmd.getName()))
+            parOrg.setName(cmd.getName());
 
         Organization org = dbProvider.execute((TransactionStatus status) -> {
             if (OrganizationGroupType.fromCode(parOrg.getGroupType()) == OrganizationGroupType.ENTERPRISE) {
@@ -724,6 +725,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (null != org.getLongitude())
             dto.setLongitude(org.getLongitude().toString());
         //end
+        dto.setUnifiedSocialCreditCode(organization.getUnifiedSocialCreditCode());
+        dto.setWebsite(organization.getWebsite());
         dto.setEmailDomain(org.getEmailDomain());
         dto.setName(organization.getName());
         dto.setCommunityId(organizationDTO.getCommunityId());
@@ -1134,6 +1137,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organization.setGroupId(group.getId());
             organization.setEmailDomain(cmd.getEmailDomain());
+            organization.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
             organizationProvider.createOrganization(organization);
 
             OrganizationDetail enterprise = new OrganizationDetail();
@@ -1282,6 +1286,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             organization.setName(cmd.getName());
             organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organization.setEmailDomain(cmd.getEmailDomain());
+            organization.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
             organizationProvider.updateOrganization(organization);
 
             OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
@@ -6815,6 +6820,12 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
 
+        // 删除离职Log表中的记录
+        OrganizationMemberDetails old_detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(org.getId(), contactToken);
+        if(old_detail != null){
+            this.archivesService.deleteArchivesDismissEmployees(old_detail.getId(), old_detail.getOrganizationId());
+        }
+
 
         //是注册用户或者从加入公司待审核的注册用户 则需要发送消息等等操作
         if (sendMsgFlag) {
@@ -6885,6 +6896,62 @@ public class OrganizationServiceImpl implements OrganizationService {
         return (Integer) tuple.first();
     }
 
+    @Override
+    public Long modifyPhoneNumberByDetailId(Long detailId, String contactToken) {
+        OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+        if (detail == null || detail.getTargetType().equals(OrganizationMemberTargetType.UNTRACK.getCode())) {
+            return 0L;
+        }
+        List<String> groupTypes = new ArrayList<>();
+        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+        groupTypes.add(OrganizationGroupType.GROUP.getCode());
+        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
+        groupTypes.add(OrganizationGroupType.JOB_LEVEL.getCode());
+        groupTypes.add(OrganizationGroupType.MANAGER.getCode());
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByDetailId(detailId, groupTypes);
+        if (members != null) {
+            members.stream().filter(r ->
+                    r.getContactType() != null && r.getContactType() == IdentifierType.MOBILE.getCode()
+            ).forEach(r -> {
+                r.setContactToken(contactToken);
+                organizationProvider.updateOrganizationMember(r);
+            });
+
+            List<Long> detailIds = members.stream().map(OrganizationMember::getDetailId).collect(Collectors.toList());
+            List<OrganizationMemberDetails> details = organizationProvider.findDetailInfoListByIdIn(detailIds);
+            if (details != null) {
+                details.forEach(r -> {
+                    r.setContactToken(contactToken);
+                    organizationProvider.updateOrganizationMemberDetails(r, r.getId());
+                });
+            }
+        }
+        return detailId;
+    }
+
+    public List<OrganizationManagerDTO> getManagerByTargetIdAndOrgId(Long orgId, Long targetId, Integer level) {
+        OrganizationMember member  = this.organizationProvider.findDepartmentMemberByTargetIdAndOrgId(targetId, orgId);
+        List<OrganizationManagerDTO> managers =  new ArrayList<>();
+        if(member != null){
+            // todo 本部门
+            Long org_id = member.getOrganizationId();
+            int i = 0;
+            while (i < level){
+                Long temp_org_id = checkOrganization(org_id).getParentId();
+                if (temp_org_id != 0) {
+                    org_id = temp_org_id;
+                    i++;
+                } else {
+                    return new ArrayList<>();
+                }
+            }
+            managers = getOrganizationManagers(org_id);
+        }
+
+        return managers;
+    }
 
     private UserIdentifier createUserAndIdentifier(Integer namespaceId, String nickName, String identifierToken) {
         User user = new User();

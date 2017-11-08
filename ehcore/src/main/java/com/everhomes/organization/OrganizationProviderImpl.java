@@ -1728,7 +1728,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
 
         query.addConditions(Tables.EH_ORGANIZATIONS.PATH.like(superiorPath));
-        query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.DEPARTMENT.getCode()));
+        query.addConditions((Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.DEPARTMENT.getCode())).or(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode())));
         query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 
         Integer offset = pageOffset == null ? 1 : (pageOffset - 1) * pageSize;
@@ -5748,5 +5748,21 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				.set(Tables.EH_ORGANIZATION_MEMBERS.UPDATE_TIME, now)
 				.where(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(path)).execute();
 		return count;
+	}
+
+	@Override
+	public OrganizationMember findDepartmentMemberByTargetIdAndOrgId(Long userId, Long organizationId) {
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId)
+				.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like("/" +organizationId + "%"))
+				.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+				.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.DEPARTMENT.getCode()));
+
+		Record r = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetchOne();
+
+		if (r != null)
+			return ConvertHelper.convert(r, OrganizationMember.class);
+		return null;
 	}
 }

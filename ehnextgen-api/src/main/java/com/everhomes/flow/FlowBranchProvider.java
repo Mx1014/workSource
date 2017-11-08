@@ -16,4 +16,6 @@ public interface FlowBranchProvider {
     FlowBranch findBranch(Long originalNodeId);
 
     List<FlowBranch> findByFlowId(Long flowId, Integer flowVersion);
+
+    FlowBranch findBranchByOriginalNodeId(Long flowMainId, Integer flowVersion, Long originalNodeId);
 }
