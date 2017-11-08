@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.flow.*;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.parking.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -23,15 +25,6 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseState;
-import com.everhomes.flow.FlowGraphNode;
-import com.everhomes.flow.FlowModuleInfo;
-import com.everhomes.flow.FlowModuleListener;
-import com.everhomes.flow.FlowNode;
-import com.everhomes.flow.FlowProvider;
-import com.everhomes.flow.FlowService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
@@ -58,6 +51,8 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 	private AddressProvider addressProvider;
 	@Autowired
 	private ParkingService parkingService;
+	@Autowired
+	private FlowCaseProvider flowCaseProvider;
 
 	@Override
 	public FlowModuleInfo initModule() {
@@ -83,29 +78,72 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		String stepType = ctx.getStepType().getCode();
 		String param = flowNode.getParams();
 		
-		Long flowId = flowNode.getFlowMainId();
-		ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(flowCase.getReferId());
 		Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
 		String tag1 = flow.getStringTag1();
 		
-		long now = System.currentTimeMillis();
-		LOGGER.debug("update parking request, stepType={}, tag1={}, param={}", stepType, tag1, param);
-		
-		parkingCardRequest.setStatus(ParkingCardRequestStatus.INACTIVE.getCode());
-		parkingCardRequest.setCancelTime(new Timestamp(System.currentTimeMillis()));
-		parkingProvider.updateParkingCardRequest(parkingCardRequest);
-		
+		LOGGER.info("update parking request, stepType={}, tag1={}, param={}", stepType, tag1, param);
+
+		if (flowCase.getReferType().equals(EntityType.PARKING_CAR_VERIFICATION.getCode())) {
+			ParkingCarVerification verification = parkingProvider.findParkingCarVerificationById(flowCase.getReferId());
+
+			verification.setStatus(ParkingCarVerificationStatus.FAILED.getCode());
+
+			parkingProvider.updateParkingCarVerification(verification);
+		}else if (flowCase.getReferType().equals(EntityType.PARKING_CARD_REQUEST.getCode())){
+			ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(flowCase.getReferId());
+			parkingCardRequest.setStatus(ParkingCardRequestStatus.INACTIVE.getCode());
+			parkingCardRequest.setCancelTime(new Timestamp(System.currentTimeMillis()));
+
+
+			parkingProvider.updateParkingCardRequest(parkingCardRequest);
+		}
 	}
 
 	@Override
 	public void onFlowCaseStateChanged(FlowCaseState ctx) {
 		// TODO Auto-generated method stub
-		
+		FlowGraphNode currentNode = ctx.getCurrentNode();
+		FlowNode flowNode = currentNode.getFlowNode();
+		FlowCase flowCase = ctx.getFlowCase();
+
+		if (flowCase.getReferType().equals(EntityType.PARKING_CAR_VERIFICATION.getCode())) {
+			ParkingCarVerification verification = parkingProvider.findParkingCarVerificationById(flowCase.getReferId());
+
+			if (verification.getFlowCaseId() == null || verification.getFlowCaseId() == 0L) {
+				verification.setFlowCaseId(flowCase.getId());
+			}
+
+			verification.setStatus(convertStatus(flowCase.getStatus()));
+
+			parkingProvider.updateParkingCarVerification(verification);
+		}
+	}
+
+	private Byte convertStatus(Byte flowCaseStatus) {
+
+		FlowCaseStatus status = FlowCaseStatus.fromCode(flowCaseStatus);
+
+		switch (status) {
+			case PROCESS: return ParkingCarVerificationStatus.AUDITING.getCode();
+			case ABSORTED: return ParkingCarVerificationStatus.FAILED.getCode();
+			case FINISHED: return ParkingCarVerificationStatus.SUCCEED.getCode();
+			default: return ParkingCarVerificationStatus.AUDITING.getCode();
+		}
 	}
 
 	@Override
 	public void onFlowCaseEnd(FlowCaseState ctx) {
-		// TODO Auto-generated method stub
+		FlowGraphNode currentNode = ctx.getCurrentNode();
+		FlowNode flowNode = currentNode.getFlowNode();
+		FlowCase flowCase = ctx.getFlowCase();
+
+		if (flowCase.getReferType().equals(EntityType.PARKING_CAR_VERIFICATION.getCode())) {
+			ParkingCarVerification verification = parkingProvider.findParkingCarVerificationById(flowCase.getReferId());
+
+			verification.setStatus(convertStatus(flowCase.getStatus()));
+
+			parkingProvider.updateParkingCarVerification(verification);
+		}
 		
 	}
 
@@ -123,67 +161,73 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
-		
-		ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(flowCase.getReferId());
-		
-		ParkingCardRequestDTO dto = ConvertHelper.convert(parkingCardRequest, ParkingCardRequestDTO.class);
 
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(parkingCardRequest.getRequestorUid(), IdentifierType.MOBILE.getCode());
-		dto.setPlateOwnerPhone(userIdentifier.getIdentifierToken());
-		if(null != parkingCardRequest.getCarSerieId()) {
-			ParkingCarSerie carSerie = parkingProvider.findParkingCarSerie(parkingCardRequest.getCarSerieId());
-			if(null != carSerie) {
-    			ParkingCarSerie secondCarSerie = parkingProvider.findParkingCarSerie(carSerie.getParentId());
-    			if(null != secondCarSerie) {
-    				ParkingCarSerie carBrand = parkingProvider.findParkingCarSerie(secondCarSerie.getParentId());
-    				dto.setCarSerieName(carSerie.getName());
-    				if(null != carBrand)
-    					dto.setCarBrand(carBrand.getName());
-    			}
+		if (flowCase.getReferType().equals(EntityType.PARKING_CARD_REQUEST.getCode())) {
+			ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(flowCase.getReferId());
+
+			ParkingCardRequestDTO dto = ConvertHelper.convert(parkingCardRequest, ParkingCardRequestDTO.class);
+
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(parkingCardRequest.getRequestorUid(), IdentifierType.MOBILE.getCode());
+			dto.setPlateOwnerPhone(userIdentifier.getIdentifierToken());
+			if (null != parkingCardRequest.getCarSerieId()) {
+				ParkingCarSerie carSerie = parkingProvider.findParkingCarSerie(parkingCardRequest.getCarSerieId());
+				if (null != carSerie) {
+					ParkingCarSerie secondCarSerie = parkingProvider.findParkingCarSerie(carSerie.getParentId());
+					if (null != secondCarSerie) {
+						ParkingCarSerie carBrand = parkingProvider.findParkingCarSerie(secondCarSerie.getParentId());
+						dto.setCarSerieName(carSerie.getName());
+						if (null != carBrand)
+							dto.setCarBrand(carBrand.getName());
+					}
+				}
 			}
-		}
-		
-    	List<ParkingAttachment> attachments = parkingProvider.listParkingAttachments(parkingCardRequest.getId(), 
-    			ParkingAttachmentType.PARKING_CARD_REQUEST.getCode());
-    	
-		List<ParkingAttachmentDTO> attachmentDtos =  attachments.stream().map(r -> {
-			ParkingAttachmentDTO attachmentDto = ConvertHelper.convert(r, ParkingAttachmentDTO.class);
-			
-			String contentUrl = getResourceUrlByUir(r.getContentUri(), 
-	                EntityType.USER.getCode(), r.getCreatorUid());
-			attachmentDto.setContentUrl(contentUrl);
-			attachmentDto.setInformationType(r.getDataType());
-			return attachmentDto;
-		}).collect(Collectors.toList());
-    	
-		dto.setAttachments(attachmentDtos);
-		
-		Integer count = parkingProvider.waitingCardCount(parkingCardRequest.getOwnerType(), parkingCardRequest.getOwnerId(),
-				parkingCardRequest.getParkingLotId(), parkingCardRequest.getCreateTime());
-		dto.setRanking(count + 1);
 
-		ParkingCardType cardType = parkingService.getParkingCardType(parkingCardRequest.getOwnerType(), parkingCardRequest.getOwnerId(),
-				parkingCardRequest.getParkingLotId(), parkingCardRequest.getCardTypeId());
-		if (null != cardType) {
-			dto.setCardTypeName(cardType.getTypeName());
-		}
+			List<ParkingAttachment> attachments = parkingProvider.listParkingAttachments(parkingCardRequest.getId(),
+					ParkingAttachmentType.PARKING_CARD_REQUEST.getCode());
 
-		if (null != parkingCardRequest.getInvoiceType()) {
-			ParkingInvoiceType parkingInvoiceType = parkingProvider.findParkingInvoiceTypeById(parkingCardRequest.getInvoiceType());
-			if (null != parkingInvoiceType) {
-				dto.setInvoiceName(parkingInvoiceType.getName());
+			List<ParkingAttachmentDTO> attachmentDtos = attachments.stream().map(r -> {
+				ParkingAttachmentDTO attachmentDto = ConvertHelper.convert(r, ParkingAttachmentDTO.class);
+
+				String contentUrl = getResourceUrlByUir(r.getContentUri(),
+						EntityType.USER.getCode(), r.getCreatorUid());
+				attachmentDto.setContentUrl(contentUrl);
+				attachmentDto.setInformationType(r.getDataType());
+				return attachmentDto;
+			}).collect(Collectors.toList());
+
+			dto.setAttachments(attachmentDtos);
+
+			Integer count = parkingProvider.waitingCardCount(parkingCardRequest.getOwnerType(), parkingCardRequest.getOwnerId(),
+					parkingCardRequest.getParkingLotId(), parkingCardRequest.getCreateTime());
+			dto.setRanking(count + 1);
+
+			ParkingCardType cardType = parkingService.getParkingCardType(parkingCardRequest.getOwnerType(), parkingCardRequest.getOwnerId(),
+					parkingCardRequest.getParkingLotId(), parkingCardRequest.getCardTypeId());
+			if (null != cardType) {
+				dto.setCardTypeName(cardType.getTypeName());
 			}
-		}
 
-		if (null != parkingCardRequest.getAddressId()) {
-			Address address = addressProvider.findAddressById(parkingCardRequest.getAddressId());
-			if (null != address) {
-				dto.setApartmentName(address.getAddress());
+			if (null != parkingCardRequest.getInvoiceType()) {
+				ParkingInvoiceType parkingInvoiceType = parkingProvider.findParkingInvoiceTypeById(parkingCardRequest.getInvoiceType());
+				if (null != parkingInvoiceType) {
+					dto.setInvoiceName(parkingInvoiceType.getName());
+				}
 			}
-		}
 
-		flowCase.setCustomObject(JSONObject.toJSONString(dto));//StringHelper.toJsonString(dto)
-		
+			if (null != parkingCardRequest.getAddressId()) {
+				Address address = addressProvider.findAddressById(parkingCardRequest.getAddressId());
+				if (null != address) {
+					dto.setApartmentName(address.getAddress());
+				}
+			}
+
+			flowCase.setCustomObject(JSONObject.toJSONString(dto));//StringHelper.toJsonString(dto)
+		}else {
+			GetParkingCarVerificationByIdCommand cmd = new GetParkingCarVerificationByIdCommand();
+			cmd.setId(flowCase.getReferId());
+			ParkingCarVerificationDTO dto = parkingService.getParkingCarVerificationById(cmd);
+			flowCase.setCustomObject(JSONObject.toJSONString(dto));//StringHelper.toJsonString(dto)
+		}
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		return entities;
 	}
@@ -214,98 +258,149 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		FlowNode flowNode = currentNode.getFlowNode();
 		FlowCase flowCase = ctx.getFlowCase();
 
-		String stepType = ctx.getStepType().getCode();
-		String params = flowNode.getParams();
-		
-		if(StringUtils.isBlank(params)) {
-			LOGGER.error("Invalid flowNode param.");
-    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
-    				"Invalid flowNode param.");
-		}
-		
-		JSONObject paramJson = JSONObject.parseObject(params);
-		String nodeType = paramJson.getString("nodeType");
-		
-		Long flowId = flowNode.getFlowMainId();
-		ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(flowCase.getReferId());
-		Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
-		String tag1 = flow.getStringTag1();
-		
-		long now = System.currentTimeMillis();
-		LOGGER.debug("update parking request, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
-		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
-			if("AUDITING".equals(nodeType)) {
+		//月卡申请才做处理
+		if (flowCase.getReferType().equals(EntityType.PARKING_CARD_REQUEST.getCode())) {
+			String stepType = ctx.getStepType().getCode();
+			String params = flowNode.getParams();
+
+			if (StringUtils.isBlank(params)) {
+				LOGGER.error("Invalid flowNode param.");
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+						"Invalid flowNode param.");
+			}
+
+			JSONObject paramJson = JSONObject.parseObject(params);
+			String nodeType = paramJson.getString("nodeType");
+
+			Long flowId = flowNode.getFlowMainId();
+			ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(flowCase.getReferId());
+			Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+			String tag1 = flow.getStringTag1();
+
+			long now = System.currentTimeMillis();
+			LOGGER.debug("update parking request, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
+			if (FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
+				if ("AUDITING".equals(nodeType)) {
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
 					parkingCardRequest.setAuditSucceedTime(new Timestamp(now));
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
-			}
-			else if("QUEUEING".equals(nodeType)) {
-				
-				ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(parkingCardRequest.getOwnerType(), 
-						parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId);
-				Integer issuedCount = parkingProvider.countParkingCardRequest(parkingCardRequest.getOwnerType(), 
-						parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId, 
-						ParkingCardRequestStatus.SUCCEED.getCode(), null);
-				
-				if(null != parkingFlow && parkingFlow.getMaxIssueNumFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
-					Integer totalCount = parkingFlow.getMaxIssueNum();
-					Integer surplusCount = totalCount - issuedCount;
-					if(surplusCount <= 0) {
-						LOGGER.error("surplusCount is 0.");
-			    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD,
-			    				"surplusCount is 0.");
+				} else if ("QUEUEING".equals(nodeType)) {
+
+					ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(parkingCardRequest.getOwnerType(),
+							parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId);
+					Integer issuedCount = parkingProvider.countParkingCardRequest(parkingCardRequest.getOwnerType(),
+							parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId,
+							ParkingCardRequestStatus.SUCCEED.getCode(), null);
+
+					if (null != parkingFlow && parkingFlow.getMaxIssueNumFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
+						Integer totalCount = parkingFlow.getMaxIssueNum();
+						Integer surplusCount = totalCount - issuedCount;
+						if (surplusCount <= 0) {
+							LOGGER.error("surplusCount is 0.");
+							throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD,
+									"surplusCount is 0.");
+						}
+					}
+					//智能模式，排队中 -》办理成功
+					if (ParkingRequestFlowType.INTELLIGENT.getCode().equals(Integer.valueOf(tag1))) {
+						LOGGER.debug("update parking request, stepType={}, tag1={}", stepType, tag1);
+						parkingCardRequest.setStatus(ParkingCardRequestStatus.SUCCEED.getCode());
+						parkingCardRequest.setProcessSucceedTime(new Timestamp(now));
+						parkingProvider.updateParkingCardRequest(parkingCardRequest);
+					} else {
+						LOGGER.debug("update parking request, stepType={}, tag1={}", stepType, tag1);
+						parkingCardRequest.setStatus(ParkingCardRequestStatus.PROCESSING.getCode());
+						parkingCardRequest.setIssueTime(new Timestamp(now));
+						parkingProvider.updateParkingCardRequest(parkingCardRequest);
+					}
+				} else if ("PROCESSING".equals(nodeType)) {
+
+					ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(parkingCardRequest.getOwnerType(),
+							parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId);
+					Integer issuedCount = parkingProvider.countParkingCardRequest(parkingCardRequest.getOwnerType(),
+							parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId,
+							ParkingCardRequestStatus.SUCCEED.getCode(), null);
+
+					if (null != parkingFlow && parkingFlow.getMaxIssueNumFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
+						Integer totalCount = parkingFlow.getMaxIssueNum();
+						Integer surplusCount = totalCount - issuedCount;
+						if (surplusCount <= 0) {
+							LOGGER.error("surplusCount is 0.");
+							throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD,
+									"surplusCount is 0.");
+						}
+					}
+
+					if (ParkingRequestFlowType.QUEQUE.getCode().equals(Integer.valueOf(tag1)) ||
+							ParkingRequestFlowType.SEMI_AUTOMATIC.getCode().equals(Integer.valueOf(tag1))) {
+						parkingCardRequest.setStatus(ParkingCardRequestStatus.SUCCEED.getCode());
+						parkingCardRequest.setProcessSucceedTime(new Timestamp(now));
+						parkingProvider.updateParkingCardRequest(parkingCardRequest);
+
+						createCarVerification(parkingCardRequest, flowCase);
 					}
 				}
-				
-				if(ParkingRequestFlowType.INTELLIGENT.getCode().equals(Integer.valueOf(tag1))) {
-					LOGGER.debug("update parking request, stepType={}, tag1={}", stepType, tag1);
-					parkingCardRequest.setStatus(ParkingCardRequestStatus.SUCCEED.getCode());
-					parkingCardRequest.setProcessSucceedTime(new Timestamp(now));
+			} else if (FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
+				if ("SUCCEED".equals(nodeType)) {
+					parkingCardRequest.setStatus(ParkingCardRequestStatus.OPENED.getCode());
+					parkingCardRequest.setOpenCardTime(new Timestamp(now));
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
-				}else {
-					LOGGER.debug("update parking request, stepType={}, tag1={}", stepType, tag1);
-					parkingCardRequest.setStatus(ParkingCardRequestStatus.PROCESSING.getCode());
-					parkingCardRequest.setIssueTime(new Timestamp(now));
-					parkingProvider.updateParkingCardRequest(parkingCardRequest);
-				}
-			}else if("PROCESSING".equals(nodeType)) {
-				
-				ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(parkingCardRequest.getOwnerType(), 
-						parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId);
-				Integer issuedCount = parkingProvider.countParkingCardRequest(parkingCardRequest.getOwnerType(), 
-						parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId, 
-						ParkingCardRequestStatus.SUCCEED.getCode(), null);
-				
-				if(null != parkingFlow && parkingFlow.getMaxIssueNumFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
-					Integer totalCount = parkingFlow.getMaxIssueNum();
-					Integer surplusCount = totalCount - issuedCount;
-					if(surplusCount <= 0) {
-						LOGGER.error("surplusCount is 0.");
-			    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD,
-			    				"surplusCount is 0.");
-					}
-				}
-				
-				if(ParkingRequestFlowType.QUEQUE.getCode().equals(Integer.valueOf(tag1)) ||
-						ParkingRequestFlowType.SEMI_AUTOMATIC.getCode().equals(Integer.valueOf(tag1))) {
-					parkingCardRequest.setStatus(ParkingCardRequestStatus.SUCCEED.getCode());
-					parkingCardRequest.setProcessSucceedTime(new Timestamp(now));
+
+					createCarVerification(parkingCardRequest, flowCase);
+				} else {
+					parkingCardRequest.setStatus(ParkingCardRequestStatus.INACTIVE.getCode());
+					parkingCardRequest.setCancelTime(new Timestamp(now));
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
 				}
 			}
-		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
-			if("SUCCEED".equals(nodeType)) {
-				parkingCardRequest.setStatus(ParkingCardRequestStatus.OPENED.getCode());
-				parkingCardRequest.setOpenCardTime(new Timestamp(now));
-				parkingProvider.updateParkingCardRequest(parkingCardRequest);
-			}else {
-				parkingCardRequest.setStatus(ParkingCardRequestStatus.INACTIVE.getCode());
-				parkingCardRequest.setCancelTime(new Timestamp(now));
-				parkingProvider.updateParkingCardRequest(parkingCardRequest);
-			}
-			
 		}
-		
+	}
+
+	private void createCarVerification(ParkingCardRequest parkingCardRequest, FlowCase flowCase) {
+
+		ParkingCarVerification verification = parkingProvider.findParkingCarVerificationByUserId(parkingCardRequest.getOwnerType(),
+				parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), parkingCardRequest.getPlateNumber(),
+				parkingCardRequest.getCreatorUid());
+
+		if (null != verification) {
+			if (verification.getStatus() == ParkingCarVerificationStatus.SUCCEED.getCode()) {
+				return;
+			}else if (verification.getStatus() == ParkingCarVerificationStatus.AUDITING.getCode()) {
+				flowCase.setStatus(FlowCaseStatus.INVALID.getCode());
+				flowCase.setDeleteFlag(TrueOrFalseFlag.TRUE.getCode());
+				flowCaseProvider.updateFlowCase(flowCase);
+			}else if (verification.getStatus() == ParkingCarVerificationStatus.UN_AUTHORIZED.getCode()) {
+
+			}
+			verification.setPlateOwnerName(parkingCardRequest.getPlateOwnerName());
+			verification.setPlateOwnerPhone(parkingCardRequest.getPlateOwnerPhone());
+			verification.setRequestorEnterpriseId(parkingCardRequest.getRequestorEnterpriseId());
+			verification.setRequestorEnterpriseName(parkingCardRequest.getPlateOwnerEntperiseName());
+			verification.setSourceType(ParkingCarVerificationSourceType.CARD_REQUEST.getCode());
+			verification.setStatus(ParkingCarVerificationStatus.SUCCEED.getCode());
+			verification.setFlowCaseId(parkingCardRequest.getFlowCaseId());
+			verification.setRequestorUid(parkingCardRequest.getCreatorUid());
+			verification.setCreatorUid(parkingCardRequest.getCreatorUid());
+			verification.setCreateTime(new Timestamp(System.currentTimeMillis()));
+			parkingProvider.updateParkingCarVerification(verification);
+		}else {
+			verification = new ParkingCarVerification();
+			verification.setOwnerType(parkingCardRequest.getOwnerType());
+			verification.setOwnerId(parkingCardRequest.getOwnerId());
+			verification.setParkingLotId(parkingCardRequest.getParkingLotId());
+			verification.setPlateNumber(parkingCardRequest.getPlateNumber());
+			verification.setPlateOwnerName(parkingCardRequest.getPlateOwnerName());
+			verification.setPlateOwnerPhone(parkingCardRequest.getPlateOwnerPhone());
+			verification.setRequestorEnterpriseId(parkingCardRequest.getRequestorEnterpriseId());
+			verification.setRequestorEnterpriseName(parkingCardRequest.getPlateOwnerEntperiseName());
+			verification.setSourceType(ParkingCarVerificationSourceType.CARD_REQUEST.getCode());
+			verification.setStatus(ParkingCarVerificationStatus.SUCCEED.getCode());
+			verification.setFlowCaseId(parkingCardRequest.getFlowCaseId());
+			verification.setRequestorUid(parkingCardRequest.getCreatorUid());
+			verification.setCreatorUid(parkingCardRequest.getCreatorUid());
+			verification.setCreateTime(new Timestamp(System.currentTimeMillis()));
+			parkingProvider.createParkingCarVerification(verification);
+		}
 	}
 
 	@Override
