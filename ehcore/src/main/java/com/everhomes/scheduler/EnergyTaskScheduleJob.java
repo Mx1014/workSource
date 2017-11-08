@@ -331,6 +331,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
             }
         }
         LOGGER.debug("paymentExpectancies_re_struct command: {}", command);
+        assetService.upodateBillStatusOnContractStatusChange(command.getContractId(),AssetPaymentStrings.CONTRACT_CANCEL);
         assetService.paymentExpectancies_re_struct(command);
     }
 

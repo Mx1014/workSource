@@ -921,20 +921,25 @@ public class AssetServiceImpl implements AssetService {
             List<EhPaymentContractReceiver> contractDateList = new ArrayList<>();
 
             //遍历计价条款包裹
-            for(int i = 0; i < feesRules.size(); i++) {
+            feeRule:for(int i = 0; i < feesRules.size(); i++) {
                 List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> innerBillItemsList = new ArrayList<>();
                 //获取单一包裹
                 FeeRules rule = feesRules.get(i);
+
+
                 //获得包裹中的地址包裹
                 List<ContractProperty> var1 = rule.getProperties();
 
                 //获得标准
                 EhPaymentChargingStandards standard = assetProvider.findChargingStandardById(rule.getChargingStandardId());
-
+                Set<String> varIdens = new HashSet<>();
                 //获得formula的额外内容
                 List<PaymentFormula> formulaCondition = null;
                 if(standard.getFormulaType()==3 || standard.getFormulaType() == 4){
                     formulaCondition = assetProvider.getFormulas(standard.getId());
+                    for(int m = 0; m < formulaCondition.size(); m ++){
+                        varIdens.add(formulaCondition.get(m).getConstraintVariableIdentifer());
+                    }
                 }
                 //获得standard公式
                 String formula = null;
@@ -950,6 +955,34 @@ public class AssetServiceImpl implements AssetService {
                         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"找不到公式,标准的id为"+standard.getId()+"");
                     }
                 }
+
+                char[] formularChars = formula.toCharArray();
+                int index = 0;
+                int start = 0;
+                while(index < formularChars.length){
+                    if(formularChars[index]=='+'||formularChars[index]=='-'||formularChars[index]=='*'||formularChars[index]=='/'||index == formularChars.length-1){
+                        varIdens.add(formula.substring(start,index==formula.length()-1?index+1:index));
+                        start = index+1;
+                    }
+                    index++;
+                }
+                //判断是否公式中有的var，计价条款没给，也不计算 || 判断是否var没有值，无值则不运算
+                //
+                int varIdenNum = 0;
+                List<VariableIdAndValue> variableIdAndValueList = rule.getVariableIdAndValueList();
+                for ( int k = 0; k < variableIdAndValueList.size(); k++){
+                    VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
+                    if(variableIdAndValue.getVariableValue() == null){
+                        continue feeRule;
+                    }
+                    if(varIdens.contains(variableIdAndValue.getVaribleIdentifier())){
+                        varIdenNum++;
+                    }
+                }
+                if(varIdenNum!=varIdens.size()){
+                    continue feeRule;
+                }
+
 
                 //获得包裹中的数据包
 
@@ -1035,6 +1068,7 @@ public class AssetServiceImpl implements AssetService {
                         item.setTargetType(cmd.getTargetType());
                         item.setTargetId(cmd.getTargetId());
                         item.setContractId(cmd.getContractId());
+                        item.setContractIdType(cmd.getContractIdType());
                         item.setContractNum(cmd.getContractNum());
                         item.setTargetName(cmd.getTargetName());
                         item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -1079,6 +1113,7 @@ public class AssetServiceImpl implements AssetService {
                             newBill.setNoticetel(cmd.getNoticeTel());
                             newBill.setOwnerId(cmd.getOwnerId());
                             newBill.setContractId(cmd.getContractId());
+                            newBill.setContractIdType(cmd.getContractIdType());
                             newBill.setContractNum(cmd.getContractNum());
                             newBill.setTargetName(cmd.getTargetName());
                             newBill.setOwnerType(cmd.getOwnerType());
@@ -1115,8 +1150,16 @@ public class AssetServiceImpl implements AssetService {
                                 x_v = sdf_dateStrD.parse(newBill.getDateStrDue());
                                 if(today.compareTo(x_v)!=-1){
                                     newBill.setNextSwitch((byte)1);
+                                    if(cmd.getContractIdType() == (byte)0){
+                                        newBill.setSwitch((byte)1);
+                                    }
                                 }else{
-                                    newBill.setNextSwitch((byte)0);
+                                    if(cmd.getContractIdType() == (byte)0){
+                                        newBill.setSwitch((byte)0);
+                                        newBill.setNextSwitch((byte)1);
+                                    }else{
+                                        newBill.setNextSwitch((byte)0);
+                                    }
                                 }
                             }catch (Exception e){
                                 newBill.setNextSwitch((byte)0);
@@ -1180,6 +1223,7 @@ public class AssetServiceImpl implements AssetService {
                 entity.setBillGroupRuleId(groupRule.getId());
                 entity.setAddressIdsJson(addressIds.toString());
                 entity.setContractId(cmd.getContractId());
+                entity.setContractIdType(cmd.getContractIdType());
                 entity.setContractNum(cmd.getContractNum());
                 entity.setEhPaymentChargingItemId(rule.getChargingItemId());
                 entity.setEhPaymentChargingStandardId(rule.getChargingStandardId());
@@ -1198,16 +1242,23 @@ public class AssetServiceImpl implements AssetService {
                 entity.setTargetName(cmd.getTargetName());
                 contractDateList.add(entity);
             }
+            if(billItemsList.size()<1 || contractDateList.size()<1){
+                upodateBillStatusOnContractStatusChange(cmd.getContractId(),AssetPaymentStrings.CONTRACT_CANCEL);
+                return;
+            }
             for(Map.Entry<BillIdentity,EhPaymentBills> entry : map.entrySet()){
                 billList.add(entry.getValue());
             }
 
+
             LOGGER.error("Asset Fee calculated！ bill list length={}，item length = {}",billList.size(),billItemsList.size());
+            if(billList.size()<1 || billItemsList.size()<1 || contractDateList.size()<1){
+                upodateBillStatusOnContractStatusChange(cmd.getContractId(),AssetPaymentStrings.CONTRACT_CANCEL);
+                return;
+            }
             this.coordinationProvider.getNamedLock(contractId.toString()).enter(() -> {
+
                 this.dbProvider.execute((TransactionStatus status) -> {
-                    if(billList.size()<1 || billItemsList.size()<1 || contractDateList.size()<1){
-                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"Bills generation failed, "+billList.size()+" bill generated, "+billItemsList.size()+" billItem generated, "+contractDateList.size()+" contract receiver generated before store");
-                    }
                     assetProvider.saveBillItems(billItemsList);
                     assetProvider.saveBills(billList);
                     assetProvider.saveContractVariables(contractDateList);
@@ -2154,6 +2205,36 @@ public class AssetServiceImpl implements AssetService {
                     }
                 }
             });
+        }
+
+    }
+
+    /**
+     * 从eh_payment_notice_config表中查询设置，每个园区数个设置，置于map中 <communityIden><configs>
+     * 查询所有有设置的园区的账单，拿到最晚交付日，根据map中拿到configs，判断是否符合发送要求，符合则催缴
+     */
+    @Scheduled(cron = "0 0 12 * * ?")
+    public void autoBillNotice() {
+        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
+//            List<PaymentNoticeConfig> configs = assetProvider.listAllNoticeConfigs();
+            List<PaymentNoticeConfig> configs = new ArrayList<>();
+
+            Map<Long,List<Integer>> noticeConfigs = new HashMap<>();
+            for(int i = 0; i < configs.size(); i ++){
+                PaymentNoticeConfig config = configs.get(i);
+                if(noticeConfigs.containsKey(config.getOwnerId())){
+                    noticeConfigs.get(config.getOwnerId()).add(config.getNoticeDayBefore());
+                }else{
+                    List<Integer> days = new ArrayList<>();
+                    days.add(config.getNoticeDayBefore());
+                    noticeConfigs.put(config.getOwnerId(),days);
+                }
+            }
+            for ( Map.Entry<Long,List<Integer>> map : noticeConfigs.entrySet()){
+//                List<PaymentBills> bills = getAllBillByCommunity(map.getKey());
+
+            }
+
         }
 
     }

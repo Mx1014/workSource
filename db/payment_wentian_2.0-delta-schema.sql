@@ -63,6 +63,11 @@ ALTER TABLE `eh_payment_bill_items` ADD COLUMN `bill_group_rule_id` BIGINT DEFAU
 ALTER TABLE `eh_payment_charging_standards_scopes` ADD COLUMN  `brother_standard_id` BIGINT DEFAULT NULL COMMENT '兄弟收费标准id，联动效果';
 ALTER TABLE `eh_payment_bill_groups` ADD COLUMN  `brother_group_id` BIGINT DEFAULT NULL COMMENT '兄弟账单组id，联动效果';
 
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `contract_id_type` TINYINT DEFAULT 1 COMMENT '1:contract_id为合同id；0：不是';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `contract_id_type` TINYINT DEFAULT 1 COMMENT '1:contract_id为合同id；0：不是';
+ALTER TABLE `eh_payment_contract_receiver` ADD COLUMN `contract_id_type` TINYINT DEFAULT 1 COMMENT '1:contract_id为合同id；0：不是';
+
+
 DROP TABLE IF EXISTS `eh_payment_notice_config`;
 CREATE TABLE `eh_payment_notice_config` (
   `id` BIGINT NOT NULL,
