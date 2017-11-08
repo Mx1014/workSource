@@ -1,0 +1,1 @@
+ALTER TABLE `eh_customer_economic_indicators` ADD COLUMN `month` DATETIME;
