@@ -79,7 +79,11 @@ public interface EnterpriseCustomerProvider {
     List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerId(Long customerId);
     List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerId(Long customerId, Timestamp startTime, Timestamp endTime);
     List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerIds(List<Long> customerIds);
-    List<CustomerAnnualStatisticDTO> listCustomerAnnualStatistics(Long communityId, Timestamp startTime, Timestamp endTime, CrossShardListingLocator locator, Integer pageSize);
+    List<CustomerAnnualStatisticDTO> listCustomerAnnualStatistics(Long communityId, Timestamp now, CrossShardListingLocator locator, Integer pageSize);
+
+    void createCustomerEconomicIndicatorStatistic(CustomerEconomicIndicatorStatistic statistic);
+    void updateCustomerEconomicIndicatorStatistic(CustomerEconomicIndicatorStatistic statistic);
+    CustomerEconomicIndicatorStatistic listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(Long customerId, Timestamp time);
 
     List<EnterpriseCustomer> listEnterpriseCustomerByCommunity(Long communityId);
     

@@ -1107,7 +1107,30 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void createCustomerEconomicIndicator(CreateCustomerEconomicIndicatorCommand cmd) {
         CustomerEconomicIndicator indicator = ConvertHelper.convert(cmd, CustomerEconomicIndicator.class);
+        if(cmd.getMonth() != null) {
+            indicator.setMonth(new Timestamp(cmd.getMonth()));
+        }
         enterpriseCustomerProvider.createCustomerEconomicIndicator(indicator);
+
+        //年月不为null 则填到年月所属对应的年度统计表里
+        if(cmd.getMonth() != null) {
+            CustomerEconomicIndicatorStatistic statistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), new Timestamp(cmd.getMonth()));
+            if(statistic == null) {
+                statistic = ConvertHelper.convert(indicator, CustomerEconomicIndicatorStatistic.class);
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(new Timestamp(cmd.getMonth()));
+                statistic.setStartTime(getDayBegin(cal));
+                statistic.setEndTime(getDayEnd(cal));
+                enterpriseCustomerProvider.createCustomerEconomicIndicatorStatistic(statistic);
+            } else {
+                BigDecimal tax = statistic.getTaxPayment() == null ? BigDecimal.ZERO : statistic.getTaxPayment();
+                statistic.setTaxPayment(tax.add(indicator.getTaxPayment()));
+                BigDecimal turnover = statistic.getTurnover() == null ? BigDecimal.ZERO : statistic.getTurnover();
+                statistic.setTurnover(turnover.add(indicator.getTurnover()));
+                enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+            }
+        }
+
     }
 
     @Override
@@ -1188,9 +1211,84 @@ public class CustomerServiceImpl implements CustomerService {
     public void updateCustomerEconomicIndicator(UpdateCustomerEconomicIndicatorCommand cmd) {
         CustomerEconomicIndicator exist = checkCustomerEconomicIndicator(cmd.getId(), cmd.getCustomerId());
         CustomerEconomicIndicator indicator = ConvertHelper.convert(cmd, CustomerEconomicIndicator.class);
+        if(cmd.getMonth() != null) {
+            indicator.setMonth(new Timestamp(cmd.getMonth()));
+        }
         indicator.setCreateTime(exist.getCreateTime());
         indicator.setCreateUid(exist.getCreateUid());
         enterpriseCustomerProvider.updateCustomerEconomicIndicator(indicator);
+
+        if(isSameYear(indicator.getMonth(), exist.getMonth())) {
+            if(indicator.getMonth() != null) {
+                CustomerEconomicIndicatorStatistic statistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), new Timestamp(cmd.getMonth()));
+                if(statistic == null) {
+                    statistic = ConvertHelper.convert(indicator, CustomerEconomicIndicatorStatistic.class);
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(new Timestamp(cmd.getMonth()));
+                    statistic.setStartTime(getDayBegin(cal));
+                    statistic.setEndTime(getDayEnd(cal));
+                    enterpriseCustomerProvider.createCustomerEconomicIndicatorStatistic(statistic);
+                } else {
+                    BigDecimal tax = statistic.getTaxPayment() == null ? BigDecimal.ZERO : statistic.getTaxPayment();
+                    statistic.setTaxPayment(tax.add(indicator.getTaxPayment()).divide(exist.getTaxPayment()));
+                    BigDecimal turnover = statistic.getTurnover() == null ? BigDecimal.ZERO : statistic.getTurnover();
+                    statistic.setTurnover(turnover.add(indicator.getTurnover()).divide(exist.getTurnover()));
+                    enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+                }
+            }
+        } else {
+            if(indicator.getMonth() == null) {
+                CustomerEconomicIndicatorStatistic statistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), exist.getMonth());
+                if(statistic != null) {
+                    BigDecimal tax = statistic.getTaxPayment() == null ? BigDecimal.ZERO : statistic.getTaxPayment();
+                    statistic.setTaxPayment(tax.divide(exist.getTaxPayment()));
+                    BigDecimal turnover = statistic.getTurnover() == null ? BigDecimal.ZERO : statistic.getTurnover();
+                    statistic.setTurnover(turnover.divide(exist.getTurnover()));
+                    enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+                }
+            } else if(exist.getMonth() == null) {
+                CustomerEconomicIndicatorStatistic statistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), indicator.getMonth());
+                if(statistic == null) {
+                    statistic = ConvertHelper.convert(indicator, CustomerEconomicIndicatorStatistic.class);
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(new Timestamp(cmd.getMonth()));
+                    statistic.setStartTime(getDayBegin(cal));
+                    statistic.setEndTime(getDayEnd(cal));
+                    enterpriseCustomerProvider.createCustomerEconomicIndicatorStatistic(statistic);
+                } else {
+                    BigDecimal tax = statistic.getTaxPayment() == null ? BigDecimal.ZERO : statistic.getTaxPayment();
+                    statistic.setTaxPayment(tax.add(indicator.getTaxPayment()));
+                    BigDecimal turnover = statistic.getTurnover() == null ? BigDecimal.ZERO : statistic.getTurnover();
+                    statistic.setTurnover(turnover.add(indicator.getTurnover()));
+                    enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+                }
+            } else {
+                CustomerEconomicIndicatorStatistic existStatistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), exist.getMonth());
+                if(existStatistic != null) {
+                    BigDecimal tax = existStatistic.getTaxPayment() == null ? BigDecimal.ZERO : existStatistic.getTaxPayment();
+                    existStatistic.setTaxPayment(tax.divide(exist.getTaxPayment()));
+                    BigDecimal turnover = existStatistic.getTurnover() == null ? BigDecimal.ZERO : existStatistic.getTurnover();
+                    existStatistic.setTurnover(turnover.divide(exist.getTurnover()));
+                    enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(existStatistic);
+                }
+                CustomerEconomicIndicatorStatistic newStatistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), indicator.getMonth());
+                if(newStatistic == null) {
+                    newStatistic = ConvertHelper.convert(indicator, CustomerEconomicIndicatorStatistic.class);
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(new Timestamp(cmd.getMonth()));
+                    newStatistic.setStartTime(getDayBegin(cal));
+                    newStatistic.setEndTime(getDayEnd(cal));
+                    enterpriseCustomerProvider.createCustomerEconomicIndicatorStatistic(newStatistic);
+                } else {
+                    BigDecimal tax = newStatistic.getTaxPayment() == null ? BigDecimal.ZERO : newStatistic.getTaxPayment();
+                    newStatistic.setTaxPayment(tax.add(indicator.getTaxPayment()));
+                    BigDecimal turnover = newStatistic.getTurnover() == null ? BigDecimal.ZERO : newStatistic.getTurnover();
+                    newStatistic.setTurnover(turnover.add(indicator.getTurnover()));
+                    enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(newStatistic);
+                }
+            }
+
+        }
     }
 
     @Override
@@ -1437,26 +1535,53 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public ListCustomerAnnualStatisticsResponse listCustomerAnnualStatistics(ListCustomerAnnualStatisticsCommand cmd) {
-        Calendar cal = Calendar.getInstance();
         Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
-        cal.setTime(now);
         ListCustomerAnnualStatisticsResponse response = new ListCustomerAnnualStatisticsResponse();
         CrossShardListingLocator locator = new CrossShardListingLocator();
         if(cmd.getPageAnchor() != null) {
             locator.setAnchor(cmd.getPageAnchor());
         }
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        List<CustomerAnnualStatisticDTO> dtos = enterpriseCustomerProvider.listCustomerAnnualStatistics(cmd.getCommunityId(), getDayBegin(cal), now, locator, pageSize);
+        List<CustomerAnnualStatisticDTO> dtos = enterpriseCustomerProvider.listCustomerAnnualStatistics(cmd.getCommunityId(), now, locator, pageSize);
         response.setStatisticDTOs(dtos);
         response.setNextPageAnchor(locator.getAnchor());
         return response;
     }
 
+    private Boolean isSameYear(Timestamp newMonth, Timestamp oldMonth) {
+        if(newMonth == null && oldMonth == null) {
+            return true;
+        } else {
+            if(newMonth != null && oldMonth != null) {
+                Calendar newCal = Calendar.getInstance();
+                newCal.setTime(newMonth);
+
+                Calendar oldCal = Calendar.getInstance();
+                oldCal.setTime(oldMonth);
+                if(newCal.get(Calendar.YEAR) == oldCal.get(Calendar.YEAR)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
     private Timestamp getDayBegin(Calendar cal) {
+        cal.set(Calendar.MONTH, 0);
+        cal.set(Calendar.DATE, 1);
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.MILLISECOND, 001);
+        return new Timestamp(cal.getTimeInMillis());
+    }
+
+    private Timestamp getDayEnd(Calendar cal) {
+        cal.set(Calendar.MONTH, 11);
+        cal.set(Calendar.DATE, 31);
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.SECOND, 59);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.MILLISECOND, 999);
         return new Timestamp(cal.getTimeInMillis());
     }
 
