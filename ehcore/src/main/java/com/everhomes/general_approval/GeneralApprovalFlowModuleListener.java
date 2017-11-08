@@ -170,10 +170,8 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
                     processMultiLineTextField(entities, e, value.getFieldValue());
                     break;
                 case IMAGE:
-                    processImageField(entities, e, value.getFieldValue());
                     break;
                 case FILE:
-                    processFileField(entities, e, value.getFieldValue());
                     break;
                 case INTEGER_TEXT:
                     processIntegerTextField(entities, e, value.getFieldValue());
@@ -519,25 +517,25 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         e.setKey(localeStringService.getLocalizedString("general_approval.ask_for_leave.key", "1", "zh_CN", "请假类型"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(leaveValue.getRestName());
-        entities.add(e);
+        entities.add(0, e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.ask_for_leave.key", "2", "zh_CN", "开始时间"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(leaveValue.getStartTime());
-        entities.add(e);
+        entities.add(1, e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.ask_for_leave.key", "3", "zh_CN", "结束时间"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(leaveValue.getEndTime());
-        entities.add(e);
+        entities.add(2, e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.ask_for_leave.key", "4", "zh_CN", "请假时长"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
-        e.setValue(leaveValue.getDuration());
-        entities.add(e);
+        e.setValue(leaveValue.getDuration() + " 天");
+        entities.add(3, e);
     }
 
     public void processBusinessTripField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
@@ -546,19 +544,19 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         e.setKey(localeStringService.getLocalizedString("general_approval.business_trip.key", "1", "zh_CN", "开始时间"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(tripValue.getStartTime());
-        entities.add(e);
+        entities.add(0, e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.business_trip.key", "2", "zh_CN", "结束时间"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(tripValue.getEndTime());
-        entities.add(e);
+        entities.add(1, e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.business_trip.key", "3", "zh_CN", "出差时长"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
-        e.setValue(tripValue.getDuration());
-        entities.add(e);
+        e.setValue(tripValue.getDuration() + " 天");
+        entities.add(2, e);
     }
 
     public void processOverTimeField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
@@ -567,19 +565,19 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         e.setKey(localeStringService.getLocalizedString("general_approval.overtime.key", "1", "zh_CN", "开始时间"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(overTimeValue.getStartTime());
-        entities.add(e);
+        entities.add(0, e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.overtime.key", "2", "zh_CN", "结束时间"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(overTimeValue.getEndTime());
-        entities.add(e);
+        entities.add(1, e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.overtime.key", "3", "zh_CN", "加班时长"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
-        e.setValue(overTimeValue.getDuration());
-        entities.add(e);
+        e.setValue(overTimeValue.getDuration() + " 天");
+        entities.add(2, e);
     }
 
     public void processGoOutField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
@@ -588,19 +586,19 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         e.setKey(localeStringService.getLocalizedString("general_approval.go_out.key", "1", "zh_CN", "开始时间"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(outValue.getStartTime());
-        entities.add(e);
+        entities.add(0, e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.go_out.key", "2", "zh_CN", "结束时间"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(outValue.getEndTime());
-        entities.add(e);
+        entities.add(1, e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.go_out.key", "3", "zh_CN", "外出时长"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
-        e.setValue(outValue.getDuration());
-        entities.add(e);
+        e.setValue(outValue.getDuration() + " 天");
+        entities.add(2, e);
     }
 
     public void processAbnormalPunchField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
@@ -609,13 +607,13 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         e.setKey(localeStringService.getLocalizedString("general_approval.abnormal_punch.key", "1", "zh_CN", "异常日期"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(punchValue.getAbnormalDate());
-        entities.add(e);
+        entities.add(0, e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.abnormal_punch.key", "2", "zh_CN", "异常班次"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(punchValue.getAbnormalItem());
-        entities.add(e);
+        entities.add(1, e);
     }
 
 
