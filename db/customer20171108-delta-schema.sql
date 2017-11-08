@@ -5,7 +5,6 @@ CREATE TABLE `eh_customer_economic_indicator_statistics` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
   `customer_id` BIGINT,
-  `community_id` BIGINT,
   `turnover` DECIMAL(10,2) COMMENT '营业额',
   `tax_payment` DECIMAL(10,2) COMMENT '纳税额',
   `start_time` DATETIME,
