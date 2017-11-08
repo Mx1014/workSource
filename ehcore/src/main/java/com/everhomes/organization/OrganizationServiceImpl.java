@@ -8082,6 +8082,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             return res;
         }
 
+        //机构经理
+        dto.setManagers(getOrganizationManagers(dto.getId()));
+
         List<OrganizationDTO> rganizationDTOs = new ArrayList<OrganizationDTO>();
         for (Organization organization : orgs) {
             OrganizationDTO orgDto = ConvertHelper.convert(organization, OrganizationDTO.class);
