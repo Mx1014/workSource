@@ -23,6 +23,14 @@ CREATE TABLE `eh_rentalv2_price_packages` (
   `full_price` DECIMAL(10,2) NULL DEFAULT NULL,
   `cut_price` DECIMAL(10,2) NULL DEFAULT NULL,
   `discount_ratio` DOUBLE NULL DEFAULT NULL,
+  `org_member_discount_type` TINYINT(4) NULL DEFAULT NULL,
+  `org_member_full_price` DECIMAL(10,2) NULL DEFAULT NULL,
+  `org_member_cut_price` DECIMAL(10,2) NULL DEFAULT NULL,
+  `org_member_discount_ratio` DOUBLE NULL DEFAULT NULL,
+  `approving_user_discount_type` TINYINT(4) NULL DEFAULT NULL,
+  `approving_user_full_price` DECIMAL(10,2) NULL DEFAULT NULL,
+  `approving_user_cut_price` DECIMAL(10,2) NULL DEFAULT NULL,
+  `approving_user_discount_ratio` DOUBLE NULL DEFAULT NULL,
   `cell_begin_id` BIGINT(20) NOT NULL DEFAULT '0',
   `cell_end_id` BIGINT(20) NOT NULL DEFAULT '0',
   `creator_uid` BIGINT(20) NULL DEFAULT NULL,
@@ -31,3 +39,13 @@ CREATE TABLE `eh_rentalv2_price_packages` (
 
 ALTER TABLE `eh_rentalv2_cells`
 ADD COLUMN `price_package_id` BIGINT(20) NULL DEFAULT NULL AFTER `half_approving_user_price`;
+
+ALTER TABLE `eh_rentalv2_price_rules`
+ADD COLUMN `org_member_discount_type` TINYINT(4) NULL DEFAULT NULL AFTER `discount_ratio`,
+ADD COLUMN `org_member_full_price` DECIMAL(10,2) NULL DEFAULT NULL AFTER `org_member_discount_type`,
+ADD COLUMN `org_member_cut_price` DECIMAL(10,2) NULL DEFAULT NULL AFTER `org_member_full_price`,
+ADD COLUMN `org_member_discount_ratio` DOUBLE NULL DEFAULT NULL AFTER `org_member_cut_price`,
+ADD COLUMN `approving_user_discount_type` TINYINT(4) NULL DEFAULT NULL AFTER `org_member_discount_ratio`,
+ADD COLUMN `approving_user_full_price` DECIMAL(10,2) NULL DEFAULT NULL AFTER `approving_user_discount_type`,
+ADD COLUMN `approving_user_cut_price` DECIMAL(10,2) NULL DEFAULT NULL AFTER `approving_user_full_price`,
+ADD COLUMN `approving_user_discount_ratio` DOUBLE NULL DEFAULT NULL AFTER `approving_user_cut_price`;
