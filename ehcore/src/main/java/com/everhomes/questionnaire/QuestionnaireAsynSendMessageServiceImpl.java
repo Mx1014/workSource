@@ -206,7 +206,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question/%s");
 			String url = String.format(homeurl+contextUrl, questionnaire.getId());
 
-			MessageChannel channel2 = new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId()));
+//			MessageChannel channel2 = new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId()));
 
 			// 组装路由
 			OfficialActionData actionData = new OfficialActionData();
@@ -226,32 +226,40 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 			if(QuestionnaireTargetType.fromCode(questionnaire.getTargetType()) == QuestionnaireTargetType.ORGANIZATION){
 				userMapingOrganizationList = generateUserMapingOrganizationList(questionnaire);
 			}
-			MessageDTO messageDto = new MessageDTO();
 			for (String range : ranges) {
-				messageDto.setAppId(AppConstants.APPID_MESSAGING);
-				messageDto.setSenderUid(User.SYSTEM_UID);
-				messageDto.setChannels(
-						new MessageChannel(MessageChannelType.USER.getCode(), range),
-						channel2
-				);
-
-				messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-				messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-				messageDto.setMeta(meta);
-
-				Thread.sleep(50);//不要发太快了。
+//				MessageDTO messageDto = new MessageDTO();
+//				messageDto.setAppId(AppConstants.APPID_MESSAGING);
+//				messageDto.setSenderUid(User.SYSTEM_UID);
+//				messageDto.setChannels(
+//						new MessageChannel(MessageChannelType.USER.getCode(), range),
+//						channel2
+//				);
+//
+//				messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+//				messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+//				messageDto.setMeta(meta);
+//
+//				Thread.sleep(50);//不要发太快了。
+//
+//				if(QuestionnaireTargetType.fromCode(questionnaire.getTargetType()) == QuestionnaireTargetType.USER) {
+//					messageDto.setBody(String.format(body,"您"));
+//					messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+//							range, messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+//					sendedranges.add(range);
+//				}else if(QuestionnaireTargetType.fromCode(questionnaire.getTargetType()) == QuestionnaireTargetType.ORGANIZATION) {
+//					for (String organizationName : userMapingOrganizationList.get(range)) {
+//						messageDto.setBody(String.format(body,organizationName));
+//						messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+//								range, messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+//						sendedranges.add(range);
+//					}
+//				}
 
 				if(QuestionnaireTargetType.fromCode(questionnaire.getTargetType()) == QuestionnaireTargetType.USER) {
-					messageDto.setBody(String.format(body,"您"));
-					messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-							range, messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-					sendedranges.add(range);
+					sendMessageToUser(range,String.format(body,"您"),meta,sendedranges);
 				}else if(QuestionnaireTargetType.fromCode(questionnaire.getTargetType()) == QuestionnaireTargetType.ORGANIZATION) {
 					for (String organizationName : userMapingOrganizationList.get(range)) {
-						messageDto.setBody(String.format(body,organizationName));
-						messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-								range, messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-						sendedranges.add(range);
+						sendMessageToUser(range,String.format(body,organizationName),meta,sendedranges);
 					}
 				}
 			}
@@ -261,6 +269,28 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		}finally {
 			return sendedranges;
 		}
+	}
+
+	private void sendMessageToUser(String uid, String content, Map<String, String> meta,List<String> sendedranges) {
+		try {
+			Thread.sleep(50);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		MessageDTO messageDto = new MessageDTO();
+		messageDto.setAppId(AppConstants.APPID_MESSAGING);
+		messageDto.setSenderUid(User.SYSTEM_UID);
+		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
+		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+		messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+		messageDto.setBody(content);
+		messageDto.setMetaAppId(AppConstants.APPID_ACLINK);
+		if(null != meta && meta.size() > 0) {
+			messageDto.getMeta().putAll(meta);
+		}
+		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+				uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+		sendedranges.add(uid);
 	}
 
 	//返回 人员-》公司列表 map
