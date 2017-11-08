@@ -53,6 +53,10 @@ ADD COLUMN `approving_user_full_price` DECIMAL(10,2) NULL DEFAULT NULL AFTER `ap
 ADD COLUMN `approving_user_cut_price` DECIMAL(10,2) NULL DEFAULT NULL AFTER `approving_user_full_price`,
 ADD COLUMN `approving_user_discount_ratio` DOUBLE NULL DEFAULT NULL AFTER `approving_user_cut_price`;
 
-ALTER TABLE `ehcore`.`eh_rentalv2_default_rules`
+ALTER TABLE `eh_rentalv2_default_rules`
+ADD COLUMN `day_open_time` DOUBLE NULL DEFAULT NULL AFTER `end_date`,
+ADD COLUMN `day_close_time` DOUBLE NULL DEFAULT NULL AFTER `day_open_time`;
+
+ALTER TABLE `eh_rentalv2_resources`
 ADD COLUMN `day_open_time` DOUBLE NULL DEFAULT NULL AFTER `end_date`,
 ADD COLUMN `day_close_time` DOUBLE NULL DEFAULT NULL AFTER `day_open_time`;
