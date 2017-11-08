@@ -108,9 +108,9 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		String triggerName = "questionnarieSendMessage";
 		String jobName= "questionnarieSendMessage_"+System.currentTimeMillis();
 		//每天一点查询即将到期的问卷，发消息给没有填的用户。
-		String cronExpression = "0 */10 * * * ?";
+		String cronExpression = "0 0 1 * * ?";
 		try {
-			configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_SEND_MESSAGE_EXPRESS, "0 */10 * * * ?");
+			configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_SEND_MESSAGE_EXPRESS, "0 0 1 * * ?");
 		}catch (Exception e){
 			e.printStackTrace();
 		}finally {
