@@ -72,5 +72,5 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 VALUES ((@locale_strings_id := @locale_strings_id + 1), 'flow', '100017', 'zh_CN', '工作流设置存在异常，请修改后再试');
 
 -- dengs,2017.11.08 配置发送消息的cron
-update eh_configurations SET value = '/questionnaire-survey/build/index.html#/question/%s' WHERE name = 'questionnaire.detail.url';
+update eh_configurations SET value = '/questionnaire-survey/build/index.html#/question/%s#sign_suffix' WHERE name = 'questionnaire.detail.url';
 update eh_configurations SET value = '0 0 1 * * ? *' WHERE name = 'questionnaire.send.message.express';
