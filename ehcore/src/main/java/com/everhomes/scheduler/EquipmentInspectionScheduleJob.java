@@ -1,15 +1,18 @@
 package com.everhomes.scheduler;
 
-import java.sql.Timestamp;
-import java.util.*;
-
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.equipment.*;
+import com.everhomes.repeat.RepeatService;
+import com.everhomes.rest.equipment.EquipmentStandardStatus;
+import com.everhomes.rest.equipment.EquipmentStatus;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.util.CronDateUtils;
-import org.quartz.*;
+import com.everhomes.util.DateHelper;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.SchedulerFactory;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,12 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
-
-import com.everhomes.repeat.RepeatService;
-import com.everhomes.rest.equipment.EquipmentStandardStatus;
-import com.everhomes.rest.equipment.EquipmentStatus;
-import com.everhomes.util.DateHelper;
 import org.springframework.transaction.TransactionStatus;
+
+import java.sql.Timestamp;
+import java.util.*;
 
 @Component
 @Scope("prototype")
