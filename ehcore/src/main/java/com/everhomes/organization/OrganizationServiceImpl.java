@@ -5387,8 +5387,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                     groupTypes_full.add(OrganizationGroupType.DEPARTMENT.getCode());
                     groupTypes_full.add(OrganizationGroupType.GROUP.getCode());
                     groupTypes_full.add(OrganizationGroupType.ENTERPRISE.getCode());
-                    groupTypes_full.add(OrganizationGroupType.JOB_LEVEL.getCode());
-                    groupTypes_full.add(OrganizationGroupType.JOB_POSITION.getCode());
                     groupTypes_full.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
                     deleteOrganizaitonMemberUnderEnterprise(enterpriseIds, groupTypes_full, leaveMembers, token);
                     //重复添加纪录
@@ -8082,9 +8080,13 @@ public class OrganizationServiceImpl implements OrganizationService {
             return res;
         }
 
+
+
         List<OrganizationDTO> rganizationDTOs = new ArrayList<OrganizationDTO>();
         for (Organization organization : orgs) {
             OrganizationDTO orgDto = ConvertHelper.convert(organization, OrganizationDTO.class);
+            //机构经理
+            orgDto.setManagers(getOrganizationManagers(orgDto.getId()));
             //把机构的入住园区加入
             orgDto = processOrganizationCommunity(orgDto);
             if (OrganizationNaviFlag.fromCode(naviFlag) == OrganizationNaviFlag.HIDE_NAVI) {
