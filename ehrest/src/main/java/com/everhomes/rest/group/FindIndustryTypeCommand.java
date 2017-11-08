@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  */
 public class FindIndustryTypeCommand {
 
-	Long id;
+	private Long id;
 
 	public Long getId() {
 		return id;

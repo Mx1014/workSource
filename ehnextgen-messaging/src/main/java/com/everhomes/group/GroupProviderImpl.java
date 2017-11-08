@@ -926,6 +926,7 @@ public class GroupProviderImpl implements GroupProvider {
     public void createGuildApply(GuildApply guildApply) {
         Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhGuildApplies.class));
         guildApply.setId(id);
+        guildApply.setUuid(UUID.randomUUID().toString());
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(GuildApply.class, id));
         EhGuildAppliesDao dao = new EhGuildAppliesDao(context.configuration());
         dao.insert(guildApply);
@@ -960,7 +961,7 @@ public class GroupProviderImpl implements GroupProvider {
 
         query.addConditions(Tables.EH_GUILD_APPLIES.GROUP_MEMBER_ID.eq(groupMemberId));
 
-        return query.fetchAny().into(GuildApply.class);
+        return query.fetchAnyInto(GuildApply.class);
     }
 
     @Override
@@ -968,9 +969,6 @@ public class GroupProviderImpl implements GroupProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhIndustryTypes.class, id));
         EhIndustryTypesDao dao = new EhIndustryTypesDao(context.configuration());
         EhIndustryTypes result = dao.findById(id);
-        if (result == null) {
-            return null;
-        }
         return ConvertHelper.convert(result, IndustryType.class);
     }
 
