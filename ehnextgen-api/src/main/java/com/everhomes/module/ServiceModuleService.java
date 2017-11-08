@@ -21,6 +21,8 @@ public interface ServiceModuleService {
 
 	List<ServiceModuleDTO> treeServiceModules(TreeServiceModuleCommand cmd);
 
+	List<ServiceModuleDTO> treeServiceModuleApps(TreeServiceModuleCommand cmd);
+
 	ServiceModuleDTO getServiceModule(GetServiceModuleCommand cmd);
 
 	List<ProjectDTO> listUserRelatedCategoryProjectByModuleId(ListUserRelatedProjectByModuleCommand cmd);

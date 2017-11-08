@@ -1,6 +1,7 @@
 package com.everhomes.rest.acl;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 
 import java.io.Serializable;
 import java.util.List;
@@ -37,6 +38,9 @@ public class ServiceModuleDTO implements Serializable {
 
 	@ItemType(ServiceModuleDTO.class)
 	private List<ServiceModuleDTO> serviceModules;
+
+	@ItemType(ServiceModuleDTO.class)
+	private List<ServiceModuleAppDTO> serviceModuleApps;
 
 	private Byte type;
 
@@ -172,5 +176,13 @@ public class ServiceModuleDTO implements Serializable {
 
 	public void setMultipleFlag(Byte multipleFlag) {
 		this.multipleFlag = multipleFlag;
+	}
+
+	public List<ServiceModuleAppDTO> getServiceModuleApps() {
+		return serviceModuleApps;
+	}
+
+	public void setServiceModuleApps(List<ServiceModuleAppDTO> serviceModuleApps) {
+		this.serviceModuleApps = serviceModuleApps;
 	}
 }

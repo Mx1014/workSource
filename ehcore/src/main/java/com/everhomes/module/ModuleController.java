@@ -76,6 +76,22 @@ public class ModuleController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /module/treeServiceModuleApps</b>
+     * <p>
+     * 树状结构的业务模块列表
+     * </p>
+     */
+    @RequestMapping("treeServiceModuleApps")
+    @RestReturn(value = ServiceModuleDTO.class, collection = true)
+    public RestResponse treeServiceModuleApps(@Valid TreeServiceModuleCommand cmd) {
+        List<ServiceModuleDTO> dto = serviceModuleService.treeServiceModuleApps(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /module/listUserRelatedCategoryProjectByModuleId</b>
      * <p>用户的在这个模块下的分类项目列表</p>
      */

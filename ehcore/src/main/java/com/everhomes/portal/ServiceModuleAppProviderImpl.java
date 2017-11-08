@@ -1,11 +1,19 @@
 // @formatter:off
 package com.everhomes.portal;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhServiceModuleAppsDao;
+import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
@@ -13,18 +21,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DaoAction;
-import com.everhomes.db.DaoHelper;
-import com.everhomes.db.DbProvider;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhServiceModuleAppsDao;
-import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
@@ -91,6 +90,19 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	public List<ServiceModuleApp> listServiceModuleAppByActionType(Integer namespaceId, Byte actionType){
 		return listServiceModuleApp(namespaceId, null, actionType, null, null);
 	}
+
+	@Override
+	public List<ServiceModuleAppDTO> listServiceModuleAppsByModuleIds(Integer namespaceId, List<Long> moduleIds) {
+		Condition cond = Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId);
+		if (null != moduleIds && moduleIds.size() > 0)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.in(moduleIds));
+		return getReadOnlyContext().select().from(Tables.EH_SERVICE_MODULE_APPS)
+				.where(cond)
+				.and(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()))
+				.orderBy(Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleAppDTO.class));
+	}
+
 
 	@Override
 	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String customPath) {
