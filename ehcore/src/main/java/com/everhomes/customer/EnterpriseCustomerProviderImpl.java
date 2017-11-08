@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.rest.customer.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
@@ -34,15 +35,6 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.customer.CustomerErrorCode;
-import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
-import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
-import com.everhomes.rest.customer.CustomerType;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
-import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
-import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
-import com.everhomes.rest.customer.TrackingPlanReadStatus;
 import com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
@@ -765,6 +757,11 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         });
 
         return result;
+    }
+
+    @Override
+    public List<CustomerAnnualStatisticDTO> listCustomerAnnualStatistics(Long communityId, Timestamp startTime, Timestamp endTime) {
+        return null;
     }
 
     @Override

@@ -1437,9 +1437,20 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public ListCustomerAnnualStatisticsResponse listCustomerAnnualStatistics(ListCustomerAnnualStatisticsCommand cmd) {
+        Calendar cal = Calendar.getInstance();
+        Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+        cal.setTime(now);
         ListCustomerAnnualStatisticsResponse response = new ListCustomerAnnualStatisticsResponse();
-        enterpriseCustomerProvider
+        enterpriseCustomerProvider.listCustomerAnnualStatistics(cmd.getCommunityId(), getDayBegin(cal),  now);
         return response;
+    }
+
+    private Timestamp getDayBegin(Calendar cal) {
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.MILLISECOND, 001);
+        return new Timestamp(cal.getTimeInMillis());
     }
 
     @Override

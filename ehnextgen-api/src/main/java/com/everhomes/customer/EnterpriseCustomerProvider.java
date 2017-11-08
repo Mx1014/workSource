@@ -2,10 +2,7 @@ package com.everhomes.customer;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
-import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
+import com.everhomes.rest.customer.*;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -82,6 +79,7 @@ public interface EnterpriseCustomerProvider {
     List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerId(Long customerId);
     List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerId(Long customerId, Timestamp startTime, Timestamp endTime);
     List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerIds(List<Long> customerIds);
+    List<CustomerAnnualStatisticDTO> listCustomerAnnualStatistics(Long communityId, Timestamp startTime, Timestamp endTime);
 
     List<EnterpriseCustomer> listEnterpriseCustomerByCommunity(Long communityId);
     
