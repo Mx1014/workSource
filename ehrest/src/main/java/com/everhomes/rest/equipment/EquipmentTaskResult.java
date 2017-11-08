@@ -21,6 +21,7 @@ public enum EquipmentTaskResult {
 	NEED_MAINTENANCE_OK((byte)3, " 需维修完成"), NEED_MAINTENANCE_DELAY((byte)4, "需维修延迟"),
 	NEED_MAINTENANCE_OK_COMPLETE_OK((byte)5, "需维修完成维修完成"), NEED_MAINTENANCE_OK_COMPLETE_DELAY((byte)6, "需维修完成维修延迟"),
 	NEED_MAINTENANCE_DELAY_COMPLETE_OK((byte)7, "需维修延迟维修完成"), NEED_MAINTENANCE_DELAY_COMPLETE_DELAY((byte)8, "需维修延迟维修延迟");
+
 	
 	private byte code;
 	private String name;
