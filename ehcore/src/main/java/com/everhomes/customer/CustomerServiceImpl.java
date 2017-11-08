@@ -1441,7 +1441,14 @@ public class CustomerServiceImpl implements CustomerService {
         Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
         cal.setTime(now);
         ListCustomerAnnualStatisticsResponse response = new ListCustomerAnnualStatisticsResponse();
-        enterpriseCustomerProvider.listCustomerAnnualStatistics(cmd.getCommunityId(), getDayBegin(cal),  now);
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        if(cmd.getPageAnchor() != null) {
+            locator.setAnchor(cmd.getPageAnchor());
+        }
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        List<CustomerAnnualStatisticDTO> dtos = enterpriseCustomerProvider.listCustomerAnnualStatistics(cmd.getCommunityId(), getDayBegin(cal), now, locator, pageSize);
+        response.setStatisticDTOs(dtos);
+        response.setNextPageAnchor(locator.getAnchor());
         return response;
     }
 

@@ -760,7 +760,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
-    public List<CustomerAnnualStatisticDTO> listCustomerAnnualStatistics(Long communityId, Timestamp startTime, Timestamp endTime) {
+    public List<CustomerAnnualStatisticDTO> listCustomerAnnualStatistics(Long communityId, Timestamp startTime, Timestamp endTime, CrossShardListingLocator locator, Integer pageSize) {
         return null;
     }
 
