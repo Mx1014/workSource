@@ -2443,7 +2443,15 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void modifyBillGroup(ModifyBillGroupCommand cmd) {
-        assetProvider.modifyBillGroup(cmd);
+        byte deCouplingFlag = 1;
+        if(cmd.getOwnerId() == null){
+            //全部的情况,修改billGroup的以及bro为billGroup的
+            deCouplingFlag = 0;
+            assetProvider.modifyBillGroup(cmd,deCouplingFlag);
+            return;
+        }
+        //个体，修改billGroup的，以及此园区的所有group解耦
+        assetProvider.modifyBillGroup(cmd,deCouplingFlag);
     }
 
     @Override
@@ -2553,7 +2561,13 @@ public class AssetServiceImpl implements AssetService {
         if(workFlag){
             response.setFailCause(AssetPaymentStrings.DELTE_GROUP_UNSAFE);
         }
-        assetProvider.deleteBillGroupAndRules(cmd.getBillGroupId());
+        byte deCouplingFlag = 1;
+        if(cmd.getOwnerId() == null) {
+            deCouplingFlag = 0;
+            assetProvider.deleteBillGroupAndRules(cmd.getBillGroupId(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId());
+            return response;
+        }
+        assetProvider.deleteBillGroupAndRules(cmd.getBillGroupId(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId());
         return response;
     }
 

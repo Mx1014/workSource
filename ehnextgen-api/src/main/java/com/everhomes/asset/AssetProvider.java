@@ -114,7 +114,7 @@ public interface AssetProvider {
 
     void deleteContractPayment(Long contractId);
 
-    List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize);
+    List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize,Long contractId);
 
     void updateBillsToSettled(Long contractId, String ownerType, Long ownerId);
 
@@ -183,7 +183,7 @@ public interface AssetProvider {
 
     Long createBillGroup(CreateBillGroupCommand cmd,byte deCouplingFlag,Long brotherGroupId);
 
-    void modifyBillGroup(ModifyBillGroupCommand cmd);
+    void modifyBillGroup(ModifyBillGroupCommand cmd,byte deCouplingFlag);
 
     List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd);
 
@@ -205,7 +205,7 @@ public interface AssetProvider {
 
     boolean checkBillsByBillGroupId(Long billGroupId);
 
-    void deleteBillGroupAndRules(Long billGroupId);
+    void deleteBillGroupAndRules(Long billGroupId,byte deCouplingFlag,String ownerType,Long ownerId);
 
     ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(Long billGroupRuleId);
 

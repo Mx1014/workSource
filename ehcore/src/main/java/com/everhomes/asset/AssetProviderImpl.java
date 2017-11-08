@@ -1756,11 +1756,12 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize) {
+    public List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize,Long contractId) {
         List<PaymentExpectancyDTO> dtos = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
         EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
+        List<Long> l = new ArrayList<>();
         context.select(t.DATE_STR,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
                 .from(t,t1)
                 .where(t.CONTRACT_NUM.eq(contractNum))
@@ -1770,6 +1771,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetch()
                 .map(r -> {
                     PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
+                    l.add(r.getValue(t.ID));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR));
                     dto.setPropertyIdentifier(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
                     dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
@@ -1780,6 +1782,30 @@ public class AssetProviderImpl implements AssetProvider {
                     dtos.add(dto);
                     return null;
                 });
+        if(l.get(0) == null){
+            List<PaymentExpectancyDTO> dtos1 = new ArrayList<>();
+            context.select(t.DATE_STR,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
+                    .from(t,t1)
+                    .where(t.CONTRACT_ID.eq(contractId))
+                    .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
+                    .orderBy(t1.NAME,t.DATE_STR)
+                    .limit(pageOffset,pageSize+1)
+                    .fetch()
+                    .map(r -> {
+                        PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
+                        l.add(r.getValue(t.ID));
+                        dto.setDateStrEnd(r.getValue(t.DATE_STR));
+                        dto.setPropertyIdentifier(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
+                        dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
+                        dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
+                        dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+                        dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                        dto.setChargingItemName(r.getValue(t1.NAME));
+                        dtos1.add(dto);
+                        return null;
+                    });
+            return dtos1;
+        }
         return dtos;
     }
 
@@ -2401,9 +2427,27 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void modifyBillGroup(ModifyBillGroupCommand cmd) {
+    public void modifyBillGroup(ModifyBillGroupCommand cmd,byte deCouplingFlag) {
         DSLContext context = getReadWriteContext();
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
+        if(deCouplingFlag == (byte)0){
+            context.update(t)
+                    .set(t.NAME,cmd.getBillGroupName())
+                    .set(t.BILLS_DAY,cmd.getBillDay())
+                    .set(t.BALANCE_DATE_TYPE,cmd.getBillingCycle())
+                    .set(t.DUE_DAY,cmd.getDueDay())
+                    .set(t.DUE_DAY_TYPE,cmd.getDueDayType())
+                    .where(t.ID.eq(cmd.getBillGroupId()))
+                    .or(t.BROTHER_GROUP_ID.eq(cmd.getBillGroupId()))
+                    .execute();
+            return;
+        }
+        Long nullId = null;
+        context.update(t)
+                .set(t.BROTHER_GROUP_ID,nullId)
+                .where(t.OWNER_ID.eq(cmd.getOwnerId()))
+                .and(t.OWNER_TYPE.eq(cmd.getOwnerType()))
+                .execute();
         context.update(t)
                 .set(t.NAME,cmd.getBillGroupName())
                 .set(t.BILLS_DAY,cmd.getBillDay())
@@ -2761,19 +2805,42 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void deleteBillGroupAndRules(Long billGroupId) {
+    public void deleteBillGroupAndRules(Long billGroupId,byte deCouplingFlag,String ownerType,Long ownerId) {
         DSLContext context = getReadWriteContext();
         EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
         EhPaymentBillGroups t1 = Tables.EH_PAYMENT_BILL_GROUPS.as("t1");
-        this.dbProvider.execute((TransactionStatus status) -> {
-            context.delete(t)
-                    .where(t.BILL_GROUP_ID.eq(billGroupId))
-                    .execute();
-            context.delete(t1)
-                    .where(t1.ID.eq(billGroupId))
-                    .execute();
-            return null;
-        });
+        if(deCouplingFlag == (byte)0){
+            this.dbProvider.execute((TransactionStatus status) -> {
+                List<Long> fetch = context.select(t1.ID)
+                        .from(t1)
+                        .where(t1.ID.eq(billGroupId))
+                        .or(t1.BROTHER_GROUP_ID.eq(billGroupId))
+                        .fetch(t1.ID);
+                context.delete(t)
+                        .where(t.BILL_GROUP_ID.in(fetch))
+                        .execute();
+                context.delete(t1)
+                        .where(t1.ID.in(fetch))
+                        .execute();
+                return null;
+            });
+        }else if(deCouplingFlag == (byte)1){
+            Long nullId = null;
+            this.dbProvider.execute((TransactionStatus status) -> {
+                context.delete(t)
+                        .where(t.BILL_GROUP_ID.eq(billGroupId))
+                        .execute();
+                context.delete(t1)
+                        .where(t1.ID.eq(billGroupId))
+                        .execute();
+                context.update(t1)
+                        .set(t1.BROTHER_GROUP_ID,nullId)
+                        .where(t1.OWNER_ID.eq(ownerId))
+                        .and(t1.OWNER_TYPE.eq(ownerType))
+                        .execute();
+                return null;
+            });
+        }
 
     }
 
