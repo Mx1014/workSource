@@ -8,8 +8,8 @@ import java.util.List;
 interface PortalService {
 
 
+	//todo
 	ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd);
-
 
 	ServiceModuleAppDTO createServiceModuleApp(CreateServiceModuleAppCommand cmd);
 

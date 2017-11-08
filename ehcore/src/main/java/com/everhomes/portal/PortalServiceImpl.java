@@ -150,6 +150,11 @@ public class PortalServiceImpl implements PortalService {
 		moduleApp.setCreatorUid(UserContext.current().getUser().getId());
 		moduleApp.setOperatorUid(moduleApp.getCreatorUid());
 		moduleApp.setActionType(serviceModule.getActionType());
+
+		//todo
+		moduleApp.setCustomTag(cmd.getCustomTag());
+		moduleApp.setCustomPath(cmd.getCustomPath());
+
 		serviceModuleAppProvider.createServiceModuleApp(moduleApp);
 		return processServiceModuleAppDTO(moduleApp);
 	}
@@ -174,6 +179,10 @@ public class PortalServiceImpl implements PortalService {
 			moduleApp.setOperatorUid(moduleApp.getCreatorUid());
 			moduleApp.setActionType(serviceModule.getActionType());
 			moduleApp.setNamespaceId(namespaceId);
+			//todo
+			moduleApp.setCustomTag(createModuleApp.getCustomTag());
+			moduleApp.setCustomPath(createModuleApp.getCustomPath());
+
 			serviceModuleApps.add(moduleApp);
 		}
 		serviceModuleAppProvider.createServiceModuleApps(serviceModuleApps);
@@ -194,6 +203,15 @@ public class PortalServiceImpl implements PortalService {
 				cmd.setInstanceConfig(serviceModule.getInstanceConfig());
 			}
 		}
+
+		//todo
+		if(!StringUtils.isEmpty(cmd.getCustomPath())){
+			moduleApp.setCustomPath(cmd.getCustomPath());
+		}
+		if(!StringUtils.isEmpty(cmd.getCustomTag())){
+			moduleApp.setCustomTag(cmd.getCustomTag());
+		}
+
 		moduleApp.setInstanceConfig(cmd.getInstanceConfig());
 		serviceModuleAppProvider.updateServiceModuleApp(moduleApp);
 		return processServiceModuleAppDTO(moduleApp);

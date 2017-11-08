@@ -92,12 +92,16 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		return listServiceModuleApp(namespaceId, null, actionType);
 	}
 
-	private List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType) {
+	private List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String customPath) {
 		Condition cond = Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId);
 		if(null != moduleId)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.eq(moduleId));
 		if(null != actionType)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.ACTION_TYPE.eq(actionType));
+		if(null != customTag)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.CUSTOM_TAG.eq(customTag));
+		if(null != customPath)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.CUSTOM_PATH.eq(customPath));
 		return getReadOnlyContext().select().from(Tables.EH_SERVICE_MODULE_APPS)
 				.where(cond)
 				.and(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()))
