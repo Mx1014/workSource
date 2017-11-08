@@ -1744,7 +1744,6 @@ public class AssetProviderImpl implements AssetProvider {
                         .execute();
                 context.delete(t2)
                         .where(t2.BILL_ID.in(billIds))
-                        .or(t2.CONTRACT_ID.eq(contractId))
                         .execute();
                 context.delete(t1)
                         .where(t1.CONTRACT_ID.eq(contractId))
@@ -1782,7 +1781,7 @@ public class AssetProviderImpl implements AssetProvider {
                     dtos.add(dto);
                     return null;
                 });
-        if(l.get(0) == null){
+        if(l.size() < 1 || l.get(0) == null){
             List<PaymentExpectancyDTO> dtos1 = new ArrayList<>();
             context.select(t.DATE_STR,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
                     .from(t,t1)
@@ -2940,25 +2939,24 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void setInworkFlagInContractReceiverWell(Long contractId, String contractNum) {
+    public void setInworkFlagInContractReceiverWell(Long contractId) {
         DSLContext writeContext = getReadWriteContext();
         PaymentContractReceiver cr = new PaymentContractReceiver();
         EhPaymentContractReceiver contract = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("contract");
         writeContext.update(contract)
                 .set(contract.IN_WORK,(byte)0)
                 .where(contract.CONTRACT_ID.eq(contractId))
-                .and(contract.CONTRACT_NUM.eq(contractNum))
                 .execute();
     }
 
     @Override
-    public Boolean checkContractInWork(String contractNum) {
+    public Boolean checkContractInWork(Long contractId) {
         EhPaymentContractReceiver contract = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("contract");
         DSLContext context = getReadOnlyContext();
         Byte aByte = context.select(contract.IN_WORK)
                 .from(contract)
                 .where(contract.IS_RECORDER.eq((byte) 1))
-                .and(contract.CONTRACT_NUM.eq(contractNum))
+                .and(contract.CONTRACT_ID.eq(contractId))
                 .fetchOne(contract.IN_WORK);
         if ( aByte == null) {
             throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.FAIL_IN_GENERATION,"mission failed");

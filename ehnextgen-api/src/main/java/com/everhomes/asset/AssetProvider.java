@@ -217,9 +217,9 @@ public interface AssetProvider {
 
     void setInworkFlagInContractReceiver(Long contractId,String contractNum);
 
-    void setInworkFlagInContractReceiverWell(Long contractId, String contractNum);
+    void setInworkFlagInContractReceiverWell(Long contractId);
 
-    Boolean checkContractInWork(String contractNum);
+    Boolean checkContractInWork(Long contractId);
 
     void updateChargingStandardByCreating(String standardName,String instruction, Long chargingStandardId, Long ownerId, String ownerType);
 
