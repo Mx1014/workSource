@@ -528,5 +528,7 @@ public interface OrganizationProvider {
 
     List listLapseOrganizations(Integer namespaceId);
 
-	Integer updateOrganizationMembersToInactiveByPath(String path,Timestamp now); 
+	Integer updateOrganizationMembersToInactiveByPath(String path,Timestamp now);
+
+	OrganizationMember findDepartmentMemberByTargetIdAndOrgId(Long userId, Long organizationId);
 }

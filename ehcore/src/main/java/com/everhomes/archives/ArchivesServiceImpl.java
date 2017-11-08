@@ -103,6 +103,9 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Autowired
     private ContentServerService contentServerService;
 
+    @Autowired
+    private ArchivesConfigurationService archivesConfigurationService;
+
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
 
@@ -2258,14 +2261,17 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
     }
 
-    @Scheduled(cron = "0 0 * * * ?")
+//    @Scheduled(cron = "0 0 * * * ?")
     public void executeArchivesNotification() {
         Calendar c = Calendar.getInstance();
         int weekDay = c.get(Calendar.DAY_OF_WEEK);
         List<ArchivesNotifications> results = archivesProvider.listArchivesNotificationsByWeek(weekDay);
         if (results != null && results.size() > 0) {
-            for (int i = 0; i < results.size(); i++) {
-                //TODO:每半个小时来执行
+            //  按照时间归类，来启动对应时间点的定时器
+            Map<Integer, List<ArchivesNotifications>> notifyMap = results.stream().collect(Collectors.groupingBy
+                    (ArchivesNotifications::getNotifyHour));
+            for(Integer key : notifyMap.keySet()){
+                archivesConfigurationService.sendingMail(notifyMap.get(key));
             }
         }
     }
