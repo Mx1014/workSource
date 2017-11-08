@@ -1762,7 +1762,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
         EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
         List<Long> l = new ArrayList<>();
-        context.select(t.DATE_STR,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
+        context.select(t.ID,t.DATE_STR,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
                 .from(t,t1)
                 .where(t.CONTRACT_NUM.eq(contractNum))
                 .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
@@ -1793,7 +1793,6 @@ public class AssetProviderImpl implements AssetProvider {
                     .fetch()
                     .map(r -> {
                         PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
-                        l.add(r.getValue(t.ID));
                         dto.setDateStrEnd(r.getValue(t.DATE_STR));
                         dto.setPropertyIdentifier(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
                         dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));

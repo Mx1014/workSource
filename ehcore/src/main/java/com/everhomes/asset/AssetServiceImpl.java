@@ -1435,8 +1435,8 @@ public class AssetServiceImpl implements AssetService {
                         Calendar d2 = Calendar.getInstance();
                         d2.setTime(item.getDateStrEnd());
 
-                        String test1 = yyyyMMdd.format(d2.getTime());
-                        String test2 = yyyyMMdd.format(longinus.getTime());
+//                        String test1 = yyyyMMdd.format(d2.getTime());
+//                        String test2 = yyyyMMdd.format(longinus.getTime());
 
                         if(d2.compareTo(longinus)!=-1){
                             //插中了！获得 插入点 到 整个计价标准的结束
