@@ -734,6 +734,24 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
+    public List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerId(Long customerId, Timestamp startTime, Timestamp endTime) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerEconomicIndicatorsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS);
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.MONTH.ge(startTime));
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.MONTH.le(endTime));
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerEconomicIndicator> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerEconomicIndicator.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
     public List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerIds(List<Long> customerIds) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhCustomerEconomicIndicatorsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS);

@@ -80,6 +80,7 @@ public interface EnterpriseCustomerProvider {
     void deleteCustomerEconomicIndicator(CustomerEconomicIndicator economicIndicator);
     CustomerEconomicIndicator findCustomerEconomicIndicatorById(Long id);
     List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerId(Long customerId);
+    List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerId(Long customerId, Timestamp startTime, Timestamp endTime);
     List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerIds(List<Long> customerIds);
 
     List<EnterpriseCustomer> listEnterpriseCustomerByCommunity(Long communityId);

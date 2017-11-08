@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import com.everhomes.contract.ContractService;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.customer.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.tomcat.jni.Time;
@@ -52,101 +53,6 @@ import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.customer.AllotEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.CreateCustomerApplyProjectCommand;
-import com.everhomes.rest.customer.CreateCustomerCertificateCommand;
-import com.everhomes.rest.customer.CreateCustomerCommercialCommand;
-import com.everhomes.rest.customer.CreateCustomerEconomicIndicatorCommand;
-import com.everhomes.rest.customer.CreateCustomerInvestmentCommand;
-import com.everhomes.rest.customer.CreateCustomerPatentCommand;
-import com.everhomes.rest.customer.CreateCustomerTalentCommand;
-import com.everhomes.rest.customer.CreateCustomerTrackingCommand;
-import com.everhomes.rest.customer.CreateCustomerTrackingPlanCommand;
-import com.everhomes.rest.customer.CreateCustomerTrademarkCommand;
-import com.everhomes.rest.customer.CreateEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.CustomerApplyProjectDTO;
-import com.everhomes.rest.customer.CustomerCertificateDTO;
-import com.everhomes.rest.customer.CustomerCommercialDTO;
-import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
-import com.everhomes.rest.customer.CustomerErrorCode;
-import com.everhomes.rest.customer.CustomerEventDTO;
-import com.everhomes.rest.customer.CustomerIndustryStatisticsDTO;
-import com.everhomes.rest.customer.CustomerIndustryStatisticsResponse;
-import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsDTO;
-import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsResponse;
-import com.everhomes.rest.customer.CustomerInvestmentDTO;
-import com.everhomes.rest.customer.CustomerPatentDTO;
-import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
-import com.everhomes.rest.customer.CustomerProjectStatisticsResponse;
-import com.everhomes.rest.customer.CustomerSourceStatisticsDTO;
-import com.everhomes.rest.customer.CustomerSourceStatisticsResponse;
-import com.everhomes.rest.customer.CustomerTalentDTO;
-import com.everhomes.rest.customer.CustomerTalentStatisticsDTO;
-import com.everhomes.rest.customer.CustomerTalentStatisticsResponse;
-import com.everhomes.rest.customer.CustomerTrackingDTO;
-import com.everhomes.rest.customer.CustomerTrackingPlanDTO;
-import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
-import com.everhomes.rest.customer.CustomerTrademarkDTO;
-import com.everhomes.rest.customer.CustomerType;
-import com.everhomes.rest.customer.DeleteCustomerApplyProjectCommand;
-import com.everhomes.rest.customer.DeleteCustomerCertificateCommand;
-import com.everhomes.rest.customer.DeleteCustomerCommercialCommand;
-import com.everhomes.rest.customer.DeleteCustomerEconomicIndicatorCommand;
-import com.everhomes.rest.customer.DeleteCustomerInvestmentCommand;
-import com.everhomes.rest.customer.DeleteCustomerPatentCommand;
-import com.everhomes.rest.customer.DeleteCustomerTalentCommand;
-import com.everhomes.rest.customer.DeleteCustomerTrackingCommand;
-import com.everhomes.rest.customer.DeleteCustomerTrackingPlanCommand;
-import com.everhomes.rest.customer.DeleteCustomerTrademarkCommand;
-import com.everhomes.rest.customer.DeleteEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.EnterpriseCustomerStatisticsDTO;
-import com.everhomes.rest.customer.GetCustomerApplyProjectCommand;
-import com.everhomes.rest.customer.GetCustomerCertificateCommand;
-import com.everhomes.rest.customer.GetCustomerCommercialCommand;
-import com.everhomes.rest.customer.GetCustomerEconomicIndicatorCommand;
-import com.everhomes.rest.customer.GetCustomerInvestmentCommand;
-import com.everhomes.rest.customer.GetCustomerPatentCommand;
-import com.everhomes.rest.customer.GetCustomerTalentCommand;
-import com.everhomes.rest.customer.GetCustomerTrackingCommand;
-import com.everhomes.rest.customer.GetCustomerTrackingPlanCommand;
-import com.everhomes.rest.customer.GetCustomerTrademarkCommand;
-import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.GiveUpEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.ImportEnterpriseCustomerDataCommand;
-import com.everhomes.rest.customer.ImportEnterpriseCustomerDataDTO;
-import com.everhomes.rest.customer.ListCustomerApplyProjectsCommand;
-import com.everhomes.rest.customer.ListCustomerCertificatesCommand;
-import com.everhomes.rest.customer.ListCustomerCommercialsCommand;
-import com.everhomes.rest.customer.ListCustomerEconomicIndicatorsCommand;
-import com.everhomes.rest.customer.ListCustomerEventsCommand;
-import com.everhomes.rest.customer.ListCustomerInvestmentsCommand;
-import com.everhomes.rest.customer.ListCustomerPatentsCommand;
-import com.everhomes.rest.customer.ListCustomerTalentsCommand;
-import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
-import com.everhomes.rest.customer.ListCustomerTrackingPlansCommand;
-import com.everhomes.rest.customer.ListCustomerTrackingsCommand;
-import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
-import com.everhomes.rest.customer.ListEnterpriseCustomerStatisticsCommand;
-import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
-import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommandResponse;
-import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
-import com.everhomes.rest.customer.SyncCustomersCommand;
-import com.everhomes.rest.customer.TrackingNotifyTemplateCode;
-import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
-import com.everhomes.rest.customer.TrackingPlanReadStatus;
-import com.everhomes.rest.customer.UpdateCustomerApplyProjectCommand;
-import com.everhomes.rest.customer.UpdateCustomerCertificateCommand;
-import com.everhomes.rest.customer.UpdateCustomerCommercialCommand;
-import com.everhomes.rest.customer.UpdateCustomerEconomicIndicatorCommand;
-import com.everhomes.rest.customer.UpdateCustomerInvestmentCommand;
-import com.everhomes.rest.customer.UpdateCustomerPatentCommand;
-import com.everhomes.rest.customer.UpdateCustomerTalentCommand;
-import com.everhomes.rest.customer.UpdateCustomerTrackingCommand;
-import com.everhomes.rest.customer.UpdateCustomerTrackingPlanCommand;
-import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
-import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -1527,6 +1433,30 @@ public class CustomerServiceImpl implements CustomerService {
         });
 
         return dto;
+    }
+
+    @Override
+    public ListCustomerAnnualStatisticsResponse listCustomerAnnualStatistics(ListCustomerAnnualStatisticsCommand cmd) {
+        ListCustomerAnnualStatisticsResponse response = new ListCustomerAnnualStatisticsResponse();
+        enterpriseCustomerProvider
+        return response;
+    }
+
+    @Override
+    public ListCustomerAnnualDetailsResponse listCustomerAnnualDetails(ListCustomerAnnualDetailsCommand cmd) {
+        ListCustomerAnnualDetailsResponse response = new ListCustomerAnnualDetailsResponse();
+        List<CustomerEconomicIndicator> economicIndicators = enterpriseCustomerProvider.listCustomerEconomicIndicatorsByCustomerId(cmd.getCustomerId(), new Timestamp(cmd.getStartTime()), new Timestamp(cmd.getEndTime()));
+        if(economicIndicators != null && economicIndicators.size() > 0) {
+            List<MonthStatistics> statistics = economicIndicators.stream().map(economicIndicator -> {
+                MonthStatistics statistic = new MonthStatistics();
+                statistic.setMonth(economicIndicator.getMonth().getTime());
+                statistic.setTaxPayment(economicIndicator.getTaxPayment());
+                statistic.setTurnover(economicIndicator.getTurnover());
+                return statistic;
+            }).collect(Collectors.toList());
+            response.setStatistics(statistics);
+        }
+        return response;
     }
 
     @Override
