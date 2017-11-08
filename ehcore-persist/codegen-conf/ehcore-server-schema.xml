@@ -210,7 +210,7 @@
             eh_parking_invoice_types | eh_parking_card_types | eh_parking_user_invoices |
             eh_service_alliance_comment_attachments | eh_service_alliance_comments |
             eh_flow_conditions|eh_flow_condition_expressions|eh_flow_lanes|eh_flow_links|eh_flow_predefined_params|eh_flow_branches|eh_flow_service_types|
-            eh_default_charging_items | eh_default_charging_item_properties |
+            eh_default_charging_items | eh_default_charging_item_properties | eh_payment_notice_config |
 
         </includes>
 
