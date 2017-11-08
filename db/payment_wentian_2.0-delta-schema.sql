@@ -62,7 +62,16 @@ ALTER TABLE `eh_payment_contract_receiver` ADD COLUMN `bill_group_rule_id` BIGIN
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `bill_group_rule_id` BIGINT DEFAULT NULL;
 ALTER TABLE `eh_payment_charging_standards_scopes` ADD COLUMN  `brother_standard_id` BIGINT DEFAULT NULL COMMENT '兄弟收费标准id，联动效果';
 ALTER TABLE `eh_payment_bill_groups` ADD COLUMN  `brother_group_id` BIGINT DEFAULT NULL COMMENT '兄弟账单组id，联动效果';
--- ALTER TABLE `eh_payment_bill_groups_rules` ADD COLUMN  `brother_rule_id` BIGINT DEFAULT NULL COMMENT '兄弟账单组id，联动效果';
+
+DROP TABLE IF EXISTS `eh_payment_notice_config`;
+CREATE TABLE `eh_payment_notice_config` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER DEFAULT NULL,
+  `owner_type` VARCHAR(255) DEFAULT NULL,
+  `owner_id` BIGINT DEFAULT NULL,
+  `notice_day_before` INTEGER DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 -- 4.10.3，合并记得删
