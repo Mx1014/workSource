@@ -563,14 +563,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         addCommand.setOrganizationId(organizationId);
         addCommand.setContactName(data.getContactName());
         addCommand.setContactEnName(data.getContactEnName());
-        //  性别
-        Byte gender;
-        if (data.getGender().trim().equals("男")) {
-            gender = 1;
-        } else {
-            gender = 2;
-        }
-        addCommand.setGender(gender);
+        addCommand.setGender(convertToArchivesEnum(data.getGender(),ArchivesParameter.GENDER));
         addCommand.setContactShortToken(data.getContactShortToken());
         addCommand.setRegionCode(getRealContactToken(data.getContactToken(), ArchivesParameter.REGION_CODE));
         addCommand.setContactToken(getRealContactToken(data.getContactToken(), ArchivesParameter.CONTACT_TOKEN));
