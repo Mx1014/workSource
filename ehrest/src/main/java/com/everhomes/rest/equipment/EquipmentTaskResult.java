@@ -25,6 +25,7 @@ public enum EquipmentTaskResult {
 	private byte code;
 
 	private String name;
+
 	private EquipmentTaskResult(byte code, String name){
 		this.code = code;
 		this.name = name;
