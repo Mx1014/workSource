@@ -1314,11 +1314,34 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 		}
 
-//		if (null != dto && null != dto.getPrice() && dto.getPrice().compareTo(new BigDecimal(0)) == 0) {
-//    		long now = System.currentTimeMillis();
-//    		long pastTime = now - dto.getPayTime();
-//    		dto.setRemainingTime();
-//		}
+		if (null != dto && null != dto.getPrice() && dto.getPrice().compareTo(new BigDecimal(0)) == 0) {
+
+    		int delayTime = dto.getDelayTime();
+			long now = System.currentTimeMillis();
+
+			long entryTime = dto.getEntryTime();
+			long pastTime = now - entryTime;
+			int pastMinute = (int) (pastTime / (60 * 1000));
+
+			if (pastMinute <= delayTime) {
+				dto.setRemainingTime(delayTime - pastMinute);
+
+			}else {
+				//延迟时间单位是分钟，这里转成毫秒
+				Timestamp startDate = new Timestamp(now - delayTime * 60 * 1000);
+				Timestamp endDate = new Timestamp(now);
+
+				ParkingRechargeOrder order = parkingProvider.getParkingRechargeTempOrder(cmd.getOwnerType(), cmd.getOwnerId(),
+						cmd.getParkingLotId(), cmd.getPlateNumber(), startDate, endDate);
+
+				if (null != order) {
+					Timestamp rechargeTime = order.getRechargeTime();
+					pastTime = now - rechargeTime.getTime();
+					pastMinute = (int) (pastTime / (60 * 1000));
+					dto.setRemainingTime(delayTime - pastMinute);
+				}
+			}
+		}
 
 		return dto;
 	}

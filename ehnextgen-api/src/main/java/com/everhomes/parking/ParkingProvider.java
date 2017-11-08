@@ -124,4 +124,7 @@ public interface ParkingProvider {
 
     ParkingCarVerification findParkingCarVerificationByUserId(String ownerType, Long ownerId, Long parkingLotId, String plateNumber,
                                                               Long userId);
+
+    ParkingRechargeOrder getParkingRechargeTempOrder(String ownerType, Long ownerId, Long parkingLotId,
+                                                     String plateNumber, Timestamp startDate, Timestamp endDate);
 }
