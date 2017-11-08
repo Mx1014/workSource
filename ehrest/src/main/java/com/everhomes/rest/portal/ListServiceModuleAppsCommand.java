@@ -7,6 +7,10 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>namespaceId: 域空间</li>
+ * <li>moduleId: 模块id</li>
+ * <li>actionType：模块action类型</li>
+ * <li>customTag：业务Tag</li>
+ * <li>customPath：业务参数</li>
  * </ul>
  */
 public class ListServiceModuleAppsCommand {
