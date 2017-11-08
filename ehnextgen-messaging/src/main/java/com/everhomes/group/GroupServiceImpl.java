@@ -2719,6 +2719,8 @@ public class GroupServiceImpl implements GroupService {
                             + ", groupMember=" + groupMember, e);
                 }
             }
+
+            groupMember.setGender(user.getGender());
         } else {
             LOGGER.error("The user related to the member not existed, userId=" + userId
                     + ", memberId=" + groupMember.getMemberId() + ", groupMember=" + groupMember);
