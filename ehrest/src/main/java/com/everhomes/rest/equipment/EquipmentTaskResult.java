@@ -17,8 +17,8 @@ import com.everhomes.util.StringHelper;
  */
 public enum EquipmentTaskResult {
 	NONE((byte)0, ""), COMPLETE_OK((byte)1, "巡检完成"), COMPLETE_DELAY((byte)2, " 巡检延迟"), 
-	NEED_MAINTENANCE_DELAY_COMPLETE_OK((byte)7, "需维修延迟维修完成"), NEED_MAINTENANCE_DELAY_COMPLETE_DELAY((byte)8, "需维修延迟维修延迟");	
-	private byte code;
+	NEED_MAINTENANCE_OK_COMPLETE_OK((byte)5, "需维修完成维修完成"), NEED_MAINTENANCE_OK_COMPLETE_DELAY((byte)6, "需维修完成维修延迟"),
+	NEED_MAINTENANCE_DELAY_COMPLETE_OK((byte)7, "需维修延迟维修完成"), NEED_MAINTENANCE_DELAY_COMPLETE_DELAY((byte)8, "需维修延迟维修延迟");	private byte code;
 	private String name;
 	
 	private EquipmentTaskResult(byte code, String name){
