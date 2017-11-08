@@ -61,7 +61,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		//双机判断
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
 			//为防止时间长了的话可能会有内存溢出的可能，把每天过期的定时任务清理一下
-			scheduleProvider.unscheduleJob("EquipmentInspectionNotify ");
+			//scheduleProvider.unscheduleJob("EquipmentInspectionNotify ");
 
 			closeDelayTasks();
 			createTask();
@@ -69,6 +69,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 //			if (notifyFlag) {
 //				sendTaskMsg();
 //			}
+
 		}
 
 	}
