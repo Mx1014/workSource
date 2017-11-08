@@ -284,7 +284,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
 		messageDto.setBodyType(MessageBodyType.TEXT.getCode());
 		messageDto.setBody(content);
-		messageDto.setMetaAppId(AppConstants.APPID_ACLINK);
+		messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
 		if(null != meta && meta.size() > 0) {
 			messageDto.getMeta().putAll(meta);
 		}
