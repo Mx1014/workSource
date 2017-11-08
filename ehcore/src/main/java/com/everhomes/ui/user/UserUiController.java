@@ -65,8 +65,7 @@ public class UserUiController extends ControllerBase {
     
     /**
      * <b>URL: /ui/user/listUserRelatedScenes</b>
-     * <p>列出用户当前域空间下的相关场景。</p>
-     * <p>必须在请求的Header中提供域空间。</p>
+     * <p>列出用户当前域空间下的相关场景。必须在请求的Header中提供域空间。</p>
      */
     @RequestMapping("listUserRelatedScenes")
     @RestReturn(value=SceneDTO.class, collection=true)
