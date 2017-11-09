@@ -58,7 +58,7 @@ class YueKongJianPmTaskHandle implements PmTaskHandle {
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone){
 
 		PmTask task1 = dbProvider.execute((TransactionStatus status) -> {
-			PmTask task = pmTaskCommonService.createTask(cmd, requestorUid, requestorName, requestorPhone);
+			PmTask task = pmTaskCommonService.createTask(cmd, requestorUid, cmd.getRequestorName(), cmd.getRequestorPhone());
 			//新建flowcase
 			Integer namespaceId = UserContext.getCurrentNamespaceId();
 			Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
