@@ -2,6 +2,7 @@ ALTER TABLE `eh_punch_exception_requests` ADD COLUMN `punch_type` TINYINT DEFAUL
 ALTER TABLE `eh_punch_exception_requests` ADD COLUMN `begin_time` DATETIME COMMENT ' 请假/加班 生效开始时间';  
 ALTER TABLE `eh_punch_exception_requests` ADD COLUMN `end_time` DATETIME COMMENT ' 请假/加班 生效结束时间';  
 ALTER TABLE `eh_punch_exception_requests` ADD COLUMN `duration` DOUBLE COMMENT ' 请假/加班 时长-可供计算';  
+ALTER TABLE `eh_punch_exception_requests` ADD COLUMN `category_id` DOUBLE COMMENT ' 请假类型';  
 ALTER TABLE `eh_punch_exception_requests` ADD COLUMN `approval_attribute` VARCHAR(128) COMMENT 'DEFAULT,CUSTOMIZE';
 
 ALTER TABLE `eh_punch_exception_approvals` ADD COLUMN `punch_type` TINYINT DEFAULT 2 COMMENT ' 0- 上班打卡 ; 1- 下班打卡';  
