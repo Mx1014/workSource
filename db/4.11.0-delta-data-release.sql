@@ -85,4 +85,6 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
   VALUES ((@id := @id + 1), '40835', '', 'EhNamespaces', '1000000', '2');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.car.verification.flowCase.url', 'zl://workflow/detail?flowCaseId=%s&flowUserType=node_applier&moduleId=40800', NULL, '0', NULL);
 
-
+-- 资源预订 add by sw 20171109
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('rental.notification', '10', 'zh_CN', '请输入备注');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('rental.notification', '11', 'zh_CN', '请输入显示内容');
