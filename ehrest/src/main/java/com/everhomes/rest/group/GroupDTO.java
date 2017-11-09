@@ -49,6 +49,7 @@ import com.everhomes.util.StringHelper;
  *     <li>touristPostPolicy: touristPostPolicy 参考{@link TouristPostPolicyFlag}</li>
  *     <li>clubType: clubType 参考{@link ClubType}</li>
  *     <li>contentUrl: 详情页面的url</li>
+ *     <li>phoneNumber: 联系电话</li>
  * </ul>
  */
 public class GroupDTO {
@@ -102,6 +103,8 @@ public class GroupDTO {
     private Byte clubType;
 
     private String contentUrl;
+
+    private String phoneNumber;
 
     public String getShareUrl() {
         return shareUrl;
@@ -424,6 +427,14 @@ public class GroupDTO {
 
     public void setContentUrl(String contentUrl) {
         this.contentUrl = contentUrl;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     @Override

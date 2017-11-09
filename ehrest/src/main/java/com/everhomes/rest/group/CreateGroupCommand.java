@@ -23,6 +23,7 @@ import com.everhomes.util.StringHelper;
  *     <li>joinPolicy: 加入策略，参考{@link com.everhomes.rest.group.GroupJoinPolicy}</li>
  *     <li>touristPostPolicy: touristPostPolicy 参考{@link TouristPostPolicyFlag}</li>
  *     <li>clubType: clubType 参考{@link ClubType}</li>
+ *     <li>phoneNumber: 联系电话</li>
  * </ul>
  */
 public class CreateGroupCommand {
@@ -45,6 +46,7 @@ public class CreateGroupCommand {
     private Integer joinPolicy;
     private Byte touristPostPolicy;
     private Byte clubType;
+    private String phoneNumber;
 
     public CreateGroupCommand() {
     }
@@ -175,6 +177,14 @@ public class CreateGroupCommand {
 
     public void setClubType(Byte clubType) {
         this.clubType = clubType;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     @Override

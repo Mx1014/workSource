@@ -337,6 +337,7 @@ public class GroupServiceImpl implements GroupService {
 
 			group.setTouristPostPolicy(cmd.getTouristPostPolicy());
             group.setClubType(cmd.getClubType());
+            group.setPhoneNumber(cmd.getPhoneNumber());
 
             this.groupProvider.createGroup(group);
     
