@@ -2247,7 +2247,13 @@ public class OrganizationServiceImpl implements OrganizationService {
         //：todo 判断该机构（子公司/部门/职级）是否有活动状态的人员
         if(organization.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode()) || organization.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()) || organization.getGroupType().equals(OrganizationGroupType.JOB_LEVEL.getCode())){
             //查询需要失效的所有人
-            List<OrganizationMember> if_empty_members = organizationProvider.listOrganizationMemberByPath(organization.getPath(), null, "");
+            List<String> groupTypes = new ArrayList<>();
+            groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+            groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+            groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
+            groupTypes.add(OrganizationGroupType.JOB_LEVEL.getCode());
+            List<OrganizationMember> if_empty_members = organizationProvider.listOrganizationMemberByPath(organization.getPath(), groupTypes, "");
             //2.如果仍有活动的人员,直接返回false
             if(if_empty_members.size() != 0){
                 return false;
@@ -5691,7 +5697,13 @@ public class OrganizationServiceImpl implements OrganizationService {
             //查询需要失效的所有人
             for(Long id : cmd.getIds()) {
                 Organization organization = this.checkOrganization(id);
-                List<OrganizationMember> if_empty_members = organizationProvider.listOrganizationMemberByPath(organization.getPath(), null, "");
+                List<String> groupTypes = new ArrayList<>();
+                groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+                groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+                groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+                groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
+                groupTypes.add(OrganizationGroupType.JOB_LEVEL.getCode());
+                List<OrganizationMember> if_empty_members = organizationProvider.listOrganizationMemberByPath(organization.getPath(), groupTypes, "");
                 //2.如果仍有活动的人员,直接返回false
                 if (if_empty_members.size() != 0) {
                     return false;
