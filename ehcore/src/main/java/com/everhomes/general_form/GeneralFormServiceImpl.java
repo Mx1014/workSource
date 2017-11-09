@@ -454,6 +454,14 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 		form.setNamespaceId(UserContext.getCurrentNamespaceId());
 		form.setFormVersion(0L);
 		form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
+
+		if(cmd.getDeleteFlag() == null)
+			form.setDeleteFlag(Byte.valueOf("1"));
+		if(cmd.getModifyFlag() == null)
+			form.setModifyFlag(Byte.valueOf("1"));
+		if(cmd.getFormAttribute() == null)
+			form.setFormAttribute(GeneralApprovalAttribute.CUSTOMIZE.getCode());
+
 		this.generalFormProvider.createGeneralForm(form);
 		return processGeneralFormDTO(form);
 	}
@@ -513,14 +521,18 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 						query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(cmd.getOwnerId()));
 						query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(cmd
 								.getOwnerType()));
-						Condition condititon = DSL.trueCondition();
-						if (cmd.getModuleId()!=null && cmd.getModuleType()!=null){
+						Condition condition = DSL.trueCondition();
+						/*if (cmd.getModuleId()!=null && cmd.getModuleType()!=null){
 							condititon = condititon.or(Tables.EH_GENERAL_FORMS.MODULE_ID.eq(cmd.getModuleId()).and(Tables.EH_GENERAL_FORMS.MODULE_TYPE.eq(cmd.getModuleType())));
 							if(FlowModuleType.SERVICE_ALLIANCE.getCode().equals(cmd.getModuleType())){
 								condititon = condititon.or(Tables.EH_GENERAL_FORMS.MODULE_ID.isNull().and(Tables.EH_GENERAL_FORMS.MODULE_TYPE.isNull()));
 							}
-						}
-						query.addConditions(condititon);
+						}*/
+                        if (cmd.getModuleId()!=null && cmd.getModuleType()!=null){
+                            condition = condition.and(Tables.EH_GENERAL_FORMS.MODULE_ID.eq(cmd.getModuleId()));
+                            condition = condition.and(Tables.EH_GENERAL_FORMS.MODULE_TYPE.eq(cmd.getModuleType()));
+                        }
+						query.addConditions(condition);
 						query.addConditions(Tables.EH_GENERAL_FORMS.STATUS
 								.ne(GeneralFormStatus.INVALID.getCode()));
 						return query;
@@ -543,9 +555,20 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 	public GeneralFormDTO getGeneralForm(GeneralFormIdCommand cmd) {
 		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
 				.getFormOriginId());
-		return processGeneralFormDTO(form);
+		GeneralFormDTO dto = processGeneralFormDTO(form);
+		//	added by LiMingDang for approval1.6
+		if (cmd.getModuleType() != null)
+			dto.setModuleType(cmd.getModuleType());
+		return dto;
 	}
 
-
-
+    @Override
+    public GeneralFormDTO verifyApprovalFormName(VerifyApprovalFormNameCommand cmd) {
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByName(cmd.getModuleId(),
+                cmd.getOwnerId(), cmd.getOwnerType(), cmd.getFormName());
+        if (form != null)
+            return ConvertHelper.convert(form, GeneralFormDTO.class);
+        return null;
+    }
 }
+

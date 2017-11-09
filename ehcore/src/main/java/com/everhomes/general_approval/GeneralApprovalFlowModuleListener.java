@@ -1,12 +1,14 @@
 package com.everhomes.general_approval;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.spi.LocaleServiceProvider;
 
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.general_approval.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -55,6 +57,10 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     protected GeneralFormProvider generalFormProvider;
     @Autowired
     protected LocaleStringService localeStringService;
+    @Autowired
+    protected OrganizationProvider organizationProvider;
+
+    private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
     public GeneralApprovalFlowModuleListener() {
         for (GeneralFormDataSourceType value : GeneralFormDataSourceType.values()) {
@@ -99,8 +105,73 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 
     @Override
     public void onFlowCaseCreating(FlowCase flowCase) {
-        // 服务联盟的审批拼接工作流 content字符串
-        flowCase.setContent(null);
+/*        // 服务联盟的审批拼接工作流 content字符串
+        flowCase.setContent(null);*/
+        PostApprovalFormCommand cmd = JSON.parseObject(flowCase.getContent(), PostApprovalFormCommand.class);
+        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(cmd.getApprovalId());
+        if (detail != null)
+            flowCase.setApplierName(detail.getContactName());
+        String content = localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "申请人") + " : " + flowCase.getApplierName() + "\n";
+        List<FlowCaseEntity> entities = processEntities(cmd.getValues());
+        for (int i = 0; i < entities.size(); i++) {
+            if (i == 3)
+                break;
+            content += entities.get(i).getKey() + " : " + entities.get(i).getValue() + "\n";
+        }
+        flowCase.setContent(content);
+    }
+
+    private List<FlowCaseEntity> processEntities(List<PostApprovalFormItem> values) {
+        List<FlowCaseEntity> entities = new ArrayList<>();
+        for (PostApprovalFormItem value : values) {
+            FlowCaseEntity e = new FlowCaseEntity();
+            e.setKey(value.getFieldDisplayName() == null ? value.getFieldName() : value.getFieldDisplayName());
+            switch (GeneralFormFieldType.fromCode(value.getFieldType())) {
+                case SINGLE_LINE_TEXT:
+                case NUMBER_TEXT:
+                case DATE:
+                case DROP_BOX:
+                    processDropBoxField(entities, e, value.getFieldValue());
+                    break;
+                case MULTI_LINE_TEXT:
+                    processMultiLineTextField(entities, e, value.getFieldValue());
+                    break;
+                case IMAGE:
+                    break;
+                case FILE:
+                    break;
+                case INTEGER_TEXT:
+                    processIntegerTextField(entities, e, value.getFieldValue());
+                    break;
+                case SUBFORM:
+                    break;
+                case CONTACT:
+                    //企业联系人
+                    processContactField(entities, e, value.getFieldValue());
+                    break;
+                case ASK_FOR_LEAVE:
+                    //请假
+                    processAskForLeaveField(entities, e, value.getFieldValue());
+                    break;
+                case BUSINESS_TRIP:
+                    //出差
+                    processBusinessTripField(entities, e, value.getFieldValue());
+                    break;
+                case OVERTIME:
+                    //加班
+                    processOverTimeField(entities, e, value.getFieldValue());
+                    break;
+                case GO_OUT:
+                    //外出
+                    processGoOutField(entities, e, value.getFieldValue());
+                    break;
+                case ABNORMAL_PUNCH:
+                    //打卡异常
+                    processAbnormalPunchField(entities, e, value.getFieldValue());
+                    break;
+            }
+        }
+        return entities;
     }
 
     @Override
@@ -172,6 +243,33 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
                 entities.add(e);
             }
         }
+
+        //  approval-1.6 added by R
+        GeneralApprovalFlowCase gf = ConvertHelper.convert(flowCase, GeneralApprovalFlowCase.class);
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "审批编号"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(gf.getApprovalNo() != null ? gf.getApprovalNo().toString() : null);
+        entities.add(e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "申请时间"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(format.format(gf.getCreateTime()));
+        entities.add(e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "申请人"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(gf.getApplierName());
+        entities.add(e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "所在部门"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(gf.getCreatorDepartment());
+        entities.add(e);
+
         entities.addAll(onFlowCaseCustomDetailRender(flowCase, flowUserType));
         return entities;
     }
@@ -212,52 +310,19 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
                         case NUMBER_TEXT:
                         case DATE:
                         case DROP_BOX:
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
-                            entities.add(e);
+                            processDropBoxField(entities, e, val.getFieldStr3());
                             break;
                         case MULTI_LINE_TEXT:
-                            e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-                            e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
-                            entities.add(e);
+                            processMultiLineTextField(entities, e, val.getFieldStr3());
                             break;
                         case IMAGE:
-                            e.setEntityType(FlowCaseEntityType.IMAGE.getCode());
-                            //工作流images怎么传
-                            PostApprovalFormImageValue imageValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormImageValue.class);
-                            for (String uriString : imageValue.getUris()) {
-                                String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-                                e.setValue(url);
-                                FlowCaseEntity e2 = ConvertHelper.convert(e, FlowCaseEntity.class);
-                                entities.add(e2);
-                            }
+                            processImageField(entities, e, val.getFieldStr3());
                             break;
                         case FILE:
-//						e.setEntityType(FlowCaseEntityType.F.getCode()); 
-                            //TODO:工作流需要新增类型file
-                            e.setEntityType(FlowCaseEntityType.FILE.getCode());
-                            PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormFileValue.class);
-                            if (null == fileValue || fileValue.getFiles() == null)
-                                break;
-                            List<FlowCaseFileDTO> files = new ArrayList<>();
-                            for (PostApprovalFormFileDTO dto2 : fileValue.getFiles()) {
-                                FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
-                                String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
-                                ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
-                                fileDTO.setUrl(url);
-                                fileDTO.setFileName(dto2.getFileName());
-                                fileDTO.setFileSize(resource.getResourceSize());
-                                files.add(fileDTO);
-                            }
-                            FlowCaseFileValue value = new FlowCaseFileValue();
-                            value.setFiles(files);
-                            e.setValue(JSON.toJSONString(value));
-                            entities.add(e);
+                            processFileField(entities, e, val.getFieldStr3());
                             break;
                         case INTEGER_TEXT:
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
-                            entities.add(e);
+                            processIntegerTextField(entities, e, val.getFieldStr3());
                             break;
                         case SUBFORM:
 
@@ -289,134 +354,28 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
                             break;
                         case CONTACT:
                             //企业联系人
-                            PostApprovalFormContactValue contactValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormContactValue.class);
-                            e = new FlowCaseEntity();
-                            e.setKey(localeStringService.getLocalizedString("general_approval.contact.key", "1", "zh_CN", "企业"));
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(contactValue.getEnterpriseName());
-                            entities.add(e);
-
-                            e = new FlowCaseEntity();
-                            e.setKey(localeStringService.getLocalizedString("general_approval.contact.key", "2", "zh_CN", "楼栋-门牌"));
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            String addresses = "";
-
-                            if (null != contactValue.getAddresses() && contactValue.getAddresses().size() > 0)
-                                addresses = StringUtils.join(contactValue.getAddresses(), ",");
-                            e.setValue(addresses);
-                            entities.add(e);
-
-                            e = new FlowCaseEntity();
-                            e.setKey(localeStringService.getLocalizedString("general_approval.contact.key", "3", "zh_CN", "联系人"));
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(contactValue.getContactName());
-                            entities.add(e);
-
-                            e = new FlowCaseEntity();
-                            e.setKey(localeStringService.getLocalizedString("general_approval.contact.key", "4", "zh_CN", "联系方式"));
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(contactValue.getContactNumber());
-                            entities.add(e);
+                            processContactField(entities, e, val.getFieldStr3());
                             break;
                         case ASK_FOR_LEAVE:
-                            PostApprovalFormAskForLeaveValue leaveValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormAskForLeaveValue.class);
-                            e = new FlowCaseEntity();
-                            e.setKey(localeStringService.getLocalizedString("general_approval.ask_for_leave.key", "1", "zh_CN", "请假类型"));
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(leaveValue.getRestName());
-                            entities.add(e);
-
-                            e = new FlowCaseEntity();
-                            e.setKey(localeStringService.getLocalizedString("general_approval.ask_for_leave.key", "2", "zh_CN", "开始时间"));
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(leaveValue.getStartTime());
-                            entities.add(e);
-
-                            e = new FlowCaseEntity();
-                            e.setKey(localeStringService.getLocalizedString("general_approval.ask_for_leave.key", "3", "zh_CN", "结束时间"));
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(leaveValue.getEndTime());
-                            entities.add(e);
-
-                            e = new FlowCaseEntity();
-                            e.setKey(localeStringService.getLocalizedString("general_approval.ask_for_leave.key", "4", "zh_CN", "请假时长"));
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(leaveValue.getDuration());
-                            entities.add(e);
+                            //请假
+                            processAskForLeaveField(entities, e, val.getFieldStr3());
                             break;
                         case BUSINESS_TRIP:
-                            PostApprovalFormBussinessTripValue tripValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormBussinessTripValue.class);
-                            e = new FlowCaseEntity();
-                            e.setKey(localeStringService.getLocalizedString("general_approval.business_trip.key", "1", "zh_CN", "开始时间"));
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(tripValue.getStartTime());
-                            entities.add(e);
-
-                            e = new FlowCaseEntity();
-                            e.setKey(localeStringService.getLocalizedString("general_approval.business_trip.key", "2", "zh_CN", "结束时间"));
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(tripValue.getEndTime());
-                            entities.add(e);
-
-                            e = new FlowCaseEntity();
-                            e.setKey(localeStringService.getLocalizedString("general_approval.business_trip.key", "3", "zh_CN", "出差时长"));
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(tripValue.getDuration());
-                            entities.add(e);
+                            //出差
+                            processBusinessTripField(entities, e, val.getFieldStr3());
                             break;
                         case OVERTIME:
-                            PostApprovalFormOverTimeValue overTimeValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormOverTimeValue.class);
-                            e = new FlowCaseEntity();
-                            e.setKey(localeStringService.getLocalizedString("general_approval.overtime.key", "1", "zh_CN", "开始时间"));
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(overTimeValue.getStartTime());
-                            entities.add(e);
-
-                            e = new FlowCaseEntity();
-                            e.setKey(localeStringService.getLocalizedString("general_approval.overtime.key", "2", "zh_CN", "结束时间"));
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(overTimeValue.getEndTime());
-                            entities.add(e);
-
-                            e = new FlowCaseEntity();
-                            e.setKey(localeStringService.getLocalizedString("general_approval.overtime.key", "3", "zh_CN", "加班时长"));
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(overTimeValue.getDuration());
-                            entities.add(e);
+                            //加班
+                            processOverTimeField(entities, e, val.getFieldStr3());
                             break;
                         case GO_OUT:
-                            PostApprovalFormGoOutValue outValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormGoOutValue.class);
-                            e = new FlowCaseEntity();
-                            e.setKey(localeStringService.getLocalizedString("general_approval.go_out.key", "1", "zh_CN", "开始时间"));
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(outValue.getStartTime());
-                            entities.add(e);
-
-                            e = new FlowCaseEntity();
-                            e.setKey(localeStringService.getLocalizedString("general_approval.go_out.key", "2", "zh_CN", "结束时间"));
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(outValue.getEndTime());
-                            entities.add(e);
-
-                            e = new FlowCaseEntity();
-                            e.setKey(localeStringService.getLocalizedString("general_approval.go_out.key", "3", "zh_CN", "外出时长"));
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(outValue.getDuration());
-                            entities.add(e);
+                            //外出
+                            processGoOutField(entities, e, val.getFieldStr3());
                             break;
                         case ABNORMAL_PUNCH:
-                            PostApprovalFormAbnormalPunchValue punchValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormAbnormalPunchValue.class);
-                            e = new FlowCaseEntity();
-                            e.setKey(localeStringService.getLocalizedString("general_approval.abnormal_punch.key", "1", "zh_CN", "异常日期"));
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(punchValue.getAbnormalDate());
-                            entities.add(e);
-
-                            e = new FlowCaseEntity();
-                            e.setKey(localeStringService.getLocalizedString("general_approval.abnormal_punch.key", "2", "zh_CN", "异常班次"));
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(punchValue.getAbnormalItem());
-                            entities.add(e);
+                            //打卡异常
+                            processAbnormalPunchField(entities, e, val.getFieldStr3());
+                            break;
                     }
                 }
             } catch (NullPointerException e) {
@@ -427,6 +386,195 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
             }
         }
     }
+
+    public void processDropBoxField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(JSON.parseObject(jsonVal, PostApprovalFormTextValue.class).getText());
+        entities.add(e);
+    }
+
+    public void processMultiLineTextField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(JSON.parseObject(jsonVal, PostApprovalFormTextValue.class).getText());
+        entities.add(e);
+    }
+
+    public void processImageField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
+        e.setEntityType(FlowCaseEntityType.IMAGE.getCode());
+        //工作流images怎么传
+        PostApprovalFormImageValue imageValue = JSON.parseObject(jsonVal, PostApprovalFormImageValue.class);
+        for (String uriString : imageValue.getUris()) {
+            String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
+            e.setValue(url);
+            FlowCaseEntity e2 = ConvertHelper.convert(e, FlowCaseEntity.class);
+            entities.add(e2);
+        }
+    }
+
+    public void processFileField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
+        //TODO:工作流需要新增类型file
+        e.setEntityType(FlowCaseEntityType.FILE.getCode());
+        PostApprovalFormFileValue fileValue = JSON.parseObject(jsonVal, PostApprovalFormFileValue.class);
+        if (null == fileValue || fileValue.getFiles() == null)
+            return;
+        List<FlowCaseFileDTO> files = new ArrayList<>();
+        for (PostApprovalFormFileDTO dto2 : fileValue.getFiles()) {
+            FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
+            String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+            ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
+            fileDTO.setUrl(url);
+            fileDTO.setFileName(dto2.getFileName());
+            fileDTO.setFileSize(resource.getResourceSize());
+            files.add(fileDTO);
+        }
+        FlowCaseFileValue value = new FlowCaseFileValue();
+        value.setFiles(files);
+        e.setValue(JSON.toJSONString(value));
+        entities.add(e);
+    }
+
+    public void processIntegerTextField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(JSON.parseObject(jsonVal, PostApprovalFormTextValue.class).getText());
+        entities.add(e);
+    }
+
+    public void processContactField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
+        PostApprovalFormContactValue contactValue = JSON.parseObject(jsonVal, PostApprovalFormContactValue.class);
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.contact.key", "1", "zh_CN", "企业"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(contactValue.getEnterpriseName());
+        entities.add(e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.contact.key", "2", "zh_CN", "楼栋-门牌"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        String addresses = "";
+
+        if (null != contactValue.getAddresses() && contactValue.getAddresses().size() > 0)
+            addresses = StringUtils.join(contactValue.getAddresses(), ",");
+        e.setValue(addresses);
+        entities.add(e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.contact.key", "3", "zh_CN", "联系人"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(contactValue.getContactName());
+        entities.add(e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.contact.key", "4", "zh_CN", "联系方式"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(contactValue.getContactNumber());
+        entities.add(e);
+    }
+
+    public void processAskForLeaveField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
+        PostApprovalFormAskForLeaveValue leaveValue = JSON.parseObject(jsonVal, PostApprovalFormAskForLeaveValue.class);
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.ask_for_leave.key", "1", "zh_CN", "请假类型"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(leaveValue.getRestName());
+        entities.add(0, e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.ask_for_leave.key", "2", "zh_CN", "开始时间"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(leaveValue.getStartTime());
+        entities.add(1, e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.ask_for_leave.key", "3", "zh_CN", "结束时间"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(leaveValue.getEndTime());
+        entities.add(2, e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.ask_for_leave.key", "4", "zh_CN", "请假时长"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(leaveValue.getDuration() + " 天");
+        entities.add(3, e);
+    }
+
+    public void processBusinessTripField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
+        PostApprovalFormBussinessTripValue tripValue = JSON.parseObject(jsonVal, PostApprovalFormBussinessTripValue.class);
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.business_trip.key", "1", "zh_CN", "开始时间"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(tripValue.getStartTime());
+        entities.add(0, e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.business_trip.key", "2", "zh_CN", "结束时间"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(tripValue.getEndTime());
+        entities.add(1, e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.business_trip.key", "3", "zh_CN", "出差时长"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(tripValue.getDuration() + " 天");
+        entities.add(2, e);
+    }
+
+    public void processOverTimeField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
+        PostApprovalFormOverTimeValue overTimeValue = JSON.parseObject(jsonVal, PostApprovalFormOverTimeValue.class);
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.overtime.key", "1", "zh_CN", "开始时间"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(overTimeValue.getStartTime());
+        entities.add(0, e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.overtime.key", "2", "zh_CN", "结束时间"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(overTimeValue.getEndTime());
+        entities.add(1, e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.overtime.key", "3", "zh_CN", "加班时长"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(overTimeValue.getDuration() + " 天");
+        entities.add(2, e);
+    }
+
+    public void processGoOutField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
+        PostApprovalFormGoOutValue outValue = JSON.parseObject(jsonVal, PostApprovalFormGoOutValue.class);
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.go_out.key", "1", "zh_CN", "开始时间"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(outValue.getStartTime());
+        entities.add(0, e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.go_out.key", "2", "zh_CN", "结束时间"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(outValue.getEndTime());
+        entities.add(1, e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.go_out.key", "3", "zh_CN", "外出时长"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(outValue.getDuration() + " 天");
+        entities.add(2, e);
+    }
+
+    public void processAbnormalPunchField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
+        PostApprovalFormAbnormalPunchValue punchValue = JSON.parseObject(jsonVal, PostApprovalFormAbnormalPunchValue.class);
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.abnormal_punch.key", "1", "zh_CN", "异常日期"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(punchValue.getAbnormalDate());
+        entities.add(0, e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.abnormal_punch.key", "2", "zh_CN", "异常班次"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(punchValue.getAbnormalItem());
+        entities.add(1, e);
+    }
+
 
     @Override
     public String onFlowVariableRender(FlowCaseState ctx, String variable) {
@@ -463,10 +611,10 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 
     }
 
-	@Override
-	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

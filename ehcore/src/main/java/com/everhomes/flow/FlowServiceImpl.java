@@ -33,6 +33,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -60,6 +61,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -2404,15 +2406,25 @@ public class FlowServiceImpl implements FlowService {
         }
 
         FlowCase flowCase = ConvertHelper.convert(flowCaseCmd, FlowCase.class);
+        if (flowCaseCmd.getAdditionalFieldDTO() != null) {
+            BeanUtils.copyProperties(flowCaseCmd.getAdditionalFieldDTO(), flowCase);
+        }
+
         flowCase.setCurrentNodeId(0L);
         if (flowCase.getApplyUserId() == null) {
             flowCase.setApplyUserId(UserContext.current().getUser().getId());
         }
+
+        /*change nickName to contactName by approval 1.6
+        flowCase.setApplierName(userInfo.getNickName());*/
+
         UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(flowCase.getApplyUserId());
-        flowCase.setApplierName(userInfo.getNickName());
         if (userInfo.getPhones() != null && userInfo.getPhones().size() > 0) {
             flowCase.setApplierPhone(userInfo.getPhones().get(0));
         }
+        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(userInfo.getId());
+        if (detail != null)
+            flowCase.setApplierName(detail.getContactName());
 
         FlowModuleDTO moduleDTO = this.getModuleById(snapshotFlow.getModuleId());
         if (FlowModuleType.SERVICE_ALLIANCE.getCode().equals(snapshotFlow.getModuleType())) {
@@ -4956,7 +4968,7 @@ public class FlowServiceImpl implements FlowService {
             return null;
         }
 
-        if (dto.getTitle() != null) {
+        if (dto.getTitle() != null && dto.getModuleName() == null) {
             dto.setModuleName(dto.getTitle());
         } else {
             dto.setTitle(dto.getModuleName());
@@ -5134,7 +5146,7 @@ public class FlowServiceImpl implements FlowService {
         FlowGraph flowGraph = ctx.getFlowGraph();
 
         FlowCaseBriefDTO dto = ConvertHelper.convert(flowCase, FlowCaseBriefDTO.class);
-        if (dto.getTitle() != null) {
+        if (dto.getTitle() != null && dto.getModuleName() == null) {
             dto.setModuleName(dto.getTitle());
         } else {
             dto.setTitle(dto.getModuleName());

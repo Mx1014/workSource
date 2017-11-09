@@ -6,8 +6,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>restId: 请假id</li>
  * <li>restName: 请假类型</li>
- * <li>startTime: 开始时间</li>
- * <li>endTime: 结束时间</li>
+ * <li>startTime: 开始时间 格式为:yy-MM-dd HH:mm</li>
+ * <li>endTime: 结束时间 格式为:yy-MM-dd HH:mm</li>
  * <li>duration: 请假时长</li>
  * </ul>
  */

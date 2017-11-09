@@ -13,7 +13,7 @@ package com.everhomes.rest.general_approval;
  * <li>pageSize: 页面大小</li>
  * </ul>
  */
-public class ListGeneralApprovalRecordsCommand {
+public class  ListGeneralApprovalRecordsCommand {
 
     private Long organizationId;
 

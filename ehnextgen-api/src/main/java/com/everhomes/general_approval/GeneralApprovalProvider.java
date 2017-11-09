@@ -20,4 +20,9 @@ public interface GeneralApprovalProvider {
 
 	List<GeneralApprovalTemplate> listGeneralApprovalTemplateByModuleId(Long moduleId);
 
-}
+    GeneralApproval getGeneralApprovalByName(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, String approvalName);
+
+    GeneralApproval getGeneralApprovalByTemplateId(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long templateId);
+
+	GeneralApproval getGeneralApprovalByAttribute(Integer namespaceId, Long ownerId, String attribute);
+        }
