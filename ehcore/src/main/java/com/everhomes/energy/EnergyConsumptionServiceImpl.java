@@ -521,6 +521,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         //楼栋门牌信息
         dto.setAddresses(populateEnergyMeterAddresses(meter.getId()));
 
+        List<EnergyMeterTask> tasks = energyMeterTaskProvider.listActiveEnergyMeterTasks(meter.getId());
+        if(tasks != null && tasks.size() > 0) {
+            dto.setLastTaskReading(tasks.get(0).getLastTaskReading());
+        }
         List<PlanMeter> maps = energyPlanProvider.listByEnergyMeter(meter.getId());
         Boolean assignFlag = false;
         if(maps != null && maps.size() > 0) {
@@ -529,10 +533,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     assignFlag = true;
                 }
             }
-            List<EnergyMeterTask> tasks = energyMeterTaskProvider.listActiveEnergyMeterTasks(meter.getId());
-            if(tasks != null && tasks.size() > 0) {
-                dto.setLastTaskReading(tasks.get(0).getLastTaskReading());
-            }
+
         }
         dto.setAssignedPlan(assignFlag);
         return dto;
@@ -2856,6 +2857,17 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         plan.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         energyPlanProvider.updateEnergyPlan(plan);
         energyPlanSearcher.feedDoc(plan);
+
+        //刷一下计划关联的表记的状态
+        List<EnergyPlanMeterMap> maps = energyPlanProvider.listMetersByEnergyPlan(plan.getId());
+        if(maps != null && maps.size() > 0) {
+            maps.forEach(map -> {
+                EnergyMeter meter = meterProvider.findById(plan.getNamespaceId(), map.getMeterId());
+                meterSearcher.feedDoc(meter);
+            });
+
+        }
+
     }
 
     @Override
@@ -3103,6 +3115,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     EnergyPlanMeterMap meterMap = ConvertHelper.convert(meter, EnergyPlanMeterMap.class);
                     meterMap.setPlanId(plan.getId());
                     energyPlanProvider.createEnergyPlanMeterMap(meterMap);
+                    //刷一下计划关联的表记的状态
+                    EnergyMeter energyMeter = meterProvider.findById(plan.getNamespaceId(), meterMap.getMeterId());
+                    meterSearcher.feedDoc(energyMeter);
                 }
             });
         }
@@ -3110,6 +3125,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         if(maps != null && maps.size() > 0) {
             maps.forEach((id, meterMap) -> {
                 energyPlanProvider.deleteEnergyPlanMeterMap(meterMap);
+                //刷一下计划关联的表记的状态
+                EnergyMeter meter = meterProvider.findById(plan.getNamespaceId(), meterMap.getMeterId());
+                meterSearcher.feedDoc(meter);
+
             });
         }
 
