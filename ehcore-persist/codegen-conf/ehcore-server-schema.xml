@@ -224,7 +224,7 @@
             eh_uniongroup_version | 
             eh_news_tag | eh_news_tag_vals|
             eh_flow_conditions|eh_flow_condition_expressions|eh_flow_lanes|eh_flow_links|eh_flow_predefined_params|eh_flow_branches|eh_flow_service_types|
-            eh_questionnaire_ranges | eh_payment_formula
+            eh_questionnaire_ranges | eh_payment_formula |
 	    eh_general_approval_templates | eh_general_form_templates |
 
         </includes>

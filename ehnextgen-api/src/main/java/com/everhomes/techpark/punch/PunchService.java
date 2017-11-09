@@ -229,8 +229,6 @@ public interface PunchService {
 
 	void invalidPunchQRCode(GetPunchQRCodeCommand cmd);
 
-	ListApprovalCategoriesResponse listApprovalCategories();
-
 	GetPunchGroupsCountResponse getPunchGroupsCount(GetPunchGroupsCountCommand cmd);
 
 	void punchGroupAddNewEmployee(Long groupId);
