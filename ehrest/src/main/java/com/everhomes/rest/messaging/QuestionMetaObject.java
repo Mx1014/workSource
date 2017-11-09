@@ -19,6 +19,7 @@ import com.everhomes.util.StringHelper;
  * <li>requestTime: 请求时间</li>
  * <li>requestInfo: 申请描述</li>
  * <li>requestId: 申请id</li>
+ * <li>detailType: 详细类型 {@link DetailType} </li>
  * <li>jsonInfo: 附带信息</li>
  * </ul>
  */
@@ -34,6 +35,7 @@ public class QuestionMetaObject {
     private Timestamp requestTime;
     private String requestInfo;
     private Long requestId;
+    private Byte detailType;
     private String jsonInfo;
 
     
@@ -123,6 +125,14 @@ public class QuestionMetaObject {
 
     public void setRequestInfo(String requestInfo) {
         this.requestInfo = requestInfo;
+    }
+
+    public Byte getDetailType() {
+        return detailType;
+    }
+
+    public void setDetailType(Byte detailType) {
+        this.detailType = detailType;
     }
 
     public String getJsonInfo() {

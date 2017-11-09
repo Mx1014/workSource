@@ -3562,6 +3562,12 @@ public class GroupServiceImpl implements GroupService {
                 GuildApply guildApply = groupProvider.findGuildApplyByGroupMemberId(member.getId());
                 metaObject.setJsonInfo(StringHelper.toJsonString(guildApply));
 
+                if(GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator())
+                        && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())
+                        && ClubType.GUILD == ClubType.fromCode(group.getClubType())){
+                    metaObject.setDetailType(DetailType.GUILD.getCode());
+                }
+
                 // 下面的应该写错了，这里不影响以前逻辑的情况下，把俱乐部的metaObjectType换成GROUP_REQUEST_TO_JOIN，add by tt, 20161104
                 if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
                     QuestionMetaActionData actionData = new QuestionMetaActionData();
