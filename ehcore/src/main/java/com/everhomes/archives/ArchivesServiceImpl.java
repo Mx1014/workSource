@@ -977,14 +977,22 @@ public class ArchivesServiceImpl implements ArchivesService {
         orgCommand.setEmployeeStatus(cmd.getEmployeeStatus());
         orgCommand.setContractPartyId(cmd.getContractPartyId());
         orgCommand.setKeywords(cmd.getKeywords());
-        if (cmd.getDepartmentId() != null)
+        if (cmd.getDepartmentId() != null){
             orgCommand.setOrganizationId(cmd.getDepartmentId());
+            List<String> groupTypes = new ArrayList<>();
+            groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+            groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+            orgCommand.setTargetTypes(groupTypes);
+        }
         orgCommand.setPageAnchor(cmd.getPageAnchor());
         if (cmd.getPageSize() != null)
             orgCommand.setPageSize(cmd.getPageSize());
         else
             orgCommand.setPageSize(20);
         orgCommand.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CHILD_ENTERPRISE.getCode()));
+
+
+
         ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
 
         if (members.getMembers() != null && members.getMembers().size() > 0) {
