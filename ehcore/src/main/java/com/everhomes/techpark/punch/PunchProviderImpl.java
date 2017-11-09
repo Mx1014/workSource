@@ -2816,7 +2816,7 @@ long id = sequenceProvider.getNextSequence(key);
 					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(ownerId))
 					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(beginDate))
 					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lt(endDate))
-					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.ABNORMAL_PUNCH.getCode()))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.ASK_FOR_LEAVE.getCode()))
 					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(ApprovalStatus.AGREEMENT.getCode()))
 					.groupBy(Tables.EH_APPROVAL_CATEGORIES.ID)
 					;
