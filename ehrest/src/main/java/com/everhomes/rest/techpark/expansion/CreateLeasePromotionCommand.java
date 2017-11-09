@@ -73,6 +73,16 @@ public class CreateLeasePromotionCommand {
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
 
+	private String unit;
+
+	public String getUnit() {
+		return unit;
+	}
+
+	public void setUnit(String unit) {
+		this.unit = unit;
+	}
+
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}

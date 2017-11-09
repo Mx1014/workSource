@@ -1,44 +1,36 @@
 package com.everhomes.general_approval;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.everhomes.general_form.GeneralForm;
-import com.everhomes.general_form.GeneralFormProvider;
-
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.general_approval.*;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.contentserver.ContentServerResource;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.entity.EntityType;
+import com.everhomes.flow.*;
+import com.everhomes.general_form.GeneralForm;
+import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.module.ServiceModule;
+import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.rest.flow.*;
+import com.everhomes.rest.general_approval.*;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.Tuple;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.everhomes.contentserver.ContentServerResource;
-import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.entity.EntityType;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseState;
-import com.everhomes.flow.FlowModuleInfo;
-import com.everhomes.flow.FlowModuleListener;
-import com.everhomes.locale.LocaleStringService;
-import com.everhomes.module.ServiceModule;
-import com.everhomes.module.ServiceModuleProvider;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseEntityType;
-import com.everhomes.rest.flow.FlowCaseFileDTO;
-import com.everhomes.rest.flow.FlowCaseFileValue;
-import com.everhomes.rest.flow.FlowReferType;
-import com.everhomes.rest.flow.FlowServiceTypeDTO;
-import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.Tuple;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
@@ -193,7 +185,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     }
 
     @Override
-    public String onFlowCaseBriefRender(FlowCase flowCase) {
+	public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -613,8 +605,26 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 
     @Override
     public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
-        // TODO Auto-generated method stub
+        ListGeneralApprovalCommand command = new ListGeneralApprovalCommand();
+        List<GeneralApproval> gas = this.generalApprovalProvider.queryGeneralApprovals(new ListingLocator(),
+                Integer.MAX_VALUE - 1, (locator, query) -> {
+                    query.addConditions(Tables.EH_GENERAL_APPROVALS.NAMESPACE_ID.eq(namespaceId));
+                    query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.in(
+                            GeneralApprovalStatus.RUNNING.getCode(),
+                            GeneralApprovalStatus.INVALID.getCode())
+                    );
+                    return query;
+                });
+        if(gas != null) {
+            List<FlowServiceTypeDTO> result = gas.stream().map(r -> {
+                FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+                dto.setId(r.getId());
+                dto.setNamespaceId(r.getNamespaceId());
+                dto.setServiceName(r.getApprovalName());
+                return dto;
+            }).collect(Collectors.toList());
+            return result;
+        }
         return null;
     }
-
 }

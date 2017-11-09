@@ -56,12 +56,7 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 
 			ParkingCardDTO parkingCardDTO = convertCardInfo(parkingLot);
 
-			if (checkExpireTime(parkingLot, expireTime)) {
-				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
-			}else {
-				parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
-
-			}
+			setCardStatus(parkingLot, expireTime, parkingCardDTO);
 
 			if (null != card.getName()) {
 				String plateOwnerName = card.getName();
@@ -420,9 +415,15 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 		}
 		
 		OpenCardInfoDTO dto = new OpenCardInfoDTO();
+		String cardTypeId = parkingCardRequest.getCardTypeId();
+		if (StringUtils.isBlank(cardTypeId)) {
+			List<ParkingCardRequestType> types = parkingProvider.listParkingCardTypes(parkingCardRequest.getOwnerType(),
+					parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId());
+			cardTypeId = types.get(0).getCardTypeId();
+		}
 
 		//月租车
-		List<KetuoCardRate> rates = getCardRule(parkingCardRequest.getCardTypeId());
+		List<KetuoCardRate> rates = getCardRule(cardTypeId);
 		if(null != rates && !rates.isEmpty()) {
 			
 			KetuoCardRate rate = null;

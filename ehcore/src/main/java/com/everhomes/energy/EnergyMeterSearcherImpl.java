@@ -213,8 +213,8 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
             ids.remove(ids.size() - 1);
             response.setNextPageAnchor(anchor + ids.size());
         }
-        List<EnergyMeter> meters = meterProvider.listByIds(UserContext.getCurrentNamespaceId(), ids);
-        response.setMeters(meters.stream().map(energyConsumptionService::toEnergyMeterDTO).collect(Collectors.toList()));
+        List<EnergyMeter> meters = meterProvider.listByIds((cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId()), ids);
+        response.setMeters(meters.stream().map(meter -> energyConsumptionService.toEnergyMeterDTO(meter,cmd.getNamespaceId())).collect(Collectors.toList()));
         return response;
     }
 

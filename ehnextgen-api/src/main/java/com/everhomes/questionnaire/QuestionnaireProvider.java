@@ -1,6 +1,10 @@
 // @formatter:off
 package com.everhomes.questionnaire;
 
+import com.everhomes.rest.questionnaire.ListQuestionnairesCommand;
+import com.everhomes.rest.questionnaire.QuestionnaireDTO;
+
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface QuestionnaireProvider {
@@ -11,12 +15,12 @@ public interface QuestionnaireProvider {
 
 	Questionnaire findQuestionnaireById(Long id);
 
-	List<Questionnaire> listQuestionnaire();
+	List<Questionnaire> listApproachCutoffTimeQuestionnaire(Timestamp timestamp);
 
-	List<Questionnaire> listQuestionnaireByOwner(Integer namespaceId, String ownerType, Long ownerId, Long pageAnchor,
-			int pageSize);
+	List<Questionnaire> listQuestionnaireByOwner(ListQuestionnairesCommand cmd,Integer namespaceId,
+												 int pageSize);
 
-	List<Questionnaire> listTargetQuestionnaireByOwner(Integer namespaceId, String ownerType, Long ownerId,
-			Long pageAnchor, int pageSize);
+	List<QuestionnaireDTO> listTargetQuestionnaireByOwner(Integer namespaceId, Timestamp nowTime, Byte collectFlag, Long UserId,Long organizationID,
+														  Byte answerFlagAnchor, Long publishTimeAnchor, int pageSize);
 
 }

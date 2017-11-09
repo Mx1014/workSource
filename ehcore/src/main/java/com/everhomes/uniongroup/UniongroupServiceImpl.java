@@ -5,13 +5,20 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.*;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.uniongroup.*;
 import com.everhomes.search.UniongroupSearcher;
+import com.everhomes.server.schema.tables.pojos.EhUniongroupConfigures;
 import com.everhomes.server.schema.tables.pojos.EhUniongroupMemberDetails;
+import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,184 +52,152 @@ public class UniongroupServiceImpl implements UniongroupService {
     @Autowired
     private UniongroupSearcher uniongroupSearcher;
 
+
+    @Autowired
+    private PunchService punchService;
+ 
+//    @Override
+//    public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd) {
+//        Integer namespaceId = UserContext.getCurrentNamespaceId();
+//        dbProvider.execute((TransactionStatus status) -> {
+//
+//
+//            //已存在（即已分配薪酬组的）的部门集合
+//            List<Long> old_ids = this.uniongroupConfigureProvider.listOrgCurrentIdsOfUniongroupConfigures(namespaceId, cmd.getEnterpriseId());
+//            List<Organization> old_orgs = this.organizationProvider.listOrganizationsByIds(old_ids);
+//            //找出已存在（即已分配薪酬组的）的个人
+//            List<Long> old_detail_ids = this.uniongroupConfigureProvider.listDetailCurrentIdsOfUniongroupConfigures(namespaceId, cmd.getEnterpriseId());
+//
+//
+//            /**刪除本次指定的groupId的配置表信息和关系表信息**/
+//            this.uniongroupConfigureProvider.deleteUniongroupConfigresByGroupId(cmd.getGroupId(), cmd.getEnterpriseId());
+//            this.uniongroupConfigureProvider.deleteUniongroupMemberDetailByGroupId(cmd.getGroupId(), cmd.getEnterpriseId());
+//
+//            /**处理配置表**/
+//            UniongroupType uniongroupType = UniongroupType.fromCode(cmd.getGroupType());
+//            List<UniongroupConfigures> configureList = new ArrayList<>();
+//            List<UniongroupTarget> targets = cmd.getTargets();
+//            if (targets != null) {
+//                targets.stream().filter(r -> {
+//                    return r.getId() != null && r.getType() != null;
+//                }).map(r -> {
+//                    //------------------------------重复项过滤规则：后更新的规则覆盖先更新的规则------------------------------
+//                    UniongroupConfigures old_uc = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, r.getId());
+//                    if (old_uc != null) {
+//                        //如果有重复的配置项，则删除前一个配置项
+//                        this.uniongroupConfigureProvider.deleteUniongroupConfigres(old_uc);
+//                    }
+////                //覆盖去重
+////                if(r.getType().equals(UniongroupTargetType.ORGANIZATION.getCode())){
+////                    //找到配置表中已经被分配薪酬组的 这个部门的 子部门
+////                    Organization org = this.organizationProvider.findOrganizationById(r.getId());
+////                    List<Long> old_atGroup_ids = this.uniongroupConfigureProvider.listOrgCurrentIdsOfUniongroupConfiguresByGroupId(namespaceId, cmd.getEnterpriseId(), cmd.getGroupId());
+////                    List<Organization> old_atGroup_orgs = this.organizationProvider.listOrganizationsByIds(old_atGroup_ids);
+////                    List<Long> under_atGroup_OrgIds = checkUnderOrganizationIdsAtConfigures(org.getPath(), old_atGroup_orgs);
+////                    if(under_atGroup_OrgIds.size() > 0){
+////                        //如果在『同一个groupId』中且有包含的配置项，删除被包含的部门的记录
+////                        this.uniongroupConfigureProvider.deleteUniongroupConfigresByOrgIds(namespaceId, under_atGroup_OrgIds);
+////                    }
+////                }
+//
+//                    UniongroupConfigures uc = new UniongroupConfigures();
+//                    uc.setNamespaceId(namespaceId);
+//                    uc.setEnterpriseId(cmd.getEnterpriseId());
+//                    uc.setGroupType(uniongroupType.getCode());
+//                    uc.setGroupId(cmd.getGroupId());
+//                    uc.setCurrentType(UniongroupTargetType.fromCode(r.getType()).getCode());
+//                    uc.setCurrentId(r.getId());
+//                    uc.setCurrentName(r.getName());
+//                    configureList.add(uc);
+//                    return null;
+//                }).collect(Collectors.toList());
+//            }
+//
+//            /**处理关系表**/
+//            //1.查询本次保存中所有勾选部门的所有人员detailId集合detailIds
+//            List<Long> orgIds = cmd.getTargets().stream().filter((r) -> {
+//                //控制organization只能是部门
+//                return r.getType().equals(UniongroupTargetType.ORGANIZATION.getCode()) && (this.organizationProvider.findOrganizationById(r.getId()).getGroupType() == OrganizationGroupType.DEPARTMENT.getCode());
+//            }).map((r) -> {
+//                return r.getId();
+//            }).collect(Collectors.toList());
+//            //------------------------------包含关系过滤规则：小范围规则覆盖大范围规则------------------------------
+//
+//
+//            //重新获取已存在（即已分配薪酬组的）的部门集合
+//            old_ids.clear();
+//            old_ids.addAll(this.uniongroupConfigureProvider.listOrgCurrentIdsOfUniongroupConfigures(namespaceId, cmd.getEnterpriseId()));
+//            old_orgs.clear();
+//            old_orgs.addAll(this.organizationProvider.listOrganizationsByIds(old_ids));
+//>>>>>>> master
+
+    private Integer DEFAULT_VERSION_CODE = 0;
+
     @Override
-    public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd) {
+    public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd){
+        this.saveUniongroupConfigures(cmd,null);
+    }
+
+    @Override
+    public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd, SaveUniongroupCallBack callBack) {
+        LOGGER.debug("saveUniongroupConfigures t1:" +  System.currentTimeMillis());
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-//        this.dbProvider.execute((TransactionStatus status) -> {
-            Long t3 = System.currentTimeMillis();
-            LOGGER.debug("saveUnion Time3 "+  t3);
+        Integer versionCode = cmd.getVersionCode() != null ? cmd.getVersionCode() : DEFAULT_VERSION_CODE;
 
-            //已存在（即已分配薪酬组的）的部门集合
-            List<Long> old_ids = this.uniongroupConfigureProvider.listOrgCurrentIdsOfUniongroupConfigures(namespaceId, cmd.getEnterpriseId());
-            List<Organization> old_orgs = this.organizationProvider.listOrganizationsByIds(old_ids);
-            //找出已存在（即已分配薪酬组的）的个人
-            List<Long> old_detail_ids = this.uniongroupConfigureProvider.listDetailCurrentIdsOfUniongroupConfigures(namespaceId, cmd.getEnterpriseId());
-
-
-            /**刪除本次指定的groupId的配置表信息和关系表信息**/
-            this.uniongroupConfigureProvider.deleteUniongroupConfigresByGroupId(cmd.getGroupId(), cmd.getEnterpriseId());
-            this.uniongroupConfigureProvider.deleteUniongroupMemberDetailByGroupId(cmd.getGroupId(), cmd.getEnterpriseId());
-
-            /**处理配置表**/
-            UniongroupType uniongroupType = UniongroupType.fromCode(cmd.getGroupType());
-            List<UniongroupConfigures> configureList = new ArrayList<>();
-            List<UniongroupTarget> targets = cmd.getTargets();
-            if (targets != null) {
-                targets.stream().filter(r -> {
-                    return r.getId() != null && r.getType() != null;
-                }).map(r -> {
-                    //------------------------------重复项过滤规则：后更新的规则覆盖先更新的规则------------------------------
-                    UniongroupConfigures old_uc = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, r.getId());
-                    if (old_uc != null) {
-                        //如果有重复的配置项，则删除前一个配置项
-                        this.uniongroupConfigureProvider.deleteUniongroupConfigres(old_uc);
-                    }
-                    UniongroupConfigures uc = new UniongroupConfigures();
-                    uc.setNamespaceId(namespaceId);
-                    uc.setEnterpriseId(cmd.getEnterpriseId());
-                    uc.setGroupType(uniongroupType.getCode());
-                    uc.setGroupId(cmd.getGroupId());
-                    uc.setCurrentType(UniongroupTargetType.fromCode(r.getType()).getCode());
-                    uc.setCurrentId(r.getId());
-                    uc.setCurrentName(r.getName());
-                    configureList.add(uc);
-                    return null;
-                }).collect(Collectors.toList());
+        dbProvider.execute((TransactionStatus status) -> {
+            UnionPolicyObject unionPolicyObject = new UnionPolicyObject();
+            if(callBack == null){
+                unionPolicyObject = this.originPolicyAlgorithm(cmd);
+            }else{
+                unionPolicyObject = callBack.policyProcess(cmd);
             }
 
-            /**处理关系表**/
-            //1.查询本次保存中所有勾选部门的所有人员detailId集合detailIds
-            List<Long> orgIds = cmd.getTargets().stream().filter((r) -> {
-                //控制organization只能是部门
-                return r.getType().equals(UniongroupTargetType.ORGANIZATION.getCode()) && (this.organizationProvider.findOrganizationById(r.getId()).getGroupType() == OrganizationGroupType.DEPARTMENT.getCode());
-            }).map((r) -> {
-                return r.getId();
-            }).collect(Collectors.toList());
-            //------------------------------包含关系过滤规则：小范围规则覆盖大范围规则------------------------------
-
-
-            //重新获取已存在（即已分配薪酬组的）的部门集合
-            old_ids.clear();
-            old_ids.addAll(this.uniongroupConfigureProvider.listOrgCurrentIdsOfUniongroupConfigures(namespaceId, cmd.getEnterpriseId()));
-            old_orgs.clear();
-            old_orgs.addAll(this.organizationProvider.listOrganizationsByIds(old_ids));
-
-            //获得每个org的groupPath，并找寻是否存在其子部门的记录
-            Set<Long> detailIds = new HashSet<>();
-            orgIds.stream().map(r -> {
-                if (null == r) {
-                    return null;
-                }
-                Organization org = checkOrganization(r);
-                if (org != null) {
-                    //对每一个已存在的部门找到其下的子部门集合
-                    List<String> underOrgPaths = checkUnderOrganizationsPathAtConfigures(org.getPath(), old_orgs);
-                    //如果存在子部门
-                    if (underOrgPaths.size() > 0) {
-                        //找到在部门下但并不在这些子部门下（即已分配薪酬组的）的人
-                        Set<Long> memberIds = this.organizationProvider.listMemberDetailIdWithExclude(namespaceId, org.getPath(), underOrgPaths);
-                        if (memberIds == null) {
-                            LOGGER.error("memberIds is not found。namespaceId = {}, orgPath = {}", namespaceId, org.getPath());
-//                        throw RuntimeErrorException.errorWith(UniongroupErrorCode.SCOPE, UniongroupErrorCode.ERROR_INVALID_PARAMETER,
-//                                "memberIds is not found。");
-                        }
-                        //去掉配置表中单独勾选的人员id
-                        memberIds.removeAll(old_detail_ids);
-
-                        detailIds.addAll(memberIds);
-                    } else {//如果不存在子部门,则找到这个部门下的人
-                        Set<Long> memberIds = this.organizationProvider.listMemberDetailIdWithExclude(namespaceId, org.getPath(), null);
-                        if (memberIds == null) {
-                            LOGGER.error("memberIds is not found。namespaceId = {}, orgPath = {}", namespaceId, org.getPath());
-//                        throw RuntimeErrorException.errorWith(UniongroupErrorCode.SCOPE, UniongroupErrorCode.ERROR_INVALID_PARAMETER,
-//                                "memberIds is not found。");
-                        }
-                        //去掉配置表中单独勾选的人员id
-                        if (null != old_detail_ids) {
-                            memberIds.removeAll(old_detail_ids);
-                        }
-
-                        detailIds.addAll(memberIds);
-                    }
-                }
-                return null;
-            }).collect(Collectors.toList());
-
-            //2.查询本次保存中所有勾选个人加入集合detailIds
-            cmd.getTargets().stream().filter((r) -> {
-                return r.getType().equals(UniongroupTargetType.MEMBERDETAIL.getCode());
-            }).map((r) -> {
-                detailIds.add(r.getId());
-                return null;
-            }).collect(Collectors.toList());
-
-            //3.组装uniongroupMemberDetail对象
-            List<EhUniongroupMemberDetails> unionDetailsList = new ArrayList<>();
-            detailIds.stream().map(r -> {
-                OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(r);
-                if (detail != null) {
-                    EhUniongroupMemberDetails uniongroupMemberDetails = new EhUniongroupMemberDetails();
-                    uniongroupMemberDetails.setGroupId(cmd.getGroupId());
-                    uniongroupMemberDetails.setGroupType(uniongroupType.getCode());
-                    uniongroupMemberDetails.setDetailId(r);
-                    uniongroupMemberDetails.setEnterpriseId(cmd.getEnterpriseId());
-                    uniongroupMemberDetails.setTargetType(detail.getTargetType());
-                    uniongroupMemberDetails.setTargetId(detail.getTargetId());
-                    uniongroupMemberDetails.setNamespaceId(detail.getNamespaceId());
-                    uniongroupMemberDetails.setContactName(detail.getContactName());
-                    uniongroupMemberDetails.setContactToken(detail.getContactToken());
-                    unionDetailsList.add(uniongroupMemberDetails);
-                }
-                return null;
-            }).collect(Collectors.toList());
-
-            Long t4 = System.currentTimeMillis();
-            LOGGER.debug("saveUnion Time4 "+  t4 + "cost: "+ (t4-t3));
-
-            Long t5 = 0L;
             //4.保存
-//            this.coordinationProvider.getNamedLock(CoordinationLocks.UNION_GROUP_LOCK.getCode()).enter(() -> {
+            UnionPolicyObject finalUnionPolicyObject = unionPolicyObject; //拷贝变量
+ 
+            LOGGER.debug("saveUniongroupConfigures t2:" +  System.currentTimeMillis());
+ 
+            this.coordinationProvider.getNamedLock(CoordinationLocks.UNION_GROUP_LOCK.getCode()).enter(() -> {
 
                 //--------------------------1.保存配置表--------------------------
-                if (configureList.size() > 0) {
-                    configureList.stream().map(r -> {
+                if (finalUnionPolicyObject.getConfigureList().size() > 0) {
+                    finalUnionPolicyObject.getConfigureList().stream().map(r -> {
                         this.uniongroupConfigureProvider.createUniongroupConfigures(r);
                         //2保存关系表
                         return null;
                     }).collect(Collectors.toList());
                 }
-                if (unionDetailsList.size() > 0) {
+                if (finalUnionPolicyObject.getUnionDetailsList().size() > 0) {
                     //--------------------------2.保存关系表--------------------------
-
-                    List detailIdsArray =  detailIds.stream().map(r->{
-                        return r.longValue();
-                    }).collect(Collectors.toList());
-
-                    this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(detailIdsArray);
-                    t5 = System.currentTimeMillis();
-                    LOGGER.debug("saveUnion Time5 "+  t4 + "cost: "+ (t5-t4));
-                    LOGGER.debug("deleteUniongroupMemberDetailsByDetailIds size :" + detailIdsArray.size());
+ 
+                    this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(new ArrayList(finalUnionPolicyObject.getDetailIds()), cmd.getGroupType(), versionCode);
+ 
                     //后保存
-                    this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetail(unionDetailsList);
+                    this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetail(finalUnionPolicyObject.getUnionDetailsList());
                 }
+ 
+                LOGGER.debug("saveUniongroupConfigures t3:" +  System.currentTimeMillis()); 
+                return null;
+            });
+            return null;
+        });  
 
-//                return null;
-//            });
-//            return null;
-//        });
-
-        Long t6 = System.currentTimeMillis();
-        LOGGER.debug("saveUnion Time6 "+  t6 + "cost: "+ (t6-t5));
         //5.同步搜索引擎
-        this.uniongroupSearcher.deleteAll();
-        this.uniongroupSearcher.syncUniongroupDetailsAtOrg(checkOrganization(cmd.getEnterpriseId()), UniongroupType.SALARYGROUP.getCode());
-        this.uniongroupSearcher.refresh();
+        ExecutorUtil.submit(new Runnable() {
+            @Override
+            public void run() {
+                uniongroupSearcher.deleteAll();
+                uniongroupSearcher.syncUniongroupDetailsAtOrg(checkOrganization(cmd.getEnterpriseId()), cmd.getGroupType(), DEFAULT_VERSION_CODE);
+                uniongroupSearcher.refresh();
+            }
+        });
+        LOGGER.debug("saveUniongroupConfigures t4:" +  System.currentTimeMillis());
     }
 
     @Override
     public List<UniongroupConfiguresDTO> getConfiguresListByGroupId(GetUniongroupConfiguresCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<UniongroupConfigures> configures = this.uniongroupConfigureProvider.listUniongroupConfiguresByGroupId(namespaceId, cmd.getGroupId());
+        List<UniongroupConfigures> configures = this.uniongroupConfigureProvider.listUniongroupConfiguresByGroupId(namespaceId, cmd.getGroupId(), cmd.getVersionCode());
         if (configures != null) {
             return configures.stream().map(r -> {
                 return ConvertHelper.convert(r, UniongroupConfiguresDTO.class);
@@ -234,7 +209,7 @@ public class UniongroupServiceImpl implements UniongroupService {
     @Override
     public List<UniongroupConfiguresDTO> getConfiguresInfosListByGroupId(GetUniongroupConfiguresCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<UniongroupConfigures> configures = this.uniongroupConfigureProvider.listUniongroupConfiguresByGroupId(namespaceId, cmd.getGroupId());
+        List<UniongroupConfigures> configures = this.uniongroupConfigureProvider.listUniongroupConfiguresByGroupId(namespaceId, cmd.getGroupId(), cmd.getVersionCode());
         if (configures != null) {
             return configures.stream().map(r -> {
                 if(r.getCurrentType().equals(UniongroupTargetType.MEMBERDETAIL.getCode())){
@@ -275,7 +250,7 @@ public class UniongroupServiceImpl implements UniongroupService {
     public List<UniongroupMemberDetailsDTO> listUniongroupMemberDetailsByGroupId(ListUniongroupMemberDetailsCommand cmd) {
 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetail(namespaceId, cmd.getGroupId(), cmd.getOwnerId());
+        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetail(namespaceId, cmd.getGroupId(), cmd.getOwnerId(), cmd.getVersionCode());
         if (details != null) {
             return details.stream().map(r -> {
                 UniongroupMemberDetailsDTO dto = convertUniongroupMemberToDTO(r);
@@ -285,11 +260,12 @@ public class UniongroupServiceImpl implements UniongroupService {
         return null;
     }
 
+    //获取当前版本
     @Override
     public List<UniongroupMemberDetailsDTO> listUniongroupMemberDetailsByGroupId(Long groupId) {
 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetail(groupId);
+        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetail(groupId,null);
         if (details != null) {
             return details.stream().map(r -> {
                 UniongroupMemberDetailsDTO dto = convertUniongroupMemberToDTO(r);
@@ -310,15 +286,17 @@ public class UniongroupServiceImpl implements UniongroupService {
 
         SearchUniongroupDetailCommand search_cmd = new SearchUniongroupDetailCommand();
 
+        search_cmd.setEnterpriseId(cmd.getOwnerId());
         if (cmd.getDepartmentId() != null)
             search_cmd.setDepartmentId(cmd.getDepartmentId());
-        search_cmd.setEnterpriseId(cmd.getOwnerId());
         if (cmd.getKeywords() != null)
             search_cmd.setKeyword(cmd.getKeywords());
         if (cmd.getGroupId() != null)
             search_cmd.setGroupId(cmd.getGroupId());
         if(cmd.getIsNormal() !=null )
             search_cmd.setIsNormal(String.valueOf(cmd.getIsNormal()));
+        if(cmd.getVersionCode() != null)
+            search_cmd.setVersionCode(cmd.getVersionCode());
 
         search_cmd.setNamespaceId(namespaceId);
         search_cmd.setPageAnchor(cmd.getPageAnchor());
@@ -339,8 +317,35 @@ public class UniongroupServiceImpl implements UniongroupService {
     }
 
     @Override
-    public List listDetailNotInUniongroup(ListDetailsNotInUniongroupsCommand cmd) {
-        return this.uniongroupConfigureProvider.listDetailNotInUniongroup(cmd.getNamespaceId(), cmd.getOrganizaitonId(), cmd.getContactName());
+    public ListOrganizationMemberCommandResponse listDetailNotInUniongroup(ListDetailsNotInUniongroupsCommand cmd) {
+        ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
+        Long pageAnchor = cmd.getPageAnchor() != null ? cmd.getPageAnchor() : 0L;
+        Integer pageSize = cmd.getPageSize() != null ? cmd.getPageSize() : 9999;
+        List<String> groupTypes = new ArrayList<>();
+        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(pageAnchor);
+        List<OrganizationMemberDetails>  details = this.uniongroupConfigureProvider.listDetailNotInUniongroup(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getContactName(), cmd.getVersionCode(), cmd.getDepartmentId(), pageSize, locator);
+        if(details != null && details.size() > 0){
+            List<OrganizationMemberDTO> dtos = details.stream().map(r->{
+                OrganizationMemberDTO dto = ConvertHelper.convert(r, OrganizationMemberDTO.class);
+                //:todo 寻找部门名
+                List<OrganizationMember> departments = this.organizationProvider.listOrganizationMembersByDetailId(r.getId(),groupTypes);
+                if(departments != null && departments.size() > 0){
+                    for(OrganizationMember d: departments){
+                        Organization departOrg = organizationProvider.findOrganizationById(d.getOrganizationId());
+                        if(departOrg != null && departOrg.getStatus().equals(OrganizationStatus.ACTIVE.getCode())){
+                            dto.setDepartmentName(departOrg.getName());
+                        }
+                    }
+
+                }
+                return dto;
+            }).collect(Collectors.toList());
+            response.setMembers(dtos);
+            response.setNextPageAnchor(locator.getAnchor());
+        }
+        return response;
     }
 
     private Organization checkOrganization(Long orgId) {
@@ -411,9 +416,7 @@ public class UniongroupServiceImpl implements UniongroupService {
     @Override
     public void reallocatedUnion(Long enterpriseId, List<Long> departmentIds, OrganizationMember organizationMember) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-//        Integer namespaceId = 1000000;
         //根据层级关系将departmentIds排序
-        Organization organization = checkOrganization(enterpriseId);
         List<Organization> departments = this.organizationProvider.listOrganizationsByIds(departmentIds);
         //按层级退化
 //        Collections.sort(departments, new Comparator<Organization>() {
@@ -426,16 +429,21 @@ public class UniongroupServiceImpl implements UniongroupService {
 //            }
 //        });
         Long groupId = 0L;
+        String groupType = "";
         /**判断departmentIds是否已经被分配薪酬组**/
         for (int i = departmentIds.size() - 1; i >= 0; i--) {
-            UniongroupConfigures uniongroupConfigures = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, departmentIds.get(i));
+            //存疑！
+            //:todo 目前只使用到薪酬组，因此只返回一个对象。如果需要支持多组织，这里需要重构
+            //:todo 查询的是0版本
+            UniongroupConfigures uniongroupConfigures = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, departmentIds.get(i), UniongroupType.PUNCHGROUP.getCode(), DEFAULT_VERSION_CODE, null);
             if (uniongroupConfigures != null) {
                 groupId = uniongroupConfigures.getGroupId();
+                groupType = uniongroupConfigures.getGroupType();
                 break;
             }
         }
 
-        /**如果没有查询到被分配的薪酬组**/
+        /**如果没有查询到被分配的薪酬组,则向上遍历**/
         if (groupId == 0) {
             //1 进化成独立无包含关系的集合
             List<Organization> departs_one = new ArrayList<>();
@@ -454,7 +462,7 @@ public class UniongroupServiceImpl implements UniongroupService {
                 Organization _org = departs_one.get(i);
                 while (unc == null) {
                     //判断是否在配置表中
-                    unc = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, _org.getId());
+                    unc = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, _org.getId(), UniongroupType.PUNCHGROUP.getCode(), DEFAULT_VERSION_CODE,null);
                     _org = this.organizationProvider.findOrganizationById(_org.getParentId());
                     if (_org == null || unc != null) {
                         break;
@@ -467,6 +475,7 @@ public class UniongroupServiceImpl implements UniongroupService {
             //3 如果循环后找到薪酬组
             if (unc != null) {
                 groupId = unc.getGroupId();
+                groupType = unc.getGroupType();
             }
         }
 
@@ -474,7 +483,7 @@ public class UniongroupServiceImpl implements UniongroupService {
         if (groupId != 0) {
             EhUniongroupMemberDetails uniongroupMemberDetails = new EhUniongroupMemberDetails();
             uniongroupMemberDetails.setGroupId(groupId);
-            uniongroupMemberDetails.setGroupType(UniongroupType.SALARYGROUP.getCode());
+            uniongroupMemberDetails.setGroupType(groupType);
             uniongroupMemberDetails.setDetailId(organizationMember.getDetailId());
             uniongroupMemberDetails.setEnterpriseId(enterpriseId);
             uniongroupMemberDetails.setTargetType(organizationMember.getTargetType());
@@ -482,9 +491,14 @@ public class UniongroupServiceImpl implements UniongroupService {
             uniongroupMemberDetails.setNamespaceId(namespaceId);
             uniongroupMemberDetails.setContactName(organizationMember.getContactName());
             uniongroupMemberDetails.setContactToken(organizationMember.getContactToken());
+            uniongroupMemberDetails.setVersionCode(DEFAULT_VERSION_CODE);
+
+            String finalGroupType = groupType;
             dbProvider.execute((TransactionStatus status) -> {
                 //先删除
-                this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(Collections.singletonList(organizationMember.getDetailId()));
+                this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(Collections.singletonList(organizationMember.getDetailId()), finalGroupType);
+                //通知
+                this.punchService.punchGroupAddNewEmployee(uniongroupMemberDetails.getGroupId());
                 //后保存
                 this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetail(Collections.singletonList(uniongroupMemberDetails));
                 return null;
@@ -495,43 +509,63 @@ public class UniongroupServiceImpl implements UniongroupService {
     @Override
     public void syncUniongroupAfterLeaveTheJob(Long detailId) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        //1.删除配置表和关系表中的数据
-        UniongroupConfigures uniongroupConfigures = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, detailId);
-        if (uniongroupConfigures != null)
-            this.uniongroupConfigureProvider.deleteUniongroupConfigres(uniongroupConfigures);
-        UniongroupMemberDetail uniongroupMemberDetail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(namespaceId, detailId, UniongroupType.SALARYGROUP.getCode());
-        if(uniongroupMemberDetail != null){
-            this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(Collections.singletonList(detailId));
+        //1.删除配置表和关系表中的数据(删除时应该删除所有薪酬组的数据)
+        this.uniongroupConfigureProvider.deleteUniongroupConfigresByCurrentIdAndGroupTypeAndVersion(detailId, null, null);
+        List<UniongroupMemberDetail> uds = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailIdWithoutGroupType(namespaceId, detailId);
+        this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(Collections.singletonList(detailId), null, null);
+        if(uds != null && uds.size() > 0){
             //2.删除搜索引擎中的失效索引
-            this.uniongroupSearcher.deleteById(uniongroupMemberDetail.getId());
+            uds.forEach(r -> {
+                this.uniongroupSearcher.deleteById(r.getId());
+            });
         }
     }
 
     @Override
-    public void distributionUniongroupToDetail(Long organiztionId, Long detailId, Long groupId) {
+    public void distributionUniongroupToDetail(Long organiztionId, Long detailId, Long groupId){
+        this.distributionUniongroupToDetail(organiztionId, detailId, groupId, DEFAULT_VERSION_CODE);
+//=======
+//        //1.删除配置表和关系表中的数据
+//        UniongroupConfigures uniongroupConfigures = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, detailId);
+//        if (uniongroupConfigures != null)
+//            this.uniongroupConfigureProvider.deleteUniongroupConfigres(uniongroupConfigures);
+//        UniongroupMemberDetail uniongroupMemberDetail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(namespaceId, detailId, UniongroupType.SALARYGROUP.getCode());
+//        this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(Collections.singletonList(detailId));
+//        //2.删除搜索引擎中的失效索引
+//        this.uniongroupSearcher.deleteById(uniongroupMemberDetail.getId());
+//>>>>>>> master
+    }
+
+    @Override
+    public void distributionUniongroupToDetail(Long organiztionId, Long detailId, Long groupId, Integer versionCode) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         dbProvider.execute((TransactionStatus status) -> {
+            //获取策略组的信息
+            Organization policyOrg = this.organizationProvider.findOrganizationById(groupId);
+            String groupType = policyOrg.getGroupType();
             OrganizationMemberDetails memberDetail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
             //配置表
-            UniongroupConfigures unc = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(memberDetail.getNamespaceId(), detailId);
+            UniongroupConfigures unc = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(memberDetail.getNamespaceId(), detailId, groupType, versionCode,null);
             if (unc != null)
                 this.uniongroupConfigureProvider.deleteUniongroupConfigres(unc);
             UniongroupConfigures uc = new UniongroupConfigures();
             uc.setNamespaceId(memberDetail.getNamespaceId());
             uc.setEnterpriseId(organiztionId);
-            uc.setGroupType(UniongroupType.SALARYGROUP.getCode());
+            uc.setGroupType(groupType);
             uc.setGroupId(groupId);
             uc.setCurrentType(UniongroupTargetType.MEMBERDETAIL.getCode());
             uc.setCurrentId(detailId);
             uc.setCurrentName(memberDetail.getContactName());
+            uc.setVersionCode(versionCode);
             this.uniongroupConfigureProvider.createUniongroupConfigures(uc);
 
             //关系表
-            UniongroupMemberDetail old_detail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(namespaceId, detailId, UniongroupType.SALARYGROUP.getCode());
-            this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(Collections.singletonList(detailId));
+            UniongroupMemberDetail old_detail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(namespaceId, detailId, groupType, versionCode);
+            this.uniongroupConfigureProvider.deleteUniongroupMemberDetails(old_detail);
+//            this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(Collections.singletonList(detailId));
             UniongroupMemberDetail uniongroupMemberDetails = new UniongroupMemberDetail();
             uniongroupMemberDetails.setGroupId(groupId);
-            uniongroupMemberDetails.setGroupType(UniongroupType.SALARYGROUP.getCode());
+            uniongroupMemberDetails.setGroupType(groupType);
             uniongroupMemberDetails.setDetailId(detailId);
             uniongroupMemberDetails.setEnterpriseId(organiztionId);
             uniongroupMemberDetails.setTargetType(memberDetail.getTargetType());
@@ -539,6 +573,7 @@ public class UniongroupServiceImpl implements UniongroupService {
             uniongroupMemberDetails.setNamespaceId(memberDetail.getNamespaceId());
             uniongroupMemberDetails.setContactName(memberDetail.getContactName());
             uniongroupMemberDetails.setContactToken(memberDetail.getContactToken());
+            uniongroupMemberDetails.setVersionCode(versionCode);
             this.uniongroupConfigureProvider.createUniongroupMemberDetail(uniongroupMemberDetails);
 
 
@@ -566,9 +601,10 @@ public class UniongroupServiceImpl implements UniongroupService {
     }
 
     @Override
-    public UniongroupMemberDetailsDTO findUniongroupMemberDetailByDetailId(Integer namespaceId, Long detailId) {
+    public UniongroupMemberDetailsDTO findUniongroupMemberDetailByDetailId(Integer namespaceId, Long detailId, String groupType, Integer versionCode) {
+        Integer versionCodeCopy = versionCode != null ? versionCode : DEFAULT_VERSION_CODE;
         //  查找用户
-        UniongroupMemberDetail detail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(namespaceId, detailId, UniongroupType.SALARYGROUP.getCode());
+        UniongroupMemberDetail detail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(namespaceId, detailId, groupType, versionCodeCopy);
 
         //  转换对象
         if (detail != null) {
@@ -587,4 +623,205 @@ public class UniongroupServiceImpl implements UniongroupService {
 		}
 		return null;
 	}
+
+    /**
+     * 将version为N1的策略组记录与current的互换,
+     **/
+    @Override
+    public UnionPolicyObject switchUnionGroupVersion(Integer namespaceId, Long enterpriseId, String groupType, Integer n1) {
+        Integer finalN1 = n1;
+        dbProvider.execute((TransactionStatus status) -> {
+            //:todo 转存temp
+            this.uniongroupConfigureProvider.updateUniongroupConfiguresVersion(namespaceId, groupType, enterpriseId, finalN1, UniongroupVersionEnum.TEMP.getCode());
+            this.uniongroupConfigureProvider.updateUniongroupMemberDetailsVersion(namespaceId, groupType, enterpriseId, finalN1, UniongroupVersionEnum.TEMP.getCode());
+
+            //:todo Current转n2
+            this.uniongroupConfigureProvider.updateUniongroupConfiguresVersion(namespaceId, groupType, enterpriseId, UniongroupVersionEnum.CURRENT.getCode(), finalN1);
+            this.uniongroupConfigureProvider.updateUniongroupMemberDetailsVersion(namespaceId, groupType, enterpriseId, UniongroupVersionEnum.CURRENT.getCode(), finalN1);
+
+            //:todo n1转Current
+            this.uniongroupConfigureProvider.updateUniongroupConfiguresVersion(namespaceId, groupType, enterpriseId, UniongroupVersionEnum.TEMP.getCode(), UniongroupVersionEnum.CURRENT.getCode());
+            this.uniongroupConfigureProvider.updateUniongroupMemberDetailsVersion(namespaceId, groupType, enterpriseId, UniongroupVersionEnum.TEMP.getCode(), UniongroupVersionEnum.CURRENT.getCode())
+            ;
+
+            return null;
+        });
+
+        return null;
+    }
+
+    @Override
+    public void deleteUniongroupVersion(Integer namespaceId, Long enterpriseId, String groupType, Integer versionCode) {
+        dbProvider.execute((TransactionStatus status) -> {
+            //todo 指定条件删除
+            this.uniongroupConfigureProvider.deleteUniongroupConfigresByEnterpriseIdAndGroupType(namespaceId, groupType, enterpriseId,versionCode);
+            this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByEnterpriseIdAndGroupType(namespaceId, groupType, enterpriseId,versionCode);
+            return null;
+        });
+    }
+
+    @Override
+    public void cloneGroupTypeDataToVersion(Integer namespaceId, Long enterpriseId, String groupType, Integer n1, Integer n2) {
+        dbProvider.execute((TransactionStatus status) -> {
+            this.coordinationProvider.getNamedLock(CoordinationLocks.UNION_GROUP_CLONE_LOCK.getCode()).enter(() -> {
+                List<EhUniongroupConfigures> configures_n1 = this.uniongroupConfigureProvider.listUniongroupConfigures(namespaceId, groupType, enterpriseId, null, n1);
+                List<EhUniongroupMemberDetails> details_n1 = this.uniongroupConfigureProvider.listUniongroupMemberDetail(namespaceId, groupType, enterpriseId, null, n1);
+                this.uniongroupConfigureProvider.batchCreateUniongroupConfigresToVersion(configures_n1, n2);
+                this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetailToVersion(details_n1, n2);
+                return null;
+            });
+            return null;
+        });
+    }
+
+    //策略算法一：源初算法
+	private UnionPolicyObject originPolicyAlgorithm(SaveUniongroupConfiguresCommand cmd){
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer versionCode = cmd.getVersionCode() != null ? cmd.getVersionCode() : DEFAULT_VERSION_CODE;
+
+        /**刪除本次指定的groupId的配置表信息和关系表信息**/
+        this.uniongroupConfigureProvider.deleteUniongroupConfigresByGroupId(cmd.getGroupId(), cmd.getEnterpriseId(), versionCode);
+        this.uniongroupConfigureProvider.deleteUniongroupMemberDetailByGroupId(cmd.getGroupId(), cmd.getEnterpriseId(), versionCode);
+
+        /**处理配置表**/
+        UniongroupType uniongroupType = UniongroupType.fromCode(cmd.getGroupType());
+        List<UniongroupConfigures> configureList = new ArrayList<>();
+        List<UniongroupTarget> targets = cmd.getTargets();
+        List<Long> targetIds = new ArrayList<>();
+        if (targets != null) {
+            targets.stream().filter(r -> {
+                return r.getId() != null && r.getType() != null;
+            }).map(r -> {
+                //------------------------------重复项过滤规则：后更新的规则覆盖先更新的规则------------------------------
+//                UniongroupConfigures old_uc = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, r.getId(), cmd.getGroupType(), versionCode, null);
+//                if (old_uc != null) {
+//                    //如果有重复的配置项，则删除前一个配置项
+//                    this.uniongroupConfigureProvider.deleteUniongroupConfigres(old_uc);
+//                }
+                UniongroupConfigures uc = new UniongroupConfigures();
+                uc.setNamespaceId(namespaceId);
+                uc.setEnterpriseId(cmd.getEnterpriseId());
+                uc.setGroupType(uniongroupType.getCode());
+                uc.setGroupId(cmd.getGroupId());
+                uc.setCurrentType(UniongroupTargetType.fromCode(r.getType()).getCode());
+                uc.setCurrentId(r.getId());
+                uc.setCurrentName(r.getName());
+                uc.setVersionCode(versionCode);
+                configureList.add(uc);
+                targetIds.add(r.getId());
+                return null;
+            }).collect(Collectors.toList());
+        }
+
+        //删除原来的配置项
+        this.uniongroupConfigureProvider.deleteUniongroupConfigresByCurrentIds(namespaceId, targetIds, uniongroupType.getCode(), versionCode);
+
+        /**处理关系表**/
+        //1.查询本次保存中所有勾选部门的所有人员detailId集合detailIds
+        List<Long> orgIds = cmd.getTargets().stream().filter((r) -> {
+            //控制organization只能是部门
+            return r.getType().equals(UniongroupTargetType.ORGANIZATION.getCode()) && (this.organizationProvider.findOrganizationById(r.getId()).getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()));
+        }).map((r) -> {
+            return r.getId();
+        }).collect(Collectors.toList());
+        //------------------------------包含关系过滤规则：小范围规则覆盖大范围规则------------------------------
+
+
+        //已存在（即已分配薪酬组的）的部门集合
+        List<Long> old_ids = this.uniongroupConfigureProvider.listOrgCurrentIdsOfUniongroupConfigures(namespaceId, cmd.getEnterpriseId(), cmd.getGroupType(), versionCode);
+        List<Organization> old_orgs = this.organizationProvider.listOrganizationsByIds(old_ids);
+        //找出已存在（即已分配薪酬组的）的个人
+        List<Long> old_detail_ids = this.uniongroupConfigureProvider.listDetailCurrentIdsOfUniongroupConfigures(namespaceId, cmd.getEnterpriseId(), cmd.getGroupType(), versionCode);
+
+//        //重新获取已存在（即已分配薪酬组的）的部门集合
+//        old_ids.clear();
+//        old_ids.addAll(this.uniongroupConfigureProvider.listOrgCurrentIdsOfUniongroupConfigures(namespaceId, cmd.getEnterpriseId()));
+//        old_orgs.clear();
+//        old_orgs.addAll(this.organizationProvider.listOrganizationsByIds(old_ids));
+
+        //获得每个org的groupPath，并找寻是否存在其子部门的记录
+        Set<Long> detailIds = new HashSet<>();
+        orgIds.stream().map(r -> {
+            if (null == r) {
+                return null;
+            }
+            Organization org = checkOrganization(r);
+            if (org != null) {
+                //查询是否有分配过策略组的子部门
+                List<String> underOrgPaths = checkUnderOrganizationsPathAtConfigures(org.getPath(), old_orgs);
+                LOGGER.debug("underOrgPaths: " + underOrgPaths.toString());
+                //如果存在子部门
+                if (underOrgPaths.size() > 0) {
+                    //找到在部门下但并不在这些子部门下（即已分配薪酬组的）的人
+                    Set<Long> memberIds = this.organizationProvider.listMemberDetailIdWithExclude(namespaceId, org.getPath(), underOrgPaths);
+                    if (memberIds == null) {
+                        LOGGER.error("memberIds is not found。namespaceId = {}, orgPath = {}", namespaceId, org.getPath());
+//                        throw RuntimeErrorException.errorWith(UniongroupErrorCode.SCOPE, UniongroupErrorCode.ERROR_INVALID_PARAMETER,
+//                                "memberIds is not found。");
+                        return null;
+                    }
+                    LOGGER.debug("guys who active save: " + memberIds.toString());
+                    //去掉配置表中单独勾选的人员id
+                    memberIds.removeAll(old_detail_ids);
+
+                    detailIds.addAll(memberIds);
+                } else {//如果不存在子部门,则找到这个部门下的人
+                    Set<Long> memberIds = this.organizationProvider.listMemberDetailIdWithExclude(namespaceId, org.getPath(), null);
+                    if (memberIds == null) {
+                        LOGGER.error("memberIds is not found。namespaceId = {}, orgPath = {}", namespaceId, org.getPath());
+//                        throw RuntimeErrorException.errorWith(UniongroupErrorCode.SCOPE, UniongroupErrorCode.ERROR_INVALID_PARAMETER,
+//                                "memberIds is not found。");
+                        return null;
+                    }
+                    //去掉配置表中单独勾选的人员id
+                    if (null != old_detail_ids) {
+                        memberIds.removeAll(old_detail_ids);
+                    }
+
+                    detailIds.addAll(memberIds);
+                }
+            }
+            return null;
+        }).collect(Collectors.toList());
+
+        //2.查询本次保存中所有勾选个人加入集合detailIds
+        cmd.getTargets().stream().filter((r) -> {
+            return r.getType().equals(UniongroupTargetType.MEMBERDETAIL.getCode());
+        }).map((r) -> {
+            detailIds.add(r.getId());
+            return null;
+        }).collect(Collectors.toList());
+
+        //3.组装uniongroupMemberDetail对象
+        List<EhUniongroupMemberDetails> unionDetailsList = new ArrayList<>();
+        detailIds.stream().map(r -> {
+            OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(r);
+            if (detail != null) {
+                EhUniongroupMemberDetails uniongroupMemberDetails = new EhUniongroupMemberDetails();
+                uniongroupMemberDetails.setGroupId(cmd.getGroupId());
+                uniongroupMemberDetails.setGroupType(uniongroupType.getCode());
+                uniongroupMemberDetails.setDetailId(r);
+                uniongroupMemberDetails.setEnterpriseId(cmd.getEnterpriseId());
+                uniongroupMemberDetails.setTargetType(detail.getTargetType());
+                uniongroupMemberDetails.setTargetId(detail.getTargetId());
+                uniongroupMemberDetails.setNamespaceId(detail.getNamespaceId());
+                uniongroupMemberDetails.setContactName(detail.getContactName());
+                uniongroupMemberDetails.setContactToken(detail.getContactToken());
+                uniongroupMemberDetails.setVersionCode(versionCode);
+                unionDetailsList.add(uniongroupMemberDetails);
+            }
+            return null;
+        }).collect(Collectors.toList());
+
+        UnionPolicyObject unionPolicyObject = new UnionPolicyObject();
+        if(configureList != null)
+            unionPolicyObject.setConfigureList(configureList);
+        if(unionDetailsList != null)
+            unionPolicyObject.setUnionDetailsList(unionDetailsList);
+        if(detailIds != null)
+            unionPolicyObject.setDetailIds(detailIds);
+
+        return unionPolicyObject;
+    }
+
 }

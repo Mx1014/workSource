@@ -47,6 +47,7 @@ import com.everhomes.util.StringHelper;
  * <li>mediaDisplayFlag: 是否显示图片，0否1是</li>
  * <li>maxQuantity: 限制人数</li>
  * <li>tag: 帖子标签</li>
+ * <li>forumEntryId: 论坛应用入口Id</li>
  * </ul>
  */
 public class NewTopicBySceneCommand {
@@ -97,6 +98,8 @@ public class NewTopicBySceneCommand {
     private Integer maxQuantity;
 
     private String tag;
+
+    private Long forumEntryId;
 
 	public Integer getMaxQuantity() {
 		return maxQuantity;
@@ -269,6 +272,14 @@ public class NewTopicBySceneCommand {
 
     public void setTag(String tag) {
         this.tag = tag;
+    }
+
+    public Long getForumEntryId() {
+        return forumEntryId;
+    }
+
+    public void setForumEntryId(Long forumEntryId) {
+        this.forumEntryId = forumEntryId;
     }
 
     @Override

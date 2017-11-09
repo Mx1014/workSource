@@ -16,4 +16,5 @@ public interface PusherService {
     void pushServiceTest(PushMessageCommand cmd);
     Map<String, Long> requestDevices(Map<String, Long> deviceMap);
     void checkAndPush(UserLogin senderLogin, UserLogin destLogin, long msgId, Message msg);
+    void sendXiaomiMessage();
 }

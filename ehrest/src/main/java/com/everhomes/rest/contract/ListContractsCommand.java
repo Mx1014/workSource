@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>keywords: 查询关键词</li>
  * <li>status: 合同状态 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
  * <li>contractType: 合同属性 参考{@link com.everhomes.rest.contract.ContractType}</li>
+ * <li>customerType: 客户类型 参考{@link com.everhomes.rest.customer.CustomerType}</li>
  * <li>categoryItemId: 合同类型</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页大小</li> 
@@ -31,6 +32,8 @@ public class ListContractsCommand {
 
 	private Byte contractType;
 
+	private Byte customerType;
+
 	private Byte status;
 
 	private Long pageAnchor;
@@ -40,6 +43,14 @@ public class ListContractsCommand {
 
 	public ListContractsCommand() {
 
+	}
+
+	public Byte getCustomerType() {
+		return customerType;
+	}
+
+	public void setCustomerType(Byte customerType) {
+		this.customerType = customerType;
 	}
 
 	public Long getCommunityId() {

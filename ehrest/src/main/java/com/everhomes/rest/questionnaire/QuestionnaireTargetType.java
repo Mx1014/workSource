@@ -4,11 +4,13 @@ package com.everhomes.rest.questionnaire;
 /**
  * 
  * <ul>
- * <li>ORGANIZATION: organization,组织</li>
+ * <li>ORGANIZATION: organization,公司</li>
+ * <li>USER: user,个人</li>
  * </ul>
  */
 public enum QuestionnaireTargetType {
-	ORGANIZATION("organization");
+	ORGANIZATION("organization"),
+    USER("user");
 	private String code;
 
 	private QuestionnaireTargetType(String code) {

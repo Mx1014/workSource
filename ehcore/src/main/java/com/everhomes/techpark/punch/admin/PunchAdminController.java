@@ -727,7 +727,24 @@ public class PunchAdminController extends ControllerBase {
 		return response;
 	}
 
-	
+	/**
+	 * <b>URL: punch/getPunchGroupsCount</b>
+	 * <p>
+	 * 获取某公司总人数和关联人数
+	 * </p>
+	 */
+	@RequestMapping("getPunchGroupsCount")
+	@RestReturn(value = GetPunchGroupsCountResponse.class)
+	public RestResponse getPunchGroupsCount(@Valid GetPunchGroupsCountCommand cmd) {
+		GetPunchGroupsCountResponse commandResponse = punchService.getPunchGroupsCount(cmd);
+		RestResponse response = new RestResponse(commandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+
 	/**
 	 * <b>URL: punch/updatePunchGroup</b>
 	 * <p>
@@ -943,7 +960,7 @@ public class PunchAdminController extends ControllerBase {
 	/**
 	 * <b>URL: punch/refreshPunchDayLogs</b>
 	 * <p>
-	 * 刷新某一段时间某公司的punchdaylogs
+	 * 刷新打卡详情
 	 * </p>
 	 */
 	@RequestMapping("refreshPunchDayLogs")
@@ -955,6 +972,23 @@ public class PunchAdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: punch/refreshPunchGroupScheduled</b>
+	 * <p>
+	 * 刷新次日更新
+	 * </p>
+	 */
+	@RequestMapping("refreshPunchGroupScheduled")
+	@RestReturn(value = String.class)
+	public RestResponse refreshPunchGroupScheduled() {
+		punchService.dayRefreshPunchGroupScheduled();
+		RestResponse response = new RestResponse( );
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	/**
 	 * <b>URL: punch/transforSceneToken</b>
 	 * <p>

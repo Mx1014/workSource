@@ -97,4 +97,6 @@ public interface ParkingService {
     List<ParkingInvoiceTypeDTO> listParkingInvoiceTypes(ListParkingInvoiceTypesCommand cmd);
 
     ParkingCardType getParkingCardType(String ownerType, Long ownerId, Long parkingLotId, String cardTypeId);
+
+    ParkingExpiredRechargeInfoDTO getExpiredRechargeInfo(GetExpiredRechargeInfoCommand cmd);
 }

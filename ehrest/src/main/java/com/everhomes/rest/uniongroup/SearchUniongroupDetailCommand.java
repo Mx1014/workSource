@@ -22,6 +22,7 @@ public class SearchUniongroupDetailCommand {
     private String isNormal;
     private Long pageAnchor;
     private Integer pageSize;
+    private Integer versionCode;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -93,4 +94,11 @@ public class SearchUniongroupDetailCommand {
         return StringHelper.toJsonString(this);
     }
 
+    public Integer getVersionCode() {
+        return versionCode;
+    }
+
+    public void setVersionCode(Integer versionCode) {
+        this.versionCode = versionCode;
+    }
 }

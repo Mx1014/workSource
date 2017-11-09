@@ -637,18 +637,19 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         Long payerId = Long.parseLong(cmd.getPayerId());
         //检查下单人的类型和id，不能为空
         if(cmd.getPayerType().equals(AssetTargetType.USER.getCode())){
-            if(Long.parseLong(cmd.getPayerId())==UserContext.currentUserId()){
-                payerId = Long.parseLong(cmd.getPayerId());
-            }else{
-                LOGGER.error("individual make asset order failed, the given uid = {}, but the online uid is = {}",cmd.getPayerId(),UserContext.currentUserId());
-                throw new RuntimeErrorException("individual make asset order failed");
-            }
+//            if(Long.parseLong(cmd.getPayerId())==UserContext.currentUserId()){
+//                payerId = Long.parseLong(cmd.getPayerId());
+//            }else{
+//                LOGGER.error("individual make asset order failed, the given uid = {}, but the online uid is = {}",cmd.getPayerId(),UserContext.currentUserId());
+//                throw new RuntimeErrorException("individual make asset order failed");
+//            }
+            payerId = UserContext.currentUserId();
         }
 
         //组装command ， 请求支付模块的下预付单
         PreOrderCommand cmd2pay = new PreOrderCommand();
-        cmd2pay.setAmount(amountsInCents);
-//        cmd2pay.setAmount(1l);
+//        cmd2pay.setAmount(amountsInCents);
+        cmd2pay.setAmount(1l);
         cmd2pay.setClientAppName(cmd.getClientAppName());
         cmd2pay.setExpiration(ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);
         cmd2pay.setNamespaceId(cmd.getNamespaceId());

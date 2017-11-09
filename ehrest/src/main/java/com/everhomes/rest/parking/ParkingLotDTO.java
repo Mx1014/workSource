@@ -56,6 +56,16 @@ public class ParkingLotDTO {
 
     private Byte invoiceFlag;
 
+    private byte businessLicenseFlag;
+
+    public byte getBusinessLicenseFlag() {
+        return businessLicenseFlag;
+    }
+
+    public void setBusinessLicenseFlag(byte businessLicenseFlag) {
+        this.businessLicenseFlag = businessLicenseFlag;
+    }
+
     public Byte getInvoiceFlag() {
         return invoiceFlag;
     }

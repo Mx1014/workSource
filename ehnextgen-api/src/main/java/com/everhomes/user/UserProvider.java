@@ -31,6 +31,8 @@ public interface UserProvider {
     UserIdentifier findIdentifierById(long id);
     List<UserIdentifier> findClaimingIdentifierByToken(String identifierToken);
     List<UserIdentifier> findClaimedIdentifiersByToken(String identifierToken);
+    List<UserIdentifier> listClaimedIdentifiersByTokens(Integer namespaceId,List<String> identifiers);
+
     UserIdentifier findClaimedIdentifierByToken(String identifierToken);
     UserIdentifier findClaimedIdentifierByToken(Integer namespaceId, String identifierToken);
     UserIdentifier findClaimedIdentifierByOwnerAndType(long ownerId, byte identifierType);
@@ -143,4 +145,13 @@ public interface UserProvider {
 
     int countUserByNamespaceIdAndNamespaceUserType(Integer namespaceId, String namespaceUserType);
 
+    /**
+     * 用于测试缓存使用是否正常，不要用于业务使用 by lqs 20171019
+     */
+    String checkCacheStatus();
+    
+    /**
+     * 用于测试缓存使用是否正常，不要用于业务使用 by lqs 20171019
+     */
+    void updateCacheStatus();
 }

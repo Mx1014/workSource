@@ -40,7 +40,9 @@ public interface CommunityProvider {
 	List<Community> findCommunitiesByNameCityIdAreaId(String name, Long cityId,Long areaId);
 	
 	List<Building> ListBuildingsByCommunityId(ListingLocator locator, int count, Long communityId, Integer namespaceId, String keyword);
-	
+
+    List<Building> ListBuildingsBykeywordAndNameSpace(Integer namespaceId, String keyword);
+
 	Building findBuildingById(Long id);
 	
 	void populateBuildingAttachments(final Building building);
@@ -128,4 +130,7 @@ public interface CommunityProvider {
 
     //在给予的communityIds的范围内根据参数中的经纬度进行排序
     List<CommunityGeoPoint> listCommunityGeoPointByGeoHashInCommunities(double latitude, double longitude, int geoHashLength, List<Long> communityIds);
+
+    List<Community> listCommunitiesByCityIdAndAreaId(Integer namespaceId, Long cityId, Long areaId, String keyword, Long pageAnchor,
+                                                     Integer pageSize);
 }

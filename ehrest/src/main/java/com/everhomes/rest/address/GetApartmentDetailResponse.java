@@ -25,6 +25,7 @@ import com.everhomes.util.StringHelper;
  * <li>sourceItemId: 资产来源：自管、业主放盘、大业主交管、其他...</li>
  * <li>decorateStatus: 装修状态</li>
  * <li>orientation: 朝向</li>
+ * <li>apartmentFloor: 楼层名称</li>
  * </ul>
  */
 public class GetApartmentDetailResponse {
@@ -40,11 +41,20 @@ public class GetApartmentDetailResponse {
 	private Long sourceItemId;
 	private Byte decorateStatus;
 	private String orientation;
+	private String apartmentFloor;
 	private Byte communityType;
 	private String enterpriseName;
 	@ItemType(OrganizationOwnerDTO.class)
 	private List<OrganizationOwnerDTO> owerList;
 	private Long nextPageAnchor;
+
+	public String getApartmentFloor() {
+		return apartmentFloor;
+	}
+
+	public void setApartmentFloor(String apartmentFloor) {
+		this.apartmentFloor = apartmentFloor;
+	}
 
 	public Double getBuildArea() {
 		return buildArea;

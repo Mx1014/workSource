@@ -5,6 +5,7 @@ package com.everhomes.rest.asset;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -15,6 +16,9 @@ import java.util.List;
  * <li>formulaType:公式类型,1:固定金额;2:普通公式;3:斜面公式;4:梯度公式</li>
  * <li>BillingCycle:计费周期,1:按天;2:按月;3:按季度;4:按年</li>
  * <li>variables:变量列表，参考{@link com.everhomes.rest.asset.PaymentVariable}</li>
+ * <li>variableNames:变量名称列表</li>
+ * <li>suggestUnitPrice:建议单价</li>
+ * <li>areaSizeType:计费面积类型,1：合同面积；2.建筑面积；3：使用面积；4：出租面积</li>
  *</ul>
  */
 public class ListChargingStandardsDTO {
@@ -25,6 +29,11 @@ public class ListChargingStandardsDTO {
     private Byte BillingCycle;
     @ItemType(PaymentVariable.class)
     private List<PaymentVariable> variables;
+    @ItemType(String.class)
+    private List<String> variableNames;
+    private BigDecimal suggestUnitPrice;
+    private Integer areaSizeType;
+
 
     @Override
     public String toString() {
@@ -35,12 +44,36 @@ public class ListChargingStandardsDTO {
         return chargingStandardId;
     }
 
+    public BigDecimal getSuggestUnitPrice() {
+        return suggestUnitPrice;
+    }
+
+    public void setSuggestUnitPrice(BigDecimal suggestUnitPrice) {
+        this.suggestUnitPrice = suggestUnitPrice;
+    }
+
+    public Integer getAreaSizeType() {
+        return areaSizeType;
+    }
+
+    public void setAreaSizeType(Integer areaSizeType) {
+        this.areaSizeType = areaSizeType;
+    }
+
     public Byte getFormulaType() {
         return formulaType;
     }
 
     public void setFormulaType(Byte formulaType) {
         this.formulaType = formulaType;
+    }
+
+    public List<String> getVariableNames() {
+        return variableNames;
+    }
+
+    public void setVariableNames(List<String> variableNames) {
+        this.variableNames = variableNames;
     }
 
     public void setChargingStandardId(Long chargingStandardId) {

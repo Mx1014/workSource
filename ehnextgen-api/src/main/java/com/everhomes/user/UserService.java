@@ -15,6 +15,7 @@ import com.everhomes.rest.user.admin.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.util.List;
 
 /**
@@ -270,4 +271,19 @@ public interface UserService {
     SceneDTO convertCommunityToScene(Integer namespaceId, Long userId, Community default_community);
 
     List<SceneDTO> listAllCommunityScenes();
+    
+    /**
+     * 用于测试服务器状态，不要用于业务使用 by lqs 20171019
+     */
+    String checkServerStatus();
+    
+    /** 
+     * 客户端更新设备信息到服务器端
+     * @param cmd
+     * @param request
+     * @param response
+     * @return 返回服务器端的信息
+     */
+    SystemInfoResponse updateUserBySystemInfo(SystemInfoCommand cmd,
+            HttpServletRequest request, HttpServletResponse response);
 }

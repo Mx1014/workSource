@@ -26,6 +26,7 @@ import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.news.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -170,6 +171,53 @@ public class NewsServiceImpl implements NewsService {
 		CreateNewsResponse response = ConvertHelper.convert(news, CreateNewsResponse.class);
 		response.setNewsToken(WebTokenGenerator.getInstance().toWebToken(news.getId()));
 		return response;
+	}
+
+	@Override
+	public void updateNews(UpdateNewsCommand cmd) {
+		final Long userId = UserContext.current().getUser().getId();
+		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
+		News news = ConvertHelper.convert(cmd, News.class);
+		news.setNamespaceId(namespaceId);
+		news.setContentType(NewsContentType.RICH_TEXT.getCode());
+		news.setTopIndex(0L);
+		news.setTopFlag(NewsTopFlag.NONE.getCode());
+		news.setStatus(NewsStatus.ACTIVE.getCode());
+		news.setCreatorUid(userId);
+		news.setDeleterUid(0L);
+		if (StringUtils.isEmpty(news.getContentAbstract())) {
+			String content = news.getContent().replaceAll("<p>.*</p>",""); //删除图片
+			news.setContentAbstract(content.substring(content.length()>100?100:content.length()));
+		}
+		if (cmd.getPublishTime() != null) {
+			news.setPublishTime(new Timestamp(cmd.getPublishTime()));
+		}
+
+		dbProvider.execute((TransactionStatus status) -> {
+			newsProvider.updateNews(news);
+
+			if (null != cmd.getCommunityIds()) {
+				newsProvider.deleteNewsCommunity(news.getId());
+				cmd.getCommunityIds().forEach(m -> {
+					NewsCommunity newsCommunity = new NewsCommunity();
+					newsCommunity.setNewsId(news.getId());
+					newsCommunity.setCommunityId(m);
+					newsProvider.createNewsCommunity(newsCommunity);
+				});
+			}
+
+			if (null != cmd.getNewsTagVals()) {
+				newsProvider.deletNewsTagVals(news.getId());
+				cmd.getNewsTagVals().forEach(r -> {
+					NewsTagVals newsTagVals = new NewsTagVals();
+					newsTagVals.setNewsTagId(r.getNewsTagId());
+					newsTagVals.setNewsId(news.getId());
+					newsProvider.createNewsTagVals(newsTagVals);
+				});
+			}
+			return null;
+		});
+		syncNews(news.getId());
 	}
 
 	private void checkBlacklist(String ownerType, Long ownerId){
@@ -611,8 +659,8 @@ public class NewsServiceImpl implements NewsService {
 		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
 
 		News news = findNewsById(userId, newsId);
-		newsProvider.increaseViewCount(newsId);
-		news.setViewCount(news.getViewCount()+1L);
+		newsProvider.increaseViewCount(newsId,news.getViewCount());
+		news.setViewCount((news.getViewCount()+1L)/2);//web端一次浏览，调用了两次接口。这里除以2
 
 		List<NewsTagVals> list = newsProvider.listNewsTagVals(newsId);
 		list.forEach(r->{
@@ -632,6 +680,49 @@ public class NewsServiceImpl implements NewsService {
 			else
 				return ConvertHelper.convert(r,NewsTagValsDTO.class);
 	  }).filter(r-> r!=null).collect(Collectors.toList()));
+		return response;
+	}
+
+	@Override
+	public GetNewsDetailResponse getNewsDetail(GetNewsDetailInfoCommand cmd) {
+		final Long userId = UserContext.current().getUser().getId();
+		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
+		News news = findNewsById(userId, newsId);
+		GetNewsDetailResponse response = ConvertHelper.convert(news,GetNewsDetailResponse.class);
+		List<Long> communityIds = newsProvider.listNewsCommunities(newsId);
+		response.setCommunityIds(communityIds.stream().map(r->r.toString()).collect(Collectors.toList()));
+		response.setPublishTime(news.getPublishTime().getTime());
+		List<NewsTag> parentTags = newsProvider.listNewsTag(news.getOwnerType(),news.getOwnerId(),null,0l,
+				null,null);
+		List<NewsTagDTO> newsTags = parentTags.stream().map(r->ConvertHelper.convert(r,NewsTagDTO.class)).
+				collect(Collectors.toList());
+		List<NewsTagVals> newsTagVals = newsProvider.listNewsTagVals(newsId);
+		Map<Long,Long> map = newsTagVals.stream().map(r->{  //创建旧新闻的父标签-子标签id映射
+			NewsTag newsTag = newsProvider.findNewsTagById(r.getNewsTagId());
+			NewsTagVals t= new NewsTagVals();
+			if (newsTag.getDeleteFlag()!=(byte)1) //没被删除
+				t.setNewsTagId(newsTag.getId()); //子标签id
+			newsTag = newsProvider.findNewsTagById(newsTag.getParentId());
+			if (newsTag.getDeleteFlag()!=(byte)1) //没被删除
+				t.setId(newsTag.getId()); //父标签id
+			return t;
+		}).filter(r-> r.getId()!=null).collect(Collectors.toMap(NewsTagVals::getId,NewsTagVals::getNewsTagId));
+
+		newsTags.forEach(r->{
+			List<NewsTag> tags = newsProvider.listNewsTag(r.getOwnerType(),r.getOwnerId(),null,r.getId(),
+					null,null);
+			List<NewsTagDTO> list = tags.stream().map(t->ConvertHelper.convert(t,NewsTagDTO.class)).
+					map(t->{
+						if (map.get(r.getId())!=null)
+							t.setIsDefault((byte)0);
+						if (t.getId().equals(map.get(r.getId())))
+							t.setIsDefault((byte)1);
+						return t;
+					}).collect(Collectors.toList());
+
+			r.setChildTags(JSONObject.toJSONString(list));
+		});
+		response.setNewsTags(newsTags);
 		return response;
 	}
 
@@ -1510,7 +1601,6 @@ public class NewsServiceImpl implements NewsService {
 		Long userId = UserContext.current().getUser().getId();
 		setNewsLikeFlag(userId, cmd.getNewsToken());
 	}
-
 
 
 }

@@ -26,6 +26,11 @@ public class PaymentExpectanciesCommand {
     private Integer pageOffset;
     private Integer pageSize;
 
+    @ItemType(RentAdjust.class)
+    private List<RentAdjust> rentAdjusts;
+    @ItemType(RentFree.class)
+    private List<RentFree> rentFrees;
+
 
     @Override
     public String toString() {
@@ -128,5 +133,21 @@ public class PaymentExpectanciesCommand {
 
     public void setFeesRules(List<FeeRules> feesRules) {
         this.feesRules = feesRules;
+    }
+
+    public List<RentAdjust> getRentAdjusts() {
+        return rentAdjusts;
+    }
+
+    public void setRentAdjusts(List<RentAdjust> rentAdjusts) {
+        this.rentAdjusts = rentAdjusts;
+    }
+
+    public List<RentFree> getRentFrees() {
+        return rentFrees;
+    }
+
+    public void setRentFrees(List<RentFree> rentFrees) {
+        this.rentFrees = rentFrees;
     }
 }

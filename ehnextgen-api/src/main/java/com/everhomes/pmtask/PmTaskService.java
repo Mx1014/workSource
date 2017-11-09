@@ -96,4 +96,6 @@ public interface PmTaskService {
 	void exportTasksCard(ExportTasksCardCommand cmd, HttpServletResponse response);
 
 	void changeTasksStatus(UpdateTasksStatusCommand cmd);
+
+	ListAuthorizationCommunityByUserResponse listOrganizationCommunityByUser(ListOrganizationCommunityByUserCommand cmd);
 }
