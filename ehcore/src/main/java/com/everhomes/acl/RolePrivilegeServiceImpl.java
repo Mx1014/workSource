@@ -467,7 +467,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	public OrganizationContactDTO createOrganizationSuperAdmin(CreateOrganizationAdminCommand cmd){
 		List<OrganizationContactDTO> dtos = new ArrayList<>();
 		dbProvider.execute((TransactionStatus status) -> {
-			OrganizationContactDTO dto = createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
+			OrganizationContactDTO dto = createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,  RoleConstants.PM_SUPER_ADMIN);
 			dtos.add(dto);
 			return null;
 		});
@@ -1410,7 +1410,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public OrganizationContactDTO createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId){
         OrganizationContactDTO contactDTO = dbProvider.execute(
-                r -> createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_ADMIN));
+                r -> createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_ADMIN, RoleConstants.ENTERPRISE_SUPER_ADMIN));
         if(contactDTO != null) {
             sendMessageAfterChangeOrganizationAdmin(
                     contactDTO,
@@ -1520,7 +1520,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         return o != null ? o.toString() : def;
     }
 
-    private OrganizationContactDTO createOrganizationAdmin(Long organizationId, String contactName, String contactToken, Long adminPrivilegeId){
+    private OrganizationContactDTO createOrganizationAdmin(Long organizationId, String contactName, String contactToken, Long adminPrivilegeId, Long roleId){
 		//创建机构账号，包括注册、把用户添加到公司
 		OrganizationMember member = organizationService.createOrganiztionMemberWithDetailAndUserOrganizationAdmin(organizationId, contactName, contactToken);
 
@@ -1530,7 +1530,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 			UserIdentifier userIdentifier = this.userProvider.findUserIdentifiersOfUser(member.getTargetId(), member.getNamespaceId());
 			//添加角色 同时删除角色
-			assignmentAclRole(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), member.getTargetId(), userIdentifier.getNamespaceId(), userIdentifier.getOwnerUid(), RoleConstants.PM_SUPER_ADMIN);
+			assignmentAclRole(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), member.getTargetId(), userIdentifier.getNamespaceId(), userIdentifier.getOwnerUid(), roleId);
 		}
 
 		return processOrganizationContactDTO(member);
@@ -1811,6 +1811,16 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					"params ownerType error.");
 		}
 		deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_ADMIN);
+		OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(cmd.getOrganizationId(), cmd.getContactToken());
+		List<Long> roleIds = Collections.singletonList(RoleConstants.ENTERPRISE_SUPER_ADMIN);
+		if(detail != null){
+			List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(cmd.getOwnerType(), cmd.getOwnerId(), detail.getTargetType(), detail.getTargetId());
+			for (RoleAssignment roleAssignment: roleAssignments) {
+				if(roleIds.contains(roleAssignment.getRoleId())){
+					aclProvider.deleteRoleAssignment(roleAssignment.getId());
+				}
+			}
+		}
 	}
 
 	@Override
@@ -3309,7 +3319,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	public void createOrganizationSuperAdmins(CreateOrganizationAdminsCommand cmd){
 		dbProvider.execute((TransactionStatus status) ->{
 			for(CreateOrganizationAdminCommand command : cmd.getCommands()){
-				createOrganizationAdmin(cmd.getOrganizationId(), command.getContactName(), command.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
+				createOrganizationAdmin(cmd.getOrganizationId(), command.getContactName(), command.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN, adminRoleId = RoleConstants.PM_SUPER_ADMIN);
 			}
 			return null;
 		});
@@ -3317,7 +3327,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	public void transferOrganizationSuperAdmin(TransferOrganizationSuperAdminCommand cmd){
 		dbProvider.execute((TransactionStatus status) ->{
-			createOrganizationAdmin(cmd.getOrganizationId(),cmd.getNewContactName(),cmd.getNewContactToken(),PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
+			createOrganizationAdmin(cmd.getOrganizationId(),cmd.getNewContactName(),cmd.getNewContactToken(),PrivilegeConstants.ORGANIZATION_SUPER_ADMIN, adminRoleId = RoleConstants.PM_SUPER_ADMIN);
 			deleteOrganizationAdmin(cmd.getOrganizationId(),cmd.getOriginalContactToken(),PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
 			return null;
 		});
