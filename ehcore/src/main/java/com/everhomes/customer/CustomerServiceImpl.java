@@ -1586,18 +1586,42 @@ public class CustomerServiceImpl implements CustomerService {
         return new Timestamp(cal.getTimeInMillis());
     }
 
+    private Timestamp getMonth(Timestamp time) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(time);
+        cal.set(Calendar.DATE, 1);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.MILLISECOND, 001);
+        return new Timestamp(cal.getTimeInMillis());
+    }
     @Override
     public ListCustomerAnnualDetailsResponse listCustomerAnnualDetails(ListCustomerAnnualDetailsCommand cmd) {
         ListCustomerAnnualDetailsResponse response = new ListCustomerAnnualDetailsResponse();
         List<CustomerEconomicIndicator> economicIndicators = enterpriseCustomerProvider.listCustomerEconomicIndicatorsByCustomerId(cmd.getCustomerId(), new Timestamp(cmd.getStartTime()), new Timestamp(cmd.getEndTime()));
         if(economicIndicators != null && economicIndicators.size() > 0) {
-            List<MonthStatistics> statistics = economicIndicators.stream().map(economicIndicator -> {
-                MonthStatistics statistic = new MonthStatistics();
-                statistic.setMonth(economicIndicator.getMonth().getTime());
-                statistic.setTaxPayment(economicIndicator.getTaxPayment());
-                statistic.setTurnover(economicIndicator.getTurnover());
-                return statistic;
-            }).collect(Collectors.toList());
+            Map<Timestamp, MonthStatistics> monthStatisticsMap = new HashMap<>();
+            economicIndicators.forEach(economicIndicator -> {
+                Timestamp month = getMonth(economicIndicator.getMonth());
+                MonthStatistics statistic = monthStatisticsMap.get(month);
+                if(statistic == null) {
+                    statistic = new MonthStatistics();
+                    statistic.setMonth(month.getTime());
+                    statistic.setTaxPayment(economicIndicator.getTaxPayment());
+                    statistic.setTurnover(economicIndicator.getTurnover());
+                } else {
+                    BigDecimal taxPayment = statistic.getTaxPayment() == null ? BigDecimal.ZERO : statistic.getTaxPayment();
+                    statistic.setTaxPayment(taxPayment.add(economicIndicator.getTaxPayment()));
+                    BigDecimal turnover = statistic.getTurnover() == null ? BigDecimal.ZERO : statistic.getTurnover();
+                    statistic.setTurnover(turnover.add(economicIndicator.getTurnover()));
+                }
+                monthStatisticsMap.put(month, statistic);
+            });
+            List<MonthStatistics> statistics = new ArrayList<>();
+            monthStatisticsMap.forEach((month, statistic) -> {
+                statistics.add(statistic);
+            });
             response.setStatistics(statistics);
         }
         return response;
