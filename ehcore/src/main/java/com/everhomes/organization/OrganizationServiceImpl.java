@@ -725,6 +725,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (null != org.getLongitude())
             dto.setLongitude(org.getLongitude().toString());
         //end
+        dto.setUnifiedSocialCreditCode(organization.getUnifiedSocialCreditCode());
+        dto.setWebsite(organization.getWebsite());
         dto.setEmailDomain(org.getEmailDomain());
         dto.setName(organization.getName());
         dto.setCommunityId(organizationDTO.getCommunityId());
@@ -1135,6 +1137,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organization.setGroupId(group.getId());
             organization.setEmailDomain(cmd.getEmailDomain());
+            organization.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
             organizationProvider.createOrganization(organization);
 
             OrganizationDetail enterprise = new OrganizationDetail();
@@ -1283,6 +1286,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             organization.setName(cmd.getName());
             organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organization.setEmailDomain(cmd.getEmailDomain());
+            organization.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
             organizationProvider.updateOrganization(organization);
 
             OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());

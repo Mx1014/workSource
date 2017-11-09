@@ -22,12 +22,16 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 
 -- 导入错误提示信息
 SET @string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100001', 'zh_CN', '姓名不能为空');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100002', 'zh_CN', '姓名过长');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100003', 'zh_CN', '姓名格式不对');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100004', 'zh_CN', '手机号不能为空');
 INSERT INTO .`eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100005', 'zh_CN', '手机号格式错误');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100006', 'zh_CN', '入职时间不能为空');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100007', 'zh_CN', '员工类型不能为空');
+INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100008', 'zh_CN', '部门不存在');
+INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100009', 'zh_CN', '职务不存在');
 
 -- 菜单
 -- 1.修改原先组织架构菜单的react
@@ -69,3 +73,19 @@ VALUES ((@flow_variables_id := @flow_variables_id + 1), 0, 0, '', 0, '', 'applie
 SET @locale_strings_id = IFNULL((SELECT MAX(id) FROM `eh_locale_strings`), 1);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 VALUES ((@locale_strings_id := @locale_strings_id + 1), 'flow', '100017', 'zh_CN', '工作流设置存在异常，请修改后再试');
+
+-- dengs,2017.11.08 配置发送消息的cron
+update eh_configurations SET value = '/questionnaire-survey/build/index.html#/question/%s#sign_suffix' WHERE name = 'questionnaire.detail.url';
+update eh_configurations SET value = '0 0 1 * * ? *' WHERE name = 'questionnaire.send.message.express';
+
+-- 停车6.1 add by sw 20171108
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`)
+	VALUES ('parking', '10021', 'zh_CN', '该车辆已存在，请重新输入');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('40835', '车辆认证申请', '40800', NULL, 'react:/vehicle-certification/certification-list', '0', '2', '/40000/40800/40835', 'park', '472', '40800', '3', NULL, 'module');
+set @id = (select MAX(id) FROM eh_web_menu_scopes);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES ((@id := @id + 1), '40835', '', 'EhNamespaces', '1000000', '2');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.car.verification.flowCase.url', 'zl://workflow/detail?flowCaseId=%s&flowUserType=node_applier&moduleId=40800', NULL, '0', NULL);
+
+

@@ -13,6 +13,15 @@ public class ParkingTempFeeDTO {
 	private Integer delayTime;
 	private String orderToken;
 	private BigDecimal originalPrice;
+	private Integer remainingTime;
+
+	public Integer getRemainingTime() {
+		return remainingTime;
+	}
+
+	public void setRemainingTime(Integer remainingTime) {
+		this.remainingTime = remainingTime;
+	}
 
 	public BigDecimal getOriginalPrice() {
 		return originalPrice;
