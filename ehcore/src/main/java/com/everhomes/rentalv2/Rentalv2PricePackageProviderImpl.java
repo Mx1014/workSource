@@ -18,6 +18,7 @@ import org.jooq.Record;
 import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.List;
 /**
  * Created by Administrator on 2017/11/7.
  */
+@Component
 public class Rentalv2PricePackageProviderImpl implements  Rentalv2PricePackageProvider {
     @Autowired
     private DbProvider dbProvider;
