@@ -19,6 +19,7 @@ import com.everhomes.search.EnergyPlanSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -245,16 +246,24 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
                 repeat.setRepeatInterval(Integer.valueOf(String.valueOf(source.get("repeatInterval"))));
                 dto.setRepeat(repeat);
 
-                String[] groupNames = String.valueOf(source.get("groupName")).split(",");
-                if(groupNames != null && groupNames.length > 0) {
+                List<EnergyPlanGroupMap> groupMaps = energyPlanProvider.listGroupsByEnergyPlan(dto.getId());
+                if(groupMaps != null && groupMaps.size() > 0) {
                     List<EnergyPlanGroupDTO> groups = new ArrayList<>();
-                    for(String groupName : groupNames) {
-                        EnergyPlanGroupDTO groupDTO = new EnergyPlanGroupDTO();
-                        groupName = groupName.replace("[", "");
-                        groupName = groupName.replace("]", "");
-                        groupDTO.setGroupName(groupName);
+                    groupMaps.forEach(group -> {
+                        EnergyPlanGroupDTO groupDTO = ConvertHelper.convert(group, EnergyPlanGroupDTO.class);
+                        StringBuilder sb = new StringBuilder();
+                        Organization org = organizationProvider.findOrganizationById(group.getGroupId());
+                        OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(group.getPositionId());
+                        if(org != null) {
+                            sb.append(org.getName());
+
+                        }
+                        if(position != null) {
+                            sb.append(position.getName());
+                        }
+                        groupDTO.setGroupName(sb.toString());
                         groups.add(groupDTO);
-                    }
+                    });
                     dto.setGroups(groups);
                 }
                 dtos.add(dto);
