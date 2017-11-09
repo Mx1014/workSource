@@ -3526,7 +3526,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         task.setPlanId(plan.getId());
         task.setMeterId(map.getMeterId());
         EnergyMeterReadingLog lastReading = meterReadingLogProvider.findLastReadingLogByMeterId(plan.getNamespaceId(), map.getMeterId());
-        task.setLastTaskReading(lastReading.getReading());
+        task.setLastTaskReading(lastReading == null ? BigDecimal.ZERO :lastReading.getReading());
         task.setDefaultOrder(map.getDefaultOrder());
 
         RepeatSettings rs = repeatService.findRepeatSettingById(plan.getRepeatSettingId());
