@@ -961,7 +961,10 @@ public class AssetServiceImpl implements AssetService {
                 int start = 0;
                 while(index < formularChars.length){
                     if(formularChars[index]=='+'||formularChars[index]=='-'||formularChars[index]=='*'||formularChars[index]=='/'||index == formularChars.length-1){
-                        varIdens.add(formula.substring(start,index==formula.length()-1?index+1:index));
+                        String var = formula.substring(start,index==formula.length()-1?index+1:index);
+                        if(!IntegerUtil.hasDigit(var)){
+                            varIdens.add(var);
+                        }
                         start = index+1;
                     }
                     index++;
@@ -2230,9 +2233,12 @@ public class AssetServiceImpl implements AssetService {
                     noticeConfigs.put(config.getOwnerId(),days);
                 }
             }
+            Map<Date,PaymentBills> needNoticeBills = new HashMap<>();
             for ( Map.Entry<Long,List<Integer>> map : noticeConfigs.entrySet()){
-//                List<PaymentBills> bills = getAllBillByCommunity(map.getKey());
-
+//                List<PaymentBills> bills = getAllBillsByCommunity(map.getKey());
+//                for(int i = 0; i < bills.size(); i ++){
+////                    bills.get()
+//                }
             }
 
         }

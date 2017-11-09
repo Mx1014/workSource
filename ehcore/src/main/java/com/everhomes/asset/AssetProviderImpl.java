@@ -47,11 +47,8 @@ import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
+import com.everhomes.util.*;
 
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.StringUtils;
@@ -74,6 +71,7 @@ import scala.Char;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Administrator on 2017/2/20.
@@ -2484,14 +2482,54 @@ public class AssetProviderImpl implements AssetProvider {
             list.add(dto);
             return null;
         });
-        List<String> fetch = context.select(t3.NAME)
-                .from(t3)
-//                .where(t3.CHARGING_ITEMS_ID.eq(cmd.getChargingItemId()))
-                .fetch(t3.NAME);
+//        List<String> fetch = context.select(t3.NAME)
+//                .from(t3)
+////                .where(t3.CHARGING_ITEMS_ID.eq(cmd.getChargingItemId()))
+//                .fetch(t3.NAME);
 
         for(int i = 0; i < list.size(); i ++){
             ListChargingStandardsDTO dto = list.get(i);
-            dto.setVariableNames(fetch);
+            Long chargingStandardId = dto.getChargingStandardId();
+
+            //获得标准
+            com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards standard = findChargingStandardById(chargingStandardId);
+            Set<String> varIdens = new HashSet<>();
+            //获得formula的额外内容
+            List<PaymentFormula> formulaCondition = null;
+            if(standard.getFormulaType()==3 || standard.getFormulaType() == 4){
+                formulaCondition = getFormulas(standard.getId());
+                for(int m = 0; m < formulaCondition.size(); m ++){
+                    varIdens.add(findVariableByIden(formulaCondition.get(m).getConstraintVariableIdentifer()).getName());
+                }
+            }
+            //获得standard公式
+            String formula = null;
+            if(standard.getFormulaType()==1 || standard.getFormulaType() == 2){
+                formulaCondition = getFormulas(standard.getId());
+                if(formulaCondition!=null){
+                    if(formulaCondition.size()>1){
+                        LOGGER.error("普通公式的标准的id为"+standard.getId()+",对应了"+formulaCondition.size()+"条公式!");
+                    }
+                    PaymentFormula paymentFormula = formulaCondition.get(0);
+                    formula = paymentFormula.getFormulaJson();
+                }else{
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"找不到公式,标准的id为"+standard.getId()+"");
+                }
+            }
+            char[] formularChars = formula.toCharArray();
+            int index = 0;
+            int start = 0;
+            while(index < formularChars.length){
+                if(formularChars[index]=='+'||formularChars[index]=='-'||formularChars[index]=='*'||formularChars[index]=='/'||index == formularChars.length-1){
+                    String var = formula.substring(start,index==formula.length()-1?index+1:index);
+                    if(!IntegerUtil.hasDigit(var)){
+                        varIdens.add(findVariableByIden(var).getName());
+                    }
+                    start = index+1;
+                }
+                index++;
+            }
+            dto.setVariableNames(new ArrayList<>(varIdens));
         }
         return list;
     }
