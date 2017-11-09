@@ -12,6 +12,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentUser;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.launchpad.ItemScope;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -3131,6 +3132,20 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERID.eq(ownerId))
                 .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERTYPE.eq(ownerType))
                 .fetchInto(PaymentBillGroupRule.class);
+    }
+
+    @Override
+    public PaymentChargingItemScope findChargingItemScope(Long chargingItemId, String ownerType, Long ownerId) {
+        DSLContext context = getReadOnlyContext();
+        List<PaymentChargingItemScope> scopes = context.selectFrom(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES)
+                .where(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID.eq(chargingItemId))
+                .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_TYPE.eq(ownerType))
+                .fetchInto(PaymentChargingItemScope.class);
+        if(scopes.size()>0){
+            return scopes.get(0);
+        }
+        return null;
     }
 
 

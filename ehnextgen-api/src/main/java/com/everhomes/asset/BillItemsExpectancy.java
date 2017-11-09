@@ -1,6 +1,9 @@
 //@formatter:off
 package com.everhomes.asset;
 
+import com.everhomes.rest.asset.ContractProperty;
+import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -21,6 +24,47 @@ public class BillItemsExpectancy {
     private String billDateGeneration;
     private String billCycleStart;
     private String billCycleEnd;
+    private ContractProperty property;
+    private PaymentBillGroupRule groupRule;
+    private PaymentBillGroup group;
+    private EhPaymentChargingStandards standard;
+    private PaymentChargingItemScope itemScope;
+
+    public PaymentChargingItemScope getItemScope() {
+        return itemScope;
+    }
+
+    public EhPaymentChargingStandards getStandard() {
+        return standard;
+    }
+
+    public void setStandard(EhPaymentChargingStandards standard) {
+        this.standard = standard;
+    }
+
+    public PaymentBillGroupRule getGroupRule() {
+        return groupRule;
+    }
+
+    public void setGroupRule(PaymentBillGroupRule groupRule) {
+        this.groupRule = groupRule;
+    }
+
+    public PaymentBillGroup getGroup() {
+        return group;
+    }
+
+    public void setGroup(PaymentBillGroup group) {
+        this.group = group;
+    }
+
+    public ContractProperty getProperty() {
+        return property;
+    }
+
+    public void setProperty(ContractProperty property) {
+        this.property = property;
+    }
 
     public BigDecimal getAmountReceivable() {
         return amountReceivable;
@@ -116,5 +160,9 @@ public class BillItemsExpectancy {
 
     public void setBillDateDeadline(String billDateDeadline) {
         this.billDateDeadline = billDateDeadline;
+    }
+
+    public void setItemScope(PaymentChargingItemScope itemScope) {
+        this.itemScope = itemScope;
     }
 }

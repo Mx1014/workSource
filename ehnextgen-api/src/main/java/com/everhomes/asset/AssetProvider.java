@@ -228,4 +228,6 @@ public interface AssetProvider {
     void deCoupledForChargingItem(Long ownerId, String ownerType);
 
     List<EhPaymentBillGroupsRules> getBillGroupRuleByCommunity(Long ownerId, String ownerType);
+
+    PaymentChargingItemScope findChargingItemScope(Long chargingItemId, String ownerType, Long ownerId);
 }
