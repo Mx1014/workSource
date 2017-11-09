@@ -996,7 +996,7 @@ public class AssetServiceImpl implements AssetService {
                 PaymentBillGroupRule groupRule = assetProvider.getBillGroupRule(rule.getChargingItemId(),rule.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
                 //获得group
                 PaymentBillGroup group = assetProvider.getBillGroupById(groupRule.getBillGroupId());
-
+                Byte balanceDateType = group.getBalanceDateType();
                 //开始循环地址包裹
                 for(int j = 0; j < var1.size(); j ++){
                     //从地址包裹中获得一个地址
@@ -1019,9 +1019,26 @@ public class AssetServiceImpl implements AssetService {
                             assetProvider.deleteContractPayment(contractId);
                             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
                     }
+                    Integer cycleForBill = 0;
+                    switch (balanceDateType){
+                        case 2:
+                            cycleForBill = 0;
+                            break;
+                        case 3:
+                            cycleForBill = 2;
+                            break;
+                        case 4:
+                            cycleForBill = 11;
+                            break;
+                        case 5:
+                            break;
+                        default:
+                            assetProvider.deleteContractPayment(contractId);
+                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
+                    }
                     //计算
                     assetFeeHandler(billItemsExpectancies,var2,formula,groupRule,group,rule,cycle,cmd,property,standard,formulaCondition,billingCycle,itemScope);
-                    assetFeeHandlerForBillCycles(uniqueRecorder,var2,formula,groupRule,group,rule,cycle,cmd,property,standard,formulaCondition,billingCycle,itemScope);
+                    assetFeeHandlerForBillCycles(uniqueRecorder,var2,formula,groupRule,group,rule,cycleForBill,cmd,property,standard,formulaCondition,billingCycle,itemScope);
 
                 }
             }
