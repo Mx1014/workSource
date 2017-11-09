@@ -80,6 +80,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -1882,7 +1883,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public List<EnergyMeterFormulaDTO> listEnergyMeterFormulas(ListEnergyMeterFormulasCommand cmd) {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOwnerId());
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
         List<EnergyMeterFormula> formulas = meterFormulaProvider.listMeterFormulas(cmd.getOwnerId(), cmd.getOwnerType(),
                 cmd.getCommunityId(), UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getFormulaType());
         return formulas.stream().map(this::toEnergyMeterFormulaDTO).collect(Collectors.toList());
@@ -2691,7 +2692,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public List<EnergyMeterPriceConfigDTO> listEnergyMeterPriceConfig(ListEnergyMeterPriceConfigCommand cmd) {
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
         List<EnergyMeterPriceConfig> priceConfig = priceConfigProvider.listPriceConfig(cmd.getOwnerId(), cmd.getOwnerType(),
                 cmd.getCommunityId(), UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
         return priceConfig.stream().map(this::toEnergyMeterPriceConfigDTO).collect(Collectors.toList());
@@ -2814,31 +2815,34 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public void batchReadEnergyMeter(BatchReadEnergyMeterCommand cmd) {
         if(cmd.getReadList() != null && cmd.getReadList().size() > 0) {
             cmd.getReadList().forEach(read -> {
-                List<EnergyMeterTask> tasks = energyMeterTaskProvider.listActiveEnergyMeterTasks(read.getMeterId());
-                if(tasks != null && tasks.size() > 0) {
-                    Boolean readTask = false;
-                    for(EnergyMeterTask task : tasks) {
-                        if(task.getExecutiveExpireTime().before(new Timestamp(DateHelper.currentGMTTime().getTime()))
-                                || EnergyTaskStatus.INACTIVE.equals(EnergyTaskStatus.fromCode(task.getStatus()))) {
-                            continue;
+                this.dbProvider.execute((TransactionStatus status) -> {
+                    List<EnergyMeterTask> tasks = energyMeterTaskProvider.listActiveEnergyMeterTasks(read.getMeterId());
+                    if(tasks != null && tasks.size() > 0) {
+                        Boolean readTask = false;
+                        for(EnergyMeterTask task : tasks) {
+                            if(task.getExecutiveExpireTime().before(new Timestamp(DateHelper.currentGMTTime().getTime()))
+                                    || EnergyTaskStatus.INACTIVE.equals(EnergyTaskStatus.fromCode(task.getStatus()))) {
+                                continue;
+                            }
+                            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), task.getTargetId(), task.getOwnerId(), PrivilegeConstants.METER_READ);
+                            EnergyMeter meter = meterProvider.findById(task.getNamespaceId(), task.getMeterId());
+                            if(!EnergyMeterStatus.ACTIVE.equals(EnergyMeterStatus.fromCode(meter.getStatus()))) {
+                                continue;
+                            }
+                            task.setReading(read.getCurrReading());
+                            task.setStatus(EnergyTaskStatus.READ.getCode());
+                            task.setOperatorUid(UserContext.currentUserId());
+                            task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                            energyMeterTaskProvider.updateEnergyMeterTask(task);
+                            energyMeterTaskSearcher.feedDoc(task);
+                            readTask = true;
                         }
-
-                        EnergyMeter meter = meterProvider.findById(task.getNamespaceId(), task.getMeterId());
-                        if(!EnergyMeterStatus.ACTIVE.equals(EnergyMeterStatus.fromCode(meter.getStatus()))) {
-                            continue;
+                        if(readTask) {
+                            readEnergyMeter(read);
                         }
-                        task.setReading(read.getCurrReading());
-                        task.setStatus(EnergyTaskStatus.READ.getCode());
-                        task.setOperatorUid(UserContext.currentUserId());
-                        task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                        energyMeterTaskProvider.updateEnergyMeterTask(task);
-                        energyMeterTaskSearcher.feedDoc(task);
-                        readTask = true;
                     }
-                    if(readTask) {
-                        readEnergyMeter(read);
-                    }
-                }
+                    return null;
+                });
             });
         }
     }
