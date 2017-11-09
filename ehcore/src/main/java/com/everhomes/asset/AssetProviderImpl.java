@@ -1758,10 +1758,16 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
         EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
+        EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
         List<Long> l = new ArrayList<>();
+        List<Long> fetch = context.select(bill.ID)
+                .from(bill)
+                .where(bill.CONTRACT_NUM.eq(contractNum))
+                .fetch(bill.ID);
         context.select(t.ID,t.DATE_STR,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
                 .from(t,t1)
-                .where(t.CONTRACT_NUM.eq(contractNum))
+//                .where(t.CONTRACT_NUM.eq(contractNum))
+                .where(t.BILL_ID.in(fetch))
                 .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
                 .orderBy(t1.NAME,t.DATE_STR)
                 .limit(pageOffset,pageSize+1)
@@ -1780,10 +1786,15 @@ public class AssetProviderImpl implements AssetProvider {
                     return null;
                 });
         if(l.size() < 1 || l.get(0) == null){
+            List<Long> fetch1 = context.select(bill.ID)
+                    .from(bill)
+                    .where(bill.CONTRACT_ID.eq(contractId))
+                    .fetch(bill.ID);
             List<PaymentExpectancyDTO> dtos1 = new ArrayList<>();
             context.select(t.DATE_STR,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
                     .from(t,t1)
-                    .where(t.CONTRACT_ID.eq(contractId))
+//                    .where(t.CONTRACT_ID.eq(contractId))
+                    .where(t.BILL_ID.in(fetch1))
                     .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
                     .orderBy(t1.NAME,t.DATE_STR)
                     .limit(pageOffset,pageSize+1)

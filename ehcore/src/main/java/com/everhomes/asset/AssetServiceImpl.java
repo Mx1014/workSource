@@ -1087,6 +1087,16 @@ public class AssetServiceImpl implements AssetService {
                     for(int g = 0; g< billItemsExpectancies.size(); g++){
                         BillItemsExpectancy exp = billItemsExpectancies.get(g);
 
+//                        //修改为不去扫描费项（没有费项的也就没有账单嘛),也是在有费项的地方去建立账单
+//
+//                        for(int m = 0; m < billItemsList.size(); m ++){
+//                            EhPaymentBillItems item = billItemsList.get(m);
+//                            String generationDate = item.getDateStrGeneration();
+//
+//                        }
+//
+//
+//
 
                         //每一个周期的bill,先判断是否是此周期的bill已经建立了
                         BillIdentity identity = new BillIdentity();
@@ -1292,12 +1302,8 @@ public class AssetServiceImpl implements AssetService {
             dateStrBegin.setTime(rule.getDateStrBegin());
         }
         Calendar dateStrEnd = Calendar.getInstance();
-        String format = yyyyMMdd.format(dateStrEnd.getTime());
-        System.out.println(format);
         if(rule.getDateStrEnd() == null){
             dateStrEnd.set(Calendar.DAY_OF_MONTH,dateStrEnd.getActualMaximum(Calendar.DAY_OF_MONTH));
-            String format1 = yyyyMMdd.format(dateStrEnd.getTime());
-            System.out.println(format1);
         }else{
             dateStrEnd.setTime(rule.getDateStrEnd());
         }
@@ -1335,13 +1341,22 @@ public class AssetServiceImpl implements AssetService {
                 // ?
                 d1.set(Calendar.DAY_OF_MONTH,groupRule.getBillItemMonthOffset());
             }
-            //比较d和d1
-            Calendar d2 = Calendar.getInstance();
-            if(d.compareTo(d1)<0){
-                d2.setTime(d.getTime());
-            }else if(d.compareTo(d1)>=0){
-                d2.setTime(d1.getTime());
+                //费项d不能超过计价条款的两个边
+            if(d1.compareTo(dateStrBegin)==-1){
+                d1.setTime(dateStrBegin.getTime());
             }
+            if(d1.compareTo(dateStrEnd)==1){
+                d1.setTime(dateStrEnd.getTime());
+            }
+            //比较d和d1---wrong
+            //比较d和dateStrEnd
+            Calendar d2 = Calendar.getInstance();
+//            if(d.compareTo(d1)<0){
+//                d2.setTime(d.getTime());
+//            }else if(d.compareTo(d1)>=0){
+//                d2.setTime(d1.getTime());
+//            }
+            d2.setTime(d.getTime());
             if(d2.compareTo(dateStrEnd)>0){
                 d2.setTime(dateStrEnd.getTime());
             }
