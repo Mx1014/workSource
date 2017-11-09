@@ -94,7 +94,8 @@ public class ArchivesController extends ControllerBase{
      */
     @RequestMapping("listArchivesContacts")
     @RestReturn(value = ListArchivesContactsResponse.class)
-    public RestResponse listArchivesContacts(ListArchivesContactsCommand cmd){
+    public RestResponse
+    listArchivesContacts(ListArchivesContactsCommand cmd){
         ListArchivesContactsResponse res = archivesService.listArchivesContacts(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);

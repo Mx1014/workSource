@@ -4079,7 +4079,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationAddressMappings.class, null);
 	}
 
-	@Cacheable(value="ListOrganizationMemberByPath", key="#path+#groupTypes+#contactToken")
+	//@Cacheable(value="ListOrganizationMemberByPath", key="#path+#groupTypes+#contactToken")
 	@Override
 	public List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, String contactToken){
 		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
@@ -5582,8 +5582,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				.fetchInto(Long.class);
     }
 
-    @Override
-	public List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand, String filterScopeType) {
+	@Override
+	public List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand, String filterScopeType, List<String> groupTypes){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		pageSize = pageSize + 1;
 		List<OrganizationMember> result = new ArrayList<>();
@@ -5607,6 +5607,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		cond = cond.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
 
+		// 不包括经理
+		cond = cond.and(t1.field("group_type").notEqual(OrganizationGroupType.MANAGER.getCode()));
+
 		if (!StringUtils.isEmpty(keywords)) {
 			Condition cond1 = t2.field("contact_token").eq(keywords);
 			cond1 = cond1.or(t2.field("contact_name").like("%" + keywords + "%"));
@@ -5623,6 +5626,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			cond = cond.and(t1.field("visible_flag").eq(visibleFlag.getCode()));
 		}
 
+		if (null != groupTypes && groupTypes.size() > 0){
+			cond = cond.and(t1.field("group_type").in(groupTypes));
+		}
 
 		if(listCommand != null){
 			// 员工状态
@@ -5652,7 +5658,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 			//合同结束日期
 			if(listCommand.getContractEndTimeStart() != null && listCommand.getContractEndTimeStart() != null){
-				cond = cond.and(t2.field("contract_end_time").between(listCommand.getContractEndTimeStart(), listCommand.getContractEndTimeStart()));
+				cond = cond.and(t2.field("contract_end_time").between(listCommand.getContractEndTimeStart(), listCommand.getContractEndTimeEnd()));
 			}
 
 			if(listCommand.getExceptIds() != null){
@@ -5677,6 +5683,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			locator.setAnchor(result.get(result.size() - 1).getDetailId());
 		}
 		return result;
+	}
+
+    @Override
+	public List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand, String filterScopeType) {
+		return this.listOrganizationPersonnelsWithDownStream(keywords, contactSignedupStatus, visibleFlag, locator, pageSize, listCommand, filterScopeType, null);
 	}
 
 	@Override
