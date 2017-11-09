@@ -225,8 +225,10 @@ public class ForumServiceImpl implements ForumService {
     @Override
     public PostDTO createTopic(NewTopicCommand cmd) {
 
-        //TODO 临时检查客户端的版本，老客户端缺少一个参数，过了几十数年之后可以把这个方法删除了。 add by yanjun 20171109
-        checkVersionForforumEntry(cmd);
+        //全部都加上论坛入口Id为0，现在没办法真的区分不了这个帖子时属于哪个应用模块，活动、论坛、俱乐部、公告  add by yanjun 20171109
+        if(cmd.getForumEntryId() == null){
+            cmd.setForumEntryId(0L);
+        }
 
         //这个原来只用一行代码的方法终于要发挥他的作用啦。
         PostDTO dto = new PostDTO();
@@ -265,37 +267,37 @@ public class ForumServiceImpl implements ForumService {
         return dto;
     }
 
-
-
-    private void checkVersionForforumEntry(NewTopicCommand cmd){
-
-        if(cmd.getForumEntryId() != null){
-            return;
-        }
-
-        String versionRealm = UserContext.current().getVersionRealm();
-        LOGGER.info("UserContext current getVersion , versionRealm = {}", versionRealm);
-
-        //来自客户端的请求
-        if(versionRealm != null && (versionRealm.contains("Android_") || versionRealm.contains("iOS_"))){
-
-            String version = UserContext.current().getVersion();
-
-            LOGGER.info("UserContext current getVersion , version = {}", version);
-            if(version == null){
-                return;
-            }
-            VersionRange versionRange = new VersionRange("["+version+","+version+")");
-            VersionRange versionRangeMin = new VersionRange("[4.10.4,4.10.4)");
-
-
-            //来自客户端小于4.10.4的版本
-            if(((int)versionRange.getUpperBound()) < ((int)versionRangeMin.getUpperBound())){
-                cmd.setForumEntryId(0L);
-            }
-
-        }
-    }
+//
+//
+//    private void checkVersionForforumEntry(NewTopicCommand cmd){
+//
+//        if(cmd.getForumEntryId() != null){
+//            return;
+//        }
+//
+//        String versionRealm = UserContext.current().getVersionRealm();
+//        LOGGER.info("UserContext current getVersion , versionRealm = {}", versionRealm);
+//
+//        //来自客户端的请求
+//        if(versionRealm != null && (versionRealm.contains("Android_") || versionRealm.contains("iOS_"))){
+//
+//            String version = UserContext.current().getVersion();
+//
+//            LOGGER.info("UserContext current getVersion , version = {}", version);
+//            if(version == null){
+//                return;
+//            }
+//            VersionRange versionRange = new VersionRange("["+version+","+version+")");
+//            VersionRange versionRangeMin = new VersionRange("[4.10.4,4.10.4)");
+//
+//
+//            //来自客户端小于4.10.4的版本
+//            if(((int)versionRange.getUpperBound()) < ((int)versionRangeMin.getUpperBound())){
+//                cmd.setForumEntryId(0L);
+//            }
+//
+//        }
+//    }
 
 
     @Override
