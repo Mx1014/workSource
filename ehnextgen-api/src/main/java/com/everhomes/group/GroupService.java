@@ -170,8 +170,6 @@ public interface GroupService {
 
     public String getGroupAlias(Long groupId);
 
-    void newGuildApply(NewGuildApplyCommand cmd);
-
     GuildApplyDTO findGuildApply(FindGuildApplyCommand cmd);
 
     GuildApplyDTO findGuildApplyByGroupMemberId(FindGuildApplyByGroupMemberIdCommand cmd);

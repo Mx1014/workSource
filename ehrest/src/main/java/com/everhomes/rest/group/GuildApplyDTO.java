@@ -13,6 +13,8 @@ import java.sql.Timestamp;
  *     <li>namespaceId: namespaceId</li>
  *     <li>groupId: groupId</li>
  *     <li>applicantUid: applicantUid</li>
+ *     <li>avatar: 成员在group内的头像URI</li>
+ *     <li>avatarUrl: 成员在group内的头像URL</li>
  *     <li>name: name</li>
  *     <li>phone: phone</li>
  *     <li>email: email</li>
@@ -30,6 +32,8 @@ public class GuildApplyDTO {
     private Integer namespaceId;
     private Long groupId;
     private Long applicantUid;
+    private String avatar;
+    private String avatarUrl;
     private String name;
     private String phone;
     private String email;
@@ -78,6 +82,22 @@ public class GuildApplyDTO {
 
     public void setApplicantUid(Long applicantUid) {
         this.applicantUid = applicantUid;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 
     public String getName() {

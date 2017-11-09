@@ -2773,7 +2773,9 @@ public class GroupServiceImpl implements GroupService {
         //行业协会加入申请时的信息，包括企业等  add by yanjun 20171107
         if(ClubType.fromCode(group.getClubType()) == ClubType.GUILD){
             GuildApply guildApply = groupProvider.findGuildApplyByGroupMemberId(groupMember.getId());
-            groupMember.setGuildApplyDTO(ConvertHelper.convert(guildApply, GuildApplyDTO.class));
+            GuildApplyDTO guildApplyDTO = ConvertHelper.convert(guildApply, GuildApplyDTO.class);
+            populateGuildApplyDTO(guildApplyDTO);
+            groupMember.setGuildApplyDTO(guildApplyDTO);
         }
     }
     
@@ -5634,14 +5636,11 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public void newGuildApply(NewGuildApplyCommand cmd) {
-
-    }
-
-    @Override
     public GuildApplyDTO findGuildApply(FindGuildApplyCommand cmd) {
         GuildApply guildApply = groupProvider.findGuildApplyById(cmd.getId());
-        return ConvertHelper.convert(guildApply, GuildApplyDTO.class);
+        GuildApplyDTO dto = ConvertHelper.convert(guildApply, GuildApplyDTO.class);
+        populateGuildApplyDTO(dto);
+        return dto;
     }
 
     @Override
@@ -5671,12 +5670,39 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public ListGuildAppliesResponse listGuildApplies(ListGuildAppliesCommand cmd) {
         ListGuildAppliesResponse response = new ListGuildAppliesResponse();
+
         List<GuildApply> list = groupProvider.listGuildApplies(cmd.getNamespaceId(), cmd.getGroupId(), cmd.getApplicantUid());
         if(list != null){
-            List<GuildApplyDTO> dtos =  list.stream().map(r-> ConvertHelper.convert(r, GuildApplyDTO.class))
-                    .collect(Collectors.toList());
+            List<GuildApplyDTO> dtos =  list.stream().map(r-> {
+                GuildApplyDTO dto = ConvertHelper.convert(r, GuildApplyDTO.class);
+                populateGuildApplyDTO(dto);
+                return dto;
+            }).collect(Collectors.toList());
             response.setDtos(dtos);
         }
         return response;
     }
+
+    private void populateGuildApplyDTO(GuildApplyDTO dto) {
+	    if(dto == null){
+	        return;
+        }
+        if(dto.getAvatar() != null){
+
+            Long userId = UserContext.currentUserId();
+	        if(userId == null){
+	            userId = dto.getApplicantUid();
+            }
+            String url = contentServerService.parserUri(dto.getAvatar(), EntityType.USER.getCode(), userId);
+            dto.setAvatarUrl(url);
+        }
+
+    }
+
+
+
+
+
+
+
 }

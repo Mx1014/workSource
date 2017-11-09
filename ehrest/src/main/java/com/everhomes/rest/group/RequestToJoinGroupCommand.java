@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  *     <li>groupId: group id</li>
  *     <li>inviterId: 邀请人id</li>
  *     <li>requestText: 发起请求时可填写的说明文本</li>
+ *     <li>avatar: 行业协会头像URI</li>
  *     <li>name: name</li>
  *     <li>phone: phone</li>
  *     <li>email: email</li>
@@ -26,6 +27,7 @@ public class RequestToJoinGroupCommand {
 
     private String requestText;
 
+    private String avatar;
     private String name;
     private String phone;
     private String email;
@@ -58,6 +60,14 @@ public class RequestToJoinGroupCommand {
 
     public void setRequestText(String requestText) {
         this.requestText = requestText;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     public String getName() {
