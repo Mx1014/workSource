@@ -337,6 +337,9 @@ public class ArchivesServiceImpl implements ArchivesService {
             orgCommand.setExceptIds(detailIds);
         if (!StringUtils.isEmpty(cmd.getKeywords()))
             orgCommand.setKeywords(cmd.getKeywords());
+        //
+        if(cmd.getTargetTypes() != null)
+            orgCommand.setTargetTypes(cmd.getTargetTypes());
         ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
         if (members != null && members.getMembers() != null) {
             members.getMembers().forEach(r -> {

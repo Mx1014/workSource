@@ -5826,6 +5826,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         // 退出公司 add by sfyan 20170427
         leaveOrganizationMembers(members);
         deleteUserOrganizationWithMembers(members);
+
+        // 删除考勤规则的操作
+        if(members != null && members.size() > 0)
+            this.uniongroupService.syncUniongroupAfterLeaveTheJob(members.get(0).getDetailId());
     }
 
     /**
