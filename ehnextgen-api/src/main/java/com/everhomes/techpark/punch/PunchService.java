@@ -240,8 +240,6 @@ public interface PunchService {
 
 	void invalidPunchQRCode(GetPunchQRCodeCommand cmd);
 
-	ListApprovalCategoriesResponse listApprovalCategories();
-
 	public CheckAbnormalStatusResponse checkAbnormalStatus(CheckPunchAdminCommand cmd);
 
 	void approveAbnormalPunch(PunchExceptionRequest request);

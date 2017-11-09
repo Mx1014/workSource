@@ -8352,16 +8352,6 @@ public class PunchServiceImpl implements PunchService {
 		redisTemplate.delete(key);
 	}
 
-
-	@Override
-	public ListApprovalCategoriesResponse listApprovalCategories(){
-
-		List<ApprovalCategory> categoryList = approvalCategoryProvider.listApprovalCategory();
-
-		return new ListApprovalCategoriesResponse(categoryList.stream()
-				.map(c -> ConvertHelper.convert(c, ApprovalCategoryDTO.class)).collect(Collectors.toList()));
-
-	}
 	@Override
 	public CheckAbnormalStatusResponse checkAbnormalStatus(CheckPunchAdminCommand cmd) {
 		CheckAbnormalStatusResponse response = new CheckAbnormalStatusResponse();
@@ -8371,7 +8361,7 @@ public class PunchServiceImpl implements PunchService {
 			response.setAbnormalStatus(approval.getStatus());
 			String approvalRoute = "zl://form/create?sourceType=GENERAL_APPROVAL&sourceId="
 					+ approval.getId() + "&ownerType=" + approval.getOwnerType() + "&ownerId="
-					+ approval.getOwnerId() + "&displayName=打卡异常&metaObject=";
+					+ approval.getOwnerId() + "&displayName=打卡异常";
 			response.setApprovalRoute(approvalRoute);
 		}
 		return response;
