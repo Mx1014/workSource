@@ -2687,7 +2687,8 @@ public class AssetProviderImpl implements AssetProvider {
 //            }
             boolean workFlag = isInWorkGroupRule(rule);
             if(workFlag){
-                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.CHANGE_SAFE_CHECK,"object is on work, modify or delete is not allowed.");
+                response.setFailCause(AssetPaymentStrings.MODIFY_GROUP_RULE_UNSAFE);
+                return response;
             }
             //如果没有关联则不修改
             rule.setBillGroupId(cmd.getBillGroupId());
