@@ -490,6 +490,8 @@ public interface OrganizationProvider {
 	
 	// 通讯录查询最新方法
 	List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand, String filterScopeTypes);
+
+	List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand, String filterScopeType, List<String> groupTypes);
 	// path查询接口
 	List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, List<String> tokens);
 

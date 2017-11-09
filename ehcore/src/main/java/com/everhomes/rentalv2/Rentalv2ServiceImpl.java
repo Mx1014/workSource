@@ -48,7 +48,8 @@ import com.everhomes.rest.rentalv2.admin.AttachmentType;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.user.*; 
-import net.greghaines.jesque.Job;  
+import net.greghaines.jesque.Job;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -555,6 +556,24 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 									EntityType.USER.getCode(), User.ROOT_UID));
 							return user;
 						}).collect(Collectors.toList()));
+					}
+				}else if (a.getAttachmentType().equals(AttachmentType.TEXT_REMARK.getCode())) {
+					if (StringUtils.isBlank(a.getContent())) {
+
+						String locale = UserContext.current().getUser().getLocale();
+
+						String content = localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
+								String.valueOf(RentalNotificationTemplateCode.RENTAL_TEXT_REMARK), locale, "");
+						rca.setContent(content);
+					}
+				}else if (a.getAttachmentType().equals(AttachmentType.SHOW_CONTENT.getCode())) {
+					if (StringUtils.isBlank(a.getContent())) {
+
+						String locale = UserContext.current().getUser().getLocale();
+
+						String content = localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
+								String.valueOf(RentalNotificationTemplateCode.RENTAL_SHOW_CONTENT), locale, "");
+						rca.setContent(content);
 					}
 				}
 				return rca;

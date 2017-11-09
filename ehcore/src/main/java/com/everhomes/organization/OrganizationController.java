@@ -1886,8 +1886,7 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("modifyPhoneNumberByDetailId")
     @RestReturn(value = Long.class)
     public RestResponse modifyPhoneNumberByDetailId(@Valid UpdateArchivesEmployeeCommand cmd) {
-        organizationService.modifyPhoneNumberByDetailId(cmd.getDetailId(), cmd.getContactToken());
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(organizationService.modifyPhoneNumberByDetailId(cmd.getDetailId(), cmd.getContactToken()));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
