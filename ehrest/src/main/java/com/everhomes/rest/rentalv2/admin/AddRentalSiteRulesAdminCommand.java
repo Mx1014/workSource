@@ -27,6 +27,8 @@ import com.everhomes.util.StringHelper;
  * <li>timeIntervals: 开放时段</li>
  * <li>beginDate: 开放日期始</li>
  * <li>endDate: 开放日期终</li>
+ * <li>dayOpenTime: 每天的开放时间</li>
+ * <li>dayCloseTime: 每天的关闭时间</li>
  * <li>openWeekday: 开放日期，从周日到周六是0123456，开放哪天就在数组传哪天List< Integer></li>
  * <li>closeDates: 关闭日期</li>
  * <li>workdayPrice: 工作日价格</li>
@@ -70,6 +72,8 @@ public class AddRentalSiteRulesAdminCommand {
 	private List<TimeIntervalDTO> timeIntervals;
 	private Long beginDate;
 	private Long endDate;
+	private Double dayOpenTime;
+	private Double dayCloseTime;
 
 	@ItemType(Integer.class)
 	private List<Integer> openWeekday;
@@ -201,7 +205,24 @@ public class AddRentalSiteRulesAdminCommand {
 	public void setAttachments(List<AttachmentConfigDTO> attachments) {
 		this.attachments = attachments;
 	}
-//
+
+	public Double getDayOpenTime() {
+		return dayOpenTime;
+	}
+
+	public void setDayOpenTime(Double dayOpenTime) {
+		this.dayOpenTime = dayOpenTime;
+	}
+
+	public Double getDayCloseTime() {
+		return dayCloseTime;
+	}
+
+	public void setDayCloseTime(Double dayCloseTime) {
+		this.dayCloseTime = dayCloseTime;
+	}
+
+	//
 //	public Byte getRentalType() {
 //		return rentalType;
 //	}

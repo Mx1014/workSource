@@ -9,7 +9,10 @@ public interface Rentalv2PricePackageProvider {
 
     void deletePricePackageByOwnerId(String ownerType, Long ownerId);
 
-    void createRentalv2PricePackage(Rentalv2PricePackage rentalv2PricePackage);
+    Long createRentalv2PricePackage(Rentalv2PricePackage rentalv2PricePackage);
 
     List<Rentalv2PricePackage> listPricePackageByOwner(String ownerType, Long ownerId, Byte rentalType);
+
+    Rentalv2PricePackage findPricePackageById(Long id);
+
 }

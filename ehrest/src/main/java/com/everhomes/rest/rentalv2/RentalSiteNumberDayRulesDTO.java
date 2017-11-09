@@ -14,7 +14,9 @@ public class RentalSiteNumberDayRulesDTO {
 	private Long rentalDate;
 	@ItemType(RentalSiteNumberRuleDTO.class)
 	private List<RentalSiteNumberRuleDTO> siteNumbers;
-	
+	@ItemType(RentalSitePackagesDto.class)
+	private List<RentalSitePackagesDto> sitePackages;
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -38,6 +40,12 @@ public class RentalSiteNumberDayRulesDTO {
 	public void setSiteNumbers(List<RentalSiteNumberRuleDTO> siteNumbers) {
 		this.siteNumbers = siteNumbers;
 	}
- 
- 
+
+	public List<RentalSitePackagesDto> getSitePackages() {
+		return sitePackages;
+	}
+
+	public void setSitePackages(List<RentalSitePackagesDto> sitePackages) {
+		this.sitePackages = sitePackages;
+	}
 }

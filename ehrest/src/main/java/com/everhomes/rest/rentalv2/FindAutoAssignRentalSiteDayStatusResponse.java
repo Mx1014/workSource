@@ -72,6 +72,9 @@ public class FindAutoAssignRentalSiteDayStatusResponse {
 	private List<SiteItemDTO> siteItems;
 	@ItemType(Long.class)
 	private List<Long> dayTimes;
+	@ItemType(RentalSitePackagesDto.class)
+	private List<RentalSitePackagesDto> sitePackages;
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -361,7 +364,12 @@ public class FindAutoAssignRentalSiteDayStatusResponse {
 	public void setDayTimes(List<Long> dayTimes) {
 		this.dayTimes = dayTimes;
 	}
- 
 
- 
+	public List<RentalSitePackagesDto> getSitePackages() {
+		return sitePackages;
+	}
+
+	public void setSitePackages(List<RentalSitePackagesDto> sitePackages) {
+		this.sitePackages = sitePackages;
+	}
 }
