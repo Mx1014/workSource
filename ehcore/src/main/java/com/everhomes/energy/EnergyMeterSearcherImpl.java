@@ -1,6 +1,7 @@
 package com.everhomes.energy;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.repeat.RepeatService;
 import com.everhomes.rest.energy.EnergyMeterAddressDTO;
 import com.everhomes.rest.energy.SearchEnergyMeterCommand;
 import com.everhomes.rest.energy.SearchEnergyMeterResponse;
@@ -56,6 +57,12 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
     @Autowired
     private EnergyMeterAddressProvider energyMeterAddressProvider;
 
+    @Autowired
+    private EnergyPlanProvider energyPlanProvider;
+
+    @Autowired
+    private RepeatService repeatService;
+
     @Override
     public void deleteById(Long id) {
         deleteById(id.toString());
@@ -99,6 +106,21 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
             if(existAddress != null && existAddress.size() > 0) {
                 builder.field("buildingId", existAddress.get(0).getBuildingId());
                 builder.field("addressId", existAddress.get(0).getAddressId());
+            }
+
+            List<PlanMeter> maps = energyPlanProvider.listByEnergyMeter(meter.getId());
+            Boolean assignFlag = false;
+            if(maps != null && maps.size() > 0) {
+                for(PlanMeter map : maps) {
+                    if(repeatService.repeatSettingStillWork(map.getRepeatSettingId())) {
+                        assignFlag = true;
+                    }
+                }
+            }
+            if(assignFlag) {
+                builder.field("assignFlag", 1);
+            } else {
+                builder.field("assignFlag", 0);
             }
 
             builder.endObject();
@@ -192,6 +214,11 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
         if (cmd.getAddressId() != null) {
             TermFilterBuilder addressIdFilter = FilterBuilders.termFilter("addressId", cmd.getAddressId());
             filterBuilders.add(addressIdFilter);
+        }
+
+        if(cmd.getAssignFlag() != null) {
+            TermFilterBuilder assignFlagFilter = FilterBuilders.termFilter("assignFlag", cmd.getAssignFlag());
+            filterBuilders.add(assignFlagFilter);
         }
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());

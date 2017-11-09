@@ -187,5 +187,8 @@ public interface PrivilegeConstants {
     long ENERGY_STAT_BY_YEAR = 21011L;
     long ENERGY_STAT_BY_YOY = 21012L;
     long ENERGY_SETTING = 21013L;
+    long ENERGY_PLAN_CREATE = 21014L;
+    long ENERGY_PLAN_LIST = 21015L;
+    long ENERGY_PLAN_DELETE = 21016L;
 
 }

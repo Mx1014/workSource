@@ -80,6 +80,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -520,6 +521,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         //楼栋门牌信息
         dto.setAddresses(populateEnergyMeterAddresses(meter.getId()));
 
+        List<EnergyMeterTask> tasks = energyMeterTaskProvider.listActiveEnergyMeterTasks(meter.getId());
+        if(tasks != null && tasks.size() > 0) {
+            dto.setLastTaskReading(tasks.get(0).getLastTaskReading());
+        }
         List<PlanMeter> maps = energyPlanProvider.listByEnergyMeter(meter.getId());
         Boolean assignFlag = false;
         if(maps != null && maps.size() > 0) {
@@ -528,10 +533,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     assignFlag = true;
                 }
             }
-            List<EnergyMeterTask> tasks = energyMeterTaskProvider.listActiveEnergyMeterTasks(meter.getId());
-            if(tasks != null && tasks.size() > 0) {
-                dto.setLastTaskReading(tasks.get(0).getLastTaskReading());
-            }
+
         }
         dto.setAssignedPlan(assignFlag);
         return dto;
@@ -1882,7 +1884,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public List<EnergyMeterFormulaDTO> listEnergyMeterFormulas(ListEnergyMeterFormulasCommand cmd) {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOwnerId());
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
         List<EnergyMeterFormula> formulas = meterFormulaProvider.listMeterFormulas(cmd.getOwnerId(), cmd.getOwnerType(),
                 cmd.getCommunityId(), UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getFormulaType());
         return formulas.stream().map(this::toEnergyMeterFormulaDTO).collect(Collectors.toList());
@@ -2691,7 +2693,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public List<EnergyMeterPriceConfigDTO> listEnergyMeterPriceConfig(ListEnergyMeterPriceConfigCommand cmd) {
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
         List<EnergyMeterPriceConfig> priceConfig = priceConfigProvider.listPriceConfig(cmd.getOwnerId(), cmd.getOwnerType(),
                 cmd.getCommunityId(), UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
         return priceConfig.stream().map(this::toEnergyMeterPriceConfigDTO).collect(Collectors.toList());
@@ -2814,47 +2816,63 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public void batchReadEnergyMeter(BatchReadEnergyMeterCommand cmd) {
         if(cmd.getReadList() != null && cmd.getReadList().size() > 0) {
             cmd.getReadList().forEach(read -> {
-                List<EnergyMeterTask> tasks = energyMeterTaskProvider.listActiveEnergyMeterTasks(read.getMeterId());
-                if(tasks != null && tasks.size() > 0) {
-                    Boolean readTask = false;
-                    for(EnergyMeterTask task : tasks) {
-                        if(task.getExecutiveExpireTime().before(new Timestamp(DateHelper.currentGMTTime().getTime()))
-                                || EnergyTaskStatus.INACTIVE.equals(EnergyTaskStatus.fromCode(task.getStatus()))) {
-                            continue;
+                this.dbProvider.execute((TransactionStatus status) -> {
+                    List<EnergyMeterTask> tasks = energyMeterTaskProvider.listActiveEnergyMeterTasks(read.getMeterId());
+                    if(tasks != null && tasks.size() > 0) {
+                        Boolean readTask = false;
+                        for(EnergyMeterTask task : tasks) {
+                            if(task.getExecutiveExpireTime().before(new Timestamp(DateHelper.currentGMTTime().getTime()))
+                                    || EnergyTaskStatus.INACTIVE.equals(EnergyTaskStatus.fromCode(task.getStatus()))) {
+                                continue;
+                            }
+                            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), task.getTargetId(), task.getOwnerId(), PrivilegeConstants.METER_READ);
+                            EnergyMeter meter = meterProvider.findById(task.getNamespaceId(), task.getMeterId());
+                            if(!EnergyMeterStatus.ACTIVE.equals(EnergyMeterStatus.fromCode(meter.getStatus()))) {
+                                continue;
+                            }
+                            task.setReading(read.getCurrReading());
+                            task.setStatus(EnergyTaskStatus.READ.getCode());
+                            task.setOperatorUid(UserContext.currentUserId());
+                            task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                            energyMeterTaskProvider.updateEnergyMeterTask(task);
+                            energyMeterTaskSearcher.feedDoc(task);
+                            readTask = true;
                         }
-
-                        EnergyMeter meter = meterProvider.findById(task.getNamespaceId(), task.getMeterId());
-                        if(!EnergyMeterStatus.ACTIVE.equals(EnergyMeterStatus.fromCode(meter.getStatus()))) {
-                            continue;
+                        if(readTask) {
+                            readEnergyMeter(read);
                         }
-                        task.setReading(read.getCurrReading());
-                        task.setStatus(EnergyTaskStatus.READ.getCode());
-                        task.setOperatorUid(UserContext.currentUserId());
-                        task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                        energyMeterTaskProvider.updateEnergyMeterTask(task);
-                        energyMeterTaskSearcher.feedDoc(task);
-                        readTask = true;
                     }
-                    if(readTask) {
-                        readEnergyMeter(read);
-                    }
-                }
+                    return null;
+                });
             });
         }
     }
 
     @Override
     public void deleteEnergyPlan(DeleteEnergyPlanCommand cmd) {
+        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_PLAN_DELETE);
         EnergyPlan plan = energyPlanProvider.findEnergyPlanById(cmd.getPlanId());
         plan.setStatus(CommonStatus.INACTIVE.getCode());
         plan.setDeleterUid(UserContext.currentUserId());
         plan.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         energyPlanProvider.updateEnergyPlan(plan);
         energyPlanSearcher.feedDoc(plan);
+
+        //刷一下计划关联的表记的状态
+        List<EnergyPlanMeterMap> maps = energyPlanProvider.listMetersByEnergyPlan(plan.getId());
+        if(maps != null && maps.size() > 0) {
+            maps.forEach(map -> {
+                EnergyMeter meter = meterProvider.findById(plan.getNamespaceId(), map.getMeterId());
+                meterSearcher.feedDoc(meter);
+            });
+
+        }
+
     }
 
     @Override
     public EnergyPlanDTO findEnergyPlanDetails(FindEnergyPlanDetailsCommand cmd) {
+        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_PLAN_LIST);
         EnergyPlan plan = energyPlanProvider.findEnergyPlanById(cmd.getPlanId());
         return toEnergyPlanDTO(plan);
     }
@@ -2888,6 +2906,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public ListEnergyPlanMetersResponse setEnergyPlanMeterOrder(SetEnergyPlanMeterOrderCommand cmd) {
+        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_PLAN_CREATE);
         ListEnergyPlanMetersResponse response = new ListEnergyPlanMetersResponse();
         if(cmd.getMeters() != null && cmd.getMeters().size() > 0) {
             cmd.getMeters().forEach(meter -> {
@@ -3096,6 +3115,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     EnergyPlanMeterMap meterMap = ConvertHelper.convert(meter, EnergyPlanMeterMap.class);
                     meterMap.setPlanId(plan.getId());
                     energyPlanProvider.createEnergyPlanMeterMap(meterMap);
+                    //刷一下计划关联的表记的状态
+                    EnergyMeter energyMeter = meterProvider.findById(plan.getNamespaceId(), meterMap.getMeterId());
+                    meterSearcher.feedDoc(energyMeter);
                 }
             });
         }
@@ -3103,6 +3125,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         if(maps != null && maps.size() > 0) {
             maps.forEach((id, meterMap) -> {
                 energyPlanProvider.deleteEnergyPlanMeterMap(meterMap);
+                //刷一下计划关联的表记的状态
+                EnergyMeter meter = meterProvider.findById(plan.getNamespaceId(), meterMap.getMeterId());
+                meterSearcher.feedDoc(meter);
+
             });
         }
 
@@ -3162,6 +3188,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public EnergyPlanDTO updateEnergyPlan(UpdateEnergyPlanCommand cmd) {
+        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_PLAN_CREATE);
         checkMeterPlanAssigment(cmd.getId(), cmd.getMeters());
         EnergyPlan plan = ConvertHelper.convert(cmd, EnergyPlan.class);
         RepeatSettings repeat = dealEnergyPlanRepeat(cmd.getRepeat());
@@ -3522,7 +3549,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         task.setPlanId(plan.getId());
         task.setMeterId(map.getMeterId());
         EnergyMeterReadingLog lastReading = meterReadingLogProvider.findLastReadingLogByMeterId(plan.getNamespaceId(), map.getMeterId());
-        task.setLastTaskReading(lastReading.getReading());
+        task.setLastTaskReading(lastReading == null ? BigDecimal.ZERO :lastReading.getReading());
         task.setDefaultOrder(map.getDefaultOrder());
 
         RepeatSettings rs = repeatService.findRepeatSettingById(plan.getRepeatSettingId());

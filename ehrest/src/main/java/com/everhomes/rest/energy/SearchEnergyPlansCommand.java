@@ -15,12 +15,21 @@ package com.everhomes.rest.energy;
 public class SearchEnergyPlansCommand {
     private Integer namespaceId;
     private Long communityId;
+    private Long organizationId;
     private String keywords;
     private Long startTime;
     private Long endTime;
 
     private Long pageAnchor;
     private Integer pageSize;
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
     public Long getCommunityId() {
         return communityId;

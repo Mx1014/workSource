@@ -1,11 +1,13 @@
 package com.everhomes.energy;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationJobPosition;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.repeat.RepeatProvider;
 import com.everhomes.repeat.RepeatSettings;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.energy.EnergyPlanDTO;
 import com.everhomes.rest.energy.EnergyPlanGroupDTO;
@@ -16,6 +18,7 @@ import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EnergyPlanSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.StringHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -57,6 +60,9 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
 
     @Autowired
     private ConfigurationProvider configProvider;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 
     @Override
     public String getIndexType() {
@@ -150,6 +156,7 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
 
     @Override
     public SearchEnergyPlansResponse query(SearchEnergyPlansCommand cmd) {
+        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_PLAN_LIST);
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
         if(cmd.getKeywords() == null || cmd.getKeywords().isEmpty()) {
@@ -241,14 +248,13 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
                 String[] groupNames = String.valueOf(source.get("groupName")).split(",");
                 if(groupNames != null && groupNames.length > 0) {
                     List<EnergyPlanGroupDTO> groups = new ArrayList<>();
-                    LOGGER.debug("EnergyPlanDTO getDTOs groupNames: {}", groupNames);
                     for(String groupName : groupNames) {
-                        LOGGER.debug("EnergyPlanDTO getDTOs groupName: {}", groupName);
                         EnergyPlanGroupDTO groupDTO = new EnergyPlanGroupDTO();
+                        groupName = groupName.replace("[", "");
+                        groupName = groupName.replace("]", "");
                         groupDTO.setGroupName(groupName);
                         groups.add(groupDTO);
                     }
-                    LOGGER.debug("EnergyPlanDTO getDTOs groups: {}", groups);
                     dto.setGroups(groups);
                 }
                 dtos.add(dto);
