@@ -605,13 +605,16 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if (null == cmd.getOrganizationId()) {
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 			OrganizationMember member = null;
-			if (cmd.getFlowOrganizationId()!=null)
-				member = organizationProvider.findOrganizationMemberByOrgIdAndToken(userIdentifier.getIdentifierToken(),cmd.getFlowOrganizationId());
+			if (cmd.getFlowOrganizationId()!=null) {
+				member = organizationProvider.findOrganizationMemberByOrgIdAndToken(userIdentifier.getIdentifierToken(), cmd.getFlowOrganizationId());
+			}
 			//真实姓名
-			if (member==null )
-				return handler.createTask(cmd, user.getId(), user.getNickName(), userIdentifier.getIdentifierToken());
-			else
-				return handler.createTask(cmd, user.getId(), member.getContactName(), userIdentifier.getIdentifierToken());
+			if (member==null ) {
+				return handler.createTask(cmd, user.getId(), user.getNickName(), userIdentifier==null?"":userIdentifier.getIdentifierToken());
+			}
+			else {
+				return handler.createTask(cmd, user.getId(), member.getContactName(), userIdentifier==null?"":userIdentifier.getIdentifierToken());
+			}
 		}else {
 			String requestorPhone = cmd.getRequestorPhone();
 			String requestorName = cmd.getRequestorName();
