@@ -85,6 +85,18 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
   VALUES ((@id := @id + 1), '40835', '', 'EhNamespaces', '1000000', '2');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.car.verification.flowCase.url', 'zl://workflow/detail?flowCaseId=%s&flowUserType=node_applier&moduleId=40800', NULL, '0', NULL);
 
+set @id = IFNULL((select MAX(id) FROM eh_parking_car_verifications), 1);
+INSERT INTO eh_parking_car_verifications(id, owner_type, owner_id, parking_lot_id, requestor_enterprise_id, requestor_enterprise_name, requestor_uid, plate_number,
+	plate_owner_name, plate_owner_phone, status, creator_uid, create_time, flow_case_id, source_type)
+SELECT (@id := @id + 1), owner_type, owner_id, parking_lot_id, requestor_enterprise_id, plate_owner_entperise_name, requestor_uid, plate_number,
+	plate_owner_name, plate_owner_phone, 2, creator_uid, create_time, flow_case_id, 1 from eh_parking_card_requests where status = 5;
+
+INSERT INTO eh_parking_car_verifications(id, owner_type, owner_id, parking_lot_id, requestor_enterprise_id, requestor_enterprise_name, requestor_uid, plate_number,
+	plate_owner_name, plate_owner_phone, status, creator_uid, create_time, flow_case_id, source_type)
+SELECT (@id := @id + 1), owner_type, owner_id, parking_lot_id, requestor_enterprise_id, plate_owner_entperise_name, requestor_uid, plate_number,
+	plate_owner_name, plate_owner_phone, 2, creator_uid, create_time, flow_case_id, 1 from eh_parking_card_requests where status = 4 and owner_id = 240111044331048623;
+
+
 -- 资源预订 add by sw 20171109
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('rental.notification', '10', 'zh_CN', '请输入备注');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('rental.notification', '11', 'zh_CN', '请输入显示内容');
