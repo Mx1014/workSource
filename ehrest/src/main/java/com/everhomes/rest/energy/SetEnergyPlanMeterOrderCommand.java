@@ -11,8 +11,26 @@ import java.util.List;
  * Created by ying.xiong on 2017/10/20.
  */
 public class SetEnergyPlanMeterOrderCommand {
+    private Long communityId;
+    private Long organizationId;
     @ItemType(EnergyPlanMeterDTO.class)
     private List<EnergyPlanMeterDTO> meters;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
     public List<EnergyPlanMeterDTO> getMeters() {
         return meters;

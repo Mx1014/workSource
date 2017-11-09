@@ -2849,6 +2849,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public void deleteEnergyPlan(DeleteEnergyPlanCommand cmd) {
+        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_PLAN_DELETE);
         EnergyPlan plan = energyPlanProvider.findEnergyPlanById(cmd.getPlanId());
         plan.setStatus(CommonStatus.INACTIVE.getCode());
         plan.setDeleterUid(UserContext.currentUserId());
@@ -2859,6 +2860,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public EnergyPlanDTO findEnergyPlanDetails(FindEnergyPlanDetailsCommand cmd) {
+        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_PLAN_LIST);
         EnergyPlan plan = energyPlanProvider.findEnergyPlanById(cmd.getPlanId());
         return toEnergyPlanDTO(plan);
     }
@@ -2892,6 +2894,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public ListEnergyPlanMetersResponse setEnergyPlanMeterOrder(SetEnergyPlanMeterOrderCommand cmd) {
+        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_PLAN_CREATE);
         ListEnergyPlanMetersResponse response = new ListEnergyPlanMetersResponse();
         if(cmd.getMeters() != null && cmd.getMeters().size() > 0) {
             cmd.getMeters().forEach(meter -> {
@@ -3166,6 +3169,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public EnergyPlanDTO updateEnergyPlan(UpdateEnergyPlanCommand cmd) {
+        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_PLAN_CREATE);
         checkMeterPlanAssigment(cmd.getId(), cmd.getMeters());
         EnergyPlan plan = ConvertHelper.convert(cmd, EnergyPlan.class);
         RepeatSettings repeat = dealEnergyPlanRepeat(cmd.getRepeat());
