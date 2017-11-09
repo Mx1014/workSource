@@ -6,6 +6,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ArchivesTest {
     String str = "1506859877968";
@@ -85,5 +87,16 @@ public class ArchivesTest {
         strs.forEach(r ->{
             System.out.println(r);
         });
+    }
+
+    @Test
+    public void pattern(){
+Pattern p = Pattern.compile("^[\\u4E00-\\u9FA5A-Za-z0-9_\\n]+$");
+        Matcher matcher = p.matcher("示例数据");
+        System.out.println(matcher.matches());
+        System.out.println(Pattern.matches("^[\\u4E00-\\u9FA5A-Za-z0-9_\\n]+$", "正常数据\n"));
+        System.out.println(Pattern.matches("^[\\u4E00-\\u9FA5A-Za-z0-9_\\n]+$", "陈利利233"));
+        System.out.println(Pattern.matches("^[\\u4E00-\\u9FA5A-Za-z0-9_\\n]+$", "姓名乱搞%#@"));
+        System.out.println(Pattern.matches("^[\\u4E00-\\u9FA5A-Za-z0-9_\\n]+$", "英文名@@@"));
     }
 }
