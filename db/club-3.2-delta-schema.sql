@@ -34,3 +34,5 @@ ALTER TABLE `eh_groups` ADD COLUMN `tourist_post_policy`  tinyint(4) NULL DEFAUL
 -- 俱乐部类型，普通俱乐部、行业协会
 ALTER TABLE `eh_groups` ADD COLUMN `club_type`  tinyint(4) NULL DEFAULT 0 COMMENT '0-normal club, 1-guild club' ;
 
+ALTER TABLE `eh_groups` ADD COLUMN `phone_number`  varchar(18) NULL ;
+
