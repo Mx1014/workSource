@@ -110,7 +110,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	private static final String CATEGORY_SEPARATOR = "/";
 
-	private static final String HANDLER = "pmtask.handler-";
+	public static final String HANDLER = "pmtask.handler-";
 	
     private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
@@ -178,7 +178,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
-		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST);
+//		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST);
 
 		Integer namespaceId = cmd.getNamespaceId();
 		if (null == namespaceId) {
