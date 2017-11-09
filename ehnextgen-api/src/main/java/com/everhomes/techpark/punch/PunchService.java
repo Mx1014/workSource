@@ -13,6 +13,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.techpark.punch.*;
 
 import com.everhomes.rest.techpark.punch.admin.*;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -115,6 +116,9 @@ public interface PunchService {
 
 	public HttpServletResponse exportPunchStatistics(ListPunchCountCommand cmd, HttpServletResponse response);
 
+	@Scheduled(cron = "1 50 5 * * ?")
+	void dayRefreshPunchGroupScheduled();
+
 	void dayRefreshLogScheduled();
 
 	void testDayRefreshLogs(Long runDate);
@@ -192,6 +196,8 @@ public interface PunchService {
 
 	public ListPunchGroupsResponse listPunchGroups(ListPunchGroupsCommand cmd);
 
+	ListApprovalCategoriesResponse listApprovalCategories();
+
 	public PunchGroupDTO updatePunchGroup(PunchGroupDTO cmd);
 
 	public void deletePunchGroup(DeleteCommonCommand cmd);
@@ -222,4 +228,8 @@ public interface PunchService {
 	HttpServletResponse exportPunchSchedulingTemplate(ListPunchSchedulingMonthCommand cmd, HttpServletResponse response);
 
 	void invalidPunchQRCode(GetPunchQRCodeCommand cmd);
+
+	GetPunchGroupsCountResponse getPunchGroupsCount(GetPunchGroupsCountCommand cmd);
+
+	void punchGroupAddNewEmployee(Long groupId);
 }

@@ -92,6 +92,20 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /parking/getExpiredRechargeInfo</b>
+     * <p>查询 过期月卡充值信息</p>
+     */
+    @RequestMapping("getExpiredRechargeInfo")
+    @RestReturn(value=ParkingExpiredRechargeInfoDTO.class)
+    public RestResponse getExpiredRechargeInfo(GetExpiredRechargeInfoCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.getExpiredRechargeInfo(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: /parking/getParkingTempFee</b>
@@ -633,6 +647,77 @@ public class ParkingController extends ControllerBase {
     public RestResponse listParkingInvoiceTypes(ListParkingInvoiceTypesCommand cmd) {
 
         RestResponse response = new RestResponse(parkingService.listParkingInvoiceTypes(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/searchParkingCarVerifications</b>
+     * <p>搜索车辆认证申请</p>
+     */
+    @RequestMapping("searchParkingCarVerifications")
+    @RestReturn(value=SearchParkingCarVerificationResponse.class)
+    public RestResponse searchParkingCarVerifications(SearchParkingCarVerificationsCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.searchParkingCarVerifications(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/listParkingCarVerifications</b>
+     * <p>获取车辆认证申请列表</p>
+     */
+    @RequestMapping("listParkingCarVerifications")
+    @RestReturn(value=ListParkingCarVerificationsResponse.class)
+    public RestResponse listParkingCarVerifications(ListParkingCarVerificationsCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.listParkingCarVerifications(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/getParkingCarVerificationById</b>
+     * <p>获取车辆认证申请</p>
+     */
+    @RequestMapping("getParkingCarVerificationById")
+    @RestReturn(value=ParkingCarVerificationDTO.class)
+    public RestResponse getParkingCarVerificationById(GetParkingCarVerificationByIdCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.getParkingCarVerificationById(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/requestCarVerification</b>
+     * <p>车辆认证申请</p>
+     */
+    @RequestMapping("requestCarVerification")
+    @RestReturn(value=ParkingCarVerificationDTO.class)
+    public RestResponse requestCarVerification(RequestCarVerificationCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.requestCarVerification(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/deleteCarVerification</b>
+     * <p>删除车辆认证</p>
+     */
+    @RequestMapping("deleteCarVerification")
+    @RestReturn(value=String.class)
+    public RestResponse deleteCarVerification(DeleteCarVerificationCommand cmd) {
+
+        parkingService.deleteCarVerification(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

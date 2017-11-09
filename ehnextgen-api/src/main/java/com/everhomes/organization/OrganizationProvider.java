@@ -12,11 +12,15 @@ import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.organization.*;
-
+ 
+import com.everhomes.rest.user.InvitationRoster;
+import com.everhomes.server.schema.tables.pojos.EhOrganizations;
+import com.everhomes.uniongroup.UniongroupMemberDetail; 
 import com.everhomes.userOrganization.UserOrganizations;
 
 import org.jooq.Condition;
 
+import javax.validation.constraints.Null;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
@@ -26,6 +30,9 @@ import java.util.Set;
 public interface OrganizationProvider {
 	void createOrganization(Organization organization);
 	void updateOrganization(Organization organization);
+
+	void updateUserOrganization(UserOrganizations userOrganization);
+
 	void updateOrganization(List<Long> ids, Byte status, Long uid, Timestamp now);
 	void deleteOrganization(Organization organization);
 	void deleteOrganizationById(Long id);
@@ -136,7 +143,8 @@ public interface OrganizationProvider {
 
 
 	Integer countOrganizationPersonnels(Integer namespaceId, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag);
-	
+
+	List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand);
 
 	OrganizationMember findOrganizationPersonnelByPhone(Long id, String phone);
 
@@ -331,6 +339,10 @@ public interface OrganizationProvider {
 
 	Organization findOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId);
 
+	List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId);
+
+	List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId, Long enterpriseId);
+
 	void createImportFileTask(ImportFileTask importFileTask);
 
 	void updateImportFileTask(ImportFileTask importFileTask);
@@ -360,6 +372,7 @@ public interface OrganizationProvider {
 	OrganizationMemberDetails findOrganizationMemberDetailsByDetailId(Long detailId);
 	Long createOrganizationMemberDetails(OrganizationMemberDetails memberDetails);
 	void updateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails, Long detailId);
+	void deleteOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails);
 	void createOrganizationMemberV2(OrganizationMember organizationMember, Long detailId);
 
 
@@ -389,7 +402,7 @@ public interface OrganizationProvider {
 	void deleteOranizationMemberContract(OrganizationMemberContracts contract);
 	void updateOrganizationMemberContract(OrganizationMemberContracts contract);
 
-	void updateOrganizationEmploymentTime(Long detailId,java.sql.Date employeeTime);
+    void updateOrganizationEmploymentTime(Long detailId, java.sql.Date employeeTime);
 	boolean updateOrganizationEmployeeStatus(Long detailId,Byte employeeStatus);
 	void updateProfileIntegrity(Long detailId, Integer integrity);
 	void createProfileLogs(OrganizationMemberProfileLogs log);
@@ -439,7 +452,7 @@ public interface OrganizationProvider {
 	Map<Long, String> listOrganizationsOfDetail(Integer namespaceId, Long detailId, String organizationGroupType);
 	List<OrganizationMember> listOrganizationMembersByDetailId(Long detailId,List<String> groupTypes);
 	
-	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus, String namespaceUserType);
+	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus, String namespaceUserType, Byte gender);
 	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus);
 	Integer countUserOrganization(Integer namespaceId, Long communityId);
 
@@ -460,7 +473,7 @@ public interface OrganizationProvider {
 	 */
 	List<Long> listOrganizationMemberDetailIdsInActiveStatus(Long organizationId); 
 	List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId,
-			CrossShardListingLocator locator, Integer pageSize);
+													List<Long> orgIds, String groupName, CrossShardListingLocator locator, Integer pageSize);
 
 
 	List listOrganizationMembersGroupByToken();
@@ -474,12 +487,25 @@ public interface OrganizationProvider {
 	List<TargetDTO> findOrganizationIdByNameAndAddressId(String targetName, List<Long> ids);
 
 	List<UserOrganizations> listUserOrganizationByUserId(Long userId);
+	
+	// 通讯录查询最新方法
+	List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand, String filterScopeTypes);
+	// path查询接口
+	List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, List<String> tokens);
+
+	void updateOrganizationMemberByDetailId(Long detailId, String contactToken, String contactName, Byte gender);
 
 	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType);
 
 	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Long targetId);
 
 	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(String memberGroup, String targetType, Long targetId);
+
+	UserOrganizations findUserOrganizationByUserIdAndOrgId(Long userId, Long orgId);
+
+	UserOrganizations findActiveAndWaitUserOrganizationByUserIdAndOrgId(Long userId, Long orgId);
+
+	UserOrganizations findUserOrganizationById(Long id);
 
 	void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent);
 
@@ -490,7 +516,19 @@ public interface OrganizationProvider {
 
 	List<Organization> findNamespaceUnifiedSocialCreditCode(String unifiedSocialCreditCode, Integer namespaceId);
 
+	void deleteOrganizationPersonelByJobPositionIdsAndDetailIds(List<Long> jobPositionIds, List<Long> detailIds);
+
+	void deleteOrganizationMembersByGroupTypeWithDetailIds(Integer namespaceId, List<Long> detailIds, String groupType);
+
+	List<Long> listDetailsByEnterpriseId(Integer namespaceId, Long enterpriseId);
+
+	List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize);
+
+	void updateOrganizationDefaultOrder(Integer namespaceId, Long orgId, Integer order);
+
     List listLapseOrganizations(Integer namespaceId);
 
 	Integer updateOrganizationMembersToInactiveByPath(String path,Timestamp now);
+
+	OrganizationMember findDepartmentMemberByTargetIdAndOrgId(Long userId, Long organizationId);
 }

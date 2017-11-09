@@ -2142,8 +2142,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	 * @return
 	 */
 	private List<OrganizationMemberDTO> convertDTO(List<OrganizationMember> organizationMembers, Organization org){
-		List<Organization> depts = organizationProvider.listDepartments(org.getPath()+"/%", 1, 1000);
-		
+		List<Organization> depts = organizationProvider.listDepartments(org.getPath().split("/")[1]+"/%", 1, 1000);
 		Long orgId = null;
 
 		if(org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){

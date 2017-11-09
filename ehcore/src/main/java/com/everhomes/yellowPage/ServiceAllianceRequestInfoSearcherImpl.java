@@ -545,7 +545,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	public void exportRequestInfo(SearchRequestInfoCommand cmd, HttpServletResponse httpResponse) {
 		//申请记录
 		if(cmd.getPageSize()==null){
-			cmd.setPageSize(100000000);
+			cmd.setPageSize(configProvider.getIntValue("service.alliance.export.max.num", 150));
 			cmd.setPageAnchor(0L);
 		}
 		SearchRequestInfoResponse response = searchRequestInfo(cmd);

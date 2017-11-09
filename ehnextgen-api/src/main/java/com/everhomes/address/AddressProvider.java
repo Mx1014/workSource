@@ -25,6 +25,9 @@ public interface AddressProvider {
     void deleteAddress(Address address);
     void deleteAddressById(long id);
     Address findAddressById(long id);
+
+    Address findGroupAddress(Long groupId);
+
     Address findApartmentAddress(Integer namespaceId, long communityId, String buildingName, String apartmentName);
     
     List<Address> queryAddress(CrossShardListingLocator locator, int count, 

@@ -34,7 +34,6 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.approval.ExceptionRequestType;
 import com.everhomes.rest.approval.ListTargetType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -2596,16 +2595,16 @@ long id = sequenceProvider.getNextSequence(key);
 	}
 
 	@Override
-	public List<PunchTimeRule> listActivePunchTimeRuleByOwner(String ownerType, Long ownerId) {
+	public List<PunchTimeRule> listActivePunchTimeRuleByOwner(String ownerType, Long ownerId, Byte status) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_PUNCH_TIME_RULES);
 		Condition condition = Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.equal(ownerType)
 				.and(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.equal(ownerId))
-				.and(Tables.EH_PUNCH_TIME_RULES.STATUS.ne(PunchRuleStatus.DELETED.getCode()));
+				.and(Tables.EH_PUNCH_TIME_RULES.STATUS.eq(status));
 		step.where(condition);
 		List<PunchTimeRule> result = step
-				.orderBy(Tables.EH_PUNCH_TIME_RULES.ID.asc()).fetch()
+				.orderBy(Tables.EH_PUNCH_TIME_RULES.ID.desc()).fetch()
 				.map((r) -> {
 					return ConvertHelper.convert(r, PunchTimeRule.class);
 				});
@@ -2735,6 +2734,46 @@ long id = sequenceProvider.getNextSequence(key);
 		Condition condition = Tables.EH_PUNCH_TIME_RULES.PUNCH_RULE_ID.eq(id);
 		step.where(condition);
 		step.execute();
+	}
+
+	@Override
+	public List<PunchRule> listPunchRulesByStatus(List<Byte> statusList) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhPunchRulesRecord> query = context
+				.selectQuery(Tables.EH_PUNCH_RULES);
+
+		Condition condition = Tables.EH_PUNCH_RULES.STATUS.in(statusList);
+		query.addConditions(condition);
+		List<PunchRule> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, PunchRule.class));
+			return null;
+		});
+		if (null != result && result.size() > 0)
+			return result ;
+		return null;
+	}
+
+	@Override
+	public List<PunchRule> listPunchRulesByOwnerAndRuleType(String ownerType, Long ownerId, byte ruleType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhPunchRulesRecord> query = context
+				.selectQuery(Tables.EH_PUNCH_RULES);
+
+		Condition condition = Tables.EH_PUNCH_RULES.OWNER_ID.eq(ownerId)
+				.and(Tables.EH_PUNCH_RULES.RULE_TYPE.eq(ruleType));
+
+		query.addConditions(condition);
+		List<PunchRule> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, PunchRule.class));
+			return null;
+		});
+		if (null != result && result.size() > 0)
+			return result ;
+		return null;
 	}
 
 

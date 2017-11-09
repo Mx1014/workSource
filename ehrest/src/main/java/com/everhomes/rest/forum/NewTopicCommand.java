@@ -54,6 +54,7 @@ import com.everhomes.util.StringHelper;
  * <li>cloneFlag: 克隆标识，参考{@link com.everhomes.rest.forum.PostCloneFlag}</li>
  * <li>realPostId: 真身帖的Id</li>
  * <li>namespaceId: 域空间Id</li>
+ * <li>forumEntryId: 论坛应用入口Id</li>
  * </ul>
  */
 public class NewTopicCommand {
@@ -129,6 +130,8 @@ public class NewTopicCommand {
     private Long realPostId;
 
     private Integer namespaceId;
+
+    private Long forumEntryId;
     
 	public Long getOldId() {
 		return oldId;
@@ -396,6 +399,14 @@ public class NewTopicCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public Long getForumEntryId() {
+        return forumEntryId;
+    }
+
+    public void setForumEntryId(Long forumEntryId) {
+        this.forumEntryId = forumEntryId;
     }
 
     @Override

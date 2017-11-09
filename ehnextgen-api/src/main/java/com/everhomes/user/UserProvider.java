@@ -31,6 +31,8 @@ public interface UserProvider {
     UserIdentifier findIdentifierById(long id);
     List<UserIdentifier> findClaimingIdentifierByToken(String identifierToken);
     List<UserIdentifier> findClaimedIdentifiersByToken(String identifierToken);
+    List<UserIdentifier> listClaimedIdentifiersByTokens(Integer namespaceId,List<String> identifiers);
+
     UserIdentifier findClaimedIdentifierByToken(String identifierToken);
     UserIdentifier findClaimedIdentifierByToken(Integer namespaceId, String identifierToken);
     UserIdentifier findClaimedIdentifierByOwnerAndType(long ownerId, byte identifierType);
@@ -74,8 +76,10 @@ public interface UserProvider {
 	UserCommunity findUserCommunityByOwnerAndCommunity(long ownerUid, long communityId);
 	List<User> findUserByNamespaceId(Integer namespaceId, CrossShardListingLocator locator, int pageSize);
 	List<User> listUserByKeywords(String keyword);
-	
-	int countUserByNamespaceId(Integer namespaceId, Boolean isAuth);
+
+    int countUserByNamespaceIdAndGender(Integer namespaceId, Byte gender);
+
+    int countUserByNamespaceId(Integer namespaceId, Boolean isAuth);
 	List<User> listUserByNickNameOrIdentifier(String keyword);
 	List<UserIdentifier> listUserIdentifierByIdentifier(String identifier);
 	List<User> listUserByIds(Integer namespaceId, List<Long> userIds);

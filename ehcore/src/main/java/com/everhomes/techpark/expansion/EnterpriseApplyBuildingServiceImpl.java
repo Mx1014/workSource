@@ -193,6 +193,11 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 		populateLeaseBuildingDTO(dto, leaseBuilding);
 
+		GetLeasePromotionConfigCommand cmd2 = new GetLeasePromotionConfigCommand();
+		cmd2.setNamespaceId(leaseBuilding.getNamespaceId());
+		LeasePromotionConfigDTO configDTO = enterpriseApplyEntryService.getLeasePromotionConfig(cmd2);
+		dto.setConsultFlag(configDTO.getConsultFlag());
+
 		return dto;
 	}
 
@@ -210,7 +215,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 		populatePostUrl(dto, leaseBuilding.getPosterUri());
 		populateLeaseBuildingAttachments(dto, attachments);
-		processBuilingDetailUrl(dto);
+		processBuildingDetailUrl(dto);
 		//表单信息
 		populateFormInfo(dto);
 
@@ -236,11 +241,11 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		}
 	}
 
-	private void processBuilingDetailUrl(LeaseBuildingDTO dto) {
+	private void processBuildingDetailUrl(LeaseBuildingDTO dto) {
 		String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
 		String detailUrl = configProvider.getValue(ConfigConstants.APPLY_ENTRY_LEASE_BUILDING_DETAIL_URL, "");
 
-		detailUrl = String.format(detailUrl, dto.getId());
+		detailUrl = String.format(detailUrl, dto.getId(), dto.getNamespaceId());
 
 		dto.setDetailUrl(homeUrl + detailUrl);
 
@@ -250,7 +255,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
 		String detailUrl = configProvider.getValue(ConfigConstants.APPLY_ENTRY_LEASE_PROJECT_DETAIL_URL, "");
 
-		detailUrl = String.format(detailUrl, dto.getProjectId());
+		detailUrl = String.format(detailUrl, dto.getProjectId(), dto.getNamespaceId());
 
 		dto.setDetailUrl(homeUrl + detailUrl);
 
@@ -526,10 +531,12 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 			dto.setBuildings(leaseBuildings.stream().map(r -> {
 				LeaseBuildingDTO d = ConvertHelper.convert(r, LeaseBuildingDTO.class);
 				populatePostUrl(d, r.getPosterUri());
-				processBuilingDetailUrl(d);
+				processBuildingDetailUrl(d);
 				return d;
 			}).collect(Collectors.toList()));
 		}
+
+		dto.setConsultFlag(config.getConsultFlag());
 
 		return dto;
 	}

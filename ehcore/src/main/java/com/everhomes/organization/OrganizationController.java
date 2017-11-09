@@ -7,7 +7,8 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.archives.UpdateArchivesEmployeeCommand;
+import com.everhomes.rest.community.CreateResourceCategoryCommand;
 import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
 import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
 import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
@@ -1085,8 +1086,7 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("deleteChildrenOrganizationJobPosition")
     @RestReturn(value = String.class)
     public RestResponse deleteChildrenOrganizationJobPosition(@Valid DeleteOrganizationIdCommand cmd) {
-        organizationService.deleteChildrenOrganizationJobPosition(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(organizationService.deleteChildrenOrganizationJobPosition(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1127,8 +1127,7 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("updateOrganizationJobPosition")
     @RestReturn(value = String.class)
     public RestResponse updateOrganizationJobPosition(@Valid UpdateOrganizationJobPositionCommand cmd) {
-        organizationService.updateOrganizationJobPosition(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(organizationService.updateOrganizationJobPosition(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1141,8 +1140,7 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("deleteOrganizationJobPosition")
     @RestReturn(value = String.class)
     public RestResponse deleteOrganizationJobPosition(@Valid DeleteOrganizationIdCommand cmd) {
-        organizationService.deleteOrganizationJobPosition(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(organizationService.deleteOrganizationJobPosition(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1198,8 +1196,7 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("deleteChildrenOrganizationJobLevel")
     @RestReturn(value = String.class)
     public RestResponse deleteChildrenOrganizationJobLevel(@Valid DeleteOrganizationIdCommand cmd) {
-        organizationService.deleteChildrenOrganizationJobLevel(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(organizationService.deleteChildrenOrganizationJobLevel(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1784,8 +1781,8 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/leaveTheJob</b>
-     * <p>人事档案离职</p>
+     * <b>URL: /org/syncOrganizationMemberStatus</b>
+     * <p>同步员工状态</p>
      */
     @RequestMapping("syncOrganizationMemberStatus")
     @RestReturn(value = String.class)
@@ -1796,22 +1793,79 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+
     /**
-     * <b>URL: /org/testAdmins</b>
-     * <p>人事档案离职</p>
+     * <b>URL: /org/sortOrganizationsAtSameLevel</b>
+     * <p>同级节点排序</p>
      */
-    /*@RequestMapping("testAdmins")
+    @RequestMapping("sortOrganizationsAtSameLevel")
     @RestReturn(value = String.class)
-    public RestResponse testAdmins() {
-        List<Long> users = this.organizationService.getOrganizationAdminIncludeList2(1000001L, 195506L, 195506L);
-        RestResponse response = new RestResponse(users);
+    public RestResponse sortOrganizationsAtSameLevel(SortOrganizationsAtSameLevelCommand cmd) {
+        this.organizationService.sortOrganizationsAtSameLevel(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }*/
+    }
 
     /**
+     * <b>URL: /org/findOrgPersonel</b>
+     * <p>超级查询接口</p>
+     */
+    @RequestMapping("findOrgPersonel")
+    @RestReturn(value = FindOrgPersonelCommandResponse.class)
+    public RestResponse findOrgPersonel(FindOrgPersonelCommand cmd) {
+        FindOrgPersonelCommandResponse res = this.organizationService.findOrgPersonel(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/findOrgByName</b>
+     * <p>根据名字查部门</p>
+     */
+    @RequestMapping("findOrgByName")
+    @RestReturn(value = String.class)
+    public RestResponse findOrgByName(CreateResourceCategoryCommand cmd) {
+        this.organizationService.getOrganizationNameByNameAndType(cmd.getName(), "DEPARTMENT");
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/deleteChildrenOrganizationAsList</b>
+     * <p>批量删除子机构(职级或部门岗位)</p>
+     */
+    @RequestMapping("deleteChildrenOrganizationAsList")
+    @RestReturn(value = String.class)
+    public RestResponse deleteChildrenOrganizationAsList(@Valid DeleteChildrenOrganizationAsListCommand cmd) {
+        RestResponse response = new RestResponse(organizationService.deleteChildrenOrganizationAsList(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /org/deleteOrganizationJobPositionsByPositionIdAndDetails</b>
+     * <p>批量撤销通用岗位下的人员</p>
+     */
+    @RequestMapping("deleteOrganizationJobPositionsByPositionIdAndDetails")
+    @RestReturn(value = String.class)
+    public RestResponse deleteOrganizationJobPositionsByPositionIdAndDetails(@Valid DeleteOrganizationJobPositionsByPositionIdAndDetailsCommand cmd) {
+        organizationService.deleteOrganizationJobPositionsByPositionIdAndDetails(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+	/**
      * <b>URL: /org/cleanWrongStatusOrganizationMembers</b>
      * <p>同步失效的organizaitonMember记录</p>
      */
@@ -1825,4 +1879,17 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /org/modifyPhoneNumberByDetailId</b>
+     * <p>修改未激活人员的手机号</p>
+     */
+    @RequestMapping("modifyPhoneNumberByDetailId")
+    @RestReturn(value = Long.class)
+    public RestResponse modifyPhoneNumberByDetailId(@Valid UpdateArchivesEmployeeCommand cmd) {
+        organizationService.modifyPhoneNumberByDetailId(cmd.getDetailId(), cmd.getContactToken());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
