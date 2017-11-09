@@ -13,6 +13,7 @@ public class LeaseBuildingDTO {
     private Long id;
     private Integer namespaceId;
     private Long communityId;
+    private String communityName;
     private Long buildingId;
     private String buildingName;
     private String name;
@@ -34,11 +35,21 @@ public class LeaseBuildingDTO {
     private String detailUrl;
     private Byte deleteFlag;
 
+    private Byte consultFlag;
+
     @ItemType(BuildingForRentAttachmentDTO.class)
     private List<BuildingForRentAttachmentDTO> attachments;
 
     @ItemType(PostApprovalFormItem.class)
     private List<PostApprovalFormItem> formValues;
+
+    public Byte getConsultFlag() {
+        return consultFlag;
+    }
+
+    public void setConsultFlag(Byte consultFlag) {
+        this.consultFlag = consultFlag;
+    }
 
     public String getPosterUri() {
         return posterUri;
@@ -238,6 +249,14 @@ public class LeaseBuildingDTO {
 
     public void setDefaultOrder(Long defaultOrder) {
         this.defaultOrder = defaultOrder;
+    }
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
     }
 
     @Override

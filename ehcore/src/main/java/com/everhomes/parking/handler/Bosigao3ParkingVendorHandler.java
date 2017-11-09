@@ -45,12 +45,8 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 			String validEnd = card.getLimitEnd();
 			Long endTime = strToLong(validEnd);
 
-			if (checkExpireTime(parkingLot, endTime)) {
-				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
-			}else {
-				parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
-			}
-			
+			setCardStatus(parkingLot, endTime, parkingCardDTO);
+
 			String plateOwnerName = card.getUserName();
 
 			String cardNumber = card.getCardID();

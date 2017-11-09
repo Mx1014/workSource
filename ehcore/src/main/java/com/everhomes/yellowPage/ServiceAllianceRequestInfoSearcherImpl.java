@@ -545,7 +545,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	public void exportRequestInfo(SearchRequestInfoCommand cmd, HttpServletResponse httpResponse) {
 		//申请记录
 		if(cmd.getPageSize()==null){
-			cmd.setPageSize(100000000);
+			cmd.setPageSize(configProvider.getIntValue("service.alliance.export.max.num", 150));
 			cmd.setPageAnchor(0L);
 		}
 		SearchRequestInfoResponse response = searchRequestInfo(cmd);
@@ -569,11 +569,13 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 					if(null==templateMap.get("flowCase"+requestInfo.getFlowCaseId())){
 						GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(requestInfo.getFlowCaseId(),
 								GeneralFormDataSourceType.USER_NAME.getCode());
-						GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
-								val.getFormOriginId(), val.getFormVersion());
-						//使用表单名称+表单id作为sheet的名称 by dengs 20170510
-						requestInfo.setTemplateType("flowCase"+form.getId());
-						templateMap.put("flowCase"+form.getId(), form.getFormName()+form.getId());
+						if(val!=null){
+							GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
+									val.getFormOriginId(), val.getFormVersion());
+							//使用表单名称+表单id作为sheet的名称 by dengs 20170510
+							requestInfo.setTemplateType("flowCase"+form.getId());
+							templateMap.put("flowCase"+form.getId(), form.getFormName()+form.getId());
+						}
 					}
 				}else{
 					extrasInfo = userActivityService.getCustomRequestInfo(command);

@@ -11,5 +11,5 @@ public interface FlowServiceTypeProvider {
 
 	FlowServiceType findById(Long id);
 
-    <T> List<T> listFlowServiceType(Integer namespaceId, Class<T> clazz);
+    <T> List<T> listFlowServiceType(Integer namespaceId, Long moduleId, Class<T> clazz);
 }

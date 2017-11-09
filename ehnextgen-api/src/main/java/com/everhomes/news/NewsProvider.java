@@ -37,6 +37,8 @@ public interface NewsProvider {
 
 	void createNewsTagVals(NewsTagVals newsTagVals);
 
+	void deletNewsTagVals(Long newsId);
+
 	List<NewsTagVals> listNewsTagVals(Long newsId);
 
 	NewsTag findNewsTagById(Long id);
@@ -45,5 +47,5 @@ public interface NewsProvider {
 
 	List<NewsTag> listNewsTag(String ownerType,Long ownerId,Byte isSearch,Long parentId,Long pageAnchor,Integer pageSize);
 
-	void increaseViewCount(Long newsId);
+	void increaseViewCount(Long newsId, Long nViewCount);
 }

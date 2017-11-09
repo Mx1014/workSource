@@ -11,6 +11,7 @@ public class ListUniongroupMemberDetailsWithConditionCommand {
     private Long pageAnchor;
     private Integer pageSize;
     private Byte isNormal;
+    private Integer versionCode;
 
     public Long getOwnerId() {
         return ownerId;
@@ -79,5 +80,13 @@ public class ListUniongroupMemberDetailsWithConditionCommand {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Integer getVersionCode() {
+        return versionCode;
+    }
+
+    public void setVersionCode(Integer versionCode) {
+        this.versionCode = versionCode;
     }
 }

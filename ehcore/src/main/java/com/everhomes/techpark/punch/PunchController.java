@@ -5,6 +5,7 @@ import javax.validation.Valid;
 import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
 
+import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -218,12 +219,12 @@ public class PunchController extends ControllerBase {
 		res.setResponseObject(pdl);
 		return res;
 	}
-	
+
 
 	/**
 	 * <b>URL: /techpark/punch/listApprovalCategories</b>
 	 * <p>
-	 * 获取默认设置好的请假类型
+	 * 根据请求 companyid和日期 取一年的打卡记录
 	 * </p>
 	 */
 	@RequestMapping("listApprovalCategories")

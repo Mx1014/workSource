@@ -1,5 +1,6 @@
 package com.everhomes.customer;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import org.springframework.web.multipart.MultipartFile;
@@ -75,4 +76,30 @@ public interface CustomerService {
 
     void syncEnterpriseCustomers(SyncCustomersCommand cmd);
     void syncIndividualCustomers(SyncCustomersCommand cmd);
+    
+    
+    List<CustomerTrackingDTO> listCustomerTrackings(ListCustomerTrackingsCommand cmd);
+	CustomerTrackingDTO getCustomerTracking(GetCustomerTrackingCommand cmd);
+	CustomerTrackingDTO updateCustomerTracking(UpdateCustomerTrackingCommand cmd);
+	void deleteCustomerTracking(DeleteCustomerTrackingCommand cmd);
+	void createCustomerTracking(CreateCustomerTrackingCommand cmd);
+	
+	List<CustomerTrackingPlanDTO> listCustomerTrackingPlans(ListCustomerTrackingPlansCommand cmd);
+	CustomerTrackingPlanDTO getCustomerTrackingPlan(GetCustomerTrackingPlanCommand cmd);
+	CustomerTrackingPlanDTO updateCustomerTrackingPlan(UpdateCustomerTrackingPlanCommand cmd);
+	void deleteCustomerTrackingPlan(DeleteCustomerTrackingPlanCommand cmd);
+	void createCustomerTrackingPlan(CreateCustomerTrackingPlanCommand cmd);
+	
+	List<CustomerEventDTO> listCustomerEvents(ListCustomerEventsCommand cmd);
+	
+	void allotEnterpriseCustomer(AllotEnterpriseCustomerCommand cmd);
+	void giveUpEnterpriseCustomer(GiveUpEnterpriseCustomerCommand cmd);
+	
+	ListNearbyEnterpriseCustomersCommandResponse listNearbyEnterpriseCustomers(ListNearbyEnterpriseCustomersCommand cmd);
+	
+	void  trackingPlanWarningSchedule();
+	void processTrackingPlanNotify(CustomerTrackingPlan plan);
+	
+	List<List<CustomerTrackingPlanDTO>> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd);
+	
 }

@@ -7,6 +7,7 @@ import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
+import com.everhomes.rest.forum.StickPostCommand;
 import com.everhomes.rest.group.ListUserGroupPostResponse;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.ui.forum.*;
@@ -14,6 +15,7 @@ import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
 import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.visibility.VisibilityScope;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.user.User;
 
 import java.util.List;
 
@@ -60,6 +62,8 @@ public interface ForumService {
     void likeTopic(LikeTopicCommand cmd);
     void cancelLikeTopic(CancelLikeTopicCommand cmd);
 
+    void stickPost(StickPostCommand cmd);
+
     ListPostCommandResponse listTopicComments(ListTopicCommentCommand cmd);
     /**
      * 设置帖子是否公开
@@ -69,6 +73,9 @@ public interface ForumService {
      */
     void updatePostPrivacy(Long forumId, Long postId, PostPrivacy privacy);
     PostDTO createComment(NewCommentCommand cmd);
+
+    void sendMessageToUserWhenCommentNotSupport(User user);
+
     void assignTopicScope(AssignTopicScopeCommand cmd);
     List<AssignedScopeDTO> listTopicAssignedScope(ListTopicAssignedScopeCommand cmd);
     
@@ -78,6 +85,11 @@ public interface ForumService {
      * @return 帖子列表
      */
     SearchTopicAdminCommandResponse searchTopic(SearchTopicAdminCommand cmd);
+
+    Byte getInteractFlag(Post post);
+
+    InteractSetting findInteractSettingByPost(Post post);
+
     SearchTopicAdminCommandResponse searchComment(SearchTopicAdminCommand cmd);
     
     void updateUsedAndRental(UsedAndRentalCommand cmd);
@@ -107,4 +119,8 @@ public interface ForumService {
 	void publisTopic(PublishTopicCommand cmd);
 
     Forum findFourmByNamespaceId(Integer namespaceId);
+
+    ListForumCategoryResponse listForumCategory(ListForumCategoryCommand cmd);
+
+    ForumCategoryDTO findForumCategory(FindForumCategoryCommand cmd);
 }

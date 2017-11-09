@@ -23,7 +23,7 @@ public interface FlowModuleListener {
 
 	default void onFlowCreating(Flow flow) { }
 
-    default List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId){return null;}
+    default List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {return null;}
 
 	/**
 	 * 当 FlowCase 开始运行时
@@ -53,7 +53,7 @@ public interface FlowModuleListener {
 	/**
 	 * FlowCase 的描述性内容
 	 */
-	String onFlowCaseBriefRender(FlowCase flowCase);
+	String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType);
 
 	/**
 	 * FlowCase 的详细信息列表

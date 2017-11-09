@@ -1,13 +1,14 @@
 package com.everhomes.hotTag;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.rest.hotTag.SearchTagCommand;
+import com.everhomes.rest.hotTag.SearchTagResponse;
+import com.everhomes.rest.hotTag.TagDTO;
+import com.everhomes.search.AbstractElasticSearch;
+import com.everhomes.search.HotTagSearcher;
+import com.everhomes.search.SearchUtils;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
-import org.elasticsearch.action.WriteConsistencyLevel;
-import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -24,18 +25,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.organization.Organization;
-import com.everhomes.rest.hotTag.SearchTagCommand;
-import com.everhomes.rest.hotTag.SearchTagResponse;
-import com.everhomes.rest.hotTag.TagDTO;
-import com.everhomes.search.AbstractElasticSearch;
-import com.everhomes.search.SearchUtils;
-import com.everhomes.search.HotTagSearcher;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.videoconf.ConfEnterpriseSearcherImpl;
-import com.everhomes.videoconf.ConfEnterprises;
-import scala.Int;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class HotTagSearcherImpl extends AbstractElasticSearch implements HotTagSearcher{
@@ -89,7 +82,7 @@ public class HotTagSearcherImpl extends AbstractElasticSearch implements HotTagS
         }
 
         //热门标签增加 categoryId    add by yanjun 20170920
-        if(cmd.getCategoryId() == null){
+        if(cmd.getCategoryId() != null){
             fb = FilterBuilders.termFilter("categoryId", cmd.getCategoryId());
         }
 

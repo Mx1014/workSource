@@ -14,6 +14,7 @@ import java.util.List;
  *     <li>statDate: 查询时间</li>
  *     <li>statBills: 统计项目id列表 {@link com.everhomes.rest.energy.EnergyStatBill}</li>
  *     <li>meterType: 表记类型 {@link com.everhomes.rest.energy.EnergyMeterType}</li>
+ *     <li>namespaceId: 域空间</li>
  * </ul>
  */
 public class EnergyStatCommand {
@@ -28,6 +29,8 @@ public class EnergyStatCommand {
     @ItemType(Byte.class)
     private List<Byte> statBills;
     private Byte meterType;
+    
+    private Integer namespaceId;
  
 
     public Long getOrganizationId() {
@@ -97,6 +100,14 @@ public class EnergyStatCommand {
 
 	public void setMeterType(Byte meterType) {
 		this.meterType = meterType;
+	}
+	
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+    public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 

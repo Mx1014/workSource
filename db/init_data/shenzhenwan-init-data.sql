@@ -1334,7 +1334,7 @@ UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRveE56Y3lOREk1
 INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (999966, 'aclink.qr_driver_zuolin_inner', 'zuolin_v2', 'use version2 of zuolin driver');
 
 -- 后台新增投诉建议菜单by st.zheng
-set @id=(select max(id) from `eh_web_menu_scopes`);
+SET @id=(SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@id:=@id+1, '42000', '投诉建议', 'EhNamespaces', '999966', '1');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@id:=@id+1, '42010', '', 'EhNamespaces', '999966', '2');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@id:=@id+1, '42020', '', 'EhNamespaces', '999966', '2');
@@ -1344,19 +1344,19 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@id:=@id+1, '42060', '', 'EhNamespaces', '999966', '2');
 
 -- 修改menu名称 by st.zheng
-update `eh_web_menu_scopes` set menu_name = '创业入驻' where menu_id = 43400;
-update `eh_web_menu_scopes` set menu_name = '企业商务服务' where menu_id = 43200;
-update `eh_web_menu_scopes` set menu_name = '融资申请' where menu_id = 43300;
+UPDATE `eh_web_menu_scopes` SET menu_name = '创业入驻' WHERE menu_id = 43400;
+UPDATE `eh_web_menu_scopes` SET menu_name = '企业商务服务' WHERE menu_id = 43200;
+UPDATE `eh_web_menu_scopes` SET menu_name = '融资申请' WHERE menu_id = 43300;
 
 -- 修改、删除服务广场内容图标等 by st.zheng
-update `eh_launch_pad_items` set action_data = '{"type":37,"parentId":37,"displayType": "grid"}' where namespace_id = 999966 and item_name like '%孵化器%' ;
+UPDATE `eh_launch_pad_items` SET action_data = '{"type":37,"parentId":37,"displayType": "grid"}' WHERE namespace_id = 999966 AND item_name LIKE '%孵化器%' ;
 
 
-delete from `eh_launch_pad_items` where namespace_id = 999966 and item_label = '创客交流' ;
-update `eh_launch_pad_items` set item_name='创业入驻' ,item_label='创业入驻',icon_uri='cs://1/image/aW1hZ2UvTVRvNVlXWTRaR1UyWVdNd1ptVTBaakl5T0RFelpESTNNV05qWmpZeU1HVXdOdw' where namespace_id = 999966 and item_name = '创业服务' and item_group!='Gallery' ;
-update `eh_launch_pad_items`  set item_name='融资申请',item_label='融资申请' where namespace_id = 999966 and item_label = '众创机构';
-update `eh_launch_pad_items`  set item_name='企业商务服务',item_label='企业商务服务' where namespace_id = 999966 and item_label = '银行超市';
-update `eh_launch_pad_items` set icon_uri='cs://1/image/aW1hZ2UvTVRveE56Y3lOREk1TURSalpEazNOVEl5T0dVNFptTmlPRFJrTkdaa09XVTFOZw' where namespace_id = 999966 and item_label = '投诉建议' ;
+DELETE FROM `eh_launch_pad_items` WHERE namespace_id = 999966 AND item_label = '创客交流' ;
+UPDATE `eh_launch_pad_items` SET item_name='创业入驻' ,item_label='创业入驻',icon_uri='cs://1/image/aW1hZ2UvTVRvNVlXWTRaR1UyWVdNd1ptVTBaakl5T0RFelpESTNNV05qWmpZeU1HVXdOdw' WHERE namespace_id = 999966 AND item_name = '创业服务' AND item_group!='Gallery' ;
+UPDATE `eh_launch_pad_items`  SET item_name='融资申请',item_label='融资申请' WHERE namespace_id = 999966 AND item_label = '众创机构';
+UPDATE `eh_launch_pad_items`  SET item_name='企业商务服务',item_label='企业商务服务' WHERE namespace_id = 999966 AND item_label = '银行超市';
+UPDATE `eh_launch_pad_items` SET icon_uri='cs://1/image/aW1hZ2UvTVRveE56Y3lOREk1TURSalpEazNOVEl5T0dVNFptTmlPRFJrTkdaa09XVTFOZw' WHERE namespace_id = 999966 AND item_label = '投诉建议' ;
 
 
 
@@ -1366,7 +1366,7 @@ update `eh_launch_pad_items` set icon_uri='cs://1/image/aW1hZ2UvTVRveE56Y3lOREk1
 
 -- 新支付 copy from 4.9.4 by lqs 20170930
 -- 支付服务器链接
-SET @eh_configurations_id = (SELECT MAX(id) from eh_configurations);
+SET @eh_configurations_id = (SELECT MAX(id) FROM eh_configurations);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'pay.v2.callback.url', '/pay/payNotify', '新支付回调接口url', '0', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'default.bind.phone', '12100001111', '绑手机号默认值', '0', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'pay.v2.orderPaymentStatusQueryUri', '/order/queryOrderPaymentStatus', '查询支付单信息', '0', NULL);
@@ -1382,11 +1382,24 @@ INSERT INTO `eh_payment_users`(`id`, `owner_type`, `owner_id`, `payment_user_typ
 	VALUES (30001, 'EhOrganizations', 1035830, '2', 1020, UTC_TIMESTAMP());
 
 INSERT INTO `eh_payment_types`(`id`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_type`, `payment_name`, `payment_logo`, `paymentParams`, `create_time`, `update_time`)
-	VALUES (10001, 'parking', 999966, 'EhOrganizations', 1035830, null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), null);
+	VALUES (10001, 'parking', 999966, 'EhOrganizations', 1035830, NULL, NULL, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), NULL);
 INSERT INTO `eh_payment_service_configs`(`id`, `name`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_split_rule_id`, `payment_user_type`, `payment_user_id`, `create_time`, `update_time`)
-	VALUES (20001, '停车充值', 'parking', 999966, 'EhOrganizations', 1035830, null, null, NULL, 1, 1020, UTC_TIMESTAMP(), null);
+	VALUES (20001, '停车充值', 'parking', 999966, 'EhOrganizations', 1035830, NULL, NULL, NULL, 1, 1020, UTC_TIMESTAMP(), NULL);
 
 INSERT INTO `eh_payment_types`(`id`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_type`, `payment_name`, `payment_logo`, `paymentParams`, `create_time`, `update_time`)
-	VALUES (10002, 'rentalOrder', 999966, 'EhOrganizations', 1035830, null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), null);
+	VALUES (10002, 'rentalOrder', 999966, 'EhOrganizations', 1035830, NULL, NULL, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), NULL);
 INSERT INTO `eh_payment_service_configs`(`id`, `name`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_split_rule_id`, `payment_user_type`, `payment_user_id`, `create_time`, `update_time`)
-	VALUES (20002, '资源预约', 'rentalOrder', 999966, 'EhOrganizations', 1035830, null, null, NULL, 1, 1020, UTC_TIMESTAMP(), null);
+	VALUES (20002, '资源预约', 'rentalOrder', 999966, 'EhOrganizations', 1035830, NULL, NULL, NULL, 1, 1020, UTC_TIMESTAMP(), NULL);
+
+
+-- 增加考勤管理菜單
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),50600,'', 'EhNamespaces', 999966,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),506000,'', 'EhNamespaces', 999966,2);
+-- 增加考勤管理模塊
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`) VALUES('50600','考勤管理','50000','/50000/50600','1','2','2','0','2016-12-06 11:40:51','','23','2017-09-08 10:45:46','0','0','0','0');
+
+
+-- 新增新左邻运营后台配置 add by xujuan 20171103
+set @domain_id = IFNULL((SELECT MAX(id) FROM `eh_domains`), 1);
+insert into `eh_domains` (`id`, `namespace_id`, `portal_type`, `portal_id`, `domain`, `create_uid`, `create_time`) values((@domain_id := @domain_id + 1),'0','EhZuolinAdmins',0, 'opv2.szbay.com', 0, now());

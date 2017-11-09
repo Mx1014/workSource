@@ -1023,7 +1023,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         }
 
         //  5. the current operator
-        List<UserInfo> processorLists = flowService.getCurrentProcessors(data.getFlowCaseId());
+        List<UserInfo> processorLists = flowService.getCurrentProcessors(data.getFlowCaseId(),true);
         if (processorLists != null && processorLists.size() > 0) {
             String processors = "";
             for (int i = 0; i < processorLists.size(); i++) {

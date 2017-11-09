@@ -313,7 +313,7 @@ public interface PunchProvider {
 
 	public void deletePunchTimeIntervalByPunchRuleId(Long id);
 
-	public List<PunchTimeRule> listActivePunchTimeRuleByOwner(String ownerType, Long ownerId);
+	public List<PunchTimeRule> listActivePunchTimeRuleByOwner(String ownerType, Long ownerId, Byte status);
 
 	public List<PunchTimeInterval> listPunchTimeIntervalByTimeRuleId(Long timeRuleId);
 
@@ -342,4 +342,8 @@ public interface PunchProvider {
 	Integer countExceptionRequests(Long userId, String ownerType, Long ownerId, String punchMonth);
 
 	List<ExtDTO> listAskForLeaveExtDTOs(Long userId, String ownerType, Long ownerId, String punchMonth);
+	
+	List<PunchRule> listPunchRulesByStatus(List<Byte> statusList);
+
+	List<PunchRule> listPunchRulesByOwnerAndRuleType(String ownerType, Long ownerId, byte code);
 }

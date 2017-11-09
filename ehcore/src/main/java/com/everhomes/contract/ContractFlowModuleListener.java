@@ -1,5 +1,8 @@
 package com.everhomes.contract;
 
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.flow.*;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
@@ -7,12 +10,13 @@ import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,6 +53,9 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 
     @Autowired
     private PropertyMgrProvider propertyMgrProvider;
+
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
     @Override
     public FlowModuleInfo initModule() {
@@ -123,13 +132,66 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     }
 
     @Override
-    public String onFlowCaseBriefRender(FlowCase flowCase) {
+    public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
         return null;
     }
 
     @Override
     public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
-        return null;
+        FindContractCommand cmd = new FindContractCommand();
+        cmd.setId(flowCase.getReferId());
+        cmd.setNamespaceId(flowCase.getNamespaceId());
+        cmd.setCommunityId(flowCase.getProjectId());
+
+        ContractService contractService = getContractService(flowCase.getNamespaceId());
+        ContractDetailDTO contractDetailDTO = contractService.findContract(cmd);
+
+        flowCase.setCustomObject(JSONObject.toJSONString(contractDetailDTO));
+
+        List<FlowCaseEntity> entities = new ArrayList<>();
+        FlowCaseEntity e;
+
+        e = new FlowCaseEntity();
+        e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+        e.setKey("合同编号");
+        e.setValue(contractDetailDTO.getContractNumber());
+        entities.add(e);
+
+        e = new FlowCaseEntity();
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setKey("合同名称");
+        e.setValue(contractDetailDTO.getName());
+        entities.add(e);
+
+        e = new FlowCaseEntity();
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setKey("客户名称");
+        e.setValue(contractDetailDTO.getCustomerName());
+        entities.add(e);
+
+        e = new FlowCaseEntity();
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setKey("合同开始时间");
+        e.setValue(timeToStr(contractDetailDTO.getContractStartDate()));
+        entities.add(e);
+
+
+        e = new FlowCaseEntity();
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setKey("合同结束时间");
+        e.setValue(timeToStr(contractDetailDTO.getContractEndDate()));
+        entities.add(e);
+
+        return entities;
+    }
+    private ContractService getContractService(Integer namespaceId) {
+        String handler = configurationProvider.getValue(namespaceId, "contractService", "");
+        return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
+    }
+
+    private String timeToStr(Timestamp time) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return sdf.format(time);
     }
 
     @Override

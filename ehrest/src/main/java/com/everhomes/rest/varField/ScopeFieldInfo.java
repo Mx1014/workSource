@@ -36,6 +36,26 @@ public class ScopeFieldInfo {
 
     private Integer defaultOrder;
 
+    private String groupPath;
+
+    private Long groupId;
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
+
+    public String getGroupPath() {
+        return groupPath;
+    }
+
+    public void setGroupPath(String groupPath) {
+        this.groupPath = groupPath;
+    }
+
     public Long getCommunityId() {
         return communityId;
     }
