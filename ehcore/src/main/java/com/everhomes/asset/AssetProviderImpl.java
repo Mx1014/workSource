@@ -1669,16 +1669,16 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(t.OWNERID.eq(ownerId))
                 .fetch()
                 .map(r -> ConvertHelper.convert(r, PaymentBillGroupRule.class));
-        if(rules.size() > 1){
-            List<PaymentBillGroupRule> rules2 = context.select()
-                    .from(t)
-                    .where(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
-                    .and(t.OWNERTYPE.eq(ownerType))
-                    .and(t.OWNERID.eq(ownerId))
-                    .fetch()
-                    .map(r -> ConvertHelper.convert(r, PaymentBillGroupRule.class));
-            return rules2.get(0);
-        }
+//        if(rules.size() > 1){
+//            List<PaymentBillGroupRule> rules2 = context.select()
+//                    .from(t)
+//                    .where(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
+//                    .and(t.OWNERTYPE.eq(ownerType))
+//                    .and(t.OWNERID.eq(ownerId))
+//                    .fetch()
+//                    .map(r -> ConvertHelper.convert(r, PaymentBillGroupRule.class));
+//            return rules2.get(0);
+//        }
         return rules.get(0);
     }
 
@@ -2516,18 +2516,21 @@ public class AssetProviderImpl implements AssetProvider {
                     throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"找不到公式,标准的id为"+standard.getId()+"");
                 }
             }
-            char[] formularChars = formula.toCharArray();
-            int index = 0;
-            int start = 0;
-            while(index < formularChars.length){
-                if(formularChars[index]=='+'||formularChars[index]=='-'||formularChars[index]=='*'||formularChars[index]=='/'||index == formularChars.length-1){
-                    String var = formula.substring(start,index==formula.length()-1?index+1:index);
-                    if(!IntegerUtil.hasDigit(var)){
-                        varIdens.add(findVariableByIden(var).getName());
+            if(formula!=null){
+                char[] formularChars = formula.toCharArray();
+                int index = 0;
+                int start = 0;
+                while(index < formularChars.length){
+                    if(formularChars[index]=='+'||formularChars[index]=='-'||formularChars[index]=='*'||formularChars[index]=='/'||index == formularChars.length-1){
+                        String var = formula.substring(start,index==formula.length()-1?index+1:index);
+                        if(!IntegerUtil.hasDigit(var)){
+                            varIdens.add(findVariableByIden(var).getName());
+                        }
+                        start = index+1;
                     }
-                    start = index+1;
+                    index++;
                 }
-                index++;
+
             }
             dto.setVariableNames(new ArrayList<>(varIdens));
         }
@@ -2639,7 +2642,8 @@ public class AssetProviderImpl implements AssetProvider {
         com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule = new PaymentBillGroupRule();
         if(ruleId == null){
             if(fetch.contains(cmd.getChargingItemId())){
-                response.setFailCause(AssetPaymentStrings.DELETE_GROUP_RULE_UNSAFE);
+                response.setFailCause(AssetPaymentStrings.CREATE_CHARGING_ITEM_FAIL);
+                return response;
             }
             //新增 一条billGroupRule
             long nextRuleId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules.class));
@@ -2777,7 +2781,6 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(t.OWNER_TYPE.eq(rule.getOwnertype()))
                 .and(t.NAMESPACE_ID.eq(rule.getNamespaceId()))
                 .and(t.EH_PAYMENT_CHARGING_ITEM_ID.eq(rule.getChargingItemId()))
-                .and(t.EH_PAYMENT_CHARGING_STANDARD_ID.eq(rule.getChargingStandardsId()))
                 .fetch(t.ID);
         if(fetch1.size()>0){
             return true;
