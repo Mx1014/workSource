@@ -1631,8 +1631,13 @@ public class GroupServiceImpl implements GroupService {
         Long groupId = cmd.getGroupId();
         Group group = checkGroupParameter(groupId, operatorUid, tag);
 
-        checkGroupPrivilege(operator.getId(), groupId, PrivilegeConstants.GroupApproveMember);
-        
+        //行业协会做特殊处理，超级管理员也可以审核
+        if(GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag()) && ClubType.GUILD == ClubType.fromCode(group.getClubType())){
+            checkGroupPrivilegeForGuild(operator.getId(), groupId, PrivilegeConstants.GroupApproveMember, cmd.getOrganizationId());
+        }else {
+            checkGroupPrivilege(operator.getId(), groupId, PrivilegeConstants.GroupApproveMember);
+        }
+
         Long userId = cmd.getUserId();
         GroupMember member = checkGroupMemberParameter(group, operatorUid, userId, tag);
         
@@ -1676,7 +1681,12 @@ public class GroupServiceImpl implements GroupService {
     	Long groupId = cmd.getGroupId();
     	Group group = checkGroupParameter(groupId, operatorUid, tag);
 
-        checkGroupPrivilege(operator.getId(), groupId, PrivilegeConstants.GroupRejectMember);
+        //行业协会做特殊处理，超级管理员也可以审核
+        if(GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag()) && ClubType.GUILD == ClubType.fromCode(group.getClubType())){
+            checkGroupPrivilegeForGuild(operator.getId(), groupId, PrivilegeConstants.GroupApproveMember, cmd.getOrganizationId());
+        }else {
+            checkGroupPrivilege(operator.getId(), groupId, PrivilegeConstants.GroupRejectMember);
+        }
         
         Long userId = cmd.getUserId();
         GroupMember member = checkGroupMemberParameter(group, operatorUid, userId, tag);
@@ -2664,6 +2674,24 @@ public class GroupServiceImpl implements GroupService {
                 roles))
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, 
                     "Insufficient privilege");
+    }
+
+    //给行业协会开一个小门，超级管理员也可以审核
+    private void checkGroupPrivilegeForGuild(long uid, long groupId, long privilege, Long organizationId) {
+        ResourceUserRoleResolver resolver = PlatformContext.getComponent(EntityType.GROUP.getCode());
+        List<Long> roles = resolver.determineRoleInResource(uid, groupId, EntityType.GROUP.getCode(), groupId);
+        if(this.aclProvider.checkAccess(EntityType.GROUP.getCode(), groupId, EntityType.USER.getCode(), uid, privilege,
+                roles)){
+           return;
+        }
+
+        SystemUserPrivilegeMgr sysResolver = PlatformContext.getComponent("SystemUser");
+        boolean result = sysResolver.checkSuperAdmin(uid, organizationId);
+        if (!result) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
+
     }
     
     private void populateGroupDTOs(long userId, List<GroupDTO> groups) {
