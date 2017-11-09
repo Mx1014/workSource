@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>requestToken： 异常申请的token </li>
  * <li>approvalStatus： 审批的状态 参考{@link com.everhomes.rest.approval.ApprovalStatus}  </li>
  * <li>smartAlignment： 智能校准 1-是智能校准 0-不是智能校准 </li>
+ * <li>identification： 打卡设备的唯一标识 </li>
  * </ul>
  */
 public class PunchLogDTO {
