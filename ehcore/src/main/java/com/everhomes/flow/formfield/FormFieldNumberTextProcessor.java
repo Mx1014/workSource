@@ -56,7 +56,13 @@ public class FormFieldNumberTextProcessor implements FormFieldProcessor {
 
     @Override
     public FlowConditionVariable getFlowConditionVariable(GeneralFormFieldDTO fieldDTO) {
-        Map<String, String> map = (Map<String, String>) StringHelper.fromJsonString(fieldDTO.getFieldValue(), Map.class);
-        return new FlowConditionNumberVariable(Float.parseFloat(map.get("text")));
+        try {
+            Map<String, String> map = (Map<String, String>) StringHelper.fromJsonString(fieldDTO.getFieldValue(), Map.class);
+            return new FlowConditionNumberVariable(Float.parseFloat(map.get("text")));
+        } catch (Exception e) {
+            return null;
+            // throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CONDITION_VARIABLE,
+            //         "Flow condition variable parse error, fieldDTO=%s", fieldDTO);
+        }
     }
 }

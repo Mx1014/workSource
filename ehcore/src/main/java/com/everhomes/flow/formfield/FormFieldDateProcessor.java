@@ -66,7 +66,10 @@ public class FormFieldDateProcessor implements FormFieldProcessor {
             TemporalAccessor accessor = formatter.parse(map.get("text"));
             LocalDateTime dateTime = LocalDateTime.from(accessor);
             return new FlowConditionDateVariable(java.sql.Date.from(dateTime.toInstant(ZoneOffset.UTC)));
-        } catch (Exception ignored) { }
-        return null;
+        } catch (Exception ignored) {
+            return null;
+            // throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CONDITION_VARIABLE,
+            //         "Flow condition variable parse error, fieldDTO=%s", fieldDTO);
+        }
     }
 }

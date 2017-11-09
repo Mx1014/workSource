@@ -394,8 +394,13 @@ public interface FlowService {
 
 	FlowResolveUsersResponse resolveSelectionUsers(Long flowId, Long selectionUserId);
 
-	FlowCase createDumpFlowCase(GeneralModuleInfo ga,
-			CreateFlowCaseCommand flowCaseCmd);
+    /**
+     * 预先申请一个flowCaseId
+     */
+    Long getNextFlowCaseId();
+
+    FlowCase createDumpFlowCase(GeneralModuleInfo ga,
+                                CreateFlowCaseCommand flowCaseCmd);
  
 	List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId,
 			List<FlowUserSelection> selections);

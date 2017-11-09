@@ -911,8 +911,8 @@ public class FlowServiceImpl implements FlowService {
                 action.setTrackerProcessor(actionInfo.getTrackerProcessor());
             }
 
-            if (actionInfo.getEnabled() == null || actionInfo.getEnabled() > 0) {
-                action.setStatus(FlowActionStatus.ENABLED.getCode());
+            if (actionInfo.getEnabled() != null) {
+                action.setStatus(actionInfo.getEnabled());
             } else {
                 action.setStatus(FlowActionStatus.DISABLED.getCode());
             }
@@ -922,8 +922,8 @@ public class FlowServiceImpl implements FlowService {
             flowActionProvider.createFlowAction(action);
 
         } else {
-            if (actionInfo.getEnabled() == null || actionInfo.getEnabled() > 0) {
-                action.setStatus(FlowActionStatus.ENABLED.getCode());
+            if (actionInfo.getEnabled() != null) {
+                action.setStatus(actionInfo.getEnabled());
             } else {
                 action.setStatus(FlowActionStatus.DISABLED.getCode());
             }
@@ -1062,10 +1062,6 @@ public class FlowServiceImpl implements FlowService {
         Flow flow = getFlowByEntity(cmd.getBelongTo(), FlowEntityType.fromCode(cmd.getFlowEntityType()));
         flowMarkUpdated(flow);
 
-        ListFlowUserSelectionResponse resp = new ListFlowUserSelectionResponse();
-        List<FlowUserSelectionDTO> selections = new ArrayList<>();
-        resp.setSelections(selections);
-
         List<FlowSingleUserSelectionCommand> cmds = cmd.getSelections();
         if (cmds != null && cmds.size() > 0) {
             for (FlowSingleUserSelectionCommand sCmd : cmds) {
@@ -1086,6 +1082,15 @@ public class FlowServiceImpl implements FlowService {
             }
         }
 
+        List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(
+                cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType());
+
+        ListFlowUserSelectionResponse resp = new ListFlowUserSelectionResponse();
+        resp.setSelections(
+                selections.stream()
+                        .map(r -> ConvertHelper.convert(r, FlowUserSelectionDTO.class))
+                .collect(Collectors.toList())
+        );
         return resp;
     }
 
@@ -1972,9 +1977,6 @@ public class FlowServiceImpl implements FlowService {
         if (flowVer.equals(0)) {
             return getConfigGraph(flowId);
         }
-
-        graphMap.clear();
-
         String fmt = String.format("%d:%d", flowId, flowVer);
         FlowGraph snapshotGraph = graphMap.get(fmt);
         if (snapshotGraph == null) {
@@ -2535,8 +2537,11 @@ public class FlowServiceImpl implements FlowService {
             flowCase.setProjectType(snapshotFlow.getProjectType());
         }
 
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowCases.class));
-        flowCase.setId(id);
+        Long flowCaseId = flowCaseCmd.getFlowCaseId();
+        if (flowCaseId == null) {
+            flowCaseId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowCases.class));
+        }
+        flowCase.setId(flowCaseId);
 
         flowListenerManager.onFlowCaseCreating(flowCase);
 
@@ -2551,6 +2556,11 @@ public class FlowServiceImpl implements FlowService {
         ctx.popProcessType();
 
         return flowCase;
+    }
+
+    @Override
+    public Long getNextFlowCaseId() {
+        return flowCaseProvider.getNextId();
     }
 
     /**
@@ -2590,16 +2600,17 @@ public class FlowServiceImpl implements FlowService {
         flowCase.setProjectType(ga.getProjectType());
         flowCase.setOrganizationId(ga.getOrganizationId());
 
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowCases.class));
-        flowCase.setId(id);
+        Long flowCaseId = flowCaseCmd.getFlowCaseId();
+        if (flowCaseId == null) {
+            flowCaseId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowCases.class));
+        }
+        flowCase.setId(flowCaseId);
+
         flowListenerManager.onFlowCaseCreating(flowCase);
 
         flowCaseProvider.createFlowCaseHasId(flowCase);
 
-
         flowListenerManager.onFlowCaseCreated(flowCase);
-
-
         return flowCase;
     }
 
@@ -2902,6 +2913,9 @@ public class FlowServiceImpl implements FlowService {
 
         if (!cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.ADMIN.getCode()) && cmd.getUserId() == null) {
             cmd.setUserId(UserContext.current().getUser().getId());
+        }
+        if (cmd.getModuleId() != null && cmd.getModuleId() == 0L) {
+            cmd.setModuleId(null);
         }
 
         int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -5002,7 +5016,7 @@ public class FlowServiceImpl implements FlowService {
         }
         dbProvider.execute(status -> {
             flow.setValidationStatus(cmd.getValidationStatus());
-            flowMarkUpdated(flow);
+            flowProvider.updateFlow(flow);
             return true;
         });
     }

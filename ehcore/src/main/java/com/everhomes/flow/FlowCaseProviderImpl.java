@@ -92,6 +92,11 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     }
 
     @Override
+    public Long getNextId() {
+        return this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowCases.class));
+    }
+
+    @Override
     public void updateFlowCase(FlowCase obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowCases.class));
         EhFlowCasesDao dao = new EhFlowCasesDao(context.configuration());

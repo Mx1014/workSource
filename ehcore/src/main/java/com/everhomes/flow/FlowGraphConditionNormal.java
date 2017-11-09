@@ -33,9 +33,7 @@ public class FlowGraphConditionNormal extends FlowGraphCondition {
 
         boolean conditionSuccess = false;
         for (FlowConditionExpression exp : expressions) {
-            FlowConditionRelationalOperatorType relationalOperatorType = FlowConditionRelationalOperatorType.fromCode(exp.getRelationalOperator());
-
-            boolean expRetVal = evaluateFlowConditionVariableRelational(ctx, relationalOperatorType, exp);
+            boolean expRetVal = evaluateFlowConditionVariableRelational(ctx, exp);
             FlowConditionLogicOperatorType logicOperatorType = FlowConditionLogicOperatorType.fromCode(exp.getLogicOperator());
             if (logicOperatorType == FlowConditionLogicOperatorType.OR && expRetVal) {
                 conditionSuccess = true;
@@ -49,14 +47,17 @@ public class FlowGraphConditionNormal extends FlowGraphCondition {
         return conditionSuccess;
     }
 
-    public boolean evaluateFlowConditionVariableRelational(FlowCaseState ctx, FlowConditionRelationalOperatorType operatorType, FlowConditionExpression exp) {
+    public boolean evaluateFlowConditionVariableRelational(FlowCaseState ctx, FlowConditionExpression exp) {
         FlowConditionVariable variable1 = getVariableValue(ctx, exp.getVariableType1(), exp.getVariable1());
         FlowConditionVariable variable2 = getVariableValue(ctx, exp.getVariableType2(), exp.getVariable2());
 
         if (variable1 == null || variable2 == null) {
             return false;
+            // throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CONDITION_VARIABLE,
+            //         "Flow condition variable is null, exp = %s", exp);
         }
 
+        FlowConditionRelationalOperatorType operatorType = FlowConditionRelationalOperatorType.fromCode(exp.getRelationalOperator());
         switch (operatorType) {
             case EQUAL:
                 return variable1.isEqual(variable2);

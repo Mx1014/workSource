@@ -1,8 +1,10 @@
 package com.everhomes.flow;
 
 import com.everhomes.rest.flow.FlowConditionVariableDTO;
+import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +57,14 @@ public class FormFieldProcessorManagerImpl implements FormFieldProcessorManager,
         GeneralFormFieldType fieldType = GeneralFormFieldType.fromCode(fieldDTO.getFieldType());
         FormFieldProcessor fieldProcessor = processorMap.get(fieldType);
         if (fieldProcessor != null) {
-            return fieldProcessor.getFlowConditionVariable(fieldDTO);
+            try {
+                return fieldProcessor.getFlowConditionVariable(fieldDTO);
+            } catch (Exception e) {
+                throw RuntimeErrorException.errorWith(e, FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CONDITION_VARIABLE,
+                        "Flow condition variable parse error, fieldDTO=%s", fieldDTO);
+            }
+        } else {
+            LOGGER.warn("Not found processor of fieldType {}", fieldDTO.getFieldType());
         }
         return null;
     }
