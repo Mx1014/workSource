@@ -135,6 +135,9 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		Timestamp remindTime = new Timestamp(System.currentTimeMillis()+intervalTime*3600*1000);
 		List<Questionnaire> questionnaires = questionnaireProvider.listApproachCutoffTimeQuestionnaire(remindTime);
 		Set<String> userLevelRanges = null;
+		LOGGER.info("approach cutoffTime quesionnaire ",StringHelper.toJsonString(questionnaires.stream().map(r->{
+			return r.getId()+"->"+r.getQuestionnaireName();
+		}).collect(Collectors.toList())));
 		for (Questionnaire questionnaire : questionnaires) {
 			String originalUseScope = questionnaire.getUserScope();
 			List<QuestionnaireAnswer> answers = questionnaireAnswerProvider.listQuestionnaireAnswerByQuestionnaireId(questionnaire.getId(), questionnaire.getTargetType());
