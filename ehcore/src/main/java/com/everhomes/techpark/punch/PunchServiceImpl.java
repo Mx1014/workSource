@@ -8066,16 +8066,6 @@ public class PunchServiceImpl implements PunchService {
 	}
 	
 	@Override
-	public ListApprovalCategoriesResponse listApprovalCategories(){
-
-		List<ApprovalCategory> categoryList = approvalCategoryProvider.listApprovalCategory();
-
-		return new ListApprovalCategoriesResponse(categoryList.stream()
-				.map(c -> ConvertHelper.convert(c, ApprovalCategoryDTO.class)).collect(Collectors.toList()));
-
-	}
-	
-	@Override
 	public void punchGroupAddNewEmployee(Long groupId){
 		PunchRule pr = punchProvider.getPunchruleByPunchOrgId(groupId);
 
