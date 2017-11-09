@@ -91,12 +91,12 @@ public class ArchivesTest {
 
     @Test
     public void pattern(){
-Pattern p = Pattern.compile("[\\u4E00-\\u9FA5A-Za-z0-9_\\n]+$");
+Pattern p = Pattern.compile("^[\\u4E00-\\u9FA5A-Za-z0-9_\\n]+$");
         Matcher matcher = p.matcher("示例数据");
         System.out.println(matcher.matches());
-        System.out.println(Pattern.matches("[\\u4E00-\\u9FA5A-Za-z0-9_\\n]+$", "正常数据\n"));
-        System.out.println(Pattern.matches("[\\u4E00-\\u9FA5A-Za-z0-9_\\n]+$", "陈利利233"));
-        System.out.println(Pattern.matches("[\\u4E00-\\u9FA5A-Za-z0-9_\\n]+$", "姓名乱搞%#@"));
-        System.out.println(Pattern.matches("[\\u4E00-\\u9FA5A-Za-z0-9_\\n]+$", "英文名@@@"));
+        System.out.println(Pattern.matches("^[\\u4E00-\\u9FA5A-Za-z0-9_\\n]+$", "正常数据\n"));
+        System.out.println(Pattern.matches("^[\\u4E00-\\u9FA5A-Za-z0-9_\\n]+$", "陈利利233"));
+        System.out.println(Pattern.matches("^[\\u4E00-\\u9FA5A-Za-z0-9_\\n]+$", "姓名乱搞%#@"));
+        System.out.println(Pattern.matches("^[\\u4E00-\\u9FA5A-Za-z0-9_\\n]+$", "英文名@@@"));
     }
 }

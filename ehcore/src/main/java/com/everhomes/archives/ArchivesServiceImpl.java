@@ -41,7 +41,6 @@ import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
@@ -516,10 +515,20 @@ public class ArchivesServiceImpl implements ArchivesService {
         if(!checkArchivesContactName(log, data, data.getContactName()))
             return log;
 
-        //  TODO:英文名校验
+        //  英文名校验
+        if(!checkArchivesContactEnName(log, data, data.getContactEnName()))
+            return log;
 
         //  手机号
         if(!checkArchivesContactToken(log, data, data.getContactToken()))
+            return log;
+
+        //  短号
+        if (!checkArchivesContactShortToken(log, data, data.getContactShortToken()))
+            return log;
+
+        //  工作邮箱
+        if (!checkArchivesWorkEmail(log, data, data.getWorkEmail()))
             return log;
 
         //  部门
@@ -1867,14 +1876,14 @@ public class ArchivesServiceImpl implements ArchivesService {
                 LOGGER.warn("Employee name is empty. data = {}", data);
                 log.setData(convertListStringToMap(data));
                 log.setErrorLog("Employee name is empty.");
-                log.setCode(ArchivesServiceErrorCode.ERROR_NAME_ISEMPTY);
+                log.setCode(ArchivesServiceErrorCode.ERROR_NAME_IS_EMPTY);
                 return log;
             } else {
                 if (itemValue.getFieldValue().length() > 40) {
                     LOGGER.warn("Employee name is too long. data = {}", data);
                     log.setData(convertListStringToMap(data));
                     log.setErrorLog("Employee name is too long.");
-                    log.setCode(ArchivesServiceErrorCode.ERROR_NAME_TOOLONG);
+                    log.setCode(ArchivesServiceErrorCode.ERROR_NAME_TOO_LONG);
                     return log;
                 } else
                     contactName = itemValue.getFieldValue();
@@ -1886,14 +1895,14 @@ public class ArchivesServiceImpl implements ArchivesService {
                 LOGGER.warn("Employee token is empty. data = {}", data);
                 log.setData(convertListStringToMap(data));
                 log.setErrorLog("Employee token is empty.");
-                log.setCode(ArchivesServiceErrorCode.ERROR_CONTACT_TOKEN_ISEMPTY);
+                log.setCode(ArchivesServiceErrorCode.ERROR_CONTACT_TOKEN_IS_EMPTY);
                 return log;
             } else {
                 if (itemValue.getFieldValue().length() != 11) {
                     LOGGER.warn("Employee token wrong format. data = {}", data);
                     log.setData(convertListStringToMap(data));
                     log.setErrorLog("Employee token wrong format.");
-                    log.setCode(ArchivesServiceErrorCode.ERROR_CONTACT_TOKEN_WRONGFORMAT);
+                    log.setCode(ArchivesServiceErrorCode.ERROR_CONTACT_TOKEN_WRONG_FORMAT);
                 } else {
                     contactToken = itemValue.getFieldValue();
                 }
@@ -1909,7 +1918,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 LOGGER.warn("Employee checkInTime is empty. data = {}", data);
                 log.setData(convertListStringToMap(data));
                 log.setErrorLog("Employee checkInTime is empty.");
-                log.setCode(ArchivesServiceErrorCode.ERROR_CHECK_IN_TIME_ISEMPTY);
+                log.setCode(ArchivesServiceErrorCode.ERROR_CHECK_IN_TIME_IS_EMPTY);
                 return log;
             }
         }
@@ -1919,7 +1928,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 LOGGER.warn("Employee employeeType is empty. data = {}", data);
                 log.setData(convertListStringToMap(data));
                 log.setErrorLog("Employee employeeType is empty.");
-                log.setCode(ArchivesServiceErrorCode.ERROR_EMPLOYEE_TYPE_ISEMPTY);
+                log.setCode(ArchivesServiceErrorCode.ERROR_EMPLOYEE_TYPE_IS_EMPTY);
                 return log;
             }
         }
@@ -2190,21 +2199,35 @@ public class ArchivesServiceImpl implements ArchivesService {
             LOGGER.warn("Contact name is empty. data = {}", data);
             log.setData(data);
             log.setErrorLog("Contact name is empty.");
-            log.setCode(ArchivesServiceErrorCode.ERROR_NAME_ISEMPTY);
+            log.setCode(ArchivesServiceErrorCode.ERROR_NAME_IS_EMPTY);
             return false;
         } else if (contactName.length() > 20) {
             LOGGER.warn("Contact name is too long. data = {}", data);
             log.setData(data);
             log.setErrorLog("Contact name too long.");
-            log.setCode(ArchivesServiceErrorCode.ERROR_NAME_TOOLONG);
+            log.setCode(ArchivesServiceErrorCode.ERROR_NAME_TOO_LONG);
             return false;
-        }else if(!Pattern.matches("[\\u4E00-\\u9FA5A-Za-z0-9_\\n]+$", contactName)){
+        }else if(!Pattern.matches("^[\\u4E00-\\u9FA5A-Za-z0-9_\\n]+$", contactName)){
             LOGGER.warn("Contact name wrong format. data = {}", data);
             log.setData(data);
             log.setErrorLog("Contact name wrong format.");
-            log.setCode(ArchivesServiceErrorCode.ERROR_NAME_WRONGFORMAT);
+            log.setCode(ArchivesServiceErrorCode.ERROR_NAME_WRONG_FORMAT);
             return false;
         }else
+            return true;
+    }
+
+    private <T> boolean checkArchivesContactEnName(ImportFileResultLog<T> log, T data, String contactEnName) {
+        if (!StringUtils.isEmpty(contactEnName)) {
+            if (!Pattern.matches("^[a-zA-Z0-9_\\-\\.]+$", contactEnName)) {
+                LOGGER.warn("Contact EnName wrong format. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Contact EnName wrong format");
+                log.setCode(ArchivesServiceErrorCode.ERROR_CONTACT_ENNAME_WRONG_FORMAT);
+                return false;
+            }
+            return true;
+        } else
             return true;
     }
 
@@ -2213,13 +2236,13 @@ public class ArchivesServiceImpl implements ArchivesService {
             LOGGER.warn("Contact token is empty. data = {}", data);
             log.setData(data);
             log.setErrorLog("Contact token is empty");
-            log.setCode(ArchivesServiceErrorCode.ERROR_CONTACT_TOKEN_ISEMPTY);
+            log.setCode(ArchivesServiceErrorCode.ERROR_CONTACT_TOKEN_IS_EMPTY);
             return false;
-        } else if (!Pattern.matches("1\\d{10}$",getRealContactToken(contactToken,ArchivesParameter.CONTACT_TOKEN))) {
+        } else if (!Pattern.matches("^1\\d{10}$",getRealContactToken(contactToken,ArchivesParameter.CONTACT_TOKEN))) {
             LOGGER.warn("Contact token wrong format. data = {}", data);
             log.setData(data);
             log.setErrorLog("Contact token wrong format");
-            log.setCode(ArchivesServiceErrorCode.ERROR_CONTACT_TOKEN_WRONGFORMAT);
+            log.setCode(ArchivesServiceErrorCode.ERROR_CONTACT_TOKEN_WRONG_FORMAT);
             return false;
         } else
             return true;
@@ -2246,6 +2269,34 @@ public class ArchivesServiceImpl implements ArchivesService {
                 log.setData(data);
                 log.setErrorLog("JobPosition not found");
                 log.setCode(ArchivesServiceErrorCode.ERROR_JOB_POSITION_NOT_FOUND);
+                return false;
+            }
+            return true;
+        } else
+            return true;
+    }
+
+    private <T> boolean checkArchivesContactShortToken(ImportFileResultLog<T> log, T data, String contactShortToken){
+        if (!StringUtils.isEmpty(contactShortToken)) {
+            if (!Pattern.matches("\\d+", contactShortToken)) {
+                LOGGER.warn("Contact short token wrong format. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Contact short token wrong format");
+                log.setCode(ArchivesServiceErrorCode.ERROR_CONTACT_SHORT_TOKEN_WRONG_FORMAT);
+                return false;
+            }
+            return true;
+        } else
+            return true;
+    }
+
+    private <T> boolean checkArchivesWorkEmail(ImportFileResultLog<T> log, T data, String workEmail){
+        if (!StringUtils.isEmpty(workEmail)) {
+            if (!Pattern.matches("^([a-zA-Z0-9]+[_|\\_|\\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\\_|\\.]?)*[a-zA-Z0-9]+\\.[a-zA-Z]{2,3}$", workEmail)) {
+                LOGGER.warn("WorkEmail wrong format. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("WorkEmail wrong format");
+                log.setCode(ArchivesServiceErrorCode.ERROR_WORK_EMAIL_WRONG_FORMAT);
                 return false;
             }
             return true;
