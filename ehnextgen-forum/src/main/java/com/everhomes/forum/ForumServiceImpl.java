@@ -4155,6 +4155,7 @@ public class ForumServiceImpl implements ForumService {
             namespaceId = UserContext.getCurrentNamespaceId();
         }
 
+        //非常不靠谱的判断，可是真的没有其他办法，急需在创建帖子的时候从来源处传来是哪个应用的  add by yanjun 20171109
         if(post.getActivityCategoryId() != null && post.getActivityCategoryId().longValue() != 0){
             //活动应用的帖子
             setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.ACTIVITY.getCode(), post.getActivityCategoryId());
