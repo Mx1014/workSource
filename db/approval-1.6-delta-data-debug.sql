@@ -20,7 +20,7 @@ INSERT INTO `eh_general_approval_templates`(`id`, `namespace_id`, `owner_id`, `o
 -- ended by R
 
 -- added for 10.1.10.85
-INSERT INTO `ehcore`.`eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (1926, 52000, '', 'EhNamespaces', 999975, 2);
-INSERT INTO `ehcore`.`eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (10891, 52010, '审批记录', 'EhNamespaces', 999975, 2);
-INSERT INTO `ehcore`.`eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (10892, 52020, '规则设置', 'EhNamespaces', 999975, 2);
-INSERT INTO `ehcore`.`eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (10893, 52030, '表单管理', 'EhNamespaces', 999975, 2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (1926, 52000, '', 'EhNamespaces', 999975, 2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (10891, 52010, '审批记录', 'EhNamespaces', 999975, 2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (10892, 52020, '规则设置', 'EhNamespaces', 999975, 2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (10893, 52030, '表单管理', 'EhNamespaces', 999975, 2);
