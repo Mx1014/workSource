@@ -2187,7 +2187,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             log.setErrorLog("Contact name too long.");
             log.setCode(ArchivesServiceErrorCode.ERROR_NAME_TOOLONG);
             return false;
-        }else if(Pattern.matches("/^[\\u4E00-\\u9FA5A-Za-z0-9_]+$/", contactName)){
+        }else if(!Pattern.matches("/^[\\u4E00-\\u9FA5A-Za-z0-9_]+$/", contactName)){
             LOGGER.warn("Contact name wrong format. data = {}", data);
             log.setData(data);
             log.setErrorLog("Contact name wrong format.");
@@ -2204,7 +2204,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             log.setErrorLog("Contact token is empty");
             log.setCode(ArchivesServiceErrorCode.ERROR_CONTACT_TOKEN_ISEMPTY);
             return false;
-        } else if (Pattern.matches("/^1\\d{10}$/",getRealContactToken(contactToken,ArchivesParameter.CONTACT_TOKEN))) {
+        } else if (!Pattern.matches("/^1\\d{10}$/",getRealContactToken(contactToken,ArchivesParameter.CONTACT_TOKEN))) {
             LOGGER.warn("Contact token wrong format. data = {}", data);
             log.setData(data);
             log.setErrorLog("Contact token wrong format");
