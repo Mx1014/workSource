@@ -1669,16 +1669,16 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(t.OWNERID.eq(ownerId))
                 .fetch()
                 .map(r -> ConvertHelper.convert(r, PaymentBillGroupRule.class));
-        if(rules.size() > 1){
-            List<PaymentBillGroupRule> rules2 = context.select()
-                    .from(t)
-                    .where(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
-                    .and(t.OWNERTYPE.eq(ownerType))
-                    .and(t.OWNERID.eq(ownerId))
-                    .fetch()
-                    .map(r -> ConvertHelper.convert(r, PaymentBillGroupRule.class));
-            return rules2.get(0);
-        }
+//        if(rules.size() > 1){
+//            List<PaymentBillGroupRule> rules2 = context.select()
+//                    .from(t)
+//                    .where(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
+//                    .and(t.OWNERTYPE.eq(ownerType))
+//                    .and(t.OWNERID.eq(ownerId))
+//                    .fetch()
+//                    .map(r -> ConvertHelper.convert(r, PaymentBillGroupRule.class));
+//            return rules2.get(0);
+//        }
         return rules.get(0);
     }
 
@@ -1758,10 +1758,16 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
         EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
+        EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
         List<Long> l = new ArrayList<>();
+        List<Long> fetch = context.select(bill.ID)
+                .from(bill)
+                .where(bill.CONTRACT_NUM.eq(contractNum))
+                .fetch(bill.ID);
         context.select(t.ID,t.DATE_STR,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
                 .from(t,t1)
-                .where(t.CONTRACT_NUM.eq(contractNum))
+//                .where(t.CONTRACT_NUM.eq(contractNum))
+                .where(t.BILL_ID.in(fetch))
                 .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
                 .orderBy(t1.NAME,t.DATE_STR)
                 .limit(pageOffset,pageSize+1)
@@ -1780,10 +1786,15 @@ public class AssetProviderImpl implements AssetProvider {
                     return null;
                 });
         if(l.size() < 1 || l.get(0) == null){
+            List<Long> fetch1 = context.select(bill.ID)
+                    .from(bill)
+                    .where(bill.CONTRACT_ID.eq(contractId))
+                    .fetch(bill.ID);
             List<PaymentExpectancyDTO> dtos1 = new ArrayList<>();
             context.select(t.DATE_STR,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
                     .from(t,t1)
-                    .where(t.CONTRACT_ID.eq(contractId))
+//                    .where(t.CONTRACT_ID.eq(contractId))
+                    .where(t.BILL_ID.in(fetch1))
                     .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
                     .orderBy(t1.NAME,t.DATE_STR)
                     .limit(pageOffset,pageSize+1)
@@ -2516,18 +2527,21 @@ public class AssetProviderImpl implements AssetProvider {
                     throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"找不到公式,标准的id为"+standard.getId()+"");
                 }
             }
-            char[] formularChars = formula.toCharArray();
-            int index = 0;
-            int start = 0;
-            while(index < formularChars.length){
-                if(formularChars[index]=='+'||formularChars[index]=='-'||formularChars[index]=='*'||formularChars[index]=='/'||index == formularChars.length-1){
-                    String var = formula.substring(start,index==formula.length()-1?index+1:index);
-                    if(!IntegerUtil.hasDigit(var)){
-                        varIdens.add(findVariableByIden(var).getName());
+            if(formula!=null){
+                char[] formularChars = formula.toCharArray();
+                int index = 0;
+                int start = 0;
+                while(index < formularChars.length){
+                    if(formularChars[index]=='+'||formularChars[index]=='-'||formularChars[index]=='*'||formularChars[index]=='/'||index == formularChars.length-1){
+                        String var = formula.substring(start,index==formula.length()-1?index+1:index);
+                        if(!IntegerUtil.hasDigit(var)){
+                            varIdens.add(findVariableByIden(var).getName());
+                        }
+                        start = index+1;
                     }
-                    start = index+1;
+                    index++;
                 }
-                index++;
+
             }
             dto.setVariableNames(new ArrayList<>(varIdens));
         }
@@ -2639,7 +2653,8 @@ public class AssetProviderImpl implements AssetProvider {
         com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule = new PaymentBillGroupRule();
         if(ruleId == null){
             if(fetch.contains(cmd.getChargingItemId())){
-                response.setFailCause(AssetPaymentStrings.DELETE_GROUP_RULE_UNSAFE);
+                response.setFailCause(AssetPaymentStrings.CREATE_CHARGING_ITEM_FAIL);
+                return response;
             }
             //新增 一条billGroupRule
             long nextRuleId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules.class));
@@ -2777,7 +2792,6 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(t.OWNER_TYPE.eq(rule.getOwnertype()))
                 .and(t.NAMESPACE_ID.eq(rule.getNamespaceId()))
                 .and(t.EH_PAYMENT_CHARGING_ITEM_ID.eq(rule.getChargingItemId()))
-                .and(t.EH_PAYMENT_CHARGING_STANDARD_ID.eq(rule.getChargingStandardsId()))
                 .fetch(t.ID);
         if(fetch1.size()>0){
             return true;

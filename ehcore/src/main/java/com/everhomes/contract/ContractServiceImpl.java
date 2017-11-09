@@ -664,8 +664,12 @@ public class ContractServiceImpl implements ContractService {
 			FeeRules feeRule = new FeeRules();
 			feeRule.setChargingItemId(chargingItem.getChargingItemId());
 			feeRule.setChargingStandardId(chargingItem.getChargingStandardId());
-			feeRule.setDateStrBegin(new Date(chargingItem.getChargingStartTime()));
-			feeRule.setDateStrEnd(new Date(chargingItem.getChargingExpiredTime()));
+			if(chargingItem.getChargingStartTime() != null){
+				feeRule.setDateStrBegin(new Date(chargingItem.getChargingStartTime()));
+			}
+			if(chargingItem.getChargingExpiredTime() !=null){
+				feeRule.setDateStrEnd(new Date(chargingItem.getChargingExpiredTime()));
+			}
 			List<ContractProperty> contractProperties = new ArrayList<>();
 			if(chargingItem.getApartments() != null && chargingItem.getApartments().size() > 0) {
 				chargingItem.getApartments().forEach(apartment -> {

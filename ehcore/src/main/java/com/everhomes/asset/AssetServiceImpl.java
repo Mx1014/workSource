@@ -1021,11 +1021,14 @@ public class AssetServiceImpl implements AssetService {
                         case 4:
                             cycle = 11;
                             break;
+                        case 5:
+                            break;
                         default:
+                            assetProvider.deleteContractPayment(contractId);
                             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
                     }
                     //计算
-                    List<BillItemsExpectancy> billItemsExpectancies = assetFeeHandler(var2,formula,groupRule,group,rule,cycle,cmd,property,standard,formulaCondition);
+                    List<BillItemsExpectancy> billItemsExpectancies = assetFeeHandler(var2,formula,groupRule,group,rule,cycle,cmd,property,standard,formulaCondition,billingCycle);
 
 //                long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), billItemsExpectancies.size());
 //                long currentBillItemSeq = nextBillItemBlock - billItemsExpectancies.size() + 1;
@@ -1084,6 +1087,16 @@ public class AssetServiceImpl implements AssetService {
                     for(int g = 0; g< billItemsExpectancies.size(); g++){
                         BillItemsExpectancy exp = billItemsExpectancies.get(g);
 
+//                        //修改为不去扫描费项（没有费项的也就没有账单嘛),也是在有费项的地方去建立账单
+//
+//                        for(int m = 0; m < billItemsList.size(); m ++){
+//                            EhPaymentBillItems item = billItemsList.get(m);
+//                            String generationDate = item.getDateStrGeneration();
+//
+//                        }
+//
+//
+//
 
                         //每一个周期的bill,先判断是否是此周期的bill已经建立了
                         BillIdentity identity = new BillIdentity();
@@ -1278,29 +1291,43 @@ public class AssetServiceImpl implements AssetService {
 
     }
 
-    private List<BillItemsExpectancy> assetFeeHandler(List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,Integer cycle,PaymentExpectanciesCommand cmd,ContractProperty property,EhPaymentChargingStandards standard,List<PaymentFormula> formulaCondition) {
+    private List<BillItemsExpectancy> assetFeeHandler(List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,Integer cycle,PaymentExpectanciesCommand cmd,ContractProperty property,EhPaymentChargingStandards standard,List<PaymentFormula> formulaCondition,Byte billingCycle ) {
+        SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
+        SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
         //返回的列表
         List<BillItemsExpectancy> list = new ArrayList<>();
         //计算的时间区间
         Calendar dateStrBegin = Calendar.getInstance();
-        dateStrBegin.setTime(rule.getDateStrBegin());
+        if(rule.getDateStrBegin() != null){
+            dateStrBegin.setTime(rule.getDateStrBegin());
+        }
         Calendar dateStrEnd = Calendar.getInstance();
-        dateStrEnd.setTime(rule.getDateStrEnd());
+        if(rule.getDateStrEnd() == null){
+            dateStrEnd.set(Calendar.DAY_OF_MONTH,dateStrEnd.getActualMaximum(Calendar.DAY_OF_MONTH));
+        }else{
+            dateStrEnd.setTime(rule.getDateStrEnd());
+        }
 
-        SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
-        SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+
         int time = 0;
 
         //先算开始a
         Calendar a = Calendar.getInstance();
         a.setTime(dateStrBegin.getTime());
-        while(a.compareTo(dateStrEnd)<0){
+
+        timeLoop:while(a.compareTo(dateStrEnd)<0){
             //计算费用产生月d d = a+cycle
             Calendar d = Calendar.getInstance();
-            d.setTime(a.getTime());
-            d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
-            d.add(Calendar.MONTH,cycle);
-            d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
+            if(billingCycle.byteValue() == (byte) 5){
+                d.setTime(dateStrEnd.getTime());
+            } else {
+                d.setTime(a.getTime());
+                d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
+                d.add(Calendar.MONTH,cycle);
+                d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
+            }
+
+
             //计算费用产生的日期
             Calendar d1 = Calendar.getInstance();
             d1.setTime(d.getTime());
@@ -1314,30 +1341,43 @@ public class AssetServiceImpl implements AssetService {
                 // ?
                 d1.set(Calendar.DAY_OF_MONTH,groupRule.getBillItemMonthOffset());
             }
-            //比较d和d1
-            Calendar d2 = Calendar.getInstance();
-            if(d.compareTo(d1)<0){
-                d2.setTime(d.getTime());
-            }else if(d.compareTo(d1)>=0){
-                d2.setTime(d1.getTime());
+                //费项d不能超过计价条款的两个边
+            if(d1.compareTo(dateStrBegin)==-1){
+                d1.setTime(dateStrBegin.getTime());
             }
+            if(d1.compareTo(dateStrEnd)==1){
+                d1.setTime(dateStrEnd.getTime());
+            }
+            //比较d和d1---wrong
+            //比较d和dateStrEnd
+            Calendar d2 = Calendar.getInstance();
+//            if(d.compareTo(d1)<0){
+//                d2.setTime(d.getTime());
+//            }else if(d.compareTo(d1)>=0){
+//                d2.setTime(d1.getTime());
+//            }
+            d2.setTime(d.getTime());
             if(d2.compareTo(dateStrEnd)>0){
                 d2.setTime(dateStrEnd.getTime());
             }
             //计算
             //计算系数r，系数r = （d2-a）天数/d2所在月往未来一周期的天数,  如果符合一个周期，那么 r = 1；
-            boolean b = checkCycle(d2, a, cycle+1);
-            float r = 1;
-            if(!b){
-                float divider = daysBetween(d2, a);
-                Calendar d_assist = Calendar.getInstance();
-                d_assist.setTime(d2.getTime());
+            float r = 1f;
+
+            if(billingCycle.byteValue() != (byte) 5){
+                boolean b = checkCycle(d2, a, cycle+1);
+                if(!b){
+                    float divider = daysBetween(d2, a);
+                    Calendar d_assist = Calendar.getInstance();
+                    d_assist.setTime(d2.getTime());
 //                d_assist.set(Calendar.MONTH,d_assist.get(Calendar.MONTH)+cycle+1);
-                d_assist.add(Calendar.MONTH,cycle+1);
-                d_assist.set(Calendar.DAY_OF_MONTH,d2.get(Calendar.DAY_OF_MONTH)-1);
-                float divided = daysBetween(d2,d_assist);
-                r = divider/divided;
+                    d_assist.add(Calendar.MONTH,cycle+1);
+                    d_assist.set(Calendar.DAY_OF_MONTH,d2.get(Calendar.DAY_OF_MONTH)-1);
+                    float divided = daysBetween(d2,d_assist);
+                    r = divider/divided;
+                }
             }
+
             BigDecimal amount = calculateFee(var2, formula, r,standard,formulaCondition);
             //组装对象
             BillItemsExpectancy obj = new BillItemsExpectancy();
@@ -1388,11 +1428,15 @@ public class AssetServiceImpl implements AssetService {
             list.add(obj);
             //更改a的值
 //            d2.set(Calendar.DAY_OF_MONTH,d2.get(Calendar.DAY_OF_MONTH)+1);
+            if(billingCycle == 5){
+                break timeLoop;
+            }
             d2.add(Calendar.DAY_OF_MONTH,1);
             a.setTime(d2.getTime());
             //继续循环
             time++;
         }
+
         //拆卸调组的包裹
         List<RentAdjust> rentAdjusts = cmd.getRentAdjusts();
         if(rentAdjusts!=null){
@@ -2638,6 +2682,7 @@ public class AssetServiceImpl implements AssetService {
 //            //添加+解耦，判断safe+修改+解耦group和rule
 //            assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
 //        }
+
         return assetProvider.addOrModifyRuleForBillGroup(cmd);
 
     }
