@@ -5582,8 +5582,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				.fetchInto(Long.class);
     }
 
-    @Override
-	public List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand, String filterScopeType) {
+	@Override
+	public List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand, String filterScopeType, List<String> groupTypes){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		pageSize = pageSize + 1;
 		List<OrganizationMember> result = new ArrayList<>();
@@ -5623,6 +5623,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			cond = cond.and(t1.field("visible_flag").eq(visibleFlag.getCode()));
 		}
 
+		if (null != groupTypes && groupTypes.size() > 0){
+			cond = cond.and(t1.field("group_type").in(groupTypes));
+		}
 
 		if(listCommand != null){
 			// 员工状态
@@ -5677,6 +5680,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			locator.setAnchor(result.get(result.size() - 1).getDetailId());
 		}
 		return result;
+	}
+
+    @Override
+	public List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand, String filterScopeType) {
+		return this.listOrganizationPersonnelsWithDownStream(keywords, contactSignedupStatus, visibleFlag, locator, pageSize, listCommand, filterScopeType, null);
 	}
 
 	@Override
