@@ -4,6 +4,7 @@ INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `operator_uid`, `creator_uid`) VALUES(49120,'抄表记录',49100,'/20000/49100/49120','1','3','2','0',NOW(), 1, 1); 
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `operator_uid`, `creator_uid`) VALUES(49130,'统计信息',49100,'/20000/49100/49130','1','3','2','0',NOW(), 1, 1); 
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `operator_uid`, `creator_uid`) VALUES(49140,'参数设置',49100,'/20000/49100/49140','1','3','2','0',NOW(), 1, 1); 
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `operator_uid`, `creator_uid`) VALUES(49150,'计划管理',49100,'/20000/49100/49150','1','3','2','0',NOW(), 1, 1); 
 
 SET @module_privilege_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
 SET @privilege_id = (SELECT MAX(id) FROM `eh_acl_privileges`);
@@ -67,6 +68,18 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) V
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
     VALUES((@module_privilege_id := @module_privilege_id + 1),'49140','0',21013,'能耗管理 参数设置权限','0',NOW());  
     
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21014, '0', '能耗管理 计划管理新增修改权限', '能耗管理 计划管理新增修改权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'49150','0',21014,'能耗管理 计划管理新增修改权限','0',NOW());  
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21015, '0', '能耗管理 计划管理查看权限', '能耗管理 计划管理查看权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'49150','0',21015,'能耗管理 计划管理查看权限','0',NOW());  
+ 
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21016, '0', '能耗管理 计划管理删除权限', '能耗管理 计划管理删除权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'49150','0',21016,'能耗管理 计划管理删除权限','0',NOW());  
+  
 -- 提醒
 SET @max_template_id = IFNULL((SELECT MAX(id) FROM `eh_locale_templates`), 1);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
