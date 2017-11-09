@@ -3,12 +3,13 @@ package com.everhomes.general_approval;
 import com.alibaba.fastjson.JSON;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.rest.approval.ApprovalStatus;
-import com.everhomes.rest.general_approval.GeneralFormFieldType;
-import com.everhomes.rest.general_approval.PostApprovalFormGoOutValue;
+import com.everhomes.rest.general_approval.*;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.techpark.punch.PunchProvider;
 
 import com.everhomes.techpark.punch.PunchService;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.DateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.flow.FlowCase;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -57,7 +59,41 @@ public class GeneralApprovalDefaultHandler implements GeneralApprovalHandler {
 	@Override
 	public void onFlowCaseCreating(FlowCase flowCase) {
 		// 每一个子类自己实现
-		
+
+		//建立一个request
+		PunchExceptionRequest request = new PunchExceptionRequest();
+		GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
+		request.setEnterpriseId(ga.getOrganizationId());
+		//初始状态是等待审批
+		request.setStatus(ApprovalStatus.WAITING_FOR_APPROVING.getCode());
+		request.setUserId(flowCase.getApplyUserId());
+		//分别处理
+		if (punchService.getTimeIntervalApprovalAttribute().contains(ga.getApprovalAttribute())) {
+
+			GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndFeildType(flowCase.getId(),
+					GeneralFormFieldType.OVERTIME.getCode());
+			PostApprovalFormAskForLeaveValue valDTO = JSON.parseObject(val.getFieldStr3(), PostApprovalFormAskForLeaveValue.class);
+			request.setBeginTime(Timestamp.valueOf(valDTO.getStartTime() + ":00"));
+			request.setEndTime(Timestamp.valueOf(valDTO.getEndTime() + ":00"));
+			request.setDuration(valDTO.getDuration());
+			request.setCategoryId(valDTO.getRestId());
+		}else if(GeneralApprovalAttribute.fromCode(ga.getApprovalAttribute()) == GeneralApprovalAttribute.ABNORMAL_PUNCH){
+
+			GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndFeildType(flowCase.getId(),
+					GeneralFormFieldType.ABNORMAL_PUNCH.getCode());
+			PostApprovalFormAbnormalPunchValue valDTO= JSON.parseObject(val.getFieldStr3(), PostApprovalFormAbnormalPunchValue.class);
+
+			request.setPunchDate(java.sql.Date.valueOf(valDTO.getAbnormalDate()));
+			request.setPunchType(valDTO.getPunchType());
+			request.setPunchIntervalNo(valDTO.getPunchIntervalNo());
+		}
+
+		request.setApprovalAttribute(ga.getApprovalAttribute());
+		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		request.setCreatorUid(UserContext.currentUserId());
+		//用工作流的id 作為表示是哪個審批
+		request.setRequestId(flowCase.getId());
+		punchProvider.createPunchExceptionRequest(request);
 	}
 
 	@Override

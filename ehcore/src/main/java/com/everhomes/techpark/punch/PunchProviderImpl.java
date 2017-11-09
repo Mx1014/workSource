@@ -1,27 +1,22 @@
 package com.everhomes.techpark.punch;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.approval.*;
+import com.everhomes.rest.approval.ApprovalStatus;
+import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.techpark.punch.*;
+import com.everhomes.server.schema.tables.daos.*;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.DeleteWhereStep;
-import org.jooq.InsertQuery;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.Record3;
-import org.jooq.Record5;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectHavingStep;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,25 +30,8 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.approval.ListTargetType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhPunchDayLogsDao;
-import com.everhomes.server.schema.tables.daos.EhPunchExceptionApprovalsDao;
-import com.everhomes.server.schema.tables.daos.EhPunchExceptionRequestsDao;
-import com.everhomes.server.schema.tables.daos.EhPunchGeopointsDao;
-import com.everhomes.server.schema.tables.daos.EhPunchHolidaysDao;
-import com.everhomes.server.schema.tables.daos.EhPunchLocationRulesDao;
-import com.everhomes.server.schema.tables.daos.EhPunchRuleOwnerMapDao;
-import com.everhomes.server.schema.tables.daos.EhPunchRulesDao;
-import com.everhomes.server.schema.tables.daos.EhPunchSpecialDaysDao;
-import com.everhomes.server.schema.tables.daos.EhPunchStatisticsDao;
-import com.everhomes.server.schema.tables.daos.EhPunchTimeIntervalsDao;
-import com.everhomes.server.schema.tables.daos.EhPunchTimeRulesDao;
-import com.everhomes.server.schema.tables.daos.EhPunchWifiRulesDao;
-import com.everhomes.server.schema.tables.daos.EhPunchWifisDao;
-import com.everhomes.server.schema.tables.daos.EhPunchWorkdayRulesDao;
 import com.everhomes.server.schema.tables.pojos.EhPunchDayLogs;
 import com.everhomes.server.schema.tables.pojos.EhPunchExceptionApprovals;
 import com.everhomes.server.schema.tables.pojos.EhPunchExceptionRequests;
@@ -2797,6 +2775,92 @@ long id = sequenceProvider.getNextSequence(key);
 		return result;
 	}
 
+	@Override
+	public Integer countExceptionRequests(Long userId, String ownerType, Long ownerId, String punchMonth) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+		Timestamp beginDate;
+		try {
+			beginDate = new Timestamp(dateFormat.parse(punchMonth+"01").getTime());
+
+			Timestamp endDate = new Timestamp(dateFormat.parse((Integer.valueOf(punchMonth)+1)+"01").getTime());
+			SelectConditionStep<Record1<Integer>> step = getReadOnlyContext().select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.count()).from(Tables.EH_APPROVAL_REQUESTS)
+					.where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.CREATOR_UID.eq(userId))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(ownerId))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(beginDate))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lt(endDate))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.ABNORMAL_PUNCH.getCode()))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(com.everhomes.rest.approval.ApprovalStatus.AGREEMENT.getCode()));
+//			LOGGER.debug(step.toString());
+			return step.fetchOneInto(Integer.class);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return 0;
+		}
+
+	}
+
+	@Override
+	public List<ExtDTO> listAskForLeaveExtDTOs(Long userId, String ownerType, Long ownerId, String punchMonth) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+		Timestamp beginDate;
+		try {
+			beginDate = new Timestamp(dateFormat.parse(punchMonth+"01").getTime());
+			List<ExtDTO> result = null;
+			Timestamp endDate = new Timestamp(dateFormat.parse((Integer.valueOf(punchMonth)+1)+"01").getTime());
+			SelectHavingStep<Record2<String, BigDecimal>> step = getReadOnlyContext()
+					.select(Tables.EH_APPROVAL_CATEGORIES.CATEGORY_NAME,Tables.EH_PUNCH_EXCEPTION_REQUESTS.DURATION.sum())
+					.from(Tables.EH_APPROVAL_CATEGORIES).leftOuterJoin(Tables.EH_PUNCH_EXCEPTION_REQUESTS)
+					.on(Tables.EH_APPROVAL_CATEGORIES.ID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.CATEGORY_ID))
+					.where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.CREATOR_UID.eq(userId))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(ownerId))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(beginDate))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lt(endDate))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.ABNORMAL_PUNCH.getCode()))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(ApprovalStatus.AGREEMENT.getCode()))
+					.groupBy(Tables.EH_APPROVAL_CATEGORIES.ID)
+					;
+//			LOGGER.debug(step.toString());
+			result = step.orderBy(Tables.EH_APPROVAL_CATEGORIES.ID).fetch().map((r) -> {
+				ExtDTO dto = new ExtDTO();
+				dto.setName(r.value1());
+				dto.setTimeCount(r.value2().toString());
+				return dto;
+			});
+			if (null == result || result.size() == 0) {
+				return null;
+			}
+			return result;
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private EhApprovalRequestsDao getReadWriteDao() {
+		return getDao(getReadWriteContext());
+	}
+
+	private EhApprovalRequestsDao getReadOnlyDao() {
+		return getDao(getReadOnlyContext());
+	}
+
+	private EhApprovalRequestsDao getDao(DSLContext context) {
+		return new EhApprovalRequestsDao(context.configuration());
+	}
+
+	private DSLContext getReadWriteContext() {
+		return getContext(AccessSpec.readWrite());
+	}
+
+	private DSLContext getReadOnlyContext() {
+		return getContext(AccessSpec.readOnly());
+	}
+
+	private DSLContext getContext(AccessSpec accessSpec) {
+		return dbProvider.getDslContext(accessSpec);
+	}
 
 }
 

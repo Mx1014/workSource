@@ -4281,50 +4281,52 @@ public class PunchServiceImpl implements PunchService {
 //				BigDecimal b = new BigDecimal(statistic.getOverTimeSum()/3600000.0);
 //				dto.setOverTimeSum(b.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
 //			}
-
-			dto.setOverTimeSum(approvalRequestProvider.countHourLengthByUserAndMonth(statistic.getUserId(),statistic.getOwnerType(),statistic.getOwnerId(),statistic.getPunchMonth()));
-			List<ApprovalRangeStatistic> abscentStats = approvalRangeStatisticProvider.queryApprovalRangeStatistics(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
-				@Override
-				public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-						SelectQuery<? extends Record> query) {
-					query.addConditions(Tables.EH_APPROVAL_RANGE_STATISTICS.PUNCH_MONTH.eq(cmd.getMonth()));
-					query.addConditions(Tables.EH_APPROVAL_RANGE_STATISTICS.USER_ID.eq(statistic.getUserId()));
-					query.addConditions(Tables.EH_APPROVAL_RANGE_STATISTICS.OWNER_ID.eq(statistic.getOwnerId()));
-					query.addConditions(Tables.EH_APPROVAL_RANGE_STATISTICS.OWNER_TYPE.eq(statistic.getOwnerType()));
-
-					return null;
-				}
-			});
-			dto.setExts(new ArrayList<ExtDTO>());
-			if(null != categories){
-				for(ApprovalCategory category : categories){
-					ExtDTO extDTO = new ExtDTO();
-					dto.getExts().add(extDTO);
-					extDTO.setName(category.getCategoryName());
-					if(null != abscentStats && abscentStats.size()>0){
-						for(ApprovalRangeStatistic abstat : abscentStats){
-							if(abstat.getCategoryId().equals(category.getId())){
-								StringBuffer timeCountBuffer = new StringBuffer();
-								String[] range = abstat.getActualResult().split("\\.");
-								if(!range[0].equals("0")){
-									timeCountBuffer.append(range[0]);
-									timeCountBuffer.append("天");
-								}
-								if(!range[1].equals("0")){
-									timeCountBuffer.append(range[1]);
-									timeCountBuffer.append("小时");
-								}
-								if(!range[2].equals("0")){
-									timeCountBuffer.append(range[2]);
-									timeCountBuffer.append("分钟");
-								}
-								extDTO.setTimeCount(timeCountBuffer.toString());
-								break;
-							}
-						}
-					}
-				}
-			}
+			dto.setExceptionRequestCount(punchProvider.countExceptionRequests(statistic.getUserId(),statistic.getOwnerType(),statistic.getOwnerId(),statistic.getPunchMonth()));
+			dto.setOverTimeSum(approvalRequestProvider.countOvertimeDurationByUserAndMonth(statistic.getUserId(),statistic.getOwnerType(),statistic.getOwnerId(),statistic.getPunchMonth()));
+//			List<ApprovalRangeStatistic> abscentStats = approvalRangeStatisticProvider.queryApprovalRangeStatistics(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
+//				@Override
+//				public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+//						SelectQuery<? extends Record> query) {
+//					query.addConditions(Tables.EH_APPROVAL_RANGE_STATISTICS.PUNCH_MONTH.eq(cmd.getMonth()));
+//					query.addConditions(Tables.EH_APPROVAL_RANGE_STATISTICS.USER_ID.eq(statistic.getUserId()));
+//					query.addConditions(Tables.EH_APPROVAL_RANGE_STATISTICS.OWNER_ID.eq(statistic.getOwnerId()));
+//					query.addConditions(Tables.EH_APPROVAL_RANGE_STATISTICS.OWNER_TYPE.eq(statistic.getOwnerType()));
+//
+//					return null;
+//				}
+//			});
+//			dto.setExts(new ArrayList<ExtDTO>());
+//			if(null != categories){
+//				for(ApprovalCategory category : categories){
+//					ExtDTO extDTO = new ExtDTO();
+//					dto.getExts().add(extDTO);
+//					extDTO.setName(category.getCategoryName());
+//					if(null != abscentStats && abscentStats.size()>0){
+//						for(ApprovalRangeStatistic abstat : abscentStats){
+//							if(abstat.getCategoryId().equals(category.getId())){
+//								StringBuffer timeCountBuffer = new StringBuffer();
+//								String[] range = abstat.getActualResult().split("\\.");
+//								if(!range[0].equals("0")){
+//									timeCountBuffer.append(range[0]);
+//									timeCountBuffer.append("天");
+//								}
+//								if(!range[1].equals("0")){
+//									timeCountBuffer.append(range[1]);
+//									timeCountBuffer.append("小时");
+//								}
+//								if(!range[2].equals("0")){
+//									timeCountBuffer.append(range[2]);
+//									timeCountBuffer.append("分钟");
+//								}
+//								extDTO.setTimeCount(timeCountBuffer.toString());
+//								break;
+//							}
+//						}
+//					}
+//				}
+//			}
+			List<ExtDTO> extDTOs = punchProvider.listAskForLeaveExtDTOs(statistic.getUserId(), statistic.getOwnerType(), statistic.getOwnerId(), statistic.getPunchMonth());
+			dto.setExts(extDTOs);
 			absenceUserIdList.add(statistic.getUserId());
 		}
 		response.setNextPageAnchor(nextPageAnchor);

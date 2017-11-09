@@ -31,30 +31,30 @@ import java.text.ParseException;
 @Component(GeneralApprovalHandler.GENERAL_APPROVAL_PREFIX + "BUSINESS_TRIP")
 public class GeneralApprovalBusinessTripHandler extends GeneralApprovalDefaultHandler {
 	  
-	@Override
-	public void onFlowCaseCreating(FlowCase flowCase) {
-		//建立一个request
-		PunchExceptionRequest request = new PunchExceptionRequest();
-		GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
-		request.setEnterpriseId(ga.getOrganizationId());
-		//初始状态是等待审批
-		request.setStatus(ApprovalStatus.WAITING_FOR_APPROVING.getCode());
-		request.setUserId(flowCase.getApplyUserId());
-
-		GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndFeildType(flowCase.getId(),
-				GeneralFormFieldType.BUSINESS_TRIP.getCode());
-		PostApprovalFormBussinessTripValue valDTO= JSON.parseObject(val.getFieldStr3(), PostApprovalFormBussinessTripValue.class);
-
-		request.setBeginTime(Timestamp.valueOf(valDTO.getStartTime()+":00"));
-		request.setEndTime(Timestamp.valueOf(valDTO.getEndTime()+":00"));
-		request.setApprovalAttribute(ga.getApprovalAttribute());
-		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		request.setCreatorUid(UserContext.currentUserId());
-		//用工作流的id 作為表示是哪個審批
-		request.setRequestId(flowCase.getId());
-		punchProvider.createPunchExceptionRequest(request);
-
-	}
+//	@Override
+//	public void onFlowCaseCreating(FlowCase flowCase) {
+//		//建立一个request
+//		PunchExceptionRequest request = new PunchExceptionRequest();
+//		GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
+//		request.setEnterpriseId(ga.getOrganizationId());
+//		//初始状态是等待审批
+//		request.setStatus(ApprovalStatus.WAITING_FOR_APPROVING.getCode());
+//		request.setUserId(flowCase.getApplyUserId());
+//
+//		GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndFeildType(flowCase.getId(),
+//				GeneralFormFieldType.BUSINESS_TRIP.getCode());
+//		PostApprovalFormBussinessTripValue valDTO= JSON.parseObject(val.getFieldStr3(), PostApprovalFormBussinessTripValue.class);
+//
+//		request.setBeginTime(Timestamp.valueOf(valDTO.getStartTime()+":00"));
+//		request.setEndTime(Timestamp.valueOf(valDTO.getEndTime()+":00"));
+//		request.setApprovalAttribute(ga.getApprovalAttribute());
+//		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		request.setCreatorUid(UserContext.currentUserId());
+//		//用工作流的id 作為表示是哪個審批
+//		request.setRequestId(flowCase.getId());
+//		punchProvider.createPunchExceptionRequest(request);
+//
+//	}
 
 //	@Override
 //	public void onFlowCaseAbsorted(FlowCase flowCase) {
