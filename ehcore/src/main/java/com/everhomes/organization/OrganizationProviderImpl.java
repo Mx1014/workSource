@@ -4079,7 +4079,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationAddressMappings.class, null);
 	}
 
-	@Cacheable(value="ListOrganizationMemberByPath", key="#path+#groupTypes+#contactToken")
+	//@Cacheable(value="ListOrganizationMemberByPath", key="#path+#groupTypes+#contactToken")
 	@Override
 	public List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, String contactToken){
 		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
@@ -5606,6 +5606,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 
 		cond = cond.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
+
+		// 不包括经理
+		cond = cond.and(t1.field("group_type").notEqual(OrganizationGroupType.MANAGER.getCode()));
 
 		if (!StringUtils.isEmpty(keywords)) {
 			Condition cond1 = t2.field("contact_token").eq(keywords);
