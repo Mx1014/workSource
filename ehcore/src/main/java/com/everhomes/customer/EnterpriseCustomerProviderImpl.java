@@ -13,6 +13,7 @@ import java.util.Map;
 import com.everhomes.rest.customer.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.*;
@@ -38,18 +39,6 @@ import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.records.EhCustomerApplyProjectsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerCertificatesRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerCommercialsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerEconomicIndicatorsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerEventsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerInvestmentsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerPatentsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerTalentsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerTrackingPlansRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerTrackingsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerTrademarksRecord;
-import com.everhomes.server.schema.tables.records.EhEnterpriseCustomersRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.user.UserContext;
@@ -477,7 +466,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     @Override
     public CustomerEconomicIndicatorStatistic listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(Long customerId, Timestamp time) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhCustomerEconomicIndicatorsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS);
+        SelectQuery<EhCustomerEconomicIndicatorStatisticsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS);
         query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.CUSTOMER_ID.eq(customerId));
         query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.START_TIME.le(time));
         query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.END_TIME.ge(time));
