@@ -1527,6 +1527,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
 			//分配具体公司管理员权限
 			assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), member.getTargetId(),"admin", adminPrivilegeId);
+			
+			//TODO 添加角色 同时删除角色
+			//assignmentAclRole
 		}
 
 		return processOrganizationContactDTO(member);
