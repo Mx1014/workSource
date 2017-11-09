@@ -3275,7 +3275,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		if(bills.size() > pageSize) {
 			bills.remove(bills.size() - 1);
-			response.setNextPageAnchor( bills.get(bills.size() -1).getId()); 
+			response.setNextPageAnchor( bills.get(bills.size() -1).getReserveTime().getTime());
 		}
 		
 		response.setRentalBills(new ArrayList<>());
