@@ -1527,9 +1527,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
 			//分配具体公司管理员权限
 			assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), member.getTargetId(),"admin", adminPrivilegeId);
-			
-			//TODO 添加角色 同时删除角色
-			//assignmentAclRole
+
+			UserIdentifier userIdentifier = this.userProvider.findUserIdentifiersOfUser(member.getTargetId(), member.getNamespaceId());
+			//添加角色 同时删除角色
+			assignmentAclRole(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), member.getTargetId(), userIdentifier.getNamespaceId(), userIdentifier.getOwnerUid(), RoleConstants.PM_SUPER_ADMIN);
 		}
 
 		return processOrganizationContactDTO(member);
@@ -1751,6 +1752,18 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		dbProvider.execute((TransactionStatus status) -> {
 			deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
+
+			OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(cmd.getOrganizationId(), cmd.getContactToken());
+			List<Long> roleIds = Collections.singletonList(RoleConstants.PM_SUPER_ADMIN);
+			if(detail != null){
+				List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(cmd.getOwnerType(), cmd.getOwnerId(), detail.getTargetType(), detail.getTargetId());
+				for (RoleAssignment roleAssignment: roleAssignments) {
+					if(roleIds.contains(roleAssignment.getRoleId())){
+						aclProvider.deleteRoleAssignment(roleAssignment.getId());
+					}
+				}
+			}
+
 			return null;
 		});
 
