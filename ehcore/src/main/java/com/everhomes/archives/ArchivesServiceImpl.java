@@ -1625,6 +1625,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
                 //  2.删除员工档案
                 organizationProvider.deleteOrganizationMemberDetails(detail);
+
+                //  3.删除离职列表中对应的员工
+                deleteArchivesDismissEmployees(detailId, detail.getOrganizationId());
             }
             return null;
         });
