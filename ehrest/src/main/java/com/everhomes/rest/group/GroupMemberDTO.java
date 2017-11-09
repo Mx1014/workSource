@@ -39,6 +39,7 @@ import java.sql.Timestamp;
  *     <li>areaName: areaName</li>
  *     <li>cityName: cityName</li>
  *     <li>gender: 性别  {@link com.everhomes.rest.user.UserGender}</li>
+ *     <li>userNickName: 用户的昵称</li>
  *     <li>guildApplyDTO: guildApplyDTO 行业协会公司相关信息 {@link GuildApplyDTO}</li>
  * </ul>
  */
@@ -76,6 +77,8 @@ public class GroupMemberDTO {
     private String cityName;
 
     private Byte gender;
+
+    private String userNickName;
 
     @ItemType(GuildApplyDTO.class)
     private GuildApplyDTO guildApplyDTO;
@@ -337,6 +340,14 @@ public class GroupMemberDTO {
 
     public void setGender(Byte gender) {
         this.gender = gender;
+    }
+
+    public String getUserNickName() {
+        return userNickName;
+    }
+
+    public void setUserNickName(String userNickName) {
+        this.userNickName = userNickName;
     }
 
     @Override

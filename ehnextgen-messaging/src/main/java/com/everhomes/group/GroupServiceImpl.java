@@ -199,6 +199,11 @@ public class GroupServiceImpl implements GroupService {
     					"description length cannot be less than 10!");
 			}
 		}
+
+		if(cmd.getClubType() == null){
+    	    cmd.setClubType(ClubType.NORMAL.getCode());
+        }
+
     	return new RestResponse(createGroup(cmd, groupSetting));
     }
     
@@ -2722,6 +2727,7 @@ public class GroupServiceImpl implements GroupService {
             }
 
             groupMember.setGender(user.getGender());
+            groupMember.setUserNickName(user.getNickName());
         } else {
             LOGGER.error("The user related to the member not existed, userId=" + userId
                     + ", memberId=" + groupMember.getMemberId() + ", groupMember=" + groupMember);
