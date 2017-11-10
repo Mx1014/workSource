@@ -33,7 +33,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 
 -- 菜单
 -- 1.修改原先组织架构菜单的react
-UPDATE `eh_web_menus` SET `data_type`='react:/address-book/address-list'  WHERE id = 50100;
+UPDATE `eh_web_menus` SET `data_type`='react:/address-book/address-list' WHERE id = 50100;
 -- 2.修改原先人员管理菜单为人事档案
 UPDATE `eh_web_menus` SET `data_type`='react:/employee-record/employee-list/1', `name`= '人事档案' WHERE `name` like '%人员管理%';
 -- 3.删除原先的scope
