@@ -1,16 +1,14 @@
 -- 物业巡检V3.1
-DROP TABLE `eh_equipment_inspection_plans`;
-DROP TABLE `eh_equipment_inspection_equipment_plan_map`;
 -- 设备巡检计划表
 CREATE TABLE `eh_equipment_inspection_plans` (
-`id ` bigint(20) NOT NULL,
+`id` bigint(20) NOT NULL,
 `owner_id` bigint(20) NOT NULL COMMENT 'organization_id',
 `owner_type` varchar(32) NOT NULL COMMENT 'organization',
 `target_type` varchar(32) NOT NULL COMMENT 'zone resource_type ',
 `target_id` bigint NOT NULL COMMENT 'zone  resource_id',
 `plan_number` varchar(128) NOT NULL COMMENT 'the plans number ',
 `plan_type` tinyint(4) NOT NULL COMMENT 'the type of plan 0: 巡检  1: 保养',
-`name ` varchar(1024) NULL COMMENT 'the name of plan_number',
+`name` varchar(1024) NULL COMMENT 'the name of plan_number',
 `status` tinyint(4) NOT NULL COMMENT 'status of plans  0:waitting for starting 1: waitting for approving  2: Active 3:inActive',
 `review_result` tinyint(4) NOT NULL  COMMENT'0:none, 1:qualified 2:unqualified 3:review_delay',
 `repeatsetting_id` bigint(20) NOT NULL COMMENT 'refers to eh_repeatsetting ',
@@ -25,7 +23,7 @@ CREATE TABLE `eh_equipment_inspection_plans` (
 `delete_time` datetime NULL,
 `last_create_taskTime`  datetime NULL COMMENT 'the last time when gen task' ,
 `namespace_id` int(11) NULL,
-PRIMARY KEY (`id `)
+PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
