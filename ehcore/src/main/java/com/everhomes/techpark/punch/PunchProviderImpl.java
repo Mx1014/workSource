@@ -2856,7 +2856,7 @@ long id = sequenceProvider.getNextSequence(key);
 
 	private DSLContext getReadOnlyContext() {
 		return getContext(AccessSpec.readOnly());
-	}
+	}p
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);

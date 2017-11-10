@@ -964,7 +964,7 @@ public class PunchServiceImpl implements PunchService {
 
 	private PunchLogsDay calculateDayLogByeverypunch(Long userId, Long companyId,
                 Calendar logDay, PunchLogsDay pdl, PunchDayLog punchDayLog) throws ParseException {
-		java.sql.Date punchDate = logDay.getTime();
+		java.sql.Date punchDate = java.sql.Date.valueOf(dateSF.get().format(logDay.getTime()));
 		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,
 			companyId, dateSF.get().format(punchDate), ClockCode.SUCESS.getCode());
 		if(null != punchLogs){
@@ -1103,7 +1103,8 @@ public class PunchServiceImpl implements PunchService {
 			Long offDutyTimeLong = punchDate.getTime()+ punchTimeRule.getStartEarlyTimeLong() + punchTimeRule.getWorkTimeLong();
 			if (HommizationType.fromCode(punchTimeRule.getHommizationType()) == HommizationType.LATEARRIVE){
 				if (onDutyLog.getStatus().equals(PunchStatus.NORMAL.getCode())) {
-					offDutyTimeLong =offDutyTimeLong +(onDutyLog.getPunchDate().getTime()-onDutyLog.getRuleTime());
+					offDutyTimeLong =offDutyTimeLong +(onDutyLog.getPunchTime().getTime()
+							-punchDate.getTime()-onDutyLog.getRuleTime());
 				}else{
 					offDutyTimeLong += flexTimeLong;
 				}
@@ -1208,7 +1209,7 @@ public class PunchServiceImpl implements PunchService {
 			offDutyTimeLong = punchDate.getTime()+ punchTimeRule.getStartEarlyTimeLong() + punchTimeRule.getWorkTimeLong();
 			if (HommizationType.fromCode(punchTimeRule.getHommizationType()) == HommizationType.LATEARRIVE){
 				if (onDutyLog.getStatus().equals(PunchStatus.NORMAL.getCode())) {
-					punchLateTime =(onDutyLog.getPunchDate().getTime()-onDutyLog.getRuleTime());
+					punchLateTime =(onDutyLog.getPunchTime().getTime()-punchDate.getTime()-onDutyLog.getRuleTime());
  					offDutyTimeLong =offDutyTimeLong + punchLateTime;
 				}else{
 					offDutyTimeLong += flexTimeLong;
@@ -1234,13 +1235,14 @@ public class PunchServiceImpl implements PunchService {
 				PunchLog onDutyLog = findPunchLog(punchLogs, PunchType.ON_DUTY.getCode(), punchIntervalNo);
 				if(onDutyLog == null){
 					onDutyLog = new PunchLog();
-					onDutyLog.setRuleTime(intervals.get(punchIntervalNo-1).)
+					onDutyLog.setRuleTime(intervals.get(punchIntervalNo - 1).getArriveTimeLong());
 					onDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 				}
 				efficientLogs.add(onDutyLog);
 				PunchLog offDutyLog = findPunchLog(punchLogs, PunchType.OFF_DUTY.getCode(), punchIntervalNo);
 				if(offDutyLog == null){
 					offDutyLog = new PunchLog();
+					onDutyLog.setRuleTime(intervals.get(punchIntervalNo - 1).getLeaveTimeLong());
 					offDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 				}
 				efficientLogs.add(offDutyLog);
@@ -1264,7 +1266,8 @@ public class PunchServiceImpl implements PunchService {
 				//只有最后一次打卡要计算晚到晚走
 				if (punchIntervalNo == intervals.size() && HommizationType.fromCode(punchTimeRule.getHommizationType()) == HommizationType.LATEARRIVE) {
 					if (onDutyLog.getStatus().equals(PunchStatus.NORMAL.getCode())) {
-						punchLateTime = (onDutyLog.getPunchDate().getTime() - onDutyLog.getRuleTime());
+						punchLateTime = (onDutyLog.getPunchTime().getTime()-punchDate.getTime()
+								- onDutyLog.getRuleTime());
 						offDutyTimeLong = offDutyTimeLong + punchLateTime;
 					} else {
 						offDutyTimeLong += flexTimeLong;
