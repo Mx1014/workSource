@@ -1162,23 +1162,23 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             task.setOwnerId(cmd.getOwnerId());
             task.setType(ImportFileTaskType.ENERGY_METER.getCode());
             task.setCreatorUid(userId);
-//            task = importFileService.executeTask(new ExecuteImportTaskCallback() {
-//                @Override
-//                public ImportFileResponse importFile() {
-//                    ImportFileResponse response = new ImportFileResponse();
-//                    List<ImportEnergyMeterDataDTO> datas = handleImportEnterpriseCustomerData(resultList);
-//                    if(datas.size() > 0){
-//                        //设置导出报错的结果excel的标题
-//                        response.setTitle(datas.get(0));
-//                        datas.remove(0);
-//                    }
-//                    List<ImportFileResultLog<ImportEnterpriseCustomerDataDTO>> results = importEnterpriseCustomerData(cmd, datas, userId);
-//                    response.setTotalCount((long)datas.size());
-//                    response.setFailCount((long)results.size());
-//                    response.setLogs(results);
-//                    return response;
-//                }
-//            }, task);
+            task = importFileService.executeTask(new ExecuteImportTaskCallback() {
+                @Override
+                public ImportFileResponse importFile() {
+                    ImportFileResponse response = new ImportFileResponse();
+                    List<ImportEnergyMeterDataDTO> datas = handleImportEnergyMeterData(resultList);
+                    if(datas.size() > 0){
+                        //设置导出报错的结果excel的标题
+                        response.setTitle(datas.get(0));
+                        datas.remove(0);
+                    }
+                    List<ImportFileResultLog<ImportEnergyMeterDataDTO>> results = importEnergyMeterData(cmd, datas, userId);
+                    response.setTotalCount((long)datas.size());
+                    response.setFailCount((long)results.size());
+                    response.setLogs(results);
+                    return response;
+                }
+            }, task);
 
         } catch (IOException e) {
             LOGGER.error("File can not be resolved...");
@@ -1187,119 +1187,271 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         LOGGER.info("task: {}",  task);
         return ConvertHelper.convert(task, ImportFileTaskDTO.class);
 
-
-//        List<EnergyMeter> meterList = new ArrayList<>();
-//        ArrayList list = processorExcel(file);
-//        for (int i = 2; i < list.size(); i++) {
-//            RowResult result = (RowResult) list.get(i);
-//            if (Stream.of(result.getA(), result.getB(), result.getC(), result.getD(), result.getE(), result.getH()).anyMatch(StringUtils::isEmpty)) {
-//                continue;
-//            }
-//            EnergyMeter meter = new EnergyMeter();
-//            meter.setOwnerId(cmd.getOwnerId());
-//            meter.setOwnerType(cmd.getOwnerType());
-//            meter.setStatus(EnergyMeterStatus.ACTIVE.getCode());
-//            meter.setCommunityId(cmd.getCommunityId());
-//            meter.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
-//            meter.setName(result.getA());
-//            meter.setMeterNumber(result.getB());
-//            LocaleString meterTypeLocale = localeStringProvider.findByText(EnergyLocalStringCode.SCOPE_METER_TYPE, result.getC(), currLocale());
-//            if (meterTypeLocale != null) {
-//                meter.setMeterType(Byte.valueOf(meterTypeLocale.getCode()));
-//            } else {
-//                LOGGER.error("Import energy meter error, error field meterType");
-//                throw errorWith(SCOPE, ERR_METER_TYPE_NOT_EXIST, "Import energy meter error, error field meterType");
-//            }
-//            EnergyMeterCategory category = meterCategoryProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), result.getD());
-//            if (category != null) {
-//                meter.setBillCategoryId(category.getId());
-//            } else {
-//                LOGGER.error("Import energy meter error, error field category");
-//                throw errorWith(SCOPE, ERR_BILL_CATEGORY_NOT_EXIST, "Import energy meter error, error field category");
-//            }
-//            category = meterCategoryProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), result.getE());
-//            if (category != null) {
-//                meter.setServiceCategoryId(category.getId());
-//            } else {
-//                LOGGER.error("Import energy meter error, error field category");
-//                throw errorWith(SCOPE, ERR_SERVICE_CATEGORY_NOT_EXIST, "Import energy meter error, error field category");
-//            }
-//
-//
-//            if (NumberUtils.isNumber(result.getH())) {
-//                meter.setMaxReading(new BigDecimal(result.getH()));
-//            } else {
-//                LOGGER.error("Import energy meter error, error field MaxReading");
-//                throw errorWith(SCOPE, ERR_MAX_READING_NOT_EXIST, "Import energy meter error, error field MaxReading");
-//            }
-//            if (NumberUtils.isNumber(result.getI())) {
-//                meter.setStartReading(new BigDecimal(result.getI()));
-//            } else {
-//                meter.setStartReading(new BigDecimal("0"));
-//            }
-//
-//            if (NumberUtils.isNumber(result.getI())) {
-//                meter.setRate(new BigDecimal(result.getI()));
-//            }
-//
-//            EnergyMeterFormula formula = meterFormulaProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), result.getK());
-//            if (formula != null) {
-//                meter.setAmountFormulaId(formula.getId());
-//            }
-//
-//            dbProvider.execute(r -> {
-//                meterProvider.createEnergyMeter(meter);
-//
-//                if(!StringUtils.isEmpty(result.getF()) && !StringUtils.isEmpty(result.getG())) {
-//                    Address address = addressProvider.findApartmentAddress(meter.getNamespaceId(), meter.getCommunityId(), result.getF(), result.getG());
-//                    if(address != null) {
-//                        EnergyMeterAddress ma = new EnergyMeterAddress();
-//                        ma.setBuildingName(address.getBuildingName());
-//                        ma.setApartmentName(address.getApartmentName());
-//                        ma.setAddressId(address.getId());
-//                        ma.setApartmentFloor(address.getApartmentFloor());
-//                        Building building = buildingProvider.findBuildingByName(meter.getNamespaceId(), meter.getCommunityId(), address.getBuildingName());
-//                        if(building != null) {
-//                            ma.setBuildingId(building.getId());
-//                        }
-//                        ma.setMeterId(meter.getId());
-//                        energyMeterAddressProvider.createEnergyMeterAddress(ma);
-//                    }
-//                }
-//
-//                // 创建setting log 记录
-//                UpdateEnergyMeterCommand updateCmd = new UpdateEnergyMeterCommand();
-//                updateCmd.setPrice(meter.getPrice());
-//                updateCmd.setRate(meter.getRate());
-//                updateCmd.setCostFormulaId(meter.getCostFormulaId());
-//                updateCmd.setAmountFormulaId(meter.getAmountFormulaId());
-//                updateCmd.setStartTime(Date.valueOf(LocalDate.now()).getTime());
-//                updateCmd.setMeterId(meter.getId());
-//                updateCmd.setCalculationType(meter.getCalculationType());
-//                updateCmd.setConfigId(meter.getConfigId());
-//                updateCmd.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
-//                this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
-//                this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
-//                this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
-//                this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd);
-//
-//                // 创建一条初始读表记录
-//                ReadEnergyMeterCommand readEnergyMeterCmd = new ReadEnergyMeterCommand();
-//                readEnergyMeterCmd.setCommunityId(cmd.getCommunityId());
-//                readEnergyMeterCmd.setCurrReading(meter.getStartReading());
-//                readEnergyMeterCmd.setMeterId(meter.getId());
-//                readEnergyMeterCmd.setOrganizationId(cmd.getOwnerId());
-//                readEnergyMeterCmd.setResetMeterFlag(TrueOrFalseFlag.FALSE.getCode());
-//                readEnergyMeterCmd.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
-//                this.readEnergyMeter(readEnergyMeterCmd);
-//
-////                meterSearcher.feedDoc(meter);
-//                return true;
-//            });
-//            meterList.add(meter);
-//        }
-//        meterSearcher.bulkUpdate(meterList);
     }
+
+
+
+    private List<ImportEnergyMeterDataDTO> handleImportEnergyMeterData(List list){
+        List<ImportEnergyMeterDataDTO> result = new ArrayList<>();
+        int row = 1;
+        for (Object o : list) {
+            if(row < 2){
+                row ++;
+                continue;
+            }
+
+            RowResult r = (RowResult)o;
+            ImportEnergyMeterDataDTO data = null;
+            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getA())) {
+                if(data == null) {
+                    data = new ImportEnergyMeterDataDTO();
+                }
+                data.setName(r.getA().trim());
+            }
+
+            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getB())) {
+                if(data == null) {
+                    data = new ImportEnergyMeterDataDTO();
+                }
+                data.setMeterNumber(r.getB().trim());
+            }
+
+            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getC())) {
+                if(data == null) {
+                    data = new ImportEnergyMeterDataDTO();
+                }
+                data.setMeterType(r.getC().trim());
+            }
+
+            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getD())) {
+                if(data == null) {
+                    data = new ImportEnergyMeterDataDTO();
+                }
+                data.setBillCategory(r.getD().trim());
+            }
+
+            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getE())) {
+                if(data == null) {
+                    data = new ImportEnergyMeterDataDTO();
+                }
+                data.setServiceCategory(r.getE().trim());
+            }
+
+            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getF())) {
+                if(data == null) {
+                    data = new ImportEnergyMeterDataDTO();
+                }
+                data.setBuildingName(r.getF().trim());
+            }
+
+            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getG())) {
+                if(data == null) {
+                    data = new ImportEnergyMeterDataDTO();
+                }
+                data.setApartmentName(r.getG().trim());
+            }
+
+            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getH())) {
+                if(data == null) {
+                    data = new ImportEnergyMeterDataDTO();
+                }
+                data.setMaxReading(r.getH().trim());
+            }
+
+            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getI())) {
+                if(data == null) {
+                    data = new ImportEnergyMeterDataDTO();
+                }
+                data.setStartReading(r.getI().trim());
+            }
+
+            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getJ())) {
+                if(data == null) {
+                    data = new ImportEnergyMeterDataDTO();
+                }
+                data.setRate(r.getJ().trim());
+            }
+
+            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getK())) {
+                if(data == null) {
+                    data = new ImportEnergyMeterDataDTO();
+                }
+                data.setAmountFormula(r.getK().trim());
+            }
+
+            if(data != null) {
+                result.add(data);
+            }
+        }
+        LOGGER.info("result size : " + result.size());
+        return result;
+
+    }
+
+    private List<ImportFileResultLog<ImportEnergyMeterDataDTO>> importEnergyMeterData(ImportEnergyMeterCommand cmd, List<ImportEnergyMeterDataDTO> list, Long userId){
+        List<ImportFileResultLog<ImportEnergyMeterDataDTO>> errorDataLogs = new ArrayList<>();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        list.forEach(str -> {
+            ImportFileResultLog<ImportEnergyMeterDataDTO> log = new ImportFileResultLog<>(EnergyConsumptionServiceErrorCode.SCOPE);
+            EnergyMeter meter = new EnergyMeter();
+
+            if (org.apache.commons.lang.StringUtils.isBlank(str.getName())) {
+                LOGGER.error("energy meter name is null, data = {}", str);
+                log.setData(str);
+                log.setErrorLog("energy meter name is null");
+                log.setCode(EnergyConsumptionServiceErrorCode.ERROR_METER_NAME_IS_NULL);
+                errorDataLogs.add(log);
+                return;
+            }
+            EnergyMeter exist = meterProvider.findByName(cmd.getCommunityId(), str.getName());
+            if (exist != null) {
+                LOGGER.error("energy meter name is exist, data = {}", str);
+                log.setData(str);
+                log.setErrorLog("energy meter name is exist");
+                log.setCode(EnergyConsumptionServiceErrorCode.ERROR_METER_NAME_EXIST);
+                errorDataLogs.add(log);
+                return;
+            }
+            meter.setName(str.getName());
+
+            if (org.apache.commons.lang.StringUtils.isBlank(str.getMeterNumber())) {
+                LOGGER.error("energy meter number is null, data = {}", str);
+                log.setData(str);
+                log.setErrorLog("energy meter number is null");
+                log.setCode(EnergyConsumptionServiceErrorCode.ERROR_METER_NUMBER_IS_NULL);
+                errorDataLogs.add(log);
+                return;
+            }
+
+            EnergyMeter existNumber = meterProvider.findByNumber(cmd.getCommunityId(), str.getMeterNumber());
+            if (existNumber != null) {
+                LOGGER.error("energy meter number is exist, data = {}", str);
+                log.setData(str);
+                log.setErrorLog("energy meter number is exist");
+                log.setCode(EnergyConsumptionServiceErrorCode.ERROR_METER_NUMBER_EXIST);
+                errorDataLogs.add(log);
+                return;
+            }
+            meter.setMeterNumber(str.getMeterNumber());
+
+
+            LocaleString meterTypeLocale = localeStringProvider.findByText(EnergyLocalStringCode.SCOPE_METER_TYPE, str.getMeterType(), currLocale());
+            if (meterTypeLocale == null) {
+                LOGGER.error("energy meter type is not exist, data = {}", str);
+                log.setData(str);
+                log.setErrorLog("energy meter type is not exist");
+                log.setCode(EnergyConsumptionServiceErrorCode.ERR_METER_TYPE_NOT_EXIST);
+                errorDataLogs.add(log);
+                return;
+            }
+            meter.setMeterType(Byte.valueOf(meterTypeLocale.getCode()));
+
+            EnergyMeterCategory category = meterCategoryProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), str.getBillCategory());
+            if (category == null) {
+                LOGGER.error("energy meter bill category is not exist, data = {}", str);
+                log.setData(str);
+                log.setErrorLog("energy meter bill category is not exist");
+                log.setCode(EnergyConsumptionServiceErrorCode.ERR_BILL_CATEGORY_NOT_EXIST);
+                errorDataLogs.add(log);
+                return;
+            }
+            meter.setBillCategoryId(category.getId());
+
+            category = meterCategoryProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), str.getServiceCategory());
+            if (category == null) {
+                LOGGER.error("energy meter service category is not exist, data = {}", str);
+                log.setData(str);
+                log.setErrorLog("energy meter service category is not exist");
+                log.setCode(EnergyConsumptionServiceErrorCode.ERR_SERVICE_CATEGORY_NOT_EXIST);
+                errorDataLogs.add(log);
+                return;
+            }
+            meter.setServiceCategoryId(category.getId());
+
+            if (!NumberUtils.isNumber(str.getMaxReading())) {
+                LOGGER.error("energy meter MaxReading is not number, data = {}", str);
+                log.setData(str);
+                log.setErrorLog("energy meter MaxReading is not number");
+                log.setCode(EnergyConsumptionServiceErrorCode.ERR_MAX_READING_NOT_EXIST);
+                errorDataLogs.add(log);
+                return;
+            }
+            meter.setMaxReading(new BigDecimal(str.getMaxReading()));
+
+            if (NumberUtils.isNumber(str.getStartReading())) {
+                meter.setStartReading(new BigDecimal(str.getStartReading()));
+            } else {
+                meter.setStartReading(new BigDecimal("0"));
+            }
+
+            if (NumberUtils.isNumber(str.getRate())) {
+                meter.setRate(new BigDecimal(str.getRate()));
+            }
+
+            EnergyMeterFormula formula = meterFormulaProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), str.getAmountFormula());
+            if (formula != null) {
+                meter.setAmountFormulaId(formula.getId());
+            }
+
+            meter.setOwnerId(cmd.getOwnerId());
+            meter.setOwnerType(cmd.getOwnerType());
+            meter.setStatus(EnergyMeterStatus.ACTIVE.getCode());
+            meter.setCommunityId(cmd.getCommunityId());
+            meter.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
+
+            dbProvider.execute(r -> {
+                meterProvider.createEnergyMeter(meter);
+
+                if (!StringUtils.isEmpty(str.getBuildingName()) && !StringUtils.isEmpty(str.getApartmentName())) {
+                    Address address = addressProvider.findApartmentAddress(meter.getNamespaceId(), meter.getCommunityId(), str.getBuildingName(), str.getApartmentName());
+                    if (address != null) {
+                        EnergyMeterAddress ma = new EnergyMeterAddress();
+                        ma.setBuildingName(address.getBuildingName());
+                        ma.setApartmentName(address.getApartmentName());
+                        ma.setAddressId(address.getId());
+                        ma.setApartmentFloor(address.getApartmentFloor());
+                        Building building = buildingProvider.findBuildingByName(meter.getNamespaceId(), meter.getCommunityId(), address.getBuildingName());
+                        if (building != null) {
+                            ma.setBuildingId(building.getId());
+                        }
+                        ma.setMeterId(meter.getId());
+                        energyMeterAddressProvider.createEnergyMeterAddress(ma);
+                    }
+                }
+
+                // 创建setting log 记录
+                UpdateEnergyMeterCommand updateCmd = new UpdateEnergyMeterCommand();
+                updateCmd.setPrice(meter.getPrice());
+                updateCmd.setRate(meter.getRate());
+                updateCmd.setCostFormulaId(meter.getCostFormulaId());
+                updateCmd.setAmountFormulaId(meter.getAmountFormulaId());
+                updateCmd.setStartTime(Date.valueOf(LocalDate.now()).getTime());
+                updateCmd.setMeterId(meter.getId());
+                updateCmd.setCalculationType(meter.getCalculationType());
+                updateCmd.setConfigId(meter.getConfigId());
+                updateCmd.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
+                this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
+                this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
+                this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
+                this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd);
+
+                // 创建一条初始读表记录
+                ReadEnergyMeterCommand readEnergyMeterCmd = new ReadEnergyMeterCommand();
+                readEnergyMeterCmd.setCommunityId(cmd.getCommunityId());
+                readEnergyMeterCmd.setCurrReading(meter.getStartReading());
+                readEnergyMeterCmd.setMeterId(meter.getId());
+                readEnergyMeterCmd.setOrganizationId(cmd.getOwnerId());
+                readEnergyMeterCmd.setResetMeterFlag(TrueOrFalseFlag.FALSE.getCode());
+                readEnergyMeterCmd.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
+                this.readEnergyMeter(readEnergyMeterCmd);
+
+                meterSearcher.feedDoc(meter);
+                return true;
+            });
+        });
+        return errorDataLogs;
+    }
+
 
     private String currLocale() {
         return UserContext.current().getUser().getLocale();
