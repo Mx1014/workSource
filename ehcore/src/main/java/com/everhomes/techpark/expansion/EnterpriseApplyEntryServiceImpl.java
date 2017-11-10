@@ -661,9 +661,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			i = LeasePromotionOrder.LEASE_PROMOTION.getCode();
 		}
 		if (null != config.getDisplayNames() ) {
+			int configSize = config.getDisplayNames().size();
+			int totalSize = LeasePromotionOrder.values().length;
+			int currentSize = totalSize - configSize;
 			for (Integer k: config.getDisplayOrders()) {
 				if (k.byteValue() ==i) {
-					sourceTypeName =config.getDisplayNames().get(k - 1);
+					sourceTypeName =config.getDisplayNames().get(k - 1 - currentSize);
 				}
 			}
 		}
@@ -760,9 +763,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		if (null != cmd.getLeaseBuildingId()) {
 			cmd.setBuildingId(cmd.getLeaseBuildingId());
 		}else{
-			LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByBuildingId(cmd.getBuildingId());
-			if (null != leaseBuilding) {
-				cmd.setBuildingId(leaseBuilding.getId());
+			if (cmd.getBuildingId() != 0L) {
+				LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByBuildingId(cmd.getBuildingId());
+				if (null != leaseBuilding) {
+					cmd.setBuildingId(leaseBuilding.getId());
+				}
 			}
 		}
 

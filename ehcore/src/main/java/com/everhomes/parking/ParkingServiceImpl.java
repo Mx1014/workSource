@@ -2148,6 +2148,9 @@ public class ParkingServiceImpl implements ParkingService {
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 							"Not support AUTHORIZED request");
 				}
+			}else if (cmd.getRequestType() == ParkingCarVerificationType.IGNORE_REPEAT_UN_AUTHORIZED.getCode()) {
+				//TODO:什么都不做 忽略重复添加（应产品要求：去认证时也会调此接口做添加操作，如果是同一车牌，忽略添加，因为后面可能会调申请认证
+				// 还是调此接口）
 			}else {
 				LOGGER.error("PlateNumber has been add, cmd={}", cmd);
 				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_REPEAT_ADD,

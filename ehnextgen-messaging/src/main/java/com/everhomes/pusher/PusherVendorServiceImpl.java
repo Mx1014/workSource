@@ -62,7 +62,7 @@ public class PusherVendorServiceImpl implements PusherVendorService {
     @Override
     public void pushMessage(PusherVenderType venderType, UserLogin senderLogin, UserLogin destLogin, com.everhomes.msgbox.Message msg, DeviceMessage devMessage) {
         int namespaceId = destLogin.getNamespaceId();
-        String name = String.format("namespaceId:%d:%s", namespaceId, venderType.getCode());
+        String name = String.format("namespace:%d:%s", namespaceId, venderType.getCode());
         PusherVender pusher = pusherMap.get(name);
         
         GetAppInfoCommand cmd = new GetAppInfoCommand();

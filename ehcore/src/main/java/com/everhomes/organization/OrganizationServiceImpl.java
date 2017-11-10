@@ -69,6 +69,7 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.common.ActivationFlag;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.IncludeChildFlagType;
 import com.everhomes.rest.common.QuestionMetaActionData;
@@ -125,6 +126,7 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.*;
 import org.jooq.Condition;
@@ -141,6 +143,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.*;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -5937,6 +5940,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 if (OrganizationMemberTargetType.fromCode(m.getTargetType()) == OrganizationMemberTargetType.USER) {
                     //Remove door auth, by Janon 2016-12-15
                     doorAccessService.deleteAuthWhenLeaveFromOrg(UserContext.getCurrentNamespaceId(), m.getOrganizationId(), m.getTargetId());
+                    LOGGER.debug("deleteUserDoorAccess, namespaceId  = {}, orgMemberId = {}, useId =  {}",UserContext.getCurrentNamespaceId(), m.getOrganizationId(),  m.getTargetId());
 
                     // 需要给用户默认一下小区（以机构所在园区为准），否则会在用户退出时没有小区而客户端拿不到场景而卡死
                     // http://devops.lab.everhomes.com/issues/2812  by lqs 20161017
@@ -8434,6 +8438,19 @@ public class OrganizationServiceImpl implements OrganizationService {
         return notifyTextForApplicant;
     }
 
+    private List<Long> listOrganzationAdminIds(Long organizationId) {
+        ListServiceModuleAdministratorsCommand cmd = new ListServiceModuleAdministratorsCommand();
+        cmd.setOrganizationId(organizationId);
+        cmd.setActivationFlag(ActivationFlag.YES.getCode());
+        List<OrganizationContactDTO> orgs = rolePrivilegeService.listOrganizationSuperAdministrators(cmd);
+        if(orgs != null && orgs.size() > 0) {
+            return orgs.stream().map((r)-> {
+                return r.getTargetId();
+            }).collect(Collectors.toList());
+        }
+        
+        return new ArrayList<Long>();
+    }
 
     private void sendMessageForContactApply(OrganizationMember member) {
 
@@ -8454,7 +8471,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         // send notification to all the other members in the group
         String notifyTextForOperator = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_REQUEST_TO_JOIN_FOR_OPERATOR);
 
-        includeList = getOrganizationAdminIncludeList(member.getOrganizationId(), user.getId(), user.getId());
+        //Updated by Jannson 
+        //includeList = getOrganizationAdminIncludeList(member.getOrganizationId(), user.getId(), user.getId());
+        includeList = listOrganzationAdminIds(member.getOrganizationId());
         if (includeList.size() > 0) {
 
             QuestionMetaObject metaObject = createGroupQuestionMetaObject(org, member, null);
@@ -8838,6 +8857,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         return org;
     }
 
+    /* Add by Jannson 这个接口已经无法使用。管理员添加的时候没有添加到 eh_acl_role_assignments 中，导致查不到 */
     private List<OrganizationMember> getOrganizationAdminMemberRole(Long organizationId, List<Long> roles) {
         List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(organizationId);
 
@@ -8876,6 +8896,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         return roleMembers;
     }
 
+    /* Added by Jannson 此函数失效 */
     private List<Long> getOrganizationAdminIncludeList(Long organizationId, Long operatorId, Long targetId) {
 
         List<Long> memberIds = new ArrayList<Long>();
