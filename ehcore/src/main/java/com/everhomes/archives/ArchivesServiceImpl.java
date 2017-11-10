@@ -309,6 +309,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         //  查询部门
         List<String> groupTypes = new ArrayList<>();
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
         Organization directlyEnterprise = organizationProvider.findOrganizationById(detail.getOrganizationId());
         dto.setDepartments(organizationService.getOrganizationMemberGroups(groupTypes, dto.getContactToken(), directlyEnterprise.getPath()));
 
