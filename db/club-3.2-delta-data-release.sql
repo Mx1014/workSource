@@ -13,5 +13,3 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),10761,'', 'EhNamespaces', 1000000,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),10762,'', 'EhNamespaces', 1000000,2);
 
--- 拒绝理由
-ALTER TABLE `eh_group_member_logs` ADD COLUMN `rejectText`  varchar(255) NULL;
