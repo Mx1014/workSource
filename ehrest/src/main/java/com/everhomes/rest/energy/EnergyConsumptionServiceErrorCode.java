@@ -37,4 +37,5 @@ public interface EnergyConsumptionServiceErrorCode {
     int ERR_BILL_CATEGORY_NOT_EXIST = 10024;//范围不存在
     int ERR_SERVICE_CATEGORY_NOT_EXIST = 10025;//性质不存在
     int ERR_MAX_READING_NOT_EXIST = 10026;//最大量程错误
+    int ERR_METER_NOT_EXIST_TASK = 10027;//表记没有任务
 }

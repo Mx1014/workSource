@@ -2841,6 +2841,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                         if(readTask) {
                             readEnergyMeter(read);
                         }
+                    } else {
+                        LOGGER.error("meter id = {} don't have task!",read.getMeterId());
+                        throw RuntimeErrorException.errorWith(SCOPE, ERR_METER_NOT_EXIST_TASK,
+                                "meter has no exist task");
                     }
                     return null;
                 });
