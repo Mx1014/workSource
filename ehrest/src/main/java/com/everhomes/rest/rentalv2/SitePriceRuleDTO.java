@@ -4,6 +4,7 @@ package com.everhomes.rest.rentalv2;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 
@@ -26,6 +27,7 @@ public class SitePriceRuleDTO {
 	private BigDecimal maxPrice;
 	private BigDecimal minPrice;
 	private String priceStr;
+	@ItemType(SitePricePackageDTO.class)
 	private List<SitePricePackageDTO> pricePackages;
 
 	public BigDecimal getMaxPrice() {
