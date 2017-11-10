@@ -1025,7 +1025,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				removeSitePriceRules(rentalSiteDTO.getSitePriceRules(), RentalType.MONTH.getCode());
 				sitePriceRules.add(rule);
 			}
-			rentalSiteDTO.getSitePriceRules().addAll(sitePriceRules.stream().filter(p -> p != null).collect(Collectors.toList()));
+			rentalSiteDTO.getSitePriceRules().addAll(sitePriceRules);
 
 			return rentalSiteDTO;
 
@@ -3978,13 +3978,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	private void setRentalsitePackagePrice(List<RentalSitePackagesDTO> packagesDtos, RentalCell rsr, List<RentalSitePackagesDTO> dtos2,
 										   SceneTokenDTO sceneTokenDTO	   ){
-//		if (rsr.getUnit()<1){
-//			for (RentalSitePackagesDTO dto : dtos2) {
-//				dto.setHalfApprovingUserPrice(dto.getPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP));
-//				dto.setHalfApprovingUserPrice(dto.getApprovingUserPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP));
-//				dto.setHalfOrgMemberPrice(dto.getOrgMemberPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP));
-//			}
-//		}
+
+		List<RentalSitePackagesDTO> t = dtos2;
 		//目前非认证用户，不能预订，后续功能让非认证用户可以使用预订之后
 		if (null != sceneTokenDTO) {
 			String scene = sceneTokenDTO.getScene();
@@ -3993,16 +3988,17 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					p.setPrice(p.getOrgMemberPrice());
 					p.setOriginalPrice(p.getOrgMemberOriginalPrice());
 				});
-				packagesDtos = dtos2;
+				t = dtos2;
 			}else if (!SceneType.ENTERPRISE.getCode().equals(scene)) {
 				dtos2.forEach(p->{
 					p.setPrice(p.getApprovingUserPrice());
 					p.setOriginalPrice(p.getHalfApprovingUserOriginalPrice());
 			});
-				packagesDtos = dtos2;
+				t = dtos2;
 		}
 
 	}
+		packagesDtos.addAll(t);
 	}
 
 	private void processPricePackage(List<RentalSitePackagesDTO> packageDtos, List <Rentalv2PricePackage> pricePackages){
