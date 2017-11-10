@@ -964,8 +964,9 @@ public class PunchServiceImpl implements PunchService {
 
 	private PunchLogsDay calculateDayLogByeverypunch(Long userId, Long companyId,
                 Calendar logDay, PunchLogsDay pdl, PunchDayLog punchDayLog) throws ParseException {
+		java.sql.Date punchDate = logDay.getTime();
 		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,
-			companyId, dateSF.get().format(logDay.getTime()), ClockCode.SUCESS.getCode());
+			companyId, dateSF.get().format(punchDate), ClockCode.SUCESS.getCode());
 		if(null != punchLogs){
 			pdl.setPunchCount(punchLogs.size());
 			for (PunchLog log : punchLogs){
@@ -1096,10 +1097,10 @@ public class PunchServiceImpl implements PunchService {
 			if(ht == HommizationType.FLEX|| ht == HommizationType.LATEARRIVE){
 				flexTimeLong = punchTimeRule.getFlexTimeLong();
 			}
-			Long beginTimeLong = onDutyLog.getPunchDate().getTime()+onDutyLog.getRuleTime()+flexTimeLong;
+			Long beginTimeLong = punchDate.getTime()+onDutyLog.getRuleTime()+flexTimeLong;
 			calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,punchTimeRule.getWorkTimeLong(),beginTimeLong);
 			//算请假对下班打卡的影响
-			Long offDutyTimeLong = onDutyLog.getPunchDate().getTime()+ punchTimeRule.getStartEarlyTimeLong() + punchTimeRule.getWorkTimeLong();
+			Long offDutyTimeLong = punchDate.getTime()+ punchTimeRule.getStartEarlyTimeLong() + punchTimeRule.getWorkTimeLong();
 			if (HommizationType.fromCode(punchTimeRule.getHommizationType()) == HommizationType.LATEARRIVE){
 				if (onDutyLog.getStatus().equals(PunchStatus.NORMAL.getCode())) {
 					offDutyTimeLong =offDutyTimeLong +(onDutyLog.getPunchDate().getTime()-onDutyLog.getRuleTime());
@@ -1163,7 +1164,7 @@ public class PunchServiceImpl implements PunchService {
 			Long beginTimeLong = onDutyLog.getPunchDate().getTime()+onDutyLog.getRuleTime()+flexTimeLong;
 			calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,punchTimeRule.getWorkTimeLong(),beginTimeLong);
 			//算请假对下班打卡的影响
-			Long offDutyTimeLong = onDutyLog.getPunchDate().getTime()+ punchTimeRule.getNoonLeaveTimeLong();
+			Long offDutyTimeLong = punchDate.getTime()+ punchTimeRule.getNoonLeaveTimeLong();
 			Long punchLateTime = 0L;
 //			Long offDutyTimeLong = onDutyLog.getPunchDate().getTime()+ punchTimeRule.getStartEarlyTimeLong() + punchTimeRule.getWorkTimeLong();
 //			if (HommizationType.fromCode(punchTimeRule.getHommizationType()) == HommizationType.LATEARRIVE){
@@ -1201,10 +1202,10 @@ public class PunchServiceImpl implements PunchService {
 //			if(ht == HommizationType.FLEX|| ht == HommizationType.LATEARRIVE){
 //				flexTimeLong = punchTimeRule.getFlexTimeLong();
 //			}
-			beginTimeLong = onDutyLog.getPunchDate().getTime()+punchTimeRule.getAfternoonArriveTimeLong();
+			beginTimeLong = punchDate.getTime()+punchTimeRule.getAfternoonArriveTimeLong();
 			calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,punchTimeRule.getWorkTimeLong(),beginTimeLong);
 			//算请假对下班打卡的影响
-			offDutyTimeLong = onDutyLog.getPunchDate().getTime()+ punchTimeRule.getStartEarlyTimeLong() + punchTimeRule.getWorkTimeLong();
+			offDutyTimeLong = punchDate.getTime()+ punchTimeRule.getStartEarlyTimeLong() + punchTimeRule.getWorkTimeLong();
 			if (HommizationType.fromCode(punchTimeRule.getHommizationType()) == HommizationType.LATEARRIVE){
 				if (onDutyLog.getStatus().equals(PunchStatus.NORMAL.getCode())) {
 					punchLateTime =(onDutyLog.getPunchDate().getTime()-onDutyLog.getRuleTime());
@@ -1233,6 +1234,7 @@ public class PunchServiceImpl implements PunchService {
 				PunchLog onDutyLog = findPunchLog(punchLogs, PunchType.ON_DUTY.getCode(), punchIntervalNo);
 				if(onDutyLog == null){
 					onDutyLog = new PunchLog();
+					onDutyLog.setRuleTime(intervals.get(punchIntervalNo-1).)
 					onDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 				}
 				efficientLogs.add(onDutyLog);
@@ -1249,15 +1251,15 @@ public class PunchServiceImpl implements PunchService {
 				if(ht == HommizationType.FLEX|| ht == HommizationType.LATEARRIVE){
 					flexTimeLong = punchTimeRule.getFlexTimeLong();
 				}
-
-				Long beginTimeLong = onDutyLog.getPunchDate().getTime() + onDutyLog.getRuleTime();
+				
+				Long beginTimeLong = punchDate.getTime() + onDutyLog.getRuleTime();
 				if (punchIntervalNo == 1) {
 					//只有第一次上班有弹性时间
 					beginTimeLong += flexTimeLong;
 				}
 				calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,punchTimeRule.getWorkTimeLong(),beginTimeLong);
 				//算请假对下班打卡的影响
-				Long offDutyTimeLong = onDutyLog.getPunchDate().getTime() + offDutyLog.getRuleTime();
+				Long offDutyTimeLong = punchDate.getTime() + offDutyLog.getRuleTime();
 				Long punchLateTime = 0L;
 				//只有最后一次打卡要计算晚到晚走
 				if (punchIntervalNo == intervals.size() && HommizationType.fromCode(punchTimeRule.getHommizationType()) == HommizationType.LATEARRIVE) {
