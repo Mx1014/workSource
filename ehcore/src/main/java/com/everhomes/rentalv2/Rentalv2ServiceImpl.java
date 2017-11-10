@@ -997,24 +997,35 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rentalSiteDTO.setSitePriceRules(priceRules.stream().map(p -> convertToSitePriceRuleDTO(rentalSite, p, resourceType, sceneTokenDTO))
 					.collect(Collectors.toList()));
 
-		//添加套餐
+			//添加套餐
 			List<SitePriceRuleDTO> sitePriceRules = new ArrayList<>();
-			sitePriceRules.add(convertToSitePackageDTO(pricePackages.stream().filter(p->p.getRentalType().equals(RentalType.HOUR.getCode())).
-					collect(Collectors.toList()),rentalSite,resourceType,sceneTokenDTO));
-			removeSitePriceRules(rentalSiteDTO.getSitePriceRules(),RentalType.HOUR.getCode()); //删掉普通定价
-			sitePriceRules.add(convertToSitePackageDTO(pricePackages.stream().filter(p->p.getRentalType().equals(RentalType.DAY.getCode())).
-					collect(Collectors.toList()),rentalSite,resourceType,sceneTokenDTO));
-			removeSitePriceRules(rentalSiteDTO.getSitePriceRules(),RentalType.DAY.getCode());
-			sitePriceRules.add(convertToSitePackageDTO(pricePackages.stream().filter(p->p.getRentalType().equals(RentalType.HALFDAY.getCode())).
-					collect(Collectors.toList()),rentalSite,resourceType,sceneTokenDTO));
-			removeSitePriceRules(rentalSiteDTO.getSitePriceRules(),RentalType.HALFDAY.getCode());
-			sitePriceRules.add(convertToSitePackageDTO(pricePackages.stream().filter(p->p.getRentalType().equals(RentalType.THREETIMEADAY.getCode())).
-					collect(Collectors.toList()),rentalSite,resourceType,sceneTokenDTO));
-			removeSitePriceRules(rentalSiteDTO.getSitePriceRules(),RentalType.THREETIMEADAY.getCode());
-			sitePriceRules.add(convertToSitePackageDTO(pricePackages.stream().filter(p->p.getRentalType().equals(RentalType.MONTH.getCode())).
-					collect(Collectors.toList()),rentalSite,resourceType,sceneTokenDTO));
-			removeSitePriceRules(rentalSiteDTO.getSitePriceRules(),RentalType.MONTH.getCode());
-			rentalSiteDTO.getSitePriceRules().addAll(sitePriceRules.stream().filter(p->p!=null).collect(Collectors.toList()));
+			SitePriceRuleDTO rule = convertToSitePackageDTO(pricePackages.stream().filter(p -> p.getRentalType().equals(RentalType.HOUR.getCode())).
+					collect(Collectors.toList()), rentalSite, resourceType, sceneTokenDTO);
+			if (rule != null) {//删掉普通定价
+				removeSitePriceRules(rentalSiteDTO.getSitePriceRules(), RentalType.HOUR.getCode());
+				sitePriceRules.add(rule);
+			}
+			rule = convertToSitePackageDTO(pricePackages.stream().filter(p -> p.getRentalType().equals(RentalType.DAY.getCode())).
+					collect(Collectors.toList()), rentalSite, resourceType, sceneTokenDTO);
+			removeSitePriceRules(rentalSiteDTO.getSitePriceRules(), RentalType.DAY.getCode());
+			if (rule != null) {//删掉普通定价
+				removeSitePriceRules(rentalSiteDTO.getSitePriceRules(), RentalType.HALFDAY.getCode());
+				sitePriceRules.add(rule);
+			}
+			removeSitePriceRules(rentalSiteDTO.getSitePriceRules(), RentalType.HALFDAY.getCode());
+			rule = convertToSitePackageDTO(pricePackages.stream().filter(p -> p.getRentalType().equals(RentalType.THREETIMEADAY.getCode())).
+					collect(Collectors.toList()), rentalSite, resourceType, sceneTokenDTO);
+			if (rule != null) {//删掉普通定价
+				removeSitePriceRules(rentalSiteDTO.getSitePriceRules(), RentalType.THREETIMEADAY.getCode());
+				sitePriceRules.add(rule);
+			}
+			rule = convertToSitePackageDTO(pricePackages.stream().filter(p -> p.getRentalType().equals(RentalType.MONTH.getCode())).
+					collect(Collectors.toList()), rentalSite, resourceType, sceneTokenDTO);
+			if (rule != null) {//删掉普通定价
+				removeSitePriceRules(rentalSiteDTO.getSitePriceRules(), RentalType.MONTH.getCode());
+				sitePriceRules.add(rule);
+			}
+			rentalSiteDTO.getSitePriceRules().addAll(sitePriceRules.stream().filter(p -> p != null).collect(Collectors.toList()));
 
 			return rentalSiteDTO;
 
