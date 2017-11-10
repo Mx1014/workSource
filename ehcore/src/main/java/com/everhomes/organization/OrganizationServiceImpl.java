@@ -5184,12 +5184,12 @@ public class OrganizationServiceImpl implements OrganizationService {
                         orgLog.setOperationType(OperationType.JOIN.getCode());
                         orgLog.setRequestType(RequestType.USER.getCode());
                         orgLog.setOperatorUid(UserContext.current().getUser().getId());
-                    orgLog.setContactDescription(member.getContactDescription());
+                        orgLog.setContactDescription(member.getContactDescription());
                         this.organizationProvider.createOrganizationMemberLog(orgLog);
                     }
                 } else {
                     LOGGER.warn("Enterprise contact not found, maybe it has been rejected, operatorUid=" + operatorUid + ", cmd=" + cmd);
-// 
+//
 //                } else {
 //                    member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
 //                    member.setOperatorUid(operatorUid);
@@ -5885,6 +5885,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
             return null;
         });
+        
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         //执行太慢，开一个线程来做
         ExecutorUtil.submit(new Runnable() {
@@ -5892,7 +5894,15 @@ public class OrganizationServiceImpl implements OrganizationService {
             public void run() {
                 try {
                     // 发消息等等操作
+                    //设置上下文对象 Added by Jannson
+                    UserContext.setCurrentNamespaceId(namespaceId);
+                    UserContext.setCurrentUser(user);
+                    
                     leaveOrganizationAfterOperation(user.getId(), members);
+                    
+                    //设置完成之后要清空
+                    UserContext.setCurrentNamespaceId(null);
+                    UserContext.setCurrentUser(null);
                 } catch (Exception e) {
                     LOGGER.error("leaveOrganizationAfterOperation error", e);
                 }
@@ -5940,7 +5950,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 if (OrganizationMemberTargetType.fromCode(m.getTargetType()) == OrganizationMemberTargetType.USER) {
                     //Remove door auth, by Janon 2016-12-15
                     doorAccessService.deleteAuthWhenLeaveFromOrg(UserContext.getCurrentNamespaceId(), m.getOrganizationId(), m.getTargetId());
-                    LOGGER.debug("deleteUserDoorAccess, namespaceId  = {}, orgMemberId = {}, useId =  {}",UserContext.getCurrentNamespaceId(), m.getOrganizationId(),  m.getTargetId());
+                    LOGGER.debug("deleteUserDoorAccess, m.namespaceId  = {}, UserContext.getCurrentNamespaceId  = {}, UserContext.current.getNamespaceId()  = {}, m.namespaceId  = {}, orgMemberId = {}, useId =  {}",
+                            m.getNamespaceId(),UserContext.getCurrentNamespaceId(), UserContext.current().getNamespaceId(), m.getOrganizationId(),  m.getTargetId());
 
                     // 需要给用户默认一下小区（以机构所在园区为准），否则会在用户退出时没有小区而客户端拿不到场景而卡死
                     // http://devops.lab.everhomes.com/issues/2812  by lqs 20161017
@@ -8534,7 +8545,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         // send notification to all the other members in the group
         notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER);
         // 消息只发给公司的管理人员  by sfyan 20170213
-        includeList = this.includeOrgList(org, member.getTargetId());
+//        includeList = this.includeOrgList(org, member.getTargetId());
+        includeList = listOrganzationAdminIds(member.getOrganizationId());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Send has approval message to admin member in organization, organizationId=" + org.getId() + ", adminList=" + includeList);
+        }
         sendEnterpriseNotificationUseSystemUser(includeList, null, notifyTextForApplicant);
     }
 
