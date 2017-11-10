@@ -4,9 +4,9 @@ package com.everhomes.rest.organization.pm;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
  * <ul>
- * <li>status: 状态，参考{@link com.everhomes.rest.group.GroupMemberStatus}</li>
+ *     <li>status: 状态，参考{@link com.everhomes.rest.group.GroupMemberStatus}</li>
+ *     <li>text: text</li>
  * </ul>
  */
 public class GetRequestInfoResponse {
@@ -22,6 +22,7 @@ public class GetRequestInfoResponse {
 		super();
 		this.status = status;
 	}
+
 	public GetRequestInfoResponse(Byte status, String text) {
 		super();
 		this.status = status;
