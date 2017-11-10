@@ -1265,6 +1265,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rentalBill.setRentalUid(userId);
 			rentalBill.setInvoiceFlag(InvoiceFlag.NONEED.getCode());
 			rentalBill.setRentalDate(new Date(cmd.getRentalDate()));
+			rentalBill.setPackageName(cmd.getPackageName());
 			this.valiRentalBill(cmd.getRules());
 			//设置订单模式
 			if(rsType.getPayMode() == null )
