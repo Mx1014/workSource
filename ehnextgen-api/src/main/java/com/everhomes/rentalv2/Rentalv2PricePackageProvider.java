@@ -13,7 +13,7 @@ public interface Rentalv2PricePackageProvider {
 
     Long createRentalv2PricePackage(Rentalv2PricePackage rentalv2PricePackage);
 
-    List<Rentalv2PricePackage> listPricePackageByOwner(String ownerType, Long ownerId, Byte rentalType);
+    List<Rentalv2PricePackage> listPricePackageByOwner(String ownerType, Long ownerId, Byte rentalType,String packageName);
 
     Rentalv2PricePackage findPricePackageById(Long id);
 

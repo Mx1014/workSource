@@ -65,13 +65,14 @@ public class Rentalv2PricePackageProviderImpl implements  Rentalv2PricePackagePr
     }
     @Cacheable(value = "listPricePackageByOwner", key="#ownerId", condition="#ownerType.equals('cell')")
     @Override
-    public List<Rentalv2PricePackage> listPricePackageByOwner(String ownerType, Long ownerId, Byte rentalType) {
+    public List<Rentalv2PricePackage> listPricePackageByOwner(String ownerType, Long ownerId, Byte rentalType,String packageName) {
         SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_RENTALV2_PRICE_PACKAGES)
                 .where(Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_TYPE.eq(ownerType))
                 .and(Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_ID.eq(ownerId));
         if (rentalType!=null)
             step.and(Tables.EH_RENTALV2_PRICE_PACKAGES.RENTAL_TYPE.eq(rentalType));
-
+        if (packageName!=null)
+            step.and(Tables.EH_RENTALV2_PRICE_PACKAGES.NAME.eq(packageName));
         return step.orderBy(Tables.EH_RENTALV2_PRICE_PACKAGES.RENTAL_TYPE.asc())
                 .fetch().map(r -> ConvertHelper.convert(r, Rentalv2PricePackage.class));
     }
