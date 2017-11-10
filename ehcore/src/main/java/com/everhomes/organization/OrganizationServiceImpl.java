@@ -5184,12 +5184,12 @@ public class OrganizationServiceImpl implements OrganizationService {
                         orgLog.setOperationType(OperationType.JOIN.getCode());
                         orgLog.setRequestType(RequestType.USER.getCode());
                         orgLog.setOperatorUid(UserContext.current().getUser().getId());
-                    orgLog.setContactDescription(member.getContactDescription());
+                        orgLog.setContactDescription(member.getContactDescription());
                         this.organizationProvider.createOrganizationMemberLog(orgLog);
                     }
                 } else {
                     LOGGER.warn("Enterprise contact not found, maybe it has been rejected, operatorUid=" + operatorUid + ", cmd=" + cmd);
-// 
+//
 //                } else {
 //                    member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
 //                    member.setOperatorUid(operatorUid);
@@ -8534,7 +8534,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         // send notification to all the other members in the group
         notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER);
         // 消息只发给公司的管理人员  by sfyan 20170213
-        includeList = this.includeOrgList(org, member.getTargetId());
+//        includeList = this.includeOrgList(org, member.getTargetId());
+        includeList = listOrganzationAdminIds(member.getOrganizationId());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Send has approval message to admin member in organization, organizationId=" + org.getId() + ", adminList=" + includeList);
+        }
         sendEnterpriseNotificationUseSystemUser(includeList, null, notifyTextForApplicant);
     }
 
