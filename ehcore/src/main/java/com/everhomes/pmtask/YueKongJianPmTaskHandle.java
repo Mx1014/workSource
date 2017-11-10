@@ -176,8 +176,7 @@ class YueKongJianPmTaskHandle implements PmTaskHandle {
 			}
 		}
 
-		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-		return handler.getTaskDetail(cmd);
+		return pmTaskCommonService.getTaskDetail(cmd, false);
 	}
 
 	@Override
