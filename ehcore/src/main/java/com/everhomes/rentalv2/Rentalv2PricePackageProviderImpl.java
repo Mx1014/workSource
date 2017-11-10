@@ -5,6 +5,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.rentalv2.MaxMinPrice;
 import com.everhomes.rest.rentalv2.PriceRuleType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -13,13 +14,17 @@ import com.everhomes.server.schema.tables.pojos.EhRentalv2PricePackages;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectConditionStep;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -77,6 +82,53 @@ public class Rentalv2PricePackageProviderImpl implements  Rentalv2PricePackagePr
 
     }
 
+    @Override
+    public MaxMinPrice findMaxMinPrice(List<Long> packageIds, Byte rentalType,String packageName) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Record record = null;
+       if (StringUtils.isEmpty(packageName))
+           record = context.select(DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.PRICE),
+                DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.ORIGINAL_PRICE),
+                DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_PRICE),
+                DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_ORIGINAL_PRICE),
+                DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_PRICE),
+                DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_ORIGINAL_PRICE)
+        ).from(Tables.EH_RENTALV2_PRICE_PACKAGES)
+                .where(Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_TYPE.eq("cell"))
+                .and(Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_ID.in(packageIds))
+                .fetchOne();
+       else
+           record = context.select(DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.PRICE),
+                   DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.ORIGINAL_PRICE),
+                   DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_PRICE),
+                   DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_ORIGINAL_PRICE),
+                   DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_PRICE),
+                   DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_ORIGINAL_PRICE)
+           ).from(Tables.EH_RENTALV2_PRICE_PACKAGES)
+                   .where(Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_TYPE.eq("cell"))
+                   .and(Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_ID.in(packageIds))
+                   .and(Tables.EH_RENTALV2_PRICE_PACKAGES.NAME.eq(packageName))
+                   .fetchOne();
+
+        if (record != null) {
+            BigDecimal maxPrice = max(record.getValue(DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.PRICE)),
+                    record.getValue(DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.ORIGINAL_PRICE)));
+            BigDecimal minPrice = min(record.getValue(DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.PRICE)),
+                    record.getValue(DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.ORIGINAL_PRICE)));
+
+            BigDecimal maxOrgMemberPrice = max(record.getValue(DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_PRICE)),
+                    record.getValue(DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_ORIGINAL_PRICE)));
+            BigDecimal minOrgMemberPrice = min(record.getValue(DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_PRICE)),
+                    record.getValue(DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_ORIGINAL_PRICE)));
+            BigDecimal maxApprovingUserPrice = max(record.getValue(DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_PRICE)),
+                    record.getValue(DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_ORIGINAL_PRICE)));
+            BigDecimal minApprovingUserPrice = min(record.getValue(DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_PRICE)),
+                    record.getValue(DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_ORIGINAL_PRICE)));
+            return new MaxMinPrice(maxPrice, minPrice, maxOrgMemberPrice, minOrgMemberPrice, maxApprovingUserPrice, minApprovingUserPrice);
+        }
+        return null;
+    }
+
     private DSLContext getReadOnlyContext() {
         return getContext(AccessSpec.readOnly());
     }
@@ -95,5 +147,35 @@ public class Rentalv2PricePackageProviderImpl implements  Rentalv2PricePackagePr
 
     private DSLContext getContext(AccessSpec accessSpec) {
         return dbProvider.getDslContext(accessSpec);
+    }
+
+    private BigDecimal max(BigDecimal ... b) {
+        BigDecimal max = new BigDecimal(Integer.MIN_VALUE);
+        for (BigDecimal bigDecimal : b) {
+            max = maxBig(max, bigDecimal);
+        }
+        return max;
+    }
+
+    private BigDecimal maxBig(BigDecimal b1, BigDecimal b2) {
+        if (b2 != null && b2.compareTo(b1) > 0) {
+            return b2;
+        }
+        return b1;
+    }
+
+    private BigDecimal min(BigDecimal ... b) {
+        BigDecimal min = new BigDecimal(Integer.MAX_VALUE);
+        for (BigDecimal bigDecimal : b) {
+            min = minBig(min, bigDecimal);
+        }
+        return min;
+    }
+
+    private BigDecimal minBig(BigDecimal b1, BigDecimal b2) {
+        if (b2 != null && b2.compareTo(b1) < 0) {
+            return b2;
+        }
+        return b1;
     }
 }

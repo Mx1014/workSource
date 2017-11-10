@@ -289,4 +289,6 @@ public interface Rentalv2Provider {
 
 	RentalResourceType findRentalResourceTypeById (Long resoureceTypeId);
 
+	List<Long> listCellPackageId (Long ownerId, Byte rentalType);
+
 }

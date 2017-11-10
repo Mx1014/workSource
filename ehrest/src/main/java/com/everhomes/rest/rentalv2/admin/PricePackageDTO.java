@@ -9,9 +9,9 @@ import java.math.BigDecimal;
  * <li>rentalType: 0按小时，1按半天，2按天，3按半天带晚上，4按月，参考{@link com.everhomes.rest.rentalv2.RentalType}</li>
  * <li>price: 园区客户价格</li>
  * <li>originalPrice: 原价-如果打折则有（园区客户）</li>
- * <li>orgMemberWorkdayPrice: 集团内部价格</li>
+ * <li>orgMemberPrice: 集团内部价格</li>
  * <li>orgMemberOriginalPrice: 原价-如果打折则有(企业内部价)</li>
- * <li>approvingUserWorkdayPrice: 外部客户价格</li>
+ * <li>approvingUserPrice: 外部客户价格</li>
  * <li>approvingUserOriginalPrice: 原价-如果打折则有（外部客户价）</li>
  * <li>discountType: 折扣类型，0不打折，1满减，2满天减，3比例折扣，参考{@link com.everhomes.rest.rentalv2.admin.DiscountType}</li>
  * <li>fullPrice: 满</li>

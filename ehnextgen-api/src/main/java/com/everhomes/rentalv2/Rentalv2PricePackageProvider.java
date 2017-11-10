@@ -1,5 +1,7 @@
 package com.everhomes.rentalv2;
 
+import com.everhomes.rest.rentalv2.MaxMinPrice;
+
 import java.util.List;
 
 /**
@@ -14,5 +16,7 @@ public interface Rentalv2PricePackageProvider {
     List<Rentalv2PricePackage> listPricePackageByOwner(String ownerType, Long ownerId, Byte rentalType);
 
     Rentalv2PricePackage findPricePackageById(Long id);
+
+    MaxMinPrice findMaxMinPrice(List<Long> packageIds,Byte rentalType,String packageName);
 
 }

@@ -2,6 +2,7 @@
 package com.everhomes.rest.rentalv2;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import com.everhomes.util.StringHelper;
 
@@ -17,6 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>fullPrice: 满</li>
  * <li>cutPrice: 减</li>
  * <li>discountRatio: 折扣比例</li>
+ * <li>pricePackages: 套餐</li>
  * </ul>
  */
 public class SitePriceRuleDTO {
@@ -24,6 +26,7 @@ public class SitePriceRuleDTO {
 	private BigDecimal maxPrice;
 	private BigDecimal minPrice;
 	private String priceStr;
+	private List<SitePricePackageDto> pricePackages;
 
 	public BigDecimal getMaxPrice() {
 		return maxPrice;
@@ -55,6 +58,14 @@ public class SitePriceRuleDTO {
 
 	public void setPriceStr(String priceStr) {
 		this.priceStr = priceStr;
+	}
+
+	public List<SitePricePackageDto> getPricePackages() {
+		return pricePackages;
+	}
+
+	public void setPricePackages(List<SitePricePackageDto> pricePackages) {
+		this.pricePackages = pricePackages;
 	}
 
 	@Override
