@@ -14,8 +14,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.everhomes.contract.ContractService;
+import com.everhomes.organization.*;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.*;
+import com.everhomes.rest.organization.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.tomcat.jni.Time;
@@ -43,12 +45,6 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.openapi.ZJGKOpenServiceImpl;
-import com.everhomes.organization.ExecuteImportTaskCallback;
-import com.everhomes.organization.ImportFileService;
-import com.everhomes.organization.ImportFileTask;
-import com.everhomes.organization.OrganizationMemberDetails;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
@@ -59,11 +55,6 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
-import com.everhomes.rest.organization.ImportFileResultLog;
-import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.organization.ImportFileTaskType;
-import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -270,6 +261,12 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private OrganizationDTO createOrganization(EnterpriseCustomer customer) {
+        Organization org = organizationProvider.findOrganizationByNameAndNamespaceId(customer.getName(), customer.getNamespaceId());
+        if(org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
+            //已存在则更新 地址、官网地址、企业logo
+
+            return ConvertHelper.convert(org, OrganizationDTO.class);
+        }
         CreateEnterpriseCommand command = new CreateEnterpriseCommand();
         command.setName(customer.getName());
         command.setDisplayName(customer.getNickName());
