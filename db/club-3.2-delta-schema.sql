@@ -37,5 +37,7 @@ ALTER TABLE `eh_groups` ADD COLUMN `club_type`  tinyint(4) NULL DEFAULT 0 COMMEN
 
 ALTER TABLE `eh_groups` ADD COLUMN `phone_number`  varchar(18) NULL ;
 
+ALTER TABLE `eh_groups`  ADD COLUMN `descriptionType`  tinyint(4) NULL DEFAULT 0;
+
 -- 拒绝理由
 ALTER TABLE `eh_group_member_logs` ADD COLUMN `reject_text`  varchar(255) NULL;
