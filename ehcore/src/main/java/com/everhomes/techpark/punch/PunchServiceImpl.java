@@ -895,8 +895,8 @@ public class PunchServiceImpl implements PunchService {
 		}
 
 		String asList = "";
-		if (null != pdl.getApprovalStatus()) {
-			String[] asArrary = pdl.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
+		if (null != pdl.getApprovalStatusList() && !StringUtils.isEmpty(pdl.getApprovalStatusList())) {
+			String[] asArrary = pdl.getApprovalStatusList().split(PunchConstants.STATUS_SEPARATOR);
 
 			for (int i = 0; i < statusArrary.length / 2; i++) {
 				String status = "";
@@ -927,7 +927,7 @@ public class PunchServiceImpl implements PunchService {
 				}
 
 			}
-			pdl.setStatusList(statusList);
+			pdl.setApprovalStatusList(asList);
 		}
 		return  pdl;
     }
@@ -1299,9 +1299,9 @@ public class PunchServiceImpl implements PunchService {
 			}
 			String approvalStatus = log.getApprovalStatus() == null ? "" : log.getApprovalStatus()+"";
 			if(null == pdl.getApprovalStatus()){
-				pdl.setStatusList(approvalStatus);
+				pdl.setApprovalStatusList(approvalStatus);
 			}else{
-				pdl.setStatusList(pdl.getStatusList()+PunchConstants.STATUS_SEPARATOR+approvalStatus);
+				pdl.setApprovalStatusList(pdl.getStatusList()+PunchConstants.STATUS_SEPARATOR+approvalStatus);
 			}
 
 		}
