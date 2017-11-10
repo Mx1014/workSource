@@ -5949,7 +5949,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 Integer namespaceId = UserContext.getCurrentNamespaceId();
                 if (OrganizationMemberTargetType.fromCode(m.getTargetType()) == OrganizationMemberTargetType.USER) {
                     //Remove door auth, by Janon 2016-12-15
-                    doorAccessService.deleteAuthWhenLeaveFromOrg(m.getNamespaceId(), m.getOrganizationId(), m.getTargetId());
+                    doorAccessService.deleteAuthWhenLeaveFromOrg(namespaceId, m.getOrganizationId(), m.getTargetId());
                     LOGGER.debug("deleteUserDoorAccess, m.namespaceId  = {}, UserContext.getCurrentNamespaceId  = {}, UserContext.current.getNamespaceId()  = {}, m.namespaceId  = {}, orgMemberId = {}, useId =  {}",
                             m.getNamespaceId(),UserContext.getCurrentNamespaceId(), UserContext.current().getNamespaceId(), m.getOrganizationId(),  m.getTargetId());
 
