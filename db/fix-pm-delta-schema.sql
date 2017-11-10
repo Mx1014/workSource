@@ -1,6 +1,6 @@
 -- 物业巡检V3.1
 DROP TABLE `eh_equipment_inspection_plans`;
-DROP TABLE ` eh_equipment_inspection_equipment_plan_map`;
+DROP TABLE `eh_equipment_inspection_equipment_plan_map`;
 -- 设备巡检计划表
 CREATE TABLE `eh_equipment_inspection_plans` (
 `id ` bigint(20) NOT NULL,
