@@ -164,10 +164,14 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             } else if (ApplyEntrySourceType.FOR_RENT == applyEntrySourceType) {
                 i = LeasePromotionOrder.LEASE_PROMOTION.getCode();
             }
+
             if (null != config.getDisplayNames()) {
+                int configSize = config.getDisplayNames().size();
+                int totalSize = LeasePromotionOrder.values().length;
+                int currentSize = totalSize - configSize;
                 for (Integer k : config.getDisplayOrders()) {
                     if (k.byteValue() == i) {
-                        sourceType = config.getDisplayNames().get(k - 1);
+                        sourceType = config.getDisplayNames().get(k - 1 - currentSize);
                     }
                 }
             }
