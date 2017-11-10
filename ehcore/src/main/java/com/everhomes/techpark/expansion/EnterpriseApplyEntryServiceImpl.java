@@ -647,11 +647,20 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
         map.put("buildingName", buildingName);
 
+        map.put("sourceType", defaultIfNull(getSourceTypeName(request.getSourceType()),""));
+
+        return localeTemplateService.getLocaleTemplateString(ApplyEntryErrorCodes.SCOPE,
+                ApplyEntryErrorCodes.FLOW_BRIEF_CONTENT_CODE, locale, map, "");
+    }
+
+    @Override
+    public String getSourceTypeName(String type) {
+
 		GetLeasePromotionConfigCommand cmd = new GetLeasePromotionConfigCommand();
 		cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		LeasePromotionConfigDTO config = getLeasePromotionConfig(cmd);
 
-		ApplyEntrySourceType sourceType = ApplyEntrySourceType.fromType(request.getSourceType());
+		ApplyEntrySourceType sourceType = ApplyEntrySourceType.fromType(type);
 		String sourceTypeName = null != sourceType ? sourceType.getDescription() : "";
 
 		byte i = -1;
@@ -671,11 +680,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			}
 		}
 
-        map.put("sourceType", defaultIfNull(sourceTypeName,""));
-
-        return localeTemplateService.getLocaleTemplateString(ApplyEntryErrorCodes.SCOPE,
-                ApplyEntryErrorCodes.FLOW_BRIEF_CONTENT_CODE, locale, map, "");
-    }
+		return sourceTypeName;
+	}
 
     private String defaultIfNull(String obj, String defaultValue) {
         return obj != null ? obj : defaultValue;
