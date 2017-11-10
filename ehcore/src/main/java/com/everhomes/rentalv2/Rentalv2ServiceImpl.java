@@ -999,8 +999,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		//添加套餐
 			List<SitePriceRuleDTO> sitePriceRules = new ArrayList<>();
-			SitePriceRuleDTO rule = convertToSitePackageDTO(pricePackages.stream().filter(p->p.getRentalType().equals(RentalType.HOUR.getCode())).
-					collect(Collectors.toList()),rentalSite,resourceType,sceneTokenDTO);
+			sitePriceRules.add(convertToSitePackageDTO(pricePackages.stream().filter(p->p.getRentalType().equals(RentalType.HOUR.getCode())).
+					collect(Collectors.toList()),rentalSite,resourceType,sceneTokenDTO));
 			removeSitePriceRules(rentalSiteDTO.getSitePriceRules(),RentalType.HOUR.getCode()); //删掉普通定价
 			sitePriceRules.add(convertToSitePackageDTO(pricePackages.stream().filter(p->p.getRentalType().equals(RentalType.DAY.getCode())).
 					collect(Collectors.toList()),rentalSite,resourceType,sceneTokenDTO));
@@ -1014,7 +1014,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			sitePriceRules.add(convertToSitePackageDTO(pricePackages.stream().filter(p->p.getRentalType().equals(RentalType.MONTH.getCode())).
 					collect(Collectors.toList()),rentalSite,resourceType,sceneTokenDTO));
 			removeSitePriceRules(rentalSiteDTO.getSitePriceRules(),RentalType.MONTH.getCode());
-			rentalSiteDTO.getSitePriceRules().addAll(sitePriceRules);
+			rentalSiteDTO.getSitePriceRules().addAll(sitePriceRules.stream().filter(p->p!=null).collect(Collectors.toList()));
 
 			return rentalSiteDTO;
 
