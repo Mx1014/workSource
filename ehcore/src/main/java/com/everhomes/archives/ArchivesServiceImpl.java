@@ -484,7 +484,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     private String checkArchivesContactsTitle(ImportArchivesContactsDTO title) {
 
         //  TODO:是否从数据库读取模板
-        List<String> module = new ArrayList<>(Arrays.asList("姓名", "英文名", "性别", "手机", "短号", "工作邮箱", "部门", "职务"));
+        List<String> module = new ArrayList<>(Arrays.asList("姓名", "英文名", "性别", "手机", "短号", "工作邮箱", "部门", "岗位"));
         //  存储字段来进行校验
         List<String> temp = new ArrayList<>();
         temp.add(title.getContactName());
