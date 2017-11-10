@@ -38,4 +38,6 @@ public interface EnergyConsumptionServiceErrorCode {
     int ERR_SERVICE_CATEGORY_NOT_EXIST = 10025;//性质不存在
     int ERR_MAX_READING_NOT_EXIST = 10026;//最大量程错误
     int ERR_METER_NOT_EXIST_TASK = 10027;//表记没有任务
+    int ERROR_METER_NAME_IS_NULL = 10028;//表计名称为空
+    int ERROR_METER_NUMBER_IS_NULL = 10029;//表计号码为空
 }

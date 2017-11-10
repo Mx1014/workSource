@@ -2,6 +2,7 @@ package com.everhomes.energy;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.repeat.RepeatService;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.energy.EnergyMeterAddressDTO;
 import com.everhomes.rest.energy.SearchEnergyMeterCommand;
 import com.everhomes.rest.energy.SearchEnergyMeterResponse;
@@ -111,11 +112,17 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
             List<PlanMeter> maps = energyPlanProvider.listByEnergyMeter(meter.getId());
             Boolean assignFlag = false;
             if(maps != null && maps.size() > 0) {
+                List<String> planNames = new ArrayList<>();
                 for(PlanMeter map : maps) {
                     if(repeatService.repeatSettingStillWork(map.getRepeatSettingId())) {
-                        assignFlag = true;
+                        EnergyPlan plan = energyPlanProvider.findEnergyPlanById(map.getPlanId());
+                        if(plan != null && CommonStatus.ACTIVE.equals(CommonStatus.fromCode(plan.getStatus()))) {
+                            planNames.add(plan.getName());
+                            assignFlag = true;
+                        }
                     }
                 }
+                builder.array("assignPlan", planNames);
             }
             if(assignFlag) {
                 builder.field("assignFlag", 1);
@@ -219,6 +226,11 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
         if(cmd.getAssignFlag() != null) {
             TermFilterBuilder assignFlagFilter = FilterBuilders.termFilter("assignFlag", cmd.getAssignFlag());
             filterBuilders.add(assignFlagFilter);
+        }
+
+        if(cmd.getPlanName() != null) {
+            FilterBuilder planFilter = FilterBuilders.termFilter("assignPlan", cmd.getPlanName());
+            filterBuilders.add(planFilter);
         }
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
