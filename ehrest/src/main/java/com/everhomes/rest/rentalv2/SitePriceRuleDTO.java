@@ -18,7 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>fullPrice: 满</li>
  * <li>cutPrice: 减</li>
  * <li>discountRatio: 折扣比例</li>
- * <li>pricePackages: 套餐</li>
+ * <li>pricePackages: 套餐 参考{@link com.everhomes.rest.rentalv2.SitePricePackageDto}</li>
  * </ul>
  */
 public class SitePriceRuleDTO {
