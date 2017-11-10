@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 /**
  * <ul>
  * <li>id：id</li>
+ * <li>name：套餐名</li>
  * <li>rentalSiteId：场所id</li>
  * <li>rentalType： time(0),halfday(1){@link com.everhomes.rest.rentalv2.RentalType} </li>
  * <li>price：场所价格</li>
@@ -18,8 +19,9 @@ import java.math.BigDecimal;
  * </ul>
  */
 
-public class RentalSitePackagesDto {
+public class RentalSitePackagesDTO {
     private Long id;
+    private String name;
     private Long rentalSiteId;
     private Byte rentalType;
     private java.math.BigDecimal price;
@@ -42,6 +44,14 @@ public class RentalSitePackagesDto {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Long getRentalSiteId() {
