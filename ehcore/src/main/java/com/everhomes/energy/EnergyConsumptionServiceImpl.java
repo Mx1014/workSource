@@ -533,12 +533,17 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         List<PlanMeter> maps = energyPlanProvider.listByEnergyMeter(meter.getId());
         Boolean assignFlag = false;
         if(maps != null && maps.size() > 0) {
+            List<String> planNames = new ArrayList<>();
             for(PlanMeter map : maps) {
                 if(repeatService.repeatSettingStillWork(map.getRepeatSettingId())) {
-                    assignFlag = true;
+                    EnergyPlan plan = energyPlanProvider.findEnergyPlanById(map.getPlanId());
+                    if(plan != null && CommonStatus.ACTIVE.equals(CommonStatus.fromCode(plan.getStatus()))) {
+                        planNames.add(plan.getName());
+                        assignFlag = true;
+                    }
                 }
             }
-
+            dto.setPlanName(planNames);
         }
         dto.setAssignedPlan(assignFlag);
         return dto;

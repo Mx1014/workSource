@@ -20,6 +20,7 @@ import javax.validation.constraints.NotNull;
  *     <li>status: 表记状态 {@link com.everhomes.rest.energy.EnergyMeterStatus}</li>
  *     <li>pageAnchor: 下页锚点</li>
  *     <li>pageSize: 每页数量</li>
+ *     <li>planName: 计划名称 完全匹配</li>
  *     <li>assignFlag: 是否关联计划 0 未关联计划； 1 已关联</li>
  * </ul>
  */
@@ -40,6 +41,15 @@ public class SearchEnergyMeterCommand {
     private Integer pageSize;
     private Integer namespaceId;
     private Byte assignFlag;
+    private String planName;
+
+    public String getPlanName() {
+        return planName;
+    }
+
+    public void setPlanName(String planName) {
+        this.planName = planName;
+    }
 
     public Byte getAssignFlag() {
         return assignFlag;
