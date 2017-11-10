@@ -1,12 +1,11 @@
 package com.everhomes.rest.equipment;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -54,6 +53,8 @@ public class UpdateEquipmentStandardCommand {
 	private String remarks;
 	
 	private Byte standardType;
+
+	@Deprecated
 	@ItemType(RepeatSettingsDTO.class)
 	private RepeatSettingsDTO repeat;
 	
