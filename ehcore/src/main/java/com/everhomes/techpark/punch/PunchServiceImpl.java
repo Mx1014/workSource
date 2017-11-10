@@ -1082,11 +1082,13 @@ public class PunchServiceImpl implements PunchService {
 			PunchLog onDutyLog = findPunchLog(punchLogs, PunchType.ON_DUTY.getCode(), 1);
 			if(onDutyLog == null){
 				onDutyLog = new PunchLog();
+				onDutyLog.setRuleTime(punchTimeRule.getStartEarlyTimeLong());
 				onDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 			}
 			PunchLog offDutyLog = findPunchLog(punchLogs, PunchType.OFF_DUTY.getCode(), 1);
 			if(offDutyLog == null){
 				offDutyLog = new PunchLog();
+				offDutyLog.setRuleTime(punchTimeRule.getStartEarlyTimeLong()+punchTimeRule.getWorkTimeLong());
 				offDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 			}
@@ -1149,11 +1151,13 @@ public class PunchServiceImpl implements PunchService {
 			PunchLog onDutyLog = findPunchLog(punchLogs, PunchType.ON_DUTY.getCode(), 1);
 			if(onDutyLog == null){
 				onDutyLog = new PunchLog();
+				onDutyLog.setRuleTime(punchTimeRule.getStartEarlyTimeLong());
 				onDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 			}
 			PunchLog offDutyLog = findPunchLog(punchLogs, PunchType.OFF_DUTY.getCode(), 1);
 			if(offDutyLog == null){
 				offDutyLog = new PunchLog();
+				offDutyLog.setRuleTime(punchTimeRule.getNoonLeaveTimeLong());
 				offDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 			}
 			//算请假对上班打卡的影响
@@ -1187,12 +1191,14 @@ public class PunchServiceImpl implements PunchService {
 			onDutyLog = findPunchLog(punchLogs, PunchType.ON_DUTY.getCode(), 2);
 			if(onDutyLog == null){
 				onDutyLog = new PunchLog();
+				onDutyLog.setRuleTime(punchTimeRule.getAfternoonArriveTimeLong());
 				onDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 			}
 			efficientLogs.add(onDutyLog);
 			offDutyLog = findPunchLog(punchLogs, PunchType.OFF_DUTY.getCode(), 2);
 			if(offDutyLog == null){
 				offDutyLog = new PunchLog();
+				offDutyLog.setRuleTime(punchTimeRule.getStartEarlyTimeLong()+punchTimeRule.getWorkTimeLong());
 				offDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 			}
 			efficientLogs.add(offDutyLog);
@@ -1242,7 +1248,7 @@ public class PunchServiceImpl implements PunchService {
 				PunchLog offDutyLog = findPunchLog(punchLogs, PunchType.OFF_DUTY.getCode(), punchIntervalNo);
 				if(offDutyLog == null){
 					offDutyLog = new PunchLog();
-					onDutyLog.setRuleTime(intervals.get(punchIntervalNo - 1).getLeaveTimeLong());
+					offDutyLog.setRuleTime(intervals.get(punchIntervalNo - 1).getLeaveTimeLong());
 					offDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 				}
 				efficientLogs.add(offDutyLog);
