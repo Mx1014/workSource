@@ -6,10 +6,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
-import com.everhomes.general_form.GeneralForm;
-import com.everhomes.general_form.GeneralFormGroup;
-import com.everhomes.general_form.GeneralFormProvider;
-import com.everhomes.general_form.GeneralFormService;
+import com.everhomes.general_form.*;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.archives.*;
@@ -91,6 +88,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Autowired
     private GeneralFormProvider generalFormProvider;
+
+    @Autowired
+    private GeneralFormValProvider generalFormValProvider;
 
     @Autowired
     private ConfigurationProvider configurationProvider;
@@ -338,7 +338,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (!StringUtils.isEmpty(cmd.getKeywords()))
             orgCommand.setKeywords(cmd.getKeywords());
         //
-        if(cmd.getTargetTypes() != null)
+        if (cmd.getTargetTypes() != null)
             orgCommand.setTargetTypes(cmd.getTargetTypes());
         ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
         if (members != null && members.getMembers() != null) {
@@ -507,21 +507,20 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
 
-
     private ImportFileResultLog<ImportArchivesContactsDTO> checkArchivesContactsDatas(ImportArchivesContactsDTO data) {
 
         ImportFileResultLog<ImportArchivesContactsDTO> log = new ImportFileResultLog<>(ArchivesServiceErrorCode.SCOPE);
 
         //  姓名校验
-        if(!checkArchivesContactName(log, data, data.getContactName()))
+        if (!checkArchivesContactName(log, data, data.getContactName()))
             return log;
 
         //  英文名校验
-        if(!checkArchivesContactEnName(log, data, data.getContactEnName()))
+        if (!checkArchivesContactEnName(log, data, data.getContactEnName()))
             return log;
 
         //  手机号
-        if(!checkArchivesContactToken(log, data, data.getContactToken()))
+        if (!checkArchivesContactToken(log, data, data.getContactToken()))
             return log;
 
         //  短号
@@ -533,11 +532,11 @@ public class ArchivesServiceImpl implements ArchivesService {
             return log;
 
         //  部门
-        if(!checkArchivesDepartment(log, data, data.getDepartment()))
+        if (!checkArchivesDepartment(log, data, data.getDepartment()))
             return log;
 
         //  职务
-        if(!checkArchivesJobPosition(log, data, data.getJobPosition()))
+        if (!checkArchivesJobPosition(log, data, data.getJobPosition()))
             return log;
 
         return null;
@@ -816,21 +815,59 @@ public class ArchivesServiceImpl implements ArchivesService {
             //  2.更新 member 表信息
             organizationService.updateOrganizationMemberInfoByDetailId(employee.getId(), employee.getContactToken(), employee.getContactName(), employee.getGender());
 
-            //  3.更新自定义字段值
+            //  3.更新自定义字段值，人事档案单独的表单值处理
             List<PostApprovalFormItem> dynamicItems = cmd.getValues().stream().filter(r -> {
                 return !GeneralFormFieldAttribute.DEFAULT.getCode().equals(r.getFieldAttribute());
             }).map(r -> {
                 return r;
             }).collect(Collectors.toList());
-            addGeneralFormValuesCommand formCommand = new addGeneralFormValuesCommand();
-            formCommand.setGeneralFormId(getRealFormOriginId(cmd.getFormOriginId()));
-            formCommand.setSourceId(employee.getId());
-            formCommand.setSourceType(GeneralFormSourceType.ARCHIVES_AUTH.getCode());
-            formCommand.setValues(dynamicItems);
-            generalFormService.addGeneralFormValues(formCommand);
+            addGeneralFormValuesForArchives(getRealFormOriginId(cmd.getFormOriginId()),employee,dynamicItems);
 
             return null;
         });
+    }
+
+    /**
+     * 为人事档案单独做一个表单值的更新处理
+     */
+    private void addGeneralFormValuesForArchives(Long formOriginId, OrganizationMemberDetails employee, List<PostApprovalFormItem> dynamicItems) {
+        if(null != dynamicItems) {
+            GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(formOriginId);
+
+            for (PostApprovalFormItem val : dynamicItems) {
+
+                GeneralFormVal obj = generalFormValProvider.getGeneralFormValBySourceIdAndName(employee.getId(), GeneralFormSourceType.ARCHIVES_AUTH.getCode(), val.getFieldName());
+                if (obj == null) {
+                    obj = new GeneralFormVal();
+                    //与表单信息一致
+                    obj.setNamespaceId(form.getNamespaceId());
+                    obj.setOrganizationId(form.getOrganizationId());
+                    obj.setOwnerId(form.getOwnerId());
+                    obj.setOwnerType(form.getOwnerType());
+                    obj.setModuleId(form.getModuleId());
+                    obj.setModuleType(form.getModuleType());
+                    obj.setFormOriginId(form.getFormOriginId());
+                    obj.setFormVersion(form.getFormVersion());
+
+                    obj.setSourceType(GeneralFormSourceType.ARCHIVES_AUTH.getCode());
+                    obj.setSourceId(employee.getId());
+                    obj.setFieldName(val.getFieldName());
+                    obj.setFieldType(val.getFieldType());
+                    obj.setFieldValue(val.getFieldValue());
+                    generalFormValProvider.createGeneralFormVal(obj);
+                } else {
+                    obj.setFieldValue(val.getFieldValue());
+                    generalFormValProvider.updateGeneralFormVal(obj);
+                }
+            }
+/*
+        addGeneralFormValuesCommand formCommand = new addGeneralFormValuesCommand();
+        formCommand.setGeneralFormId();
+        formCommand.setSourceId(employee.getId());
+        formCommand.setSourceType(GeneralFormSourceType.ARCHIVES_AUTH.getCode());
+        formCommand.setValues(dynamicItems);
+        generalFormService.addGeneralFormValues(formCommand);*/
+        }
     }
 
     @Override
@@ -935,7 +972,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         orgCommand.setEmployeeStatus(cmd.getEmployeeStatus());
         orgCommand.setContractPartyId(cmd.getContractPartyId());
         orgCommand.setKeywords(cmd.getKeywords());
-        if (cmd.getDepartmentId() != null){
+        if (cmd.getDepartmentId() != null) {
             orgCommand.setOrganizationId(cmd.getDepartmentId());
             List<String> groupTypes = new ArrayList<>();
             groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
@@ -948,7 +985,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         else
             orgCommand.setPageSize(20);
         orgCommand.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CHILD_ENTERPRISE.getCode()));
-
 
 
         ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
@@ -1676,6 +1712,9 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
     }
 
+    /**
+     * 为人事档案单独做一个表单的更新处理
+     */
     private GeneralFormDTO updateGeneralFormForArchives(UpdateArchivesFormCommand cmd) {
         //  1.更新表单的字段
         GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(cmd
@@ -2216,13 +2255,13 @@ public class ArchivesServiceImpl implements ArchivesService {
             log.setErrorLog("Contact name too long.");
             log.setCode(ArchivesServiceErrorCode.ERROR_NAME_TOO_LONG);
             return false;
-        }else if(!Pattern.matches("^[\\u4E00-\\u9FA5A-Za-z0-9_\\n]+$", contactName)){
+        } else if (!Pattern.matches("^[\\u4E00-\\u9FA5A-Za-z0-9_\\n]+$", contactName)) {
             LOGGER.warn("Contact name wrong format. data = {}", data);
             log.setData(data);
             log.setErrorLog("Contact name wrong format.");
             log.setCode(ArchivesServiceErrorCode.ERROR_NAME_WRONG_FORMAT);
             return false;
-        }else
+        } else
             return true;
     }
 
@@ -2247,7 +2286,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             log.setErrorLog("Contact token is empty");
             log.setCode(ArchivesServiceErrorCode.ERROR_CONTACT_TOKEN_IS_EMPTY);
             return false;
-        } else if (!Pattern.matches("^1\\d{10}$",getRealContactToken(contactToken,ArchivesParameter.CONTACT_TOKEN))) {
+        } else if (!Pattern.matches("^1\\d{10}$", getRealContactToken(contactToken, ArchivesParameter.CONTACT_TOKEN))) {
             LOGGER.warn("Contact token wrong format. data = {}", data);
             log.setData(data);
             log.setErrorLog("Contact token wrong format");
@@ -2285,7 +2324,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             return true;
     }
 
-    private <T> boolean checkArchivesContactShortToken(ImportFileResultLog<T> log, T data, String contactShortToken){
+    private <T> boolean checkArchivesContactShortToken(ImportFileResultLog<T> log, T data, String contactShortToken) {
         if (!StringUtils.isEmpty(contactShortToken)) {
             if (!Pattern.matches("\\d+", contactShortToken)) {
                 LOGGER.warn("Contact short token wrong format. data = {}", data);
@@ -2299,7 +2338,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             return true;
     }
 
-    private <T> boolean checkArchivesWorkEmail(ImportFileResultLog<T> log, T data, String workEmail){
+    private <T> boolean checkArchivesWorkEmail(ImportFileResultLog<T> log, T data, String workEmail) {
         if (!StringUtils.isEmpty(workEmail)) {
             if (!Pattern.matches("^([a-zA-Z0-9]+[_|\\_|\\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\\_|\\.]?)*[a-zA-Z0-9]+\\.[a-zA-Z]{2,3}$", workEmail)) {
                 LOGGER.warn("WorkEmail wrong format. data = {}", data);
