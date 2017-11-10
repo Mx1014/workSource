@@ -1,5 +1,7 @@
 package com.everhomes.general_approval;
 
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseDetail;
 import com.everhomes.rest.general_approval.*;
 
 import java.util.Map;
@@ -58,6 +60,8 @@ public interface GeneralApprovalService {
     ListGeneralApprovalResponse listActiveGeneralApproval(ListActiveGeneralApprovalCommand cmd);
 
     ListGeneralApprovalRecordsResponse listGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd);
+
+    GeneralApprovalRecordDTO convertGeneralApprovalRecordDTO(FlowCase r);
 
     void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd, HttpServletResponse httpResponse);
 

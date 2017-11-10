@@ -31,6 +31,7 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.approval.ApprovalCategoryDTO;
+import com.everhomes.rest.general_approval.GeneralApprovalRecordDTO;
 import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.rest.techpark.punch.admin.*;
@@ -4987,9 +4988,11 @@ public class PunchServiceImpl implements PunchService {
 			exceptionRequests.addAll(requests2);
 		}
 		if (exceptionRequests.size() > 0) {
+			dto.setApprovalRecords(new ArrayList<>());
 			for (PunchExceptionRequest request : exceptionRequests) {
-				// TODO: 2017/11/6 等荣男的接口
-				request.getRequestId();
+				FlowCase flowCase = flowCaseProvider.getFlowCaseById(request.getRequestId());
+				GeneralApprovalRecordDTO recordDTO = generalApprovalService.convertGeneralApprovalRecordDTO(flowCase);
+				dto.getApprovalRecords().add(recordDTO);
 			}
 		}
 		

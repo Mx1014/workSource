@@ -912,21 +912,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         });
         if (details != null && details.size() > 0) {
             List<GeneralApprovalRecordDTO> results = details.stream().map(r -> {
-                GeneralApprovalFlowCase flowCase = ConvertHelper.convert(r, GeneralApprovalFlowCase.class);
-                GeneralApprovalRecordDTO dto = new GeneralApprovalRecordDTO();
-                dto.setId(r.getId());
-                dto.setNamespaceId(r.getNamespaceId());
-                dto.setModuleId(r.getModuleId());
-                dto.setCreatorName(r.getApplierName());
-                dto.setCreatorDepartment(flowCase.getCreatorDepartment());
-                dto.setCreatorDepartmentId(flowCase.getCreatorDepartmentId());
-                dto.setCreatorMobile(r.getApplierPhone());
-                String time = format.format(r.getCreateTime());
-                dto.setCreateTime(time);
-                dto.setApprovalType(r.getTitle());
-                dto.setApprovalNo(flowCase.getApprovalNo());
-                dto.setApprovalStatus(r.getStatus());
-                dto.setFlowCaseId(flowCase.getId());
+
+                GeneralApprovalRecordDTO dto = convertGeneralApprovalRecordDTO(r);
                 return dto;
             }).collect(Collectors.toList());
             response.setRecords(results);
@@ -936,6 +923,27 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         return response;
     }
 
+
+
+    @Override
+    public GeneralApprovalRecordDTO convertGeneralApprovalRecordDTO(FlowCase r){
+        GeneralApprovalFlowCase flowCase = ConvertHelper.convert(r, GeneralApprovalFlowCase.class);
+        GeneralApprovalRecordDTO dto = new GeneralApprovalRecordDTO();
+        dto.setId(r.getId());
+        dto.setNamespaceId(r.getNamespaceId());
+        dto.setModuleId(r.getModuleId());
+        dto.setCreatorName(r.getApplierName());
+        dto.setCreatorDepartment(flowCase.getCreatorDepartment());
+        dto.setCreatorDepartmentId(flowCase.getCreatorDepartmentId());
+        dto.setCreatorMobile(r.getApplierPhone());
+        String time = format.format(r.getCreateTime());
+        dto.setCreateTime(time);
+        dto.setApprovalType(r.getTitle());
+        dto.setApprovalNo(flowCase.getApprovalNo());
+        dto.setApprovalStatus(r.getStatus());
+        dto.setFlowCaseId(flowCase.getId());
+        return dto;
+    }
     @Override
     public void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd, HttpServletResponse httpResponse) {
         cmd.setPageAnchor(null);
