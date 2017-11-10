@@ -304,7 +304,7 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 					dto.setPlateNumber(plateNumber);
 					dto.setEntryTime(strToLong("20171110000000"));
 					dto.setPayTime(now);
-					dto.setParkingTime( (int) ((now - dto.getEntryTime()) / (1000 * 60)) );
+					dto.setParkingTime( (int) ((order.getRechargeTime().getTime() - dto.getEntryTime()) / (1000 * 60)) );
 					dto.setDelayTime(15);
 					dto.setPrice(new BigDecimal(0));
 
@@ -314,7 +314,7 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 					ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
 
 					dto.setPlateNumber(plateNumber);
-					dto.setEntryTime(strToLong("20171106000000"));
+					dto.setEntryTime(strToLong("20171110000000"));
 					dto.setPayTime(now);
 					dto.setParkingTime( (int) ((now - dto.getEntryTime()) / (1000 * 60)) );
 					dto.setDelayTime(15);

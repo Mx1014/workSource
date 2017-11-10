@@ -61,6 +61,13 @@ public class ParkingOrderCallBackHandler implements PaymentCallBackHandler {
 
 		//TODO:ceshi
 		if (configProvider.getBooleanValue("parking.order.amount", false)) {
+			Long orderId = cmd.getOrderId();
+
+			ParkingRechargeOrder order = checkOrder(orderId);
+
+			order.setStatus(ParkingRechargeOrderStatus.RECHARGED.getCode());
+			order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+			parkingProvider.updateParkingRechargeOrder(order);
 			return;
 		}
 
