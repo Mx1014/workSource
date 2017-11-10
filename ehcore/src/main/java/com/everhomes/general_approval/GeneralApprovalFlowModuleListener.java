@@ -627,8 +627,6 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     public void onFlowCaseCreated(FlowCase flowCase) {
         // TODO Auto-generated method stub
 
-        GeneralApprovalHandler handler = getGeneralApprovalHandler(flowCase.getReferId());
-        handler.onFlowCaseCreated(flowCase);
 
     }
 

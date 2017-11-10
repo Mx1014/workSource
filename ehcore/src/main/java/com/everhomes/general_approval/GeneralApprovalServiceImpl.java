@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
@@ -291,9 +292,33 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
             response.setFormFields(fieldDTOs);
             response.setValues(cmd.getValues());
+
+
+            //added by wh 建立了审批单之后
+
+            GeneralApprovalHandler handler = getGeneralApprovalHandler(flowCase.getReferId());
+            handler.onApprovalCreated(flowCase);
             return response;
         });
     }
+
+    public GeneralApprovalHandler getGeneralApprovalHandler(Long referId) {
+
+        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(referId);
+        return getGeneralApprovalHandler(ga.getApprovalAttribute());
+    }
+
+    public GeneralApprovalHandler getGeneralApprovalHandler(String generalApprovalAttribute) {
+        if (generalApprovalAttribute != null) {
+            GeneralApprovalHandler handler = PlatformContext.getComponent(GeneralApprovalHandler.GENERAL_APPROVAL_PREFIX
+                    + generalApprovalAttribute);
+            if (handler != null) {
+                return handler;
+            }
+        }
+        return PlatformContext.getComponent(GeneralApprovalDefaultHandler.GENERAL_APPROVAL_DEFAULT_HANDLER_NAME);
+    }
+
 
     @Override
     public GeneralFormDTO createApprovalForm(CreateApprovalFormCommand cmd) {

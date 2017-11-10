@@ -33,7 +33,7 @@ import java.text.ParseException;
 public class GeneralApprovalOvertimeHandler extends GeneralApprovalDefaultHandler {
 	  
 //	@Override
-//	public void onFlowCaseCreated(FlowCase flowCase) {
+//	public void onApprovalCreated(FlowCase flowCase) {
 //		//建立一个request
 //		PunchExceptionRequest request = new PunchExceptionRequest();
 //		GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());

@@ -57,7 +57,7 @@ public class GeneralApprovalDefaultHandler implements GeneralApprovalHandler {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(GeneralApprovalDefaultHandler.class);
 
 	@Override
-	public void onFlowCaseCreated(FlowCase flowCase) {
+	public void onApprovalCreated(FlowCase flowCase) {
 		// 每一个子类自己实现
 
 		//建立一个request
