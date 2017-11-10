@@ -216,8 +216,15 @@ public class UpdateEquipmentStandardCommand {
         this.items = items;
     }
 
+    public List<EquipmentsDTO> getEquipments() {
+        return equipments;
+    }
 
-	@Override
+    public void setEquipments(List<EquipmentsDTO> equipments) {
+        this.equipments = equipments;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
