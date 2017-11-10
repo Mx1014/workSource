@@ -9,7 +9,7 @@ import java.math.BigDecimal;
  * <li>maxPrice: 最大价格</li>
  * </ul>
  */
-public class SitePricePackageDto {
+public class SitePricePackageDTO {
 
     private String name;
     private BigDecimal maxPrice;

@@ -18,7 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>fullPrice: 满</li>
  * <li>cutPrice: 减</li>
  * <li>discountRatio: 折扣比例</li>
- * <li>pricePackages: 套餐 参考{@link com.everhomes.rest.rentalv2.SitePricePackageDto}</li>
+ * <li>pricePackages: 套餐 参考{@link SitePricePackageDTO}</li>
  * </ul>
  */
 public class SitePriceRuleDTO {
@@ -26,7 +26,7 @@ public class SitePriceRuleDTO {
 	private BigDecimal maxPrice;
 	private BigDecimal minPrice;
 	private String priceStr;
-	private List<SitePricePackageDto> pricePackages;
+	private List<SitePricePackageDTO> pricePackages;
 
 	public BigDecimal getMaxPrice() {
 		return maxPrice;
@@ -60,11 +60,11 @@ public class SitePriceRuleDTO {
 		this.priceStr = priceStr;
 	}
 
-	public List<SitePricePackageDto> getPricePackages() {
+	public List<SitePricePackageDTO> getPricePackages() {
 		return pricePackages;
 	}
 
-	public void setPricePackages(List<SitePricePackageDto> pricePackages) {
+	public void setPricePackages(List<SitePricePackageDTO> pricePackages) {
 		this.pricePackages = pricePackages;
 	}
 

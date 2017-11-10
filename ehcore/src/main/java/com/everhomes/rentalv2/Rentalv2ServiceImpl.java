@@ -32,7 +32,6 @@ import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PayService;
-import com.everhomes.parking.innospring.InnoSpringCardInfo;
 import com.everhomes.pay.order.PaymentType;
 import com.everhomes.rest.aclink.CreateDoorAuthCommand;
 import com.everhomes.rest.aclink.DoorAuthDTO;
@@ -1059,7 +1058,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		sitePriceRuleDTO.setPricePackages(new ArrayList<>()); //设置每个套餐的价格范围
 		pricePackages.forEach(r->{
-			SitePricePackageDto dto = new SitePricePackageDto();
+			SitePricePackageDTO dto = new SitePricePackageDTO();
 			dto.setName(r.getName());
 			MaxMinPrice maxMinPrice2 =rentalv2PricePackageProvider.findMaxMinPrice(packageIds,pricePackages.get(0).getRentalType(),r.getName());
 			BigDecimal maxPrice2 = null;
