@@ -4,6 +4,8 @@ package com.everhomes.parking.handler;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -304,10 +306,26 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 			}
 
 			if (plateNumber.startsWith("粤C")) {
+
+				String s = plateNumber.substring(2);
+				String DATE_TIME = "yyyyMMddHHmm";
+				String DATE = "yyyy-MM-dd";
+				String DATE_TIME_STR = "yyyyMMdd";
+
+				SimpleDateFormat sdf1 = new SimpleDateFormat(DATE_TIME_STR);
+				String q = sdf1.format(new Date());
+
+				SimpleDateFormat sdf2 = new SimpleDateFormat(DATE_TIME);
+				long t = 0;
+				try {
+					t = sdf2.parse(q+s).getTime();
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
 				ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
 
 				dto.setPlateNumber(plateNumber);
-				dto.setEntryTime(strToLong("20171108161800"));
+				dto.setEntryTime(t);
 				long now = System.currentTimeMillis();
 				dto.setPayTime(now);
 				dto.setParkingTime( (int) ((now - dto.getEntryTime()) / (1000 * 60)) );

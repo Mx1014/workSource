@@ -59,6 +59,11 @@ public class ParkingOrderCallBackHandler implements PaymentCallBackHandler {
 	@Override
 	public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
 
+		//TODO:ceshi
+		if (configProvider.getBooleanValue("parking.order.amount", false)) {
+			return;
+		}
+
 //		ActivityRoster roster = activityProvider.findRosterByOrderNo(cmd.getOrderId());
 //		if(roster == null){
 //			LOGGER.info("can not find roster by orderno = {}", cmd.getOrderId());

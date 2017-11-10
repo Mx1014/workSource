@@ -51,6 +51,10 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 
 	@Override
 	public void paySuccess(PayCallbackCommand cmd) {
+		//TODO:ceshi
+		if (configProvider.getBooleanValue("parking.order.amount", false)) {
+			return;
+		}
 
 		LOGGER.info("Parking pay info, cmd={}", cmd);
 
@@ -68,6 +72,7 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 			ParkingRechargeOrder order = checkOrder(orderId);
 			//加一个开关，方便在beta环境测试
 			boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+
 			if (!flag) {
 				if (0 != order.getPrice().compareTo(payAmount)) {
 					LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
