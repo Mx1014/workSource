@@ -1773,9 +1773,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             return msgGenerator.generateTimeMessage(resp.getId());
         }
         
-        return msgGenerator.generateWebSocketMessage(resp.getId());
+        //return msgGenerator.generateWebSocketMessage(resp.getId());
         
-//        return null;
+        return null;
     }
     
     @Override
@@ -2497,6 +2497,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         auth.setOrganization(cmd.getOrganization());
         auth.setPhone(cmd.getPhone());
         auth.setNickname(cmd.getUserName());
+        auth.setLinglingUuid(uuid);
+        auth.setCurrStorey(cmd.getDoorNumber());
         
         if(cmd.getValidFromMs() == null) {
         	auth.setValidFromMs(System.currentTimeMillis());	
@@ -2931,7 +2933,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 
 //                qrArr = Base64.decodeBase64("+mfPObQMjcXYWp+UpXhknA==");
                 
-                resp.setQr(AclinkUtils.createZlQrCodeForFlapDoor(qrArr, System.currentTimeMillis(), 30*60*1000l));
+                Long qrImageTimeout = this.configProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_TIMEOUTS, 10*60l);
+                resp.setQr(AclinkUtils.createZlQrCodeForFlapDoor(qrArr, System.currentTimeMillis(), qrImageTimeout*1000l));
                 
                 return resp;
             }

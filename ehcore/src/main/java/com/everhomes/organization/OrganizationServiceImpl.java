@@ -5885,6 +5885,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
             return null;
         });
+        
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         //执行太慢，开一个线程来做
         ExecutorUtil.submit(new Runnable() {
@@ -5892,7 +5894,15 @@ public class OrganizationServiceImpl implements OrganizationService {
             public void run() {
                 try {
                     // 发消息等等操作
+                    //设置上下文对象 Added by Jannson
+                    UserContext.setCurrentNamespaceId(namespaceId);
+                    UserContext.setCurrentUser(user);
+                    
                     leaveOrganizationAfterOperation(user.getId(), members);
+                    
+                    //设置完成之后要清空
+                    UserContext.setCurrentNamespaceId(null);
+                    UserContext.setCurrentUser(null);
                 } catch (Exception e) {
                     LOGGER.error("leaveOrganizationAfterOperation error", e);
                 }
