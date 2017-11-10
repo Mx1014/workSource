@@ -5609,7 +5609,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 List<Long> childIds = cmd.getChildIds();
                 for (Long orgId : childIds) {
                     this.organizationProvider.updateOrganizationDefaultOrder(namespaceId, orgId, childIds.indexOf(orgId));
-                    LOGGER.debug("sortOrganizationsAtSameLevel" + childIds.indexOf(orgId));
+                    LOGGER.debug("sortOrganizationsAtSameLevel" + childIds.indexOf(orgId)+ "namespaceId:" + namespaceId);
                 }
             }
             return null;
