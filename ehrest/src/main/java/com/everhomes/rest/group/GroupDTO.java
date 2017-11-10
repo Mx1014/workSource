@@ -48,7 +48,8 @@ import com.everhomes.util.StringHelper;
  *     <li>approvalStatus: 审核的状态，针对需要验证的才有此标记，参考{@link com.everhomes.rest.group.ApprovalStatus}</li>
  *     <li>touristPostPolicy: touristPostPolicy 参考{@link TouristPostPolicyFlag}</li>
  *     <li>clubType: clubType 参考{@link ClubType}</li>
- *     <li>contentUrl: 详情页面的url</li>
+ *     <li>descriptionUrl: 详情页面的url</li>
+ *     <li>descriptionType: group描述的载体类型  参考{@link com.everhomes.rest.group.DescriptionType}</li>
  *     <li>phoneNumber: 联系电话</li>
  * </ul>
  */
@@ -102,7 +103,9 @@ public class GroupDTO {
 
     private Byte clubType;
 
-    private String contentUrl;
+    private String descriptionUrl;
+
+    private Byte descriptionType;
 
     private String phoneNumber;
 
@@ -421,12 +424,12 @@ public class GroupDTO {
         this.clubType = clubType;
     }
 
-    public String getContentUrl() {
-        return contentUrl;
+    public String getDescriptionUrl() {
+        return descriptionUrl;
     }
 
-    public void setContentUrl(String contentUrl) {
-        this.contentUrl = contentUrl;
+    public void setDescriptionUrl(String descriptionUrl) {
+        this.descriptionUrl = descriptionUrl;
     }
 
     public String getPhoneNumber() {

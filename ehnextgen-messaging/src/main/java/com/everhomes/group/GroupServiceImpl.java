@@ -245,6 +245,8 @@ public class GroupServiceImpl implements GroupService {
             group.setName(cmd.getName());
             group.setAvatar(cmd.getAvatar());
             group.setDescription(cmd.getDescription());
+            group.setDescriptionType(cmd.getDescriptionType());
+
             group.setDiscriminator(GroupDiscriminator.GROUP.getCode());
             group.setMemberCount(1L); // 创建者也参与人数计算
             
@@ -535,8 +537,10 @@ public class GroupServiceImpl implements GroupService {
         if(cmd.getAvatar() != null)
             group.setAvatar(cmd.getAvatar());
         
-        if(cmd.getDescription() != null)
+        if(cmd.getDescription() != null){
             group.setDescription(cmd.getDescription());
+            group.setDescriptionType(cmd.getDescriptionType());
+        }
         
         if(cmd.getName() != null)
             group.setName(cmd.getName());
@@ -1591,7 +1595,7 @@ public class GroupServiceImpl implements GroupService {
         case WAITING_FOR_ACCEPTANCE:
             deletePendingGroupMember(operatorUid, member);
             member.setMemberStatus(GroupMemberStatus.REJECT.getCode());
-            addGroupMemberLog(member, group);
+            addGroupMemberLog(member, group, cmd.getRejectText());
             
             GroupMember inviter = this.groupProvider.findGroupMemberByMemberInfo(groupId, 
                 EntityType.USER.getCode(), member.getInviterUid());
@@ -1608,7 +1612,7 @@ public class GroupServiceImpl implements GroupService {
         }
     }
     
-    private void addGroupMemberLog(GroupMember member, Group group) {
+    private void addGroupMemberLog(GroupMember member, Group group, String rejectText) {
         GroupMemberLog memberLog = ConvertHelper.convert(member, GroupMemberLog.class);
         memberLog.setNamespaceId(group.getNamespaceId());
         memberLog.setMemberStatus(member.getMemberStatus());
@@ -1619,6 +1623,7 @@ public class GroupServiceImpl implements GroupService {
         memberLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         memberLog.setCommunityId(group.getFamilyCommunityId());
         memberLog.setAddressId(group.getFamilyAddressId());
+        memberLog.setRejectText(rejectText);
         groupMemberLogProvider.createGroupMemberLog(memberLog);
 	}
 
@@ -1704,7 +1709,7 @@ public class GroupServiceImpl implements GroupService {
         case WAITING_FOR_APPROVAL:
             deletePendingGroupMember(operatorUid, member);
             member.setMemberStatus(GroupMemberStatus.REJECT.getCode());
-            addGroupMemberLog(member, group);
+            addGroupMemberLog(member, group, cmd.getRejectText());
 
             GroupMember rejecter = this.groupProvider.findGroupMemberByMemberInfo(groupId, 
                 EntityType.USER.getCode(), operatorUid);
@@ -2895,13 +2900,13 @@ public class GroupServiceImpl implements GroupService {
 
         populateGroupDTO(operatorId, groupDto);
 
-        groupDto.setContentUrl(getGroupContentUrl(group.getId()));
+        groupDto.setDescriptionUrl(getDescriptionUrl(group.getId()));
         
         return groupDto;
     }
 
 
-    private String getGroupContentUrl(Long id){
+    private String getDescriptionUrl(Long id){
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         String homeUrl = configProvider.getValue(namespaceId, ConfigConstants.HOME_URL, "");
         String contentUrl = configProvider.getValue(namespaceId, ConfigConstants.GROUP_CONTENT_URL, "");
@@ -5211,6 +5216,7 @@ public class GroupServiceImpl implements GroupService {
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		
 		List<Broadcast> broadcastList = broadcastProvider.listBroadcastByOwner(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getPageAnchor(), pageSize+1);
+		Integer count = broadcastProvider.countBroadcastByOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		Long nextPageAnchor = null;
 		if (broadcastList != null && broadcastList.size() > pageSize) {
 			broadcastList.remove(broadcastList.size()-1);
@@ -5221,7 +5227,7 @@ public class GroupServiceImpl implements GroupService {
 			return toBroadcastDTO(b);
 		}).collect(Collectors.toList());
 		
-		return new ListBroadcastsResponse(resultList, nextPageAnchor);
+		return new ListBroadcastsResponse(resultList, nextPageAnchor, count);
 	}
 	
 	private BroadcastDTO toBroadcastDTO(Broadcast broadcast){
@@ -5730,6 +5736,10 @@ public class GroupServiceImpl implements GroupService {
             String url = contentServerService.parserUri(dto.getAvatar(), EntityType.USER.getCode(), userId);
             dto.setAvatarUrl(url);
         }
+
+        Group group = groupProvider.findGroupById(dto.getGroupId());
+
+        dto.setGroupName(group.getName());
 
     }
 

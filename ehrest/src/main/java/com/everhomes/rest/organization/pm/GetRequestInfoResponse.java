@@ -12,6 +12,8 @@ import com.everhomes.util.StringHelper;
 public class GetRequestInfoResponse {
 	private Byte status;
 
+	private String text;
+
 	public GetRequestInfoResponse() {
 		super();
 	}
@@ -20,6 +22,11 @@ public class GetRequestInfoResponse {
 		super();
 		this.status = status;
 	}
+	public GetRequestInfoResponse(Byte status, String text) {
+		super();
+		this.status = status;
+		this.text = text;
+	}
 
 	public Byte getStatus() {
 		return status;
@@ -27,6 +34,14 @@ public class GetRequestInfoResponse {
 
 	public void setStatus(Byte status) {
 		this.status = status;
+	}
+
+	public String getText() {
+		return text;
+	}
+
+	public void setText(String text) {
+		this.text = text;
 	}
 
 	@Override

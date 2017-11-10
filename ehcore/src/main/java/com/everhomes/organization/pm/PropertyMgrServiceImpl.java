@@ -6318,7 +6318,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             if (LOGGER.isDebugEnabled())
                 LOGGER.debug("getRequestInfo groupMemberLog {}", groupMemberLog);
 			if (groupMemberLog != null) {
-				return new GetRequestInfoResponse(groupMemberLog.getMemberStatus());
+				return new GetRequestInfoResponse(groupMemberLog.getMemberStatus(), groupMemberLog.getRejectText());
 			}
 		}
         if (LOGGER.isDebugEnabled())

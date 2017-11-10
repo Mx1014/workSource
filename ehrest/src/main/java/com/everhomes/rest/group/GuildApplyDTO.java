@@ -12,6 +12,7 @@ import java.sql.Timestamp;
  *     <li>uuid: uuid</li>
  *     <li>namespaceId: namespaceId</li>
  *     <li>groupId: groupId</li>
+ *     <li>groupId: groupName</li>
  *     <li>applicantUid: applicantUid</li>
  *     <li>avatar: 成员在group内的头像URI</li>
  *     <li>avatarUrl: 成员在group内的头像URL</li>
@@ -31,6 +32,7 @@ public class GuildApplyDTO {
     private String uuid;
     private Integer namespaceId;
     private Long groupId;
+    private String groupName;
     private Long applicantUid;
     private String avatar;
     private String avatarUrl;
@@ -170,6 +172,14 @@ public class GuildApplyDTO {
 
     public void setUpdateUid(Long updateUid) {
         this.updateUid = updateUid;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
     }
 
     @Override

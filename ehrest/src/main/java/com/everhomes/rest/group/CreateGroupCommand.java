@@ -3,12 +3,14 @@ package com.everhomes.rest.group;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.rest.comment.ContentType;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
  *     <li>name: group名称</li>
  *     <li>description: group描述</li>
+ *     <li>descriptionType: group描述的载体类型  参考{@link com.everhomes.rest.group.DescriptionType}</li>
  *     <li>avatar: group头像ID，图片上传到ContentServer得到的ID</li>
  *     <li>visibilityScope: group可见性类型，参考{@link com.everhomes.rest.visibility.VisibilityScope}</li>
  *     <li>visibilityScopeId: 根据group可见性类型对应的ID（如小区ID、城市ID等）</li>
@@ -30,6 +32,7 @@ public class CreateGroupCommand {
     @NotNull
     private String name;
     private String description;
+    private Byte descriptionType;
     private String avatar;
     private Byte visibilityScope;
     private Long visibilityScopeId;
@@ -73,6 +76,14 @@ public class CreateGroupCommand {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Byte getDescriptionType() {
+        return descriptionType;
+    }
+
+    public void setDescriptionType(Byte descriptionType) {
+        this.descriptionType = descriptionType;
     }
 
     public String getAvatar() {

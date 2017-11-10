@@ -20,14 +20,17 @@ public class ListBroadcastsResponse {
 	
 	private Long nextPageAnchor;
 
+	private Integer count;
+
 	public ListBroadcastsResponse() {
 
 	}
 
-	public ListBroadcastsResponse(List<BroadcastDTO> broadcasts, Long nextPageAnchor) {
+	public ListBroadcastsResponse(List<BroadcastDTO> broadcasts, Long nextPageAnchor, Integer count) {
 		super();
 		this.broadcasts = broadcasts;
 		this.nextPageAnchor = nextPageAnchor;
+		this.count = count;
 	}
 
 	public Long getNextPageAnchor() {
@@ -44,6 +47,14 @@ public class ListBroadcastsResponse {
 
 	public void setBroadcasts(List<BroadcastDTO> broadcasts) {
 		this.broadcasts = broadcasts;
+	}
+
+	public Integer getCount() {
+		return count;
+	}
+
+	public void setCount(Integer count) {
+		this.count = count;
 	}
 
 	@Override
