@@ -1139,6 +1139,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public void importEnergyMeter(ImportEnergyMeterCommand cmd, MultipartFile file) {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOwnerId());
+        import
         userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.METER_IMPORT);
         List<EnergyMeter> meterList = new ArrayList<>();
         ArrayList list = processorExcel(file);
