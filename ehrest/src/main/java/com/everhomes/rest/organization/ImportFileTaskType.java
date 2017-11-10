@@ -6,6 +6,7 @@ package com.everhomes.rest.organization;
  * <li>ORGANIZATION_CONTACT("organization_contact"): 机构通讯录导入</li>
  * <li>ENGERPRISE("enterprise"): 企业信息导入</li>
  * <li>PERSONNEL_FILE("personnel_file"): 人事档案导入</li>
+ * <li>ENERGY_METER("energy_meter"): 能耗表计</li>
  * </ul>
  */
 public enum ImportFileTaskType {
@@ -18,7 +19,7 @@ public enum ImportFileTaskType {
 
 
     PERSONNEL_FILE("psersonnel_file"),
-    SALARY_GROUP("salary_group");
+    SALARY_GROUP("salary_group"), ENERGY_METER("energy_meter");
 
 	private String code;
 

@@ -7,11 +7,18 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.energy.*;
 import com.everhomes.rest.equipment.ExportEquipmentsCardCommand;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
+import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.scheduler.EnergyTaskScheduleJob;
 import com.everhomes.search.EnergyMeterTaskSearcher;
 import com.everhomes.search.EnergyPlanSearcher;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.RuntimeErrorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,6 +37,7 @@ import java.util.Date;
 @RequestMapping("/energy")
 @RestController
 public class EnergyConsumptionController extends ControllerBase {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnergyConsumptionController.class);
 
     @Autowired
     private EnergyConsumptionService energyConsumptionService;
@@ -216,11 +224,17 @@ public class EnergyConsumptionController extends ControllerBase {
      * <p>导入表记(Excel)</p>
      * <b>URL: /energy/importEnergyMeter</b>
      */
-    @RestReturn(String.class)
+    @RestReturn(ImportFileTaskDTO.class)
     @RequestMapping("importEnergyMeter")
-    public RestResponse importEnergyMeter(ImportEnergyMeterCommand cmd, @RequestParam("attachment") MultipartFile file) {
-        energyConsumptionService.importEnergyMeter(cmd, file);
-        return success();
+    public RestResponse importEnergyMeter(ImportEnergyMeterCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
+        User manaUser = UserContext.current().getUser();
+        Long userId = manaUser.getId();
+        if (null == files || null == files[0]) {
+            LOGGER.error("files is null。userId=" + userId);
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+                    "files is null");
+        }
+        return response(energyConsumptionService.importEnergyMeter(cmd, files[0], userId));
     }
 
     /**

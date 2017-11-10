@@ -2,6 +2,7 @@
 package com.everhomes.energy;
 
 import com.everhomes.rest.energy.*;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 
@@ -126,7 +127,7 @@ public interface EnergyConsumptionService {
      * @param cmd   cmd
      * @param file  Excel文件
      */
-    void importEnergyMeter(ImportEnergyMeterCommand cmd, MultipartFile file);
+    ImportFileTaskDTO importEnergyMeter(ImportEnergyMeterCommand cmd, MultipartFile mfile, Long userId);
 
     /**
      * 水电能耗每日报表

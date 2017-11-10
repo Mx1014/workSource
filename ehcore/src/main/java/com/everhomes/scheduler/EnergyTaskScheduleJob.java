@@ -331,6 +331,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
 
     private void paymentExpectancies_re_struct(EnergyMeterTask task, EnergyMeterAddress address, List<FeeRules> feeRules, Long contractId) {
         PaymentExpectanciesCommand command = new PaymentExpectanciesCommand();
+        command.setIsEffectiveImmediately((byte)1);
         command.setContractId(contractId);
         command.setContractIdType((byte)1);
         if(command.getContractId() == null) {

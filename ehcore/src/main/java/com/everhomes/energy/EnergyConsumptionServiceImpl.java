@@ -34,12 +34,12 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.MeterFormulaVariable;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.customer.ImportEnterpriseCustomerDataDTO;
 import com.everhomes.rest.energy.*;
 import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
-import com.everhomes.rest.organization.ListOrganizationContactByJobPositionIdCommand;
-import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.pmNotify.*;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
@@ -49,6 +49,7 @@ import com.everhomes.rest.repeat.RepeatServiceErrorCode;
 import com.everhomes.rest.repeat.RepeatSettingStatus;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
+import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.scheduler.EnergyTaskScheduleJob;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
@@ -66,6 +67,7 @@ import com.everhomes.util.doc.DocUtil;
 import com.everhomes.util.excel.MySheetContentsHandler;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.SAXHandlerEventUserModel;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.zxing.WriterException;
@@ -254,6 +256,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Autowired
     private BuildingProvider buildingProvider;
+
+    @Autowired
+    private ImportFileService importFileService;
 
     static final String TASK_EXECUTE = "energyTask.isexecute";
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
@@ -1136,122 +1141,164 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     @Override
-    public void importEnergyMeter(ImportEnergyMeterCommand cmd, MultipartFile file) {
+    public ImportFileTaskDTO importEnergyMeter(ImportEnergyMeterCommand cmd, MultipartFile file, Long userId) {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOwnerId());
-        import
         userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.METER_IMPORT);
-        List<EnergyMeter> meterList = new ArrayList<>();
-        ArrayList list = processorExcel(file);
-        for (int i = 2; i < list.size(); i++) {
-            RowResult result = (RowResult) list.get(i);
-            if (Stream.of(result.getA(), result.getB(), result.getC(), result.getD(), result.getE(), result.getH()).anyMatch(StringUtils::isEmpty)) {
-                continue;
+
+        ImportFileTask task = new ImportFileTask();
+        try {
+            //解析excel
+            List resultList = PropMrgOwnerHandler.processorExcel(file.getInputStream());
+
+            if(null == resultList || resultList.isEmpty()){
+                LOGGER.error("File content is empty。userId="+userId);
+                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL,
+                        localeStringService.getLocalizedString(String.valueOf(UserServiceErrorCode.SCOPE),
+                                String.valueOf(UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL),
+                                UserContext.current().getUser().getLocale(),"File content is empty"));
             }
-            EnergyMeter meter = new EnergyMeter();
-            meter.setOwnerId(cmd.getOwnerId());
-            meter.setOwnerType(cmd.getOwnerType());
-            meter.setStatus(EnergyMeterStatus.ACTIVE.getCode());
-            meter.setCommunityId(cmd.getCommunityId());
-            meter.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
-            meter.setName(result.getA());
-            meter.setMeterNumber(result.getB());
-            LocaleString meterTypeLocale = localeStringProvider.findByText(EnergyLocalStringCode.SCOPE_METER_TYPE, result.getC(), currLocale());
-            if (meterTypeLocale != null) {
-                meter.setMeterType(Byte.valueOf(meterTypeLocale.getCode()));
-            } else {
-                LOGGER.error("Import energy meter error, error field meterType");
-                throw errorWith(SCOPE, ERR_METER_TYPE_NOT_EXIST, "Import energy meter error, error field meterType");
-            }
-            EnergyMeterCategory category = meterCategoryProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), result.getD());
-            if (category != null) {
-                meter.setBillCategoryId(category.getId());
-            } else {
-                LOGGER.error("Import energy meter error, error field category");
-                throw errorWith(SCOPE, ERR_BILL_CATEGORY_NOT_EXIST, "Import energy meter error, error field category");
-            }
-            category = meterCategoryProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), result.getE());
-            if (category != null) {
-                meter.setServiceCategoryId(category.getId());
-            } else {
-                LOGGER.error("Import energy meter error, error field category");
-                throw errorWith(SCOPE, ERR_SERVICE_CATEGORY_NOT_EXIST, "Import energy meter error, error field category");
-            }
+            task.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+            task.setOwnerId(cmd.getOwnerId());
+            task.setType(ImportFileTaskType.ENERGY_METER.getCode());
+            task.setCreatorUid(userId);
+//            task = importFileService.executeTask(new ExecuteImportTaskCallback() {
+//                @Override
+//                public ImportFileResponse importFile() {
+//                    ImportFileResponse response = new ImportFileResponse();
+//                    List<ImportEnergyMeterDataDTO> datas = handleImportEnterpriseCustomerData(resultList);
+//                    if(datas.size() > 0){
+//                        //设置导出报错的结果excel的标题
+//                        response.setTitle(datas.get(0));
+//                        datas.remove(0);
+//                    }
+//                    List<ImportFileResultLog<ImportEnterpriseCustomerDataDTO>> results = importEnterpriseCustomerData(cmd, datas, userId);
+//                    response.setTotalCount((long)datas.size());
+//                    response.setFailCount((long)results.size());
+//                    response.setLogs(results);
+//                    return response;
+//                }
+//            }, task);
 
-
-            if (NumberUtils.isNumber(result.getH())) {
-                meter.setMaxReading(new BigDecimal(result.getH()));
-            } else {
-                LOGGER.error("Import energy meter error, error field MaxReading");
-                throw errorWith(SCOPE, ERR_MAX_READING_NOT_EXIST, "Import energy meter error, error field MaxReading");
-            }
-            if (NumberUtils.isNumber(result.getI())) {
-                meter.setStartReading(new BigDecimal(result.getI()));
-            } else {
-                meter.setStartReading(new BigDecimal("0"));
-            }
-
-            if (NumberUtils.isNumber(result.getI())) {
-                meter.setRate(new BigDecimal(result.getI()));
-            }
-
-            EnergyMeterFormula formula = meterFormulaProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), result.getK());
-            if (formula != null) {
-                meter.setAmountFormulaId(formula.getId());
-            }
-
-            dbProvider.execute(r -> {
-                meterProvider.createEnergyMeter(meter);
-
-                if(!StringUtils.isEmpty(result.getF()) && !StringUtils.isEmpty(result.getG())) {
-                    Address address = addressProvider.findApartmentAddress(meter.getNamespaceId(), meter.getCommunityId(), result.getF(), result.getG());
-                    if(address != null) {
-                        EnergyMeterAddress ma = new EnergyMeterAddress();
-                        ma.setBuildingName(address.getBuildingName());
-                        ma.setApartmentName(address.getApartmentName());
-                        ma.setAddressId(address.getId());
-                        ma.setApartmentFloor(address.getApartmentFloor());
-                        Building building = buildingProvider.findBuildingByName(meter.getNamespaceId(), meter.getCommunityId(), address.getBuildingName());
-                        if(building != null) {
-                            ma.setBuildingId(building.getId());
-                        }
-                        ma.setMeterId(meter.getId());
-                        energyMeterAddressProvider.createEnergyMeterAddress(ma);
-                    }
-                }
-
-                // 创建setting log 记录
-                UpdateEnergyMeterCommand updateCmd = new UpdateEnergyMeterCommand();
-                updateCmd.setPrice(meter.getPrice());
-                updateCmd.setRate(meter.getRate());
-                updateCmd.setCostFormulaId(meter.getCostFormulaId());
-                updateCmd.setAmountFormulaId(meter.getAmountFormulaId());
-                updateCmd.setStartTime(Date.valueOf(LocalDate.now()).getTime());
-                updateCmd.setMeterId(meter.getId());
-                updateCmd.setCalculationType(meter.getCalculationType());
-                updateCmd.setConfigId(meter.getConfigId());
-                updateCmd.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
-                this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
-                this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
-                this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
-                this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd);
-
-                // 创建一条初始读表记录
-                ReadEnergyMeterCommand readEnergyMeterCmd = new ReadEnergyMeterCommand();
-                readEnergyMeterCmd.setCommunityId(cmd.getCommunityId());
-                readEnergyMeterCmd.setCurrReading(meter.getStartReading());
-                readEnergyMeterCmd.setMeterId(meter.getId());
-                readEnergyMeterCmd.setOrganizationId(cmd.getOwnerId());
-                readEnergyMeterCmd.setResetMeterFlag(TrueOrFalseFlag.FALSE.getCode());
-                readEnergyMeterCmd.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
-                this.readEnergyMeter(readEnergyMeterCmd);
-
-//                meterSearcher.feedDoc(meter);
-                return true;
-            });
-            meterList.add(meter);
+        } catch (IOException e) {
+            LOGGER.error("File can not be resolved...");
+            e.printStackTrace();
         }
-        meterSearcher.bulkUpdate(meterList);
+        LOGGER.info("task: {}",  task);
+        return ConvertHelper.convert(task, ImportFileTaskDTO.class);
+
+
+//        List<EnergyMeter> meterList = new ArrayList<>();
+//        ArrayList list = processorExcel(file);
+//        for (int i = 2; i < list.size(); i++) {
+//            RowResult result = (RowResult) list.get(i);
+//            if (Stream.of(result.getA(), result.getB(), result.getC(), result.getD(), result.getE(), result.getH()).anyMatch(StringUtils::isEmpty)) {
+//                continue;
+//            }
+//            EnergyMeter meter = new EnergyMeter();
+//            meter.setOwnerId(cmd.getOwnerId());
+//            meter.setOwnerType(cmd.getOwnerType());
+//            meter.setStatus(EnergyMeterStatus.ACTIVE.getCode());
+//            meter.setCommunityId(cmd.getCommunityId());
+//            meter.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
+//            meter.setName(result.getA());
+//            meter.setMeterNumber(result.getB());
+//            LocaleString meterTypeLocale = localeStringProvider.findByText(EnergyLocalStringCode.SCOPE_METER_TYPE, result.getC(), currLocale());
+//            if (meterTypeLocale != null) {
+//                meter.setMeterType(Byte.valueOf(meterTypeLocale.getCode()));
+//            } else {
+//                LOGGER.error("Import energy meter error, error field meterType");
+//                throw errorWith(SCOPE, ERR_METER_TYPE_NOT_EXIST, "Import energy meter error, error field meterType");
+//            }
+//            EnergyMeterCategory category = meterCategoryProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), result.getD());
+//            if (category != null) {
+//                meter.setBillCategoryId(category.getId());
+//            } else {
+//                LOGGER.error("Import energy meter error, error field category");
+//                throw errorWith(SCOPE, ERR_BILL_CATEGORY_NOT_EXIST, "Import energy meter error, error field category");
+//            }
+//            category = meterCategoryProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), result.getE());
+//            if (category != null) {
+//                meter.setServiceCategoryId(category.getId());
+//            } else {
+//                LOGGER.error("Import energy meter error, error field category");
+//                throw errorWith(SCOPE, ERR_SERVICE_CATEGORY_NOT_EXIST, "Import energy meter error, error field category");
+//            }
+//
+//
+//            if (NumberUtils.isNumber(result.getH())) {
+//                meter.setMaxReading(new BigDecimal(result.getH()));
+//            } else {
+//                LOGGER.error("Import energy meter error, error field MaxReading");
+//                throw errorWith(SCOPE, ERR_MAX_READING_NOT_EXIST, "Import energy meter error, error field MaxReading");
+//            }
+//            if (NumberUtils.isNumber(result.getI())) {
+//                meter.setStartReading(new BigDecimal(result.getI()));
+//            } else {
+//                meter.setStartReading(new BigDecimal("0"));
+//            }
+//
+//            if (NumberUtils.isNumber(result.getI())) {
+//                meter.setRate(new BigDecimal(result.getI()));
+//            }
+//
+//            EnergyMeterFormula formula = meterFormulaProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), result.getK());
+//            if (formula != null) {
+//                meter.setAmountFormulaId(formula.getId());
+//            }
+//
+//            dbProvider.execute(r -> {
+//                meterProvider.createEnergyMeter(meter);
+//
+//                if(!StringUtils.isEmpty(result.getF()) && !StringUtils.isEmpty(result.getG())) {
+//                    Address address = addressProvider.findApartmentAddress(meter.getNamespaceId(), meter.getCommunityId(), result.getF(), result.getG());
+//                    if(address != null) {
+//                        EnergyMeterAddress ma = new EnergyMeterAddress();
+//                        ma.setBuildingName(address.getBuildingName());
+//                        ma.setApartmentName(address.getApartmentName());
+//                        ma.setAddressId(address.getId());
+//                        ma.setApartmentFloor(address.getApartmentFloor());
+//                        Building building = buildingProvider.findBuildingByName(meter.getNamespaceId(), meter.getCommunityId(), address.getBuildingName());
+//                        if(building != null) {
+//                            ma.setBuildingId(building.getId());
+//                        }
+//                        ma.setMeterId(meter.getId());
+//                        energyMeterAddressProvider.createEnergyMeterAddress(ma);
+//                    }
+//                }
+//
+//                // 创建setting log 记录
+//                UpdateEnergyMeterCommand updateCmd = new UpdateEnergyMeterCommand();
+//                updateCmd.setPrice(meter.getPrice());
+//                updateCmd.setRate(meter.getRate());
+//                updateCmd.setCostFormulaId(meter.getCostFormulaId());
+//                updateCmd.setAmountFormulaId(meter.getAmountFormulaId());
+//                updateCmd.setStartTime(Date.valueOf(LocalDate.now()).getTime());
+//                updateCmd.setMeterId(meter.getId());
+//                updateCmd.setCalculationType(meter.getCalculationType());
+//                updateCmd.setConfigId(meter.getConfigId());
+//                updateCmd.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
+//                this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
+//                this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
+//                this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
+//                this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd);
+//
+//                // 创建一条初始读表记录
+//                ReadEnergyMeterCommand readEnergyMeterCmd = new ReadEnergyMeterCommand();
+//                readEnergyMeterCmd.setCommunityId(cmd.getCommunityId());
+//                readEnergyMeterCmd.setCurrReading(meter.getStartReading());
+//                readEnergyMeterCmd.setMeterId(meter.getId());
+//                readEnergyMeterCmd.setOrganizationId(cmd.getOwnerId());
+//                readEnergyMeterCmd.setResetMeterFlag(TrueOrFalseFlag.FALSE.getCode());
+//                readEnergyMeterCmd.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
+//                this.readEnergyMeter(readEnergyMeterCmd);
+//
+////                meterSearcher.feedDoc(meter);
+//                return true;
+//            });
+//            meterList.add(meter);
+//        }
+//        meterSearcher.bulkUpdate(meterList);
     }
 
     private String currLocale() {

@@ -598,6 +598,7 @@ public class ContractServiceImpl implements ContractService {
 			}
 		}
 //		assetService.paymentExpectancies(command);
+		command.setIsEffectiveImmediately((byte)0);
 		assetService.paymentExpectancies_re_struct(command);
 	}
 
