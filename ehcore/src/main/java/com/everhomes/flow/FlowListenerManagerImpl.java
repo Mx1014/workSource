@@ -1,9 +1,6 @@
 package com.everhomes.flow;
 
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowModuleDTO;
-import com.everhomes.rest.flow.FlowServiceTypeDTO;
-import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.util.Tuple;
 import org.slf4j.Logger;
@@ -202,6 +199,53 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
             });
         }
         return serviceTypes;
+    }
+
+    @Override
+    public List<FlowPredefinedParamDTO> listPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+        FlowModuleInst inst = moduleMap.get(flow.getModuleId());
+        if (inst != null) {
+            FlowModuleListener listener = inst.getListener();
+            List<FlowPredefinedParamDTO> dtoList = listener.listPredefinedParam(flow, flowEntityType, ownerType, ownerId);
+            if (dtoList != null) {
+                return dtoList;
+            }
+        }
+        return new ArrayList<>();
+    }
+
+    @Override
+    public boolean evaluateFlowConditionVariableRelational(FlowCaseState ctx, FlowConditionRelationalOperatorType relationalOperatorType, FlowConditionExpression exp) {
+        FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
+        if (inst == null) {
+            return false;
+        }
+        ctx.setModule(inst.getInfo());
+        FlowModuleListener listener = inst.getListener();
+        if (listener instanceof FlowModuleConditionEvaluator) {
+            FlowModuleConditionEvaluator evaluator = (FlowModuleConditionEvaluator) listener;
+            switch (relationalOperatorType) {
+                case EQUAL:
+                    return evaluator.evaluateEqual(ctx, exp);
+                case NOT_EQUAL:
+                    return !evaluator.evaluateEqual(ctx, exp);
+                case GREATER_THEN:
+                    return evaluator.evaluateGreaterThen(ctx, exp);
+                case LESS_THEN:
+                    return evaluator.evaluateLessThen(ctx, exp);
+                case GREATER_OR_EQUAL:
+                    return evaluator.evaluateGreaterThen(ctx, exp) || evaluator.evaluateEqual(ctx, exp);
+                case LESS_OR_EQUAL:
+                    return evaluator.evaluateLessThen(ctx, exp) || evaluator.evaluateEqual(ctx, exp);
+                case CONTAIN:
+                    return evaluator.evaluateContains(ctx, exp);
+                case NOT_CONTAIN:
+                    return !evaluator.evaluateContains(ctx, exp);
+                default:
+                    return evaluator.evaluateCustomize(ctx, exp);
+            }
+        }
+        return false;
     }
 
     @Override

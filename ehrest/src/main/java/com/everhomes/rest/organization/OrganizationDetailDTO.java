@@ -6,54 +6,63 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.community.admin.CommunityUserOrgDetailDTO;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *  <li>id: 主键id</li>
- *  <li>organizationId: 机构id</li>
- *  <li>description: 描述</li>
- *  <li>contact: 联系电话</li>
- *  <li>address: 地址</li>
- *  <li>geohash: 地理哈希</li>
- *  <li>contactor: 联系人</li>
- *  <li>memberCount: 机构人数</li>
- *  <li>checkinDate: 入住时间</li>
- *  <li>name: 机构名称</li>
- *  <li>avatarUri: 机构logo uri</li>
- *  <li>avatarUrl: 机构logo url</li>
- *  <li>accountPhone: 公司管理账号电话</li>
- *  <li>accountName: 公司管理账号人名称</li>
- *  <li>assignmentId: 用户权限id</li>
- *  <li>postUri: 标题图 uri</li>
- *  <li>postUrl: 标题图 url</li>
- *  <li>addresses: 机构入住门牌地址</li>
- *  <li>attachments: 机构banner图</li>
- *  <li>longitude: 经度</li>
- *  <li>latitude: 纬度</li>
- *  <li>emailDomain: 邮箱域名 </li>
- *  <li>signupCount: 注册人数</li>
- *  <li>serviceUserId: 客服服务人员id</li>
- *  <li>serviceUserName: 客服服务人员名称</li>
- *  <li>serviceUserPhone: 客服服务人员电话</li>
- *  <li>website: 企业官网</li>
- *  <li>unifiedSocialCreditCode: 统一社会信用代码</li>
- *  <li>adminMembers: 管理员列表，参考{@link com.everhomes.rest.organization.OrganizationContactDTO}</li>
+ *     <li>id: 主键id</li>
+ *     <li>organizationId: 机构id</li>
+ *     <li>description: 描述</li>
+ *     <li>contact: 联系电话</li>
+ *     <li>address: 地址</li>
+ *     <li>geohash: 地理哈希</li>
+ *     <li>displayName: displayName</li>
+ *     <li>contactor: 联系人</li>
+ *     <li>memberCount: 机构人数</li>
+ *     <li>checkinDate: 入住时间</li>
+ *     <li>name: 机构名称</li>
+ *     <li>avatarUri: 机构logo uri</li>
+ *     <li>avatarUrl: 机构logo url</li>
+ *     <li>updateTime: updateTime</li>
+ *     <li>createTime: createTime</li>
+ *     <li>accountPhone: 公司管理账号电话</li>
+ *     <li>accountName: 公司管理账号人名称</li>
+ *     <li>assignmentId: 用户权限id</li>
+ *     <li>postUri: 标题图 uri</li>
+ *     <li>postUrl: 标题图 url</li>
+ *     <li>longitude: 经度</li>
+ *     <li>latitude: 纬度</li>
+ *     <li>member: member {@link com.everhomes.rest.organization.OrganizationMemberDTO}</li>
+ *     <li>community: community {@link com.everhomes.rest.address.CommunityDTO}</li>
+ *     <li>emailDomain: 邮箱域名</li>
+ *     <li>addresses: 机构入住门牌地址 {@link com.everhomes.rest.address.AddressDTO}</li>
+ *     <li>attachments: 机构banner图 {@link com.everhomes.rest.forum.AttachmentDescriptor}</li>
+ *     <li>communityId: communityId</li>
+ *     <li>communityName: communityName</li>
+ *     <li>signupCount: 注册人数</li>
+ *     <li>serviceUserId: 客服服务人员id</li>
+ *     <li>serviceUserName: 客服服务人员名称</li>
+ *     <li>serviceUserPhone: 客服服务人员电话</li>
+ *     <li>adminMembers: 管理员列表，参考{@link com.everhomes.rest.organization.OrganizationContactDTO}</li>
+ *     <li>website: 企业官网</li>
+ *     <li>unifiedSocialCreditCode: 统一社会信用代码</li>
+ *     <li>communityUserOrgDetailDTO: 用户企业信息 {@link CommunityUserOrgDetailDTO}</li>
+ *     <li>organizationMemberName: 当前用户在企业的contact_name</li>
  * </ul>
- *
  */
 public class OrganizationDetailDTO {
 
-	private Long     id;
-	private Long     organizationId;
-	private String   description;
-	private String   contact;
-	private String   address;
-	private String   geohash;
-	private String   displayName;
-	private String   contactor;
-	private Long     memberCount;
+	private Long id;
+	private Long organizationId;
+	private String description;
+	private String contact;
+	private String address;
+	private String geohash;
+	private String displayName;
+	private String contactor;
+	private Long memberCount;
 	private Long checkinDate;
 	private String name;
 
@@ -105,6 +114,10 @@ public class OrganizationDetailDTO {
 
 	private String unifiedSocialCreditCode;
 
+	private CommunityUserOrgDetailDTO communityUserOrgDetailDTO;
+
+	private String organizationMemberName;
+
 	public String getUnifiedSocialCreditCode() {
 		return unifiedSocialCreditCode;
 	}
@@ -126,12 +139,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setSignupCount(Integer signupCount) {
 		this.signupCount = signupCount;
 	}
-
-
 
 
 	public List<OrganizationContactDTO> getAdminMembers() {
@@ -139,11 +149,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setAdminMembers(List<OrganizationContactDTO> adminMembers) {
 		this.adminMembers = adminMembers;
 	}
-
 
 
 	public Long getServiceUserId() {
@@ -151,11 +159,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setServiceUserId(Long serviceUserId) {
 		this.serviceUserId = serviceUserId;
 	}
-
 
 
 	public String getServiceUserName() {
@@ -163,11 +169,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setServiceUserName(String serviceUserName) {
 		this.serviceUserName = serviceUserName;
 	}
-
 
 
 	public String getServiceUserPhone() {
@@ -175,11 +179,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setServiceUserPhone(String serviceUserPhone) {
 		this.serviceUserPhone = serviceUserPhone;
 	}
-
 
 
 	public Long getId() {
@@ -187,11 +189,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setId(Long id) {
 		this.id = id;
 	}
-
 
 
 	public Long getOrganizationId() {
@@ -199,11 +199,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
 	}
-
 
 
 	public String getDescription() {
@@ -211,11 +209,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setDescription(String description) {
 		this.description = description;
 	}
-
 
 
 	public String getContact() {
@@ -223,11 +219,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setContact(String contact) {
 		this.contact = contact;
 	}
-
 
 
 	public String getAddress() {
@@ -235,11 +229,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setAddress(String address) {
 		this.address = address;
 	}
-
 
 
 	public String getGeohash() {
@@ -247,11 +239,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setGeohash(String geohash) {
 		this.geohash = geohash;
 	}
-
 
 
 	public String getDisplayName() {
@@ -259,11 +249,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public Long getCommunityId() {
 		return communityId;
 	}
-
 
 
 	public void setCommunityId(Long communityId) {
@@ -271,11 +259,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
-
 
 
 	public String getContactor() {
@@ -283,11 +269,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setContactor(String contactor) {
 		this.contactor = contactor;
 	}
-
 
 
 	public Long getMemberCount() {
@@ -295,11 +279,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setMemberCount(Long memberCount) {
 		this.memberCount = memberCount;
 	}
-
 
 
 	public Long getCheckinDate() {
@@ -307,11 +289,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setCheckinDate(Long checkinDate) {
 		this.checkinDate = checkinDate;
 	}
-
 
 
 	public String getName() {
@@ -319,11 +299,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setName(String name) {
 		this.name = name;
 	}
-
 
 
 	public String getAvatarUri() {
@@ -331,11 +309,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setAvatarUri(String avatarUri) {
 		this.avatarUri = avatarUri;
 	}
-
 
 
 	public String getAvatarUrl() {
@@ -343,11 +319,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setAvatarUrl(String avatarUrl) {
 		this.avatarUrl = avatarUrl;
 	}
-
 
 
 	public Long getUpdateTime() {
@@ -355,11 +329,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setUpdateTime(Long updateTime) {
 		this.updateTime = updateTime;
 	}
-
 
 
 	public Long getCreateTime() {
@@ -367,11 +339,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setCreateTime(Long createTime) {
 		this.createTime = createTime;
 	}
-
 
 
 	public String getAccountPhone() {
@@ -379,11 +349,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setAccountPhone(String accountPhone) {
 		this.accountPhone = accountPhone;
 	}
-
 
 
 	public String getAccountName() {
@@ -391,11 +359,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setAccountName(String accountName) {
 		this.accountName = accountName;
 	}
-
 
 
 	public String getPostUri() {
@@ -403,11 +369,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setPostUri(String postUri) {
 		this.postUri = postUri;
 	}
-
 
 
 	public String getPostUrl() {
@@ -415,13 +379,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setPostUrl(String postUrl) {
 		this.postUrl = postUrl;
 	}
-
-
-
 
 
 	public List<AddressDTO> getAddresses() {
@@ -429,11 +389,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setAddresses(List<AddressDTO> addresses) {
 		this.addresses = addresses;
 	}
-
 
 
 	public List<AttachmentDescriptor> getAttachments() {
@@ -441,11 +399,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setAttachments(List<AttachmentDescriptor> attachments) {
 		this.attachments = attachments;
 	}
-
 
 
 	public Long getAssignmentId() {
@@ -453,13 +409,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setAssignmentId(Long assignmentId) {
 		this.assignmentId = assignmentId;
 	}
-
-
-
 
 
 	public OrganizationMemberDTO getMember() {
@@ -467,11 +419,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setMember(OrganizationMemberDTO member) {
 		this.member = member;
 	}
-
 
 
 	public CommunityDTO getCommunity() {
@@ -479,11 +429,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setCommunity(CommunityDTO community) {
 		this.community = community;
 	}
-
 
 
 	public String getLongitude() {
@@ -491,11 +439,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setLongitude(String longitude) {
 		this.longitude = longitude;
 	}
-
 
 
 	public String getLatitude() {
@@ -503,12 +449,25 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public void setLatitude(String latitude) {
 		this.latitude = latitude;
 	}
 
+	public CommunityUserOrgDetailDTO getCommunityUserOrgDetailDTO() {
+		return communityUserOrgDetailDTO;
+	}
 
+	public void setCommunityUserOrgDetailDTO(CommunityUserOrgDetailDTO communityUserOrgDetailDTO) {
+		this.communityUserOrgDetailDTO = communityUserOrgDetailDTO;
+	}
+
+	public String getOrganizationMemberName() {
+		return organizationMemberName;
+	}
+
+	public void setOrganizationMemberName(String organizationMemberName) {
+		this.organizationMemberName = organizationMemberName;
+	}
 
 	@Override
 	public String toString() {
@@ -516,11 +475,9 @@ public class OrganizationDetailDTO {
 	}
 
 
-
 	public String getEmailDomain() {
 		return emailDomain;
 	}
-
 
 
 	public void setEmailDomain(String emailDomain) {
@@ -534,6 +491,7 @@ public class OrganizationDetailDTO {
 	public void setCommunityName(String communityName) {
 		this.communityName = communityName;
 	}
+
 
 	@Override
 	public boolean equals(Object o) {

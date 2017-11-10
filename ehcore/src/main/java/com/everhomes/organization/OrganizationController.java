@@ -7,6 +7,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.archives.UpdateArchivesEmployeeCommand;
 import com.everhomes.rest.community.CreateResourceCategoryCommand;
 import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
 import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
@@ -1878,4 +1879,16 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /org/modifyPhoneNumberByDetailId</b>
+     * <p>修改未激活人员的手机号</p>
+     */
+    @RequestMapping("modifyPhoneNumberByDetailId")
+    @RestReturn(value = Long.class)
+    public RestResponse modifyPhoneNumberByDetailId(@Valid UpdateArchivesEmployeeCommand cmd) {
+        RestResponse response = new RestResponse(organizationService.modifyPhoneNumberByDetailId(cmd.getDetailId(), cmd.getContactToken()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

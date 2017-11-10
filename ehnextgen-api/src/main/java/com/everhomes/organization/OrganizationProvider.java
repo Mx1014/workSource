@@ -30,6 +30,9 @@ import java.util.Set;
 public interface OrganizationProvider {
 	void createOrganization(Organization organization);
 	void updateOrganization(Organization organization);
+
+	void updateUserOrganization(UserOrganizations userOrganization);
+
 	void updateOrganization(List<Long> ids, Byte status, Long uid, Timestamp now);
 	void deleteOrganization(Organization organization);
 	void deleteOrganizationById(Long id);
@@ -399,7 +402,7 @@ public interface OrganizationProvider {
 	void deleteOranizationMemberContract(OrganizationMemberContracts contract);
 	void updateOrganizationMemberContract(OrganizationMemberContracts contract);
 
-	void updateOrganizationEmploymentTime(Long detailId,java.sql.Date employeeTime);
+    void updateOrganizationEmploymentTime(Long detailId, java.sql.Date employeeTime);
 	boolean updateOrganizationEmployeeStatus(Long detailId,Byte employeeStatus);
 	void updateProfileIntegrity(Long detailId, Integer integrity);
 	void createProfileLogs(OrganizationMemberProfileLogs log);
@@ -449,7 +452,7 @@ public interface OrganizationProvider {
 	Map<Long, String> listOrganizationsOfDetail(Integer namespaceId, Long detailId, String organizationGroupType);
 	List<OrganizationMember> listOrganizationMembersByDetailId(Long detailId,List<String> groupTypes);
 	
-	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus, String namespaceUserType);
+	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus, String namespaceUserType, Byte gender);
 	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus);
 	Integer countUserOrganization(Integer namespaceId, Long communityId);
 
@@ -487,6 +490,8 @@ public interface OrganizationProvider {
 	
 	// 通讯录查询最新方法
 	List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand, String filterScopeTypes);
+
+	List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand, String filterScopeType, List<String> groupTypes);
 	// path查询接口
 	List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, List<String> tokens);
 
@@ -497,6 +502,12 @@ public interface OrganizationProvider {
 	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Long targetId);
 
 	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(String memberGroup, String targetType, Long targetId);
+
+	UserOrganizations findUserOrganizationByUserIdAndOrgId(Long userId, Long orgId);
+
+	UserOrganizations findActiveAndWaitUserOrganizationByUserIdAndOrgId(Long userId, Long orgId);
+
+	UserOrganizations findUserOrganizationById(Long id);
 
 	void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent);
 
@@ -519,5 +530,7 @@ public interface OrganizationProvider {
 
     List listLapseOrganizations(Integer namespaceId);
 
-	Integer updateOrganizationMembersToInactiveByPath(String path,Timestamp now); 
+	Integer updateOrganizationMembersToInactiveByPath(String path,Timestamp now);
+
+	OrganizationMember findDepartmentMemberByTargetIdAndOrgId(Long userId, Long organizationId);
 }

@@ -77,8 +77,8 @@ public enum EntityType {
     CHILD_PROJECT("child_project"),
     LEASE_BUILDING(EhLeaseBuildings.class.getSimpleName()),
     LEASE_PROJECT(EhLeaseProjects.class.getSimpleName()),
-	CUSTOMER_TRACKING(EhCustomerTrackings.class.getSimpleName());
-
+	CUSTOMER_TRACKING(EhCustomerTrackings.class.getSimpleName()),
+    PARKING_CAR_VERIFICATION(EhParkingCarVerifications.class.getSimpleName());
 
     private String code;
     

@@ -16,7 +16,8 @@ import org.apache.commons.lang.StringUtils;
 public enum GeneralFormSourceType {
 	LEASE_PROMOTION("EhLeasePromotions"), GENERAL_APPROVE("GENERAL_APPROVE"), BUILDING("EhBuildings"), TALENT("EhTalents"),
 	PERSONAL_AUTH("personal_auth"),ORGANIZATION_AUTH("organization_auth"),
-	ARCHIVES_AUTH("archives_auth");
+	ARCHIVES_AUTH("archives_auth"),
+	LEASE_PROJECT("EhLeaseProjects");
 
 	private String code;
 

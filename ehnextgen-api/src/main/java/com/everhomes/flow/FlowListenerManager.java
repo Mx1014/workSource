@@ -1,8 +1,6 @@
 package com.everhomes.flow;
 
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowServiceTypeDTO;
-import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.util.Tuple;
 
@@ -81,5 +79,9 @@ public interface FlowListenerManager {
 
     Map<String,String> onFlowVariableRender(FlowCaseState ctx, List<String> vars);
 
+    List<FlowPredefinedParamDTO> listPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId);
+
     List<FlowServiceTypeDTO> listFlowServiceTypes(Integer namespaceId, Long moduleId);
+
+    boolean evaluateFlowConditionVariableRelational(FlowCaseState ctx, FlowConditionRelationalOperatorType relationalOperatorType, FlowConditionExpression exp);
 }

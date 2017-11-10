@@ -647,11 +647,20 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
         map.put("buildingName", buildingName);
 
+        map.put("sourceType", defaultIfNull(getSourceTypeName(request.getSourceType()),""));
+
+        return localeTemplateService.getLocaleTemplateString(ApplyEntryErrorCodes.SCOPE,
+                ApplyEntryErrorCodes.FLOW_BRIEF_CONTENT_CODE, locale, map, "");
+    }
+
+    @Override
+    public String getSourceTypeName(String type) {
+
 		GetLeasePromotionConfigCommand cmd = new GetLeasePromotionConfigCommand();
 		cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		LeasePromotionConfigDTO config = getLeasePromotionConfig(cmd);
 
-		ApplyEntrySourceType sourceType = ApplyEntrySourceType.fromType(request.getSourceType());
+		ApplyEntrySourceType sourceType = ApplyEntrySourceType.fromType(type);
 		String sourceTypeName = null != sourceType ? sourceType.getDescription() : "";
 
 		byte i = -1;
@@ -661,18 +670,18 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			i = LeasePromotionOrder.LEASE_PROMOTION.getCode();
 		}
 		if (null != config.getDisplayNames() ) {
+			int configSize = config.getDisplayNames().size();
+			int totalSize = LeasePromotionOrder.values().length;
+			int currentSize = totalSize - configSize;
 			for (Integer k: config.getDisplayOrders()) {
 				if (k.byteValue() ==i) {
-					sourceTypeName =config.getDisplayNames().get(k - 1);
+					sourceTypeName =config.getDisplayNames().get(k - 1 - currentSize);
 				}
 			}
 		}
 
-        map.put("sourceType", defaultIfNull(sourceTypeName,""));
-
-        return localeTemplateService.getLocaleTemplateString(ApplyEntryErrorCodes.SCOPE,
-                ApplyEntryErrorCodes.FLOW_BRIEF_CONTENT_CODE, locale, map, "");
-    }
+		return sourceTypeName;
+	}
 
     private String defaultIfNull(String obj, String defaultValue) {
         return obj != null ? obj : defaultValue;
@@ -760,9 +769,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		if (null != cmd.getLeaseBuildingId()) {
 			cmd.setBuildingId(cmd.getLeaseBuildingId());
 		}else{
-			LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByBuildingId(cmd.getBuildingId());
-			if (null != leaseBuilding) {
-				cmd.setBuildingId(leaseBuilding.getId());
+			if (null != cmd.getBuildingId() && cmd.getBuildingId() != 0L) {
+				LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByBuildingId(cmd.getBuildingId());
+				if (null != leaseBuilding) {
+					cmd.setBuildingId(leaseBuilding.getId());
+				}
 			}
 		}
 
@@ -1550,7 +1561,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 
 		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType());
+				null, null, cmd.getSourceType());
 
 		if (null == request) {
 			if (null != cmd.getSourceId()) {
@@ -1578,7 +1589,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 
 		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType());
+				null, null, cmd.getSourceType());
 
 		LeaseFormRequestDTO dto = ConvertHelper.convert(request, LeaseFormRequestDTO.class);
 
