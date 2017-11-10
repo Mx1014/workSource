@@ -195,6 +195,30 @@ public class UpdateEquipmentStandardCommand {
 		this.reviewExpiredDays = reviewExpiredDays;
 	}
 
+    public Byte getRepeatType() {
+        return repeatType;
+    }
+
+    public void setRepeatType(Byte repeatType) {
+        this.repeatType = repeatType;
+    }
+
+    public List<InspectionItemDTO> getItems() {
+        return items;
+    }
+
+    public void setItems(List<InspectionItemDTO> items) {
+        this.items = items;
+    }
+
+    public List<Long> getEquipmentsIds() {
+        return equipmentsIds;
+    }
+
+    public void setEquipmentsIds(List<Long> equipmentsIds) {
+        this.equipmentsIds = equipmentsIds;
+    }
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
