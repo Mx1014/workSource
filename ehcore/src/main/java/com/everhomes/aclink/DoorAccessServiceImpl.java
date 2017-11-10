@@ -26,6 +26,7 @@ import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -42,7 +43,9 @@ import com.everhomes.organization.*;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.aclink.*;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.community.GetCommunityByIdCommand;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -1478,7 +1481,14 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             @Override
             public AesUserKey doInTransaction(TransactionStatus arg0) {
                 //Find it if it's already created
-                AesUserKey aesUserKey = aesUserKeyProvider.queryAesUserKeyByDoorId(doorAuth.getDoorId(), doorAuth.getUserId());
+                AesUserKey aesUserKey = null;
+                Long userId = 1L;//表示访客二维码
+                if(!doorAuth.getUserId().equals(0L)) {
+                    //Fix for visitor, always create new aes user key
+                    aesUserKey = aesUserKeyProvider.queryAesUserKeyByDoorId(doorAuth.getDoorId(), doorAuth.getUserId());
+                    userId = doorAuth.getUserId();
+                }
+                
                 if(aesUserKey == null) {
                     AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAccess.getId());
                     aesUserKey = new AesUserKey();
@@ -1498,7 +1508,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     
                     aesUserKey.setStatus(AesUserKeyStatus.VALID.getCode());
                     aesUserKey.setKeyType(AesUserKeyType.NORMAL.getCode());
-                    aesUserKey.setSecret(AclinkUtils.packAesUserKey(aesServerKey.getSecret(), doorAuth.getUserId(), aesUserKey.getKeyId(), aesUserKey.getExpireTimeMs()));
+                    aesUserKey.setSecret(AclinkUtils.packAesUserKey(aesServerKey.getSecret(), userId, aesUserKey.getKeyId(), aesUserKey.getExpireTimeMs()));
                     aesUserKeyProvider.createAesUserKey(aesUserKey);
                     }
                 return aesUserKey;
@@ -2855,6 +2865,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     @Override
     public GetVisitorResponse getVisitor(GetVisitorCommand cmd) {
+        //TODOTEST
         GetVisitorResponse resp = new GetVisitorResponse();
         DoorAuth auth = doorAuthProvider.getLinglingDoorAuthByUuid(cmd.getId());
         if(auth == null) {
@@ -2883,6 +2894,48 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         
         resp.setCreateTime(auth.getCreateTime().getTime());
+        Integer namespaceId = null;
+        if(doorAccess.getOwnerType() != null && doorAccess.getDoorType() != null 
+                && ( doorAccess.getDoorType().equals(DoorAccessType.ZLACLINK_WIFI.getCode())
+                        || doorAccess.getDoorType().equals(DoorAccessType.ZLACLINK_NOWIFI.getCode())
+                        || doorAccess.getDoorType().equals(DoorAccessType.ACLINK_ZL_GROUP.getCode())
+                        || doorAccess.getDoorType().equals(DoorAccessType.ZLACLINK_WIFI.getCode()) ) ) {
+            
+            if(doorAccess.getOwnerType().equals(DoorAccessOwnerType.COMMUNITY.getCode())) {
+                Community community = communityProvider.findCommunityById(doorAccess.getOwnerId());
+                if(community != null) {
+                    namespaceId =  community.getNamespaceId();    
+                }
+                
+            } else if(doorAccess.getOwnerType().equals(DoorAccessOwnerType.ENTERPRISE.getCode())) {
+                Organization org = organizationProvider.findOrganizationById(doorAccess.getOwnerId());
+                if(org != null) {
+                    namespaceId = org.getNamespaceId();
+                }
+            }
+            
+        }
+        
+        if(namespaceId != null) {
+            DoorAccessDriverType driverType = getQrDriverZuolinInner(namespaceId);
+            DoorAccessDriverType qrDriverExt = getQrDriverExt(namespaceId);
+            if(driverType == DoorAccessDriverType.ZUOLIN_V2 && qrDriverExt == DoorAccessDriverType.ZUOLIN) {
+                byte[] origin = Base64.decodeBase64(auth.getQrKey());
+                byte[] qrLenArr = new byte[2];
+                qrLenArr[0] = origin[2];
+                qrLenArr[1] = origin[3];
+                int qrLen = (int)DataUtil.byteToShort(qrLenArr);
+                qrLen -= 2;
+                byte[] qrArr = new byte[qrLen];
+                System.arraycopy(origin, 6, qrArr, 0, qrLen);
+                
+//                qrArr = Base64.decodeBase64("+mfPObQMjcXYWp+UpXhknA==");
+                
+                resp.setQr(AclinkUtils.createZlQrCodeForFlapDoor(qrArr, System.currentTimeMillis(), 30*60*1000l));
+                
+                return resp;
+            }
+        }
         resp.setQr(auth.getQrKey());
       
         return resp;
