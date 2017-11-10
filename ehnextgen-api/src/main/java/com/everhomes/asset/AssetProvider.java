@@ -230,4 +230,12 @@ public interface AssetProvider {
     List<EhPaymentBillGroupsRules> getBillGroupRuleByCommunity(Long ownerId, String ownerType);
 
     PaymentChargingItemScope findChargingItemScope(Long chargingItemId, String ownerType, Long ownerId);
+
+    List<Integer> listAutoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId);
+
+    void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, List<Integer> configDays);
+
+    AssetPaymentOrder getOrderById(Long orderId);
+
+    String getBillSource(String billId);
 }

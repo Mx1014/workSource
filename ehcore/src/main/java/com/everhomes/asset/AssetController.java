@@ -1059,8 +1059,22 @@ public class AssetController extends ControllerBase {
     @RequestMapping("autoNoticeConfig")
     @RestReturn(String.class)
     public RestResponse autoNoticeConfig(AutoNoticeConfigCommand cmd){
-//        assetService.autoNoticeConfig(cmd);
+        assetService.autoNoticeConfig(cmd);
         RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /asset/listAutoNoticeConfig</b>
+     * <p></p>
+     */
+    @RequestMapping("listAutoNoticeConfig")
+    @RestReturn(ListAutoNoticeConfigResponse.class)
+    public RestResponse listAutoNoticeConfig(ListAutoNoticeConfigCommand cmd){
+        ListAutoNoticeConfigResponse response = assetService.listAutoNoticeConfig(cmd);
+        RestResponse restResponse = new RestResponse(response);
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         restResponse.setErrorDescription("OK");
         return restResponse;
