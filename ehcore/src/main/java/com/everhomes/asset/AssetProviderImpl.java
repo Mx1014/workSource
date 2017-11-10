@@ -33,6 +33,7 @@ import com.everhomes.server.schema.tables.EhPaymentChargingStandards;
 import com.everhomes.server.schema.tables.EhPaymentChargingStandardsScopes;
 import com.everhomes.server.schema.tables.EhPaymentContractReceiver;
 import com.everhomes.server.schema.tables.EhPaymentExemptionItems;
+import com.everhomes.server.schema.tables.EhPaymentNoticeConfig;
 import com.everhomes.server.schema.tables.EhPaymentUsers;
 import com.everhomes.server.schema.tables.EhPaymentVariables;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
@@ -630,18 +631,20 @@ public class AssetProviderImpl implements AssetProvider {
         if(ownerId!=null){
             query.addConditions(t.OWNER_ID.eq(ownerId));
         }
-        if(targetType!=null){
-            query.addConditions(t.TARGET_TYPE.eq(targetType));
-        }
-        if(targetId!=null){
-            query.addConditions(t.TARGET_ID.eq(targetId));
-        }
+
         if(billGroupId!=null){
             query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
         }
         query.addConditions(t.SWITCH.eq((byte)1));
         if(contractId!=null){
             query.addConditions(t.CONTRACT_ID.eq(contractId));
+        }else{
+            if(targetType!=null){
+                query.addConditions(t.TARGET_TYPE.eq(targetType));
+            }
+            if(targetId!=null){
+                query.addConditions(t.TARGET_ID.eq(targetId));
+            }
         }
         if(contractNum!=null){
             query.addConditions(t.CONTRACT_NUM.eq(contractNum));
@@ -3147,6 +3150,73 @@ public class AssetProviderImpl implements AssetProvider {
             return scopes.get(0);
         }
         return null;
+    }
+
+    @Override
+    public List<Integer> listAutoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId) {
+        DSLContext context = getReadOnlyContext();
+        return context.select(Tables.EH_PAYMENT_NOTICE_CONFIG.NOTICE_DAY_BEFORE)
+                .from(Tables.EH_PAYMENT_NOTICE_CONFIG)
+                .where(Tables.EH_PAYMENT_NOTICE_CONFIG.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_PAYMENT_NOTICE_CONFIG.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_PAYMENT_NOTICE_CONFIG.OWNER_TYPE.eq(ownerType))
+                .fetch(Tables.EH_PAYMENT_NOTICE_CONFIG.NOTICE_DAY_BEFORE);
+    }
+
+    @Override
+    public void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, List<Integer> configDays) {
+        DSLContext writeContext = getReadWriteContext();
+        EhPaymentNoticeConfig noticeConfig = Tables.EH_PAYMENT_NOTICE_CONFIG.as("noticeConfig");
+        EhPaymentNoticeConfigDao noticeConfigDao = new EhPaymentNoticeConfigDao(writeContext.configuration());
+        this.dbProvider.execute((TransactionStatus status) -> {
+            writeContext.delete(noticeConfig)
+                    .where(noticeConfig.NAMESPACE_ID.eq(namespaceId))
+                    .and(noticeConfig.OWNER_TYPE.eq(ownerType))
+                    .and(noticeConfig.OWNER_ID.eq(ownerId))
+                    .execute();
+            if(configDays != null){
+                for(int i = 0; i < configDays.size(); i++){
+                    PaymentNoticeConfig config = new PaymentNoticeConfig();
+                    config.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentNoticeConfig.class)));
+                    config.setNamespaceId(namespaceId);
+                    config.setOwnerId(ownerId);
+                    config.setOwnerType(ownerType);
+                    config.setNoticeDayBefore(configDays.get(i));
+                    noticeConfigDao.insert(config);
+                }
+            }
+            return null;
+        });
+    }
+
+    @Override
+    public AssetPaymentOrder getOrderById(Long orderId) {
+        DSLContext context = getReadOnlyContext();
+        List<AssetPaymentOrder> assetPaymentOrders = context.selectFrom(Tables.EH_ASSET_PAYMENT_ORDER)
+                .where(Tables.EH_ASSET_PAYMENT_ORDER.ID.eq(orderId))
+                .fetchInto(AssetPaymentOrder.class);
+        if(assetPaymentOrders.size() > 0) {
+            return assetPaymentOrders.get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public String getBillSource(String billId) {
+        Long id = null;
+        try{
+            id = Long.parseLong(billId);
+        }catch(Exception e){
+            return "";
+        }
+        DSLContext context = getReadOnlyContext();
+        PaymentBills bill = context.selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.ID.eq(id))
+                .fetchOneInto(PaymentBills.class);
+        PaymentBillGroup group = context.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(bill.getBillGroupId()))
+                .fetchOneInto(PaymentBillGroup.class);
+        return bill.getDateStr()+group.getName();
     }
 
 

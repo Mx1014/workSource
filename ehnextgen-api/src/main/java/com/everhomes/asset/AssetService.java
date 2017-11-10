@@ -142,4 +142,8 @@ public interface AssetService {
     List<ListChargingItemsDTO> listAvailableChargingItems(OwnerIdentityCommand cmd);
 
     void paymentExpectancies_re_struct(PaymentExpectanciesCommand cmd);
+
+    ListAutoNoticeConfigResponse listAutoNoticeConfig(ListAutoNoticeConfigCommand cmd);
+
+    void autoNoticeConfig(AutoNoticeConfigCommand cmd);
 }

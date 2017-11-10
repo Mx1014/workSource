@@ -301,8 +301,6 @@ public class AssetServiceImpl implements AssetService {
 
     private void NoticeWithTextAndMessage(SelectedNoticeCommand cmd, List<NoticeInfo> noticeInfos) {
         List<Long> uids = new ArrayList<>();
-        //"{targetName}先生/女士，您好，您的账单已出，应付{amount1}元，待缴{amount2}元，下载"{appName} APP"可及时查看账单并支持在线付款,还可体会指尖上的园区给您带来的便利和高效，请到应用市场下载安装。"
-        //短信： 54	物业费催缴	王闻天	{1-> targetName}先生/女士，您好，您的物业账单已出，账期{2 dateStr}，使用"{3 appName} APP"可及时查看账单并支持在线付款。
         try {
             for (int i = 0; i < noticeInfos.size(); i++) {
                 NoticeInfo noticeInfo = noticeInfos.get(i);
@@ -1269,6 +1267,21 @@ public class AssetServiceImpl implements AssetService {
         }catch(Exception e){
             assetProvider.deleteContractPayment(contractId);
         }
+    }
+
+    @Override
+    public ListAutoNoticeConfigResponse listAutoNoticeConfig(ListAutoNoticeConfigCommand cmd) {
+        ListAutoNoticeConfigResponse response = new ListAutoNoticeConfigResponse();
+        response.setNoticeDays(assetProvider.listAutoNoticeConfig(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId()));
+        return response;
+    }
+
+    @Override
+    public void autoNoticeConfig(AutoNoticeConfigCommand cmd) {
+        checkNullProhibit("所属者类型",cmd.getOwnerType());
+        checkNullProhibit("园区id",cmd.getOwnerId());
+        checkNullProhibit("域空间",cmd.getNamespaceId());
+        assetProvider.autoNoticeConfig(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getConfigDays());
     }
 
     private void assetFeeHandler(List<BillItemsExpectancy> list,List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,Integer cycle,PaymentExpectanciesCommand cmd,ContractProperty property,EhPaymentChargingStandards standard,List<PaymentFormula> formulaCondition,Byte billingCycle,PaymentChargingItemScope itemScope) {
