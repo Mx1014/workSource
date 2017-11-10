@@ -292,7 +292,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         }
     }
 
-    private Long createEquipmentStandardItems(EquipmentInspectionStandards standards, List<InspectionItemDTO> itemDTOS) {
+    private void  createEquipmentStandardItems(EquipmentInspectionStandards standards, List<InspectionItemDTO> itemDTOS) {
         EquipmentInspectionTemplates templates = new EquipmentInspectionTemplates();
         templates.setName(standards.getName());
         Long templateId = equipmentProvider.createEquipmentInspectionTemplates(templates);
@@ -308,16 +308,15 @@ public class EquipmentServiceImpl implements EquipmentService {
             templateItemMap.setItemId(item.getId());
             equipmentProvider.createEquipmentInspectionTemplateItemMap(templateItemMap);
         }
-        return templateId;
     }
 
-    private void unReviewEquipmentStandardRelations(EquipmentStandardMap map) {
+    /*private void unReviewEquipmentStandardRelations(EquipmentStandardMap map) {
         map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
         map.setReviewResult(ReviewResult.NONE.getCode());
         equipmentProvider.updateEquipmentStandardMap(map);
         equipmentStandardMapSearcher.feedDoc(map);
 
-    }
+    }*/
 
     private EquipmentStandardsDTO converStandardToDto(EquipmentInspectionStandards standard) {
         processRepeatSetting(standard);
