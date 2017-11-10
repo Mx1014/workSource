@@ -76,7 +76,8 @@ public class PunchLogsDay{
     //added by wh 增加状态说明文字
     private String statuString;
     //added by wh 增加3.0 的字段
-    private String statusList;
+	private String statusList;
+	 private String approvalStatusList;
     private Integer punchCount;
 
 	 private Long punchOrganizationId;
@@ -496,8 +497,11 @@ public class PunchLogsDay{
 	}
 
 
- 
+	 public String getApprovalStatusList() {
+		 return approvalStatusList;
+	 }
 
- 
-
+	 public void setApprovalStatusList(String approvalStatusList) {
+		 this.approvalStatusList = approvalStatusList;
+	 }
  }

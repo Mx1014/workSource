@@ -30,7 +30,7 @@ import java.text.ParseException;
 public class GeneralApprovalAskForLeaveHandler extends GeneralApprovalDefaultHandler {
 	  
 //	@Override
-//	public void onFlowCaseCreating(FlowCase flowCase) {
+//	public void onFlowCaseCreated(FlowCase flowCase) {
 //		//建立一个request
 //		PunchExceptionRequest request = new PunchExceptionRequest();
 //		GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());

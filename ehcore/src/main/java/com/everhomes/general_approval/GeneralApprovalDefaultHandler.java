@@ -57,7 +57,7 @@ public class GeneralApprovalDefaultHandler implements GeneralApprovalHandler {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(GeneralApprovalDefaultHandler.class);
 
 	@Override
-	public void onFlowCaseCreating(FlowCase flowCase) {
+	public void onFlowCaseCreated(FlowCase flowCase) {
 		// 每一个子类自己实现
 
 		//建立一个request
@@ -71,7 +71,7 @@ public class GeneralApprovalDefaultHandler implements GeneralApprovalHandler {
 		if (punchService.getTimeIntervalApprovalAttribute().contains(ga.getApprovalAttribute())) {
 
 			GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndFeildType(flowCase.getId(),
-					GeneralFormFieldType.OVERTIME.getCode());
+					ga.getApprovalAttribute());
 			PostApprovalFormAskForLeaveValue valDTO = JSON.parseObject(val.getFieldStr3(), PostApprovalFormAskForLeaveValue.class);
 			request.setBeginTime(Timestamp.valueOf(valDTO.getStartTime() + ":00"));
 			request.setEndTime(Timestamp.valueOf(valDTO.getEndTime() + ":00"));

@@ -6,7 +6,7 @@ import com.everhomes.techpark.punch.PunchExceptionRequest;
 public interface GeneralApprovalHandler { 
 	static final String GENERAL_APPROVAL_PREFIX = "GeneralApprovalHandler_";
 
-	void onFlowCaseCreating(FlowCase flowCase);
+	void onFlowCaseCreated(FlowCase flowCase);
 
 	void onFlowCaseAbsorted(FlowCase flowCase);
 
