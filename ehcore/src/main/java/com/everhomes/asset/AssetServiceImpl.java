@@ -1019,28 +1019,28 @@ public class AssetServiceImpl implements AssetService {
                             assetProvider.deleteContractPayment(contractId);
                             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
                     }
-                    Integer cycleForBill = 0;
-                    switch (balanceDateType){
-                        case 2:
-                            cycleForBill = 0;
-                            break;
-                        case 3:
-                            cycleForBill = 2;
-                            break;
-                        case 4:
-                            cycleForBill = 11;
-                            break;
-                        case 5:
-                            break;
-                        default:
-                            assetProvider.deleteContractPayment(contractId);
-                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
-                    }
                     //计算
                     assetFeeHandler(billItemsExpectancies,var2,formula,groupRule,group,rule,cycle,cmd,property,standard,formulaCondition,billingCycle,itemScope);
-                    assetFeeHandlerForBillCycles(uniqueRecorder,var2,formula,groupRule,group,rule,cycleForBill,cmd,property,standard,formulaCondition,billingCycle,itemScope);
 
                 }
+                Integer cycleForBill = 0;
+                switch (balanceDateType){
+                    case 2:
+                        cycleForBill = 0;
+                        break;
+                    case 3:
+                        cycleForBill = 2;
+                        break;
+                    case 4:
+                        cycleForBill = 11;
+                        break;
+                    case 5:
+                        break;
+                    default:
+                        assetProvider.deleteContractPayment(contractId);
+                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
+                }
+                assetFeeHandlerForBillCycles(uniqueRecorder,var2,formula,groupRule,group,rule,cycleForBill,cmd,standard,formulaCondition,billingCycle,itemScope);
             }
             //先算出所有的item
             for(int g = 0; g < billItemsExpectancies.size(); g++){
@@ -1108,12 +1108,12 @@ public class AssetServiceImpl implements AssetService {
                     nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
                 }
                 newBill.setId(nextBillId);
-                ContractProperty property = exp.getProperty();
+
                 PaymentBillGroup group = exp.getGroup();
-                //资产
-                newBill.setAddressId(property.getAddressId());
-                newBill.setBuildingName(property.getBuldingName());
-                newBill.setApartmentName(property.getApartmentName());
+                //资产,账单对应多个地址，所以不包裹
+//                newBill.setAddressId(property.getAddressId());
+//                newBill.setBuildingName(property.getBuldingName());
+//                newBill.setApartmentName(property.getApartmentName());
                 //周期时间
                 newBill.setDateStr(exp.getBillDateStr());
                 newBill.setDateStrBegin(exp.getBillCycleStart());
@@ -1615,7 +1615,7 @@ public class AssetServiceImpl implements AssetService {
         }
     }
 
-    private void assetFeeHandlerForBillCycles(Map<BillDateAndGroupId,BillItemsExpectancy> uniqueRecorder, List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,Integer cycle,PaymentExpectanciesCommand cmd,ContractProperty property,EhPaymentChargingStandards standard,List<PaymentFormula> formulaCondition,Byte billingCycle,PaymentChargingItemScope itemScope ) {
+    private void assetFeeHandlerForBillCycles(Map<BillDateAndGroupId,BillItemsExpectancy> uniqueRecorder, List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,Integer cycle,PaymentExpectanciesCommand cmd,EhPaymentChargingStandards standard,List<PaymentFormula> formulaCondition,Byte billingCycle,PaymentChargingItemScope itemScope ) {
         SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
         SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -1659,7 +1659,7 @@ public class AssetServiceImpl implements AssetService {
             //组装对象
             BillItemsExpectancy obj = new BillItemsExpectancy();
 
-            obj.setProperty(property);
+//            obj.setProperty(property);
             obj.setGroupRule(groupRule);
             obj.setGroup(group);
             obj.setStandard(standard);
