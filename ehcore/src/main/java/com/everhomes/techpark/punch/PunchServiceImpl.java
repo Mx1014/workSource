@@ -7511,17 +7511,6 @@ public class PunchServiceImpl implements PunchService {
                     if(approvalStatus!=null && approvalStatus.length>punchIntervalNo && approvalStatus[punchIntervalNo-1]!=null)
                     	intervalDTO.setSmartAlignment(NormalFlag.YES.getCode());
                 }
-//                PunchExceptionRequest exceptionRequest = punchProvider.findPunchExceptionRequest(userId, cmd.getEnterpriseId(),
-//                        cmd.getQueryTime(), punchIntervalNo);
-//                if(null != exceptionRequest) {
-//                    FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getRequestId(),
-//                            ApprovalRequestDefaultHandler.REFER_TYPE, PunchConstants.PUNCH_MODULE_ID);
-//                    if (null != flowCase)
-//                        intervalDTO.setRequestToken(ApprovalRequestDefaultHandler.processFlowURL(flowCase.getId(),
-//                                FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
-//                    else
-//                        intervalDTO.setRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
-//                }
                 response.getIntervals().add(intervalDTO);
             }
         }
@@ -7538,6 +7527,18 @@ public class PunchServiceImpl implements PunchService {
 		}
 		dto1.setPunchTime(pl.getPunchTime().getTime());
 		dto1.setClockStatus(pl.getStatus());
+
+		PunchExceptionRequest exceptionRequest = punchProvider.findPunchExceptionRequest(pl.getUserId(), pl.getEnterpriseId(),
+				pl.getPunchDate(),pl.getPunchIntervalNo(),pl.getPunchType());
+		if(null != exceptionRequest) {
+			FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getRequestId(),
+					ApprovalRequestDefaultHandler.REFER_TYPE, PunchConstants.PUNCH_MODULE_ID);
+			if (null != flowCase)
+				dto1.setRequestToken(ApprovalRequestDefaultHandler.processFlowURL(flowCase.getId(),
+						FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
+			else
+				dto1.setRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
+		}
 		return dto1;
 	}
 

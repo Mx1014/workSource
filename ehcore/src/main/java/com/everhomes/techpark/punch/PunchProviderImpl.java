@@ -2901,5 +2901,30 @@ long id = sequenceProvider.getNextSequence(key);
 			return result ;
 		return null;
 	}
+
+	@Override
+	public PunchExceptionRequest findPunchExceptionRequest(Long userId, Long enterpriseId, Date punchDate, Integer punchIntervalNo, Byte punchType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields())
+				.from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
+		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(enterpriseId));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.eq(punchDate));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_INTERVAL_NO.eq(punchIntervalNo));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_TYPE.eq(punchType));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.ABNORMAL_PUNCH.getCode()));
+
+		List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
+				.orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
+				.map(new EhPunchExceptionRequestMapper());
+
+		List<PunchExceptionRequest> result = resultRecord.stream().map((r) -> {
+			return ConvertHelper.convert(r, PunchExceptionRequest.class);
+		}).collect(Collectors.toList());
+		if (result == null || result.size() == 0) {
+			return null;
+		}
+		return result.get(0);
+	}
 }
 

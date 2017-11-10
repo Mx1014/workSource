@@ -346,4 +346,6 @@ public interface PunchProvider {
 	List<PunchRule> listPunchRulesByStatus(List<Byte> statusList);
 
 	List<PunchRule> listPunchRulesByOwnerAndRuleType(String ownerType, Long ownerId, byte code);
+
+	PunchExceptionRequest findPunchExceptionRequest(Long userId, Long enterpriseId, Date punchDate, Integer punchIntervalNo, Byte punchType);
 }
