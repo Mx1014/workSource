@@ -74,35 +74,6 @@ public class PmTaskController extends ControllerBase {
       }
       
       /**
-       * <b>URL: /pmtask/createTaskOperatePerson</b>
-       * <p>新增任务人员</p>
-       */
-      @RequestMapping("createTaskOperatePerson")
-      @RestReturn(value=String.class)
-      public RestResponse createTaskOperatePerson(CreateTaskOperatePersonCommand cmd) {
-    	  pmTaskService.createTaskOperatePerson(cmd);
-          RestResponse response = new RestResponse();
-          response.setErrorCode(ErrorCodes.SUCCESS);
-          response.setErrorDescription("OK");
-          return response;
-      }
-      
-      /**
-       * <b>URL: /pmtask/deleteTaskOperatePerson</b>
-       * <p>删除任务人员</p>
-       */
-      @RequestMapping("deleteTaskOperatePerson")
-      @RestReturn(value=String.class)
-      public RestResponse deleteTaskOperatePerson(DeleteTaskOperatePersonCommand cmd) {
-    	  pmTaskService.deleteTaskOperatePerson(cmd);
-          RestResponse response = new RestResponse();
-          response.setErrorCode(ErrorCodes.SUCCESS);
-          response.setErrorDescription("OK");
-          return response;
-      }
-      
-      
-      /**
        * <b>URL: /pmtask/createTaskCategory</b>
        * <p>新建服务类型</p>
        */
@@ -443,29 +414,6 @@ public class PmTaskController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /pmtask/searchTaskOperatorStatistics</b>
-     * <p>搜索执行人员统计列表</p>
-     */
-    @RequestMapping("searchTaskOperatorStatistics")
-    @RestReturn(value=SearchTaskOperatorStatisticsResponse.class)
-    public RestResponse searchTaskOperatorStatistics(SearchTaskOperatorStatisticsCommand cmd) {
-    	SearchTaskOperatorStatisticsResponse resp = pmTaskService.searchTaskOperatorStatistics(cmd);
-        RestResponse response = new RestResponse(resp);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * <b>URL: /pmtask/exportTaskOperatorStatistics</b>
-     * <p>导出执行人员统计列表</p>
-     */
-    @RequestMapping("exportTaskOperatorStatistics")
-    public void exportTaskOperatorStatistics(SearchTaskOperatorStatisticsCommand cmd, HttpServletResponse resp) {
-    	pmTaskService.exportTaskOperatorStatistics(cmd, resp);
-    }
-    
-    /**
      * <b>URL: /pmtask/exportTaskCategoryStatistics</b>
      * <p>导出分类统计列表</p>
      */
@@ -557,7 +505,6 @@ public class PmTaskController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse createStatistics() {
     	pmTaskService.createStatistics();
-    	pmTaskService.createTaskTargetStatistics();
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

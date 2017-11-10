@@ -545,6 +545,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     private boolean saveArchivesContactsData(ImportArchivesContactsDTO data, Long organizationId, Long departmentId) {
         AddArchivesContactCommand addCommand = new AddArchivesContactCommand();
+        //  1.设置信息
         addCommand.setOrganizationId(organizationId);
         addCommand.setContactName(data.getContactName());
         addCommand.setContactEnName(data.getContactEnName());
@@ -568,8 +569,12 @@ public class ArchivesServiceImpl implements ArchivesService {
             addCommand.setJobPositionIds(ids);
         }
         addCommand.setVisibleFlag(VisibleFlag.SHOW.getCode());
+
+        //  2.先校验是否已存在手机号，否则的话添加完后再校验，结果肯定是覆盖导入
+        boolean flag = verifyPersonnelByPhone(organizationId, addCommand.getContactToken());
+        //  3.添加人员
         addArchivesContact(addCommand);
-        return verifyPersonnelByPhone(organizationId, addCommand.getContactToken());
+        return flag;
     }
 
     @Override
