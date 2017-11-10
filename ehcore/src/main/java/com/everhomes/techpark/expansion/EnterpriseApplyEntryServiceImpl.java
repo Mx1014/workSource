@@ -763,7 +763,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		if (null != cmd.getLeaseBuildingId()) {
 			cmd.setBuildingId(cmd.getLeaseBuildingId());
 		}else{
-			if (cmd.getBuildingId() != 0L) {
+			if (null != cmd.getBuildingId() && cmd.getBuildingId() != 0L) {
 				LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByBuildingId(cmd.getBuildingId());
 				if (null != leaseBuilding) {
 					cmd.setBuildingId(leaseBuilding.getId());
