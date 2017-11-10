@@ -1926,14 +1926,14 @@ public class ArchivesServiceImpl implements ArchivesService {
             if (!checkArchivesContactName(log, convertListStringToMap(data), itemValue.getFieldValue()))
                 return log;
             else
-                map.put(ArchivesParameter.CONTACT_NAME, itemValue);
+                map.put(ArchivesParameter.CONTACT_NAME, itemValue.getFieldValue());
         }
 
         if (ArchivesParameter.CONTACT_TOKEN.equals(itemValue.getFieldName())) {
             if (!checkArchivesContactToken(log, convertListStringToMap(data), itemValue.getFieldValue()))
                 return log;
             else
-                map.put(ArchivesParameter.CONTACT_TOKEN, itemValue);
+                map.put(ArchivesParameter.CONTACT_TOKEN, itemValue.getFieldValue());
         }
 
         if (ArchivesParameter.GENDER.equals(itemValue.getFieldName())) {
@@ -1965,6 +1965,9 @@ public class ArchivesServiceImpl implements ArchivesService {
             if (StringUtils.isEmpty(itemValue.getFieldValue())) {
                 map.put(ArchivesParameter.DEPARTMENT_IDS, departmentId);
             } else {
+                if(!checkArchivesDepartment(log, convertListStringToMap(data), itemValue.getFieldValue()))
+                    return log;
+                else
                 map.put(ArchivesParameter.DEPARTMENT_IDS, organizationService.getOrganizationNameByNameAndType(itemValue.getFieldValue(), OrganizationGroupType.DEPARTMENT.getCode()));
             }
         }
@@ -2014,10 +2017,10 @@ public class ArchivesServiceImpl implements ArchivesService {
             Long organizationId, Map<String, Object> basicDataMap, boolean flag) {
         AddArchivesEmployeeCommand addCommand = new AddArchivesEmployeeCommand();
         addCommand.setOrganizationId(organizationId);
-        addCommand.setContactName((String)basicDataMap.get(ArchivesParameter.CONTACT_NAME));
+        addCommand.setContactName((String) basicDataMap.get(ArchivesParameter.CONTACT_NAME));
         addCommand.setGender((Byte)basicDataMap.get(ArchivesParameter.GENDER));
 
-        //  部门、岗位、职级在 check 阶段获取 id 值
+        //  1.部门、岗位、职级在 check 阶段获取 id 值
         List<Long> departmentIds = new ArrayList<>();
         departmentIds.add((Long)basicDataMap.get(ArchivesParameter.DEPARTMENT_IDS));
         addCommand.setDepartmentIds(departmentIds);
@@ -2029,8 +2032,10 @@ public class ArchivesServiceImpl implements ArchivesService {
         addCommand.setJobLevelIds(jobLevelIds);
         addCommand.setContactToken((String)basicDataMap.get(ArchivesParameter.CONTACT_TOKEN));
 
-        ArchivesEmployeeDTO dto = addArchivesEmployee(addCommand);
+        //  2.先校验是否已存在手机号，否则的话添加完后再校验，结果肯定是覆盖导入
         flag = verifyPersonnelByPhone(organizationId, addCommand.getContactToken());
+        //  3.添加人员
+        ArchivesEmployeeDTO dto = addArchivesEmployee(addCommand);
         Long detailId = null;
         if (dto != null)
             detailId = dto.getDetailId();
@@ -2187,6 +2192,11 @@ public class ArchivesServiceImpl implements ArchivesService {
         excelUtils.setNeedTitleRemark(true);
     }
 
+    @Override
+    public ImportFileResponse<ImportArchivesEmployeesDTO> getImportEmployeesResult(GetImportFileResultCommand cmd) {
+        return importFileService.getImportFileResult(cmd.getTaskId());
+    }
+
     /********************    import function start    ********************/
     private Integer checkMandatory(String name) {
         if (ArchivesParameter.CONTACT_NAME.equals(name))
@@ -2201,11 +2211,6 @@ public class ArchivesServiceImpl implements ArchivesService {
             return 1;
         else
             return 0;
-    }
-
-    @Override
-    public ImportFileResponse<ImportArchivesEmployeesDTO> getImportEmployeesResult(GetImportFileResultCommand cmd) {
-        return importFileService.getImportFileResult(cmd.getTaskId());
     }
 
     private boolean verifyPersonnelByPhone(Long organizationId, String contactToken) {
