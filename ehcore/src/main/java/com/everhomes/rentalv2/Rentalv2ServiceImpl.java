@@ -1021,6 +1021,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	private void removeSitePriceRules(List<SitePriceRuleDTO> sitePriceRules, Byte rentalType){
+		if (sitePriceRules==null || sitePriceRules.size()==0)
+			return;
 		int t = -1;
 		for (int i = 0;i<sitePriceRules.size();i++)
 			if (sitePriceRules.get(i).getRentalType().equals(RentalType.HOUR.getCode())){t = i;break;}
