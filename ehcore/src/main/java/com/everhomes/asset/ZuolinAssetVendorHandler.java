@@ -557,7 +557,12 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
             response.setNextPageOffset(cmd.getPageOffset()+cmd.getPageSize());
             dtos.remove(dtos.size()-1);
         }
+        BigDecimal totalAmount = new BigDecimal("0");
+        for(int i = 0; i < dtos.size(); i ++){
+            totalAmount = totalAmount.add(dtos.get(i).getAmountReceivable());
+        }
         response.setList(dtos);
+        response.setTotalAmount(totalAmount.toString());
         return response;
     }
 

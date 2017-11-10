@@ -33,6 +33,15 @@ public class PaymentExpectanciesCommand {
     @ItemType(RentFree.class)
     private List<RentFree> rentFrees;
 
+    private Byte isEffectiveImmediately;
+
+    public Byte getIsEffectiveImmediately() {
+        return isEffectiveImmediately;
+    }
+
+    public void setIsEffectiveImmediately(Byte isEffectiveImmediately) {
+        this.isEffectiveImmediately = isEffectiveImmediately;
+    }
 
     @Override
     public String toString() {

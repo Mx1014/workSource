@@ -1163,11 +1163,20 @@ public class AssetServiceImpl implements AssetService {
                     x_v = sdf_dateStrD.parse(newBill.getDateStrDue());
                     if(today.compareTo(x_v)!=-1){
                         newBill.setNextSwitch((byte)1);
-                        if(cmd.getContractIdType() == (byte)0){
+//                        if(cmd.getContractIdType() == (byte)0){
+//                            newBill.setSwitch((byte)1);
+//                        }
+                        if(cmd.getIsEffectiveImmediately().byteValue() == (byte)1){
                             newBill.setSwitch((byte)1);
                         }
                     }else{
-                        if(cmd.getContractIdType() == (byte)0){
+//                        if(cmd.getContractIdType() == (byte)0){
+//                            newBill.setSwitch((byte)0);
+//                            newBill.setNextSwitch((byte)1);
+//                        }else{
+//                            newBill.setNextSwitch((byte)0);
+//                        }
+                        if(cmd.getIsEffectiveImmediately().byteValue() == (byte)1){
                             newBill.setSwitch((byte)0);
                             newBill.setNextSwitch((byte)1);
                         }else{
