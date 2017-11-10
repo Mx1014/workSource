@@ -10,8 +10,11 @@ import com.everhomes.contract.ContractChargingItemProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.customer.EnterpriseCustomerProvider;
+import com.everhomes.customer.IndividualCustomerProvider;
 import com.everhomes.energy.*;
 import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationOwner;
@@ -97,6 +100,9 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
     private EnergyMeterProvider energyMeterProvider;
 
     @Autowired
+    private ContractProvider contractProvider;
+
+    @Autowired
     private ContractChargingItemAddressProvider contractChargingItemAddressProvider;
 
     @Autowired
@@ -119,6 +125,12 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
 
     @Autowired
     private EnergyMeterFormulaProvider meterFormulaProvider;
+
+    @Autowired
+    private IndividualCustomerProvider individualCustomerProvider;
+
+    @Autowired
+    private EnterpriseCustomerProvider enterpriseCustomerProvider;
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
@@ -343,26 +355,51 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         command.setOwnerId(task.getTargetId());
         command.setOwnerType("community");
 
-//        eh_organization_owner_address eh_organization_addresses
-        OrganizationAddress organizationAddress = organizationProvider.findActiveOrganizationAddressByAddressId(address.getAddressId());
-        if(organizationAddress != null) {
-            command.setTargetType("eh_organization");
-            command.setTargetId(organizationAddress.getOrganizationId());
-            OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(organizationAddress.getOrganizationId());
-            command.setTargetName(detail.getDisplayName());
-            command.setNoticeTel(detail.getContact());
+//      没合同时  eh_organization_owner_address eh_organization_addresses
+        if(command.getContractIdType() == 0) {
+            OrganizationAddress organizationAddress = organizationProvider.findActiveOrganizationAddressByAddressId(address.getAddressId());
+            if(organizationAddress != null) {
+                command.setTargetType("eh_organization");
+                command.setTargetId(organizationAddress.getOrganizationId());
+                OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(organizationAddress.getOrganizationId());
+                command.setTargetName(detail.getDisplayName());
+                command.setNoticeTel(detail.getContact());
+            } else {
+                List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwners(task.getTargetId(), address.getAddressId());
+                if(pmOwners != null && pmOwners.size() > 0) {
+                    command.setTargetType("eh_user");
+                    command.setTargetName(pmOwners.get(0).getContactName());
+                    command.setNoticeTel(pmOwners.get(0).getContactToken());
+                    UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(pmOwners.get(0).getNamespaceId(), pmOwners.get(0).getContactToken());
+                    if(identifier != null) {
+                        command.setTargetId(identifier.getOwnerUid());
+                    }
+                }
+            }
         } else {
-            List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwners(task.getTargetId(), address.getAddressId());
-            if(pmOwners != null && pmOwners.size() > 0) {
+            Contract contract = contractProvider.findContractById(command.getContractId());
+            if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+                command.setTargetType("eh_organization");
+                EnterpriseCustomer customer = enterpriseCustomerProvider.findById(contract.getCustomerId());
+                if(customer != null) {
+                    command.setTargetId(customer.getOrganizationId());
+                    command.setTargetName(customer.getName());
+                    command.setNoticeTel(customer.getContactMobile());
+                }
+            } else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
                 command.setTargetType("eh_user");
-                command.setTargetName(pmOwners.get(0).getContactName());
-                command.setNoticeTel(pmOwners.get(0).getContactToken());
-                UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(pmOwners.get(0).getNamespaceId(), pmOwners.get(0).getContactToken());
-                if(identifier != null) {
-                    command.setTargetId(identifier.getOwnerUid());
+                OrganizationOwner owner = individualCustomerProvider.findOrganizationOwnerById(contract.getCustomerId());
+                if(owner != null) {
+                    command.setTargetName(owner.getContactName());
+                    command.setNoticeTel(owner.getContactToken());
+                    UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(owner.getNamespaceId(), owner.getContactToken());
+                    if(identifier != null) {
+                        command.setTargetId(identifier.getOwnerUid());
+                    }
                 }
             }
         }
+
         LOGGER.debug("paymentExpectancies_re_struct command: {}", command);
         assetService.upodateBillStatusOnContractStatusChange(command.getContractId(),AssetPaymentStrings.CONTRACT_CANCEL);
         assetService.paymentExpectancies_re_struct(command);
