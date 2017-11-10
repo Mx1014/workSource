@@ -39,30 +39,6 @@ public class UpdateEquipmentStandardCommand {
 	@NotNull
 	private String ownerType;
 
-	public Byte getRepeatType() {
-		return repeatType;
-	}
-
-	public void setRepeatType(Byte repeatType) {
-		this.repeatType = repeatType;
-	}
-
-	public List<InspectionItemDTO> getItems() {
-		return items;
-	}
-
-	public void setItems(List<InspectionItemDTO> items) {
-		this.items = items;
-	}
-
-	public List<Long> getEquipmentsIds() {
-		return equipmentsIds;
-	}
-
-	public void setEquipmentsIds(List<Long> equipmentsIds) {
-		this.equipmentsIds = equipmentsIds;
-	}
-
 	@NotNull
 
 	private Long targetId;
@@ -231,6 +207,30 @@ public class UpdateEquipmentStandardCommand {
 	public void setReviewExpiredDays(Integer reviewExpiredDays) {
 		this.reviewExpiredDays = reviewExpiredDays;
 	}
+
+    public Byte getRepeatType() {
+        return repeatType;
+    }
+
+    public void setRepeatType(Byte repeatType) {
+        this.repeatType = repeatType;
+    }
+
+    public List<InspectionItemDTO> getItems() {
+        return items;
+    }
+
+    public void setItems(List<InspectionItemDTO> items) {
+        this.items = items;
+    }
+
+    public List<Long> getEquipmentsIds() {
+        return equipmentsIds;
+    }
+
+    public void setEquipmentsIds(List<Long> equipmentsIds) {
+        this.equipmentsIds = equipmentsIds;
+    }
 
 	@Override
     public String toString() {
