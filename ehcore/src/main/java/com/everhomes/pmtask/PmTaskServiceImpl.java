@@ -1170,10 +1170,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 			Timestamp endDate, Long now, Integer namespaceId) {
 		PmTaskStatistics statistics = new PmTaskStatistics();
 		Integer totalCount = pmTaskProvider.countTask(communityId, null, taskCategoryId, categoryId, null, startDate, endDate);
-		Integer unprocessCount = pmTaskProvider.countTask(communityId, PmTaskStatus.UNPROCESSED.getCode(), taskCategoryId, categoryId, null, startDate, endDate);
-		Integer processingCount = pmTaskProvider.countTask(communityId, PmTaskStatus.PROCESSING.getCode(), taskCategoryId, categoryId, null, startDate, endDate);
-		Integer processedCount = pmTaskProvider.countTask(communityId, PmTaskStatus.PROCESSED.getCode(), taskCategoryId, categoryId, null, startDate, endDate);
-		Integer closeCount = pmTaskProvider.countTask(communityId, PmTaskStatus.CLOSED.getCode(), taskCategoryId, categoryId, null, startDate, endDate);
+		Integer unProcessCount = pmTaskProvider.countTask(communityId, PmTaskFlowStatus.ACCEPTING.getCode(), taskCategoryId, categoryId, null, startDate, endDate);
+		Integer processingCount = pmTaskProvider.countTask(communityId, PmTaskFlowStatus.PROCESSING.getCode(), taskCategoryId, categoryId, null, startDate, endDate);
+		Integer processedCount = pmTaskProvider.countTask(communityId, PmTaskFlowStatus.COMPLETED.getCode(), taskCategoryId, categoryId, null, startDate, endDate);
+		Integer closeCount = pmTaskProvider.countTask(communityId, PmTaskFlowStatus.INACTIVE.getCode(), taskCategoryId, categoryId, null, startDate, endDate);
 		
 		Integer star1 = pmTaskProvider.countTask(communityId, null, taskCategoryId, categoryId, (byte)1, startDate, endDate);
 		Integer star2 = pmTaskProvider.countTask(communityId, null, taskCategoryId, categoryId, (byte)2, startDate, endDate);
@@ -1190,7 +1190,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		statistics.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
 		
 		statistics.setTotalCount(totalCount);
-		statistics.setUnprocessCount(unprocessCount);
+		statistics.setUnprocessCount(unProcessCount);
 		statistics.setProcessedCount(processedCount);
 		statistics.setProcessingCount(processingCount);
 		statistics.setCloseCount(closeCount);
@@ -1556,115 +1556,6 @@ public class PmTaskServiceImpl implements PmTaskService {
     				"Invalid organizationId parameter.");
         }
 	}
-	
-//	@Override
-//	public void createTaskOperatePerson(CreateTaskOperatePersonCommand cmd) {
-//		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-//		checkOperateType(cmd.getOperateType());
-//		checkOrganizationId(cmd.getOrganizationId());
-//
-//		List<Long> privilegeIds = new ArrayList<>();
-//		if(cmd.getOperateType().equals(PmTaskOperateType.EXECUTOR.getCode())) {
-//			privilegeIds.add(PrivilegeConstants.LISTALLTASK);
-//			privilegeIds.add(PrivilegeConstants.LISTUSERTASK);
-//			privilegeIds.add(PrivilegeConstants.ASSIGNTASK);
-//			privilegeIds.add(PrivilegeConstants.COMPLETETASK);
-//			privilegeIds.add(PrivilegeConstants.CLOSETASK);
-//			privilegeIds.add(PrivilegeConstants.REVISITTASK);
-//		}
-//		else if(cmd.getOperateType().equals(PmTaskOperateType.REPAIR.getCode())) {
-//			privilegeIds.add(PrivilegeConstants.LISTUSERTASK);
-//			privilegeIds.add(PrivilegeConstants.COMPLETETASK);
-//		}
-//
-//		List<Long> targetIds = cmd.getTargetIds();
-//		if(null == targetIds || targetIds.isEmpty()) {
-//			LOGGER.error("TargetIds cannot be null or empty.");
-//    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//    				"TargetIds cannot be null or empty.");
-//		}
-//
-//		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-//
-//		dbProvider.execute((TransactionStatus status) -> {
-//			targetIds.forEach(t -> {
-//				// 有下面这段代码会导致：如果在业务授权那边指了权限，这些人会在报修模块这边添加不进去，故注释掉 by lqs 20170123
-////				if(resolver.checkUserPrivilege(targetIds.get(i), EntityType.COMMUNITY.getCode(),
-////						cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PM_TASK_MODULE)) {
-////					continue;
-////				}
-//				PmTaskTarget pmTaskTarget = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOperateType(),
-//						EntityType.USER.getCode(), t);
-//
-//				if (null == pmTaskTarget) {
-//					pmTaskTarget = new PmTaskTarget();
-//					pmTaskTarget.setRoleId(cmd.getOperateType());
-//					pmTaskTarget.setOwnerId(cmd.getOwnerId());
-//					pmTaskTarget.setOwnerType(cmd.getOwnerType());
-//					pmTaskTarget.setStatus(PmTaskTargetStatus.ACTIVE.getCode());
-//					pmTaskTarget.setTargetType(EntityType.USER.getCode());
-//					pmTaskTarget.setTargetId(t);
-//					pmTaskTarget.setCreateTime(new Timestamp(System.currentTimeMillis()));
-//					pmTaskTarget.setCreatorUid(UserContext.current().getUser().getId());
-//
-//					pmTaskProvider.createTaskTarget(pmTaskTarget);
-//
-//					//检查 （超级管理员，模块管理员都不添加物业报修子权限，会覆盖物业报修模块权限） 如果没有物业报修模块权限，才添加物业报修的权限  add by sw 20170120
-//					if (!resolver.checkUserPrivilege(t, EntityType.COMMUNITY.getCode(), cmd.getOwnerId(),
-//							cmd.getOrganizationId(), PrivilegeConstants.PM_TASK_MODULE)) {
-//
-//						rolePrivilegeService.assignmentPrivileges(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(),
-//								EntityType.USER.getCode(), t, "pmtask", privilegeIds);
-//					}
-//				}
-//			});
-//			return null;
-//		});
-//	}
-//
-//	@Override
-//	public void deleteTaskOperatePerson(DeleteTaskOperatePersonCommand cmd) {
-//		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-//		checkOperateType(cmd.getOperateType());
-//		checkOrganizationId(cmd.getOrganizationId());
-//
-//		dbProvider.execute((TransactionStatus status) -> {
-//			List<Long> privilegeIds = new ArrayList<>();
-//
-//			PmTaskTarget pmTaskTarget2 = null;
-//			if (cmd.getOperateType().equals(PmTaskOperateType.EXECUTOR.getCode())) {
-//				privilegeIds.add(PrivilegeConstants.LISTUSERTASK);
-//				privilegeIds.add(PrivilegeConstants.COMPLETETASK);
-//				pmTaskTarget2 = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), PmTaskOperateType.REPAIR.getCode(),
-//						EntityType.USER.getCode(), cmd.getTargetId());
-//			}
-//			else if (cmd.getOperateType().equals(PmTaskOperateType.REPAIR.getCode())) {
-//				pmTaskTarget2 = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), PmTaskOperateType.EXECUTOR.getCode(),
-//						EntityType.USER.getCode(), cmd.getTargetId());
-//				privilegeIds.add(PrivilegeConstants.LISTALLTASK);
-//				privilegeIds.add(PrivilegeConstants.LISTUSERTASK);
-//				privilegeIds.add(PrivilegeConstants.ASSIGNTASK);
-//				privilegeIds.add(PrivilegeConstants.COMPLETETASK);
-//				privilegeIds.add(PrivilegeConstants.CLOSETASK);
-//				privilegeIds.add(PrivilegeConstants.REVISITTASK);
-//			}
-//			PmTaskTarget pmTaskTarget = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOperateType(),
-//					EntityType.USER.getCode(), cmd.getTargetId());
-////			pmTaskTarget.setStatus(PmTaskTargetStatus.INACTIVE.getCode());
-//
-//			pmTaskProvider.deleteTaskTarget(pmTaskTarget);
-//
-//			//
-//			rolePrivilegeService.deleteAcls(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(),
-//					EntityType.USER.getCode(), cmd.getTargetId(), ServiceModuleConstants.PM_TASK_MODULE, null);
-//			if (null != pmTaskTarget2) {
-//				rolePrivilegeService.assignmentPrivileges(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(),
-//						EntityType.USER.getCode(), cmd.getTargetId(), "pmtask", privilegeIds);
-//			}
-//			return null;
-//		});
-//
-//	}
 
 	@Override
 	public SearchTaskCategoryStatisticsResponse searchTaskCategoryStatistics(SearchTaskStatisticsCommand cmd) {
@@ -2031,55 +1922,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 		});
 
 		return addressDTOs;
-	}
-
-	private List<PmTaskTargetStatistic> mergeTaskOperatorList(List<PmTaskTargetStatistic> list) {
-		
-		List<PmTaskTargetStatistic> result = new ArrayList<>();
-		Map<Long, List<PmTaskTargetStatistic>> tempMap = new HashMap<>();
-		for(PmTaskTargetStatistic p: list){
-			Long id = p.getTargetId();
-			if(tempMap.containsKey(id)){
-				List<PmTaskTargetStatistic> ptsList = tempMap.get(id);
-				List<PmTaskTargetStatistic> temp = new ArrayList<>();
-				temp.addAll(ptsList);
-				temp.add(p);
-				tempMap.put(id, temp);
-				continue;
-			}
-			tempMap.put(id, Collections.singletonList(p));
-		}
-		
-		for(List<PmTaskTargetStatistic> l:tempMap.values()){
-			l = mergeTaskOperatorCategoryList(l);
-			result.addAll(l);
-		}
-		return result;
-	}
-	
-	private List<PmTaskTargetStatistic> mergeTaskOperatorCategoryList(List<PmTaskTargetStatistic> list) {
-		
-		Map<Long, PmTaskTargetStatistic> tempMap = new HashMap<>();
-		for(PmTaskTargetStatistic p: list){
-			Long id = p.getTaskCategoryId();
-			PmTaskTargetStatistic pts;
-			if(tempMap.containsKey(id)){
-				pts = tempMap.get(id);
-				if(pts.getAvgStar().intValue() != 0) {
-					if(p.getAvgStar().intValue() != 0)
-						pts.setAvgStar(pts.getAvgStar().add(p.getAvgStar()).divide(new BigDecimal(2), RoundingMode.HALF_DOWN));
-				}else {
-					pts.setAvgStar(pts.getAvgStar().add(p.getAvgStar()));
-				}
-				continue;
-			}
-			tempMap.put(id, p);
-		}
-	
-		List<PmTaskTargetStatistic> result = new ArrayList<>();
-		result.addAll(tempMap.values());
-		
-		return result;
 	}
 
 	private void exportExcel(Workbook wb, HttpServletResponse resp ) {
