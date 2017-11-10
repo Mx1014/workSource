@@ -21,17 +21,21 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100002', 'zh_CN', '姓名过长');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100003', 'zh_CN', '姓名格式不对');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100004', 'zh_CN', '手机号不能为空');
-INSERT INTO .`eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100005', 'zh_CN', '手机号格式错误');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100005', 'zh_CN', '手机号格式错误');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100006', 'zh_CN', '入职时间不能为空');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100007', 'zh_CN', '员工类型不能为空');
 INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100008', 'zh_CN', '部门不存在');
 INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100009', 'zh_CN', '职务不存在');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100010', 'zh_CN', '英文名格式错误');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100011', 'zh_CN', '邮箱格式错误');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100012', 'zh_CN', '短号格式错误');
+
 
 -- 菜单
 -- 1.修改原先组织架构菜单的react
-UPDATE `ehcore`.`eh_web_menus` SET `data_type`='react:/address-book/address-list', WHERE id = 50100;
+UPDATE `eh_web_menus` SET `data_type`='react:/address-book/address-list' WHERE id = 50100;
 -- 2.修改原先人员管理菜单为人事档案
-UPDATE `ehcore`.`eh_web_menus` SET `data_type`='react:/employee-record/employee-list/1', `name`= '人事档案' WHERE `name` like '%人员管理%';
+UPDATE `eh_web_menus` SET `data_type`='react:/employee-record/employee-list/1', `name`= '人事档案' WHERE `name` like '%人员管理%';
 -- 3.删除原先的scope
 DELETE FROM eh_web_menu_scopes where menu_id IN (50110,50200,50210,50220,50300,50400);
 -- 4.为 volgo 与 深业物业 上线新菜单
