@@ -103,3 +103,8 @@ SELECT (@id := @id + 1), owner_type, owner_id, parking_lot_id, requestor_enterpr
 -- 资源预订 add by sw 20171109
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('rental.notification', '10', 'zh_CN', '请输入备注');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('rental.notification', '11', 'zh_CN', '请输入显示内容');
+
+-- add by xq.tian   2017/11/10
+SET @locale_strings_id = IFNULL((SELECT MAX(id) FROM `eh_locale_strings`), 1);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+VALUES ((@locale_strings_id := @locale_strings_id + 1), 'flow', '10008', 'zh_CN', '该节点任务已被处理');
