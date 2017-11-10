@@ -61,10 +61,6 @@ public interface PmTaskService {
 	
 	void revisit(RevisitCommand cmd);
 	
-	void createTaskOperatePerson(CreateTaskOperatePersonCommand cmd);
-	
-	void deleteTaskOperatePerson(DeleteTaskOperatePersonCommand cmd);
-	
 	SearchTaskCategoryStatisticsResponse searchTaskCategoryStatistics(SearchTaskStatisticsCommand cmd);
 	
 	void exportTaskCategoryStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp);
@@ -76,13 +72,7 @@ public interface PmTaskService {
 	ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd);
 	
 	GetUserRelatedAddressByCommunityResponse getUserRelatedAddressesByCommunity(GetUserRelatedAddressesByCommunityCommand cmd);
-	
-	SearchTaskOperatorStatisticsResponse searchTaskOperatorStatistics(SearchTaskOperatorStatisticsCommand cmd);
-	
-	void exportTaskOperatorStatistics(SearchTaskOperatorStatisticsCommand cmd, HttpServletResponse resp);
-	
-	void createTaskTargetStatistics();
-	
+
 	NamespaceHandlerDTO getNamespaceHandler(GetNamespaceHandlerCommand cmd);
 
 	void synchronizedData(SearchTasksCommand cmd);

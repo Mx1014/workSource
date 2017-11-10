@@ -66,17 +66,6 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 		EhPmTasksDao dao = new EhPmTasksDao(context.configuration());
 		dao.delete(pmTask);
 	}
-	
-	@Override
-    public void createTaskTarget(PmTaskTarget pmTaskTarget){
-    	long id = sequenceProvider.getNextSequence(NameMapper
-				.getSequenceDomainFromTablePojo(EhPmTaskTargets.class));
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhPmTaskTargetsDao dao = new EhPmTaskTargetsDao(context.configuration());
-    	pmTaskTarget.setId(id);
-    	dao.insert(pmTaskTarget);
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmTaskTargets.class, null);
-    }
 
 	@Override
 	public void createTaskHistoryAddress(PmTaskHistoryAddress pmTaskHistoryAddress){
@@ -152,40 +141,6 @@ public class PmTaskProviderImpl implements PmTaskProvider{
         
         return result;
     }
-	
-	@Override
-    public PmTaskTarget findTaskTarget(String ownerType, Long ownerId, Byte roleId, String targetType, Long targetId){
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
-        SelectQuery<EhPmTaskTargetsRecord> query = context.selectQuery(Tables.EH_PM_TASK_TARGETS);
-
-        query.addConditions(Tables.EH_PM_TASK_TARGETS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_PM_TASK_TARGETS.OWNER_ID.eq(ownerId));
-        query.addConditions(Tables.EH_PM_TASK_TARGETS.ROLE_ID.eq(roleId));
-        query.addConditions(Tables.EH_PM_TASK_TARGETS.TARGET_TYPE.eq(targetType));
-        query.addConditions(Tables.EH_PM_TASK_TARGETS.TARGET_ID.eq(targetId));
-        query.addConditions(Tables.EH_PM_TASK_TARGETS.STATUS.eq(PmTaskTargetStatus.ACTIVE.getCode()));
-        
-        // 有可能有多行重复数据，此时使用fetchone会报错，但为什么会产生多行重复数据待春节后孙稳回来定位 by lqs 20170123
-        // PmTaskTarget result = ConvertHelper.convert(query.fetchOne(), PmTaskTarget.class);
-        PmTaskTarget result = ConvertHelper.convert(query.fetchAny(), PmTaskTarget.class);
-        return result;
-    }
-	
-	@Override
-    public void updateTaskTarget(PmTaskTarget pmTaskTarget){
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhPmTaskTargetsDao dao = new EhPmTaskTargetsDao(context.configuration());
-    	dao.update(pmTaskTarget);
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPmTaskTargets.class, null);
-    }
-
-	@Override
-	public void deleteTaskTarget(PmTaskTarget pmTaskTarget){
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhPmTaskTargetsDao dao = new EhPmTaskTargetsDao(context.configuration());
-		dao.delete(pmTaskTarget);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPmTaskTargets.class, null);
-	}
 	
 //	@Caching(evict = { 
 //			@CacheEvict(value="PmTask", key="#pmTask.id")
@@ -510,32 +465,6 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 	}
 	
 	@Override
-	public List<PmTaskTargetStatistic> searchTaskTargetStatistics(Integer namespaceId, Long ownerId, Long taskCategoryId, Long userId, 
-			Timestamp dateStr, Long pageAnchor, Integer pageSize){
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskTargetStatistics.class));
-        
-        SelectJoinStep<Record> query = context.select(Tables.EH_PM_TASK_TARGET_STATISTICS.fields()).from(Tables.EH_PM_TASK_TARGET_STATISTICS);
-        Condition condition = Tables.EH_PM_TASK_TARGET_STATISTICS.NAMESPACE_ID.eq(namespaceId);
-        
-        if(null != taskCategoryId)
-        	condition = condition.and(Tables.EH_PM_TASK_TARGET_STATISTICS.TASK_CATEGORY_ID.eq(taskCategoryId));
-        if(null != ownerId)
-        	condition = condition.and(Tables.EH_PM_TASK_TARGET_STATISTICS.OWNER_ID.eq(ownerId));
-        if(null != dateStr)
-        	condition = condition.and(Tables.EH_PM_TASK_TARGET_STATISTICS.DATE_STR.eq(dateStr));
-        if(null != userId){
-        	condition = condition.and(Tables.EH_PM_TASK_TARGET_STATISTICS.TARGET_ID.eq(userId));        }
-        if(null != pageAnchor)
-            condition = condition.and(Tables.EH_PM_TASK_TARGET_STATISTICS.ID.gt(pageAnchor));
-        query.orderBy(Tables.EH_PM_TASK_TARGET_STATISTICS.ID.asc());
-        if(null != pageSize)
-        	query.limit(pageSize);
-        
-		return query.where(condition).fetch().map(new DefaultRecordMapper(Tables.EH_PM_TASK_TARGET_STATISTICS.recordType(), 
-				PmTaskTargetStatistic.class));
-	}
-	
-	@Override
 	public Integer countTaskStatistics(Long ownerId, Long taskCategoryId, Timestamp dateStr){
         //DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
         final Integer[] count = new Integer[1];
@@ -555,17 +484,6 @@ public class PmTaskProviderImpl implements PmTaskProvider{
                 });
 		return count[0];
 	}
-	
-	@Override
-    public void createTaskTargetStatistic(PmTaskTargetStatistic pmTaskTargetStatistic) {
-    	long id = sequenceProvider.getNextSequence(NameMapper
-				.getSequenceDomainFromTablePojo(EhPmTaskTargetStatistics.class));
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhPmTaskTargetStatisticsDao dao = new EhPmTaskTargetStatisticsDao(context.configuration());
-        pmTaskTargetStatistic.setId(id);
-    	dao.insert(pmTaskTargetStatistic);
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmTaskTargetStatistics.class, null);
-    }
 
 	/**
 	 * 金地同步数据使用
