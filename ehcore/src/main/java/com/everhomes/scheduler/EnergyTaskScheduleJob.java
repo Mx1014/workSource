@@ -164,9 +164,9 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         // 拿出单个表统计当天的所有的读表记录
         List<EnergyMeterReadingLog> meterReadingLogs = meterReadingLogProvider.listMeterReadingLogByTask(task.getId());
 
-        BigDecimal amount = new BigDecimal("0");
-        BigDecimal taskReading = task.getReading();
-        BigDecimal readingAnchor = task.getLastTaskReading();
+        BigDecimal amount = BigDecimal.ZERO;
+        BigDecimal taskReading = task.getReading() == null ? BigDecimal.ZERO : task.getReading();
+        BigDecimal readingAnchor = task.getLastTaskReading() == null ? BigDecimal.ZERO : task.getLastTaskReading();
         // 重置flag
         Byte resetFlag = TrueOrFalseFlag.FALSE.getCode();
         // 换表flag
@@ -180,7 +180,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                     resetFlag = TrueOrFalseFlag.TRUE.getCode();
 
                     amount = amount.add(meter.getMaxReading().subtract(readingAnchor));
-                    readingAnchor = new BigDecimal(0);
+                    readingAnchor = BigDecimal.ZERO;
                 }
                 // 有换表 量程加上旧表读数-锚点,锚点重置为新读数
                 if(TrueOrFalseFlag.fromCode(log.getChangeMeterFlag()) == TrueOrFalseFlag.TRUE) {
