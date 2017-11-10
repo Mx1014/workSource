@@ -588,7 +588,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             //  1.设置导出文件名与 sheet 名
             ExcelUtils excelUtils = new ExcelUtils(httpResponse, "通讯录成员列表", "通讯录成员列表");
             //  2.设置导出标题栏
-            List<String> titleNames = new ArrayList<String>(Arrays.asList("姓名", "性别", "手机", "短号", "工作邮箱", "部门", "职务"));
+            List<String> titleNames = new ArrayList<String>(Arrays.asList("姓名", "性别", "手机", "短号", "工作邮箱", "部门", "岗位"));
             //  3.设置格式长度
             List<Integer> cellSizes = new ArrayList<Integer>(Arrays.asList(20, 10, 20, 20, 30, 30, 20));
             //  4.设置导出变量名
