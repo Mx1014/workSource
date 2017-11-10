@@ -146,4 +146,6 @@ public interface AssetService {
     ListAutoNoticeConfigResponse listAutoNoticeConfig(ListAutoNoticeConfigCommand cmd);
 
     void autoNoticeConfig(AutoNoticeConfigCommand cmd);
+
+    void activeAutoBillNotice();
 }

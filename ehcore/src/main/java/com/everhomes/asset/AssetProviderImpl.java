@@ -3219,6 +3219,24 @@ public class AssetProviderImpl implements AssetProvider {
         return bill.getDateStr()+group.getName();
     }
 
+    @Override
+    public List<PaymentNoticeConfig> listAllNoticeConfigs() {
+        DSLContext context = getReadOnlyContext();
+        List<PaymentNoticeConfig> list = new ArrayList<>();
+        return context.selectFrom(Tables.EH_PAYMENT_NOTICE_CONFIG)
+                .fetchInto(PaymentNoticeConfig.class);
+
+    }
+
+    @Override
+    public List<PaymentBills> getAllBillsByCommunity(Long key) {
+        DSLContext context = getReadOnlyContext();
+        return context.selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(key))
+                .and(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq("community"))
+                .fetchInto(PaymentBills.class);
+    }
+
 
     private DSLContext getReadOnlyContext(){
        return this.dbProvider.getDslContext(AccessSpec.readOnly());
