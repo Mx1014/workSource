@@ -2148,7 +2148,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		dto.setSpec(bill.getSpec());
 		dto.setNotice(bill.getNotice());
 		dto.setIntroduction(bill.getIntroduction());
-		dto.setRentalBillId(bill.getId()); 
+		dto.setRentalBillId(bill.getId());
+		dto.setPackageName(bill.getPackageName());
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(bill.getRentalResourceId());
 		//只有非独占资源，不需要选择资源编号且允许预约多个资源才显示该字段
 		if(rs != null &&NormalFlag.NONEED.getCode() == rs.getExclusiveFlag()
