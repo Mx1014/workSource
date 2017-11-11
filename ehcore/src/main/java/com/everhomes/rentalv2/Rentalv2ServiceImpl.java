@@ -1048,7 +1048,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		sitePriceRuleDTO.setRentalType(pricePackages.get(0).getRentalType());
 		List<Long> packageIds = rentalv2Provider.listCellPackageId(rentalSite.getId(),pricePackages.get(0).getRentalType());
 		MaxMinPrice maxMinPrice = rentalv2PricePackageProvider.findMaxMinPrice(packageIds,pricePackages.get(0).getRentalType(),null);
-
+		if (maxMinPrice ==null) {
+			Long minLong = Long.MIN_VALUE;
+			Long maxLong = Long.MAX_VALUE;
+			maxMinPrice = new MaxMinPrice(BigDecimal.valueOf(minLong),BigDecimal.valueOf(maxLong),BigDecimal.valueOf(minLong),BigDecimal.valueOf(maxLong),
+					BigDecimal.valueOf(minLong),BigDecimal.valueOf(maxLong));
+		}
 		BigDecimal maxPrice = null;
 		BigDecimal minPrice = null;
 		if (sceneTokenDTO != null) {
@@ -4533,7 +4538,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			List <Rentalv2PricePackage> pricePackages = rentalv2PricePackageProvider.listPricePackageByOwner(PriceRuleType.RESOURCE.getCode(), rs.getId(), cmd.getRentalType(),cmd.getPackageName());
 			List<RentalSitePackagesDTO> resourcePackageDtos = new ArrayList<>();
 			processPricePackage(resourcePackageDtos,pricePackages);
-			response.setSitePackages(new ArrayList<>());
+
 			for (RentalCell rsr : rentalSiteRules) {
 				RentalSiteRulesDTO dto =ConvertHelper.convert(rsr, RentalSiteRulesDTO.class);
 
