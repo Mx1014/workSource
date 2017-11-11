@@ -332,7 +332,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         if(isOwedBill.byteValue() == (byte)1){
             for(int i = 0; i < billDetailDTOList.size(); i++) {
                 BillDetailDTO dto = billDetailDTOList.get(i);
-                if(dto.getStatus().byteValue() == (byte)2 || dto.getStatus().byteValue() == (byte)3){
+                if(dto.getStatus().byteValue() == (byte)2 || dto.getStatus().byteValue() == (byte)0){
                     dateStrFilter.add(dto.getDateStr());
                     amountOwed = amountOwed.add(dto.getAmountOwed());
                 }

@@ -686,18 +686,18 @@ public class AssetProviderImpl implements AssetProvider {
             }
             try{
                 if(due!=null && sdf.parse(due).compareTo(today) != 1){
-                    dto.setStatus((byte)3);
-                    //状态进阶为未缴
-                }else if(due!=null && sdf.parse(due).compareTo(today) == 1){
                     dto.setStatus((byte)0);
-                    //待缴
+                    //状态进阶为待缴
+                }else if(due!=null && sdf.parse(due).compareTo(today) == 1){
+                    dto.setStatus((byte)3);
+                    //未缴
                 }
                 if(deadline!=null && sdf.parse(deadline).compareTo(today)== -1){
                     //状态进阶为欠费
                     dto.setStatus((byte)2);
                 }
             }catch (Exception e){
-                dto.setStatus((byte)3);
+                dto.setStatus((byte)0);
             }
         }
         for(int i = 0; i < dtos.size(); i++){
