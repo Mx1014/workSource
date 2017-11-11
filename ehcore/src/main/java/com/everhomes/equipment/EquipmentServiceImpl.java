@@ -179,8 +179,7 @@ public class EquipmentServiceImpl implements EquipmentService {
     private UserProvider userProvider;
 
     @Override
-    public EquipmentStandardsDTO updateEquipmentStandard(
-            UpdateEquipmentStandardCommand cmd) {
+    public EquipmentStandardsDTO updateEquipmentStandard(UpdateEquipmentStandardCommand cmd) {
         Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_UPDATE, 0L);
         if (cmd.getTargetId() != null) {
             userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
@@ -202,7 +201,7 @@ public class EquipmentServiceImpl implements EquipmentService {
             standard.setOperatorUid(user.getId());
             standard.setNamespaceId(UserContext.getCurrentNamespaceId());
             /*if(cmd.getRepeat() == null) {
-				throw RuntimeErrorException.errorWith(RepeatServiceErrorCode.SCOPE,
+                throw RuntimeErrorException.errorWith(RepeatServiceErrorCode.SCOPE,
 						RepeatServiceErrorCode.ERROR_REPEAT_SETTING_NOT_EXIST,
 	 				"执行周期为空");
 			}
@@ -224,12 +223,12 @@ public class EquipmentServiceImpl implements EquipmentService {
             standard.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
             equipmentProvider.creatEquipmentStandard(standard);
 
-            createEquipmentStandardsEquipmentsMap(standard.getId(), cmd.getEquipmentsIds());
+            createEquipmentStandardsEquipmentsMap(standard, cmd.getEquipmentsIds());
 
         } else {
             EquipmentInspectionStandards exist = verifyEquipmentStandard(cmd.getId());
             standard = ConvertHelper.convert(cmd, EquipmentInspectionStandards.class);
-            standard.setRepeatSettingId(exist.getRepeatSettingId());
+            //standard.setRepeatSettingId(exist.getRepeatSettingId());
             standard.setStatus(exist.getStatus());
             standard.setOperatorUid(user.getId());
             standard.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -255,8 +254,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 					standard.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
 				}
 			}*/
-            createEquipmentStandardItems(standard,cmd.getItems());
+            createEquipmentStandardItems(standard, cmd.getItems());
             equipmentProvider.updateEquipmentStandard(standard);
+            updateEquipmentStandardsEquipmentsMap(standard, cmd.getEquipmentsIds());
 
 			/*List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
 			if(maps != null && maps.size() > 0) {
@@ -282,17 +282,33 @@ public class EquipmentServiceImpl implements EquipmentService {
         return dto;
     }
 
+    private void updateEquipmentStandardsEquipmentsMap(EquipmentInspectionStandards standard, List<Long> equipmentsIds) {
+        inActiveEquipmentStandardsEquipmentsMap(standard, equipmentsIds);
+        createEquipmentStandardsEquipmentsMap(standard, equipmentsIds);
+    }
 
-    private void createEquipmentStandardsEquipmentsMap(Long id, List<Long> equipmentsIds) {
+    private void inActiveEquipmentStandardsEquipmentsMap(EquipmentInspectionStandards standard, List<Long> equipmentsIds) {
         EquipmentStandardMap equipmentStandardMap = new EquipmentStandardMap();
-        equipmentStandardMap.setStandardId(id);
+        equipmentStandardMap.setStandardId(standard.getId());
         for (Long equipmentId : equipmentsIds) {
+            standard.getEquipmentIds().add(equipmentId);
+            equipmentStandardMap.setTargetId(equipmentId);
+            equipmentProvider.inActiveEquipmentStandardMap(equipmentStandardMap);
+        }
+    }
+
+
+    private void createEquipmentStandardsEquipmentsMap(EquipmentInspectionStandards standard, List<Long> equipmentsIds) {
+        EquipmentStandardMap equipmentStandardMap = new EquipmentStandardMap();
+        equipmentStandardMap.setStandardId(standard.getId());
+        for (Long equipmentId : equipmentsIds) {
+            standard.getEquipmentIds().add(equipmentId);
             equipmentStandardMap.setTargetId(equipmentId);
             equipmentProvider.createEquipmentStandardMap(equipmentStandardMap);
         }
     }
 
-    private void  createEquipmentStandardItems(EquipmentInspectionStandards standards, List<InspectionItemDTO> itemDTOS) {
+    private void createEquipmentStandardItems(EquipmentInspectionStandards standards, List<InspectionItemDTO> itemDTOS) {
         EquipmentInspectionTemplates templates = new EquipmentInspectionTemplates();
         templates.setName(standards.getName());
         Long templateId = equipmentProvider.createEquipmentInspectionTemplates(templates);
@@ -300,14 +316,16 @@ public class EquipmentServiceImpl implements EquipmentService {
         EquipmentInspectionTemplateItemMap templateItemMap = new EquipmentInspectionTemplateItemMap();
         templateItemMap.setTemplateId(templateId);
 
+        List<EquipmentInspectionItems> items = new ArrayList<>();
         for (InspectionItemDTO itemDTO : itemDTOS) {
             EquipmentInspectionItems item = ConvertHelper.convert(itemDTO, EquipmentInspectionItems.class);
-
             equipmentProvider.createEquipmentInspectionItems(item);
+            items.add(item);
 
             templateItemMap.setItemId(item.getId());
             equipmentProvider.createEquipmentInspectionTemplateItemMap(templateItemMap);
         }
+        standards.setItems(items);
     }
 
     /*private void unReviewEquipmentStandardRelations(EquipmentStandardMap map) {
@@ -392,7 +410,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         return standardDto;
     }
 
-    private void processStandardGroups(List<StandardGroupDTO> groupList, EquipmentInspectionStandards standard) {
+    /*private void processStandardGroups(List<StandardGroupDTO> groupList, EquipmentInspectionStandards standard) {
 
         List<EquipmentInspectionStandardGroupMap> executiveGroup = null;
         List<EquipmentInspectionStandardGroupMap> reviewGroup = null;
@@ -426,15 +444,15 @@ public class EquipmentServiceImpl implements EquipmentService {
             standard.setExecutiveGroup(executiveGroup);
             standard.setReviewGroup(reviewGroup);
         }
-    }
+    }*/
 
-    private void inActiveEquipmentStandardRelations(EquipmentStandardMap map) {
+   /* private void inActiveEquipmentStandardRelations(EquipmentStandardMap map) {
         map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
         map.setReviewResult(ReviewResult.INACTIVE.getCode());
         equipmentProvider.updateEquipmentStandardMap(map);
         equipmentStandardMapSearcher.feedDoc(map);
 
-    }
+    }*/
 
     @Override
     public void deleteEquipmentStandard(DeleteEquipmentStandardCommand cmd) {
@@ -462,14 +480,14 @@ public class EquipmentServiceImpl implements EquipmentService {
         equipmentProvider.updateEquipmentStandard(standard);
         equipmentStandardSearcher.feedDoc(standard);
 
-        List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
+       /* List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
         if (maps != null && maps.size() > 0) {
             for (EquipmentStandardMap map : maps) {
                 inActiveEquipmentStandardRelations(map);
             }
         }
 
-        inactiveTasksByStandardId(standard.getId());
+        inactiveTasksByStandardId(standard.getId());*/
     }
 
     @Override
@@ -1157,14 +1175,14 @@ public class EquipmentServiceImpl implements EquipmentService {
         equipmentProvider.updateEquipmentInspectionEquipment(equipment);
         equipmentSearcher.feedDoc(equipment);
 
-        List<EquipmentStandardMap> maps = equipmentProvider.findByTarget(equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
+       /* List<EquipmentStandardMap> maps = equipmentProvider.findByTarget(equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
         if (maps != null && maps.size() > 0) {
             for (EquipmentStandardMap map : maps) {
                 inActiveEquipmentStandardRelations(map);
             }
         }
 
-        inactiveTasksByEquipmentId(equipment.getId());
+        inactiveTasksByEquipmentId(equipment.getId());*/
 
     }
 

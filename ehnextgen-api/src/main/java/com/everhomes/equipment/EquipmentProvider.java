@@ -1,17 +1,13 @@
 package com.everhomes.equipment;
 
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.rest.equipment.*;
+
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-
-
-
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.quality.QualityInspectionStandards;
-import com.everhomes.rest.equipment.*;
 
 
 public interface EquipmentProvider {
@@ -146,4 +142,7 @@ public interface EquipmentProvider {
 	List<ItemResultStat> statItemResults(Long equipmentId, Long standardId, Timestamp startTime, Timestamp endTime);
 
 	List<EquipmentInspectionTasks> listDelayTasks(Long inspectionCategoryId, List<Long> standards, String targetType, Long targetId, Integer offset, Integer pageSize, Byte adminFlag, Timestamp startTime);
+
+	//add inactiveEquipmentStandardMap
+    void inActiveEquipmentStandardMap(EquipmentStandardMap equipmentStandardMap);
 }
