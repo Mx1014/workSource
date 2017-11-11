@@ -702,7 +702,7 @@ public class AssetProviderImpl implements AssetProvider {
         }
         for(int i = 0; i < dtos.size(); i++){
             BillDetailDTO dto = dtos.get(i);
-            if(isOwedBill.byteValue() == (byte)1 && dto.getStatus().byteValue() == (byte)0){
+            if(isOwedBill.byteValue() == (byte)1 && dto.getStatus().byteValue() == (byte)3){
                 dtos.remove(dto);
                 i--;
             }
