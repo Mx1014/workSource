@@ -1824,7 +1824,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                         response.setFileLog(fileLog);
                         return response;
                     }
-                    response.setTitle(dataList.get(0).getValues());
+                    response.setTitle(convertListStringToMap(dataList.get(0)));
                     dataList.remove(0);
                 }
 
