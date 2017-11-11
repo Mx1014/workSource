@@ -264,7 +264,21 @@ public class CustomerServiceImpl implements CustomerService {
         Organization org = organizationProvider.findOrganizationByNameAndNamespaceId(customer.getName(), customer.getNamespaceId());
         if(org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
             //已存在则更新 地址、官网地址、企业logo
-
+            org.setWebsite(customer.getCorpWebsite());
+            organizationProvider.updateOrganization(org);
+            OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(org.getId());
+            if(detail != null) {
+                detail.setAvatar(customer.getCorpLogoUri());
+                detail.setAddress(customer.getCorpOpAddress());
+                organizationProvider.updateOrganizationDetail(detail);
+            } else {
+                detail = new OrganizationDetail();
+                detail.setOrganizationId(org.getId());
+                detail.setAddress(customer.getCorpOpAddress());
+                detail.setAvatar(customer.getCorpLogoUri());
+                detail.setCreateTime(org.getCreateTime());
+                organizationProvider.createOrganizationDetail(detail);
+            }
             return ConvertHelper.convert(org, OrganizationDTO.class);
         }
         CreateEnterpriseCommand command = new CreateEnterpriseCommand();
@@ -278,7 +292,7 @@ public class CustomerServiceImpl implements CustomerService {
         command.setContactor(customer.getContactName());
         command.setContactsPhone(customer.getContactPhone());
         command.setEntries(customer.getContactMobile());
-        command.setAddress(customer.getContactAddress());
+        command.setAddress(customer.getCorpOpAddress());
         return organizationService.createEnterprise(command);
     }
 
@@ -327,11 +341,13 @@ public class CustomerServiceImpl implements CustomerService {
             command.setDescription(updateCustomer.getCorpDescription());
             command.setCommunityId(updateCustomer.getCommunityId());
             command.setMemberCount(updateCustomer.getCorpEmployeeAmount() == null ? 0 : updateCustomer.getCorpEmployeeAmount() + 0L);
-            command.setContactor(updateCustomer.getContactName());
-            command.setContactsPhone(updateCustomer.getContactPhone());
-            command.setEntries(updateCustomer.getContactMobile());
             command.setAddress(updateCustomer.getContactAddress());
+            command.setWebsite(updateCustomer.getCorpWebsite());
             organizationService.updateEnterprise(command, false);
+        } else {//没有企业的要新增一个
+            OrganizationDTO dto = createOrganization(updateCustomer);
+            updateCustomer.setOrganizationId(dto.getId());
+            enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
         }
 
         //修改了客户名称则要同步修改合同里面的客户名称

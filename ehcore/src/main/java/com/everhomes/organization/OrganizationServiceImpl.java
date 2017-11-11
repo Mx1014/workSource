@@ -16,6 +16,8 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
@@ -63,6 +65,7 @@ import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.category.CategoryConstants;
@@ -102,10 +105,7 @@ import com.everhomes.rest.uniongroup.UniongroupType;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
-import com.everhomes.search.OrganizationSearcher;
-import com.everhomes.search.PostAdminQueryFilter;
-import com.everhomes.search.PostSearcher;
-import com.everhomes.search.UserWithoutConfAccountSearcher;
+import com.everhomes.search.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
@@ -269,6 +269,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Autowired
     private UserOrganizationProvider userOrganizationProvider;
+
+    @Autowired
+    private EnterpriseCustomerProvider enterpriseCustomerProvider;
+
+    @Autowired
+    private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
 
     private int getPageCount(int totalCount, int pageSize) {
         int pageCount = totalCount / pageSize;
@@ -1170,8 +1176,33 @@ public class OrganizationServiceImpl implements OrganizationService {
         });
 
         organizationSearcher.feedDoc(organization);
+        createEnterpriseCustomer(organization, cmd.getAvatar(), cmd.getAddress());
 
         return ConvertHelper.convert(organization, OrganizationDTO.class);
+    }
+
+    private void createEnterpriseCustomer(Organization organization, String logo, String address) {
+        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(organization.getNamespaceId(), organization.getName());
+        if(customers != null && customers.size() > 0) {
+            EnterpriseCustomer customer = customers.get(0);
+            customer.setOrganizationId(organization.getId());
+            customer.setCorpWebsite(organization.getWebsite());
+            customer.setCorpLogoUri(logo);
+            customer.setCorpOpAddress(address);
+            enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+            enterpriseCustomerSearcher.feedDoc(customer);
+
+        } else {
+            EnterpriseCustomer customer = new EnterpriseCustomer();
+            customer.setOrganizationId(organization.getId());
+            customer.setName(organization.getName());
+            customer.setCorpWebsite(organization.getWebsite());
+            customer.setCorpLogoUri(logo);
+            customer.setCorpOpAddress(address);
+            enterpriseCustomerProvider.createEnterpriseCustomer(customer);
+            enterpriseCustomerSearcher.feedDoc(customer);
+        }
+
     }
 
     private void createActiveOrganizationCommunityRequest(Long creatorId, Long organizationId, Long communityId) {
@@ -1320,6 +1351,19 @@ public class OrganizationServiceImpl implements OrganizationService {
             // organization.setCommunityId(cmd.getCommunityId());
             organization.setDescription(organizationDetail.getDescription());
             organizationSearcher.feedDoc(organization);
+
+            //查到有关联的客户则同步修改过去
+            EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(organization.getId());
+            if(customer != null) {
+                customer.setName(organization.getName());
+                customer.setNickName(organizationDetail.getDisplayName());
+                customer.setCorpOpAddress(organizationDetail.getAddress());
+                customer.setCorpWebsite(organization.getWebsite());
+                customer.setCorpLogoUri(organizationDetail.getAvatar());
+                enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+                enterpriseCustomerSearcher.feedDoc(customer);
+            }
+
             return null;
         });
 
@@ -1347,6 +1391,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 			Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 			organization.setUpdateTime(now);
 			organizationProvider.updateOrganization(organization);
+
+            //如在客户管理中有则同步删除
+            EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(organization.getId());
+            if(customer != null) {
+                customer.setStatus(CommonStatus.INACTIVE.getCode());
+                enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+                enterpriseCustomerSearcher.feedDoc(customer);
+            }
 
 			OrganizationCommunityRequest r = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organization.getId());
 
@@ -6871,6 +6923,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (null == org) {
                 OrganizationDTO dto = this.createEnterprise(enterpriseCommand);
                 org = ConvertHelper.convert(dto, Organization.class);
+
             } else {
                 UpdateEnterpriseCommand updateEnterpriseCommand = ConvertHelper.convert(enterpriseCommand, UpdateEnterpriseCommand.class);
                 updateEnterpriseCommand.setId(org.getId());
