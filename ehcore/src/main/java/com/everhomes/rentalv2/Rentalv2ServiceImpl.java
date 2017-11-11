@@ -1007,12 +1007,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 			rule = convertToSitePackageDTO(pricePackages.stream().filter(p -> p.getRentalType().equals(RentalType.DAY.getCode())).
 					collect(Collectors.toList()), rentalSite, resourceType, sceneTokenDTO);
-			removeSitePriceRules(rentalSiteDTO.getSitePriceRules(), RentalType.DAY.getCode());
 			if (rule != null) {//删掉普通定价
-				removeSitePriceRules(rentalSiteDTO.getSitePriceRules(), RentalType.HALFDAY.getCode());
+				removeSitePriceRules(rentalSiteDTO.getSitePriceRules(), RentalType.DAY.getCode());
 				sitePriceRules.add(rule);
 			}
-			removeSitePriceRules(rentalSiteDTO.getSitePriceRules(), RentalType.HALFDAY.getCode());
+
+            rule = convertToSitePackageDTO(pricePackages.stream().filter(p -> p.getRentalType().equals(RentalType.HALFDAY.getCode())).
+                    collect(Collectors.toList()), rentalSite, resourceType, sceneTokenDTO);
+            if (rule != null) {//删掉普通定价
+                removeSitePriceRules(rentalSiteDTO.getSitePriceRules(), RentalType.HALFDAY.getCode());
+                sitePriceRules.add(rule);
+            }
+
 			rule = convertToSitePackageDTO(pricePackages.stream().filter(p -> p.getRentalType().equals(RentalType.THREETIMEADAY.getCode())).
 					collect(Collectors.toList()), rentalSite, resourceType, sceneTokenDTO);
 			if (rule != null) {//删掉普通定价
@@ -1036,7 +1042,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return;
 		int t = -1;
 		for (int i = 0;i<sitePriceRules.size();i++)
-			if (sitePriceRules.get(i).getRentalType().equals(RentalType.HOUR.getCode())){t = i;break;}
+			if (sitePriceRules.get(i).getRentalType().equals(rentalType)){t = i;break;}
 		if (t!=-1)
 			sitePriceRules.remove(t);
 	}
