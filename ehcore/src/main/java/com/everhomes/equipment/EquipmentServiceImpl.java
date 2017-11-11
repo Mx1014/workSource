@@ -200,6 +200,7 @@ public class EquipmentServiceImpl implements EquipmentService {
             standard.setCreatorUid(user.getId());
             standard.setOperatorUid(user.getId());
             standard.setNamespaceId(UserContext.getCurrentNamespaceId());
+            standard.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
             /*if(cmd.getRepeat() == null) {
                 throw RuntimeErrorException.errorWith(RepeatServiceErrorCode.SCOPE,
 						RepeatServiceErrorCode.ERROR_REPEAT_SETTING_NOT_EXIST,
@@ -220,7 +221,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}*/
             createEquipmentStandardItems(standard, cmd.getItems());
 
-            standard.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
             equipmentProvider.creatEquipmentStandard(standard);
 
             createEquipmentStandardsEquipmentsMap(standard, cmd.getEquipmentsIds());
@@ -232,10 +232,10 @@ public class EquipmentServiceImpl implements EquipmentService {
             standard.setStatus(exist.getStatus());
             standard.setOperatorUid(user.getId());
             standard.setNamespaceId(UserContext.getCurrentNamespaceId());
-            standard.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
+            //standard.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
 
 			/*if(EquipmentStandardStatus.NOT_COMPLETED.equals(EquipmentStandardStatus.fromStatus(standard.getStatus()))) {
-				if(cmd.getRepeat() == null) {
+                if(cmd.getRepeat() == null) {
 					throw RuntimeErrorException.errorWith(RepeatServiceErrorCode.SCOPE,
 							RepeatServiceErrorCode.ERROR_REPEAT_SETTING_NOT_EXIST,
 		 				"执行周期为空");
@@ -255,19 +255,18 @@ public class EquipmentServiceImpl implements EquipmentService {
 				}
 			}*/
             createEquipmentStandardItems(standard, cmd.getItems());
+
             equipmentProvider.updateEquipmentStandard(standard);
+
             updateEquipmentStandardsEquipmentsMap(standard, cmd.getEquipmentsIds());
 
-			/*List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
-			if(maps != null && maps.size() > 0) {
-				for(EquipmentStandardMap map : maps) {
-					if(EquipmentReviewStatus.REVIEWED.equals(EquipmentReviewStatus.fromStatus(map.getReviewStatus()))) {
-						unReviewEquipmentStandardRelations(map);
-					}
-				}
-			}
-
-			inactiveTasksByStandardId(standard.getId());*/
+            List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
+            if (maps != null && maps.size() > 0) {
+                for (EquipmentStandardMap map : maps) {
+                    map.setStatus(Status.INACTIVE.getCode());
+                    equipmentProvider.inActiveEquipmentStandardMap(map);
+                }
+            }
 
         }
 
@@ -283,29 +282,20 @@ public class EquipmentServiceImpl implements EquipmentService {
     }
 
     private void updateEquipmentStandardsEquipmentsMap(EquipmentInspectionStandards standard, List<Long> equipmentsIds) {
-        inActiveEquipmentStandardsEquipmentsMap(standard, equipmentsIds);
         createEquipmentStandardsEquipmentsMap(standard, equipmentsIds);
-    }
-
-    private void inActiveEquipmentStandardsEquipmentsMap(EquipmentInspectionStandards standard, List<Long> equipmentsIds) {
-        EquipmentStandardMap equipmentStandardMap = new EquipmentStandardMap();
-        equipmentStandardMap.setStandardId(standard.getId());
-        for (Long equipmentId : equipmentsIds) {
-            standard.getEquipmentIds().add(equipmentId);
-            equipmentStandardMap.setTargetId(equipmentId);
-            equipmentProvider.inActiveEquipmentStandardMap(equipmentStandardMap);
-        }
     }
 
 
     private void createEquipmentStandardsEquipmentsMap(EquipmentInspectionStandards standard, List<Long> equipmentsIds) {
         EquipmentStandardMap equipmentStandardMap = new EquipmentStandardMap();
         equipmentStandardMap.setStandardId(standard.getId());
+        List<Long> equipments = new ArrayList<>();
         for (Long equipmentId : equipmentsIds) {
-            standard.getEquipmentIds().add(equipmentId);
             equipmentStandardMap.setTargetId(equipmentId);
             equipmentProvider.createEquipmentStandardMap(equipmentStandardMap);
+            equipments.add(equipmentId);
         }
+        standard.setEquipmentIds(equipments);
     }
 
     private void createEquipmentStandardItems(EquipmentInspectionStandards standards, List<InspectionItemDTO> itemDTOS) {
