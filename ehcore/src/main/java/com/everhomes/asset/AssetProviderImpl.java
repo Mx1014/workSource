@@ -70,6 +70,7 @@ import org.springframework.jca.cci.CciOperationNotSupportedException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import scala.Char;
+import sun.util.resources.cldr.aa.CalendarData_aa_DJ;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -654,6 +655,7 @@ public class AssetProviderImpl implements AssetProvider {
         if(isOwedBill==1){
             query.addConditions(t.STATUS.eq((byte)0));
         }
+        List<Object> list  = new ArrayList<>();
         query.fetch()
                 .map(r -> {
                     BillDetailDTO dto = new BillDetailDTO();
@@ -661,11 +663,42 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setAmountReceviable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dto.setBillId(String.valueOf(r.getValue(t.ID)));
                     dto.setDateStr(r.getValue(t.DATE_STR));
-                    dto.setStatus(r.getValue(t.STATUS));
+
+                    list.add(r.getValue(t.DATE_STR_DUE));
+                    list.add(r.getValue(t.DUE_DAY_DEADLINE));
+                    list.add(r.getValue(t.STATUS));
+
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
                     dtos.add(dto);
                     return null;});
+        Date today = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        for(int i = 0; i < dtos.size(); i ++){
+            BillDetailDTO dto = dtos.get(i);
+            String due = (String)list.get(i);
+            String deadline = (String)list.get(i+1);
+            Byte status = (Byte)list.get(i+2);
+            if(status != null && status.byteValue() == (byte)1){
+                dto.setStatus((byte)1);
+                continue;
+            }
+            try{
+                if(due!=null && sdf.parse(due).compareTo(today) != -1){
+                    dto.setStatus((byte)3);
+                    //状态进阶为未缴
+                }else if(due!=null && sdf.parse(due).compareTo(today) == -1){
+                    dto.setStatus((byte)0);
+                    //待缴
+                }
+                if(deadline!=null && sdf.parse(deadline).compareTo(today)!=-1){
+                    //状态进阶为欠费
+                    dto.setStatus((byte)2);
+                }
+            }catch (Exception e){
+                dto.setStatus((byte)3);
+            }
+        }
         return dtos;
     }
 
