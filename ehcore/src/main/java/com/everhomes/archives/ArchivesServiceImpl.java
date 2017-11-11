@@ -1815,21 +1815,21 @@ public class ArchivesServiceImpl implements ArchivesService {
             @Override
             public ImportFileResponse importFile() {
                 ImportFileResponse response = new ImportFileResponse();
-                List<ImportArchivesEmployeesDTO> datas = handleImportArchivesEmployees(resultList, form.getFormFields());
+                List<ImportArchivesEmployeesDTO> dataList = handleImportArchivesEmployees(resultList, form.getFormFields());
                 String fileLog;
-                if (datas.size() > 0) {
+                if (dataList.size() > 0) {
                     //  校验标题，若不合格直接返回错误
-                    fileLog = checkArchivesEmployeesTitle(datas.get(0), form.getFormFields());
+                    fileLog = checkArchivesEmployeesTitle(dataList.get(0), form.getFormFields());
                     if (!StringUtils.isEmpty(fileLog)) {
                         response.setFileLog(fileLog);
                         return response;
                     }
-                    response.setTitle(datas.get(0));
-                    datas.remove(0);
+                    response.setTitle(dataList.get(0).getValues());
+                    dataList.remove(0);
                 }
 
                 //  开始导入，同时设置导入结果
-                importArchivesEmployeesFiles(datas, response, cmd.getFormOriginId(), cmd.getOrganizationId(), cmd.getDepartmentId(), form.getFormFields());
+                importArchivesEmployeesFiles(dataList, response, cmd.getFormOriginId(), cmd.getOrganizationId(), cmd.getDepartmentId(), form.getFormFields());
                 //  返回结果
                 return response;
             }
