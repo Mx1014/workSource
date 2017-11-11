@@ -1365,6 +1365,15 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionEquipmentStandardMap.class, null);
 
     }
+    @Override
+    public  void  inActiveEquipmentStandardMap(EquipmentStandardMap map){
+        map.setStatus(Status.INACTIVE.getCode());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhEquipmentInspectionEquipmentStandardMapDao dao = new EhEquipmentInspectionEquipmentStandardMapDao(context.configuration());
+        dao.update(map);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEquipmentInspectionEquipmentStandardMap.class, map.getId());
+    }
 
     @Override
     public void updateEquipmentStandardMap(EquipmentStandardMap map) {
