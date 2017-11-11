@@ -4643,7 +4643,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					dto.setStatus(SiteRuleStatus.EARLY.getCode());
 				}
 			}
-
+			time = rsr.getBeginTime().getTime();
 			if (NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag()) {
 				time -= rs.getRentalEndTime();
 			}
