@@ -5276,7 +5276,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			cell.setApprovingUserOriginalPrice(cmd.getApprovingUserOriginalPrice());
 			cell.setStatus(cmd.getStatus());
 			cell.setCounts(cmd.getCounts());
-			cell.setPricePackageId(cmd.getPricePackageId());
+			cell.setPricePackageId(cmd.getSitePackageId());
 			RentalCell dbCell = this.rentalv2Provider.getRentalCellById(cell.getId());
 			if(null == dbCell)
 				this.rentalv2Provider.createRentalSiteRule(cell);
@@ -5308,9 +5308,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(null!=rs.getAutoAssign() && rs.getAutoAssign().equals(NormalFlag.NEED.getCode())){
 			cmd.setCounts(1.0);
 		}
-		if (cmd.getPricePackages()!=null && !cmd.getPricePackages().isEmpty()) {
-			Long pricePackageId = createCellPricePackage(cmd.getPricePackages());
-			cmd.setPricePackageId(pricePackageId);
+		if (cmd.getSitePackages()!=null && !cmd.getSitePackages().isEmpty()) {
+			Long sitePackageId = createCellPricePackage(cmd.getSitePackages());
+			cmd.setSitePackageId(sitePackageId);
 		}
 
 		this.dbProvider.execute((TransactionStatus status) -> {

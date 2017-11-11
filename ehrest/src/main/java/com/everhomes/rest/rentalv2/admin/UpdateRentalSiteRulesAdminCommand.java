@@ -24,8 +24,8 @@ import java.util.List;
  * <li>orgMemberPrice: 实际价格-打折则为折后价(企业内部价)</li>
  * <li>approvingUserOriginalPrice: 原价-如果打折则有（外部客户价）</li>
  * <li>approvingUserPrice: 实际价格-打折则为折后价（外部客户价）</li>
- * <li>pricePackageId: 对应套餐id</li>
- * <li>pricePackages: 套餐价格表{@link com.everhomes.rest.rentalv2.admin.PricePackageDTO}</li>
+ * <li>sitePackageId: 对应套餐id</li>
+ * <li>sitePackages: 套餐价格表{@link com.everhomes.rest.rentalv2.admin.PricePackageDTO}</li>
  * </ul>
  */
 public class UpdateRentalSiteRulesAdminCommand {
@@ -57,8 +57,8 @@ public class UpdateRentalSiteRulesAdminCommand {
 	
 	private Byte rentalType;
 	@ItemType(PricePackageDTO.class)
-	private List<PricePackageDTO> pricePackages;
-	private Long pricePackageId;
+	private List<PricePackageDTO> sitePackages;
+	private Long sitePackageId;
 
 	public Byte getRentalType() {
 		return rentalType;
@@ -137,12 +137,12 @@ public class UpdateRentalSiteRulesAdminCommand {
 		this.halfsiteOriginalPrice = halfsiteOriginalPrice;
 	}
 
-	public List<PricePackageDTO> getPricePackages() {
-		return pricePackages;
+	public List<PricePackageDTO> getSitePackages() {
+		return sitePackages;
 	}
 
-	public void setPricePackages(List<PricePackageDTO> pricePackages) {
-		this.pricePackages = pricePackages;
+	public void setSitePackages(List<PricePackageDTO> sitePackages) {
+		this.sitePackages = sitePackages;
 	}
 
 	public Long getRuleId() {
@@ -158,12 +158,12 @@ public class UpdateRentalSiteRulesAdminCommand {
 		this.resourceId = resourceId;
 	}
 
-	public Long getPricePackageId() {
-		return pricePackageId;
+	public Long getSitePackageId() {
+		return sitePackageId;
 	}
 
-	public void setPricePackageId(Long pricePackageId) {
-		this.pricePackageId = pricePackageId;
+	public void setSitePackageId(Long sitePackageId) {
+		this.sitePackageId = sitePackageId;
 	}
 
 	public BigDecimal getOrgMemberOriginalPrice() {
