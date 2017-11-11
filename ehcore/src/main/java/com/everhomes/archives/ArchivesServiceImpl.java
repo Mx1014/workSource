@@ -1875,45 +1875,44 @@ public class ArchivesServiceImpl implements ArchivesService {
         for (ImportArchivesEmployeesDTO data : datas) {
             List<PostApprovalFormItem> itemValues = new ArrayList<>();
             Map<String, Object> basicDataMap = new HashMap<>();
-/*            String contactName = "", contactToken = "";
-            Long realDepartmentId = 0L, realJobPositionId = 0L, realJobLevelId = 0L, ;
-            Byte gender = null;
-            */
-
+            boolean errorFlag = false;
 
             //  1.在校验的时候保存需要单独调用add的值,可以节省一次循环获取的时间
             for (int i = 0; i < formValues.size(); i++) {
                 PostApprovalFormItem itemValue = ConvertHelper.convert(formValues.get(i), PostApprovalFormItem.class);
                 itemValue.setFieldValue(data.getValues().get(i));
                 //  2.校验导入数据
-/*                log = checkArchivesEmployeesData(data, itemValue, departmentId, contactName, gender,
-                        contactToken, realDepartmentId, realJobPositionId, realJobLevelId);*/
                 log = checkArchivesEmployeesData(data, itemValue, departmentId, basicDataMap);
                 if (log != null) {
                     errorDataLogs.add(log);
+                    errorFlag = true;
                     break;
                 }
                 itemValues.add(itemValue);
             }
-            //  3.导入基础数据
+            //  3.如果校验出错误则进行下一次循环
+            if(errorFlag)
+                continue;
+
+            //  4.导入基础数据
             Long detailId = null;
             boolean flag = false;
             detailId = saveArchivesEmployeesMember(organizationId, basicDataMap, flag);
-            //  4.导入详细信息
+            //  5.导入详细信息
             if (detailId == null)
                 continue;
             saveArchivesEmployeesDetail(formOriginId, detailId, organizationId, itemValues);
-            //  5.记录重复数据
+            //  6.记录重复数据
             if (flag)
                 coverCount++;
         }
-        //  6.存储所有数据行数
+        //  7.存储所有数据行数
         response.setTotalCount((long) datas.size());
-        //  7.存储覆盖数据行数
+        //  8.存储覆盖数据行数
         response.setCoverCount(coverCount);
-        //  8.存储错误数据行数
+        //  9.存储错误数据行数
         response.setFailCount((long) errorDataLogs.size());
-        //  9.存储错误数据
+        //  10.存储错误数据
         response.setLogs(errorDataLogs);
     }
 
