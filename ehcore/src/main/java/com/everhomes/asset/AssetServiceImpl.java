@@ -345,37 +345,40 @@ public class AssetServiceImpl implements AssetService {
                     //企业超管是1005？不是1001
                     List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(tempCmd);
                     for (int j = 0; j < organizationContactDTOS.size(); j++) {
-                        uids.add(organizationContactDTOS.get(j).getId());
+                        uids.add(organizationContactDTOS.get(j).getTargetId());
                     }
                     LOGGER.info("notice uids found = {}"+uids.size());
                 }
             }
         }
-        try {
+
             for (int k = 0; k < uids.size(); k++) {
-                MessageDTO messageDto = new MessageDTO();
-                messageDto.setAppId(AppConstants.APPID_MESSAGING);
-                messageDto.setSenderUid(User.SYSTEM_UID);
-                messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uids.get(k).toString()));
-                messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-                //insert into eh_locale_template values(@xx+1,user_notification,3?,zh_CN,物业账单通知用户,text,999985)
-                //这个逻辑是张江高科的， 但为了测试统一，999971先改为999985用华润测试
-                Map<String, Object> map = new HashMap<>();
-                User targetUser = userProvider.findUserById(uids.get(k));
-                map.put("targetName", targetUser.getNickName());
-                String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(UserContext.getCurrentNamespaceId(), UserNotificationTemplateCode.SCOPE, UserNotificationTemplateCode.USER_PAYMENT_NOTICE, UserContext.current().getUser().getLocale(), map, "");
-                messageDto.setBody(notifyTextForApplicant);
-                messageDto.setMetaAppId(AppConstants.APPID_USER);
-                if (!notifyTextForApplicant.trim().equals("")) {
-                    messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-                            uids.get(k).toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+                try {
+                    MessageDTO messageDto = new MessageDTO();
+                    messageDto.setAppId(AppConstants.APPID_MESSAGING);
+//                    messageDto.setSenderUid(User.SYSTEM_UID);
+                    messageDto.setSenderUid(2L);
+//                    messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uids.get(k).toString()),
+//                            new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.BIZ_USER_LOGIN.getUserId())));
+                    messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uids.get(k).toString()));
+                    messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+                    //insert into eh_locale_template values(@xx+1,user_notification,3?,zh_CN,物业账单通知用户,text,999985)
+                    //这个逻辑是张江高科的， 但为了测试统一，999971先改为999985用华润测试
+                    Map<String, Object> map = new HashMap<>();
+                    User targetUser = userProvider.findUserById(uids.get(k));
+                    map.put("targetName", targetUser.getNickName());
+                    String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(UserContext.getCurrentNamespaceId(), UserNotificationTemplateCode.SCOPE, UserNotificationTemplateCode.USER_PAYMENT_NOTICE, UserContext.current().getUser().getLocale(), map, "");
+                    messageDto.setBody(notifyTextForApplicant);
+                    messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+                    if (!notifyTextForApplicant.trim().equals("")) {
+                        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                                uids.get(k).toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+                    }
+                } catch (Exception e) {
+                    LOGGER.error(e.toString());
+                    LOGGER.error("WUYE BILL SENDING MESSAGE FAILED");
                 }
             }
-        } catch (Exception e) {
-            LOGGER.error("MAIL SEND SUCCESSFULLY，app SENDING MESSAGE FAILED");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "MAIL SEND SUCCESSFULLY，app SENDING MESSAGE FAILED");
-        }
         if (UserContext.getCurrentNamespaceId() != 999971) {
             //催缴次数加1
 //            List<BillIdAndType> billIdAndTypes = cmd.getBillIdAndTypes();
@@ -431,29 +434,32 @@ public class AssetServiceImpl implements AssetService {
                 }
             }
         }
-        try {
-            for (int k = 0; k < uids.size(); k++) {
+        for (int k = 0; k < uids.size(); k++) {
+            try {
                 MessageDTO messageDto = new MessageDTO();
                 messageDto.setAppId(AppConstants.APPID_MESSAGING);
-                messageDto.setSenderUid(User.SYSTEM_UID);
+//                    messageDto.setSenderUid(User.SYSTEM_UID);
+                messageDto.setSenderUid(2L);
+//                    messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uids.get(k).toString()),
+//                            new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.BIZ_USER_LOGIN.getUserId())));
                 messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uids.get(k).toString()));
                 messageDto.setBodyType(MessageBodyType.TEXT.getCode());
                 //insert into eh_locale_template values(@xx+1,user_notification,3?,zh_CN,物业账单通知用户,text,999985)
+                //这个逻辑是张江高科的， 但为了测试统一，999971先改为999985用华润测试
                 Map<String, Object> map = new HashMap<>();
                 User targetUser = userProvider.findUserById(uids.get(k));
                 map.put("targetName", targetUser.getNickName());
                 String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(UserContext.getCurrentNamespaceId(), UserNotificationTemplateCode.SCOPE, UserNotificationTemplateCode.USER_PAYMENT_NOTICE, UserContext.current().getUser().getLocale(), map, "");
                 messageDto.setBody(notifyTextForApplicant);
-                messageDto.setMetaAppId(AppConstants.APPID_USER);
+                messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
                 if (!notifyTextForApplicant.trim().equals("")) {
                     messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
                             uids.get(k).toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
                 }
+            } catch (Exception e) {
+                LOGGER.error(e.toString());
+                LOGGER.error("WUYE BILL SENDING MESSAGE FAILED");
             }
-        } catch (Exception e) {
-            LOGGER.error("MAIL SEND SUCCESSFULLY，app SENDING MESSAGE FAILED");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "MAIL SEND SUCCESSFULLY，app SENDING MESSAGE FAILED");
         }
         if (UserContext.getCurrentNamespaceId() != 999971) {
             //催缴次数加1
@@ -1861,17 +1867,21 @@ public class AssetServiceImpl implements AssetService {
                     break;
                 case 3:
                     //按比例递增
-                    BigDecimal one = new BigDecimal("1");
-                    BigDecimal amount_changed = amount.multiply(one.add(adjustAmplitude.multiply(new BigDecimal("0.01")))).multiply(d);
-                    item.setAmountOwed(amount.add(amount_changed));
-                    item.setAmountReceivable(amount.add(amount_changed));
+                    BigDecimal amount_before_adjust = item.getAmountOwed();
+                    // a * ((b * 0.01)+1) * d
+                    BigDecimal changedAmount_2 = amount_before_adjust.multiply((adjustAmplitude.multiply(new BigDecimal("0.01"))).add(new BigDecimal("1"))).multiply(d);
+                    // amount_at_d - (amount_before * d)
+                    item.setAmountReceivable(item.getAmountReceivable().add(changedAmount_2.subtract(amount_before_adjust.multiply(d))));
+                    item.setAmountOwed(item.getAmountReceivable());
                     break;
                 case 4:
-                    //按比例递减去
-                    BigDecimal one_1 = new BigDecimal("1");
-                    BigDecimal amount_changed_1 = amount.multiply(one_1.add(adjustAmplitude.multiply(new BigDecimal("0.01")))).multiply(d);
-                    item.setAmountOwed(amount.add(amount_changed_1));
-                    item.setAmountReceivable(amount.add(amount_changed_1));
+                    //按比例递减
+                    BigDecimal amount_before_adjust_1 = item.getAmountOwed();
+                    BigDecimal one = new BigDecimal("1");
+                    // a * (1- (b * 0.01)) * d
+                    BigDecimal changedAmount_3 = amount_before_adjust_1.multiply(one.subtract(adjustAmplitude.multiply(new BigDecimal("0.01")))).multiply(d);
+                    item.setAmountReceivable(item.getAmountReceivable().subtract(amount_before_adjust_1.multiply(d).subtract(changedAmount_3)));
+                    item.setAmountOwed(item.getAmountReceivable());
                     break;
             }
         }

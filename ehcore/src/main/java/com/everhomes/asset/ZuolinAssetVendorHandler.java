@@ -331,8 +331,10 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         BigDecimal amountOwed = new BigDecimal("0");
         for(int i = 0; i < billDetailDTOList.size(); i++) {
             BillDetailDTO dto = billDetailDTOList.get(i);
-            dateStrFilter.add(dto.getDateStr());
-            amountOwed = amountOwed.add(dto.getAmountOwed());
+            if(dto.getStatus().byteValue() == (byte)1){
+                dateStrFilter.add(dto.getDateStr());
+                amountOwed = amountOwed.add(dto.getAmountOwed());
+            }
         }
         response.setAmountOwed(amountOwed);
         response.setBillPeriodMonths(dateStrFilter.size());
