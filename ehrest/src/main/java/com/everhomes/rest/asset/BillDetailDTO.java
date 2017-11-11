@@ -27,6 +27,15 @@ public class BillDetailDTO {
     private String payStatus;
     private String dateStrBegin;
     private String dateStrEnd;
+    private String deadline;
+
+    public String getDeadline() {
+        return deadline;
+    }
+
+    public void setDeadline(String deadline) {
+        this.deadline = deadline;
+    }
 
     @Override
     public String toString() {

@@ -670,33 +670,41 @@ public class AssetProviderImpl implements AssetProvider {
 
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+                    dto.setDeadline(r.getValue(t.DUE_DAY_DEADLINE));
                     dtos.add(dto);
                     return null;});
         Date today = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         for(int i = 0; i < dtos.size(); i ++){
             BillDetailDTO dto = dtos.get(i);
-            String due = (String)list.get(i);
-            String deadline = (String)list.get(i+1);
-            Byte status = (Byte)list.get(i+2);
+            String due = (String)list.get(3*i);
+            String deadline = (String)list.get(3*i+1);
+            Byte status = (Byte)list.get(3*i+2);
             if(status != null && status.byteValue() == (byte)1){
                 dto.setStatus((byte)1);
                 continue;
             }
             try{
-                if(due!=null && sdf.parse(due).compareTo(today) != -1){
+                if(due!=null && sdf.parse(due).compareTo(today) != 1){
                     dto.setStatus((byte)3);
                     //状态进阶为未缴
-                }else if(due!=null && sdf.parse(due).compareTo(today) == -1){
+                }else if(due!=null && sdf.parse(due).compareTo(today) == 1){
                     dto.setStatus((byte)0);
                     //待缴
                 }
-                if(deadline!=null && sdf.parse(deadline).compareTo(today)!=-1){
+                if(deadline!=null && sdf.parse(deadline).compareTo(today)== -1){
                     //状态进阶为欠费
                     dto.setStatus((byte)2);
                 }
             }catch (Exception e){
                 dto.setStatus((byte)3);
+            }
+        }
+        for(int i = 0; i < dtos.size(); i++){
+            BillDetailDTO dto = dtos.get(i);
+            if(isOwedBill.byteValue() == (byte)1 && dto.getStatus().byteValue() == (byte)0){
+                dtos.remove(dto);
+                i--;
             }
         }
         return dtos;
@@ -1468,6 +1476,7 @@ public class AssetProviderImpl implements AssetProvider {
                     PaymentVariable variable = variables.get(j);
                     if(variable.getVariableName().equals(AssetPaymentStrings.VARIABLE_YJ)){
                         variables.remove(j);
+                        j--;
                     }
                 }
             }
