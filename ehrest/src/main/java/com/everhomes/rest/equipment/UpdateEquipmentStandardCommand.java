@@ -63,7 +63,7 @@ public class UpdateEquipmentStandardCommand {
 	@Deprecated
 	@ItemType(RepeatSettingsDTO.class)
 	private RepeatSettingsDTO repeat;
-	
+	@Deprecated
 	private Long templateId;
 	@Deprecated
 	private Integer reviewExpiredDays;
