@@ -15,6 +15,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -99,6 +100,15 @@ public class ArchivesProviderImpl implements ArchivesProvider {
             return ConvertHelper.convert(query.fetchOne(), ArchivesStickyContacts.class);
         } else
             return null;
+    }
+
+    @Override
+    public void deleteArchivesStickyContactsByDetailId(Integer namespaceId, Long detailId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        DeleteQuery query = context.deleteQuery(Tables.EH_ARCHIVES_STICKY_CONTACTS);
+        query.addConditions(Tables.EH_ARCHIVES_STICKY_CONTACTS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ARCHIVES_STICKY_CONTACTS.DETAIL_ID.eq(detailId));
+        query.execute();
     }
 
     @Override
