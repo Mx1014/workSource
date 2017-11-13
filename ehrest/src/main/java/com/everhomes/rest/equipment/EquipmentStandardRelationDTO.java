@@ -16,6 +16,7 @@ import java.sql.Timestamp;
  *  <li>standardId: 关联标准id</li>
  *  <li>standardName: 标准名称</li>
  *  <li>repeatType: 标准周期类型  0:no repeat 1: by day 2:by week 3: by month 4:year</li>
+ *  <li>order: 计划关联巡检对象排序 </li>
  * </ul>
  */
 public class EquipmentStandardRelationDTO {
@@ -52,6 +53,8 @@ public class EquipmentStandardRelationDTO {
 
 	@Deprecated
 	private Timestamp reviewTime;
+
+	private Long   order;
 	
 	public Long getId() {
 		return id;
@@ -172,6 +175,14 @@ public class EquipmentStandardRelationDTO {
 
 	public void setRepeatType(Byte repeatType) {
 		this.repeatType = repeatType;
+	}
+
+	public Long getOrder() {
+		return order;
+	}
+
+	public void setOrder(Long order) {
+		this.order = order;
 	}
 
 	@Override

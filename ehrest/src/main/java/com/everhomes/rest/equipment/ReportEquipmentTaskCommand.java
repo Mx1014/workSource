@@ -1,18 +1,17 @@
 package com.everhomes.rest.equipment;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
  *  <li>taskId: 任务id</li>
  *  <li>verificationResult: 上报结果  参考{@link com.everhomes.rest.equipment.EquipmentTaskResult}</li>
- *  <li>attachments: 上报内容图片</li>
+ *  <li>attachments: 上报内容图片对应设备id  参考{@link  com.everhomes.rest.equipment.Attachment}</li>
  *  <li>message: 上报内容文字</li>
  *  <li>itemResults: 设备参数 参考{@link com.everhomes.rest.equipment.InspectionItemResult}</li>
  *  <li>ownerId: 设备所属的主体id</li>
@@ -34,8 +33,9 @@ public class ReportEquipmentTaskCommand {
 	
 	@NotNull
 	@ItemType(AttachmentDescriptor.class)
-    private List<AttachmentDescriptor> attachments;
-	
+    private List<Attachment> attachments;
+
+	@Deprecated
 	private String message;
 	
 	@ItemType(InspectionItemResult.class)
@@ -57,11 +57,11 @@ public class ReportEquipmentTaskCommand {
 		this.verificationResult = verificationResult;
 	}
 
-	public List<AttachmentDescriptor> getAttachments() {
+	public List<Attachment> getAttachments() {
 		return attachments;
 	}
 
-	public void setAttachments(List<AttachmentDescriptor> attachments) {
+	public void setAttachments(List<Attachment> attachments) {
 		this.attachments = attachments;
 	}
 
