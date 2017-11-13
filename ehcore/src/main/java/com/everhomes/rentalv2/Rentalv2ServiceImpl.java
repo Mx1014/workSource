@@ -1482,16 +1482,36 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		if (null != sceneTokenDTO) { //根据用户类型区分优惠
 			String scene = sceneTokenDTO.getScene();
-			if (SceneType.PM_ADMIN.getCode().equals(scene)) {
-				priceRule.setDiscountType(priceRule.getOrgMemberDiscountType());
-				priceRule.setFullPrice(priceRule.getOrgMemberFullPrice());
-				priceRule.setCutPrice(priceRule.getOrgMemberCutPrice());
-				priceRule.setDiscountRatio(priceRule.getDiscountRatio());
-			}else if (!SceneType.ENTERPRISE.getCode().equals(scene)) {
-				priceRule.setDiscountType(priceRule.getApprovingUserDiscountType());
-				priceRule.setFullPrice(priceRule.getApprovingUserFullPrice());
-				priceRule.setCutPrice(priceRule.getApprovingUserCutPrice());
-				priceRule.setDiscountRatio(priceRule.getApprovingUserDiscountRatio());
+			if (cmd.getPackageName()!=null) {
+				if (SceneType.PM_ADMIN.getCode().equals(scene)) {
+					priceRule.setDiscountType(priceRule.getOrgMemberDiscountType());
+					priceRule.setFullPrice(priceRule.getOrgMemberFullPrice());
+					priceRule.setCutPrice(priceRule.getOrgMemberCutPrice());
+					priceRule.setDiscountRatio(priceRule.getDiscountRatio());
+				} else if (!SceneType.ENTERPRISE.getCode().equals(scene)) {
+					priceRule.setDiscountType(priceRule.getApprovingUserDiscountType());
+					priceRule.setFullPrice(priceRule.getApprovingUserFullPrice());
+					priceRule.setCutPrice(priceRule.getApprovingUserCutPrice());
+					priceRule.setDiscountRatio(priceRule.getApprovingUserDiscountRatio());
+				}
+			}else{ //启用套餐的优惠
+				List<Rentalv2PricePackage> list =rentalv2PricePackageProvider.listPricePackageByOwner(PriceRuleType.RESOURCE.getCode(),rs.getId(),
+						cmd.getRentalType(),cmd.getPackageName());
+				if (list!=null && list.size()>0){
+					Rentalv2PricePackage pricePackage = list.get(0);
+					if (SceneType.PM_ADMIN.getCode().equals(scene)) {
+						priceRule.setDiscountType(pricePackage.getOrgMemberDiscountType());
+						priceRule.setFullPrice(pricePackage.getOrgMemberFullPrice());
+						priceRule.setCutPrice(pricePackage.getOrgMemberCutPrice());
+						priceRule.setDiscountRatio(pricePackage.getDiscountRatio());
+					} else if (!SceneType.ENTERPRISE.getCode().equals(scene)) {
+						priceRule.setDiscountType(pricePackage.getApprovingUserDiscountType());
+						priceRule.setFullPrice(pricePackage.getApprovingUserFullPrice());
+						priceRule.setCutPrice(pricePackage.getApprovingUserCutPrice());
+						priceRule.setDiscountRatio(pricePackage.getApprovingUserDiscountRatio());
+					}
+				}
+
 			}
 		}
 
