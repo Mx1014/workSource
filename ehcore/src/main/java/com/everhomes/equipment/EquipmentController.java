@@ -143,44 +143,44 @@ public class EquipmentController extends ControllerBase {
         return getRestResponse(importDataResponse);
     }
 
-    /**
-     * <b>URL: /equipment/searchEquipmentStandardRelations</b>
-     * <p>查看设备-标准关联</p>
-     */
-    @RequestMapping("searchEquipmentStandardRelations")
-    @RestReturn(value = SearchEquipmentStandardRelationsResponse.class)
-    public RestResponse searchEquipmentStandardRelations(SearchEquipmentStandardRelationsCommand cmd) {
-
-        SearchEquipmentStandardRelationsResponse relations = equipmentStandardMapSearcher.query(cmd);
-
-        return getRestResponse(relations);
-    }
-
-    /**
-     * <b>URL: /equipment/reviewEquipmentStandardRelations</b>
-     * <p>审批设备-标准关联</p>
-     */
-    @RequestMapping("reviewEquipmentStandardRelations")
-    @RestReturn(value = String.class)
-    public RestResponse reviewEquipmentStandardRelations(ReviewEquipmentStandardRelationsCommand cmd) {
-
-        equipmentService.reviewEquipmentStandardRelations(cmd);
-
-        return getSuccessResponse();
-    }
-
-    /**
-     * <b>URL: /equipment/deleteEquipmentStandardRelations</b>
-     * <p>删除失效的设备-标准关联</p>
-     */
-    @RequestMapping("deleteEquipmentStandardRelations")
-    @RestReturn(value = String.class)
-    public RestResponse deleteEquipmentStandardRelations(DeleteEquipmentStandardRelationsCommand cmd) {
-
-        equipmentService.deleteEquipmentStandardRelations(cmd);
-
-        return getSuccessResponse();
-    }
+//    /**
+//     * <b>URL: /equipment/searchEquipmentStandardRelations</b>
+//     * <p>查看设备-标准关联</p>
+//     */
+//    @RequestMapping("searchEquipmentStandardRelations")
+//    @RestReturn(value = SearchEquipmentStandardRelationsResponse.class)
+//    public RestResponse searchEquipmentStandardRelations(SearchEquipmentStandardRelationsCommand cmd) {
+//
+//        SearchEquipmentStandardRelationsResponse relations = equipmentStandardMapSearcher.query(cmd);
+//
+//        return getRestResponse(relations);
+//    }
+//
+//    /**
+//     * <b>URL: /equipment/reviewEquipmentStandardRelations</b>
+//     * <p>审批设备-标准关联</p>
+//     */
+//    @RequestMapping("reviewEquipmentStandardRelations")
+//    @RestReturn(value = String.class)
+//    public RestResponse reviewEquipmentStandardRelations(ReviewEquipmentStandardRelationsCommand cmd) {
+//
+//        equipmentService.reviewEquipmentStandardRelations(cmd);
+//
+//        return getSuccessResponse();
+//    }
+//
+//    /**
+//     * <b>URL: /equipment/deleteEquipmentStandardRelations</b>
+//     * <p>删除失效的设备-标准关联</p>
+//     */
+//    @RequestMapping("deleteEquipmentStandardRelations")
+//    @RestReturn(value = String.class)
+//    public RestResponse deleteEquipmentStandardRelations(DeleteEquipmentStandardRelationsCommand cmd) {
+//
+//        equipmentService.deleteEquipmentStandardRelations(cmd);
+//
+//        return getSuccessResponse();
+//    }
 
     /**
      * <b>URL: /equipment/updateEquipments</b>
@@ -228,6 +228,18 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("searchEquipments")
     @RestReturn(value = SearchEquipmentsResponse.class)
     public RestResponse searchEquipments(SearchEquipmentsCommand cmd) {
+
+        SearchEquipmentsResponse equipments = equipmentSearcher.queryEquipments(cmd);
+
+        return getRestResponse(equipments);
+    }
+    /**
+     * <b>URL: /equipment/searchEquipmentStandardsObject</b>
+     * <p>列出设备列表 新建计划时关联巡检对象</p>
+     */
+    @RequestMapping("searchEquipmentStandardsObject")
+    @RestReturn(value = SearchEquipmentsResponse.class)
+    public RestResponse searchEquipmentStandardsObject(SearchEquipmentsCommand cmd) {
 
         SearchEquipmentsResponse equipments = equipmentSearcher.queryEquipments(cmd);
 

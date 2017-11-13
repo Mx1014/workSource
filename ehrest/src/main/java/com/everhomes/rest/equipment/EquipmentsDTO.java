@@ -39,6 +39,15 @@ import java.util.List;
  *  <li>remarks: 备注</li>
  *  <li>eqAccessoryMap: 设备备品配件 参考{@link com.everhomes.rest.equipment.EquipmentAccessoryMapDTO}</li>
  *  <li>pictureFlag: 是否需要拍照 0：否 1：是</li>
+ *  <li>brand_name 品牌
+ *  <li>construction_party :施工方</li>
+ *  <li>discard_time :废弃时间</li>
+ *  <li>manager_contact :联系方式</li>
+ *  <li>Detail:设备详情</li>
+ *  <li>factory_time: 出厂时间</li>
+ *  <li>Price: 采购价格</li>
+ *  <li>buy_time: 采购时间</li>
+ *  <li>depreciation_years: 折旧年限</li>
  * </ul>
  */
 public class EquipmentsDTO {
