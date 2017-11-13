@@ -858,12 +858,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
         EnergyMeterReadingLog log = new EnergyMeterReadingLog();
         log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+        log.setTaskId(cmd.getTaskId());
         log.setReading(cmd.getCurrReading());
         log.setCommunityId(meter.getCommunityId());
         log.setMeterId(meter.getId());
         log.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
         log.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        log.setOperatorId(UserContext.current().getUser().getId());
+        log.setOperatorId(UserContext.currentUserId());
         log.setResetMeterFlag(cmd.getResetMeterFlag() != null ? cmd.getResetMeterFlag() : TrueOrFalseFlag.FALSE.getCode());
         dbProvider.execute(r -> {
             meterReadingLogProvider.createEnergyMeterReadingLog(log);
@@ -963,7 +964,19 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             EnergyMeterReadingLog lastReadingLog = meterReadingLogProvider.findLastReadingLogByMeterId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), log.getMeterId());
             meterReadingLogProvider.deleteEnergyMeterReadingLog(log);
 
+            //把关联任务的读数改成新的最后一次读数
+            if(lastReadingLog.getTaskId() != null && lastReadingLog.getTaskId() != 0L) {
+                EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskById(lastReadingLog.getTaskId());
+                if(task != null) {
+                    EnergyMeterReadingLog taskLastReadingLog = meterReadingLogProvider.findLastReadingLogByTaskId(task.getId());
+                    task.setReading(taskLastReadingLog.getReading());
+                    energyMeterTaskProvider.updateEnergyMeterTask(task);
+                    energyMeterTaskSearcher.feedDoc(task);
+                }
+
+            }
             // 删除的记录是最后一条, 把表记的lastReading修改成新的最后一次读数
+
             if (Objects.equals(lastReadingLog.getId(), log.getId())) {
                 EnergyMeter meter = meterProvider.findById(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), log.getMeterId());
                 lastReadingLog = meterReadingLogProvider.findLastReadingLogByMeterId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), log.getMeterId());
@@ -975,7 +988,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     meter.setLastReadTime(null);
                 }
                 meterProvider.updateEnergyMeter(meter);
+
             }
+
             return true;
         });
         readingLogSearcher.deleteById(log.getId());
@@ -3047,6 +3062,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                             energyMeterTaskProvider.updateEnergyMeterTask(task);
                             energyMeterTaskSearcher.feedDoc(task);
                             readTask = true;
+                            read.setTaskId(task.getId());
                         }
                         if(readTask) {
                             readEnergyMeter(read);
@@ -3270,6 +3286,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         energyMeterTaskSearcher.feedDoc(task);
         ReadEnergyMeterCommand command = ConvertHelper.convert(cmd, ReadEnergyMeterCommand.class);
         command.setMeterId(task.getMeterId());
+        command.setTaskId(task.getId());
         readEnergyMeter(command);
     }
 
