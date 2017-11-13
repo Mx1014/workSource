@@ -8,6 +8,7 @@ import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -1128,35 +1129,88 @@ public class PmTaskServiceImpl implements PmTaskService {
 			this.coordinationProvider.getNamedLock(CoordinationLocks.PMTASK_STATISTICS.getCode()).tryEnter(() -> {
 
 				List<Namespace> namespaces = pmTaskProvider.listNamespace();
-				long now = System.currentTimeMillis();
-				Timestamp startDate = getBeginOfMonth(now);
-				Timestamp endDate = getEndOfMonth(now);
-				boolean isOperateByAdmin = configProvider.getBooleanValue("pmtask.statistics.create", false);
-				if (isOperateByAdmin) {
-					startDate = getEndOfMonth(now);
-					endDate = null;
-				}
-				for (Namespace n : namespaces) {
-					Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
-					Category ancestor = categoryProvider.findCategoryById(defaultId);
 
-					if (null != ancestor) {
-						List<Category> categories = categoryProvider.listTaskCategories(n.getId(), ancestor.getId(), null, null, null);
-						if (null != categories && !categories.isEmpty()) {
-							List<Community> communities = communityProvider.listCommunitiesByNamespaceId(n.getId());
-							for (Community community : communities) {
-								for (Category taskCategory : categories) {
-									createTaskStatistics(community.getId(), taskCategory.getId(), 0L, startDate, endDate, now, n.getId());
-									List<Category> tempCategories = categoryProvider.listTaskCategories(n.getId(), taskCategory.getId(), null, null, null);
-									for (Category category : tempCategories) {
-										createTaskStatistics(community.getId(), taskCategory.getId(), category.getId(), startDate, endDate, now, n.getId());
-									}
-								}
+				long now = System.currentTimeMillis();
+
+				Timestamp startDate = getBeginOfLastMonth(now);
+				Timestamp endDate = getBeginOfMonth(now);
+				createTaskStatistics(namespaces, startDate, endDate, now);
+			});
+		}
+	}
+
+	@Override
+	public void syncTaskStatistics(HttpServletResponse resp) {
+
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				List<Namespace> namespaces = pmTaskProvider.listNamespace();
+//				List<Namespace> namespaces = new ArrayList<>();
+//				Namespace m = new Namespace();
+//				m.setId(1000000);
+//				namespaces.add(m);
+
+				long now = System.currentTimeMillis();
+
+				String dateStr = "2017-01-01 00:00:00";
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				try {
+					Date date = sdf.parse(dateStr);
+
+					Calendar begin = Calendar.getInstance();
+					begin.setTime(date);
+
+					Calendar nowCalendar = Calendar.getInstance();
+					nowCalendar.setTimeInMillis(now);
+
+					while (begin.before(nowCalendar)) {
+
+						Timestamp startDate = new Timestamp(begin.getTimeInMillis());
+
+						begin.add(Calendar.MONTH, 1);
+						Timestamp endDate = new Timestamp(begin.getTimeInMillis());
+						createTaskStatistics(namespaces, startDate, endDate, now);
+
+					}
+
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+
+		PrintWriter writer = null;
+		try {
+			writer = resp.getWriter();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		writer.write("success");
+		writer.flush();
+		writer.close();
+	}
+
+	private void createTaskStatistics(List<Namespace> namespaces, Timestamp startDate, Timestamp endDate, long now) {
+		for (Namespace n : namespaces) {
+			Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
+			Category ancestor = categoryProvider.findCategoryById(defaultId);
+
+			if (null != ancestor) {
+				List<Category> categories = categoryProvider.listTaskCategories(n.getId(), ancestor.getId(), null, null, null);
+				if (null != categories && !categories.isEmpty()) {
+					List<Community> communities = communityProvider.listCommunitiesByNamespaceId(n.getId());
+					for (Community community : communities) {
+						for (Category taskCategory : categories) {
+							createTaskStatistics(community.getId(), taskCategory.getId(), 0L, startDate, endDate, now, n.getId());
+							List<Category> tempCategories = categoryProvider.listTaskCategories(n.getId(), taskCategory.getId(), null, null, null);
+							for (Category category : tempCategories) {
+								createTaskStatistics(community.getId(), taskCategory.getId(), category.getId(), startDate, endDate, now, n.getId());
 							}
 						}
 					}
 				}
-			});
+			}
 		}
 	}
 
@@ -1197,7 +1251,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		pmTaskProvider.createTaskStatistics(statistics);
 	}
 	
-	private Timestamp getBeginOfMonth(Long time){
+	private Timestamp getBeginOfLastMonth(Long time){
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(time);
 		
@@ -1211,7 +1265,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return new Timestamp(calendar.getTime().getTime());
 	}
 	
-	private Timestamp getEndOfMonth(Long time){
+	private Timestamp getBeginOfMonth(Long time){
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(time);
 		

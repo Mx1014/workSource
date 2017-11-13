@@ -497,17 +497,12 @@ public class PmTaskController extends ControllerBase {
 //    }
     
     /**
-     * <b>URL: /pmtask/createStatistics</b>
+     * <b>URL: /pmtask/syncTaskStatistics</b>
      * <p>统计</p>
      */
-    @RequestMapping("createStatistics")
-    @RestReturn(value=String.class)
-    public RestResponse createStatistics() {
-    	pmTaskService.createStatistics();
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+    @RequestMapping("syncTaskStatistics")
+    public void createStatistics(HttpServletResponse resp) {
+    	pmTaskService.syncTaskStatistics(resp);
     }
 
     /**

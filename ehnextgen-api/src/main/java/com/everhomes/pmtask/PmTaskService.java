@@ -55,8 +55,6 @@ public interface PmTaskService {
 	
 	void exportListStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp);
 	
-	void createStatistics();
-	
 //	ListOperatePersonnelsResponse listOperatePersonnels(ListOperatePersonnelsCommand cmd);
 	
 //	void revisit(RevisitCommand cmd);
@@ -88,4 +86,6 @@ public interface PmTaskService {
 	void changeTasksStatus(UpdateTasksStatusCommand cmd);
 
 	ListAuthorizationCommunityByUserResponse listOrganizationCommunityByUser(ListOrganizationCommunityByUserCommand cmd);
+
+	void syncTaskStatistics(HttpServletResponse resp);
 }
