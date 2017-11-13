@@ -1,25 +1,31 @@
 package com.everhomes.rest.equipment;
 
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
+
 /**
  * <ul>
- *  <li>taskId: 任务id</li>
- *  <li>EquipmentStandardRelationOfflineDTO: 离线巡检对象关联DTO 参考{@link com.everhomes.rest.equipment.EquipmentStandardRelationOfflineDTO}</li>
+ * <li>taskId: 任务id</li>
+ * <li>EquipmentStandardRelationOfflineDTO: 离线巡检对象关联DTO 参考{@link com.everhomes.rest.equipment.EquipmentStandardRelationOfflineDTO}</li>
  * </ul>
  */
 public class EquipmentTaskOffLineDTO {
-    private  Long   TaskId;
+
+    private Long taskId;
+
+    private String name;
+    @ItemType(EquipmentStandardRelationOfflineDTO.class)
     private List<EquipmentStandardRelationOfflineDTO> equipmentStandardRelations;
 
     public Long getTaskId() {
-        return TaskId;
+        return taskId;
     }
 
     public void setTaskId(Long taskId) {
-        TaskId = taskId;
+        taskId = taskId;
     }
 
     public List<EquipmentStandardRelationOfflineDTO> getEquipmentStandardRelations() {
