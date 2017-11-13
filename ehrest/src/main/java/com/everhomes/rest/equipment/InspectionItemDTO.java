@@ -1,14 +1,15 @@
 package com.everhomes.rest.equipment;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
  *  <li>id: 巡检项id</li>
  *  <li>ownerId: 巡检项所属组织等的id</li>
  *  <li>ownerType: 巡检项所属组织类型，参考{@link com.everhomes.rest.quality.OwnerType}</li>
+ *  <li>templateId: 模板id</li>
  *  <li>name: 巡检项名称</li>
  *  <li>valueType: 巡检项类型0-none、1-two-tuple、2-range</li>
  *  <li>unit: 单位</li>
@@ -24,7 +25,9 @@ public class InspectionItemDTO {
 	
 	@NotNull
 	private String ownerType;
-	
+	//add in PM.V3.2
+	private Long  templateId;
+
 	private String name;
 	
 	private Byte valueType;
