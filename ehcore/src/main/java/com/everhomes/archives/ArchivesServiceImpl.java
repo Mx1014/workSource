@@ -19,6 +19,7 @@ import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -139,6 +140,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 memberDetail.setEmployeeType(EmployeeType.FULLTIME.getCode());
                 memberDetail.setEmployeeStatus(EmployeeStatus.ON_THE_JOB.getCode());
                 memberDetail.setWorkEmail(cmd.getWorkEmail());
+                memberDetail.setContractPartyId(cmd.getOrganizationId());
                 organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());
                 dto.setDetailId(detailId);
                 dto.setContactName(memberDetail.getContactName());
@@ -761,6 +763,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         addCommand.setJobPositionIds(cmd.getJobPositionIds());
         addCommand.setJobLevelIds(cmd.getJobLevelIds());
         addCommand.setContactToken(cmd.getContactToken());
+        addCommand.setVisibleFlag(VisibleFlag.SHOW.getCode());
         dbProvider.execute((TransactionStatus status) -> {
 
             OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
@@ -771,8 +774,10 @@ public class ArchivesServiceImpl implements ArchivesService {
                 detailId = memberDTO.getDetailId();
             OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
             if (memberDetail != null) {
-
-                memberDetail.setCheckInTime(cmd.getCheckInTime());
+                if (cmd.getCheckInTime() != null)
+                    memberDetail.setCheckInTime(cmd.getCheckInTime());
+                else
+                    memberDetail.setCheckInTime(ArchivesUtil.currentDate());
                 memberDetail.setEmployeeType(cmd.getEmployeeType());
                 memberDetail.setEmployeeStatus(cmd.getEmployeeStatus());
                 if (cmd.getEmploymentTime() == null)
@@ -785,6 +790,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 memberDetail.setWorkEmail(cmd.getWorkEmail());
                 memberDetail.setContractPartyId(cmd.getContractPartyId());
                 memberDetail.setRegionCode(cmd.getRegionCode());
+                memberDetail.setContractPartyId(cmd.getOrganizationId());
                 organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());
                 dto.setDetailId(detailId);
                 dto.setContactName(memberDetail.getContactName());
@@ -1907,7 +1913,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             //  5.导入详细信息
             if (detailId == null)
                 continue;
-            saveArchivesEmployeesDetail(formOriginId, detailId, organizationId, itemValues);
+            saveArchivesEmployeesDetail(formOriginId, organizationId, detailId, itemValues);
             //  6.记录重复数据
             if (flag)
                 coverCount++;
@@ -1986,6 +1992,10 @@ public class ArchivesServiceImpl implements ArchivesService {
             if (!StringUtils.isEmpty(itemValue.getFieldValue()))
                 map.put(ArchivesParameter.JOB_LEVEL_IDS, organizationService.getOrganizationNameByNameAndType(itemValue.getFieldValue(), OrganizationGroupType.JOB_LEVEL.getCode()));
         }
+        if (ArchivesParameter.CHECK_IN_TIME.equals(itemValue.getFieldName())){
+            if (!StringUtils.isEmpty(itemValue.getFieldValue()))
+                map.put(ArchivesParameter.CHECK_IN_TIME, itemValue.getFieldValue());
+        }
         return null;
     }
         /*    private ImportFileResultLog<Map> checkArchivesEmployeesData(
@@ -2036,6 +2046,8 @@ public class ArchivesServiceImpl implements ArchivesService {
         jobLevelIds.add((Long)basicDataMap.get(ArchivesParameter.JOB_LEVEL_IDS));
         addCommand.setJobLevelIds(jobLevelIds);
         addCommand.setContactToken((String)basicDataMap.get(ArchivesParameter.CONTACT_TOKEN));
+        if(basicDataMap.get(ArchivesParameter.CHECK_IN_TIME) != null)
+            addCommand.setCheckInTime((String)basicDataMap.get(ArchivesParameter.CHECK_IN_TIME));
 
         //  2.先校验是否已存在手机号，否则的话添加完后再校验，结果肯定是覆盖导入
         flag = verifyPersonnelByPhone(organizationId, addCommand.getContactToken());

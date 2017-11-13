@@ -10386,7 +10386,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                     departmentName += org.getName() + ",";
                 }
             }
-            departmentName = departmentName.substring(0, departmentName.length() - 1);
+            if (!"".equals(departmentName))
+                departmentName = departmentName.substring(0, departmentName.length() - 1);
             return departmentName;
         } else
             return "";
