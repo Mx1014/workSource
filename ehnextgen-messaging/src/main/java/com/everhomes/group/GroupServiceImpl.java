@@ -2914,7 +2914,7 @@ public class GroupServiceImpl implements GroupService {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         String homeUrl = configProvider.getValue(namespaceId, ConfigConstants.HOME_URL, "");
         String descriptionUrl = configProvider.getValue(namespaceId, ConfigConstants.CLUB_DESCRIPTION_URL, "");
-        return homeUrl + descriptionUrl + "?id=" + id;
+        return homeUrl + descriptionUrl + "?groupId=" + id;
     }
     
     private String getShareUrl(Group group) {
