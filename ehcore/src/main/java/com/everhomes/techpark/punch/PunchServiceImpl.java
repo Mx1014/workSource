@@ -622,6 +622,7 @@ public class PunchServiceImpl implements PunchService {
 		if (null == pdl) {
 			return null;
 		}
+		newPunchDayLog.setApprovalStatusList(pdl.getApprovalStatusList());
 		newPunchDayLog.setStatusList(pdl.getStatusList());
 		if(null != pdl.getArriveTime())
 			newPunchDayLog.setArriveTime(new Time(pdl.getArriveTime()));
