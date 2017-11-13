@@ -1298,7 +1298,7 @@ public class PunchServiceImpl implements PunchService {
 			if(null == pdl.getApprovalStatusList()){
 				pdl.setApprovalStatusList(approvalStatus);
 			}else{
-				pdl.setApprovalStatusList(pdl.getStatusList()+PunchConstants.STATUS_SEPARATOR+approvalStatus);
+				pdl.setApprovalStatusList(pdl.getApprovalStatusList()+PunchConstants.STATUS_SEPARATOR+approvalStatus);
 			}
 
 		}
