@@ -8404,7 +8404,7 @@ public class PunchServiceImpl implements PunchService {
 		pl.setPunchType(request.getPunchType());
 		pl.setPunchIntervalNo(request.getPunchIntervalNo());
 		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), request.getEnterpriseId(),
-				request.getEnterpriseId());
+				request.getUserId());
 		PunchTimeRule ptr = getPunchTimeRuleByRuleIdAndDate(pr, request.getPunchDate(),request.getUserId());
 		pl.setRuleTime(findRuleTime(ptr, request.getPunchType(), request.getPunchIntervalNo()));
 		pl.setStatus(PunchStatus.UNPUNCH.getCode());
