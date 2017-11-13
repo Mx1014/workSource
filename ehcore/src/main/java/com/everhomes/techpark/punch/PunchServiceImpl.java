@@ -7531,10 +7531,12 @@ public class PunchServiceImpl implements PunchService {
 		}
 		dto1.setPunchTime(pl.getPunchTime().getTime());
 		dto1.setClockStatus(pl.getStatus());
-		dto1.setApprovalStatus(pl.getApprovalStatus());
+//		dto1.setApprovalStatus(pl.getApprovalStatus());
 		PunchExceptionRequest exceptionRequest = punchProvider.findPunchExceptionRequest(pl.getUserId(), pl.getEnterpriseId(),
-				pl.getPunchDate(),pl.getPunchIntervalNo(),pl.getPunchType());
-		if(null != exceptionRequest) {
+				pl.getPunchDate(), pl.getPunchIntervalNo(), pl.getPunchType());
+
+		if (null != exceptionRequest) {
+			dto1.setApprovalStatus(exceptionRequest.getStatus());
 			FlowCase flowCase = flowCaseProvider.getFlowCaseById(exceptionRequest.getRequestId());
 			if (null != flowCase)
 				dto1.setRequestToken(ApprovalRequestDefaultHandler.processFlowURL(flowCase.getId(),
