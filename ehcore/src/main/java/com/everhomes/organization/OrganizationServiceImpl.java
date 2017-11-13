@@ -5414,8 +5414,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                     memberDetail.setDepartment(convertToOrganizationName(departmentIds));
                     organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());
                     //删除置顶信息
-                    ArchivesStickyContacts stickContact = archivesProvider.findArchivesStickyContactsByDetailIdAndOrganizationId(namespaceId,memberDetail.getOrganizationId(),detailId);
-                    archivesProvider.deleteArchivesStickyContacts(stickContact);
+                    ArchivesStickyContacts stickContact = archivesProvider.findArchivesStickyContactsByDetailIdAndOrganizationId(namespaceId, memberDetail.getOrganizationId(), detailId);
+                    if (stickContact != null)
+                        archivesProvider.deleteArchivesStickyContacts(stickContact);
                 }
             });
 
