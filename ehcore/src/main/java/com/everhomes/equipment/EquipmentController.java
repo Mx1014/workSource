@@ -233,15 +233,16 @@ public class EquipmentController extends ControllerBase {
 
         return getRestResponse(equipments);
     }
+
     /**
      * <b>URL: /equipment/searchEquipmentStandardsObject</b>
      * <p>列出设备列表 新建计划时关联巡检对象</p>
      */
     @RequestMapping("searchEquipmentStandardsObject")
-    @RestReturn(value =  SearchEquipmentStandardRelationsResponse.class)
+    @RestReturn(value = SearchEquipmentStandardRelationsResponse.class)
     public RestResponse searchEquipmentStandardsObject(SearchEquipmentsCommand cmd) {
 
-        SearchEquipmentStandardRelationsResponse searchEquipmentStandardsObject =null;
+        SearchEquipmentStandardRelationsResponse searchEquipmentStandardsObject = null;
 
         return getRestResponse(searchEquipmentStandardsObject);
     }
@@ -377,7 +378,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("createEquipmentInspectionPlan")
     @RestReturn(value = EquipmentInspectionPlanDTO.class)
     public RestResponse createEquipmentInspectionPlan(UpdateEquipmentPlanCommand cmd) {
-        EquipmentInspectionPlanDTO equipmentInspectionPlans =null;
+        EquipmentInspectionPlanDTO equipmentInspectionPlans = null;
 
         return getRestResponse(equipmentInspectionPlans);
     }
@@ -390,7 +391,7 @@ public class EquipmentController extends ControllerBase {
     @RestReturn(value = String.class)
     public RestResponse updateEquipmentInspectionPlan(UpdateEquipmentPlanCommand cmd) {
 
-        EquipmentInspectionPlanDTO equipmentInspectionPlans =null;
+        EquipmentInspectionPlanDTO equipmentInspectionPlans = null;
 
         return getSuccessResponse();
     }
@@ -403,7 +404,7 @@ public class EquipmentController extends ControllerBase {
     @RestReturn(value = EquipmentInspectionPlanDTO.class)
     public RestResponse getEquipmentInspectionPlan(DeleteEquipmentAccessoriesCommand cmd) {
 
-        EquipmentInspectionPlanDTO equipmentInspectionPlans =null;
+        EquipmentInspectionPlanDTO equipmentInspectionPlans = null;
 
         return getRestResponse(equipmentInspectionPlans);
     }
@@ -416,7 +417,7 @@ public class EquipmentController extends ControllerBase {
     @RestReturn(value = searchEquipmentInspectionPlansResponse.class)
     public RestResponse searchEquipmentInspectionPlans(searchEquipmentInspectionPlansCommand cmd) {
 
-        searchEquipmentInspectionPlansResponse equipmentInspectionPlansResponse =null;
+        searchEquipmentInspectionPlansResponse equipmentInspectionPlansResponse = null;
         return getRestResponse(equipmentInspectionPlansResponse);
     }
 
@@ -425,9 +426,9 @@ public class EquipmentController extends ControllerBase {
      * <p>导出备品备件表</p>
      */
     @RequestMapping("exportEquipmentInspectionPlans")
-    public HttpServletResponse exportEquipmentInspectionPlans( searchEquipmentInspectionPlansCommand cmd, HttpServletResponse response) {
+    public HttpServletResponse exportEquipmentInspectionPlans(searchEquipmentInspectionPlansCommand cmd, HttpServletResponse response) {
 
-        HttpServletResponse commandResponse =null;
+        HttpServletResponse commandResponse = null;
 
         return commandResponse;
     }
@@ -677,6 +678,7 @@ public class EquipmentController extends ControllerBase {
         equipmentTasksSearcher.syncFromDb();
         return getSuccessResponse();
     }
+
     /**
      * <b>URL: /equipment/syncEquipmentPlansIndex</b>
      * <p>搜索索引同步</p>
@@ -689,7 +691,7 @@ public class EquipmentController extends ControllerBase {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
-       // equipmentPlanSearcher.syncFromDb();
+        // equipmentPlanSearcher.syncFromDb();
         return getSuccessResponse();
     }
 
@@ -763,64 +765,80 @@ public class EquipmentController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /equipment/createInspectionTemplate</b>
-     * <p>新建巡检模板</p>
+     * <b>URL: /equipment/listEquipmentStandardRelationsByTaskId</b>
+     * <p>查看单个任务下设备标准关系列表</p>
      */
-    @RequestMapping("createInspectionTemplate")
-    @RestReturn(value = String.class)
-    public RestResponse createInspectionTemplate(CreateInspectionTemplateCommand cmd) {
+    @RequestMapping("listEquipmentsByTaskId")
+    @RestReturn(value = InspectionItemDTO.class, collection = true)
+    public RestResponse listEquipmentStandardRelationsByTaskId(ListTaskByIdCommand cmd) {
 
-        equipmentService.createInspectionTemplate(cmd);
-        return getSuccessResponse();
+        List<EquipmentStandardRelationDTO> equipments = null;
+
+        RestResponse response = new RestResponse(equipments);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 
-    /**
-     * <b>URL: /equipment/updateInspectionTemplate</b>
-     * <p>修改巡检模板</p>
-     */
-    @RequestMapping("updateInspectionTemplate")
-    @RestReturn(value = String.class)
-    public RestResponse updateInspectionTemplate(UpdateInspectionTemplateCommand cmd) {
-
-        equipmentService.updateInspectionTemplate(cmd);
-        return getSuccessResponse();
-    }
-
-    /**
-     * <b>URL: /equipment/deleteInspectionTemplate</b>
-     * <p>删除巡检模板</p>
-     */
-    @RequestMapping("deleteInspectionTemplate")
-    @RestReturn(value = String.class)
-    public RestResponse deleteInspectionTemplate(DeleteInspectionTemplateCommand cmd) {
-
-        equipmentService.deleteInspectionTemplate(cmd);
-        return getSuccessResponse();
-    }
-
-    /**
-     * <b>URL: /equipment/findInspectionTemplate</b>
-     * <p>查询巡检模板</p>
-     */
-    @RequestMapping("findInspectionTemplate")
-    @RestReturn(value = InspectionTemplateDTO.class)
-    public RestResponse findInspectionTemplate(DeleteInspectionTemplateCommand cmd) {
-
-        InspectionTemplateDTO inspectionTemplate = equipmentService.findInspectionTemplate(cmd);
-        return getRestResponse(inspectionTemplate);
-    }
-
-    /**
-     * <b>URL: /equipment/listInspectionTemplates</b>
-     * <p>列出巡检模板</p>
-     */
-    @RequestMapping("listInspectionTemplates")
-    @RestReturn(value = InspectionTemplateDTO.class, collection = true)
-    public RestResponse listInspectionTemplates(ListInspectionTemplatesCommand cmd) {
-
-        List<InspectionTemplateDTO> inspectionTemplates = equipmentService.listInspectionTemplates(cmd);
-        return getRestResponse(inspectionTemplates);
-    }
+//    /**
+//     * <b>URL: /equipment/createInspectionTemplate</b>
+//     * <p>新建巡检模板</p>
+//     */
+//    @RequestMapping("createInspectionTemplate")
+//    @RestReturn(value = String.class)
+//    public RestResponse createInspectionTemplate(CreateInspectionTemplateCommand cmd) {
+//
+//        equipmentService.createInspectionTemplate(cmd);
+//        return getSuccessResponse();
+//    }
+//
+//    /**
+//     * <b>URL: /equipment/updateInspectionTemplate</b>
+//     * <p>修改巡检模板</p>
+//     */
+//    @RequestMapping("updateInspectionTemplate")
+//    @RestReturn(value = String.class)
+//    public RestResponse updateInspectionTemplate(UpdateInspectionTemplateCommand cmd) {
+//
+//        equipmentService.updateInspectionTemplate(cmd);
+//        return getSuccessResponse();
+//    }
+//
+//    /**
+//     * <b>URL: /equipment/deleteInspectionTemplate</b>
+//     * <p>删除巡检模板</p>
+//     */
+//    @RequestMapping("deleteInspectionTemplate")
+//    @RestReturn(value = String.class)
+//    public RestResponse deleteInspectionTemplate(DeleteInspectionTemplateCommand cmd) {
+//
+//        equipmentService.deleteInspectionTemplate(cmd);
+//        return getSuccessResponse();
+//    }
+//
+//    /**
+//     * <b>URL: /equipment/findInspectionTemplate</b>
+//     * <p>查询巡检模板</p>
+//     */
+//    @RequestMapping("findInspectionTemplate")
+//    @RestReturn(value = InspectionTemplateDTO.class)
+//    public RestResponse findInspectionTemplate(DeleteInspectionTemplateCommand cmd) {
+//
+//        InspectionTemplateDTO inspectionTemplate = equipmentService.findInspectionTemplate(cmd);
+//        return getRestResponse(inspectionTemplate);
+//    }
+//
+//    /**
+//     * <b>URL: /equipment/listInspectionTemplates</b>
+//     * <p>列出巡检模板</p>
+//     */
+//    @RequestMapping("listInspectionTemplates")
+//    @RestReturn(value = InspectionTemplateDTO.class, collection = true)
+//    public RestResponse listInspectionTemplates(ListInspectionTemplatesCommand cmd) {
+//
+//        List<InspectionTemplateDTO> inspectionTemplates = equipmentService.listInspectionTemplates(cmd);
+//        return getRestResponse(inspectionTemplates);
+//    }
 
     /**
      * <b>URL: /equipment/listTasksByToken</b>
