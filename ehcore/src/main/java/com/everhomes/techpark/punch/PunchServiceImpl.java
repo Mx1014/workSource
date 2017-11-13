@@ -894,7 +894,7 @@ public class PunchServiceImpl implements PunchService {
 
 		String asList = "";
 		if (null != pdl.getApprovalStatusList() && !StringUtils.isEmpty(pdl.getApprovalStatusList())) {
-			String[] asArrary = pdl.getApprovalStatusList().split(PunchConstants.STATUS_SEPARATOR);
+			String[] asArrary = org.apache.commons.lang.StringUtils.splitByWholeSeparator(pdl.getApprovalStatusList(),PunchConstants.STATUS_SEPARATOR);
 			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 			for (int i = 0; i < statusArrary.length / 2; i++) {
 				String approvalStatus = "";
@@ -1297,7 +1297,6 @@ public class PunchServiceImpl implements PunchService {
 			}
 			punchDayLog.setWorkTime(convertTime(workTimeLong));
 		}
-		// TODO: 2017/11/3  现在只有异常审批处理的approvalStatus,以后要加入请假修改的逻辑
 
 		for(PunchLog log : efficientLogs){
 			if(null == pdl.getStatusList()){
@@ -7459,8 +7458,8 @@ public class PunchServiceImpl implements PunchService {
             response.setStatusList(pdl.getStatusList());
             if (null != pdl.getStatusList()) {
                 if (null != pdl.getApprovalStatusList())
-                    approvalStatus = pdl.getApprovalStatusList().split(PunchConstants.STATUS_SEPARATOR);
-                statusList = pdl.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
+                    approvalStatus = org.apache.commons.lang.StringUtils.splitByWholeSeparator(pdl.getApprovalStatusList(),PunchConstants.STATUS_SEPARATOR);
+                statusList = org.apache.commons.lang.StringUtils.splitByWholeSeparator( pdl.getStatusList(),PunchConstants.STATUS_SEPARATOR);
                 if (statusList.length < pdl.getPunchTimesPerDay() / 2) {
                     if (statusList.length == 1) {
                         statusList = new String[pdl.getPunchTimesPerDay() / 2];
@@ -7556,6 +7555,7 @@ public class PunchServiceImpl implements PunchService {
 		}else{
 			dto1.setPunchType(pl.getPunchType());
 		}
+
 		if (null != pl.getPunchTime()) {
 			dto1.setPunchTime(pl.getPunchTime().getTime());
 		}
