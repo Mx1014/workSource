@@ -39,10 +39,10 @@ UPDATE `eh_web_menus` SET `data_type`='react:/address-book/address-list' WHERE i
 UPDATE `eh_web_menus` SET `data_type`='react:/employee-record/employee-list/1', `name`= '人事档案' WHERE `name` like '%人员管理%';
 -- 3.删除原先的scope
 DELETE FROM `eh_web_menu_scopes` where menu_id IN (50110,50200,50210,50220,50400);
--- 4.为 volgo 与 深业物业 上线新菜单
+-- 4.为 volgo 上线新菜单人事档案
 SET @scope_id = (SELECT MAX(id) FROM eh_web_menu_scopes);
 INSERT INTO `eh_web_menu_scopes` VALUES(@scope_id := @scope_id + 1,50400,'','EhNamespaces',1,2);
-INSERT INTO `eh_web_menu_scopes` VALUES(@scope_id := @scope_id + 1,50400,'','EhNamespaces',999992,2);
+-- INSERT INTO `eh_web_menu_scopes` VALUES(@scope_id := @scope_id + 1,50400,'','EhNamespaces',999992,2);
 
 -- R ended --
 
@@ -145,3 +145,11 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 -- 运营后台增加账单管理menu by wentian
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2500000', '账单管理', '2000000', NULL, 'payment-management', '1', '2', '/2000000/2500000', 'zuolin', '3', '20400', '2', 'project', 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2510000', '账单管理', '2500000', NULL, 'payment-management', '0', '2', '/2000000/2500000/2510000', 'zuolin', '3', '20400', '3', 'project', 'page');
+
+DELETE from `eh_locale_strings` where scope = 'assetv2';
+set @assetv2_id = (select MAX(id) from `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@assetv2_id:=@assetv2_id+1, 'assetv2', '10001', 'zh_CN', '正在生成中');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@assetv2_id:=@assetv2_id+1, 'assetv2', '10002', 'zh_CN', '操作失败，该域名下没有可用园区');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@assetv2_id:=@assetv2_id+1, 'assetv2', '10003', 'zh_CN', '还未进行生成');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@assetv2_id:=@assetv2_id+1, 'assetv2', '10004', 'zh_CN', '添加失败，一个收费项目只能存在一个账单组中');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@assetv2_id:=@assetv2_id+1, 'assetv2', '10005', 'zh_CN', '对象已经或正在正常工作中，不能删除或修改');

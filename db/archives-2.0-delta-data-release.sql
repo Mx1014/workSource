@@ -38,9 +38,9 @@ UPDATE `eh_web_menus` SET `data_type`='react:/address-book/address-list' WHERE i
 UPDATE `eh_web_menus` SET `data_type`='react:/employee-record/employee-list/1', `name`= '人事档案' WHERE `name` like '%人员管理%';
 -- 3.删除原先的scope
 DELETE FROM eh_web_menu_scopes where menu_id IN (50110,50200,50210,50220,50400);
--- 4.为 volgo 与 深业物业 上线新菜单
+-- 4.为 volgo 上线新菜单人事档案
 SET @scope_id = (SELECT MAX(id) FROM eh_web_menu_scopes);
 INSERT INTO `eh_web_menu_scopes` VALUES(@scope_id := @scope_id + 1,50400,'','EhNamespaces',1,2);
-INSERT INTO `eh_web_menu_scopes` VALUES(@scope_id := @scope_id + 1,50400,'','EhNamespaces',999992,2);
+-- INSERT INTO `eh_web_menu_scopes` VALUES(@scope_id := @scope_id + 1,50400,'','EhNamespaces',999992,2);
 
 -- R ended --

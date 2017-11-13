@@ -3159,14 +3159,21 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public Boolean checkContractInWork(Long contractId) {
+    public Boolean checkContractInWork(Long contractId,String contractNum) {
         EhPaymentContractReceiver contract = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("contract");
         DSLContext context = getReadOnlyContext();
         Byte aByte = context.select(contract.IN_WORK)
                 .from(contract)
                 .where(contract.IS_RECORDER.eq((byte) 1))
-                .and(contract.CONTRACT_ID.eq(contractId))
+                .and(contract.CONTRACT_NUM.eq(contractNum))
                 .fetchOne(contract.IN_WORK);
+        if( aByte == null ){
+             aByte = context.select(contract.IN_WORK)
+                    .from(contract)
+                    .where(contract.IS_RECORDER.eq((byte) 1))
+                    .and(contract.CONTRACT_ID.eq(contractId))
+                    .fetchOne(contract.IN_WORK);
+        }
         if ( aByte == null) {
             throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.FAIL_IN_GENERATION,"mission failed");
         }
