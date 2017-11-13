@@ -10,6 +10,7 @@ import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.boot.test.IntegrationTest;
@@ -321,6 +322,9 @@ public class ExcelUtils {
         font.setBold(true);
         style.setAlignment(CellStyle.ALIGN_CENTER);
         style.setFont(font);
+        //  日期格式
+        XSSFDataFormat format = workbook.createDataFormat();
+        style.setDataFormat(format.getFormat("yyyy-MM-dd"));
     }
 
     /**
@@ -334,6 +338,9 @@ public class ExcelUtils {
         font.setBold(true);
         style.setAlignment(CellStyle.ALIGN_CENTER);
         style.setFont(font);
+        //  日期格式
+        XSSFDataFormat format = workbook.createDataFormat();
+        style.setDataFormat(format.getFormat("yyyy-MM-dd"));
     }
 
     /**
@@ -346,6 +353,9 @@ public class ExcelUtils {
         font.setBold(true);
         style.setFont(font);
         style.setWrapText(true);
+        //  日期格式
+        XSSFDataFormat format = workbook.createDataFormat();
+        style.setDataFormat(format.getFormat("yyyy-MM-dd"));
     }
 
     /*public static void main(String[] args) {
