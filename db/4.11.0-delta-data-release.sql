@@ -108,3 +108,7 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('ren
 SET @locale_strings_id = IFNULL((SELECT MAX(id) FROM `eh_locale_strings`), 1);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 VALUES ((@locale_strings_id := @locale_strings_id + 1), 'flow', '10008', 'zh_CN', '该节点任务已被处理');
+
+-- 修改物业报修 add by sw 20171110
+DELETE from eh_web_menu_scopes where menu_id in (20192, 20160);
+DELETE from eh_web_menus where menu_id in (20192, 20160);

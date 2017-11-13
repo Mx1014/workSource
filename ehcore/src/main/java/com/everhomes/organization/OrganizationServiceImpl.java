@@ -5609,7 +5609,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 List<Long> childIds = cmd.getChildIds();
                 for (Long orgId : childIds) {
                     this.organizationProvider.updateOrganizationDefaultOrder(namespaceId, orgId, childIds.indexOf(orgId));
-                    LOGGER.debug("sortOrganizationsAtSameLevel" + childIds.indexOf(orgId));
+                    LOGGER.debug("sortOrganizationsAtSameLevel" + childIds.indexOf(orgId)+ "namespaceId:" + namespaceId);
                 }
             }
             return null;
@@ -5950,7 +5950,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 Integer namespaceId = UserContext.getCurrentNamespaceId();
                 if (OrganizationMemberTargetType.fromCode(m.getTargetType()) == OrganizationMemberTargetType.USER) {
                     //Remove door auth, by Janon 2016-12-15
-                    doorAccessService.deleteAuthWhenLeaveFromOrg(namespaceId, m.getOrganizationId(), m.getTargetId());
+                    doorAccessService.deleteAuthWhenLeaveFromOrg(UserContext.getCurrentNamespaceId(), m.getOrganizationId(), m.getTargetId());
                     LOGGER.debug("deleteUserDoorAccess, m.namespaceId  = {}, UserContext.getCurrentNamespaceId  = {}, UserContext.current.getNamespaceId()  = {}, m.namespaceId  = {}, orgMemberId = {}, useId =  {}",
                             m.getNamespaceId(),UserContext.getCurrentNamespaceId(), UserContext.current().getNamespaceId(), m.getOrganizationId(),  m.getTargetId());
 
