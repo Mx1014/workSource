@@ -471,7 +471,7 @@ public class EquipmentController extends ControllerBase {
 
     /**
      * <b>URL: /equipment/listEquipmentTasksDetail</b>
-     * <p>查看任务列表-app</p>
+     * <p>获取任务所有信息 用于离线</p>
      */
     @RequestMapping("listEquipmentTasksDetails")
     @RestReturn(value = listEquipmentTasksDetailsResponse.class)
@@ -758,27 +758,27 @@ public class EquipmentController extends ControllerBase {
         return getSuccessResponse();
     }
 
-    /**
-     * <b>URL: /equipment/listParametersByStandardId</b>
-     * <p>查看设备所需记录的参数</p>
-     */
-    @RequestMapping("listParametersByStandardId")
-    @RestReturn(value = InspectionItemDTO.class, collection = true)
-    public RestResponse listParametersByStandardId(ListParametersByStandardIdCommand cmd) {
-
-        List<InspectionItemDTO> paras = equipmentService.listParametersByStandardId(cmd);
-
-        RestResponse response = new RestResponse(paras);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+//    /**
+//     * <b>URL: /equipment/listParametersByStandardId</b>
+//     * <p>查看设备所需记录的参数</p>
+//     */
+//    @RequestMapping("listParametersByStandardId")
+//    @RestReturn(value = InspectionItemDTO.class, collection = true)
+//    public RestResponse listParametersByStandardId(ListParametersByStandardIdCommand cmd) {
+//
+//        List<InspectionItemDTO> paras = equipmentService.listParametersByStandardId(cmd);
+//
+//        RestResponse response = new RestResponse(paras);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
 
     /**
      * <b>URL: /equipment/listEquipmentStandardRelationsByTaskId</b>
      * <p>查看单个任务下设备标准关系列表</p>
      */
-    @RequestMapping("listEquipmentsByTaskId")
+    @RequestMapping("listEquipmentStandardRelationsByTaskId")
     @RestReturn(value = InspectionItemDTO.class, collection = true)
     public RestResponse listEquipmentStandardRelationsByTaskId(ListTaskByIdCommand cmd) {
 
@@ -850,18 +850,18 @@ public class EquipmentController extends ControllerBase {
 //        return getRestResponse(inspectionTemplates);
 //    }
 
-    /**
-     * <b>URL: /equipment/listTasksByToken</b>
-     * <p>扫码查看设备任务</p>
-     */
-    @RequestMapping("listTasksByToken")
-    @RestReturn(value = ListEquipmentTasksResponse.class)
-    public RestResponse listTasksByToken(ListTasksByTokenCommand cmd) {
-
-        ListEquipmentTasksResponse tasks = equipmentService.listTasksByToken(cmd);
-
-        return getRestResponse(tasks);
-    }
+//    /**
+//     * <b>URL: /equipment/listTasksByToken</b>
+//     * <p>扫码查看设备任务</p>
+//     */
+//    @RequestMapping("listTasksByToken")
+//    @RestReturn(value = ListEquipmentTasksResponse.class)
+//    public RestResponse listTasksByToken(ListTasksByTokenCommand cmd) {
+//
+//        ListEquipmentTasksResponse tasks = equipmentService.listTasksByToken(cmd);
+//
+//        return getRestResponse(tasks);
+//    }
 
     /**
      * <b>URL: /equipment/getInspectionObjectByQRCode</b>
@@ -967,18 +967,18 @@ public class EquipmentController extends ControllerBase {
         return getRestResponse(stat);
     }
 
-    /**
-     * <b>URL: /equipment/statItemResultsInEquipmentTasks</b>
-     * <p>按设备-标准统计任务的细项</p>
-     */
-    @RequestMapping("statItemResultsInEquipmentTasks")
-    @RestReturn(value = StatItemResultsInEquipmentTasksResponse.class)
-    public RestResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd) {
-
-        StatItemResultsInEquipmentTasksResponse stat = equipmentService.statItemResultsInEquipmentTasks(cmd);
-
-        return getRestResponse(stat);
-    }
+//    /**
+//     * <b>URL: /equipment/statItemResultsInEquipmentTasks</b>
+//     * <p>按设备-标准统计任务的细项</p>
+//     */
+//    @RequestMapping("statItemResultsInEquipmentTasks")
+//    @RestReturn(value = StatItemResultsInEquipmentTasksResponse.class)
+//    public RestResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd) {
+//
+//        StatItemResultsInEquipmentTasksResponse stat = equipmentService.statItemResultsInEquipmentTasks(cmd);
+//
+//        return getRestResponse(stat);
+//    }
 
     /**
      * <b>URL: /equipment/listAbnormalTasks</b>
