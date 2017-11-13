@@ -29,19 +29,12 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.FLOW)
-class FlowPmTaskHandle implements PmTaskHandle {
+class FlowPmTaskHandle extends DefaultPmTaskHandle {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowPmTaskHandle.class);
-	@Autowired
-	private DbProvider dbProvider;
-	@Autowired
-	private PmTaskProvider pmTaskProvider;
-	@Autowired
-	private PmTaskSearch pmTaskSearch;
+
 	@Autowired
 	private FlowService flowService;
-	@Autowired
-	private PmTaskCommonServiceImpl pmTaskCommonService;
 	@Autowired
 	private FlowCaseProvider flowCaseProvider;
 	@Autowired
@@ -52,8 +45,6 @@ class FlowPmTaskHandle implements PmTaskHandle {
 	private CommunityProvider communityProvider;
 	@Autowired
 	private FlowButtonProvider flowButtonProvider;
-	@Autowired
-	private CategoryProvider categoryProvider;
 
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone){
@@ -79,7 +70,6 @@ class FlowPmTaskHandle implements PmTaskHandle {
 			createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
 			createFlowCaseCommand.setReferId(task.getId());
 			createFlowCaseCommand.setReferType(EntityType.PM_TASK.getCode());
-			//createFlowCaseCommand.setContent("发起人：" + requestorName + "\n" + "联系方式：" + requestorPhone);
 			createFlowCaseCommand.setContent(task.getContent());
 			createFlowCaseCommand.setCurrentOrganizationId(cmd.getFlowOrganizationId());
 
@@ -123,96 +113,96 @@ class FlowPmTaskHandle implements PmTaskHandle {
 		return ConvertHelper.convert(task1, PmTaskDTO.class);
 	}
 
-	@Override
-	public void cancelTask(CancelTaskCommand cmd) {
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+//	@Override
+//	public void cancelTask(CancelTaskCommand cmd) {
+//		Integer namespaceId = UserContext.getCurrentNamespaceId();
+//
+//		//TODO:为科兴与一碑对接
+//		if(namespaceId == 999983) {
+//
+//			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
+//
+//			if(StringUtils.isNotBlank(task.getStringTag1())) {
+//
+//				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
+//
+//				handler.cancelTask(cmd);
+//			}
+//		}
+//
+//	}
 
-		//TODO:为科兴与一碑对接
-		if(namespaceId == 999983) {
+//	@Override
+//	public void evaluateTask(EvaluateTaskCommand cmd) {
+//		Integer namespaceId = UserContext.getCurrentNamespaceId();
+//
+//		//TODO:为科兴与一碑对接
+//		if(namespaceId == 999983) {
+//
+//			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
+//
+//			if(StringUtils.isNotBlank(task.getStringTag1())) {
+//
+//				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
+//
+//				handler.evaluateTask(cmd);
+//			}
+//		}
+//	}
 
-			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
+//	@Override
+//	public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
+//
+//		Integer namespaceId = UserContext.getCurrentNamespaceId();
+//		//TODO:为科兴与一碑对接
+//		if(namespaceId == 999983) {
+//
+//			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
+//
+//			if(task != null && StringUtils.isNotBlank(task.getStringTag1())) {
+//
+//				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
+//
+//				return handler.getTaskDetail(cmd);
+//			}
+//		}
+//
+////		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+//		return super.getTaskDetail(cmd);
+//	}
 
-			if(StringUtils.isNotBlank(task.getStringTag1())) {
+//	@Override
+//	public ListTaskCategoriesResponse listTaskCategories(ListTaskCategoriesCommand cmd) {
+//		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+//
+//		return handler.listTaskCategories(cmd);
+//	}
 
-				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
+//	@Override
+//	public List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd) {
+//		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+//
+//		return handler.listAllTaskCategories(cmd);
+//	}
 
-				handler.cancelTask(cmd);
-			}
-		}
+//	@Override
+//	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
+//		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+//
+//		return handler.searchTasks(cmd);
+//	}
 
-	}
-
-	@Override
-	public void evaluateTask(EvaluateTaskCommand cmd) {
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-
-		//TODO:为科兴与一碑对接
-		if(namespaceId == 999983) {
-
-			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
-
-			if(StringUtils.isNotBlank(task.getStringTag1())) {
-
-				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
-
-				handler.evaluateTask(cmd);
-			}
-		}
-	}
-
-	@Override
-	public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
-
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		//TODO:为科兴与一碑对接
-		if(namespaceId == 999983) {
-
-			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
-
-			if(task != null && StringUtils.isNotBlank(task.getStringTag1())) {
-
-				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
-
-				return handler.getTaskDetail(cmd);
-			}
-		}
-
-		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-		return handler.getTaskDetail(cmd);
-	}
-
-	@Override
-	public ListTaskCategoriesResponse listTaskCategories(ListTaskCategoriesCommand cmd) {
-		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-
-		return handler.listTaskCategories(cmd);
-	}
-
-	@Override
-	public List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd) {
-		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-
-		return handler.listAllTaskCategories(cmd);
-	}
-
-	@Override
-	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
-		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-
-		return handler.searchTasks(cmd);
-	}
-
-	@Override
-	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
-		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-
-		return handler.listUserTasks(cmd);
-	}
+//	@Override
+//	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
+//		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+//
+//		return handler.listUserTasks(cmd);
+//	}
 
 	@Override
 	public void updateTaskByOrg(UpdateTaskCommand cmd) {
-		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-		handler.updateTaskByOrg(cmd);
+//		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+		super.updateTaskByOrg(cmd);
 
 		PmTask task = pmTaskProvider.findTaskById(cmd.getTaskId());
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());

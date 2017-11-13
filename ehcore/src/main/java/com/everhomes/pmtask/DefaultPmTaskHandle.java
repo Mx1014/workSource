@@ -19,58 +19,45 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
-import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.pmtask.CancelTaskCommand;
-import com.everhomes.rest.pmtask.EvaluateTaskCommand;
 import com.everhomes.rest.pmtask.GetTaskDetailCommand;
 import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
-import com.everhomes.rest.pmtask.ListUserTasksCommand;
-import com.everhomes.rest.pmtask.ListUserTasksResponse;
 import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.pmtask.CreateTaskCommand;
-import com.everhomes.rest.pmtask.PmTaskProcessStatus;
-import com.everhomes.rest.pmtask.PmTaskStatus;
 import com.everhomes.rest.pmtask.SearchTasksCommand;
 import com.everhomes.rest.pmtask.SearchTasksResponse;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
-@Component(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE)
-class ShenyePmTaskHandle implements PmTaskHandle {
+abstract class DefaultPmTaskHandle implements PmTaskHandle {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(ShenyePmTaskHandle.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultPmTaskHandle.class);
 	@Autowired
-	private CategoryProvider categoryProvider;
+	CategoryProvider categoryProvider;
 	@Autowired
-    private DbProvider dbProvider;
+	DbProvider dbProvider;
 	@Autowired
-	private PmTaskProvider pmTaskProvider;
+	PmTaskProvider pmTaskProvider;
 	@Autowired
-	private PmTaskSearch pmTaskSearch;
+	PmTaskSearch pmTaskSearch;
 	@Autowired
-    private ConfigurationProvider configProvider;
+    ConfigurationProvider configProvider;
 	@Autowired
-	private PmTaskCommonServiceImpl pmTaskCommonService;
+	PmTaskCommonServiceImpl pmTaskCommonService;
 	
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone){
@@ -108,62 +95,62 @@ class ShenyePmTaskHandle implements PmTaskHandle {
         }
 	}
 
-	@Override
-	public void evaluateTask(EvaluateTaskCommand cmd) {
-		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		pmTaskCommonService.checkId(cmd.getId());
-//		if(null == cmd.getStar()){
-//			cmd.setStar((byte)0);
+//	@Override
+//	public void evaluateTask(EvaluateTaskCommand cmd) {
+//		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+//		pmTaskCommonService.checkId(cmd.getId());
+////		if(null == cmd.getStar()){
+////			cmd.setStar((byte)0);
+////		}
+////		if(null == cmd.getOperatorStar()){
+////			cmd.setOperatorStar((byte)0);
+////		}
+//		PmTask task = pmTaskCommonService.checkPmTask(cmd.getId());
+//		if(!task.getStatus().equals(PmTaskStatus.PROCESSED.getCode())){
+//			LOGGER.error("Task have not been completed, cmd={}", cmd);
+//    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//    				"Task have not been completed.");
 //		}
-//		if(null == cmd.getOperatorStar()){
-//			cmd.setOperatorStar((byte)0);
-//		}
-		PmTask task = pmTaskCommonService.checkPmTask(cmd.getId());
-		if(!task.getStatus().equals(PmTaskStatus.PROCESSED.getCode())){
-			LOGGER.error("Task have not been completed, cmd={}", cmd);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    				"Task have not been completed.");
-		}
-		task.setOperatorStar(cmd.getOperatorStar());
-		task.setStar(cmd.getStar());
-		pmTaskProvider.updateTask(task);
-
-	}
+//		task.setOperatorStar(cmd.getOperatorStar());
+//		task.setStar(cmd.getStar());
+//		pmTaskProvider.updateTask(task);
+//
+//	}
 	
-	@Override
-	public void cancelTask(CancelTaskCommand cmd) {
-		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		pmTaskCommonService.checkId(cmd.getId());
-
-		User user = UserContext.current().getUser();
-		Timestamp now = new Timestamp(System.currentTimeMillis());
-
-		dbProvider.execute((TransactionStatus transactionStatus) -> {
-
-			PmTask task = pmTaskCommonService.checkPmTask(cmd.getId());
-			if(!task.getStatus().equals(PmTaskStatus.UNPROCESSED.getCode())){
-				LOGGER.error("Task cannot be canceled. cmd={}", cmd);
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-						"Task cannot be canceled.");
-			}
-			task.setStatus(PmTaskStatus.INACTIVE.getCode());
-			task.setDeleteUid(user.getId());
-			task.setDeleteTime(now);
-			pmTaskProvider.updateTask(task);
-			
-			//elasticsearch更新
-			pmTaskSearch.deleteById(task.getId());
-
-			return null;
-		});
-		
-	}
+//	@Override
+//	public void cancelTask(CancelTaskCommand cmd) {
+//		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+//		pmTaskCommonService.checkId(cmd.getId());
+//
+//		User user = UserContext.current().getUser();
+//		Timestamp now = new Timestamp(System.currentTimeMillis());
+//
+//		dbProvider.execute((TransactionStatus transactionStatus) -> {
+//
+//			PmTask task = pmTaskCommonService.checkPmTask(cmd.getId());
+//			if(!task.getStatus().equals(PmTaskStatus.UNPROCESSED.getCode())){
+//				LOGGER.error("Task cannot be canceled. cmd={}", cmd);
+//				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//						"Task cannot be canceled.");
+//			}
+//			task.setStatus(PmTaskStatus.INACTIVE.getCode());
+//			task.setDeleteUid(user.getId());
+//			task.setDeleteTime(now);
+//			pmTaskProvider.updateTask(task);
+//
+//			//elasticsearch更新
+//			pmTaskSearch.deleteById(task.getId());
+//
+//			return null;
+//		});
+//
+//	}
 	
-	@Override
-	public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
-		
-		return pmTaskCommonService.getTaskDetail(cmd, true);
-	}
+//	@Override
+//	public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
+//
+//		return pmTaskCommonService.getTaskDetail(cmd, true);
+//	}
 
 	@Override
 	public void updateTaskByOrg(UpdateTaskCommand cmd) {
@@ -179,14 +166,16 @@ class ShenyePmTaskHandle implements PmTaskHandle {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"PmTask not found.");
 		}
-		if(null != cmd.getCategoryId())
+		if(null != cmd.getCategoryId()) {
 			checkCategory(cmd.getCategoryId());
+		}
 		task.setCategoryId(cmd.getCategoryId());
 		task.setPriority(cmd.getPriority());
-		if(null != cmd.getReserveTime())
+		if(null != cmd.getReserveTime()) {
 			task.setReserveTime(new Timestamp(cmd.getReserveTime()));
-		else
+		}else {
 			task.setReserveTime(null);
+		}
 		task.setSourceType(cmd.getSourceType());
 		pmTaskProvider.updateTask(task);
 	}
@@ -331,69 +320,69 @@ class ShenyePmTaskHandle implements PmTaskHandle {
 		return response;
 	}
 	
-	@Override
-	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
-		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		User current = UserContext.current().getUser();
-		
-		Byte status = cmd.getStatus();
-		List<PmTask> list = new ArrayList<>();
-		if (null != status && (status.equals(PmTaskProcessStatus.PROCESSED.getCode()) ||
-				status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))) {
-			
-			checkOrganizationId(cmd.getOrganizationId());
-
-	    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-	    	
-	    	if(resolver.checkUserPrivilege(current.getId(), EntityType.COMMUNITY.getCode(), 
-	    			cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.LISTALLTASK)
-	    			){
-	    		
-	    		list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status, null,
-	    				cmd.getPageAnchor(), cmd.getPageSize());
-			}else if(resolver.checkUserPrivilege(current.getId(), EntityType.COMMUNITY.getCode(), 
-	    			cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.LISTUSERTASK)
-	    			){
-				
-				if(status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))
-				list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.USER_UNPROCESSED.getCode(),
-						null, cmd.getPageAnchor(), cmd.getPageSize());
-				else if(status.equals(PmTaskProcessStatus.PROCESSED.getCode()))
-					list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.PROCESSED.getCode(),
-							null, cmd.getPageAnchor(), cmd.getPageSize());
-			}else{
-				returnNoPrivileged(null, current.getId());
-			}
-	    	
-		}else{
-			list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status, cmd.getTaskCategoryId(),
-					cmd.getPageAnchor(), cmd.getPageSize());
-		}
-		
-		ListUserTasksResponse response = new ListUserTasksResponse();
-		int size = list.size();
-		if(size > 0){
-    		response.setRequests(list.stream().map(r -> {
-    			PmTaskDTO dto = ConvertHelper.convert(r, PmTaskDTO.class);
-
-    			Category category = categoryProvider.findCategoryById(r.getCategoryId());
-    			Category taskCategory = checkCategory(r.getTaskCategoryId());
-    			if(null != category)
-    				dto.setCategoryName(category.getName());
-    	    	dto.setTaskCategoryName(taskCategory.getName());
-    			
-    			return dto;
-    		}).collect(Collectors.toList()));
-    		if(size != pageSize){
-        		response.setNextPageAnchor(null);
-        	}else{
-        		response.setNextPageAnchor(list.get(size-1).getCreateTime().getTime());
-        	}
-    	}
-		
-		return response;
-	}
+//	@Override
+//	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
+//		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+//		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+//		User current = UserContext.current().getUser();
+//
+//		Byte status = cmd.getStatus();
+//		List<PmTask> list = new ArrayList<>();
+//		if (null != status && (status.equals(PmTaskProcessStatus.PROCESSED.getCode()) ||
+//				status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))) {
+//
+//			checkOrganizationId(cmd.getOrganizationId());
+//
+//	    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//
+//	    	if(resolver.checkUserPrivilege(current.getId(), EntityType.COMMUNITY.getCode(),
+//	    			cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.LISTALLTASK)
+//	    			){
+//
+//	    		list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status, null,
+//	    				cmd.getPageAnchor(), cmd.getPageSize());
+//			}else if(resolver.checkUserPrivilege(current.getId(), EntityType.COMMUNITY.getCode(),
+//	    			cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.LISTUSERTASK)
+//	    			){
+//
+//				if(status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))
+//				list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.USER_UNPROCESSED.getCode(),
+//						null, cmd.getPageAnchor(), cmd.getPageSize());
+//				else if(status.equals(PmTaskProcessStatus.PROCESSED.getCode()))
+//					list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.PROCESSED.getCode(),
+//							null, cmd.getPageAnchor(), cmd.getPageSize());
+//			}else{
+//				returnNoPrivileged(null, current.getId());
+//			}
+//
+//		}else{
+//			list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status, cmd.getTaskCategoryId(),
+//					cmd.getPageAnchor(), cmd.getPageSize());
+//		}
+//
+//		ListUserTasksResponse response = new ListUserTasksResponse();
+//		int size = list.size();
+//		if(size > 0){
+//    		response.setRequests(list.stream().map(r -> {
+//    			PmTaskDTO dto = ConvertHelper.convert(r, PmTaskDTO.class);
+//
+//    			Category category = categoryProvider.findCategoryById(r.getCategoryId());
+//    			Category taskCategory = checkCategory(r.getTaskCategoryId());
+//    			if(null != category)
+//    				dto.setCategoryName(category.getName());
+//    	    	dto.setTaskCategoryName(taskCategory.getName());
+//
+//    			return dto;
+//    		}).collect(Collectors.toList()));
+//    		if(size != pageSize){
+//        		response.setNextPageAnchor(null);
+//        	}else{
+//        		response.setNextPageAnchor(list.get(size-1).getCreateTime().getTime());
+//        	}
+//    	}
+//
+//		return response;
+//	}
 	
 	private void checkOrganizationId(Long organizationId) {
 		if(null == organizationId) {
