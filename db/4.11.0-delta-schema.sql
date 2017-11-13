@@ -170,3 +170,5 @@ CREATE TABLE `eh_parking_car_verifications` (
   `source_type` tinyint(4) DEFAULT NULL COMMENT '1: card request, 2: car verify',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- by dengs,园区快讯多入口，2017.11.13
+ALTER TABLE eh_news_categories ADD COLUMN `entry_id` INTEGER;
