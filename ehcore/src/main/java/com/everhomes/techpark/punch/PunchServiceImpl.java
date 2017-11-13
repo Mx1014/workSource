@@ -7519,7 +7519,7 @@ public class PunchServiceImpl implements PunchService {
                     intervalDTO.setStatus(processIntevalStatus(String.valueOf(dto1.getClockStatus()),String.valueOf(dto2.getClockStatus())));
                 }else{
 					intervalDTO.setStatus(statusList[punchIntervalNo - 1]);
-					if (approvalStatus != null && approvalStatus.length > punchIntervalNo && !StringUtils.isEmpty(approvalStatus[punchIntervalNo - 1])) {
+					if (approvalStatus != null && approvalStatus.length >= punchIntervalNo && !StringUtils.isEmpty(approvalStatus[punchIntervalNo - 1])) {
 						intervalDTO.setSmartAlignment(NormalFlag.YES.getCode());
 						if (intervalDTO.getStatus().equals(PunchStatus.NORMAL.getCode() + "")) {
 							dto1.setClockStatus(PunchStatus.NORMAL.getCode());
