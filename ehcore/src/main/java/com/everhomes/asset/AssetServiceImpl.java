@@ -296,10 +296,10 @@ public class AssetServiceImpl implements AssetService {
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         List<NoticeInfo> noticeInfos = handler.listNoticeInfoByBillId(cmd.getBillIdAndTypes());
         if(noticeInfos.size()<1) return;
-        NoticeWithTextAndMessage(cmd, noticeInfos);
+        NoticeWithTextAndMessage(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getBillIdAndTypes(), noticeInfos);
     }
 
-    private void NoticeWithTextAndMessage(SelectedNoticeCommand cmd, List<NoticeInfo> noticeInfos) {
+    private void NoticeWithTextAndMessage(String ownerType,Long ownerId,List<BillIdAndType> billIdAndTypes, List<NoticeInfo> noticeInfos) {
         List<Long> uids = new ArrayList<>();
         try {
             for (int i = 0; i < noticeInfos.size(); i++) {
@@ -314,7 +314,7 @@ public class AssetServiceImpl implements AssetService {
                 smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
                 //模板改了，所以这个也要改
 //                smsProvider.addToTupleList(variables, "dateStr", noticeInfo.getDateStr());
-                smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"应用内查看":noticeInfo.getDateStr());
+                smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
 //            smsProvider.addToTupleList(variables,"amount2",noticeInfo.getAmountOwed());
                 smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
                 String templateLocale = UserContext.current().getUser().getLocale();
@@ -337,23 +337,111 @@ public class AssetServiceImpl implements AssetService {
                     uids.add(noticeInfo.getTargetId());
                 } else if (noticeInfo.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())) {
                     ListServiceModuleAdministratorsCommand tempCmd = new ListServiceModuleAdministratorsCommand();
-                    tempCmd.setOwnerId(cmd.getOwnerId());
-                    tempCmd.setOwnerType(cmd.getOwnerType());
+//                    tempCmd.setOwnerId(cmd.getOwnerId());
+//                    tempCmd.setOwnerType(cmd.getOwnerType());
+                    tempCmd.setOwnerId(ownerId);
+                    tempCmd.setOwnerType(ownerType);
                     tempCmd.setOrganizationId(noticeInfo.getTargetId());
                     //企业超管是1005？不是1001
                     List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(tempCmd);
-                    for (int j = 0; i < organizationContactDTOS.size(); i++) {
-                        uids.add(organizationContactDTOS.get(0).getId());
+                    for (int j = 0; j < organizationContactDTOS.size(); j++) {
+                        uids.add(organizationContactDTOS.get(j).getTargetId());
                     }
                     LOGGER.info("notice uids found = {}"+uids.size());
                 }
             }
         }
-        try {
+
             for (int k = 0; k < uids.size(); k++) {
+                try {
+                    MessageDTO messageDto = new MessageDTO();
+                    messageDto.setAppId(AppConstants.APPID_MESSAGING);
+//                    messageDto.setSenderUid(User.SYSTEM_UID);
+                    messageDto.setSenderUid(2L);
+//                    messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uids.get(k).toString()),
+//                            new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.BIZ_USER_LOGIN.getUserId())));
+                    messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uids.get(k).toString()));
+                    messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+                    //insert into eh_locale_template values(@xx+1,user_notification,3?,zh_CN,物业账单通知用户,text,999985)
+                    //这个逻辑是张江高科的， 但为了测试统一，999971先改为999985用华润测试
+                    Map<String, Object> map = new HashMap<>();
+                    User targetUser = userProvider.findUserById(uids.get(k));
+                    map.put("targetName", targetUser.getNickName());
+                    String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(UserContext.getCurrentNamespaceId(), UserNotificationTemplateCode.SCOPE, UserNotificationTemplateCode.USER_PAYMENT_NOTICE, UserContext.current().getUser().getLocale(), map, "");
+                    messageDto.setBody(notifyTextForApplicant);
+                    messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+                    if (!notifyTextForApplicant.trim().equals("")) {
+                        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                                uids.get(k).toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+                    }
+                } catch (Exception e) {
+                    LOGGER.error(e.toString());
+                    LOGGER.error("WUYE BILL SENDING MESSAGE FAILED");
+                }
+            }
+        if (UserContext.getCurrentNamespaceId() != 999971) {
+            //催缴次数加1
+//            List<BillIdAndType> billIdAndTypes = cmd.getBillIdAndTypes();
+            List<Long> billIds = new ArrayList<>();
+            for (int i = 0; i < billIdAndTypes.size(); i++) {
+                billIds.add(Long.parseLong(billIdAndTypes.get(i).getBillId()));
+            }
+            assetProvider.increaseNoticeTime(billIds);
+        }
+    }
+    private void NoticeWithTextAndMessage(List<Long> billIds, List<NoticeInfo> noticeInfos) {
+        List<Long> uids = new ArrayList<>();
+        try {
+            for (int i = 0; i < noticeInfos.size(); i++) {
+                NoticeInfo noticeInfo = noticeInfos.get(i);
+                String phoneNums = noticeInfo.getPhoneNums();
+                if(phoneNums == null){
+                    continue;
+                }
+                String[] telNOs = phoneNums.split(",");
+                List<Tuple<String, Object>> variables = new ArrayList<>();
+                smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
+                smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
+                smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
+                String templateLocale = UserContext.current().getUser().getLocale();
+                Integer nameSpaceId = UserContext.getCurrentNamespaceId();
+                nameSpaceId = 999971;
+                smsProvider.sendSms(nameSpaceId, telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
+            }
+        } catch(Exception e){
+            LOGGER.error("YZX MAIL SEND FAILED");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "YZX MAIL SEND FAILED");
+        }
+        //客户在系统内，把需要推送的uid放在list中
+        for (int i = 0; i < noticeInfos.size(); i++) {
+            NoticeInfo noticeInfo = noticeInfos.get(i);
+            Long targetId = noticeInfo.getTargetId();
+            if (targetId != null && targetId != 0l) {
+                if (noticeInfo.getTargetType().equals(AssetTargetType.USER.getCode())) {
+                    uids.add(noticeInfo.getTargetId());
+                } else if (noticeInfo.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())) {
+                    ListServiceModuleAdministratorsCommand tempCmd = new ListServiceModuleAdministratorsCommand();
+                    tempCmd.setOwnerId(noticeInfo.getOwnerId());
+                    tempCmd.setOwnerType(noticeInfo.getOwnerType());
+                    tempCmd.setOrganizationId(noticeInfo.getTargetId());
+                    //企业超管是1005？不是1001
+                    List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(tempCmd);
+                    for (int j = 0; j < organizationContactDTOS.size(); j++) {
+                        uids.add(organizationContactDTOS.get(j).getId());
+                    }
+                    LOGGER.info("notice uids found = {}"+uids.size());
+                }
+            }
+        }
+        for (int k = 0; k < uids.size(); k++) {
+            try {
                 MessageDTO messageDto = new MessageDTO();
                 messageDto.setAppId(AppConstants.APPID_MESSAGING);
-                messageDto.setSenderUid(User.SYSTEM_UID);
+//                    messageDto.setSenderUid(User.SYSTEM_UID);
+                messageDto.setSenderUid(2L);
+//                    messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uids.get(k).toString()),
+//                            new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.BIZ_USER_LOGIN.getUserId())));
                 messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uids.get(k).toString()));
                 messageDto.setBodyType(MessageBodyType.TEXT.getCode());
                 //insert into eh_locale_template values(@xx+1,user_notification,3?,zh_CN,物业账单通知用户,text,999985)
@@ -363,24 +451,18 @@ public class AssetServiceImpl implements AssetService {
                 map.put("targetName", targetUser.getNickName());
                 String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(UserContext.getCurrentNamespaceId(), UserNotificationTemplateCode.SCOPE, UserNotificationTemplateCode.USER_PAYMENT_NOTICE, UserContext.current().getUser().getLocale(), map, "");
                 messageDto.setBody(notifyTextForApplicant);
-                messageDto.setMetaAppId(AppConstants.APPID_USER);
+                messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
                 if (!notifyTextForApplicant.trim().equals("")) {
                     messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
                             uids.get(k).toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
                 }
+            } catch (Exception e) {
+                LOGGER.error(e.toString());
+                LOGGER.error("WUYE BILL SENDING MESSAGE FAILED");
             }
-        } catch (Exception e) {
-            LOGGER.error("MAIL SEND SUCCESSFULLY，app SENDING MESSAGE FAILED");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "MAIL SEND SUCCESSFULLY，app SENDING MESSAGE FAILED");
         }
         if (UserContext.getCurrentNamespaceId() != 999971) {
             //催缴次数加1
-            List<BillIdAndType> billIdAndTypes = cmd.getBillIdAndTypes();
-            List<Long> billIds = new ArrayList<>();
-            for (int i = 0; i < billIdAndTypes.size(); i++) {
-                billIds.add(Long.parseLong(billIdAndTypes.get(i).getBillId()));
-            }
             assetProvider.increaseNoticeTime(billIds);
         }
     }
@@ -521,7 +603,7 @@ public class AssetServiceImpl implements AssetService {
                     info.setTargetName(dto.getTargetName());
                     list.add(info);
                 }
-                NoticeWithTextAndMessage(requestCmd,list);
+                NoticeWithTextAndMessage(requestCmd.getOwnerType(),requestCmd.getOwnerId(),requestCmd.getBillIdAndTypes(),list);
                 return;
             }
             selectNotice(requestCmd);
@@ -1785,17 +1867,21 @@ public class AssetServiceImpl implements AssetService {
                     break;
                 case 3:
                     //按比例递增
-                    BigDecimal one = new BigDecimal("1");
-                    BigDecimal amount_changed = amount.multiply(one.add(adjustAmplitude.multiply(new BigDecimal("0.01")))).multiply(d);
-                    item.setAmountOwed(amount.add(amount_changed));
-                    item.setAmountReceivable(amount.add(amount_changed));
+                    BigDecimal amount_before_adjust = item.getAmountOwed();
+                    // a * ((b * 0.01)+1) * d
+                    BigDecimal changedAmount_2 = amount_before_adjust.multiply((adjustAmplitude.multiply(new BigDecimal("0.01"))).add(new BigDecimal("1"))).multiply(d);
+                    // amount_at_d - (amount_before * d)
+                    item.setAmountReceivable(item.getAmountReceivable().add(changedAmount_2.subtract(amount_before_adjust.multiply(d))));
+                    item.setAmountOwed(item.getAmountReceivable());
                     break;
                 case 4:
-                    //按比例递减去
-                    BigDecimal one_1 = new BigDecimal("1");
-                    BigDecimal amount_changed_1 = amount.multiply(one_1.add(adjustAmplitude.multiply(new BigDecimal("0.01")))).multiply(d);
-                    item.setAmountOwed(amount.add(amount_changed_1));
-                    item.setAmountReceivable(amount.add(amount_changed_1));
+                    //按比例递减
+                    BigDecimal amount_before_adjust_1 = item.getAmountOwed();
+                    BigDecimal one = new BigDecimal("1");
+                    // a * (1- (b * 0.01)) * d
+                    BigDecimal changedAmount_3 = amount_before_adjust_1.multiply(one.subtract(adjustAmplitude.multiply(new BigDecimal("0.01")))).multiply(d);
+                    item.setAmountReceivable(item.getAmountReceivable().subtract(amount_before_adjust_1.multiply(d).subtract(changedAmount_3)));
+                    item.setAmountOwed(item.getAmountReceivable());
                     break;
             }
         }
@@ -2370,8 +2456,10 @@ public class AssetServiceImpl implements AssetService {
     @Scheduled(cron = "0 0 12 * * ?")
     public void autoBillNotice() {
         if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
-//            List<PaymentNoticeConfig> configs = assetProvider.listAllNoticeConfigs();
-            List<PaymentNoticeConfig> configs = new ArrayList<>();
+            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+            Calendar today = Calendar.getInstance();
+            List<PaymentNoticeConfig> configs = assetProvider.listAllNoticeConfigs();
+//            List<PaymentNoticeConfig> configs = new ArrayList<>();
 
             Map<Long,List<Integer>> noticeConfigs = new HashMap<>();
             for(int i = 0; i < configs.size(); i ++){
@@ -2384,17 +2472,65 @@ public class AssetServiceImpl implements AssetService {
                     noticeConfigs.put(config.getOwnerId(),days);
                 }
             }
-            Map<Date,PaymentBills> needNoticeBills = new HashMap<>();
+            Map<Long,PaymentBills> needNoticeBills = new HashMap<>();
+            // noticeConfig map中存有communityid和notice days
             for ( Map.Entry<Long,List<Integer>> map : noticeConfigs.entrySet()){
-//                List<PaymentBills> bills = getAllBillsByCommunity(map.getKey());
-//                for(int i = 0; i < bills.size(); i ++){
-////                    bills.get()
-//                }
+                List<PaymentBills> bills = assetProvider.getAllBillsByCommunity(map.getKey());
+                for(int i = 0; i < bills.size(); i ++){
+                    PaymentBills bill = bills.get(i);
+                    if(!needNoticeBills.containsKey(bill.getId())){
+                        //已经在提醒名单的bill不需要再提醒
+                        List<Integer> days = map.getValue();
+                        for( int j = 0; j < days.size(); j ++){
+                            Integer day = days.get(j);
+                            String dueDayDeadline = bill.getDueDayDeadline();
+                            try{
+                                Calendar deadline = Calendar.getInstance();
+                                deadline.setTime(yyyyMMdd.parse(dueDayDeadline));
+                                deadline.add(Calendar.DAY_OF_MONTH,day*(-1));
+                                if(today.compareTo(deadline) != -1 ){
+                                    needNoticeBills.put(bill.getId(),bill);
+                                }
+                            }catch (Exception e){
+                                continue;
+                            }
+                        }
+                    }
+                    List<PaymentBills> targetBills = new ArrayList<>();
+                    for(Map.Entry<Long,PaymentBills> b : needNoticeBills.entrySet()){
+                        targetBills.add(b.getValue());
+                    }
+
+                    //
+                    List<Long> billIds = new ArrayList<>();
+                    List<NoticeInfo> noticeInfoList = new ArrayList<>();
+                    for(int k = 0; k < targetBills.size(); k++){
+                        PaymentBills b = targetBills.get(k);
+                        billIds.add(b.getId());
+                        NoticeInfo info = new NoticeInfo();
+                        info.setPhoneNums(b.getNoticetel());
+                        info.setDateStr(b.getDateStr());
+                        info.setTargetName(b.getTargetName());
+                        info.setTargetType(b.getTargetType());
+                        info.setAmountOwed(b.getAmountOwed());
+                        info.setAmountRecevable(b.getAmountReceivable());
+                        info.setAppName(assetProvider.findAppName(b.getNamespaceId()));
+                        info.setOwnerId(b.getOwnerId());
+                        info.setOwnerType(b.getOwnerType());
+                        noticeInfoList.add(info);
+                    }
+                    NoticeWithTextAndMessage(billIds,noticeInfoList);
+                }
             }
 
         }
 
     }
+    @Override
+    public void activeAutoBillNotice() {
+        autoBillNotice();
+    }
+
 
     @Override
     public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
@@ -2769,7 +2905,6 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public AddOrModifyRuleForBillGroupResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
-
 //        byte deCouplingFlag = 1;
 //        Long brotherRuleId = null;
 //        if(cmd.getOwnerId() == null){

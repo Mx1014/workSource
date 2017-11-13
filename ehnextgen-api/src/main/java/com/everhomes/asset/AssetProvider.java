@@ -238,4 +238,8 @@ public interface AssetProvider {
     AssetPaymentOrder getOrderById(Long orderId);
 
     String getBillSource(String billId);
+
+    List<PaymentNoticeConfig> listAllNoticeConfigs();
+
+    List<PaymentBills> getAllBillsByCommunity(Long key);
 }

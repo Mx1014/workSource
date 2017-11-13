@@ -1080,4 +1080,18 @@ public class AssetController extends ControllerBase {
         return restResponse;
     }
 
+    /**
+     * <b>URL: /asset/activeAutoBillNotice</b>
+     * <p></p>
+     */
+    @RequestMapping("activeAutoBillNotice")
+    @RestReturn(String.class)
+    public RestResponse listAutoNoticeConfig(){
+        assetService.activeAutoBillNotice();
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
 }

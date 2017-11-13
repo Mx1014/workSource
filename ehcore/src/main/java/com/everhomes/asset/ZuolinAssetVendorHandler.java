@@ -329,10 +329,22 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         List<BillDetailDTO> billDetailDTOList = assetProvider.listBillForClient(ownerId,ownerType,targetType,targetId,billGroupId,isOwedBill,cid,contractNum);
         HashSet<String> dateStrFilter = new HashSet<>();
         BigDecimal amountOwed = new BigDecimal("0");
-        for(int i = 0; i < billDetailDTOList.size(); i++) {
-            BillDetailDTO dto = billDetailDTOList.get(i);
-            dateStrFilter.add(dto.getDateStr());
-            amountOwed = amountOwed.add(dto.getAmountOwed());
+        if(isOwedBill.byteValue() == (byte)1){
+            for(int i = 0; i < billDetailDTOList.size(); i++) {
+                BillDetailDTO dto = billDetailDTOList.get(i);
+                if(dto.getStatus().byteValue() == (byte)2 || dto.getStatus().byteValue() == (byte)0){
+                    dateStrFilter.add(dto.getDateStr());
+                    amountOwed = amountOwed.add(dto.getAmountOwed());
+                }
+            }
+        }else if(isOwedBill.byteValue() == (byte)0){
+            for(int i = 0; i < billDetailDTOList.size(); i++) {
+                BillDetailDTO dto = billDetailDTOList.get(i);
+                if(dto.getStatus().byteValue() != (byte)1){
+                    dateStrFilter.add(dto.getDateStr());
+                    amountOwed = amountOwed.add(dto.getAmountOwed());
+                }
+            }
         }
         response.setAmountOwed(amountOwed);
         response.setBillPeriodMonths(dateStrFilter.size());

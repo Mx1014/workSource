@@ -119,7 +119,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         );
         queryBuilder.where(getListOrderPaymentCondition(cmd));
         queryBuilder.sortBy(getListOrderPaymentSorts(cmd.getSorts()));
-        queryBuilder.limit(cmd.getPageSize()).offset(cmd.getNextPageAnchor());
+        queryBuilder.limit(cmd.getPageSize()).offset(cmd.getPageAnchor());
 
         MapListRestResponse response = (MapListRestResponse) callPaymentMethod(
                 "POST",
@@ -127,7 +127,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                 payCmd.done(),
                 MapListRestResponse.class);
 
-        ListPaymentBillResp result = new ListPaymentBillResp(cmd.getNextPageAnchor(), cmd.getPageSize());
+        ListPaymentBillResp result = new ListPaymentBillResp(cmd.getPageAnchor(), cmd.getPageSize());
         result.setList(new ArrayList<PaymentBillResp>());
 
         if(response.getResponse() != null && !response.getResponse().isEmpty()) {
@@ -165,7 +165,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         }
         List<AssetPaymentOrderBills> orderBills = assetProvider.findBillsById(order.getId());
         StringBuilder sb = new StringBuilder();
-        sb.append("[缴费]");
+//        sb.append("[缴费]");
         for( int i = 0; i < orderBills.size(); i ++){
             AssetPaymentOrderBills orderBill = orderBills.get(i);
             sb.append(assetProvider.getBillSource(orderBill.getBillId()));

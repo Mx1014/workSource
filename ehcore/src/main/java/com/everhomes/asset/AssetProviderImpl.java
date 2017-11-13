@@ -57,6 +57,7 @@ import com.mysql.jdbc.StringUtils;
 import com.sun.xml.ws.api.SOAPVersion;
 import freemarker.core.ArithmeticEngine;
 import freemarker.core.ReturnInstruction;
+import freemarker.template.SimpleDate;
 import org.apache.log4j.spi.ErrorCode;
 import org.jooq.*;
 import org.jooq.exception.DataAccessException;
@@ -69,9 +70,11 @@ import org.springframework.jca.cci.CciOperationNotSupportedException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import scala.Char;
+import sun.util.resources.cldr.aa.CalendarData_aa_DJ;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -652,6 +655,7 @@ public class AssetProviderImpl implements AssetProvider {
         if(isOwedBill==1){
             query.addConditions(t.STATUS.eq((byte)0));
         }
+        List<Object> list  = new ArrayList<>();
         query.fetch()
                 .map(r -> {
                     BillDetailDTO dto = new BillDetailDTO();
@@ -659,9 +663,50 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setAmountReceviable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dto.setBillId(String.valueOf(r.getValue(t.ID)));
                     dto.setDateStr(r.getValue(t.DATE_STR));
-                    dto.setStatus(r.getValue(t.STATUS));
+
+                    list.add(r.getValue(t.DATE_STR_DUE));
+                    list.add(r.getValue(t.DUE_DAY_DEADLINE));
+                    list.add(r.getValue(t.STATUS));
+
+                    dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
+                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+                    dto.setDeadline(r.getValue(t.DUE_DAY_DEADLINE));
                     dtos.add(dto);
                     return null;});
+        Date today = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        for(int i = 0; i < dtos.size(); i ++){
+            BillDetailDTO dto = dtos.get(i);
+            String due = (String)list.get(3*i);
+            String deadline = (String)list.get(3*i+1);
+            Byte status = (Byte)list.get(3*i+2);
+            if(status != null && status.byteValue() == (byte)1){
+                dto.setStatus((byte)1);
+                continue;
+            }
+            try{
+                if(due!=null && sdf.parse(due).compareTo(today) != 1){
+                    dto.setStatus((byte)0);
+                    //状态进阶为待缴
+                }else if(due!=null && sdf.parse(due).compareTo(today) == 1){
+                    dto.setStatus((byte)3);
+                    //未缴
+                }
+                if(deadline!=null && sdf.parse(deadline).compareTo(today)== -1){
+                    //状态进阶为欠费
+                    dto.setStatus((byte)2);
+                }
+            }catch (Exception e){
+                dto.setStatus((byte)0);
+            }
+        }
+        for(int i = 0; i < dtos.size(); i++){
+            BillDetailDTO dto = dtos.get(i);
+            if(isOwedBill.byteValue() == (byte)1 && dto.getStatus().byteValue() == (byte)3){
+                dtos.remove(dto);
+                i--;
+            }
+        }
         return dtos;
     }
 
@@ -675,7 +720,7 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
 
-        dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE)
+        dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE,t.DATE_STR_BEGIN,t.DATE_STR_END)
                 .from(t)
                 .where(t.BILL_ID.eq(billId))
                 .fetch()
@@ -685,6 +730,8 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
                     dto.setAddressName(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
                     dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
+                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
                     dtos.add(dto);
                     dateStr[0] = r.getValue(t.DATE_STR);
                     amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
@@ -808,7 +855,56 @@ public class AssetProviderImpl implements AssetProvider {
             Long billGroupId = billGroupDTO.getBillGroupId();
             List<BillItemDTO> list1 = billGroupDTO.getBillItemDTOList();
             List<ExemptionItemDTO> list2 = billGroupDTO.getExemptionItemDTOList();
-
+            //需要billGroup查看生成账单周期
+            PaymentBillGroup group = getBillGroupById(billGroupId);
+            //根据billGroup获得时间，如需重复使用，则请抽象出来
+            SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
+            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+            List<String> dates = new ArrayList<>();
+            Byte balanceDateType = group.getBalanceDateType();
+            byte dueDayType = group.getDueDayType();
+            Integer dueDay = group.getDueDay();
+            Integer billsDay = group.getBillsDay();
+            Calendar start = Calendar.getInstance();
+            try{
+                start.setTime(yyyyMM.parse(dateStr));
+                start.set(Calendar.DAY_OF_MONTH,start.getActualMinimum(Calendar.DAY_OF_MONTH));
+                dates.add(yyyyMMdd.format(start.getTime()));
+                int cycle = 0;
+                switch(balanceDateType){
+                    case 2:
+                        cycle = 1;
+                        break;
+                    case 3:
+                        cycle = 3;
+                        break;
+                    case 4:
+                        cycle = 12;
+                        break;
+                }
+                start.add(Calendar.MONTH,cycle);
+                if(cycle == 0){
+                    //自然周期
+                    start.set(Calendar.DAY_OF_MONTH,start.getActualMaximum(Calendar.DAY_OF_MONTH));
+                }
+                start.add(Calendar.DAY_OF_MONTH,-1);
+                dates.add(yyyyMMdd.format(start.getTime()));
+                start.add(Calendar.MONTH,1);
+                start.set(Calendar.DAY_OF_MONTH,billsDay);
+                dates.add(yyyyMMdd.format(start.getTime()));
+                if(dueDayType == (byte)1){
+                    start.add(Calendar.DAY_OF_MONTH,dueDay);
+                }else if(dueDayType == (byte)0){
+                    start.add(Calendar.MONTH,dueDay);
+                }
+                dates.add(yyyyMMdd.format(start.getTime()));
+            }catch (Exception e){
+                dates.add(null);
+                dates.add(null);
+                dates.add(null);
+                dates.add(null);
+                LOGGER.error(e.toString());
+            }
             //需要组装的信息
             BigDecimal amountExemption = new BigDecimal("0");
             BigDecimal amountSupplement = new BigDecimal("0");
@@ -903,6 +999,12 @@ public class AssetProviderImpl implements AssetProvider {
                     item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     item.setCreatorUid(UserContext.currentUserId());
                     item.setDateStr(dateStr);
+                    //时间假定
+                    item.setDateStrBegin(dates.get(0));
+                    item.setDateStrEnd(dates.get(1));
+
+
+
                     item.setId(currentBillItemSeq);
                     item.setNamespaceId(UserContext.getCurrentNamespaceId());
                     item.setOwnerType(ownerType);
@@ -942,7 +1044,18 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setAmountSupplement(amountSupplement);
             newBill.setAmountExemption(amountExemption);
             newBill.setBillGroupId(billGroupId);
+            //时间
             newBill.setDateStr(dateStr);
+            newBill.setDateStrBegin(dates.get(0));
+            newBill.setDateStrEnd(dates.get(1));
+            newBill.setDateStrDue(dates.get(2));
+            newBill.setDueDayDeadline(dates.get(3));
+
+
+
+
+
+
             newBill.setId(nextBillId);
             newBill.setNamespaceId(UserContext.getCurrentNamespaceId());
             newBill.setNoticetel(noticeTel);
@@ -1086,8 +1199,11 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(t1.SWITCH.eq((byte) 1))
                 .fetch(t1.ID);
         SelectQuery<Record> query = context.selectQuery();
-        query.addSelect(DSL.sum(o.AMOUNT_RECEIVABLE),DSL.sum(o.AMOUNT_RECEIVED),DSL.sum(o.AMOUNT_OWED),o.CHARGING_ITEM_NAME);
-        query.addFrom(t,o);
+        query.addSelect(DSL.sum(o.AMOUNT_RECEIVABLE),DSL.sum(o.AMOUNT_RECEIVED),DSL.sum(o.AMOUNT_OWED),o.CHARGING_ITEM_NAME,t.ID);
+//        query.addFrom(t,o);
+        query.addFrom(t);
+        query.addJoin(o);
+
 //        query.addJoin(o);
         if(settledBillIds!=null&& settledBillIds.size()>0){
             query.addConditions(o.BILL_ID.in(settledBillIds));
@@ -1103,6 +1219,7 @@ public class AssetProviderImpl implements AssetProvider {
         }
         query.addGroupBy(t.ID);
         query.addOrderBy(t.DEFAULT_ORDER);
+        List<Long> itemIds = new ArrayList<>();
         query.fetch()
                 .map(f -> {
                     BillStaticsDTO dto = new BillStaticsDTO();
@@ -1110,9 +1227,16 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setAmountReceivable(f.getValue(DSL.sum(o.AMOUNT_RECEIVABLE)));
                     dto.setAmountReceived(f.getValue(DSL.sum(o.AMOUNT_RECEIVED)));
                     dto.setValueOfX(f.getValue(o.CHARGING_ITEM_NAME));
+                    itemIds.add(f.getValue(t.ID));
                     list.add(dto);
                     return null;
                 });
+        for(int i = 0; i < list.size(); i++){
+            String projectName = getProjectName(ownerId, ownerType, itemIds.get(i));
+            if(projectName != null){
+                list.get(i).setValueOfX(projectName);
+            }
+        }
 //        context.select(DSL.sum(o.AMOUNT_RECEIVABLE),DSL.sum(o.AMOUNT_RECEIVED),DSL.sum(o.AMOUNT_OWED),o.CHARGING_ITEM_NAME)
 //                .from(o,t)
 //                .where(o.OWNER_TYPE.eq(ownerType))
@@ -1131,6 +1255,19 @@ public class AssetProviderImpl implements AssetProvider {
 //                    return null;
 //                });
         return list;
+    }
+
+    private String getProjectName(Long ownerId, String ownerType, Long aLong) {
+        List<String> names = getReadOnlyContext().select(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.PROJECT_LEVEL_NAME)
+                .from(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES)
+                .where(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID.eq(aLong))
+                .fetch(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.PROJECT_LEVEL_NAME);
+        if(names.size() > 1){
+            return names.get(0);
+        }
+        return null;
     }
 
     @Override
@@ -1339,6 +1476,7 @@ public class AssetProviderImpl implements AssetProvider {
                     PaymentVariable variable = variables.get(j);
                     if(variable.getVariableName().equals(AssetPaymentStrings.VARIABLE_YJ)){
                         variables.remove(j);
+                        j--;
                     }
                 }
             }
@@ -2147,6 +2285,17 @@ public class AssetProviderImpl implements AssetProvider {
                 .set(t1.STATUS,(byte)1)
                 .where(t1.BILL_ID.in(billIds))
                 .execute();
+        //更改金钱
+        context.update(t)
+                .set(t.AMOUNT_OWED,new BigDecimal("0"))
+                .set(t.AMOUNT_RECEIVED,t.AMOUNT_RECEIVABLE)
+                .where(t.ID.in(billIds))
+                .execute();
+        context.update(t1)
+                .set(t1.AMOUNT_OWED,new BigDecimal("0"))
+                .set(t1.AMOUNT_RECEIVED,t1.AMOUNT_RECEIVABLE)
+                .where(t1.BILL_ID.in(billIds))
+                .execute();
 
     }
 
@@ -2908,16 +3057,16 @@ public class AssetProviderImpl implements AssetProvider {
         PaymentBillGroupRule rule = context.selectFrom(t1)
                 .where(t1.ID.eq(billGroupRuleId))
                 .fetchOneInto(PaymentBillGroupRule.class);
-        PaymentChargingStandards standard = context.selectFrom(t)
-                .where(t.ID.eq(rule.getChargingStandardsId()))
-                .fetchOneInto(PaymentChargingStandards.class);
-        dto.setBillCycle(standard.getBillingCycle());
+//        PaymentChargingStandards standard = context.selectFrom(t)
+//                .where(t.ID.eq(rule.getChargingStandardsId()))
+//                .fetchOneInto(PaymentChargingStandards.class);
+//        dto.setBillCycle(standard.getBillingCycle());
         dto.setBillGroupRuleId(rule.getId());
         dto.setChargingItemId(rule.getChargingItemId());
-        dto.setChargingStandardId(standard.getId());
+//        dto.setChargingStandardId(standard.getId());
         dto.setDayOffset(rule.getBillItemDayOffset());
         dto.setMonthOffset(rule.getBillItemMonthOffset());
-        dto.setFormula(standard.getFormula());
+//        dto.setFormula(standard.getFormula());
         dto.setGroupChargingItemName(rule.getChargingItemName());
         return dto;
     }
@@ -3216,7 +3365,28 @@ public class AssetProviderImpl implements AssetProvider {
         PaymentBillGroup group = context.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS)
                 .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(bill.getBillGroupId()))
                 .fetchOneInto(PaymentBillGroup.class);
-        return bill.getDateStr()+group.getName();
+        StringBuilder sb = new StringBuilder();
+        sb.append(bill==null?"":bill.getDateStr()==null?"":bill.getDateStr());
+        sb.append(group == null? "":group.getName()==null?"":group.getName());
+        return sb.toString();
+    }
+
+    @Override
+    public List<PaymentNoticeConfig> listAllNoticeConfigs() {
+        DSLContext context = getReadOnlyContext();
+        List<PaymentNoticeConfig> list = new ArrayList<>();
+        return context.selectFrom(Tables.EH_PAYMENT_NOTICE_CONFIG)
+                .fetchInto(PaymentNoticeConfig.class);
+
+    }
+
+    @Override
+    public List<PaymentBills> getAllBillsByCommunity(Long key) {
+        DSLContext context = getReadOnlyContext();
+        return context.selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(key))
+                .and(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq("community"))
+                .fetchInto(PaymentBills.class);
     }
 
 
