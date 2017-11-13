@@ -170,7 +170,7 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
 
         List<FilterBuilder> filterBuilders = new ArrayList<>();
         if (StringUtils.isNotEmpty(cmd.getMeterNumber())) {
-            FilterBuilder meterNumberTerm = FilterBuilders.termFilter("meterNumber", cmd.getMeterNumber().toLowerCase());
+            FilterBuilder meterNumberTerm = FilterBuilders.termFilter("meterNumber", cmd.getMeterNumber());
             filterBuilders.add(meterNumberTerm);
         }
         if (cmd.getCommunityId() != null) {
