@@ -340,6 +340,10 @@ public class ArchivesServiceImpl implements ArchivesService {
         //
         if (cmd.getTargetTypes() != null)
             orgCommand.setTargetTypes(cmd.getTargetTypes());
+
+        //modified by lei.lv
+        orgCommand.setVisibleFlag(VisibleFlag.ALL.getCode());
+
         ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
         if (members != null && members.getMembers() != null) {
             members.getMembers().forEach(r -> {
@@ -986,6 +990,8 @@ public class ArchivesServiceImpl implements ArchivesService {
             orgCommand.setPageSize(20);
         orgCommand.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CHILD_ENTERPRISE.getCode()));
 
+        //modified by lei.lv
+        orgCommand.setVisibleFlag(VisibleFlag.ALL.getCode());
 
         ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
 
