@@ -104,7 +104,6 @@ public class EquipmentController extends ControllerBase {
     @RestReturn(value = SearchEquipmentStandardsResponse.class)
     public RestResponse searchEquipmentStandards(SearchEquipmentStandardsCommand cmd) {
 
-//		SearchEquipmentStandardsResponse standards = equipmentService.searchEquipmentStandards(cmd);
         SearchEquipmentStandardsResponse standards = equipmentStandardSearcher.query(cmd);
 
         RestResponse response = new RestResponse(standards);
@@ -120,9 +119,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("exportEquipmentStandards")
     public HttpServletResponse exportEquipmentStandards(@Valid SearchEquipmentStandardsCommand cmd, HttpServletResponse response) {
 
-        HttpServletResponse commandResponse = equipmentService.exportEquipmentStandards(cmd, response);
-
-        return commandResponse;
+        return equipmentService.exportEquipmentStandards(cmd, response);
     }
 
     /**
@@ -135,7 +132,7 @@ public class EquipmentController extends ControllerBase {
         User manaUser = UserContext.current().getUser();
         Long userId = manaUser.getId();
         if (null == files || null == files[0]) {
-            LOGGER.error("files is null。userId=" + userId);
+            LOGGER.error("files is null userId=" + userId);
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
                     "files is null");
         }
@@ -393,7 +390,7 @@ public class EquipmentController extends ControllerBase {
 
         EquipmentInspectionPlanDTO equipmentInspectionPlans = null;
 
-        return getSuccessResponse();
+        return getRestResponse(equipmentInspectionPlans);
     }
 
     /**
