@@ -1042,8 +1042,6 @@ public class EquipmentController extends ControllerBase {
     }
 
 
-
-
     private RestResponse getRestResponse(Object obj) {
         RestResponse response = new RestResponse(obj);
         response.setErrorCode(ErrorCodes.SUCCESS);
