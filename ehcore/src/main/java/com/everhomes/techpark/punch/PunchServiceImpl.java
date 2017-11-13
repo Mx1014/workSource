@@ -1306,7 +1306,7 @@ public class PunchServiceImpl implements PunchService {
 			}
 
 		}
-		makeExceptionForDayList(userId, companyId, logDay, pdl);
+//		makeExceptionForDayList(userId, companyId, logDay, pdl);
 		return pdl;
 	}
 
