@@ -4,7 +4,7 @@ package com.everhomes.rest.equipment;
 import com.everhomes.util.StringHelper;
 
 public enum EquipmentInspectionPlanResult {
-    NONE((byte) 0, "待发起"),
+    NONE((byte) 0, ""),
     QUALIFIED((byte) 1, "审批通过"),
     UNQUALIDIED((byte) 2, "审批不通过"),
     REVIEW_DELAY((byte) 3, "审批延迟"),
