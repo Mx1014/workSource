@@ -1,5 +1,6 @@
 package com.everhomes.energy;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ public interface EnergyMeterTaskProvider {
     void createEnergyMeterTask(EnergyMeterTask task);
     void updateEnergyMeterTask(EnergyMeterTask task);
     EnergyMeterTask findEnergyMeterTaskById(Long taskId);
+    EnergyMeterTask findEnergyMeterTaskByMeterId(Long meterId, Timestamp now);
     List<EnergyMeterTask> listEnergyMeterTasks(long pageAnchor, int pageSize);
     List<EnergyMeterTask> listNotGeneratePaymentEnergyMeterTasks();
     List<EnergyMeterTask> listEnergyMeterTasksByPlan(List<Long> planIds, Long targetId, Long ownerId, long pageAnchor, int pageSize);

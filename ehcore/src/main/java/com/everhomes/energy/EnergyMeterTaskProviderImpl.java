@@ -71,6 +71,17 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
     }
 
     @Override
+    public EnergyMeterTask findEnergyMeterTaskByMeterId(Long meterId, Timestamp now) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_ENERGY_METER_TASKS)
+                .where(Tables.EH_ENERGY_METER_TASKS.METER_ID.eq(meterId))
+                .and(Tables.EH_ENERGY_METER_TASKS.STATUS.ne(EnergyTaskStatus.INACTIVE.getCode()))
+                .and(Tables.EH_ENERGY_METER_TASKS.EXECUTIVE_START_TIME.le(now))
+                .and(Tables.EH_ENERGY_METER_TASKS.EXECUTIVE_EXPIRE_TIME.ge(now))
+                .fetchAnyInto(EnergyMeterTask.class);
+    }
+
+    @Override
     public List<EnergyMeterTask> listEnergyMeterTasks(long pageAnchor, int pageSize) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_ENERGY_METER_TASKS)
