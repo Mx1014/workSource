@@ -1262,7 +1262,7 @@ public class PunchServiceImpl implements PunchService {
 					//只有第一次上班有弹性时间
 					beginTimeLong += flexTimeLong;
 				}
-				calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,punchTimeRule.getWorkTimeLong(),beginTimeLong);
+				calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,offDutyLog.getRuleTime()-onDutyLog.getRuleTime(),beginTimeLong);
 				//算请假对下班打卡的影响
 				Long offDutyTimeLong = punchDate.getTime() + offDutyLog.getRuleTime();
 				Long punchLateTime = 0L;
