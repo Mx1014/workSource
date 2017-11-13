@@ -16,7 +16,6 @@ import java.sql.Timestamp;
  *  <li>standardId: 关联标准id</li>
  *  <li>standardName: 标准名称</li>
  *  <li>templateId: 标准模板id</li>
- *  <li>taskId: 任务id</li>
  *  <li>repeatType: 标准周期类型  0:no repeat 1: by day 2:by week 3: by month 4:year</li>
  *  <li>order: 计划关联巡检对象排序 </li>
  * </ul>
@@ -47,15 +46,14 @@ public class EquipmentStandardRelationDTO {
 	
 	private String standardName;
 
-	private Long   templateId;
-
 	private Long  taskId;
 
 	private  Byte  repeatType;
 
 	@Deprecated
 	private Byte reviewStatus;
-	
+
+	@Deprecated
 	private Byte reviewResult;
 
 	@Deprecated
@@ -209,14 +207,6 @@ public class EquipmentStandardRelationDTO {
 
 	public void setLocation(String location) {
 		this.location = location;
-	}
-
-	public Long getTemplateId() {
-		return templateId;
-	}
-
-	public void setTemplateId(Long templateId) {
-		this.templateId = templateId;
 	}
 
 	public Long getTaskId() {

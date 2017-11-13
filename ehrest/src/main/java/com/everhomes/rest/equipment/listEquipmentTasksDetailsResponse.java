@@ -5,36 +5,14 @@ import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
+/**
+ * <ul>
+ *  <li>tasks: 任务离线列表 参考{@link com.everhomes.rest.equipment.EquipmentTaskOffLineDTO}</li>
+ *  <li>nextPageAnchor: 下一页的锚点，没有下一页则没有</li>
+ * </ul>
+ */
 public class listEquipmentTasksDetailsResponse {
-    private List<EquipmentTaskDTO> tasks;
-
-    private List<EquipmentStandardRelationDTO> EquipmentStandardRelations;
-
-    private List<InspectionItemDTO> inspectionItems;
-
-    public List<EquipmentTaskDTO> getTasks() {
-        return tasks;
-    }
-
-    public void setTasks(List<EquipmentTaskDTO> tasks) {
-        this.tasks = tasks;
-    }
-
-    public List<EquipmentStandardRelationDTO> getEquipmentStandardRelations() {
-        return EquipmentStandardRelations;
-    }
-
-    public void setEquipmentStandardRelations(List<EquipmentStandardRelationDTO> equipmentStandardRelations) {
-        EquipmentStandardRelations = equipmentStandardRelations;
-    }
-
-    public List<InspectionItemDTO> getInspectionItems() {
-        return inspectionItems;
-    }
-
-    public void setInspectionItems(List<InspectionItemDTO> inspectionItems) {
-        this.inspectionItems = inspectionItems;
-    }
+    private List<EquipmentTaskOffLineDTO> tasks;
 
     @Override
     public String toString() {
