@@ -5209,10 +5209,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 //                    this.organizationProvider.createOrganizationMemberLog(orgLog);
 //  master
                 }
-
-                this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), cmd.getEnterpriseId(), cmd.getUserId());
             }
         }
+        this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), cmd.getEnterpriseId(), cmd.getUserId());
     }
 
     /**
