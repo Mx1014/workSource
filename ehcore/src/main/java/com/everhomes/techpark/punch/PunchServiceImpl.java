@@ -7457,7 +7457,7 @@ public class PunchServiceImpl implements PunchService {
             }
             response.setStatusList(pdl.getStatusList());
             if (null != pdl.getStatusList()) {
-                if (null != pdl.getApprovalStatusList())
+                if (!StringUtils.isEmpty( pdl.getApprovalStatusList()))
                     approvalStatus = org.apache.commons.lang.StringUtils.splitPreserveAllTokens(pdl.getApprovalStatusList(),PunchConstants.STATUS_SEPARATOR,pdl.getPunchTimesPerDay()/2);
                 statusList = org.apache.commons.lang.StringUtils.splitPreserveAllTokens( pdl.getStatusList(),PunchConstants.STATUS_SEPARATOR);
                 if (statusList.length < pdl.getPunchTimesPerDay() / 2) {
