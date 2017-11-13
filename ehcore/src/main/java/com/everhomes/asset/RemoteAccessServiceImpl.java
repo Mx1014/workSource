@@ -166,6 +166,9 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         List<AssetPaymentOrderBills> orderBills = assetProvider.findBillsById(order.getId());
         StringBuilder sb = new StringBuilder();
 //        sb.append("[缴费]");
+        if(orderBills == null){
+            return;
+        }
         for( int i = 0; i < orderBills.size(); i ++){
             AssetPaymentOrderBills orderBill = orderBills.get(i);
             sb.append(assetProvider.getBillSource(orderBill.getBillId()));

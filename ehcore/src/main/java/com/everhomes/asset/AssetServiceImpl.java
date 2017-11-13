@@ -2455,76 +2455,73 @@ public class AssetServiceImpl implements AssetService {
      */
     @Scheduled(cron = "0 0 12 * * ?")
     public void autoBillNotice() {
-        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
+        if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
             Calendar today = Calendar.getInstance();
             List<PaymentNoticeConfig> configs = assetProvider.listAllNoticeConfigs();
 //            List<PaymentNoticeConfig> configs = new ArrayList<>();
 
-            Map<Long,List<Integer>> noticeConfigs = new HashMap<>();
-            for(int i = 0; i < configs.size(); i ++){
+            Map<Long, List<Integer>> noticeConfigs = new HashMap<>();
+            for (int i = 0; i < configs.size(); i++) {
                 PaymentNoticeConfig config = configs.get(i);
-                if(noticeConfigs.containsKey(config.getOwnerId())){
+                if (noticeConfigs.containsKey(config.getOwnerId())) {
                     noticeConfigs.get(config.getOwnerId()).add(config.getNoticeDayBefore());
-                }else{
+                } else {
                     List<Integer> days = new ArrayList<>();
                     days.add(config.getNoticeDayBefore());
-                    noticeConfigs.put(config.getOwnerId(),days);
+                    noticeConfigs.put(config.getOwnerId(), days);
                 }
             }
-            Map<Long,PaymentBills> needNoticeBills = new HashMap<>();
+            Map<Long, PaymentBills> needNoticeBills = new HashMap<>();
             // noticeConfig map中存有communityid和notice days
-            for ( Map.Entry<Long,List<Integer>> map : noticeConfigs.entrySet()){
+            for (Map.Entry<Long, List<Integer>> map : noticeConfigs.entrySet()) {
                 List<PaymentBills> bills = assetProvider.getAllBillsByCommunity(map.getKey());
-                for(int i = 0; i < bills.size(); i ++){
+                for (int i = 0; i < bills.size(); i++) {
                     PaymentBills bill = bills.get(i);
-                    if(!needNoticeBills.containsKey(bill.getId())){
+                    if (!needNoticeBills.containsKey(bill.getId())) {
                         //已经在提醒名单的bill不需要再提醒
                         List<Integer> days = map.getValue();
-                        for( int j = 0; j < days.size(); j ++){
+                        for (int j = 0; j < days.size(); j++) {
                             Integer day = days.get(j);
                             String dueDayDeadline = bill.getDueDayDeadline();
-                            try{
+                            try {
                                 Calendar deadline = Calendar.getInstance();
                                 deadline.setTime(yyyyMMdd.parse(dueDayDeadline));
-                                deadline.add(Calendar.DAY_OF_MONTH,day*(-1));
-                                if(today.compareTo(deadline) != -1 ){
-                                    needNoticeBills.put(bill.getId(),bill);
+                                deadline.add(Calendar.DAY_OF_MONTH, day * (-1));
+                                if (today.compareTo(deadline) != -1) {
+                                    needNoticeBills.put(bill.getId(), bill);
                                 }
-                            }catch (Exception e){
+                            } catch (Exception e) {
                                 continue;
                             }
                         }
                     }
-                    List<PaymentBills> targetBills = new ArrayList<>();
-                    for(Map.Entry<Long,PaymentBills> b : needNoticeBills.entrySet()){
-                        targetBills.add(b.getValue());
-                    }
-
-                    //
-                    List<Long> billIds = new ArrayList<>();
-                    List<NoticeInfo> noticeInfoList = new ArrayList<>();
-                    for(int k = 0; k < targetBills.size(); k++){
-                        PaymentBills b = targetBills.get(k);
-                        billIds.add(b.getId());
-                        NoticeInfo info = new NoticeInfo();
-                        info.setPhoneNums(b.getNoticetel());
-                        info.setDateStr(b.getDateStr());
-                        info.setTargetName(b.getTargetName());
-                        info.setTargetType(b.getTargetType());
-                        info.setAmountOwed(b.getAmountOwed());
-                        info.setAmountRecevable(b.getAmountReceivable());
-                        info.setAppName(assetProvider.findAppName(b.getNamespaceId()));
-                        info.setOwnerId(b.getOwnerId());
-                        info.setOwnerType(b.getOwnerType());
-                        noticeInfoList.add(info);
-                    }
-                    NoticeWithTextAndMessage(billIds,noticeInfoList);
                 }
             }
-
+            List<PaymentBills> targetBills = new ArrayList<>();
+            for (Map.Entry<Long, PaymentBills> b : needNoticeBills.entrySet()) {
+                targetBills.add(b.getValue());
+            }
+            //
+            List<Long> billIds = new ArrayList<>();
+            List<NoticeInfo> noticeInfoList = new ArrayList<>();
+            for (int k = 0; k < targetBills.size(); k++) {
+                PaymentBills b = targetBills.get(k);
+                billIds.add(b.getId());
+                NoticeInfo info = new NoticeInfo();
+                info.setPhoneNums(b.getNoticetel());
+                info.setDateStr(b.getDateStr());
+                info.setTargetName(b.getTargetName());
+                info.setTargetType(b.getTargetType());
+                info.setAmountOwed(b.getAmountOwed());
+                info.setAmountRecevable(b.getAmountReceivable());
+                info.setAppName(assetProvider.findAppName(b.getNamespaceId()));
+                info.setOwnerId(b.getOwnerId());
+                info.setOwnerType(b.getOwnerType());
+                noticeInfoList.add(info);
+                NoticeWithTextAndMessage(billIds, noticeInfoList);
+            }
         }
-
     }
     @Override
     public void activeAutoBillNotice() {

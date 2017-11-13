@@ -488,7 +488,9 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         SelectQuery<EhPaymentBillsRecord> query = context.selectQuery(t);
-        query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
+//        if(currentNamespaceId.intValue() != (int)0){
+//            query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
+//        }
         query.addConditions(t.OWNER_ID.eq(ownerId));
         query.addConditions(t.OWNER_TYPE.eq(ownerType));
         if(!org.springframework.util.StringUtils.isEmpty(status)){
@@ -1199,7 +1201,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(t1.SWITCH.eq((byte) 1))
                 .fetch(t1.ID);
         SelectQuery<Record> query = context.selectQuery();
-        query.addSelect(DSL.sum(o.AMOUNT_RECEIVABLE),DSL.sum(o.AMOUNT_RECEIVED),DSL.sum(o.AMOUNT_OWED),o.CHARGING_ITEM_NAME,t.ID);
+        query.addSelect(DSL.sum(o.AMOUNT_RECEIVABLE),DSL.sum(o.AMOUNT_RECEIVED),DSL.sum(o.AMOUNT_OWED),t.NAME,t.ID);
 //        query.addFrom(t,o);
         query.addFrom(t);
         query.addJoin(o);
@@ -1226,7 +1228,7 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setAmountOwed(f.getValue(DSL.sum(o.AMOUNT_OWED)));
                     dto.setAmountReceivable(f.getValue(DSL.sum(o.AMOUNT_RECEIVABLE)));
                     dto.setAmountReceived(f.getValue(DSL.sum(o.AMOUNT_RECEIVED)));
-                    dto.setValueOfX(f.getValue(o.CHARGING_ITEM_NAME));
+                    dto.setValueOfX(f.getValue(t.NAME));
                     itemIds.add(f.getValue(t.ID));
                     list.add(dto);
                     return null;
@@ -1236,6 +1238,7 @@ public class AssetProviderImpl implements AssetProvider {
             if(projectName != null){
                 list.get(i).setValueOfX(projectName);
             }
+
         }
 //        context.select(DSL.sum(o.AMOUNT_RECEIVABLE),DSL.sum(o.AMOUNT_RECEIVED),DSL.sum(o.AMOUNT_OWED),o.CHARGING_ITEM_NAME)
 //                .from(o,t)
@@ -3362,12 +3365,14 @@ public class AssetProviderImpl implements AssetProvider {
         PaymentBills bill = context.selectFrom(Tables.EH_PAYMENT_BILLS)
                 .where(Tables.EH_PAYMENT_BILLS.ID.eq(id))
                 .fetchOneInto(PaymentBills.class);
-        PaymentBillGroup group = context.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS)
-                .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(bill.getBillGroupId()))
-                .fetchOneInto(PaymentBillGroup.class);
         StringBuilder sb = new StringBuilder();
         sb.append(bill==null?"":bill.getDateStr()==null?"":bill.getDateStr());
-        sb.append(group == null? "":group.getName()==null?"":group.getName());
+        if(bill != null) {
+            PaymentBillGroup group = context.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS)
+                    .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(bill.getBillGroupId()))
+                    .fetchOneInto(PaymentBillGroup.class);
+            sb.append(group == null? "":group.getName()==null?"":group.getName());
+        }
         return sb.toString();
     }
 
