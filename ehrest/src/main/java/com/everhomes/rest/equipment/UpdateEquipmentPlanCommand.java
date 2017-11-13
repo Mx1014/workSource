@@ -23,6 +23,7 @@ import java.util.List;
  *  <li>remarks: 计划备注内容</li>
  *  <li>repeatSettings: 执行周期</li>
  *  <li>equipmentStandardRelations: 设备标准关系</li>
+ *  </ul>
  */
 public class UpdateEquipmentPlanCommand {
     private Long id;
