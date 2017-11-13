@@ -14,7 +14,6 @@ import java.util.List;
  *  <li>ownerType: 标准所属的主体，参考{@link com.everhomes.rest.quality.OwnerType}</li>
  *  <li>name: 标准名称</li>
  *  <li>repeatType: 0:no repeat 1: by day 2:by week 3: by month 4:year</li>
- *  <li>standardNumber: 标准编号</li>
  *  <li>standardSource: 标准来源</li>
  *  <li>status: 标准状态 参考{@link com.everhomes.rest.equipment.EquipmentStandardStatus}</li>
  *  <li>equipmentsCount: 使用此标准的设备数</li>
@@ -40,7 +39,8 @@ public class EquipmentStandardsDTO {
 	private String ownerType;
 	
 	private Long ownerId;
-	
+
+	@Deprecated
 	private String standardNumber;
 	
 	private String standardSource;

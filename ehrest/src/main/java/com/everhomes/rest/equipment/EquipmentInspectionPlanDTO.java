@@ -13,14 +13,14 @@ import java.util.List;
  *  <li>targetId: 计划所属管理处id</li>
  *  <li>targetType: 计划所属管理处类型</li>
  *  <li>targetName: 计划所属管理处名称</li>
- *  <li>planNumber: 计划序号/li>
+ *  <li>planNumber: 计划序号</li>
  *  <li>planType: 计划类别  参考{@link com.everhomes.rest.equipment.StandardType}</li>
  *  <li>name: 计划名称</li>
  *  <li>status: 计划状态 参考{@link com.everhomes.rest.equipment.EquipmentPlanStatus}</li>
  *  <li>reviewResult: 计划审批结果 参考{@link com.everhomes.rest.equipment.EquipmentInspectionPlanResult}</li>
  *  <li>remarks: 计划备注内容</li>
  *  <li>repeatSettings: 执行周期</li>
- *  <li>equipmentStandardRelations: 设备标准关系</li>
+ *  <li>equipmentStandardRelations: 设备标准关系 参考{@link com.everhomes.rest.equipment.EquipmentStandardRelationDTO}</li>
  * </ul>
  */
 
