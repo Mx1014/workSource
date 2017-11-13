@@ -3008,7 +3008,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             LOGGER.error("EnergyMeter not exist, id = {}", cmd.getMeterQRCode());
             throw errorWith(SCOPE, ERR_METER_NOT_EXIST, "The meter is not exist id = %s", cmd.getMeterQRCode());
         }
-
+        //判断表计当前是否有任务
+        EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskByMeterId(meter.getId(), new Timestamp(DateHelper.currentGMTTime().getTime()));
+        if(task == null) {
+            LOGGER.error("EnergyMeter task not exist, id = {}", cmd.getMeterQRCode());
+            throw errorWith(SCOPE, ERR_METER_TASK_NOT_EXIST, "The meter task is not exist id = %s", cmd.getMeterQRCode());
+        }
         return toEnergyMeterDTO(meter,cmd.getNamespaceId());
     }
 

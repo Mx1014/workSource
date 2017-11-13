@@ -228,8 +228,8 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
             realAmount = BigDecimal.valueOf((double) engine.eval(aoumtFormula));
         } catch (ScriptException e) {
             e.printStackTrace();
-            LOGGER.error("The energy meter error");
-            throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "The energy meter error");
+            LOGGER.error("The energy meter amount formula: {} error", aoumtFormula);
+            throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "The energy meter formula error");
         }
 
         return realAmount;
