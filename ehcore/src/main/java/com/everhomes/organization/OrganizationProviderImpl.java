@@ -5600,7 +5600,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		Condition cond = null;
 		if(filterScopeType.equals(FilterOrganizationContactScopeType.CURRENT.getCode())){
-			cond = t1.field("organization_id").eq(listCommand.getOrganizationId());
+			// 当传入的是分公司节点时
+			if(org.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode()) && org.getParentId() != 0){
+				// 获取公司下级的隐藏部门
+				Organization under_org = findUnderOrganizationByParentOrgId(org.getId());
+				if (under_org != null){
+					cond = t1.field("organization_id").eq(under_org.getId());
+				}else{ //如果没有隐藏部门，直接返回空
+					return new ArrayList<>();
+				}
+			}
+			cond = t1.field("organization_id").eq(org.getId());
 		}else{
 			cond = t1.field("group_path").like(org.getPath()+"%");
 		}
