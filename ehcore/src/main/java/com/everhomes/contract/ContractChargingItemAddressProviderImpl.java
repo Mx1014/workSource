@@ -8,6 +8,8 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.energy.EnergyMeterType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhContractAttachmentsDao;
@@ -19,6 +21,8 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
+import org.jooq.JoinType;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +32,7 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/8/16.
@@ -96,6 +101,57 @@ public class ContractChargingItemAddressProviderImpl implements ContractCharging
             return null;
         });
 
+        return result;
+    }
+
+    @Override
+    public List<ContractChargingItemAddress> findByAddressId(Long addressId, Byte meterType, Timestamp startDate, Timestamp endDate) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.ID,Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.NAMESPACE_ID,
+                Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.CONTRACT_CHARGING_ITEM_ID, Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.ADDRESS_ID,
+                Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.STATUS, Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.CREATE_UID,
+                Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.CREATE_TIME);
+        query.addFrom(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES);
+        query.addJoin(Tables.EH_CONTRACT_CHARGING_ITEMS, JoinType.LEFT_OUTER_JOIN,
+                Tables.EH_CONTRACT_CHARGING_ITEMS.ID.eq(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.CONTRACT_CHARGING_ITEM_ID));
+        query.addJoin(Tables.EH_CONTRACTS, JoinType.LEFT_OUTER_JOIN,
+                Tables.EH_CONTRACTS.ID.eq(Tables.EH_CONTRACT_CHARGING_ITEMS.CONTRACT_ID));
+        query.addConditions(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_CONTRACTS.CONTRACT_START_DATE.le(startDate));
+        query.addConditions(Tables.EH_CONTRACTS.CONTRACT_END_DATE.ge(endDate));
+        query.addConditions(Tables.EH_CONTRACT_CHARGING_ITEMS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.ADDRESS_ID.eq(addressId));
+        query.addConditions(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+        if(meterType != null) {
+            if(EnergyMeterType.ELECTRIC.equals(EnergyMeterType.fromCode(meterType))) {
+                query.addJoin(Tables.EH_PAYMENT_CHARGING_ITEMS, JoinType.LEFT_OUTER_JOIN,
+                        Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(Tables.EH_CONTRACT_CHARGING_ITEMS.CHARGING_ITEM_ID));
+                query.addConditions(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME.eq("电费"));
+            } else if(EnergyMeterType.WATER.equals(EnergyMeterType.fromCode(meterType))) {
+                query.addJoin(Tables.EH_PAYMENT_CHARGING_ITEMS, JoinType.LEFT_OUTER_JOIN,
+                        Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(Tables.EH_CONTRACT_CHARGING_ITEMS.CHARGING_ITEM_ID));
+                query.addConditions(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME.eq("水费"));
+            }
+        }
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("findByAddressId, sql=" + query.getSQL());
+            LOGGER.debug("findByAddressId, bindValues=" + query.getBindValues());
+        }
+        List<ContractChargingItemAddress> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            ContractChargingItemAddress itemAddress = new ContractChargingItemAddress();
+            itemAddress.setId(r.getValue(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.ID));
+            itemAddress.setNamespaceId(r.getValue(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.NAMESPACE_ID));
+            itemAddress.setContractChargingItemId(r.getValue(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.CONTRACT_CHARGING_ITEM_ID));
+            itemAddress.setAddressId(r.getValue(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.ADDRESS_ID));
+            itemAddress.setStatus(r.getValue(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.STATUS));
+            itemAddress.setCreateTime(r.getValue(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.CREATE_TIME));
+            itemAddress.setCreateUid(r.getValue(Tables.EH_CONTRACT_CHARGING_ITEM_ADDRESSES.CREATE_UID));
+            result.add(itemAddress);
+            return null;
+        });
         return result;
     }
 }

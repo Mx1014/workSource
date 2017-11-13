@@ -172,3 +172,24 @@ CREATE TABLE `eh_parking_car_verifications` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 -- by dengs,园区快讯多入口，2017.11.13
 ALTER TABLE eh_news_categories ADD COLUMN `entry_id` INTEGER;
+
+-- by wentian 物业缴费模块2.0
+-- payment_wentian_v2 new sql after 4.10.4
+
+ALTER TABLE `eh_payment_charging_standards_scopes` ADD COLUMN `namespace_id` INTEGER DEFAULT 0;
+ALTER TABLE `eh_payment_contract_receiver` ADD COLUMN `bill_group_rule_id` BIGINT DEFAULT NULL;
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `bill_group_rule_id` BIGINT DEFAULT NULL;
+ALTER TABLE `eh_payment_charging_standards_scopes` ADD COLUMN  `brother_standard_id` BIGINT DEFAULT NULL COMMENT '兄弟收费标准id，联动效果';
+ALTER TABLE `eh_payment_bill_groups` ADD COLUMN  `brother_group_id` BIGINT DEFAULT NULL COMMENT '兄弟账单组id，联动效果';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `contract_id_type` TINYINT DEFAULT 1 COMMENT '1:contract_id为合同id；0：不是';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `contract_id_type` TINYINT DEFAULT 1 COMMENT '1:contract_id为合同id；0：不是';
+ALTER TABLE `eh_payment_contract_receiver` ADD COLUMN `contract_id_type` TINYINT DEFAULT 1 COMMENT '1:contract_id为合同id；0：不是';
+DROP TABLE IF EXISTS `eh_payment_notice_config`;
+CREATE TABLE `eh_payment_notice_config` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER DEFAULT NULL,
+  `owner_type` VARCHAR(255) DEFAULT NULL,
+  `owner_id` BIGINT DEFAULT NULL,
+  `notice_day_before` INTEGER DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

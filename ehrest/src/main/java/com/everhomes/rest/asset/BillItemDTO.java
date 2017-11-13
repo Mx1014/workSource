@@ -16,6 +16,7 @@ import java.math.BigDecimal;
  * <li>addressId:地址id</li>
  * <li>apartmentName:楼栋</li>
  * <li>buildingName:门牌</li>
+ * <li>billGroupRuleId:计价标准id</li>
  *</ul>
  */
 public class BillItemDTO {
@@ -27,6 +28,7 @@ public class BillItemDTO {
     private Long addressId;
     private String apartmentName;
     private String buildingName;
+    private Long billGroupRuleId;
 
     @Override
     public String toString() {
@@ -96,6 +98,14 @@ public class BillItemDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Long getBillGroupRuleId() {
+        return billGroupRuleId;
+    }
+
+    public void setBillGroupRuleId(Long billGroupRuleId) {
+        this.billGroupRuleId = billGroupRuleId;
     }
 
     public BillItemDTO() {
