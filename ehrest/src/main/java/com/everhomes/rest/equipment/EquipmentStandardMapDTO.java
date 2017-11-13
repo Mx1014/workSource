@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  *  <li>id: id</li>
  *  <li>standardId: 标准id</li>
  *  <li>standardName: 标准名称</li>
+ *  <li>repeatType: 标准周期类型 0:no repeat 1: by day 2:by week 3: by month 4:year</li>
  *  <li>equipmentId: 设备id</li>
  *  <li>equipmentName: 设备名称</li>
  *  <li>sequenceNo: 设备编号</li>
