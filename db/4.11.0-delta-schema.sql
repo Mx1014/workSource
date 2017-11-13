@@ -5,7 +5,8 @@ ALTER TABLE `eh_questionnaires` MODIFY COLUMN scope_sent_message_users MEDIUMTEX
 ALTER TABLE `eh_questionnaires` MODIFY COLUMN scope_resent_message_users MEDIUMTEXT;
 ALTER TABLE `eh_questionnaires` MODIFY COLUMN organization_scope MEDIUMTEXT;
 
-DROP TABLE IF EXISTS `eh_archives_sticky_contacts`;
+-- added by R. 人事档案与表单字段组 start 2017.11.13
+-- DROP TABLE IF EXISTS `eh_archives_sticky_contacts`;
 CREATE TABLE `eh_archives_sticky_contacts` (
 	`id` BIGINT NOT NULL COMMENT 'id of the record',
 	`namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -17,7 +18,7 @@ CREATE TABLE `eh_archives_sticky_contacts` (
 	PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 
-DROP TABLE IF EXISTS `eh_archives_dismiss_employees`;
+-- DROP TABLE IF EXISTS `eh_archives_dismiss_employees`;
 CREATE TABLE `eh_archives_dismiss_employees` (
 	`id` BIGINT NOT NULL COMMENT 'id of the record',
 	`namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -37,7 +38,7 @@ CREATE TABLE `eh_archives_dismiss_employees` (
 	PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 
-DROP TABLE IF EXISTS `eh_general_form_groups`;
+-- DROP TABLE IF EXISTS `eh_general_form_groups`;
 CREATE TABLE `eh_general_form_groups` (
 	`id` BIGINT NOT NULL COMMENT 'id of the record',
 	`namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -51,7 +52,7 @@ CREATE TABLE `eh_general_form_groups` (
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
 
-DROP TABLE IF EXISTS `eh_archives_forms`;
+-- DROP TABLE IF EXISTS `eh_archives_forms`;
 CREATE TABLE `eh_archives_forms` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -63,7 +64,7 @@ CREATE TABLE `eh_archives_forms` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
 
-DROP TABLE IF EXISTS `eh_archives_configurations`;
+-- DROP TABLE IF EXISTS `eh_archives_configurations`;
 CREATE TABLE `eh_archives_configurations` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -78,7 +79,7 @@ CREATE TABLE `eh_archives_configurations` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
 
-DROP TABLE IF EXISTS `eh_archives_logs`;
+-- DROP TABLE IF EXISTS `eh_archives_logs`;
 CREATE TABLE `eh_archives_logs` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -95,7 +96,7 @@ CREATE TABLE `eh_archives_logs` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
 
-DROP TABLE IF EXISTS `eh_archives_notifications`;
+-- DROP TABLE IF EXISTS `eh_archives_notifications`;
 CREATE TABLE `eh_archives_notifications` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -140,7 +141,7 @@ ALTER TABLE eh_organization_member_details ADD COLUMN entry_form TEXT COMMENT '�
 ALTER TABLE eh_organization_member_details ADD COLUMN graduation_certificate TEXT COMMENT '毕业证书';
 ALTER TABLE eh_organization_member_details ADD COLUMN degree_certificate TEXT COMMENT '学位证书';
 ALTER TABLE eh_organization_member_details ADD COLUMN contract_certificate TEXT COMMENT '劳动合同';
-
+-- added by R. 人事档案与表单字段组 end 2017.11.13
 
 -- lei.lv 机构表加排序
 ALTER TABLE `eh_organizations` ADD COLUMN `order` int(11) NULL DEFAULT '0' COMMENT 'order';
