@@ -8408,6 +8408,7 @@ public class PunchServiceImpl implements PunchService {
 		PunchTimeRule ptr = getPunchTimeRuleByRuleIdAndDate(pr, request.getPunchDate(),request.getUserId());
 		pl.setRuleTime(findRuleTime(ptr, request.getPunchType(), request.getPunchIntervalNo()));
 		pl.setStatus(PunchStatus.UNPUNCH.getCode());
+		return pl;
 	}
 	@Override
 	public void punchGroupAddNewEmployee(Long groupId){

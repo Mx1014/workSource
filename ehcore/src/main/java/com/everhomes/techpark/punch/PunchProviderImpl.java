@@ -2926,5 +2926,23 @@ long id = sequenceProvider.getNextSequence(key);
 		}
 		return result.get(0);
 	}
+
+	@Override
+	public PunchLog findPunchLog(Long organizationId, Long applyUserId, Date punchDate, Byte punchType, Integer punchIntervalNo) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select().from(Tables.EH_PUNCH_LOGS)
+				.where(Tables.EH_PUNCH_LOGS.USER_ID.eq(applyUserId))
+				.and(Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.eq(organizationId))
+				.and(Tables.EH_PUNCH_LOGS.PUNCH_DATE.eq(punchDate))
+				.and(Tables.EH_PUNCH_LOGS.PUNCH_TYPE.eq(punchType))
+				.and(Tables.EH_PUNCH_LOGS.PUNCH_INTERVAL_NO.eq(punchIntervalNo))
+				.limit(1)
+				.fetchOne();
+
+		if (record != null) {
+			return ConvertHelper.convert(record, PunchLog.class);
+		}
+		return null;
+	}
 }
 
