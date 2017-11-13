@@ -2418,7 +2418,7 @@ long id = sequenceProvider.getNextSequence(key);
 				.where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(creatorUid))
 				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(ownerId))
 				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.REQUEST_ID.eq(requestId))
-				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+//				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.limit(1)
 				.fetchOne();
 		
