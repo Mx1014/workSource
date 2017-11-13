@@ -15,10 +15,7 @@ import java.sql.Timestamp;
  *  <li>status: 设备状态 参考{@link com.everhomes.rest.equipment.EquipmentStatus}</li>
  *  <li>standardId: 关联标准id</li>
  *  <li>standardName: 标准名称</li>
- *  <li>reviewStatus: 审批状态 参考{@link com.everhomes.rest.equipment.EquipmentReviewStatus}</li>
- *  <li>reviewResult: 审批结果 参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
- *  <li>reviewer: 审批人</li>
- *  <li>reviewTime: 审批时间</li>
+ *  <li>repeatType: 标准周期类型  0:no repeat 1: by day 2:by week 3: by month 4:year</li>
  * </ul>
  */
 public class EquipmentStandardRelationDTO {
@@ -42,13 +39,18 @@ public class EquipmentStandardRelationDTO {
 	private Long standardId;
 	
 	private String standardName;
-	
+
+	private  Byte  repeatType;
+
+	@Deprecated
 	private Byte reviewStatus;
 	
 	private Byte reviewResult;
 
+	@Deprecated
 	private String reviewer;
 
+	@Deprecated
 	private Timestamp reviewTime;
 	
 	public Long getId() {
@@ -162,6 +164,14 @@ public class EquipmentStandardRelationDTO {
 
 	public void setReviewTime(Timestamp reviewTime) {
 		this.reviewTime = reviewTime;
+	}
+
+	public Byte getRepeatType() {
+		return repeatType;
+	}
+
+	public void setRepeatType(Byte repeatType) {
+		this.repeatType = repeatType;
 	}
 
 	@Override

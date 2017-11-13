@@ -238,12 +238,12 @@ public class EquipmentController extends ControllerBase {
      * <p>列出设备列表 新建计划时关联巡检对象</p>
      */
     @RequestMapping("searchEquipmentStandardsObject")
-    @RestReturn(value = SearchEquipmentsResponse.class)
+    @RestReturn(value =  SearchEquipmentStandardRelationsResponse.class)
     public RestResponse searchEquipmentStandardsObject(SearchEquipmentsCommand cmd) {
 
-        SearchEquipmentsResponse equipments = equipmentSearcher.queryEquipments(cmd);
+        SearchEquipmentStandardRelationsResponse searchEquipmentStandardsObject =null;
 
-        return getRestResponse(equipments);
+        return getRestResponse(searchEquipmentStandardsObject);
     }
 
     /**
