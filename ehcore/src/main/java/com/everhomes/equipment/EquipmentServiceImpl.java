@@ -3486,7 +3486,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 //		EquipmentInspectionTasks task = verifyEquipmentTask(cmd.getTaskId(), cmd.getOwnerType(), cmd.getOwnerId());
         //分公司拿不到ownerId为总公司的数据 by xiongying20170323
         EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(cmd.getTaskId());
-
+        //这里加上 任务关联的planId 查找设备列表 放到dto中
         if (task == null) {
             throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
                     EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_NOT_EXIST,

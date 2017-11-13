@@ -1,8 +1,10 @@
 package com.everhomes.rest.equipment;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -30,8 +32,7 @@ import java.sql.Timestamp;
  *  <li>status: 执行状态 参考{@link com.everhomes.rest.equipment.EquipmentTaskStatus}</li>
  *  <li>result: 执行结果 参考{@link com.everhomes.rest.equipment.EquipmentTaskResult}</li>
  *  <li>reviewResult: 审阅结果 参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
- *  <li>standardDescription: 标准内容</li>
- *  <li>pictureFlag: 是否需要拍照 0：否 1：是</li>
+ *  <li>equipments: 审阅结果 参考{@link com.everhomes.rest.equipment.EquipmentsDTO}</li>
  * </ul>
  */
 public class EquipmentTaskDTO {
@@ -107,12 +108,15 @@ public class EquipmentTaskDTO {
 	private String reviewerType;
 	
 	private String reviewerName;
-
+	@Deprecated
 	private String standardDescription;
 	@Deprecated
 	private Byte qrCodeFlag;
 	@Deprecated
 	private Byte pictureFlag;
+
+	@ItemType(EquipmentsDTO.class)
+	private List<EquipmentsDTO> equipments;
 
 	public Long getId() {
 		return id;

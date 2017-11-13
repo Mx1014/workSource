@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  */
 public enum EquipmentTaskStatus {
 	NONE((byte)0, ""), WAITING_FOR_EXECUTING((byte)1, "待执行"), NEED_MAINTENANCE((byte)2, "需维修"), 
-	IN_MAINTENANCE((byte)3, "待维修"), CLOSE((byte)4, "关闭"), DELAY((byte)5, "已过期");
+	IN_MAINTENANCE((byte)3, "待维修"), CLOSE((byte)4, "关闭"), DELAY((byte)5, "已延期");
 	
 	private byte code;
 	private String name;
