@@ -598,39 +598,12 @@ public class ContractServiceImpl implements ContractService {
 			}
 		}
 //		assetService.paymentExpectancies(command);
-<<<<<<< HEAD
-		assetService.paymentExpectancies_re_struct(command);
-	}
 
-	private List<RentFree> generateRentFree(List<ContractChargingChangeDTO> frees) {
-		List<RentFree> rentFrees = new ArrayList<>();
-		frees.forEach(free -> {
-			RentFree rentFree = new RentFree();
-			rentFree.setChargingItemId(free.getChargingItemId());
-			rentFree.setStartDate(new Date(free.getChangeStartTime()));
-			rentFree.setEndDate(new Date(free.getChangeExpiredTime()));
-			rentFree.setAmount(free.getChangeRange());
-			rentFree.setRemark(free.getRemark());
-			if(free.getApartments() != null && free.getApartments().size() > 0) {
-				List<ContractProperty> properties = new ArrayList<ContractProperty>();
-				free.getApartments().forEach(apartmentDTO -> {
-					ContractProperty cp = ConvertHelper.convert(apartmentDTO, ContractProperty.class);
-					cp.setPropertyName(cp.getBuldingName() + "-" + cp.getApartmentName());
-					properties.add(cp);
-				});
-				rentFree.setProperties(properties);
-			}
-			rentFrees.add(rentFree);
-		});
-		return rentFrees;
-	}
-
-=======
 		command.setIsEffectiveImmediately((byte)0);
 		assetService.paymentExpectancies_re_struct(command);
 	}
 
->>>>>>> payment_wentian_2.0
+
 	private List<RentAdjust> generateRentAdjust(List<ContractChargingChangeDTO> adjusts) {
 		List<RentAdjust> rentAdjusts = new ArrayList<>();
 		adjusts.forEach(adjust -> {
@@ -664,8 +637,7 @@ public class ContractServiceImpl implements ContractService {
 		return rentAdjusts;
 	}
 
-<<<<<<< HEAD
-=======
+
 	private List<RentFree> generateRentFree(List<ContractChargingChangeDTO> frees) {
 		List<RentFree> rentFrees = new ArrayList<>();
 		frees.forEach(free -> {
@@ -689,7 +661,7 @@ public class ContractServiceImpl implements ContractService {
 		return rentFrees;
 	}
 
->>>>>>> payment_wentian_2.0
+
 	private List<FeeRules> generateChargingItemsFeeRules(List<ContractChargingItemDTO> chargingItems) {
 		Gson gson = new Gson();
 		List<FeeRules> feeRules = new ArrayList<>();
