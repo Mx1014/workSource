@@ -440,6 +440,14 @@ public class GroupDTO {
         this.phoneNumber = phoneNumber;
     }
 
+    public Byte getDescriptionType() {
+        return descriptionType;
+    }
+
+    public void setDescriptionType(Byte descriptionType) {
+        this.descriptionType = descriptionType;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

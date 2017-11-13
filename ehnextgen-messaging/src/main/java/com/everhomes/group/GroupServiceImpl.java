@@ -1171,6 +1171,10 @@ public class GroupServiceImpl implements GroupService {
         Long userId = user.getId();
         
         Long groupId = cmd.getGroupId();
+        //以前业务会传这个字段，新业务可能不传，后面加入行业协会发消息会用到这个字段，不能为null   add by yanjun 20171113
+        if(cmd.getRequestText() ==null){
+            cmd.setRequestText("");
+        }
         Group group = checkGroupParameter(groupId, userId, "requestToJoinGroup");
         
     	GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(groupId, EntityType.USER.getCode(), user.getId());
@@ -3553,7 +3557,7 @@ public class GroupServiceImpl implements GroupService {
             code = GroupNotificationTemplateCode.GROUP_AUTH_JOIN_REQ_FOR_OPERATOR;
             // 如果是俱乐部，则按以下模板发送消息，add by tt, 20161104
             if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
-				map.put("reason", member.getRequestorComment());
+                map.put("reason", member.getRequestorComment());
 				code = GroupNotificationTemplateCode.GROUP_MEMBER_TO_ADMIN_WHEN_REQUEST_TO_JOIN;
 			}
             String notifyTextForAdmin = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
