@@ -42,7 +42,6 @@ import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 import com.everhomes.uniongroup.*;
 import com.everhomes.util.*;
 
-import org.apache.commons.codec.language.bm.RuleType;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
@@ -75,7 +74,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.approval.ApprovalCategory;
 import com.everhomes.approval.ApprovalCategoryProvider;
 import com.everhomes.approval.ApprovalDayActualTimeProvider;
-import com.everhomes.approval.ApprovalRangeStatistic;
 import com.everhomes.approval.ApprovalRangeStatisticProvider;
 import com.everhomes.approval.ApprovalRequestDefaultHandler;
 import com.everhomes.approval.ApprovalRequestProvider;
@@ -106,7 +104,6 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.approval.ApprovalCategoryDTO;
 import com.everhomes.rest.approval.ApprovalType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
@@ -180,7 +177,6 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 @Service
 public class PunchServiceImpl implements PunchService {
@@ -8393,21 +8389,26 @@ public class PunchServiceImpl implements PunchService {
 
 		Integer updateNum = punchProvider.approveAbnormalPunch(request.getUserId(), request.getPunchDate(), request.getPunchIntervalNo(), request.getPunchType());
 		if(updateNum <1){
-			PunchLog pl = new PunchLog();
-			pl.setUserId(request.getUserId());
-			pl.setEnterpriseId(request.getEnterpriseId());
-			pl.setPunchDate(request.getPunchDate());
+			PunchLog pl = getAbnormalPunchLog(request);
 			pl.setApprovalStatus(PunchStatus.NORMAL.getCode());
-			pl.setPunchType(request.getPunchType());
-			pl.setPunchIntervalNo(request.getPunchIntervalNo());
-			PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), request.getEnterpriseId(),
-					request.getEnterpriseId());
-			PunchTimeRule ptr = getPunchTimeRuleByRuleIdAndDate(pr, request.getPunchDate(),request.getUserId());
-			pl.setRuleTime(findRuleTime(ptr, request.getPunchType(), request.getPunchIntervalNo()));
-			pl.setStatus(PunchStatus.UNPUNCH.getCode());
+			punchProvider.createPunchLog(pl);
+
 		}
 	}
-	
+	@Override
+	public PunchLog getAbnormalPunchLog(PunchExceptionRequest request){
+		PunchLog pl = new PunchLog();
+		pl.setUserId(request.getUserId());
+		pl.setEnterpriseId(request.getEnterpriseId());
+		pl.setPunchDate(request.getPunchDate());
+		pl.setPunchType(request.getPunchType());
+		pl.setPunchIntervalNo(request.getPunchIntervalNo());
+		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), request.getEnterpriseId(),
+				request.getEnterpriseId());
+		PunchTimeRule ptr = getPunchTimeRuleByRuleIdAndDate(pr, request.getPunchDate(),request.getUserId());
+		pl.setRuleTime(findRuleTime(ptr, request.getPunchType(), request.getPunchIntervalNo()));
+		pl.setStatus(PunchStatus.UNPUNCH.getCode());
+	}
 	@Override
 	public void punchGroupAddNewEmployee(Long groupId){
 		PunchRule pr = punchProvider.getPunchruleByPunchOrgId(groupId);

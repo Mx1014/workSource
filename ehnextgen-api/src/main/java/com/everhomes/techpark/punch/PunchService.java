@@ -246,5 +246,7 @@ public interface PunchService {
 	
 	GetPunchGroupsCountResponse getPunchGroupsCount(GetPunchGroupsCountCommand cmd);
 
+	PunchLog getAbnormalPunchLog(PunchExceptionRequest request);
+
 	void punchGroupAddNewEmployee(Long groupId);
 }

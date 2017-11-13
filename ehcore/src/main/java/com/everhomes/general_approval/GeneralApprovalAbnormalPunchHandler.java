@@ -24,9 +24,11 @@ import java.util.Calendar;
  */
 @Component(GeneralApprovalHandler.GENERAL_APPROVAL_PREFIX + "ABNORMAL_PUNCH")
 public class GeneralApprovalAbnormalPunchHandler extends GeneralApprovalDefaultHandler {
-//
-//	@Override
-//	public void onApprovalCreated(FlowCase flowCase) {
+    //
+//    @Override
+//    public void onApprovalCreated(FlowCase flowCase) {
+
+        //对于打卡
 //		//建立一个request
 //		PunchExceptionRequest request = new PunchExceptionRequest();
 //		GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
@@ -48,8 +50,8 @@ public class GeneralApprovalAbnormalPunchHandler extends GeneralApprovalDefaultH
 //		//用工作流的id 作為表示是哪個審批
 //		request.setRequestId(flowCase.getId());
 //		punchProvider.createPunchExceptionRequest(request);
-//
-//	}
+
+//    }
 
 //	@Override
 //	public void onFlowCaseAbsorted(FlowCase flowCase) {

@@ -4,7 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.techpark.punch.PunchStatus;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
+import com.everhomes.techpark.punch.PunchLog;
 import com.everhomes.techpark.punch.PunchProvider;
 
 import com.everhomes.techpark.punch.PunchService;
@@ -67,6 +69,11 @@ public class GeneralApprovalDefaultHandler implements GeneralApprovalHandler {
 		//初始状态是等待审批
 		request.setStatus(ApprovalStatus.WAITING_FOR_APPROVING.getCode());
 		request.setUserId(flowCase.getApplyUserId());
+		request.setApprovalAttribute(ga.getApprovalAttribute());
+		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		request.setCreatorUid(UserContext.currentUserId());
+		//用工作流的id 作為表示是哪個審批
+		request.setRequestId(flowCase.getId());
 		//分别处理
 		if (punchService.getTimeIntervalApprovalAttribute().contains(ga.getApprovalAttribute())) {
 
@@ -86,13 +93,14 @@ public class GeneralApprovalDefaultHandler implements GeneralApprovalHandler {
 			request.setPunchDate(java.sql.Date.valueOf(valDTO.getAbnormalDate()));
 			request.setPunchType(valDTO.getPunchType());
 			request.setPunchIntervalNo(valDTO.getPunchIntervalNo());
+			//对于异常申请,如果没有打卡,需要增加一条打卡记录
+			PunchLog pl = punchProvider.findPunchLog(ga.getOrganizationId(), flowCase.getApplyUserId(), request.getPunchDate(), request.getPunchType(), request.getPunchIntervalNo());
+			if (null == pl) {
+				pl = punchService.getAbnormalPunchLog(request);
+				punchProvider.createPunchLog(pl);
+			}
 		}
 
-		request.setApprovalAttribute(ga.getApprovalAttribute());
-		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		request.setCreatorUid(UserContext.currentUserId());
-		//用工作流的id 作為表示是哪個審批
-		request.setRequestId(flowCase.getId());
 		punchProvider.createPunchExceptionRequest(request);
 	}
 
