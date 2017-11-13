@@ -977,18 +977,18 @@ public class EquipmentController extends ControllerBase {
         return getRestResponse(stat);
     }
 
-//    /**
-//     * <b>URL: /equipment/statItemResultsInEquipmentTasks</b>
-//     * <p>按设备-标准统计任务的细项</p>
-//     */
-//    @RequestMapping("statItemResultsInEquipmentTasks")
-//    @RestReturn(value = StatItemResultsInEquipmentTasksResponse.class)
-//    public RestResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd) {
-//
-//        StatItemResultsInEquipmentTasksResponse stat = equipmentService.statItemResultsInEquipmentTasks(cmd);
-//
-//        return getRestResponse(stat);
-//    }
+    /**
+     * <b>URL: /equipment/statItemResultsInEquipmentTasks</b>
+     * <p>按设备-标准统计任务的细项</p>
+     */
+    @RequestMapping("statItemResultsInEquipmentTasks")
+    @RestReturn(value = StatItemResultsInEquipmentTasksResponse.class)
+    public RestResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd) {
+
+        StatItemResultsInEquipmentTasksResponse stat = equipmentService.statItemResultsInEquipmentTasks(cmd);
+
+        return getRestResponse(stat);
+    }
 
     /**
      * <b>URL: /equipment/listAbnormalTasks</b>
