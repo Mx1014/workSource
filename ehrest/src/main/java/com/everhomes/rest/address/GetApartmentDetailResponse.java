@@ -8,7 +8,7 @@ import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
+ *
  * <ul>
  * <li>buildingName: 楼栋名称</li>
  * <li>apartmentName: 门牌名称</li>

@@ -1,6 +1,9 @@
 package com.everhomes.energy;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.repeat.RepeatService;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.energy.EnergyMeterAddressDTO;
 import com.everhomes.rest.energy.SearchEnergyMeterCommand;
 import com.everhomes.rest.energy.SearchEnergyMeterResponse;
 import com.everhomes.search.AbstractElasticSearch;
@@ -8,6 +11,7 @@ import com.everhomes.search.EnergyMeterSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.mysql.jdbc.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -28,6 +32,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -49,6 +54,15 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
 
     @Autowired
     private EnergyConsumptionService energyConsumptionService;
+
+    @Autowired
+    private EnergyMeterAddressProvider energyMeterAddressProvider;
+
+    @Autowired
+    private EnergyPlanProvider energyPlanProvider;
+
+    @Autowired
+    private RepeatService repeatService;
 
     @Override
     public void deleteById(Long id) {
@@ -88,6 +102,34 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
             builder.field("name", meter.getName());
             builder.field("meterNumber", meter.getMeterNumber());
             builder.field("createTime", meter.getCreateTime().getTime());
+
+            List<EnergyMeterAddress> existAddress = energyMeterAddressProvider.listByMeterId(meter.getId());
+            if(existAddress != null && existAddress.size() > 0) {
+                builder.field("buildingId", existAddress.get(0).getBuildingId());
+                builder.field("addressId", existAddress.get(0).getAddressId());
+            }
+
+            List<PlanMeter> maps = energyPlanProvider.listByEnergyMeter(meter.getId());
+            Boolean assignFlag = false;
+            if(maps != null && maps.size() > 0) {
+                List<String> planNames = new ArrayList<>();
+                for(PlanMeter map : maps) {
+                    if(repeatService.repeatSettingStillWork(map.getRepeatSettingId())) {
+                        EnergyPlan plan = energyPlanProvider.findEnergyPlanById(map.getPlanId());
+                        if(plan != null && CommonStatus.ACTIVE.equals(CommonStatus.fromCode(plan.getStatus()))) {
+                            planNames.add(plan.getName());
+                            assignFlag = true;
+                        }
+                    }
+                }
+                builder.array("assignPlan", planNames);
+            }
+            if(assignFlag) {
+                builder.field("assignFlag", 1);
+            } else {
+                builder.field("assignFlag", 0);
+            }
+
             builder.endObject();
             return builder;
         } catch (IOException e) {
@@ -170,6 +212,27 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
             TermFilterBuilder statusFilter = FilterBuilders.termFilter("status", cmd.getStatus());
             filterBuilders.add(statusFilter);
         }
+
+        if (cmd.getBuildingId() != null) {
+            TermFilterBuilder buildingIdFilter = FilterBuilders.termFilter("buildingId", cmd.getBuildingId());
+            filterBuilders.add(buildingIdFilter);
+        }
+
+        if (cmd.getAddressId() != null) {
+            TermFilterBuilder addressIdFilter = FilterBuilders.termFilter("addressId", cmd.getAddressId());
+            filterBuilders.add(addressIdFilter);
+        }
+
+        if(cmd.getAssignFlag() != null) {
+            TermFilterBuilder assignFlagFilter = FilterBuilders.termFilter("assignFlag", cmd.getAssignFlag());
+            filterBuilders.add(assignFlagFilter);
+        }
+
+        if(cmd.getPlanName() != null) {
+            FilterBuilder planFilter = FilterBuilders.termFilter("assignPlan", cmd.getPlanName());
+            filterBuilders.add(planFilter);
+        }
+
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0L;
         if(cmd.getPageAnchor() != null) {

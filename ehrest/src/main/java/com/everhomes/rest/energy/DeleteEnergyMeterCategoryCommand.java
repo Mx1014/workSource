@@ -1,3 +1,4 @@
+
 package com.everhomes.rest.energy;
 
 import com.everhomes.util.StringHelper;
@@ -8,14 +9,30 @@ import javax.validation.constraints.NotNull;
  * <ul>
  *     <li>organizationId: 组织id</li>
  *     <li>categoryId: 分类id</li>
- *     <li>namespaceId: 域空间</li>
  * </ul>
  */
 public class DeleteEnergyMeterCategoryCommand {
 
+    private Long communityId;
     @NotNull private Long organizationId;
     @NotNull private Long categoryId;
     private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Long getOrganizationId() {
         return organizationId;
@@ -32,14 +49,6 @@ public class DeleteEnergyMeterCategoryCommand {
     public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
     }
-    
-    public Integer getNamespaceId() {
-		return namespaceId;
-	}
-
-    public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
 
     @Override
     public String toString() {

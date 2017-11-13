@@ -3,7 +3,7 @@ package com.everhomes.rest.pmtask;
 
 /**
  * <ul>
- * <li>0: 无效任务</li>
+ * <li>0: 已取消（无效任务）</li>
  * <li>1: 待受理</li>
  * <li>2: 待分配</li>
  * <li>3: 处理中</li>
