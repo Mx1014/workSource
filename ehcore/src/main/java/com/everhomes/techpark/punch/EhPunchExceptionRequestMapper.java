@@ -30,6 +30,7 @@ public class EhPunchExceptionRequestMapper implements RecordMapper<Record, EhPun
         post.setRequestType(r.getValue((Field<Byte>)r.field("request_type"))); 
         post.setStatus(r.getValue((Field<Byte>)r.field("status")));
         post.setUserId(r.getValue((Field<Long>)r.field("user_id")));
+        post.setRequestId(r.getValue((Field<Long>)r.field("request_id")));
         post.setPunchIntervalNo(r.getValue((Field<Integer>)r.field("punch_interval_no")));
         post.setPunchType(r.getValue((Field<Byte>)r.field("punch_type")));
         post.setBeginTime(r.getValue((Field<Timestamp>)r.field("begin_time")));
