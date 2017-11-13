@@ -18,8 +18,8 @@ public class EquipmentInspectionStandards extends EhEquipmentInspectionStandards
 	private Integer equipmentsCount;
 
 	//add in PM.V3.2
-	@ItemType(Long.class)
-	private  List<Long> equipmentIds;
+	@ItemType(EquipmentInspectionEquipments.class)
+	private  List<EquipmentInspectionEquipments> equipments;
 
 	//add in PM.V3.2
 	@ItemType(EquipmentInspectionItems.class)
@@ -66,13 +66,7 @@ public class EquipmentInspectionStandards extends EhEquipmentInspectionStandards
 		this.reviewGroup = reviewGroup;
 	}
 
-	public List<Long> getEquipmentIds() {
-		return equipmentIds;
-	}
 
-	public void setEquipmentIds(List<Long> equipmentIds) {
-		this.equipmentIds = equipmentIds;
-	}
 
 	public List<EquipmentInspectionItems> getItems() {
 		return items;
@@ -80,6 +74,14 @@ public class EquipmentInspectionStandards extends EhEquipmentInspectionStandards
 
 	public void setItems(List<EquipmentInspectionItems> items) {
 		this.items = items;
+	}
+
+	public List<EquipmentInspectionEquipments> getEquipments() {
+		return equipments;
+	}
+
+	public void setEquipments(List<EquipmentInspectionEquipments> equipments) {
+		this.equipments = equipments;
 	}
 
 	@Override
