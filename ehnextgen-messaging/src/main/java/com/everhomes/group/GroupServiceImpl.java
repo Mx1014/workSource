@@ -2913,8 +2913,8 @@ public class GroupServiceImpl implements GroupService {
     private String getDescriptionUrl(Long id){
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         String homeUrl = configProvider.getValue(namespaceId, ConfigConstants.HOME_URL, "");
-        String contentUrl = configProvider.getValue(namespaceId, ConfigConstants.GROUP_CONTENT_URL, "");
-        return homeUrl + contentUrl + "?id=" + id;
+        String descriptionUrl = configProvider.getValue(namespaceId, ConfigConstants.CLUB_DESCRIPTION_URL, "");
+        return homeUrl + descriptionUrl + "?id=" + id;
     }
     
     private String getShareUrl(Group group) {

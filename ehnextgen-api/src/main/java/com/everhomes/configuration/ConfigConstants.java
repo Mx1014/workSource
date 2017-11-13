@@ -76,7 +76,7 @@ public interface ConfigConstants {
 	
 	public static final String ACTIVITY_CONTENT_URL = "activity.content.url";
 
-    public static final String GROUP_CONTENT_URL = "group.content.url";
+    public static final String CLUB_DESCRIPTION_URL = "club.description.url";
 	
 	public static final String CLUB_PLACEHOLDER_NAME = "club.placeholder.name"; 
 	
