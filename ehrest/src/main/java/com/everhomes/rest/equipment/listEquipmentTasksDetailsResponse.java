@@ -14,6 +14,14 @@ import java.util.List;
 public class listEquipmentTasksDetailsResponse {
     private List<EquipmentTaskOffLineDTO> tasks;
 
+    public List<EquipmentTaskOffLineDTO> getTasks() {
+        return tasks;
+    }
+
+    public void setTasks(List<EquipmentTaskOffLineDTO> tasks) {
+        this.tasks = tasks;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

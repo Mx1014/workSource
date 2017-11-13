@@ -474,10 +474,10 @@ public class EquipmentController extends ControllerBase {
      * <p>获取任务所有信息 用于离线</p>
      */
     @RequestMapping("listEquipmentTasksDetails")
-    @RestReturn(value = listEquipmentTasksDetailsResponse.class)
+    @RestReturn(value = EquipmentTaskOffLineDTO.class)
     public RestResponse listEquipmentTasksDetails(ListEquipmentTasksCommand cmd) {
 
-        listEquipmentTasksDetailsResponse tasksDetail = null;
+        List<EquipmentTaskOffLineDTO> tasksDetail = null;
 
         return getRestResponse(tasksDetail);
     }
@@ -776,7 +776,7 @@ public class EquipmentController extends ControllerBase {
 
     /**
      * <b>URL: /equipment/listEquipmentStandardRelationsByTaskId</b>
-     * <p>查看单个任务下设备标准关系列表</p>
+     * <p>查看具体任务下设备标准关系列表</p>
      */
     @RequestMapping("listEquipmentStandardRelationsByTaskId")
     @RestReturn(value = InspectionItemDTO.class, collection = true)
