@@ -557,7 +557,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
         }
         //先查看任务
-        Boolean inWork = assetProvider.checkContractInWork(cmd.getContractId());
+        Boolean inWork = assetProvider.checkContractInWork(cmd.getContractId(),cmd.getContractNum());
         if(inWork){
 //            return response;
             throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.ERROR_IN_GENERATING,"Mission in process");
