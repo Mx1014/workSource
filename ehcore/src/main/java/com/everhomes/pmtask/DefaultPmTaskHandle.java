@@ -191,7 +191,7 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 		ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
 
 		List<Category> list;
-		if(null != cmd.getTaskCategoryId() && cmd.getTaskCategoryId() != 0L) {
+		if(null != cmd.getTaskCategoryId() && cmd.getTaskCategoryId() != 0L && cmd.getParentId() == null) {
 			Category category = categoryProvider.findCategoryById(cmd.getTaskCategoryId());
 			list = new ArrayList<>();
 			list.add(category);
