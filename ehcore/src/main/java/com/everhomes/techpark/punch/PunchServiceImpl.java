@@ -7518,9 +7518,29 @@ public class PunchServiceImpl implements PunchService {
                 if (null == statusList) {
                     intervalDTO.setStatus(processIntevalStatus(String.valueOf(dto1.getClockStatus()),String.valueOf(dto2.getClockStatus())));
                 }else{
-                    intervalDTO.setStatus(statusList[punchIntervalNo-1]);
-                    if(approvalStatus!=null && approvalStatus.length>punchIntervalNo && approvalStatus[punchIntervalNo-1]!=null)
-                    	intervalDTO.setSmartAlignment(NormalFlag.YES.getCode());
+					intervalDTO.setStatus(statusList[punchIntervalNo - 1]);
+					if (approvalStatus != null && approvalStatus.length > punchIntervalNo && !StringUtils.isEmpty(approvalStatus[punchIntervalNo - 1])) {
+						intervalDTO.setSmartAlignment(NormalFlag.YES.getCode());
+						if (intervalDTO.getStatus().equals(PunchStatus.NORMAL.getCode() + "")) {
+							dto1.setClockStatus(PunchStatus.NORMAL.getCode());
+							dto2.setClockStatus(PunchStatus.NORMAL.getCode());
+						}else if (intervalDTO.getStatus().equals(PunchStatus.BELATE.getCode() + "")) {
+							dto1.setClockStatus(PunchStatus.BELATE.getCode());
+							dto2.setClockStatus(PunchStatus.NORMAL.getCode());
+						}else if (intervalDTO.getStatus().equals(PunchStatus.LEAVEEARLY.getCode() + "")) {
+							dto1.setClockStatus(PunchStatus.NORMAL.getCode());
+							dto2.setClockStatus(PunchStatus.LEAVEEARLY.getCode());
+						}else if (intervalDTO.getStatus().equals(PunchStatus.BLANDLE.getCode() + "")) {
+							dto1.setClockStatus(PunchStatus.BELATE.getCode());
+							dto2.setClockStatus(PunchStatus.LEAVEEARLY.getCode());
+						}else if (intervalDTO.getStatus().equals(PunchStatus.UNPUNCH.getCode() + "")) {
+							dto1.setClockStatus(PunchStatus.UNPUNCH.getCode());
+							dto2.setClockStatus(PunchStatus.UNPUNCH.getCode());
+						}else if (intervalDTO.getStatus().equals(PunchStatus.FORGOT.getCode() + "")) {
+//							dto1.setClockStatus(PunchStatus.NORMAL.getCode());
+							dto2.setClockStatus(PunchStatus.UNPUNCH.getCode());
+						}
+					}
                 }
                 response.getIntervals().add(intervalDTO);
             }
