@@ -1509,6 +1509,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						priceRule.setFullPrice(pricePackage.getApprovingUserFullPrice());
 						priceRule.setCutPrice(pricePackage.getApprovingUserCutPrice());
 						priceRule.setDiscountRatio(pricePackage.getApprovingUserDiscountRatio());
+					}else {
+						priceRule.setDiscountType(pricePackage.getDiscountType());
+						priceRule.setFullPrice(pricePackage.getFullPrice());
+						priceRule.setCutPrice(pricePackage.getCutPrice());
+						priceRule.setDiscountRatio(pricePackage.getDiscountRatio());
 					}
 				}
 
