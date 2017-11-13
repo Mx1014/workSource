@@ -13836,7 +13836,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (orgs.size() > 1 && i == list.length) {
             //todo 获得多个结果 到达极限 报错
             LOGGER.error("cannot find the exact :organization. path = {}", list.toString());
-            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, "cannot find the exact organization. path = {}", list.toString());
+//            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, "cannot find the exact organization. path = {}", list.toString());
+            return null;
         } else {
             //todo 递归
             List<Organization> result = orgs.stream().map(r -> {

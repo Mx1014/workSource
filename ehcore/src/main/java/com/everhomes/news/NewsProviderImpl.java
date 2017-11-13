@@ -277,4 +277,15 @@ public class NewsProviderImpl implements NewsProvider {
 		assert (id!=null);
 		return ConvertHelper.convert(new EhNewsTagDao(getContext(AccessSpec.readOnly()).configuration()).findById(id),NewsTag.class);
 	}
+
+	@Override
+	public NewsCategory getCategoryIdByEntryId(Integer entryId,Integer namespaceId) {
+		List<NewsCategory> categories = dbProvider.getDslContext(AccessSpec.readOnly()).select().from(Tables.EH_NEWS_CATEGORIES)
+				.where(Tables.EH_NEWS_CATEGORIES.ENTRY_ID.eq(entryId)).and(Tables.EH_NEWS_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+				.fetch().map(r -> ConvertHelper.convert(r, NewsCategory.class));
+		if(categories!=null && categories.size()>0){
+			return categories.get(0);
+		}
+		return null;
+	}
 }
