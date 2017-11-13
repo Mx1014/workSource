@@ -1029,6 +1029,19 @@ public class EquipmentController extends ControllerBase {
         equipmentService.deletePmNotifyParams(cmd);
         return getSuccessResponse();
     }
+    /**
+     * <b>URL: /equipment/checkEquipmentInspectionNumber</b>
+     * <p>检查设备巡检编号是否存在</p>
+     */
+    @RequestMapping("checkEquipmentInspectionNumber")
+    @RestReturn(value = CheckResultResponse.class)
+    public RestResponse checkEquipmentInspectionNumber(CheckEquipmentInspectionNumberCommand cmd) {
+        //equipmentService.deletePmNotifyParams(cmd);
+        CheckResultResponse checkResultResponse =null;
+        return getRestResponse(checkResultResponse);
+    }
+
+
 
 
     private RestResponse getRestResponse(Object obj) {
