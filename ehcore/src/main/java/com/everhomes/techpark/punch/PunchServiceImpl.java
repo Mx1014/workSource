@@ -7525,7 +7525,9 @@ public class PunchServiceImpl implements PunchService {
 		}else{
 			dto1.setPunchType(pl.getPunchType());
 		}
-		dto1.setPunchTime(pl.getPunchTime().getTime());
+		if (null != pl.getPunchTime()) {
+			dto1.setPunchTime(pl.getPunchTime().getTime());
+		}
 		dto1.setClockStatus(pl.getStatus());
 //		dto1.setApprovalStatus(pl.getApprovalStatus());
 		PunchExceptionRequest exceptionRequest = punchProvider.findPunchExceptionRequest(pl.getUserId(), pl.getEnterpriseId(),
@@ -8402,6 +8404,7 @@ public class PunchServiceImpl implements PunchService {
 		pl.setEnterpriseId(request.getEnterpriseId());
 		pl.setPunchDate(request.getPunchDate());
 		pl.setPunchType(request.getPunchType());
+		pl.setPunchStatus(ClockCode.SUCESS.getCode());
 		pl.setPunchIntervalNo(request.getPunchIntervalNo());
 		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), request.getEnterpriseId(),
 				request.getUserId());
