@@ -9,6 +9,7 @@ import java.util.List;
 /**
  * <ul>
  * <li>taskId: 任务id</li>
+ * <li>taskName: 任务名称/li>
  * <li>EquipmentStandardRelationOfflineDTO: 离线巡检对象关联DTO 参考{@link com.everhomes.rest.equipment.EquipmentStandardRelationOfflineDTO}</li>
  * </ul>
  */
