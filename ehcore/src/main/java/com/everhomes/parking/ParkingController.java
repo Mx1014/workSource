@@ -639,6 +639,20 @@ public class ParkingController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /parking/listParkingInvoiceTypes</b>
+     * <p>获取发票列表</p>
+     */
+    @RequestMapping("listParkingInvoiceTypes")
+    @RestReturn(value=ParkingInvoiceTypeDTO.class, collection = true)
+    public RestResponse listParkingInvoiceTypes(ListParkingInvoiceTypesCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.listParkingInvoiceTypes(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /parking/searchParkingCarVerifications</b>
      * <p>搜索车辆认证申请</p>
      */

@@ -8,7 +8,7 @@ package com.everhomes.rest.parking;
  * </ul>
  */
 public enum ParkingCarVerificationType {
-    UN_AUTHORIZED((byte)1), AUTHORIZED((byte)2);
+    UN_AUTHORIZED((byte)1), AUTHORIZED((byte)2), IGNORE_REPEAT_UN_AUTHORIZED((byte)3);
 
     private byte code;
 

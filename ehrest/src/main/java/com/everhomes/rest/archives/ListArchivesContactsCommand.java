@@ -10,6 +10,7 @@ import java.util.List;
  * <li>organizationId: 公司或部门id</li>
  * <li>keywords: 搜索关键词</li>
  * <li>filterScopeTypes: 过滤范围类型{@link com.everhomes.rest.organization.FilterOrganizationContactScopeType}</li>
+ * <li>targetTypes: 组织架构类型</li>
  * <li>pageAnchor: 分页锚点</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
@@ -22,6 +23,9 @@ public class ListArchivesContactsCommand {
 
     @ItemType(String.class)
     private List<String> filterScopeTypes;
+
+    @ItemType(String.class)
+    private List<String> targetTypes;
 
     private Long pageAnchor;
 
@@ -73,5 +77,13 @@ public class ListArchivesContactsCommand {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public List<String> getTargetTypes() {
+        return targetTypes;
+    }
+
+    public void setTargetTypes(List<String> targetTypes) {
+        this.targetTypes = targetTypes;
     }
 }

@@ -110,4 +110,6 @@ public interface ArchivesParameter {
 
     static final String JOB_POSITION_IDS = "jobPositionIds";
 
+    static final String JOB_LEVEL_IDS = "jobLevelIds";
+
 }
