@@ -223,7 +223,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
             equipmentProvider.creatEquipmentStandard(standard);
 
-            createEquipmentStandardsEquipmentsMap(standard, cmd.getEquipmentsIds());
+            createEquipmentStandardsEquipmentsMap(standard, cmd.getEquipments());
 
         } else {
             EquipmentInspectionStandards exist = verifyEquipmentStandard(cmd.getId());
@@ -258,7 +258,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
             equipmentProvider.updateEquipmentStandard(standard);
 
-            updateEquipmentStandardsEquipmentsMap(standard, cmd.getEquipmentsIds());
+            updateEquipmentStandardsEquipmentsMap(standard, cmd.getEquipments());
 
             List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
             if (maps != null && maps.size() > 0) {
@@ -277,25 +277,28 @@ public class EquipmentServiceImpl implements EquipmentService {
 
         equipmentStandardSearcher.feedDoc(standard);
 
-        EquipmentStandardsDTO dto = converStandardToDto(standard);
+        EquipmentStandardsDTO dto = convertStandardToDto(standard);
         return dto;
     }
 
-    private void updateEquipmentStandardsEquipmentsMap(EquipmentInspectionStandards standard, List<Long> equipmentsIds) {
-        createEquipmentStandardsEquipmentsMap(standard, equipmentsIds);
+    private void updateEquipmentStandardsEquipmentsMap(EquipmentInspectionStandards standard, List<EquipmentsDTO> equipments) {
+        createEquipmentStandardsEquipmentsMap(standard, equipments);
     }
 
 
-    private void createEquipmentStandardsEquipmentsMap(EquipmentInspectionStandards standard, List<Long> equipmentsIds) {
+    private void createEquipmentStandardsEquipmentsMap(EquipmentInspectionStandards standard, List<EquipmentsDTO> equipmentsDTO) {
         EquipmentStandardMap equipmentStandardMap = new EquipmentStandardMap();
         equipmentStandardMap.setStandardId(standard.getId());
-        List<Long> equipments = new ArrayList<>();
-        for (Long equipmentId : equipmentsIds) {
-            equipmentStandardMap.setTargetId(equipmentId);
+       // List<Long> equipmentIds = new ArrayList<>();
+        List<EquipmentInspectionEquipments> equipments =new ArrayList<>();
+        for (EquipmentsDTO equipmentDTO :equipmentsDTO){
+            EquipmentInspectionEquipments equipment = ConvertHelper.convert(equipmentDTO, EquipmentInspectionEquipments.class);
+            equipmentStandardMap.setTargetId(equipment.getId());
             equipmentProvider.createEquipmentStandardMap(equipmentStandardMap);
-            equipments.add(equipmentId);
+            equipments.add(equipment);
         }
-        standard.setEquipmentIds(equipments);
+
+        standard.setEquipments(equipments);
     }
 
     private void createEquipmentStandardItems(EquipmentInspectionStandards standards, List<InspectionItemDTO> itemDTOS) {
@@ -326,7 +329,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
     }*/
 
-    private EquipmentStandardsDTO converStandardToDto(EquipmentInspectionStandards standard) {
+    private EquipmentStandardsDTO convertStandardToDto(EquipmentInspectionStandards standard) {
         processRepeatSetting(standard);
         EquipmentStandardsDTO standardDto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
         RepeatSettingsDTO repeatDto = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
@@ -625,7 +628,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         processRepeatSetting(standard);
 
         equipmentProvider.populateStandardGroups(standard);
-        EquipmentStandardsDTO dto = converStandardToDto(standard);
+        EquipmentStandardsDTO dto = convertStandardToDto(standard);
 
         return dto;
     }
@@ -1979,7 +1982,7 @@ public class EquipmentServiceImpl implements EquipmentService {
     @Override
     public void creatTaskByStandard(EquipmentInspectionEquipments equipment, EquipmentInspectionStandards standard) {
         equipmentProvider.populateStandardGroups(standard);
-        EquipmentStandardsDTO standardDto = converStandardToDto(standard);
+        EquipmentStandardsDTO standardDto = convertStandardToDto(standard);
         EquipmentInspectionTasks task = new EquipmentInspectionTasks();
         task.setOwnerType(equipment.getOwnerType());
         task.setOwnerId(equipment.getOwnerId());

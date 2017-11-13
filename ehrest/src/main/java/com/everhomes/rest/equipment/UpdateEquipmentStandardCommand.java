@@ -26,7 +26,7 @@ import java.util.List;
  *  <li>reviewExpiredDays: 审批过期时间限制（天） { 物业巡检V3.2删除}</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
  *  <li>items: 标准关联的巡检项目 参考{@link com.everhomes.rest.equipment.InspectionItemDTO}</li>
- *  <li>equipmentsIds: 标准关联的设备id列表 </li>
+ *  <li>equipmentsDTO: 标准关联的设备id列表 </li>
  * </ul>
  */
 public class UpdateEquipmentStandardCommand {
@@ -77,8 +77,8 @@ public class UpdateEquipmentStandardCommand {
 	@ItemType(InspectionItemDTO.class)
 	private  List<InspectionItemDTO>  items;
 
-	@ItemType(Long.class)
-	private List<Long> equipmentsIds;
+	@ItemType(EquipmentsDTO.class)
+	private List<EquipmentsDTO> equipments;
 
 	public Long getTargetId() {
 		return targetId;
@@ -224,13 +224,13 @@ public class UpdateEquipmentStandardCommand {
         this.items = items;
     }
 
-    public List<Long> getEquipmentsIds() {
-        return equipmentsIds;
-    }
+	public List<EquipmentsDTO> getEquipments() {
+		return equipments;
+	}
 
-    public void setEquipmentsIds(List<Long> equipmentsIds) {
-        this.equipmentsIds = equipmentsIds;
-    }
+	public void setEquipments(List<EquipmentsDTO> equipments) {
+		this.equipments = equipments;
+	}
 
 	@Override
     public String toString() {
