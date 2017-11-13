@@ -19,7 +19,7 @@ import java.util.List;
  *  <li>standardSource: 标准来源</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
  *  <li>items: 标准关联的巡检项目 参考{@link com.everhomes.rest.equipment.InspectionItemDTO}</li>
- *  <li>equipmentsDTO: 标准关联的设备id列表 </li>
+ *  <li>equipmentsDTO: 标准关联的设备列表 参考{@link com.everhomes.rest.equipment.EquipmentsDTO}</li>
  * </ul>
  */
 public class UpdateEquipmentStandardCommand {
