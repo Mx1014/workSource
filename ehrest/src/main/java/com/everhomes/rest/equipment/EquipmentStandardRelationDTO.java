@@ -10,11 +10,13 @@ import java.sql.Timestamp;
  *  <li>targetId: 标准所属管理处id</li>
  *  <li>targetName: 标准所属管理处名</li>
  *  <li>equipmentName: 设备名称</li>
- *  <li>equipmentModel: 设备型号</li>
- *  <li>qrCodeFlag: 二维码状态</li>
+ *  <li>location: 设备位置</li>
+ *  <li>sequenceNo: 编号</li>
  *  <li>status: 设备状态 参考{@link com.everhomes.rest.equipment.EquipmentStatus}</li>
  *  <li>standardId: 关联标准id</li>
  *  <li>standardName: 标准名称</li>
+ *  <li>templateId: 标准模板id</li>
+ *  <li>taskId: 任务id</li>
  *  <li>repeatType: 标准周期类型  0:no repeat 1: by day 2:by week 3: by month 4:year</li>
  *  <li>order: 计划关联巡检对象排序 </li>
  * </ul>
@@ -30,9 +32,13 @@ public class EquipmentStandardRelationDTO {
 	private String targetName;
 	
 	private String equipmentName;
-	
+
+	private  String sequenceNo;
+
+	private  String location;
+	@Deprecated
 	private String equipmentModel;
-	
+	@Deprecated
 	private Byte qrCodeFlag;
 	
 	private Byte status;
@@ -40,6 +46,10 @@ public class EquipmentStandardRelationDTO {
 	private Long standardId;
 	
 	private String standardName;
+
+	private Long   templateId;
+
+	private Long  taskId;
 
 	private  Byte  repeatType;
 
@@ -183,6 +193,38 @@ public class EquipmentStandardRelationDTO {
 
 	public void setOrder(Long order) {
 		this.order = order;
+	}
+
+	public String getSequenceNo() {
+		return sequenceNo;
+	}
+
+	public void setSequenceNo(String sequenceNo) {
+		this.sequenceNo = sequenceNo;
+	}
+
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
+	public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
+	}
+
+	public Long getTaskId() {
+		return taskId;
+	}
+
+	public void setTaskId(Long taskId) {
+		this.taskId = taskId;
 	}
 
 	@Override
