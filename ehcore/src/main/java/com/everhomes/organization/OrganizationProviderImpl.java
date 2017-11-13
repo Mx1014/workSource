@@ -5609,8 +5609,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				}else{ //如果没有隐藏部门，直接返回空
 					return new ArrayList<>();
 				}
+			}else{
+				cond = t1.field("organization_id").eq(org.getId());
 			}
-			cond = t1.field("organization_id").eq(org.getId());
 		}else{
 			cond = t1.field("group_path").like(org.getPath()+"%");
 		}

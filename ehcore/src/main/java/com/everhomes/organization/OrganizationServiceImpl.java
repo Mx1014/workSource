@@ -5622,6 +5622,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         cmd_1.setOrganizationId(cmd.getOrganizationId());
         cmd_1.setKeywords(cmd.getKeywords());
         cmd_1.setFilterScopeTypes(Collections.singletonList("current"));
+        cmd_1.setVisibleFlag(VisibleFlag.ALL.getCode());
         ListOrganizationMemberCommandResponse res_1 = listOrganizationPersonnelsWithDownStream(cmd_1);
         res.setMembers(res_1.getMembers());
 
