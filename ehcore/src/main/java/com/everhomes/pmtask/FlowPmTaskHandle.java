@@ -228,6 +228,7 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 		FlowFireButtonCommand fireButtonCommand = new FlowFireButtonCommand();
 		fireButtonCommand.setFlowCaseId(flowCase.getId());
 		fireButtonCommand.setButtonId(button.getId());
+		fireButtonCommand.setStepCount(flowCase.getStepCount());
 		flowService.fireButton(fireButtonCommand);
 	}
 
