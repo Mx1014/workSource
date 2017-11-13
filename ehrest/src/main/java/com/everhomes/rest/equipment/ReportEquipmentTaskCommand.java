@@ -1,7 +1,6 @@
 package com.everhomes.rest.equipment;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
@@ -32,7 +31,7 @@ public class ReportEquipmentTaskCommand {
 	private String ownerType;
 	
 	@NotNull
-	@ItemType(AttachmentDescriptor.class)
+	@ItemType(Attachment.class)
     private List<Attachment> attachments;
 
 	@Deprecated

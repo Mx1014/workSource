@@ -38,7 +38,6 @@ import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.equipment.*;
-import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -258,8 +257,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 
             equipmentProvider.updateEquipmentStandard(standard);
 
-            updateEquipmentStandardsEquipmentsMap(standard, cmd.getEquipments());
-
             List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
             if (maps != null && maps.size() > 0) {
                 for (EquipmentStandardMap map : maps) {
@@ -267,6 +264,7 @@ public class EquipmentServiceImpl implements EquipmentService {
                     equipmentProvider.inActiveEquipmentStandardMap(map);
                 }
             }
+            updateEquipmentStandardsEquipmentsMap(standard, cmd.getEquipments());
 
         }
 
@@ -303,7 +301,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
     private void createEquipmentStandardItems(EquipmentInspectionStandards standards, List<InspectionItemDTO> itemDTOS) {
         EquipmentInspectionTemplates templates = new EquipmentInspectionTemplates();
-        templates.setName(standards.getName());
+        templates.setName(standards.getName()+standards.getId().toString());
         Long templateId = equipmentProvider.createEquipmentInspectionTemplates(templates);
         standards.setTemplateId(templateId);
         EquipmentInspectionTemplateItemMap templateItemMap = new EquipmentInspectionTemplateItemMap();
@@ -1597,7 +1595,7 @@ public class EquipmentServiceImpl implements EquipmentService {
     }
 
     private EquipmentTaskDTO updateEquipmentTasks(EquipmentInspectionTasks task,
-                                                  EquipmentInspectionTasksLogs log, List<AttachmentDescriptor> attachmentList) {
+                                                  EquipmentInspectionTasksLogs log, List<Attachment> attachmentList) {
 
         equipmentProvider.updateEquipmentTask(task);
         equipmentTasksSearcher.feedDoc(task);
@@ -1726,14 +1724,14 @@ public class EquipmentServiceImpl implements EquipmentService {
         return dto;
     }
 
-    private void processLogAttachments(long userId, List<AttachmentDescriptor> attachmentList, EquipmentInspectionTasksLogs log) {
+    private void processLogAttachments(long userId, List<Attachment> attachmentList, EquipmentInspectionTasksLogs log) {
         List<EquipmentInspectionTasksAttachments> results = null;
 
         if (attachmentList != null) {
             results = new ArrayList<EquipmentInspectionTasksAttachments>();
 
             EquipmentInspectionTasksAttachments attachment = null;
-            for (AttachmentDescriptor descriptor : attachmentList) {
+            for (Attachment descriptor : attachmentList) {
                 attachment = new EquipmentInspectionTasksAttachments();
                 attachment.setCreatorUid(userId);
                 attachment.setLogId(log.getId());
