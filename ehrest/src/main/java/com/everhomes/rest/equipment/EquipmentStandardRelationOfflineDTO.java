@@ -1,37 +1,35 @@
 package com.everhomes.rest.equipment;
 
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
 /**
  * <ul>
- *  <li>taskId: 任务id</li>
- *  <li>equipmentId: 设备id</li>
- *  <li>targetId: 标准所属管理处id</li>
- *  <li>targetName: 标准所属管理处名</li>
- *  <li>equipmentName: 设备名称</li>
- *  <li>location: 设备位置</li>
- *  <li>sequenceNo: 编号</li>
- *  <li>status: 设备状态 参考{@link com.everhomes.rest.equipment.EquipmentStatus}</li>
- *  <li>standardId: 关联标准id</li>
- *  <li>standardName: 标准名称</li>
- *  <li>repeatType: 标准周期类型  0:no repeat 1: by day 2:by week 3: by month 4:year</li>
- *  <li>inspectionItems: 标准周期类型  参考{@link com.everhomes.rest.equipment.InspectionItemOfflineDTO}</li>
+ * <li>equipmentId: 设备id</li>
+ * <li>targetId: 标准所属管理处id</li>
+ * <li>targetName: 标准所属管理处名</li>
+ * <li>equipmentName: 设备名称</li>
+ * <li>location: 设备位置</li>
+ * <li>sequenceNo: 编号</li>
+ * <li>status: 设备状态 参考{@link com.everhomes.rest.equipment.EquipmentStatus}</li>
+ * <li>standardId: 关联标准id</li>
+ * <li>standardName: 标准名称</li>
+ * <li>repeatType: 标准周期类型  0:no repeat 1: by day 2:by week 3: by month 4:year</li>
+ * <li>inspectionItems: 标准周期类型  参考{@link com.everhomes.rest.equipment.InspectionItemOfflineDTO}</li>
  * </ul>
  */
 public class EquipmentStandardRelationOfflineDTO {
-
-    private Long taskId;
 
     private Long equipmentId;
 
     private String equipmentName;
 
-    private  String sequenceNo;
+    private String sequenceNo;
 
-    private  String location;
+    private String location;
 
     private Byte status;
 
@@ -39,17 +37,9 @@ public class EquipmentStandardRelationOfflineDTO {
 
     private String standardName;
 
-    private  Byte  repeatType;
-
+    private Byte repeatType;
+    @ItemType(InspectionItemOfflineDTO.class)
     private List<InspectionItemOfflineDTO> inspectionItems;
-
-    public Long getTaskId() {
-        return taskId;
-    }
-
-    public void setTaskId(Long taskId) {
-        this.taskId = taskId;
-    }
 
     public Long getEquipmentId() {
         return equipmentId;
