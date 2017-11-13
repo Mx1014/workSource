@@ -6,7 +6,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
- *  <li>ownerId: 设备所属组织等的id</li>
+ *  <li>ownerId: 设备所属组织的id</li>
  *  <li>ownerType: 设备所属组织类型，参考{@link com.everhomes.rest.quality.OwnerType}</li>
  *  <li>targetId: 设备所属管理处id</li>
  *  <li>targetType: 设备所属管理处类型</li>
@@ -16,7 +16,6 @@ import javax.validation.constraints.NotNull;
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
- *  <li>repeatType: 巡检对象对应标准周期类型</li>
  * </ul>
  */
 public class SearchEquipmentsCommand {
@@ -49,7 +48,6 @@ public class SearchEquipmentsCommand {
 	
 	private Long inspectionCategoryId;
 
-	private  Byte repeatType;
 	
 	public Long getInspectionCategoryId() {
 		return inspectionCategoryId;
@@ -145,14 +143,6 @@ public class SearchEquipmentsCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
-	}
-
-	public Byte getRepeatType() {
-		return repeatType;
-	}
-
-	public void setRepeatType(Byte repeatType) {
-		this.repeatType = repeatType;
 	}
 
 	@Override
