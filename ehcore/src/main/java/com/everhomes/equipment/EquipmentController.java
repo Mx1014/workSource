@@ -399,11 +399,21 @@ public class EquipmentController extends ControllerBase {
      */
     @RequestMapping("getEquipmentInspectionPlan")
     @RestReturn(value = EquipmentInspectionPlanDTO.class)
-    public RestResponse getEquipmentInspectionPlan(DeleteEquipmentAccessoriesCommand cmd) {
+    public RestResponse getEquipmentInspectionPlan(DeleteEquipmentPlanCommand cmd) {
 
         EquipmentInspectionPlanDTO equipmentInspectionPlans = null;
 
         return getRestResponse(equipmentInspectionPlans);
+    }
+    /**
+     * <b>URL: /equipment/deleteEquipmentInspectionPlan</b>
+     * <p>根据id删除巡检计划</p>
+     */
+    @RequestMapping("deleteEquipmentInspectionPlan")
+    @RestReturn(value = EquipmentInspectionPlanDTO.class)
+    public RestResponse deleteEquipmentInspectionPlan(DeleteEquipmentPlanCommand cmd) {
+
+        return  getSuccessResponse();
     }
 
     /**
