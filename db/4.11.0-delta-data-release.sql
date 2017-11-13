@@ -158,3 +158,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@assetv2_id:=@assetv2_id+1, 'assetv2', '10003', 'zh_CN', '还未进行生成');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@assetv2_id:=@assetv2_id+1, 'assetv2', '10004', 'zh_CN', '添加失败，一个收费项目只能存在一个账单组中');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@assetv2_id:=@assetv2_id+1, 'assetv2', '10005', 'zh_CN', '对象已经或正在正常工作中，不能删除或修改');
+
+-- 物业报修 统计数据同步 add by sw 20171113
+UPDATE eh_pm_tasks set status = 4 where status = 5;
+DELETE from eh_pm_task_statistics;
