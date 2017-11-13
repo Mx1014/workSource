@@ -6,7 +6,9 @@ import com.everhomes.acl.*;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.archives.ArchivesProvider;
 import com.everhomes.archives.ArchivesService;
+import com.everhomes.archives.ArchivesStickyContacts;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -276,6 +278,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Autowired
     private ArchivesService archivesService;
+
+    @Autowired
+    private ArchivesProvider archivesProvider;
 
     private int getPageCount(int totalCount, int pageSize) {
         int pageCount = totalCount / pageSize;
@@ -5408,6 +5413,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                         memberDetail.setDepartmentIds(JSON.toJSONString(departmentIds));
                     memberDetail.setDepartment(convertToOrganizationName(departmentIds));
                     organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());
+                    //删除置顶信息
+                    ArchivesStickyContacts stickContact = archivesProvider.findArchivesStickyContactsByDetailIdAndOrganizationId(namespaceId,memberDetail.getOrganizationId(),detailId);
+                    archivesProvider.deleteArchivesStickyContacts(stickContact);
                 }
             });
 
