@@ -119,6 +119,7 @@ public class GeneralApprovalDefaultHandler implements GeneralApprovalHandler {
 		GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
 		PunchExceptionRequest request = punchProvider.findPunchExceptionRequestByRequestId(ga.getOrganizationId(), flowCase.getApplyUserId(), flowCase.getId());
 		request.setStatus(ApprovalStatus.AGREEMENT.getCode());
+		punchProvider.updatePunchExceptionRequest(request);
 		//如果审批类型是-加班请假等,重刷影响日期的pdl
 		if (punchService.getTimeIntervalApprovalAttribute().contains(ga.getApprovalAttribute())) {
 			Calendar punCalendar = Calendar.getInstance();
