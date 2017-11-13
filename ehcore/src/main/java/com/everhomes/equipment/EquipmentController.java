@@ -430,7 +430,7 @@ public class EquipmentController extends ControllerBase {
 
     /**
      * <b>URL: /equipment/exportEquipmentInspectionPlans</b>
-     * <p>导出备品备件表</p>
+     * <p>导出计划表</p>
      */
     @RequestMapping("exportEquipmentInspectionPlans")
     public HttpServletResponse exportEquipmentInspectionPlans(searchEquipmentInspectionPlansCommand cmd, HttpServletResponse response) {

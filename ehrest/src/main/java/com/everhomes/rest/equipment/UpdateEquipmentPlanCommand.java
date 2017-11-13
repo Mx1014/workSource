@@ -19,7 +19,6 @@ import java.util.List;
  *  <li>planType: 计划类别  参考{@link com.everhomes.rest.equipment.StandardType}</li>
  *  <li>name: 计划名称</li>
  *  <li>status: 计划状态 参考{@link com.everhomes.rest.equipment.EquipmentPlanStatus}</li>
- *  <li>reviewResult: 计划审批结果 参考{@link com.everhomes.rest.equipment.EquipmentInspectionPlanResult}</li>
  *  <li>remarks: 计划备注内容</li>
  *  <li>repeatSettings: 执行周期 参考{@link com.everhomes.rest.repeat.RepeatSettingsDTO}</li>
  *  <li>equipmentStandardRelations: 设备标准关系 参考{@link com.everhomes.rest.equipment.EquipmentStandardRelationDTO}</li>
@@ -43,8 +42,6 @@ public class UpdateEquipmentPlanCommand {
     private String name;
 
     private Byte status;
-
-    private Byte reviewResult;
 
     private String remarks;
 
@@ -122,14 +119,6 @@ public class UpdateEquipmentPlanCommand {
 
     public void setStatus(Byte status) {
         this.status = status;
-    }
-
-    public Byte getReviewResult() {
-        return reviewResult;
-    }
-
-    public void setReviewResult(Byte reviewResult) {
-        this.reviewResult = reviewResult;
     }
 
     public String getRemarks() {
