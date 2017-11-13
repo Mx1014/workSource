@@ -363,4 +363,19 @@ public class NewsController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /news/getCategoryIdByEntryId</b>
+	 * <p>
+	 * 根据入口id获取新闻分类id
+	 * </p>
+	 */
+	@RequestMapping("getCategoryIdByEntryId")
+	@RestReturn(GetCategoryIdByEntryIdResponse.class)
+	public RestResponse syncNews(GetCategoryIdByEntryIdCommand cmd){
+		RestResponse response = new RestResponse(newsService.getCategoryIdByEntryId(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

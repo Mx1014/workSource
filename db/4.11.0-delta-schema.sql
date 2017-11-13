@@ -110,7 +110,7 @@ CREATE TABLE `eh_archives_notifications` (
 
 -- eh_organization_member_details 表的字段添加
 ALTER TABLE eh_organization_member_details CHANGE political_status political_flag VARCHAR(128) COMMENT '政治面貌';
-ALTER TABLE eh_organization_member_details ADD COLUMN procreative DATE COMMENT '生育状况';
+ALTER TABLE eh_organization_member_details ADD COLUMN procreative VARCHAR(64) COMMENT '生育状况';
 ALTER TABLE eh_organization_member_details ADD COLUMN ethnicity VARCHAR(128) COMMENT '民族';
 ALTER TABLE eh_organization_member_details ADD COLUMN id_type VARCHAR(64) COMMENT '证件类型';
 ALTER TABLE eh_organization_member_details ADD COLUMN id_expiry_date DATE COMMENT '证件有效期';
@@ -170,3 +170,5 @@ CREATE TABLE `eh_parking_car_verifications` (
   `source_type` tinyint(4) DEFAULT NULL COMMENT '1: card request, 2: car verify',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- by dengs,园区快讯多入口，2017.11.13
+ALTER TABLE eh_news_categories ADD COLUMN `entry_id` INTEGER;

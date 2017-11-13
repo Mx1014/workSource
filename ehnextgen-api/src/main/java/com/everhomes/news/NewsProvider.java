@@ -48,4 +48,6 @@ public interface NewsProvider {
 	List<NewsTag> listNewsTag(String ownerType,Long ownerId,Byte isSearch,Long parentId,Long pageAnchor,Integer pageSize);
 
 	void increaseViewCount(Long newsId, Long nViewCount);
+
+	NewsCategory getCategoryIdByEntryId(Integer entryId,Integer namespaceId);
 }
