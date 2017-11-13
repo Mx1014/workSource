@@ -4002,7 +4002,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}else if (!SceneType.ENTERPRISE.getCode().equals(scene)) {
 				dtos2.forEach(p->{
 					p.setPrice(p.getApprovingUserPrice());
-					p.setOriginalPrice(p.getHalfApprovingUserOriginalPrice());
+					p.setOriginalPrice(p.getApprovingUserOriginalPrice());
 			});
 				t = dtos2;
 		}
@@ -4014,7 +4014,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			RentalSitePackagesDTO dto = t.get(0);
 			rulesDtos.setPrice(dto.getPrice());
 			rulesDtos.setOriginalPrice(dto.getOriginalPrice());
-
+			rulesDtos.setOrgMemberPrice(dto.getOrgMemberPrice());
+			rulesDtos.setApprovingUserPrice(dto.getApprovingUserPrice());
 		}
 	}
 
