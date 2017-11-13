@@ -19,6 +19,8 @@ public interface ArchivesProvider {
 
     ArchivesStickyContacts findArchivesStickyContactsByDetailIdAndOrganizationId(Integer namespaceId, Long organizationId, Long detailId);
 
+    void deleteArchivesStickyContactsByDetailId(Integer namespaceId, Long detailId);
+
     void deleteArchivesDismissEmployees(ArchivesDismissEmployees dismissEmployee);
 
     ArchivesDismissEmployees getArchivesDismissEmployeesByDetailId(Long organizationId, Long detailId);
