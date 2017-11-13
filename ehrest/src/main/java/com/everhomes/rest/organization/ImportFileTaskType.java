@@ -16,7 +16,7 @@ public enum ImportFileTaskType {
     WAREHOUSE_MATERIAL_CATEGORY("warehouse_material_category"),
     ENTERPRISE_CUSTOMER("enterprise_customer"),
     PERSONNEL_FILE("psersonnel_file"),
-
+    PERSONNEL_ARCHIVES("personnel_archives"),
     SALARY_GROUP("salary_group"), ENERGY_METER("energy_meter");
 
 	private String code;

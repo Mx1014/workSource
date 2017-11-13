@@ -199,10 +199,6 @@ public class ContractFlowModuleListener implements FlowModuleListener {
         return sdf.format(time);
     }
 
-    private ContractService getContractService(Integer namespaceId) {
-        String handler = configurationProvider.getValue(namespaceId, "contractService", "");
-        return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
-    }
 
     @Override
     public String onFlowVariableRender(FlowCaseState ctx, String variable) {
