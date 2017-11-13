@@ -1,8 +1,8 @@
 package com.everhomes.rest.equipment;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
@@ -10,8 +10,8 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerType: 标准所属组织类型，参考{@link com.everhomes.rest.quality.OwnerType}</li>
  *  <li>targetId: 标准所属项目id</li>
  *  <li>targetType: 标准所属项目类型</li>
- *  <li>standardType: 标准类别 参考{@link com.everhomes.rest.equipment.StandardType}</li>
  *  <li>status: 标准状态 参考{@link com.everhomes.rest.equipment.EquipmentStandardStatus}</li>
+ *  <li>repeatType:标准周期  0:no repeat 1: by day 2:by week 3: by month 4:year</li>
  *  <li>keyword: 查询关键字</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
@@ -30,9 +30,12 @@ public class SearchEquipmentStandardsCommand {
 	private Long targetId;
 
 	private String targetType;
-	
+
+	@Deprecated
 	private Byte standardType;
-	
+
+	private  Byte repeatType;
+
 	private Byte status;
 	
 	private String keyword;
@@ -132,7 +135,15 @@ public class SearchEquipmentStandardsCommand {
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
-	
+
+	public Byte getRepeatType() {
+		return repeatType;
+	}
+
+	public void setRepeatType(Byte repeatType) {
+		this.repeatType = repeatType;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
