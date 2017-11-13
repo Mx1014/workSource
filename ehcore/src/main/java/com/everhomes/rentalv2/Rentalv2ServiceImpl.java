@@ -1482,7 +1482,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		if (null != sceneTokenDTO) { //根据用户类型区分优惠
 			String scene = sceneTokenDTO.getScene();
-			if (cmd.getPackageName()!=null) {
+			if (cmd.getPackageName()==null) {
 				if (SceneType.PM_ADMIN.getCode().equals(scene)) {
 					priceRule.setDiscountType(priceRule.getOrgMemberDiscountType());
 					priceRule.setFullPrice(priceRule.getOrgMemberFullPrice());
