@@ -16,14 +16,7 @@ import java.util.List;
  *  <li>targetType: 标准所属项目类型</li>
  *  <li>name: 标准名称</li>
  *  <li>repeatType: 0:no repeat 1: by day 2:by week 3: by month 4:year</li>
- *  <li>standardNumber: 标准编号 { 物业巡检V3.2删除}</li>
  *  <li>standardSource: 标准来源</li>
- *  <li>description: 具体内容 { 物业巡检V3.2删除}</li>
- *  <li>remarks: 备注 { 物业巡检V3.2删除}</li>
- *  <li>standardType: 标准类别 参考{@link com.everhomes.rest.equipment.StandardType}</li>
- *  <li>repeat: 执行周期 { 物业巡检V3.2删除} 参考{@link com.everhomes.rest.repeat.RepeatSettingsDTO}</li>
- *  <li>templateId: 巡检项模板id</li>
- *  <li>reviewExpiredDays: 审批过期时间限制（天） { 物业巡检V3.2删除}</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
  *  <li>items: 标准关联的巡检项目 参考{@link com.everhomes.rest.equipment.InspectionItemDTO}</li>
  *  <li>equipmentsDTO: 标准关联的设备id列表 </li>
