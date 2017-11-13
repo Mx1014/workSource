@@ -111,7 +111,7 @@ VALUES ((@locale_strings_id := @locale_strings_id + 1), 'flow', '10008', 'zh_CN'
 
 -- 修改物业报修 add by sw 20171110
 DELETE from eh_web_menu_scopes where menu_id in (20192, 20160);
-DELETE from eh_web_menus where menu_id in (20192, 20160);
+DELETE from eh_web_menus where id in (20192, 20160);
 
 -- bydengs,20171113,新闻多入口修改。
 update eh_news_categories SET entry_id = 0 WHERE id in (0,1,3,60);
