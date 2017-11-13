@@ -894,7 +894,7 @@ public class PunchServiceImpl implements PunchService {
 
 		String asList = "";
 		if (null != pdl.getApprovalStatusList() && !StringUtils.isEmpty(pdl.getApprovalStatusList())) {
-			String[] asArrary = org.apache.commons.lang.StringUtils.splitByWholeSeparator(pdl.getApprovalStatusList(),PunchConstants.STATUS_SEPARATOR);
+			String[] asArrary = org.apache.commons.lang.StringUtils.splitByWholeSeparator(pdl.getApprovalStatusList(),PunchConstants.STATUS_SEPARATOR,statusArrary.length);
 			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 			for (int i = 0; i < statusArrary.length / 2; i++) {
 				String approvalStatus = "";
@@ -7458,7 +7458,7 @@ public class PunchServiceImpl implements PunchService {
             response.setStatusList(pdl.getStatusList());
             if (null != pdl.getStatusList()) {
                 if (null != pdl.getApprovalStatusList())
-                    approvalStatus = org.apache.commons.lang.StringUtils.splitByWholeSeparator(pdl.getApprovalStatusList(),PunchConstants.STATUS_SEPARATOR);
+                    approvalStatus = org.apache.commons.lang.StringUtils.splitByWholeSeparator(pdl.getApprovalStatusList(),PunchConstants.STATUS_SEPARATOR,pdl.getPunchTimesPerDay()/2);
                 statusList = org.apache.commons.lang.StringUtils.splitByWholeSeparator( pdl.getStatusList(),PunchConstants.STATUS_SEPARATOR);
                 if (statusList.length < pdl.getPunchTimesPerDay() / 2) {
                     if (statusList.length == 1) {
