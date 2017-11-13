@@ -235,13 +235,13 @@ public class EquipmentController extends ControllerBase {
      * <b>URL: /equipment/searchEquipmentStandardsObject</b>
      * <p>列出设备列表 新建计划时关联巡检对象</p>
      */
-    @RequestMapping("searchEquipmentStandardsObject")
+    @RequestMapping("searchEquipmentStandardRelations")
     @RestReturn(value = SearchEquipmentStandardRelationsResponse.class)
-    public RestResponse searchEquipmentStandardsObject(SearchEquipmentsCommand cmd) {
+    public RestResponse searchEquipmentStandardRelations(SearchEquipmentStandardRelationsCommand cmd) {
+        //增加搜索条件  repeatType
+        SearchEquipmentStandardRelationsResponse relations = equipmentStandardMapSearcher.query(cmd);
 
-        SearchEquipmentStandardRelationsResponse searchEquipmentStandardsObject = null;
-
-        return getRestResponse(searchEquipmentStandardsObject);
+        return getRestResponse(relations);
     }
 
     /**
@@ -263,7 +263,7 @@ public class EquipmentController extends ControllerBase {
      */
     @RequestMapping("exportEquipments")
     public HttpServletResponse exportEquipments(@Valid SearchEquipmentsCommand cmd, HttpServletResponse response) {
-
+        //动态excel
         return equipmentService.exportEquipments(cmd, response);
     }
 
