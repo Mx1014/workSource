@@ -26,10 +26,25 @@ public class PaymentExpectanciesCommand {
     private Integer pageOffset;
     private Integer pageSize;
 
+
+    private Byte contractIdType;
+
+
     @ItemType(RentAdjust.class)
     private List<RentAdjust> rentAdjusts;
     @ItemType(RentFree.class)
     private List<RentFree> rentFrees;
+
+
+    private Byte isEffectiveImmediately;
+
+    public Byte getIsEffectiveImmediately() {
+        return isEffectiveImmediately;
+    }
+
+    public void setIsEffectiveImmediately(Byte isEffectiveImmediately) {
+        this.isEffectiveImmediately = isEffectiveImmediately;
+    }
 
 
     @Override
@@ -43,6 +58,14 @@ public class PaymentExpectanciesCommand {
 
     public Long getContractId() {
         return contractId;
+    }
+
+    public Byte getContractIdType() {
+        return contractIdType;
+    }
+
+    public void setContractIdType(Byte contractIdType) {
+        this.contractIdType = contractIdType;
     }
 
     public void setContractId(Long contractId) {

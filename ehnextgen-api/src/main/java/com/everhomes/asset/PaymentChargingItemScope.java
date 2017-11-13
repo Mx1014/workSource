@@ -4,7 +4,7 @@ package com.everhomes.asset;
 import com.everhomes.server.schema.tables.pojos.EhPaymentChargingItemScopes;
 
 /**
- * Created by Wentian Wang on 2017/11/2.
+ * Created by Wentian Wang on 2017/10/11.
  */
 
 public class PaymentChargingItemScope extends EhPaymentChargingItemScopes {

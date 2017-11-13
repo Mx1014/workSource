@@ -11,6 +11,7 @@ import java.sql.Timestamp;
  *     <li>meterId: 表记id</li>
  *     <li>meterName: 表记名称</li>
  *     <li>meterNumber: 表记编号</li>
+ *     <li>meterType: 表记分类</li>
  *     <li>reading: 读数</li>
  *     <li>oldReading: 旧表读数(只有换表情况下才会有该字段)</li>
  *     <li>operatorName: 读表人名字</li>
@@ -26,7 +27,9 @@ public class EnergyMeterReadingLogDTO {
     private Long id;
     private Long meterId;
     private String meterName;
+    private Byte meterType;
     private String meterNumber;
+    private String meterAddress;
     private BigDecimal reading;
     private BigDecimal oldReading;
     private String operatorName;
@@ -36,6 +39,22 @@ public class EnergyMeterReadingLogDTO {
 
     private BigDecimal dayPrompt;
     private BigDecimal monthPrompt;
+
+    public String getMeterAddress() {
+        return meterAddress;
+    }
+
+    public void setMeterAddress(String meterAddress) {
+        this.meterAddress = meterAddress;
+    }
+
+    public Byte getMeterType() {
+        return meterType;
+    }
+
+    public void setMeterType(Byte meterType) {
+        this.meterType = meterType;
+    }
 
     public Long getId() {
         return id;

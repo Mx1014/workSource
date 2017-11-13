@@ -95,6 +95,14 @@ public class RepeatServiceImpl implements RepeatService {
 	}
 
 	@Override
+	public void updateRepeatSettings(RepeatSettings repeat) {
+		if(LOGGER.isInfoEnabled()) {
+			LOGGER.info("update repeat setting, repeat=" + repeat);
+		}
+		repeatProvider.updateRepeatSettings(repeat);
+	}
+
+	@Override
 	public void deleteRepeatSettingsById(Long id) {
 		// TODO Auto-generated method stub
 		
@@ -132,6 +140,42 @@ public class RepeatServiceImpl implements RepeatService {
 		RepeatSettings repeat = findRepeatSettingById(4L);
 		List<RepeatExpressionDTO> ex = analyzeExpression(repeat.getExpression());
 		return ex;
+	}
+
+	@Override
+	public boolean repeatSettingStillWork(Long repeatSettingId) {
+		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+		RepeatSettings repeat = findRepeatSettingById(repeatSettingId);
+		if(repeat.getStatus() == RepeatSettingStatus.ACTIVE.getCode()) {
+			if(repeat.getForeverFlag() == 1) {
+				return true;
+			} else if(repeat.getForeverFlag() == 0) {
+				if(repeat.getRepeatCount() == 0) {
+					if(repeat.getEndDate() == null) {
+						return false;
+					} else {
+						Timestamp expiredDate = addPeriod(new Timestamp(repeat.getEndDate().getTime()), 1, "d");
+						if(expiredDate.after(now)) {
+							return true;
+						}
+					}
+
+				} else {
+					if(repeat.getRepeatType() == 0) {
+						return false;
+					} else {
+						Timestamp expiredDate = addPeriod(new Timestamp(repeat.getEndDate().getTime()), 1, "d");
+						Timestamp repeatEndDate = addPeriod(new Timestamp(repeat.getStartDate().getTime()),
+								repeat.getRepeatCount()*repeat.getRepeatInterval()+1, getRepeatType(repeat.getRepeatType()));
+						Timestamp endDate = getEarlyTime(expiredDate, repeatEndDate);
+						if(endDate.after(now)) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	@Override
