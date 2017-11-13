@@ -456,7 +456,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
             return null;
         });
 
-        pmTaskSearch.feedDoc(task);
+        pmTaskSearch.feedDoc(pmTaskProvider.findTaskById(task.getId()));
         return ConvertHelper.convert(task, PmTaskDTO.class);
     }
 
