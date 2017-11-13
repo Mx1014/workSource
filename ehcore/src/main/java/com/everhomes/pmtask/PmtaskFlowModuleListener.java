@@ -126,7 +126,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				Integer namespaceId = UserContext.getCurrentNamespaceId();
 				if(namespaceId == 1000000) {
 					LOGGER.debug("synchronizedTaskToTechpark, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
-					List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.ASSIGNING.getCode());
+					List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.PROCESSING.getCode());
 					if (null != logs && logs.size() != 0) {
 						for (PmTaskLog r: logs) {
 							if (null != r.getTargetId()) {
@@ -197,7 +197,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		//TODO:为科兴与一碑对接
 		if(task.getNamespaceId() == 999983 &&
 				task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
-			PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
+			EbeiPmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
 			dto = handler.getTaskDetail(cmd);
 		}else {
 			dto = pmTaskCommonService.getTaskDetail(cmd, false);
@@ -309,7 +309,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 						pmTaskLog.setOperatorUid(UserContext.current().getUser().getId());
 						pmTaskLog.setOwnerId(task.getOwnerId());
 						pmTaskLog.setOwnerType(task.getOwnerType());
-						pmTaskLog.setStatus(task.getStatus());
+						pmTaskLog.setStatus(PmTaskFlowStatus.PROCESSING.getCode());
 						pmTaskLog.setTargetId(targetId);
 						pmTaskLog.setTargetType(PmTaskTargetType.USER.getCode());
 						pmTaskLog.setTaskId(task.getId());
@@ -323,7 +323,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			//TODO:为科兴与一碑对接
 			if(task.getNamespaceId() == 999983 &&
 					task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
-				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
+				EbeiPmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
 				CancelTaskCommand command = new CancelTaskCommand();
 				command.setId(task.getId());
 				command.setOwnerId(task.getOwnerId());
@@ -337,8 +337,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				flowService.processAutoStep(stepDTO);
 				ctx.setContinueFlag(false);
 
-			}else
-			if ("ASSIGNING".equals(nodeType)) {
+			}else if ("ASSIGNING".equals(nodeType)) {
 				FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
 				stepDTO.setFlowCaseId(flowCase.getId());
 				stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
@@ -407,7 +406,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			smsProvider.addToTupleList(variables, "categoryName", category.getName());
 		}else if (SmsTemplateCode.PM_TASK_FLOW_ASSIGN_CODE == templateId) {
 			//分配任务
-			List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.ASSIGNING.getCode());
+			List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.PROCESSING.getCode());
 
 			if (logs.size() != 0) {
 				Long targetId = logs.get(0).getTargetId();
