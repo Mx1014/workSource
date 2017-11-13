@@ -408,7 +408,7 @@ public class EquipmentController extends ControllerBase {
 
     /**
      * <b>URL: /equipment/searchEquipmentAccessories</b>
-     * <p>查看巡检计划</p>
+     * <p>查看巡检计划列表</p>
      */
     @RequestMapping("searchEquipmentInspectionPlans")
     @RestReturn(value = searchEquipmentInspectionPlansResponse.class)
@@ -467,6 +467,19 @@ public class EquipmentController extends ControllerBase {
         ListEquipmentTasksResponse tasks = equipmentService.listEquipmentTasks(cmd);
 
         return getRestResponse(tasks);
+    }
+
+    /**
+     * <b>URL: /equipment/listEquipmentTasksDetail</b>
+     * <p>查看任务列表-app</p>
+     */
+    @RequestMapping("listEquipmentTasksDetails")
+    @RestReturn(value = listEquipmentTasksDetailsResponse.class)
+    public RestResponse listEquipmentTasksDetails(ListEquipmentTasksCommand cmd) {
+
+        listEquipmentTasksDetailsResponse tasksDetail = null;
+
+        return getRestResponse(tasksDetail);
     }
 
     /**
