@@ -32,7 +32,7 @@ import java.util.List;
  *  <li>status: 执行状态 参考{@link com.everhomes.rest.equipment.EquipmentTaskStatus}</li>
  *  <li>result: 执行结果 参考{@link com.everhomes.rest.equipment.EquipmentTaskResult}</li>
  *  <li>reviewResult: 审阅结果 参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
- *  <li>equipments: 审阅结果 参考{@link com.everhomes.rest.equipment.EquipmentsDTO}</li>
+ *  <li>equipments: 任务关联设备信息列表 参考{@link com.everhomes.rest.equipment.EquipmentsDTO}</li>
  * </ul>
  */
 public class EquipmentTaskDTO {
