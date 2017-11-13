@@ -894,15 +894,25 @@ public class PunchServiceImpl implements PunchService {
 		String asList = "";
 		if (null != pdl.getApprovalStatusList() && !StringUtils.isEmpty(pdl.getApprovalStatusList())) {
 			String[] asArrary = pdl.getApprovalStatusList().split(PunchConstants.STATUS_SEPARATOR);
-
+			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 			for (int i = 0; i < statusArrary.length / 2; i++) {
-				String status = "";
+				String approvalStatus = "";
 				String a1 = asArrary[2 * i];
 				String a2 = asArrary[2 * i + 1];
 				if (StringUtils.isEmpty(a1) && StringUtils.isEmpty(a2)) {
 					//俩都是空,那就空
 					a1 = "";
 					a2 = "";
+					//按照打卡的状态来计算是否正常
+					String status =null;
+					if (null == statusArrary || statusArrary.length == 0) {
+						status = pdl.getStatusList();
+					}else{
+						status = processIntevalStatus(statusArrary[2 * i], statusArrary[2 * i + 1]);
+					}
+					if (!status.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
+						pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+					}
 				}else if(StringUtils.isEmpty(a1)||StringUtils.isEmpty(a2)){
 					//2个有一个为空就要拿status来匹配
 					if (StringUtils.isEmpty(a1)) {
@@ -913,14 +923,14 @@ public class PunchServiceImpl implements PunchService {
 				}else{
 					//两个都有审批结果那就用审批结果这里不用动
 				}
-				status = processIntevalStatus(a1,a2);
-				if (!status.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
+				approvalStatus = processIntevalStatus(a1,a2);
+				if (!approvalStatus.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
 					pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 				}
 				if (i == 0) {
-					asList = status;
+					asList = approvalStatus;
 				} else {
-					asList = asList + PunchConstants.STATUS_SEPARATOR + status;
+					asList = asList + PunchConstants.STATUS_SEPARATOR + approvalStatus;
 				}
 
 			}

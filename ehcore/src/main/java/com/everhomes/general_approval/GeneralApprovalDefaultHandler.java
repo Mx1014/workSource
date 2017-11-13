@@ -110,6 +110,7 @@ public class GeneralApprovalDefaultHandler implements GeneralApprovalHandler {
 		GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
 		PunchExceptionRequest request = punchProvider.findPunchExceptionRequestByRequestId(ga.getOrganizationId(), flowCase.getApplyUserId(), flowCase.getId());
 		request.setStatus(ApprovalStatus.REJECTION.getCode());
+		punchProvider.updatePunchExceptionRequest(request);
 
 	}
 

@@ -68,6 +68,7 @@ public class GeneralApprovalAbnormalPunchHandler extends GeneralApprovalDefaultH
         punchService.approveAbnormalPunch(request);
         Calendar punCalendar = Calendar.getInstance();
         punCalendar.setTime(request.getPunchDate());
+        punchProvider.updatePunchExceptionRequest(request);
         try {
             punchService.refreshPunchDayLog(request.getUserId(), request.getEnterpriseId(), punCalendar);
         } catch (ParseException e) {
