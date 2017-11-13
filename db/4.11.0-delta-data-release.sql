@@ -44,6 +44,11 @@ SET @scope_id = (SELECT MAX(id) FROM eh_web_menu_scopes);
 INSERT INTO `eh_web_menu_scopes` VALUES(@scope_id := @scope_id + 1,50400,'','EhNamespaces',1,2);
 -- INSERT INTO `eh_web_menu_scopes` VALUES(@scope_id := @scope_id + 1,50400,'','EhNamespaces',999992,2);
 
+-- 同步合同主体信息
+update eh_organization_member_details set contract_party_id = organization_id;
+-- 同步员工状态
+update eh_organization_member_details set employee_status = 1 where employment_time < '2017-11-13' or employment_time is null;
+
 -- R ended --
 
 
