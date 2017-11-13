@@ -2783,7 +2783,7 @@ long id = sequenceProvider.getNextSequence(key);
 			beginDate = new Timestamp(dateFormat.parse(punchMonth+"01").getTime());
 
 			Timestamp endDate = new Timestamp(dateFormat.parse((Integer.valueOf(punchMonth)+1)+"01").getTime());
-			SelectConditionStep<Record1<Integer>> step = getReadOnlyContext().select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.count()).from(Tables.EH_APPROVAL_REQUESTS)
+			SelectConditionStep<Record1<Integer>> step = getReadOnlyContext().select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.count()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS)
 					.where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.CREATOR_UID.eq(userId))
 					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(ownerId))
 					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(beginDate))
