@@ -57,6 +57,11 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     @Autowired
     private ConfigurationProvider configurationProvider;
 
+
+//    @Autowired
+//    private ContractService contractService;
+
+
     @Override
     public FlowModuleInfo initModule() {
         FlowModuleInfo module = new FlowModuleInfo();
@@ -193,6 +198,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return sdf.format(time);
     }
+
 
     @Override
     public String onFlowVariableRender(FlowCaseState ctx, String variable) {

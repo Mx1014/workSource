@@ -53,10 +53,7 @@ import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
-import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
-import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
-import com.everhomes.rest.acl.RoleConstants;
+import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
@@ -88,6 +85,7 @@ import com.everhomes.rest.launchpad.ItemKind;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.module.Project;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
+import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
@@ -5211,10 +5209,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 //                    this.organizationProvider.createOrganizationMemberLog(orgLog);
 //  master
                 }
-
-                this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), cmd.getEnterpriseId(), cmd.getUserId());
             }
         }
+        this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), cmd.getEnterpriseId(), cmd.getUserId());
     }
 
     /**
@@ -5625,6 +5622,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         cmd_1.setOrganizationId(cmd.getOrganizationId());
         cmd_1.setKeywords(cmd.getKeywords());
         cmd_1.setFilterScopeTypes(Collections.singletonList("current"));
+        cmd_1.setVisibleFlag(VisibleFlag.ALL.getCode());
         ListOrganizationMemberCommandResponse res_1 = listOrganizationPersonnelsWithDownStream(cmd_1);
         res.setMembers(res_1.getMembers());
 
@@ -5846,6 +5844,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         // 删除考勤规则的操作
         if(members != null && members.size() > 0)
             this.uniongroupService.syncUniongroupAfterLeaveTheJob(members.get(0).getDetailId());
+
     }
 
     /**
@@ -5945,6 +5944,17 @@ public class OrganizationServiceImpl implements OrganizationService {
                             organizationSearcher.feedDoc(o);
                         }
                     }
+                }
+
+                // 删除模块管理员
+                if(OrganizationMemberTargetType.fromCode(m.getTargetType()) == OrganizationMemberTargetType.USER){
+                    DeleteServiceModuleAdministratorsCommand dscommand = new DeleteServiceModuleAdministratorsCommand();
+                    dscommand.setTargetId(m.getTargetId());
+                    dscommand.setTargetType(OwnerType.USER.getCode());
+                    dscommand.setOwnerType(OwnerType.ORGANIZATION.getCode());
+                    dscommand.setOwnerId(m.getOrganizationId());
+                    dscommand.setOrganizationId(m.getOrganizationId());
+                    this.rolePrivilegeService.deleteServiceModuleAdministrators(dscommand);
                 }
 
                 Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -10602,6 +10612,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             response.setTotalCount(this.organizationProvider.countOrganizationPersonnels(cmd.getNamespaceId(), orgCommoand, cmd.getIsSignedup(), visibleFlag));
         } else {
             List<String> groupTypes = new ArrayList<>();
+            groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
             groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
             groupTypes.add(OrganizationGroupType.GROUP.getCode());
             organizationMembers = this.organizationProvider.listOrganizationMemberByPath(cmd.getKeywords(), org.getPath(), groupTypes, cmd.getIsSignedup(), visibleFlag, locator, pageSize);

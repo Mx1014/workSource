@@ -99,7 +99,6 @@ public enum CoordinationLocks {
     TRACKING_PLAN_WARNING_SCHEDULE("tracking.plan.warning.schedule"),
  
     EVENT_STAT_SCHEDULE("event.stat.schedule"),
-
     ADD_ORGANIZATION_PERSONEL("add.organization.personel"),
 
     ORGANIZATION_ORDER_LOCK("organization.order.lock"),
@@ -108,8 +107,9 @@ public enum CoordinationLocks {
     FLOW("flow"),
 
     CLEANWRONGSTATUS_ORGANIZATIONMEMBERS("cleanwrongstatus.organizationmembers"),
+    CREATE_ENERGY_TASK("energy.task.create"),
+    SCHEDULE_ENERGY_TASK("energy.task.schedule"),
     ;
- 
     private String code;
     private CoordinationLocks(String code) {
         this.code = code;

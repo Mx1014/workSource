@@ -329,10 +329,22 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         List<BillDetailDTO> billDetailDTOList = assetProvider.listBillForClient(ownerId,ownerType,targetType,targetId,billGroupId,isOwedBill,cid,contractNum);
         HashSet<String> dateStrFilter = new HashSet<>();
         BigDecimal amountOwed = new BigDecimal("0");
-        for(int i = 0; i < billDetailDTOList.size(); i++) {
-            BillDetailDTO dto = billDetailDTOList.get(i);
-            dateStrFilter.add(dto.getDateStr());
-            amountOwed = amountOwed.add(dto.getAmountOwed());
+        if(isOwedBill.byteValue() == (byte)1){
+            for(int i = 0; i < billDetailDTOList.size(); i++) {
+                BillDetailDTO dto = billDetailDTOList.get(i);
+                if(dto.getStatus().byteValue() == (byte)2 || dto.getStatus().byteValue() == (byte)0){
+                    dateStrFilter.add(dto.getDateStr());
+                    amountOwed = amountOwed.add(dto.getAmountOwed());
+                }
+            }
+        }else if(isOwedBill.byteValue() == (byte)0){
+            for(int i = 0; i < billDetailDTOList.size(); i++) {
+                BillDetailDTO dto = billDetailDTOList.get(i);
+                if(dto.getStatus().byteValue() != (byte)1){
+                    dateStrFilter.add(dto.getDateStr());
+                    amountOwed = amountOwed.add(dto.getAmountOwed());
+                }
+            }
         }
         response.setAmountOwed(amountOwed);
         response.setBillPeriodMonths(dateStrFilter.size());
@@ -542,14 +554,15 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         }
         if(cmd.getPageOffset()==null||cmd.getPageOffset()<0){
             cmd.setPageOffset(0);
+
         }
         //先查看任务
-        Boolean inWork = assetProvider.checkContractInWork(cmd.getContractNum());
+        Boolean inWork = assetProvider.checkContractInWork(cmd.getContractId());
         if(inWork){
 //            return response;
             throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.ERROR_IN_GENERATING,"Mission in process");
         }
-        List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize());
+        List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize(),cmd.getContractId());
         if(dtos.size() <= cmd.getPageSize()){
 //            response.setNextPageOffset(cmd.getPageOffset());
             response.setNextPageOffset(null);
@@ -557,7 +570,12 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
             response.setNextPageOffset(cmd.getPageOffset()+cmd.getPageSize());
             dtos.remove(dtos.size()-1);
         }
+        BigDecimal totalAmount = new BigDecimal("0");
+        for(int i = 0; i < dtos.size(); i ++){
+            totalAmount = totalAmount.add(dtos.get(i).getAmountReceivable());
+        }
         response.setList(dtos);
+        response.setTotalAmount(totalAmount.toString());
         return response;
     }
 
@@ -605,7 +623,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 //            return null;
 //        }
         //如果账单为新的，则进行存储
-        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),String.valueOf(amountsInCents/100l),cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, cmd.getNamespaceId());
+        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),String.valueOf(amountsInCents/100l),cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, cmd.getNamespaceId(),OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
         assetProvider.saveOrderBills(bills,orderId);
         Long payerId = Long.parseLong(cmd.getPayerId());
         //检查下单人的类型和id，不能为空

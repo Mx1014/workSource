@@ -340,6 +340,10 @@ public class ArchivesServiceImpl implements ArchivesService {
         //
         if (cmd.getTargetTypes() != null)
             orgCommand.setTargetTypes(cmd.getTargetTypes());
+
+        //modified by lei.lv
+        orgCommand.setVisibleFlag(VisibleFlag.ALL.getCode());
+
         ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
         if (members != null && members.getMembers() != null) {
             members.getMembers().forEach(r -> {
@@ -986,6 +990,8 @@ public class ArchivesServiceImpl implements ArchivesService {
             orgCommand.setPageSize(20);
         orgCommand.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CHILD_ENTERPRISE.getCode()));
 
+        //modified by lei.lv
+        orgCommand.setVisibleFlag(VisibleFlag.ALL.getCode());
 
         ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
 
@@ -1098,7 +1104,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                         employee.setCheckInTime(ArchivesUtil.parseDate(itemValue.getFieldValue()));
                         break;
                     case ArchivesParameter.PROCREATIVE:
-                        employee.setProcreative(ArchivesUtil.parseDate(itemValue.getFieldValue()));
+                        employee.setProcreative(itemValue.getFieldValue());
                         break;
                     case ArchivesParameter.ETHNICITY:
                         employee.setEthnicity(itemValue.getFieldValue());
@@ -1188,7 +1194,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             valueMap.put(ArchivesParameter.BIRTHDAY, String.valueOf(employee.getBirthday()));
         valueMap.put(ArchivesParameter.MARITAL_FLAG, convertToArchivesInfo(employee.getMaritalFlag(), ArchivesParameter.MARITAL_FLAG));
         if (employee.getProcreative() != null)
-            valueMap.put(ArchivesParameter.PROCREATIVE, String.valueOf(employee.getProcreative()));
+            valueMap.put(ArchivesParameter.PROCREATIVE, employee.getProcreative());
         valueMap.put(ArchivesParameter.ETHNICITY, employee.getEthnicity());
         valueMap.put(ArchivesParameter.POLITICAL_FLAG, employee.getPoliticalFlag());
         valueMap.put(ArchivesParameter.NATIVE_PLACE, employee.getNativePlace());

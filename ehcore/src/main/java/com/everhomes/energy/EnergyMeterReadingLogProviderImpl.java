@@ -180,7 +180,15 @@ public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogP
                 .execute();
     }
 
-    /*@Override
+    @Override
+    public List<EnergyMeterReadingLog> listMeterReadingLogByTask(Long taskId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_ENERGY_METER_READING_LOGS)
+                .where(Tables.EH_ENERGY_METER_READING_LOGS.TASK_ID.eq(taskId))
+                .and(Tables.EH_ENERGY_METER_READING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
+                .fetchInto(EnergyMeterReadingLog.class);
+    }
+/*@Override
     public List<EnergyMeterReadingLog> listMeterReadingLogs(Integer namespaceId, Long meterId, Long pageAnchor, int pageSize) {
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEnergyMeterReadingLogsRecord> query = context.selectFrom(Tables.EH_ENERGY_METER_READING_LOGS)
