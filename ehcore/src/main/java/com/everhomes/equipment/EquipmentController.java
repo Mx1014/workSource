@@ -474,7 +474,7 @@ public class EquipmentController extends ControllerBase {
      * <p>获取任务所有信息 用于离线</p>
      */
     @RequestMapping("listEquipmentTasksDetails")
-    @RestReturn(value = EquipmentTaskOffLineDTO.class)
+    @RestReturn(value = EquipmentTaskOffLineDTO.class,collection = true)
     public RestResponse listEquipmentTasksDetails(ListEquipmentTasksCommand cmd) {
 
         List<EquipmentTaskOffLineDTO> tasksDetail = null;
