@@ -7490,6 +7490,7 @@ public class PunchServiceImpl implements PunchService {
                     if(null != ptr)
                         dto1.setRuleTime(findRuleTime(ptr,dto1.getPunchType(),punchIntervalNo));
                 }else{
+					//因为如果有异常审批一定会有pl,所以异常写在里面
                     dto1 = convertPunchLog2DTO(pl);
                 }
                 intervalDTO.getPunchLogs().add(dto1);
@@ -7534,8 +7535,7 @@ public class PunchServiceImpl implements PunchService {
 		PunchExceptionRequest exceptionRequest = punchProvider.findPunchExceptionRequest(pl.getUserId(), pl.getEnterpriseId(),
 				pl.getPunchDate(),pl.getPunchIntervalNo(),pl.getPunchType());
 		if(null != exceptionRequest) {
-			FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getRequestId(),
-					ApprovalRequestDefaultHandler.REFER_TYPE, PunchConstants.PUNCH_MODULE_ID);
+			FlowCase flowCase = flowCaseProvider.getFlowCaseById(exceptionRequest.getRequestId());
 			if (null != flowCase)
 				dto1.setRequestToken(ApprovalRequestDefaultHandler.processFlowURL(flowCase.getId(),
 						FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
