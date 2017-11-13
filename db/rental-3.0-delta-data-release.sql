@@ -7,3 +7,4 @@ set @eh_locale_strings_id = (select max(id) from eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'rental.flow', 'authKey', 'zh_CN', '门禁二维码');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'rental.flow', 'authValue', 'zh_CN', '在二维码有效期内前往门禁功能查看二维码');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'rental.flow', 'authTime', 'zh_CN', '二维码有效期');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'rental.flow', 'packageName', 'zh_CN', '使用套餐');

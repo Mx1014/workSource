@@ -240,6 +240,15 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		e.setValue(order.getUseDetail());
 		entities.add(e);
 
+		if (!StringUtils.isEmpty(order.getPackageName())){
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
+					"packageName", RentalNotificationTemplateCode.locale, ""));
+			e.setValue(order.getPackageName());
+			entities.add(e);
+		}
+
 		if (order.getDoorAuthId()!=null){
 			e = new FlowCaseEntity();
 			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
