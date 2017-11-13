@@ -122,7 +122,18 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
 
-				//TODO: 同步数据到科技园
+			}else if ("ASSIGNING".equals(nodeType)) {
+
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
+				pmTaskProvider.updateTask(task);
+
+			}else if ("PROCESSING".equals(nodeType)) {
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
+				task.setProcessingTime(new Timestamp(System.currentTimeMillis()));
+				pmTaskProvider.updateTask(task);
+
+				//TODO: 同步数据到科技园 （当受理之后才同步） 此处由于不好获取工作流中分配的人，所以当节点值（ASSIGNING）待分配时
+				// 在fireButton存在eh_pm_task_logs表中，onFlowCaseStateChanged方法是状态已经更新之后，此处节点值是当前节点的下一个节点
 				Integer namespaceId = UserContext.getCurrentNamespaceId();
 				if(namespaceId == 1000000) {
 					LOGGER.debug("synchronizedTaskToTechpark, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
@@ -136,16 +147,6 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 						}
 					}
 				}
-			}else if ("ASSIGNING".equals(nodeType)) {
-
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
-				pmTaskProvider.updateTask(task);
-
-
-			}else if ("PROCESSING".equals(nodeType)) {
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
-				task.setProcessingTime(new Timestamp(System.currentTimeMillis()));
-				pmTaskProvider.updateTask(task);
 			}else if ("COMPLETED".equals(nodeType)) {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
