@@ -1299,7 +1299,7 @@ public class PunchServiceImpl implements PunchService {
 				pdl.setStatusList(pdl.getStatusList()+PunchConstants.STATUS_SEPARATOR+log.getStatus());
 			}
 			String approvalStatus = log.getApprovalStatus() == null ? "" : log.getApprovalStatus()+"";
-			if(null == pdl.getApprovalStatus()){
+			if(null == pdl.getApprovalStatusList()){
 				pdl.setApprovalStatusList(approvalStatus);
 			}else{
 				pdl.setApprovalStatusList(pdl.getStatusList()+PunchConstants.STATUS_SEPARATOR+approvalStatus);
