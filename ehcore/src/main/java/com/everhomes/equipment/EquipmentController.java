@@ -371,6 +371,69 @@ public class EquipmentController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /equipment/createEquipmentInspectionPlan</b>
+     * <p>创建巡检计划</p>
+     */
+    @RequestMapping("createEquipmentInspectionPlan")
+    @RestReturn(value = EquipmentInspectionPlanDTO.class)
+    public RestResponse createEquipmentInspectionPlan(UpdateEquipmentPlanCommand cmd) {
+        EquipmentInspectionPlanDTO equipmentInspectionPlans =null;
+
+        return getRestResponse(equipmentInspectionPlans);
+    }
+
+    /**
+     * <b>URL: /equipment/updateEquipmentInspectionPlan</b>
+     * <p>更新巡检计划</p>
+     */
+    @RequestMapping("updateEquipmentInspectionPlan")
+    @RestReturn(value = String.class)
+    public RestResponse updateEquipmentInspectionPlan(UpdateEquipmentPlanCommand cmd) {
+
+        EquipmentInspectionPlanDTO equipmentInspectionPlans =null;
+
+        return getSuccessResponse();
+    }
+
+    /**
+     * <b>URL: /equipment/getEquipmentInspectionPlan</b>
+     * <p>根据id查询巡检计划</p>
+     */
+    @RequestMapping("getEquipmentInspectionPlan")
+    @RestReturn(value = EquipmentInspectionPlanDTO.class)
+    public RestResponse getEquipmentInspectionPlan(DeleteEquipmentAccessoriesCommand cmd) {
+
+        EquipmentInspectionPlanDTO equipmentInspectionPlans =null;
+
+        return getRestResponse(equipmentInspectionPlans);
+    }
+
+    /**
+     * <b>URL: /equipment/searchEquipmentAccessories</b>
+     * <p>查看巡检计划</p>
+     */
+    @RequestMapping("searchEquipmentInspectionPlans")
+    @RestReturn(value = searchEquipmentInspectionPlansResponse.class)
+    public RestResponse searchEquipmentInspectionPlans(searchEquipmentInspectionPlansCommand cmd) {
+
+        searchEquipmentInspectionPlansResponse equipmentInspectionPlansResponse =null;
+        return getRestResponse(equipmentInspectionPlansResponse);
+    }
+
+    /**
+     * <b>URL: /equipment/exportEquipmentInspectionPlans</b>
+     * <p>导出备品备件表</p>
+     */
+    @RequestMapping("exportEquipmentInspectionPlans")
+    public HttpServletResponse exportEquipmentInspectionPlans( searchEquipmentInspectionPlansCommand cmd, HttpServletResponse response) {
+
+        HttpServletResponse commandResponse =null;
+
+        return commandResponse;
+    }
+
+
+    /**
      * <b>URL: /equipment/exportEquipmentTasks</b>
      * <p>导出任务</p>
      */
