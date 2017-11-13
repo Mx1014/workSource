@@ -9,4 +9,7 @@ package com.everhomes.rest.equipment;
  * </ul>
  */
 public class DeleteEquipmentPlanCommand {
+    private  Long  id;
+
+    private  Long  ownerId;
 }
