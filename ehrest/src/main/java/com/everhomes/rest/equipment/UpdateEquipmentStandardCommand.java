@@ -54,7 +54,7 @@ public class UpdateEquipmentStandardCommand {
 	private String remarks;
 	
 	private Byte standardType;
-	
+	@ItemType(RepeatSettingsDTO.class)
 	private RepeatSettingsDTO repeat;
 	
 	private Long templateId;

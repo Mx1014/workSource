@@ -801,11 +801,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 
-		//为科兴与一碑对接
-		if(namespaceId == 999983 ) {
-			handle = PmTaskHandle.EBEI;
-		}
-
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
 		return handler.listAllTaskCategories(cmd);

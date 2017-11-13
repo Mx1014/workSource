@@ -190,28 +190,28 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 
 		ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
 
-		if(null == parentId){
-			Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
-			Category ancestor = categoryProvider.findCategoryById(defaultId);
-			parentId = ancestor.getId();
-		}else {
-			Category parent = categoryProvider.findCategoryById(parentId);
-			if (null == parent) {
-				LOGGER.error("Category not found, cmd={}", cmd);
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"Category not found.");
-			}
-			if (CategoryAdminStatus.INACTIVE.getCode() == parent.getStatus()) {
-				return response;
-			}
-		}
-
 		List<Category> list;
-		if(null != cmd.getTaskCategoryId() && cmd.getTaskCategoryId() != 0L) {
+		if(null != cmd.getTaskCategoryId() && cmd.getTaskCategoryId() != 0L && cmd.getParentId() == null) {
 			Category category = categoryProvider.findCategoryById(cmd.getTaskCategoryId());
 			list = new ArrayList<>();
 			list.add(category);
 		}else{
+			if(null == parentId){
+				Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
+				Category ancestor = categoryProvider.findCategoryById(defaultId);
+				parentId = ancestor.getId();
+			}else {
+				Category parent = categoryProvider.findCategoryById(parentId);
+				if (null == parent) {
+					LOGGER.error("Category not found, cmd={}", cmd);
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"Category not found.");
+				}
+				if (CategoryAdminStatus.INACTIVE.getCode() == parent.getStatus()) {
+					return response;
+				}
+			}
+
 			list = categoryProvider.listTaskCategories(namespaceId, parentId, cmd.getKeyword(),
 					cmd.getPageAnchor(), cmd.getPageSize());
 		}

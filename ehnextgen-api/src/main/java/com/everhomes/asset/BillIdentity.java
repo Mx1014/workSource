@@ -8,7 +8,6 @@ package com.everhomes.asset;
 public class BillIdentity {
     private String dateStr;
     private Long billGroupId;
-    private String contract;
 
     public String getDateStr() {
         return dateStr;
@@ -19,33 +18,21 @@ public class BillIdentity {
     }
 
 
-
-    public String getContract() {
-        return contract;
-    }
-
-    public void setContract(String contract) {
-        this.contract = contract;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof BillIdentity)) return false;
 
-        BillIdentity that = (BillIdentity) o;
+        BillIdentity identity = (BillIdentity) o;
 
-        if (getDateStr() != null ? !getDateStr().equals(that.getDateStr()) : that.getDateStr() != null) return false;
-        if (getBillGroupId() != null ? !getBillGroupId().equals(that.getBillGroupId()) : that.getBillGroupId() != null)
-            return false;
-        return getContract() != null ? getContract().equals(that.getContract()) : that.getContract() == null;
+        if (!getDateStr().equals(identity.getDateStr())) return false;
+        return getBillGroupId().equals(identity.getBillGroupId());
     }
 
     @Override
     public int hashCode() {
-        int result = getDateStr() != null ? getDateStr().hashCode() : 0;
-        result = 31 * result + (getBillGroupId() != null ? getBillGroupId().hashCode() : 0);
-        result = 31 * result + (getContract() != null ? getContract().hashCode() : 0);
+        int result = getDateStr().hashCode();
+        result = 31 * result + getBillGroupId().hashCode();
         return result;
     }
 

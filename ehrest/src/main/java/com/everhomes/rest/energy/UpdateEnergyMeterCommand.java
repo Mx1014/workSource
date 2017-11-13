@@ -1,10 +1,12 @@
 package com.everhomes.rest.energy;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <ul>
@@ -20,7 +22,7 @@ import java.math.BigDecimal;
  *     <li>endTime: 修改属性时选择的结束时间 </li>
  *     <li>calculationType: 价格计算方式 参考{@link com.everhomes.rest.energy.PriceCalculationType} </li>
  *     <li>configId: 价格方案id </li>
- *     <li>namespaceId: 域空间</li>
+ *     <li>addresses: 表记所属楼栋门牌</li>
  * </ul>
  */
 public class UpdateEnergyMeterCommand {
@@ -32,6 +34,7 @@ public class UpdateEnergyMeterCommand {
     private BigDecimal rate;
     private BigDecimal price;
     private Long costFormulaId;
+    private Byte costFormulaSource;
     private Long amountFormulaId;
 
     private Long startTime;
@@ -39,8 +42,26 @@ public class UpdateEnergyMeterCommand {
 
     private Byte calculationType;
     private Long configId;
-    
+    @ItemType(EnergyMeterAddressDTO.class)
+    private List<EnergyMeterAddressDTO> addresses;
+
     private Integer namespaceId;
+
+    public Byte getCostFormulaSource() {
+        return costFormulaSource;
+    }
+
+    public void setCostFormulaSource(Byte costFormulaSource) {
+        this.costFormulaSource = costFormulaSource;
+    }
+
+    public List<EnergyMeterAddressDTO> getAddresses() {
+        return addresses;
+    }
+
+    public void setAddresses(List<EnergyMeterAddressDTO> addresses) {
+        this.addresses = addresses;
+    }
 
     public Long getMeterId() {
         return meterId;
@@ -137,17 +158,18 @@ public class UpdateEnergyMeterCommand {
     public void setConfigId(Long configId) {
         this.configId = configId;
     }
-    
+
     public Integer getNamespaceId() {
-		return namespaceId;
-	}
+        return namespaceId;
+    }
 
     public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
+        this.namespaceId = namespaceId;
+    }
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 }
+

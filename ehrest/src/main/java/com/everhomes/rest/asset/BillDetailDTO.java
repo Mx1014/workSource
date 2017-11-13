@@ -11,7 +11,7 @@ import java.math.BigDecimal;
  * <li>dateStr:账期</li>
  * <li>amountReceviable:应收金额</li>
  * <li>amountOwed:待缴金额</li>
- * <li>status:状态,1:待缴;2:缴清</li>
+ * <li>status:状态,0:待缴；1：已缴；2：欠费；3：未缴</li>
  * <li>billId:账单id</li>
  * <li>payStatus:清账状态</li>
  * <li>dateStrBegin:计费开始时间</li>
@@ -27,6 +27,15 @@ public class BillDetailDTO {
     private String payStatus;
     private String dateStrBegin;
     private String dateStrEnd;
+    private String deadline;
+
+    public String getDeadline() {
+        return deadline;
+    }
+
+    public void setDeadline(String deadline) {
+        this.deadline = deadline;
+    }
 
     @Override
     public String toString() {

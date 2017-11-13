@@ -43,6 +43,9 @@ public class PaymentVariable {
     }
 
     public BigDecimal getVariableValue() {
+        if(this.variableValue!=null){
+            this.variableValue.setScale(2,BigDecimal.ROUND_HALF_UP);
+        }
         return variableValue;
     }
 

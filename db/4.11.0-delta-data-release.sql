@@ -141,3 +141,7 @@ update eh_launch_pad_layouts SET version_code = '2017111001',layout_json='{\"ver
 SET @scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@scope_id:=@scope_id+1), @menu_id,'', 'EhNamespaces', @namespace_id , 2);
 -- bydengs,20171113,新闻多入口修改 end。
+
+-- 运营后台增加账单管理menu by wentian
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2500000', '账单管理', '2000000', NULL, 'payment-management', '1', '2', '/2000000/2500000', 'zuolin', '3', '20400', '2', 'project', 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2510000', '账单管理', '2500000', NULL, 'payment-management', '0', '2', '/2000000/2500000/2510000', 'zuolin', '3', '20400', '3', 'project', 'page');
