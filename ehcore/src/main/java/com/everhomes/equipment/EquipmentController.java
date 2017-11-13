@@ -510,44 +510,44 @@ public class EquipmentController extends ControllerBase {
         return getRestResponse(dto);
     }
 
-    /**
-     * <b>URL: /equipment/reviewEquipmentTask</b>
-     * <p>任务审阅</p>
-     */
-    @RequestMapping("reviewEquipmentTask")
-    @RestReturn(value = String.class)
-    public RestResponse reviewEquipmentTask(ReviewEquipmentTaskCommand cmd) {
-
-        equipmentService.reviewEquipmentTask(cmd);
-
-        return getSuccessResponse();
-    }
-
-    /**
-     * <b>URL: /equipment/reviewEquipmentTasks</b>
-     * <p>任务批量审阅</p>
-     */
-    @RequestMapping("reviewEquipmentTasks")
-    @RestReturn(value = String.class)
-    public RestResponse reviewEquipmentTasks(ReviewEquipmentTasksCommand cmd) {
-
-        equipmentService.reviewEquipmentTasks(cmd);
-
-        return getSuccessResponse();
-    }
-
-    /**
-     * <b>URL: /equipment/createEquipmentTask</b>
-     * <p>创建某设备的任务</p>
-     */
-    @RequestMapping("createEquipmentTask")
-    @RestReturn(value = String.class)
-    public RestResponse createEquipmentTask(DeleteEquipmentsCommand cmd) {
-
-        equipmentService.createEquipmentTask(cmd);
-
-        return getSuccessResponse();
-    }
+//    /**
+//     * <b>URL: /equipment/reviewEquipmentTask</b>
+//     * <p>任务审阅</p>
+//     */
+//    @RequestMapping("reviewEquipmentTask")
+//    @RestReturn(value = String.class)
+//    public RestResponse reviewEquipmentTask(ReviewEquipmentTaskCommand cmd) {
+//
+//        equipmentService.reviewEquipmentTask(cmd);
+//
+//        return getSuccessResponse();
+//    }
+//
+//    /**
+//     * <b>URL: /equipment/reviewEquipmentTasks</b>
+//     * <p>任务批量审阅</p>
+//     */
+//    @RequestMapping("reviewEquipmentTasks")
+//    @RestReturn(value = String.class)
+//    public RestResponse reviewEquipmentTasks(ReviewEquipmentTasksCommand cmd) {
+//
+//        equipmentService.reviewEquipmentTasks(cmd);
+//
+//        return getSuccessResponse();
+//    }
+//
+//    /**
+//     * <b>URL: /equipment/createEquipmentTask</b>
+//     * <p>创建某设备的任务</p>
+//     */
+//    @RequestMapping("createEquipmentTask")
+//    @RestReturn(value = String.class)
+//    public RestResponse createEquipmentTask(DeleteEquipmentsCommand cmd) {
+//
+//        equipmentService.createEquipmentTask(cmd);
+//
+//        return getSuccessResponse();
+//    }
 
     /**
      * <b>URL: /equipment/listLogsByTaskId</b>
@@ -575,18 +575,18 @@ public class EquipmentController extends ControllerBase {
         return getRestResponse(resp);
     }
 
-    /**
-     * <b>URL: /equipment/listParametersByEquipmentId</b>
-     * <p>查看设备所需记录的参数</p>
-     */
-    @RequestMapping("listParametersByEquipmentId")
-    @RestReturn(value = EquipmentParameterDTO.class, collection = true)
-    public RestResponse listParametersByEquipmentId(DeleteEquipmentsCommand cmd) {
-
-        List<EquipmentParameterDTO> parameterDTOS = equipmentService.listParametersByEquipmentId(cmd);
-
-        return getRestResponse(parameterDTOS);
-    }
+//    /**
+//     * <b>URL: /equipment/listParametersByEquipmentId</b>
+//     * <p>查看设备所需记录的参数</p>
+//     */
+//    @RequestMapping("listParametersByEquipmentId")
+//    @RestReturn(value = EquipmentParameterDTO.class, collection = true)
+//    public RestResponse listParametersByEquipmentId(DeleteEquipmentsCommand cmd) {
+//
+//        List<EquipmentParameterDTO> parameterDTOS = equipmentService.listParametersByEquipmentId(cmd);
+//
+//        return getRestResponse(parameterDTOS);
+//    }
 
     /**
      * <b>URL: /equipment/listAttachmentsByEquipmentId</b>
@@ -675,6 +675,21 @@ public class EquipmentController extends ControllerBase {
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
         equipmentTasksSearcher.syncFromDb();
+        return getSuccessResponse();
+    }
+    /**
+     * <b>URL: /equipment/syncEquipmentPlansIndex</b>
+     * <p>搜索索引同步</p>
+     *
+     * @return {String.class}
+     */
+    @RequestMapping("syncEquipmentPlansIndex")
+    @RestReturn(value = String.class)
+    public RestResponse syncEquipmentPlansIndex() {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+       // equipmentPlanSearcher.syncFromDb();
         return getSuccessResponse();
     }
 
