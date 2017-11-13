@@ -14,7 +14,7 @@ import java.util.List;
  *  <li>targetId: 计划所属管理处id</li>
  *  <li>targetType: 计划所属管理处类型</li>
  *  <li>targetName: 计划所属管理处名称</li>
- *  <li>planNumber: 计划序号/li>
+ *  <li>planNumber: 计划序号</li>
  *  <li>planType: 计划类别  参考{@link com.everhomes.rest.equipment.StandardType}</li>
  *  <li>name: 计划名称</li>
  *  <li>status: 计划状态 参考{@link com.everhomes.rest.equipment.EquipmentPlanStatus}</li>

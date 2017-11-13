@@ -1,15 +1,21 @@
 package com.everhomes.equipment;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.quality.OwnerType;
+import com.everhomes.search.AbstractElasticSearch;
+import com.everhomes.search.EquipmentStandardMapSearcher;
+import com.everhomes.search.SearchUtils;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
+import com.mysql.jdbc.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -26,21 +32,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.equipment.EquipmentReviewStatus;
-import com.everhomes.rest.equipment.EquipmentStandardRelationDTO;
-import com.everhomes.rest.equipment.InspectionStandardMapTargetType;
-import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsCommand;
-import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsResponse;
-import com.everhomes.rest.quality.OwnerType;
-import com.everhomes.search.AbstractElasticSearch;
-import com.everhomes.search.EquipmentStandardMapSearcher;
-import com.everhomes.search.SearchUtils;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.mysql.jdbc.StringUtils;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch implements
@@ -247,6 +241,8 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
             EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
             if(standard != null) {
             	b.field("standardNumber", standard.getStandardNumber());
+            	//add repeatType
+				b.field("repeatType", standard.getRepeatType());
 				b.field("namespaceId", standard.getNamespaceId());
             } else {
             	b.field("standardNumber", "");
