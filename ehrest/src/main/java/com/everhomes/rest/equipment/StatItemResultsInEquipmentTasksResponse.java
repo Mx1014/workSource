@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * <ul>
- *  <li>statItemResultsByTaskIdResponse: 任务下所有设备具体巡检细项目 参考{@link com.everhomes.rest.equipment.statItemResultsByTaskId}</li>
+ *  <li>statItemResults: 任务下所有设备具体巡检细项结果 参考{@link com.everhomes.rest.equipment.statItemResultsByTaskId}</li>
  * </ul>
  */
 public class StatItemResultsInEquipmentTasksResponse {

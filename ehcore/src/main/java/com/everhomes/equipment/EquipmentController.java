@@ -768,21 +768,6 @@ public class EquipmentController extends ControllerBase {
         return getSuccessResponse();
     }
 
-//    /**
-//     * <b>URL: /equipment/listParametersByStandardId</b>
-//     * <p>查看设备所需记录的参数</p>
-//     */
-//    @RequestMapping("listParametersByStandardId")
-//    @RestReturn(value = InspectionItemDTO.class, collection = true)
-//    public RestResponse listParametersByStandardId(ListParametersByStandardIdCommand cmd) {
-//
-//        List<InspectionItemDTO> paras = equipmentService.listParametersByStandardId(cmd);
-//
-//        RestResponse response = new RestResponse(paras);
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
 
     /**
      * <b>URL: /equipment/listEquipmentStandardRelationsByTaskId</b>
@@ -796,6 +781,20 @@ public class EquipmentController extends ControllerBase {
 
         return getRestResponse(equipments);
     }
+
+    /**
+     * <b>URL: /equipment/listParametersByStandardId</b>
+     * <p>查看设备所需记录的参数</p>
+     */
+    @RequestMapping("listParametersByStandardId")
+    @RestReturn(value = InspectionItemDTO.class, collection = true)
+    public RestResponse listParametersByStandardId(ListParametersByStandardIdCommand cmd) {
+
+        List<InspectionItemDTO> items = equipmentService.listParametersByStandardId(cmd);
+
+        return getRestResponse(items);
+    }
+
 
 //    /**
 //     * <b>URL: /equipment/createInspectionTemplate</b>
