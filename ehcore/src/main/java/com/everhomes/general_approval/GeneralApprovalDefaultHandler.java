@@ -109,6 +109,9 @@ public class GeneralApprovalDefaultHandler implements GeneralApprovalHandler {
 
 		GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
 		PunchExceptionRequest request = punchProvider.findPunchExceptionRequestByRequestId(ga.getOrganizationId(), flowCase.getApplyUserId(), flowCase.getId());
+		if (null == request) {
+			return;
+		}
 		if (UserContext.current().getUser().getId().equals(request.getUserId())) {
 			//如果是自己取消的,删除request
 			punchProvider.deletePunchExceptionRequest(request);
@@ -124,6 +127,9 @@ public class GeneralApprovalDefaultHandler implements GeneralApprovalHandler {
 		//通过就把状态置为已审批
 		GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
 		PunchExceptionRequest request = punchProvider.findPunchExceptionRequestByRequestId(ga.getOrganizationId(), flowCase.getApplyUserId(), flowCase.getId());
+		if (null == request) {
+			return null;
+		}
 		request.setStatus(ApprovalStatus.AGREEMENT.getCode());
 		punchProvider.updatePunchExceptionRequest(request);
 		//如果审批类型是-加班请假等,重刷影响日期的pdl
