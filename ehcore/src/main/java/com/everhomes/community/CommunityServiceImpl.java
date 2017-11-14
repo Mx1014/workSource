@@ -2133,6 +2133,7 @@ public class CommunityServiceImpl implements CommunityService {
 				CommunityUserDto dto = new CommunityUserDto();
 				//dto.setUserName(u.getNickName());
 				dto.setNickName(u.getNickName());
+				dto.setUserId(u.getId());
 				// dto.setPhone(r.getPhoneNumber());
 				dto.setApplyTime(u.getCreateTime());
 				dto.setIdentityNumber(u.getIdentityNumberTag());
