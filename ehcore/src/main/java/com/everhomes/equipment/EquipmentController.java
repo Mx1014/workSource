@@ -106,10 +106,7 @@ public class EquipmentController extends ControllerBase {
 
         SearchEquipmentStandardsResponse standards = equipmentStandardSearcher.query(cmd);
 
-        RestResponse response = new RestResponse(standards);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+        return getRestResponse(standards);
     }
 
     /**
@@ -232,7 +229,7 @@ public class EquipmentController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /equipment/searchEquipmentStandardsObject</b>
+     * <b>URL: /equipment/searchEquipmentStandardRelations</b>
      * <p>列出设备列表 新建计划时关联巡检对象</p>
      */
     @RequestMapping("searchEquipmentStandardRelations")
@@ -326,7 +323,7 @@ public class EquipmentController extends ControllerBase {
 
     /**
      * <b>URL: /equipment/searchEquipmentAccessories</b>
-     * <p>查看备品备件</p>
+     * <p>备品备件列表</p>
      */
     @RequestMapping("searchEquipmentAccessories")
     @RestReturn(value = SearchEquipmentAccessoriesResponse.class)
@@ -418,7 +415,7 @@ public class EquipmentController extends ControllerBase {
 
     /**
      * <b>URL: /equipment/searchEquipmentAccessories</b>
-     * <p>查看巡检计划列表</p>
+     * <p>巡检计划列表</p>
      */
     @RequestMapping("searchEquipmentInspectionPlans")
     @RestReturn(value = searchEquipmentInspectionPlansResponse.class)
