@@ -1083,8 +1083,8 @@ public class PunchServiceImpl implements PunchService {
 
 		//请假的汇总interval
 		List<TimeInterval> tiDTOs = null;
-		Timestamp dayStart = new Timestamp(punchDate.getTime() + ptr.getStartEarlyTimeLong() - ptr.getBeginPunchTime());
-		Timestamp dayEnd = new Timestamp(punchDate.getTime() + ptr.getDaySplitTimeLong());
+		Timestamp dayStart = new Timestamp(punchDate.getTime() - (ptr.getBeginPunchTime()==null?14400000L:ptr.getBeginPunchTime()));
+		Timestamp dayEnd = new Timestamp(punchDate.getTime() +(ptr.getDaySplitTimeLong()==null?104400000L:ptr.getBeginPunchTime()));
 		tiDTOs = processTimeRuleDTO(tiDTOs, userId, companyId, dayStart,dayEnd);
 
 		List<PunchLog> efficientLogs = new ArrayList<>();
@@ -4861,7 +4861,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	private void refreshPunchDayLog(Long userId, Long companyId, Calendar start, Calendar end) {
-		while (start.before(end)) {
+		while (!end.after(start)) {
 
 			try {
 				this.refreshPunchDayLog(userId, companyId, start);
@@ -5021,8 +5021,8 @@ public class PunchServiceImpl implements PunchService {
 		PunchTimeRule ptr = punchProvider.getPunchTimeRuleById(r.getTimeRuleId());
 		if (null != ptr) {
 
-			Timestamp dayStart = new Timestamp(r.getPunchDate().getTime() + ptr.getStartEarlyTimeLong() - ptr.getBeginPunchTime());
-			Timestamp dayEnd = new Timestamp(r.getPunchDate().getTime() + ptr.getDaySplitTimeLong());
+			Timestamp dayStart = new Timestamp(r.getPunchDate().getTime() - (ptr.getBeginPunchTime()==null?14400000L:ptr.getBeginPunchTime()));
+			Timestamp dayEnd = new Timestamp(r.getPunchDate().getTime() +(ptr.getDaySplitTimeLong()==null?104400000L:ptr.getBeginPunchTime()));
 			List<PunchExceptionRequest> exceptionRequests = punchProvider.listPunchExceptionRequestBetweenBeginAndEndTime(r.getUserId(),
 					r.getEnterpriseId(), dayStart, dayEnd);
 			if (null == exceptionRequests) {
@@ -7716,8 +7716,8 @@ public class PunchServiceImpl implements PunchService {
 
 		if (null != ptr) {
 
-			Timestamp dayStart = new Timestamp(punchDate.getTime() + ptr.getStartEarlyTimeLong() - ptr.getBeginPunchTime());
-			Timestamp dayEnd = new Timestamp(punchDate.getTime() + ptr.getDaySplitTimeLong());
+			Timestamp dayStart = new Timestamp(punchDate.getTime() - (ptr.getBeginPunchTime()==null?14400000L:ptr.getBeginPunchTime()));
+			Timestamp dayEnd = new Timestamp(punchDate.getTime() +(ptr.getDaySplitTimeLong()==null?104400000L:ptr.getBeginPunchTime()));
 			tiDTOs = processTimeRuleDTO(tiDTOs, userId, enterpriseId, dayStart, dayEnd);
 		}
 		if(ptr.getPunchTimesPerDay().equals((byte)2)){
