@@ -2940,6 +2940,7 @@ public class AssetServiceImpl implements AssetService {
             brotherRuleId = assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
             List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), false);
             for(int i = 0; i < allCommunity.size(); i ++){
+                cmd.setOwnerId(allCommunity.get(i));
                 boolean coupled = checkCoupledForGroupRule(cmd.getOwnerId(),cmd.getOwnerType());
                 if(coupled){
                     assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
@@ -2956,23 +2957,29 @@ public class AssetServiceImpl implements AssetService {
 //        List<EhPaymentBillGroupsRules> list = assetProvider.getBillGroupRuleByCommunity(ownerId,ownerType);
         List<EhPaymentBillGroupsRules> list = assetProvider.getBillGroupRuleByCommunityWithBro(ownerId,ownerType,false);
         if(list.size() > 0){
-            return true;
+            //没有bro，不耦合或者为空
+            List<EhPaymentBillGroupsRules> list2 = assetProvider.getBillGroupRuleByCommunity(ownerId,ownerType);
+            if(list2.size() == 0){
+                return true;
+            }
+            return false;
         }
-        return false;
+        //有bro，肯定耦合
+        return true;
     }
 
     @Override
     public DeleteChargingItemForBillGroupResponse deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd) {
-        DeleteChargingItemForBillGroupResponse response = new DeleteChargingItemForBillGroupResponse();
+        //获得此rule，ownerid = namesapceid，则在全部操作页面, 修改全部的+bro；如果ownerid != namespaceid，则在single，需要改变，并 不需要 解耦所有账单组合rule
         EhPaymentBillGroupsRules rule = assetProvider.findBillGroupRuleById(cmd.getBillGroupRuleId());
-        boolean workFlag = isInWorkGroupRule(rule,false);
-        if(workFlag){
-            response.setFailCause(AssetPaymentStrings.DELETE_GROUP_RULE_UNSAFE);
-            return response;
+        byte deCouplingFlag = 1;
+        if(rule.getOwnerid().intValue() == rule.getNamespaceId().intValue()){
+            //全部
+            deCouplingFlag = 0;
+            return assetProvider.deleteBillGroupRuleById(cmd.getBillGroupRuleId(),deCouplingFlag);
+        }else{
+            return assetProvider.deleteBillGroupRuleById(cmd.getBillGroupRuleId(),deCouplingFlag);
         }
-        assetProvider.deleteBillGroupRuleById(cmd.getBillGroupRuleId());
-//        response.setFailCause(AssetPaymentStrings.DELETE_SUCCCESS);
-        return response;
     }
 
     /**
@@ -2980,20 +2987,12 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public DeleteBillGroupReponse deleteBillGroup(DeleteBillGroupCommand cmd) {
-        DeleteBillGroupReponse response = new DeleteBillGroupReponse();
-        boolean workFlag = isInWorkGroup(cmd.getBillGroupId(),false);
-        if(workFlag){
-            response.setFailCause(AssetPaymentStrings.DELTE_GROUP_UNSAFE);
-            return response;
-        }
         byte deCouplingFlag = 1;
         if(cmd.getOwnerId() == null) {
             deCouplingFlag = 0;
-            assetProvider.deleteBillGroupAndRules(cmd.getBillGroupId(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId());
-            return response;
+            return assetProvider.deleteBillGroupAndRules(cmd.getBillGroupId(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId());
         }
-        assetProvider.deleteBillGroupAndRules(cmd.getBillGroupId(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId());
-        return response;
+        return assetProvider.deleteBillGroupAndRules(cmd.getBillGroupId(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId());
     }
 
     @Override

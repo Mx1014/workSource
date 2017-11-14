@@ -197,7 +197,7 @@ public interface AssetProvider {
 
     boolean isInWorkGroupRule(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule);
 
-    void deleteBillGroupRuleById(Long billGroupRuleId);
+    DeleteChargingItemForBillGroupResponse deleteBillGroupRuleById(Long billGroupRuleId,byte deCouplingFlag);
 
     EhPaymentChargingStandards findChargingStandardById(Long chargingStandardId);
 
@@ -205,7 +205,7 @@ public interface AssetProvider {
 
     boolean checkBillsByBillGroupId(Long billGroupId);
 
-    void deleteBillGroupAndRules(Long billGroupId,byte deCouplingFlag,String ownerType,Long ownerId);
+    DeleteBillGroupReponse deleteBillGroupAndRules(Long billGroupId,byte deCouplingFlag,String ownerType,Long ownerId);
 
     ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(Long billGroupRuleId);
 
