@@ -598,31 +598,11 @@ public class ContractServiceImpl implements ContractService {
 			}
 		}
 //		assetService.paymentExpectancies(command);
+
+		command.setIsEffectiveImmediately((byte)0);
 		assetService.paymentExpectancies_re_struct(command);
 	}
 
-	private List<RentFree> generateRentFree(List<ContractChargingChangeDTO> frees) {
-		List<RentFree> rentFrees = new ArrayList<>();
-		frees.forEach(free -> {
-			RentFree rentFree = new RentFree();
-			rentFree.setChargingItemId(free.getChargingItemId());
-			rentFree.setStartDate(new Date(free.getChangeStartTime()));
-			rentFree.setEndDate(new Date(free.getChangeExpiredTime()));
-			rentFree.setAmount(free.getChangeRange());
-			rentFree.setRemark(free.getRemark());
-			if(free.getApartments() != null && free.getApartments().size() > 0) {
-				List<ContractProperty> properties = new ArrayList<ContractProperty>();
-				free.getApartments().forEach(apartmentDTO -> {
-					ContractProperty cp = ConvertHelper.convert(apartmentDTO, ContractProperty.class);
-					cp.setPropertyName(cp.getBuldingName() + "-" + cp.getApartmentName());
-					properties.add(cp);
-				});
-				rentFree.setProperties(properties);
-			}
-			rentFrees.add(rentFree);
-		});
-		return rentFrees;
-	}
 
 	private List<RentAdjust> generateRentAdjust(List<ContractChargingChangeDTO> adjusts) {
 		List<RentAdjust> rentAdjusts = new ArrayList<>();
@@ -657,6 +637,31 @@ public class ContractServiceImpl implements ContractService {
 		return rentAdjusts;
 	}
 
+
+	private List<RentFree> generateRentFree(List<ContractChargingChangeDTO> frees) {
+		List<RentFree> rentFrees = new ArrayList<>();
+		frees.forEach(free -> {
+			RentFree rentFree = new RentFree();
+			rentFree.setChargingItemId(free.getChargingItemId());
+			rentFree.setStartDate(new Date(free.getChangeStartTime()));
+			rentFree.setEndDate(new Date(free.getChangeExpiredTime()));
+			rentFree.setAmount(free.getChangeRange());
+			rentFree.setRemark(free.getRemark());
+			if(free.getApartments() != null && free.getApartments().size() > 0) {
+				List<ContractProperty> properties = new ArrayList<ContractProperty>();
+				free.getApartments().forEach(apartmentDTO -> {
+					ContractProperty cp = ConvertHelper.convert(apartmentDTO, ContractProperty.class);
+					cp.setPropertyName(cp.getBuldingName() + "-" + cp.getApartmentName());
+					properties.add(cp);
+				});
+				rentFree.setProperties(properties);
+			}
+			rentFrees.add(rentFree);
+		});
+		return rentFrees;
+	}
+
+
 	private List<FeeRules> generateChargingItemsFeeRules(List<ContractChargingItemDTO> chargingItems) {
 		Gson gson = new Gson();
 		List<FeeRules> feeRules = new ArrayList<>();
@@ -664,8 +669,12 @@ public class ContractServiceImpl implements ContractService {
 			FeeRules feeRule = new FeeRules();
 			feeRule.setChargingItemId(chargingItem.getChargingItemId());
 			feeRule.setChargingStandardId(chargingItem.getChargingStandardId());
-			feeRule.setDateStrBegin(new Date(chargingItem.getChargingStartTime()));
-			feeRule.setDateStrEnd(new Date(chargingItem.getChargingExpiredTime()));
+			if(chargingItem.getChargingStartTime() != null){
+				feeRule.setDateStrBegin(new Date(chargingItem.getChargingStartTime()));
+			}
+			if(chargingItem.getChargingExpiredTime() !=null){
+				feeRule.setDateStrEnd(new Date(chargingItem.getChargingExpiredTime()));
+			}
 			List<ContractProperty> contractProperties = new ArrayList<>();
 			if(chargingItem.getApartments() != null && chargingItem.getApartments().size() > 0) {
 				chargingItem.getApartments().forEach(apartment -> {

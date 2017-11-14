@@ -36,8 +36,26 @@ public class SearchEnergyMeterReadingLogsCommand {
     private Long startTime;
     private Long endTime;
 
+    private Long addressId;
+    private Long buildingId;
     private Long pageAnchor;
     private Integer pageSize;
+
+    public Long getBuildingId() {
+        return buildingId;
+    }
+
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
+    }
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
 
     public Long getOrganizationId() {
         return organizationId;

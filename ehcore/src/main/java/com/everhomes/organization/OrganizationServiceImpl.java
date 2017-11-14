@@ -6,7 +6,9 @@ import com.everhomes.acl.*;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.archives.ArchivesProvider;
 import com.everhomes.archives.ArchivesService;
+import com.everhomes.archives.ArchivesStickyContacts;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -53,10 +55,7 @@ import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
-import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
-import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
-import com.everhomes.rest.acl.RoleConstants;
+import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
@@ -88,6 +87,7 @@ import com.everhomes.rest.launchpad.ItemKind;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.module.Project;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
+import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
@@ -278,6 +278,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Autowired
     private ArchivesService archivesService;
+
+    @Autowired
+    private ArchivesProvider archivesProvider;
 
     private int getPageCount(int totalCount, int pageSize) {
         int pageCount = totalCount / pageSize;
@@ -5184,12 +5187,12 @@ public class OrganizationServiceImpl implements OrganizationService {
                         orgLog.setOperationType(OperationType.JOIN.getCode());
                         orgLog.setRequestType(RequestType.USER.getCode());
                         orgLog.setOperatorUid(UserContext.current().getUser().getId());
-                    orgLog.setContactDescription(member.getContactDescription());
+                        orgLog.setContactDescription(member.getContactDescription());
                         this.organizationProvider.createOrganizationMemberLog(orgLog);
                     }
                 } else {
                     LOGGER.warn("Enterprise contact not found, maybe it has been rejected, operatorUid=" + operatorUid + ", cmd=" + cmd);
-// 
+//
 //                } else {
 //                    member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
 //                    member.setOperatorUid(operatorUid);
@@ -5211,10 +5214,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 //                    this.organizationProvider.createOrganizationMemberLog(orgLog);
 //  master
                 }
-
-                this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), cmd.getEnterpriseId(), cmd.getUserId());
             }
         }
+        this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), cmd.getEnterpriseId(), cmd.getUserId());
     }
 
     /**
@@ -5411,6 +5413,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                         memberDetail.setDepartmentIds(JSON.toJSONString(departmentIds));
                     memberDetail.setDepartment(convertToOrganizationName(departmentIds));
                     organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());
+
+                    //删除置顶信息
+                    archivesProvider.deleteArchivesStickyContactsByDetailId(namespaceId, detailId);
                 }
             });
 
@@ -5609,6 +5614,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 List<Long> childIds = cmd.getChildIds();
                 for (Long orgId : childIds) {
                     this.organizationProvider.updateOrganizationDefaultOrder(namespaceId, orgId, childIds.indexOf(orgId));
+                    LOGGER.debug("sortOrganizationsAtSameLevel" + childIds.indexOf(orgId)+ "namespaceId:" + namespaceId);
                 }
             }
             return null;
@@ -5624,6 +5630,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         cmd_1.setOrganizationId(cmd.getOrganizationId());
         cmd_1.setKeywords(cmd.getKeywords());
         cmd_1.setFilterScopeTypes(Collections.singletonList("current"));
+        cmd_1.setVisibleFlag(VisibleFlag.ALL.getCode());
         ListOrganizationMemberCommandResponse res_1 = listOrganizationPersonnelsWithDownStream(cmd_1);
         res.setMembers(res_1.getMembers());
 
@@ -5845,6 +5852,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         // 删除考勤规则的操作
         if(members != null && members.size() > 0)
             this.uniongroupService.syncUniongroupAfterLeaveTheJob(members.get(0).getDetailId());
+
     }
 
     /**
@@ -5885,6 +5893,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
             return null;
         });
+        
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         //执行太慢，开一个线程来做
         ExecutorUtil.submit(new Runnable() {
@@ -5892,7 +5902,15 @@ public class OrganizationServiceImpl implements OrganizationService {
             public void run() {
                 try {
                     // 发消息等等操作
+                    //设置上下文对象 Added by Jannson
+                    UserContext.setCurrentNamespaceId(namespaceId);
+                    UserContext.setCurrentUser(user);
+                    
                     leaveOrganizationAfterOperation(user.getId(), members);
+                    
+                    //设置完成之后要清空
+                    UserContext.setCurrentNamespaceId(null);
+                    UserContext.setCurrentUser(null);
                 } catch (Exception e) {
                     LOGGER.error("leaveOrganizationAfterOperation error", e);
                 }
@@ -5936,11 +5954,23 @@ public class OrganizationServiceImpl implements OrganizationService {
                     }
                 }
 
+                // 删除模块管理员
+                if(OrganizationMemberTargetType.fromCode(m.getTargetType()) == OrganizationMemberTargetType.USER){
+                    DeleteServiceModuleAdministratorsCommand dscommand = new DeleteServiceModuleAdministratorsCommand();
+                    dscommand.setTargetId(m.getTargetId());
+                    dscommand.setTargetType(OwnerType.USER.getCode());
+                    dscommand.setOwnerType(OwnerType.ORGANIZATION.getCode());
+                    dscommand.setOwnerId(m.getOrganizationId());
+                    dscommand.setOrganizationId(m.getOrganizationId());
+                    this.rolePrivilegeService.deleteServiceModuleAdministrators(dscommand);
+                }
+
                 Integer namespaceId = UserContext.getCurrentNamespaceId();
                 if (OrganizationMemberTargetType.fromCode(m.getTargetType()) == OrganizationMemberTargetType.USER) {
                     //Remove door auth, by Janon 2016-12-15
                     doorAccessService.deleteAuthWhenLeaveFromOrg(UserContext.getCurrentNamespaceId(), m.getOrganizationId(), m.getTargetId());
-                    LOGGER.debug("deleteUserDoorAccess, namespaceId  = {}, orgMemberId = {}, useId =  {}",UserContext.getCurrentNamespaceId(), m.getOrganizationId(),  m.getTargetId());
+                    LOGGER.debug("deleteUserDoorAccess, m.namespaceId  = {}, UserContext.getCurrentNamespaceId  = {}, UserContext.current.getNamespaceId()  = {}, m.namespaceId  = {}, orgMemberId = {}, useId =  {}",
+                            m.getNamespaceId(),UserContext.getCurrentNamespaceId(), UserContext.current().getNamespaceId(), m.getOrganizationId(),  m.getTargetId());
 
                     // 需要给用户默认一下小区（以机构所在园区为准），否则会在用户退出时没有小区而客户端拿不到场景而卡死
                     // http://devops.lab.everhomes.com/issues/2812  by lqs 20161017
@@ -8534,7 +8564,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         // send notification to all the other members in the group
         notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER);
         // 消息只发给公司的管理人员  by sfyan 20170213
-        includeList = this.includeOrgList(org, member.getTargetId());
+//        includeList = this.includeOrgList(org, member.getTargetId());
+        includeList = listOrganzationAdminIds(member.getOrganizationId());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Send has approval message to admin member in organization, organizationId=" + org.getId() + ", adminList=" + includeList);
+        }
         sendEnterpriseNotificationUseSystemUser(includeList, null, notifyTextForApplicant);
     }
 
@@ -10360,7 +10394,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                     departmentName += org.getName() + ",";
                 }
             }
-            departmentName = departmentName.substring(0, departmentName.length() - 1);
+            if (!"".equals(departmentName))
+                departmentName = departmentName.substring(0, departmentName.length() - 1);
             return departmentName;
         } else
             return "";
@@ -10586,6 +10621,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             response.setTotalCount(this.organizationProvider.countOrganizationPersonnels(cmd.getNamespaceId(), orgCommoand, cmd.getIsSignedup(), visibleFlag));
         } else {
             List<String> groupTypes = new ArrayList<>();
+            groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
             groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
             groupTypes.add(OrganizationGroupType.GROUP.getCode());
             organizationMembers = this.organizationProvider.listOrganizationMemberByPath(cmd.getKeywords(), org.getPath(), groupTypes, cmd.getIsSignedup(), visibleFlag, locator, pageSize);
@@ -13810,7 +13846,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (orgs.size() > 1 && i == list.length) {
             //todo 获得多个结果 到达极限 报错
             LOGGER.error("cannot find the exact :organization. path = {}", list.toString());
-            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, "cannot find the exact organization. path = {}", list.toString());
+//            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, "cannot find the exact organization. path = {}", list.toString());
+            return null;
         } else {
             //todo 递归
             List<Organization> result = orgs.stream().map(r -> {

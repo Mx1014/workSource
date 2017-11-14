@@ -320,7 +320,7 @@ public class AssetController extends ControllerBase {
 
     // this is for 展示所有收费项目   4
     /**
-     * <p>获取园区启用的收费项目列表</p>
+     * <p>获取账单组启用的收费项目列表</p>
      * <b>URL: /asset/listChargingItems</b>
      */
     @RequestMapping("listChargingItems")
@@ -333,6 +333,10 @@ public class AssetController extends ControllerBase {
         return response;
     }
     //左邻管理员可以进入，点击收费项目，传递所在园区，点击保存，其园区可以看到此收费项目          ---   4
+    // 查看时，全部情况是查看域空间为namespaceid的，(接口为listAllChargingItems
+    // )
+    // 修改时(此修改支持删除,增加)，只使用此接口，全部：储存到namespaceid，同步到下面的communityid； 单个：修改单个的并且修改decoupleFlag
+    //
     /**
      * <p>园区收费项权限配置</p>
      * <b>URL: /asset/configChargingItems</b>
@@ -520,10 +524,10 @@ public class AssetController extends ControllerBase {
      * <b>URL: /asset/deleteBillGroup</b>
      */
     @RequestMapping("deleteBillGroup")
-    @RestReturn(value = String.class)
+    @RestReturn(value = DeleteBillGroupReponse.class)
     public RestResponse deleteBillGroup(DeleteBillGroupCommand cmd) {
-        assetService.deleteBillGroup(cmd);
-        RestResponse response = new RestResponse();
+        DeleteBillGroupReponse res = assetService.deleteBillGroup(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
@@ -1047,6 +1051,47 @@ public class AssetController extends ControllerBase {
 //        }
         assetService.paymentExpectancies_re_struct(cmd);
         return "ROU ARE WA GA DEKI ROU KU ROU!";
+    }
+    /**
+     * <b>URL: /asset/autoNoticeConfig</b>
+     * <p></p>
+     */
+    @RequestMapping("autoNoticeConfig")
+    @RestReturn(String.class)
+    public RestResponse autoNoticeConfig(AutoNoticeConfigCommand cmd){
+        assetService.autoNoticeConfig(cmd);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /asset/listAutoNoticeConfig</b>
+     * <p></p>
+     */
+    @RequestMapping("listAutoNoticeConfig")
+    @RestReturn(ListAutoNoticeConfigResponse.class)
+    public RestResponse listAutoNoticeConfig(ListAutoNoticeConfigCommand cmd){
+        ListAutoNoticeConfigResponse response = assetService.listAutoNoticeConfig(cmd);
+        RestResponse restResponse = new RestResponse(response);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /asset/activeAutoBillNotice</b>
+     * <p></p>
+     */
+    @RequestMapping("activeAutoBillNotice")
+    @RestReturn(String.class)
+    public RestResponse listAutoNoticeConfig(){
+        assetService.activeAutoBillNotice();
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
     }
 
 }

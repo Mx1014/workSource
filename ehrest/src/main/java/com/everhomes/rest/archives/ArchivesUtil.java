@@ -7,11 +7,26 @@ import java.util.Calendar;
 public class ArchivesUtil {
 
     public static java.sql.Date parseDate(String strDate) {
-        String str = strDate;
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        String pattern = null;
+        if (strDate != null) {
+            if (strDate.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                pattern = "yyyy-MM-dd";
+            } else if (strDate.matches("\\d{2}/\\d{2}/\\d{2}")) {
+                pattern = "MM/dd/yy";
+            }else if (strDate.matches("\\d{2}/\\d/\\d{2}")) {
+                pattern = "MM/d/yy";
+            }else if (strDate.matches("\\d/\\d/\\d{2}")) {
+                pattern = "M/d/yy";
+            }else if (strDate.matches("\\d/\\d{2}/\\d{2}")) {
+                pattern = "M/dd/yy";
+            }
+        }
+        if (pattern == null)
+            return null;
+        SimpleDateFormat format = new SimpleDateFormat(pattern);
         java.util.Date d = null;
         try {
-            d = format.parse(str);
+            d = format.parse(strDate);
         } catch (Exception e) {
             e.printStackTrace();
         }

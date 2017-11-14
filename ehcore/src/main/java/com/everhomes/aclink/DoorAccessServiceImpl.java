@@ -39,12 +39,16 @@ import com.everhomes.locale.LocaleTemplate;
 import com.everhomes.locale.LocaleTemplateProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.organization.*;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.aclink.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.appurl.AppUrlDTO;
+import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.community.GetCommunityByIdCommand;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
@@ -56,6 +60,7 @@ import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.OSType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.server.schema.Tables;
@@ -214,6 +219,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     @Autowired
     private DoorAuthLevelProvider doorAuthLevelProvider;
+    
+    @Autowired
+    private NamespaceProvider namespaceProvider;
     
     AlipayClient alipayClient;
     
@@ -1773,9 +1781,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             return msgGenerator.generateTimeMessage(resp.getId());
         }
         
-        return msgGenerator.generateWebSocketMessage(resp.getId());
+        //return msgGenerator.generateWebSocketMessage(resp.getId());
         
-//        return null;
+        return null;
     }
     
     @Override
@@ -2497,6 +2505,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         auth.setOrganization(cmd.getOrganization());
         auth.setPhone(cmd.getPhone());
         auth.setNickname(cmd.getUserName());
+        auth.setLinglingUuid(uuid);
+        auth.setCurrStorey(cmd.getDoorNumber());
         
         if(cmd.getValidFromMs() == null) {
         	auth.setValidFromMs(System.currentTimeMillis());	
@@ -2919,6 +2929,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         if(namespaceId != null) {
             DoorAccessDriverType driverType = getQrDriverZuolinInner(namespaceId);
             DoorAccessDriverType qrDriverExt = getQrDriverExt(namespaceId);
+            Namespace namespace = namespaceProvider.findNamespaceById(namespaceId);
+            if(namespace != null) {
+                resp.setNamespaceName(namespace.getName());    
+            }
+            
             if(driverType == DoorAccessDriverType.ZUOLIN_V2 && qrDriverExt == DoorAccessDriverType.ZUOLIN) {
                 byte[] origin = Base64.decodeBase64(auth.getQrKey());
                 byte[] qrLenArr = new byte[2];
@@ -2931,7 +2946,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 
 //                qrArr = Base64.decodeBase64("+mfPObQMjcXYWp+UpXhknA==");
                 
-                resp.setQr(AclinkUtils.createZlQrCodeForFlapDoor(qrArr, System.currentTimeMillis(), 30*60*1000l));
+                Long qrImageTimeout = this.configProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_TIMEOUTS, 10*60l);
+                resp.setQr(AclinkUtils.createZlQrCodeForFlapDoor(qrArr, System.currentTimeMillis(), qrImageTimeout*1000l));
                 
                 return resp;
             }

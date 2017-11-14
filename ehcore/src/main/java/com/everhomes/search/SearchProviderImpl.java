@@ -87,7 +87,7 @@ public class SearchProviderImpl implements SearchProvider {
 		try {
 			return HttpUtils.putJson(url, json, TIME_OUT, CHARSET);
 		} catch (IOException e) {
-			LOGGER.error("request to elasticsearch error: url=" + url + ", json=" + json);
+			LOGGER.error("request to elasticsearch error: url={}, json={}", url, json, e);
 			throw RuntimeErrorException.errorWith(SearchErrorCode.SCOPE,
 					SearchErrorCode.ERROR_REQUEST_ELASTICSEARCH_ERROR, "request to elasticsearch error");
 		}

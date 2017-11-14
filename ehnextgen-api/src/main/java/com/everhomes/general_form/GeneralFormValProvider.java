@@ -18,4 +18,6 @@ public interface GeneralFormValProvider {
 
 	void deleteGeneralFormVals(String sourceType, Long sourceId);
 
+	GeneralFormVal getGeneralFormValBySourceIdAndName(Long sourceId, String sourceType, String fieldName);
+
 }

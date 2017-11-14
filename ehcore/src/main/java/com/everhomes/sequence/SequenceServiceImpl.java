@@ -107,6 +107,8 @@ import com.everhomes.server.schema.tables.pojos.EhCustomerInvestments;
 import com.everhomes.server.schema.tables.pojos.EhCustomerPatents;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTalents;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTrademarks;
+import com.everhomes.server.schema.tables.pojos.EhDefaultChargingItemProperties;
+import com.everhomes.server.schema.tables.pojos.EhDefaultChargingItems;
 import com.everhomes.server.schema.tables.pojos.EhDockingMappings;
 import com.everhomes.server.schema.tables.pojos.EhDoorAccess;
 import com.everhomes.server.schema.tables.pojos.EhDoorAuth;
@@ -115,15 +117,21 @@ import com.everhomes.server.schema.tables.pojos.EhDoorCommand;
 import com.everhomes.server.schema.tables.pojos.EhDoorUserPermission;
 import com.everhomes.server.schema.tables.pojos.EhEnergyCountStatistics;
 import com.everhomes.server.schema.tables.pojos.EhEnergyDateStatistics;
+import com.everhomes.server.schema.tables.pojos.EhEnergyMeterAddresses;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterCategories;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterChangeLogs;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterDefaultSettings;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterFormulas;
+import com.everhomes.server.schema.tables.pojos.EhEnergyMeterLogs;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterPriceConfig;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterReadingLogs;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterSettingLogs;
+import com.everhomes.server.schema.tables.pojos.EhEnergyMeterTasks;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeters;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMonthStatistics;
+import com.everhomes.server.schema.tables.pojos.EhEnergyPlanGroupMap;
+import com.everhomes.server.schema.tables.pojos.EhEnergyPlanMeterMap;
+import com.everhomes.server.schema.tables.pojos.EhEnergyPlans;
 import com.everhomes.server.schema.tables.pojos.EhEnergyYoyStatistics;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseAddresses;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseAttachments;
@@ -277,15 +285,28 @@ import com.everhomes.server.schema.tables.pojos.EhParkingStatistics;
 import com.everhomes.server.schema.tables.pojos.EhParkingUserInvoices;
 import com.everhomes.server.schema.tables.pojos.EhParkingVendors;
 import com.everhomes.server.schema.tables.pojos.EhPaymentAccounts;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillNoticeRecords;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardIssuerCommunities;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardIssuers;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardRechargeOrders;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardTransactions;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCards;
+import com.everhomes.server.schema.tables.pojos.EhPaymentChargingItemScopes;
+import com.everhomes.server.schema.tables.pojos.EhPaymentChargingItems;
+import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards;
+import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes;
+import com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver;
+import com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems;
+import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import com.everhomes.server.schema.tables.pojos.EhPaymentOrderRecords;
 import com.everhomes.server.schema.tables.pojos.EhPaymentServiceConfigs;
 import com.everhomes.server.schema.tables.pojos.EhPaymentTypes;
 import com.everhomes.server.schema.tables.pojos.EhPaymentUsers;
+import com.everhomes.server.schema.tables.pojos.EhPaymentVariables;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyConfigurations;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyLogs;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyRecords;
@@ -2325,6 +2346,7 @@ public class SequenceServiceImpl implements SequenceService {
                     .from(Tables.EH_PAYMENT_SERVICE_CONFIGS).fetchOne().value1();
         });
 
+
 		syncTableSequence(null, EhArchivesStickyContacts.class, Tables.EH_ARCHIVES_STICKY_CONTACTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ARCHIVES_STICKY_CONTACTS.ID.max()).from(Tables.EH_ARCHIVES_STICKY_CONTACTS).fetchOne().value1();
         });
@@ -2350,14 +2372,66 @@ public class SequenceServiceImpl implements SequenceService {
         });
 
 
+
+        syncTableSequence(null, EhPaymentChargingStandards.class, Tables.EH_PAYMENT_CHARGING_STANDARDS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_CHARGING_STANDARDS.ID.max())
+                    .from(Tables.EH_PAYMENT_CHARGING_STANDARDS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentChargingStandardsScopes.class, Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.ID.max())
+                    .from(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentChargingItems.class, Tables.EH_PAYMENT_CHARGING_ITEMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_CHARGING_ITEMS.ID.max())
+                    .from(Tables.EH_PAYMENT_CHARGING_ITEMS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentChargingItemScopes.class, Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.ID.max())
+                    .from(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentBillGroups.class, Tables.EH_PAYMENT_BILL_GROUPS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_BILL_GROUPS.ID.max())
+                    .from(Tables.EH_PAYMENT_BILL_GROUPS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentBillGroupsRules.class, Tables.EH_PAYMENT_BILL_GROUPS_RULES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_BILL_GROUPS_RULES.ID.max())
+                    .from(Tables.EH_PAYMENT_BILL_GROUPS_RULES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentBills.class, Tables.EH_PAYMENT_BILLS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_BILLS.ID.max())
+                    .from(Tables.EH_PAYMENT_BILLS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentBillItems.class, Tables.EH_PAYMENT_BILL_ITEMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_BILL_ITEMS.ID.max())
+                    .from(Tables.EH_PAYMENT_BILL_ITEMS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentContractReceiver.class, Tables.EH_PAYMENT_CONTRACT_RECEIVER.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_CONTRACT_RECEIVER.ID.max())
+                    .from(Tables.EH_PAYMENT_CONTRACT_RECEIVER).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentBillNoticeRecords.class, Tables.EH_PAYMENT_BILL_NOTICE_RECORDS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_BILL_NOTICE_RECORDS.ID.max())
+                    .from(Tables.EH_PAYMENT_BILL_NOTICE_RECORDS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentExemptionItems.class, Tables.EH_PAYMENT_EXEMPTION_ITEMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_EXEMPTION_ITEMS.ID.max())
+                    .from(Tables.EH_PAYMENT_EXEMPTION_ITEMS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentVariables.class, Tables.EH_PAYMENT_VARIABLES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_VARIABLES.ID.max())
+                    .from(Tables.EH_PAYMENT_VARIABLES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentFormula.class, Tables.EH_PAYMENT_FORMULA.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_FORMULA.ID.max())
+                    .from(Tables.EH_PAYMENT_FORMULA).fetchOne().value1();
+        });
+
         syncTableSequence(null, EhNewsTag.class, Tables.EH_NEWS_TAG.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_NEWS_TAG.ID.max()).from(Tables.EH_NEWS_TAG).fetchOne().value1();
         });
-
         syncTableSequence(null, EhNewsTagVals.class, Tables.EH_NEWS_TAG_VALS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_NEWS_TAG_VALS.ID.max()).from(Tables.EH_NEWS_TAG_VALS).fetchOne().value1();
         });
-
         syncTableSequence(null, EhLeaseProjects.class, Tables.EH_LEASE_PROJECTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_LEASE_PROJECTS.ID.max()).from(Tables.EH_LEASE_PROJECTS).fetchOne().value1();
         });
@@ -2365,6 +2439,7 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhLeaseProjectCommunities.class, Tables.EH_LEASE_PROJECT_COMMUNITIES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_LEASE_PROJECT_COMMUNITIES.ID.max()).from(Tables.EH_LEASE_PROJECT_COMMUNITIES).fetchOne().value1();
         });
+
 
         syncTableSequence(null, EhParkingCarVerifications.class, Tables.EH_PARKING_CAR_VERIFICATIONS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PARKING_CAR_VERIFICATIONS.ID.max()).from(Tables.EH_PARKING_CAR_VERIFICATIONS).fetchOne().value1();
@@ -2377,7 +2452,36 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_FORUM_CATEGORIES.ID.max()).from(Tables.EH_FORUM_CATEGORIES).fetchOne().value1();
         });
         syncTableSequence(null, EhInteractSettings.class, Tables.EH_INTERACT_SETTINGS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_INTERACT_SETTINGS.ID.max()).from(Tables.EH_INTERACT_SETTINGS).fetchOne().value1();
+                    return dbContext.select(Tables.EH_INTERACT_SETTINGS.ID.max()).from(Tables.EH_INTERACT_SETTINGS).fetchOne().value1();
+                });
+        syncTableSequence(null, EhEnergyMeterAddresses.class, Tables.EH_ENERGY_METER_ADDRESSES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ENERGY_METER_ADDRESSES.ID.max()).from(Tables.EH_ENERGY_METER_ADDRESSES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEnergyPlans.class, Tables.EH_ENERGY_PLANS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ENERGY_PLANS.ID.max()).from(Tables.EH_ENERGY_PLANS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEnergyPlanGroupMap.class, Tables.EH_ENERGY_PLAN_GROUP_MAP.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ENERGY_PLAN_GROUP_MAP.ID.max()).from(Tables.EH_ENERGY_PLAN_GROUP_MAP).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEnergyPlanMeterMap.class, Tables.EH_ENERGY_PLAN_METER_MAP.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ENERGY_PLAN_METER_MAP.ID.max()).from(Tables.EH_ENERGY_PLAN_METER_MAP).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEnergyMeterTasks.class, Tables.EH_ENERGY_METER_TASKS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ENERGY_METER_TASKS.ID.max()).from(Tables.EH_ENERGY_METER_TASKS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEnergyMeterLogs.class, Tables.EH_ENERGY_METER_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ENERGY_METER_LOGS.ID.max()).from(Tables.EH_ENERGY_METER_LOGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhDefaultChargingItemProperties.class, Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.ID.max()).from(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhDefaultChargingItems.class, Tables.EH_DEFAULT_CHARGING_ITEMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_DEFAULT_CHARGING_ITEMS.ID.max()).from(Tables.EH_DEFAULT_CHARGING_ITEMS).fetchOne().value1();
+
+        });
+        
+        syncTableSequence(null, EhDoorAuthLevel.class, Tables.EH_DOOR_AUTH_LEVEL.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_DOOR_AUTH_LEVEL.ID.max()).from(Tables.EH_DOOR_AUTH_LEVEL).fetchOne().value1();
         });
 
     }
