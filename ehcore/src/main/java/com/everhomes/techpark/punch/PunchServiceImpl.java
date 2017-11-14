@@ -7518,8 +7518,8 @@ public class PunchServiceImpl implements PunchService {
                 }
                 for (int i = 0; i < pdl.getPunchTimesPerDay() / 2; i++) {
                     try {
-                        if (approvalStatus != null  ) {
-                            statusList[i] = approvalStatus[i] + "";
+                        if (approvalStatus != null && !StringUtils.isEmpty(approvalStatus[i])) {
+                            statusList[i] = approvalStatus[i];
                         }
                     } catch (Exception e) {
                         LOGGER.error("approval status error", e);
@@ -7784,7 +7784,9 @@ public class PunchServiceImpl implements PunchService {
 			tiDTOs.add(dto);
 		}
 		else{
-			for (TimeInterval ti : tiDTOs) {
+			List<TimeInterval> oldTis = new ArrayList<>();
+			oldTis.addAll(tiDTOs);
+			for (TimeInterval ti : oldTis) {
 				//如果request开始和结束时间都在ti时间区间内,直接return
 				if (request.getBeginTime().after(ti.getBeginTime()) && request.getBeginTime().before(ti.getEndTime())
 						&& request.getEndTime().after(ti.getBeginTime()) && request.getEndTime().before(ti.getEndTime())) {
