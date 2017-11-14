@@ -4861,7 +4861,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	private void refreshPunchDayLog(Long userId, Long companyId, Calendar start, Calendar end) {
-		while (!end.after(start)) {
+		while (!start.after(end)) {
 
 			try {
 				this.refreshPunchDayLog(userId, companyId, start);
