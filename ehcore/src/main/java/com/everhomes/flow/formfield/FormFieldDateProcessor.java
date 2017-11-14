@@ -31,8 +31,7 @@ public class FormFieldDateProcessor implements FormFieldProcessor {
         return GeneralFormFieldType.DATE;
     }
 
-    @Override
-    public List<FlowConditionRelationalOperatorType> getSupportOperatorList() {
+    protected List<FlowConditionRelationalOperatorType> getSupportOperatorList() {
         List<FlowConditionRelationalOperatorType> operatorTypes = new ArrayList<>();
         operatorTypes.add(FlowConditionRelationalOperatorType.EQUAL);
         operatorTypes.add(FlowConditionRelationalOperatorType.NOT_EQUAL);
@@ -59,7 +58,7 @@ public class FormFieldDateProcessor implements FormFieldProcessor {
     }
 
     @Override
-    public FlowConditionVariable getFlowConditionVariable(GeneralFormFieldDTO fieldDTO) {
+    public FlowConditionVariable getFlowConditionVariable(GeneralFormFieldDTO fieldDTO, String fieldName, String extra) {
         try {
             Map<String, String> map = (Map<String, String>) StringHelper.fromJsonString(fieldDTO.getFieldValue(), Map.class);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");

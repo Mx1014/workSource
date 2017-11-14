@@ -27,8 +27,7 @@ public class FormFieldNumberTextProcessor implements FormFieldProcessor {
         return GeneralFormFieldType.NUMBER_TEXT;
     }
 
-    @Override
-    public List<FlowConditionRelationalOperatorType> getSupportOperatorList() {
+    protected List<FlowConditionRelationalOperatorType> getSupportOperatorList() {
         List<FlowConditionRelationalOperatorType> operatorTypes = new ArrayList<>();
         operatorTypes.add(FlowConditionRelationalOperatorType.EQUAL);
         operatorTypes.add(FlowConditionRelationalOperatorType.NOT_EQUAL);
@@ -55,7 +54,7 @@ public class FormFieldNumberTextProcessor implements FormFieldProcessor {
     }
 
     @Override
-    public FlowConditionVariable getFlowConditionVariable(GeneralFormFieldDTO fieldDTO) {
+    public FlowConditionVariable getFlowConditionVariable(GeneralFormFieldDTO fieldDTO, String fieldName, String extra) {
         try {
             Map<String, String> map = (Map<String, String>) StringHelper.fromJsonString(fieldDTO.getFieldValue(), Map.class);
             return new FlowConditionNumberVariable(Float.parseFloat(map.get("text")));

@@ -5023,17 +5023,18 @@ public class FlowServiceImpl implements FlowService {
     }
 
     @Override
-    public FlowConditionVariable getFormFieldValueByVariable(FlowCaseState ctx, String variable) {
+    public FlowConditionVariable getFormFieldValueByVariable(FlowCaseState ctx, String variable, String extra) {
+        String fieldName = formFieldProcessorManager.parseFormFieldName(ctx, variable, extra);
         FlowCase flowCase = ctx.getFlowCase();
         GeneralFormFieldDTO fieldDTO = generalFormService.getGeneralFormValueByOwner(
                 flowCase.getModuleType(),
                 flowCase.getModuleId(),
                 EhFlowCases.class.getSimpleName(),
                 flowCase.getId(),
-                variable
+                fieldName
         );
         if (fieldDTO != null) {
-            return formFieldProcessorManager.getFlowConditionVariable(fieldDTO);
+            return formFieldProcessorManager.getFlowConditionVariable(fieldDTO, variable, extra);
         }
         return null;
     }
@@ -5801,16 +5802,10 @@ public class FlowServiceImpl implements FlowService {
     }
 
     private List<FlowCaseEntity> getFlowCaseEntities(List<FlowUserType> flowUserTypes, FlowCase flowCase) {
-        try {
-            if (flowUserTypes.size() > 0) {
-                return flowListenerManager.onFlowCaseDetailRender(flowCase, flowUserTypes.get(0));
-            }
-            return flowListenerManager.onFlowCaseDetailRender(flowCase, null);
-        } catch (Exception e) {
-            LOGGER.error("Flow module listener onFlowCaseDetailRender error, flowCaseId = "+flowCase.getId(), e);
-            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_DETAIL_RENDER,
-                    "Flow module listener onFlowCaseDetailRender error, flowCaseId=%s", flowCase.getId());
+        if (flowUserTypes.size() > 0) {
+            return flowListenerManager.onFlowCaseDetailRender(flowCase, flowUserTypes.get(0));
         }
+        return flowListenerManager.onFlowCaseDetailRender(flowCase, null);
     }
 
     private List<FlowButtonDTO> getFlowButtonDTOList(FlowGraph flowGraph, Long userId, List<FlowUserType> flowUserTypes, boolean checkProcessor, FlowCase flowCase, List<FlowNode> nodes, List<FlowLane> laneList) {
@@ -6235,6 +6230,8 @@ public class FlowServiceImpl implements FlowService {
         exp.setRelationalOperator(expressionCmd.getRelationalOperator());
         exp.setVariable1(expressionCmd.getVariable1());
         exp.setVariable2(expressionCmd.getVariable2());
+        exp.setVariableExtra1(expressionCmd.getVariableExtra1());
+        exp.setVariableExtra2(expressionCmd.getVariableExtra2());
         exp.setVariableType1(expressionCmd.getVariableType1());
         exp.setVariableType2(expressionCmd.getVariableType2());
 

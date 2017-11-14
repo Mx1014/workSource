@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 @Component
 public class FormFieldDropBoxProcessor extends FormFieldSingleLineTextProcessor {
 
-    @Override
     public GeneralFormFieldType getSupportFieldType() {
         return GeneralFormFieldType.DROP_BOX;
     }
@@ -49,7 +48,7 @@ public class FormFieldDropBoxProcessor extends FormFieldSingleLineTextProcessor 
     }
 
     @Override
-    public FlowConditionVariable getFlowConditionVariable(GeneralFormFieldDTO fieldDTO) {
+    public FlowConditionVariable getFlowConditionVariable(GeneralFormFieldDTO fieldDTO, String fieldName, String extra) {
         try {
             Map<String, String> map = (Map<String, String>) StringHelper.fromJsonString(fieldDTO.getFieldValue(), Map.class);
             return new FlowConditionStringVariable(map.get("text"));
