@@ -861,10 +861,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 				cell4.setCellStyle(style);
 				PmTask pmTask = pmTaskProvider.findTaskById(task.getId());
 				if(pmTask != null) {
+					cell4.setCellValue(pmTask.getAddress());
 					if(PmTaskAddressType.FAMILY.equals(PmTaskAddressType.fromCode(pmTask.getAddressType()))) {
 						Address address = addressProvider.findAddressById(pmTask.getAddressId());
-						if(null != address)
+						if(null != address) {
 							cell4.setCellValue(address.getAddress());
+						}
 					}else {
 						Organization organization = organizationProvider.findOrganizationById(pmTask.getAddressOrgId());
 						if(null != organization)
