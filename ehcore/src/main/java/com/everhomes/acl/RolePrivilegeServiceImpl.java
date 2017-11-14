@@ -49,8 +49,6 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
-import org.apache.commons.collections.ListUtils;
-import org.apache.commons.collections.MapUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -3282,7 +3280,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		int namespaceId = UserContext.getCurrentNamespaceId();
 		AuthorizationsAppControl authorizationsAppControl = new AuthorizationsAppControl();
 
-		List<Authorization> authorizations =  authorizationProvider.listAuthorizations(ownerType, ownerId, targetType, targetId ,authType, authId, null, moduleControlType, null, false);
+		List<Authorization> authorizations =  authorizationProvider.listAuthorizations(ownerType, ownerId, targetType, targetId ,authType, authId, null, null, moduleControlType, null, false);
 		List<ServiceModuleApp> serviceModuleApps = new ArrayList<>();
 
 		if(authorizations.size() == 0){

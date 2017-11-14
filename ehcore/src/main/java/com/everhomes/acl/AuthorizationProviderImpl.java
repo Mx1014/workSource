@@ -322,7 +322,7 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 
 
 	@Override
-	public List<Authorization> listAuthorizations(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType, String moduleControlType, Byte all_control_flag, Boolean targetFlag){
+	public List<Authorization> listAuthorizations(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType, Long appId, String moduleControlType, Byte all_control_flag, Boolean targetFlag){
 		return listAuthorizations(null, null, new ListingQueryBuilderCallback() {
 			@Override
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
@@ -346,6 +346,10 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 
 				if(!StringUtils.isEmpty(identityType)){
 					query.addConditions(Tables.EH_AUTHORIZATIONS.IDENTITY_TYPE.eq(identityType));
+				}
+
+				if(null != appId){
+					query.addConditions(Tables.EH_AUTHORIZATIONS.MODULE_APP_ID.eq(appId));
 				}
 
 				if(!StringUtils.isEmpty(moduleControlType)){
