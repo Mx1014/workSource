@@ -106,10 +106,7 @@ public class EquipmentController extends ControllerBase {
 
         SearchEquipmentStandardsResponse standards = equipmentStandardSearcher.query(cmd);
 
-        RestResponse response = new RestResponse(standards);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+        return getRestResponse(standards);
     }
 
     /**
