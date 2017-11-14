@@ -1084,7 +1084,7 @@ public class PunchServiceImpl implements PunchService {
 		//请假的汇总interval
 		List<TimeInterval> tiDTOs = null;
 		Timestamp dayStart = new Timestamp(punchDate.getTime() - (ptr.getBeginPunchTime()==null?14400000L:ptr.getBeginPunchTime()));
-		Timestamp dayEnd = new Timestamp(punchDate.getTime() +(ptr.getDaySplitTimeLong()==null?104400000L:ptr.getBeginPunchTime()));
+		Timestamp dayEnd = new Timestamp(punchDate.getTime() +(ptr.getDaySplitTimeLong()==null?104400000L:ptr.getDaySplitTimeLong()));
 		tiDTOs = processTimeRuleDTO(tiDTOs, userId, companyId, dayStart,dayEnd);
 
 		List<PunchLog> efficientLogs = new ArrayList<>();
@@ -5022,7 +5022,7 @@ public class PunchServiceImpl implements PunchService {
 		if (null != ptr) {
 
 			Timestamp dayStart = new Timestamp(r.getPunchDate().getTime() - (ptr.getBeginPunchTime()==null?14400000L:ptr.getBeginPunchTime()));
-			Timestamp dayEnd = new Timestamp(r.getPunchDate().getTime() +(ptr.getDaySplitTimeLong()==null?104400000L:ptr.getBeginPunchTime()));
+			Timestamp dayEnd = new Timestamp(r.getPunchDate().getTime() +(ptr.getDaySplitTimeLong()==null?104400000L:ptr.getDaySplitTimeLong()));
 			List<PunchExceptionRequest> exceptionRequests = punchProvider.listPunchExceptionRequestBetweenBeginAndEndTime(r.getUserId(),
 					r.getEnterpriseId(), dayStart, dayEnd);
 			if (null == exceptionRequests) {
@@ -7717,7 +7717,7 @@ public class PunchServiceImpl implements PunchService {
 		if (null != ptr) {
 
 			Timestamp dayStart = new Timestamp(punchDate.getTime() - (ptr.getBeginPunchTime()==null?14400000L:ptr.getBeginPunchTime()));
-			Timestamp dayEnd = new Timestamp(punchDate.getTime() +(ptr.getDaySplitTimeLong()==null?104400000L:ptr.getBeginPunchTime()));
+			Timestamp dayEnd = new Timestamp(punchDate.getTime() +(ptr.getDaySplitTimeLong()==null?104400000L:ptr.getDaySplitTimeLong()));
 			tiDTOs = processTimeRuleDTO(tiDTOs, userId, enterpriseId, dayStart, dayEnd);
 		}
 		if(ptr.getPunchTimesPerDay().equals((byte)2)){
