@@ -21,6 +21,7 @@ import java.util.List;
  *  <li>name: 计划名称</li>
  *  <li>status: 计划状态 参考{@link com.everhomes.rest.equipment.EquipmentPlanStatus}</li>
  *  <li>remarks: 计划备注内容</li>
+ *  <li>inspectionCategoryId: 巡检对象类型id</li>
  *  <li>repeatSettings: 执行周期 参考{@link com.everhomes.rest.repeat.RepeatSettingsDTO}</li>
  *  <li>equipmentStandardRelations: 设备标准关系 参考{@link com.everhomes.rest.equipment.EquipmentStandardRelationDTO}</li>
  *  </ul>
