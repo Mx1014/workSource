@@ -394,8 +394,13 @@ public interface FlowService {
 
 	FlowResolveUsersResponse resolveSelectionUsers(Long flowId, Long selectionUserId);
 
-	FlowCase createDumpFlowCase(GeneralModuleInfo ga,
-			CreateFlowCaseCommand flowCaseCmd);
+    /**
+     * 预先申请一个flowCaseId
+     */
+    Long getNextFlowCaseId();
+
+    FlowCase createDumpFlowCase(GeneralModuleInfo ga,
+                                CreateFlowCaseCommand flowCaseCmd);
  
 	List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId,
 			List<FlowUserSelection> selections);
@@ -466,4 +471,18 @@ public interface FlowService {
     FlowGraphDTO createOrUpdateFlowCondition(CreateFlowConditionCommand cmd);
 
     void updateFlowValidationStatus(UpdateFlowValidationStatusCommand cmd);
+
+    FlowConditionVariable getFormFieldValueByVariable(FlowCaseState ctx, String variable, String extra);
+
+    ListFlowConditionVariablesResponse listFlowConditionVariables(ListFlowConditionVariablesCommand cmd);
+
+    ListFlowFormsResponse listFlowForms(ListFlowFormsCommand cmd);
+
+    FlowFormDTO updateFlowFormVersion(UpdateFlowFormCommand cmd);
+
+    FlowFormDTO createFlowForm(UpdateFlowFormCommand cmd);
+
+    void deleteFlowForm(UpdateFlowFormCommand cmd);
+
+    FlowFormDTO getFlowForm(FlowIdCommand cmd);
 }

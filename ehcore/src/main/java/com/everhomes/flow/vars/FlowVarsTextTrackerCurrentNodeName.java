@@ -20,6 +20,9 @@ public class FlowVarsTextTrackerCurrentNodeName implements FlowVariableTextResol
 	
 	@Override
 	public String variableTextRender(FlowCaseState ctx, String variable) {
-	    return ctx.getFlowGraph().getGraphNode(ctx.getFlowCase().getCurrentNodeId()).getFlowNode().getNodeName();
+        if (ctx.getCurrentNode() != null) {
+            return ctx.getCurrentNode().getFlowNode().getNodeName();
+        }
+        return ctx.getFlowGraph().getGraphNode(ctx.getFlowCase().getCurrentNodeId()).getFlowNode().getNodeName();
 	}
 }

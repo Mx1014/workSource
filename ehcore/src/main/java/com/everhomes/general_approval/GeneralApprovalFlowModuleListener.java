@@ -16,6 +16,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.server.schema.Tables;
@@ -586,6 +587,10 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         ServiceModule module = serviceModuleProvider.findServiceModuleById(GeneralApprovalController.MODULE_ID);
         moduleInfo.setModuleName(module.getName());
         moduleInfo.setModuleId(GeneralApprovalController.MODULE_ID);
+
+        // 添加表单支持
+        moduleInfo.addMeta(FlowModuleInfo.META_KEY_FORM_FLAG, String.valueOf(TrueOrFalseFlag.TRUE.getCode()));
+
         return moduleInfo;
     }
 
@@ -626,5 +631,24 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
             return result;
         }
         return null;
+    }
+
+    @Override
+    public List<FlowFormDTO> listFlowForms(Flow flow) {
+        List<FlowFormDTO> flowFormDTOS = new ArrayList<>();
+        if (flow.getOwnerType().equals(FlowOwnerType.GENERAL_APPROVAL.getCode())) {
+            GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(flow.getOwnerId());
+
+            GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(approval.getFormOriginId());
+            if (form != null) {
+                FlowFormDTO dto = new FlowFormDTO();
+                dto.setName(form.getFormName());
+                dto.setFormVersion(form.getFormVersion());
+                dto.setFormOriginId(form.getFormOriginId());
+
+                flowFormDTOS.add(dto);
+            }
+        }
+        return flowFormDTOS;
     }
 }

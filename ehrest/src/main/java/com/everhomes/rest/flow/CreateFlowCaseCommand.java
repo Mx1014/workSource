@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
+ *     <li>flowCaseId: 预先申请的flowCaseId, 如果在第一个节点配置条件变量可能要用到这个</li>
  *     <li>flowMainId: enabled flow id</li>
  *     <li>flowVersion: flow 版本</li>
  *     <li>applyUserId: 申请人id</li>
@@ -23,6 +24,7 @@ import javax.validation.constraints.NotNull;
  */
 public class CreateFlowCaseCommand {
 
+    private Long flowCaseId;
     private Long flowMainId;
     private Integer flowVersion;
     private Long applyUserId;
@@ -133,6 +135,14 @@ public class CreateFlowCaseCommand {
 
     public void setAdditionalFieldDTO(FlowCaseAdditionalFieldDTO additionalFieldDTO) {
         this.additionalFieldDTO = additionalFieldDTO;
+    }
+
+    public Long getFlowCaseId() {
+        return flowCaseId;
+    }
+
+    public void setFlowCaseId(Long flowCaseId) {
+        this.flowCaseId = flowCaseId;
     }
 
     @Override

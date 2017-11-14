@@ -859,7 +859,7 @@ public class BusinessServiceImpl implements BusinessService {
 		//recommand business first
 		/*dtos.sort(new Comparator<BusinessDTO>() {
 			@Override
-			public int compare(BusinessDTO o1, BusinessDTO o2) {
+			public int compareTo(BusinessDTO o1, BusinessDTO o2) {
 				return o2.getRecommendStatus() - o1.getRecommendStatus();
 			}
 		});*/
