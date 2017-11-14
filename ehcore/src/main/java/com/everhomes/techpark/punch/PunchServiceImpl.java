@@ -1184,7 +1184,7 @@ public class PunchServiceImpl implements PunchService {
 				flexTimeLong = ptr.getFlexTimeLong();
 			}
 			Long beginTimeLong = onDutyLog.getPunchDate().getTime()+onDutyLog.getRuleTime()+flexTimeLong;
-			calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,ptr.getWorkTimeLong(),beginTimeLong);
+			calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,ptr.getNoonLeaveTimeLong() - ptr.getStartEarlyTimeLong(),beginTimeLong);
 			//算请假对下班打卡的影响
 			Long offDutyTimeLong = punchDate.getTime()+ ptr.getNoonLeaveTimeLong();
 			Long punchLateTime = 0L;
@@ -1229,7 +1229,8 @@ public class PunchServiceImpl implements PunchService {
 //				flexTimeLong = punchTimeRule.getFlexTimeLong();
 //			}
 			beginTimeLong = punchDate.getTime()+ptr.getAfternoonArriveTimeLong();
-			calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,ptr.getWorkTimeLong(),beginTimeLong);
+			calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,
+					ptr.getWorkTimeLong()-(ptr.getNoonLeaveTimeLong() - ptr.getStartEarlyTimeLong()),beginTimeLong);
 			//算请假对下班打卡的影响
 			offDutyTimeLong = punchDate.getTime()+ ptr.getStartEarlyTimeLong() + ptr.getWorkTimeLong();
 			if (HommizationType.fromCode(ptr.getHommizationType()) == HommizationType.LATEARRIVE){
@@ -1358,7 +1359,7 @@ public class PunchServiceImpl implements PunchService {
 				if (!interval.getBeginTime().after(new Date(beginTimeLong))) {
 					offDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
 					return ;
-				}else if(!interval.getBeginTime().after(offDutyLog.getPunchTime())){
+				}else if(offDutyLog.getPunchTime() != null && !interval.getBeginTime().after(offDutyLog.getPunchTime())){
 					//如果请假的结束时间不早于打卡时间 也是正常
 					offDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
 					return ;
@@ -1395,7 +1396,7 @@ public class PunchServiceImpl implements PunchService {
 				if (!interval.getEndTime().before(new Date(beginTimeLong + workTimeLong))) {
 					onDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
 					return;
-				} else if (!interval.getEndTime().before(onDutyLog.getPunchTime())) {
+				} else if (onDutyLog.getPunchTime() != null && !interval.getEndTime().before(onDutyLog.getPunchTime())) {
 					//如果请假的结束时间不早于打卡时间 也是正常
 					onDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
 					return;
@@ -7790,18 +7791,18 @@ public class PunchServiceImpl implements PunchService {
 				//如果request开始和结束时间都在ti时间区间内,直接return
 				if (request.getBeginTime().after(ti.getBeginTime()) && request.getBeginTime().before(ti.getEndTime())
 						&& request.getEndTime().after(ti.getBeginTime()) && request.getEndTime().before(ti.getEndTime())) {
-					return tiDTOs;
+					return oldTis;
 				}
 				//如果request有开始时间在ti时间区间内,把request的结束时间代替ti的结束时间
 				else if (request.getBeginTime().after(ti.getBeginTime()) && request.getBeginTime().before(ti.getEndTime())) {
 					ti.setEndTime(request.getEndTime());
-					return tiDTOs;
+					return oldTis;
 				}
 				//如果request的结束时间在ti时间区间,把request的开始时间代替ti的开始时间
 				else if (request.getEndTime().after(ti.getBeginTime()) && request.getEndTime().before(ti.getEndTime())) {
 					ti.setBeginTime(request.getBeginTime());
 
-					return tiDTOs;
+					return oldTis;
 				}
 				//循环过后request和tiDTOs没有什么重合,就把request加入tiDTOs
 				TimeInterval dto = new TimeInterval();
