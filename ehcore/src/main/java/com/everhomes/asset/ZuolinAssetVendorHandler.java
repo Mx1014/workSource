@@ -154,7 +154,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public AssetBillTemplateValueDTO findAssetBill(Long id, Long ownerId, String ownerType, Long targetId, String targetType,
-                    Long templateVersion, Long organizationId, String dateStr, Long tenantId, String tenantType, Long addressId) {
+                                                   Long templateVersion, Long organizationId, String dateStr, Long tenantId, String tenantType, Long addressId) {
         AssetBillTemplateValueDTO dto = new AssetBillTemplateValueDTO();
         AssetBill bill = null;
         if(id != null) {
@@ -282,7 +282,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         dto.setUnpaidAmount(BigDecimal.ZERO);
         Set<Timestamp> accountPeriod = new HashSet<>();
         bills.forEach(bill -> {
-        	dto.setUnpaidAmount(dto.getUnpaidAmount().add(bill.getPeriodAccountAmount()));
+            dto.setUnpaidAmount(dto.getUnpaidAmount().add(bill.getPeriodAccountAmount()));
             accountPeriod.add(bill.getAccountPeriod());
         });
         BigDecimal unpaidMonth = new BigDecimal(accountPeriod.size());
@@ -554,9 +554,10 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         }
         if(cmd.getPageOffset()==null||cmd.getPageOffset()<0){
             cmd.setPageOffset(0);
+
         }
         //先查看任务
-        Boolean inWork = assetProvider.checkContractInWork(cmd.getContractId());
+        Boolean inWork = assetProvider.checkContractInWork(cmd.getContractId(),cmd.getContractNum());
         if(inWork){
 //            return response;
             throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.ERROR_IN_GENERATING,"Mission in process");

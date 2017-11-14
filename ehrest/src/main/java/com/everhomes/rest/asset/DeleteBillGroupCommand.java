@@ -11,6 +11,7 @@ package com.everhomes.rest.asset;
  */
 public class DeleteBillGroupCommand {
     private Long billGroupId;
+
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
@@ -38,6 +39,7 @@ public class DeleteBillGroupCommand {
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
     }
+
 
     public Long getBillGroupId() {
         return billGroupId;

@@ -40,6 +40,7 @@ public class IntegerUtil {
     /**
      * 判断一个string是否含有数字
      */
+
     public static boolean hasDigit(String iden) {
         char[] chars = iden.toCharArray();
         for(char c : chars){

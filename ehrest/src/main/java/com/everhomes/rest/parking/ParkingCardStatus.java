@@ -4,11 +4,12 @@ package com.everhomes.rest.parking;
 /**
  * <ul>停车充值 卡状态
  * <li>NORMAL(1): 正常</li>
- * <li>EXPIRED(2): 过期</li>
+ * <li>EXPIRED(2): 过期, 不可充值</li>
+ * <li>SUPPORT_EXPIRED_RECHARGE(3): 过期, 可充值</li>
  * </ul>
  */
 public enum ParkingCardStatus {
-    NORMAL((byte)1), EXPIRED((byte)2);
+    NORMAL((byte)1), EXPIRED((byte)2), SUPPORT_EXPIRED_RECHARGE((byte)3);
 
     private byte code;
 

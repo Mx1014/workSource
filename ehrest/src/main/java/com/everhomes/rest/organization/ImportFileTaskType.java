@@ -14,11 +14,9 @@ public enum ImportFileTaskType {
     ORGANIZATION_CONTACT("organization_contact"), ENGERPRISE("enterprise"), BUILDING("building"), APARTMENT("apartment"),
     WAREHOUSE_MATERIAL("warehouse_material"),
     WAREHOUSE_MATERIAL_CATEGORY("warehouse_material_category"),
-
     ENTERPRISE_CUSTOMER("enterprise_customer"),
-
-
     PERSONNEL_FILE("psersonnel_file"),
+    PERSONNEL_ARCHIVES("personnel_archives"),
     SALARY_GROUP("salary_group"), ENERGY_METER("energy_meter");
 
 	private String code;

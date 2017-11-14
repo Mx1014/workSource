@@ -126,20 +126,20 @@ public class AssetController extends ControllerBase {
 
 //    新增账单
     /**
-	 * <b>URL: /asset/creatAssetBill</b>
-	 * <p>新增账单</p>
-	 */
-	@RequestMapping("creatAssetBill")
-	@RestReturn(value = AssetBillTemplateValueDTO.class)
-	public RestResponse creatAssetBill(@Valid CreatAssetBillCommand cmd) {
+     * <b>URL: /asset/creatAssetBill</b>
+     * <p>新增账单</p>
+     */
+    @RequestMapping("creatAssetBill")
+    @RestReturn(value = AssetBillTemplateValueDTO.class)
+    public RestResponse creatAssetBill(@Valid CreatAssetBillCommand cmd) {
 
         AssetBillTemplateValueDTO bill = assetService.creatAssetBill(cmd);
 
-		RestResponse response = new RestResponse(bill);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+        RestResponse response = new RestResponse(bill);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 //            查看账单
     /**
      * <b>URL: /asset/findAssetBill</b>
@@ -1031,7 +1031,7 @@ public class AssetController extends ControllerBase {
     }
 
 
-        /**
+    /**
      * <p>测试清单产生</p>
      * <b>URL: /asset/doctor</b>
      *
@@ -1049,8 +1049,8 @@ public class AssetController extends ControllerBase {
 //                list.get(j).setVariableValue(c);
 //            }
 //        }
-         assetService.paymentExpectancies_re_struct(cmd);
-         return "ROU ARE WA GA DEKI ROU KU ROU!";
+        assetService.paymentExpectancies_re_struct(cmd);
+        return "ROU ARE WA GA DEKI ROU KU ROU!";
     }
     /**
      * <b>URL: /asset/autoNoticeConfig</b>

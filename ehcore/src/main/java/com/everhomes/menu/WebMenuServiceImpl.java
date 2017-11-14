@@ -174,6 +174,11 @@ public class WebMenuServiceImpl implements WebMenuService {
 	}
 
 	private List<WebMenuDTO> listZuolinAdminWebMenu(Long userId, WebMenu menu, List<String> categories) {
+
+		//超级管理员才能获取左邻的菜单  add by yanjun 20171110
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		String path = null;
 		if(null != menu){
 			path = menu.getPath() + "/%";

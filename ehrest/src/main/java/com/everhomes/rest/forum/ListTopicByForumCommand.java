@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
  * <li>tag: 标签</li>
+ * <li>forumEntryId: 论坛应用入口Id</li>
  * </ul>
  */
 public class ListTopicByForumCommand {
@@ -34,6 +35,8 @@ public class ListTopicByForumCommand {
     private Long categoryId;
 
     private String tag;
+
+    private Long forumEntryId;
 
     public ListTopicByForumCommand() {
     }
@@ -94,6 +97,14 @@ public class ListTopicByForumCommand {
 
     public void setTag(String tag) {
         this.tag = tag;
+    }
+
+    public Long getForumEntryId() {
+        return forumEntryId;
+    }
+
+    public void setForumEntryId(Long forumEntryId) {
+        this.forumEntryId = forumEntryId;
     }
 
     @Override

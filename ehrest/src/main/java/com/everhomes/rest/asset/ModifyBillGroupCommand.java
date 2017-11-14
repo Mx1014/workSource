@@ -30,6 +30,7 @@ public class ModifyBillGroupCommand {
     @NotNull
     private Byte dueDayType;
 
+
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
@@ -57,6 +58,7 @@ public class ModifyBillGroupCommand {
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
     }
+
 
     @Override
     public String toString() {

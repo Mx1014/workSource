@@ -15,6 +15,7 @@ import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
 import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.visibility.VisibilityScope;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.user.User;
 
 import java.util.List;
 
@@ -72,6 +73,9 @@ public interface ForumService {
      */
     void updatePostPrivacy(Long forumId, Long postId, PostPrivacy privacy);
     PostDTO createComment(NewCommentCommand cmd);
+
+    void sendMessageToUserWhenCommentNotSupport(User user);
+
     void assignTopicScope(AssignTopicScopeCommand cmd);
     List<AssignedScopeDTO> listTopicAssignedScope(ListTopicAssignedScopeCommand cmd);
     
@@ -81,6 +85,11 @@ public interface ForumService {
      * @return 帖子列表
      */
     SearchTopicAdminCommandResponse searchTopic(SearchTopicAdminCommand cmd);
+
+    Byte getInteractFlag(Post post);
+
+    InteractSetting findInteractSettingByPost(Post post);
+
     SearchTopicAdminCommandResponse searchComment(SearchTopicAdminCommand cmd);
     
     void updateUsedAndRental(UsedAndRentalCommand cmd);
@@ -110,4 +119,8 @@ public interface ForumService {
 	void publisTopic(PublishTopicCommand cmd);
 
     Forum findFourmByNamespaceId(Integer namespaceId);
+
+    ListForumCategoryResponse listForumCategory(ListForumCategoryCommand cmd);
+
+    ForumCategoryDTO findForumCategory(FindForumCategoryCommand cmd);
 }

@@ -139,7 +139,7 @@ public class BuildingApplyEntryFormHandler implements GeneralFormModuleHandler {
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
 
         LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-                cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType());
+                null, null, cmd.getSourceType());
 
         GeneralFormDTO dto;
 

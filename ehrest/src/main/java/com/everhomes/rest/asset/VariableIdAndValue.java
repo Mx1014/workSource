@@ -10,7 +10,10 @@ import java.math.BigDecimal;
  */
 
 public class VariableIdAndValue {
+
+
 //    private Long variableId;
+
 //    private BigDecimal variableValue;
 //    private String varibleIdentifier;
 //

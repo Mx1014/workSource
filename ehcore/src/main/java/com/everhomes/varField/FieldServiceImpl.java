@@ -764,9 +764,11 @@ public class FieldServiceImpl implements FieldService {
         List<FieldGroupDTO> groups = new ArrayList<>();
 
         //双重循环匹配浏览器所传的sheetName，获得目标sheet集合
+
         if(StringUtils.isEmpty(cmd.getIncludedGroupIds())) {
             return;
         }
+
         String[] split = cmd.getIncludedGroupIds().split(",");
         for(int i = 0 ; i < split.length; i ++){
             long targetGroupId = Long.parseLong(split[i]);

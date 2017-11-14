@@ -1,0 +1,55 @@
+package com.everhomes.archives;
+
+import org.jooq.Condition;
+
+import java.sql.Date;
+import java.util.List;
+
+public interface ArchivesProvider {
+
+    void createArchivesStickyContacts(ArchivesStickyContacts archivesContactsSticky);
+
+    void updateArchivesStickyContacts(ArchivesStickyContacts archivesContactsSticky);
+
+    void deleteArchivesStickyContacts(ArchivesStickyContacts archivesContactsSticky);
+
+    ArchivesStickyContacts findArchivesStickyContactsById(Long id);
+
+    List<Long> listArchivesStickyContactsIds(Integer namespaceId, Long organizationId, Integer stickCount);
+
+    ArchivesStickyContacts findArchivesStickyContactsByDetailIdAndOrganizationId(Integer namespaceId, Long organizationId, Long detailId);
+
+    void deleteArchivesStickyContactsByDetailId(Integer namespaceId, Long detailId);
+
+    void deleteArchivesDismissEmployees(ArchivesDismissEmployees dismissEmployee);
+
+    ArchivesDismissEmployees getArchivesDismissEmployeesByDetailId(Long organizationId, Long detailId);
+
+    void createArchivesDismissEmployee(ArchivesDismissEmployees archivesDismissEmployee);
+
+    List<ArchivesDismissEmployees> listArchivesDismissEmployees(Integer offset, Integer count, Integer namespaceId, Condition condition);
+
+    void createArchivesForm(ArchivesFroms form);
+
+    void updateArchivesForm(ArchivesFroms form);
+
+    ArchivesFroms findArchivesFormOriginId(Integer namespaceId, Long organizationId);
+
+    void createArchivesConfigurations(ArchivesConfigurations configuration);
+
+    void updateArchivesConfigurations(ArchivesConfigurations configuration);
+
+    List<ArchivesConfigurations> listArchivesConfigurations(Date date);
+
+    void createArchivesLogs(ArchivesLogs log);
+
+    List<ArchivesLogs> listArchivesLogs(Long organizationId, Long detailId);
+
+    void createArchivesNotifications(ArchivesNotifications archivesNotification);
+
+    ArchivesNotifications findArchivesNotificationsByOrganizationId(Integer namespaceId, Long organizationId);
+
+    void updateArchivesNotifications(ArchivesNotifications archivesNotification);
+
+    List<ArchivesNotifications> listArchivesNotificationsByWeek(Integer weekDay);
+}

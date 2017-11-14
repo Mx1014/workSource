@@ -598,9 +598,11 @@ public class ContractServiceImpl implements ContractService {
 			}
 		}
 //		assetService.paymentExpectancies(command);
+
 		command.setIsEffectiveImmediately((byte)0);
 		assetService.paymentExpectancies_re_struct(command);
 	}
+
 
 	private List<RentAdjust> generateRentAdjust(List<ContractChargingChangeDTO> adjusts) {
 		List<RentAdjust> rentAdjusts = new ArrayList<>();
@@ -635,6 +637,7 @@ public class ContractServiceImpl implements ContractService {
 		return rentAdjusts;
 	}
 
+
 	private List<RentFree> generateRentFree(List<ContractChargingChangeDTO> frees) {
 		List<RentFree> rentFrees = new ArrayList<>();
 		frees.forEach(free -> {
@@ -657,6 +660,7 @@ public class ContractServiceImpl implements ContractService {
 		});
 		return rentFrees;
 	}
+
 
 	private List<FeeRules> generateChargingItemsFeeRules(List<ContractChargingItemDTO> chargingItems) {
 		Gson gson = new Gson();
@@ -703,6 +707,7 @@ public class ContractServiceImpl implements ContractService {
 
 		return feeRules;
 	}
+
 
 	private void addToFlowCase(Contract contract) {
 		Flow flow = flowService.getEnabledFlow(contract.getNamespaceId(), FlowConstants.CONTRACT_MODULE,

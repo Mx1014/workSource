@@ -31,6 +31,8 @@ public class ListAllChildrenOrganizationsCommand {
 	
 	private Long pageAnchor;
 	
+	private Byte simpleFlag;
+	
 	private Integer pageSize;
 
 	private Integer namespaceId;
@@ -96,4 +98,11 @@ public class ListAllChildrenOrganizationsCommand {
 		return StringHelper.toJsonString(this);
 	}
 
+	public Byte getSimpleFlag() {
+		return simpleFlag;
+	}
+
+	public void setSimpleFlag(Byte simpleFlag) {
+		this.simpleFlag = simpleFlag;
+	}
 }

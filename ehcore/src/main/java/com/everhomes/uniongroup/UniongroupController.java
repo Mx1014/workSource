@@ -6,6 +6,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.uniongroup.*;
 import com.everhomes.search.UniongroupSearcher;
 import com.everhomes.user.UserContext;
@@ -99,9 +100,10 @@ public class UniongroupController extends ControllerBase {
      * <b>URL: /uniongroup/listDetailNotInUniongroup</b>
      */
     @RequestMapping("listDetailNotInUniongroup")
-    @RestReturn(value = UniongroupMemberDetailsDTO.class, collection = true)
+    @RestReturn(value = ListOrganizationMemberCommandResponse.class)
     public RestResponse listDetailNotInUniongroup(ListDetailsNotInUniongroupsCommand cmd){
-        RestResponse response = new RestResponse(uniongroupService.listDetailNotInUniongroup(cmd));
+        ListOrganizationMemberCommandResponse res = uniongroupService.listDetailNotInUniongroup(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -122,7 +124,17 @@ public class UniongroupController extends ControllerBase {
         return response;
     }
 
-
-
+    /**
+     * <p>版本号切换 </p>
+     * <b>URL: /uniongroup/switchUnionGroupVersion</b>
+     */
+    @RequestMapping("switchUnionGroupVersion")
+    @RestReturn(value =String.class)
+    public RestResponse switchUnionGroupVersion(){
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }

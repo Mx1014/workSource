@@ -7,8 +7,6 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>flowNodeId: 当前节点id</li>
- *     <li>flowNodeLevel: 条件节点level</li>
  *     <li>nextNodeId: 条件成立时去向的节点id</li>
  *     <li>nextNodeLevel: 条件成立时去向的节点level</li>
  *     <li>conditionLevel: 条件level</li>
@@ -18,9 +16,9 @@ import java.util.List;
  */
 public class FlowConditionCommand {
 
+    private Integer conditionLevel;
     private Long flowNodeId;
     private Integer flowNodeLevel;
-    private Integer conditionLevel;
     private Long nextNodeId;
     private Integer nextNodeLevel;
     private Integer flowLinkLevel;
@@ -28,22 +26,6 @@ public class FlowConditionCommand {
 
     @ItemType(FlowConditionExpressionCommand.class)
     private List<FlowConditionExpressionCommand> expressions;
-
-    public Long getFlowNodeId() {
-        return flowNodeId;
-    }
-
-    public void setFlowNodeId(Long flowNodeId) {
-        this.flowNodeId = flowNodeId;
-    }
-
-    public Integer getFlowNodeLevel() {
-        return flowNodeLevel;
-    }
-
-    public void setFlowNodeLevel(Integer flowNodeLevel) {
-        this.flowNodeLevel = flowNodeLevel;
-    }
 
     public Long getNextNodeId() {
         return nextNodeId;
@@ -91,6 +73,22 @@ public class FlowConditionCommand {
 
     public void setConditionLevel(Integer conditionLevel) {
         this.conditionLevel = conditionLevel;
+    }
+
+    public Long getFlowNodeId() {
+        return flowNodeId;
+    }
+
+    public void setFlowNodeId(Long flowNodeId) {
+        this.flowNodeId = flowNodeId;
+    }
+
+    public Integer getFlowNodeLevel() {
+        return flowNodeLevel;
+    }
+
+    public void setFlowNodeLevel(Integer flowNodeLevel) {
+        this.flowNodeLevel = flowNodeLevel;
     }
 
     @Override

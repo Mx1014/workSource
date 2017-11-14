@@ -40,7 +40,9 @@ public interface CommunityProvider {
 	List<Community> findCommunitiesByNameCityIdAreaId(String name, Long cityId,Long areaId);
 	
 	List<Building> ListBuildingsByCommunityId(ListingLocator locator, int count, Long communityId, Integer namespaceId, String keyword);
-	
+
+    List<Building> ListBuildingsBykeywordAndNameSpace(Integer namespaceId, String keyword);
+
 	Building findBuildingById(Long id);
 	
 	void populateBuildingAttachments(final Building building);

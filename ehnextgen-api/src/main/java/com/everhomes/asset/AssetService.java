@@ -133,7 +133,10 @@ public interface AssetService {
 
     DeleteChargingItemForBillGroupResponse deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd);
 
+
+
     DeleteBillGroupReponse deleteBillGroup(DeleteBillGroupCommand cmd);
+
 
     ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(BillGroupRuleIdCommand cmd);
 
@@ -143,9 +146,11 @@ public interface AssetService {
 
     void paymentExpectancies_re_struct(PaymentExpectanciesCommand cmd);
 
+
     ListAutoNoticeConfigResponse listAutoNoticeConfig(ListAutoNoticeConfigCommand cmd);
 
     void autoNoticeConfig(AutoNoticeConfigCommand cmd);
 
     void activeAutoBillNotice();
+
 }

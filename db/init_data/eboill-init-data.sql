@@ -1060,3 +1060,18 @@ INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `
 INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES((@search_types_id := @search_types_id + 1),'999973','','0','应用','launchpaditem','1',NULL,NULL,'5');
 INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES((@search_types_id := @search_types_id + 1),'999973','','0','商家','shop','1',NULL,NULL,'6');
 INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES((@search_types_id := @search_types_id + 1),'999973','', '0', '快讯', 'news', '1',NULL,NULL,'6');
+
+DELETE FROM `eh_stat_event_portal_configs` WHERE namespace_id = 999973 AND config_type=2;
+
+-- #18230 add by xq.tian  2017/11/02
+-- 门户配置（修改这里）
+--
+SET @stat_event_portal_configs_id = IFNULL((SELECT MAX(id) FROM `eh_stat_event_portal_configs`), 1);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`)
+VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 999973, 0, 2, '服务', '0', '服务', '服务广场', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`)
+VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 999973, 0, 2, '小站', '1', '小站', '电商', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`)
+VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 999973, 0, 2, '活动', '2', '活动', '活动', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`)
+VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 999973, 0, 2, '我', '3', '我', '个人中心', 4, NULL, NULL, NULL, NULL);

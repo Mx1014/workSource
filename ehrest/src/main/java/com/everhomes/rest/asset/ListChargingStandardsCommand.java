@@ -25,7 +25,9 @@ public class ListChargingStandardsCommand {
     private String ownerType;
     private Long pageAnchor;
     private Integer pageSize;
+
     private Integer namespaceId;
+
 
     public Long getPageAnchor() {
         return pageAnchor;
@@ -35,6 +37,7 @@ public class ListChargingStandardsCommand {
         this.pageAnchor = pageAnchor;
     }
 
+
     public Integer getNamespaceId() {
         return namespaceId;
     }
@@ -42,6 +45,7 @@ public class ListChargingStandardsCommand {
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
     }
+
 
     public Integer getPageSize() {
         return pageSize;

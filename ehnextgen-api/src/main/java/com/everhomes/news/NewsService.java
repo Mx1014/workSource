@@ -66,5 +66,6 @@ public interface NewsService {
 	AddNewsCommentResponse addNewsForWebComment(AddNewsCommentForWebCommand cmd);
 
 	void setNewsLikeFlagForWeb(SetNewsLikeFlagForWebCommand cmd);
-	
+
+	GetCategoryIdByEntryIdResponse getCategoryIdByEntryId(GetCategoryIdByEntryIdCommand cmd);
 }

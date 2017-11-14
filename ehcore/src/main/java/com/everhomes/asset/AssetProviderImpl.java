@@ -585,10 +585,10 @@ public class AssetProviderImpl implements AssetProvider {
             if(org.apache.commons.lang.StringUtils.isEmpty(dtos.get(i).getBillItemName())) {
                 BillDTO dto = dtos.get(i);
                 String projectLevelName = context.select(itemScope.PROJECT_LEVEL_NAME)
-                    .from(itemScope, groupRule)
-                    .where(groupRule.CHARGING_STANDARDS_ID.eq(itemScope.ID))
-                    .and(groupRule.ID.eq(dto.getBillGroupRuleId()))
-                    .fetchOne(itemScope.PROJECT_LEVEL_NAME);
+                        .from(itemScope, groupRule)
+                        .where(groupRule.CHARGING_STANDARDS_ID.eq(itemScope.ID))
+                        .and(groupRule.ID.eq(dto.getBillGroupRuleId()))
+                        .fetchOne(itemScope.PROJECT_LEVEL_NAME);
                 dto.setBillItemName(projectLevelName);
             }
         }
@@ -1392,7 +1392,7 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setChargingStandardId(r.getValue(standardT.ID));
 //                    formulaJsons.add(r.getValue(standardT.FORMULA_JSON));
                     suggestPrices.add(r.getValue(standardT.SUGGEST_UNIT_PRICE)==null?null:r.getValue(standardT.SUGGEST_UNIT_PRICE).longValue());
-                   list.add(dto);
+                    list.add(dto);
                     return null;
                 });
         List<List<String>> formus = new ArrayList<>();
@@ -1402,14 +1402,14 @@ public class AssetProviderImpl implements AssetProvider {
             List<String> formu = new ArrayList<>();
             List<String> conditionVarIden = new ArrayList<>();
             context.select(Tables.EH_PAYMENT_FORMULA.FORMULA_JSON,Tables.EH_PAYMENT_FORMULA.CONSTRAINT_VARIABLE_IDENTIFER)
-                .from(Tables.EH_PAYMENT_FORMULA)
-                .where(Tables.EH_PAYMENT_FORMULA.CHARGING_STANDARD_ID.eq(dto.getChargingStandardId()))
-                .fetch()
-                .map(r -> {
-                    formu.add(r.getValue(Tables.EH_PAYMENT_FORMULA.FORMULA_JSON));
-                    conditionVarIden.add(r.getValue(Tables.EH_PAYMENT_FORMULA.CONSTRAINT_VARIABLE_IDENTIFER));
-                   return null;
-                });
+                    .from(Tables.EH_PAYMENT_FORMULA)
+                    .where(Tables.EH_PAYMENT_FORMULA.CHARGING_STANDARD_ID.eq(dto.getChargingStandardId()))
+                    .fetch()
+                    .map(r -> {
+                        formu.add(r.getValue(Tables.EH_PAYMENT_FORMULA.FORMULA_JSON));
+                        conditionVarIden.add(r.getValue(Tables.EH_PAYMENT_FORMULA.CONSTRAINT_VARIABLE_IDENTIFER));
+                        return null;
+                    });
 
             formus.add(formu);
             conditionVarIdens.add(conditionVarIden);
@@ -2856,8 +2856,8 @@ public class AssetProviderImpl implements AssetProvider {
             dao.update(rule);
 //            response.setFailCause(AssetPaymentStrings.MODIFY_SUCCESS);
         }
-            Long nullId = null;
-            writeContext.update(Tables.EH_PAYMENT_BILL_GROUPS)
+        Long nullId = null;
+        writeContext.update(Tables.EH_PAYMENT_BILL_GROUPS)
                 .set(Tables.EH_PAYMENT_BILL_GROUPS.BROTHER_GROUP_ID,nullId)
                 .where(Tables.EH_PAYMENT_BILL_GROUPS.OWNER_ID.eq(cmd.getOwnerId()))
                 .and(Tables.EH_PAYMENT_BILL_GROUPS.OWNER_TYPE.eq(cmd.getOwnerType()))
@@ -3157,14 +3157,21 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public Boolean checkContractInWork(Long contractId) {
+    public Boolean checkContractInWork(Long contractId,String contractNum) {
         EhPaymentContractReceiver contract = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("contract");
         DSLContext context = getReadOnlyContext();
         Byte aByte = context.select(contract.IN_WORK)
                 .from(contract)
                 .where(contract.IS_RECORDER.eq((byte) 1))
-                .and(contract.CONTRACT_ID.eq(contractId))
+                .and(contract.CONTRACT_NUM.eq(contractNum))
                 .fetchOne(contract.IN_WORK);
+        if( aByte == null ){
+             aByte = context.select(contract.IN_WORK)
+                    .from(contract)
+                    .where(contract.IS_RECORDER.eq((byte) 1))
+                    .and(contract.CONTRACT_ID.eq(contractId))
+                    .fetchOne(contract.IN_WORK);
+        }
         if ( aByte == null) {
             throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.FAIL_IN_GENERATION,"mission failed");
         }
@@ -3395,7 +3402,7 @@ public class AssetProviderImpl implements AssetProvider {
 
 
     private DSLContext getReadOnlyContext(){
-       return this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return this.dbProvider.getDslContext(AccessSpec.readOnly());
     }
     private DSLContext getReadWriteContext(){
         return this.dbProvider.getDslContext(AccessSpec.readWrite());

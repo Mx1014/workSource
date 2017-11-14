@@ -11,7 +11,7 @@ public interface FlowConditionProvider {
 
 	FlowCondition findById(Long id);
 
-    void deleteFlowCondition(Long flowMainId, Integer flowVersion);
+    void deleteFlowCondition(Long flowMainId, Long flowNodeId, Integer flowVersion);
 
     List<FlowCondition> listFlowCondition(Long flowNodeId);
 
