@@ -2957,6 +2957,7 @@ public class AssetServiceImpl implements AssetService {
         boolean workFlag = isInWorkGroup(cmd.getBillGroupId(),false);
         if(workFlag){
             response.setFailCause(AssetPaymentStrings.DELTE_GROUP_UNSAFE);
+            return response;
         }
         byte deCouplingFlag = 1;
         if(cmd.getOwnerId() == null) {
