@@ -191,7 +191,7 @@ public interface AssetProvider {
 
     List<ListChargingItemsForBillGroupDTO> listChargingItemsForBillGroup(Long billGroupId,Long pageAnchor,Integer pageSize);
 
-    AddOrModifyRuleForBillGroupResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
+    Long addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd,Long brotherRuleId,byte deCouplingFlag);
 
     EhPaymentBillGroupsRules findBillGroupRuleById(Long billGroupRuleId);
 
@@ -242,4 +242,6 @@ public interface AssetProvider {
     List<PaymentNoticeConfig> listAllNoticeConfigs();
 
     List<PaymentBills> getAllBillsByCommunity(Long key);
+
+    List<EhPaymentBillGroupsRules> getBillGroupRuleByCommunityWithBro(Long ownerId, String ownerType, boolean b);
 }

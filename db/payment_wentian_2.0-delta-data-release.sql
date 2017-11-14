@@ -1,0 +1,1 @@
+update  `eh_organizations` set `order` = '0' where `order` is NULL;

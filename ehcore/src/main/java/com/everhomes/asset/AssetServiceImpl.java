@@ -2931,33 +2931,30 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public AddOrModifyRuleForBillGroupResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
-//        byte deCouplingFlag = 1;
-//        Long brotherRuleId = null;
-//        if(cmd.getOwnerId() == null){
-//            deCouplingFlag = 0;
-//            cmd.setOwnerId(cmd.getNamespaceId().longValue());
-//            brotherRuleId = assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
-//            //耦合中
-//            List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), false);
-//            for(int i = 0; i < allCommunity.size(); i ++){
-////是否耦合（必须检查，否则不耦合的会导致新增失败）
-//                boolean coupled = checkCoupledForGroupRule(cmd.getOwnerId(),cmd.getOwnerType());
-//                if(coupled){
-//                    assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
-//                }
-//            }
-//        }else if(cmd.getOwnerId() != null){
-//            //添加+解耦，判断safe+修改+解耦group和rule
-//            assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
-//        }
-
-        return assetProvider.addOrModifyRuleForBillGroup(cmd);
-
+    public void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
+        byte deCouplingFlag = 1;
+        Long brotherRuleId = null;
+        if(cmd.getOwnerId() == null){
+            deCouplingFlag = 0;
+            cmd.setOwnerId(cmd.getNamespaceId().longValue());
+            brotherRuleId = assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
+            List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), false);
+            for(int i = 0; i < allCommunity.size(); i ++){
+                boolean coupled = checkCoupledForGroupRule(cmd.getOwnerId(),cmd.getOwnerType());
+                if(coupled){
+                    assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
+                }
+            }
+        }else if(cmd.getOwnerId() != null){
+            //添加+解耦，判断safe+修改+解耦group和rule
+            assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
+        }
+//        return assetProvider.addOrModifyRuleForBillGroup(cmd);
     }
 
     private boolean checkCoupledForGroupRule(Long ownerId, String ownerType) {
-        List<EhPaymentBillGroupsRules> list = assetProvider.getBillGroupRuleByCommunity(ownerId,ownerType);
+//        List<EhPaymentBillGroupsRules> list = assetProvider.getBillGroupRuleByCommunity(ownerId,ownerType);
+        List<EhPaymentBillGroupsRules> list = assetProvider.getBillGroupRuleByCommunityWithBro(ownerId,ownerType,false);
         if(list.size() > 0){
             return true;
         }
