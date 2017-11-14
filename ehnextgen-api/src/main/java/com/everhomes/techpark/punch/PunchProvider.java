@@ -350,4 +350,6 @@ public interface PunchProvider {
 	PunchExceptionRequest findPunchExceptionRequest(Long userId, Long enterpriseId, Date punchDate, Integer punchIntervalNo, Byte punchType);
 
 	PunchLog findPunchLog(Long organizationId, Long applyUserId, Date punchDate, Byte punchType, Integer punchIntervalNo);
+
+	void updatePunchLog(PunchLog onDutyLog);
 }

@@ -2944,5 +2944,18 @@ long id = sequenceProvider.getNextSequence(key);
 		}
 		return null;
 	}
+
+	@Override
+	public void updatePunchLog(PunchLog punchLog) {
+
+		assert (punchLog.getId() == null);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPunchLogsDao dao = new EhPunchLogsDao(
+				context.configuration());
+		dao.update(punchLog);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchLogs.class,
+				punchLog.getId());
+
+	}
 }
 
