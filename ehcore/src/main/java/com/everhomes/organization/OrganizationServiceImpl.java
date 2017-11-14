@@ -1195,6 +1195,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         } else {
             EnterpriseCustomer customer = new EnterpriseCustomer();
             customer.setCommunityId(communityId);
+            customer.setNamespaceId(organization.getNamespaceId());
             customer.setOrganizationId(organization.getId());
             customer.setName(organization.getName());
             customer.setCorpWebsite(organization.getWebsite());
