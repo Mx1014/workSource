@@ -22,6 +22,7 @@ CREATE TABLE `eh_equipment_inspection_plans` (
 `deleter_uid` bigint NULL,
 `delete_time` datetime NULL,
 `last_create_taskTime`  datetime NULL COMMENT 'the last time when gen task' ,
+`inspection_category_id` bigint(20),
 `namespace_id` int(11) NULL,
 PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
