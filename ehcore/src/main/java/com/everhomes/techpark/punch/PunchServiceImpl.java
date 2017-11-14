@@ -7452,8 +7452,12 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public GetPunchDayStatusResponse getPunchDayStatus(GetPunchDayStatusCommand cmd) {
 		//
-        cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
-        Long userId = UserContext.current().getUser().getId();
+
+		Long userId = UserContext.current().getUser().getId();
+		if (null != cmd.getUserId()) {
+			userId = cmd.getUserId();
+		}
+		cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
         PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
         GetPunchDayStatusResponse response = new GetPunchDayStatusResponse();
 		Date punchTime = new Date();
