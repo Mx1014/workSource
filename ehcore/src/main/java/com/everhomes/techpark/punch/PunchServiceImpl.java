@@ -4865,7 +4865,8 @@ public class PunchServiceImpl implements PunchService {
 
 			try {
 				LOGGER.debug("refresh day log : userid =["+userId
-						+"] day is ["+dateSF.get().format(start.getTime())+"]");
+						+"] day is ["+dateSF.get().format(start.getTime())+"] enddate ["
+						+dateSF.get().format(end.getTime())+"]");
 				this.refreshPunchDayLog(userId, companyId, start);
 			} catch (Exception e) {
 				LOGGER.error("refresh day log wrong  userId["+userId+"],  day"+start.getTime(),e);
