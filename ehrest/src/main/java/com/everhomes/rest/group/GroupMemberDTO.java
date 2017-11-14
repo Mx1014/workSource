@@ -25,6 +25,8 @@ import java.sql.Timestamp;
  *     <li>inviterAvatarUrl: 被邀请人用户头像URL，有邀请人时才有效</li>
  *     <li>inviteTime: 被邀请时间，有邀请人时才有效</li>
  *     <li>createTime: 成员加入group的时间</li>
+ *     <li>rejectTime: 拒绝时间</li>
+ *     <li>rejectText: 拒绝原因</li>
  *     <li>approveTime: approveTime</li>
  *     <li>operatorName: operatorName</li>
  *     <li>operatorPhone: operatorPhone</li>
@@ -41,6 +43,7 @@ import java.sql.Timestamp;
  *     <li>gender: 性别  {@link com.everhomes.rest.user.UserGender}</li>
  *     <li>userNickName: 用户的昵称</li>
  *     <li>guildApplyDTO: guildApplyDTO 行业协会公司相关信息 {@link GuildApplyDTO}</li>
+ *     <li>createTime: 成员加入group的时间</li>
  * </ul>
  */
 public class GroupMemberDTO {
@@ -61,6 +64,8 @@ public class GroupMemberDTO {
     private String inviterAvatarUrl;
     private Timestamp inviteTime;
     private Timestamp createTime;
+    private Timestamp rejectTime;
+    private String rejectText;
     private Timestamp approveTime;
     private String operatorName;
     private String operatorPhone;
@@ -260,6 +265,22 @@ public class GroupMemberDTO {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+
+    public Timestamp getRejectTime() {
+        return rejectTime;
+    }
+
+    public void setRejectTime(Timestamp rejectTime) {
+        this.rejectTime = rejectTime;
+    }
+
+    public String getRejectText() {
+        return rejectText;
+    }
+
+    public void setRejectText(String rejectText) {
+        this.rejectText = rejectText;
     }
 
     public Timestamp getApproveTime() {

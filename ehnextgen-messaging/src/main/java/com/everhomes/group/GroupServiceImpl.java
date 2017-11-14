@@ -2005,7 +2005,27 @@ public class GroupServiceImpl implements GroupService {
 //				query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.ne(group.getCreatorUid()));
 //			}
 //			query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ROLE.asc());
+
 			Long from = pageAnchor * pageSize;
+
+            //俱乐部删除的成员在groupmember中已经不存在，被放到groupmemberlog中，现在只能去log表查了
+            // 此接口返回的数据是GroupMemberDTO，实际上在groupMember中已经不存在，因此此数据仅用于展现不可用于其他逻辑  add by yanjun 20171114
+            if(GroupMemberStatus.REJECT == GroupMemberStatus.fromCode(cmd.getStatus())){
+                List<GroupMemberLog> list = groupMemberLogProvider.listGroupMemberLogByGroupId(cmd.getGroupId(), cmd.getKeyword(), from, pageSize+1);
+                if(members.size() > pageSize) {
+                    members.remove(members.size() - 1);
+                    nextPageAnchor = pageAnchor + 1;
+                }
+
+                List<GroupMemberDTO> dtos = getGroupMemberDtoFromLog(list);
+
+                ListMemberCommandResponse response = new ListMemberCommandResponse();
+                response.setMembers(dtos);
+                response.setNextPageAnchor(nextPageAnchor);
+                return response;
+            }
+
+
             boolean includeCreator = TrueOrFalseFlag.fromCode(cmd.getIncludeCreator()) == TrueOrFalseFlag.TRUE;
             members = groupProvider.listPublicGroupMembersByStatus(
                     cmd.getGroupId(), cmd.getKeyword(), cmd.getStatus(),
@@ -2044,6 +2064,47 @@ public class GroupServiceImpl implements GroupService {
         }
         return new ListMemberCommandResponse(nextPageAnchor, memberDtos);
     }
+
+    private List<GroupMemberDTO> getGroupMemberDtoFromLog(List<GroupMemberLog> listLog){
+
+        if(listLog == null || listLog.size() ==0){
+            return null;
+        }
+
+        List<GroupMemberDTO> dtos = new ArrayList<>();
+        for(GroupMemberLog log: listLog){
+            GroupMemberDTO dto = ConvertHelper.convert(log, GroupMemberDTO.class);
+            dto.setRejectTime(log.getApproveTime());
+            dto.setId(log.getGroupMemberId());
+
+            User user = userProvider.findUserById(log.getMemberId());
+            if(user != null){
+                dto.setGender(user.getGender());
+                dto.setMemberNickName(user.getNickName());
+            }
+
+            UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(log.getMemberId(), IdentifierType.MOBILE.getCode());
+            if(userIdentifier != null){
+                dto.setCellPhone(userIdentifier.getIdentifierToken());
+            }
+
+            Group group = groupProvider.findGroupById(dto.getGroupId());
+            //行业协会加入申请时的信息，包括企业等  add by yanjun 20171107
+            if(ClubType.fromCode(group.getClubType()) == ClubType.GUILD){
+                GuildApply guildApply = groupProvider.findGuildApplyByGroupMemberId(log.getGroupMemberId());
+                GuildApplyDTO guildApplyDTO = ConvertHelper.convert(guildApply, GuildApplyDTO.class);
+                populateGuildApplyDTO(guildApplyDTO);
+                dto.setGuildApplyDTO(guildApplyDTO);
+            }
+
+            dtos.add(dto);
+
+        }
+        return dtos;
+
+
+    }
+
     
     @Override
     public void requestToBeAdmin(RequestAdminRoleCommand cmd) {
