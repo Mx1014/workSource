@@ -13,3 +13,5 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),10761,'', 'EhNamespaces', 1000000,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),10762,'', 'EhNamespaces', 1000000,2);
 
+SET @id = (SELECT MAX(id) from eh_locale_templates);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'group.notification', '60', 'zh_CN', '行业协会发消息息', '${userName}申请加入“${groupName}”，是否同意？', '0');

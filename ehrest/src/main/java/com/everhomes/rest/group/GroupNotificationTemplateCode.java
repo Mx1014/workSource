@@ -66,4 +66,6 @@ public interface GroupNotificationTemplateCode {
     static final int GROUP_BE_REMOVE = 56;  //你被${userName}移出了群聊
     static final int GROUP_DELETE = 57;  //你加入的群聊“${groupName}”已解散
 
+    static final int GROUP_MEMBER_TO_ADMIN_WHEN_REQUEST_TO_JOIN_FOR_GUILD = 60;  //${userName}申请加入“${groupName}”，是否同意？
+
 }

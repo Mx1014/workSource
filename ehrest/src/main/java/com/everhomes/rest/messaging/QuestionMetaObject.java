@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>targetId: 目标ID</li>
  * <li>requestorUid: 请求者用户ID</li>
  * <li>requestorNickName: 请求者昵称</li>
+ * <li>requestorPhone: 请求者手机</li>
  * <li>requestorAvatar: 请求者头像URI</li>
  * <li>requestorAvatarUrl: 请求者头像URL</li>
  * <li>requestTime: 请求时间</li>
@@ -30,6 +31,7 @@ public class QuestionMetaObject {
     private Long targetId;
     private Long requestorUid;
     private String requestorNickName;
+    private String requestorPhone;
     private String requestorAvatar;
     private String requestorAvatarUrl;
     private Timestamp requestTime;
@@ -93,6 +95,14 @@ public class QuestionMetaObject {
 
     public void setRequestorNickName(String requestorNickName) {
         this.requestorNickName = requestorNickName;
+    }
+
+    public String getRequestorPhone() {
+        return requestorPhone;
+    }
+
+    public void setRequestorPhone(String requestorPhone) {
+        this.requestorPhone = requestorPhone;
     }
 
     public String getRequestorAvatar() {

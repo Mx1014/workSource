@@ -3557,8 +3557,13 @@ public class GroupServiceImpl implements GroupService {
             code = GroupNotificationTemplateCode.GROUP_AUTH_JOIN_REQ_FOR_OPERATOR;
             // 如果是俱乐部，则按以下模板发送消息，add by tt, 20161104
             if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
-                map.put("reason", member.getRequestorComment());
-				code = GroupNotificationTemplateCode.GROUP_MEMBER_TO_ADMIN_WHEN_REQUEST_TO_JOIN;
+                if(ClubType.GUILD == ClubType.fromCode(group.getClubType())){
+                    code = GroupNotificationTemplateCode.GROUP_MEMBER_TO_ADMIN_WHEN_REQUEST_TO_JOIN_FOR_GUILD;
+                }else {
+                    map.put("reason", member.getRequestorComment());
+                    code = GroupNotificationTemplateCode.GROUP_MEMBER_TO_ADMIN_WHEN_REQUEST_TO_JOIN;
+                }
+
 			}
             String notifyTextForAdmin = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
             List<Long> includeList = getGroupAdminIncludeList(group.getId(), member.getMemberId(), null);
@@ -3569,7 +3574,9 @@ public class GroupServiceImpl implements GroupService {
 
                 //在信息中增加审批信息 add by yanjun 20171108
                 GuildApply guildApply = groupProvider.findGuildApplyByGroupMemberId(member.getId());
-                metaObject.setJsonInfo(StringHelper.toJsonString(guildApply));
+                GuildApplyDTO guildApplyDTO = ConvertHelper.convert(guildApply, GuildApplyDTO.class);
+                populateGuildApplyDTO(guildApplyDTO);
+                metaObject.setJsonInfo(StringHelper.toJsonString(guildApplyDTO));
 
                 if(GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator())
                         && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())
@@ -4276,6 +4283,12 @@ public class GroupServiceImpl implements GroupService {
                 }
             }
             metaObject.setRequestId(requestor.getId());
+
+            //增加电话信息 add by yanjun 20171114
+            UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(requestor.getMemberId(), IdentifierType.MOBILE.getCode());
+            if(userIdentifier != null){
+                metaObject.setRequestorPhone(userIdentifier.getIdentifierToken());
+            }
         }
         
         if(target != null) {
@@ -5743,7 +5756,9 @@ public class GroupServiceImpl implements GroupService {
 
         Group group = groupProvider.findGroupById(dto.getGroupId());
 
-        dto.setGroupName(group.getName());
+        if(group != null){
+            dto.setGroupName(group.getName());
+        }
 
     }
 
