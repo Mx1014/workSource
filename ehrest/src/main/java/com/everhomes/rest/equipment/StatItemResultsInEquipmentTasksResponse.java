@@ -7,21 +7,21 @@ import java.util.List;
 
 /**
  * <ul>
- *  <li>equipmentName: 设备名称  </li>
- *  <li>customNumber: 对象自编号  </li>
- *  <li>location: 位置</li>
- *  <li>itemResultStat: 巡检参数统计 参考{@link com.everhomes.rest.equipment.ItemResultStat}</li>
+ *  <li>statItemResultsByTaskIdResponse: 任务下所有设备具体巡检细项目 参考{@link com.everhomes.rest.equipment.statItemResultsByTaskId}</li>
  * </ul>
- * Created by ying.xiong on 2017/4/19.
  */
 public class StatItemResultsInEquipmentTasksResponse {
 
+    @ItemType(statItemResultsByTaskId.class)
+    List<statItemResultsByTaskId> statItemResults;
+
+    @Deprecated
     private String equipmentName;
-
+    @Deprecated
     private String customNumber;
-
+    @Deprecated
     private String location;
-
+    @Deprecated
     @ItemType(ItemResultStat.class)
     private List<ItemResultStat> itemResultStat;
 
@@ -57,8 +57,17 @@ public class StatItemResultsInEquipmentTasksResponse {
         this.location = location;
     }
 
+    public List<statItemResultsByTaskId> getStatItemResults() {
+        return statItemResults;
+    }
+
+    public void setStatItemResults(List<statItemResultsByTaskId> statItemResults) {
+        this.statItemResults = statItemResults;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 }
