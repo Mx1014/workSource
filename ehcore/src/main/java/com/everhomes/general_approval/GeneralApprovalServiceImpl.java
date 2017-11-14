@@ -924,10 +924,6 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 "审批状态", "审批记录", "当前审批人", "督办人");
         //  4. Start to write the excel
         XSSFWorkbook workbook = exportGeneralApprovalRecordsFile(mainTitle, subTitle, titles, response.getRecords());
-
-/*        List<Long> flowCaseIds = response.getRecords().stream().map(r -> {
-            return r.getFlowCaseId();
-        }).collect(Collectors.toList());*/
         writeExcel(workbook, httpResponse);
     }
 
@@ -1063,7 +1059,6 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             String fileName = "审批记录.xlsx";
             httpResponse.setContentType("application/msexcel");
             httpResponse.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
-            //response.addHeader("Content-Length", "" + out.);
             OutputStream excelStream = new BufferedOutputStream(httpResponse.getOutputStream());
             httpResponse.setContentType("application/msexcel");
             excelStream.write(out.toByteArray());
