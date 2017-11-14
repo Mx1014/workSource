@@ -2438,6 +2438,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         cal.add(Calendar.DAY_OF_MONTH, -1);
         // Timestamp dayBeforeYestBegin = getDayBegin(cal);
         for(EnergyMeter meter : meters){
+            if(meter.getId() != 1119L) {
+                continue;
+            }
             try {
 
                 EnergyDateStatistic dayStat = ConvertHelper.convert(meter, EnergyDateStatistic.class);
@@ -2499,23 +2502,24 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 LOGGER.info("dayStat amount : {}", dayStat);
 
                 //获取公式,计算当天的费用
-                EnergyMeterSettingLog priceSetting  = meterSettingLogProvider
-                        .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.PRICE,yesterdayBegin);
+//                EnergyMeterSettingLog priceSetting  = meterSettingLogProvider
+//                        .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.PRICE,yesterdayBegin);
                 EnergyMeterSettingLog rateSetting   = meterSettingLogProvider
                         .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.RATE ,yesterdayBegin);
                 EnergyMeterSettingLog amountSetting = meterSettingLogProvider
                         .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.AMOUNT_FORMULA ,yesterdayBegin);
-                EnergyMeterSettingLog costSetting   = meterSettingLogProvider
-                        .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.COST_FORMULA ,yesterdayBegin);
+//                EnergyMeterSettingLog costSetting   = meterSettingLogProvider
+//                        .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.COST_FORMULA ,yesterdayBegin);
 
-                Stream<EnergyMeterSettingLog> settings = Stream.of(amountSetting, rateSetting, priceSetting, costSetting);
+//                Stream<EnergyMeterSettingLog> settings = Stream.of(amountSetting, rateSetting, priceSetting, costSetting);
+                Stream<EnergyMeterSettingLog> settings = Stream.of(amountSetting, rateSetting);
                 if (settings.anyMatch(Objects::isNull)) {
-                    LOGGER.error("not found energy meter settings, meterId={}, priceSetting={}, rateSetting={}, amountSetting={}, costSetting={}",
-                            meter.getId(), priceSetting, rateSetting, amountSetting, costSetting);
+                    LOGGER.error("not found energy meter settings, meterId={}, rateSetting={}, amountSetting={}",
+                            meter.getId(), rateSetting, amountSetting);
                     continue;
                 }
                 String amountFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId()).getExpression();
-                String costFormula = meterFormulaProvider.findById(costSetting.getNamespaceId(), costSetting.getFormulaId()).getExpression();
+//                String costFormula = meterFormulaProvider.findById(costSetting.getNamespaceId(), costSetting.getFormulaId()).getExpression();
 
                 ScriptEngineManager manager = new ScriptEngineManager();
                 ScriptEngine engine = manager.getEngineByName("js");
@@ -2525,7 +2529,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 //                engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
                 engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
 
-//                BigDecimal realAmount = new BigDecimal(0);
+                BigDecimal realAmount = new BigDecimal(0);
                 BigDecimal realCost = new BigDecimal(0);
 
 //                try {
@@ -2563,7 +2567,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 dayStat.setMeterBill(meterCategoryProvider.findById(meter.getNamespaceId(), meter.getBillCategoryId()).getName());
                 dayStat.setMeterService(meterCategoryProvider.findById(meter.getNamespaceId(), meter.getServiceCategoryId()).getName());
                 dayStat.setMeterRate(rateSetting.getSettingValue());
-                dayStat.setMeterPrice(priceSetting.getSettingValue());
+//                dayStat.setMeterPrice(priceSetting.getSettingValue());
                 dayStat.setLastReading(dayLastReading);
                 dayStat.setCurrentReading(dayCurrReading);
 //                dayStat.setCurrentAmount(amount);
