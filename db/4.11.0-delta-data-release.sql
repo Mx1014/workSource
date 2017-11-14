@@ -162,3 +162,9 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 -- 物业报修 统计数据同步 add by sw 20171113
 UPDATE eh_pm_tasks set status = 4 where status = 5;
 DELETE from eh_pm_task_statistics;
+
+-- 物业报修 统计数据同步 add by sw 20171114
+DELETE from eh_pm_task_logs where target_id = 0;
+update eh_pm_task_logs set status = 3 where target_id != 0;
+DELETE from eh_pm_task_statistics where date_str = '2017-11-01 00:00:00';
+
