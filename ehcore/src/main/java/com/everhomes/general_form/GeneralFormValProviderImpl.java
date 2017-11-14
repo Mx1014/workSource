@@ -13,6 +13,7 @@ import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -97,7 +98,7 @@ public class GeneralFormValProviderImpl implements GeneralFormValProvider {
     }
 
     @Override
-    public GeneralFormVal getGeneralFormValBySourceAndField(String sourceType, Long sourceId, String fieldName) {
+    public GeneralFormVal getGeneralFormValBySourceIdAndName(Long sourceId, String sourceType, String fieldName){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralFormVals.class));
 
         SelectQuery<EhGeneralFormValsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_VALS);
@@ -105,7 +106,7 @@ public class GeneralFormValProviderImpl implements GeneralFormValProvider {
         query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_TYPE.eq(sourceType));
         query.addConditions(Tables.EH_GENERAL_FORM_VALS.FIELD_NAME.eq(fieldName));
 
+        query.addOrderBy(Tables.EH_GENERAL_FORM_VALS.ID.desc());
         return query.fetchAnyInto(GeneralFormVal.class);
     }
-
 }

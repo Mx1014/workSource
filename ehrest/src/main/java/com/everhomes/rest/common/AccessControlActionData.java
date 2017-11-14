@@ -14,7 +14,7 @@ public class AccessControlActionData {
     private String doorId;
 
     private int isSupportKeyShowing; //是否显示我的钥匙
-
+    
     private int isHighlight; // 0: 不支持高亮，1 支持高亮
 
     public int getIsSupportSmart() {

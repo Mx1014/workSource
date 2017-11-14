@@ -20,6 +20,7 @@ public interface PunchServiceErrorCode {
     static final int ERROR_WIFI_WRONG = 10007;  //用户wifi地址错误
     static final int ERROR_PUNCH_TYPE = 10009;  //用户打卡类型错误,重新请求
     static final int ERROR_ENTERPRISE_DIDNOT_SETTING = 10010;  //公司没有设置打卡规则
+    static final int ERROR_ENTERPRISE_DIDNOT_FOUND = 10011;  //公司没有
 
 
     static final int ERROR_PUNCH_TOKEN_TIMEOUT = 10100;  //token过期了,返回首页

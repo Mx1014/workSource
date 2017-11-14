@@ -4,6 +4,8 @@ package com.everhomes.parking.handler;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -45,12 +47,8 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 			String validEnd = card.getLimitEnd();
 			Long endTime = strToLong(validEnd);
 
-			if (checkExpireTime(parkingLot, endTime)) {
-				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
-			}else {
-				parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
-			}
-			
+			setCardStatus(parkingLot, endTime, parkingCardDTO);
+
 			String plateOwnerName = card.getUserName();
 
 			String cardNumber = card.getCardID();
@@ -289,6 +287,77 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 
 	@Override
 	public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
+		//TODO:ceshi
+		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+		if (flag) {
+			if (plateNumber.startsWith("粤B")) {
+
+				long now = System.currentTimeMillis();
+
+				Timestamp startDate = new Timestamp(now - 15 * 60 * 1000);
+				Timestamp endDate = new Timestamp(now);
+				ParkingRechargeOrder order = parkingProvider.getParkingRechargeTempOrder(parkingLot.getOwnerType(), parkingLot.getOwnerId(),
+						parkingLot.getId(), plateNumber, startDate, endDate);
+				if (null != order) {
+					ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
+
+					dto.setPlateNumber(plateNumber);
+					dto.setEntryTime(strToLong("20171110000000"));
+					dto.setPayTime(now);
+					dto.setParkingTime( (int) ((order.getRechargeTime().getTime() - dto.getEntryTime()) / (1000 * 60)) );
+					dto.setDelayTime(15);
+					dto.setPrice(new BigDecimal(0));
+
+					dto.setOrderToken("100");
+					return dto;
+				}else {
+					ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
+
+					dto.setPlateNumber(plateNumber);
+					dto.setEntryTime(strToLong("20171110000000"));
+					dto.setPayTime(now);
+					dto.setParkingTime( (int) ((now - dto.getEntryTime()) / (1000 * 60)) );
+					dto.setDelayTime(15);
+					dto.setPrice(new BigDecimal(1000));
+
+					dto.setOrderToken("100");
+					return dto;
+				}
+
+			}
+
+			if (plateNumber.startsWith("粤C")) {
+
+				String s = plateNumber.substring(2);
+				String DATE_TIME = "yyyyMMddHHmm";
+				String DATE = "yyyy-MM-dd";
+				String DATE_TIME_STR = "yyyyMMdd";
+
+				SimpleDateFormat sdf1 = new SimpleDateFormat(DATE_TIME_STR);
+				String q = sdf1.format(new Date());
+
+				SimpleDateFormat sdf2 = new SimpleDateFormat(DATE_TIME);
+				long t = 0;
+				try {
+					t = sdf2.parse(q+s).getTime();
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+				ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
+
+				dto.setPlateNumber(plateNumber);
+				dto.setEntryTime(t);
+				long now = System.currentTimeMillis();
+				dto.setPayTime(now);
+				dto.setParkingTime( (int) ((now - dto.getEntryTime()) / (1000 * 60)) );
+				dto.setDelayTime(15);
+				dto.setPrice(new BigDecimal(0));
+
+				dto.setOrderToken("100");
+				return dto;
+			}
+		}
+
 		BosigaoTempFee tempFee = getTempFee(plateNumber);
 
 		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();

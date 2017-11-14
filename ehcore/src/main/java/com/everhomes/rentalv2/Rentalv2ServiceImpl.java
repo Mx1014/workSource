@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PayService;
+import com.everhomes.pay.order.PaymentType;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.rentalv2.*;
@@ -47,7 +48,8 @@ import com.everhomes.rest.rentalv2.admin.AttachmentType;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.user.*; 
-import net.greghaines.jesque.Job;  
+import net.greghaines.jesque.Job;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -554,6 +556,24 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 									EntityType.USER.getCode(), User.ROOT_UID));
 							return user;
 						}).collect(Collectors.toList()));
+					}
+				}else if (a.getAttachmentType().equals(AttachmentType.TEXT_REMARK.getCode())) {
+					if (StringUtils.isBlank(a.getContent())) {
+
+						String locale = UserContext.current().getUser().getLocale();
+
+						String content = localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
+								String.valueOf(RentalNotificationTemplateCode.RENTAL_TEXT_REMARK), locale, "");
+						rca.setContent(content);
+					}
+				}else if (a.getAttachmentType().equals(AttachmentType.SHOW_CONTENT.getCode())) {
+					if (StringUtils.isBlank(a.getContent())) {
+
+						String locale = UserContext.current().getUser().getLocale();
+
+						String content = localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
+								String.valueOf(RentalNotificationTemplateCode.RENTAL_SHOW_CONTENT), locale, "");
+						rca.setContent(content);
 					}
 				}
 				return rca;
@@ -1414,7 +1434,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			//用基于服务器平台的锁添加订单（包括验证和添加）
 			Tuple<Long, Boolean> tuple = this.coordinationProvider
-					.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode())
+					.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode() + rs.getId())
 					.enter(() -> {
 						// this.groupProvider.updateGroup(group);
 						this.valiRentalBill(cmd.getRules());
@@ -2870,7 +2890,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return (AddRentalBillItemV2Response) actualAddRentalItemBill(cmd, ActivityRosterPayVersionFlag.V2);
 	}
 
-	private AddRentalBillItemV2Response convertOrderDTOForV2(RentalOrder order, String clientAppName, String flowCaseUrl) {
+	private AddRentalBillItemV2Response convertOrderDTOForV2(RentalOrder order, String clientAppName,Integer paymentType,
+															 String flowCaseUrl) {
 		PreOrderCommand preOrderCommand = new PreOrderCommand();
 
 		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
@@ -2884,6 +2905,22 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //        preOrderCommand.setExpiration(expiredTime);
 
 		preOrderCommand.setClientAppName(clientAppName);
+
+		//微信公众号支付，重新设置ClientName，设置支付方式和参数
+		if(paymentType != null && paymentType.intValue() == PaymentType.WECHAT_JS_PAY.getCode()){
+
+//			if(preOrderCommand.getClientAppName() == null){
+//				Integer namespaceId = UserContext.getCurrentNamespaceId();
+//				preOrderCommand.setClientAppName("wechat_" + namespaceId);
+//			}
+			preOrderCommand.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
+			PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+			paymentParamsDTO.setPayType("no_credit");
+			User user = UserContext.current().getUser();
+			paymentParamsDTO.setAcct(user.getNamespaceUserToken());
+			preOrderCommand.setPaymentParams(paymentParamsDTO);
+
+		}
 
 		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
 
@@ -3093,7 +3130,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if (ActivityRosterPayVersionFlag.V1 == version) {
 			return response;
 		}else {
-			return convertOrderDTOForV2(bill, cmd.getClientAppName(), response.getFlowCaseUrl());
+			return convertOrderDTOForV2(bill, cmd.getClientAppName(),cmd.getPaymentType(), response.getFlowCaseUrl());
 		}
 	}
 
@@ -3238,7 +3275,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		if(bills.size() > pageSize) {
 			bills.remove(bills.size() - 1);
-			response.setNextPageAnchor( bills.get(bills.size() -1).getId()); 
+			response.setNextPageAnchor( bills.get(bills.size() -1).getReserveTime().getTime());
 		}
 		
 		response.setRentalBills(new ArrayList<>());

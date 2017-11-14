@@ -32,6 +32,8 @@ public interface ParkingErrorCode {
 
     int NOT_SUPPORT_APP_RECHARGE = 10020;  //不支持APP缴费
 
+    int ERROR_PLATE_REPEAT_ADD = 10021;  //车牌不可重复添加！
+
     // ------------------ 车辆放行 ----------------------
     String SCOPE_CLEARANCE = "parking.clearance";
 

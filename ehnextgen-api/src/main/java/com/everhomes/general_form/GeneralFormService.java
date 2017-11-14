@@ -42,4 +42,15 @@ public interface GeneralFormService {
      * 根据owner和字段名称获取字段的值
      */
     GeneralFormFieldDTO getGeneralFormValueByOwner(String moduleType, Long moduleId, String ownerType, Long ownerId, String fieldName);
+//
+//	void createGeneralFormGroup(CreateGeneralFormGroupCommand cmd);
+//
+//	List<GeneralFormGroupDTO> listGeneralFormGroups(ListGeneralFormGroupsCommand cmd);
+
+//	GeneralFormDTO getGeneralFormTemplate(GeneralFormTemplateCommand cmd);
+
+	GeneralFormGroup createGeneralFormGroup(GeneralForm form, List<GeneralFormGroupDTO> groupDTOS);
+
+	void updateGeneralFormGroupByFormId(GeneralFormGroup group, GeneralForm form, List<GeneralFormGroupDTO> groupDTOS);
+
 }

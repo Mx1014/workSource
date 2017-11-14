@@ -264,9 +264,10 @@ public class NewsProviderImpl implements NewsProvider {
 	}
 
 	@Override
-	public void increaseViewCount(Long newsId) {
-		dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_NEWS).set(Tables.EH_NEWS.VIEW_COUNT,Tables.EH_NEWS.VIEW_COUNT.add(1))
-				.where(Tables.EH_NEWS.ID.eq(newsId));
+	public void increaseViewCount(Long newsId, Long nViewCount) {
+		Long newViewCount = (nViewCount==null?0:nViewCount)+1;
+		dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_NEWS).set(Tables.EH_NEWS.VIEW_COUNT,newViewCount)
+				.where(Tables.EH_NEWS.ID.eq(newsId)).execute();
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhNews.class, null);
 	}
 
@@ -275,5 +276,16 @@ public class NewsProviderImpl implements NewsProvider {
 	public NewsTag findNewsTagById(Long id) {
 		assert (id!=null);
 		return ConvertHelper.convert(new EhNewsTagDao(getContext(AccessSpec.readOnly()).configuration()).findById(id),NewsTag.class);
+	}
+
+	@Override
+	public NewsCategory getCategoryIdByEntryId(Integer entryId,Integer namespaceId) {
+		List<NewsCategory> categories = dbProvider.getDslContext(AccessSpec.readOnly()).select().from(Tables.EH_NEWS_CATEGORIES)
+				.where(Tables.EH_NEWS_CATEGORIES.ENTRY_ID.eq(entryId)).and(Tables.EH_NEWS_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+				.fetch().map(r -> ConvertHelper.convert(r, NewsCategory.class));
+		if(categories!=null && categories.size()>0){
+			return categories.get(0);
+		}
+		return null;
 	}
 }

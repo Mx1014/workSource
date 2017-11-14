@@ -22,7 +22,7 @@ public class FindEnergyMeterByQRCodeCommand {
     public void setMeterQRCode(Long meterQRCode) {
         this.meterQRCode = meterQRCode;
     }
-    
+
     public Integer getNamespaceId() {
 		return namespaceId;
 	}

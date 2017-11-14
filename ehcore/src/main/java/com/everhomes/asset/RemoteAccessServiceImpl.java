@@ -3,7 +3,10 @@ package com.everhomes.asset;
 
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.db.AccessSpec;
 import com.everhomes.http.HttpUtils;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.pay.base.RestClient;
 import com.everhomes.pay.order.OrderPaymentStatus;
 import com.everhomes.pay.order.PaymentAttributes;
@@ -16,10 +19,17 @@ import com.everhomes.query.SortSpec;
 import com.everhomes.rest.MapListRestResponse;
 import com.everhomes.rest.RestErrorCode;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.user.GetUserInfoByIdCommand;
+import com.everhomes.rest.user.UserInfo;
+import com.everhomes.user.User;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.user.UserServiceImpl;
 import com.everhomes.util.AmountUtil;
 import com.everhomes.util.GsonUtil;
 import com.everhomes.util.IntegerUtil;
 import com.everhomes.util.LongUtil;
+import jdk.nashorn.internal.runtime.Context;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.protocol.HTTP;
 import org.hibernate.engine.config.spi.ConfigurationService;
@@ -46,6 +56,16 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
     private PaymentService paymentService;
     @Autowired
     private ConfigurationProvider configurationProvider;
+    @Autowired
+    private AssetProvider assetProvider;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private UserProvider userProvider;
+    @Autowired
+    private OrganizationService organizationService;
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
 //    @PostConstruct
 //    void init() throws Exception {
@@ -99,7 +119,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         );
         queryBuilder.where(getListOrderPaymentCondition(cmd));
         queryBuilder.sortBy(getListOrderPaymentSorts(cmd.getSorts()));
-        queryBuilder.limit(cmd.getPageSize()).offset(cmd.getNextPageAnchor());
+        queryBuilder.limit(cmd.getPageSize()).offset(cmd.getPageAnchor());
 
         MapListRestResponse response = (MapListRestResponse) callPaymentMethod(
                 "POST",
@@ -107,7 +127,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                 payCmd.done(),
                 MapListRestResponse.class);
 
-        ListPaymentBillResp result = new ListPaymentBillResp(cmd.getNextPageAnchor(), cmd.getPageSize());
+        ListPaymentBillResp result = new ListPaymentBillResp(cmd.getPageAnchor(), cmd.getPageSize());
         result.setList(new ArrayList<PaymentBillResp>());
 
         if(response.getResponse() != null && !response.getResponse().isEmpty()) {
@@ -115,6 +135,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                 PaymentBillResp paymentBillDTO = convert(map);
                 if(paymentBillDTO != null) {
                     processAmount(paymentBillDTO, cmd);
+                    putOrderInfo(paymentBillDTO);
                     result.getList().add(paymentBillDTO);
                 }
             }
@@ -127,6 +148,39 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         }
 
         return result;
+    }
+
+    private void putOrderInfo(PaymentBillResp dto) {
+        String orderRemark2 = dto.getOrderRemark2();
+        Long orderId = null;
+        try{
+            orderId = Long.parseLong(orderRemark2);
+        }catch(Exception e){
+            LOGGER.error(e.toString());
+            return;
+        }
+        AssetPaymentOrder order = assetProvider.getOrderById(orderId);
+        if(order == null){
+            return;
+        }
+        List<AssetPaymentOrderBills> orderBills = assetProvider.findBillsById(order.getId());
+        StringBuilder sb = new StringBuilder();
+//        sb.append("[缴费]");
+        if(orderBills == null){
+            return;
+        }
+        for( int i = 0; i < orderBills.size(); i ++){
+            AssetPaymentOrderBills orderBill = orderBills.get(i);
+            sb.append(assetProvider.getBillSource(orderBill.getBillId()));
+            if(i < orderBills.size() -1 ){
+                sb.append(",");
+            }
+        }
+        dto.setOrderSource(sb.toString());
+        //获得付款人员
+        User userById = userProvider.findUserById(order.getUid());
+        dto.setPayerName(userById.getNickName());
+        dto.setPayerTel(userById.getAccountName());
     }
 
     private void processAmount(PaymentBillResp paymentBill, ListPaymentBillCmd cmd) {
@@ -183,6 +237,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         paymentBill.setTransactionType(IntegerUtil.convert(map.get("transactionType")));
         paymentBill.setOrderRemark1(map.get("orderRemark1"));
         paymentBill.setPaymentOrderId(Long.valueOf(map.get("orderId")));
+
+        paymentBill.setOrderRemark2(map.get("orderRemark2"));
 
         Long payTimeMill = LongUtil.convert(map.get("createTime"));
         if(payTimeMill != null) {

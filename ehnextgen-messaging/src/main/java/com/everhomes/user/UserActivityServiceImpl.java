@@ -749,6 +749,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         boolean alwaysStoreManage = configurationProvider.getBooleanValue("always.store.management", false);
         if(alwaysStoreManage){
         	rsp.setIsAppliedShop(1);
+            rsp.setApplyShopUrl(getManageShopUrl(user.getId()));
         }
         
         if(couponCount != null) {

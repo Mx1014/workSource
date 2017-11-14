@@ -24,6 +24,7 @@ import java.util.List;
  * <li>needTemporary: 0-已发布， 1-全部，2-仅仅暂存，不填默认0 参考{@link NeedTemporaryType}</li>
  * <li>tag: 标签</li>
  * <li>namespaceId: 域空间id</li>
+ * <li>forumEntryId: 论坛应用入口Id</li>
  * </ul>
  */
 public class QueryOrganizationTopicCommand {
@@ -53,6 +54,8 @@ public class QueryOrganizationTopicCommand {
     private Byte needTemporary;
 
     private String tag;
+
+    private Long forumEntryId;
 
     public QueryOrganizationTopicCommand() {
     }
@@ -231,6 +234,14 @@ public class QueryOrganizationTopicCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public Long getForumEntryId() {
+        return forumEntryId;
+    }
+
+    public void setForumEntryId(Long forumEntryId) {
+        this.forumEntryId = forumEntryId;
     }
 
     @Override

@@ -765,6 +765,27 @@ public class CommunityProviderImpl implements CommunityProvider {
 		return buildings;
 	}
 
+    @Override
+    public List<Building> ListBuildingsBykeywordAndNameSpace(Integer namespaceId, String keyword) {
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBuildings.class));
+        List<Building> buildings = new ArrayList<Building>();
+        SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
+
+        query.addConditions(Tables.EH_BUILDINGS.NAME.like("%" + keyword + "%"));
+        query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
+
+        query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        query.addOrderBy(Tables.EH_BUILDINGS.DEFAULT_ORDER.desc());
+
+        query.fetch().map((EhBuildingsRecord record) -> {
+            buildings.add(ConvertHelper.convert(record, Building.class));
+            return null;
+        });
+
+        return buildings;
+    }
+
 	@Override
 	public Building findBuildingById(Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBuildings.class, id));

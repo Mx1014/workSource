@@ -106,4 +106,11 @@ public interface ParkingVendorHandler {
      * @return
      */
     ParkingCarLocationDTO getCarLocation(ParkingLot parkingLot, GetCarLocationCommand cmd);
+
+    /**
+     * 寻车 获取车位置
+     * @param cmd
+     * @return
+     */
+    ParkingExpiredRechargeInfoDTO getExpiredRechargeInfo(ParkingLot parkingLot, GetExpiredRechargeInfoCommand cmd);
 }

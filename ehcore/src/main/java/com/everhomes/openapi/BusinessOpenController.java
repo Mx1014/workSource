@@ -545,18 +545,32 @@ public class BusinessOpenController extends ControllerBase {
 	}
 	
 	/**
-     * <b>URL: /openapi/listBuildingsByKeyword</b>
-     * <p>根据小区Id和关键字查询小区楼栋</p>
+     * <b>URL: /openapi/listBuildingsByKeywordAndNameSpace</b>
+     * <p>根据关键字查询域空间楼栋</p>
      */
-    @RequestMapping("listBuildingsByKeyword")
+    @RequestMapping("listBuildingsByKeywordAndNameSpace")
     @RestReturn(value=BuildingDTO.class, collection=true)
-    public RestResponse listBuildingsByKeyword(@Valid ListBuildingByCommunityIdsCommand cmd) {
-        List<BuildingDTO> data = this.businessService.listBuildingsByKeyword(cmd);
+    public RestResponse listBuildingsByKeywordAndNameSpace(@Valid ListBuildingsByKeywordAndNameSpaceCommand cmd) {
+        List<BuildingDTO> data = this.businessService.listBuildingsByKeywordAndNameSpace(cmd);
         RestResponse response = new RestResponse(data);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
+
+	/**
+	 * <b>URL: /openapi/listBuildingsByKeyword</b>
+	 * <p>根据小区Id和关键字查询小区楼栋</p>
+	 */
+	@RequestMapping("listBuildingsByKeyword")
+	@RestReturn(value=BuildingDTO.class, collection=true)
+	public RestResponse listBuildingsByKeyword(@Valid ListBuildingByCommunityIdsCommand cmd) {
+		List<BuildingDTO> data = this.businessService.listBuildingsByKeyword(cmd);
+		RestResponse response = new RestResponse(data);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
     
     /**
      * <b>URL: /openapi/listApartmentFloor</b>

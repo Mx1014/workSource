@@ -24,6 +24,7 @@ public class FlowLaneLogDTO {
     private Long laneId;
     private Integer laneLevel;
     private String laneName;
+    private String currNodeParams;
     private Byte isCurrentLane;
     private Byte isRejectLane;
     private Byte isAbsortLane;
@@ -91,6 +92,14 @@ public class FlowLaneLogDTO {
 
     public void setLaneEnterTime(Long laneEnterTime) {
         this.laneEnterTime = laneEnterTime;
+    }
+
+    public String getCurrNodeParams() {
+        return currNodeParams;
+    }
+
+    public void setCurrNodeParams(String currNodeParams) {
+        this.currNodeParams = currNodeParams;
     }
 
     public Byte getIsRejectLane() {

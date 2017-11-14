@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
  *<ul>
  * <li>ownerId: 所属者id</li>
  * <li>ownerType: 所属者type</li>
+ * <li>namespaceId: 域名</li>
  *</ul>
  */
 public class OwnerIdentityCommand {
@@ -17,6 +18,8 @@ public class OwnerIdentityCommand {
     private Long ownerId;
     @NotNull
     private String ownerType;
+    @NotNull
+    private Integer namespaceId;
 
     @Override
     public String toString() {
@@ -37,6 +40,14 @@ public class OwnerIdentityCommand {
 
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public OwnerIdentityCommand() {

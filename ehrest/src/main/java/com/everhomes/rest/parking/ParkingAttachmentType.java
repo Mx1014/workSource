@@ -2,7 +2,7 @@
 package com.everhomes.rest.parking;
 
 public enum ParkingAttachmentType {
-    PARKING_CARD_REQUEST("parkingcardrequest");
+    PARKING_CARD_REQUEST("parkingcardrequest"), PARKING_CAR_VERIFICATION("PARKING_CAR_VERIFICATION");
     
     private String code;
     private ParkingAttachmentType(String code) {
