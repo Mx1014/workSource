@@ -104,7 +104,6 @@ public class EquipmentController extends ControllerBase {
     @RestReturn(value = SearchEquipmentStandardsResponse.class)
     public RestResponse searchEquipmentStandards(SearchEquipmentStandardsCommand cmd) {
 
-//		SearchEquipmentStandardsResponse standards = equipmentService.searchEquipmentStandards(cmd);
         SearchEquipmentStandardsResponse standards = equipmentStandardSearcher.query(cmd);
 
         RestResponse response = new RestResponse(standards);
@@ -120,9 +119,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("exportEquipmentStandards")
     public HttpServletResponse exportEquipmentStandards(@Valid SearchEquipmentStandardsCommand cmd, HttpServletResponse response) {
 
-        HttpServletResponse commandResponse = equipmentService.exportEquipmentStandards(cmd, response);
-
-        return commandResponse;
+        return equipmentService.exportEquipmentStandards(cmd, response);
     }
 
     /**
@@ -135,7 +132,7 @@ public class EquipmentController extends ControllerBase {
         User manaUser = UserContext.current().getUser();
         Long userId = manaUser.getId();
         if (null == files || null == files[0]) {
-            LOGGER.error("files is null。userId=" + userId);
+            LOGGER.error("files is null userId=" + userId);
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
                     "files is null");
         }
@@ -143,44 +140,44 @@ public class EquipmentController extends ControllerBase {
         return getRestResponse(importDataResponse);
     }
 
-    /**
-     * <b>URL: /equipment/searchEquipmentStandardRelations</b>
-     * <p>查看设备-标准关联</p>
-     */
-    @RequestMapping("searchEquipmentStandardRelations")
-    @RestReturn(value = SearchEquipmentStandardRelationsResponse.class)
-    public RestResponse searchEquipmentStandardRelations(SearchEquipmentStandardRelationsCommand cmd) {
-
-        SearchEquipmentStandardRelationsResponse relations = equipmentStandardMapSearcher.query(cmd);
-
-        return getRestResponse(relations);
-    }
-
-    /**
-     * <b>URL: /equipment/reviewEquipmentStandardRelations</b>
-     * <p>审批设备-标准关联</p>
-     */
-    @RequestMapping("reviewEquipmentStandardRelations")
-    @RestReturn(value = String.class)
-    public RestResponse reviewEquipmentStandardRelations(ReviewEquipmentStandardRelationsCommand cmd) {
-
-        equipmentService.reviewEquipmentStandardRelations(cmd);
-
-        return getSuccessResponse();
-    }
-
-    /**
-     * <b>URL: /equipment/deleteEquipmentStandardRelations</b>
-     * <p>删除失效的设备-标准关联</p>
-     */
-    @RequestMapping("deleteEquipmentStandardRelations")
-    @RestReturn(value = String.class)
-    public RestResponse deleteEquipmentStandardRelations(DeleteEquipmentStandardRelationsCommand cmd) {
-
-        equipmentService.deleteEquipmentStandardRelations(cmd);
-
-        return getSuccessResponse();
-    }
+//    /**
+//     * <b>URL: /equipment/searchEquipmentStandardRelations</b>
+//     * <p>查看设备-标准关联</p>
+//     */
+//    @RequestMapping("searchEquipmentStandardRelations")
+//    @RestReturn(value = SearchEquipmentStandardRelationsResponse.class)
+//    public RestResponse searchEquipmentStandardRelations(SearchEquipmentStandardRelationsCommand cmd) {
+//
+//        SearchEquipmentStandardRelationsResponse relations = equipmentStandardMapSearcher.query(cmd);
+//
+//        return getRestResponse(relations);
+//    }
+//
+//    /**
+//     * <b>URL: /equipment/reviewEquipmentStandardRelations</b>
+//     * <p>审批设备-标准关联</p>
+//     */
+//    @RequestMapping("reviewEquipmentStandardRelations")
+//    @RestReturn(value = String.class)
+//    public RestResponse reviewEquipmentStandardRelations(ReviewEquipmentStandardRelationsCommand cmd) {
+//
+//        equipmentService.reviewEquipmentStandardRelations(cmd);
+//
+//        return getSuccessResponse();
+//    }
+//
+//    /**
+//     * <b>URL: /equipment/deleteEquipmentStandardRelations</b>
+//     * <p>删除失效的设备-标准关联</p>
+//     */
+//    @RequestMapping("deleteEquipmentStandardRelations")
+//    @RestReturn(value = String.class)
+//    public RestResponse deleteEquipmentStandardRelations(DeleteEquipmentStandardRelationsCommand cmd) {
+//
+//        equipmentService.deleteEquipmentStandardRelations(cmd);
+//
+//        return getSuccessResponse();
+//    }
 
     /**
      * <b>URL: /equipment/updateEquipments</b>
@@ -235,6 +232,19 @@ public class EquipmentController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /equipment/searchEquipmentStandardsObject</b>
+     * <p>列出设备列表 新建计划时关联巡检对象</p>
+     */
+    @RequestMapping("searchEquipmentStandardRelations")
+    @RestReturn(value = SearchEquipmentStandardRelationsResponse.class)
+    public RestResponse searchEquipmentStandardRelations(SearchEquipmentStandardRelationsCommand cmd) {
+        //增加搜索条件  repeatType
+        SearchEquipmentStandardRelationsResponse relations = equipmentStandardMapSearcher.query(cmd);
+
+        return getRestResponse(relations);
+    }
+
+    /**
      * <b>URL: /equipment/listEquipmentsCategories</b>
      * <p>查看设备类型</p>
      */
@@ -253,7 +263,7 @@ public class EquipmentController extends ControllerBase {
      */
     @RequestMapping("exportEquipments")
     public HttpServletResponse exportEquipments(@Valid SearchEquipmentsCommand cmd, HttpServletResponse response) {
-
+        //动态excel
         return equipmentService.exportEquipments(cmd, response);
     }
 
@@ -359,6 +369,79 @@ public class EquipmentController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /equipment/createEquipmentInspectionPlan</b>
+     * <p>创建巡检计划</p>
+     */
+    @RequestMapping("createEquipmentInspectionPlan")
+    @RestReturn(value = EquipmentInspectionPlanDTO.class)
+    public RestResponse createEquipmentInspectionPlan(UpdateEquipmentPlanCommand cmd) {
+        EquipmentInspectionPlanDTO equipmentInspectionPlans = null;
+
+        return getRestResponse(equipmentInspectionPlans);
+    }
+
+    /**
+     * <b>URL: /equipment/updateEquipmentInspectionPlan</b>
+     * <p>更新巡检计划</p>
+     */
+    @RequestMapping("updateEquipmentInspectionPlan")
+    @RestReturn(value = String.class)
+    public RestResponse updateEquipmentInspectionPlan(UpdateEquipmentPlanCommand cmd) {
+
+        EquipmentInspectionPlanDTO equipmentInspectionPlans = null;
+
+        return getRestResponse(equipmentInspectionPlans);
+    }
+
+    /**
+     * <b>URL: /equipment/getEquipmentInspectionPlan</b>
+     * <p>根据id查询巡检计划</p>
+     */
+    @RequestMapping("getEquipmentInspectionPlan")
+    @RestReturn(value = EquipmentInspectionPlanDTO.class)
+    public RestResponse getEquipmentInspectionPlan(DeleteEquipmentPlanCommand cmd) {
+
+        EquipmentInspectionPlanDTO equipmentInspectionPlans = null;
+
+        return getRestResponse(equipmentInspectionPlans);
+    }
+    /**
+     * <b>URL: /equipment/deleteEquipmentInspectionPlan</b>
+     * <p>根据id删除巡检计划</p>
+     */
+    @RequestMapping("deleteEquipmentInspectionPlan")
+    @RestReturn(value = EquipmentInspectionPlanDTO.class)
+    public RestResponse deleteEquipmentInspectionPlan(DeleteEquipmentPlanCommand cmd) {
+
+        return  getSuccessResponse();
+    }
+
+    /**
+     * <b>URL: /equipment/searchEquipmentAccessories</b>
+     * <p>查看巡检计划列表</p>
+     */
+    @RequestMapping("searchEquipmentInspectionPlans")
+    @RestReturn(value = searchEquipmentInspectionPlansResponse.class)
+    public RestResponse searchEquipmentInspectionPlans(searchEquipmentInspectionPlansCommand cmd) {
+
+        searchEquipmentInspectionPlansResponse equipmentInspectionPlansResponse = null;
+        return getRestResponse(equipmentInspectionPlansResponse);
+    }
+
+    /**
+     * <b>URL: /equipment/exportEquipmentInspectionPlans</b>
+     * <p>导出计划表</p>
+     */
+    @RequestMapping("exportEquipmentInspectionPlans")
+    public HttpServletResponse exportEquipmentInspectionPlans(searchEquipmentInspectionPlansCommand cmd, HttpServletResponse response) {
+
+        HttpServletResponse commandResponse = null;
+
+        return commandResponse;
+    }
+
+
+    /**
      * <b>URL: /equipment/exportEquipmentTasks</b>
      * <p>导出任务</p>
      */
@@ -394,6 +477,19 @@ public class EquipmentController extends ControllerBase {
         ListEquipmentTasksResponse tasks = equipmentService.listEquipmentTasks(cmd);
 
         return getRestResponse(tasks);
+    }
+
+    /**
+     * <b>URL: /equipment/listEquipmentTasksDetail</b>
+     * <p>获取任务所有信息 用于离线</p>
+     */
+    @RequestMapping("listEquipmentTasksDetails")
+    @RestReturn(value = EquipmentTaskOffLineDTO.class,collection = true)
+    public RestResponse listEquipmentTasksDetails(ListEquipmentTasksCommand cmd) {
+
+        List<EquipmentTaskOffLineDTO> tasksDetail = null;
+
+        return getRestResponse(tasksDetail);
     }
 
     /**
@@ -435,44 +531,44 @@ public class EquipmentController extends ControllerBase {
         return getRestResponse(dto);
     }
 
-    /**
-     * <b>URL: /equipment/reviewEquipmentTask</b>
-     * <p>任务审阅</p>
-     */
-    @RequestMapping("reviewEquipmentTask")
-    @RestReturn(value = String.class)
-    public RestResponse reviewEquipmentTask(ReviewEquipmentTaskCommand cmd) {
-
-        equipmentService.reviewEquipmentTask(cmd);
-
-        return getSuccessResponse();
-    }
-
-    /**
-     * <b>URL: /equipment/reviewEquipmentTasks</b>
-     * <p>任务批量审阅</p>
-     */
-    @RequestMapping("reviewEquipmentTasks")
-    @RestReturn(value = String.class)
-    public RestResponse reviewEquipmentTasks(ReviewEquipmentTasksCommand cmd) {
-
-        equipmentService.reviewEquipmentTasks(cmd);
-
-        return getSuccessResponse();
-    }
-
-    /**
-     * <b>URL: /equipment/createEquipmentTask</b>
-     * <p>创建某设备的任务</p>
-     */
-    @RequestMapping("createEquipmentTask")
-    @RestReturn(value = String.class)
-    public RestResponse createEquipmentTask(DeleteEquipmentsCommand cmd) {
-
-        equipmentService.createEquipmentTask(cmd);
-
-        return getSuccessResponse();
-    }
+//    /**
+//     * <b>URL: /equipment/reviewEquipmentTask</b>
+//     * <p>任务审阅</p>
+//     */
+//    @RequestMapping("reviewEquipmentTask")
+//    @RestReturn(value = String.class)
+//    public RestResponse reviewEquipmentTask(ReviewEquipmentTaskCommand cmd) {
+//
+//        equipmentService.reviewEquipmentTask(cmd);
+//
+//        return getSuccessResponse();
+//    }
+//
+//    /**
+//     * <b>URL: /equipment/reviewEquipmentTasks</b>
+//     * <p>任务批量审阅</p>
+//     */
+//    @RequestMapping("reviewEquipmentTasks")
+//    @RestReturn(value = String.class)
+//    public RestResponse reviewEquipmentTasks(ReviewEquipmentTasksCommand cmd) {
+//
+//        equipmentService.reviewEquipmentTasks(cmd);
+//
+//        return getSuccessResponse();
+//    }
+//
+//    /**
+//     * <b>URL: /equipment/createEquipmentTask</b>
+//     * <p>创建某设备的任务</p>
+//     */
+//    @RequestMapping("createEquipmentTask")
+//    @RestReturn(value = String.class)
+//    public RestResponse createEquipmentTask(DeleteEquipmentsCommand cmd) {
+//
+//        equipmentService.createEquipmentTask(cmd);
+//
+//        return getSuccessResponse();
+//    }
 
     /**
      * <b>URL: /equipment/listLogsByTaskId</b>
@@ -500,18 +596,18 @@ public class EquipmentController extends ControllerBase {
         return getRestResponse(resp);
     }
 
-    /**
-     * <b>URL: /equipment/listParametersByEquipmentId</b>
-     * <p>查看设备所需记录的参数</p>
-     */
-    @RequestMapping("listParametersByEquipmentId")
-    @RestReturn(value = EquipmentParameterDTO.class, collection = true)
-    public RestResponse listParametersByEquipmentId(DeleteEquipmentsCommand cmd) {
-
-        List<EquipmentParameterDTO> parameterDTOS = equipmentService.listParametersByEquipmentId(cmd);
-
-        return getRestResponse(parameterDTOS);
-    }
+//    /**
+//     * <b>URL: /equipment/listParametersByEquipmentId</b>
+//     * <p>查看设备所需记录的参数</p>
+//     */
+//    @RequestMapping("listParametersByEquipmentId")
+//    @RestReturn(value = EquipmentParameterDTO.class, collection = true)
+//    public RestResponse listParametersByEquipmentId(DeleteEquipmentsCommand cmd) {
+//
+//        List<EquipmentParameterDTO> parameterDTOS = equipmentService.listParametersByEquipmentId(cmd);
+//
+//        return getRestResponse(parameterDTOS);
+//    }
 
     /**
      * <b>URL: /equipment/listAttachmentsByEquipmentId</b>
@@ -604,6 +700,22 @@ public class EquipmentController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /equipment/syncEquipmentPlansIndex</b>
+     * <p>搜索索引同步</p>
+     *
+     * @return {String.class}
+     */
+    @RequestMapping("syncEquipmentPlansIndex")
+    @RestReturn(value = String.class)
+    public RestResponse syncEquipmentPlansIndex() {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        // equipmentPlanSearcher.syncFromDb();
+        return getSuccessResponse();
+    }
+
+    /**
      * <b>URL: /equipment/syncEquipmentStandardMapIndex</b>
      * <p>搜索索引同步</p>
      *
@@ -656,94 +768,107 @@ public class EquipmentController extends ControllerBase {
         return getSuccessResponse();
     }
 
-    /**
-     * <b>URL: /equipment/listParametersByStandardId</b>
-     * <p>查看设备所需记录的参数</p>
-     */
-    @RequestMapping("listParametersByStandardId")
-    @RestReturn(value = InspectionItemDTO.class, collection = true)
-    public RestResponse listParametersByStandardId(ListParametersByStandardIdCommand cmd) {
-
-        List<InspectionItemDTO> paras = equipmentService.listParametersByStandardId(cmd);
-
-        RestResponse response = new RestResponse(paras);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /equipment/createInspectionTemplate</b>
-     * <p>新建巡检模板</p>
-     */
-    @RequestMapping("createInspectionTemplate")
-    @RestReturn(value = String.class)
-    public RestResponse createInspectionTemplate(CreateInspectionTemplateCommand cmd) {
-
-        equipmentService.createInspectionTemplate(cmd);
-        return getSuccessResponse();
-    }
+//    /**
+//     * <b>URL: /equipment/listParametersByStandardId</b>
+//     * <p>查看设备所需记录的参数</p>
+//     */
+//    @RequestMapping("listParametersByStandardId")
+//    @RestReturn(value = InspectionItemDTO.class, collection = true)
+//    public RestResponse listParametersByStandardId(ListParametersByStandardIdCommand cmd) {
+//
+//        List<InspectionItemDTO> paras = equipmentService.listParametersByStandardId(cmd);
+//
+//        RestResponse response = new RestResponse(paras);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
 
     /**
-     * <b>URL: /equipment/updateInspectionTemplate</b>
-     * <p>修改巡检模板</p>
+     * <b>URL: /equipment/listEquipmentStandardRelationsByTaskId</b>
+     * <p>查看具体任务下设备标准关系列表</p>
      */
-    @RequestMapping("updateInspectionTemplate")
-    @RestReturn(value = String.class)
-    public RestResponse updateInspectionTemplate(UpdateInspectionTemplateCommand cmd) {
+    @RequestMapping("listEquipmentStandardRelationsByTaskId")
+    @RestReturn(value = EquipmentStandardRelationDTO.class, collection = true)
+    public RestResponse listEquipmentStandardRelationsByTaskId(ListTaskByIdCommand cmd) {
 
-        equipmentService.updateInspectionTemplate(cmd);
-        return getSuccessResponse();
+        List<EquipmentStandardRelationDTO> equipments = null;
+
+        return getRestResponse(equipments);
     }
 
-    /**
-     * <b>URL: /equipment/deleteInspectionTemplate</b>
-     * <p>删除巡检模板</p>
-     */
-    @RequestMapping("deleteInspectionTemplate")
-    @RestReturn(value = String.class)
-    public RestResponse deleteInspectionTemplate(DeleteInspectionTemplateCommand cmd) {
+//    /**
+//     * <b>URL: /equipment/createInspectionTemplate</b>
+//     * <p>新建巡检模板</p>
+//     */
+//    @RequestMapping("createInspectionTemplate")
+//    @RestReturn(value = String.class)
+//    public RestResponse createInspectionTemplate(CreateInspectionTemplateCommand cmd) {
+//
+//        equipmentService.createInspectionTemplate(cmd);
+//        return getSuccessResponse();
+//    }
+//
+//    /**
+//     * <b>URL: /equipment/updateInspectionTemplate</b>
+//     * <p>修改巡检模板</p>
+//     */
+//    @RequestMapping("updateInspectionTemplate")
+//    @RestReturn(value = String.class)
+//    public RestResponse updateInspectionTemplate(UpdateInspectionTemplateCommand cmd) {
+//
+//        equipmentService.updateInspectionTemplate(cmd);
+//        return getSuccessResponse();
+//    }
+//
+//    /**
+//     * <b>URL: /equipment/deleteInspectionTemplate</b>
+//     * <p>删除巡检模板</p>
+//     */
+//    @RequestMapping("deleteInspectionTemplate")
+//    @RestReturn(value = String.class)
+//    public RestResponse deleteInspectionTemplate(DeleteInspectionTemplateCommand cmd) {
+//
+//        equipmentService.deleteInspectionTemplate(cmd);
+//        return getSuccessResponse();
+//    }
+//
+//    /**
+//     * <b>URL: /equipment/findInspectionTemplate</b>
+//     * <p>查询巡检模板</p>
+//     */
+//    @RequestMapping("findInspectionTemplate")
+//    @RestReturn(value = InspectionTemplateDTO.class)
+//    public RestResponse findInspectionTemplate(DeleteInspectionTemplateCommand cmd) {
+//
+//        InspectionTemplateDTO inspectionTemplate = equipmentService.findInspectionTemplate(cmd);
+//        return getRestResponse(inspectionTemplate);
+//    }
+//
+//    /**
+//     * <b>URL: /equipment/listInspectionTemplates</b>
+//     * <p>列出巡检模板</p>
+//     */
+//    @RequestMapping("listInspectionTemplates")
+//    @RestReturn(value = InspectionTemplateDTO.class, collection = true)
+//    public RestResponse listInspectionTemplates(ListInspectionTemplatesCommand cmd) {
+//
+//        List<InspectionTemplateDTO> inspectionTemplates = equipmentService.listInspectionTemplates(cmd);
+//        return getRestResponse(inspectionTemplates);
+//    }
 
-        equipmentService.deleteInspectionTemplate(cmd);
-        return getSuccessResponse();
-    }
-
-    /**
-     * <b>URL: /equipment/findInspectionTemplate</b>
-     * <p>查询巡检模板</p>
-     */
-    @RequestMapping("findInspectionTemplate")
-    @RestReturn(value = InspectionTemplateDTO.class)
-    public RestResponse findInspectionTemplate(DeleteInspectionTemplateCommand cmd) {
-
-        InspectionTemplateDTO inspectionTemplate = equipmentService.findInspectionTemplate(cmd);
-        return getRestResponse(inspectionTemplate);
-    }
-
-    /**
-     * <b>URL: /equipment/listInspectionTemplates</b>
-     * <p>列出巡检模板</p>
-     */
-    @RequestMapping("listInspectionTemplates")
-    @RestReturn(value = InspectionTemplateDTO.class, collection = true)
-    public RestResponse listInspectionTemplates(ListInspectionTemplatesCommand cmd) {
-
-        List<InspectionTemplateDTO> inspectionTemplates = equipmentService.listInspectionTemplates(cmd);
-        return getRestResponse(inspectionTemplates);
-    }
-
-    /**
-     * <b>URL: /equipment/listTasksByToken</b>
-     * <p>扫码查看设备任务</p>
-     */
-    @RequestMapping("listTasksByToken")
-    @RestReturn(value = ListEquipmentTasksResponse.class)
-    public RestResponse listTasksByToken(ListTasksByTokenCommand cmd) {
-
-        ListEquipmentTasksResponse tasks = equipmentService.listTasksByToken(cmd);
-
-        return getRestResponse(tasks);
-    }
+//    /**
+//     * <b>URL: /equipment/listTasksByToken</b>
+//     * <p>扫码查看设备任务</p>
+//     */
+//    @RequestMapping("listTasksByToken")
+//    @RestReturn(value = ListEquipmentTasksResponse.class)
+//    public RestResponse listTasksByToken(ListTasksByTokenCommand cmd) {
+//
+//        ListEquipmentTasksResponse tasks = equipmentService.listTasksByToken(cmd);
+//
+//        return getRestResponse(tasks);
+//    }
 
     /**
      * <b>URL: /equipment/getInspectionObjectByQRCode</b>
@@ -849,17 +974,29 @@ public class EquipmentController extends ControllerBase {
         return getRestResponse(stat);
     }
 
+//    /**
+//     * <b>URL: /equipment/statItemResultsInEquipmentTasks</b>
+//     * <p>按设备-标准统计任务的细项</p>
+//     */
+//    @RequestMapping("statItemResultsInEquipmentTasks")
+//    @RestReturn(value = StatItemResultsInEquipmentTasksResponse.class)
+//    public RestResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd) {
+//
+//        StatItemResultsInEquipmentTasksResponse stat = equipmentService.statItemResultsInEquipmentTasks(cmd);
+//
+//        return getRestResponse(stat);
+//    }
     /**
-     * <b>URL: /equipment/statItemResultsInEquipmentTasks</b>
-     * <p>按设备-标准统计任务的细项</p>
+     * <b>URL: /equipment/statItemResultsByTaskId</b>
+     * <p>按任务id统计任务的细项</p>
      */
-    @RequestMapping("statItemResultsInEquipmentTasks")
+    @RequestMapping("statItemResultsByTaskId")
     @RestReturn(value = StatItemResultsInEquipmentTasksResponse.class)
-    public RestResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd) {
+    public RestResponse statItemResultsByTaskId(ListTaskByIdCommand cmd) {
 
-        StatItemResultsInEquipmentTasksResponse stat = equipmentService.statItemResultsInEquipmentTasks(cmd);
+        StatItemResultsInEquipmentTasksResponse stats = null;
 
-        return getRestResponse(stat);
+        return getRestResponse(stats);
     }
 
     /**
@@ -910,6 +1047,17 @@ public class EquipmentController extends ControllerBase {
     public RestResponse deletePmNotifyParams(DeletePmNotifyParamsCommand cmd) {
         equipmentService.deletePmNotifyParams(cmd);
         return getSuccessResponse();
+    }
+    /**
+     * <b>URL: /equipment/checkEquipmentInspectionNumber</b>
+     * <p>检查设备巡检编号是否存在</p>
+     */
+    @RequestMapping("checkEquipmentInspectionNumber")
+    @RestReturn(value = CheckResultResponse.class)
+    public RestResponse checkEquipmentInspectionNumber(CheckEquipmentInspectionNumberCommand cmd) {
+        //equipmentService.deletePmNotifyParams(cmd);
+        CheckResultResponse checkResultResponse =null;
+        return getRestResponse(checkResultResponse);
     }
 
 

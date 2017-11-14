@@ -1,8 +1,8 @@
 package com.everhomes.rest.equipment;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
@@ -24,7 +24,7 @@ public class InspectionItemDTO {
 	
 	@NotNull
 	private String ownerType;
-	
+
 	private String name;
 	
 	private Byte valueType;

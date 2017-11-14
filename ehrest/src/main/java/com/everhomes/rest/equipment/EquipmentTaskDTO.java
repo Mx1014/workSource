@@ -1,28 +1,20 @@
 package com.everhomes.rest.equipment;
 
-import java.sql.Timestamp;
-
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
  *  <li>id: 任务主键id</li>
- *  <li>standardId: 标准id</li>
- *  <li>standardName: 标准名称</li>
- *  <li>templateId: 模板id</li>
- *  <li>templateName: 模板名称</li>
- *  <li>equipmentId: 设备id</li>
- *  <li>equipmentName: 设备名称</li>
+ *  <li>planId: 计划id</li>
  *  <li>equipmentLocation: 设备位置</li>
- *  <li>qrCodeFlag: 二维码状态 0: inactive, 1: active</li>
- *  <li>parentId: 父任务id</li>
- *  <li>childCount: 子任务数量</li>
  *  <li>ownerType: 任务所属机构类型 com.everhomes.rest.quality.OwnerType</li>
  *  <li>ownerId: 任务所属机构id</li>
  *  <li>taskName: 任务名称</li>
  *  <li>taskNumber: 任务编号</li>
- *  <li>executiveGroupId: 执行业务组id</li>
- *  <li>groupName: 业务组名称</li>
  *  <li>executorType: 执行人类型</li>
  *  <li>executorId:执行人id</li>
  *  <li>executorName:执行人姓名</li>
@@ -40,29 +32,29 @@ import com.everhomes.util.StringHelper;
  *  <li>status: 执行状态 参考{@link com.everhomes.rest.equipment.EquipmentTaskStatus}</li>
  *  <li>result: 执行结果 参考{@link com.everhomes.rest.equipment.EquipmentTaskResult}</li>
  *  <li>reviewResult: 审阅结果 参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
- *  <li>standardDescription: 标准内容</li>
- *  <li>pictureFlag: 是否需要拍照 0：否 1：是</li>
+ *  <li>equipments: 任务关联设备信息列表 参考{@link com.everhomes.rest.equipment.EquipmentsDTO}</li>
  * </ul>
  */
 public class EquipmentTaskDTO {
 	private Long id;
-	
+
+	@Deprecated
 	private Long standardId;
-	
+	@Deprecated
 	private String standardName;
-	
+	@Deprecated
 	private Long templateId;
-	
+	@Deprecated
 	private String templateName;
-	
+	@Deprecated
 	private Long equipmentId;
-	
+	@Deprecated
 	private String equipmentName;
-	
+	@Deprecated
 	private String equipmentLocation;
-	
+	@Deprecated
 	private Long parentId;
-	
+	@Deprecated
 	private Long childCount;
 
 	private String ownerType;
@@ -78,9 +70,9 @@ public class EquipmentTaskDTO {
 	private String taskName;
 	
 	private String taskNumber;
-	
+	@Deprecated
 	private String groupName;
-	
+	@Deprecated
 	private Long executiveGroupId;
 	
 	private String executorType;
@@ -116,12 +108,15 @@ public class EquipmentTaskDTO {
 	private String reviewerType;
 	
 	private String reviewerName;
-
+	@Deprecated
 	private String standardDescription;
-	
+	@Deprecated
 	private Byte qrCodeFlag;
-
+	@Deprecated
 	private Byte pictureFlag;
+
+	@ItemType(EquipmentsDTO.class)
+	private List<EquipmentsDTO> equipments;
 
 	public Long getId() {
 		return id;

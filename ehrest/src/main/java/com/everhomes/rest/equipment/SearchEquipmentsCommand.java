@@ -1,18 +1,17 @@
 package com.everhomes.rest.equipment;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
- *  <li>ownerId: 设备所属组织等的id</li>
+ *  <li>ownerId: 设备所属组织的id</li>
  *  <li>ownerType: 设备所属组织类型，参考{@link com.everhomes.rest.quality.OwnerType}</li>
  *  <li>targetId: 设备所属管理处id</li>
  *  <li>targetType: 设备所属管理处类型</li>
  *  <li>categoryId: 设备类型id</li>
  *  <li>status: 设备状态 参考{@link com.everhomes.rest.equipment.EquipmentStatus}</li>
- *  <li>reviewStatus: 设备-标准关联状态，参考{@link com.everhomes.rest.equipment.EquipmentReviewStatus}</li>
  *  <li>keyword: 查询关键字</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
@@ -30,9 +29,11 @@ public class SearchEquipmentsCommand {
 	private Long targetId;
 	
 	private String targetType;
-	
+
+	@Deprecated
 	private Byte reviewStatus;
-	
+
+	@Deprecated
 	private Byte reviewResult;
 	
 	private Byte status;
@@ -46,6 +47,7 @@ public class SearchEquipmentsCommand {
 	private Integer pageSize;
 	
 	private Long inspectionCategoryId;
+
 	
 	public Long getInspectionCategoryId() {
 		return inspectionCategoryId;
@@ -142,7 +144,7 @@ public class SearchEquipmentsCommand {
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
-	
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

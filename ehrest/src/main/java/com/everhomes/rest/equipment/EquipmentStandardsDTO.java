@@ -1,11 +1,11 @@
 package com.everhomes.rest.equipment;
 
-import java.sql.Timestamp;
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.util.StringHelper;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -13,14 +13,12 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerId: 标准所属的主体id</li>
  *  <li>ownerType: 标准所属的主体，参考{@link com.everhomes.rest.quality.OwnerType}</li>
  *  <li>name: 标准名称</li>
- *  <li>standardNumber: 标准编号</li>
+ *  <li>repeatType: 0:no repeat 1: by day 2:by week 3: by month 4:year</li>
  *  <li>standardSource: 标准来源</li>
- *  <li>description: 具体内容</li>
- *  <li>remarks: 备注</li>
- *  <li>standardType: 标准类别 参考{@link com.everhomes.rest.equipment.StandardType}</li>
- *  <li>repeat: 执行周期 参考{@link com.everhomes.rest.repeat.RepeatSettingsDTO}</li>
  *  <li>status: 标准状态 参考{@link com.everhomes.rest.equipment.EquipmentStandardStatus}</li>
  *  <li>equipmentsCount: 使用此标准的设备数</li>
+ *  <li>items: 标准关联的巡检项目 参考{@link com.everhomes.rest.equipment.InspectionItemDTO}</li>
+ *  <li>equipmentsDTO: 标准关联的设备列表 参考{@link com.everhomes.rest.equipment.EquipmentsDTO}</li>
  *  <li>creatorUid: 创建该标准的用户id</li>
  *  <li>createTime: 创建该标准的时间</li>
  *  <li>operatorUid: 最后对该标准进行修改的用户id</li>
@@ -28,9 +26,6 @@ import com.everhomes.util.StringHelper;
  *  <li>updateTime: 更新该标准的时间</li>
  *  <li>deleterUid: 删除该标准的用户id</li>
  *  <li>deleteTime: 删除该标准的时间</li>
- *  <li>templateId: 巡检项模板id</li>
- *  <li>templateName: 巡检项模板名称</li>
- *  <li>reviewExpiredDays: 审批过期时间限制（天）</li>
  * </ul>
  */
 public class EquipmentStandardsDTO {
@@ -38,23 +33,35 @@ public class EquipmentStandardsDTO {
 	private Long id;
 
 	private String name;
+
+	private  Byte repeatType;
 	
 	private String ownerType;
 	
 	private Long ownerId;
-	
+
+	@Deprecated
 	private String standardNumber;
 	
 	private String standardSource;
-	
+
+	@Deprecated
 	private String remarks;
-	
+
+	@Deprecated
 	private String description;
 	
 	private Byte standardType;
-	
+
+	@Deprecated
 	@ItemType(RepeatSettingsDTO.class)
 	private RepeatSettingsDTO repeat;
+
+	@ItemType(InspectionItemDTO.class)
+	private  List<InspectionItemDTO>  items;
+
+	@ItemType(EquipmentsDTO.class)
+	private List<EquipmentsDTO> equipments;
 	
 	private Integer equipmentsCount;
 	
@@ -74,15 +81,20 @@ public class EquipmentStandardsDTO {
 	
 	private Timestamp deleteTime;
 
+	@Deprecated
 	private Long templateId;
-	
+
+	@Deprecated
 	private String templateName;
-	
+
+	@Deprecated
 	private Integer reviewExpiredDays;
-	
+
+	@Deprecated
 	@ItemType(StandardGroupDTO.class)
 	private List<StandardGroupDTO> executiveGroup;
 
+	@Deprecated
 	@ItemType(StandardGroupDTO.class)
 	private List<StandardGroupDTO> reviewGroup;
 	
@@ -276,6 +288,30 @@ public class EquipmentStandardsDTO {
 
 	public void setReviewGroup(List<StandardGroupDTO> reviewGroup) {
 		this.reviewGroup = reviewGroup;
+	}
+
+	public Byte getRepeatType() {
+		return repeatType;
+	}
+
+	public void setRepeatType(Byte repeatType) {
+		this.repeatType = repeatType;
+	}
+
+	public List<InspectionItemDTO> getItems() {
+		return items;
+	}
+
+	public void setItems(List<InspectionItemDTO> items) {
+		this.items = items;
+	}
+
+	public List<EquipmentsDTO> getEquipments() {
+		return equipments;
+	}
+
+	public void setEquipments(List<EquipmentsDTO> equipments) {
+		this.equipments = equipments;
 	}
 
 	@Override

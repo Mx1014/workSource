@@ -1,0 +1,42 @@
+package com.everhomes.rest.equipment;
+//0:waitting for starting 1: waitting for approving  2: Active 3:inActive
+
+
+import com.everhomes.util.StringHelper;
+
+public enum EquipmentPlanStatus {
+    WAITTING_FOR_STARTING((byte) 0, "待发起"),
+    WATTING_FOR_APPOVING((byte) 1, "待审批"),
+    ACTIVE((byte) 2, "有效"),
+    INACTIVE((byte) 3, "无效");
+
+    private byte code;
+    private String name;
+
+    EquipmentPlanStatus(byte code, String name) {
+        this.code = code;
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public byte getCode() {
+        return code;
+    }
+
+    public static EquipmentPlanStatus FromCode(byte code) {
+        for (EquipmentPlanStatus v : EquipmentPlanStatus.values()) {
+            if (v.getCode() == code) {
+                return v;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

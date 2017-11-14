@@ -770,12 +770,13 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhEquipmentInspectionTasks.class, Tables.EH_EQUIPMENT_INSPECTION_TASKS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_TASKS).fetchOne().value1();
         });
-        syncTableSequence(null, EhEquipmentInspectionTasks.class, Tables.EH_EQUIPMENT_INSPECTION_TASKS.getName(), (dbContext) -> {
+        syncTableSequence(null, EhEquipmentInspectionPlans.class, Tables.EH_EQUIPMENT_INSPECTION_PLANS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_PLANS.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_PLANS).fetchOne().value1();
         });
-        syncTableSequence(null, EhEquipmentInspectionTasks.class, Tables.EH_EQUIPMENT_INSPECTION_TASKS.getName(), (dbContext) -> {
+        syncTableSequence(null, EhEquipmentInspectionEquipmentPlanMap.class, Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP).fetchOne().value1();
         });
+
         syncTableSequence(null, EhEquipmentInspectionTaskAttachments.class, Tables.EH_EQUIPMENT_INSPECTION_TASK_ATTACHMENTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_TASK_ATTACHMENTS.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_TASK_ATTACHMENTS).fetchOne().value1();
         });
