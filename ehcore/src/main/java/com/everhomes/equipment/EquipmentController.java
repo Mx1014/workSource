@@ -789,15 +789,12 @@ public class EquipmentController extends ControllerBase {
      * <p>查看具体任务下设备标准关系列表</p>
      */
     @RequestMapping("listEquipmentStandardRelationsByTaskId")
-    @RestReturn(value = InspectionItemDTO.class, collection = true)
+    @RestReturn(value = EquipmentStandardRelationDTO.class, collection = true)
     public RestResponse listEquipmentStandardRelationsByTaskId(ListTaskByIdCommand cmd) {
 
         List<EquipmentStandardRelationDTO> equipments = null;
 
-        RestResponse response = new RestResponse(equipments);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+        return getRestResponse(equipments);
     }
 
 //    /**
@@ -977,17 +974,29 @@ public class EquipmentController extends ControllerBase {
         return getRestResponse(stat);
     }
 
+//    /**
+//     * <b>URL: /equipment/statItemResultsInEquipmentTasks</b>
+//     * <p>按设备-标准统计任务的细项</p>
+//     */
+//    @RequestMapping("statItemResultsInEquipmentTasks")
+//    @RestReturn(value = StatItemResultsInEquipmentTasksResponse.class)
+//    public RestResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd) {
+//
+//        StatItemResultsInEquipmentTasksResponse stat = equipmentService.statItemResultsInEquipmentTasks(cmd);
+//
+//        return getRestResponse(stat);
+//    }
     /**
-     * <b>URL: /equipment/statItemResultsInEquipmentTasks</b>
-     * <p>按设备-标准统计任务的细项</p>
+     * <b>URL: /equipment/statItemResultsByTaskId</b>
+     * <p>按任务id统计任务的细项</p>
      */
-    @RequestMapping("statItemResultsInEquipmentTasks")
+    @RequestMapping("statItemResultsByTaskId")
     @RestReturn(value = StatItemResultsInEquipmentTasksResponse.class)
-    public RestResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd) {
+    public RestResponse statItemResultsByTaskId(ListTaskByIdCommand cmd) {
 
-        StatItemResultsInEquipmentTasksResponse stat = equipmentService.statItemResultsInEquipmentTasks(cmd);
+        StatItemResultsInEquipmentTasksResponse stats = null;
 
-        return getRestResponse(stat);
+        return getRestResponse(stats);
     }
 
     /**
