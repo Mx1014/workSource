@@ -159,6 +159,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 		if(cmd.getReviewResult() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewResult", cmd.getReviewResult()));
 
+		//add  inspectionCategoryId  过滤
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
         if(cmd.getPageAnchor() != null) {
@@ -256,6 +257,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
             	b.field("targetId", equipment.getTargetId());
             	b.field("targetType", equipment.getTargetType());
             	b.field("equipmentName", equipment.getName());
+            	//add equipment   inspectionCategoryId
             } else {
             	b.field("ownerId", "");
                 b.field("ownerType", "");

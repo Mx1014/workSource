@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
  *  <li>targetType: 设备-标准关联所属管理处类型</li>
  *  <li>targetId: 设备-标准关联所属管理处</li>
  *  <li>repeatType: 巡检对象对应标准周期类型</li>
+ *  <li>inspectionCategoryId: 巡检对象类型id</li>
  *  <li>keyword: 查询关键字</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
