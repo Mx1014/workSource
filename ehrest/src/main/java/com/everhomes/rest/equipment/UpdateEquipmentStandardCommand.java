@@ -216,13 +216,6 @@ public class UpdateEquipmentStandardCommand {
         this.items = items;
     }
 
-    public List<Long> getEquipmentsIds() {
-        return equipmentsIds;
-    }
-
-    public void setEquipmentsIds(List<Long> equipmentsIds) {
-        this.equipmentsIds = equipmentsIds;
-    }
 
 	@Override
     public String toString() {
