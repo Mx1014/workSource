@@ -2438,9 +2438,6 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         cal.add(Calendar.DAY_OF_MONTH, -1);
         // Timestamp dayBeforeYestBegin = getDayBegin(cal);
         for(EnergyMeter meter : meters){
-            if(meter.getId() != 1119L) {
-                continue;
-            }
             try {
 
                 EnergyDateStatistic dayStat = ConvertHelper.convert(meter, EnergyDateStatistic.class);
