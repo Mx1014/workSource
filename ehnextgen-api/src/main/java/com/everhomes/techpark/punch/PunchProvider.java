@@ -2,7 +2,7 @@ package com.everhomes.techpark.punch;
 
 import java.sql.Date;
 import java.sql.Time;
-import java.util.Collection;
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
@@ -335,7 +335,7 @@ public interface PunchProvider {
 
 	Integer approveAbnormalPunch(Long userId, Date punchDate, Integer punchIntervalNo, Byte punchType);
 
-	List<PunchExceptionRequest> listPunchExceptionRequestBetweenBeginAndEndTime(Long userId, Long enterpriseId, Date punchDate);
+	List<PunchExceptionRequest> listPunchExceptionRequestBetweenBeginAndEndTime(Long userId, Long enterpriseId, Timestamp dayStart, Timestamp dayEnd);
 
 	List<PunchExceptionRequest> listpunchexceptionRequestByDate(Long userId, Long enterpriseId, Date punchDate);
 

@@ -1083,7 +1083,9 @@ public class PunchServiceImpl implements PunchService {
 
 		//请假的汇总interval
 		List<TimeInterval> tiDTOs = null;
-		tiDTOs = processTimeRuleDTO(tiDTOs, userId, companyId, new java.sql.Date(logDay.getTimeInMillis()));
+		Timestamp dayStart = new Timestamp(punchDate.getTime() + ptr.getStartEarlyTimeLong() - ptr.getBeginPunchTime());
+		Timestamp dayEnd = new Timestamp(punchDate.getTime() + ptr.getDaySplitTimeLong());
+		tiDTOs = processTimeRuleDTO(tiDTOs, userId, companyId, dayStart,dayEnd);
 
 		List<PunchLog> efficientLogs = new ArrayList<>();
 		//2次打卡的计算
@@ -5016,24 +5018,30 @@ public class PunchServiceImpl implements PunchService {
 		}
 		//审批单
 		//请假之类的审批单
-		List<PunchExceptionRequest> exceptionRequests = punchProvider.listPunchExceptionRequestBetweenBeginAndEndTime(r.getUserId(),
-				r.getEnterpriseId(), r.getPunchDate());
-		if (null == exceptionRequests) {
-			exceptionRequests = new ArrayList<>();
-		}
-		List<PunchExceptionRequest> requests2 = punchProvider.listpunchexceptionRequestByDate(r.getUserId(), r.getEnterpriseId(), r.getPunchDate());
-		if (null != requests2) {
-			exceptionRequests.addAll(requests2);
-		}
-		if (exceptionRequests.size() > 0) {
-			dto.setApprovalRecords(new ArrayList<>());
-			for (PunchExceptionRequest request : exceptionRequests) {
-				FlowCase flowCase = flowCaseProvider.getFlowCaseById(request.getRequestId());
-				GeneralApprovalRecordDTO recordDTO = generalApprovalService.convertGeneralApprovalRecordDTO(flowCase);
-				dto.getApprovalRecords().add(recordDTO);
+		PunchTimeRule ptr = punchProvider.getPunchTimeRuleById(r.getTimeRuleId());
+		if (null != ptr) {
+
+			Timestamp dayStart = new Timestamp(r.getPunchDate().getTime() + ptr.getStartEarlyTimeLong() - ptr.getBeginPunchTime());
+			Timestamp dayEnd = new Timestamp(r.getPunchDate().getTime() + ptr.getDaySplitTimeLong());
+			List<PunchExceptionRequest> exceptionRequests = punchProvider.listPunchExceptionRequestBetweenBeginAndEndTime(r.getUserId(),
+					r.getEnterpriseId(), dayStart, dayEnd);
+			if (null == exceptionRequests) {
+				exceptionRequests = new ArrayList<>();
+			}
+			List<PunchExceptionRequest> requests2 = punchProvider.listpunchexceptionRequestByDate(r.getUserId(), r.getEnterpriseId(), r.getPunchDate());
+			if (null != requests2) {
+				exceptionRequests.addAll(requests2);
+			}
+			if (exceptionRequests.size() > 0) {
+				dto.setApprovalRecords(new ArrayList<>());
+				for (PunchExceptionRequest request : exceptionRequests) {
+					FlowCase flowCase = flowCaseProvider.getFlowCaseById(request.getRequestId());
+					GeneralApprovalRecordDTO recordDTO = generalApprovalService.convertGeneralApprovalRecordDTO(flowCase);
+					dto.getApprovalRecords().add(recordDTO);
+				}
 			}
 		}
-		
+
 		if(null!= r.getArriveTime())
 			dto.setArriveTime(  convertTimeToGMTMillisecond(r.getArriveTime())  );
 
@@ -7705,7 +7713,13 @@ public class PunchServiceImpl implements PunchService {
 		int PunchIntervalNo = 1;
 		//请假的汇总interval
 		List<TimeInterval> tiDTOs = null;
-		tiDTOs = processTimeRuleDTO(tiDTOs, userId, enterpriseId, punchDate);
+
+		if (null != ptr) {
+
+			Timestamp dayStart = new Timestamp(punchDate.getTime() + ptr.getStartEarlyTimeLong() - ptr.getBeginPunchTime());
+			Timestamp dayEnd = new Timestamp(punchDate.getTime() + ptr.getDaySplitTimeLong());
+			tiDTOs = processTimeRuleDTO(tiDTOs, userId, enterpriseId, dayStart, dayEnd);
+		}
 		if(ptr.getPunchTimesPerDay().equals((byte)2)){
 			//对于2次打卡:
 			return calculate2timePunchStatus(ptr,punchTimeLong,punchLogs,result,punchDate,tiDTOs);
@@ -7740,9 +7754,9 @@ public class PunchServiceImpl implements PunchService {
 
 	}
 
-	private List<TimeInterval> processTimeRuleDTO(List<TimeInterval> tiDTOs, Long userId, Long enterpriseId, java.sql.Date punchDate) {
+	private List<TimeInterval> processTimeRuleDTO(List<TimeInterval> tiDTOs, Long userId, Long enterpriseId, Timestamp dayStart, Timestamp dayEnd) {
 		List<PunchExceptionRequest> exceptionRequests = punchProvider.listPunchExceptionRequestBetweenBeginAndEndTime(userId, enterpriseId,
-                        punchDate);
+                        dayStart,dayEnd);
 		if (null == exceptionRequests) {
 			return null;
 		}

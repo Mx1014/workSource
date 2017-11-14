@@ -2728,14 +2728,11 @@ long id = sequenceProvider.getNextSequence(key);
 	}
 
 	@Override
-	public List<PunchExceptionRequest> listPunchExceptionRequestBetweenBeginAndEndTime(Long userId, Long enterpriseId, Date punchDate) {
+	public List<PunchExceptionRequest> listPunchExceptionRequestBetweenBeginAndEndTime(Long userId, Long enterpriseId, Timestamp dayStart, Timestamp dayEnd) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields())
 				.from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
 		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(enterpriseId));
-		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
-		Timestamp dayStart = Timestamp.valueOf(dateSF.format(punchDate)+" 00:00:00");
-		Timestamp dayEnd = Timestamp.valueOf(dateSF.format(punchDate)+" 23:59:59");
 		condition = condition.and((Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lessOrEqual(dayEnd)
 				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.greaterOrEqual(dayStart)))
 				.or(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.lessOrEqual(dayEnd)
