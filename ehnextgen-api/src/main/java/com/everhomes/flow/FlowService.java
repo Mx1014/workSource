@@ -472,7 +472,7 @@ public interface FlowService {
 
     void updateFlowValidationStatus(UpdateFlowValidationStatusCommand cmd);
 
-    FlowConditionVariable getFormFieldValueByVariable(FlowCaseState ctx, String variable);
+    FlowConditionVariable getFormFieldValueByVariable(FlowCaseState ctx, String variable, String extra);
 
     ListFlowConditionVariablesResponse listFlowConditionVariables(ListFlowConditionVariablesCommand cmd);
 

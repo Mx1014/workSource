@@ -1,5 +1,7 @@
 package com.everhomes.flow;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.rest.flow.FlowConditionVariableDTO;
 import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
@@ -65,6 +67,35 @@ public class FormFieldProcessorManagerImpl implements FormFieldProcessorManager,
             }
         } else {
             LOGGER.warn("Not found processor of fieldType {}", fieldDTO.getFieldType());
+        }
+        return null;
+    }
+
+    @Override
+    public String parseFormFieldName(FlowCaseState ctx, String variable, String extra) {
+        Object fieldTypeExtra = null;
+        try {
+            JSONObject extraObject = JSON.parseObject(extra);
+            fieldTypeExtra = extraObject.get("fieldType");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (fieldTypeExtra == null) {
+            return variable;
+        }
+        GeneralFormFieldType fieldType = GeneralFormFieldType.fromCode(fieldTypeExtra.toString());
+
+        FormFieldProcessor fieldProcessor = processorMap.get(fieldType);
+        if (fieldProcessor != null) {
+            try {
+                return fieldProcessor.parseFormFieldName(ctx, variable, extra);
+            } catch (Exception e) {
+                throw RuntimeErrorException.errorWith(e, FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CONDITION_VARIABLE,
+                        "Flow condition variable parse error, fieldType=%s, extra=%s", fieldType, extra);
+            }
+        } else {
+            LOGGER.warn("Not found processor of fieldType {}", fieldTypeExtra);
         }
         return null;
     }

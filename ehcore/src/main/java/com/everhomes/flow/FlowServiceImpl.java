@@ -5023,14 +5023,15 @@ public class FlowServiceImpl implements FlowService {
     }
 
     @Override
-    public FlowConditionVariable getFormFieldValueByVariable(FlowCaseState ctx, String variable) {
+    public FlowConditionVariable getFormFieldValueByVariable(FlowCaseState ctx, String variable, String extra) {
+        String fieldName = formFieldProcessorManager.parseFormFieldName(ctx, variable, extra);
         FlowCase flowCase = ctx.getFlowCase();
         GeneralFormFieldDTO fieldDTO = generalFormService.getGeneralFormValueByOwner(
                 flowCase.getModuleType(),
                 flowCase.getModuleId(),
                 EhFlowCases.class.getSimpleName(),
                 flowCase.getId(),
-                variable
+                fieldName
         );
         if (fieldDTO != null) {
             return formFieldProcessorManager.getFlowConditionVariable(fieldDTO);
@@ -6235,6 +6236,8 @@ public class FlowServiceImpl implements FlowService {
         exp.setRelationalOperator(expressionCmd.getRelationalOperator());
         exp.setVariable1(expressionCmd.getVariable1());
         exp.setVariable2(expressionCmd.getVariable2());
+        exp.setVariableExtra1(expressionCmd.getVariableExtra1());
+        exp.setVariableExtra2(expressionCmd.getVariableExtra2());
         exp.setVariableType1(expressionCmd.getVariableType1());
         exp.setVariableType2(expressionCmd.getVariableType2());
 

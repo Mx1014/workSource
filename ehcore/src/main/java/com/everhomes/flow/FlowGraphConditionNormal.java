@@ -48,8 +48,8 @@ public class FlowGraphConditionNormal extends FlowGraphCondition {
     }
 
     public boolean evaluateFlowConditionVariableRelational(FlowCaseState ctx, FlowConditionExpression exp) {
-        FlowConditionVariable variable1 = getVariableValue(ctx, exp.getVariableType1(), exp.getVariable1());
-        FlowConditionVariable variable2 = getVariableValue(ctx, exp.getVariableType2(), exp.getVariable2());
+        FlowConditionVariable variable1 = getVariableValue(ctx, exp.getVariableType1(), exp.getVariable1(), exp.getVariableExtra1());
+        FlowConditionVariable variable2 = getVariableValue(ctx, exp.getVariableType2(), exp.getVariable2(), exp.getVariableExtra2());
 
         if (variable1 == null || variable2 == null) {
             return false;
@@ -75,7 +75,7 @@ public class FlowGraphConditionNormal extends FlowGraphCondition {
         return false;
     }
 
-    private FlowConditionVariable getVariableValue(FlowCaseState ctx, String variableType, String variable) {
+    private FlowConditionVariable getVariableValue(FlowCaseState ctx, String variableType, String variable, String extra) {
         FlowConditionExpressionVarType varType = FlowConditionExpressionVarType.fromCode(variableType);
         FlowConditionVariable value = null;
         switch (varType) {
@@ -84,10 +84,10 @@ public class FlowGraphConditionNormal extends FlowGraphCondition {
                 value = new FlowConditionStringVariable(variable);
                 break;
             case FORM:
-                value = flowService.getFormFieldValueByVariable(ctx, variable);
+                value = flowService.getFormFieldValueByVariable(ctx, variable, extra);
                 break;
             case VARIABLE:
-                value = listenerManager.onFlowConditionVariableRender(ctx, variable);
+                value = listenerManager.onFlowConditionVariableRender(ctx, variable, extra);
                 break;
         }
         return value;

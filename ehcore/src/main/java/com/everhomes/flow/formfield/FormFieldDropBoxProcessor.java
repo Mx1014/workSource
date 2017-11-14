@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 @Component
 public class FormFieldDropBoxProcessor extends FormFieldSingleLineTextProcessor {
 
-    @Override
     public GeneralFormFieldType getSupportFieldType() {
         return GeneralFormFieldType.DROP_BOX;
     }

@@ -13,6 +13,7 @@ import java.util.List;
  *     <li>fieldType: 字段类型 {@link com.everhomes.rest.general_approval.GeneralFormFieldType}</li>
  *     <li>operators: 运算符列表</li>
  *     <li>options: 如果是选项的话就是选项列表</li>
+ *     <li>extra: 附加选项</li>
  * </ul>
  */
 public class FlowConditionVariableDTO {
@@ -20,6 +21,7 @@ public class FlowConditionVariableDTO {
     private String displayName;
     private String name;
     private String fieldType;
+    private String extra;
 
     @ItemType(String.class)
     private List<String> operators = new ArrayList<>();
@@ -64,6 +66,14 @@ public class FlowConditionVariableDTO {
 
     public void setOptions(List<String> options) {
         this.options = options;
+    }
+
+    public String getExtra() {
+        return extra;
+    }
+
+    public void setExtra(String extra) {
+        this.extra = extra;
     }
 
     @Override

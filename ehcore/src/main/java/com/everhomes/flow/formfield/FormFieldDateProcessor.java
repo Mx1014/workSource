@@ -31,8 +31,7 @@ public class FormFieldDateProcessor implements FormFieldProcessor {
         return GeneralFormFieldType.DATE;
     }
 
-    @Override
-    public List<FlowConditionRelationalOperatorType> getSupportOperatorList() {
+    protected List<FlowConditionRelationalOperatorType> getSupportOperatorList() {
         List<FlowConditionRelationalOperatorType> operatorTypes = new ArrayList<>();
         operatorTypes.add(FlowConditionRelationalOperatorType.EQUAL);
         operatorTypes.add(FlowConditionRelationalOperatorType.NOT_EQUAL);

@@ -118,9 +118,10 @@ public interface FlowModuleListener {
      * 业务变量渲染
      * @param ctx
      * @param variable  变量名称
+     * @param extra
      * @return
      */
-    default FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable) { return null;}
+    default FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) { return null;}
 
     /**
      * 需要在工作流里使用表单功能，需要实现此方法

@@ -299,14 +299,14 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     }
 
     @Override
-    public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable) {
+    public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) {
         FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
         if (inst != null) {
             ctx.setModule(inst.getInfo());
             FlowModuleListener listener = inst.getListener();
             FlowConditionVariable conditionVariable = null;
             try {
-                conditionVariable = listener.onFlowConditionVariableRender(ctx, variable);
+                conditionVariable = listener.onFlowConditionVariableRender(ctx, variable, extra);
             } catch (Exception e) {
                 wrapError(e, listener);
             }

@@ -27,8 +27,7 @@ public class FormFieldSingleLineTextProcessor implements FormFieldProcessor {
         return GeneralFormFieldType.SINGLE_LINE_TEXT;
     }
 
-    @Override
-    public List<FlowConditionRelationalOperatorType> getSupportOperatorList() {
+    protected List<FlowConditionRelationalOperatorType> getSupportOperatorList() {
         List<FlowConditionRelationalOperatorType> operatorTypes = new ArrayList<>();
         operatorTypes.add(FlowConditionRelationalOperatorType.EQUAL);
         operatorTypes.add(FlowConditionRelationalOperatorType.NOT_EQUAL);
@@ -43,6 +42,7 @@ public class FormFieldSingleLineTextProcessor implements FormFieldProcessor {
         dto.setFieldType(fieldDTO.getFieldType());
         dto.setDisplayName(fieldDTO.getFieldDisplayName());
         dto.setName(fieldDTO.getFieldName());
+        dto.setExtra("11111111");
 
         dto.setOperators(getSupportOperatorList().stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
 

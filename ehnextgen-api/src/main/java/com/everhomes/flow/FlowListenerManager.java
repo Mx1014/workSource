@@ -84,7 +84,7 @@ public interface FlowListenerManager {
 
     List<FlowServiceTypeDTO> listFlowServiceTypes(Integer namespaceId, Long moduleId);
 
-    FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable);
+    FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra);
 
     List<FlowFormDTO> listFlowForms(Flow flow);
 }
