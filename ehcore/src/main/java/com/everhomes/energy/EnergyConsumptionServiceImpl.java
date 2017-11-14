@@ -891,9 +891,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public void batchUpdateEnergyMeterSettings(BatchUpdateEnergyMeterSettingsCommand cmd) {
-        validate(cmd);
-//        checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_BATCHUPDATE);
+//        validate(cmd);
+////        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_BATCHUPDATE);
         if (cmd.getMeterIds() != null) {
             List<EnergyMeter> meters = meterProvider.listByIds(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getMeterIds());
             if (meters != null && meters.size() > 0) {
@@ -901,37 +901,40 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     UpdateEnergyMeterCommand updateCmd = new UpdateEnergyMeterCommand();
                     updateCmd.setMeterId(r.getId());
                     updateCmd.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
-                    // 价格
-                    if (cmd.getPrice() != null || cmd.getConfigId() != null) {
-                        updateCmd.setPrice(cmd.getPrice());
-                        updateCmd.setStartTime(cmd.getPriceStart());
-                        updateCmd.setEndTime(cmd.getPriceEnd());
-                        updateCmd.setConfigId(cmd.getConfigId());
-                        updateCmd.setCalculationType(cmd.getCalculationType());
-                        this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
-                    }
+//                    // 价格
+//                    if (cmd.getPrice() != null || cmd.getConfigId() != null) {
+//                        updateCmd.setPrice(cmd.getPrice());
+//                        updateCmd.setStartTime(cmd.getPriceStart());
+//                        updateCmd.setEndTime(cmd.getPriceEnd());
+//                        updateCmd.setConfigId(cmd.getConfigId());
+//                        updateCmd.setCalculationType(cmd.getCalculationType());
+//                        this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
+//                    }
                     // 倍率
                     if (cmd.getRate() != null) {
                         updateCmd.setRate(cmd.getRate());
                         updateCmd.setStartTime(cmd.getRateStart());
                         updateCmd.setEndTime(cmd.getRateEnd());
                         this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
+                        r.setRate(cmd.getRate());
                     }
-                    // 费用
-                    if (cmd.getCostFormulaId() != null) {
-                        updateCmd.setCostFormulaId(cmd.getCostFormulaId());
-                        updateCmd.setCostFormulaSource(cmd.getCostFormulaSource());
-                        updateCmd.setStartTime(cmd.getCostFormulaStart());
-                        updateCmd.setEndTime(cmd.getCostFormulaEnd());
-                        this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd);
-                    }
+//                    // 费用
+//                    if (cmd.getCostFormulaId() != null) {
+//                        updateCmd.setCostFormulaId(cmd.getCostFormulaId());
+//                        updateCmd.setCostFormulaSource(cmd.getCostFormulaSource());
+//                        updateCmd.setStartTime(cmd.getCostFormulaStart());
+//                        updateCmd.setEndTime(cmd.getCostFormulaEnd());
+//                        this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd);
+//                    }
                     // 用量
                     if (cmd.getAmountFormulaId() != null) {
                         updateCmd.setAmountFormulaId(cmd.getAmountFormulaId());
                         updateCmd.setStartTime(cmd.getAmountFormulaStart());
                         updateCmd.setEndTime(cmd.getAmountFormulaEnd());
                         this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
+                        r.setAmountFormulaId(cmd.getAmountFormulaId());
                     }
+                    meterProvider.updateEnergyMeter(r);
                 });
             }
         }
