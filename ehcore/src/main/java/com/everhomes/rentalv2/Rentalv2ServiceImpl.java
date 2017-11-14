@@ -3484,7 +3484,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			if (rentalResource.getAclinkId()!=null) {
 				Long doorAuthId = createDoorAuth(order.getRentalUid(), order.getAuthStartTime().getTime(), order.getAuthEndTime().getTime(),
 						rentalResource.getAclinkId(), rentalResource.getCreatorUid());
-				rentalv2Provider.setAuthDoorId(order.getId(),doorAuthId);
+				order.setDoorAuthId(doorAuthId);
 			}
 
 			//创建哑工作流
