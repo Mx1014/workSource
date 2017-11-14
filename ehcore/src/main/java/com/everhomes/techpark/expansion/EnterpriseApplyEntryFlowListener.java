@@ -151,29 +151,8 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
             map.put("contactPhone", defaultIfNull(userIdentifier.getIdentifierToken(), ""));
             map.put("enterpriseName", defaultIfNull(applyEntry.getEnterpriseName(), ""));
-//            String applyType = localeStringService.getLocalizedString(ExpansionLocalStringCode.SCOPE_APPLY_TYPE,
-//                    applyEntry.getApplyType() + "", locale, "");
-            ApplyEntrySourceType applyEntrySourceType = ApplyEntrySourceType.fromType(applyEntry.getSourceType());
-            String sourceType = null != applyEntrySourceType ? applyEntrySourceType.getDescription() : "";
 
-            GetLeasePromotionConfigCommand cmd = new GetLeasePromotionConfigCommand();
-            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-            LeasePromotionConfigDTO config = enterpriseApplyEntryService.getLeasePromotionConfig(cmd);
-            byte i = -1;
-            if (ApplyEntrySourceType.BUILDING == applyEntrySourceType) {
-                i = LeasePromotionOrder.PARK_INTRODUCE.getCode();
-            } else if (ApplyEntrySourceType.FOR_RENT == applyEntrySourceType) {
-                i = LeasePromotionOrder.LEASE_PROMOTION.getCode();
-            }
-            if (null != config.getDisplayNames()) {
-                for (Integer k : config.getDisplayOrders()) {
-                    if (k.byteValue() == i) {
-                        sourceType = config.getDisplayNames().get(k - 1);
-                    }
-                }
-            }
-
-            map.put("sourceType", defaultIfNull(sourceType, ""));
+            map.put("sourceType", defaultIfNull(enterpriseApplyEntryService.getSourceTypeName(applyEntry.getSourceType()), ""));
 
             map.put("description", StringUtils.isBlank(applyEntry.getDescription()) ? defaultValue : applyEntry.getDescription());
 
@@ -282,6 +261,10 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
                     }
                 }
             }
+        }else if (ApplyEntrySourceType.LEASE_PROJECT.getCode().equals(applyEntry.getSourceType())) {
+            //如果是项目介绍的申请，产品定义buildingName 值显示项目名称
+            Community community = communityProvider.findCommunityById(applyEntry.getSourceId());
+            buildingName = community.getName();
         }
 
         return buildingName;

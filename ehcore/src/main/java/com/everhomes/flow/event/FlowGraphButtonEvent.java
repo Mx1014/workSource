@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
 
@@ -175,19 +176,43 @@ public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
                 flowStateProcessor.rejectToNode(ctx, gotoLevel, currentNode);
                 // next = ctx.getNextNode();
 
-                boolean notFindNextNode = ctx.getAllFlowState().stream().allMatch(r -> r.getNextNode() == null);
-                if (notFindNextNode) {
+                List<FlowGraphNode> nextNodes = ctx.getAllFlowState().stream()
+                        .map(FlowCaseState::getNextNode).filter(Objects::nonNull).collect(Collectors.toList());
+                if (nextNodes.size() == 0) {
                     throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_REJECT_NODE_NOT_ENTER,
                             "reject node not found");
                 }
 
-                if (subject == null) {
-                    subject = new FlowSubject();
+                FlowGraphNode rejectToNode = nextNodes.get(0);
+
+                // 驳回需要一个特殊的日志类型，用于在跟踪上特殊显示
+                FlowEventLog rejectLog = new FlowEventLog();
+                rejectLog.setId(flowEventLogProvider.getNextId());
+                rejectLog.setFlowMainId(flowGraph.getFlow().getFlowMainId());
+                rejectLog.setFlowVersion(flowGraph.getFlow().getFlowVersion());
+                rejectLog.setNamespaceId(flowGraph.getFlow().getNamespaceId());
+                rejectLog.setFlowButtonId(this.getFiredButtonId());
+                rejectLog.setFlowNodeId(currentNode.getFlowNode().getId());
+                rejectLog.setParentId(0L);
+                rejectLog.setFlowCaseId(flowCase.getId());
+                rejectLog.setStepCount(oldStepCount);
+                rejectLog.setLogType(FlowLogType.REJECT_TRACKER.getCode());
+                rejectLog.setLogTitle("");
+                rejectLog.setButtonFiredStep(stepType.getCode());//mark as transfer log
+                if (!Objects.equals(rejectToNode.getFlowNode().getFlowLaneId(), currentLane.getFlowLane().getId())) {
+                    rejectLog.setCrossLaneRejectFlag(1L);
                 }
+                ctx.getLogs().add(rejectLog);
+
+                // if (subject == null) {
+                //     subject = new FlowSubject();
+                // }
 
                 flowCase.setRejectNodeId(currentNode.getFlowNode().getId());
                 flowCase.setRejectCount(flowCase.getRejectCount() + 1);
                 flowCase.setStepCount(flowCase.getStepCount() + 1);
+
+                tracker = null;
 
                 break;
             case TRANSFER_STEP:

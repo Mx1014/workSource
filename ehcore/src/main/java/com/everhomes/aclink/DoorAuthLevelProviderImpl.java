@@ -93,10 +93,11 @@ public class DoorAuthLevelProviderImpl implements DoorAuthLevelProvider {
             queryBuilderCallback.buildCondition(locator, query);
 
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_DOOR_AUTH_LEVEL.ID.gt(locator.getAnchor()));
+            query.addConditions(Tables.EH_DOOR_AUTH_LEVEL.ID.lt(locator.getAnchor()));
             }
 
         query.addLimit(count);
+        query.addOrderBy(Tables.EH_DOOR_AUTH_LEVEL.ID.desc());
         List<DoorAuthLevel> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, DoorAuthLevel.class);
         });

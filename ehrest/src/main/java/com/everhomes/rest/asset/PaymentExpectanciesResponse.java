@@ -15,6 +15,7 @@ import com.everhomes.discover.ItemType;
 /**
  *<ul>
  * <li>nextPageOffset:下一次offset</li>
+ * <li>totalAmount:费用总额</li>
  * <li>list:明细列表，参考{@link com.everhomes.rest.asset.PaymentExpectancyDTO}</li>
  *</ul>
  */
@@ -22,6 +23,15 @@ public class PaymentExpectanciesResponse {
     @ItemType(PaymentExpectancyDTO.class)
     List<PaymentExpectancyDTO>  list;
     private Integer nextPageOffset;
+    private String totalAmount;
+
+    public String getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(String totalAmount) {
+        this.totalAmount = totalAmount;
+    }
 
     public List<PaymentExpectancyDTO> getList() {
         return list;

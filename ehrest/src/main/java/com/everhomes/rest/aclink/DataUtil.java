@@ -34,6 +34,11 @@ public class DataUtil {
         result[1] = (byte)(i & 0xFF);
         return result;
     }
+    
+    public static short byteToShort(byte[] b) {
+        short s = (short)(((int)b[0] << 8) + (int)b[1]);
+        return s;
+    }
 
     /**
      * byte[]转int

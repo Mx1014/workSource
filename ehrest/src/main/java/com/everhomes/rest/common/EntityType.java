@@ -41,6 +41,8 @@ public enum EntityType {
     ALL("EhAll"),
     CHILD_PROJECT("child_project"),
     SERVICE_ALLIANCES("EhServiceAlliances"),
+    PARKING_CAR_VERIFICATION("EhParkingCarVerifications"),
+    PARKING_CARD_REQUEST("EhParkingCardRequests"),
     ;
 
     private String code;

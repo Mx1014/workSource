@@ -37,6 +37,17 @@ public interface GeneralFormService {
 			List<GeneralFormFieldDTO> fieldDTOs, boolean showDefaultFields);
 
 	List<FlowCaseEntity> getGeneralFormFlowEntities(GetGeneralFormValuesCommand cmd, boolean showDefaultFields);
+//
+//	void createGeneralFormGroup(CreateGeneralFormGroupCommand cmd);
+//
+//	List<GeneralFormGroupDTO> listGeneralFormGroups(ListGeneralFormGroupsCommand cmd);
+
+//	GeneralFormDTO getGeneralFormTemplate(GeneralFormTemplateCommand cmd);
 
 	GeneralFormDTO verifyApprovalFormName(VerifyApprovalFormNameCommand cmd);
+
+	GeneralFormGroup createGeneralFormGroup(GeneralForm form, List<GeneralFormGroupDTO> groupDTOS);
+
+	void updateGeneralFormGroupByFormId(GeneralFormGroup group, GeneralForm form, List<GeneralFormGroupDTO> groupDTOS);
+
 }

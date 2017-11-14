@@ -19,6 +19,7 @@ public class DeleteChargingStandardCommand {
     private String ownerType;
     @NotNull
     private Long chargingStandardId;
+    private Integer namespaceId;
 
     @Override
     public String toString() {
@@ -51,5 +52,13 @@ public class DeleteChargingStandardCommand {
 
     public DeleteChargingStandardCommand() {
 
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 }

@@ -120,31 +120,50 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 	}
 
 	@Override
-	public List<QuestionnaireDTO> listTargetQuestionnaireByOwner(Integer namespaceId, Timestamp nowTime, Byte collectFlag, Long UserId,Long organizationID,
+	public List<QuestionnaireDTO> listTargetQuestionnaireByOwner(Integer namespaceId, Timestamp nowTime, Byte collectFlag,String targetType, Long UserId,Long organizationID,
 																 Byte answerFlagAnchor, Long publishTimeAnchor, int pageSize) {
-		Condition condition = DSL.trueCondition();
+		//查询条件
+		Condition condition = Tables.EH_QUESTIONNAIRES.NAMESPACE_ID.eq(namespaceId)
+				.and(Tables.EH_QUESTIONNAIRES.STATUS.eq(QuestionnaireStatus.ACTIVE.getCode()));
 		QuestionnaireCollectFlagType collectFlagType = QuestionnaireCollectFlagType.fromCode(collectFlag);
-		SortField<?>[] orderby = null;
+		SortField<?>[] orderby ;
 		if(collectFlagType == QuestionnaireCollectFlagType.COLLECTING){
 			condition = condition.and(Tables.EH_QUESTIONNAIRES.CUT_OFF_TIME.ge(nowTime));
-			orderby = new SortField<?>[]{getSortAnswerTimeField().desc(), Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.desc()};
+			orderby = new SortField<?>[]{getSortAnswerFlagField().asc(), Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.desc()};
 		}else if(collectFlagType == QuestionnaireCollectFlagType.FINISHED){
 			condition = condition.and(Tables.EH_QUESTIONNAIRES.CUT_OFF_TIME.lt(nowTime));
-			orderby = new SortField<?>[]{getSortAnswerTimeField().asc(), Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.desc()};
+			orderby = new SortField<?>[]{getSortAnswerFlagField().desc(), Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.desc()};
 		}else{
 			orderby = new SortField<?>[]{Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.desc()};
 		}
-		condition = condition.and(Tables.EH_QUESTIONNAIRES.USER_SCOPE.like("%"+UserId+"%"));
+
+		// 连接条件
+		Condition joinCondition = Tables.EH_QUESTIONNAIRES.ID.eq(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTIONNAIRE_ID);
+		if(QuestionnaireTargetType.ORGANIZATION == QuestionnaireTargetType.fromCode(targetType)){
+			joinCondition = joinCondition.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE.eq(QuestionnaireTargetType.ORGANIZATION.getCode()).and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID.eq(organizationID)));
+			condition = condition.and((Tables.EH_QUESTIONNAIRES.TARGET_TYPE.eq(QuestionnaireTargetType.ORGANIZATION.getCode())
+							.and(Tables.EH_QUESTIONNAIRES.ORGANIZATION_SCOPE.like("%"+organizationID+"%"))));
+		}else if(QuestionnaireTargetType.USER == QuestionnaireTargetType.fromCode(targetType)){
+			joinCondition = joinCondition.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE.eq(QuestionnaireTargetType.USER.getCode()).and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID.eq(UserId)));
+			condition = condition.and(Tables.EH_QUESTIONNAIRES.TARGET_TYPE.eq(QuestionnaireTargetType.USER.getCode())
+					.and(Tables.EH_QUESTIONNAIRES.USER_SCOPE.like("%"+UserId+"%")
+							.and(Tables.EH_QUESTIONNAIRES.ORGANIZATION_SCOPE.isNull())));
+		}else{
+			joinCondition = joinCondition.and(
+					(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE.eq(QuestionnaireTargetType.USER.getCode()).and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID.eq(UserId))).
+							or(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE.eq(QuestionnaireTargetType.ORGANIZATION.getCode()).and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID.eq(organizationID)))
+			);
+			condition = condition.and((Tables.EH_QUESTIONNAIRES.TARGET_TYPE.eq(QuestionnaireTargetType.USER.getCode())
+					.and(Tables.EH_QUESTIONNAIRES.USER_SCOPE.like("%"+UserId+"%")
+							.and(Tables.EH_QUESTIONNAIRES.ORGANIZATION_SCOPE.isNull())))
+					.or((Tables.EH_QUESTIONNAIRES.TARGET_TYPE.eq(QuestionnaireTargetType.ORGANIZATION.getCode())
+							.and(Tables.EH_QUESTIONNAIRES.ORGANIZATION_SCOPE.like("%"+organizationID+"%")))));
+		}
 		SelectOffsetStep<Record> limit = getReadOnlyContext().selectDistinct(getFieldLists())
 				.from(Tables.EH_QUESTIONNAIRES).leftOuterJoin(Tables.EH_QUESTIONNAIRE_ANSWERS)
 				//连接条件
-				.on(Tables.EH_QUESTIONNAIRES.ID.eq(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTIONNAIRE_ID))
-				.and(Tables.EH_QUESTIONNAIRE_ANSWERS.CREATOR_UID.eq(UserId).
-						or(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE.eq(QuestionnaireTargetType.ORGANIZATION.getCode())
-								.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID.eq(organizationID))))
-				.where(Tables.EH_QUESTIONNAIRES.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_QUESTIONNAIRES.STATUS.eq(QuestionnaireStatus.ACTIVE.getCode()))
-				.and(condition)
+				.on(joinCondition)
+				.where(condition)
 				.orderBy(orderby)
 				.limit(pageSize);
 		LOGGER.debug("search sql = {}, bind value = {}",limit.getSQL(),limit.getBindValues());
@@ -159,6 +178,7 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 			dto.setDescription(r.getValue(Tables.EH_QUESTIONNAIRES.DESCRIPTION));
 			dto.setAnsweredFlag(Byte.valueOf(r.getValue(getAnsweredFlagField()).toString()));
 			dto.setTargetType(r.getValue(Tables.EH_QUESTIONNAIRES.TARGET_TYPE));
+			dto.setPosterUri(r.getValue(Tables.EH_QUESTIONNAIRES.POSTER_URI));
 			if(QuestionnaireCommonStatus.TRUE == QuestionnaireCommonStatus.fromCode(dto.getAnsweredFlag())){
 				dto.setCreateTime(((Timestamp)r.getValue(getAnsweredTimeField())).getTime());
 			}
@@ -186,6 +206,10 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 
 	private Field<?> getSortAnswerTimeField() {
 		return DSL.field("answerTime");
+	}
+
+	private Field<?> getSortAnswerFlagField() {
+		return DSL.field("answeredFlag");
 	}
 
 	private EhQuestionnairesDao getReadWriteDao() {

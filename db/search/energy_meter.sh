@@ -13,7 +13,9 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/energyMeter" -d '
             "serviceCategoryId":{"type":"long"},
             "createTime":{"type":"long"},
             "status":{"type":"byte"},
-            "meterType":{"type":"byte"}
+            "meterType":{"type":"byte"},
+            "assignFlag":{"type":"byte"},
+            "assignPlan":{"type":"string", "index":"not_analyzed"}
         }
     }
 }

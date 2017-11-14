@@ -196,7 +196,7 @@ public interface FlowService {
 
     FlowCase getFlowCaseById(Long flowCaseId);
 
-    List<UserInfo> getCurrentProcessors(Long flowCaseId, boolean allFlowCaseFlag);
+    FlowCaseProcessorsProcessor getCurrentProcessors(Long flowCaseId, boolean allFlowCaseFlag);
 
     List<UserInfo> getSupervisor(FlowCase flowCase);
 
@@ -285,7 +285,7 @@ public interface FlowService {
 
 	void flushState(FlowCaseState ctx) throws FlowStepBusyException;
 
-	void createSnapshotNodeProcessors(FlowCaseState ctx, FlowGraphNode nextNode);
+	void createSnapshotNodeProcessors(FlowCaseState ctx, FlowGraphNode node);
 
 	void createSnapshotSupervisors(FlowCaseState ctx);
 	
@@ -420,6 +420,8 @@ public interface FlowService {
 
 	void fixupUserInfoInContext(FlowCaseState ctx, UserInfo ui);
 
+    void fixupUserInfo(Long organizationId, UserInfo userInfo);
+
     /**
      * 删除flowCase
      */
@@ -460,4 +462,8 @@ public interface FlowService {
     FlowEvaluateItemDTO updateFlowEvaluateItem(CreateFlowEvaluateItemCommand cmd);
 
     List<FlowCase> getAllFlowCase(Long flowCaseId);
+
+    FlowGraphDTO createOrUpdateFlowCondition(CreateFlowConditionCommand cmd);
+
+    void updateFlowValidationStatus(UpdateFlowValidationStatusCommand cmd);
 }

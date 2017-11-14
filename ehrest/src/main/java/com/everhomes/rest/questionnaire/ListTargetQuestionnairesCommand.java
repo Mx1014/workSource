@@ -12,7 +12,7 @@ import java.sql.Timestamp;
  * <li>ownerType: 所属类型，community</li>
  * <li>ownerId: 所属id，communityId</li>
  * <li>targetType: 目标类型，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireTargetType}</li>
- * <li>targetId: 目标id</li>
+ * <li>organizationId: 当前场景公司的id</li>
  * <li>collectFlag: 问卷状态（进行中，已结束），参考{@link com.everhomes.rest.questionnaire.QuestionnaireCollectFlagType}</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页大小</li>
@@ -29,8 +29,10 @@ public class ListTargetQuestionnairesCommand {
 	private Long ownerId;
 
 	private String targetType;
+//
+//	private Long targetId;
 
-	private Long targetId;
+	private Long organizationId;
 
 	private Byte collectFlag;
 
@@ -47,16 +49,24 @@ public class ListTargetQuestionnairesCommand {
 
 	}
 
-	public ListTargetQuestionnairesCommand(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, Byte collectFlag, Timestamp nowTime, String pageAnchor, Integer pageSize) {
+	public ListTargetQuestionnairesCommand(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long organizationId, Byte collectFlag, Timestamp nowTime, String pageAnchor, Integer pageSize) {
 		this.namespaceId = namespaceId;
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
 		this.targetType = targetType;
-		this.targetId = targetId;
+		this.organizationId = organizationId;
 		this.collectFlag = collectFlag;
 		this.nowTime = nowTime;
 		this.pageAnchor = pageAnchor;
 		this.pageSize = pageSize;
+	}
+
+	public String getTargetType() {
+		return targetType;
+	}
+
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
 	}
 
 	public String getPageAnchor() {
@@ -91,20 +101,12 @@ public class ListTargetQuestionnairesCommand {
 		this.ownerId = ownerId;
 	}
 
-	public String getTargetType() {
-		return targetType;
+	public Long getOrganizationId() {
+		return organizationId;
 	}
 
-	public void setTargetType(String targetType) {
-		this.targetType = targetType;
-	}
-
-	public Long getTargetId() {
-		return targetId;
-	}
-
-	public void setTargetId(Long targetId) {
-		this.targetId = targetId;
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	public Timestamp getNowTime() {

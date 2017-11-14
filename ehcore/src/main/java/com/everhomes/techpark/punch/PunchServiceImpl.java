@@ -6900,9 +6900,18 @@ public class PunchServiceImpl implements PunchService {
 		List<PunchSchedulingDTO> result = new ArrayList<PunchSchedulingDTO>();
 		PunchSchedulingDTO dto = new PunchSchedulingDTO();
 		dto.setMonth(startDate.getTime());
-		List<PunchScheduling> schedulings = punchSchedulingProvider.queryPunchSchedulings(startDate,endDate,pr.getId(),pr.getStatus()) ;
-		// TODO: 2017/10/25  按照今日分割查不同status的
-
+		Calendar tomorrowCalendar = Calendar.getInstance();
+		tomorrowCalendar.add(Calendar.DAY_OF_MONTH, 1);
+		java.sql.Date tomorrow= new java.sql.Date(tomorrowCalendar.getTimeInMillis());
+		//今日之后用pr的status查,之前用active查
+		List<PunchScheduling> schedulings = punchSchedulingProvider.queryPunchSchedulings(tomorrow,endDate,pr.getId(),pr.getStatus()) ;
+		if (null == schedulings) {
+			schedulings = new ArrayList<>();
+		}
+		List<PunchScheduling> schedulings2 = punchSchedulingProvider.queryPunchSchedulings(startDate,tomorrow,pr.getId(),PunchRuleStatus.ACTIVE.getCode()) ;
+		if (null != schedulings2) {
+			schedulings.addAll(schedulings2);
+		}
 		if(null != schedulings){
 			Map<Long, List<PunchScheduling>> scheMap = new HashMap<>();
 			for(PunchScheduling sche : schedulings){

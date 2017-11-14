@@ -11,7 +11,7 @@ import java.util.List;
  */
 
 public class ListPaymentBillCmd {
-    private Long nextPageAnchor;
+    private Long pageAnchor;
     private Long pageSize;
 
     private String startPayTime;
@@ -42,12 +42,12 @@ public class ListPaymentBillCmd {
     @ItemType(ReSortCmd.class)
     private List<ReSortCmd> sorts;
 
-    public Long getNextPageAnchor() {
-        return nextPageAnchor;
+    public Long getPageAnchor() {
+        return pageAnchor;
     }
 
-    public void setNextPageAnchor(Long nextPageAnchor) {
-        this.nextPageAnchor = nextPageAnchor;
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
     }
 
     public Long getPageSize() {

@@ -8,6 +8,7 @@ package com.everhomes.rest.flow;
  * <li>BUTTON_FIRED: 是否已经处理过 Case，确定节点执行人 </li>
  * <li>FLOW_SUPERVISOR: 确定节点的督办人员 </li>
  * <li>NODE_SUPERVISE: 督办次数 </li>
+ * <li>REJECT_TRACKER: 驳回跟踪 </li>
  * </ul>
  * @author janson
  *
@@ -21,6 +22,7 @@ public enum FlowLogType {
     AUTO_STEP("auto_step"),
     NODE_REMIND("flow_remind"),
     NODE_SUPERVISE("node_supervise"),
+    REJECT_TRACKER("reject_tracker"),
     ;
 	
 	private String code;

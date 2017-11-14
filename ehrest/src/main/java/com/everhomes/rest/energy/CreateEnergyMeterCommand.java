@@ -1,10 +1,13 @@
+
 package com.everhomes.rest.energy;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <ul>
@@ -20,11 +23,12 @@ import java.math.BigDecimal;
  *     <li>rate: 倍率</li>
  *     <li>price: 价格</li>
  *     <li>costFormulaId: 费用计算公式</li>
+ *     <li>costFormulaSource: 费用计算公式来源 0: 能耗设置, 1: 缴费模块</li>
  *     <li>amountFormulaId: 用量计算公式</li>
  *     <li>calculationType: 价格计算方式 参考{@link com.everhomes.rest.energy.PriceCalculationType}</li>
  *     <li>configId: 价格方案id </li>
  *     <li>ownerType: 所属组织类型</li>
- *     <li>namespaceId: 域空间</li>
+ *     <li>addresses: 表记所属楼栋门牌</li>
  * </ul>
  */
 public class CreateEnergyMeterCommand {
@@ -41,11 +45,38 @@ public class CreateEnergyMeterCommand {
     @NotNull private BigDecimal rate;
     @NotNull private BigDecimal price;
     @NotNull private Long costFormulaId;
+    private Byte costFormulaSource;
     @NotNull private Long amountFormulaId;
     private Byte calculationType;
     private Long configId;
     private String ownerType;
+    @ItemType(EnergyMeterAddressDTO.class)
+    private List<EnergyMeterAddressDTO> addresses;
     private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Byte getCostFormulaSource() {
+        return costFormulaSource;
+    }
+
+    public void setCostFormulaSource(Byte costFormulaSource) {
+        this.costFormulaSource = costFormulaSource;
+    }
+
+    public List<EnergyMeterAddressDTO> getAddresses() {
+        return addresses;
+    }
+
+    public void setAddresses(List<EnergyMeterAddressDTO> addresses) {
+        this.addresses = addresses;
+    }
 
     public Long getCommunityId() {
         return communityId;
@@ -174,18 +205,10 @@ public class CreateEnergyMeterCommand {
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
     }
-    
 
-    public Integer getNamespaceId() {
-		return namespaceId;
-	}
-
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
-
-	@Override
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 }
+
