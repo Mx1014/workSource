@@ -55,7 +55,6 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import javax.validation.constraints.Null;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
@@ -5787,4 +5786,30 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return ConvertHelper.convert(r, OrganizationMember.class);
 		return null;
 	}
+
+    @Override
+    public List checkOrgExistInOrgOrPaths(Integer namespaceId, List<Long> orgIds, List<String> orgPaths) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+		// in
+		if(orgIds != null && orgIds.size() > 0){
+			query.addConditions(Tables.EH_ORGANIZATIONS.ID.in(orgIds));
+		}
+		// like
+		if(orgPaths != null && orgPaths.size() > 0){
+			Condition cond = null;
+			for (String orgPath : orgPaths) {
+				if(cond == null){
+					cond = Tables.EH_ORGANIZATIONS.PATH.like("orgPath + %");
+				}else{
+					cond = cond.or(Tables.EH_ORGANIZATIONS.PATH.like("orgPath + %"));
+				}
+			}
+			if (cond != null)
+				query.addConditions(cond);
+		}
+		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		return query.fetch();
+    }
 }

@@ -17,6 +17,8 @@ import com.everhomes.portal.ServiceModuleAppProvider;
 import com.everhomes.rest.acl.IdentityType;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.blacklist.BlacklistErrorCode;
+import com.everhomes.rest.common.IncludeChildFlagType;
+import com.everhomes.rest.module.ControlTarget;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.organization.OrganizationType;
@@ -191,18 +193,41 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
     }
 
     // 按appId校验
-    public boolean checkModuleAppAdmin(String ownerType, Long ownerId, Long userId, Long appId, Long communityId){
+    public boolean checkModuleAppAdmin(String ownerType, Long ownerId, Long userId, Long appId, Long communityId, Long organizationId){
+        Integer namespaceId = UserContext.current().getNamespaceId();
         // 查询app关联的moduleId
         ServiceModuleApp app = this.serviceModuleAppProvider.findServiceModuleAppById(appId);
         if(app != null){
             Long moduleId = app.getModuleId();
             List<Authorization> authorizations = this.authorizationProvider.listAuthorizations(ownerType, ownerId, OwnerType.USER.getCode(), userId, EntityType.SERVICE_MODULE.getCode(), moduleId, IdentityType.MANAGE.getCode(), appId, null, null, false);
-            authorizationsAppControl
+            List<ControlTarget> controlTargets = this.authorizationProvider.listAuthorizationControlConfigs(namespaceId, userId, authorizations.get(0).getControlId());
             if(authorizations != null && authorizations.size() > 0){
                 switch (ModuleManagementType.fromCode(authorizations.get(0).getModuleControlType())){
                     case COMMUNITY_CONTROL:
-                        this.
+                        for (ControlTarget controlTarget : controlTargets) {
+                            if(controlTarget.getId() == communityId){
+                                return true;
+                            }
+                        }
                         break;
+                    case ORG_CONTROL:
+                        List<Long> orgIds = new ArrayList<>();
+                        List<String> orgPaths = new ArrayList<>();
+                        for (ControlTarget controlTarget : controlTargets) {
+                            if(controlTarget.getIncludeChildFlag() == IncludeChildFlagType.YES.getCode()){
+                                Organization org = this.organizationProvider.findOrganizationById(controlTarget.getId());
+                                if(org != null)
+                                    orgPaths.add(org.getPath());
+                            }else{
+                                orgIds.add(controlTarget.getId());
+                            }
+                        }
+
+                        List orgs = this.organizationProvider.checkOrgExistInOrgOrPaths(namespaceId, orgIds, orgPaths);
+                        if(orgs != null && orgs.size() > 0)
+                            return true;
+                    case UNLIMIT_CONTROL:
+                        return true;
 
                 }
             }

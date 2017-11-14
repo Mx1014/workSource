@@ -12,15 +12,11 @@ import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.organization.*;
- 
-import com.everhomes.rest.user.InvitationRoster;
-import com.everhomes.server.schema.tables.pojos.EhOrganizations;
-import com.everhomes.uniongroup.UniongroupMemberDetail; 
+
 import com.everhomes.userOrganization.UserOrganizations;
 
 import org.jooq.Condition;
 
-import javax.validation.constraints.Null;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
@@ -533,4 +529,6 @@ public interface OrganizationProvider {
 	Integer updateOrganizationMembersToInactiveByPath(String path,Timestamp now);
 
 	OrganizationMember findDepartmentMemberByTargetIdAndOrgId(Long userId, Long organizationId);
+
+	List checkOrgExistInOrgOrPaths(Integer namespaceId, List<Long> orgIds, List<String> orgPaths);
 }
