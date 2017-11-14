@@ -21,6 +21,9 @@ public enum NormalFlag {
     }
     
     public static NormalFlag fromCode(Byte code) {
+        if (null == code) {
+            return null;
+        }
         for(NormalFlag t : NormalFlag.values()) {
             if (t.code == code) {
                 return t;
