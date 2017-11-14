@@ -12,6 +12,8 @@ import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.portal.ServiceModuleApp;
+import com.everhomes.portal.ServiceModuleAppProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.blacklist.BlacklistErrorCode;
 import com.everhomes.rest.organization.OrganizationType;
@@ -50,6 +52,9 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
 
     @Autowired
     private ServiceModuleProvider serviceModuleProvider;
+
+    @Autowired
+    private ServiceModuleAppProvider serviceModuleAppProvider;
 
 
 
@@ -176,6 +181,18 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
             if(aclProvider.checkAccessEx(ownerType, ownerId, moduleAdmin.getPrivilegeId(), descriptors)){
                 return true;
             }
+        }
+        return false;
+    }
+
+    // 按appId校验
+    public boolean checkModuleAppAdmin(String ownerType, Long ownerId, Long userId, Long appId){
+        // 查询app关联的moduleId
+        ServiceModuleApp app = this.serviceModuleAppProvider.findServiceModuleAppById(appId);
+        if(app != null){
+            Long moduleId = app.getModuleId();
+            // 检查是否对模块有权
+         return checkModuleAdmin(ownerType, ownerId, userId, moduleId);
         }
         return false;
     }
