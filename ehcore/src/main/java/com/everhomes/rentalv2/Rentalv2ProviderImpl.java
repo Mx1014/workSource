@@ -786,7 +786,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public List<RentalOrder> listRentalBills(Long userId,Long resourceTypeId,
+	public List<RentalOrder> listRentalBills(Long id,Long userId,Long resourceTypeId,
 			ListingLocator locator, int count, List<Byte> status, Byte payMode) {
 		final List<RentalOrder> result = new ArrayList<RentalOrder>();
 		Condition condition = Tables.EH_RENTALV2_ORDERS.ID.lt(locator.getAnchor());
@@ -801,6 +801,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 //		if (StringUtils.isNotEmpty(siteType))
 //			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE
 //					.eq(siteType));
+		if (null != id)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.ID.eq(id));
 		if (null != payMode) {
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.PAY_MODE.eq(payMode));
 		}
@@ -2386,7 +2388,25 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 		return null;
 	}
-	
+
+	@Override
+	public List<Long> listCellPackageId(Long resourceId, Byte rentalType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select(Tables.EH_RENTALV2_CELLS.PRICE_PACKAGE_ID).from(Tables.EH_RENTALV2_CELLS)
+				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
+				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(rentalType))
+				.and(Tables.EH_RENTALV2_CELLS.STATUS.eq(RentalSiteStatus.NORMAL.getCode()))
+				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.ge(new Date(new java.util.Date().getTime())))
+				.fetch().map(r->r.value1());
+	}
+
+	@Override
+	public void setAuthDoorId(Long rentalId, Long AuthDoorId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		context.update(Tables.EH_RENTALV2_ORDERS).set(Tables.EH_RENTALV2_ORDERS.DOOR_AUTH_ID,AuthDoorId).where(
+				Tables.EH_RENTALV2_ORDERS.ID.eq(rentalId)
+		).execute();
+	}
 	private BigDecimal max(BigDecimal ... b) {
 		BigDecimal max = new BigDecimal(Integer.MIN_VALUE);
 		for (BigDecimal bigDecimal : b) {
@@ -2416,5 +2436,6 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 		return b1;
 	}
-	
+
+
 }
