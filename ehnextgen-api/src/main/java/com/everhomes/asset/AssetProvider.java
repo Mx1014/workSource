@@ -4,9 +4,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentUser;
 import com.everhomes.rest.asset.*;
-import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
-import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
-import com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver;
+import com.everhomes.server.schema.tables.pojos.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -52,7 +50,7 @@ public interface AssetProvider {
 
     List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds);
 
-    List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,Long contractId);
+    List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,Long contractId,String contractNum);
 
     ShowBillDetailForClientResponse getBillDetailForClient(Long billId);
 
@@ -104,7 +102,7 @@ public interface AssetProvider {
 
     List<Object> getBillDayAndCycleByChargingItemId(Long chargingStandardId, Long chargingItemId,String ownerType, Long ownerId);
 
-    PaymentBillGroupRule getBillGroupRule(Long chargingStandardId, Long chargingStandardId1, String ownerType, Long ownerId);
+    PaymentBillGroupRule getBillGroupRule(Long chargingItemId, Long chargingStandardId, String ownerType, Long ownerId);
 
     void saveBillItems(List<EhPaymentBillItems> billItemsList);
 
@@ -116,7 +114,7 @@ public interface AssetProvider {
 
     void deleteContractPayment(Long contractId);
 
-    List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize);
+    List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize,Long contractId);
 
     void updateBillsToSettled(Long contractId, String ownerType, Long ownerId);
 
@@ -145,7 +143,7 @@ public interface AssetProvider {
     String findIdentifierByUid(Long aLong);
 
 
-    Long saveAnOrderCopy(String payerType, String payerId, String amountOwed,  String clientAppName, Long communityId, String contactNum, String openid, String payerName, Long expireTimePeriod,Integer namespaceId);
+    Long saveAnOrderCopy(String payerType, String payerId, String amountOwed,  String clientAppName, Long communityId, String contactNum, String openid, String payerName, Long expireTimePeriod,Integer namespaceId,String orderType);
 
     Long findAssetOrderByBillIds(List<String> billIds);
 
@@ -166,6 +164,82 @@ public interface AssetProvider {
 
     void changeBillStatusOnPaiedOff(List<Long> billIds);
 
+
+    void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId,String ownerType, Integer namespaceId,List<Long> communityIds);
+
+    void createChargingStandard(EhPaymentChargingStandards c, EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f);
+
+    void modifyChargingStandard(Long chargingStandardId,String chargingStandardName,String instruction,byte deCouplingFlag,String ownerType,Long ownerId);
+
+    GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
+
+    void deleteChargingStandard(Long chargingStandardId, Long ownerId, String ownerType,byte deCouplingFlag);
+
+    List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd);
+
+    String getVariableIdenfitierById(Long variableId);
+
+    String getVariableIdenfitierByName(String targetStr);
+
+    Long createBillGroup(CreateBillGroupCommand cmd,byte deCouplingFlag,Long brotherGroupId);
+
+    void modifyBillGroup(ModifyBillGroupCommand cmd,byte deCouplingFlag);
+
     List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd);
 
+    void adjustBillGroupOrder(Long subjectBillGroupId, Long targetBillGroupId);
+
+    List<ListChargingItemsForBillGroupDTO> listChargingItemsForBillGroup(Long billGroupId,Long pageAnchor,Integer pageSize);
+
+    AddOrModifyRuleForBillGroupResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
+
+    EhPaymentBillGroupsRules findBillGroupRuleById(Long billGroupRuleId);
+
+    boolean isInWorkGroupRule(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule);
+
+    void deleteBillGroupRuleById(Long billGroupRuleId);
+
+    EhPaymentChargingStandards findChargingStandardById(Long chargingStandardId);
+
+    PaymentBillGroup getBillGroupById(Long billGroupId);
+
+    boolean checkBillsByBillGroupId(Long billGroupId);
+
+    void deleteBillGroupAndRules(Long billGroupId,byte deCouplingFlag,String ownerType,Long ownerId);
+
+    ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(Long billGroupRuleId);
+
+    List<ListChargingItemsDTO> listAvailableChargingItems(OwnerIdentityCommand cmd);
+
+    List<PaymentFormula> getFormulas(Long id);
+
+    boolean cheackGroupRuleExistByChargingStandard(Long chargingStandardId,String ownerType,Long ownerId);
+
+    void setInworkFlagInContractReceiver(Long contractId,String contractNum);
+
+    void setInworkFlagInContractReceiverWell(Long contractId);
+
+    Boolean checkContractInWork(Long contractId,String contractNum);
+
+    void updateChargingStandardByCreating(String standardName,String instruction, Long chargingStandardId, Long ownerId, String ownerType);
+
+    boolean checkCoupledChargingStandard(Long cid);
+
+    void deCoupledForChargingItem(Long ownerId, String ownerType);
+
+    List<EhPaymentBillGroupsRules> getBillGroupRuleByCommunity(Long ownerId, String ownerType);
+
+    PaymentChargingItemScope findChargingItemScope(Long chargingItemId, String ownerType, Long ownerId);
+
+    List<Integer> listAutoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId);
+
+    void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, List<Integer> configDays);
+
+    AssetPaymentOrder getOrderById(Long orderId);
+
+    String getBillSource(String billId);
+
+    List<PaymentNoticeConfig> listAllNoticeConfigs();
+
+    List<PaymentBills> getAllBillsByCommunity(Long key);
 }

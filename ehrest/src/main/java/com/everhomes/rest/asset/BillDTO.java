@@ -38,6 +38,7 @@ public class BillDTO {
     private BigDecimal amountOwed;
     private Byte billStatus;
     private String payStatus;
+    private Long billGroupRuleId;
 
     @Override
     public String toString() {
@@ -66,6 +67,14 @@ public class BillDTO {
 
     public void setBuildingName(String buildingName) {
         this.buildingName = buildingName;
+    }
+
+    public Long getBillGroupRuleId() {
+        return billGroupRuleId;
+    }
+
+    public void setBillGroupRuleId(Long billGroupRuleId) {
+        this.billGroupRuleId = billGroupRuleId;
     }
 
     public String getApartmentName() {

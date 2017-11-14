@@ -517,10 +517,9 @@ public class OrganizationAdminController extends ControllerBase {
      * <p>创建子机构</p>
      */
     @RequestMapping("createChildrenOrganization")
-    @RestReturn(value = String.class, collection = true)
+    @RestReturn(value = OrganizationDTO.class)
     public RestResponse createChildrenOrganization(@Valid CreateOrganizationCommand cmd) {
-        organizationService.createChildrenOrganization(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(organizationService.createChildrenOrganization(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -564,10 +563,8 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("deleteOrganizationById")
     @RestReturn(value = String.class)
     public RestResponse deleteOrganizationById(@Valid DeleteOrganizationIdCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-
-        organizationService.deleteOrganization(cmd);
-        RestResponse response = new RestResponse();
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        RestResponse response = new RestResponse(organizationService.deleteOrganization(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1228,6 +1225,4 @@ public class OrganizationAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-
-
 }

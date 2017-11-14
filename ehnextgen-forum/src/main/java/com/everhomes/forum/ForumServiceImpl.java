@@ -224,6 +224,12 @@ public class ForumServiceImpl implements ForumService {
     
     @Override
     public PostDTO createTopic(NewTopicCommand cmd) {
+
+        //全部都加上论坛入口Id为0，现在没办法真的区分不了这个帖子时属于哪个应用模块，活动、论坛、俱乐部、公告  add by yanjun 20171109
+        if(cmd.getForumEntryId() == null){
+            cmd.setForumEntryId(0L);
+        }
+
         //这个原来只用一行代码的方法终于要发挥他的作用啦。
         PostDTO dto = new PostDTO();
 
@@ -256,8 +262,43 @@ public class ForumServiceImpl implements ForumService {
             createTopic(cmd, UserContext.current().getUser().getId());
         }
 
+
+
         return dto;
     }
+
+//
+//
+//    private void checkVersionForforumEntry(NewTopicCommand cmd){
+//
+//        if(cmd.getForumEntryId() != null){
+//            return;
+//        }
+//
+//        String versionRealm = UserContext.current().getVersionRealm();
+//        LOGGER.info("UserContext current getVersion , versionRealm = {}", versionRealm);
+//
+//        //来自客户端的请求
+//        if(versionRealm != null && (versionRealm.contains("Android_") || versionRealm.contains("iOS_"))){
+//
+//            String version = UserContext.current().getVersion();
+//
+//            LOGGER.info("UserContext current getVersion , version = {}", version);
+//            if(version == null){
+//                return;
+//            }
+//            VersionRange versionRange = new VersionRange("["+version+","+version+")");
+//            VersionRange versionRangeMin = new VersionRange("[4.10.4,4.10.4)");
+//
+//
+//            //来自客户端小于4.10.4的版本
+//            if(((int)versionRange.getUpperBound()) < ((int)versionRangeMin.getUpperBound())){
+//                cmd.setForumEntryId(0L);
+//            }
+//
+//        }
+//    }
+
 
     @Override
     public PostDTO createTopic(NewTopicCommand cmd, Long creatorUid) {
@@ -4114,13 +4155,14 @@ public class ForumServiceImpl implements ForumService {
             namespaceId = UserContext.getCurrentNamespaceId();
         }
 
+        //非常不靠谱的判断，可是真的没有其他办法，急需在创建帖子的时候从来源处传来是哪个应用的  add by yanjun 20171109
         if(post.getActivityCategoryId() != null && post.getActivityCategoryId().longValue() != 0){
             //活动应用的帖子
             setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.ACTIVITY.getCode(), post.getActivityCategoryId());
-        }else if(post.getForumEntryId() != null){
+        }else if(post.getForumEntryId() != null && (post.getCategoryId() == null || post.getCategoryId() != 1003)){
             //论坛应用的帖子
             setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.FORUM.getCode(), post.getForumEntryId());
-        }else if(post.getCategoryId() == 1003){
+        }else if(post.getCategoryId() != null && post.getCategoryId() == 1003){
             //公告应用的帖子
             setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.ANNOUNCEMENT.getCode(), null);
         }
@@ -4787,11 +4829,6 @@ public class ForumServiceImpl implements ForumService {
             topicCmd.setVisibleRegionType(visibleRegionType.getCode());
         }
         topicCmd.setVisibleRegionId(visibleRegionId);
-
-        //老客户端来的默认入口论坛
-        if(topicCmd.getForumEntryId() == null){
-            topicCmd.setForumEntryId(0L);
-        }
         
         return this.createTopic(topicCmd);
     }

@@ -35,8 +35,8 @@ public class PaymentServiceImpl implements PaymentService {
         }else{
             cmd.setPageSize(cmd.getPageSize()+1l);
         }
-        if(cmd.getNextPageAnchor() == null){
-            cmd.setNextPageAnchor(0l);
+        if(cmd.getPageAnchor() == null){
+            cmd.setPageAnchor(0l);
         }
         if (cmd.getTransactionType() == null) {
             List<Integer> transactionTypes = new ArrayList<Integer>();
@@ -55,7 +55,7 @@ public class PaymentServiceImpl implements PaymentService {
         //payeeUserId
         PaymentUser paymentUser = assetProvider.findByOwner(cmd.getUserType(),cmd.getUserId());
         if(paymentUser == null) {
-            return new ListPaymentBillResp(cmd.getNextPageAnchor(), cmd.getPageSize());
+            return new ListPaymentBillResp(cmd.getPageAnchor(), cmd.getPageSize());
         }
         cmd.setUserId(paymentUser.getPaymentUserId());
         LOGGER.info("payee user payer id is = {}",paymentUser.getPaymentUserId());

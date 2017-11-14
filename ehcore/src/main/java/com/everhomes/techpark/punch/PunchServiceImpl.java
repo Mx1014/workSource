@@ -5005,22 +5005,22 @@ public class PunchServiceImpl implements PunchService {
 	@Scheduled(cron = "1 50 5 * * ?")
 	@Override
 	public void dayRefreshPunchGroupScheduled() {
-		LOGGER.debug("dayRefreshPunchGroupScheduled BEGIN !!! ");
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
-			if(null ==UserContext.current().getUser() ){
-	    		User user = userProvider.findUserById(User.SYSTEM_UID);
-	    		UserContext.current().setUser(user);
-//	    		UserContext.current().setNamespaceId(flowCase.getNamespaceId());
-    		}
-			// TODO: 2017/10/17 把状态为新增和更新的找出来,然后置状态为使用中,更新的把之前的正常废弃.然后用组织架构的接口改version为0
-			Set<Long> orgIds = new HashSet<>();
-			List<Byte> statusList = new ArrayList<>();
-			statusList.add(PunchRuleStatus.MODIFYED.getCode());
-			statusList.add(PunchRuleStatus.NEW.getCode());
-			List<PunchRule> punchRules = punchProvider.listPunchRulesByStatus(statusList);
-			if(null != punchRules)
-				for (PunchRule pr : punchRules) {
-					this.coordinationProvider.getNamedLock(CoordinationLocks.REFRESH_PUNCH_RULE.getCode()+pr.getId()).enter(() -> {
+			this.coordinationProvider.getNamedLock(CoordinationLocks.REFRESH_PUNCH_RULE.getCode() ).enter(() -> {
+				LOGGER.debug("dayRefreshPunchGroupScheduled BEGIN !!! ");
+				if(null ==UserContext.current().getUser() ){
+		    		User user = userProvider.findUserById(User.SYSTEM_UID);
+		    		UserContext.current().setUser(user);
+	//	    		UserContext.current().setNamespaceId(flowCase.getNamespaceId());
+	    		}
+				// TODO: 2017/10/17 把状态为新增和更新的找出来,然后置状态为使用中,更新的把之前的正常废弃.然后用组织架构的接口改version为0
+				Set<Long> orgIds = new HashSet<>();
+				List<Byte> statusList = new ArrayList<>();
+				statusList.add(PunchRuleStatus.MODIFYED.getCode());
+				statusList.add(PunchRuleStatus.NEW.getCode());
+				List<PunchRule> punchRules = punchProvider.listPunchRulesByStatus(statusList);
+				if(null != punchRules)
+					for (PunchRule pr : punchRules) {
 						try {
 							if(!pr.getStatus().equals(PunchRuleStatus.ACTIVE.getCode())){
 								
@@ -5035,29 +5035,32 @@ public class PunchServiceImpl implements PunchService {
 							LOGGER.error("dayRefreshPunchGroupScheduled error!!! pr id : "+pr.getId());
 							LOGGER.error("update pr from modify to active error!!",e);
 						}
-						return null;
-					});
+					}
+				//把uniongroup相关表version改为0
+				for (Long orgId : orgIds) {
+					Organization org = organizationProvider.findOrganizationById(orgId);
+					Integer versionId= 0;
+					try {
+						UniongroupVersion unionGroupVersion = getPunchGroupVersion(org.getId());
+						versionId=unionGroupVersion.getCurrentVersionCode() + 1;
+						unionGroupVersion.setCurrentVersionCode(versionId);
+						//把config版本复制一份新的,
+						uniongroupService.cloneGroupTypeDataToVersion(org.getNamespaceId(), org.getId(), UniongroupType.PUNCHGROUP.getCode(),
+								CONFIG_VERSION_CODE, unionGroupVersion.getCurrentVersionCode());
+	
+						//更新当前版本到新的
+						uniongroupVersionProvider.updateUniongroupVersion(unionGroupVersion);
+					} catch (Exception e) {
+						LOGGER.error("dayRefreshPunchGroupScheduled error!!!+ org id : "+orgId +" current version : "+ versionId);
+						LOGGER.error("switch union group version error!!!",e);
+					}
 				}
-			//把uniongroup相关表version改为0
-			for (Long orgId : orgIds) {
-				Organization org = organizationProvider.findOrganizationById(orgId);
-				try {
-					UniongroupVersion unionGroupVersion = getPunchGroupVersion(org.getId());
-					unionGroupVersion.setCurrentVersionCode(unionGroupVersion.getCurrentVersionCode() + 1);
-					//把config版本复制一份新的,
-					uniongroupService.cloneGroupTypeDataToVersion(org.getNamespaceId(), org.getId(), UniongroupType.PUNCHGROUP.getCode(),
-							CONFIG_VERSION_CODE, unionGroupVersion.getCurrentVersionCode());
 
-					//更新当前版本到新的
-					uniongroupVersionProvider.updateUniongroupVersion(unionGroupVersion);
-				} catch (Exception e) {
-					LOGGER.error("dayRefreshPunchGroupScheduled error!!!");
-					LOGGER.error("switch union group version error!!!",e);
-				}
-			}
+				LOGGER.debug("dayRefreshPunchGroupScheduled ---------- END ");
+				return null;
+			});
 		}
-
-		LOGGER.debug("dayRefreshPunchGroupScheduled ---------- END ");
+	
 	}
 
 	private void processTimeRule2Active(PunchRule pr) {
@@ -6257,7 +6260,7 @@ public class PunchServiceImpl implements PunchService {
 	public ListPunchSupportiveAddressCommandResponse listPunchSupportiveAddress(ListPunchSupportiveAddressCommand cmd){
 
         ListPunchSupportiveAddressCommandResponse response = new ListPunchSupportiveAddressCommandResponse();
-
+        cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
 	    Long userId = UserContext.current().getUser().getId();
         PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
         if (null == pr  )
@@ -6852,9 +6855,18 @@ public class PunchServiceImpl implements PunchService {
 		List<PunchSchedulingDTO> result = new ArrayList<PunchSchedulingDTO>();
 		PunchSchedulingDTO dto = new PunchSchedulingDTO();
 		dto.setMonth(startDate.getTime());
-		List<PunchScheduling> schedulings = punchSchedulingProvider.queryPunchSchedulings(startDate,endDate,pr.getId(),pr.getStatus()) ;
-		// TODO: 2017/10/25  按照今日分割查不同status的
-
+		Calendar tomorrowCalendar = Calendar.getInstance();
+		tomorrowCalendar.add(Calendar.DAY_OF_MONTH, 1);
+		java.sql.Date tomorrow= new java.sql.Date(tomorrowCalendar.getTimeInMillis());
+		//今日之后用pr的status查,之前用active查
+		List<PunchScheduling> schedulings = punchSchedulingProvider.queryPunchSchedulings(tomorrow,endDate,pr.getId(),pr.getStatus()) ;
+		if (null == schedulings) {
+			schedulings = new ArrayList<>();
+		}
+		List<PunchScheduling> schedulings2 = punchSchedulingProvider.queryPunchSchedulings(startDate,tomorrow,pr.getId(),PunchRuleStatus.ACTIVE.getCode()) ;
+		if (null != schedulings2) {
+			schedulings.addAll(schedulings2);
+		}
 		if(null != schedulings){
 			Map<Long, List<PunchScheduling>> scheMap = new HashMap<>();
 			for(PunchScheduling sche : schedulings){
@@ -7141,11 +7153,11 @@ public class PunchServiceImpl implements PunchService {
 		Calendar punCalendar = Calendar.getInstance();
 		punCalendar.setTime(punchTime);
 		//现在打卡属于哪一天
-		java.sql.Date pDate = calculatePunchDate(punCalendar, cmd.getEnterpriseId(), userId);
+		java.sql.Date pDate = new java.sql.Date(punchTime.getTime()); 
 		if (null == cmd.getQueryTime()) {
 			cmd.setQueryTime(punchTime.getTime());
             if(null != pr) {
-				
+        		pDate = calculatePunchDate(punCalendar, cmd.getEnterpriseId(), userId);
 				PunchLogDTO punchLog = getPunchType(userId, cmd.getEnterpriseId(), punchTime, pDate);
 				if (null != punchLog) {
 					if (null != punchLog.getExpiryTime()) {

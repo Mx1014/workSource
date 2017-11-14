@@ -27,6 +27,26 @@ public class PaymentExpectanciesCommand {
     private Integer pageSize;
 
 
+    private Byte contractIdType;
+
+
+    @ItemType(RentAdjust.class)
+    private List<RentAdjust> rentAdjusts;
+    @ItemType(RentFree.class)
+    private List<RentFree> rentFrees;
+
+
+    private Byte isEffectiveImmediately;
+
+    public Byte getIsEffectiveImmediately() {
+        return isEffectiveImmediately;
+    }
+
+    public void setIsEffectiveImmediately(Byte isEffectiveImmediately) {
+        this.isEffectiveImmediately = isEffectiveImmediately;
+    }
+
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -38,6 +58,14 @@ public class PaymentExpectanciesCommand {
 
     public Long getContractId() {
         return contractId;
+    }
+
+    public Byte getContractIdType() {
+        return contractIdType;
+    }
+
+    public void setContractIdType(Byte contractIdType) {
+        this.contractIdType = contractIdType;
     }
 
     public void setContractId(Long contractId) {
@@ -128,5 +156,21 @@ public class PaymentExpectanciesCommand {
 
     public void setFeesRules(List<FeeRules> feesRules) {
         this.feesRules = feesRules;
+    }
+
+    public List<RentAdjust> getRentAdjusts() {
+        return rentAdjusts;
+    }
+
+    public void setRentAdjusts(List<RentAdjust> rentAdjusts) {
+        this.rentAdjusts = rentAdjusts;
+    }
+
+    public List<RentFree> getRentFrees() {
+        return rentFrees;
+    }
+
+    public void setRentFrees(List<RentFree> rentFrees) {
+        this.rentFrees = rentFrees;
     }
 }

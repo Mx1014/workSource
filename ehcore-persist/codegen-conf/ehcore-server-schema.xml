@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <configuration xmlns="http://www.jooq.org/xsd/jooq-codegen-3.4.0.xsd">
 
 <!-- Configure the database connection here -->
@@ -203,28 +202,47 @@
             eh_payment_users | eh_payment_accounts | eh_payment_service_configs | eh_payment_order_records | eh_payment_types | eh_asset_payment_order | eh_asset_payment_order_bills |
             eh_news_tag | eh_news_tag_vals |
 	    eh_forum_categories | eh_interact_settings |
+            eh_archives_sticky_contacts | eh_archives_dismiss_employees | eh_general_form_groups | eh_archives_forms | eh_archives_configurations | eh_archives_logs | eh_archives_notifications |
             eh_lease_projects | eh_lease_project_communities |
             eh_customer_events  | eh_customer_tracking_plans  | eh_customer_trackings  |   eh_tracking_notify_logs  | 
             eh_address_attachments | eh_contract_charging_changes | eh_contract_charging_change_addresses |
+            eh_parking_car_verifications |
         eh_siyin_print_settings | eh_siyin_print_printers | eh_siyin_print_orders | eh_siyin_print_records | eh_siyin_print_emails |eh_community_approve |
         eh_community_approve_requests |
         eh_lease_buildings | eh_lease_promotion_communities |
             eh_siyin_print_settings | eh_siyin_print_printers | eh_siyin_print_orders | eh_siyin_print_records | eh_siyin_print_emails |eh_community_approve|
         eh_community_approve_requests | 
 	    eh_express_company_businesses | eh_express_hotlines | eh_express_param_settings |
+
+        eh_lease_buildings | eh_lease_promotion_communities |
+		eh_express_company_businesses | eh_express_hotlines | eh_express_param_settings |
+
         eh_stat_event_device_logs | eh_stat_event_upload_strategies | eh_stat_events | eh_stat_event_params | eh_stat_event_content_logs |
         eh_stat_event_logs | eh_stat_event_param_logs | eh_stat_event_app_attachment_logs | eh_stat_event_portal_configs | eh_stat_event_portal_statistics |
         eh_stat_event_statistics | eh_stat_event_task_logs | eh_community_default | eh_namespace_masks | eh_door_auth_level |
-            eh_salary_default_entities | eh_salary_entity_categories | eh_salary_group_entities | eh_salary_employee_origin_vals | eh_salary_groups | eh_salary_employees | eh_salary_employee_period_vals |        eh_uniongroup_configures | eh_uniongroup_member_details |
         eh_punch_special_days | eh_punch_time_intervals |
+        eh_service_alliance_comment_attachments | eh_service_alliance_comments |
+	eh_incubator_applies | eh_incubator_project_types | eh_incubator_apply_attachments |
+            eh_payment_users | eh_payment_accounts | eh_payment_service_configs | eh_payment_order_records | eh_payment_types | eh_asset_payment_order | eh_asset_payment_order_bills |
+            eh_payment_formula |
+            eh_community_map_shops |      
+            eh_energy_meter_addresses | eh_energy_plans | eh_energy_plan_group_map | eh_energy_plan_meter_map | eh_energy_meter_tasks | eh_energy_meter_logs |     
+            eh_parking_invoice_types | eh_parking_card_types | eh_parking_user_invoices |
+            eh_news_tag | eh_news_tag_vals |
+            eh_lease_projects | eh_lease_project_communities |
+            eh_customer_events  | eh_customer_tracking_plans  | eh_customer_trackings  |   eh_tracking_notify_logs  | 
+            eh_address_attachments | eh_contract_charging_changes | eh_contract_charging_change_addresses | 
             eh_parking_invoice_types | eh_parking_card_types | eh_parking_user_invoices |
             eh_service_alliance_comment_attachments | eh_service_alliance_comments |
+
             eh_incubator_applies | eh_incubator_project_types | eh_incubator_apply_attachments |
-            eh_payment_users | eh_payment_accounts | eh_payment_service_configs | eh_payment_order_records | eh_payment_types | eh_asset_payment_order | eh_asset_payment_order_bills |
             eh_uniongroup_version | 
             eh_news_tag | eh_news_tag_vals|
             eh_flow_conditions|eh_flow_condition_expressions|eh_flow_lanes|eh_flow_links|eh_flow_predefined_params|eh_flow_branches|eh_flow_service_types|
-            eh_questionnaire_ranges | eh_authorization_control_configs |
+            eh_questionnaire_ranges | eh_payment_formula | eh_servers |
+
+            eh_flow_conditions|eh_flow_condition_expressions|eh_flow_lanes|eh_flow_links|eh_flow_predefined_params|eh_flow_branches|eh_flow_service_types|
+            eh_default_charging_items | eh_default_charging_item_properties | eh_payment_notice_config | eh_authorization_control_configs |
 
         </includes>
 

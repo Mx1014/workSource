@@ -599,7 +599,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
 
         createOrderCmd.setBackUrl(backUrl);
         createOrderCmd.setExtendInfo(cmd.getExtendInfo());
-        createOrderCmd.setGoodsName(null);
+        createOrderCmd.setGoodsName(serviceConfig.getName());
         createOrderCmd.setGoodsDescription(null);
         createOrderCmd.setIndustryCode(null);
         createOrderCmd.setIndustryName(null);

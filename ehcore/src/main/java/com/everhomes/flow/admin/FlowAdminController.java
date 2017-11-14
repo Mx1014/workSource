@@ -558,6 +558,34 @@ public class FlowAdminController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /admin/flow/createOrUpdateFlowCondition</b>
+     * <p>保存或修改条件</p>
+     */
+    @RequestMapping("createOrUpdateFlowCondition")
+    @RestReturn(value=FlowGraphDTO.class)
+    public RestResponse createOrUpdateFlowCondition(@Valid CreateFlowConditionCommand cmd) {
+        FlowGraphDTO flowGraphDTO = flowService.createOrUpdateFlowCondition(cmd);
+        RestResponse response = new RestResponse(flowGraphDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/updateFlowValidationStatus</b>
+     * <p>修改工作流校验状态</p>
+     */
+    @RequestMapping("updateFlowValidationStatus")
+    @RestReturn(value=String.class)
+    public RestResponse updateFlowValidationStatus(@Valid UpdateFlowValidationStatusCommand cmd) {
+        flowService.updateFlowValidationStatus(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /admin/flow/getFlowGraph</b>
      * <p>获取工作流流程图</p>
      */

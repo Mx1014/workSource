@@ -90,6 +90,16 @@ public class BuildingForRentDTO {
 	@ItemType(ProjectDTO.class)
 	private List<ProjectDTO> projectDTOS;
 
+	private Byte consultFlag;
+
+	public Byte getConsultFlag() {
+		return consultFlag;
+	}
+
+	public void setConsultFlag(Byte consultFlag) {
+		this.consultFlag = consultFlag;
+	}
+
 	public String getCommunityName() {
 		return communityName;
 	}

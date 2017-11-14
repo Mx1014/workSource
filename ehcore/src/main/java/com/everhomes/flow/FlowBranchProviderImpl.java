@@ -51,7 +51,7 @@ public class FlowBranchProviderImpl implements FlowBranchProvider {
 		return ConvertHelper.convert(dao().findById(id), FlowBranch.class);
 	}
 
-    @Override
+	@Override
     public void deleteFlowBranch(Long flowMainId, Integer flowVersion) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhFlowBranches t = Tables.EH_FLOW_BRANCHES;
@@ -78,6 +78,17 @@ public class FlowBranchProviderImpl implements FlowBranchProvider {
                 .where(t.FLOW_MAIN_ID.eq(flowId))
                 .and(t.FLOW_VERSION.eq(flowVersion))
                 .fetchInto(FlowBranch.class);
+    }
+
+    @Override
+    public FlowBranch findBranchByOriginalNodeId(Long flowMainId, Integer flowVersion, Long originalNodeId) {
+        com.everhomes.server.schema.tables.EhFlowBranches t = Tables.EH_FLOW_BRANCHES;
+        return context()
+                .selectFrom(t)
+                .where(t.FLOW_MAIN_ID.eq(flowMainId))
+                .and(t.FLOW_VERSION.eq(flowVersion))
+                .and(t.ORIGINAL_NODE_ID.eq(originalNodeId))
+                .fetchAnyInto(FlowBranch.class);
     }
 
     private EhFlowBranchesDao rwDao() {

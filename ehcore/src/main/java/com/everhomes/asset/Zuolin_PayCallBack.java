@@ -32,14 +32,13 @@ public class Zuolin_PayCallBack implements PaymentCallBackHandler{
     @Override
     public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
         Long orderId = cmd.getOrderId();
-        AssetPaymentOrder order = assetProvider.findAssetPaymentById(orderId);
         List<AssetPaymentOrderBills> bills = assetProvider.findBillsById(orderId);
         Map<String,Integer> billStatuses = new HashMap<>();
         List<Long> billIds = new ArrayList<>();
         for(int i = 0; i < bills.size(); i++){
             AssetPaymentOrderBills bill = bills.get(i);
             //ORDER_BILL  中 1代表成功
-            billStatuses.put(bills.get(i).getBillId(),1);
+            billStatuses.put(bill.getBillId(),1);
             billIds.add(Long.parseLong(bills.get(i).getBillId()));
         }
         //这个没有请求第三发，所以直接走

@@ -41,12 +41,16 @@ public class PusherXiaomi implements PusherVender {
     
     @Override
     public void sendPushMessage(String deviceToken, Message msgBox, DeviceMessage devMessage, UserLogin senderLogin, UserLogin destLogin) {
+        String description = devMessage.getAlert();
+        if(devMessage.getAlert().length() > 20) {
+            devMessage.setAlert(devMessage.getAlert().substring(0, 20));    
+        }
+        
         String messagePayload = StringHelper.toJsonString(devMessage);
         String title = devMessage.getTitle();
         if(title == null) {
             title = "zuolin";
         }
-        String description = devMessage.getAlert();
         com.xiaomi.xmpush.server.Message message = new com.xiaomi.xmpush.server.Message.Builder()
             .title(title)
             .description(description).payload(messagePayload)

@@ -119,16 +119,18 @@ public class PusherHuawei implements PusherVender {
         
         JSONObject param = new JSONObject();
 //      param.put("appPkgName", appPkgName);//定义需要打开的appPkgName
-        String intent = "#Intent;launchFlags=0x10000000;package=com.everhomes.android.oa.debug;end";
+        String intent = "#Intent;launchFlags=0x10000000;package="+this.appPkgName+";end";
         if (ChannelType.GROUP.getCode().equals(msgBox.getChannelType())) {
-            param.put("intent",  String.format("zl-1://message/open-session?dstChannel=%s&dstChannelId=%s&senderUid=%s"
+            param.put("intent",  String.format("zl-%d://message/open-session?dstChannel=%s&dstChannelId=%s&senderUid=%s"
+                    , destLogin.getNamespaceId()
                     , msgBox.getChannelType()
                     , msgBox.getChannelToken()
                     , String.valueOf(msgBox.getSenderUid()))
                     );
             
         } else {
-            param.put("intent",  String.format("zl-1://message/open-session?dstChannel=%s&dstChannelId=%s&srcChannel=%s&srcChannelId=%s&senderUid=%s%s"
+            param.put("intent",  String.format("zl-%d://message/open-session?dstChannel=%s&dstChannelId=%s&srcChannel=%s&srcChannelId=%s&senderUid=%s%s"
+                    , destLogin.getNamespaceId()
                     , msgBox.getChannelType()
                     , msgBox.getChannelToken()
                     , ChannelType.USER.getCode()
@@ -150,7 +152,7 @@ public class PusherHuawei implements PusherVender {
         
         JSONObject ext = new JSONObject();//扩展信息，含BI消息统计，特定展示风格，消息折叠。
         ext.put("biTag", "Trump");//设置消息标签，如果带了这个标签，会在回执中推送给CP用于检测某种类型消息的到达率和状态
-        if(devMessage.getIcon() != null && devMessage.getIcon().startsWith("http://")) {
+        if(devMessage.getIcon() != null && (devMessage.getIcon().startsWith("http://") || devMessage.getIcon().startsWith("https://")) ) {
             ext.put("icon", devMessage.getIcon());//自定义推送消息在通知栏的图标,value为一个公网可以访问的URL    
         }
         
