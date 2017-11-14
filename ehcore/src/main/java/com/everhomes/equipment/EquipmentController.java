@@ -241,18 +241,6 @@ public class EquipmentController extends ControllerBase {
         return getRestResponse(relations);
     }
 
-    /**
-     * <b>URL: /equipment/listEquipmentsCategories</b>
-     * <p>查看设备类型</p>
-     */
-    @RequestMapping("listEquipmentsCategories")
-    @RestReturn(value = CategoryDTO.class, collection = true)
-    public RestResponse listEquipmentsCategories() {
-
-        List<CategoryDTO> categories = equipmentService.listEquipmentsCategories();
-
-        return getRestResponse(categories);
-    }
 
     /**
      * <b>URL: /equipment/exportEquipments</b>
@@ -516,6 +504,45 @@ public class EquipmentController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /equipment/listEquipmentStandardRelationsByTaskId</b>
+     * <p>查看具体任务下设备标准关系列表</p>
+     */
+    @RequestMapping("listEquipmentStandardRelationsByTaskId")
+    @RestReturn(value = EquipmentStandardRelationDTO.class, collection = true)
+    public RestResponse listEquipmentStandardRelationsByTaskId(ListTaskByIdCommand cmd) {
+
+        List<EquipmentStandardRelationDTO> equipments = null;
+
+        return getRestResponse(equipments);
+    }
+
+    /**
+     * <b>URL: /equipment/statItemResultsByTaskId</b>
+     * <p>按任务id统计任务的执行结果细项</p>
+     */
+    @RequestMapping("statItemResultsByTaskId")
+    @RestReturn(value = StatItemResultsInEquipmentTasksResponse.class)
+    public RestResponse statItemResultsByTaskId(ListTaskByIdCommand cmd) {
+
+        StatItemResultsInEquipmentTasksResponse stats = null;
+
+        return getRestResponse(stats);
+    }
+
+    /**
+     * <b>URL: /equipment/listParametersByStandardId</b>
+     * <p>查看设备所需记录的参数</p>
+     */
+    @RequestMapping("listParametersByStandardId")
+    @RestReturn(value = InspectionItemDTO.class, collection = true)
+    public RestResponse listParametersByStandardId(ListParametersByStandardIdCommand cmd) {
+
+        List<InspectionItemDTO> items = equipmentService.listParametersByStandardId(cmd);
+
+        return getRestResponse(items);
+    }
+
+    /**
      * <b>URL: /equipment/reportEquipmentTask</b>
      * <p>任务上报</p>
      */
@@ -754,6 +781,20 @@ public class EquipmentController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /equipment/listEquipmentsCategories</b>
+     * <p>查看设备类型</p>
+     */
+    @RequestMapping("listEquipmentsCategories")
+    @RestReturn(value = CategoryDTO.class, collection = true)
+    public RestResponse listEquipmentsCategories() {
+
+        List<CategoryDTO> categories = equipmentService.listEquipmentsCategories();
+
+        return getRestResponse(categories);
+    }
+
+
+    /**
      * <b>URL: /pmtask/deleteEquipmentCategory</b>
      * <p>删除设备类型</p>
      */
@@ -765,32 +806,6 @@ public class EquipmentController extends ControllerBase {
         return getSuccessResponse();
     }
 
-
-    /**
-     * <b>URL: /equipment/listEquipmentStandardRelationsByTaskId</b>
-     * <p>查看具体任务下设备标准关系列表</p>
-     */
-    @RequestMapping("listEquipmentStandardRelationsByTaskId")
-    @RestReturn(value = EquipmentStandardRelationDTO.class, collection = true)
-    public RestResponse listEquipmentStandardRelationsByTaskId(ListTaskByIdCommand cmd) {
-
-        List<EquipmentStandardRelationDTO> equipments = null;
-
-        return getRestResponse(equipments);
-    }
-
-    /**
-     * <b>URL: /equipment/listParametersByStandardId</b>
-     * <p>查看设备所需记录的参数</p>
-     */
-    @RequestMapping("listParametersByStandardId")
-    @RestReturn(value = InspectionItemDTO.class, collection = true)
-    public RestResponse listParametersByStandardId(ListParametersByStandardIdCommand cmd) {
-
-        List<InspectionItemDTO> items = equipmentService.listParametersByStandardId(cmd);
-
-        return getRestResponse(items);
-    }
 
 
 //    /**
@@ -982,18 +997,7 @@ public class EquipmentController extends ControllerBase {
 //
 //        return getRestResponse(stat);
 //    }
-    /**
-     * <b>URL: /equipment/statItemResultsByTaskId</b>
-     * <p>按任务id统计任务的细项</p>
-     */
-    @RequestMapping("statItemResultsByTaskId")
-    @RestReturn(value = StatItemResultsInEquipmentTasksResponse.class)
-    public RestResponse statItemResultsByTaskId(ListTaskByIdCommand cmd) {
 
-        StatItemResultsInEquipmentTasksResponse stats = null;
-
-        return getRestResponse(stats);
-    }
 
     /**
      * <b>URL: /equipment/listAbnormalTasks</b>
