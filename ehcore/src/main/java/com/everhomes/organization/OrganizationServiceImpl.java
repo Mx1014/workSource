@@ -1176,12 +1176,12 @@ public class OrganizationServiceImpl implements OrganizationService {
         });
 
         organizationSearcher.feedDoc(organization);
-        createEnterpriseCustomer(organization, cmd.getAvatar(), cmd.getAddress());
+        createEnterpriseCustomer(organization, cmd.getAvatar(), cmd.getAddress(), cmd.getCommunityId());
 
         return ConvertHelper.convert(organization, OrganizationDTO.class);
     }
 
-    private void createEnterpriseCustomer(Organization organization, String logo, String address) {
+    private void createEnterpriseCustomer(Organization organization, String logo, String address, Long communityId) {
         List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(organization.getNamespaceId(), organization.getName());
         if(customers != null && customers.size() > 0) {
             EnterpriseCustomer customer = customers.get(0);
@@ -1194,6 +1194,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         } else {
             EnterpriseCustomer customer = new EnterpriseCustomer();
+            customer.setCommunityId(communityId);
             customer.setOrganizationId(organization.getId());
             customer.setName(organization.getName());
             customer.setCorpWebsite(organization.getWebsite());
