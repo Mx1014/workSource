@@ -1717,7 +1717,7 @@ public class GroupServiceImpl implements GroupService {
 
             GroupMember rejecter = this.groupProvider.findGroupMemberByMemberInfo(groupId, 
                 EntityType.USER.getCode(), operatorUid);
-            sendGroupNotificationForRejectJoinGroupRequest(group, rejecter, member);
+            sendGroupNotificationForRejectJoinGroupRequest(group, rejecter, member, cmd.getRejectText());
             break;
         default:
             LOGGER.error("Group member is not in waiting approval state, operatorUid=" + operatorUid + ", groupId=" + groupId 
@@ -2012,8 +2012,8 @@ public class GroupServiceImpl implements GroupService {
             // 此接口返回的数据是GroupMemberDTO，实际上在groupMember中已经不存在，因此此数据仅用于展现不可用于其他逻辑  add by yanjun 20171114
             if(GroupMemberStatus.REJECT == GroupMemberStatus.fromCode(cmd.getStatus())){
                 List<GroupMemberLog> list = groupMemberLogProvider.listGroupMemberLogByGroupId(cmd.getGroupId(), cmd.getKeyword(), from, pageSize+1);
-                if(members.size() > pageSize) {
-                    members.remove(members.size() - 1);
+                if(list.size() > pageSize) {
+                    list.remove(list.size() - 1);
                     nextPageAnchor = pageAnchor + 1;
                 }
 
@@ -3620,10 +3620,13 @@ public class GroupServiceImpl implements GroupService {
             if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
                 if(ClubType.GUILD == ClubType.fromCode(group.getClubType())){
                     code = GroupNotificationTemplateCode.GROUP_MEMBER_TO_ADMIN_WHEN_REQUEST_TO_JOIN_FOR_GUILD;
+                    GuildApply guildApply = groupProvider.findGuildApplyByGroupMemberId(member.getId());
+                    map.put("organizationName", guildApply.getOrganizationName());
                 }else {
                     map.put("reason", member.getRequestorComment());
                     code = GroupNotificationTemplateCode.GROUP_MEMBER_TO_ADMIN_WHEN_REQUEST_TO_JOIN;
                 }
+
 
 			}
             String notifyTextForAdmin = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
@@ -3866,6 +3869,11 @@ public class GroupServiceImpl implements GroupService {
             
             String scope = GroupNotificationTemplateCode.SCOPE;
             int code = GroupNotificationTemplateCode.GROUP_MEMBER_APPROVE_REQUEST_TO_JOIN;
+            if(ClubType.GUILD == ClubType.fromCode(group.getClubType())){
+                code = GroupNotificationTemplateCode.GROUP_MEMBER_APPROVE_REQUEST_TO_JOIN_FOR_GUILD;
+                GuildApply guildApply = groupProvider.findGuildApplyByGroupMemberId(requestor.getId());
+                map.put("organizationName", guildApply.getOrganizationName());
+            }
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
             sendGroupNotificationToIncludeUser(group.getId(), requestor.getMemberId(), notifyTextForApplicant);
     		
@@ -3896,7 +3904,7 @@ public class GroupServiceImpl implements GroupService {
         sendGroupNotificationToExcludeUsers(group.getId(), opeartor.getMemberId(), requestor.getMemberId(), notifyTextForOther);
     }
     
-    private void sendGroupNotificationForRejectJoinGroupRequest(Group group, GroupMember opeartor, GroupMember requestor) {
+    private void sendGroupNotificationForRejectJoinGroupRequest(Group group, GroupMember opeartor, GroupMember requestor, String rejectText) {
         if(opeartor == null || requestor == null) {
             LOGGER.error("The opeartor or requestor should not be null, opeartor=" + opeartor + ", requestor=" + requestor);
             return;
@@ -3909,6 +3917,14 @@ public class GroupServiceImpl implements GroupService {
             
             String scope = GroupNotificationTemplateCode.SCOPE;
             int code = GroupNotificationTemplateCode.GROUP_MEMBER_REJECT_REQUEST_TO_JOIN;
+
+            if(ClubType.GUILD == ClubType.fromCode(group.getClubType())){
+                code = GroupNotificationTemplateCode.GROUP_MEMBER_REJECT_REQUEST_TO_JOIN_FOR_GUILD;
+                GuildApply guildApply = groupProvider.findGuildApplyByGroupMemberId(requestor.getId());
+                map.put("organizationName", guildApply.getOrganizationName());
+                map.put("rejectText", rejectText);
+            }
+
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
             sendGroupNotificationToIncludeUser(group.getId(), requestor.getMemberId(), notifyTextForApplicant);
     		
@@ -4519,6 +4535,11 @@ public class GroupServiceImpl implements GroupService {
        
         String scope = GroupNotificationTemplateCode.SCOPE;
         int code = GroupNotificationTemplateCode.GROUP_DELETE;
+
+        if(ClubType.GUILD == ClubType.fromCode(group.getClubType())){
+            code = GroupNotificationTemplateCode.GROUP_DELETE_FOR_GUILD;
+        }
+
 //        int code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETE_MEMBER;
 //        //如果是解散群聊，提示普通人${userName}已删除群聊“${groupName}”，update by tt, 20160811
 //        if(GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PRIVATE){
