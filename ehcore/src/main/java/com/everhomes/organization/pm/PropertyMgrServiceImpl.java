@@ -6372,6 +6372,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			defaultChargingItem.setCreateUid(exist.getCreateUid());
 			defaultChargingItem.setCreateTime(exist.getCreateTime());
 			defaultChargingItemProvider.updateDefaultChargingItem(defaultChargingItem);
+			dealDefaultChargingItemProperty(defaultChargingItem, cmd.getApartments());
 		}
 		return toDefaultChargingItemDTO(defaultChargingItem);
 	}
