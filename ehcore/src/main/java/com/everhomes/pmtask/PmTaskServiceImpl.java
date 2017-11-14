@@ -111,7 +111,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	private static final String CATEGORY_SEPARATOR = "/";
 
-	private static final String HANDLER = "pmtask.handler-";
+	public static final String HANDLER = "pmtask.handler-";
 	
     private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
@@ -172,7 +172,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
-		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST);
+//		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST);
 
 		Integer namespaceId = cmd.getNamespaceId();
 		if (null == namespaceId) {
@@ -599,13 +599,16 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if (null == cmd.getOrganizationId()) {
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 			OrganizationMember member = null;
-			if (cmd.getFlowOrganizationId()!=null)
-				member = organizationProvider.findOrganizationMemberByOrgIdAndToken(userIdentifier.getIdentifierToken(),cmd.getFlowOrganizationId());
+			if (cmd.getFlowOrganizationId()!=null) {
+				member = organizationProvider.findOrganizationMemberByOrgIdAndToken(userIdentifier.getIdentifierToken(), cmd.getFlowOrganizationId());
+			}
 			//真实姓名
-			if (member==null )
-				return handler.createTask(cmd, user.getId(), user.getNickName(), userIdentifier.getIdentifierToken());
-			else
-				return handler.createTask(cmd, user.getId(), member.getContactName(), userIdentifier.getIdentifierToken());
+			if (member==null ) {
+				return handler.createTask(cmd, user.getId(), user.getNickName(), userIdentifier==null?"":userIdentifier.getIdentifierToken());
+			}
+			else {
+				return handler.createTask(cmd, user.getId(), member.getContactName(), userIdentifier==null?"":userIdentifier.getIdentifierToken());
+			}
 		}else {
 			String requestorPhone = cmd.getRequestorPhone();
 			String requestorName = cmd.getRequestorName();
