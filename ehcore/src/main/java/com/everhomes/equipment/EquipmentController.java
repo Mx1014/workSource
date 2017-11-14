@@ -232,7 +232,7 @@ public class EquipmentController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /equipment/searchEquipmentStandardsObject</b>
+     * <b>URL: /equipment/searchEquipmentStandardRelations</b>
      * <p>列出设备列表 新建计划时关联巡检对象</p>
      */
     @RequestMapping("searchEquipmentStandardRelations")
