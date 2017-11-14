@@ -3,14 +3,15 @@ package com.everhomes.rest.parking;
 
 /**
  * <ul>
- * <li>IDCARD(1): 身份证</li>
+ * <li>ID_CARD(1): 身份证</li>
  * <li>TRAVEL_LICENSE(2): 行驶证</li>
  * <li>DRIVING_LICENSE(3): 驾驶证</li>
+ * <li>BUSINESS_LICENSE(3): 营业执照</li>
  * </ul>
  */
 public enum ParkingRequestContentType {
     
-    ID_CARD((byte)1), TRAVEL_LICENSE((byte)2), DRIVING_LICENSE((byte)3);
+    ID_CARD((byte)1), TRAVEL_LICENSE((byte)2), DRIVING_LICENSE((byte)3), BUSINESS_LICENSE((byte)4);
     
     private byte code;
     

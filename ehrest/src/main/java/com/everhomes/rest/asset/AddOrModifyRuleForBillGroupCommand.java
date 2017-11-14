@@ -40,6 +40,7 @@ public class AddOrModifyRuleForBillGroupCommand {
     private Integer billItemMonthOffset;
     private Integer billItemDayOffset;
 
+
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
@@ -67,6 +68,7 @@ public class AddOrModifyRuleForBillGroupCommand {
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
     }
+
 
     public Integer getBillItemMonthOffset() {
         return billItemMonthOffset;

@@ -57,8 +57,10 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     @Autowired
     private ConfigurationProvider configurationProvider;
 
+
 //    @Autowired
 //    private ContractService contractService;
+
 
     @Override
     public FlowModuleInfo initModule() {
@@ -187,16 +189,16 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 
         return entities;
     }
+    private ContractService getContractService(Integer namespaceId) {
+        String handler = configurationProvider.getValue(namespaceId, "contractService", "");
+        return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
+    }
 
     private String timeToStr(Timestamp time) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return sdf.format(time);
     }
 
-    private ContractService getContractService(Integer namespaceId) {
-        String handler = configurationProvider.getValue(namespaceId, "contractService", "");
-        return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
-    }
 
     @Override
     public String onFlowVariableRender(FlowCaseState ctx, String variable) {

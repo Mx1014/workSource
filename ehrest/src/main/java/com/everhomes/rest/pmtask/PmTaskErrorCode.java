@@ -32,4 +32,5 @@ public interface PmTaskErrorCode {
     int ERROR_APP_KEY = 10014; //查不到对应的app key！
     int ERROR_DOWNLOAD = 10015; //下载错误！
     int ERROR_ORDER_ID = 10016; //不存在的orderId
+    int ERROR_STATE_ID = 10017;//非法状态
 }

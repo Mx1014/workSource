@@ -29,18 +29,18 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class AddOrganizationPersonnelCommand {
-
-	@NotNull
-	private Long organizationId;
-
+	
+    @NotNull
+    private Long organizationId;
+   
 	private String targetType;
-
+	
 	private Long targetId;
-
+	
 	private String contactName;
-
+	
 	private String contactToken;
-
+	
 	private Byte gender;
 
 	private String employeeNo;
@@ -54,7 +54,7 @@ public class AddOrganizationPersonnelCommand {
 	private String checkInTime;
 
 	private Byte visibleFlag;
-
+	
 	@ItemType(Long.class)
 	private List<Long> departmentIds;
 
@@ -63,7 +63,7 @@ public class AddOrganizationPersonnelCommand {
 
 	@ItemType(Long.class)
 	private List<Long> jobPositionIds;
-
+	
 	@ItemType(Long.class)
 	private List<Long> jobLevelIds;
 

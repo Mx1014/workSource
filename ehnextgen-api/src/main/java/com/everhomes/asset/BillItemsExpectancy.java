@@ -1,6 +1,7 @@
 //@formatter:off
 package com.everhomes.asset;
 
+
 import com.everhomes.rest.asset.ContractProperty;
 import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards;
 
@@ -24,6 +25,7 @@ public class BillItemsExpectancy {
     private String billDateGeneration;
     private String billCycleStart;
     private String billCycleEnd;
+
     private ContractProperty property;
     private PaymentBillGroupRule groupRule;
     private PaymentBillGroup group;
@@ -65,6 +67,7 @@ public class BillItemsExpectancy {
     public void setProperty(ContractProperty property) {
         this.property = property;
     }
+
 
     public BigDecimal getAmountReceivable() {
         return amountReceivable;
@@ -162,7 +165,9 @@ public class BillItemsExpectancy {
         this.billDateDeadline = billDateDeadline;
     }
 
+
     public void setItemScope(PaymentChargingItemScope itemScope) {
         this.itemScope = itemScope;
     }
+
 }

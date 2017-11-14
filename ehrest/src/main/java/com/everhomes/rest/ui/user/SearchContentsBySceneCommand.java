@@ -1,6 +1,9 @@
 package com.everhomes.rest.ui.user;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  *<ul>

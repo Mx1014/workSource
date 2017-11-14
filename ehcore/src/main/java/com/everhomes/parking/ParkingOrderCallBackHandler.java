@@ -59,6 +59,28 @@ public class ParkingOrderCallBackHandler implements PaymentCallBackHandler {
 	@Override
 	public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
 
+		//TODO:ceshi
+		if (configProvider.getBooleanValue("parking.order.amount", false)) {
+			Long orderId = cmd.getOrderId();
+			Long payTime = System.currentTimeMillis();
+			Timestamp payTimeStamp = new Timestamp(payTime);
+
+			ParkingRechargeOrder order = checkOrder(orderId);
+			order.setPaidTime(payTimeStamp);
+			PaymentType paymentType = PaymentType.fromCode(cmd.getPaymentType());
+			if (null != paymentType) {
+				if (paymentType.name().toUpperCase().startsWith("WECHAT")) {
+					order.setPaidType(VendorType.WEI_XIN.getCode());
+				}else {
+					order.setPaidType(VendorType.ZHI_FU_BAO.getCode());
+				}
+			}
+			order.setStatus(ParkingRechargeOrderStatus.RECHARGED.getCode());
+			order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+			parkingProvider.updateParkingRechargeOrder(order);
+			return;
+		}
+
 //		ActivityRoster roster = activityProvider.findRosterByOrderNo(cmd.getOrderId());
 //		if(roster == null){
 //			LOGGER.info("can not find roster by orderno = {}", cmd.getOrderId());

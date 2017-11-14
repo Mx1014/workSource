@@ -52,12 +52,13 @@ public class FlowConditionProviderImpl implements FlowConditionProvider {
 	}
 
     @Override
-    public void deleteFlowCondition(Long flowMainId, Integer flowVersion) {
+    public void deleteFlowCondition(Long flowMainId, Long flowNodeId, Integer flowVersion) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         com.everhomes.server.schema.tables.EhFlowConditions t = Tables.EH_FLOW_CONDITIONS;
         context.delete(t)
                 .where(t.FLOW_MAIN_ID.eq(flowMainId))
                 .and(t.FLOW_VERSION.eq(flowVersion))
+                .and(t.FLOW_NODE_ID.eq(flowNodeId))
                 .execute();
     }
 

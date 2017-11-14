@@ -123,4 +123,10 @@ public interface ConfigConstants {
     public static final String PAY_V2_HOME_URL = "pay.v2.home.url";
     public static final String PAY_PLATFORM = "pay.platform";
 
+    public static final String QUESTIONNAIRE_DETAIL_URL = "questionnaire.detail.url";
+    public static final String QUESTIONNAIRE_SEND_MESSAGE_EXPRESS = "questionnaire.send.message.express";
+    public static final String QUESTIONNAIRE_REMIND_TIME_INTERVAL = "questionnaire.remind.time.interval";
+
+    String PARKING_CAR_VERIFICATION_FLOWCASE_URL = "parking.car.verification.flowCase.url";
+
 }

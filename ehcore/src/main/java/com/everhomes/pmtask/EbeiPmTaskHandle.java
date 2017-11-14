@@ -14,15 +14,12 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.flow.*;
-import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pmtask.ebei.*;
 import com.everhomes.rest.flow.*;
@@ -33,7 +30,6 @@ import com.everhomes.docking.DockingMapping;
 import com.everhomes.docking.DockingMappingProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.docking.DockingMappingScope;
-import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhDockingMappings;
 import org.apache.commons.lang.StringUtils;
@@ -56,7 +52,6 @@ import com.alibaba.fastjson.TypeReference;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -66,7 +61,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI)
-public class EbeiPmTaskHandle implements PmTaskHandle{
+public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
 
     private static final String LIST_SERVICE_TYPE = "/rest/crmFeedBackInfoJoin/serviceTypeList";
     private static final String CREATE_TASK = "/rest/crmFeedBackInfoJoin/uploadFeedBackOrder";
@@ -83,17 +78,9 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
     private CloseableHttpClient httpclient = null;
 
     @Autowired
-    private DbProvider dbProvider;
-    @Autowired
-    private PmTaskProvider pmTaskProvider;
-    @Autowired
-    private PmTaskSearch pmTaskSearch;
-    @Autowired
     private ContentServerService contentServerService;
     @Autowired
     private ConfigurationProvider configProvider;
-    @Autowired
-    private PmTaskCommonServiceImpl pmTaskCommonService;
     @Autowired
     private DockingMappingProvider dockingMappingProvider;
     @Autowired
@@ -108,8 +95,6 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
     private CommunityProvider communityProvider;
     @Autowired
     private FlowService flowService;
-    @Autowired
-    private CategoryProvider categoryProvider;
     @Autowired
     private OrganizationProvider organizationProvider;
 
@@ -446,7 +431,6 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
             task.setTaskCategoryId(taskCategoryId);
             task.setCategoryId(categoryId);
             task.setContent(content);
-            task.setStatus(PmTaskStatus.UNPROCESSED.getCode());
             task.setUnprocessedTime(now);
             task.setCreatorUid(user.getId());
             task.setCreateTime(now);
@@ -468,30 +452,11 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
             //附件
             pmTaskCommonService.addAttachments(cmd.getAttachments(), user.getId(), task.getId(), PmTaskAttachmentType.TASK.getCode());
 
-//			PmTaskLog pmTaskLog = new PmTaskLog();
-//			pmTaskLog.setNamespaceId(task.getNamespaceId());
-//			pmTaskLog.setOperatorTime(now);
-//			pmTaskLog.setOperatorUid(requestorUid);
-//			pmTaskLog.setOwnerId(task.getOwnerId());
-//			pmTaskLog.setOwnerType(task.getOwnerType());
-//			pmTaskLog.setStatus(task.getStatus());
-//			pmTaskLog.setTaskId(task.getId());
-//			pmTaskProvider.createTaskLog(pmTaskLog);
-//
-//			//查询园区执行人，发消息
-//			List<PmTaskTarget> targets = pmTaskProvider.listTaskTargets(cmd.getOwnerType(), cmd.getOwnerId(),
-//					PmTaskOperateType.EXECUTOR.getCode(), null, null);
-//			int size = targets.size();
-//			if(LOGGER.isDebugEnabled())
-//				LOGGER.debug("Create pmtask and send message, size={}, cmd={}", size, cmd);
-//			if(size > 0){
-//				sendMessageForCreateTask(targets, requestorName, requestorPhone, taskCategory.getName(), user);
-//			}
             createFlowCase(task);
             return null;
         });
 
-        pmTaskSearch.feedDoc(task);
+        pmTaskSearch.feedDoc(pmTaskProvider.findTaskById(task.getId()));
         return ConvertHelper.convert(task, PmTaskDTO.class);
     }
 
@@ -570,8 +535,8 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
         }
     }
 
-    @Override
-    public void cancelTask(CancelTaskCommand cmd) {
+
+    void cancelTask(CancelTaskCommand cmd) {
         checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
         checkId(cmd.getId());
 
@@ -579,16 +544,16 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 
             PmTask task = checkPmTask(cmd.getId());
             EbeiPmTaskDTO dto = getTaskDetail(task);
-            if(!(dto.getState().byteValue() == PmTaskStatus.UNPROCESSED.getCode())){
-                LOGGER.error("Task cannot be canceled. cmd={}", cmd);
-                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CANCEL_TASK,
-                        "Task cannot be canceled.");
-            }
+//            if(!(dto.getState().byteValue() == PmTaskStatus.UNPROCESSED.getCode())){
+//                LOGGER.error("Task cannot be canceled. cmd={}", cmd);
+//                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CANCEL_TASK,
+//                        "Task cannot be canceled.");
+//            }
 
             if(cancelTask(task)) {
                 User user = UserContext.current().getUser();
                 Timestamp now = new Timestamp(System.currentTimeMillis());
-                task.setStatus(PmTaskStatus.INACTIVE.getCode());
+                task.setStatus(PmTaskFlowStatus.INACTIVE.getCode());
                 task.setDeleteUid(user.getId());
                 task.setDeleteTime(now);
                 pmTaskProvider.updateTask(task);
@@ -604,14 +569,12 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
         });
     }
 
-
-    @Override
-    public void evaluateTask(EvaluateTaskCommand cmd) {
+    void evaluateTask(EvaluateTaskCommand cmd) {
         checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
         checkId(cmd.getId());
 
         PmTask task = checkPmTask(cmd.getId());
-        if(!task.getStatus().equals(PmTaskStatus.PROCESSED.getCode())){
+        if(!task.getStatus().equals(PmTaskFlowStatus.COMPLETED.getCode())){
             LOGGER.error("Task have not been completed, cmd={}", cmd);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "Task have not been completed.");
@@ -642,8 +605,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
         return pmTask;
     }
 
-    @Override
-    public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
+    PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
         // TODO Auto-generated method stub
 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -655,11 +617,8 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
         dbProvider.execute((TransactionStatus status) -> {
 
             EbeiPmTaskDTO ebeiPmTask = getTaskDetail(task);
-            //TODO  枚举值更新
-            Integer state = ebeiPmTask.getState()==6 ? PmTaskStatus.INACTIVE.getCode():ebeiPmTask.getState();
-            task.setStatus(state.byteValue() > PmTaskStatus.PROCESSED.getCode() ? PmTaskStatus.PROCESSED.getCode(): state.byteValue() );
-            //pmTaskProvider.updateTask(task);
-            dto.setStatus(task.getStatus());
+
+            dto.setStatus(ebeiPmTask.getState().byteValue());
 
 
             CategoryDTO taskCategory = createCategoryDTO();
@@ -739,14 +698,14 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
     @Override
     public List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd) {
 
-        List<CategoryDTO> childrens = listServiceType(projectId, null);
+        List<CategoryDTO> children = listServiceType(projectId, null);
         CategoryDTO dto = createCategoryDTO();
-        dto.setChildrens(childrens);
+        dto.setChildrens(children);
 
         return Collections.singletonList(dto);
     }
 
-    public CategoryDTO createCategoryDTO() {
+    CategoryDTO createCategoryDTO() {
         CategoryDTO dto = new CategoryDTO();
         dto.setId(PmTaskHandle.EBEI_TASK_CATEGORY);
         dto.setName("物业报修");
@@ -798,48 +757,6 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
         }
 
         return response;
-    }
-
-    @Override
-    public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
-        checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-        Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        User current = UserContext.current().getUser();
-
-        Byte status = cmd.getStatus();
-        List<PmTask> list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status, cmd.getTaskCategoryId(),
-                cmd.getPageAnchor(), cmd.getPageSize());
-
-        ListUserTasksResponse response = new ListUserTasksResponse();
-        int size = list.size();
-        if(size > 0){
-            response.setRequests(list.stream().map(r -> {
-                PmTaskDTO dto = ConvertHelper.convert(r, PmTaskDTO.class);
-//    			if(null == r.getOrganizationId() || r.getOrganizationId() ==0 ){
-//    				User user = userProvider.findUserById(r.getCreatorUid());
-//        			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-//        			dto.setRequestorName(user.getNickName());
-//        			dto.setRequestorPhone(userIdentifier.getIdentifierToken());
-//    			}
-                CategoryDTO taskCategory = createCategoryDTO();
-                dto.setTaskCategoryName(taskCategory.getName());
-
-                return dto;
-            }).collect(Collectors.toList()));
-            if(size != pageSize){
-                response.setNextPageAnchor(null);
-            }else{
-                response.setNextPageAnchor(list.get(size-1).getCreateTime().getTime());
-            }
-        }
-
-        return response;
-    }
-
-    @Override
-    public void updateTaskByOrg(UpdateTaskCommand cmd) {
-        PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-        handler.updateTaskByOrg(cmd);
     }
 
 }

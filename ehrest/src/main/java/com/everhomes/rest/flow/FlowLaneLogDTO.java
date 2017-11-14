@@ -12,9 +12,11 @@ import java.util.List;
  *     <li>laneLevel: 泳道level</li>
  *     <li>laneName: 泳道名称</li>
  *     <li>isCurrentLane: 是否是当前泳道</li>
- *     <li>logs: 详细日志信息，目前仅有 logContent 有用 {@link com.everhomes.rest.flow.FlowEventLogDTO}</li>
+ *     <li>isRejectLane: 当前节点是驳回节点</li>
+ *     <li>isAbsortLane: 当前节点是终止节点</li>
  *     <li>needSelectNextNode: 下个节点需要处理人选择</li>
  *     <li>laneEnterTime: 进入泳道的时间</li>
+ *     <li>logs: 详细日志信息，目前仅有 logContent 有用 {@link com.everhomes.rest.flow.FlowEventLogDTO}</li>
  * </ul>
  */
 public class FlowLaneLogDTO {
@@ -22,7 +24,10 @@ public class FlowLaneLogDTO {
     private Long laneId;
     private Integer laneLevel;
     private String laneName;
+    private String currNodeParams;
     private Byte isCurrentLane;
+    private Byte isRejectLane;
+    private Byte isAbsortLane;
     private Byte needSelectNextNode;
     private Long laneEnterTime;
 
@@ -87,6 +92,30 @@ public class FlowLaneLogDTO {
 
     public void setLaneEnterTime(Long laneEnterTime) {
         this.laneEnterTime = laneEnterTime;
+    }
+
+    public String getCurrNodeParams() {
+        return currNodeParams;
+    }
+
+    public void setCurrNodeParams(String currNodeParams) {
+        this.currNodeParams = currNodeParams;
+    }
+
+    public Byte getIsRejectLane() {
+        return isRejectLane;
+    }
+
+    public void setIsRejectLane(Byte isRejectLane) {
+        this.isRejectLane = isRejectLane;
+    }
+
+    public Byte getIsAbsortLane() {
+        return isAbsortLane;
+    }
+
+    public void setIsAbsortLane(Byte isAbsortLane) {
+        this.isAbsortLane = isAbsortLane;
     }
 
     @Override

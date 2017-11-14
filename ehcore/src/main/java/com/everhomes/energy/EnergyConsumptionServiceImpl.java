@@ -3033,6 +3033,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         return toEnergyMeterDTO(meter,cmd.getNamespaceId());
     }
 
+    public static boolean isNumeric(String str){
+        Pattern pattern = Pattern.compile("[0-9]*");
+        return pattern.matcher(str).matches();
+    }
+
     @Override
     public String getEnergyMeterQRCode(GetEnergyMeterQRCodeCommand cmd) {
         return generateQRString(cmd.getMeterId(), cmd.getNamespaceId());

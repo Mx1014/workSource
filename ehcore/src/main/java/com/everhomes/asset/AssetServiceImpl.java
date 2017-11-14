@@ -80,7 +80,9 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.sun.org.apache.regexp.internal.RE;
 import org.apache.commons.collections.list.AbstractLinkedList;
+
 import org.apache.commons.collections.map.HashedMap;
+
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -314,13 +316,15 @@ public class AssetServiceImpl implements AssetService {
                 smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
                 //模板改了，所以这个也要改
 //                smsProvider.addToTupleList(variables, "dateStr", noticeInfo.getDateStr());
+
                 smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
+
 //            smsProvider.addToTupleList(variables,"amount2",noticeInfo.getAmountOwed());
                 smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
                 String templateLocale = UserContext.current().getUser().getLocale();
                 //phoneNums make it fake during test
                 Integer nameSpaceId = UserContext.getCurrentNamespaceId();
-                nameSpaceId = 999971;
+//                nameSpaceId = 999971;
                 smsProvider.sendSms(nameSpaceId, telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
             }
         } catch(Exception e){
@@ -405,7 +409,7 @@ public class AssetServiceImpl implements AssetService {
                 smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
                 String templateLocale = UserContext.current().getUser().getLocale();
                 Integer nameSpaceId = UserContext.getCurrentNamespaceId();
-                nameSpaceId = 999971;
+//                nameSpaceId = 999971;
                 smsProvider.sendSms(nameSpaceId, telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
             }
         } catch(Exception e){
@@ -978,12 +982,23 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public void paymentExpectancies_re_struct(PaymentExpectanciesCommand cmd) {
+
+//        List<RentAdjust> rentAdjusts = cmd.getRentAdjusts();
+//        List<RentFree> rentFrees = cmd.getRentFrees();
+//        if(rentAdjusts!=null && rentAdjusts.size()>0){
+//            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.RENT_CHANGE_NOT_SUPPORTED,"rent adjust or rent free not supported");
+//        }
+//        if(rentFrees!=null && rentFrees.size()>0){
+//            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.RENT_CHANGE_NOT_SUPPORTED,"rent adjust or rent free not supported");
+//        }
+
         LOGGER.error("STARTTTTTTTTTTTT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
         Long contractId = cmd.getContractId();
         String contractNum = cmd.getContractNum();
 
         assetProvider.setInworkFlagInContractReceiver(contractId,contractNum);
+
         try{
 
             SimpleDateFormat sdf_dateStrD = new SimpleDateFormat("yyyy-MM-dd");
@@ -1308,6 +1323,7 @@ public class AssetServiceImpl implements AssetService {
             entity.setContractIdType(cmd.getContractIdType());
             entity.setContractNum(cmd.getContractNum());
 
+
             long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CONTRACT_RECEIVER.getClass()));
             if(nextSequence==0l){
                 nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CONTRACT_RECEIVER.getClass()));
@@ -1322,6 +1338,7 @@ public class AssetServiceImpl implements AssetService {
             entity.setTargetType(cmd.getTargetType());
             entity.setTargetName(cmd.getTargetName());
             contractDateList.add(entity);
+
 
         if(billItemsList.size()<1 || contractDateList.size()<1){
             upodateBillStatusOnContractStatusChange(cmd.getContractId(),AssetPaymentStrings.CONTRACT_CANCEL);
@@ -1382,9 +1399,11 @@ public class AssetServiceImpl implements AssetService {
         }
 
 
+
         //先算开始a
         Calendar a = Calendar.getInstance();
         a.setTime(dateStrBegin.getTime());
+
 
         timeLoop:while(a.compareTo(dateStrEnd)<0){
             //计算费用产生月d d = a+cycle
@@ -1398,10 +1417,10 @@ public class AssetServiceImpl implements AssetService {
                 d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
             }
 
-
             //计算费用产生的日期
             Calendar d1 = Calendar.getInstance();
             d1.setTime(d.getTime());
+
 
 //            if(groupRule.getBillItemDayOffset()!=null && time != 0){
 //                d1.add(Calendar.MONTH,groupRule.getBillItemMonthOffset());
@@ -1478,7 +1497,9 @@ public class AssetServiceImpl implements AssetService {
             obj.setBillGroupId(group.getId());
             obj.setBillDateStr(yyyyMM.format(a.getTime()));
             Calendar due = Calendar.getInstance();
+
             due.setTime(d2.getTime());
+
 //            due.set(Calendar.MONTH,due.get(Calendar.MONTH)+1);
             due.add(Calendar.MONTH,1);
             due.set(Calendar.DAY_OF_MONTH,group.getBillsDay());
@@ -1498,6 +1519,7 @@ public class AssetServiceImpl implements AssetService {
             }
             obj.setBillDateDeadline(yyyyMMdd.format(deadline.getTime()));
             obj.setBillCycleStart(yyyyMMdd.format(a.getTime()));
+
 //            if(d.compareTo(dateStrEnd) ==-1){
 //                obj.setBillCycleEnd(yyyyMMdd.format(d.getTime()));
 //            }else{
@@ -1505,9 +1527,11 @@ public class AssetServiceImpl implements AssetService {
 //            }
             obj.setBillCycleEnd(yyyyMMdd.format(d2.getTime()));
 
+
             list.add(obj);
             //更改a的值
 //            d2.set(Calendar.DAY_OF_MONTH,d2.get(Calendar.DAY_OF_MONTH)+1);
+
             if(billingCycle == 5){
                 break timeLoop;
             }
@@ -1612,6 +1636,7 @@ public class AssetServiceImpl implements AssetService {
                         Calendar d2 = Calendar.getInstance();
                         d2.setTime(item.getDateStrEnd());
 
+
 //                        String test1 = yyyyMMdd.format(d2.getTime());
 //                        String test2 = yyyyMMdd.format(longinus.getTime());
 
@@ -1629,6 +1654,7 @@ public class AssetServiceImpl implements AssetService {
 
         //拆卸免租的包裹
         List<RentFree> rentFrees = cmd.getRentFrees();
+
         if(rentFrees!=null){
 
             //是否对应一个资源和收费项，不对应则不进行调组
@@ -1711,6 +1737,7 @@ public class AssetServiceImpl implements AssetService {
 //                        item.setAmountReceivable(item.getAmountReceivable().subtract(amount_free_real));
 //                        item.setAmountOwed(item.getAmountOwed().subtract(amount_free_real));
 //                    }
+
                 }
                 //免租结束
 
@@ -2633,11 +2660,13 @@ public class AssetServiceImpl implements AssetService {
         s.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.getClass())));
         s.setOwnerType(cmd.getOwnerType());
         s.setOwnerId(cmd.getOwnerId());
+
         s.setNamespaceId(cmd.getNamespaceId());
         s.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         s.setBrotherStandardId(brotherStandardId);
         assetProvider.createChargingStandard(c,s,f);
         return nextStandardId;
+
     }
 
     @Override
@@ -2669,6 +2698,7 @@ public class AssetServiceImpl implements AssetService {
 //            }
         }
     }
+
 
 
     @Override

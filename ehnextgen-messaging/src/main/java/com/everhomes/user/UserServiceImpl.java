@@ -1449,8 +1449,9 @@ public class UserServiceImpl implements UserService {
 		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
 		Object maxLoginId = accessor.getMapValueObject(hkeyIndex);
 		if(maxLoginId != null) {
-			LOGGER.debug("maxLoginId: "+maxLoginId);
-			LOGGER.debug("maxLoginId.toString: "+maxLoginId.toString());
+		    // 日志太多，先注释掉 by lqs 20171102
+			// LOGGER.debug("maxLoginId: "+maxLoginId);
+			// LOGGER.debug("maxLoginId.toString: "+maxLoginId.toString());
 			for(int i = 1; i <= Integer.parseInt(maxLoginId.toString()); i++) {
 				String hkeyLogin = String.valueOf(i);
 				Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
@@ -3013,7 +3014,7 @@ public class UserServiceImpl implements UserService {
 //        }
 		sceneDto.setTitleName(titlieName.toString());
 		sceneDto.setName(fullName);
-        sceneDto.setAliasName(aliasName);
+        sceneDto.setAliasName(organizaitonName);
 		sceneDto.setAvatar(organizationDto.getAvatarUri());
 		sceneDto.setAvatarUrl(organizationDto.getAvatarUrl());
 		sceneDto.setCommunityName(communityName);
@@ -3214,7 +3215,7 @@ public class UserServiceImpl implements UserService {
 		sceneDto.setSceneType(sceneType.getCode());
 		sceneDto.setEntityType(UserCurrentEntityType.COMMUNITY.getCode());
 		sceneDto.setName(fullName);
-		sceneDto.setAliasName(aliasName);
+		sceneDto.setAliasName(communityName);
 
 		String entityContent = StringHelper.toJsonString(community);
 		sceneDto.setEntityContent(entityContent);
@@ -4954,7 +4955,6 @@ public class UserServiceImpl implements UserService {
 		default_communityScene.setStatus(SCENE_EXAMPLE);
 		return default_communityScene;
 	}
-
 	@Override
 	public UserIdentifier getUserIdentifier(Long userId) {
 		if(userId == null){

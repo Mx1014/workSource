@@ -26,12 +26,15 @@ public class PaymentExpectanciesCommand {
     private Integer pageOffset;
     private Integer pageSize;
 
+
     private Byte contractIdType;
+
 
     @ItemType(RentAdjust.class)
     private List<RentAdjust> rentAdjusts;
     @ItemType(RentFree.class)
     private List<RentFree> rentFrees;
+
 
     private Byte isEffectiveImmediately;
 
@@ -42,6 +45,7 @@ public class PaymentExpectanciesCommand {
     public void setIsEffectiveImmediately(Byte isEffectiveImmediately) {
         this.isEffectiveImmediately = isEffectiveImmediately;
     }
+
 
     @Override
     public String toString() {

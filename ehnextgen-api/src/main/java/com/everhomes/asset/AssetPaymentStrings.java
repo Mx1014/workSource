@@ -15,6 +15,7 @@ public interface AssetPaymentStrings {
     public static final String EH_USER = "eh_user";
     public static final String EH_ORGANIZATION = "eh_organization";
 
+
     public static final String DELETE_CHARGING_STANDARD_UNSAFE = "删除失败，该计费标准已经被账单组关联使用";
     public static final String DELETE_GROUP_RULE_UNSAFE = "删除失败，该账单组的计价条款已经关联合同，或者产生了账单";
     public static final String CREATE_CHARGING_ITEM_FAIL = "添加失败，一个收费项只能在一个账单组存在";
@@ -24,6 +25,7 @@ public interface AssetPaymentStrings {
     public static final String CHARGING_ITEM_NAME_WATER = "水费";
     public static final String CHARGING_ITEM_NAME_ELECTRICITY = "电费";
     public static final String VARIABLE_YJ = "用量";
+
 
 
 }

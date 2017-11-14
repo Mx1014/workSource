@@ -32,6 +32,7 @@ public class GetVisitorResponse {
     String approveName;
     Byte permissionDeny;
     Long validEndMs;
+    String namespaceName;
     
     public String getUserName() {
         return userName;
@@ -119,7 +120,13 @@ public class GetVisitorResponse {
 	public void setDoorId(Long doorId) {
 		this.doorId = doorId;
 	}
-	@Override
+	public String getNamespaceName() {
+        return namespaceName;
+    }
+    public void setNamespaceName(String namespaceName) {
+        this.namespaceName = namespaceName;
+    }
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

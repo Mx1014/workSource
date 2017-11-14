@@ -659,8 +659,8 @@ public class NewsServiceImpl implements NewsService {
 		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
 
 		News news = findNewsById(userId, newsId);
-		newsProvider.increaseViewCount(newsId);
-		news.setViewCount(news.getViewCount()+1L);
+		newsProvider.increaseViewCount(newsId,news.getViewCount());
+		news.setViewCount((news.getViewCount()+1L)/2);//web端一次浏览，调用了两次接口。这里除以2
 
 		List<NewsTagVals> list = newsProvider.listNewsTagVals(newsId);
 		list.forEach(r->{
@@ -1600,6 +1600,15 @@ public class NewsServiceImpl implements NewsService {
 	public void setNewsLikeFlagForWeb(SetNewsLikeFlagForWebCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
 		setNewsLikeFlag(userId, cmd.getNewsToken());
+	}
+
+	@Override
+	public GetCategoryIdByEntryIdResponse getCategoryIdByEntryId(GetCategoryIdByEntryIdCommand cmd) {
+		NewsCategory category = newsProvider.getCategoryIdByEntryId(cmd.getEntryId(),UserContext.getCurrentNamespaceId());
+		if(category == null){
+			return new GetCategoryIdByEntryIdResponse(0L);
+		}
+		return new GetCategoryIdByEntryIdResponse(category.getId());
 	}
 
 
