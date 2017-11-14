@@ -1156,6 +1156,27 @@ public class CustomerServiceImpl implements CustomerService {
     public void deleteCustomerEconomicIndicator(DeleteCustomerEconomicIndicatorCommand cmd) {
         CustomerEconomicIndicator indicator = checkCustomerEconomicIndicator(cmd.getId(), cmd.getCustomerId());
         enterpriseCustomerProvider.deleteCustomerEconomicIndicator(indicator);
+
+        if(indicator.getMonth() != null) {
+            CustomerEconomicIndicatorStatistic statistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), indicator.getMonth());
+            if(statistic != null) {
+                if(statistic.getTaxPayment() != null && indicator.getTaxPayment() != null) {
+                    if(statistic.getTaxPayment().compareTo(indicator.getTaxPayment()) > 0) {
+                        statistic.setTaxPayment(statistic.getTaxPayment().subtract(indicator.getTaxPayment()));
+                    } else {
+                        statistic.setTaxPayment(BigDecimal.ZERO);
+                    }
+                }
+                if(statistic.getTurnover() != null && indicator.getTurnover() != null) {
+                    if(statistic.getTurnover().compareTo(indicator.getTurnover()) > 0) {
+                        statistic.setTurnover(statistic.getTurnover().subtract(indicator.getTurnover()));
+                    } else {
+                        statistic.setTurnover(BigDecimal.ZERO);
+                    }
+                }
+                enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+            }
+        }
     }
 
     private CustomerEconomicIndicator checkCustomerEconomicIndicator(Long id, Long customerId) {
