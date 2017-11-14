@@ -884,14 +884,18 @@ public class PmTaskServiceImpl implements PmTaskService {
 				cell7.setCellStyle(style);
 				if(logSize != 0){
 					User user = userProvider.findUserById(logs.get(logSize-1).getTargetId());
-					cell7.setCellValue(user.getNickName());
+					if (null != user) {
+						cell7.setCellValue(user.getNickName());
+					}
 				}
 				Cell cell8 = tempRow.createCell(8);
 				cell8.setCellStyle(style);
 				cell8.setCellValue(category.getName());
 				Cell cell9 = tempRow.createCell(9);
 				cell9.setCellStyle(style);
-				cell9.setCellValue(pmTaskCommonService.convertStatus(task.getStatus()));
+
+				PmTaskFlowStatus flowStatus = PmTaskFlowStatus.fromCode(task.getStatus());
+				cell9.setCellValue(null != flowStatus ? flowStatus.getDescription() : "");
 
 			}
 

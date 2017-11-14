@@ -412,21 +412,6 @@ class PmTaskCommonServiceImpl {
         return pmTask;
     }
 
-    String convertStatus(Byte status){
-        if(status == 1)
-            return "处理中";
-        else if(status == 2)
-            return "已分派";
-        else if(status == 3)
-            return "已完成";
-        else if(status == 4)
-            return "已关闭";
-        else if(status == 5)
-            return "已回访";
-        else
-            return "";
-    }
-
     void handoverTaskToTrd(PmTask task, String content, List<String> attachments) {
         String handlerPrefix = HandoverTaskHandler.HANDOVER_VENDOR_PREFIX;
         HandoverTaskHandler handler = PlatformContext.getComponent(handlerPrefix + task.getNamespaceId());
