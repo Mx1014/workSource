@@ -264,7 +264,7 @@ public class EquipmentServiceImpl implements EquipmentService {
                     equipmentProvider.inActiveEquipmentStandardMap(map);
                 }
             }
-            updateEquipmentStandardsEquipmentsMap(standard, cmd.getEquipments());
+            createEquipmentStandardsEquipmentsMap(standard, cmd.getEquipments());
 
         }
 
@@ -277,10 +277,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 
         EquipmentStandardsDTO dto = convertStandardToDto(standard);
         return dto;
-    }
-
-    private void updateEquipmentStandardsEquipmentsMap(EquipmentInspectionStandards standard, List<EquipmentsDTO> equipments) {
-        createEquipmentStandardsEquipmentsMap(standard, equipments);
     }
 
 
