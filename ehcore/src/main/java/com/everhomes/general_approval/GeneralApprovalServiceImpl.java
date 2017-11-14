@@ -37,6 +37,7 @@ import com.everhomes.yellowPage.YellowPageProvider;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import org.apache.juli.logging.Log;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
@@ -297,6 +298,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             //added by wh 建立了审批单之后
 
             GeneralApprovalHandler handler = getGeneralApprovalHandler(flowCase.getReferId());
+            LOGGER.debug("建立审批,handler 执行 onApprovalCreated ");
             handler.onApprovalCreated(flowCase);
             return response;
         });
