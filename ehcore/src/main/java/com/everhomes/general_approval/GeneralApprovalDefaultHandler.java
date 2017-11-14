@@ -109,9 +109,14 @@ public class GeneralApprovalDefaultHandler implements GeneralApprovalHandler {
 
 		GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
 		PunchExceptionRequest request = punchProvider.findPunchExceptionRequestByRequestId(ga.getOrganizationId(), flowCase.getApplyUserId(), flowCase.getId());
-		request.setStatus(ApprovalStatus.REJECTION.getCode());
-		punchProvider.updatePunchExceptionRequest(request);
-
+		if (UserContext.current().getUser().getId().equals(request.getUserId())) {
+			//如果是自己取消的,删除request
+			punchProvider.deletePunchExceptionRequest(request);
+		}else {
+			//否则request变成reject
+			request.setStatus(ApprovalStatus.REJECTION.getCode());
+			punchProvider.updatePunchExceptionRequest(request);
+		}
 	}
 
 	@Override
