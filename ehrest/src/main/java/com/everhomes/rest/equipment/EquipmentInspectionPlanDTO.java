@@ -1,5 +1,6 @@
 package com.everhomes.rest.equipment;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.util.StringHelper;
 
@@ -50,6 +51,7 @@ public class EquipmentInspectionPlanDTO {
 
     private RepeatSettingsDTO repeatSettings;
 
+    @ItemType(EquipmentStandardRelationDTO.class)
     private List<EquipmentStandardRelationDTO> equipmentStandardRelations;
 
     public Long getId() {
