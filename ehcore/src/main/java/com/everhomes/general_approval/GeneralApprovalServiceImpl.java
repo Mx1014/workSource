@@ -1030,11 +1030,11 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         }
 
         //  5. the current operator
-        List<UserInfo> processorLists = flowService.getCurrentProcessors(data.getFlowCaseId(), true);
-        if (processorLists != null && processorLists.size() > 0) {
+        FlowCaseProcessorsProcessor processorRes = flowService.getCurrentProcessors(data.getFlowCaseId(), true);
+        if (processorRes.getProcessorsInfoList() != null && processorRes.getProcessorsInfoList().size() > 0) {
             String processors = "";
-            for (int i = 0; i < processorLists.size(); i++) {
-                processors += processorLists.get(i).getNickName() + ",";
+            for (int i = 0; i < processorRes.getProcessorsInfoList().size(); i++) {
+                processors += processorRes.getProcessorsInfoList().get(i).getNickName() + ",";
             }
             if (!"".equals(processors))
                 processors = processors.substring(0, processors.length() - 1);
@@ -1046,7 +1046,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         List<UserInfo> supervisorLists = flowService.getSupervisor(flowCase);
         if (supervisorLists != null && supervisorLists.size() > 0) {
             String supervisors = "";
-            for (int i = 0; i < processorLists.size(); i++) {
+            for (int i = 0; i < supervisorLists.size(); i++) {
                 supervisors += supervisorLists.get(i).getNickName() + ",";
             }
             if (!"".equals(supervisors))

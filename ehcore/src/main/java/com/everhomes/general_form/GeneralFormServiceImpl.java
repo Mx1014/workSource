@@ -22,8 +22,10 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
+import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -582,8 +584,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 		GeneralFormDTO result = processGeneralFormDTO(form,group);
 		//	added by LiMingDang for approval1.6
 		if (cmd.getModuleType() != null)
-			dto.setModuleType(cmd.getModuleType());
-		return dto;
+			result.setModuleType(cmd.getModuleType());
+		return result;
 	}
 
     //  表单控件组的新增(与表单绑定故作为私有方法)

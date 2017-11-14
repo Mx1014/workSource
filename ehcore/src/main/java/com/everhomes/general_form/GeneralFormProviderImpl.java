@@ -15,6 +15,7 @@ import com.everhomes.server.schema.tables.daos.EhGeneralFormsDao;
 import com.everhomes.server.schema.tables.pojos.EhGeneralFormGroups;
 import com.everhomes.server.schema.tables.pojos.EhGeneralForms;
 import com.everhomes.server.schema.tables.records.EhGeneralFormGroupsRecord;
+import com.everhomes.server.schema.tables.records.EhGeneralFormTemplatesRecord;
 import com.everhomes.server.schema.tables.records.EhGeneralFormsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
