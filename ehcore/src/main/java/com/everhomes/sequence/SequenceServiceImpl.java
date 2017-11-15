@@ -2479,11 +2479,15 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_DEFAULT_CHARGING_ITEMS.ID.max()).from(Tables.EH_DEFAULT_CHARGING_ITEMS).fetchOne().value1();
 
         });
-        
+
         syncTableSequence(null, EhDoorAuthLevel.class, Tables.EH_DOOR_AUTH_LEVEL.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_DOOR_AUTH_LEVEL.ID.max()).from(Tables.EH_DOOR_AUTH_LEVEL).fetchOne().value1();
         });
 
+
+        syncTableSequence(null, EhRentalv2PricePackages.class, Tables.EH_RENTALV2_PRICE_PACKAGES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_RENTALV2_PRICE_PACKAGES.ID.max()).from(Tables.EH_RENTALV2_PRICE_PACKAGES).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
