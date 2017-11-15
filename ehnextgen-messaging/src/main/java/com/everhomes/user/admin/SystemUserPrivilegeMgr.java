@@ -192,7 +192,8 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         return false;
     }
 
-    // 按appId校验（应用Id）
+    // 按appId校验应用管理员（应用Id）
+    @Override
     public boolean checkModuleAppAdmin(String ownerType, Long ownerId, Long userId, Long privilegeId, Long appId, Long communityId, Long organizationId){
         Integer namespaceId = UserContext.current().getNamespaceId();
         // 查询privilegeId关联的模块
@@ -208,7 +209,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         // 查询app关联的moduleId
         ServiceModuleApp app = this.serviceModuleAppProvider.findServiceModuleAppById(appId);
         if(app != null && p_moduleId != 0L && p_moduleId == app.getModuleId()){//如果权限对应的moduleId和appId对应的模块Id相等，再校验是否对应用有权
-            List<Authorization> authorizations = this.authorizationProvider.listAuthorizations(ownerType, ownerId, OwnerType.USER.getCode(), userId, EntityType.SERVICE_MODULE.getCode(), moduleId, IdentityType.MANAGE.getCode(), appId, null, null, false);
+            List<Authorization> authorizations = this.authorizationProvider.listAuthorizations(ownerType, ownerId, OwnerType.USER.getCode(), userId, EntityType.SERVICE_MODULE.getCode(), p_moduleId, IdentityType.MANAGE.getCode(), appId, null, null, false);
             List<ControlTarget> controlTargets = this.authorizationProvider.listAuthorizationControlConfigs(namespaceId, userId, authorizations.get(0).getControlId());
             if(authorizations != null && authorizations.size() > 0){
                 switch (ModuleManagementType.fromCode(authorizations.get(0).getModuleControlType())){
@@ -318,11 +319,11 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
 
     @Override
     public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId){
-        return  checkUserPrivilege(userId, ownerType, ownerId, currentOrgId, privilegeId, null);
+        return  checkUserPrivilege(userId, ownerType, ownerId, currentOrgId, privilegeId, null, null, null);
     }
 
     @Override
-    public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId, Long appId){
+    public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId, Long appId, Long checkOrgId, Long checkCommunityId){
 
         Domain domain = UserContext.current().getDomain();
 
@@ -345,8 +346,8 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
                         }
                         // 当需要校验appId，by lei.lv
                         if(appId != null){
-                            if(checkModuleAppAdmin(ownerType, ownerId, userId, privilegeId, appId, communityId, currentOrgId)){
-                                LOGGER.debug("check moduleApp admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, communityId= {}, privilegeId={}, appId={}" , userId, ownerType, ownerId, currentOrgId, communityId, privilegeId, appId);
+                            if(checkModuleAppAdmin(ownerType, ownerId, userId, privilegeId, appId, checkCommunityId, checkOrgId)){
+                                LOGGER.debug("check moduleApp admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, checkCommunityId={}, checkOrgId={}, privilegeId={}, appId={}" , userId, ownerType, ownerId, currentOrgId, checkCommunityId, checkOrgId, privilegeId, appId);
                                 return true;
                             }
                         }

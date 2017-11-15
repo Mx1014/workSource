@@ -27,9 +27,10 @@ public interface UserPrivilegeMgr {
      * @param currentOrgId
      * @param privilegeId
      * @param appId
-     * @return
+     * @param checkOrgId
+     *@param checkCommunityId @return
      */
-    boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId, Long appId);
+    boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId, Long appId, Long checkOrgId, Long checkCommunityId);
 
 
     /**
@@ -166,4 +167,17 @@ public interface UserPrivilegeMgr {
      * @return
      */
     boolean checkAllModuleAdmin(String ownerType, Long ownerId, Long userId);
+
+    /**
+     * 检查应用管理员
+     * @param ownerType
+     * @param ownerId
+     * @param userId
+     * @param privilegeId
+     * @param appId
+     * @param communityId
+     * @param organizationId
+     * @return
+     */
+    boolean checkModuleAppAdmin(String ownerType, Long ownerId, Long userId, Long privilegeId, Long appId, Long communityId, Long organizationId);
 }
