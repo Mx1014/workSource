@@ -293,6 +293,7 @@ public class CustomerServiceImpl implements CustomerService {
         command.setContactsPhone(customer.getContactPhone());
         command.setEntries(customer.getContactMobile());
         command.setAddress(customer.getContactAddress());
+        command.setWebsite(customer.getCorpWebsite());
         return organizationService.createEnterprise(command);
     }
 

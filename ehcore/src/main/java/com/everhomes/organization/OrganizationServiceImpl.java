@@ -1317,6 +1317,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             organization.setName(cmd.getName());
             organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organization.setEmailDomain(cmd.getEmailDomain());
+            organization.setWebsite(cmd.getWebsite());
             organizationProvider.updateOrganization(organization);
 
             OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
@@ -1384,7 +1385,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             if(customer != null) {
                 customer.setName(organization.getName());
                 customer.setNickName(organizationDetail.getDisplayName());
-                customer.setCorpOpAddress(organizationDetail.getAddress());
+                customer.setContactAddress(organizationDetail.getAddress());
                 customer.setCorpWebsite(organization.getWebsite());
                 customer.setCorpLogoUri(organizationDetail.getAvatar());
                 enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
