@@ -18,7 +18,6 @@ import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow.*;
-import com.everhomes.rest.general_approval.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -491,7 +490,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     }
 
     public void processBusinessTripField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
-        PostApprovalFormBussinessTripValue tripValue = JSON.parseObject(jsonVal, PostApprovalFormBussinessTripValue.class);
+        PostApprovalFormBusinessTripValue tripValue = JSON.parseObject(jsonVal, PostApprovalFormBusinessTripValue.class);
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.business_trip.key", "1", "zh_CN", "开始时间"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());

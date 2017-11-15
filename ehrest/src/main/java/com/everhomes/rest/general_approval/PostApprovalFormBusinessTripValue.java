@@ -9,13 +9,13 @@ import com.everhomes.util.StringHelper;
  * <li>duration: 出差时长</li>
  * </ul>
  */
-public class PostApprovalFormBussinessTripValue {
+public class PostApprovalFormBusinessTripValue {
 
 	private String startTime;
 
 	private String endTime;
 
-	private String duration;
+	private Double duration;
 
 	public String getStartTime() {
 		return startTime;
@@ -33,11 +33,11 @@ public class PostApprovalFormBussinessTripValue {
 		this.endTime = endTime;
 	}
 
-	public String getDuration() {
+	public Double getDuration() {
 		return duration;
 	}
 
-	public void setDuration(String duration) {
+	public void setDuration(Double duration) {
 		this.duration = duration;
 	}
 
