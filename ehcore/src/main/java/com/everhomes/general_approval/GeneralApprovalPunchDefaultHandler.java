@@ -116,7 +116,7 @@ public class GeneralApprovalPunchDefaultHandler extends GeneralApprovalDefaultHa
 		if (null == request) {
 			return;
 		}
-		if (UserContext.current().getUser().getId().equals(request.getUserId()) && ctx.getCurrentEvent().getUserType().equals(FlowUserType.APPLIER.getCode())) {
+		if (UserContext.current().getUser().getId().equals(request.getUserId()) && ctx.getCurrentEvent().getUserType() == FlowUserType.APPLIER) {
 			//如果是自己取消的,删除request
 			punchProvider.deletePunchExceptionRequest(request);
 		}else {

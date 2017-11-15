@@ -206,8 +206,8 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 
     @Override
     public void onFlowCaseEnd(FlowCaseState ctx) {
-        // 审批通过
-        if (!ctx.getStepType().equals(FlowStepType.ABSORT_STEP.getCode())) {
+        // 审批通过 -- 如果stepType不是驳回 就是正常结束,进入处理
+        if (!(ctx.getStepType() == FlowStepType.ABSORT_STEP)){
             FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
             LOGGER.debug("审批终止(通过),handler 执行 onFlowCaseEnd  step type:"+ctx.getStepType());
             GeneralApprovalHandler handler = getGeneralApprovalHandler(flowCase.getReferId());
