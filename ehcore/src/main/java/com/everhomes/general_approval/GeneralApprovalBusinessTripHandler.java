@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.general_approval.PostApprovalFormAskForLeaveValue;
-import com.everhomes.rest.general_approval.PostApprovalFormBussinessTripValue;
+import com.everhomes.rest.general_approval.PostApprovalFormBusinessTripValue;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.user.UserContext;
