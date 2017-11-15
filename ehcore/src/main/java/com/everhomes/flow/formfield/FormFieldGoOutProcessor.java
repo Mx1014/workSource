@@ -10,16 +10,16 @@ import com.everhomes.rest.flow.FlowConditionRelationalOperatorType;
 import com.everhomes.rest.flow.FlowConditionVariableDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
-import com.everhomes.rest.general_approval.PostApprovalFormOverTimeValue;
+import com.everhomes.rest.general_approval.PostApprovalFormGoOutValue;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class FormFieldOverTimeProcessor implements FormFieldProcessor {
+public class FormFieldGoOutProcessor implements FormFieldProcessor{
     @Override
     public GeneralFormFieldType getSupportFieldType() {
-        return GeneralFormFieldType.OVERTIME;
+        return GeneralFormFieldType.GO_OUT;
     }
 
     @Override
@@ -43,8 +43,8 @@ public class FormFieldOverTimeProcessor implements FormFieldProcessor {
 
         dto = new FlowConditionVariableDTO();
         dto.setFieldType(GeneralFormFieldType.NUMBER_TEXT.getCode());
-        dto.setDisplayName("加班时长");
-        dto.setName("加班时长");
+        dto.setDisplayName("外出时长");
+        dto.setName("外出时长");
         dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.NUMBER_TEXT).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
         dtoList.add(dto);
 
@@ -54,13 +54,13 @@ public class FormFieldOverTimeProcessor implements FormFieldProcessor {
     @Override
     public FlowConditionVariable getFlowConditionVariable(GeneralFormFieldDTO fieldDTO, String variable, String extra) {
 
-        PostApprovalFormOverTimeValue overTime = JSON.parseObject(fieldDTO.getFieldValue(), PostApprovalFormOverTimeValue.class);
+        PostApprovalFormGoOutValue goOut = JSON.parseObject(fieldDTO.getFieldValue(), PostApprovalFormGoOutValue.class);
         if ("开始时间".equals(variable)) {
-            return new FlowConditionStringVariable(overTime.getStartTime());
+            return new FlowConditionStringVariable(goOut.getStartTime());
         } else if ("结束时间".equals(variable)) {
-            return new FlowConditionStringVariable(overTime.getEndTime());
-        } else if ("加班时长".equals(variable)) {
-            return new FlowConditionNumberVariable(overTime.getDuration());
+            return new FlowConditionStringVariable(goOut.getEndTime());
+        } else if ("外出时长".equals(variable)) {
+            return new FlowConditionNumberVariable(goOut.getDuration());
         }
         return null;
     }
