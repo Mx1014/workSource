@@ -16,7 +16,12 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),10762,'', 'EhNamespaces', 1000000,2);
 
 SET @id = (SELECT MAX(id) from eh_locale_templates);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'group.notification', '60', 'zh_CN', '行业协会申请加入', '${申请人昵称}申请${企业名}加入${协会名}，是否同意？', '0');
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'group.notification', '61', 'zh_CN', '行业协会通过申请', '您提交的申请：${organizationName}加入${groupName}，已被管理员通过。', '0');
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'group.notification', '62', 'zh_CN', '行业协会拒绝申请', '您提交的申请：${organizationName}加入${groupName}，已被管理员拒绝，理由：${rejectText}。', '0');
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'group.notification', '63', 'zh_CN', '行业协会解散', '${groupName}已被创建者解散。', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'group.notification', '60', 'zh_CN', '行业协会申请加入', '${userName}申请“${organizationName}”加入“${groupName}”，是否同意？', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'group.notification', '61', 'zh_CN', '行业协会通过申请', '您提交的申请：“${organizationName}”加入“${groupName}”，已被管理员通过。', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'group.notification', '62', 'zh_CN', '行业协会拒绝申请', '您提交的申请：“${organizationName}”加入“${groupName}”，已被管理员拒绝，理由：“${rejectText}”。', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'group.notification', '63', 'zh_CN', '行业协会解散', '您加入的行业协会“${groupName}”已解散', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'group.notification', '64', 'zh_CN', '俱乐部解散', '您加入的俱乐部“${groupName}”已解散', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'group.notification', '65', 'zh_CN', '退出俱乐部', '您已退出俱乐部“${groupName}”', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'group.notification', '66', 'zh_CN', '退出行业协会', '您已退出行业协会“${groupName}”', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'group.notification', '67', 'zh_CN', '退出俱乐部发给管理员', '${userName}已退出俱乐部“${groupName}”', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'group.notification', '68', 'zh_CN', '退出行业协会发给管理员', '${userName}已退出行业协会“${groupName}”', '0');

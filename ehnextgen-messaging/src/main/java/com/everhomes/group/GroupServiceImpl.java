@@ -4013,9 +4013,26 @@ public class GroupServiceImpl implements GroupService {
         
         // send notification to all members in the group
         int code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETE_MEMBER;
+
+        //俱乐部和行业协会使用自己的文案
+        if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+
+            if(ClubType.GUILD == ClubType.fromCode(group.getClubType())){
+                code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETE_MEMBER_FOR_GUILD;
+            }else {
+                code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETE_MEMBER_FOR_CLUB;
+            }
+
+        }
+
         String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
         sendMessageToUser(member.getMemberId(), notifyTextForOther, null);
-        
+
+        //俱乐部和行业协会不在发送人数有变化的信息 add by yanjun 20171115
+        if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+            return;
+        }
+
         code = GroupNotificationTemplateCode.GROUP_MEMBER_PUBLIC_MEMBER_CHANGE;
         notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
         
@@ -4540,9 +4557,18 @@ public class GroupServiceImpl implements GroupService {
         String scope = GroupNotificationTemplateCode.SCOPE;
         int code = GroupNotificationTemplateCode.GROUP_DELETE;
 
-        if(ClubType.GUILD == ClubType.fromCode(group.getClubType())){
-            code = GroupNotificationTemplateCode.GROUP_DELETE_FOR_GUILD;
+
+        //俱乐部和行业协会使用自己的文案
+        if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+
+            if(ClubType.GUILD == ClubType.fromCode(group.getClubType())){
+                code = GroupNotificationTemplateCode.GROUP_DELETE_FOR_GUILD;
+            }else {
+                code = GroupNotificationTemplateCode.GROUP_DELETE_FOR_CLUB;
+            }
+
         }
+
 
 //        int code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETE_MEMBER;
 //        //如果是解散群聊，提示普通人${userName}已删除群聊“${groupName}”，update by tt, 20160811
@@ -5019,6 +5045,27 @@ public class GroupServiceImpl implements GroupService {
 
         String scope = GroupNotificationTemplateCode.SCOPE;
         int code = GroupNotificationTemplateCode.GROUP_MEMBER_LEAVE;
+
+        //俱乐部和行业协会使用自己的文案
+        if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+
+            map.put("groupName", group.getName());
+            if (ClubType.GUILD == ClubType.fromCode(group.getClubType())) {
+                code = GroupNotificationTemplateCode.GROUP_MEMBER_LEAVE_FOR_GUILD;
+            } else {
+                code = GroupNotificationTemplateCode.GROUP_MEMBER_LEAVE_FOR_CLUB;
+            }
+
+            String notifyTextForAdmin = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+            List<Long> includeList = getGroupAdminIncludeList(group.getId(), leaveMember.getMemberId(), null);
+            if(includeList.size() > 0) {
+                sendGroupNotification(group.getId(), includeList, null, notifyTextForAdmin, null, null);
+            }
+
+            return;
+
+        }
+
         String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 
         //发送会话内提示时间
