@@ -28,5 +28,9 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'group.notification', '69', 'zh_CN', '加入免费俱乐部发给管理员', '${userName}已加入俱乐部“${groupName}”', '0');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'group.notification', '70', 'zh_CN', '加入免费行业协会发给管理员', '${userName}已加入行业协会“${groupName}”', '0');
 
+SET @id = (SELECT MAX(id) from eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id := @id + 1), 'group', '10036', 'zh_CN', '俱乐部创建者无法被删除');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id := @id + 1), 'group', '10037', 'zh_CN', '行业协会创建者无法被删除');
+
 
 

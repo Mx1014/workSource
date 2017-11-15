@@ -1798,10 +1798,22 @@ public class GroupServiceImpl implements GroupService {
         case ACTIVE:
             Long memberRole = member.getMemberRole();
             if(memberRole != null && memberRole.longValue() == Role.ResourceCreator) {
+
+                int code = GroupServiceErrorCode.ERROR_GROUP_CREATOR_REVOKED_NOT_ALLOW;
+
+                //俱乐部和行业协会使用自己的文案  add by yanjun 20171115
+                if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+                    if(ClubType.GUILD == ClubType.fromCode(group.getClubType())){
+                        code = GroupServiceErrorCode.ERROR_GROUP_CREATOR_REVOKED_NOT_ALLOW_FOR_GUILD;
+                    }else {
+                        code = GroupServiceErrorCode.ERROR_GROUP_CREATOR_REVOKED_NOT_ALLOW_FOR_CLUB;
+                    }
+                }
+
                 LOGGER.error("Creator can't be revoked from the group, userId=" + userId 
                     + ", groupId=" + groupId + ", memberId=" + userId + ", memberRole=" + memberRole);
-                throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, 
-                    GroupServiceErrorCode.ERROR_GROUP_CREATOR_REVOKED_NOT_ALLOW, 
+                throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE,
+                        code,
                         "Creator can't be revoked from the group");
             } else {
                 deleteActiveGroupMember(userId, member, cmd.getRevokeText());
