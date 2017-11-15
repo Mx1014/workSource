@@ -2,6 +2,7 @@ package com.everhomes.flow;
 
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.util.Tuple;
 
 import java.util.List;
@@ -107,4 +108,9 @@ public interface FlowModuleListener {
     default List<FlowPredefinedParamDTO> listPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
         return null;
     }
+
+    /**
+     * 从工作流界面扫描二维码
+     */
+    default void onScanQRCode(FlowCase flowCase, QRCodeDTO qrCode, Long currentUserId) { }
 }

@@ -1,54 +1,31 @@
 // @formatter:off
 package com.everhomes.qrcode;
 
-import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.qrcode.GetQRCodeImageCommand;
+import com.everhomes.rest.qrcode.GetQRCodeInfoCommand;
+import com.everhomes.rest.qrcode.NewQRCodeCommand;
+import com.everhomes.rest.qrcode.QRCodeDTO;
+import com.everhomes.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
-
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.controller.ControllerBase;
-import com.everhomes.discover.RestReturn;
-import com.everhomes.region.Region;
-import com.everhomes.region.RegionProvider;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.forum.NewTopicCommand;
-import com.everhomes.rest.forum.PostDTO;
-import com.everhomes.rest.qrcode.GetQRCodeImageCommand;
-import com.everhomes.rest.qrcode.GetQRCodeInfoCommand;
-import com.everhomes.rest.qrcode.NewQRCodeCommand;
-import com.everhomes.rest.qrcode.QRCodeDTO;
-import com.everhomes.rest.region.ListRegionCommand;
-import com.everhomes.rest.region.RegionAdminStatus;
-import com.everhomes.rest.region.RegionDTO;
-import com.everhomes.rest.region.RegionScope;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.FileHelper;
-import com.everhomes.util.QRCodeConfig;
-import com.everhomes.util.QRCodeEncoder;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SortOrder;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.RequireAuthentication;
+import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @RestController
 @RequestMapping("/qrcode")
@@ -98,7 +75,7 @@ public class QRCodeController extends ControllerBase {
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         
         String qrid = cmd.getQrid();
-        QRCodeDTO qrcode = this.qrcodeService.getQRCodeInfoById(qrid);
+        QRCodeDTO qrcode = this.qrcodeService.getQRCodeInfoById(qrid, cmd.getSource());
         
         BufferedOutputStream bos = null;
         ByteArrayOutputStream out = null;

@@ -466,4 +466,6 @@ public interface FlowService {
     FlowGraphDTO createOrUpdateFlowCondition(CreateFlowConditionCommand cmd);
 
     void updateFlowValidationStatus(UpdateFlowValidationStatusCommand cmd);
+
+    String getFlowCaseRouteURI(Long flowCaseId, Long moduleId);
 }

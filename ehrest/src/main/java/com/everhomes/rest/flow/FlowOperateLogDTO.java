@@ -12,6 +12,7 @@ import java.sql.Timestamp;
  *     <li>flowCaseContent: 任务信息</li>
  *     <li>logContent: 日志内容</li>
  *     <li>createTime: 创建时间</li>
+ *     <li>routeUri: 路由</li>
  * </ul>
  */
 public class FlowOperateLogDTO {
@@ -23,6 +24,7 @@ public class FlowOperateLogDTO {
     private String flowCaseContent;
     private String logContent;
     private Timestamp createTime;
+    private String routeUri;
 
     public Long getFlowCaseId() {
         return flowCaseId;
@@ -78,6 +80,14 @@ public class FlowOperateLogDTO {
 
     public void setModuleId(Long moduleId) {
         this.moduleId = moduleId;
+    }
+
+    public String getRouteUri() {
+        return routeUri;
+    }
+
+    public void setRouteUri(String routeUri) {
+        this.routeUri = routeUri;
     }
 
     @Override

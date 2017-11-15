@@ -630,8 +630,11 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
         com.everhomes.server.schema.tables.EhFlowEventLogs log = Tables.EH_FLOW_EVENT_LOGS;
         com.everhomes.server.schema.tables.EhFlowCases flowCase = Tables.EH_FLOW_CASES;
 
-        SelectQuery<Record8<Long, Long, String, String, Long, String, String, Timestamp>> query = context
-                .select(log.ID, flowCase.ID, flowCase.TITLE, flowCase.MODULE_NAME, flowCase.MODULE_ID, flowCase.CONTENT, log.LOG_CONTENT, log.CREATE_TIME)
+
+
+        SelectQuery<Record9<Long, Long, String, String, String, Long, String, String, Timestamp>> query = context
+                .select(log.ID, flowCase.ID, flowCase.TITLE, flowCase.ROUTE_URI, flowCase.MODULE_NAME, flowCase.MODULE_ID,
+                        flowCase.CONTENT, log.LOG_CONTENT, log.CREATE_TIME)
                 .from(log)
                 .join(flowCase).on(log.FLOW_CASE_ID.eq(flowCase.ID))
                 .getQuery();
@@ -669,6 +672,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
             dto.setId(r.getValue(log.ID));
             dto.setFlowCaseId(r.getValue(flowCase.ID));
             dto.setModuleId(r.getValue(flowCase.MODULE_ID));
+            dto.setRouteUri(r.getValue(flowCase.ROUTE_URI));
             String title = r.getValue(flowCase.TITLE);
             if (title == null || title.isEmpty()) {
                 title = r.getValue(flowCase.MODULE_NAME);
@@ -689,7 +693,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     }
 
     @Override
-    public FlowEventLog isSupervisors(Long userId, FlowCase flowCase) {
+    public FlowEventLog isSupervisor(Long userId, FlowCase flowCase) {
         List<FlowEventLog> objs = this.queryFlowEventLogs(new ListingLocator(), 1, (locator, query) -> {
             query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(flowCase.getId()));
             query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.FLOW_SUPERVISOR.getCode()));
@@ -712,5 +716,19 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
             query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.eq(stepCount));
             return query;
         });
+    }
+
+    @Override
+    public FlowEventLog isHistoryProcessors(Long userId, FlowCase flowCase) {
+        List<FlowEventLog> flowEventLogs = this.queryFlowEventLogs(new ListingLocator(), 1, (locator, query) -> {
+            query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.in(flowCase.getId()));
+            query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(userId));
+            query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.BUTTON_FIRED.getCode()));
+            return query;
+        });
+        if (flowEventLogs != null && flowEventLogs.size() > 0) {
+            return flowEventLogs.get(0);
+        }
+        return null;
     }
 }

@@ -2,6 +2,7 @@ package com.everhomes.flow;
 
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.util.Tuple;
 
 import java.util.List;
@@ -84,4 +85,6 @@ public interface FlowListenerManager {
     List<FlowServiceTypeDTO> listFlowServiceTypes(Integer namespaceId, Long moduleId);
 
     boolean evaluateFlowConditionVariableRelational(FlowCaseState ctx, FlowConditionRelationalOperatorType relationalOperatorType, FlowConditionExpression exp);
+
+    void onScanQRCode(FlowCase flowCase, QRCodeDTO qrCode, Long currentUserId);
 }

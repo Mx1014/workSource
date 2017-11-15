@@ -19,6 +19,7 @@ import javax.validation.constraints.NotNull;
  *     <li>title: 标题</li>
  *     <li>currentOrganizationId: 用户当前场景下的公司id</li>
  *     <li>serviceType: 业务类型</li>
+ *     <li>routeUri: 路由</li>
  * </ul>
  */
 public class CreateFlowCaseCommand {
@@ -35,6 +36,8 @@ public class CreateFlowCaseCommand {
     @NotNull
     private Long currentOrganizationId;
     private String serviceType;
+
+    private String routeUri;
 
     @ItemType(FlowCaseAdditionalFieldDTO.class)
     private FlowCaseAdditionalFieldDTO additionalFieldDTO;
@@ -133,6 +136,14 @@ public class CreateFlowCaseCommand {
 
     public void setAdditionalFieldDTO(FlowCaseAdditionalFieldDTO additionalFieldDTO) {
         this.additionalFieldDTO = additionalFieldDTO;
+    }
+
+    public String getRouteUri() {
+        return routeUri;
+    }
+
+    public void setRouteUri(String routeUri) {
+        this.routeUri = routeUri;
     }
 
     @Override
