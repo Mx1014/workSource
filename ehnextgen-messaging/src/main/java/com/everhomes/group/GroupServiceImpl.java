@@ -569,6 +569,10 @@ public class GroupServiceImpl implements GroupService {
 		if(cmd.getTouristPostPolicy() != null){
             group.setTouristPostPolicy(cmd.getTouristPostPolicy());
         }
+
+        if(cmd.getPhoneNumber() != null){
+		    group.setPhoneNumber(cmd.getPhoneNumber());
+        }
         
         group.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_GROUP.getCode()).enter(()-> {
