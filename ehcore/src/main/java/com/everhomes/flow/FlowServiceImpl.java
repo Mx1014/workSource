@@ -5034,7 +5034,7 @@ public class FlowServiceImpl implements FlowService {
                 fieldName
         );
         if (fieldDTO != null) {
-            return formFieldProcessorManager.getFlowConditionVariable(fieldDTO);
+            return formFieldProcessorManager.getFlowConditionVariable(fieldDTO, variable, extra);
         }
         return null;
     }
@@ -5802,16 +5802,10 @@ public class FlowServiceImpl implements FlowService {
     }
 
     private List<FlowCaseEntity> getFlowCaseEntities(List<FlowUserType> flowUserTypes, FlowCase flowCase) {
-        try {
-            if (flowUserTypes.size() > 0) {
-                return flowListenerManager.onFlowCaseDetailRender(flowCase, flowUserTypes.get(0));
-            }
-            return flowListenerManager.onFlowCaseDetailRender(flowCase, null);
-        } catch (Exception e) {
-            LOGGER.error("Flow module listener onFlowCaseDetailRender error, flowCaseId = "+flowCase.getId(), e);
-            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_DETAIL_RENDER,
-                    "Flow module listener onFlowCaseDetailRender error, flowCaseId=%s", flowCase.getId());
+        if (flowUserTypes.size() > 0) {
+            return flowListenerManager.onFlowCaseDetailRender(flowCase, flowUserTypes.get(0));
         }
+        return flowListenerManager.onFlowCaseDetailRender(flowCase, null);
     }
 
     private List<FlowButtonDTO> getFlowButtonDTOList(FlowGraph flowGraph, Long userId, List<FlowUserType> flowUserTypes, boolean checkProcessor, FlowCase flowCase, List<FlowNode> nodes, List<FlowLane> laneList) {
@@ -5822,7 +5816,6 @@ public class FlowServiceImpl implements FlowService {
         if (flowUserTypes.contains(FlowUserType.APPLIER)) {
             btnList.addAll(getApplierButtonDTOList(flowGraph, flowCase));
         }
-        //SUPERVISOR at last
         return btnList;
     }
 

@@ -1,5 +1,6 @@
 package com.everhomes.flow;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.util.RuntimeErrorException;
@@ -373,7 +374,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     }
 
     private void wrapError(Exception e, FlowModuleListener listener) {
-        throw RuntimeErrorException.errorWith(e, FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_MODULE_LISTENER,
+        throw RuntimeErrorException.errorWith(e, ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                 "Flow module listener error, listener=%s, cause=%s", listener.getClass().getSimpleName(), e);
     }
 }

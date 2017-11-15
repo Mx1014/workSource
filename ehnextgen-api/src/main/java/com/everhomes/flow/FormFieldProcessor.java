@@ -15,9 +15,9 @@ public interface FormFieldProcessor {
 
     List<FlowConditionVariableDTO> convertFieldDtoToFlowConditionVariableDto(Flow flow, GeneralFormFieldDTO fieldDTO);
 
-    FlowConditionVariable getFlowConditionVariable(GeneralFormFieldDTO fieldDTO);
+    FlowConditionVariable getFlowConditionVariable(GeneralFormFieldDTO fieldDTO, String variable, String extra);
 
-    default String parseFormFieldName(FlowCaseState ctx, String variable, String extra) {
-        return variable;
+    default String parseFieldName(Flow flow, String fieldName, String extra) {
+        return fieldName;
     }
 }

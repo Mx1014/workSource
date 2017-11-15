@@ -55,12 +55,12 @@ public class FormFieldProcessorManagerImpl implements FormFieldProcessorManager,
     }
 
     @Override
-    public FlowConditionVariable getFlowConditionVariable(GeneralFormFieldDTO fieldDTO) {
+    public FlowConditionVariable getFlowConditionVariable(GeneralFormFieldDTO fieldDTO, String variable, String extra) {
         GeneralFormFieldType fieldType = GeneralFormFieldType.fromCode(fieldDTO.getFieldType());
         FormFieldProcessor fieldProcessor = processorMap.get(fieldType);
         if (fieldProcessor != null) {
             try {
-                return fieldProcessor.getFlowConditionVariable(fieldDTO);
+                return fieldProcessor.getFlowConditionVariable(fieldDTO, variable, extra);
             } catch (Exception e) {
                 throw RuntimeErrorException.errorWith(e, FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CONDITION_VARIABLE,
                         "Flow condition variable parse error, fieldDTO=%s", fieldDTO);
@@ -89,7 +89,7 @@ public class FormFieldProcessorManagerImpl implements FormFieldProcessorManager,
         FormFieldProcessor fieldProcessor = processorMap.get(fieldType);
         if (fieldProcessor != null) {
             try {
-                return fieldProcessor.parseFormFieldName(ctx, variable, extra);
+                return fieldProcessor.parseFieldName(ctx.getFlowGraph().getFlow(), variable, extra);
             } catch (Exception e) {
                 throw RuntimeErrorException.errorWith(e, FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CONDITION_VARIABLE,
                         "Flow condition variable parse error, fieldType=%s, extra=%s", fieldType, extra);
