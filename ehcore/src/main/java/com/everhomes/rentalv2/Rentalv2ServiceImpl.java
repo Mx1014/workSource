@@ -3195,6 +3195,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			User user = UserContext.current().getUser();
 			paymentParamsDTO.setAcct(user.getNamespaceUserToken());
 			preOrderCommand.setPaymentParams(paymentParamsDTO);
+			preOrderCommand.setCommitFlag(1);
 
 		}
 
