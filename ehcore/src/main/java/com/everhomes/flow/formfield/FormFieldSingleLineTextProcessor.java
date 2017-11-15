@@ -27,13 +27,6 @@ public class FormFieldSingleLineTextProcessor implements FormFieldProcessor {
         return GeneralFormFieldType.SINGLE_LINE_TEXT;
     }
 
-    protected List<FlowConditionRelationalOperatorType> getSupportOperatorList() {
-        List<FlowConditionRelationalOperatorType> operatorTypes = new ArrayList<>();
-        operatorTypes.add(FlowConditionRelationalOperatorType.EQUAL);
-        operatorTypes.add(FlowConditionRelationalOperatorType.NOT_EQUAL);
-        return operatorTypes;
-    }
-
     @Override
     public List<FlowConditionVariableDTO> convertFieldDtoToFlowConditionVariableDto(Flow flow, GeneralFormFieldDTO fieldDTO) {
         List<FlowConditionVariableDTO> dtoList = new ArrayList<>();
@@ -44,7 +37,7 @@ public class FormFieldSingleLineTextProcessor implements FormFieldProcessor {
         dto.setName(fieldDTO.getFieldName());
         dto.setExtra("11111111");
 
-        dto.setOperators(getSupportOperatorList().stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
+        dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.SINGLE_LINE_TEXT).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
 
         dtoList.add(dto);
         return dtoList;

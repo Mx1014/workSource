@@ -36,7 +36,7 @@ public class FormFieldDropBoxProcessor extends FormFieldSingleLineTextProcessor 
         dto.setDisplayName(fieldDTO.getFieldDisplayName());
         dto.setName(fieldDTO.getFieldName());
 
-        dto.setOperators(getSupportOperatorList().stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
+        dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.DROP_BOX).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
 
         // {"selectValue":["财务部","行政与人力资源部","数量与质量运营部","市场-品牌部","市场-市场拓展部","市场-运营部",
         // "产品-产品组","产品-设计组","产品-项目管理组","研发-前端开发组","研发-移动开发组","研发-后端开发组","研发-测试组"]}

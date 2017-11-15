@@ -40,13 +40,14 @@ public class FormFieldAskForLeaveProcessor implements FormFieldProcessor {
         FlowConditionVariableDTO dto;
 
         dto = new FlowConditionVariableDTO();
-        dto.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+        dto.setFieldType(GeneralFormFieldType.DROP_BOX.getCode());
         dto.setDisplayName("请假类型");
         dto.setName("请假类型");
+        dto.setOptions(null);
         dto.setExtra("");
         //todo:操作符确定
         // PostApprovalFormAskForLeaveValue field = JSON.parseObject(fieldDTO.getFieldValue(), PostApprovalFormAskForLeaveValue.class);
-        dto.setOperators(null);
+        dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.DROP_BOX).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
         dtoList.add(dto);
 
         dto = new FlowConditionVariableDTO();
@@ -56,7 +57,7 @@ public class FormFieldAskForLeaveProcessor implements FormFieldProcessor {
         dto.setExtra("");
         //todo:操作符确定
         // PostApprovalFormAskForLeaveValue field = JSON.parseObject(fieldDTO.getFieldValue(), PostApprovalFormAskForLeaveValue.class);
-        dto.setOperators(null);
+        dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.MULTI_LINE_TEXT).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
         dtoList.add(dto);
 
         dto = new FlowConditionVariableDTO();
@@ -66,7 +67,7 @@ public class FormFieldAskForLeaveProcessor implements FormFieldProcessor {
         dto.setExtra("");
         //todo:操作符确定
         // PostApprovalFormAskForLeaveValue field = JSON.parseObject(fieldDTO.getFieldValue(), PostApprovalFormAskForLeaveValue.class);
-        dto.setOperators(null);
+        dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.MULTI_LINE_TEXT).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
         dtoList.add(dto);
 
         dto = new FlowConditionVariableDTO();
@@ -76,14 +77,19 @@ public class FormFieldAskForLeaveProcessor implements FormFieldProcessor {
         dto.setExtra("");
         //todo:操作符确定,是否支持浮点数
         // PostApprovalFormAskForLeaveValue field = JSON.parseObject(fieldDTO.getFieldValue(), PostApprovalFormAskForLeaveValue.class);
-        dto.setOperators(null);
+        dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.NUMBER_TEXT).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
         dtoList.add(dto);
 
         return dtoList;
     }
 
     @Override
-    public FlowConditionVariable getFlowConditionVariable(GeneralFormFieldDTO fieldDTO) {
+    public FlowConditionVariable getFlowConditionVariable(GeneralFormFieldDTO fieldDTO, String variable, String extra) {
+        return null;
+    }
+
+    @Override
+    public String parseFieldName(Flow flow, String fieldName, String extra) {
         return null;
     }
 

@@ -27,17 +27,6 @@ public class FormFieldNumberTextProcessor implements FormFieldProcessor {
         return GeneralFormFieldType.NUMBER_TEXT;
     }
 
-    protected List<FlowConditionRelationalOperatorType> getSupportOperatorList() {
-        List<FlowConditionRelationalOperatorType> operatorTypes = new ArrayList<>();
-        operatorTypes.add(FlowConditionRelationalOperatorType.EQUAL);
-        operatorTypes.add(FlowConditionRelationalOperatorType.NOT_EQUAL);
-        operatorTypes.add(FlowConditionRelationalOperatorType.GREATER_THEN);
-        operatorTypes.add(FlowConditionRelationalOperatorType.GREATER_OR_EQUAL);
-        operatorTypes.add(FlowConditionRelationalOperatorType.LESS_THEN);
-        operatorTypes.add(FlowConditionRelationalOperatorType.LESS_OR_EQUAL);
-        return operatorTypes;
-    }
-
     @Override
     public List<FlowConditionVariableDTO> convertFieldDtoToFlowConditionVariableDto(Flow flow, GeneralFormFieldDTO fieldDTO) {
         List<FlowConditionVariableDTO> dtoList = new ArrayList<>();
@@ -48,7 +37,7 @@ public class FormFieldNumberTextProcessor implements FormFieldProcessor {
         dto.setName(fieldDTO.getFieldName());
         dto.setExtra("{'url':'http://zdadasd'}");
 
-        dto.setOperators(getSupportOperatorList().stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
+        dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.NUMBER_TEXT).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
 
         dtoList.add(dto);
         return dtoList;
