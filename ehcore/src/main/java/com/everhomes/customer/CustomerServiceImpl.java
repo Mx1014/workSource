@@ -283,15 +283,15 @@ public class CustomerServiceImpl implements CustomerService {
         }
         CreateEnterpriseCommand command = new CreateEnterpriseCommand();
         command.setName(customer.getName());
-        command.setDisplayName(customer.getNickName());
+//        command.setDisplayName(customer.getNickName());
         command.setNamespaceId(customer.getNamespaceId());
         command.setAvatar(customer.getCorpLogoUri());
-        command.setDescription(customer.getCorpDescription());
+//        command.setDescription(customer.getCorpDescription());
         command.setCommunityId(customer.getCommunityId());
-        command.setMemberCount(customer.getCorpEmployeeAmount() == null ? 0 : customer.getCorpEmployeeAmount() + 0L);
-        command.setContactor(customer.getContactName());
-        command.setContactsPhone(customer.getContactPhone());
-        command.setEntries(customer.getContactMobile());
+//        command.setMemberCount(customer.getCorpEmployeeAmount() == null ? 0 : customer.getCorpEmployeeAmount() + 0L);
+//        command.setContactor(customer.getContactName());
+//        command.setContactsPhone(customer.getContactPhone());
+//        command.setEntries(customer.getContactMobile());
         command.setAddress(customer.getContactAddress());
         command.setWebsite(customer.getCorpWebsite());
         return organizationService.createEnterprise(command);
