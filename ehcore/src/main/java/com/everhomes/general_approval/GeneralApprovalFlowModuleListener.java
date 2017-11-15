@@ -207,10 +207,12 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     @Override
     public void onFlowCaseEnd(FlowCaseState ctx) {
         // 审批通过
-    	FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
-        LOGGER.debug("审批终止(通过),handler 执行 onFlowCaseEnd ");
-        GeneralApprovalHandler handler = getGeneralApprovalHandler(flowCase.getReferId());
-        handler.onFlowCaseEnd(flowCase);
+        if (!ctx.getStepType().equals(FlowStepType.ABSORT_STEP.getCode())) {
+            FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
+            LOGGER.debug("审批终止(通过),handler 执行 onFlowCaseEnd ");
+            GeneralApprovalHandler handler = getGeneralApprovalHandler(flowCase.getReferId());
+            handler.onFlowCaseEnd(flowCase);
+        }
     }
 
     @Override
