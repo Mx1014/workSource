@@ -159,19 +159,19 @@ public class PmTaskController extends ControllerBase {
           return response;
       }
       
-//      /**
-//       * <b>URL: /pmtask/getTaskDetail</b>
-//       * <p>获取任务详情</p>
-//       */
-//      @RequestMapping("getTaskDetail")
-//      @RestReturn(value=PmTaskDTO.class)
-//      public RestResponse getTaskDetail(GetTaskDetailCommand cmd) {
-//    	  PmTaskDTO  res = pmTaskService.getTaskDetail(cmd);
-//          RestResponse response = new RestResponse(res);
-//          response.setErrorCode(ErrorCodes.SUCCESS);
-//          response.setErrorDescription("OK");
-//          return response;
-//      }
+      /**
+       * <b>URL: /pmtask/getTaskDetail</b>
+       * <p>获取任务详情-越空间</p>
+       */
+      @RequestMapping("getTaskDetail")
+      @RestReturn(value=PmTaskDTO.class)
+      public RestResponse getTaskDetail(GetTaskDetailCommand cmd) {
+    	  PmTaskDTO  res = pmTaskService.getTaskDetail(cmd);
+          RestResponse response = new RestResponse(res);
+          response.setErrorCode(ErrorCodes.SUCCESS);
+          response.setErrorDescription("OK");
+          return response;
+      }
       
 //  	/**
 //  	 * <b>URL: /pmtask/assignTask</b>
@@ -303,19 +303,19 @@ public class PmTaskController extends ControllerBase {
 //		return response;
 //	}
   	
-//	/**
-//     * <b>URL: /pmtask/listUserTasks</b>
-//     * <p>获取任务列表</p>
-//     */
-//    @RequestMapping("listUserTasks")
-//    @RestReturn(value=ListUserTasksResponse.class)
-//    public RestResponse listUserTasks(ListUserTasksCommand cmd) {
-//    	ListUserTasksResponse res = pmTaskService.listUserTasks(cmd);
-//        RestResponse response = new RestResponse(res);
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
+	/**
+     * <b>URL: /pmtask/listUserTasks</b>
+     * <p>获取任务列表-越空间使用</p>
+     */
+    @RequestMapping("listUserTasks")
+    @RestReturn(value=ListUserTasksResponse.class)
+    public RestResponse listUserTasks(ListUserTasksCommand cmd) {
+    	ListUserTasksResponse res = pmTaskService.listUserTasks(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 //    /**
 //     * <b>URL: /pmtask/listOperatePersonnels</b>
