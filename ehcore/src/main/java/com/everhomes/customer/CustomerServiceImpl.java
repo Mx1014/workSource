@@ -270,11 +270,15 @@ public class CustomerServiceImpl implements CustomerService {
             if(detail != null) {
                 detail.setAvatar(customer.getCorpLogoUri());
                 detail.setAddress(customer.getContactAddress());
+                detail.setLatitude(customer.getLatitude());
+                detail.setLongitude(customer.getLongitude());
                 organizationProvider.updateOrganizationDetail(detail);
             } else {
                 detail = new OrganizationDetail();
                 detail.setOrganizationId(org.getId());
                 detail.setAddress(customer.getContactAddress());
+                detail.setLatitude(customer.getLatitude());
+                detail.setLongitude(customer.getLongitude());
                 detail.setAvatar(customer.getCorpLogoUri());
                 detail.setCreateTime(org.getCreateTime());
                 organizationProvider.createOrganizationDetail(detail);
@@ -293,6 +297,12 @@ public class CustomerServiceImpl implements CustomerService {
 //        command.setContactsPhone(customer.getContactPhone());
 //        command.setEntries(customer.getContactMobile());
         command.setAddress(customer.getContactAddress());
+        if(customer.getLatitude() != null) {
+            command.setLatitude(customer.getLatitude().toString());
+        }
+        if(customer.getLongitude() != null) {
+            command.setLongitude(customer.getLongitude().toString());
+        }
         command.setWebsite(customer.getCorpWebsite());
         return organizationService.createEnterprise(command);
     }
@@ -343,6 +353,8 @@ public class CustomerServiceImpl implements CustomerService {
             command.setCommunityId(updateCustomer.getCommunityId());
             command.setMemberCount(updateCustomer.getCorpEmployeeAmount() == null ? 0 : updateCustomer.getCorpEmployeeAmount() + 0L);
             command.setAddress(updateCustomer.getContactAddress());
+            command.setLongitude(updateCustomer.getLongitude());
+            command.setLatitude(updateCustomer.getLatitude());
             command.setWebsite(updateCustomer.getCorpWebsite());
             organizationService.updateEnterprise(command, false);
         } else {//没有企业的要新增一个

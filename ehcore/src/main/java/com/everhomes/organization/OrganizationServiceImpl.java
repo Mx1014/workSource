@@ -1197,23 +1197,27 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (null != addressDTOs && 0 != addressDTOs.size()) {
                 this.addAddresses(organization.getId(), addressDTOs, user.getId());
             }
+
+            createEnterpriseCustomer(organization, cmd.getAvatar(), enterprise, cmd.getCommunityId());
             return null;
         });
 
         organizationSearcher.feedDoc(organization);
-        createEnterpriseCustomer(organization, cmd.getAvatar(), cmd.getAddress(), cmd.getCommunityId());
+
 
         return ConvertHelper.convert(organization, OrganizationDTO.class);
     }
 
-    private void createEnterpriseCustomer(Organization organization, String logo, String address, Long communityId) {
+    private void createEnterpriseCustomer(Organization organization, String logo, OrganizationDetail enterprise, Long communityId) {
         List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(organization.getNamespaceId(), organization.getName());
         if(customers != null && customers.size() > 0) {
             EnterpriseCustomer customer = customers.get(0);
             customer.setOrganizationId(organization.getId());
             customer.setCorpWebsite(organization.getWebsite());
             customer.setCorpLogoUri(logo);
-            customer.setContactAddress(address);
+            customer.setContactAddress(enterprise.getAddress());
+            customer.setLatitude(enterprise.getLatitude());
+            customer.setLongitude(enterprise.getLongitude());
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 
@@ -1225,7 +1229,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             customer.setName(organization.getName());
             customer.setCorpWebsite(organization.getWebsite());
             customer.setCorpLogoUri(logo);
-            customer.setContactAddress(address);
+            customer.setContactAddress(enterprise.getAddress());
+            customer.setLatitude(enterprise.getLatitude());
+            customer.setLongitude(enterprise.getLongitude());
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
         }
@@ -1387,6 +1393,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 customer.setName(organization.getName());
                 customer.setNickName(organizationDetail.getDisplayName());
                 customer.setContactAddress(organizationDetail.getAddress());
+                customer.setLatitude(organizationDetail.getLatitude());
+                customer.setLongitude(organizationDetail.getLongitude());
                 customer.setCorpWebsite(organization.getWebsite());
                 customer.setCorpLogoUri(organizationDetail.getAvatar());
                 enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
