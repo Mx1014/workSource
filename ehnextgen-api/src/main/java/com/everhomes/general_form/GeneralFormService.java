@@ -37,6 +37,11 @@ public interface GeneralFormService {
 			List<GeneralFormFieldDTO> fieldDTOs, boolean showDefaultFields);
 
 	List<FlowCaseEntity> getGeneralFormFlowEntities(GetGeneralFormValuesCommand cmd, boolean showDefaultFields);
+
+    /**
+     * 根据owner和字段名称获取字段的值
+     */
+    GeneralFormFieldDTO getGeneralFormValueByOwner(String moduleType, Long moduleId, String ownerType, Long ownerId, String fieldName);
 //
 //	void createGeneralFormGroup(CreateGeneralFormGroupCommand cmd);
 //
@@ -44,9 +49,10 @@ public interface GeneralFormService {
 
 //	GeneralFormDTO getGeneralFormTemplate(GeneralFormTemplateCommand cmd);
 
+	GeneralFormDTO verifyApprovalFormName(VerifyApprovalFormNameCommand cmd);
+
 	GeneralFormGroup createGeneralFormGroup(GeneralForm form, List<GeneralFormGroupDTO> groupDTOS);
 
 	void updateGeneralFormGroupByFormId(GeneralFormGroup group, GeneralForm form, List<GeneralFormGroupDTO> groupDTOS);
 
-	GeneralFormDTO verifyApprovalFormName(VerifyApprovalFormNameCommand cmd);
 }

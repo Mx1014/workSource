@@ -1,14 +1,17 @@
+// @formatter:off
 package com.everhomes.rest.flow;
 
 /**
  * <ul>
  *     <li>VARIABLE("variable"): 变量类型，${amount}</li>
  *     <li>CONST("const"): 常量类型，数字常量</li>
+ *     <li>FORM("form"): 表单变量</li>
+ *     <li>OPTION("option"): 选项</li>
  * </ul>
  */
 public enum FlowConditionExpressionVarType {
 
-    VARIABLE("variable"), CONST("const");
+    VARIABLE("variable"), CONST("const"), FORM("form"), OPTION("option");
 
     private String code;
 

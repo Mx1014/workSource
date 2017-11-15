@@ -5304,7 +5304,8 @@ public class UserServiceImpl implements UserService {
         User user = UserContext.current().getUser();
         UserLogin login = UserContext.current().getLogin();
         SystemInfoResponse resp = new SystemInfoResponse();
-        resp.setUploadUrlInBrowser("https://upload.zuolin.com");
+        String urlInBrowser = configProvider.getValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.APP_SYSTEM_UPLOAD_URL_IN_BROWSER, "https://upload.zuolin.com");
+        resp.setUploadUrlInBrowser(urlInBrowser);
         
         if(user != null && user.getId() >= User.MAX_SYSTEM_USER_ID && login != null) {
             String userKey = NameMapper.getCacheKey("user", user.getId(), null);

@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 /**
  * <ul>
  * <li>isEvaluate: 是否是评价节点</li>
+ * <li>extra: 日志附加信息，json格式，比如: {"route":"zl://browser/i"}</li>
  * </ul>
  * @author janson
  *
@@ -30,6 +31,8 @@ public class FlowEventLogDTO {
     private Long flowButtonId;
     private Timestamp createTime;
     private Byte isEvaluate;
+
+    private String extra;
 
     public Long getId() {
         return id;
@@ -173,6 +176,14 @@ public class FlowEventLogDTO {
 
     public void setButtonFiredStep(String buttonFiredStep) {
         this.buttonFiredStep = buttonFiredStep;
+    }
+
+    public String getExtra() {
+        return extra;
+    }
+
+    public void setExtra(String extra) {
+        this.extra = extra;
     }
 
     @Override

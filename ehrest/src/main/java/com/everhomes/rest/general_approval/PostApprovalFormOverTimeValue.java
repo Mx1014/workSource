@@ -15,7 +15,7 @@ public class PostApprovalFormOverTimeValue {
 
 	private String endTime;
 
-	private String duration;
+	private Double duration;
 
 	public String getStartTime() {
 		return startTime;
@@ -33,11 +33,11 @@ public class PostApprovalFormOverTimeValue {
 		this.endTime = endTime;
 	}
 
-	public String getDuration() {
+	public Double getDuration() {
 		return duration;
 	}
 
-	public void setDuration(String duration) {
+	public void setDuration(Double duration) {
 		this.duration = duration;
 	}
 

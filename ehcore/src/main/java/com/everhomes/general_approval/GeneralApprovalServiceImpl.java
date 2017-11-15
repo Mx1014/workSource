@@ -850,7 +850,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     }
 
     @Override
-    public GeneralApproval getGeneralApprovalByAttribute(Long ownerId, String attribute){
+    public GeneralApproval getGeneralApprovalByAttribute(Long ownerId, String attribute) {
         GeneralApproval approval = generalApprovalProvider.getGeneralApprovalByAttribute(UserContext.getCurrentNamespaceId(), ownerId, attribute);
         return approval;
     }
@@ -964,10 +964,6 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 "审批状态", "审批记录", "当前审批人", "督办人");
         //  4. Start to write the excel
         XSSFWorkbook workbook = exportGeneralApprovalRecordsFile(mainTitle, subTitle, titles, response.getRecords());
-
-/*        List<Long> flowCaseIds = response.getRecords().stream().map(r -> {
-            return r.getFlowCaseId();
-        }).collect(Collectors.toList());*/
         writeExcel(workbook, httpResponse);
     }
 
@@ -1017,13 +1013,17 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         //  3.Set the title of the approval lists
         Row titleRow = sheet.createRow(2);
         for (int i = 0; i < list.size(); i++) {
-            sheet.setColumnWidth(i,15*256);
+            sheet.setColumnWidth(i, 15 * 256);
             Cell cell = titleRow.createCell(i);
             cell.setCellValue(list.get(i));
         }
     }
 
     private void createGeneralApprovalRecordsFileData(XSSFWorkbook workbook, Row dataRow, GeneralApprovalRecordDTO data) {
+
+        XSSFCellStyle wrapStyle = workbook.createCellStyle();
+        wrapStyle.setWrapText(true);
+
         //  1. basic data from flowCases
         dataRow.createCell(0).setCellValue(data.getApprovalNo());
         dataRow.createCell(1).setCellValue(data.getCreateTime());
@@ -1037,7 +1037,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             for (int i = 4; i < entitiyLists.size(); i++) {
                 formLogs += entitiyLists.get(i).getKey() + " : " + entitiyLists.get(i).getValue() + "\n";
             }
-            dataRow.createCell(4).setCellValue(formLogs);
+            Cell formCell = dataRow.createCell(4);
+            formCell.setCellStyle(wrapStyle);
+            formCell.setCellValue(formLogs);
         }
 
         //  3. approval status
@@ -1058,17 +1060,20 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             for (int i = 0; i < operateLogLists.size(); i++) {
                 operateLogs += operateLogLists.get(i).getFlowCaseContent() + "\n";
             }
-            dataRow.createCell(6).setCellValue(operateLogs);
+            Cell logCell = dataRow.createCell(6);
+            logCell.setCellStyle(wrapStyle);
+            logCell.setCellValue(operateLogs);
         }
 
         //  5. the current operator
-        List<UserInfo> processorLists = flowService.getCurrentProcessors(data.getFlowCaseId(),true);
-        if (processorLists != null && processorLists.size() > 0) {
+        FlowCaseProcessorsProcessor processorRes = flowService.getCurrentProcessors(data.getFlowCaseId(), true);
+        if (processorRes.getProcessorsInfoList() != null && processorRes.getProcessorsInfoList().size() > 0) {
             String processors = "";
-            for (int i = 0; i < processorLists.size(); i++) {
-                processors += processorLists.get(i).getNickName() + ", ";
+            for (int i = 0; i < processorRes.getProcessorsInfoList().size(); i++) {
+                processors += processorRes.getProcessorsInfoList().get(i).getNickName() + ",";
             }
-            processors = processors.substring(0, processors.length()-1);
+            if (!"".equals(processors))
+                processors = processors.substring(0, processors.length() - 1);
             dataRow.createCell(7).setCellValue(processors);
         }
 
@@ -1077,10 +1082,11 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         List<UserInfo> supervisorLists = flowService.getSupervisor(flowCase);
         if (supervisorLists != null && supervisorLists.size() > 0) {
             String supervisors = "";
-            for (int i = 0; i < processorLists.size(); i++) {
-                supervisors += supervisorLists.get(i).getNickName() + ", ";
+            for (int i = 0; i < supervisorLists.size(); i++) {
+                supervisors += supervisorLists.get(i).getNickName() + ",";
             }
-            supervisors = supervisors.substring(0, supervisors.length()-1);
+            if (!"".equals(supervisors))
+                supervisors = supervisors.substring(0, supervisors.length() - 1);
             dataRow.createCell(8).setCellValue(supervisors);
         }
     }
@@ -1093,7 +1099,6 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             String fileName = "审批记录.xlsx";
             httpResponse.setContentType("application/msexcel");
             httpResponse.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
-            //response.addHeader("Content-Length", "" + out.);
             OutputStream excelStream = new BufferedOutputStream(httpResponse.getOutputStream());
             httpResponse.setContentType("application/msexcel");
             excelStream.write(out.toByteArray());

@@ -55,12 +55,6 @@ public class PostApprovalFormAskForLeaveValue {
 		this.endTime = endTime;
 	}
 
-
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
-
 	public Double getDuration() {
 		return duration;
 	}
@@ -68,4 +62,10 @@ public class PostApprovalFormAskForLeaveValue {
 	public void setDuration(Double duration) {
 		this.duration = duration;
 	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+
 }

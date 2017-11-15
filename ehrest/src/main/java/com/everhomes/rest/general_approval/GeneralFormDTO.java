@@ -174,14 +174,6 @@ public class GeneralFormDTO {
 		this.formFields = formFields;
 	}
 
-	public List<GeneralFormGroupDTO> getFormGroups() {
-		return formGroups;
-	}
-
-	public void setFormGroups(List<GeneralFormGroupDTO> formGroups) {
-		this.formGroups = formGroups;
-	}
-
 	public String getFormAttribute() {
 		return formAttribute;
 	}
@@ -206,6 +198,13 @@ public class GeneralFormDTO {
 		this.deleteFlag = deleteFlag;
 	}
 
+	public List<GeneralFormGroupDTO> getFormGroups() {
+		return formGroups;
+	}
+
+	public void setFormGroups(List<GeneralFormGroupDTO> formGroups) {
+		this.formGroups = formGroups;
+	}
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

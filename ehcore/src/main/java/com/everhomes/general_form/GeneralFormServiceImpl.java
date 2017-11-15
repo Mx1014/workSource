@@ -8,6 +8,11 @@ import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.general_approval.GeneralApprovalVal;
+import com.everhomes.general_approval.GeneralApprovalValProvider;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.flow.*;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.flow.FlowCaseEntity;
@@ -22,8 +27,10 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
+import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +57,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 	private GeneralFormValProvider generalFormValProvider;
 	@Autowired
 	private ContentServerService contentServerService;
+
+    @Autowired
+    private GeneralApprovalValProvider generalApprovalValProvider;
 
 	@Override
 	public GeneralFormDTO getTemplateByFormId(GetTemplateByFormIdCommand cmd) {
@@ -308,7 +318,33 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 		return entities;
 	}
 
-	@Override
+    @Override
+    public GeneralFormFieldDTO getGeneralFormValueByOwner(String moduleType, Long moduleId, String ownerType, Long ownerId, String fieldName) {
+        GeneralFormFieldDTO dto = null;
+        // 审批的值是在一张表
+        if (moduleId == 52000L) {
+            GeneralApprovalVal approvalVal = generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(ownerId, fieldName);
+            if (approvalVal != null) {
+                dto = new GeneralFormFieldDTO();
+                dto.setFieldType(approvalVal.getFieldType());
+                dto.setFieldValue(approvalVal.getFieldStr3());
+                dto.setFieldName(approvalVal.getFieldName());
+            }
+        }
+        // 其他表单的值是在另一张表
+        else {
+            GeneralFormVal formVal = generalFormValProvider.getGeneralFormValBySourceIdAndName(ownerId, ownerType, fieldName);
+            if (formVal != null) {
+                dto = new GeneralFormFieldDTO();
+                dto.setFieldType(formVal.getFieldType());
+                dto.setFieldValue(formVal.getFieldValue());
+                dto.setFieldName(formVal.getFieldName());
+            }
+        }
+        return dto;
+    }
+
+    @Override
 	public void processFlowEntities(List<FlowCaseEntity> entities, List<GeneralFormVal> vals, List<GeneralFormFieldDTO> fieldDTOs) {
 		processFlowEntities(entities, vals, fieldDTOs, false);
 	}
@@ -602,6 +638,15 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         return null;
     }
 
+    @Override
+    public GeneralFormDTO verifyApprovalFormName(VerifyApprovalFormNameCommand cmd) {
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByName(cmd.getModuleId(),
+                cmd.getOwnerId(), cmd.getOwnerType(), cmd.getFormName());
+        if (form != null)
+            return ConvertHelper.convert(form, GeneralFormDTO.class);
+        return null;
+    }
+
     //  表单控件组的修改(与表单绑定故作为私有方法)
 	@Override
     public void updateGeneralFormGroupByFormId(GeneralFormGroup group, GeneralForm form, List<GeneralFormGroupDTO> groupDTOS) {
@@ -609,15 +654,6 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         group.setFormVersion(form.getFormVersion());
         group.setTemplateText(JSON.toJSONString(groupDTOS));
         generalFormProvider.updateGeneralFormGroup(group);
-    }
-	
-	@Override
-    public GeneralFormDTO verifyApprovalFormName(VerifyApprovalFormNameCommand cmd) {
-        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByName(cmd.getModuleId(),
-                cmd.getOwnerId(), cmd.getOwnerType(), cmd.getFormName());
-        if (form != null)
-            return ConvertHelper.convert(form, GeneralFormDTO.class);
-        return null;
     }
 }
 
