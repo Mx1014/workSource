@@ -3550,9 +3550,32 @@ public class GroupServiceImpl implements GroupService {
                 }
             map.put("userName", userName);
             String locale = user.getLocale();
-            
+
             // send notification to who is requesting to join the group
             String scope = GroupNotificationTemplateCode.SCOPE;
+
+            //俱乐部和行业协会使用自己的文案  add by yanjun 20171115
+            if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+
+                int code;
+                map.put("groupName", group.getName());
+                if (ClubType.GUILD == ClubType.fromCode(group.getClubType())) {
+                    code = GroupNotificationTemplateCode.GROUP_MEMBER_JOIN_FREE_FOR_GUILD;
+                } else {
+                    code = GroupNotificationTemplateCode.GROUP_MEMBER_JOIN_FREE_FOR_CLUB;
+                }
+
+                String notifyTextForAdmin = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+                List<Long> includeList = getGroupAdminIncludeList(group.getId(), member.getMemberId(), null);
+                if(includeList.size() > 0) {
+                    sendGroupNotification(group.getId(), includeList, null, notifyTextForAdmin, null, null);
+                }
+
+                return;
+
+            }
+
+
             int code = GroupNotificationTemplateCode.GROUP_MEMBER_PUBLIC_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
             sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
@@ -3590,10 +3613,12 @@ public class GroupServiceImpl implements GroupService {
         if(group.getPrivateFlag().equals(GroupPrivacy.PRIVATE.getCode())) {
             this.sendGroupNotificationPrivateForReqToJoinGroupFreely(group, member);
         } else {
-        	//加入俱乐部时，如果不需要审核，不发消息，add by tt, 20161104
-        	if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
-				return;
-			}
+
+            //产品要求需要发消息   add by yanjun 20171115
+//        	//加入俱乐部时，如果不需要审核，不发消息，add by tt, 20161104
+//        	if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+//        	    return;
+//			}
             this.sendGroupNotificationPublicForReqToJoinGroupFreely(group, member);
         }
     }

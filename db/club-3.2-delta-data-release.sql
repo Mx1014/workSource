@@ -25,3 +25,8 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'group.notification', '66', 'zh_CN', '退出行业协会', '您已退出行业协会“${groupName}”', '0');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'group.notification', '67', 'zh_CN', '退出俱乐部发给管理员', '${userName}已退出俱乐部“${groupName}”', '0');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'group.notification', '68', 'zh_CN', '退出行业协会发给管理员', '${userName}已退出行业协会“${groupName}”', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'group.notification', '69', 'zh_CN', '加入免费俱乐部发给管理员', '${userName}已加入俱乐部“${groupName}”', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'group.notification', '70', 'zh_CN', '加入免费行业协会发给管理员', '${userName}已加入行业协会“${groupName}”', '0');
+
+
+

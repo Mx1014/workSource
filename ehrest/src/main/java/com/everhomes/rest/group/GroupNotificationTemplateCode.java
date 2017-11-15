@@ -75,5 +75,7 @@ public interface GroupNotificationTemplateCode {
     static final int GROUP_MEMBER_DELETE_MEMBER_FOR_GUILD = 66;   //您已退出行业协会“${groupName}”
     static final int GROUP_MEMBER_LEAVE_FOR_CLUB = 67;  //${userName}已退出俱乐部“${groupName}”
     static final int GROUP_MEMBER_LEAVE_FOR_GUILD = 68;  //${userName}已退出行业协会“${groupName}”
+    static final int GROUP_MEMBER_JOIN_FREE_FOR_CLUB = 69;  //${userName}已退出俱乐部“${groupName}”
+    static final int GROUP_MEMBER_JOIN_FREE_FOR_GUILD = 70;  //${userName}已退出行业协会“${groupName}”
 
 }
