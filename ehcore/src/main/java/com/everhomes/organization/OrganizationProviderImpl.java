@@ -5788,27 +5788,32 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
     @Override
-    public List checkOrgExistInOrgOrPaths(Integer namespaceId, List<Long> orgIds, List<String> orgPaths) {
+    public List checkOrgExistInOrgOrPaths(Integer namespaceId, Long organizationId, List<Long> orgIds, List<String> orgPaths) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
 		// in
+		Condition cond1 = null;
 		if(orgIds != null && orgIds.size() > 0){
-			query.addConditions(Tables.EH_ORGANIZATIONS.ID.in(orgIds));
+			cond1 = Tables.EH_ORGANIZATIONS.ID.in(orgIds);
 		}
 		// like
+		Condition cond2 = null;
 		if(orgPaths != null && orgPaths.size() > 0){
-			Condition cond = null;
 			for (String orgPath : orgPaths) {
-				if(cond == null){
-					cond = Tables.EH_ORGANIZATIONS.PATH.like("orgPath + %");
+				if(cond2 == null){
+					cond2 = Tables.EH_ORGANIZATIONS.PATH.like(orgPath +"%");
 				}else{
-					cond = cond.or(Tables.EH_ORGANIZATIONS.PATH.like("orgPath + %"));
+					cond2 = cond2.or(Tables.EH_ORGANIZATIONS.PATH.like(orgPath + "%"));
 				}
 			}
-			if (cond != null)
-				query.addConditions(cond);
 		}
-		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+		if (cond1 != null && cond2 != null) {
+			query.addConditions(cond1.or(cond2));
+		}else if(cond1 != null){
+			query.addConditions(cond1);
+		}else if(cond2 != null){
+			query.addConditions(cond2);
+		}
 		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
 		return query.fetch();
     }

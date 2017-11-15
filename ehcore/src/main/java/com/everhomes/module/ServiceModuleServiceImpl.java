@@ -24,6 +24,8 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.module.*;
+import com.everhomes.rest.oauth2.ModuleManagementType;
+import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -501,14 +503,38 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     }
 
     @Override
-    public List<ServiceModuleDTO> treeServiceModuleApps(TreeServiceModuleCommand cmd) {
+    public TreeServiceModuleAppsResponse treeServiceModuleApps(TreeServiceModuleCommand cmd) {
         checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         //过滤出与scopes匹配的serviceModule
         List<ServiceModuleDTO> tempList = filterByScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId());
 
-        return this.getServiceModuleAppsAsLevelTree(tempList, 0L);
+        TreeServiceModuleAppsResponse response = new TreeServiceModuleAppsResponse();
+        List<ServiceModuleDTO> communityControlList = new ArrayList<>();
+        List<ServiceModuleDTO> orgControlList = new ArrayList<>();
+        List<ServiceModuleDTO> unlimitControlList = new ArrayList<>();
+        //按控制范围进行区分
+        tempList.stream().map(r->{
+            switch (ModuleManagementType.fromCode(r.getModuleControlType())){
+                case COMMUNITY_CONTROL:
+                    communityControlList.add(r);
+                    break;
+                case ORG_CONTROL:
+                    orgControlList.add(r);
+                    break;
+                case UNLIMIT_CONTROL:
+                    unlimitControlList.add(r);
+                    break;
+            }
+            return null;
+        }).collect(Collectors.toList());
+
+        response.setCommunityControlList(this.getServiceModuleAppsAsLevelTree(communityControlList, 0L));
+        response.setOrgControlList(this.getServiceModuleAppsAsLevelTree(orgControlList, 0L));
+        response.setUnlimitControlList(this.getServiceModuleAppsAsLevelTree(unlimitControlList, 0L));
+
+        return response;
     }
 
     @Override

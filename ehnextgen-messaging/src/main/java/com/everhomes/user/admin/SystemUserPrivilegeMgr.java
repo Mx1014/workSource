@@ -192,47 +192,58 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         return false;
     }
 
-    // 按appId校验
-    public boolean checkModuleAppAdmin(String ownerType, Long ownerId, Long userId, Long appId, Long communityId, Long organizationId){
+    // 按appId校验（应用Id）
+    public boolean checkModuleAppAdmin(String ownerType, Long ownerId, Long userId, Long privilegeId, Long appId, Long communityId, Long organizationId){
         Integer namespaceId = UserContext.current().getNamespaceId();
+        // 查询privilegeId关联的模块
+        Long p_moduleId = 0L;
+        List<ServiceModulePrivilege> serviceModules = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(privilegeId, ServiceModulePrivilegeType.ORDINARY);
+        if(0 < serviceModules.size()){
+            ServiceModule module = serviceModuleProvider.findServiceModuleById(serviceModules.get(0).getModuleId());
+            p_moduleId = module.getId();
+            if(module.getLevel() > 2){
+                p_moduleId = module.getParentId();
+            }
+        }
         // 查询app关联的moduleId
         ServiceModuleApp app = this.serviceModuleAppProvider.findServiceModuleAppById(appId);
-        if(app != null){
-            Long moduleId = app.getModuleId();
+        if(app != null && p_moduleId != 0L && p_moduleId == app.getModuleId()){//如果权限对应的moduleId和appId对应的模块Id相等，再校验是否对应用有权
             List<Authorization> authorizations = this.authorizationProvider.listAuthorizations(ownerType, ownerId, OwnerType.USER.getCode(), userId, EntityType.SERVICE_MODULE.getCode(), moduleId, IdentityType.MANAGE.getCode(), appId, null, null, false);
             List<ControlTarget> controlTargets = this.authorizationProvider.listAuthorizationControlConfigs(namespaceId, userId, authorizations.get(0).getControlId());
             if(authorizations != null && authorizations.size() > 0){
                 switch (ModuleManagementType.fromCode(authorizations.get(0).getModuleControlType())){
                     case COMMUNITY_CONTROL:
-                        for (ControlTarget controlTarget : controlTargets) {
-                            if(controlTarget.getId() == communityId){
-                                return true;
+                        if(communityId != null && communityId != 0L){
+                            for (ControlTarget controlTarget : controlTargets) {
+                                if(controlTarget.getId() == communityId){
+                                    return true;
+                                }
                             }
                         }
                         break;
                     case ORG_CONTROL:
-                        List<Long> orgIds = new ArrayList<>();
-                        List<String> orgPaths = new ArrayList<>();
-                        for (ControlTarget controlTarget : controlTargets) {
-                            if(controlTarget.getIncludeChildFlag() == IncludeChildFlagType.YES.getCode()){
-                                Organization org = this.organizationProvider.findOrganizationById(controlTarget.getId());
-                                if(org != null)
-                                    orgPaths.add(org.getPath());
-                            }else{
-                                orgIds.add(controlTarget.getId());
+                        if(organizationId != null && organizationId != 0L){
+                            List<Long> orgIds = new ArrayList<>();
+                            List<String> orgPaths = new ArrayList<>();
+                            for (ControlTarget controlTarget : controlTargets) {
+                                if(controlTarget.getIncludeChildFlag() == IncludeChildFlagType.YES.getCode()){
+                                    Organization org = this.organizationProvider.findOrganizationById(controlTarget.getId());
+                                    if(org != null)
+                                        orgPaths.add(org.getPath());
+                                }else{
+                                    orgIds.add(controlTarget.getId());
+                                }
                             }
-                        }
 
-                        List orgs = this.organizationProvider.checkOrgExistInOrgOrPaths(namespaceId, orgIds, orgPaths);
-                        if(orgs != null && orgs.size() > 0)
-                            return true;
+                            List orgs = this.organizationProvider.checkOrgExistInOrgOrPaths(namespaceId, organizationId, orgIds, orgPaths);
+                            if(orgs != null && orgs.size() > 0)
+                                return true;
+                        }
                     case UNLIMIT_CONTROL:
                         return true;
 
                 }
             }
-            // 检查是否对模块有权
-         return checkModuleAdmin(ownerType, ownerId, userId, moduleId);
         }
         return false;
     }
@@ -307,6 +318,11 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
 
     @Override
     public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId){
+        return  checkUserPrivilege(userId, ownerType, ownerId, currentOrgId, privilegeId, null);
+    }
+
+    @Override
+    public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId, Long appId){
 
         Domain domain = UserContext.current().getDomain();
 
@@ -327,6 +343,14 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
                             LOGGER.debug("check module admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
                             return true;
                         }
+                        // 当需要校验appId，by lei.lv
+                        if(appId != null){
+                            if(checkModuleAppAdmin(ownerType, ownerId, userId, privilegeId, appId, communityId, currentOrgId)){
+                                LOGGER.debug("check moduleApp admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, communityId= {}, privilegeId={}, appId={}" , userId, ownerType, ownerId, currentOrgId, communityId, privilegeId, appId);
+                                return true;
+                            }
+                        }
+
                     }else{
                         if(checkOrganizationAdmin(userId, currentOrgId)){
                             LOGGER.debug("check organization admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);

@@ -20,6 +20,17 @@ public interface UserPrivilegeMgr {
      */
     boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId);
 
+    /**
+     * 新权限校验
+     * @param ownerType
+     * @param ownerId
+     * @param currentOrgId
+     * @param privilegeId
+     * @param appId
+     * @return
+     */
+    boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId, Long appId);
+
 
     /**
      * 新权限校验

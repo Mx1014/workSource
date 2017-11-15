@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.module.*;
+import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -82,10 +83,9 @@ public class ModuleController extends ControllerBase {
      * </p>
      */
     @RequestMapping("treeServiceModuleApps")
-    @RestReturn(value = ServiceModuleDTO.class, collection = true)
+    @RestReturn(value = TreeServiceModuleAppsResponse.class)
     public RestResponse treeServiceModuleApps(@Valid TreeServiceModuleCommand cmd) {
-        List<ServiceModuleDTO> dto = serviceModuleService.treeServiceModuleApps(cmd);
-        RestResponse response = new RestResponse(dto);
+        RestResponse response = new RestResponse(serviceModuleService.treeServiceModuleApps(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

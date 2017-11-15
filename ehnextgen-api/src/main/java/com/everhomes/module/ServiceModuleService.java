@@ -5,6 +5,7 @@ import java.util.List;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.module.*;
+import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 
 public interface ServiceModuleService {
 	List<ServiceModuleDTO> listServiceModules(ListServiceModulesCommand cmd);
@@ -21,7 +22,7 @@ public interface ServiceModuleService {
 
 	List<ServiceModuleDTO> treeServiceModules(TreeServiceModuleCommand cmd);
 
-	List<ServiceModuleDTO> treeServiceModuleApps(TreeServiceModuleCommand cmd);
+	TreeServiceModuleAppsResponse treeServiceModuleApps(TreeServiceModuleCommand cmd);
 
 	ServiceModuleDTO getServiceModule(GetServiceModuleCommand cmd);
 

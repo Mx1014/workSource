@@ -4,7 +4,7 @@ package com.everhomes.rest.oauth2;
  * <ul>
  * <li>COMMUNITY_CONTROL: 受到项目节制</li>
  * <li>ORG_CONTROL: 受到OA架构节制</li>
- * <li>UNLIMIT: 不受控制</li>
+ * <li>UNLIMIT_CONTROL: 不受控制</li>
  * </ul>
  */
 public enum ModuleManagementType {

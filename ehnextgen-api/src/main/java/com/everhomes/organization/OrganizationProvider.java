@@ -530,5 +530,5 @@ public interface OrganizationProvider {
 
 	OrganizationMember findDepartmentMemberByTargetIdAndOrgId(Long userId, Long organizationId);
 
-	List checkOrgExistInOrgOrPaths(Integer namespaceId, List<Long> orgIds, List<String> orgPaths);
+	List checkOrgExistInOrgOrPaths(Integer namespaceId, Long organizationId, List<Long> orgIds, List<String> orgPaths);
 }

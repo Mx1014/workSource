@@ -59,6 +59,8 @@ public class ServiceModuleDTO implements Serializable {
 
 	private Byte multipleFlag;
 
+	private String moduleControlType;
+
 	public Long getId() {
 		return id;
 	}
@@ -185,5 +187,13 @@ public class ServiceModuleDTO implements Serializable {
 
 	public void setServiceModuleApps(List<ServiceModuleAppDTO> serviceModuleApps) {
 		this.serviceModuleApps = serviceModuleApps;
+	}
+
+	public String getModuleControlType() {
+		return moduleControlType;
+	}
+
+	public void setModuleControlType(String moduleControlType) {
+		this.moduleControlType = moduleControlType;
 	}
 }
