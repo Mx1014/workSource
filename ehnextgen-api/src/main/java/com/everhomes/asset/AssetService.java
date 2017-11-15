@@ -153,4 +153,5 @@ public interface AssetService {
 
     void activeAutoBillNotice();
 
+    ShowBillForClientDTO showBillForClientV2(ClientIdentityCommand cmd);
 }

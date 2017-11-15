@@ -62,4 +62,5 @@ public interface AssetVendorHandler {
 
     PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd);
 
+//    ShowBillForClientDTO showBillForClientV2(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId, Byte isOnlyOwedBill, String contractId);
 }

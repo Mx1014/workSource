@@ -671,6 +671,47 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         return preOrder;
     }
 
+//    @Override
+    public ShowBillForClientDTO showBillForClientV2(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId, Byte isOnlyOwedBill, String contractId) {
+//        ShowBillForClientDTO response = new ShowBillForClientDTO();
+//        if(targetType.equals("eh_user")) {
+//            targetId = UserContext.current().getUser().getId();
+//        }
+//        String contractNum = null;
+//        Long cid = null;
+//        try{
+//            cid = Long.parseLong(contractId);
+//        }catch (Exception e){
+//            cid = null;
+//            contractNum = contractId;
+//        }
+//        List<BillDetailDTO> billDetailDTOList = assetProvider.listBillForClient(ownerId,ownerType,targetType,targetId,billGroupId,isOwedBill,cid,contractNum);
+//        HashSet<String> dateStrFilter = new HashSet<>();
+//        BigDecimal amountOwed = new BigDecimal("0");
+//        if(isOwedBill.byteValue() == (byte)1){
+//            for(int i = 0; i < billDetailDTOList.size(); i++) {
+//                BillDetailDTO dto = billDetailDTOList.get(i);
+//                if(dto.getStatus().byteValue() == (byte)2 || dto.getStatus().byteValue() == (byte)0){
+//                    dateStrFilter.add(dto.getDateStr());
+//                    amountOwed = amountOwed.add(dto.getAmountOwed());
+//                }
+//            }
+//        }else if(isOwedBill.byteValue() == (byte)0){
+//            for(int i = 0; i < billDetailDTOList.size(); i++) {
+//                BillDetailDTO dto = billDetailDTOList.get(i);
+//                if(dto.getStatus().byteValue() != (byte)1){
+//                    dateStrFilter.add(dto.getDateStr());
+//                    amountOwed = amountOwed.add(dto.getAmountOwed());
+//                }
+//            }
+//        }
+//        response.setAmountOwed(amountOwed);
+//        response.setBillPeriodMonths(dateStrFilter.size());
+//        response.setBillDetailDTOList(billDetailDTOList);
+//        return response;
+        return null;
+    }
+
 
     @Override
     public ShowBillDetailForClientResponse getBillDetailForClient(String billId,String targetType) {

@@ -1739,7 +1739,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Override
     public List<GetApartmentNameByBuildingNameDTO> getApartmentNameByBuildingName(GetApartmentNameByBuildingNameCommand cmd) {
-        return addressProvider.getApartmentNameByBuildingName(cmd.getBuildingName(), cmd.getCommunityId(), UserContext.getCurrentNamespaceId());
+        return addressProvider.getApartmentNameByBuildingName(cmd.getBuildingName(), cmd.getCommunityId(), cmd.getNamespaceId() == null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId());
     }
     @Override
     public ListNearbyMixCommunitiesCommandV2Response listNearbyMixCommunitiesV2(ListNearbyMixCommunitiesCommand cmd) {

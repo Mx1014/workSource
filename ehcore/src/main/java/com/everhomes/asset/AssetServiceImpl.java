@@ -324,7 +324,7 @@ public class AssetServiceImpl implements AssetService {
                 String templateLocale = UserContext.current().getUser().getLocale();
                 //phoneNums make it fake during test
                 Integer nameSpaceId = UserContext.getCurrentNamespaceId();
-//                nameSpaceId = 999971;
+                nameSpaceId = 999971;
                 smsProvider.sendSms(nameSpaceId, telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
             }
         } catch(Exception e){
@@ -409,7 +409,7 @@ public class AssetServiceImpl implements AssetService {
                 smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
                 String templateLocale = UserContext.current().getUser().getLocale();
                 Integer nameSpaceId = UserContext.getCurrentNamespaceId();
-//                nameSpaceId = 999971;
+                nameSpaceId = 999971;
                 smsProvider.sendSms(nameSpaceId, telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
             }
         } catch(Exception e){
@@ -2553,6 +2553,15 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public void activeAutoBillNotice() {
         autoBillNotice();
+    }
+
+    @Override
+    public ShowBillForClientDTO showBillForClientV2(ClientIdentityCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vendorName = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vendorName);
+//        return handler.showBillForClientV2(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getBillGroupId(),cmd.getIsOnlyOwedBill(),cmd.getContractId());
+        return null;
     }
 
 
