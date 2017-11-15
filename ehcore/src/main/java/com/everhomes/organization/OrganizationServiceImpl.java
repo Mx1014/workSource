@@ -1140,6 +1140,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organization.setGroupId(group.getId());
+            organization.setWebsite(cmd.getWebsite());
             organization.setEmailDomain(cmd.getEmailDomain());
             organizationProvider.createOrganization(organization);
 
@@ -1211,7 +1212,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             customer.setOrganizationId(organization.getId());
             customer.setCorpWebsite(organization.getWebsite());
             customer.setCorpLogoUri(logo);
-            customer.setCorpOpAddress(address);
+            customer.setContactAddress(address);
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 
@@ -1223,7 +1224,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             customer.setName(organization.getName());
             customer.setCorpWebsite(organization.getWebsite());
             customer.setCorpLogoUri(logo);
-            customer.setCorpOpAddress(address);
+            customer.setContactAddress(address);
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
         }

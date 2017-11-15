@@ -269,12 +269,12 @@ public class CustomerServiceImpl implements CustomerService {
             OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(org.getId());
             if(detail != null) {
                 detail.setAvatar(customer.getCorpLogoUri());
-                detail.setAddress(customer.getCorpOpAddress());
+                detail.setAddress(customer.getContactAddress());
                 organizationProvider.updateOrganizationDetail(detail);
             } else {
                 detail = new OrganizationDetail();
                 detail.setOrganizationId(org.getId());
-                detail.setAddress(customer.getCorpOpAddress());
+                detail.setAddress(customer.getContactAddress());
                 detail.setAvatar(customer.getCorpLogoUri());
                 detail.setCreateTime(org.getCreateTime());
                 organizationProvider.createOrganizationDetail(detail);
@@ -292,7 +292,7 @@ public class CustomerServiceImpl implements CustomerService {
         command.setContactor(customer.getContactName());
         command.setContactsPhone(customer.getContactPhone());
         command.setEntries(customer.getContactMobile());
-        command.setAddress(customer.getCorpOpAddress());
+        command.setAddress(customer.getContactAddress());
         return organizationService.createEnterprise(command);
     }
 
