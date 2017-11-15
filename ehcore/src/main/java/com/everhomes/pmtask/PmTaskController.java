@@ -29,20 +29,6 @@ public class PmTaskController extends ControllerBase {
 	private PmTaskService pmTaskService;
 	@Autowired
 	private PmTaskSearch pmTaskSearch;
-
-//	/**
-//     * <b>URL: /pmtask/getPrivileges</b>
-//     * <p>获取权限列表</p>
-//     */
-//    @RequestMapping("getPrivileges")
-//    @RestReturn(value=GetPrivilegesDTO.class)
-//    public RestResponse getPrivileges(GetPrivilegesCommand cmd) {
-//  	    GetPrivilegesDTO res = pmTaskService.getPrivileges(cmd);
-//        RestResponse response = new RestResponse(res);
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
 	
       /**
        * <b>URL: /pmtask/listTaskCategories</b>
@@ -316,22 +302,6 @@ public class PmTaskController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-
-//    /**
-//     * <b>URL: /pmtask/listOperatePersonnels</b>
-//     * <p>查看任务执行人员或维修人员</p>
-//     */
-//    @RequestMapping("listOperatePersonnels")
-//    @RestReturn(value=ListOperatePersonnelsResponse.class)
-//    public RestResponse listOperatePersonnels(ListOperatePersonnelsCommand cmd){
-//
-//    	ListOperatePersonnelsResponse resp = pmTaskService.listOperatePersonnels(cmd);
-//  	  	RestResponse res = new RestResponse(resp);
-//        res.setErrorCode(ErrorCodes.SUCCESS);
-//        res.setErrorDescription("OK");
-//
-//        return res;
-//    }
     
     /**
      * <b>URL: /pmtask/getUserRelatedAddressesByCommunity</b>
@@ -564,4 +534,34 @@ public class PmTaskController extends ControllerBase {
         resp.setErrorDescription("OK");
         return resp;
     }
+
+    /*---------------------------- start 以下接口是为了给客户端打rest包，已经废弃----------------------------------*/
+	/**
+     * <b>URL: /pmtask/getPrivileges</b>
+     * <p>获取权限列表</p>
+     */
+    @RequestMapping("getPrivileges")
+    @RestReturn(value=GetPrivilegesDTO.class)
+    @Deprecated
+    public RestResponse getPrivileges(GetPrivilegesCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /pmtask/listOperatePersonnels</b>
+     * <p>查看任务执行人员或维修人员</p>
+     */
+    @RequestMapping("listOperatePersonnels")
+    @RestReturn(value=ListOperatePersonnelsResponse.class)
+    @Deprecated
+    public RestResponse listOperatePersonnels(ListOperatePersonnelsCommand cmd){
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+
+        return res;
+    }
+    /*---------------------------- end 以上接口是为了给客户端打rest包，已经废弃----------------------------------*/
 }
