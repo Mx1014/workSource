@@ -17,7 +17,7 @@ import java.text.ParseException;
 import java.util.Calendar;
 
 /**
- * 
+ *
  * <ul>
  * 用于审批的默认handler
  * </ul>
@@ -53,30 +53,34 @@ public class GeneralApprovalAbnormalPunchHandler extends GeneralApprovalPunchDef
 
 //    }
 
-//	@Override
+        //	@Override
 //	public void onFlowCaseAbsorted(FlowCase flowCase) {
 //		super();
 //
 //	}
 //
-	@Override
-	public PunchExceptionRequest onFlowCaseEnd(FlowCase flowCase) {
-        //把狀態置为审批通过
-        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
-        PunchExceptionRequest request = punchProvider.findPunchExceptionRequestByRequestId(ga.getOrganizationId(), flowCase.getApplyUserId(), flowCase.getId());
-        request.setStatus(ApprovalStatus.AGREEMENT.getCode());
-        punchService.approveAbnormalPunch(request);
-        Calendar punCalendar = Calendar.getInstance();
-        punCalendar.setTime(request.getPunchDate());
-        punchProvider.updatePunchExceptionRequest(request);
-        try {
-            punchService.refreshPunchDayLog(request.getUserId(), request.getEnterpriseId(), punCalendar);
-        } catch (ParseException e) {
-            LOGGER.error("refresh punchDayLog ParseException : userid ["+request.getUserId()+"],enterpriseid ["
-                    +request.getEnterpriseId()+"] day["+request.getPunchDate()+"]");
-        }
-        return request;
+        @Override
+        public PunchExceptionRequest onFlowCaseEnd(FlowCase flowCase) {
 
-	}
+                //把狀態置为审批通过
+                GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
+                PunchExceptionRequest request = punchProvider.findPunchExceptionRequestByRequestId(ga.getOrganizationId(), flowCase.getApplyUserId(), flowCase.getId());
+                if (null == request) {
+                        return null;
+                }
+                request.setStatus(ApprovalStatus.AGREEMENT.getCode());
+                punchService.approveAbnormalPunch(request);
+                Calendar punCalendar = Calendar.getInstance();
+                punCalendar.setTime(request.getPunchDate());
+                punchProvider.updatePunchExceptionRequest(request);
+                try {
+                        punchService.refreshPunchDayLog(request.getUserId(), request.getEnterpriseId(), punCalendar);
+                } catch (ParseException e) {
+                        LOGGER.error("refresh punchDayLog ParseException : userid [" + request.getUserId() + "],enterpriseid ["
+                                + request.getEnterpriseId() + "] day[" + request.getPunchDate() + "]");
+                }
+                return request;
+
+        }
 //
 }
