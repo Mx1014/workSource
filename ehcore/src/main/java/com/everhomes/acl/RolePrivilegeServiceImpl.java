@@ -2307,6 +2307,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		if(0 != projects.size()){
 			for (ProjectDTO project: projects) {
+				// 获得关联了project(域空间下所有项目)的assignment
 				ResourceCategoryAssignment categoryAssignment = communityProvider.findResourceCategoryAssignment(project.getProjectId(), project.getProjectType(),namespaceId);
 
 				if(null != categoryAssignment){
@@ -2315,6 +2316,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 						String[] idStrs = category.getPath().split("/");
 						for (String idStr:idStrs) {
 							if(!StringUtils.isEmpty(idStr) && !categoryIds.contains(Long.valueOf(idStr)))
+								// 获得所有有关联的分类categoryIds
 								categoryIds.add(Long.valueOf(idStr));
 						}
 					}
@@ -2322,19 +2324,21 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					entityts.add(project);
 				}
 
+				//project(域空间下所有项目)的ids
 				projectIds.add(project.getProjectId());
 
-				// 获取项目下的子项目
-				ListChildProjectCommand child_cmd = new ListChildProjectCommand();
-				child_cmd.setProjectId(project.getProjectId());
-				child_cmd.setProjectType(EntityType.COMMUNITY.getCode());
-				List<ProjectDTO> projectDTOS = this.communityService.listChildProjects(child_cmd);
-				List<Long> childProjectId = projectDTOS.stream().map(ProjectDTO :: getProjectId).collect(Collectors.toList());
-				projectIds.addAll(childProjectId);
+//				// 获取项目下的子项目
+//				ListChildProjectCommand child_cmd = new ListChildProjectCommand();
+//				child_cmd.setProjectId(project.getProjectId());
+//				child_cmd.setProjectType(EntityType.COMMUNITY.getCode());
+//				List<ProjectDTO> projectDTOS = this.communityService.listChildProjects(child_cmd);
+//				List<Long> childProjectId = projectDTOS.stream().map(ProjectDTO :: getProjectId).collect(Collectors.toList());
+//				projectIds.addAll(childProjectId);
 			}
 		}
 		List<ProjectDTO> projectTrees = new ArrayList<>();
 		if(0 != categoryIds.size()){
+			//把分类下的每一个项目树形化，并加入到resource
 			List<ProjectDTO> temp = communityProvider.listResourceCategory(null, null, categoryIds, ResourceCategoryType.CATEGORY.getCode())
 					.stream().map(r -> {
 						ProjectDTO dto = ConvertHelper.convert(r, ProjectDTO.class);
@@ -2345,6 +2349,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					}).collect(Collectors.toList());
 
 			for(ProjectDTO project: temp) {
+				// 树形结构化
 				getChildCategories(temp, project);
 				if(project.getParentId() == 0L) {
 					projectTrees.add(project);
