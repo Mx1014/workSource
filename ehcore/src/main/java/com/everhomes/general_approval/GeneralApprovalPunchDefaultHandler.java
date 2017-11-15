@@ -2,8 +2,10 @@ package com.everhomes.general_approval;
 
 import com.alibaba.fastjson.JSON;
 import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseState;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.rest.approval.ApprovalStatus;
+import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.general_approval.PostApprovalFormAbnormalPunchValue;
@@ -107,14 +109,14 @@ public class GeneralApprovalPunchDefaultHandler extends GeneralApprovalDefaultHa
 	}
 
 	@Override
-	public void onFlowCaseAbsorted(FlowCase flowCase) {
-
+	public void onFlowCaseAbsorted(FlowCaseState ctx) {
+		FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
 		GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
 		PunchExceptionRequest request = punchProvider.findPunchExceptionRequestByRequestId(ga.getOrganizationId(), flowCase.getApplyUserId(), flowCase.getId());
 		if (null == request) {
 			return;
 		}
-		if (UserContext.current().getUser().getId().equals(request.getUserId())) {
+		if (UserContext.current().getUser().getId().equals(request.getUserId()) && ctx.getCurrentEvent().getUserType().equals(FlowUserType.APPLIER.getCode())) {
 			//如果是自己取消的,删除request
 			punchProvider.deletePunchExceptionRequest(request);
 		}else {

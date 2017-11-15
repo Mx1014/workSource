@@ -92,10 +92,10 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     @Override
     public void onFlowCaseAbsorted(FlowCaseState ctx) {
         // TODO Auto-generated method stub
-    	FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
+        FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
         LOGGER.debug("审批被驳回,handler 执行 onFlowCaseAbsorted ");
         GeneralApprovalHandler handler = getGeneralApprovalHandler(flowCase.getReferId());
-        handler.onFlowCaseAbsorted(flowCase);
+        handler.onFlowCaseAbsorted(ctx);
     	
     }
     

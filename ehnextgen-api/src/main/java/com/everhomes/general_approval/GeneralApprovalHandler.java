@@ -1,6 +1,7 @@
 package com.everhomes.general_approval;
 
 import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseState;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
 
 public interface GeneralApprovalHandler { 
@@ -8,7 +9,7 @@ public interface GeneralApprovalHandler {
 
 	void onApprovalCreated(FlowCase flowCase);
 
-	void onFlowCaseAbsorted(FlowCase flowCase);
+	void onFlowCaseAbsorted(FlowCaseState flowCase);
 
 	PunchExceptionRequest onFlowCaseEnd(FlowCase flowCase);
 	
