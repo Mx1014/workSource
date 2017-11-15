@@ -571,8 +571,10 @@ public class AssetController extends ControllerBase {
     @RequestMapping("addOrModifyRuleForBillGroup")
     @RestReturn(value = AddOrModifyRuleForBillGroupResponse.class)
     public RestResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
-        AddOrModifyRuleForBillGroupResponse res = assetService.addOrModifyRuleForBillGroup(cmd);
-        RestResponse response = new RestResponse(res);
+//        AddOrModifyRuleForBillGroupResponse res = assetService.addOrModifyRuleForBillGroup(cmd);
+//        RestResponse response = new RestResponse(res);
+        assetService.addOrModifyRuleForBillGroup(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;

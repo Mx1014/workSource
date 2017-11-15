@@ -191,13 +191,13 @@ public interface AssetProvider {
 
     List<ListChargingItemsForBillGroupDTO> listChargingItemsForBillGroup(Long billGroupId,Long pageAnchor,Integer pageSize);
 
-    AddOrModifyRuleForBillGroupResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
+    Long addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd,Long brotherRuleId,byte deCouplingFlag);
 
     EhPaymentBillGroupsRules findBillGroupRuleById(Long billGroupRuleId);
 
     boolean isInWorkGroupRule(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule);
 
-    void deleteBillGroupRuleById(Long billGroupRuleId);
+    DeleteChargingItemForBillGroupResponse deleteBillGroupRuleById(Long billGroupRuleId,byte deCouplingFlag);
 
     EhPaymentChargingStandards findChargingStandardById(Long chargingStandardId);
 
@@ -205,7 +205,7 @@ public interface AssetProvider {
 
     boolean checkBillsByBillGroupId(Long billGroupId);
 
-    void deleteBillGroupAndRules(Long billGroupId,byte deCouplingFlag,String ownerType,Long ownerId);
+    DeleteBillGroupReponse deleteBillGroupAndRules(Long billGroupId,byte deCouplingFlag,String ownerType,Long ownerId);
 
     ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(Long billGroupRuleId);
 
@@ -242,4 +242,6 @@ public interface AssetProvider {
     List<PaymentNoticeConfig> listAllNoticeConfigs();
 
     List<PaymentBills> getAllBillsByCommunity(Long key);
+
+    List<EhPaymentBillGroupsRules> getBillGroupRuleByCommunityWithBro(Long ownerId, String ownerType, boolean b);
 }
