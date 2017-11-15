@@ -27,7 +27,7 @@ import java.util.Date;
 /**
  * 
  * <ul>
- * 用于审批的默认handler
+ * 用于和考勤相关的审批的默认handler
  * </ul>
  */
 @Component(GeneralApprovalPunchDefaultHandler.GENERAL_APPROVAL_DEFAULT_HANDLER_NAME)
@@ -61,10 +61,10 @@ public class GeneralApprovalPunchDefaultHandler extends GeneralApprovalDefaultHa
 	@Override
 	public void onApprovalCreated(FlowCase flowCase) {
 		GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
-		if (!punchService.getTimeIntervalApprovalAttribute().contains(ga.getApprovalAttribute()) &&
-				!(GeneralApprovalAttribute.fromCode(ga.getApprovalAttribute()) == GeneralApprovalAttribute.ABNORMAL_PUNCH)) {
-			//非打卡的:
-		}
+//		if (!punchService.getTimeIntervalApprovalAttribute().contains(ga.getApprovalAttribute()) &&
+//				!(GeneralApprovalAttribute.fromCode(ga.getApprovalAttribute()) == GeneralApprovalAttribute.ABNORMAL_PUNCH)) {
+//			//非打卡的:
+//		}
 			//建立一个request
 		PunchExceptionRequest request = new PunchExceptionRequest();
 		request.setEnterpriseId(ga.getOrganizationId());
