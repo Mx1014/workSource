@@ -714,26 +714,26 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         log.setSettingType(settingType.getCode());
         log.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
         switch (settingType) {
-            case PRICE:
-                log.setCalculationType(cmd.getCalculationType());
-                if(PriceCalculationType.STANDING_CHARGE_TARIFF.equals(PriceCalculationType.fromCode(cmd.getCalculationType()))) {
-                    log.setSettingValue(cmd.getPrice());
-                }
-                if(PriceCalculationType.BLOCK_TARIFF.equals(PriceCalculationType.fromCode(cmd.getCalculationType()))) {
-                    log.setConfigId(cmd.getConfigId());
-                }
+//            case PRICE:
+//                log.setCalculationType(cmd.getCalculationType());
+//                if(PriceCalculationType.STANDING_CHARGE_TARIFF.equals(PriceCalculationType.fromCode(cmd.getCalculationType()))) {
+//                    log.setSettingValue(cmd.getPrice());
+//                }
+//                if(PriceCalculationType.BLOCK_TARIFF.equals(PriceCalculationType.fromCode(cmd.getCalculationType()))) {
+//                    log.setConfigId(cmd.getConfigId());
+//                }
 
-                break;
+//                break;
             case RATE:
                 log.setSettingValue(cmd.getRate());
                 break;
             case AMOUNT_FORMULA:
                 log.setFormulaId(cmd.getAmountFormulaId());
                 break;
-            case COST_FORMULA:
-                log.setFormulaId(cmd.getCostFormulaId());
-                log.setFormulaSource(cmd.getCostFormulaSource());
-                break;
+//            case COST_FORMULA:
+//                log.setFormulaId(cmd.getCostFormulaId());
+//                log.setFormulaSource(cmd.getCostFormulaSource());
+//                break;
         }
         meterSettingLogProvider.createSettingLog(log);
     }
@@ -901,6 +901,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     UpdateEnergyMeterCommand updateCmd = new UpdateEnergyMeterCommand();
                     updateCmd.setMeterId(r.getId());
                     updateCmd.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
+                    updateCmd.setOrganizationId(cmd.getOrganizationId());
 //                    // 价格
 //                    if (cmd.getPrice() != null || cmd.getConfigId() != null) {
 //                        updateCmd.setPrice(cmd.getPrice());
