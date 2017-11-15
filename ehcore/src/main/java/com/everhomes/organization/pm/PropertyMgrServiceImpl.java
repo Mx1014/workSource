@@ -50,6 +50,8 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.customer.CustomerErrorCode;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
 import com.everhomes.rest.family.*;
@@ -2336,6 +2338,19 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters");
 		}
+		List<Contract> contracts = contractProvider.listContractByAddressId(address.getId());
+		if(contracts != null && contracts.size() > 0) {
+			contracts.forEach(contract -> {
+				if(contract.getStatus() == ContractStatus.ACTIVE.getCode() || contract.getStatus() == ContractStatus.WAITING_FOR_LAUNCH.getCode()
+						|| contract.getStatus() == ContractStatus.WAITING_FOR_APPROVAL.getCode() || contract.getStatus() == ContractStatus.APPROVE_QUALITIED.getCode()
+						|| contract.getStatus() == ContractStatus.EXPIRING.getCode() || contract.getStatus() == ContractStatus.DRAFT.getCode()) {
+					LOGGER.error("the address has attach to contract. address id: {}", cmd.getId());
+					throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_ADDRESS_HAS_CONTRACT,
+							"the address has attach to contract");
+				}
+			});
+		}
+
     	address.setStatus(AddressAdminStatus.INACTIVE.getCode());
     	addressProvider.updateAddress(address);
     	addressProvider.updateOrganizationAddressMapping(address.getId());
