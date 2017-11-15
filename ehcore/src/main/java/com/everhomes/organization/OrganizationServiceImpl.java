@@ -1469,10 +1469,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 				for (OrganizationMember m : underOrganiztionsMembers){
 					m.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
 					m.setUpdateTime(now);
-//					m.setOperatorUid(user.getId());
+					m.setOperatorUid(user.getId());
 					organizationProvider.updateOrganizationMember(m);
 					//解除门禁权限
-//					doorAccessService.deleteAuthWhenLeaveFromOrg(UserContext.getCurrentNamespaceId(), m.getOrganizationId(), m.getTargetId());
+					doorAccessService.deleteAuthWhenLeaveFromOrg(UserContext.getCurrentNamespaceId(), m.getOrganizationId(), m.getTargetId());
 				}
 				return null;
 			}).collect(Collectors.toList());
