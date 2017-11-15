@@ -1354,16 +1354,19 @@ public class PunchServiceImpl implements PunchService {
 		for (TimeInterval interval : tiDTOs) {
 			//下班时间时间包含在interval中会对上班打卡造成影响
 			if (!interval.getBeginTime().after(offDutyTime) && !interval.getEndTime().before(offDutyTime)) {
-				updateSmartAlignment(offDutyLog);
 				//如果整个时段请假,打卡状态为正常
 				if (!interval.getBeginTime().after(new Date(beginTimeLong))) {
 					offDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
-					return ;
+					updateSmartAlignment(offDutyLog);
+					return;
 				}else if(offDutyLog.getPunchTime() != null && !interval.getBeginTime().after(offDutyLog.getPunchTime())){
 					//如果请假的结束时间不早于打卡时间 也是正常
 					offDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
-					return ;
+					updateSmartAlignment(offDutyLog);
+					return;
 				}
+				updateSmartAlignment(offDutyLog);
+
 			}
 		}
 	}
@@ -1391,16 +1394,18 @@ public class PunchServiceImpl implements PunchService {
 		for (TimeInterval interval : tiDTOs) {
 			//最晚上班时间包含在interval中会对上班打卡造成影响
 			if (!interval.getBeginTime().after(ruleBeginTime) && !interval.getEndTime().before(ruleBeginTime)) {
-				updateSmartAlignment(onDutyLog);
 				//如果全天请假,打卡状态为正常
 				if (!interval.getEndTime().before(new Date(beginTimeLong + workTimeLong))) {
 					onDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
+					updateSmartAlignment(onDutyLog);
 					return;
 				} else if (onDutyLog.getPunchTime() != null && !interval.getEndTime().before(onDutyLog.getPunchTime())) {
 					//如果请假的结束时间不早于打卡时间 也是正常
 					onDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
+					updateSmartAlignment(onDutyLog);
 					return;
 				}
+				updateSmartAlignment(onDutyLog);
 
 			}
 		}
