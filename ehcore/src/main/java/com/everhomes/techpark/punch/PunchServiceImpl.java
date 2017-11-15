@@ -7584,8 +7584,8 @@ public class PunchServiceImpl implements PunchService {
 							dto1.setClockStatus(PunchStatus.BELATE.getCode());
 							dto2.setClockStatus(PunchStatus.LEAVEEARLY.getCode());
 						}else if (intervalDTO.getStatus().equals(PunchStatus.UNPUNCH.getCode() + "")) {
-							dto1.setClockStatus(PunchStatus.UNPUNCH.getCode());
-							dto2.setClockStatus(PunchStatus.UNPUNCH.getCode());
+//							dto1.setClockStatus(PunchStatus.UNPUNCH.getCode());
+//							dto2.setClockStatus(PunchStatus.UNPUNCH.getCode());
 						}else if (intervalDTO.getStatus().equals(PunchStatus.FORGOT.getCode() + "")) {
 //							dto1.setClockStatus(PunchStatus.NORMAL.getCode());
 							dto2.setClockStatus(PunchStatus.UNPUNCH.getCode());
