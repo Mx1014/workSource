@@ -8,3 +8,9 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'rental.flow', 'authValue', 'zh_CN', '在二维码有效期内前往门禁功能查看二维码');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'rental.flow', 'authTime', 'zh_CN', '二维码有效期');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'rental.flow', 'packageName', 'zh_CN', '使用套餐');
+
+-- 修正消息模板 by lei.lv
+update eh_locale_templates set text = '${userName}(${userToken})${description}申请加入公司“${enterpriseName}”，是否同意？' where scope = 'enterprise.notification' and code = 7;
+update eh_locale_templates set text = '${userName}(${userToken})已加入公司“${enterpriseName}”。' where scope = 'enterprise.notification' and code = 2;
+update eh_locale_templates set text = '${userName}(${userToken})已离开公司“${enterpriseName}”。' where scope = 'enterprise.notification' and code = 5;
+
