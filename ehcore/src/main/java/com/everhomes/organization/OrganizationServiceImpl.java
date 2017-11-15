@@ -721,6 +721,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             dto.setLongitude(org.getLongitude().toString());
         //end
         dto.setEmailDomain(org.getEmailDomain());
+        dto.setWebsite(organization.getWebsite());
         dto.setName(organization.getName());
         dto.setCommunityId(organizationDTO.getCommunityId());
         dto.setCommunityName(organizationDTO.getCommunityName());
