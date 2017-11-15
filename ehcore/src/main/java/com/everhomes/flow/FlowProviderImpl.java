@@ -267,10 +267,14 @@ public class FlowProviderImpl implements FlowProvider {
 //	}
 
     @Override
-    public Flow getEnabledConfigFlow(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
+    public Flow getEnabledConfigFlow(Integer namespaceId, String projectType, Long projectId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
         List<Flow> flows = this.queryFlows(new ListingLocator(), 1, (locator, query) -> {
 
             query.addConditions(Tables.EH_FLOWS.NAMESPACE_ID.eq(namespaceId));
+            if (projectType != null && projectId != null) {
+                query.addConditions(Tables.EH_FLOWS.PROJECT_TYPE.eq(projectType));
+                query.addConditions(Tables.EH_FLOWS.PROJECT_ID.eq(projectId));
+            }
             query.addConditions(Tables.EH_FLOWS.MODULE_ID.eq(moduleId));
             if (moduleType != null) {
                 query.addConditions(Tables.EH_FLOWS.MODULE_TYPE.eq(moduleType));
