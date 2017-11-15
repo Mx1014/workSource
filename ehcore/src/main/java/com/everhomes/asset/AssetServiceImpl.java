@@ -2555,6 +2555,15 @@ public class AssetServiceImpl implements AssetService {
         autoBillNotice();
     }
 
+    @Override
+    public ShowBillForClientDTO showBillForClientV2(ClientIdentityCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vendorName = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vendorName);
+//        return handler.showBillForClientV2(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getBillGroupId(),cmd.getIsOnlyOwedBill(),cmd.getContractId());
+        return null;
+    }
+
 
     @Override
     public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
