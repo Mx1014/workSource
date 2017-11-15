@@ -31,7 +31,7 @@ import java.text.ParseException;
  * </ul>
  */
 @Component(GeneralApprovalHandler.GENERAL_APPROVAL_PREFIX + "GO_OUT")
-public class GeneralApprovalGoOutHandler extends GeneralApprovalDefaultHandler {
+public class GeneralApprovalGoOutHandler extends GeneralApprovalPunchDefaultHandler {
 	  
 //	@Override
 //	public void onApprovalCreated(FlowCase flowCase) {

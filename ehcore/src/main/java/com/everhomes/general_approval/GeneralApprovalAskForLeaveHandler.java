@@ -27,7 +27,7 @@ import java.text.ParseException;
  * </ul>
  */
 @Component(GeneralApprovalHandler.GENERAL_APPROVAL_PREFIX + "ASK_FOR_LEAVE")
-public class GeneralApprovalAskForLeaveHandler extends GeneralApprovalDefaultHandler {
+public class GeneralApprovalAskForLeaveHandler extends GeneralApprovalPunchDefaultHandler {
 	  
 //	@Override
 //	public void onApprovalCreated(FlowCase flowCase) {

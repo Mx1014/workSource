@@ -30,7 +30,7 @@ import java.text.ParseException;
  * </ul>
  */
 @Component(GeneralApprovalHandler.GENERAL_APPROVAL_PREFIX + "OVERTIME")
-public class GeneralApprovalOvertimeHandler extends GeneralApprovalDefaultHandler {
+public class GeneralApprovalOvertimeHandler extends GeneralApprovalPunchDefaultHandler {
 	  
 //	@Override
 //	public void onApprovalCreated(FlowCase flowCase) {

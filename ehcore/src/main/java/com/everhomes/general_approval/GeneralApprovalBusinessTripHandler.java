@@ -29,7 +29,7 @@ import java.text.ParseException;
  * </ul>
  */
 @Component(GeneralApprovalHandler.GENERAL_APPROVAL_PREFIX + "BUSINESS_TRIP")
-public class GeneralApprovalBusinessTripHandler extends GeneralApprovalDefaultHandler {
+public class GeneralApprovalBusinessTripHandler extends GeneralApprovalPunchDefaultHandler {
 	  
 //	@Override
 //	public void onApprovalCreated(FlowCase flowCase) {

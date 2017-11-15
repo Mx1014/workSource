@@ -23,7 +23,7 @@ import java.util.Calendar;
  * </ul>
  */
 @Component(GeneralApprovalHandler.GENERAL_APPROVAL_PREFIX + "ABNORMAL_PUNCH")
-public class GeneralApprovalAbnormalPunchHandler extends GeneralApprovalDefaultHandler {
+public class GeneralApprovalAbnormalPunchHandler extends GeneralApprovalPunchDefaultHandler {
     //
 //    @Override
 //    public void onApprovalCreated(FlowCase flowCase) {
