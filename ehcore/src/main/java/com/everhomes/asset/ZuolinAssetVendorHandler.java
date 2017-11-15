@@ -671,44 +671,23 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         return preOrder;
     }
 
-//    @Override
-    public ShowBillForClientDTO showBillForClientV2(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId, Byte isOnlyOwedBill, String contractId) {
-//        ShowBillForClientDTO response = new ShowBillForClientDTO();
-//        if(targetType.equals("eh_user")) {
-//            targetId = UserContext.current().getUser().getId();
-//        }
-//        String contractNum = null;
-//        Long cid = null;
-//        try{
-//            cid = Long.parseLong(contractId);
-//        }catch (Exception e){
-//            cid = null;
-//            contractNum = contractId;
-//        }
-//        List<BillDetailDTO> billDetailDTOList = assetProvider.listBillForClient(ownerId,ownerType,targetType,targetId,billGroupId,isOwedBill,cid,contractNum);
-//        HashSet<String> dateStrFilter = new HashSet<>();
-//        BigDecimal amountOwed = new BigDecimal("0");
-//        if(isOwedBill.byteValue() == (byte)1){
-//            for(int i = 0; i < billDetailDTOList.size(); i++) {
-//                BillDetailDTO dto = billDetailDTOList.get(i);
-//                if(dto.getStatus().byteValue() == (byte)2 || dto.getStatus().byteValue() == (byte)0){
-//                    dateStrFilter.add(dto.getDateStr());
-//                    amountOwed = amountOwed.add(dto.getAmountOwed());
-//                }
-//            }
-//        }else if(isOwedBill.byteValue() == (byte)0){
-//            for(int i = 0; i < billDetailDTOList.size(); i++) {
-//                BillDetailDTO dto = billDetailDTOList.get(i);
-//                if(dto.getStatus().byteValue() != (byte)1){
-//                    dateStrFilter.add(dto.getDateStr());
-//                    amountOwed = amountOwed.add(dto.getAmountOwed());
-//                }
-//            }
-//        }
-//        response.setAmountOwed(amountOwed);
-//        response.setBillPeriodMonths(dateStrFilter.size());
-//        response.setBillDetailDTOList(billDetailDTOList);
-//        return response;
+    @Override
+    public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
+        List<ShowBillForClientV2DTO> dtos = new ArrayList<>();
+        OwnerIdentityCommand cmd1 = ConvertHelper.convert(cmd,OwnerIdentityCommand.class);
+        if(cmd1.getNamespaceId() == null){
+            cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+        }
+        List<ListBillGroupsDTO> groups = assetService.listBillGroups(cmd1);
+        for(int i = 0; i < groups.size(); i ++){
+            ListBillGroupsDTO group = groups.get(i);
+            ShowBillForClientV2DTO dto = new ShowBillForClientV2DTO();
+            dto.setBillGroupId(group.getBillGroupId());
+            dto.setBillGroupName(group.getBillGroupName());
+            
+
+        }
+
         return null;
     }
 

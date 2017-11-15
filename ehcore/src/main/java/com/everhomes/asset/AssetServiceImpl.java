@@ -2559,12 +2559,11 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public ShowBillForClientDTO showBillForClientV2(ClientIdentityCommand cmd) {
+    public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
-//        return handler.showBillForClientV2(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getBillGroupId(),cmd.getIsOnlyOwedBill(),cmd.getContractId());
-        return null;
+        return handler.showBillForClientV2(cmd);
     }
 
 

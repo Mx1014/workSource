@@ -883,10 +883,10 @@ public class AssetController extends ControllerBase {
      * <b>URL: /asset/showBillForClientV2</b>
      */
     @RequestMapping("showBillForClientV2")
-    @RestReturn(value = ShowBillForClientDTO.class)
-    public RestResponse showBillForClientV2(ClientIdentityCommand cmd) {
-        ShowBillForClientDTO dto = assetService.showBillForClientV2(cmd);
-        RestResponse response = new RestResponse(dto);
+    @RestReturn(value = ShowBillForClientV2DTO.class,collection = true)
+    public RestResponse showBillForClientV2(ShowBillForClientV2Command cmd) {
+        List<ShowBillForClientV2DTO> dtos = assetService.showBillForClientV2(cmd);
+        RestResponse response = new RestResponse(dtos);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
