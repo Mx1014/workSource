@@ -4955,7 +4955,6 @@ public class UserServiceImpl implements UserService {
 		default_communityScene.setStatus(SCENE_EXAMPLE);
 		return default_communityScene;
 	}
-
 	@Override
 	public UserIdentifier getUserIdentifier(Long userId) {
 		if(userId == null){

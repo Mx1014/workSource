@@ -43,4 +43,6 @@ public interface QuestionnaireService {
     public void exportQuestionnaireResultDetail(GetQuestionnaireResultDetailCommand cmd, HttpServletResponse response);
 
 	public ListUsersbyIdentifiersResponse listUsersbyIdentifiers(ListUsersbyIdentifiersCommand cmd);
+
+	public GetTargetQuestionnaireDetailResponse getAnsweredQuestionnaireDetail(GetTargetQuestionnaireDetailCommand cmd);
 }

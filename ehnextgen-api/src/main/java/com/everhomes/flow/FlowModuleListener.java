@@ -1,8 +1,6 @@
 package com.everhomes.flow;
 
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowServiceTypeDTO;
-import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.util.Tuple;
 
@@ -23,7 +21,9 @@ public interface FlowModuleListener {
 
 	default void onFlowCreating(Flow flow) { }
 
-    default List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {return null;}
+    default List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+	    return null;
+	}
 
 	/**
 	 * 当 FlowCase 开始运行时
@@ -84,11 +84,27 @@ public interface FlowModuleListener {
      * @param vars  变量名称，比如：${amount}
      * @return  参数名称对应的参数的值，比如：key=${amount}, value=100
      */
-    default Map<String, String> onFlowVariableRender(FlowCaseState ctx, List<String> vars) { return null;}
+    default Map<String, String> onFlowVariableRender(FlowCaseState ctx, List<String> vars) {
+        return null;
+    }
 
     /**
      * FlowCase 的变量渲染, 见 onFlowVariableRender(FlowCaseState ctx, List<String> vars)
      */
     @Deprecated
-    default String onFlowVariableRender(FlowCaseState ctx, String variable) { return null;}
+    default String onFlowVariableRender(FlowCaseState ctx, String variable) {
+        return null;
+    }
+
+    /**
+     * 获取预定义的参数
+     * @param flow  工作流
+     * @param flowEntityType 不同地方的参数，比如条件，节点，按钮等
+     * @param ownerType 归属类型
+     * @param ownerId   归属id
+     * @return  返回参数列表
+     */
+    default List<FlowPredefinedParamDTO> listPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+        return null;
+    }
 }

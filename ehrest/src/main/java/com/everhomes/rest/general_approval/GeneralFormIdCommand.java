@@ -14,6 +14,13 @@ public class GeneralFormIdCommand {
 
 	//	added by LiMingDang for approval1.6
 	private String moduleType;
+	
+	public GeneralFormIdCommand() {
+	}
+
+	public GeneralFormIdCommand(Long formOriginId) {
+		this.formOriginId = formOriginId;
+	}
 
 	public Long getFormOriginId() {
 		return formOriginId;

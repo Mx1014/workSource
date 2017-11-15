@@ -24,7 +24,9 @@ import com.everhomes.util.StringHelper;
  * <li>validatorType: 校验方式 {@link com.everhomes.rest.general_approval.GeneralFormValidatorType}</li>
  * <li>dataSourceType: 数据源类型 {@link com.everhomes.rest.general_approval.GeneralFormDataSourceType}</li>
  * <li>renderType: 渲染类型，{@link com.everhomes.rest.general_approval.GeneralFormRenderType}</li>
- * <li>fieldValue: 字段值（查询详情时才会有值）</li>
+ * <li>fieldValue: 字段值</li>
+ * <li>fieldGroupName: 字段组名称</li>
+ * <li>fieldAttribute: 字段属性 比如：DEFAULT-系统字段 {@link GeneralFormFieldAttribute}</li>
  * <li>modifyFlag: 是否可修改 0-不可修改 1-可以修改</li>
  * <li>deleteFlag: 是否可修改 0-不可删除 1-可以删除</li>
  * </ul>
@@ -44,10 +46,11 @@ public class GeneralFormFieldDTO {
 	private String dataSourceType;
 	private String validatorType;
 	private String fieldExtra;
-
 	private String fieldValue;
 
-	//added by R
+	//	added by R 20170825
+	private String fieldGroupName;
+	private String fieldAttribute;
 	private Byte modifyFlag;
 	private Byte deleteFlag;
 
@@ -154,6 +157,22 @@ public class GeneralFormFieldDTO {
 
 	public void setFieldValue(String fieldValue) {
 		this.fieldValue = fieldValue;
+	}
+
+	public String getFieldGroupName() {
+		return fieldGroupName;
+	}
+
+	public void setFieldGroupName(String fieldGroupName) {
+		this.fieldGroupName = fieldGroupName;
+	}
+
+	public String getFieldAttribute() {
+		return fieldAttribute;
+	}
+
+	public void setFieldAttribute(String fieldAttribute) {
+		this.fieldAttribute = fieldAttribute;
 	}
 
 	public Byte getModifyFlag() {

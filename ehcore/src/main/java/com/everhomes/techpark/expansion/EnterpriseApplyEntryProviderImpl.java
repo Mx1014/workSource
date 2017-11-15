@@ -450,8 +450,13 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 
 		SelectQuery query = context.selectQuery(Tables.EH_LEASE_FORM_REQUESTS);
 		query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.NAMESPACE_ID.eq(namespaceId));
-		query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.OWNER_ID.eq(ownerId));
-		query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.OWNER_TYPE.eq(ownerType));
+
+		if (null != ownerId) {
+			query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.OWNER_ID.eq(ownerId));
+		}
+		if (!StringUtils.isEmpty(ownerType)) {
+			query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.OWNER_TYPE.eq(ownerType));
+		}
 		query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.SOURCE_TYPE.eq(sourceType));
 
 		return ConvertHelper.convert(query.fetchAny(), LeaseFormRequest.class);

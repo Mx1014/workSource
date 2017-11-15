@@ -130,6 +130,7 @@ public class ZJContractHandler implements ContractService{
         }
 
         String enterprises = sb.toString();
+        LOGGER.debug("zjgk listContracts enterprise: {}",enterprises);
         ShenzhouJsonEntity<List<ZJContract>> entity = JSONObject.parseObject(enterprises, new TypeReference<ShenzhouJsonEntity<List<ZJContract>>>(){});
         List<ZJContract> contracts = entity.getResponse();
         ListContractsResponse response = new ListContractsResponse();

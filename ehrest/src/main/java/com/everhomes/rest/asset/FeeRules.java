@@ -24,6 +24,8 @@ public class FeeRules {
     @ItemType(VariableIdAndValue.class)
     private List<VariableIdAndValue> variableIdAndValueList;
 
+    private Long billGroupRuleId;
+
 
     public Long getChargingItemId() {
         return chargingItemId;

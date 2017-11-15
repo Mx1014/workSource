@@ -23,6 +23,43 @@ public class PaymentBillResp {
     private String orderRemark1;
     private Long paymentOrderId;
 
+    private String orderRemark2;
+    private String orderSource;
+    private String payerName;
+    private String payerTel;
+
+    public String getPayerTel() {
+        return payerTel;
+    }
+
+    public void setPayerTel(String payerTel) {
+        this.payerTel = payerTel;
+    }
+
+    public String getOrderRemark2() {
+        return orderRemark2;
+    }
+
+    public void setOrderRemark2(String orderRemark2) {
+        this.orderRemark2 = orderRemark2;
+    }
+
+    public String getOrderSource() {
+        return orderSource;
+    }
+
+    public void setOrderSource(String orderSource) {
+        this.orderSource = orderSource;
+    }
+
+    public String getPayerName() {
+        return payerName;
+    }
+
+    public void setPayerName(String payerName) {
+        this.payerName = payerName;
+    }
+
     public Long getUserId() {
         return userId;
     }

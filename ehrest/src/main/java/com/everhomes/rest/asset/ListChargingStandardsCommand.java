@@ -10,7 +10,10 @@ import javax.validation.constraints.NotNull;
  *<ul>
  * <li>ownerId: 所属者id</li>
  * <li>ownerType: 所属者type</li>
+ * <li>namespaceId:域空间</li>
  * <li>chargingItemId:收费项目id</li>
+ * <li>pageAnchor:锚点</li>
+ * <li>pageSize:每页大小</li>
  *</ul>
  */
 public class ListChargingStandardsCommand {
@@ -23,6 +26,9 @@ public class ListChargingStandardsCommand {
     private Long pageAnchor;
     private Integer pageSize;
 
+    private Integer namespaceId;
+
+
     public Long getPageAnchor() {
         return pageAnchor;
     }
@@ -30,6 +36,16 @@ public class ListChargingStandardsCommand {
     public void setPageAnchor(Long pageAnchor) {
         this.pageAnchor = pageAnchor;
     }
+
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
 
     public Integer getPageSize() {
         return pageSize;

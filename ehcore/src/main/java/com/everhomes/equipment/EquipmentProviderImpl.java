@@ -194,14 +194,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		standard.setId(id);
 		standard.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		standard.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        
-		LOGGER.info("creatEquipmentStandard: " + standard);
 		
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionStandards.class, id));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionStandards.class));
         EhEquipmentInspectionStandardsDao dao = new EhEquipmentInspectionStandardsDao(context.configuration());
         dao.insert(standard);
         
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionStandards.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionStandards.class, id);
 		
 	}
 
@@ -210,7 +208,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 		assert(standard.getId() != null);
         
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionStandards.class, standard.getId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionStandards.class));
         EhEquipmentInspectionStandardsDao dao = new EhEquipmentInspectionStandardsDao(context.configuration());
         standard.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(standard);
@@ -233,14 +231,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		equipment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		equipment.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		equipment.setNamespaceId(UserContext.getCurrentNamespaceId());
-        
-		LOGGER.info("creatEquipmentInspectionEquipment: " + equipment);
 		
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionEquipments.class, id));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionEquipments.class));
         EhEquipmentInspectionEquipmentsDao dao = new EhEquipmentInspectionEquipmentsDao(context.configuration());
         dao.insert(equipment);
         
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionEquipments.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionEquipments.class, id);
 				
 	}
 
@@ -250,14 +246,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionAccessories.class));
 		
 		accessory.setId(id);
-        
-		LOGGER.info("creatEquipmentInspectionAccessories: " + accessory);
 		
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionAccessories.class, id));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionAccessories.class));
         EhEquipmentInspectionAccessoriesDao dao = new EhEquipmentInspectionAccessoriesDao(context.configuration());
         dao.insert(accessory);
         
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionAccessories.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionAccessories.class, id);
 	}
 
 	@Override
@@ -289,7 +283,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			EquipmentInspectionEquipments equipment) {
 		assert(equipment.getId() != null);
         
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionEquipments.class, equipment.getId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionEquipments.class));
         EhEquipmentInspectionEquipmentsDao dao = new EhEquipmentInspectionEquipmentsDao(context.configuration());
         
         dao.update(equipment);
@@ -305,14 +299,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionEquipmentParameters.class));
 		
 		parameter.setId(id);
-        
-		LOGGER.info("creatEquipmentParameter: " + parameter);
 		
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionEquipmentParameters.class, id));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionEquipmentParameters.class));
         EhEquipmentInspectionEquipmentParametersDao dao = new EhEquipmentInspectionEquipmentParametersDao(context.configuration());
         dao.insert(parameter);
         
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionEquipmentParameters.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionEquipmentParameters.class, id);
 	}
 
 	@Override
@@ -320,7 +312,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			EquipmentInspectionEquipmentParameters parameter) {
 		assert(parameter.getId() != null);
         
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionEquipmentParameters.class, parameter.getId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionEquipmentParameters.class));
         EhEquipmentInspectionEquipmentParametersDao dao = new EhEquipmentInspectionEquipmentParametersDao(context.configuration());
         dao.update(parameter);
         
@@ -333,14 +325,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionAccessoryMap.class));
 		
 		map.setId(id);
-        
-		LOGGER.info("creatEquipmentAccessoryMap: " + map);
 		
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionAccessoryMap.class, id));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionAccessoryMap.class));
         EhEquipmentInspectionAccessoryMapDao dao = new EhEquipmentInspectionAccessoryMapDao(context.configuration());
         dao.insert(map);
         
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionAccessoryMap.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionAccessoryMap.class, id);
 		
 	}
 
@@ -348,7 +338,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	public void updateEquipmentAccessoryMap(EquipmentInspectionAccessoryMap map) {
 		assert(map.getId() != null);
         
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionAccessoryMap.class, map.getId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionAccessoryMap.class));
         EhEquipmentInspectionAccessoryMapDao dao = new EhEquipmentInspectionAccessoryMapDao(context.configuration());
         dao.update(map);
         
@@ -363,14 +353,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		
 		eqAttachment.setId(id);
 		eqAttachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        
-		LOGGER.info("creatEquipmentAttachment: " + eqAttachment);
 		
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionEquipmentAttachments.class, id));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionEquipmentAttachments.class));
         EhEquipmentInspectionEquipmentAttachmentsDao dao = new EhEquipmentInspectionEquipmentAttachmentsDao(context.configuration());
         dao.insert(eqAttachment);
         
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionEquipmentAttachments.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionEquipmentAttachments.class, id);
 	}
 
 	@Override
@@ -446,7 +434,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			EquipmentInspectionAccessories accessory) {
 		assert(accessory.getId() != null);
         
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionAccessories.class, accessory.getId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionAccessories.class));
         EhEquipmentInspectionAccessoriesDao dao = new EhEquipmentInspectionAccessoriesDao(context.configuration());
         dao.update(accessory);
         
@@ -502,14 +490,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		
 		task.setId(id);
 		task.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        
-		LOGGER.info("creatEquipmentTask: " + task);
 		
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionTasks.class, id));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionTasks.class));
         EhEquipmentInspectionTasksDao dao = new EhEquipmentInspectionTasksDao(context.configuration());
         dao.insert(task);
         
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionTasks.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionTasks.class, id);
 		
 	}
 
@@ -519,7 +505,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 		assert(task.getId() != null);
         
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionTasks.class, task.getId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionTasks.class));
         EhEquipmentInspectionTasksDao dao = new EhEquipmentInspectionTasksDao(context.configuration());
         dao.update(task);
         
@@ -535,14 +521,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		log.setId(id);
 		log.setProcessTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		log.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        
-		LOGGER.info("createEquipmentInspectionTasksLogs: " + log);
 		
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionTasks.class, log.getTaskId()));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionTasks.class));
         EhEquipmentInspectionTaskLogsDao dao = new EhEquipmentInspectionTaskLogsDao(context.configuration());
         dao.insert(log);
         
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionTaskLogs.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionTaskLogs.class, id);
 		
 	}
 
@@ -553,14 +537,14 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		assert(attachment.getLogId() != null);
 		assert(attachment.getTaskId() != null);
         
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionTasks.class, attachment.getTaskId()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionTasks.class));
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionTaskAttachments.class));
         attachment.setId(id);
         
         EhEquipmentInspectionTaskAttachmentsDao dao = new EhEquipmentInspectionTaskAttachmentsDao(context.configuration());
         dao.insert(attachment);
         
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionTaskAttachments.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionTaskAttachments.class, id);
 		
 	}
 
@@ -1219,14 +1203,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		template.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		template.setStatus(Status.ACTIVE.getCode());
 		template.setNamespaceId(UserContext.getCurrentNamespaceId());
-        
-		LOGGER.info("createEquipmentInspectionTemplates: " + template);
 		
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionTemplates.class, id));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionTemplates.class));
 		EhEquipmentInspectionTemplatesDao dao = new EhEquipmentInspectionTemplatesDao(context.configuration());
         dao.insert(template);
         
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionTemplates.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionTemplates.class, id);
 		return id;
 	}
 
@@ -1235,7 +1217,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			EquipmentInspectionTemplates template) {
 		assert(template.getId() != null);
         
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionTemplates.class, template.getId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionTemplates.class));
         EhEquipmentInspectionTemplatesDao dao = new EhEquipmentInspectionTemplatesDao(context.configuration());
         dao.update(template);
         
@@ -1269,14 +1251,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionItems.class));
 		
 		item.setId(id);
-        
-		LOGGER.info("createEquipmentInspectionItems: " + item);
 		
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionItems.class, id));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionItems.class));
 		EhEquipmentInspectionItemsDao dao = new EhEquipmentInspectionItemsDao(context.configuration());
         dao.insert(item);
         
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionItems.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionItems.class, id);
 		return id;
 	}
 
@@ -1284,7 +1264,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	public Long updateEquipmentInspectionItems(EquipmentInspectionItems item) {
 		assert(item.getId() != null);
         
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionItems.class, item.getId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionItems.class));
         EhEquipmentInspectionItemsDao dao = new EhEquipmentInspectionItemsDao(context.configuration());
         dao.update(item);
         
@@ -1301,14 +1281,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		
 		map.setId(id);
 		map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        
-		LOGGER.info("createEquipmentInspectionTemplateItemMap: " + map);
 		
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionTemplateItemMap.class, id));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionTemplateItemMap.class));
 		EhEquipmentInspectionTemplateItemMapDao dao = new EhEquipmentInspectionTemplateItemMapDao(context.configuration());
         dao.insert(map);
         
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionTemplateItemMap.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionTemplateItemMap.class, id);
 		
 	}
 
@@ -1426,14 +1404,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		map.setId(id);
 		map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		map.setStatus(Status.ACTIVE.getCode());
-        
-		LOGGER.info("createEquipmentStandardMap: " + map);
 		
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionEquipmentStandardMap.class, id));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionEquipmentStandardMap.class));
 		EhEquipmentInspectionEquipmentStandardMapDao dao = new EhEquipmentInspectionEquipmentStandardMapDao(context.configuration());
         dao.insert(map);
         
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionEquipmentStandardMap.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionEquipmentStandardMap.class, id);
 		
 	}
 
@@ -1441,7 +1417,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	public void updateEquipmentStandardMap(EquipmentStandardMap map) {
 		assert(map.getId() != null);
         
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionEquipmentStandardMap.class, map.getId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionEquipmentStandardMap.class));
         EhEquipmentInspectionEquipmentStandardMapDao dao = new EhEquipmentInspectionEquipmentStandardMapDao(context.configuration());
         dao.update(map);
         
@@ -1557,14 +1533,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		
 		result.setId(id);
 		result.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        
-		LOGGER.info("createEquipmentInspectionItemResults: " + result);
 		
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionItemResults.class, id));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionItemResults.class));
 		EhEquipmentInspectionItemResultsDao dao = new EhEquipmentInspectionItemResultsDao(context.configuration());
         dao.insert(result);
         
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionItemResults.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionItemResults.class, id);
 	}
 
 	@Override
@@ -1817,7 +1791,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			EquipmentInspectionStandardGroupMap standardGroup) {
 		assert(standardGroup.getStandardId() != null);
         
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionStandardGroupMap.class, standardGroup.getStandardId()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionStandardGroupMap.class));
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionStandardGroupMap.class));
         standardGroup.setId(id);
         standardGroup.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -1825,7 +1799,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         EhEquipmentInspectionStandardGroupMapDao dao = new EhEquipmentInspectionStandardGroupMapDao(context.configuration());
         dao.insert(standardGroup);
         
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionStandardGroupMap.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionStandardGroupMap.class, id);
 		
 	}
 
