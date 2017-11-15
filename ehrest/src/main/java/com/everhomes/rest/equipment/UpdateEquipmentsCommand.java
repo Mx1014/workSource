@@ -109,9 +109,9 @@ public class UpdateEquipmentsCommand {
 
 	private  String manager_contact ;
 
-	private  String Detail ;
+	private  String detail ;
 
-	private  String Price ;
+	private  String price ;
 
 	private  Long buy_time;
 
@@ -407,19 +407,19 @@ public class UpdateEquipmentsCommand {
 	}
 
 	public String getDetail() {
-		return Detail;
+		return detail;
 	}
 
 	public void setDetail(String detail) {
-		Detail = detail;
+		detail = detail;
 	}
 
 	public String getPrice() {
-		return Price;
+		return price;
 	}
 
 	public void setPrice(String price) {
-		Price = price;
+		price = price;
 	}
 
 	public Long getBuy_time() {
