@@ -8453,6 +8453,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         Map<String, String> map = new HashMap<String, String>();
         map.put("enterpriseName", org.getName());
         map.put("userName", null == member.getContactName() ? member.getContactToken().replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2") : member.getContactName());
+        map.put("userToken", null == member.getContactName()? "" :member.getContactToken().replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2"));
         if (member.getContactDescription() != null && member.getContactDescription().length() > 0) {
             map.put("description", String.format("(%s)", member.getContactDescription()));
         } else {
