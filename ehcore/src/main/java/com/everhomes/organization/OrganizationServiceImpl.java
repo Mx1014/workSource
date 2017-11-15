@@ -16,6 +16,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.db.DaoAction;
@@ -75,6 +76,7 @@ import com.everhomes.rest.common.QuestionMetaActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.customer.DeleteEnterpriseCustomerCommand;
 import com.everhomes.rest.enterprise.*;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.family.ParamType;
@@ -275,6 +277,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Autowired
     private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
+
+    @Autowired
+    private CustomerService customerService;
 
     private int getPageCount(int totalCount, int pageSize) {
         int pageCount = totalCount / pageSize;
@@ -1389,6 +1394,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 		User user = UserContext.current().getUser();
 
 		dbProvider.execute((TransactionStatus status) -> {
+            //已删除则直接跳出
+            if(OrganizationStatus.DELETED.equals(OrganizationStatus.fromCode(organization.getStatus()))) {
+                return null;
+            }
 			organization.setStatus(OrganizationStatus.DELETED.getCode());
 			Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 			organization.setUpdateTime(now);
@@ -1397,9 +1406,10 @@ public class OrganizationServiceImpl implements OrganizationService {
             //如在客户管理中有则同步删除
             EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(organization.getId());
             if(customer != null) {
-                customer.setStatus(CommonStatus.INACTIVE.getCode());
-                enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
-                enterpriseCustomerSearcher.feedDoc(customer);
+                DeleteEnterpriseCustomerCommand command = new DeleteEnterpriseCustomerCommand();
+                command.setId(customer.getId());
+                command.setCommunityId(customer.getCommunityId());
+                customerService.deleteEnterpriseCustomer(command);
             }
 
 			OrganizationCommunityRequest r = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organization.getId());
