@@ -1560,9 +1560,9 @@ public class CustomerServiceImpl implements CustomerService {
         dto.setTotalTaxAmount(BigDecimal.ZERO);
         indicators.forEach(indicator -> {
             BigDecimal turnover = indicator.getTurnover() == null ? BigDecimal.ZERO : indicator.getTurnover();
-            BigDecimal taxAmount = indicator.getTotalTaxAmount() == null ? BigDecimal.ZERO : indicator.getTotalTaxAmount();
+            BigDecimal taxPayment = indicator.getTaxPayment() == null ? BigDecimal.ZERO : indicator.getTaxPayment();
             dto.setTotalTurnover(dto.getTotalTurnover().add(turnover));
-            dto.setTotalTaxAmount(dto.getTotalTaxAmount().add(taxAmount));
+            dto.setTotalTaxAmount(dto.getTotalTaxAmount().add(taxPayment));
         });
 
         return dto;
