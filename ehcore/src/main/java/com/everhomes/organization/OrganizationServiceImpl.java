@@ -1428,10 +1428,6 @@ public class OrganizationServiceImpl implements OrganizationService {
             if(OrganizationStatus.DELETED.equals(OrganizationStatus.fromCode(organization.getStatus()))) {
                 return null;
             }
-			organization.setStatus(OrganizationStatus.DELETED.getCode());
-			Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
-			organization.setUpdateTime(now);
-			organizationProvider.updateOrganization(organization);
 
             //如在客户管理中有则同步删除
             EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(organization.getId());
@@ -1442,6 +1438,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                 customerService.deleteEnterpriseCustomer(command);
             }
 
+            organization.setStatus(OrganizationStatus.DELETED.getCode());
+            Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+            organization.setUpdateTime(now);
+            organizationProvider.updateOrganization(organization);
+            
 			OrganizationCommunityRequest r = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organization.getId());
 
 			if(null != r){
