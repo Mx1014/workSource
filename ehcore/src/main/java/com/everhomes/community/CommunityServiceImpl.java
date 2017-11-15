@@ -27,19 +27,23 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.namespace.*;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.*;
+import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserLevel;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.ProjectDTO;
-import com.everhomes.rest.address.AddressDTO;
-import com.everhomes.rest.address.CommunityAdminStatus;
-import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.*;
+import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.admin.*;
+import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.messaging.*;
@@ -165,6 +169,12 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Autowired
     private ServiceConfigurationsProvider serviceConfigurationsProvider;
+
+	@Autowired
+	private ContractProvider contractProvider;
+
+	@Autowired
+	private PropertyMgrService propertyMgrService;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -827,8 +837,37 @@ public class CommunityServiceImpl implements CommunityService {
 	public void deleteBuilding(DeleteBuildingAdminCommand cmd) {
 		
 		Building building = this.communityProvider.findBuildingById(cmd.getBuildingId());
-		
-		this.communityProvider.deleteBuilding(building);
+//		1.若楼栋或楼栋下的门牌关联了合同或其他业务（如车辆、服务等），则
+//		不允许删除；
+//		2.若楼栋或楼栋下的门牌没有做任何关联，则删除楼栋时，连同楼栋下的
+//		子节点一同删除；
+		dbProvider.execute((TransactionStatus status) -> {
+			if(building != null) {
+				List<Contract> contracts = contractProvider.listContractByBuildingName(building.getName(), building.getCommunityId());
+				if(contracts != null && contracts.size() > 0) {
+					contracts.forEach(contract -> {
+						if(contract.getStatus() == ContractStatus.ACTIVE.getCode() || contract.getStatus() == ContractStatus.WAITING_FOR_LAUNCH.getCode()
+								|| contract.getStatus() == ContractStatus.WAITING_FOR_APPROVAL.getCode() || contract.getStatus() == ContractStatus.APPROVE_QUALITIED.getCode()
+								|| contract.getStatus() == ContractStatus.EXPIRING.getCode() || contract.getStatus() == ContractStatus.DRAFT.getCode()) {
+							LOGGER.error("the building has attach to contract. address id: {}", cmd.getBuildingId());
+							throw RuntimeErrorException.errorWith(BuildingServiceErrorCode.SCOPE, BuildingServiceErrorCode.ERROR_BUILDING_HAS_CONTRACT,
+									"the building has attach to contract");
+						}
+					});
+				}
+				List<ApartmentDTO> apartments = addressProvider.listApartmentsByBuildingName(building.getCommunityId(), building.getName() , 0 , Integer.MAX_VALUE-1);
+				if(apartments != null && apartments.size() > 0) {
+					apartments.forEach(apartmentDTO -> {
+						DeleteApartmentCommand command = new DeleteApartmentCommand();
+						command.setId(apartmentDTO.getAddressId());
+						propertyMgrService.deleteApartment(command);
+					});
+				}
+				this.communityProvider.deleteBuilding(building);
+			}
+			return null;
+		});
+
 	}
 
 
