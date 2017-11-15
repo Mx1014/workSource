@@ -533,23 +533,23 @@ public class CustomerServiceImpl implements CustomerService {
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
             //给企业账号添加管理员 默认添加联系人作为管理员 by xiongying20170909
-            Map<Long, List<String>> orgAdminAccounts = new HashMap<>();
-            if (orgAdminAccounts.get(organizationDTO.getId()) == null ||
-                    !orgAdminAccounts.get(organizationDTO.getId()).contains(str.getContactMobile())) {
-                if (!org.springframework.util.StringUtils.isEmpty(str.getContactMobile())) {
-                    CreateOrganizationAdminCommand createOrganizationAdminCommand = new CreateOrganizationAdminCommand();
-                    createOrganizationAdminCommand.setOrganizationId(organizationDTO.getId());
-                    createOrganizationAdminCommand.setContactToken(str.getContactMobile());
-                    createOrganizationAdminCommand.setContactName(str.getContactName());
-                    rolePrivilegeService.createOrganizationAdmin(createOrganizationAdminCommand, cmd.getNamespaceId());
-                }
-                if(orgAdminAccounts.get(organizationDTO.getId()) == null) {
-                    List<String> mobiles = new ArrayList<>();
-                    mobiles.add(str.getContactMobile());
-                    orgAdminAccounts.put(organizationDTO.getId(), mobiles);
-                }
-                orgAdminAccounts.get(organizationDTO.getId()).add(str.getContactMobile());
-            }
+//            Map<Long, List<String>> orgAdminAccounts = new HashMap<>();
+//            if (orgAdminAccounts.get(organizationDTO.getId()) == null ||
+//                    !orgAdminAccounts.get(organizationDTO.getId()).contains(str.getContactMobile())) {
+//                if (!org.springframework.util.StringUtils.isEmpty(str.getContactMobile())) {
+//                    CreateOrganizationAdminCommand createOrganizationAdminCommand = new CreateOrganizationAdminCommand();
+//                    createOrganizationAdminCommand.setOrganizationId(organizationDTO.getId());
+//                    createOrganizationAdminCommand.setContactToken(str.getContactMobile());
+//                    createOrganizationAdminCommand.setContactName(str.getContactName());
+//                    rolePrivilegeService.createOrganizationAdmin(createOrganizationAdminCommand, cmd.getNamespaceId());
+//                }
+//                if(orgAdminAccounts.get(organizationDTO.getId()) == null) {
+//                    List<String> mobiles = new ArrayList<>();
+//                    mobiles.add(str.getContactMobile());
+//                    orgAdminAccounts.put(organizationDTO.getId(), mobiles);
+//                }
+//                orgAdminAccounts.get(organizationDTO.getId()).add(str.getContactMobile());
+//            }
         }
         return errorDataLogs;
     }
