@@ -2532,6 +2532,7 @@ public class AssetServiceImpl implements AssetService {
             //
             List<Long> billIds = new ArrayList<>();
             List<NoticeInfo> noticeInfoList = new ArrayList<>();
+//            for (int k = 0; k < targetBills.size(); k++) {
             for (int k = 0; k < targetBills.size(); k++) {
                 PaymentBills b = targetBills.get(k);
                 billIds.add(b.getId());
@@ -2541,6 +2542,7 @@ public class AssetServiceImpl implements AssetService {
                 info.setTargetName(b.getTargetName());
                 info.setTargetType(b.getTargetType());
                 info.setAmountOwed(b.getAmountOwed());
+                info.setTargetId(b.getTargetId());
                 info.setAmountRecevable(b.getAmountReceivable());
                 info.setAppName(assetProvider.findAppName(b.getNamespaceId()));
                 info.setOwnerId(b.getOwnerId());
@@ -2548,6 +2550,7 @@ public class AssetServiceImpl implements AssetService {
                 noticeInfoList.add(info);
                 NoticeWithTextAndMessage(billIds, noticeInfoList);
             }
+            LOGGER.info("done");
         }
     }
     @Override
