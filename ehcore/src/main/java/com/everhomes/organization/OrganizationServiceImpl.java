@@ -1080,6 +1080,23 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     }
 
+    private void checkOrgNameUnique(Long id, Integer namespaceId, String orgName) {
+        if(org.apache.commons.lang.StringUtils.isNotBlank(orgName)) {
+            Organization org = organizationProvider.findOrganizationByName(orgName, namespaceId);
+            if(org != null) {
+                if(id != null) {
+                    if(id.equals(org.getId())) {
+                        return;
+                    }
+                }
+                LOGGER.error("organizationName {} in namespace {} already exist!", orgName, namespaceId);
+                throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_EXIST,
+                        "organizationName is already exist");
+            }
+        }
+
+    }
+
     @Override
     public OrganizationDTO createEnterprise(CreateEnterpriseCommand cmd) {
         User user = UserContext.current().getUser();
@@ -1089,6 +1106,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if(org.apache.commons.lang.StringUtils.isNotBlank(cmd.getUnifiedSocialCreditCode())) {
             checkUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode(), namespaceId, null);
         }
+        checkOrgNameUnique(null, cmd.getNamespaceId(), cmd.getName());
         Organization organization = new Organization();
 
         dbProvider.execute((TransactionStatus status) -> {
@@ -1292,6 +1310,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if(org.apache.commons.lang.StringUtils.isNotBlank(cmd.getUnifiedSocialCreditCode())) {
             checkUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode(), cmd.getNamespaceId(), cmd.getId());
         }
+        checkOrgNameUnique(cmd.getId(), cmd.getNamespaceId(), cmd.getName());
         dbProvider.execute((TransactionStatus status) -> {
             organization.setId(cmd.getId());
             organization.setName(cmd.getName());
