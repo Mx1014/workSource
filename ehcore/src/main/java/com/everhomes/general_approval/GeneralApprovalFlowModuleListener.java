@@ -93,7 +93,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     public void onFlowCaseAbsorted(FlowCaseState ctx) {
         // TODO Auto-generated method stub
         FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
-        LOGGER.debug("审批被驳回,handler 执行 onFlowCaseAbsorted ");
+        LOGGER.debug("审批被驳回,handler 执行 onFlowCaseAbsorted  userType : "+ ctx.getCurrentEvent().getUserType());
         GeneralApprovalHandler handler = getGeneralApprovalHandler(flowCase.getReferId());
         handler.onFlowCaseAbsorted(ctx);
     	
@@ -209,7 +209,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         // 审批通过
         if (!ctx.getStepType().equals(FlowStepType.ABSORT_STEP.getCode())) {
             FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
-            LOGGER.debug("审批终止(通过),handler 执行 onFlowCaseEnd ");
+            LOGGER.debug("审批终止(通过),handler 执行 onFlowCaseEnd  step type:"+ctx.getStepType());
             GeneralApprovalHandler handler = getGeneralApprovalHandler(flowCase.getReferId());
             handler.onFlowCaseEnd(flowCase);
         }
