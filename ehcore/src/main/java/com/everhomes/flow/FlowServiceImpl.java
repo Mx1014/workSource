@@ -46,6 +46,7 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.FlowCaseDetailActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.rest.messaging.*;
@@ -5073,6 +5074,9 @@ public class FlowServiceImpl implements FlowService {
             List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
 
             for (GeneralFormFieldDTO fieldDTO : fieldDTOs) {
+                if (GeneralFormDataVisibleType.HIDDEN.getCode().equals(fieldDTO.getVisibleType())) {
+                    continue;
+                }
                 List<FlowConditionVariableDTO> dtoList = formFieldProcessorManager.convertFieldDtoToFlowConditionVariableDto(flow, fieldDTO);
                 if (dtoList != null) {
                     variables.addAll(dtoList);
