@@ -655,8 +655,8 @@ public class AclController extends ControllerBase {
     @RequestMapping("listServiceModuleAppsAdministrators")
     @RestReturn(value=ServiceModuleAppsAuthorizationsDto.class, collection = true)
     public RestResponse listServiceModuleAppsAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.MODULE_ADMIN_LIST);
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.MODULE_ADMIN_LIST);
         RestResponse response = new RestResponse(rolePrivilegeService.listServiceModuleAppsAdministrators(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
