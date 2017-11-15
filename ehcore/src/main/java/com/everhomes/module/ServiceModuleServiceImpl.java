@@ -25,6 +25,7 @@ import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.module.*;
 import com.everhomes.rest.oauth2.ModuleManagementType;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -515,7 +516,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         List<ServiceModuleDTO> orgControlList = new ArrayList<>();
         List<ServiceModuleDTO> unlimitControlList = new ArrayList<>();
         //按控制范围进行区分
-        tempList.stream().map(r->{
+        tempList.stream().filter(r->r.getModuleControlType() != "").map(r->{
             switch (ModuleManagementType.fromCode(r.getModuleControlType())){
                 case COMMUNITY_CONTROL:
                     communityControlList.add(r);
@@ -530,9 +531,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             return null;
         }).collect(Collectors.toList());
 
-        response.setCommunityControlList(this.getServiceModuleAppsAsLevelTree(communityControlList, 0L));
-        response.setOrgControlList(this.getServiceModuleAppsAsLevelTree(orgControlList, 0L));
-        response.setUnlimitControlList(this.getServiceModuleAppsAsLevelTree(unlimitControlList, 0L));
+        response.setCommunityControlList(this.getServiceModuleAppsAsList(communityControlList));
+        response.setOrgControlList(this.getServiceModuleAppsAsList(orgControlList));
+        response.setUnlimitControlList(this.getServiceModuleAppsAsList(unlimitControlList));
 
         return response;
     }
@@ -847,6 +848,18 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             }
         }
         return results;
+    }
+
+    /**
+     * 获取serviceModuleApps的平行结构（level  = 2）
+     *
+     * @param tempList
+     * @return
+     */
+    private List<ServiceModuleAppDTO> getServiceModuleAppsAsList(List<ServiceModuleDTO> tempList) {
+        List<Long> moduleIds = tempList.stream().map(ServiceModuleDTO::getId).collect(Collectors.toList());
+        List<ServiceModuleAppDTO> serviceModuleAppDTOS = serviceModuleAppProvider.listServiceModuleAppsByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
+        return serviceModuleAppDTOS;
     }
 
     /**
