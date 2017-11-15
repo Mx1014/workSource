@@ -5816,7 +5816,6 @@ public class FlowServiceImpl implements FlowService {
         if (flowUserTypes.contains(FlowUserType.APPLIER)) {
             btnList.addAll(getApplierButtonDTOList(flowGraph, flowCase));
         }
-        //SUPERVISOR at last
         return btnList;
     }
 
