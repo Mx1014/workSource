@@ -1113,6 +1113,9 @@ public class CommunityServiceImpl implements CommunityService {
 					String[] temp = data.getLongitudeLatitude().replace("，", ",").replace("、", ",").split(",");
 					building.setLongitude(Double.parseDouble(temp[0]));
 					building.setLatitude(Double.parseDouble(temp[1]));
+				} else {
+					building.setLongitude(null);
+					building.setLatitude(null);
 				}
 
 				building.setNamespaceBuildingType(data.getNamespaceBuildingType());
