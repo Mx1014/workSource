@@ -283,6 +283,7 @@ public class ZJContractHandler implements ContractService{
         List<ContractChargingItemDTO> items = new ArrayList<>();
         ContractChargingItemDTO item = new ContractChargingItemDTO();
         item.setChargingItemName("物业费");
+        item.setFormulaType((byte)1);
         ChargingVariables cv = new ChargingVariables();
         List<PaymentVariable> chargingVariables = new ArrayList<>();
         PaymentVariable pv = new PaymentVariable();
@@ -295,6 +296,7 @@ public class ZJContractHandler implements ContractService{
 
         ContractChargingItemDTO itemRent = new ContractChargingItemDTO();
         itemRent.setChargingItemName("租金");
+        itemRent.setFormulaType((byte)1);
         PaymentVariable pvRent = new PaymentVariable();
         pvRent.setVariableName("租金");
         pvRent.setVariableValue(zjContract.getRent());
