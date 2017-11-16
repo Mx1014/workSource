@@ -10558,6 +10558,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             organizationTreeDTOs.add(orgTreeDTO);
 //			}
         }
+
         dto = this.processOrganizationTree(organizationTreeDTOs, dto);
         return dto;
     }
@@ -10585,10 +10586,12 @@ public class OrganizationServiceImpl implements OrganizationService {
         for (OrganizationTreeDTO orgTreeDTO : dtos) {
             if (orgTreeDTO.getParentId().equals(dto.getOrganizationId())) {
                 OrganizationTreeDTO organizationTreeDTO = processOrganizationTree(dtos, orgTreeDTO);
+                organizationTreeDTO.getTrees();
                 trees.add(organizationTreeDTO);
             }
         }
-
+        //同级排序
+        trees.sort(Comparator.comparingInt(OrganizationTreeDTO::getOrder));
         dto.setTrees(trees);
         return dto;
     }

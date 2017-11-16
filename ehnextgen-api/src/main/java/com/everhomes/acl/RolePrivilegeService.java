@@ -215,6 +215,12 @@ public interface RolePrivilegeService {
 	void deleteServiceModuleAdministrators(DeleteServiceModuleAdministratorsCommand cmd);
 
 	/**
+	 * 删除业务模块应用管理员
+	 * @param cmd
+	 */
+	void deleteServiceModuleAppsAdministrators(DeleteServiceModuleAdministratorsCommand cmd);
+
+	/**
 	 * 业务模块授权
 	 * @param cmd
      */

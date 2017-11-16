@@ -2678,9 +2678,22 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public List<ServiceModuleAppsAuthorizationsDto> listServiceModuleAppsAdministrators(ListServiceModuleAdministratorsCommand cmd) {
 
-	    List<Authorization> authorizations = authorizationProvider.listManageAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), EntityType.SERVICE_MODULE.getCode(), cmd.getModuleId());
+	    List<Authorization> authorizations = authorizationProvider.listManageAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), EntityType.SERVICE_MODULE_APP.getCode(), null);
+//		authorizations = authorizations.stream().filter(r-> !StringUtils.isEmpty(r.getModuleControlType())).collect(Collectors.toList());
 		return authorizations.stream().map((r) ->{
             ServiceModuleAppsAuthorizationsDto dto = new ServiceModuleAppsAuthorizationsDto();
+
+			// 添加用户信息
+			ServiceModuleAuthorizationsDTO module_dto = ConvertHelper.convert(r, ServiceModuleAuthorizationsDTO.class);
+			processServiceModuleAuthorization(module_dto);
+			dto.setTargetType(module_dto.getTargetType());
+			dto.setTargetId(module_dto.getTargetId());
+			dto.setNickName(module_dto.getNickName());
+			dto.setIdentifierToken(module_dto.getIdentifierToken());
+			dto.setOwnerType(module_dto.getOwnerType());
+			dto.setOwnerId(module_dto.getOwnerId());
+			dto.setAllFlag(module_dto.getAllFlag());
+
 			// 园区控制范围数据
 			ServiceModuleAuthorizationsDTO c_dto = processServiceModuleApps(r, ModuleManagementType.COMMUNITY_CONTROL.getCode());
 
@@ -2690,13 +2703,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			// 无限制范围数据
             ServiceModuleAuthorizationsDTO u_dto = processServiceModuleApps(r, ModuleManagementType.UNLIMIT_CONTROL.getCode());
 
-            dto.setTargetType(c_dto.getTargetType());
-            dto.setTargetId(c_dto.getTargetId());
-            dto.setNickName(c_dto.getNickName());
-            dto.setIdentifierToken(c_dto.getIdentifierToken());
-            dto.setOwnerType(c_dto.getOwnerType());
-            dto.setOwnerId(c_dto.getOwnerId());
-            dto.setAllFlag(c_dto.getAllFlag());
 
             dto.setCommunityControlApps(c_dto);
             dto.setOrgControlApps(o_dto);
@@ -2834,6 +2840,22 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				deleteAcls(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId(), moduleIds, ServiceModulePrivilegeType.SUPER);
 			return null;
 		});
+	}
+
+	@Override
+	public void deleteServiceModuleAppsAdministrators(DeleteServiceModuleAdministratorsCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+
+		checkTarget(cmd.getTargetType(), cmd.getTargetId());
+
+		//todo: 先删除本公司给这个user的赋权
+		this.authorizationProvider.deleteAuthorizationWithConditon(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId(), EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(),null,null,null);
+		this.authorizationProvider.delteAuthorizationControlConfigsWithCondition(namespaceId, cmd.getTargetId());
+
+		//再调用删除模块管理员的方法
+		deleteServiceModuleAdministrators(cmd);
 	}
 
 	@Override
@@ -3355,8 +3377,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	private ServiceModuleAuthorizationsDTO processServiceModuleApps(Authorization authorization, String controlType){
 		ServiceModuleAuthorizationsDTO dto = ConvertHelper.convert(authorization, ServiceModuleAuthorizationsDTO.class);
 
-		// todo: 添加用户信息
-		processServiceModuleAuthorization(dto);
+//		// todo: 添加用户信息
+//		processServiceModuleAuthorization(dto);
 
 		// todo: 获取auth和config信息
 		AuthorizationsAppControl authorizationsAppControl = getServiceModuleAppsManageByTarget(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType(), null, controlType);
@@ -3496,7 +3518,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Authorization authorization = ConvertHelper.convert(cmd, Authorization.class);
-		authorization.setAuthType(EntityType.SERVICE_MODULE.getCode());
+		authorization.setAuthType(EntityType.SERVICE_MODULE_APP.getCode());
 		authorization.setIdentityType(IdentityType.MANAGE.getCode());
 		authorization.setNamespaceId(namespaceId);
 		authorization.setCreatorUid(user.getId());

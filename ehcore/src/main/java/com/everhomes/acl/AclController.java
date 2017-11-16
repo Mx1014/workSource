@@ -558,6 +558,22 @@ public class AclController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /acl/deleteServiceModuleAppsAdministrators</b>
+     * <p>删除业务模块应用管理员</p>
+     */
+    @RequestMapping("deleteServiceModuleAppsAdministrators")
+    @RestReturn(value=String.class)
+    public RestResponse deleteServiceModuleAppsAdministrators(@Valid DeleteServiceModuleAdministratorsCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.MODULE_ADMIN_DELETE);
+        rolePrivilegeService.deleteServiceModuleAppsAdministrators(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /acl/listServiceModulesByTarget</b>
      * <p>查询管理员对象授权业务模块</p>
      */
