@@ -4,7 +4,7 @@ package com.everhomes.rest.address;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
+ *
  * <ul>
  * <li>id: 门牌id</li>
  * <li>apartmentName: 门牌名称</li>

@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>checkedCount: 被选择次数</li>
  * <li>optionContent: 选项内容，仅针对填空题统计时此字段有值</li>
  * <li>checked: 是否选中，0否1是，仅当企业查询时有效</li>
+ * <li>targetPhone: 回答者联系方式。</li>
  * </ul>
  */
 public class QuestionnaireOptionDTO {
@@ -23,6 +24,7 @@ public class QuestionnaireOptionDTO {
 	private Integer checkedCount;
 	private String optionContent;
 	private Byte checked;
+	private String targetPhone;
 
 	public String getOptionUri() {
 		return optionUri;
@@ -78,6 +80,14 @@ public class QuestionnaireOptionDTO {
 
 	public void setOptionContent(String optionContent) {
 		this.optionContent = optionContent;
+	}
+
+	public String getTargetPhone() {
+		return targetPhone;
+	}
+
+	public void setTargetPhone(String targetPhone) {
+		this.targetPhone = targetPhone;
 	}
 
 	@Override

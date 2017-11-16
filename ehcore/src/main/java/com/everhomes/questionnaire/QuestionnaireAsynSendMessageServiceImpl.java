@@ -114,9 +114,16 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		//计算推送消息的用户范围
 		Set<String> userLevelRanges = calculateQuesionnaireRange(questionnaire);
 		//保存文件的范围和用户数量
-		questionnaire.setTargetUserNum(userLevelRanges.size());
+		QuestionnaireTargetType targetType = QuestionnaireTargetType.fromCode(questionnaire.getTargetType());
+		//目标数量，面向用户则计算用户数量，面向企业则计算企业数量。
+		if(targetType == QuestionnaireTargetType.USER) {
+			questionnaire.setTargetUserNum(userLevelRanges.size());
+		}else if(targetType == QuestionnaireTargetType.ORGANIZATION){
+			questionnaire.setTargetUserNum(questionnaire.getRanges().size());
+		}
 		questionnaire.setUserScope(StringHelper.toJsonString(userLevelRanges));
 		//发送消息
+		questionnaireProvider.updateQuestionnaire(questionnaire);
 		questionnaire.setScopeSentMessageUsers(StringHelper.toJsonString(sendMessage(questionnaire)));
 		questionnaireProvider.updateQuestionnaire(questionnaire);
 	}
@@ -128,6 +135,9 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		Timestamp remindTime = new Timestamp(System.currentTimeMillis()+intervalTime*3600*1000);
 		List<Questionnaire> questionnaires = questionnaireProvider.listApproachCutoffTimeQuestionnaire(remindTime);
 		Set<String> userLevelRanges = null;
+		LOGGER.info("approach cutoffTime quesionnaire ",StringHelper.toJsonString(questionnaires.stream().map(r->{
+			return r.getId()+"->"+r.getQuestionnaireName();
+		}).collect(Collectors.toList())));
 		for (Questionnaire questionnaire : questionnaires) {
 			String originalUseScope = questionnaire.getUserScope();
 			List<QuestionnaireAnswer> answers = questionnaireAnswerProvider.listQuestionnaireAnswerByQuestionnaireId(questionnaire.getId(), questionnaire.getTargetType());
@@ -196,10 +206,10 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 			String string1 = stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.UNKNOWN1, "zh_CN", "邀请%s参与《");
 			String string2 = stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.UNKNOWN2, "zh_CN", "》问卷调查。");
 			String homeurl = configurationProvider.getValue(ConfigConstants.HOME_URL,"https://core.zuolin.com");
-			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question/%s/0");
+			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question/%s#sign_suffix");
 			String url = String.format(homeurl+contextUrl, questionnaire.getId());
 
-			MessageChannel channel2 = new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId()));
+//			MessageChannel channel2 = new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId()));
 
 			// 组装路由
 			OfficialActionData actionData = new OfficialActionData();
@@ -219,36 +229,71 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 			if(QuestionnaireTargetType.fromCode(questionnaire.getTargetType()) == QuestionnaireTargetType.ORGANIZATION){
 				userMapingOrganizationList = generateUserMapingOrganizationList(questionnaire);
 			}
-			MessageDTO messageDto = new MessageDTO();
 			for (String range : ranges) {
-				messageDto.setAppId(AppConstants.APPID_MESSAGING);
-				messageDto.setSenderUid(User.SYSTEM_UID);
-				messageDto.setChannels(
-						new MessageChannel(MessageChannelType.USER.getCode(), range),
-						channel2
-				);
-
-				messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-				messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-				messageDto.setMeta(meta);
+//				MessageDTO messageDto = new MessageDTO();
+//				messageDto.setAppId(AppConstants.APPID_MESSAGING);
+//				messageDto.setSenderUid(User.SYSTEM_UID);
+//				messageDto.setChannels(
+//						new MessageChannel(MessageChannelType.USER.getCode(), range),
+//						channel2
+//				);
+//
+//				messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+//				messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+//				messageDto.setMeta(meta);
+//
+//				Thread.sleep(50);//不要发太快了。
+//
+//				if(QuestionnaireTargetType.fromCode(questionnaire.getTargetType()) == QuestionnaireTargetType.USER) {
+//					messageDto.setBody(String.format(body,"您"));
+//					messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+//							range, messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+//					sendedranges.add(range);
+//				}else if(QuestionnaireTargetType.fromCode(questionnaire.getTargetType()) == QuestionnaireTargetType.ORGANIZATION) {
+//					for (String organizationName : userMapingOrganizationList.get(range)) {
+//						messageDto.setBody(String.format(body,organizationName));
+//						messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+//								range, messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+//						sendedranges.add(range);
+//					}
+//				}
 
 				if(QuestionnaireTargetType.fromCode(questionnaire.getTargetType()) == QuestionnaireTargetType.USER) {
-					messageDto.setBody(String.format(body,"您"));
-					messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-							range, messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-					sendedranges.add(range);
+					sendMessageToUser(range,String.format(body,"您"),meta,sendedranges);
 				}else if(QuestionnaireTargetType.fromCode(questionnaire.getTargetType()) == QuestionnaireTargetType.ORGANIZATION) {
 					for (String organizationName : userMapingOrganizationList.get(range)) {
-						messageDto.setBody(String.format(body,organizationName));
-						messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-								range, messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-						sendedranges.add(range);
+						sendMessageToUser(range,String.format(body,organizationName),meta,sendedranges);
 					}
 				}
 			}
+		}catch (Exception e){
+			LOGGER.warn(e.getMessage());
+			e.printStackTrace();
 		}finally {
 			return sendedranges;
 		}
+	}
+
+	private void sendMessageToUser(String uid, String content, Map<String, String> meta,List<String> sendedranges) {
+		try {
+			Thread.sleep(50);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		MessageDTO messageDto = new MessageDTO();
+		messageDto.setAppId(AppConstants.APPID_MESSAGING);
+		messageDto.setSenderUid(User.SYSTEM_UID);
+		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
+		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+		messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+		messageDto.setBody(content);
+		messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+		if(null != meta && meta.size() > 0) {
+			messageDto.getMeta().putAll(meta);
+		}
+		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+				uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+		sendedranges.add(uid);
 	}
 
 	//返回 人员-》公司列表 map
@@ -302,11 +347,20 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 					case COMMUNITY_ALL:
 						userLevelRanges.addAll(getCommunityUsers(originalRange.getRange(),0));
 						break;
-					case COMMUNITY_UNAUTHORIZED:
+					case COMMUNITY_AUTHENTICATED:
 						userLevelRanges.addAll(getCommunityUsers(originalRange.getRange(),1));
 						break;
-					case COMMUNITY_AUTHENTICATED:
+					case COMMUNITY_UNAUTHORIZED:
 						userLevelRanges.addAll(getCommunityUsers(originalRange.getRange(),2));
+						break;
+					case NAMESPACE_ALL:
+						userLevelRanges.addAll(getNamespaceUsers(originalRange.getRange(),0));
+						break;
+					case NAMESPACE_AUTHENTICATED:
+						userLevelRanges.addAll(getNamespaceUsers(originalRange.getRange(),1));
+						break;
+					case NAMESPACE_UNAUTHORIZED:
+						userLevelRanges.addAll(getNamespaceUsers(originalRange.getRange(),2));
 						break;
 				}
 			}else if (targetType == QuestionnaireTargetType.ORGANIZATION){
@@ -322,6 +376,8 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		}
 		if (targetType == QuestionnaireTargetType.ORGANIZATION){
 			questionnaireDTO.setRanges(originalRanges);
+			List<String> sOrganizationList = originalRanges.stream().map(r->r.getRange()).collect(Collectors.toList());
+			questionnaireDTO.setOrganizationScope(StringHelper.toJsonString(sOrganizationList));
 		}
 		return userLevelRanges;
 	}
@@ -345,6 +401,16 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		return userOrganizations.stream().map(r->String.valueOf(r.getUserId())).collect(Collectors.toList());
 	}
 
+	private  List<String> getNamespaceUsers(String range, Integer isAuthor) {
+		ListCommunityUsersCommand cmd = new ListCommunityUsersCommand();
+		cmd.setNamespaceId(Integer.valueOf(range));
+		cmd.setPageSize(10000000);
+		cmd.setIsAuth(isAuthor);
+		//这里只需要查询userID，其他的附加查询不需要，所以自己搞了个查询。
+		List<UserOrganizations> userOrganizations = listUserCommunities(cmd);
+		return userOrganizations.stream().map(r->String.valueOf(r.getUserId())).collect(Collectors.toList());
+	}
+
 	private List<String> getEnterpriseUsers(String range) {
 		ListOrganizationContactCommand cmd = new ListOrganizationContactCommand();
 		cmd.setOrganizationId( Long.valueOf(range));
@@ -359,10 +425,10 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 	private List<UserOrganizations> listUserCommunities(
 			ListCommunityUsersCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+//		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		return organizationProvider.listUserOrganizations(locator, pageSize, new ListingQueryBuilderCallback() {
+		return organizationProvider.listUserOrganizations(locator, cmd.getPageSize(), new ListingQueryBuilderCallback() {
 			@Override
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
 				query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));

@@ -8,6 +8,7 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.asset.AssetProvider;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
 import com.everhomes.community.Building;
@@ -45,6 +46,7 @@ import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
@@ -248,6 +250,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Autowired
 	private ContractProvider contractProvider;
+
+	@Autowired
+	private AssetProvider assetProvider;
+
+	@Autowired
+	private DefaultChargingItemProvider defaultChargingItemProvider;
     
     private String queueName = "property-mgr-push";
 
@@ -2189,27 +2197,27 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		communityProvider.updateCommunity(community);
 	}
 
-    @Override
+	@Override
 	public void updateApartment(UpdateApartmentCommand cmd) {
-    	Address address = addressProvider.findAddressById(cmd.getId());
-    	if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters");
+		Address address = addressProvider.findAddressById(cmd.getId());
+		if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters");
 		}
 		Community community = checkCommunity(address.getCommunityId());
 		Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
-    	if (cmd.getStatus() != null) {
-    		Long organizationId = findOrganizationByCommunity(community);
-    		CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
-    		communityAddressMapping.setLivingStatus(cmd.getStatus());
-    		organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
+		if (cmd.getStatus() != null) {
+			Long organizationId = findOrganizationByCommunity(community);
+			CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+			communityAddressMapping.setLivingStatus(cmd.getStatus());
+			organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
 		}else {
 			if (!StringUtils.isEmpty(cmd.getApartmentName())) {
-	    		Address other = addressProvider.findAddressByBuildingApartmentName(address.getNamespaceId(), address.getCommunityId(), address.getBuildingName(), cmd.getApartmentName());
-	    		if (other != null && other.getId() != cmd.getId()) {
-	    			throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_EXISTS_APARTMENT_NAME, "exists apartment name");
-	    		}
-	    		address.setApartmentName(cmd.getApartmentName());
-	    		address.setAddress(address.getBuildingName() + "-" + cmd.getApartmentName());
+				Address other = addressProvider.findAddressByBuildingApartmentName(address.getNamespaceId(), address.getCommunityId(), address.getBuildingName(), cmd.getApartmentName());
+				if (other != null && other.getId() != cmd.getId()) {
+					throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_EXISTS_APARTMENT_NAME, "exists apartment name");
+				}
+				address.setApartmentName(cmd.getApartmentName());
+				address.setAddress(address.getBuildingName() + "-" + cmd.getApartmentName());
 			}else if (cmd.getAreaSize() != null) {
 				address.setAreaSize(cmd.getAreaSize());
 			}else if (cmd.getSharedArea() != null) {
@@ -2265,7 +2273,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}else if (cmd.getApartmentFloor() != null) {
 				address.setApartmentFloor(cmd.getApartmentFloor());
 			}
-	    	addressProvider.updateAddress(address);
+			addressProvider.updateAddress(address);
 
 			communityProvider.updateBuilding(building);
 			communityProvider.updateCommunity(community);
@@ -2276,13 +2284,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	public GetApartmentDetailResponse getApartmentDetail(GetApartmentDetailCommand cmd) {
 		GetApartmentDetailResponse response = new GetApartmentDetailResponse();
 		Address address = addressProvider.findAddressById(cmd.getId());
-    	if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters");
+		if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters");
 		}
-    	Community community = checkCommunity(address.getCommunityId());
+		Community community = checkCommunity(address.getCommunityId());
 		Long organizationId = findOrganizationByCommunity(community);
 		CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
-		
+
 //		response.setBuildingName(address.getBuildingName());
 //		response.setApartmentName(address.getApartmentName());
 //		response.setAreaSize(address.getAreaSize());
@@ -2292,7 +2300,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}else {
 			response.setStatus(address.getLivingStatus());
 		}
-		
+
 		if (CommunityType.fromCode(community.getCommunityType()) == CommunityType.COMMERCIAL) {
 			OrganizationAddress organizationAddress = organizationProvider.findOrganizationAddressByAddressId(address.getId());
 			if (organizationAddress != null) {
@@ -6325,5 +6333,125 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             LOGGER.debug("getRequestInfo new GetRequestInfoResponse(GroupMemberStatus.INACTIVE.getCode())");
 		return new GetRequestInfoResponse(GroupMemberStatus.INACTIVE.getCode());
 	}
-    
+
+	@Override
+	public void deleteDefaultChargingItem(DeleteDefaultChargingItemCommand cmd) {
+		DefaultChargingItem item = findDefaultChargingItem(cmd.getId());
+		item.setStatus(CommonStatus.INACTIVE.getCode());
+		item.setDeleteUid(UserContext.currentUserId());
+		item.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+		defaultChargingItemProvider.updateDefaultChargingItem(item);
+	}
+
+	private DefaultChargingItem findDefaultChargingItem(Long id) {
+		DefaultChargingItem item = defaultChargingItemProvider.findById(id);
+		if(item == null || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(item.getStatus()))) {
+			LOGGER.error("DefaultChargingItem id: {} is not exist or active!", id);
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"DefaultChargingItem id is not exist or active.");
+		}
+		return item;
+	}
+
+	@Override
+	public DefaultChargingItemDTO updateDefaultChargingItem(UpdateDefaultChargingItemCommand cmd) {
+		DefaultChargingItem defaultChargingItem = ConvertHelper.convert(cmd, DefaultChargingItem.class);
+		if(cmd.getChargingStartTime() != null) {
+			defaultChargingItem.setChargingStartTime(new Timestamp(cmd.getChargingStartTime()));
+		}
+		if(cmd.getChargingExpiredTime() != null) {
+			defaultChargingItem.setChargingExpiredTime(new Timestamp(cmd.getChargingExpiredTime()));
+		}
+		defaultChargingItem.setStatus(CommonStatus.ACTIVE.getCode());
+		if(cmd.getId() == null) {
+			defaultChargingItemProvider.createDefaultChargingItem(defaultChargingItem);
+			dealDefaultChargingItemProperty(defaultChargingItem, cmd.getApartments());
+		} else {
+			DefaultChargingItem exist = findDefaultChargingItem(cmd.getId());
+			defaultChargingItem.setCreateUid(exist.getCreateUid());
+			defaultChargingItem.setCreateTime(exist.getCreateTime());
+			defaultChargingItemProvider.updateDefaultChargingItem(defaultChargingItem);
+		}
+		return toDefaultChargingItemDTO(defaultChargingItem);
+	}
+
+	@Override
+	public List<DefaultChargingItemDTO> listDefaultChargingItems(ListDefaultChargingItemsCommand cmd) {
+		List<DefaultChargingItem> items = defaultChargingItemProvider.listDefaultChargingItems(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getOwnerType(), cmd.getOwnerId());
+		if(items != null && items.size() > 0) {
+			return items.stream().map(item -> toDefaultChargingItemDTO(item)).collect(Collectors.toList());
+		}
+		return null;
+	}
+
+	private void dealDefaultChargingItemProperty(DefaultChargingItem item, List<DefaultChargingItemPropertyDTO> apartments) {
+		List<DefaultChargingItemProperty> existItemProperties = defaultChargingItemProvider.findByItemId(item.getId());
+		Map<Long, DefaultChargingItemProperty> map = new HashMap<>();
+		if(existItemProperties != null && existItemProperties.size() > 0) {
+			existItemProperties.forEach(address -> {
+				map.put(address.getId(), address);
+			});
+		}
+
+		if(apartments != null && apartments.size() > 0) {
+			apartments.forEach(itemProperty -> {
+				if(itemProperty.getId() == null) {
+					DefaultChargingItemProperty property = ConvertHelper.convert(itemProperty, DefaultChargingItemProperty.class);
+					property.setDefaultChargingItemId(item.getId());
+					property.setNamespaceId(item.getNamespaceId());
+					property.setStatus(CommonStatus.ACTIVE.getCode());
+					defaultChargingItemProvider.createDefaultChargingItemProperty(property);
+				} else {
+					map.remove(itemProperty.getId());
+				}
+			});
+		}
+		if(map.size() > 0) {
+			map.forEach((id, property) -> {
+				property.setStatus(CommonStatus.INACTIVE.getCode());
+				defaultChargingItemProvider.updateDefaultChargingItemProperty(property);
+			});
+		}
+	}
+
+	private DefaultChargingItemDTO toDefaultChargingItemDTO(DefaultChargingItem item) {
+		DefaultChargingItemDTO dto = ConvertHelper.convert(item, DefaultChargingItemDTO.class);
+		String itemName = assetProvider.findChargingItemNameById(dto.getChargingItemId());
+		dto.setChargingItemName(itemName);
+		String standardName = assetProvider.getStandardNameById(dto.getChargingStandardId());
+		dto.setChargingStandardName(standardName);
+
+		processDefaultChargingItemAddresses(dto);
+		return dto;
+	}
+
+	private void processDefaultChargingItemAddresses(DefaultChargingItemDTO dto) {
+		List<DefaultChargingItemProperty> itemAddresses = defaultChargingItemProvider.findByItemId(dto.getId());
+		if(itemAddresses != null && itemAddresses.size() > 0) {
+			List<DefaultChargingItemPropertyDTO> addressDtos = new ArrayList<>();
+			itemAddresses.forEach(address -> {
+				DefaultChargingItemPropertyDTO propertyDTO = ConvertHelper.convert(address, DefaultChargingItemPropertyDTO.class);
+
+				if(propertyDTO.getPropertyType() == DefaultChargingItemPropertyType.COMMUNITY.getCode()) {
+					Community community = communityProvider.findCommunityById(propertyDTO.getPropertyId());
+					if(community != null) {
+						propertyDTO.setPropertyName(community.getName());
+					}
+				} else if(propertyDTO.getPropertyType() == DefaultChargingItemPropertyType.BUILDING.getCode()) {
+					Building building = communityProvider.findBuildingById(propertyDTO.getPropertyId());
+					if(building != null) {
+						propertyDTO.setPropertyName(building.getName());
+					}
+				} else if(propertyDTO.getPropertyType() == DefaultChargingItemPropertyType.APARTMENT.getCode()) {
+					Address addr = addressProvider.findAddressById(propertyDTO.getPropertyId());
+					if(addr != null) {
+						propertyDTO.setPropertyName(addr.getApartmentName());
+					}
+				}
+				addressDtos.add(propertyDTO);
+			});
+			dto.setApartments(addressDtos);
+		}
+	}
 }

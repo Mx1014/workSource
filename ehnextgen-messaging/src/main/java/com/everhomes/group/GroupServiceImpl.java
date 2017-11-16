@@ -74,6 +74,7 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.version.VersionService;
 import com.google.gson.Gson;
+import org.hibernate.loader.custom.Return;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -760,8 +761,14 @@ public class GroupServiceImpl implements GroupService {
 
         //添加公司group  add by yanjun 20170721
         List<OrganizationDTO> listOrg = organizationService.listUserRelateOrganizations(namespaceId, userId, OrganizationGroupType.ENTERPRISE);
+
         if(listOrg != null){
             for(OrganizationDTO org : listOrg){
+                OrganizationMember org_member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, org.getId());
+                // 过滤待审核·审核中 by lei.lv
+                if(org_member.getStatus().equals(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode()) || org_member.getStatus().equals(OrganizationMemberStatus.WAITING_FOR_ACCEPTANCE.getCode())){
+                    continue;
+                }
                 if(org.getGroupId() != null){
 
                     tmpGroup = groupProvider.findGroupById(org.getGroupId());

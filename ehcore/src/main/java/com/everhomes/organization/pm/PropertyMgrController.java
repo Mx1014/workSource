@@ -2070,4 +2070,39 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <p>设置计价条款</p>
+	 * <b>URL: /pm/updateDefaultChargingItem</b>
+	 */
+	@RequestMapping("updateDefaultChargingItem")
+	@RestReturn(DefaultChargingItemDTO.class)
+	public RestResponse updateDefaultChargingItem(UpdateDefaultChargingItemCommand cmd){
+		return new RestResponse(propertyMgrService.updateDefaultChargingItem(cmd));
+	}
+
+	/**
+	 * <p>删除计价条款</p>
+	 * <b>URL: /pm/deleteDefaultChargingItem</b>
+	 */
+	@RequestMapping("deleteDefaultChargingItem")
+	@RestReturn(String.class)
+	public RestResponse deleteDefaultChargingItem(DeleteDefaultChargingItemCommand cmd){
+		propertyMgrService.deleteDefaultChargingItem(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>列出计价条款</p>
+	 * <b>URL: /pm/listDefaultChargingItems</b>
+	 */
+	@RequestMapping("listDefaultChargingItems")
+	@RestReturn(value = DefaultChargingItemDTO.class, collection = true)
+	public RestResponse listDefaultChargingItems(ListDefaultChargingItemsCommand cmd){
+		return new RestResponse(propertyMgrService.listDefaultChargingItems(cmd));
+	}
+
 }

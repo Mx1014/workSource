@@ -27,7 +27,7 @@ public class OrganizationMemberDetailsMapper implements RecordMapper<Record, EhO
         detail.setAvatar(r.getValue((Field<String>) r.field("avatar")));
         detail.setGender(r.getValue((Field<Byte>) r.field("gender")));
         detail.setMaritalFlag(r.getValue((Field<Byte>) r.field("marital_flag")));
-        detail.setPoliticalStatus(r.getValue((Field<String>) r.field("political_status")));
+        detail.setPoliticalFlag(r.getValue((Field<String>) r.field("political_flag")));
         detail.setNativePlace(r.getValue((Field<String>) r.field("native_place")));
         detail.setEnName(r.getValue((Field<String>) r.field("en_name")));
         detail.setRegResidence(r.getValue((Field<String>) r.field("reg_residence")));
