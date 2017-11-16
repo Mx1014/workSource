@@ -5197,6 +5197,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			resource.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
 			resource.setCreatorUid( UserContext.current().getUser().getId());
+			resource.setAclinkId(cmd.getAclinkId());
 			QueryDefaultRuleAdminCommand cmd2 = new QueryDefaultRuleAdminCommand();
 			cmd2.setOwnerType(RentalOwnerType.ORGANIZATION.getCode());
 			cmd2.setOwnerId(resource.getOrganizationId());
