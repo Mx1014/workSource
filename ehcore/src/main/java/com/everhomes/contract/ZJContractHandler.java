@@ -128,12 +128,14 @@ public class ZJContractHandler implements ContractService{
             }
 
         }
-
+        ListContractsResponse response = new ListContractsResponse();
         String enterprises = sb.toString();
         LOGGER.debug("zjgk listContracts enterprise: {}",enterprises);
+        if(StringUtils.isBlank(enterprises)) {
+            return response;
+        }
         ShenzhouJsonEntity<List<ZJContract>> entity = JSONObject.parseObject(enterprises, new TypeReference<ShenzhouJsonEntity<List<ZJContract>>>(){});
         List<ZJContract> contracts = entity.getResponse();
-        ListContractsResponse response = new ListContractsResponse();
         if(contracts != null && contracts.size() > 0) {
             List<ContractDTO> dtos = contracts.stream().map(contract -> {
                 ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
