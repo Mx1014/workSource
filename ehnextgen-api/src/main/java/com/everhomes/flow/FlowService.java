@@ -300,7 +300,9 @@ public interface FlowService {
 	Flow getEnabledFlow(Integer namespaceId, Long moduleId, String moduleType,
 			Long ownerId, String ownerType);
 
-	/**
+    Flow getEnabledFlow(Integer namespaceId, String projectType, Long projectId, Long moduleId, String moduleType, Long ownerId, String ownerType);
+
+    /**
 	 * 添加一个 Case 到工作流中，注意此时为 snapshotFlow，即为运行中的 Flow 副本。
 	 * @param flowCaseCmd
 	 * @return
@@ -394,8 +396,13 @@ public interface FlowService {
 
 	FlowResolveUsersResponse resolveSelectionUsers(Long flowId, Long selectionUserId);
 
-	FlowCase createDumpFlowCase(GeneralModuleInfo ga,
-			CreateFlowCaseCommand flowCaseCmd);
+    /**
+     * 预先申请一个flowCaseId
+     */
+    Long getNextFlowCaseId();
+
+    FlowCase createDumpFlowCase(GeneralModuleInfo ga,
+                                CreateFlowCaseCommand flowCaseCmd);
  
 	List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId,
 			List<FlowUserSelection> selections);
@@ -468,4 +475,18 @@ public interface FlowService {
     void updateFlowValidationStatus(UpdateFlowValidationStatusCommand cmd);
 
     String getFlowCaseRouteURI(Long flowCaseId, Long moduleId);
+
+    FlowConditionVariable getFormFieldValueByVariable(FlowCaseState ctx, String variable, String extra);
+
+    ListFlowConditionVariablesResponse listFlowConditionVariables(ListFlowConditionVariablesCommand cmd);
+
+    ListFlowFormsResponse listFlowForms(ListFlowFormsCommand cmd);
+
+    FlowFormDTO updateFlowFormVersion(UpdateFlowFormCommand cmd);
+
+    FlowFormDTO createFlowForm(UpdateFlowFormCommand cmd);
+
+    void deleteFlowForm(UpdateFlowFormCommand cmd);
+
+    FlowFormDTO getFlowForm(FlowIdCommand cmd);
 }

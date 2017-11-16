@@ -1,8 +1,10 @@
 package com.everhomes.flow;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.qrcode.QRCodeDTO;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +59,11 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         FlowModuleInst inst = moduleMap.get(module.getModuleId());
         if (inst != null) {
             FlowModuleListener listener = inst.getListener();
-            listener.onFlowCreating(flow);
+            try {
+                listener.onFlowCreating(flow);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
         }
     }
 
@@ -67,7 +73,11 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         if (inst != null) {
             ctx.setModule(inst.getInfo());
             FlowModuleListener listener = inst.getListener();
-            listener.onFlowCaseStart(ctx);
+            try {
+                listener.onFlowCaseStart(ctx);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
         }
     }
 
@@ -82,7 +92,11 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         if (inst != null) {
             ctx.setModule(inst.getInfo());
             FlowModuleListener listener = inst.getListener();
-            listener.onFlowCaseAbsorted(ctx);
+            try {
+                listener.onFlowCaseAbsorted(ctx);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
         }
     }
 
@@ -92,7 +106,11 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         if (inst != null) {
             ctx.setModule(inst.getInfo());
             FlowModuleListener listener = inst.getListener();
-            listener.onFlowCaseStateChanged(ctx);
+            try {
+                listener.onFlowCaseStateChanged(ctx);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
         }
     }
 
@@ -102,7 +120,11 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         if (inst != null) {
             ctx.setModule(inst.getInfo());
             FlowModuleListener listener = inst.getListener();
-            listener.onFlowButtonFired(ctx);
+            try {
+                listener.onFlowButtonFired(ctx);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
         }
     }
 
@@ -112,7 +134,11 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         if (inst != null) {
             ctx.setModule(inst.getInfo());
             FlowModuleListener listener = inst.getListener();
-            listener.onFlowCaseEnd(ctx);
+            try {
+                listener.onFlowCaseEnd(ctx);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
         }
     }
 
@@ -122,7 +148,11 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         if (inst != null) {
             ctx.setModule(inst.getInfo());
             FlowModuleListener listener = inst.getListener();
-            listener.onFlowCaseActionFired(ctx);
+            try {
+                listener.onFlowCaseActionFired(ctx);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
         }
     }
 
@@ -131,7 +161,13 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         FlowModuleInst inst = moduleMap.get(flowCase.getModuleId());
         if (inst != null) {
             FlowModuleListener listener = inst.getListener();
-            return listener.onFlowCaseBriefRender(flowCase, flowUserType);
+            String briefRender = null;
+            try {
+                briefRender = listener.onFlowCaseBriefRender(flowCase, flowUserType);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
+            return briefRender;
         }
         return null;
     }
@@ -139,11 +175,15 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     @Override
     public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
         FlowModuleInst inst = moduleMap.get(flowCase.getModuleId());
-        // LOGGER.debug("enter flow onFlowCaseDetailRender flowCase={}, flowUserType={}, inst={}", flowCase, flowUserType, inst);
         if (inst != null) {
             FlowModuleListener listener = inst.getListener();
-            // LOGGER.debug("enter flow onFlowCaseDetailRender flowCase={}, flowUserType={}, listener={}", flowCase, flowUserType, listener);
-            return listener.onFlowCaseDetailRender(flowCase, flowUserType);
+            List<FlowCaseEntity> entities = null;
+            try {
+                entities = listener.onFlowCaseDetailRender(flowCase, flowUserType);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
+            return entities;
         }
         return null;
     }
@@ -153,7 +193,11 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
         if (inst != null) {
             FlowModuleListener listener = inst.getListener();
-            listener.onFlowSMSVariableRender(ctx, templateId, variables);
+            try {
+                listener.onFlowSMSVariableRender(ctx, templateId, variables);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
         }
     }
 
@@ -163,19 +207,47 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         if (inst != null) {
             ctx.setModule(inst.getInfo());
             FlowModuleListener listener = inst.getListener();
-            listener.onFlowMessageSend(ctx, messageDto);
+            try {
+                listener.onFlowMessageSend(ctx, messageDto);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
         }
     }
 
     @Override
-    public Map<String, String> onFlowVariableRender(FlowCaseState ctx, List<String> vars) {
+    public String onFlowVariableRender(FlowCaseState ctx, String variable) {
         FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
         if (inst != null) {
             ctx.setModule(inst.getInfo());
             FlowModuleListener listener = inst.getListener();
-            return listener.onFlowVariableRender(ctx, vars);
+            String value = null;
+            try {
+                value = listener.onFlowVariableRender(ctx, variable);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
+            return value;
         }
         return null;
+    }
+
+    @Override
+    public List<FlowPredefinedParamDTO> listFlowPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+        FlowModuleInst inst = moduleMap.get(flow.getModuleId());
+        if (inst != null) {
+            FlowModuleListener listener = inst.getListener();
+            List<FlowPredefinedParamDTO> dtoList = null;
+            try {
+                dtoList = listener.listFlowPredefinedParam(flow, flowEntityType, ownerType, ownerId);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
+            if (dtoList != null) {
+                return dtoList;
+            }
+        }
+        return new ArrayList<>();
     }
 
     @Override
@@ -185,17 +257,25 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
             FlowModuleInst moduleInst = moduleMap.get(moduleId);
             if (moduleInst != null) {
                 FlowModuleListener listener = moduleInst.getListener();
-                List<FlowServiceTypeDTO> types = listener.listServiceTypes(namespaceId);
-                if (types != null) {
-                    serviceTypes.addAll(types);
+                try {
+                    List<FlowServiceTypeDTO> types = listener.listServiceTypes(namespaceId);
+                    if (types != null) {
+                        serviceTypes.addAll(types);
+                    }
+                } catch (Exception e) {
+                    wrapError(e, listener);
                 }
             }
         } else {
             moduleMap.forEach((k, v) -> {
                 FlowModuleListener listener = v.getListener();
-                List<FlowServiceTypeDTO> types = listener.listServiceTypes(namespaceId);
-                if (types != null) {
-                    serviceTypes.addAll(types);
+                try {
+                    List<FlowServiceTypeDTO> types = listener.listServiceTypes(namespaceId);
+                    if (types != null) {
+                        serviceTypes.addAll(types);
+                    }
+                } catch (Exception e) {
+                    wrapError(e, listener);
                 }
             });
         }
@@ -203,11 +283,16 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     }
 
     @Override
-    public List<FlowPredefinedParamDTO> listPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+    public List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
         FlowModuleInst inst = moduleMap.get(flow.getModuleId());
         if (inst != null) {
             FlowModuleListener listener = inst.getListener();
-            List<FlowPredefinedParamDTO> dtoList = listener.listPredefinedParam(flow, flowEntityType, ownerType, ownerId);
+            List<FlowConditionVariableDTO> dtoList = null;
+            try {
+                dtoList = listener.listFlowConditionVariables(flow, flowEntityType, ownerType, ownerId);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
             if (dtoList != null) {
                 return dtoList;
             }
@@ -216,37 +301,36 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     }
 
     @Override
-    public boolean evaluateFlowConditionVariableRelational(FlowCaseState ctx, FlowConditionRelationalOperatorType relationalOperatorType, FlowConditionExpression exp) {
+    public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) {
         FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
-        if (inst == null) {
-            return false;
-        }
-        ctx.setModule(inst.getInfo());
-        FlowModuleListener listener = inst.getListener();
-        if (listener instanceof FlowModuleConditionEvaluator) {
-            FlowModuleConditionEvaluator evaluator = (FlowModuleConditionEvaluator) listener;
-            switch (relationalOperatorType) {
-                case EQUAL:
-                    return evaluator.evaluateEqual(ctx, exp);
-                case NOT_EQUAL:
-                    return !evaluator.evaluateEqual(ctx, exp);
-                case GREATER_THEN:
-                    return evaluator.evaluateGreaterThen(ctx, exp);
-                case LESS_THEN:
-                    return evaluator.evaluateLessThen(ctx, exp);
-                case GREATER_OR_EQUAL:
-                    return evaluator.evaluateGreaterThen(ctx, exp) || evaluator.evaluateEqual(ctx, exp);
-                case LESS_OR_EQUAL:
-                    return evaluator.evaluateLessThen(ctx, exp) || evaluator.evaluateEqual(ctx, exp);
-                case CONTAIN:
-                    return evaluator.evaluateContains(ctx, exp);
-                case NOT_CONTAIN:
-                    return !evaluator.evaluateContains(ctx, exp);
-                default:
-                    return evaluator.evaluateCustomize(ctx, exp);
+        if (inst != null) {
+            ctx.setModule(inst.getInfo());
+            FlowModuleListener listener = inst.getListener();
+            FlowConditionVariable conditionVariable = null;
+            try {
+                conditionVariable = listener.onFlowConditionVariableRender(ctx, variable, extra);
+            } catch (Exception e) {
+                wrapError(e, listener);
             }
+            return conditionVariable;
         }
-        return false;
+        return null;
+    }
+
+    @Override
+    public List<FlowFormDTO> listFlowForms(Flow flow) {
+        FlowModuleInst inst = moduleMap.get(flow.getModuleId());
+        if (inst != null) {
+            FlowModuleListener listener = inst.getListener();
+            List<FlowFormDTO> flowForms = null;
+            try {
+                flowForms = listener.listFlowForms(flow);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
+            return flowForms;
+        }
+        return null;
     }
 
     @Override
@@ -278,7 +362,11 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         FlowModuleInst inst = moduleMap.get(flowCase.getModuleId());
         if (inst != null) {
             FlowModuleListener listener = inst.getListener();
-            listener.onFlowCaseCreating(flowCase);
+            try {
+                listener.onFlowCaseCreating(flowCase);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
         }
     }
 
@@ -287,7 +375,16 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         FlowModuleInst inst = moduleMap.get(flowCase.getModuleId());
         if (inst != null) {
             FlowModuleListener listener = inst.getListener();
-            listener.onFlowCaseCreated(flowCase);
+            try {
+                listener.onFlowCaseCreated(flowCase);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
         }
+    }
+
+    private void wrapError(Exception e, FlowModuleListener listener) {
+        throw RuntimeErrorException.errorWith(e, ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                "Flow module listener error, listener=%s, cause=%s", listener.getClass().getSimpleName(), e);
     }
 }
