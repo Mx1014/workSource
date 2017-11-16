@@ -72,6 +72,25 @@ public class EnergyMeterTaskDTO {
     private BigDecimal startReading;
     private BigDecimal maxReading;
 
+    private Long billCategoryId;
+    private String billCategory;
+
+    public String getBillCategory() {
+        return billCategory;
+    }
+
+    public void setBillCategory(String billCategory) {
+        this.billCategory = billCategory;
+    }
+
+    public Long getBillCategoryId() {
+        return billCategoryId;
+    }
+
+    public void setBillCategoryId(Long billCategoryId) {
+        this.billCategoryId = billCategoryId;
+    }
+
     public BigDecimal getDayPrompt() {
         return dayPrompt;
     }
