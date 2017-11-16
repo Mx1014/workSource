@@ -15,6 +15,9 @@ update eh_locale_templates set text = '${userName}(${userToken})已加入公司�
 update eh_locale_templates set text = '${userName}(${userToken})已离开公司“${enterpriseName}”。' where scope = 'enterprise.notification' and code = 5;
 
 -- merge from customer20171108 add by xiongying
+INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`) 
+VALUES (27, 'enterprise_customer', '0', '/27', '客户合同', '', '0', NULL, '2', '1', NOW());
+
 set @field_id = (SELECT MAX(id) from eh_var_fields);
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
 VALUES ((@field_id := @field_id + 1), 'enterprise_customer', 'month', '年月', 'Long', '9', '/9', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"datetime\", \"length\": 32}');
