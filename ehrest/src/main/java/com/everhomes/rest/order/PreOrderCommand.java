@@ -50,6 +50,16 @@ public class PreOrderCommand {
     //支付微信公众号必填
     private PaymentParamsDTO paymentParams;
 
+    private Integer commitFlag;
+
+    public Integer getCommitFlag() {
+        return commitFlag;
+    }
+
+    public void setCommitFlag(Integer commitFlag) {
+        this.commitFlag = commitFlag;
+    }
+
     public String getClientAppName() {
         return clientAppName;
     }

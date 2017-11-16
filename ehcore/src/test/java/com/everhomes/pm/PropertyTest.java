@@ -36,6 +36,8 @@ import com.everhomes.rest.organization.pm.PropCommunityBuildAddessCommand;
 import com.everhomes.rest.organization.pm.PropCommunityIdCommand;
 import com.everhomes.rest.organization.pm.PropOwnerDTO;
 import com.everhomes.sharding.ShardingProvider;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 
 public class PropertyTest extends CoreServerTestCase {
     
@@ -238,5 +240,21 @@ public class PropertyTest extends CoreServerTestCase {
 		System.out.println(response.getTodayList());
 		System.out.println(response.getYesterdayList());
 		System.out.println(response.getWeekList());
+	}
+
+	@Test
+	public void testCache()throws Exception{
+		clearCache(99l);
+		System.out.println(getCache(99l));
+	}
+
+	@Cacheable(value="findNewsTagById", key="{#id}", unless="#result == null")
+	public String getCache(Long id){
+    	return "33333";
+	}
+
+	//@CacheEvict(value="findNewsTagById", key="#id")
+	public void clearCache(Long id){
+
 	}
 }

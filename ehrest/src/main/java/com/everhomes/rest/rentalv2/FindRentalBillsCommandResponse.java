@@ -16,7 +16,7 @@ public class FindRentalBillsCommandResponse {
 
     private Long nextPageAnchor;
     @ItemType(RentalBillDTO.class)
-	private List<RentalBillDTO> rentalBills; 
+	private List<RentalBillDTO> rentalBills;
 	@Override
     public String toString() {
 
