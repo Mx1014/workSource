@@ -281,12 +281,14 @@ public class ZJContractHandler implements ContractService{
         List<ContractChargingItemDTO> items = new ArrayList<>();
         ContractChargingItemDTO item = new ContractChargingItemDTO();
         item.setChargingItemName("物业费");
+        ChargingVariables cv = new ChargingVariables();
         List<PaymentVariable> chargingVariables = new ArrayList<>();
         PaymentVariable pv = new PaymentVariable();
         pv.setVariableName("物业费单价");
         pv.setVariableValue(zjContract.getPropertyFeeUnit());
         chargingVariables.add(pv);
-        item.setChargingVariables(StringHelper.toJsonString(chargingVariables));
+        cv.setChargingVariables(chargingVariables);
+        item.setChargingVariables(StringHelper.toJsonString(cv));
         items.add(item);
 
         ContractChargingItemDTO itemRent = new ContractChargingItemDTO();
@@ -294,9 +296,11 @@ public class ZJContractHandler implements ContractService{
         PaymentVariable pvRent = new PaymentVariable();
         pvRent.setVariableName("租金");
         pvRent.setVariableValue(zjContract.getRent());
-        chargingVariables = new ArrayList<>();
-        chargingVariables.add(pvRent);
-        itemRent.setChargingVariables(StringHelper.toJsonString(chargingVariables));
+        ChargingVariables cvRent = new ChargingVariables();
+        List<PaymentVariable> rents = new ArrayList<>();
+        rents.add(pvRent);
+        cvRent.setChargingVariables(rents);
+        itemRent.setChargingVariables(StringHelper.toJsonString(cvRent));
         items.add(itemRent);
         dto.setChargingItems(items);
         if(zjContract.getApartments() != null && zjContract.getApartments().size() > 0) {
