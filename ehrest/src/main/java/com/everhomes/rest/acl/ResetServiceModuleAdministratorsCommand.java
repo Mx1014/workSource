@@ -52,7 +52,7 @@ public class ResetServiceModuleAdministratorsCommand {
     //
     private Byte allCommunityControlFlag;
 
-    private Integer communityControlOption;
+    private Byte communityControlOption;
 
     @ItemType(Long.class)
     private List<Long> communityControlIds;
@@ -63,7 +63,7 @@ public class ResetServiceModuleAdministratorsCommand {
     //
     private Byte allOrgControlFlag;
 
-    private Integer orgControlOption;
+    private Byte orgControlOption;
 
     @ItemType(ControlTarget.class)
     private List<ControlTarget> orgControlDetails;
@@ -203,19 +203,19 @@ public class ResetServiceModuleAdministratorsCommand {
         this.targetIds = targetIds;
     }
 
-    public Integer getCommunityControlOption() {
+    public Byte getCommunityControlOption() {
         return communityControlOption;
     }
 
-    public void setCommunityControlOption(Integer communityControlOption) {
+    public void setCommunityControlOption(Byte communityControlOption) {
         this.communityControlOption = communityControlOption;
     }
 
-    public Integer getOrgControlOption() {
+    public Byte getOrgControlOption() {
         return orgControlOption;
     }
 
-    public void setOrgControlOption(Integer orgControlOption) {
+    public void setOrgControlOption(Byte orgControlOption) {
         this.orgControlOption = orgControlOption;
     }
 }
