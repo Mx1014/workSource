@@ -439,21 +439,21 @@ public class ArchivesServiceImpl implements ArchivesService {
             RowResult r = (RowResult) resultLists.get(i);
             ImportArchivesContactsDTO data = new ImportArchivesContactsDTO();
             if (null != r.getCells().get("A"))
-                data.setContactName(r.getCells().get("A"));
+                data.setContactName(r.getCells().get("A") != null ? r.getCells().get("A") : "");
             if (null != r.getCells().get("B"))
-                data.setContactEnName(r.getCells().get("B"));
+                data.setContactEnName(r.getCells().get("B") != null ? r.getCells().get("B") : "");
             if (null != r.getCells().get("C"))
-                data.setGender(r.getCells().get("C"));
+                data.setGender(r.getCells().get("C") != null ? r.getCells().get("C") : "");
             if (null != r.getCells().get("D"))
-                data.setContactToken(r.getCells().get("D"));
+                data.setContactToken(r.getCells().get("D") != null ? r.getCells().get("D") : "");
             if (null != r.getCells().get("E"))
-                data.setContactShortToken(r.getCells().get("E"));
+                data.setContactShortToken(r.getCells().get("E") != null ? r.getCells().get("E") : "");
             if (null != r.getCells().get("F"))
-                data.setWorkEmail(r.getCells().get("F"));
+                data.setWorkEmail(r.getCells().get("F") != null ? r.getCells().get("F") : "");
             if (null != r.getCells().get("G"))
-                data.setDepartment(r.getCells().get("G"));
+                data.setDepartment(r.getCells().get("G") != null ? r.getCells().get("G") : "");
             if (null != r.getCells().get("H"))
-                data.setJobPosition(r.getCells().get("H"));
+                data.setJobPosition(r.getCells().get("H") != null ? r.getCells().get("H") : "");
             datas.add(data);
         }
         return datas;
