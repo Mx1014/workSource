@@ -128,5 +128,5 @@ public interface ConfigConstants {
     public static final String QUESTIONNAIRE_REMIND_TIME_INTERVAL = "questionnaire.remind.time.interval";
 
     String PARKING_CAR_VERIFICATION_FLOWCASE_URL = "parking.car.verification.flowCase.url";
-
+    String ARCHIVES_FORM_ORIGIN_ID = "archives.form.origin.id";
 }

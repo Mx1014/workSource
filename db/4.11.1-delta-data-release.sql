@@ -241,7 +241,9 @@ update eh_addresses set namespace_address_type = 'shenzhou', namespace_address_t
 update eh_addresses set namespace_address_type = 'shenzhou', namespace_address_token = '8D9E03E2-0E05-4C25-AD4C-B8467BF34639' where namespace_id = 999971 and building_name = '张东路1388号2幢' and apartment_name = '201';
 update eh_addresses set namespace_address_type = 'shenzhou', namespace_address_token = '0D874418-2127-416C-BCB6-CE0F3CF06511' where namespace_id = 999971 and building_name = '张东路1388号2幢' and apartment_name = '301';
 
-	
+-- added by R 11/16/2017
+-- 更新导入错误提示语
+update eh_locale_strings set text = '岗位不存在' where scope = 'archives' and `code` = 100009;
 	
 	
 
