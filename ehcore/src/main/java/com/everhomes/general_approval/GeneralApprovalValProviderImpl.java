@@ -2,27 +2,25 @@ package com.everhomes.general_approval;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.naming.NameMapper;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-
-import java.sql.Timestamp;
-import java.util.List;
-
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.everhomes.server.schema.Tables;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhGeneralApprovalValsDao;
 import com.everhomes.server.schema.tables.pojos.EhGeneralApprovalVals;
 import com.everhomes.server.schema.tables.records.EhGeneralApprovalValsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 @Component
 public class GeneralApprovalValProviderImpl implements GeneralApprovalValProvider {
@@ -130,7 +128,8 @@ public class GeneralApprovalValProviderImpl implements GeneralApprovalValProvide
 	        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovalVals.class));
 
 	        result[0] = context.select().from(Tables.EH_GENERAL_APPROVAL_VALS)
-	            .where(Tables.EH_GENERAL_APPROVAL_VALS.FLOW_CASE_ID.eq(id)).and(Tables.EH_GENERAL_APPROVAL_VALS.FIELD_NAME.eq(fieldName))
+	            .where(Tables.EH_GENERAL_APPROVAL_VALS.FLOW_CASE_ID.eq(id))
+                    .and(Tables.EH_GENERAL_APPROVAL_VALS.FIELD_NAME.eq(fieldName))
 	            .fetchAny().map((r) -> {
 	                return ConvertHelper.convert(r, GeneralApprovalVal.class);
 	            });

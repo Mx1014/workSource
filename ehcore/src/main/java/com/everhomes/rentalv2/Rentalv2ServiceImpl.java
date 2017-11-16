@@ -93,7 +93,7 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowAutoStepDTO;
+import com.everhomes.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowReferType;
@@ -3012,7 +3012,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			//增加审批后线上支付模式的判断 审批模式，订单状态设置成待审批 add by sw 20170506
 			//现在审批线上模式，线下订单模式都跟踪状态，金额为0时，直接预约成功，否则设置成待付款
 			//线上模式只有成功之后才走工作流
-//			if (bill.getPayMode().equals(PayMode.ONLINE_PAY.getCode())&&compare == 0) {
+//			if (bill.getPayMode().equals(PayMode.ONLINE_PAY.getCode())&&compareTo == 0) {
 			//线下模式和审批线上模式 都走工作流
 			if (PayMode.ONLINE_PAY.getCode().equals(bill.getPayMode())) {
 				int compare = bill.getPayTotalMoney().compareTo(BigDecimal.ZERO);
