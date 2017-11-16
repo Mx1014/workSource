@@ -1041,16 +1041,12 @@ public class FlowServiceImpl implements FlowService {
             }
         }
 
-        List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(
-                cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType());
+        ListFlowUserSelectionCommand cmd1 = new ListFlowUserSelectionCommand();
+        cmd1.setBelongTo(cmd.getBelongTo());
+        cmd1.setFlowEntityType(cmd.getFlowEntityType());
+        cmd1.setFlowUserType(cmd.getFlowUserType());
 
-        ListFlowUserSelectionResponse resp = new ListFlowUserSelectionResponse();
-        resp.setSelections(
-                selections.stream()
-                        .map(r -> ConvertHelper.convert(r, FlowUserSelectionDTO.class))
-                .collect(Collectors.toList())
-        );
-        return resp;
+        return listFlowUserSelection(cmd1);
     }
 
     @Override
@@ -1060,7 +1056,7 @@ public class FlowServiceImpl implements FlowService {
         List<FlowUserSelectionDTO> selections = new ArrayList<>();
         resp.setSelections(selections);
         List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(
-                cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType(), 0);
+                cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType(), FlowConstants.FLOW_CONFIG_VER);
         if (seles != null && seles.size() > 0) {
             seles.forEach((sel) -> {
                 selections.add(ConvertHelper.convert(sel, FlowUserSelectionDTO.class));

@@ -7,6 +7,7 @@ import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
@@ -70,6 +71,8 @@ class PmTaskCommonServiceImpl {
     private CommunityProvider communityProvider;
     @Autowired
     private OrganizationProvider organizationProvider;
+    @Autowired
+    private ConfigurationProvider configProvider;
 
     List<PmTaskAttachmentDTO> convertAttachmentDTO(List<PmTaskAttachment> attachments) {
         return attachments.stream().map(r -> {
@@ -222,10 +225,18 @@ class PmTaskCommonServiceImpl {
         task.setOrganizationId(cmd.getOrganizationId());
         task.setRequestorName(requestorName);
         task.setRequestorPhone(requestorPhone);
+        task.setOrganizationName(cmd.getOrganizationName());
 
         //设置门牌地址,楼栋地址,服务地点
-        setPmTaskAddressInfo(cmd, task);
 
+        String handle = configProvider.getValue(PmTaskServiceImpl.HANDLER + namespaceId, PmTaskHandle.FLOW);
+        if(PmTaskHandle.YUE_KONG_JIAN.equals(handle)){
+            task.setAddress(cmd.getAddress());
+            task.setAddressType(cmd.getAddressType());
+        }
+        else {
+            setPmTaskAddressInfo(cmd, task);
+        }
         pmTaskProvider.createTask(task);
         //附件
         addAttachments(cmd.getAttachments(), user.getId(), task.getId(), PmTaskAttachmentType.TASK.getCode());

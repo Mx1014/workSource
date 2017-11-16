@@ -58,7 +58,7 @@ public class UpdateResourceAdminCommand {
 	private String confirmationPrompt;
     private String offlineCashierAddress;
     private Long offlinePayeeUid;
-
+    private Long aclinkId;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -222,4 +222,11 @@ public class UpdateResourceAdminCommand {
 		this.offlinePayeeUid = offlinePayeeUid;
 	}
 
+	public Long getAclinkId() {
+		return aclinkId;
+	}
+
+	public void setAclinkId(Long aclinkId) {
+		this.aclinkId = aclinkId;
+	}
 }
