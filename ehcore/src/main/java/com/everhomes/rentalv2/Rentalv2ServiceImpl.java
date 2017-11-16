@@ -1961,6 +1961,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				Long orderReminderTimeLong = order.getReminderTime().getTime();
 				Long orderEndTimeLong = order.getEndTime().getTime();
 				Long orderReminderEndTimeLong = order.getReminderEndTime().getTime();
+				LOGGER.debug("rentalSchedule: orderId:"+order.getId()+"  orderReminderTimeLong:"+orderReminderTimeLong+"  orderEndTimeLong:"+orderEndTimeLong+
+						"  orderReminderEndTimeLong:"+orderReminderEndTimeLong);
 				//时间快到发推送
 				if(currTime<orderReminderTimeLong && currTime + 30*60*1000l >= orderReminderTimeLong){
 					Map<String, String> map = new HashMap<String, String>();  
@@ -3008,7 +3010,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					.errorWith(RentalServiceErrorCode.SCOPE,
 							RentalServiceErrorCode.ERROR_CANCEL_OVERTIME,"cancel bill over time");
 		}else{
-			this.dbProvider.execute((TransactionStatus status) -> {
+		this.dbProvider.execute((TransactionStatus status) -> {
 				//默认是已退款
 				order.setStatus(SiteBillStatus.REFUNDED.getCode());
 				if (rs.getRefundFlag().equals(NormalFlag.NEED.getCode())&&(order.getPaidMoney().compareTo(new BigDecimal(0))==1)){ 
