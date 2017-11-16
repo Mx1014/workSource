@@ -423,5 +423,5 @@ public interface RolePrivilegeService {
     void transferOrganizationSuperAdmin(TransferOrganizationSuperAdminCommand cmd);
 
     // 新版设置模块管理员 added by lei.lv 20171101
-	void resetServiceModuleAdministrators(CreateServiceModuleAdministratorsCommand cmd);
+	void resetServiceModuleAdministrators(ResetServiceModuleAdministratorsCommand cmd);
 }

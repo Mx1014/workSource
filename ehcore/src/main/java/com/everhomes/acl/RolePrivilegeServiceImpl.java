@@ -24,7 +24,6 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.ActivationFlag;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.IncludeChildFlagType;
-import com.everhomes.rest.community.ListChildProjectCommand;
 import com.everhomes.rest.community.ResourceCategoryType;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.module.AssignmentTarget;
@@ -46,7 +45,6 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -3413,7 +3411,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
                     }
 
                     // todo:获取Org的ControlTargets
-                    dto.setOrgControlDetails(authorizationsAppControl.getControlTargets());
+					List<ControlTarget> orgControlTarget = authorizationsAppControl.getControlTargets();
+                    dto.setOrgControlDetails(orgControlTarget);
 
                     break;
                 case UNLIMIT_CONTROL:
@@ -3511,78 +3510,82 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 
 	@Override
-	public void resetServiceModuleAdministrators(CreateServiceModuleAdministratorsCommand cmd) {
+	public void resetServiceModuleAdministrators(ResetServiceModuleAdministratorsCommand cmd) {
 		User user = UserContext.current().getUser();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		Authorization authorization = ConvertHelper.convert(cmd, Authorization.class);
-		authorization.setAuthType(EntityType.SERVICE_MODULE_APP.getCode());
-		authorization.setIdentityType(IdentityType.MANAGE.getCode());
-		authorization.setNamespaceId(namespaceId);
-		authorization.setCreatorUid(user.getId());
-		authorization.setOperatorUid(user.getId());
-		authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
 		dbProvider.execute((TransactionStatus status) -> {
 
-			//todo: 先删除本公司给这个user的赋权
-			this.authorizationProvider.deleteAuthorizationWithConditon(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId(), authorization.getAuthType(), null, authorization.getIdentityType(),null,null,null);
-			this.authorizationProvider.delteAuthorizationControlConfigsWithCondition(namespaceId, user.getId());
+			cmd.getTargetIds().stream().map(targetId -> {
+				Integer namespaceId = UserContext.getCurrentNamespaceId();
+				Authorization authorization = ConvertHelper.convert(cmd, Authorization.class);
+				authorization.setAuthType(EntityType.SERVICE_MODULE_APP.getCode());
+				authorization.setIdentityType(IdentityType.MANAGE.getCode());
+				authorization.setNamespaceId(namespaceId);
+				authorization.setCreatorUid(user.getId());
+				authorization.setOperatorUid(user.getId());
+				authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				authorization.setTargetId(targetId);
 
-			// todo: 保存按园区范围控制的应用
-			// 保存control_config表
-			Long control_id_c = this.sequenceProvider.getNextSequence("authControlId");
-			// 将参数里的信息处理成config
-			List<AuthorizationControlConfig> configs_c = processAuthorizationControlConfig(namespaceId, control_id_c, user.getId(), cmd.getCommunityControlIds(), null);
-			authorizationProvider.createAuthorizationControlConfigs(configs_c);
 
-			if(AllFlagType.fromCode(cmd.getAllCommunityControlFlag()) == AllFlagType.YES){
-				processAuthorization(authorization, 0L, 0L, ModuleManagementType.COMMUNITY_CONTROL.getCode(), cmd.getAllCommunityControlFlag(), control_id_c);
-				authorizationProvider.createAuthorization(authorization);
-				assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(),authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
-			}else{
-				for (ModuleAppTarget target : cmd.getCommunityTarget()){
-					processAuthorization(authorization, target.getModuleId(), target.getAppId(), ModuleManagementType.COMMUNITY_CONTROL.getCode(), cmd.getAllCommunityControlFlag(), control_id_c);
+				//todo: 先删除本公司给这个user的赋权
+				this.authorizationProvider.deleteAuthorizationWithConditon(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), targetId, authorization.getAuthType(), null, authorization.getIdentityType(), null, null, null);
+				this.authorizationProvider.delteAuthorizationControlConfigsWithCondition(namespaceId, targetId);
+
+				// todo: 保存按园区范围控制的应用
+				// 保存control_config表
+				Long control_id_c = this.sequenceProvider.getNextSequence("authControlId");
+				// 将参数里的信息处理成config
+				List<AuthorizationControlConfig> configs_c = processAuthorizationControlConfig(namespaceId, control_id_c, targetId, cmd.getCommunityControlIds(), null);
+				authorizationProvider.createAuthorizationControlConfigs(configs_c);
+
+				if (AllFlagType.fromCode(cmd.getAllCommunityControlFlag()) == AllFlagType.YES) {
+					processAuthorization(authorization, 0L, 0L, ModuleManagementType.COMMUNITY_CONTROL.getCode(), cmd.getAllCommunityControlFlag(), control_id_c);
 					authorizationProvider.createAuthorization(authorization);
-					assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(),authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
+					assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
+				} else {
+					for (ModuleAppTarget target : cmd.getCommunityTarget()) {
+						processAuthorization(authorization, target.getModuleId(), target.getAppId(), ModuleManagementType.COMMUNITY_CONTROL.getCode(), cmd.getAllCommunityControlFlag(), control_id_c);
+						authorizationProvider.createAuthorization(authorization);
+						assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
+					}
 				}
-			}
 
 
+				// todo: 保存按OA范围控制的应用
+				// 保存control_config表
+				Long control_id_oa = this.sequenceProvider.getNextSequence("authControlId");
+				// 将参数里的信息处理成config
+				List<AuthorizationControlConfig> configs_oa = processAuthorizationControlConfig(namespaceId, control_id_oa, targetId, null, cmd.getOrgControlDetails());
+				authorizationProvider.createAuthorizationControlConfigs(configs_oa);
 
-			// todo: 保存按OA范围控制的应用
-			// 保存control_config表
-			Long control_id_oa = this.sequenceProvider.getNextSequence("authControlId");
-			// 将参数里的信息处理成config
-			List<AuthorizationControlConfig> configs_oa = processAuthorizationControlConfig(namespaceId, control_id_oa, user.getId(), null, cmd.getOrgControlDetails());
-			authorizationProvider.createAuthorizationControlConfigs(configs_oa);
-
-			if(AllFlagType.fromCode(cmd.getAllOrgControlFlag()) == AllFlagType.YES) {
-				processAuthorization(authorization, 0L, 0L, ModuleManagementType.ORG_CONTROL.getCode(), cmd.getAllOrgControlFlag(), control_id_oa);
-				authorizationProvider.createAuthorization(authorization);
-				assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(),authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
-			}else {
-				for (ModuleAppTarget target : cmd.getOrgTarget()){
-					processAuthorization(authorization, target.getModuleId(), target.getAppId(), ModuleManagementType.ORG_CONTROL.getCode(), cmd.getAllOrgControlFlag(), control_id_oa);
+				if (AllFlagType.fromCode(cmd.getAllOrgControlFlag()) == AllFlagType.YES) {
+					processAuthorization(authorization, 0L, 0L, ModuleManagementType.ORG_CONTROL.getCode(), cmd.getAllOrgControlFlag(), control_id_oa);
 					authorizationProvider.createAuthorization(authorization);
-					assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(),authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
+					assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
+				} else {
+					for (ModuleAppTarget target : cmd.getOrgTarget()) {
+						processAuthorization(authorization, target.getModuleId(), target.getAppId(), ModuleManagementType.ORG_CONTROL.getCode(), cmd.getAllOrgControlFlag(), control_id_oa);
+						authorizationProvider.createAuthorization(authorization);
+						assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
+					}
 				}
-			}
 
 
-			// todo: 保存无范围控制的应用
-			if(AllFlagType.fromCode(cmd.getAllUnlimitControlFlag()) == AllFlagType.YES) {
-				processAuthorization(authorization, 0L, 0L, ModuleManagementType.UNLIMIT_CONTROL.getCode(), cmd.getAllUnlimitControlFlag(),0L);
-				authorizationProvider.createAuthorization(authorization);
-				assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(),authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
-			}else{
-				for (ModuleAppTarget target : cmd.getUnlimitTarget()){
-					processAuthorization(authorization, target.getModuleId(), target.getAppId(),  ModuleManagementType.UNLIMIT_CONTROL.getCode(), cmd.getAllUnlimitControlFlag(), 0L);
+				// todo: 保存无范围控制的应用
+				if (AllFlagType.fromCode(cmd.getAllUnlimitControlFlag()) == AllFlagType.YES) {
+					processAuthorization(authorization, 0L, 0L, ModuleManagementType.UNLIMIT_CONTROL.getCode(), cmd.getAllUnlimitControlFlag(), 0L);
 					authorizationProvider.createAuthorization(authorization);
-					assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(),authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
+					assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
+				} else {
+					for (ModuleAppTarget target : cmd.getUnlimitTarget()) {
+						processAuthorization(authorization, target.getModuleId(), target.getAppId(), ModuleManagementType.UNLIMIT_CONTROL.getCode(), cmd.getAllUnlimitControlFlag(), 0L);
+						authorizationProvider.createAuthorization(authorization);
+						assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
+					}
 				}
-			}
 
-			return  null;
+				return null;
+			}).collect(Collectors.toList());
+			return null;
 		});
 
 
@@ -3605,7 +3608,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 //		});
 	}
 
-	private void processAuthorization(Authorization authorization, Long authId, Long moduleAppId, String controlType, Byte controlFlag, Long controlId){
+	private void processAuthorization(Authorization authorization, Long authId, Long moduleAppId, String controlType, Byte controlFlag, Long controlId, Integer controlOption){
 		authorization.setAuthId(authId);
 		authorization.setModuleAppId(moduleAppId);
 		authorization.setModuleControlType(controlType);
@@ -3631,6 +3634,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		if(controlTargets != null){
 			for(ControlTarget controlTarget : controlTargets){
+				if(controlTarget.getId()  == 0L){
+
+				}
 				AuthorizationControlConfig config = new AuthorizationControlConfig();
 				config.setControlId(controlId);
 				config.setNamespaceId(namespaceId);

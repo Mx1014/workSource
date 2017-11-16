@@ -653,7 +653,7 @@ public class AclController extends ControllerBase {
      */
     @RequestMapping("resetServiceModuleAdministrators")
     @RestReturn(value=String.class)
-    public RestResponse resetServiceModuleAdministrators(@Valid CreateServiceModuleAdministratorsCommand cmd) {
+    public RestResponse resetServiceModuleAdministrators(@Valid ResetServiceModuleAdministratorsCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.AUTH_RELATION_CREATE);
         rolePrivilegeService.resetServiceModuleAdministrators(cmd);

@@ -6,7 +6,7 @@ ALTER TABLE `eh_authorizations` ADD COLUMN `module_app_id`  bigint(20) COMMENT '
 ALTER TABLE `eh_authorizations` ADD COLUMN `module_control_type`  varchar(64)  DEFAULT '' COMMENT 'community_control;org_control;unlimit' ;
 ALTER TABLE `eh_authorizations` ADD COLUMN `all_control_flag` tinyint(4) DEFAULT 0 COMMENT '0 not all, 1 all' ;
 ALTER TABLE `eh_authorizations` ADD COLUMN `control_id` bigint(20) ;
-
+ALTER TABLE `eh_authorizations` ADD COLUMN `control_option` bigint(20) ;
 -- eh_authorization_control_configs
 -- DROP TABLE IF EXISTS `eh_authorization_control_configs`;
 CREATE TABLE `eh_authorization_control_configs` (
