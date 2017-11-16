@@ -10588,7 +10588,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 trees.add(organizationTreeDTO);
             }
         }
-
+        //同级排序
+        trees.sort(Comparator.comparingInt(OrganizationTreeDTO::getOrder));
         dto.setTrees(trees);
         return dto;
     }
