@@ -46,7 +46,7 @@ public class FlowGraphNodeCondition extends FlowGraphNode {
                     processCtx(ctx, branch, next);
                 } else {
                     throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_NEED_SELECT_NEXT_NODE,
-                            "need next node id, please update your app");
+                            "Need next node id, please update your app.");
                 }
             } else if (flowBranchDecider == FlowBranchDecider.CONDITION) {
                 FlowGraphCondition trueCond = null;
