@@ -366,7 +366,11 @@ public class BannerServiceImpl implements BannerService {
         SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
         
         GetBannersCommand getCmd = new GetBannersCommand();
-        getCmd.setBannerGroup(cmd.getBannerGroup());
+
+        //先注释掉bannerGroup，原因是运营后台配置是多入口的，但是园区后台发布banner是单入口的，他们的bannerGroup字段不一致会导致查询失败
+        //当前所有域空间的banner都是单入口的，因此此处临时去除bannerGroup，待园区后台实现多入口后可开放   add by yanjun 20171116
+        //getCmd.setBannerGroup(cmd.getBannerGroup());
+
         getCmd.setBannerLocation(cmd.getBannerLocation());
         getCmd.setNamespaceId(sceneToken.getNamespaceId());
         
