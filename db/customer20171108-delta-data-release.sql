@@ -5,10 +5,6 @@ VALUES ((@field_id := @field_id + 1), 'enterprise_customer', 'month', '年月', 
 -- bug 16915 【客户管理-动态字段配置】人才团队tab页个人证书、主要职业经历建议为多行文本（优化）
 update eh_var_fields set field_param = '{"fieldParamType": "multiText", "length": 2048}' where name = 'personalCertificate';
 update eh_var_fields set field_param = '{"fieldParamType": "multiText", "length": 2048}' where name = 'careerExperience';
-update eh_var_fields set display_name = '营业额(万元)' where display_name = '营业额';
-update eh_var_fields set display_name = '纳税额(万元)' where display_name = '纳税额';
-update eh_var_field_scopes set field_display_name = '纳税额(万元)' where field_display_name = '纳税额';
-update eh_var_field_scopes set field_display_name = '营业额(万元)' where field_display_name = '营业额';
 
 
 -- 张江高科基础数据

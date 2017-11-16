@@ -1442,7 +1442,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
             organization.setUpdateTime(now);
             organizationProvider.updateOrganization(organization);
-            
+
 			OrganizationCommunityRequest r = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organization.getId());
 
 			if(null != r){
