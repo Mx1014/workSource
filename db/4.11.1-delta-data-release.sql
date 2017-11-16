@@ -241,8 +241,16 @@ update eh_addresses set namespace_address_type = 'shenzhou', namespace_address_t
 update eh_addresses set namespace_address_type = 'shenzhou', namespace_address_token = '8D9E03E2-0E05-4C25-AD4C-B8467BF34639' where namespace_id = 999971 and building_name = '张东路1388号2幢' and apartment_name = '201';
 update eh_addresses set namespace_address_type = 'shenzhou', namespace_address_token = '0D874418-2127-416C-BCB6-CE0F3CF06511' where namespace_id = 999971 and building_name = '张东路1388号2幢' and apartment_name = '301';
 
-	
-	
+-- added by R 11/16/2017
+-- 更新导入错误提示语
+update eh_locale_strings set text = '岗位不存在' where scope = 'archives' and `code` = 100009;
+-- added by R 11/16/2017 17:36
+-- 导入错误提示信息
+SET @string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100010', 'zh_CN', '英文名格式错误');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100011', 'zh_CN', '邮箱格式错误');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100012', 'zh_CN', '短号格式错误');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100013', 'zh_CN', '日期格式错误');
 	
 
 

@@ -1670,6 +1670,45 @@ public class CustomerServiceImpl implements CustomerService {
                 statistics.add(statistic);
             });
             response.setStatistics(statistics);
+
+            //季度
+            Map<Integer, QuarterStatistics> quarterStatisticsMap = new HashMap<>();
+            monthStatisticsMap.forEach((timestamp, statistic) -> {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(timestamp);
+                int month = cal.get(Calendar.MONTH);
+                int quarter = 0;
+                if(month <= 3) {
+                    quarter = YearQuarter.THE_FIRST_QUARTER.getCode();
+                } else if(month > 3 && month <= 6) {
+                    quarter = YearQuarter.THE_SECOND_QUARTER.getCode();
+                } else if(month > 6 && month <= 9) {
+                    quarter = YearQuarter.THE_THIRD_QUARTER.getCode();
+                } else if(month > 9 && month <= 12) {
+                    quarter = YearQuarter.THE_FOURTH_QUARTER.getCode();
+                }
+
+                QuarterStatistics qs = quarterStatisticsMap.get(quarter);
+                if(qs == null) {
+                    qs = new QuarterStatistics();
+                    qs.setQuarter(quarter);
+                    qs.setTaxPayment(statistic.getTaxPayment());
+                    qs.setTurnover(statistic.getTurnover());
+
+                } else {
+                    BigDecimal taxPayment = statistic.getTaxPayment() == null ? BigDecimal.ZERO : statistic.getTaxPayment();
+                    qs.setTaxPayment(taxPayment.add(qs.getTaxPayment() == null ? BigDecimal.ZERO : qs.getTaxPayment()));
+                    BigDecimal turnover = statistic.getTurnover() == null ? BigDecimal.ZERO : statistic.getTurnover();
+                    qs.setTurnover(turnover.add(qs.getTurnover() == null ? BigDecimal.ZERO : qs.getTurnover()));
+                }
+                quarterStatisticsMap.put(quarter, qs);
+            });
+
+            List<QuarterStatistics> quarterStatisticses = new ArrayList<>();
+            quarterStatisticsMap.forEach((quarter, statistic) -> {
+                quarterStatisticses.add(statistic);
+            });
+            response.setQuarterStatisticses(quarterStatisticses);
         }
         return response;
     }

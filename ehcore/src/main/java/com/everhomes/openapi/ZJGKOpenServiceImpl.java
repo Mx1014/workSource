@@ -1474,12 +1474,15 @@ public class ZJGKOpenServiceImpl {
             organizationDetail.setDescription(organization.getDescription());
             organizationDetail.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organizationDetail.setDisplayName(organization.getName());
+            organizationDetail.setAddress(customer.getContactAddress());
             organizationProvider.createOrganizationDetail(organizationDetail);
         }else {
             organizationDetail.setOrganizationId(organization.getId());
             organizationDetail.setDescription(organization.getDescription());
             organizationDetail.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organizationDetail.setDisplayName(organization.getName());
+            organizationDetail.setAddress(customer.getContactAddress());
+            organizationDetail.setContact("");
             organizationProvider.updateOrganizationDetail(organizationDetail);
         }
         organizationSearcher.feedDoc(organization);
