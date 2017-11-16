@@ -1100,4 +1100,11 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
     VALUES ((@launch_pad_item_id := @launch_pad_item_id + 1), @namespace_id, '0', '0', '0', '/home/work1', 'NigtWork8', '训练营机构', '训练营机构', 'cs://1/image/aW1hZ2UvTVRvM1pETmxPVFU1TWpReVlqWmpaVFl6WkRCaFkyTm1OMkV6WWpoa016YzNNUQ', '1', '1', '33', CONCAT('{"type":',@eh_service_alliance_categories_id,',"parentId":',@eh_service_alliance_categories_id,',"displayType": "list"}'), '10', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', NULL, NULL, '0', NULL, NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`) 
     VALUES ((@launch_pad_item_id := @launch_pad_item_id + 1), @namespace_id, '0', '0', '0', '/home/work1', 'NigtWork8', '训练营机构', '训练营机构', 'cs://1/image/aW1hZ2UvTVRvM1pETmxPVFU1TWpReVlqWmpaVFl6WkRCaFkyTm1OMkV6WWpoa016YzNNUQ', '1', '1', '33', CONCAT('{"type":',@eh_service_alliance_categories_id,',"parentId":',@eh_service_alliance_categories_id,',"displayType": "list"}'), '10', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0', NULL, NULL, '0', NULL, NULL);    
-         
+
+-- add by sw 20171116
+set @id = (select MAX(id) FROM eh_web_menu_scopes);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),40103,NULL,'EhNamespaces',999961,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),40105,NULL,'EhNamespaces',999961,2);
+

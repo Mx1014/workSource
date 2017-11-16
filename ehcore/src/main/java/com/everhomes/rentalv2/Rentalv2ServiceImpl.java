@@ -3395,7 +3395,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							bill.setFlowCaseId(flowCase.getId());
 						}
 
-
+						bill.setPaidVersion(version.getCode());
 						rentalv2Provider.updateRentalBill(bill);
 
 						return null;
