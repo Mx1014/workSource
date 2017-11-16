@@ -44,6 +44,7 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.parking.ParkingLocalStringCode;
 import com.everhomes.rest.pmNotify.*;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
@@ -55,14 +56,19 @@ import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.rest.varField.FieldDTO;
+import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.search.*;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 import com.everhomes.util.doc.DocUtil;
+import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.everhomes.varField.FieldService;
 import com.google.zxing.WriterException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
@@ -82,7 +88,12 @@ import sun.misc.BASE64Encoder;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -178,6 +189,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Autowired
 	private UserProvider userProvider;
+
+	@Autowired
+	private FieldService  fieldService;
+
+	@Autowired
+	private   ImportFileService  importFileService;
 
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(
@@ -1211,27 +1228,70 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	@Override
-	public HttpServletResponse exportEquipments(SearchEquipmentsCommand cmd,
+	public void exportEquipments(SearchEquipmentsCommand cmd,
 			HttpServletResponse response) {
-		Integer pageSize = Integer.MAX_VALUE;
-		cmd.setPageSize(pageSize);
-		
 		SearchEquipmentsResponse equipments = equipmentSearcher.queryEquipments(cmd);
 		List<EquipmentsDTO> dtos = equipments.getEquipment();
 		
-		URL rootPath = RentalServiceImpl.class.getResource("/");
-		String filePath =rootPath.getPath() + this.downloadDir ;
-		File file = new File(filePath);
-		if(!file.exists())
-			file.mkdirs();
-		filePath = filePath + "Equipments"+System.currentTimeMillis()+".xlsx";
-		//新建了一个文件
-		this.createEquipmentsBook(filePath, dtos);
-		LOGGER.info("filePath:{}", filePath);
-		
-		return download(filePath,response);
+//		URL rootPath = RentalServiceImpl.class.getResource("/");
+//		String filePath =rootPath.getPath() + this.downloadDir ;
+//		File file = new File(filePath);
+//		if(!file.exists())
+//			file.mkdirs();
+//		filePath = filePath + "Equipments"+System.currentTimeMillis()+".xlsx";
+//		//新建了一个文件
+//		this.createEquipmentsBook(filePath, dtos);
+//		LOGGER.info("filePath:{}", filePath);
+//
+//		return download(filePath,response);
+
+		//把DTO中状态代码转换成映射String
+		List<ExportEquipmentData>  data= dtos.stream().map(this::toExportEquipment).collect(Collectors.toList());
+		if (data != null && dtos.size()>0){
+			String fileName = String.format("巡检对象%s", DateUtil.dateToStr(new java.util.Date(), DateUtil.DATE_TIME_NO_SLASH));
+			ExcelUtils  excelUtils =new ExcelUtils(response,fileName,"巡检对象");
+
+			ListFieldCommand listFieldCommand = ConvertHelper.convert(cmd, ListFieldCommand.class);
+			List<FieldDTO>  fields =fieldService.listFields(listFieldCommand);
+			List<String> propertyNames = new ArrayList<>();
+			List<String> titleNames = new ArrayList<>();
+			List<Integer> titleSizes = new ArrayList<>();
+			excelUtils.setNeedSequenceColumn(true);
+			//fieldService.listFields();
+			for (FieldDTO field : fields) {
+				//去除附件cell
+				if(!Objects.equals(field.getFieldName(), "attachments")) {
+					propertyNames.add(field.getFieldName());
+					titleNames.add(field.getFieldDisplayName());
+					titleSizes.add(20);
+				}
+			}
+
+			excelUtils.writeExcel(propertyNames,titleNames,titleSizes,data);
+		}else {
+			throw RuntimeErrorException.errorWith(ParkingLocalStringCode.SCOPE_STRING,
+					Integer.parseInt(ParkingLocalStringCode.NO_DATA), "no data");
+		}
 	}
-	
+
+	private ExportEquipmentData  toExportEquipment(EquipmentsDTO equipmentsDTO) {
+		ExportEquipmentData data = ConvertHelper.convert(equipmentsDTO, ExportEquipmentData.class);
+		//convert status
+		if (equipmentsDTO.getQrCodeFlag()!=null){
+			if (equipmentsDTO.getQrCodeFlag()== 0){
+				data.setQrCodeFlag("停用");
+			}else {
+				data.setQrCodeFlag("启用");
+			}
+		}
+
+		if (equipmentsDTO.getStatus()!=null) {
+				data.setStatus(EquipmentStatus.fromStatus(equipmentsDTO.getStatus()).getName());
+		}
+
+		return  data;
+	}
+
 	public void createEquipmentsBook(String path,List<EquipmentsDTO> dtos) {
 		Workbook wb = new XSSFWorkbook();
 		Sheet sheet = wb.createSheet("equipments");
@@ -2523,8 +2583,257 @@ public class EquipmentServiceImpl implements EquipmentService {
 	public ImportDataResponse importEquipments(ImportOwnerCommand cmd, MultipartFile mfile, Long userId) {
 		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_UPDATE, 0L);
 		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-		ImportDataResponse importDataResponse = importData(cmd, mfile, userId, ImportDataType.EQUIPMENTS.getCode());
-		return importDataResponse;
+		ImportDataResponse response =new ImportDataResponse();
+		try {
+			//解析excel
+			List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
+
+			if(null == resultList || resultList.isEmpty()){
+				LOGGER.error("File content is empty...userId="+userId);
+				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL,
+						localeStringService.getLocalizedString(String.valueOf(UserServiceErrorCode.SCOPE),
+								String.valueOf(UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL),
+								UserContext.current().getUser().getLocale(),"File content is empty"));
+			}
+			List<EquipmentInspectionEquipments> equipments = handleImportEquipmentsData(cmd ,resultList);
+			List<String> erroLogs = importEquipmentsData(equipments, cmd);
+
+			response.setTotalCount((long)resultList.size()-1);
+			response.setFailCount((long)erroLogs.size());
+			response.setLogs(erroLogs);
+		} catch (IOException e) {
+			LOGGER.error("File can not be resolved...");
+			e.printStackTrace();
+		}
+
+		return  null;
+
+	}
+
+	private List<String> importEquipmentsData( List<EquipmentInspectionEquipments> datas,ImportOwnerCommand cmd) {
+		List<String> erroLogs =new ArrayList<String>();
+		Integer namespaceId = cmd.getNamespaceId();
+		Long  userId =UserContext.currentUserId();
+		for (EquipmentInspectionEquipments equipment: datas) {
+
+			equipment.setNamespaceId(namespaceId);
+			equipment.setOwnerType(cmd.getOwnerType());
+			equipment.setOwnerId(cmd.getOwnerId());
+			equipment.setTargetType(cmd.getTargetType());
+			equipment.setTargetId(cmd.getTargetId());
+			equipment.setInspectionCategoryId(cmd.getInspectionCategoryId());
+			equipment.setStatus(EquipmentStatus.INCOMPLETE.getCode());
+			String tokenString = UUID.randomUUID().toString();
+			equipment.setQrCodeToken(tokenString);
+			equipment.setCreatorUid(userId);
+			equipment.setOperatorUid(userId);
+			LOGGER.info("add equipment");
+			equipmentProvider.creatEquipmentInspectionEquipment(equipment);
+			equipmentSearcher.feedDoc(equipment);
+		}
+
+		return  erroLogs;
+	}
+
+	private  List<EquipmentInspectionEquipments> handleImportEquipmentsData(ImportOwnerCommand cmd, List resultList) {
+
+		ListFieldCommand listFieldCommand = ConvertHelper.convert(cmd, ListFieldCommand.class);
+		// field 和 name 对应关系DTO
+		List<FieldDTO>  fieldDTO =fieldService.listFields(listFieldCommand);
+
+		try {
+			 return  getImportEquipmentData(resultList,fieldDTO);
+		} catch (Exception e) {
+			e.printStackTrace();
+			LOGGER.error("importEquipmentErro",e);
+		}
+		return  null;
+
+	}
+
+	private  List<EquipmentInspectionEquipments>  getImportEquipmentData(List resultList , List<FieldDTO> fieldsDTO) throws Exception {
+		EquipmentInspectionEquipments eq = new EquipmentInspectionEquipments();
+		List<EquipmentInspectionEquipments> objList = new ArrayList<>();
+		//获取导入Excel的的title
+		/*RowResult titleNames = (RowResult)resultList.get(0);
+		Map<String,String> tileMap = titleNames.getCells();
+		List<String> tileNameList = (List<String>) tileMap.values();*/
+		//记录excel中的field顺序
+		List<String> fieldOrders = new ArrayList<>();
+		for (FieldDTO field :fieldsDTO){
+			fieldOrders.add(field.getFieldName());
+		}
+		int flag = 0;
+		for(int i = 1; i < resultList.size(); i++) {
+			RowResult r = (RowResult) resultList.get(i);
+
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getA()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getB()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getC()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getD()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getE()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getF()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getG()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getH()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getI()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getJ()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getK()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getL()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getM()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getN()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getO()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getP()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getQ()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getR()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getS()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getT()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getU()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getV()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getW()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getX()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getY()));
+				flag++;
+			}
+			if(flag<fieldOrders.size()){
+				setToObj(fieldOrders.get(flag), eq, trim(r.getZ()));
+				flag++;
+			}
+			flag=0;
+			objList.add(eq);
+			}
+
+			return objList;
+	}
+
+	private void setToObj(String fieldName, Object dto,Object value) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
+		Class<?> clz = dto.getClass();
+		Object val = value;
+		String type = dto.getClass().getField(fieldName).getType().toString();
+		System.out.println(type);
+		System.out.println("==============");
+		if(StringUtils.isEmpty((String)value)){
+			val = null;
+		}else{
+			switch(type){
+				case "BigDecimal":
+					val = new BigDecimal((String)value);
+					break;
+				case "Long":
+					val = Long.parseLong((String)value);
+					break;
+				case "Timestamp":
+					if(((String)value).length()<1){
+						val = null;
+						break;
+					}
+					java.util.Date date = new java.util.Date();
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+					try {
+						date = sdf.parse((String) value);
+					} catch (ParseException e) {
+						val = null;
+						break;
+					}
+
+					val = new Timestamp(date.getTime());
+					break;
+				case "Integer":
+					val = Integer.parseInt((String)value);
+					break;
+				case "Byte":
+					val = Byte.parseByte((String)value);
+					break;
+				case "String":
+					if(((String)val).trim().length()<1){
+						val = null;
+						break;
+					}
+			}
+		}
+		PropertyDescriptor pd = new PropertyDescriptor(fieldName,clz);
+		Method writeMethod = pd.getWriteMethod();
+		writeMethod.invoke(dto,val);
+
+	}
+
+	private String trim(String string) {
+		if (string != null) {
+			return string.trim();
+		}
+		return "";
 	}
 
 	@Override
@@ -2533,35 +2842,35 @@ public class EquipmentServiceImpl implements EquipmentService {
 		ImportDataResponse importDataResponse = importData(cmd, mfile, userId, ImportDataType.EQUIPMENT_ACCESSORIES.getCode());
 		return importDataResponse;
 	}
-	
+
 	private ImportDataResponse importData(ImportOwnerCommand cmd, MultipartFile mfile,
 			Long userId, String dataType) {
 		ImportDataResponse importDataResponse = new ImportDataResponse();
 		try {
 			//解析excel
 			List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
-			
+
 			if(null == resultList || resultList.isEmpty()){
 				LOGGER.error("File content is empty。userId="+userId);
 				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL,
 						"File content is empty");
 			}
 			LOGGER.debug("Start import data...,total:" + resultList.size());
-			
+
 			List<String> errorDataLogs = null;
 			//导入数据，返回导入错误的日志数据集
 			if(StringUtils.equals(dataType, ImportDataType.EQUIPMENT_STANDARDS.getCode())) {
 				errorDataLogs = importEquipmentStandardsData(cmd, convertToStrList(resultList, 6), userId);
 			}
-			
-			if(StringUtils.equals(dataType, ImportDataType.EQUIPMENTS.getCode())) {
-				errorDataLogs = importEquipmentsData(cmd, convertEquipmentToStrList(resultList), userId);
-			}
-			
+
+//			if(StringUtils.equals(dataType, ImportDataType.EQUIPMENTS.getCode())) {
+//				errorDataLogs = importEquipmentsData(cmd, convertEquipmentToStrList(resultList), userId);
+//			}
+
 			if(StringUtils.equals(dataType, ImportDataType.EQUIPMENT_ACCESSORIES.getCode())) {
 				errorDataLogs = importEquipmentAccessoriesData(cmd, convertToStrList(resultList, 5), userId);
 			}
-			
+
 			LOGGER.debug("End import data...,fail:" + errorDataLogs.size());
 			if(null == errorDataLogs || errorDataLogs.isEmpty()){
 				LOGGER.debug("Data import all success...");
@@ -2571,7 +2880,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 					LOGGER.error(log);
 				}
 			}
-			
+
 			importDataResponse.setTotalCount((long)resultList.size()-1);
 			importDataResponse.setFailCount((long)errorDataLogs.size());
 			importDataResponse.setLogs(errorDataLogs);
@@ -2642,49 +2951,49 @@ public class EquipmentServiceImpl implements EquipmentService {
 		
 	}
 	
-	private List<String> importEquipmentsData(ImportOwnerCommand cmd, List<String> list, Long userId){
-		List<String> errorDataLogs = new ArrayList<String>();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		for (String str : list) {
-			String[] s = str.split("\\|\\|");
-//			dbProvider.execute((TransactionStatus status) -> {
-				EquipmentInspectionEquipments equipment = new EquipmentInspectionEquipments();
-				equipment.setCustomNumber(s[1]);
-				equipment.setName(s[2]);
-				equipment.setEquipmentModel(s[3]);
-				equipment.setParameter(s[4]);
-				equipment.setManufacturer(s[5]);
-				if(!StringUtils.isBlank(s[6])) {
-					equipment.setInstallationTime(dateStrToTimestamp(s[6]));
-				}
-				if(!StringUtils.isBlank(s[7])) {
-					equipment.setRepairTime(dateStrToTimestamp(s[7]));
-				}
-				equipment.setLocation(s[8]);
-				equipment.setQuantity(Long.valueOf(s[9]));
-				if(!StringUtils.isEmpty(s[10]) && !"null".equals(s[10])) {
-					equipment.setRemarks(s[10]);
-				}
-				equipment.setNamespaceId(namespaceId);
-				equipment.setOwnerType(cmd.getOwnerType());
-				equipment.setOwnerId(cmd.getOwnerId());
-				equipment.setTargetType(cmd.getTargetType());
-				equipment.setTargetId(cmd.getTargetId());
-				equipment.setInspectionCategoryId(cmd.getInspectionCategoryId());
-				equipment.setStatus(EquipmentStatus.INCOMPLETE.getCode());
-				String tokenString = UUID.randomUUID().toString();
-				equipment.setQrCodeToken(tokenString);
-				equipment.setCreatorUid(userId);
-				equipment.setOperatorUid(userId);
-				LOGGER.info("add equipment");
-				equipmentProvider.creatEquipmentInspectionEquipment(equipment);
-				equipmentSearcher.feedDoc(equipment);
-//				return null;
-//			});
-		}
-		return errorDataLogs;
-		
-	}
+//	private List<String> importEquipmentsData(ImportOwnerCommand cmd, List<String> list, Long userId){
+//		List<String> errorDataLogs = new ArrayList<String>();
+//		Integer namespaceId = UserContext.getCurrentNamespaceId();
+//		for (String str : list) {
+//			String[] s = str.split("\\|\\|");
+////			dbProvider.execute((TransactionStatus status) -> {
+//				EquipmentInspectionEquipments equipment = new EquipmentInspectionEquipments();
+//				equipment.setCustomNumber(s[1]);
+//				equipment.setName(s[2]);
+//				equipment.setEquipmentModel(s[3]);
+//				equipment.setParameter(s[4]);
+//				equipment.setManufacturer(s[5]);
+//				if(!StringUtils.isBlank(s[6])) {
+//					equipment.setInstallationTime(dateStrToTimestamp(s[6]));
+//				}
+//				if(!StringUtils.isBlank(s[7])) {
+//					equipment.setRepairTime(dateStrToTimestamp(s[7]));
+//				}
+//				equipment.setLocation(s[8]);
+//				equipment.setQuantity(Long.valueOf(s[9]));
+//				if(!StringUtils.isEmpty(s[10]) && !"null".equals(s[10])) {
+//					equipment.setRemarks(s[10]);
+//				}
+//				equipment.setNamespaceId(namespaceId);
+//				equipment.setOwnerType(cmd.getOwnerType());
+//				equipment.setOwnerId(cmd.getOwnerId());
+//				equipment.setTargetType(cmd.getTargetType());
+//				equipment.setTargetId(cmd.getTargetId());
+//				equipment.setInspectionCategoryId(cmd.getInspectionCategoryId());
+//				equipment.setStatus(EquipmentStatus.INCOMPLETE.getCode());
+//				String tokenString = UUID.randomUUID().toString();
+//				equipment.setQrCodeToken(tokenString);
+//				equipment.setCreatorUid(userId);
+//				equipment.setOperatorUid(userId);
+//				LOGGER.info("add equipment");
+//				equipmentProvider.creatEquipmentInspectionEquipment(equipment);
+//				equipmentSearcher.feedDoc(equipment);
+////				return null;
+////			});
+//		}
+//		return errorDataLogs;
+//
+//	}
 
 	private Timestamp dateStrToTimestamp(String str) {
 		LocalDate localDate = LocalDate.parse(str,dateSF);

@@ -1,20 +1,18 @@
 package com.everhomes.equipment;
 
-import java.util.List;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletResponse;
-
+import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.pmNotify.DeletePmNotifyParamsCommand;
 import com.everhomes.rest.pmNotify.ListPmNotifyParamsCommand;
 import com.everhomes.rest.pmNotify.PmNotifyParamDTO;
 import com.everhomes.rest.pmNotify.SetPmNotifyParamsCommand;
+import com.everhomes.rest.user.admin.ImportDataResponse;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.user.admin.ImportDataResponse;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+import java.util.Set;
 
 public interface EquipmentService {
 	
@@ -26,7 +24,7 @@ public interface EquipmentService {
 	void deleteEquipmentStandardRelations(DeleteEquipmentStandardRelationsCommand cmd);
 	void updateEquipments(UpdateEquipmentsCommand cmd);
 	void deleteEquipments(DeleteEquipmentsCommand cmd);
-	HttpServletResponse exportEquipments(SearchEquipmentsCommand cmd,HttpServletResponse response);
+	void exportEquipments(SearchEquipmentsCommand cmd,HttpServletResponse response);
 	EquipmentAccessoriesDTO updateEquipmentAccessories(UpdateEquipmentAccessoriesCommand cmd);
 	void deleteEquipmentAccessories(DeleteEquipmentAccessoriesCommand cmd);
 	HttpServletResponse exportEquipmentAccessories(SearchEquipmentAccessoriesCommand cmd,HttpServletResponse response);

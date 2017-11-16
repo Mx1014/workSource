@@ -1,12 +1,11 @@
 package com.everhomes.rest.equipment;
 
-import java.util.List;
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
-
-import com.everhomes.discover.ItemType;
-import com.everhomes.rest.forum.AttachmentDTO;
-import com.everhomes.util.StringHelper;
+import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <ul>
@@ -26,20 +25,30 @@ import com.everhomes.util.StringHelper;
  *  <li>latitude: 设备纬度</li>
  *  <li>status: 设备状态</li>
  *  <li>installationTime: 安装时间</li>
- *  <li>repairTime: 保修时间</li>
+ *  <li>repairTime: 免保时间</li>
  *  <li>initialAssetValue: 资产原值</li>
  *  <li>customNumber: 自编号</li>
  *  <li>parameter: 参数</li>
  *  <li>quantity: 数量</li>
  *  <li>sequenceNo: 编号</li>
  *  <li>versionNo: 版号</li>
- *  <li>manager: 责任人编号</li>
+ *  <li>manager: 联系人编号</li>
  *  <li>attachments: 操作图示&说明书 参考{@link com.everhomes.rest.equipment.EquipmentAttachmentDTO}</li>
  *  <li>remarks: 备注</li>
  *  <li>eqAccessoryMap: 设备备品配件 参考{@link com.everhomes.rest.equipment.EquipmentAccessoryMapDTO}</li>
  *  <li>eqStandardMap: 设备-标准关联 参考{@link com.everhomes.rest.equipment.EquipmentStandardMapDTO}</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
  *  <li>pictureFlag: 是否需要拍照 0：否 1：是</li>
+ *  <li>brandName: 品牌名称</li>
+ *  <li>constructionParty: 施工方</li>
+ *  <li>discardTime: 报废日期</li>
+ *  <li>managerContact: 联系人电话</li>
+ *  <li>detail: 设备详情</li>
+ *  <li>factoryTime: 出厂时间</li>
+ *  <li>provenance: 产地</li>
+ *  <li>price: 购买价格</li>
+ *  <li>buyTime: 购买日期</li>
+ *  <li>depreciationYears: 折旧年限</li>
  * </ul>
  */
 public class UpdateEquipmentsCommand {
@@ -106,6 +115,29 @@ public class UpdateEquipmentsCommand {
     private Long inspectionCategoryId;
 
 	private Byte pictureFlag;
+
+	//add in PM V3.0.1
+
+	private String brandName;
+
+	private String constructionParty;
+
+	private Long discardTime;
+
+	private String managerContact;
+
+	private String detail;
+
+	private Long factoryTime;
+
+	private String provenance;
+
+	private BigDecimal price;
+
+	private Long buyTime;
+
+	private Long depreciationYear;
+
 
 	public Byte getPictureFlag() {
 		return pictureFlag;
@@ -346,6 +378,86 @@ public class UpdateEquipmentsCommand {
 
 	public void setEqStandardMap(List<EquipmentStandardMapDTO> eqStandardMap) {
 		this.eqStandardMap = eqStandardMap;
+	}
+
+	public String getBrandName() {
+		return brandName;
+	}
+
+	public void setBrandName(String brandName) {
+		this.brandName = brandName;
+	}
+
+	public String getConstructionParty() {
+		return constructionParty;
+	}
+
+	public void setConstructionParty(String constructionParty) {
+		this.constructionParty = constructionParty;
+	}
+
+	public Long getDiscardTime() {
+		return discardTime;
+	}
+
+	public void setDiscardTime(Long discardTime) {
+		this.discardTime = discardTime;
+	}
+
+	public String getManagerContact() {
+		return managerContact;
+	}
+
+	public void setManagerContact(String managerContact) {
+		this.managerContact = managerContact;
+	}
+
+	public String getDetail() {
+		return detail;
+	}
+
+	public void setDetail(String detail) {
+		this.detail = detail;
+	}
+
+	public Long getFactoryTime() {
+		return factoryTime;
+	}
+
+	public void setFactoryTime(Long factoryTime) {
+		this.factoryTime = factoryTime;
+	}
+
+	public String getProvenance() {
+		return provenance;
+	}
+
+	public void setProvenance(String provenance) {
+		this.provenance = provenance;
+	}
+
+	public BigDecimal getPrice() {
+		return price;
+	}
+
+	public void setPrice(BigDecimal price) {
+		this.price = price;
+	}
+
+	public Long getBuyTime() {
+		return buyTime;
+	}
+
+	public void setBuyTime(Long buyTime) {
+		this.buyTime = buyTime;
+	}
+
+	public Long getDepreciationYear() {
+		return depreciationYear;
+	}
+
+	public void setDepreciationYear(Long depreciationYear) {
+		this.depreciationYear = depreciationYear;
 	}
 
 	@Override
