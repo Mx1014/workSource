@@ -3614,6 +3614,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		authorization.setModuleControlType(controlType);
 		authorization.setAllControlFlag(controlFlag);
 		authorization.setControlId(controlId);
+		authorization.setControlOption(controlOption);
 	}
 
 
