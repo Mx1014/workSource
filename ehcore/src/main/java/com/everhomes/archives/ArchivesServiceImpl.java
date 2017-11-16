@@ -2,6 +2,7 @@ package com.everhomes.archives;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -64,8 +65,6 @@ public class ArchivesServiceImpl implements ArchivesService {
     private static final String ARCHIVES_FORM = "archives_form";
 
     private static final String ARCHIVE_OWNER_TYPE = "archives_owner_type";
-
-    private static final String ARCHIVES_FORM_ORIGIN_ID = "archives.form.origin.id";
 
     private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -438,21 +437,13 @@ public class ArchivesServiceImpl implements ArchivesService {
         for (int i = 1; i < resultLists.size(); i++) {
             RowResult r = (RowResult) resultLists.get(i);
             ImportArchivesContactsDTO data = new ImportArchivesContactsDTO();
-            if (null != r.getCells().get("A"))
                 data.setContactName(r.getCells().get("A") != null ? r.getCells().get("A") : "");
-            if (null != r.getCells().get("B"))
                 data.setContactEnName(r.getCells().get("B") != null ? r.getCells().get("B") : "");
-            if (null != r.getCells().get("C"))
                 data.setGender(r.getCells().get("C") != null ? r.getCells().get("C") : "");
-            if (null != r.getCells().get("D"))
                 data.setContactToken(r.getCells().get("D") != null ? r.getCells().get("D") : "");
-            if (null != r.getCells().get("E"))
                 data.setContactShortToken(r.getCells().get("E") != null ? r.getCells().get("E") : "");
-            if (null != r.getCells().get("F"))
                 data.setWorkEmail(r.getCells().get("F") != null ? r.getCells().get("F") : "");
-            if (null != r.getCells().get("G"))
                 data.setDepartment(r.getCells().get("G") != null ? r.getCells().get("G") : "");
-            if (null != r.getCells().get("H"))
                 data.setJobPosition(r.getCells().get("H") != null ? r.getCells().get("H") : "");
             datas.add(data);
         }
@@ -1789,7 +1780,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         Long formOriginId = id;
         if (id == 0L) {
             //  当没有表单 id 的时候则去获取模板表单的id
-            String value = configurationProvider.getValue(ARCHIVES_FORM_ORIGIN_ID, "");
+            String value = configurationProvider.getValue(ConfigConstants.ARCHIVES_FORM_ORIGIN_ID, "0");
             formOriginId = Long.valueOf(value);
         }
         return formOriginId;
