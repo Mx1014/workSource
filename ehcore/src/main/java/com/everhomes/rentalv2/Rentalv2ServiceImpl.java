@@ -4364,11 +4364,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		response.setAttachments(convertAttachments(attachments));
 
 		//设置优惠信息
-		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(),rs, cmd.getSceneToken(), cmd.getRentalType(),cmd.getPackageName());
-		response.setFullPrice(dto.getFullPrice());
-		response.setCutPrice(dto.getCutPrice());
-		response.setDiscountType(dto.getDiscountType());
-		response.setDiscountRatio(dto.getDiscountRatio());
+		PriceRuleDTO ruleDto = processPriceCut(cmd.getSiteId(),rs, cmd.getSceneToken(), cmd.getRentalType(),cmd.getPackageName());
+		response.setFullPrice(ruleDto.getFullPrice());
+		response.setCutPrice(ruleDto.getCutPrice());
+		response.setDiscountType(ruleDto.getDiscountType());
+		response.setDiscountRatio(ruleDto.getDiscountRatio());
 
 		// 查rules
 		
@@ -4515,11 +4515,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		response.setAttachments(convertAttachments(attachments));
 
 		//设置优惠信息
-		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(),rs, cmd.getSceneToken(), cmd.getRentalType(),cmd.getPackageName());
-		response.setFullPrice(dto.getFullPrice());
-		response.setCutPrice(dto.getCutPrice());
-		response.setDiscountType(dto.getDiscountType());
-		response.setDiscountRatio(dto.getDiscountRatio());
+		PriceRuleDTO ruleDto = processPriceCut(cmd.getSiteId(),rs, cmd.getSceneToken(), cmd.getRentalType(),cmd.getPackageName());
+		response.setFullPrice(ruleDto.getFullPrice());
+		response.setCutPrice(ruleDto.getCutPrice());
+		response.setDiscountType(ruleDto.getDiscountType());
+		response.setDiscountRatio(ruleDto.getDiscountRatio());
 
 		// 查rules
 		
@@ -4655,11 +4655,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		response.setAttachments(convertAttachments(attachments));
 
 		//设置优惠信息
-		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(),rs, cmd.getSceneToken(), cmd.getRentalType(),cmd.getPackageName());
-		response.setFullPrice(dto.getFullPrice());
-		response.setCutPrice(dto.getCutPrice());
-		response.setDiscountType(dto.getDiscountType());
-		response.setDiscountRatio(dto.getDiscountRatio());
+		PriceRuleDTO ruleDto = processPriceCut(cmd.getSiteId(),rs, cmd.getSceneToken(), cmd.getRentalType(),cmd.getPackageName());
+		response.setFullPrice(ruleDto.getFullPrice());
+		response.setCutPrice(ruleDto.getCutPrice());
+		response.setDiscountType(ruleDto.getDiscountType());
+		response.setDiscountRatio(ruleDto.getDiscountRatio());
 
 		response.setAnchorTime(0L);
 		//当前时间+预定开始时间 即为可预订开始时间
