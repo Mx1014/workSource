@@ -74,6 +74,9 @@ public interface CustomerService {
     CustomerProjectStatisticsResponse listCustomerProjectStatistics(ListEnterpriseCustomerStatisticsCommand cmd);
     CustomerSourceStatisticsResponse listCustomerSourceStatistics(ListEnterpriseCustomerStatisticsCommand cmd);
 
+    ListCustomerAnnualStatisticsResponse listCustomerAnnualStatistics(ListCustomerAnnualStatisticsCommand cmd);
+    ListCustomerAnnualDetailsResponse listCustomerAnnualDetails(ListCustomerAnnualDetailsCommand cmd);
+
     void syncEnterpriseCustomers(SyncCustomersCommand cmd);
     void syncIndividualCustomers(SyncCustomersCommand cmd);
     
