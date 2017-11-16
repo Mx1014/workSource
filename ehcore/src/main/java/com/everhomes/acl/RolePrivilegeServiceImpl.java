@@ -2679,7 +2679,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	public List<ServiceModuleAppsAuthorizationsDto> listServiceModuleAppsAdministrators(ListServiceModuleAdministratorsCommand cmd) {
 
 	    List<Authorization> authorizations = authorizationProvider.listManageAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), EntityType.SERVICE_MODULE_APP.getCode(), null);
-//		authorizations = authorizations.stream().filter(r-> !StringUtils.isEmpty(r.getModuleControlType())).collect(Collectors.toList());
 		return authorizations.stream().map((r) ->{
             ServiceModuleAppsAuthorizationsDto dto = new ServiceModuleAppsAuthorizationsDto();
 
@@ -3377,9 +3376,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	private ServiceModuleAuthorizationsDTO processServiceModuleApps(Authorization authorization, String controlType){
 		ServiceModuleAuthorizationsDTO dto = ConvertHelper.convert(authorization, ServiceModuleAuthorizationsDTO.class);
 
-//		// todo: 添加用户信息
-//		processServiceModuleAuthorization(dto);
-
 		// todo: 获取auth和config信息
 		AuthorizationsAppControl authorizationsAppControl = getServiceModuleAppsManageByTarget(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType(), null, controlType);
 
@@ -3400,6 +3396,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
                     // todo:获取ControlCommunityIds
                     List<Long> communityIds = authorizationsAppControl.getControlTargets().stream().map(r->{
+                    	//如果是r.getId()为0，则表示选择的是全部全区
                        return r.getId();
                     }).collect(Collectors.toList());
                     dto.setCommunityControlIds(communityIds);
@@ -3534,6 +3531,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			// todo: 保存按园区范围控制的应用
 			// 保存control_config表
 			Long control_id_c = this.sequenceProvider.getNextSequence("authControlId");
+			// 将参数里的信息处理成config
 			List<AuthorizationControlConfig> configs_c = processAuthorizationControlConfig(namespaceId, control_id_c, user.getId(), cmd.getCommunityControlIds(), null);
 			authorizationProvider.createAuthorizationControlConfigs(configs_c);
 
@@ -3554,6 +3552,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			// todo: 保存按OA范围控制的应用
 			// 保存control_config表
 			Long control_id_oa = this.sequenceProvider.getNextSequence("authControlId");
+			// 将参数里的信息处理成config
 			List<AuthorizationControlConfig> configs_oa = processAuthorizationControlConfig(namespaceId, control_id_oa, user.getId(), null, cmd.getOrgControlDetails());
 			authorizationProvider.createAuthorizationControlConfigs(configs_oa);
 

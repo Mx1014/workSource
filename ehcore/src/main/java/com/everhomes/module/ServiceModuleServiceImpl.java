@@ -39,7 +39,6 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -516,7 +515,8 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         List<ServiceModuleDTO> orgControlList = new ArrayList<>();
         List<ServiceModuleDTO> unlimitControlList = new ArrayList<>();
         //按控制范围进行区分
-        tempList.stream().filter(r->r.getModuleControlType() != "").map(r->{
+        //把二级模块加入list
+        tempList.stream().filter(r->r.getModuleControlType() != "" && r.getLevel() == 2).map(r->{
             switch (ModuleManagementType.fromCode(r.getModuleControlType())){
                 case COMMUNITY_CONTROL:
                     communityControlList.add(r);
@@ -531,9 +531,25 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             return null;
         }).collect(Collectors.toList());
 
-        response.setCommunityControlList(this.getServiceModuleAppsAsList(communityControlList));
-        response.setOrgControlList(this.getServiceModuleAppsAsList(orgControlList));
-        response.setUnlimitControlList(this.getServiceModuleAppsAsList(unlimitControlList));
+        //把一级分类加入所有list
+        tempList.stream().filter(r -> r.getLevel() == 1).map(r -> {
+            communityControlList.add(ConvertHelper.convert(r,ServiceModuleDTO.class));
+            orgControlList.add(ConvertHelper.convert(r,ServiceModuleDTO.class));
+            unlimitControlList.add(ConvertHelper.convert(r,ServiceModuleDTO.class));
+            return null;
+        }).collect(Collectors.toList());
+
+        List<ServiceModuleDTO> c = this.getServiceModuleAppsAsLevelTree(communityControlList, 0L);
+        List<ServiceModuleDTO> o = this.getServiceModuleAppsAsLevelTree(orgControlList, 0L);
+        List<ServiceModuleDTO> u = this.getServiceModuleAppsAsLevelTree(unlimitControlList, 0L);
+
+        c=c.stream().filter(r->r.getServiceModuleApps() != null && r.getServiceModuleApps().size() > 0).collect(Collectors.toList());
+        o=o.stream().filter(r->r.getServiceModuleApps() != null && r.getServiceModuleApps().size() > 0).collect(Collectors.toList());
+        u=u.stream().filter(r->r.getServiceModuleApps() != null && r.getServiceModuleApps().size() > 0).collect(Collectors.toList());
+
+        response.setCommunityControlList(c);
+        response.setOrgControlList(o);
+        response.setUnlimitControlList(u);
 
         return response;
     }
@@ -840,9 +856,14 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             if (current.getParentId().equals(parentId) && current.getLevel() < 3) {
                 List<ServiceModuleDTO> c_node = getServiceModuleAppsAsLevelTree(tempList, current.getId());
                 current.setServiceModules(c_node);
-                if (current.getLevel() != 1){
+                if (current.getLevel() == 1){
                     List<Long> moduleIds = c_node.stream().map(ServiceModuleDTO::getId).collect(Collectors.toList());
-                    current.setServiceModuleApps(serviceModuleAppProvider.listServiceModuleAppsByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds));
+                    if(moduleIds.size() != 0){
+                        //给一级模块设置APPS
+                        List<ServiceModuleAppDTO> apps = serviceModuleAppProvider.listServiceModuleAppsByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
+                        current.setServiceModuleApps(apps);
+                        LOGGER.debug(current.getName()+ "分类下一共有"+moduleIds.toString() +"的模块和"+ apps.size() + "个应用");
+                    }
                 }
                 results.add(current);
             }
@@ -894,4 +915,17 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         }
     }
 
+    private List<ServiceModuleDTO> processServiceModuleDtoTreeToAppTree(List<ServiceModuleDTO> dtos){
+        List dtos_ = dtos.stream().filter(r -> (r.getServiceModules() != null && r.getServiceModules().size() != 0)).map(r -> {
+            List<ServiceModuleAppDTO> apps = new ArrayList<>();
+            for (ServiceModuleDTO dto : r.getServiceModules()) {
+                if (dto.getServiceModuleApps() != null) {
+                    apps.addAll(dto.getServiceModuleApps());
+                }
+            }
+            r.setServiceModuleApps(apps);
+            return r;
+        }).collect(Collectors.toList());
+        return dtos_;
+    }
 }

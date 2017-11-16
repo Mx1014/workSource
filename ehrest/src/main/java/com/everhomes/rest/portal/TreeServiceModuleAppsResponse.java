@@ -15,35 +15,35 @@ import java.util.List;
  * </ul>
  */
 public class TreeServiceModuleAppsResponse {
-    private List<ServiceModuleAppDTO> communityControlList;
-    private List<ServiceModuleAppDTO> orgControlList;
-    private List<ServiceModuleAppDTO> unlimitControlList;
+    private List<ServiceModuleDTO> communityControlList;
+    private List<ServiceModuleDTO> orgControlList;
+    private List<ServiceModuleDTO> unlimitControlList;
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
-    public List<ServiceModuleAppDTO> getCommunityControlList() {
+    public List<ServiceModuleDTO> getCommunityControlList() {
         return communityControlList;
     }
 
-    public void setCommunityControlList(List<ServiceModuleAppDTO> communityControlList) {
+    public void setCommunityControlList(List<ServiceModuleDTO> communityControlList) {
         this.communityControlList = communityControlList;
     }
 
-    public List<ServiceModuleAppDTO> getOrgControlList() {
+    public List<ServiceModuleDTO> getOrgControlList() {
         return orgControlList;
     }
 
-    public void setOrgControlList(List<ServiceModuleAppDTO> orgControlList) {
+    public void setOrgControlList(List<ServiceModuleDTO> orgControlList) {
         this.orgControlList = orgControlList;
     }
 
-    public List<ServiceModuleAppDTO> getUnlimitControlList() {
+    public List<ServiceModuleDTO> getUnlimitControlList() {
         return unlimitControlList;
     }
 
-    public void setUnlimitControlList(List<ServiceModuleAppDTO> unlimitControlList) {
+    public void setUnlimitControlList(List<ServiceModuleDTO> unlimitControlList) {
         this.unlimitControlList = unlimitControlList;
     }
 }
