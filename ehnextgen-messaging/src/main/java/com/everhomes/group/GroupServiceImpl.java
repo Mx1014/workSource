@@ -3669,6 +3669,7 @@ public class GroupServiceImpl implements GroupService {
                 if(ClubType.GUILD == ClubType.fromCode(group.getClubType())){
                     code = GroupNotificationTemplateCode.GROUP_MEMBER_TO_ADMIN_WHEN_REQUEST_TO_JOIN_FOR_GUILD;
                     GuildApply guildApply = groupProvider.findGuildApplyByGroupMemberId(member.getId());
+                    map.put("userName", guildApply.getName());
                     map.put("organizationName", guildApply.getOrganizationName());
                 }else {
                     map.put("reason", member.getRequestorComment());
