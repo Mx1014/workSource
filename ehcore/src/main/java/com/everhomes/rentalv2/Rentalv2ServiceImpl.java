@@ -3728,6 +3728,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		
 		processDayRuleDTOs(start, end, response.getSiteDays(), cmd.getSiteId(), rs, response.getAnchorTime(), cmd.getSceneToken(), cmd.getRentalType(),cmd.getPackageName());
+		//设置优惠信息
+		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(),rs, cmd.getSceneToken(), cmd.getRentalType(),cmd.getPackageName());
+		response.setFullPrice(dto.getFullPrice());
+		response.setCutPrice(dto.getCutPrice());
+		response.setDiscountType(dto.getDiscountType());
+		response.setDiscountRatio(dto.getDiscountRatio());
+
 		return response;
 	}
 	
@@ -3761,6 +3768,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		response.setSiteDays(new ArrayList<>());
 
 		processDayRuleDTOs(start, end, response.getSiteDays(), cmd.getSiteId(), rs, response.getAnchorTime(), cmd.getSceneToken(), cmd.getRentalType(),cmd.getPackageName());
+		//设置优惠信息
+		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(),rs, cmd.getSceneToken(), cmd.getRentalType(),cmd.getPackageName());
+		response.setFullPrice(dto.getFullPrice());
+		response.setCutPrice(dto.getCutPrice());
+		response.setDiscountType(dto.getDiscountType());
+		response.setDiscountRatio(dto.getDiscountRatio());
+
 		//按小时预订的,给客户端找到每一个时间点
 		if(cmd.getRentalType().equals(RentalType.HOUR.getCode())){
 			List<RentalTimeInterval> timeIntervals = this.rentalv2Provider.queryRentalTimeIntervalByOwner(EhRentalv2Resources.class.getSimpleName(),rs.getId());
@@ -3770,6 +3784,69 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	 		response.setDayTimes(dayTimes);
  		}
 		return response;
+	}
+
+	private PriceRuleDTO processPriceCut(Long siteId,RentalResource rs, String sceneToken,
+								 Byte rentalType,String packageName){
+		PriceRuleDTO dto = new PriceRuleDTO();
+		//解析场景信息
+		SceneTokenDTO sceneTokenDTO = null;
+		if (null != sceneToken) {
+			User user = UserContext.current().getUser();
+			sceneTokenDTO = userService.checkSceneToken(user.getId(), sceneToken);
+		}
+
+		if (packageName==null ){ //使用本身的优惠
+			List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rs.getId());
+			Rentalv2PriceRule priceRule = priceRules.stream().filter(p->p.getRentalType().equals(rentalType)).findFirst().get();
+			if (priceRule==null)
+				return dto;
+			if (null != sceneTokenDTO) {
+				String scene = sceneTokenDTO.getScene();
+				if (SceneType.PM_ADMIN.getCode().equals(scene)) {
+					dto.setFullPrice(priceRule.getOrgMemberFullPrice());
+					dto.setCutPrice(priceRule.getOrgMemberCutPrice());
+					dto.setDiscountRatio(priceRule.getOrgMemberDiscountRatio());
+					dto.setDiscountType(priceRule.getOrgMemberDiscountType());
+				}else if (!SceneType.ENTERPRISE.getCode().equals(scene)) {
+					dto.setFullPrice(priceRule.getApprovingUserFullPrice());
+					dto.setCutPrice(priceRule.getApprovingUserCutPrice());
+					dto.setDiscountRatio(priceRule.getApprovingUserDiscountRatio());
+					dto.setDiscountType(priceRule.getApprovingUserDiscountType());
+				}else{
+					dto.setFullPrice(priceRule.getFullPrice());
+					dto.setCutPrice(priceRule.getCutPrice());
+					dto.setDiscountRatio(priceRule.getDiscountRatio());
+					dto.setDiscountType(priceRule.getDiscountType());
+				}
+			}
+		}else{
+			List <Rentalv2PricePackage> pricePackages = rentalv2PricePackageProvider.listPricePackageByOwner(
+					PriceRuleType.RESOURCE.getCode(), rs.getId(), rentalType,packageName);
+			Rentalv2PricePackage pricePackage = pricePackages.get(0);
+			if (pricePackage==null)
+				return dto;
+			if (null != sceneTokenDTO) {
+				String scene = sceneTokenDTO.getScene();
+				if (SceneType.PM_ADMIN.getCode().equals(scene)) {
+					dto.setFullPrice(pricePackage.getOrgMemberFullPrice());
+					dto.setCutPrice(pricePackage.getOrgMemberCutPrice());
+					dto.setDiscountRatio(pricePackage.getOrgMemberDiscountRatio());
+					dto.setDiscountType(pricePackage.getOrgMemberDiscountType());
+				}else if (!SceneType.ENTERPRISE.getCode().equals(scene)) {
+					dto.setFullPrice(pricePackage.getApprovingUserFullPrice());
+					dto.setCutPrice(pricePackage.getApprovingUserCutPrice());
+					dto.setDiscountRatio(pricePackage.getApprovingUserDiscountRatio());
+					dto.setDiscountType(pricePackage.getApprovingUserDiscountType());
+				}else{
+					dto.setFullPrice(pricePackage.getFullPrice());
+					dto.setCutPrice(pricePackage.getCutPrice());
+					dto.setDiscountRatio(pricePackage.getDiscountRatio());
+					dto.setDiscountType(pricePackage.getDiscountType());
+				}
+			}
+		}
+		return dto;
 	}
 
 	@Override
@@ -3803,6 +3880,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		response.setSiteDays(new ArrayList<>());
 
 		processMonthRuleDTOs(start, end, response.getSiteDays(), cmd.getSiteId(), rs, response.getAnchorTime(), cmd.getSceneToken(), cmd.getRentalType(),cmd.getPackageName());
+		//设置优惠信息
+		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(),rs, cmd.getSceneToken(), cmd.getRentalType(),cmd.getPackageName());
+		response.setFullPrice(dto.getFullPrice());
+		response.setCutPrice(dto.getCutPrice());
+		response.setDiscountType(dto.getDiscountType());
+		response.setDiscountRatio(dto.getDiscountRatio());
 		return response;
 	}
 
@@ -4280,6 +4363,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		List<RentalConfigAttachment> attachments=this.rentalv2Provider.queryRentalConfigAttachmentByOwner(EhRentalv2Resources.class.getSimpleName(),rs.getId());
 		response.setAttachments(convertAttachments(attachments));
 
+		//设置优惠信息
+		PriceRuleDTO ruleDto = processPriceCut(cmd.getSiteId(),rs, cmd.getSceneToken(), cmd.getRentalType(),cmd.getPackageName());
+		response.setFullPrice(ruleDto.getFullPrice());
+		response.setCutPrice(ruleDto.getCutPrice());
+		response.setDiscountType(ruleDto.getDiscountType());
+		response.setDiscountRatio(ruleDto.getDiscountRatio());
+
 		// 查rules
 		
 		java.util.Date nowTime = new java.util.Date();
@@ -4424,6 +4514,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		List<RentalConfigAttachment> attachments=this.rentalv2Provider.queryRentalConfigAttachmentByOwner(EhRentalv2Resources.class.getSimpleName(),rs.getId());
 		response.setAttachments(convertAttachments(attachments));
 
+		//设置优惠信息
+		PriceRuleDTO ruleDto = processPriceCut(cmd.getSiteId(),rs, cmd.getSceneToken(), cmd.getRentalType(),cmd.getPackageName());
+		response.setFullPrice(ruleDto.getFullPrice());
+		response.setCutPrice(ruleDto.getCutPrice());
+		response.setDiscountType(ruleDto.getDiscountType());
+		response.setDiscountRatio(ruleDto.getDiscountRatio());
+
 		// 查rules
 		
 		java.util.Date nowTime = new java.util.Date();
@@ -4556,6 +4653,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		List<RentalConfigAttachment> attachments=this.rentalv2Provider.queryRentalConfigAttachmentByOwner(EhRentalv2Resources.class.getSimpleName(),rs.getId());
 		response.setAttachments(convertAttachments(attachments));
+
+		//设置优惠信息
+		PriceRuleDTO ruleDto = processPriceCut(cmd.getSiteId(),rs, cmd.getSceneToken(), cmd.getRentalType(),cmd.getPackageName());
+		response.setFullPrice(ruleDto.getFullPrice());
+		response.setCutPrice(ruleDto.getCutPrice());
+		response.setDiscountType(ruleDto.getDiscountType());
+		response.setDiscountRatio(ruleDto.getDiscountRatio());
 
 		response.setAnchorTime(0L);
 		//当前时间+预定开始时间 即为可预订开始时间

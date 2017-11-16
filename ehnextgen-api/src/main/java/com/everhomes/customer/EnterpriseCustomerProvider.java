@@ -2,11 +2,9 @@ package com.everhomes.customer;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
-import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
+import com.everhomes.rest.customer.*;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +78,14 @@ public interface EnterpriseCustomerProvider {
     void deleteCustomerEconomicIndicator(CustomerEconomicIndicator economicIndicator);
     CustomerEconomicIndicator findCustomerEconomicIndicatorById(Long id);
     List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerId(Long customerId);
+    List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerId(Long customerId, Timestamp startTime, Timestamp endTime);
     List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerIds(List<Long> customerIds);
+    List<CustomerAnnualStatisticDTO> listCustomerAnnualStatistics(Long communityId, Timestamp now, CrossShardListingLocator locator, Integer pageSize,
+        BigDecimal turnoverMinimum, BigDecimal turnoverMaximum, BigDecimal taxPaymentMinimum, BigDecimal taxPaymentMaximum);
+
+    void createCustomerEconomicIndicatorStatistic(CustomerEconomicIndicatorStatistic statistic);
+    void updateCustomerEconomicIndicatorStatistic(CustomerEconomicIndicatorStatistic statistic);
+    CustomerEconomicIndicatorStatistic listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(Long customerId, Timestamp time);
 
     List<EnterpriseCustomer> listEnterpriseCustomerByCommunity(Long communityId);
     
