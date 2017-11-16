@@ -281,10 +281,12 @@ public class ZJContractHandler implements ContractService{
         List<ContractChargingItemDTO> items = new ArrayList<>();
         ContractChargingItemDTO item = new ContractChargingItemDTO();
         item.setChargingItemName("物业费");
+        List<PaymentVariable> chargingVariables = new ArrayList<>();
         PaymentVariable pv = new PaymentVariable();
         pv.setVariableName("物业费单价");
         pv.setVariableValue(zjContract.getPropertyFeeUnit());
-        item.setChargingVariables(pv.toString());
+        chargingVariables.add(pv);
+        item.setChargingVariables(StringHelper.toJsonString(chargingVariables));
         items.add(item);
 
         ContractChargingItemDTO itemRent = new ContractChargingItemDTO();
@@ -292,7 +294,9 @@ public class ZJContractHandler implements ContractService{
         PaymentVariable pvRent = new PaymentVariable();
         pvRent.setVariableName("租金");
         pvRent.setVariableValue(zjContract.getRent());
-        itemRent.setChargingVariables(pvRent.toString());
+        chargingVariables = new ArrayList<>();
+        chargingVariables.add(pvRent);
+        itemRent.setChargingVariables(StringHelper.toJsonString(chargingVariables));
         items.add(itemRent);
         dto.setChargingItems(items);
         if(zjContract.getApartments() != null && zjContract.getApartments().size() > 0) {
