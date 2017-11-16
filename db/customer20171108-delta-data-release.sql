@@ -1,23 +1,3 @@
--- 增加资源预订到期文案 by st.zheng
-set @eh_locale_templates_id = (select max(id) from eh_locale_templates);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@eh_locale_templates_id:=@eh_locale_templates_id+1, 'rental.notification', '10', 'zh_CN', '资源到期给资源负责人推送提醒(半天/小时)', '温馨提醒：${resourceName}资源的使用将在15分钟后结束，使用客户${requestorName}(${requestorPhone}),请进行确认', '0');
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@eh_locale_templates_id:=@eh_locale_templates_id+1, 'rental.notification', '11', 'zh_CN', '资源到期给资源负责人推送提醒(天/月)', '温馨提醒：${resourceName}资源的使用将在今日结束，使用客户${requestorName}(${requestorPhone}),请进行确认', '0');
-
-set @eh_locale_strings_id = (select max(id) from eh_locale_strings);
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'rental.flow', 'authKey', 'zh_CN', '门禁二维码');
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'rental.flow', 'authValue', 'zh_CN', '在二维码有效期内前往门禁功能查看二维码');
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'rental.flow', 'authTime', 'zh_CN', '二维码有效期');
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'rental.flow', 'packageName', 'zh_CN', '使用套餐');
-
--- 修正消息模板 by lei.lv
-update eh_locale_templates set text = '${userName}(${userToken})${description}申请加入公司“${enterpriseName}”，是否同意？' where scope = 'enterprise.notification' and code = 7;
-update eh_locale_templates set text = '${userName}(${userToken})已加入公司“${enterpriseName}”。' where scope = 'enterprise.notification' and code = 2;
-update eh_locale_templates set text = '${userName}(${userToken})已离开公司“${enterpriseName}”。' where scope = 'enterprise.notification' and code = 5;
-
--- merge from customer20171108 add by xiongying
-INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`) 
-VALUES (27, 'enterprise_customer', '0', '/27', '客户合同', '', '0', NULL, '2', '1', NOW());
-
 set @field_id = (SELECT MAX(id) from eh_var_fields);
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
 VALUES ((@field_id := @field_id + 1), 'enterprise_customer', 'month', '年月', 'Long', '9', '/9', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"datetime\", \"length\": 32}');
