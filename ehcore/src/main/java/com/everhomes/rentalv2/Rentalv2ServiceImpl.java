@@ -3048,7 +3048,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						//微信直接退款，支付宝置为退款中 
 						//update by wuhan 2017-5-15 :支付宝也和微信一样退款
 							PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refoundApi, refundCmd, PayZuolinRefundResponse.class);
-							if(refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+							if(refundResponse!=null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
 								//退款成功保存退款单信息，修改bill状态
 								rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
 								order.setStatus(SiteBillStatus.REFUNDED.getCode());
