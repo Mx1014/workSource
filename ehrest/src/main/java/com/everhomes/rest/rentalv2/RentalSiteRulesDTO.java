@@ -1,8 +1,10 @@
 package com.everhomes.rest.rentalv2;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <ul>
@@ -65,7 +67,8 @@ public class RentalSiteRulesDTO {
 	private BigDecimal halfOrgMemberPrice;
 	private BigDecimal halfApprovingUserOriginalPrice;
 	private BigDecimal halfApprovingUserPrice;
-
+	@ItemType(RentalSitePackagesDTO.class)
+	private List<RentalSitePackagesDTO> sitePackages;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -107,7 +110,13 @@ public class RentalSiteRulesDTO {
 		return rentalSiteId;
 	}
 
+	public List<RentalSitePackagesDTO> getSitePackages() {
+		return sitePackages;
+	}
 
+	public void setSitePackages(List<RentalSitePackagesDTO> sitePackages) {
+		this.sitePackages = sitePackages;
+	}
 
 	public java.math.BigDecimal getOriginalPrice() {
 		return originalPrice;
