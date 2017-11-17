@@ -464,6 +464,16 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
+    public void deleteCustomerEconomicIndicatorStatistic(CustomerEconomicIndicatorStatistic statistic) {
+        assert(statistic.getId() != null);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEconomicIndicatorStatistics.class, statistic.getId()));
+        EhCustomerEconomicIndicatorStatisticsDao dao = new EhCustomerEconomicIndicatorStatisticsDao(context.configuration());
+        dao.delete(statistic);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerEconomicIndicatorStatistics.class, statistic.getId());
+
+    }
+
+    @Override
     public CustomerEconomicIndicatorStatistic listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(Long customerId, Timestamp time) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhCustomerEconomicIndicatorStatisticsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS);

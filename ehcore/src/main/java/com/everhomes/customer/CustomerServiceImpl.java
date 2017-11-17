@@ -1187,7 +1187,14 @@ public class CustomerServiceImpl implements CustomerService {
                         statistic.setTurnover(BigDecimal.ZERO);
                     }
                 }
-                enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+
+                if(statistic.getTaxPayment().compareTo(BigDecimal.ZERO) == 0
+                        && statistic.getTurnover().compareTo(BigDecimal.ZERO) == 0) {
+                    enterpriseCustomerProvider.deleteCustomerEconomicIndicatorStatistic(statistic);
+                } else {
+                    enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+                }
+
             }
         }
     }
@@ -1280,7 +1287,12 @@ public class CustomerServiceImpl implements CustomerService {
                     statistic.setTaxPayment(tax.add(indicator.getTaxPayment() == null ? BigDecimal.ZERO : indicator.getTaxPayment()).subtract(exist.getTaxPayment() == null ? BigDecimal.ZERO : exist.getTaxPayment()));
                     BigDecimal turnover = statistic.getTurnover() == null ? BigDecimal.ZERO : statistic.getTurnover();
                     statistic.setTurnover(turnover.add(indicator.getTurnover() == null ? BigDecimal.ZERO : indicator.getTurnover()).subtract(exist.getTurnover() == null ? BigDecimal.ZERO : exist.getTurnover()));
-                    enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+                    if(statistic.getTaxPayment().compareTo(BigDecimal.ZERO) <= 0
+                            && statistic.getTurnover().compareTo(BigDecimal.ZERO) <= 0) {
+                        enterpriseCustomerProvider.deleteCustomerEconomicIndicatorStatistic(statistic);
+                    } else {
+                        enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+                    }
                 }
             }
         } else {
@@ -1291,7 +1303,12 @@ public class CustomerServiceImpl implements CustomerService {
                     statistic.setTaxPayment(tax.subtract(exist.getTaxPayment() == null ? BigDecimal.ZERO : exist.getTaxPayment()));
                     BigDecimal turnover = statistic.getTurnover() == null ? BigDecimal.ZERO : statistic.getTurnover();
                     statistic.setTurnover(turnover.subtract(exist.getTurnover() == null ? BigDecimal.ZERO : exist.getTurnover()));
-                    enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+                    if(statistic.getTaxPayment().compareTo(BigDecimal.ZERO) <= 0
+                            && statistic.getTurnover().compareTo(BigDecimal.ZERO) <= 0) {
+                        enterpriseCustomerProvider.deleteCustomerEconomicIndicatorStatistic(statistic);
+                    } else {
+                        enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+                    }
                 }
             } else if(exist.getMonth() == null) {
                 CustomerEconomicIndicatorStatistic statistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), indicator.getMonth());
@@ -1316,7 +1333,12 @@ public class CustomerServiceImpl implements CustomerService {
                     existStatistic.setTaxPayment(tax.subtract(exist.getTaxPayment() == null ? BigDecimal.ZERO : exist.getTaxPayment()));
                     BigDecimal turnover = existStatistic.getTurnover() == null ? BigDecimal.ZERO : existStatistic.getTurnover();
                     existStatistic.setTurnover(turnover.subtract(exist.getTurnover() == null ? BigDecimal.ZERO : exist.getTurnover()));
-                    enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(existStatistic);
+                    if(existStatistic.getTaxPayment().compareTo(BigDecimal.ZERO) <= 0
+                            && existStatistic.getTurnover().compareTo(BigDecimal.ZERO) <= 0) {
+                        enterpriseCustomerProvider.deleteCustomerEconomicIndicatorStatistic(existStatistic);
+                    } else {
+                        enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(existStatistic);
+                    }
                 }
                 CustomerEconomicIndicatorStatistic newStatistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), indicator.getMonth());
                 if(newStatistic == null) {
