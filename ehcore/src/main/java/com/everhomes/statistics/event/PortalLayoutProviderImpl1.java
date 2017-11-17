@@ -8,10 +8,7 @@ import com.everhomes.util.StringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -28,6 +25,7 @@ public class PortalLayoutProviderImpl1 implements PortalLayoutProvider {
         List<LaunchPadLayoutDTO> layoutDTOList = launchPadProvider.listLaunchPadLayoutByKeyword(10000, 0, null);
         layoutDTOList = layoutDTOList.stream()
                 .filter(r -> LaunchPadLayoutStatus.fromCode(r.getStatus()) == LaunchPadLayoutStatus.ACTIVE)
+                .sorted(Comparator.comparing(LaunchPadLayoutDTO::getName))
                 .collect(Collectors.toList());
 
         List<PortalLayout> portalLayoutList = new ArrayList<>();
