@@ -8,6 +8,7 @@ import com.everhomes.server.schema.tables.pojos.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -244,4 +245,12 @@ public interface AssetProvider {
     List<PaymentBills> getAllBillsByCommunity(Long key);
 
     List<EhPaymentBillGroupsRules> getBillGroupRuleByCommunityWithBro(Long ownerId, String ownerType, boolean b);
+
+    List<PaymentBills> findBillsByContractIds(List<Long> contractIds);
+
+    String getbillGroupNameById(Long billGroupId);
+
+    Collection<? extends Long> getAddressIdByBillId(Long id);
+
+    String getAddressStrByIds(List<Long> collect);
 }

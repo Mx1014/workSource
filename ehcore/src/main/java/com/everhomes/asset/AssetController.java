@@ -885,6 +885,9 @@ public class AssetController extends ControllerBase {
     @RequestMapping("showBillForClientV2")
     @RestReturn(value = ShowBillForClientV2DTO.class,collection = true)
     public RestResponse showBillForClientV2(ShowBillForClientV2Command cmd) {
+        if(cmd.getNamespaceId()!=UserContext.getCurrentNamespaceId()){
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        }
         List<ShowBillForClientV2DTO> dtos = assetService.showBillForClientV2(cmd);
         RestResponse response = new RestResponse(dtos);
         response.setErrorDescription("OK");

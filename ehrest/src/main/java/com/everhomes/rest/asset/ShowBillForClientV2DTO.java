@@ -13,44 +13,51 @@ import java.util.List;
  *<ul>
  * <li>billGroupName:账单组名称</li>
  * <li>billGroupId:账单组id</li>
- * <li>billDuration:账期</li>
- * <li>overAllAmountReceivabled:应收金额总计</li>
  * <li>overAllAmountOwed:待缴金额总计</li>
- * <li>isPaymentAvailable:是否启用缴纳功能</li>
- * <li>isContractAvailable:是否启用查看合同</li>
+ * <li>addressStr:包含的地址</li>
+ * <li>contractId:合同id</li>
  *</ul>
  */
 public class ShowBillForClientV2DTO {
     private String billGroupName;
-    private Long billGroupId;
-    private String billDuration;
-    private String overAllAmountReceivabled;
     private String overAllAmountOwed;
-    private Byte isPaymentAvailable;
-    private Byte isContractAvailable;
+    private Long billGroupId;
+    private String addressStr;
+    private String contractId;
 
-    public Long getBillGroupId() {
-        return billGroupId;
-    }
+    List<BillForClientV2> bills;
 
-    public void setBillGroupId(Long billGroupId) {
+    public ShowBillForClientV2DTO(Long billGroupId, String contractId) {
         this.billGroupId = billGroupId;
+        this.contractId = contractId;
     }
 
-    public Byte getIsPaymentAvailable() {
-        return isPaymentAvailable;
+    @Override
+
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ShowBillForClientV2DTO)) return false;
+
+        ShowBillForClientV2DTO that = (ShowBillForClientV2DTO) o;
+
+        if (getBillGroupId() != null ? !getBillGroupId().equals(that.getBillGroupId()) : that.getBillGroupId() != null)
+            return false;
+        return getContractId() != null ? getContractId().equals(that.getContractId()) : that.getContractId() == null;
     }
 
-    public void setIsPaymentAvailable(Byte isPaymentAvailable) {
-        this.isPaymentAvailable = isPaymentAvailable;
+    @Override
+    public int hashCode() {
+        int result = getBillGroupId() != null ? getBillGroupId().hashCode() : 0;
+        result = 31 * result + (getContractId() != null ? getContractId().hashCode() : 0);
+        return result;
     }
 
-    public Byte getIsContractAvailable() {
-        return isContractAvailable;
+    public String getContractId() {
+        return contractId;
     }
 
-    public void setIsContractAvailable(Byte isContractAvailable) {
-        this.isContractAvailable = isContractAvailable;
+    public void setContractId(String contractId) {
+        this.contractId = contractId;
     }
 
     public String getBillGroupName() {
@@ -61,27 +68,35 @@ public class ShowBillForClientV2DTO {
         this.billGroupName = billGroupName;
     }
 
-    public String getBillDuration() {
-        return billDuration;
-    }
-
-    public void setBillDuration(String billDuration) {
-        this.billDuration = billDuration;
-    }
-
-    public String getOverAllAmountReceivabled() {
-        return overAllAmountReceivabled;
-    }
-
-    public void setOverAllAmountReceivabled(String overAllAmountReceivabled) {
-        this.overAllAmountReceivabled = overAllAmountReceivabled;
-    }
-
     public String getOverAllAmountOwed() {
         return overAllAmountOwed;
     }
 
     public void setOverAllAmountOwed(String overAllAmountOwed) {
         this.overAllAmountOwed = overAllAmountOwed;
+    }
+
+    public Long getBillGroupId() {
+        return billGroupId;
+    }
+
+    public void setBillGroupId(Long billGroupId) {
+        this.billGroupId = billGroupId;
+    }
+
+    public String getAddressStr() {
+        return addressStr;
+    }
+
+    public void setAddressStr(String addressStr) {
+        this.addressStr = addressStr;
+    }
+
+    public List<BillForClientV2> getBills() {
+        return bills;
+    }
+
+    public void setBills(List<BillForClientV2> bills) {
+        this.bills = bills;
     }
 }

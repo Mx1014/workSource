@@ -27,6 +27,8 @@ import java.math.BigDecimal;
  * <li>noticeTimes:已催缴次数</li>
  * <li>ownerId:所属者id</li>
  * <li>ownerType:所属者类型</li>
+ * <li>dateStrBegin:所属者类型</li>
+ * <li>dateStrEnd:所属者类型</li>
  *</ul>
  */
 public class ListBillsDTO {

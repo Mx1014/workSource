@@ -915,6 +915,9 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dto.setTargetName(sourceDto.getCustomerName());
                     dto.setTargetType(targetType);
                     dto.setPayStatus(sourceDto.getStatus()!=null?sourceDto.getStatus().equals(PaymentStatus.SUSPEND.getCode())?PaymentStatus.IN_PROCESS.getCode():null:null);
+                    //增加计费周期
+                    dto.setDateStrBegin(sourceDto.getDateStrBegin());
+                    dto.setDateStrEnd(sourceDto.getDateStrEnd());
                     list.add(dto);
                 }
             }

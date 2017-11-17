@@ -72,6 +72,7 @@ import org.springframework.transaction.TransactionStatus;
 import scala.Char;
 import sun.util.resources.cldr.aa.CalendarData_aa_DJ;
 
+import java.io.StringBufferInputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -3473,6 +3474,47 @@ public class AssetProviderImpl implements AssetProvider {
             query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BROTHER_RULE_ID.isNull());
         }
         return query.fetchInto(PaymentBillGroupRule.class);
+    }
+
+    @Override
+    public List<PaymentBills> findBillsByContractIds(List<Long> contractIds) {
+        return getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.CONTRACT_ID.in(contractIds))
+                .fetchInto(PaymentBills.class);
+    }
+
+    @Override
+    public String getbillGroupNameById(Long billGroupId) {
+        return getReadOnlyContext().select(Tables.EH_PAYMENT_BILL_GROUPS.NAME)
+                .from(Tables.EH_PAYMENT_BILL_GROUPS)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(billGroupId))
+                .fetchOne(Tables.EH_PAYMENT_BILL_GROUPS.NAME);
+    }
+
+    @Override
+    public Collection<? extends Long> getAddressIdByBillId(Long id) {
+        Set<Long> ids = new HashSet<>();
+        getReadOnlyContext().select(Tables.EH_PAYMENT_BILL_ITEMS.ADDRESS_ID)
+                .from(Tables.EH_PAYMENT_BILL_ITEMS)
+                .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(id))
+                .fetch()
+                .forEach(r -> {
+                    ids.add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.ADDRESS_ID));
+                });
+        return ids;
+    }
+
+    @Override
+    public String getAddressStrByIds(List<Long> collect) {
+        StringBuilder sb = new StringBuilder();
+        getReadOnlyContext().select(Tables.EH_ADDRESSES.BUILDING_NAME,Tables.EH_ADDRESSES.APARTMENT_NAME)
+                .from(Tables.EH_ADDRESSES)
+                .where(Tables.EH_ADDRESSES.ID.in(collect))
+                .fetch()
+                .forEach(r -> {
+                    sb.append(r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME)+r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME)+",");
+                });
+        return sb.toString();
     }
 
 
