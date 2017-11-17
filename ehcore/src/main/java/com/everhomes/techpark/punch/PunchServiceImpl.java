@@ -924,23 +924,23 @@ public class PunchServiceImpl implements PunchService {
 			pdl.setPunchStatus(ApprovalStatus.RESIGNED.getCode());
 			return pdl;
 		}else{
-			//查找是否未入职 --通过log的时间
-			List<Long> orgIds = new ArrayList<>();
-			for(OrganizationMember member : organizationMembers){
-				orgIds.add(member.getOrganizationId());
-			}
-			List<OrganizationMemberLog> memberLogs = organizationProvider.listOrganizationMemberLogs(userId,orgIds, OperationType.JOIN.getCode()) ;
-			if (null != memberLogs ){
-				if(memberLogs.get(0).getOperateTime().after(logDay.getTime())){
-					pdl.setStatusList(PunchStatus.NONENTRY.getCode()+"");
-					pdl.setPunchTimesPerDay(PunchTimesPerDay.TWICE.getCode());
-					pdl.setMorningPunchStatus(PunchStatus.NONENTRY.getCode());
-					pdl.setAfternoonPunchStatus(PunchStatus.NONENTRY.getCode());
-					punchDayLog.setStatus(ApprovalStatus.NONENTRY.getCode());
-					pdl.setPunchStatus(ApprovalStatus.NONENTRY.getCode());
-					return pdl;
-				}
-			}
+//			//查找是否未入职 --通过log的时间
+//			List<Long> orgIds = new ArrayList<>();
+//			for(OrganizationMember member : organizationMembers){
+//				orgIds.add(member.getOrganizationId());
+//			}
+//			List<OrganizationMemberLog> memberLogs = organizationProvider.listOrganizationMemberLogs(userId,orgIds, OperationType.JOIN.getCode()) ;
+//			if (null != memberLogs ){
+//				if(memberLogs.get(0).getOperateTime().after(logDay.getTime())){
+//					pdl.setStatusList(PunchStatus.NONENTRY.getCode()+"");
+//					pdl.setPunchTimesPerDay(PunchTimesPerDay.TWICE.getCode());
+//					pdl.setMorningPunchStatus(PunchStatus.NONENTRY.getCode());
+//					pdl.setAfternoonPunchStatus(PunchStatus.NONENTRY.getCode());
+//					punchDayLog.setStatus(ApprovalStatus.NONENTRY.getCode());
+//					pdl.setPunchStatus(ApprovalStatus.NONENTRY.getCode());
+//					return pdl;
+//				}
+//			}
 		}
 
 		// 如果有排班 而且 零次打卡记录

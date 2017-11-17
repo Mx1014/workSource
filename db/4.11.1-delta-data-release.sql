@@ -252,4 +252,5 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100012', 'zh_CN', '短号格式错误');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100013', 'zh_CN', '日期格式错误');
 	
-
+-- 表计管理的menu换链接，fix bug 18412 by xiongying20171117
+update eh_web_menus set data_type = 'react:/energy-management/table-list' where id = 49110;

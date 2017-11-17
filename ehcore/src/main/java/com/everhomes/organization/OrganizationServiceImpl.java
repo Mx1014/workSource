@@ -5964,10 +5964,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         leaveOrganizationMembers(members);
         deleteUserOrganizationWithMembers(members);
 
-        // 删除考勤规则的操作
-        if(members != null && members.size() > 0)
-            this.uniongroupService.syncUniongroupAfterLeaveTheJob(members.get(0).getDetailId());
-
     }
 
     /**
@@ -6008,7 +6004,11 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
             return null;
         });
-        
+
+        // 删除考勤规则的操作
+        if(members != null && members.size() > 0)
+            this.uniongroupService.syncUniongroupAfterLeaveTheJob(members.get(0).getDetailId());
+
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         //执行太慢，开一个线程来做
@@ -8573,7 +8573,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         Map<String, String> map = new HashMap<String, String>();
         map.put("enterpriseName", org.getName());
         map.put("userName", null == member.getContactName() ? member.getContactToken().replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2") : member.getContactName());
-        map.put("userToken", member.getContactToken().replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2"));
+        map.put("userToken", member.getContactToken());
         if (member.getContactDescription() != null && member.getContactDescription().length() > 0) {
             map.put("description", String.format("(%s)", member.getContactDescription()));
         } else {
