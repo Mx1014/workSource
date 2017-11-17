@@ -1,5 +1,6 @@
 package com.everhomes.statistics.event;
 
+import com.everhomes.launchpad.LaunchPadLayout;
 import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
 import com.everhomes.rest.launchpad.LaunchPadLayoutStatus;
@@ -84,6 +85,26 @@ public class PortalLayoutProviderImpl1 implements PortalLayoutProvider {
 
     @Override
     public PortalLayout findPortalLayoutById(Long id) {
-        throw new RuntimeException("findPortalLayoutById not supported");
+        LaunchPadLayout layout = launchPadProvider.findLaunchPadLayoutById(id);
+        if (layout != null) {
+            PortalLayout portalLayout = new PortalLayout();
+
+            portalLayout.setNamespaceId(layout.getNamespaceId());
+
+            Map<String, String> map = (Map<String, String>) StringHelper.fromJsonString(layout.getLayoutJson(), HashMap.class);
+
+            portalLayout.setName(layout.getName());
+            String displayName = map.get("displayName");
+
+            portalLayout.setLabel(displayName);
+            portalLayout.setDescription(layout.getName());
+
+            portalLayout.setId(layout.getId());
+            portalLayout.setStatus((byte) 4);
+
+            portalLayout.setSceneType(layout.getSceneType());
+            return portalLayout;
+        }
+        return null;
     }
 }

@@ -4823,7 +4823,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //	public void processPartnerOrganizationUser(Long userId, Long partnerId) {
 //	    long startTime = System.currentTimeMillis();
 //	    if(userId == null || userId <= 0) {
-//	        LOGGER.info("User id is null, ignore to process partner organization user, userId=" + userId + ", partnerId=" + partnerId);
+//	        LOGGER.info("User id is null, ignore to processStat partner organization user, userId=" + userId + ", partnerId=" + partnerId);
 //	        return;
 //	    }
 //	    User user = userProvider.findUserById(userId);
@@ -4833,7 +4833,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //        }
 //
 //	    if(partnerId == null || partnerId <= 0) {
-//            LOGGER.info("Partner id is null, ignore to process partner organization user, userId=" + userId + ", partnerId=" + partnerId);
+//            LOGGER.info("Partner id is null, ignore to processStat partner organization user, userId=" + userId + ", partnerId=" + partnerId);
 //            return;
 //	    }
 //        Organization organization = organizationProvider.findOrganizationById(partnerId);
@@ -7245,7 +7245,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
             return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
         } catch (Exception e) {
-            LOGGER.error("Failed to process the enterprise contact for the user, userId=" + identifier.getOwnerUid(), e);
+            LOGGER.error("Failed to processStat the enterprise contact for the user, userId=" + identifier.getOwnerUid(), e);
         }
         return null;
     }

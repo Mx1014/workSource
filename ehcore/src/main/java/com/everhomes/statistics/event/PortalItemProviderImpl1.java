@@ -57,6 +57,7 @@ public class PortalItemProviderImpl1 implements PortalItemProvider {
             portalItem.setActionType(String.valueOf(launchPadItem.getActionType()));
             portalItem.setActionData(launchPadItem.getActionData());
             portalItem.setGroupName(launchPadItem.getItemGroup());
+            portalItem.setLaunchPadItem(launchPadItem);
             return portalItem;
         }
         return null;
