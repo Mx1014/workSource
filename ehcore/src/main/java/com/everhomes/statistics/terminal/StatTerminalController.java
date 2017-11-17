@@ -236,4 +236,17 @@ public class StatTerminalController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /stat/terminal/listTerminalAppPlatformStatistics</b>
+     * <p>按照平台统计人数</p>
+     */
+    @RequestMapping("listTerminalAppPlatformStatistics")
+    @RestReturn(value=TerminalAppVersionStatisticsDTO.class)
+    public RestResponse listTerminalAppPlatformStatistics(@Valid ListTerminalStatisticsByDayCommand cmd) {
+        RestResponse response = new RestResponse(statTerminalService.listTerminalAppVersionStatistics(cmd.getDate()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

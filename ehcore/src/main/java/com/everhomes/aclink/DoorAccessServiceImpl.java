@@ -1955,6 +1955,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 
                 for(Aclink ca : aclinks) {
                     String key = keyMap.get(ca.getLinglingDoorId());
+                    if(key == null) {
+                        LOGGER.error("lingling keyMap failed, linglingDoorId=" + ca.getLinglingDoorId() + " doorId=" + doorAccess.getId());
+                        continue;
+                    }
+                    
                     if(!key.equals(ca.getLinglingSDKKey())) {
                         ca.setLinglingSDKKey(key);
                         aclinkProvider.updateAclink(ca);    
@@ -1975,6 +1980,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 Map<Long, String> keyMap = aclinkLinglingService.makeSdkKey(sdkKey);
                 
                 String key = keyMap.get(ca.getLinglingDoorId());
+                if(key == null) {
+                    LOGGER.error("lingling single failed, linglingDoorId=" + ca.getLinglingDoorId() + " doorId=" + doorAccess.getId());
+                    return;
+                }
+                
                 if(!key.equals(ca.getLinglingSDKKey())) {
                     ca.setLinglingSDKKey(key);
                     aclinkProvider.updateAclink(ca);    
@@ -2003,6 +2013,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         qr.setStatus(DoorAccessStatus.ACTIVE.getCode());
         qr.setQrCodeKey("11223344");
         qr.setId(auth.getId());
+        
+        qr.setDoorOwnerId(doorAccess.getOwnerId());
+        qr.setDoorOwnerType(doorAccess.getOwnerType());
         
         DoorLinglingExtraKeyDTO extra = new DoorLinglingExtraKeyDTO();
         
@@ -2083,6 +2096,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         qr.setQrDriver(this.getQrDriverZuolinInner(UserContext.getCurrentNamespaceId()).getCode());
         qr.setCreateTimeMs(auth.getCreateTime().getTime());
         qr.setCurrentTime(DateHelper.currentGMTTime().getTime());
+        qr.setDoorOwnerId(doorAccess.getOwnerId());
+        qr.setDoorOwnerType(doorAccess.getOwnerType());
         
         Long qrImageTimeout = this.configProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_TIMEOUTS, 1*60);
         qr.setQrImageTimeout(qrImageTimeout*1000l);
@@ -2102,6 +2117,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         qr.setExpireTimeMs(auth.getKeyValidTime());
         qr.setId(auth.getId());
         qr.setQrDriver(DoorAccessDriverType.HUARUN_ANGUAN.getCode());
+        qr.setDoorOwnerId(doorAccess.getOwnerId());
+        qr.setDoorOwnerType(doorAccess.getOwnerType());
       
         AclinkGetSimpleQRCode getCode = new AclinkGetSimpleQRCode();
         UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(user.getId());

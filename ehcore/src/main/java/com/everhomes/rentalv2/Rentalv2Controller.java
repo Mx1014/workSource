@@ -414,9 +414,5 @@ public class Rentalv2Controller extends ControllerBase {
 		return response;
 	}
 
-	@RequestMapping("testSch")
-	public String testSch(@Valid ListRentalBillsCommand cmd,HttpServletResponse response){
-		rentalService.rentalSchedule();
-		return null;
-	}
+
 }
