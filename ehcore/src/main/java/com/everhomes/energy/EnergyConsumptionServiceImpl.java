@@ -973,7 +973,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskById(lastReadingLog.getTaskId());
                 if(task != null) {
                     EnergyMeterReadingLog taskLastReadingLog = meterReadingLogProvider.findLastReadingLogByTaskId(task.getId());
-                    task.setReading(taskLastReadingLog.getReading());
+                    if(taskLastReadingLog != null) {
+                        task.setReading(taskLastReadingLog.getReading());
+                    } else {
+                        task.setReading(task.getLastTaskReading());
+                    }
+
                     energyMeterTaskProvider.updateEnergyMeterTask(task);
                     energyMeterTaskSearcher.feedDoc(task);
                 }
