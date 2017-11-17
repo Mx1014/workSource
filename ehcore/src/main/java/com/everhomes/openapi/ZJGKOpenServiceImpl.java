@@ -102,7 +102,7 @@ public class ZJGKOpenServiceImpl {
 
     private static ThreadLocal<SimpleDateFormat> simpleDateSF = new ThreadLocal<SimpleDateFormat>(){
         protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("yyyy-MM-dd");
+            return new SimpleDateFormat("yyyyMMdd");
         }
     };
 
@@ -1784,7 +1784,7 @@ public class ZJGKOpenServiceImpl {
         try {
             ts = new Timestamp(simpleDateSF.get().parse(str).getTime());
         } catch (ParseException e) {
-            LOGGER.error("validityPeriod data format is not yyyymmdd.");
+            LOGGER.error("validityPeriod data format is not yyyymmdd. data = {}", str);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "validityPeriod data format is not yyyymmdd.");
         }

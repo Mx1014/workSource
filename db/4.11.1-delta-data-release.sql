@@ -254,3 +254,6 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 	
 -- 表计管理的menu换链接，fix bug 18412 by xiongying20171117
 update eh_web_menus set data_type = 'react:/energy-management/table-list' where id = 49110;
+
+delete from `eh_var_field_scopes`  WHERE `module_name` = 'contract' AND `field_id` = (select id from `eh_var_fields` WHERE `module_name` = 'contract' AND `display_name` = '租赁总额');
+delete from `eh_var_fields` WHERE `module_name` = 'contract' AND `display_name` = '租赁总额';
