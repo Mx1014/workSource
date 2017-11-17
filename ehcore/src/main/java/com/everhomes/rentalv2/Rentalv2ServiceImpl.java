@@ -1737,7 +1737,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return null;
 		});
 
-
+		cellList.get().clear();
 		return billDTO;
 	}
 
@@ -3771,6 +3771,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		response.setDiscountType(dto.getDiscountType());
 		response.setDiscountRatio(dto.getDiscountRatio());
 
+		cellList.get().clear();
 		return response;
 	}
 	
@@ -3819,6 +3820,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	 		Collections.sort(dayTimes);
 	 		response.setDayTimes(dayTimes);
  		}
+
+		cellList.get().clear();
 		return response;
 	}
 
@@ -3922,6 +3925,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		response.setCutPrice(dto.getCutPrice());
 		response.setDiscountType(dto.getDiscountType());
 		response.setDiscountRatio(dto.getDiscountRatio());
+		
+
+		cellList.get().clear();
 		return response;
 	}
 
@@ -4367,6 +4373,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 		}
 
+		cellList.get().clear();
 		return response;
 	}
 
@@ -4519,6 +4526,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		}
 
+		cellList.get().clear();
 		return response;
 	}
 
@@ -4671,6 +4679,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		}
 
+		cellList.get().clear();
 		return response;
 	}
 
@@ -4813,6 +4822,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Collections.sort(dayTimes);
  		response.setDayTimes(dayTimes);
 
+		cellList.get().clear();
 		return response;
 	}
 
@@ -5639,7 +5649,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return null;
 		});
 		
-		
+
+		cellList.get().clear();
 	}
 	private  Long createCellPricePackage(List<PricePackageDTO> pricePackages){
 		Rentalv2PricePackage rentalv2PricePackage = new Rentalv2PricePackage();
