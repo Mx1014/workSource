@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.flow.action.FlowTimeoutJob;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PayService;
 import com.everhomes.pay.order.PaymentType;
@@ -202,6 +203,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private DoorAccessService doorAccessService;
 	@Autowired
 	DoorAccessProvider doorAccessProvider;
+
 
 	/**cellList : 当前线程用到的单元格 */
 	private static ThreadLocal<List<RentalCell>> cellList = new ThreadLocal<List<RentalCell>>() {
@@ -1970,12 +1972,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			        map.put("startTime", order.getUseDetail()); 
 					String notifyTextForOther = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE, 
 							RentalNotificationTemplateCode.RENTAL_BEGIN_NOTIFY, RentalNotificationTemplateCode.locale, map, "");
-					final Job job3 = new Job(
-							SendMessageAction.class.getName(),
-							new Object[] {order.getRentalUid(),notifyTextForOther});
+
+					Map<String, Object> messageMap = new HashMap<>();
+					messageMap.put("userId",order.getRentalUid());
+					messageMap.put("content",notifyTextForOther);
+					scheduleProvider.scheduleSimpleJob(
+							queueName,
+							queueName,
+							new java.util.Date(orderReminderTimeLong),
+							RentalMessageJob.class,
+							messageMap
+					);
 					LOGGER.debug("rentalSchedule push reminderMessage id:"+order.getRentalUid()+"  message:"+notifyTextForOther+"  time:"+orderReminderTimeLong);
-					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
-							orderReminderTimeLong);
+
 				}
 
 				//结束时间快到发推送
@@ -1996,12 +2005,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						notifyTextForOther = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
 								RentalNotificationTemplateCode.RENTAL_END_NOTIFY_DAY, RentalNotificationTemplateCode.locale, map, "");
 
-					final Job job3 = new Job(
-							SendMessageAction.class.getName(),
-							new Object[] {chargeUid,notifyTextForOther});
+					Map<String, Object> messageMap = new HashMap<>();
+					messageMap.put("userId",chargeUid);
+					messageMap.put("content",notifyTextForOther);
+					scheduleProvider.scheduleSimpleJob(
+							queueName,
+							queueName,
+							new java.util.Date(orderReminderEndTimeLong),
+							RentalMessageJob.class,
+							messageMap
+					);
 					LOGGER.debug("rentalSchedule push endReminderMessage id:"+chargeUid+"  message:"+notifyTextForOther+"  time:"+orderReminderTimeLong);
-					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
-							orderReminderEndTimeLong);
+
 				}
 				//订单过期,置状态
 				if(orderEndTimeLong <= currTime){
@@ -2012,7 +2027,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					final Job job1 = new Job(
 							IncompleteUnsuccessRentalBillAction.class.getName(),
 							new Object[] { String.valueOf(order.getId()) });
-		
+
 					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
 							orderEndTimeLong); 
 				}
