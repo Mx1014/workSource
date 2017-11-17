@@ -48,31 +48,16 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 
 		ActivityEntryConfigulation config = (ActivityEntryConfigulation)StringHelper.fromJsonString(instanceConfig, ActivityEntryConfigulation.class);
 
+		//保存应用入口的信息，不存在则新增，存在则更新
 		ActivityCategories activityCategory = saveEntry(config, namespaceId, itemLabel);
 
 		//将值组装到config中，用于后面返回服务广场
 		config.setId(activityCategory.getId());
 		config.setEntryId(activityCategory.getEntryId());
 
-		//删除内容分类
-		deleteContentCategory(config, namespaceId);
-
-		//如果没有则增加默认分类、或者子分类关闭
-		if(config.getCategoryDTOList() == null || config.getCategoryDTOList().size() ==0
-				|| config.getCategoryFlag() == null || config.getCategoryFlag().byteValue() == 0){
-				List<ActivityCategoryDTO> listDto = new ArrayList<>();
-				ActivityCategoryDTO newDto = new ActivityCategoryDTO();
-				newDto.setAllFlag(AllFlagType.YES.getCode());
-				newDto.setName("all");
-				listDto.add(newDto);
-				config.setCategoryDTOList(listDto);
-
-				config.setCategoryFlag((byte)1);
-
-		}
-
 		//新增、更新内容分类
-		updateContentCategory(config, activityCategory, namespaceId);
+		saveContencategory(config, activityCategory, namespaceId);
+		//updateContentCategory(config, activityCategory, namespaceId);
 
 		LOGGER.info("ActivityPortalPublishHandler publish end instanceConfig = {}", StringHelper.toJsonString(config));
 
@@ -202,58 +187,80 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		return  entryCategory;
 	}
 
+	private void saveContencategory(ActivityEntryConfigulation config, ActivityCategories parentCategory, Integer namespaceId){
+		//清理部分被删除的主题分类
+		deleteContentCategory(config, namespaceId);
+		//更新、新增主题分类
+		updateContentCategory(config, parentCategory, namespaceId);
+
+	}
 
 	private void updateContentCategory(ActivityEntryConfigulation config, ActivityCategories parentCategory, Integer namespaceId){
 
-		if(null != config.getCategoryFlag() && config.getCategoryFlag() == 1){
+		//如果没有则增加默认分类、或者子分类关闭
+		if(config.getCategoryDTOList() == null || config.getCategoryDTOList().size() == 0
+				|| config.getCategoryFlag() == null || config.getCategoryFlag().byteValue() == 0){
 
-			//新增、更新入口
-			Long maxEntryId = activityProvider.findActivityCategoriesMaxEntryId(namespaceId);
-			if(maxEntryId == null){
-				maxEntryId = 1L;
-			}
+			List<ActivityCategoryDTO> listDto = new ArrayList<>();
+			ActivityCategoryDTO newDto = new ActivityCategoryDTO();
+			newDto.setAllFlag(AllFlagType.YES.getCode());
+			newDto.setName("all");
+			listDto.add(newDto);
+			config.setCategoryDTOList(listDto);
 
-			for(int i=0; i<config.getCategoryDTOList().size(); i++){
-				ActivityCategoryDTO dto = config.getCategoryDTOList().get(i);
+			config.setCategoryFlag((byte)1);
+		}
 
-				if(dto.getId() != null){
-					ActivityCategories oldCategory = activityProvider.findActivityCategoriesById(dto.getId());
-					if(dto.getName() != null){
-						oldCategory.setName(dto.getName());
-					}
-					oldCategory.setIconUri(dto.getIconUri());
-					oldCategory.setSelectedIconUri(dto.getSelectedIconUri());
-					oldCategory.setEnabled(dto.getEnabled());
-					activityProvider.updateActivityCategories(oldCategory);
-				}else {
-					maxEntryId++;
-					ActivityCategories newCategory = ConvertHelper.convert(dto, ActivityCategories.class);
-					newCategory.setParentId(parentCategory.getEntryId());
-					newCategory.setEntryId(maxEntryId);
-					newCategory.setPath(parentCategory.getPath() + "/" + maxEntryId);
-					newCategory.setOwnerId(0L);
-					newCategory.setDefaultOrder(0);
-					newCategory.setStatus((byte)2);
-					newCategory.setCreatorUid(1L);
-					if(newCategory.getName() == null){
-						newCategory.setName("default");
-					}
-					newCategory.setNamespaceId(namespaceId);
-					if(newCategory.getAllFlag() == null){
-						newCategory.setAllFlag((byte)0);
-					}
-					activityProvider.createActivityCategories(newCategory);
+		//新增、更新入口
+		Long maxEntryId = activityProvider.findActivityCategoriesMaxEntryId(namespaceId);
+		if(maxEntryId == null){
+			maxEntryId = 1L;
+		}
 
-					dto.setId(newCategory.getId());
-					dto.setEntryId(newCategory.getEntryId());
+		for(int i=0; i<config.getCategoryDTOList().size(); i++){
+			ActivityCategoryDTO dto = config.getCategoryDTOList().get(i);
 
+			if(dto.getId() != null){
+				ActivityCategories oldCategory = activityProvider.findActivityCategoriesById(dto.getId());
+				if(dto.getName() != null){
+					oldCategory.setName(dto.getName());
 				}
-			}
+				oldCategory.setIconUri(dto.getIconUri());
+				oldCategory.setSelectedIconUri(dto.getSelectedIconUri());
+				oldCategory.setEnabled(dto.getEnabled());
+				activityProvider.updateActivityCategories(oldCategory);
+			}else {
+				maxEntryId++;
+				ActivityCategories newCategory = ConvertHelper.convert(dto, ActivityCategories.class);
+				newCategory.setParentId(parentCategory.getEntryId());
+				newCategory.setEntryId(maxEntryId);
+				newCategory.setPath(parentCategory.getPath() + "/" + maxEntryId);
+				newCategory.setOwnerId(0L);
+				newCategory.setDefaultOrder(0);
+				newCategory.setStatus((byte)2);
+				newCategory.setCreatorUid(1L);
+				if(newCategory.getName() == null){
+					newCategory.setName("default");
+				}
+				newCategory.setNamespaceId(namespaceId);
+				if(newCategory.getAllFlag() == null){
+					newCategory.setAllFlag((byte)0);
+				}
+				activityProvider.createActivityCategories(newCategory);
 
+				dto.setId(newCategory.getId());
+				dto.setEntryId(newCategory.getEntryId());
+
+			}
 		}
 
 	}
 
+	/**
+	 * 删除主题分类
+	 * @param config
+	 * @param namespaceId
+	 */
 	private void deleteContentCategory(ActivityEntryConfigulation config, Integer namespaceId){
 		//删除分类
 		List<ActivityCategories> oldContentCategories = activityProvider.listActivityCategory(namespaceId, config.getId());
@@ -263,13 +270,16 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 			return;
 		}
 
-		//新发布的没有则删除全部，如果有则一个个对比
 		if(config.getCategoryFlag() == null || config.getCategoryFlag() == 0 || config.getCategoryDTOList() == null || config.getCategoryDTOList().size() == 0){
+
+			//如果新发布的没有则删除全部
 			for(int i=0; i<oldContentCategories.size(); i++){
 				activityProvider.deleteActivityCategories(oldContentCategories.get(i).getId());
 			}
 
 		} else {
+
+			//如果新发布的有则一个个对比，遍历旧的主题分类，以id为根据，不存在的话则删除
 			for(int i=0; i<oldContentCategories.size(); i++){
 
 				boolean deleteFlag = true;

@@ -39,6 +39,7 @@ import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.order.*;
+import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.rest.rentalv2.admin.AttachmentType;
@@ -1952,15 +1953,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	 * 每半小时的50秒钟时候开始执行
 	 * */
 	@Scheduled(cron = "50 0/30 * * * ?")
+	@Override
 	public void rentalSchedule(){
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
 			//把所有状态为success-已预约的捞出来 
 			Long currTime = DateHelper.currentGMTTime().getTime();
 			List<RentalOrder>  orders = rentalv2Provider.listSuccessRentalBills();
 			for(RentalOrder order : orders ){
-				Long orderReminderTimeLong = order.getReminderTime().getTime();
-				Long orderEndTimeLong = order.getEndTime().getTime();
-				Long orderReminderEndTimeLong = order.getReminderEndTime().getTime();
+				Long orderReminderTimeLong = order.getReminderTime()!=null?order.getReminderTime().getTime():0l;
+				Long orderEndTimeLong = order.getEndTime()!=null?order.getEndTime().getTime():0l;
+				Long orderReminderEndTimeLong = order.getReminderEndTime()!=null?order.getReminderEndTime().getTime():0l;
 				LOGGER.debug("rentalSchedule: orderId:"+order.getId()+"  orderReminderTimeLong:"+orderReminderTimeLong+"  orderEndTimeLong:"+orderEndTimeLong+
 						"  orderReminderEndTimeLong:"+orderReminderEndTimeLong);
 				//时间快到发推送
@@ -3015,30 +3017,30 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				order.setStatus(SiteBillStatus.REFUNDED.getCode());
 				if (rs.getRefundFlag().equals(NormalFlag.NEED.getCode())&&(order.getPaidMoney().compareTo(new BigDecimal(0))==1)){ 
 					List<RentalOrderPayorderMap>  billmaps = this.rentalv2Provider.findRentalBillPaybillMapByBillId(order.getId());
-					for(RentalOrderPayorderMap billMap : billmaps){
+					for(RentalOrderPayorderMap billMap : billmaps) {
 						//循环退款
 						PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
-						String refoundApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
-						String appKey = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.appKey", "");
+						String refoundApi = this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
+						String appKey = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "pay.appKey", "");
 						refundCmd.setAppKey(appKey);
 						Long timestamp = System.currentTimeMillis();
 						refundCmd.setTimestamp(timestamp);
-						Integer randomNum = (int) (Math.random()*1000);
+						Integer randomNum = (int) (Math.random() * 1000);
 						refundCmd.setNonce(randomNum);
 						Long refoundOrderNo = this.onlinePayService.createBillId(DateHelper
 								.currentGMTTime().getTime());
 						refundCmd.setRefundOrderNo(String.valueOf(refoundOrderNo));
 						refundCmd.setOrderNo(String.valueOf(billMap.getOrderNo()));
-						refundCmd.setOnlinePayStyleNo(VendorType.fromCode(billMap.getVendorType()).getStyleNo()); 
+						refundCmd.setOnlinePayStyleNo(VendorType.fromCode(billMap.getVendorType()).getStyleNo());
 						refundCmd.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
 						//已付金额乘以退款比例除以100
-						refundCmd.setRefundAmount(order.getPaidMoney().multiply(new BigDecimal(rs.getRefundRatio()/100)));
+						refundCmd.setRefundAmount(order.getPaidMoney().multiply(new BigDecimal(rs.getRefundRatio() / 100)));
 						refundCmd.setRefundMsg("预订单取消退款");
 						this.setSignatureParam(refundCmd);
-						RentalRefundOrder rentalRefundOrder = ConvertHelper.convert(refundCmd,RentalRefundOrder.class);
+						RentalRefundOrder rentalRefundOrder = ConvertHelper.convert(refundCmd, RentalRefundOrder.class);
 						rentalRefundOrder.setOrderNo(billMap.getOrderNo());
 						rentalRefundOrder.setRefundOrderNo(refoundOrderNo);
-						rentalRefundOrder.setOrderId(order.getId()); 
+						rentalRefundOrder.setOrderId(order.getId());
 						rentalRefundOrder.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 						rentalRefundOrder.setCreatorUid(UserContext.current().getUser().getId());
 						rentalRefundOrder.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -3047,20 +3049,37 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						rentalRefundOrder.setAmount(refundCmd.getRefundAmount());
 						//微信直接退款，支付宝置为退款中 
 						//update by wuhan 2017-5-15 :支付宝也和微信一样退款
+						if (order.getPaidVersion() == ActivityRosterPayVersionFlag.V2.getCode()) { //新支付退款
+							Long amount = payService.changePayAmount(refundCmd.getRefundAmount());
+							CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.RENTALORDER.getPycode(), Long.getLong(order.getOrderNo()), refoundOrderNo, amount);
+
+							if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+								rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
+								order.setStatus(SiteBillStatus.REFUNDED.getCode());
+							} else{
+								LOGGER.error("Refund failed from vendor, cmd={}, response={}",
+										cmd, refundResponse);
+								throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+										RentalServiceErrorCode.ERROR_REFUND_ERROR,
+										"bill refund error");
+							}
+							this.rentalv2Provider.createRentalRefundOrder(rentalRefundOrder);
+						} else {
 							PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refoundApi, refundCmd, PayZuolinRefundResponse.class);
-							if(refundResponse!=null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+							if (refundResponse != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())) {
 								//退款成功保存退款单信息，修改bill状态
 								rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
 								order.setStatus(SiteBillStatus.REFUNDED.getCode());
-							}
-							else{
-								LOGGER.error("bill id=["+order.getId()+"] refound error param is "+refundCmd.toString());
+							} else {
+								LOGGER.error("bill id=[" + order.getId() + "] refound error param is " + refundCmd.toString());
 								throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 										RentalServiceErrorCode.ERROR_REFUND_ERROR,
-												"bill  refound error"); 
-							}	
+										"bill  refound error");
+							}
 
-						this.rentalv2Provider.createRentalRefundOrder(rentalRefundOrder);
+							this.rentalv2Provider.createRentalRefundOrder(rentalRefundOrder);
+
+						}
 					}
 				}
 				else{
@@ -3080,6 +3099,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			});
 		}
 	}
+
+	private Long createOrderNo(Long time) {
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+//		String prefix = sdf.format(new Date());
+		String suffix = String.valueOf(generateRandomNumber(3));
+
+		return Long.valueOf(String.valueOf(time) + suffix);
+	}
+
+	private long generateRandomNumber(int n){
+		return (long)((Math.random() * 9 + 1) * Math.pow(10, n-1));
+	}
+
 	/**
 	 * 取消订单发推送
 	 * 
@@ -3401,6 +3433,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						return null;
 					});
 		}else {
+			bill.setPaidVersion(version.getCode());
 			rentalv2Provider.updateRentalBill(bill);
 
 			if(bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())){
@@ -3450,7 +3483,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		String moduleType = FlowModuleType.NO_MODULE.getCode();
 		Long ownerId = order.getResourceTypeId();
 		String ownerType = FlowOwnerType.RENTALRESOURCETYPE.getCode();
-		Flow flow = flowService.getEnabledFlow(order.getNamespaceId(), Rentalv2Controller.moduleId, moduleType, ownerId, ownerType);
+		Flow flow = flowService.getEnabledFlow(order.getNamespaceId(),EntityType.COMMUNITY.getCode(),order.getCommunityId(),
+                Rentalv2Controller.moduleId, moduleType, ownerId, ownerType);
 		LOGGER.debug("parames : " +order.getNamespaceId()+"*"+ Rentalv2Controller.moduleId+"*"+ moduleType+"*"+ ownerId+"*"+ ownerType );
 		LOGGER.debug("\n flow is "+flow);
 
@@ -5166,6 +5200,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			resource.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
 			resource.setCreatorUid( UserContext.current().getUser().getId());
+			resource.setAclinkId(cmd.getAclinkId());
 			QueryDefaultRuleAdminCommand cmd2 = new QueryDefaultRuleAdminCommand();
 			cmd2.setOwnerType(RentalOwnerType.ORGANIZATION.getCode());
 			cmd2.setOwnerId(resource.getOrganizationId());

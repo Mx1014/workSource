@@ -1902,13 +1902,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Organization org = this.checkOrganizationByCommIdAndOrgType(communityId, OrganizationType.PM.getCode());
 		long organizationId = org.getId();
 
+		int sum = addressProvider.countApartment(communityId);
 		int defaultCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, AddressMappingStatus.DEFAULT.getCode());
-		int liveCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, AddressMappingStatus.LIVING.getCode());
+		int liveCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, AddressMappingStatus.LIVING.getCode()) + sum - propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, null);
 		int rentCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, AddressMappingStatus.RENT.getCode());
 		int freeCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, AddressMappingStatus.FREE.getCode());
 		int saledCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, AddressMappingStatus.SALED.getCode());
 		int unsaleCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, AddressMappingStatus.UNSALE.getCode());
-		int sum = defaultCount + liveCount + rentCount + freeCount + saledCount + unsaleCount;
+
 		dto.setAptCount(sum);
 		dto.setFamilyCount(familyCount);
 		dto.setUserCount(userCount);
@@ -1930,6 +1931,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		this.checkCommunityIdIsNull(communityId);
 		Community community = this.checkCommunity(communityId);
 
+		// 科技园的从address表里统计，其它域空间还是按以前的方式统计
+		if (community.getNamespaceId() != 1000000) {
+			return getApartmentStatistics(cmd);
+		}
 		int familyCount = familyProvider.countFamiliesByCommunityId(communityId);
 		int userCount = familyProvider.countUserByCommunityId(communityId);
 //		Organization org = this.checkOrganizationByCommIdAndOrgType(communityId, OrganizationType.PM.getCode());
@@ -1964,11 +1969,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		int occupiedCount = (temp = result.get(AddressMappingStatus.OCCUPIED.getCode())) == null ? 0 : temp;
 		dto.setOccupiedCount(occupiedCount);
 		sum = defaultCount + livingCount + rentCount + freeCount + saledCount + unsaleCount + occupiedCount;
-		
-		// 科技园的从address表里统计，其它域空间还是按以前的方式统计
-		if (sum == 0) {
-			return getApartmentStatistics(cmd);
-		}
+
 		dto.setAptCount(sum);
 		dto.setHasOwnerCount(livingCount + rentCount + saledCount);
 		dto.setNoOwnerCount(freeCount + unsaleCount);
