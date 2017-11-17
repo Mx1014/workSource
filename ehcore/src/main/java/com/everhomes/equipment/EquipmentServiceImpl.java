@@ -2611,10 +2611,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	private List<String> importEquipmentsData( List<EquipmentInspectionEquipments> datas,ImportOwnerCommand cmd) {
-		List<String> erroLogs =new ArrayList<String>();
+		List<String> erroLogs = new ArrayList<String>();
 		Integer namespaceId = cmd.getNamespaceId();
-		Long  userId =UserContext.currentUserId();
-		for (EquipmentInspectionEquipments equipment: datas) {
+		Long userId = UserContext.currentUserId();
+		for (EquipmentInspectionEquipments equipment : datas) {
 
 			equipment.setNamespaceId(namespaceId);
 			equipment.setOwnerType(cmd.getOwnerType());
@@ -2632,26 +2632,26 @@ public class EquipmentServiceImpl implements EquipmentService {
 			equipmentSearcher.feedDoc(equipment);
 		}
 
-		return  erroLogs;
+		return erroLogs;
 	}
 
 	private  List<EquipmentInspectionEquipments> handleImportEquipmentsData(ImportOwnerCommand cmd, List resultList) {
 
 		ListFieldCommand listFieldCommand = ConvertHelper.convert(cmd, ListFieldCommand.class);
 		// field 和 name 对应关系DTO
-		List<FieldDTO>  fieldDTO =fieldService.listFields(listFieldCommand);
+		List<FieldDTO> fieldDTO = fieldService.listFields(listFieldCommand);
 
 		try {
-			 return  getImportEquipmentData(resultList,fieldDTO);
+			return getImportEquipmentData(resultList, fieldDTO);
 		} catch (Exception e) {
 			e.printStackTrace();
-			LOGGER.error("importEquipmentErro",e);
+			LOGGER.error("importEquipmentErro", e);
 		}
-		return  null;
+		return null;
 
 	}
 
-	private  List<EquipmentInspectionEquipments>  getImportEquipmentData(List resultList , List<FieldDTO> fieldsDTO) throws Exception {
+	private List<EquipmentInspectionEquipments> getImportEquipmentData(List resultList, List<FieldDTO> fieldsDTO) throws Exception {
 		EquipmentInspectionEquipments eq = new EquipmentInspectionEquipments();
 		List<EquipmentInspectionEquipments> objList = new ArrayList<>();
 		//获取导入Excel的的title
@@ -2660,122 +2660,122 @@ public class EquipmentServiceImpl implements EquipmentService {
 		List<String> tileNameList = (List<String>) tileMap.values();*/
 		//记录excel中的field顺序
 		List<String> fieldOrders = new ArrayList<>();
-		for (FieldDTO field :fieldsDTO){
+		for (FieldDTO field : fieldsDTO) {
 			fieldOrders.add(field.getFieldName());
 		}
 		int flag = 0;
-		for(int i = 1; i < resultList.size(); i++) {
+		for (int i = 1; i < resultList.size(); i++) {
 			RowResult r = (RowResult) resultList.get(i);
 
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getA()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getB()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getC()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getD()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getE()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getF()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getG()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getH()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getI()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getJ()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getK()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getL()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getM()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getN()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getO()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getP()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getQ()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getR()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getS()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getT()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getU()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getV()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getW()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getX()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getY()));
 				flag++;
 			}
-			if(flag<fieldOrders.size()){
+			if (flag < fieldOrders.size()) {
 				setToObj(fieldOrders.get(flag), eq, trim(r.getZ()));
 				flag++;
 			}
-			flag=0;
+			flag = 0;
 			objList.add(eq);
-			}
+		}
 
-			return objList;
+		return objList;
 	}
 
 	private void setToObj(String fieldName, Object dto,Object value) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
