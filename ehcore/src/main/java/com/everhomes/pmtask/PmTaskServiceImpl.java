@@ -2103,7 +2103,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 //
 //				}
 //				FlowNode flowNode = flowNodeProvider.getFlowNodeById(flowCase.getCurrentNodeId());
-//				task.setStatus(pmTaskCommonService.convertFlowStatus(flowNode.getParams()));
+//				task.setStatus(pmTaskCommonService.convertFlowStatus(flowNode.getGroupByParams()));
 //				task.setFlowCaseId(flowCase.getId());
 //				pmTaskProvider.updateTask(task);
 //

@@ -105,7 +105,7 @@ public class DocUtil {
 //                }
 //            }
 //            Writer outWriter=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), "utf-8"));
-//            template.process(dataMap, outWriter);
+//            template.processStat(dataMap, outWriter);
 //            outWriter.close();
 //
 //        } catch (IOException e) {
