@@ -257,3 +257,6 @@ update eh_web_menus set data_type = 'react:/energy-management/table-list' where 
 
 delete from `eh_var_field_scopes`  WHERE `module_name` = 'contract' AND `field_id` = (select id from `eh_var_fields` WHERE `module_name` = 'contract' AND `display_name` = '租赁总额');
 delete from `eh_var_fields` WHERE `module_name` = 'contract' AND `display_name` = '租赁总额';
+
+-- 删除用户行为统计错误数据 add by xq.tian  2017/11/17
+DELETE FROM eh_stat_event_statistics WHERE event_name='launchpad_on_launch_pad_item_click';
