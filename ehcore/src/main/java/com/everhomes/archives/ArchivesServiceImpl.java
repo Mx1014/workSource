@@ -1673,6 +1673,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
                 //  3.删除离职列表中对应的员工
                 deleteArchivesDismissEmployees(detailId, detail.getOrganizationId());
+
             }
             return null;
         });

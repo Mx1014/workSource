@@ -3051,7 +3051,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						//update by wuhan 2017-5-15 :支付宝也和微信一样退款
 						if (order.getPaidVersion() == ActivityRosterPayVersionFlag.V2.getCode()) { //新支付退款
 							Long amount = payService.changePayAmount(refundCmd.getRefundAmount());
-							CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.RENTALORDER.getPycode(), Long.getLong(order.getOrderNo()), refoundOrderNo, amount);
+							CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.RENTALORDER.getPycode(), Long.valueOf(order.getOrderNo()), refoundOrderNo, amount);
 
 							if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
 								rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
@@ -3099,6 +3099,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			});
 		}
 	}
+
+
 
 	private Long createOrderNo(Long time) {
 //		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
