@@ -5781,7 +5781,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public SearchFlowOperateLogResponse searchFlowOperateLogs(SearchFlowOperateLogsCommand cmd) {
         Long userId = cmd.getUserId();
-        if (userId == null) {
+        if (userId == null && TrueOrFalseFlag.fromCode(cmd.getAdminFlag()) != TrueOrFalseFlag.TRUE) {
             userId = UserContext.currentUserId();
         }
         ListingLocator locator = new ListingLocator();

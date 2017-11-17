@@ -70,7 +70,7 @@ public class FlowQRCodeModuleListener implements QRCodeModuleListener {
                 return;
             }
         }
-        throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS,
+        throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_ON_SCAN_QRCODE,
                 "Identity validate error");
     }
 }

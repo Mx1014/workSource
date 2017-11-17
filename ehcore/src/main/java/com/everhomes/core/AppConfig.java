@@ -8,10 +8,14 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
+
+import java.util.concurrent.Executor;
 
 /**
  * Note
@@ -29,7 +33,7 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 @EnableCaching
 @EnableAsync
 @EnableScheduling
-public class AppConfig {
+public class AppConfig implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
     
     public static int DEFAULT_PAGINATION_PAGE_SIZE = 20;
@@ -61,7 +65,17 @@ public class AppConfig {
         filter.setForceEncoding(true);
         return filter;
     }
-    
+
+    @Override
+    public Executor getAsyncExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(7);
+        executor.setMaxPoolSize(12);
+        executor.setQueueCapacity(11);
+        executor.setThreadNamePrefix("AsyncMethodInvocation-");
+        executor.initialize();
+        return executor;
+    }
 //    @Bean
 //    public SchedulerFactoryBean quartz() {
 //        SchedulerFactoryBean factoryBean = new SchedulerFactoryBean();

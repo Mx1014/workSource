@@ -74,28 +74,30 @@ public class QRCodeServiceImpl implements QRCodeService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
                 ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid QR code id");
         }
-        
+
         try {
             IdToken token = WebTokenGenerator.getInstance().fromWebToken(qrid, IdToken.class);
             long qrcodeId = token.getId();
             QRCode qrcode = qrcodeProvider.findQRCodeById(qrcodeId);
-            if(qrcode.getExpireTime() != null) {
+            if (qrcode.getExpireTime() != null) {
                 Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime());
-                if(qrcode.getExpireTime().before(current)) {
-                    LOGGER.error("QR code expired, operatorId=" + operatorId + ", qrid=" + qrid 
-                        + ", current=" + current.getTime() + ", expiredTime=" + qrcode.getExpireTime().getTime());
-                    throw RuntimeErrorException.errorWith(QRCodeServiceErrorCode.SCOPE, 
-                        QRCodeServiceErrorCode.ERROR_QR_CODE_EXPIRED, "QR code expired");
+                if (qrcode.getExpireTime().before(current)) {
+                    LOGGER.error("QR code expired, operatorId=" + operatorId + ", qrid=" + qrid
+                            + ", current=" + current.getTime() + ", expiredTime=" + qrcode.getExpireTime().getTime());
+                    throw RuntimeErrorException.errorWith(QRCodeServiceErrorCode.SCOPE,
+                            QRCodeServiceErrorCode.ERROR_QR_CODE_EXPIRED, "QR code expired");
                 }
             }
 
             QRCodeDTO qrCodeDTO = toQRCodeDTO(qrcode);
             qrCodeListenerManager.onGetQRCodeInfo(qrCodeDTO, source);
             return qrCodeDTO;
-        } catch(Exception e) {
+        } catch (RuntimeErrorException ree) {
+            throw ree;
+        } catch (Exception e) {
             LOGGER.error("QR code id is invalid format, operatorId=" + operatorId + ", qrid=" + qrid);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
-                ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid QR code id");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid QR code id");
         }
     }
     
