@@ -1983,7 +1983,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							RentalMessageJob.class,
 							messageMap
 					);
-					LOGGER.debug("rentalSchedule push reminderMessage id:"+order.getRentalUid()+"  message:"+notifyTextForOther+"  time:"+orderReminderTimeLong);
+					LOGGER.debug("rentalSchedule push reminderMessage uid:"+order.getRentalUid()+"  orderId:"+order.getId()+"  message:"+notifyTextForOther+"  time:"+orderReminderTimeLong);
 
 				}
 
@@ -2015,7 +2015,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							RentalMessageJob.class,
 							messageMap
 					);
-					LOGGER.debug("rentalSchedule push endReminderMessage id:"+chargeUid+"  message:"+notifyTextForOther+"  time:"+orderReminderTimeLong);
+					LOGGER.debug("rentalSchedule push endReminderMessage id:"+chargeUid+"  orderId:"+order.getId()+"  message:"+notifyTextForOther+"  time:"+orderReminderTimeLong);
 
 				}
 				//订单过期,置状态
