@@ -2817,8 +2817,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		if(null == modules){
 			LOGGER.error("This user has not been added to the administrator list.");
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_ADMINISTRATORS_LIST_NONEXISTS,
-					"This user has not been added to the administrator list.");
+//			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_ADMINISTRATORS_LIST_NONEXISTS,
+//					"This user has not been added to the administrator list.");
 		}
 
 		List<Authorization> authorizations = authorizationProvider.listManageAuthorizationsByTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId(), EntityType.SERVICE_MODULE.getCode(), null);
