@@ -539,7 +539,8 @@ public class ParkingServiceImpl implements ParkingService {
 		param.setPlateNumber(cmd.getPlateNumber());
 		param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
 		param.setPrice(cmd.getPrice());
-		
+		param.setClientAppName(cmd.getClientAppName());
+
 		return (CommonOrderDTO) createGeneralOrder(param, ParkingRechargeType.TEMPORARY.getCode(), ActivityRosterPayVersionFlag.V1);
 
 	}
@@ -661,6 +662,7 @@ public class ParkingServiceImpl implements ParkingService {
 //        preOrderCommand.setClientAppName(clientAppName);
 //
 //        PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+		LOGGER.info("createAppPreOrder clientAppName={}", clientAppName);
 		PreOrderDTO callBack = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(), clientAppName, OrderType.OrderTypeEnum.PARKING.getPycode(),
 				parkingRechargeOrder.getId(), parkingRechargeOrder.getPayerUid(), amount);
 
