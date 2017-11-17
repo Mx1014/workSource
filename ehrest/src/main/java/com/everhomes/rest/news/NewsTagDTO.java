@@ -16,6 +16,7 @@ import java.util.List;
  * <li>isSearch: 是否支持筛选</li>
  * <li>childTags: 可选标签</li>
  * <li>defaultOrder: 顺序</li>
+ * <li>categoryId: categoryId</li>
  * </ul>
  */
 public class NewsTagDTO {
@@ -31,7 +32,15 @@ public class NewsTagDTO {
     private Long defaultOrder;
 
     private String childTags;
+    private Long categoryId;
 
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
     public Long getId() {
         return id;
     }
