@@ -1108,3 +1108,44 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `ow
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@id := @id + 1),40105,NULL,'EhNamespaces',999961,2);
 
+-- add by sw 20171117 添加普通公司菜单
+set @id = (select MAX(id) FROM eh_web_menu_scopes);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),500000,NULL,'EhNamespaces',999961,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),501000,NULL,'EhNamespaces',999961,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),501100,NULL,'EhNamespaces',999961,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),503000,NULL,'EhNamespaces',999961,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),504000,NULL,'EhNamespaces',999961,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),505000,NULL,'EhNamespaces',999961,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),507000,NULL,'EhNamespaces',999961,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),507100,NULL,'EhNamespaces',999961,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),507200,NULL,'EhNamespaces',999961,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),507300,NULL,'EhNamespaces',999961,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),508000,NULL,'EhNamespaces',999961,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),508100,NULL,'EhNamespaces',999961,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),508200,NULL,'EhNamespaces',999961,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),508300,NULL,'EhNamespaces',999961,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),508400,NULL,'EhNamespaces',999961,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),508500,NULL,'EhNamespaces',999961,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),508600,NULL,'EhNamespaces',999961,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),600000,NULL,'EhNamespaces',999961,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),604000,NULL,'EhNamespaces',999961,2);
+
