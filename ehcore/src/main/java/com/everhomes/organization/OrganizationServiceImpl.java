@@ -5964,10 +5964,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         leaveOrganizationMembers(members);
         deleteUserOrganizationWithMembers(members);
 
-        // 删除考勤规则的操作
-        if(members != null && members.size() > 0)
-            this.uniongroupService.syncUniongroupAfterLeaveTheJob(members.get(0).getDetailId());
-
     }
 
     /**
@@ -6008,7 +6004,11 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
             return null;
         });
-        
+
+        // 删除考勤规则的操作
+        if(members != null && members.size() > 0)
+            this.uniongroupService.syncUniongroupAfterLeaveTheJob(members.get(0).getDetailId());
+
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         //执行太慢，开一个线程来做
