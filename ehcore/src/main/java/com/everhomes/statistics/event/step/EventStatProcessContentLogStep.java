@@ -3,8 +3,8 @@ package com.everhomes.statistics.event.step;
 import com.everhomes.db.DbProvider;
 import com.everhomes.rest.statistics.event.StatEventCommonStatus;
 import com.everhomes.rest.statistics.event.StatEventLogDTO;
-import com.everhomes.rest.statistics.event.StatEventParamType;
 import com.everhomes.statistics.event.*;
+import com.everhomes.statistics.event.handler.StatEventHandlerManager;
 import com.everhomes.util.StringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,9 +39,6 @@ public class EventStatProcessContentLogStep extends AbstractStatEventStep {
     private StatEventLogProvider statEventLogProvider;
 
     @Autowired
-    private StatEventParamProvider statEventParamProvider;
-
-    @Autowired
     private StatEventParamLogProvider statEventParamLogProvider;
 
     @Override
@@ -63,7 +60,7 @@ public class EventStatProcessContentLogStep extends AbstractStatEventStep {
         // statDeviceLogMap.put("0", zeroDevice);
 
         Map<String, StatEvent> statEventMap = new HashMap<>();
-        Map<String, StatEventParam> statEventParamMap = new HashMap<>();
+        // Map<String, StatEventParam> statEventParamMap = new HashMap<>();
         Map<String, List<Long>> sessionIdToDeviceGenIdMap = new HashMap<>();
 
         for (StatEventLogContent logContent : logContents) {
@@ -120,7 +117,12 @@ public class EventStatProcessContentLogStep extends AbstractStatEventStep {
                     if (param == null) {
                         continue;
                     }
-                    for (Map.Entry<String, String> entry : param.entrySet()) {
+
+                    StatEventHandler handler = StatEventHandlerManager.getHandler(log.getEventName());
+                    List<StatEventParamLog> paramLogs = handler.processEventParamLogs(log, param);
+                    statEventParamLogProvider.createStatEventParamLogs(paramLogs);
+
+                    /*for (Map.Entry<String, String> entry : param.entrySet()) {
                         StatEventParam statEventParam = statEventParamMap.get(log.getEventName() + entry.getKey());
                         if (statEventParam == null) {
                             statEventParam = statEventParamProvider.findStatEventParam(log.getEventName(), entry.getKey());
@@ -145,7 +147,7 @@ public class EventStatProcessContentLogStep extends AbstractStatEventStep {
                             }
                             statEventParamLogProvider.createStatEventParamLog(paramLog);
                         }
-                    }
+                    }*/
                 }
                 return true;
             });

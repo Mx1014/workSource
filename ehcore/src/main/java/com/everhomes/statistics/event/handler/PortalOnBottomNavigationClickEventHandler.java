@@ -57,7 +57,7 @@ public class PortalOnBottomNavigationClickEventHandler extends AbstractStatEvent
     }
 
     /*@Override
-    public List<StatEventStatistic> process(Namespace namespace, StatEvent statEvent, LocalDate statDate) {
+    public List<StatEventStatistic> processStat(Namespace namespace, StatEvent statEvent, LocalDate statDate) {
         Timestamp minTime = Timestamp.valueOf(LocalDateTime.of(statDate, LocalTime.MIN));
         Timestamp maxTime = Timestamp.valueOf(LocalDateTime.of(statDate, LocalTime.MAX));
         Date date = Date.valueOf(statDate);

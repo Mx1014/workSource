@@ -90,10 +90,10 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 				LOGGER.debug("Create organization task, task=" + task);
 			}*/
 		} catch(Exception e) {
-			LOGGER.error("Failed to pre-process the organization task, postId=" + post.getId() + ", creatorId=" + post.getCreatorUid() 
+			LOGGER.error("Failed to pre-processStat the organization task, postId=" + post.getId() + ", creatorId=" + post.getCreatorUid()
 					+ ", subject=" + post.getSubject(), e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
-					"Failed to pre-process the organization task.");
+					"Failed to pre-processStat the organization task.");
 		}
 
 		return post;	
@@ -214,7 +214,7 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 				}
 			}
 		} catch(Exception e) {
-			LOGGER.error("Failed to post-process the organization task, postId=" + post.getId() + ", creatorId=" + post.getCreatorUid() 
+			LOGGER.error("Failed to post-processStat the organization task, postId=" + post.getId() + ", creatorId=" + post.getCreatorUid()
 					+ ", subject=" + post.getSubject(), e);
 		}
 

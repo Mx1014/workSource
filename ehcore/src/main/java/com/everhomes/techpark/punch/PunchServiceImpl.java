@@ -4683,7 +4683,7 @@ public class PunchServiceImpl implements PunchService {
 
 		Long t3= System.currentTimeMillis();
 
-		LOGGER.debug("process pdls   "+  t3 + "cost: "+ (t3-t2));
+		LOGGER.debug("processStat pdls   "+  t3 + "cost: "+ (t3-t2));
 		return response;
 	}
 	String processStatus(String statuList ){

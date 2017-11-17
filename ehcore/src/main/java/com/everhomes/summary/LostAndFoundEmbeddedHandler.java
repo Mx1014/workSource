@@ -54,7 +54,7 @@ public class LostAndFoundEmbeddedHandler implements ForumEmbeddedHandler {
                 });
             }
         } catch(Exception e) {
-            LOGGER.error("Failed to process lost and found embedded json info, postId=" + post.getId() + ", json=" + embeddedJson, e);
+            LOGGER.error("Failed to processStat lost and found embedded json info, postId=" + post.getId() + ", json=" + embeddedJson, e);
         }
         
         return post;
