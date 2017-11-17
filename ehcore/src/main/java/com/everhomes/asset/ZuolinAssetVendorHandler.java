@@ -684,7 +684,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
             ShowBillForClientV2DTO dto = new ShowBillForClientV2DTO();
             dto.setBillGroupId(group.getBillGroupId());
             dto.setBillGroupName(group.getBillGroupName());
-            
+
 
         }
 

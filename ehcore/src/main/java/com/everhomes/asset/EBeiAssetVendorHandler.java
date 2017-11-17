@@ -268,6 +268,11 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         return null;
     }
 
+    @Override
+    public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
+        return null;
+    }
+
 
     private Timestamp covertStrToTimestamp(String str) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
