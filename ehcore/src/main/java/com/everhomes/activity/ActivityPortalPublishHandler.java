@@ -263,7 +263,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	 */
 	private void deleteContentCategory(ActivityEntryConfigulation config, Integer namespaceId){
 		//删除分类
-		List<ActivityCategories> oldContentCategories = activityProvider.listActivityCategory(namespaceId, config.getId());
+		List<ActivityCategories> oldContentCategories = activityProvider.listActivityCategory(namespaceId, config.getEntryId());
 
 		//原来没有则不用删除了
 		if(oldContentCategories == null || oldContentCategories.size() == 0){
