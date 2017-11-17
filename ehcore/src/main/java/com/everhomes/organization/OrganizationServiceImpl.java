@@ -1134,6 +1134,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         User user = UserContext.current().getUser();
 
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        if(namespaceId == 999971) {
+            LOGGER.error("Insufficient privilege, createEnterprise");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
 
         if(org.apache.commons.lang.StringUtils.isNotBlank(cmd.getUnifiedSocialCreditCode())) {
             checkUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode(), namespaceId, null);
@@ -1241,6 +1246,11 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     private void createEnterpriseCustomer(Organization organization, String logo, OrganizationDetail enterprise, Long communityId) {
+        if(organization.getNamespaceId() == 999971) {
+            LOGGER.error("Insufficient privilege, createEnterpriseCustomer");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
         List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(organization.getNamespaceId(), organization.getName());
         if(customers != null && customers.size() > 0) {
             EnterpriseCustomer customer = customers.get(0);
@@ -1345,6 +1355,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public void updateEnterprise(UpdateEnterpriseCommand cmd, boolean updateAttachmentAndAddress) {
+        if(cmd.getNamespaceId() == 999971) {
+            LOGGER.error("Insufficient privilege, createEnterprise");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
         //先判断，后台管理员才能创建。状态直接设为正常
         Organization organization = checkOrganization(cmd.getId());
         User user = UserContext.current().getUser();
@@ -1455,6 +1470,11 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public void deleteEnterpriseById(DeleteOrganizationIdCommand cmd) {
         Organization organization = checkOrganization(cmd.getId());
+        if(organization.getNamespaceId() == 999971) {
+            LOGGER.error("Insufficient privilege, createEnterprise");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
         User user = UserContext.current().getUser();
 
 		dbProvider.execute((TransactionStatus status) -> {
@@ -7464,7 +7484,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<ImportFileResultLog<ImportEnterpriseDataDTO>> errorDataLogs = new ArrayList<>();
 
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-
+        if(namespaceId == 999971) {
+            LOGGER.error("Insufficient privilege, createEnterprise");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
         Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 
         // 业务太复杂，导入企业时如果本身系统里面已存在，要覆盖掉，如果是本次导入了同一企业多行，要合并门牌及管理员
@@ -10684,7 +10708,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 trees.add(organizationTreeDTO);
             }
         }
-
+        //同级排序
+        trees.sort(Comparator.comparingInt(OrganizationTreeDTO::getOrder));
         dto.setTrees(trees);
         return dto;
     }

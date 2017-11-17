@@ -128,12 +128,14 @@ public class ZJContractHandler implements ContractService{
             }
 
         }
-
+        ListContractsResponse response = new ListContractsResponse();
         String enterprises = sb.toString();
         LOGGER.debug("zjgk listContracts enterprise: {}",enterprises);
+        if(StringUtils.isBlank(enterprises)) {
+            return response;
+        }
         ShenzhouJsonEntity<List<ZJContract>> entity = JSONObject.parseObject(enterprises, new TypeReference<ShenzhouJsonEntity<List<ZJContract>>>(){});
         List<ZJContract> contracts = entity.getResponse();
-        ListContractsResponse response = new ListContractsResponse();
         if(contracts != null && contracts.size() > 0) {
             List<ContractDTO> dtos = contracts.stream().map(contract -> {
                 ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
@@ -281,18 +283,28 @@ public class ZJContractHandler implements ContractService{
         List<ContractChargingItemDTO> items = new ArrayList<>();
         ContractChargingItemDTO item = new ContractChargingItemDTO();
         item.setChargingItemName("物业费");
+        item.setFormulaType((byte)1);
+        ChargingVariables cv = new ChargingVariables();
+        List<PaymentVariable> chargingVariables = new ArrayList<>();
         PaymentVariable pv = new PaymentVariable();
         pv.setVariableName("物业费单价");
         pv.setVariableValue(zjContract.getPropertyFeeUnit());
-        item.setChargingVariables(pv.toString());
+        chargingVariables.add(pv);
+        cv.setChargingVariables(chargingVariables);
+        item.setChargingVariables(StringHelper.toJsonString(cv));
         items.add(item);
 
         ContractChargingItemDTO itemRent = new ContractChargingItemDTO();
         itemRent.setChargingItemName("租金");
+        itemRent.setFormulaType((byte)1);
         PaymentVariable pvRent = new PaymentVariable();
         pvRent.setVariableName("租金");
         pvRent.setVariableValue(zjContract.getRent());
-        itemRent.setChargingVariables(pvRent.toString());
+        ChargingVariables cvRent = new ChargingVariables();
+        List<PaymentVariable> rents = new ArrayList<>();
+        rents.add(pvRent);
+        cvRent.setChargingVariables(rents);
+        itemRent.setChargingVariables(StringHelper.toJsonString(cvRent));
         items.add(itemRent);
         dto.setChargingItems(items);
         if(zjContract.getApartments() != null && zjContract.getApartments().size() > 0) {

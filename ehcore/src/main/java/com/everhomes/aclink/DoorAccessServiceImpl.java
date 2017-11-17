@@ -620,9 +620,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
      */
     @Override
     public DoorAuthDTO createDoorAuth(CreateDoorAuthCommand cmd) {
-    	User currUser = UserContext.current().getUser();
+    	User operator = UserContext.current().getUser();
         if(cmd.getApproveUserId() == null) {
-            cmd.setApproveUserId(currUser.getId());
+            cmd.setApproveUserId(operator.getId());//操作人
         }
         
         if(cmd.getRightOpen() == null) {
@@ -636,30 +636,44 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         
         DoorAccess doorAcc = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
-        UserInfo user = userService.getUserSnapshotInfoWithPhone(cmd.getUserId());
+        UserInfo custom = userService.getUserSnapshotInfoWithPhone(cmd.getUserId());//被授权人
         
-        if(user == null) {
+        if(custom == null) {
         	throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "the input user is not found");
         }
+        
+        if(cmd.getOperatorOrgId() == null) {
+            List<OrganizationDTO> dtos = organizationService.listUserRelateOrganizations(UserContext.getCurrentNamespaceId(), cmd.getApproveUserId(), OrganizationGroupType.ENTERPRISE);
+            if(dtos != null && dtos.size() > 0) {
+                OrganizationDTO orgDTO = dtos.get(0);
+                cmd.setOperatorOrgId(orgDTO.getId());
+            }
+        }
+        
         if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_HUARUN_GROUP.getCode())) {
-        	List<OrganizationDTO> dtos = organizationService.listUserRelateOrganizations(UserContext.getCurrentNamespaceId(), user.getId(), OrganizationGroupType.ENTERPRISE);
-        	if(dtos == null || dtos.isEmpty()) {
-        		throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "the input user haven't companies");	
-        	}
-        	OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), dtos.get(0).getId());
+            OrganizationDTO orgDTO = null;
+            List<OrganizationDTO> dtos = organizationService.listUserRelateOrganizations(UserContext.getCurrentNamespaceId(), cmd.getUserId(), OrganizationGroupType.ENTERPRISE);
+            if(dtos != null && dtos.size() > 0) {
+                orgDTO = dtos.get(0);
+            }
+            
+            if(orgDTO == null) {
+                throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "the input user haven't companies");   
+                }
+        	
+        	OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(custom.getId(), orgDTO.getId());
 			if(om != null && om.getContactName() != null && !om.getContactName().isEmpty()) {
-				user.setNickName(om.getContactName());
+				custom.setNickName(om.getContactName());
 			}
 			
         	AclinkHuarunSyncUser syncUser = new AclinkHuarunSyncUser();
-        	syncUser.setPhone(user.getPhones().get(0));
-        	syncUser.setUsername(user.getNickName());
-        	syncUser.setOrganization(dtos.get(0).getName());
+        	syncUser.setPhone(custom.getPhones().get(0));
+        	syncUser.setUsername(custom.getNickName());
+        	syncUser.setOrganization(om.getOrganizationName());
         	AclinkHuarunSyncUserResp resp = aclinkHuarunService.syncUser(syncUser);
         	if(resp.getStatus() < 0) {
         		throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "huarun response error " + resp.getDescription());
         	}
-        	
         }
         
         DoorAuth doorAuth = ConvertHelper.convert(cmd, DoorAuth.class);
@@ -669,7 +683,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             DoorAuth doorAuthResult = this.dbProvider.execute(new TransactionCallback<DoorAuth>() {
                 @Override
                 public DoorAuth doInTransaction(TransactionStatus arg0) {
-                    DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthForever(doorAcc.getId(), user.getId());
+                    DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthForever(doorAcc.getId(), custom.getId());
                     if(doorAuth != null) {
                         doorAuth.setRightOpen(cmd.getRightOpen());
                         doorAuth.setRightRemote(cmd.getRightRemote());
@@ -690,7 +704,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     doorAuth.setOwnerId(doorAcc.getOwnerId());
                     doorAuth.setOwnerType(doorAcc.getOwnerType());
                     doorAuth.setApproveUserId(cmd.getApproveUserId());
-                    doorAuth.setUserId(user.getId());
+                    doorAuth.setUserId(custom.getId());
                     doorAuth.setStatus(DoorAuthStatus.VALID.getCode());
                     doorAuth.setOrganization(cmd.getOrganization());
                     doorAuth.setDescription(cmd.getDescription());
@@ -705,8 +719,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                         doorAuth.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
                     }
                     
-                    if(user.getPhones() != null && user.getPhones().size() > 0) {
-                        doorAuth.setPhone(user.getPhones().get(0));    
+                    if(custom.getPhones() != null && custom.getPhones().size() > 0) {
+                        doorAuth.setPhone(custom.getPhones().get(0));    
                         }
                     
                     doorAuthProvider.createDoorAuth(doorAuth);
@@ -738,11 +752,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 doorAuth.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
             }
             
-            if(user.getPhones() != null && user.getPhones().size() > 0) {
-                doorAuth.setPhone(user.getPhones().get(0));    
+            if(custom.getPhones() != null && custom.getPhones().size() > 0) {
+                doorAuth.setPhone(custom.getPhones().get(0));    
                 }
             
-            User tmpUser = ConvertHelper.convert(user, User.class);
+            User tmpUser = ConvertHelper.convert(custom, User.class);
             doorAuth.setNickname(getRealName(tmpUser));
             
             doorAuthProvider.createDoorAuth(doorAuth);
@@ -756,20 +770,19 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         this.createDoorAuthLog(doorAuth);
 
         User tmpUser = new User();
-        tmpUser.setNickName(user.getNickName());
-        if (currUser != null && currUser.getId() != 0) {
-            tmpUser.setNickName(getRealName(currUser));
-            List<OrganizationDTO> dtos = organizationService.listUserRelateOrganizations(UserContext.getCurrentNamespaceId(), currUser.getId(), OrganizationGroupType.ENTERPRISE);
-            if(dtos != null && !dtos.isEmpty()) {
-                OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), dtos.get(0).getId());
+        tmpUser.setNickName("admin");
+        if (operator != null && operator.getId() != 0) {
+            tmpUser.setNickName(getRealName(operator));
+            if(cmd.getOperatorOrgId() != null) {
+                OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(operator.getId(), cmd.getOperatorOrgId());
                 if(om != null && om.getContactName() != null && !om.getContactName().isEmpty()) {
                     tmpUser.setNickName(om.getContactName());
                 }
             }
         }
 
-        tmpUser.setId(user.getId());
-        tmpUser.setAccountName(user.getAccountName());
+        tmpUser.setId(custom.getId());
+        tmpUser.setAccountName(custom.getAccountName());
         //Send messages
         if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING.getCode())
                 || (doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING_GROUP.getCode()))) {
