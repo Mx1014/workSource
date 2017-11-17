@@ -1,1 +1,1 @@
-ALTER TABLE eh_news_tag ADD COLUMN `entry_id` INTEGER;;
+ALTER TABLE eh_news_tag ADD COLUMN `entry_id` INTEGER;
