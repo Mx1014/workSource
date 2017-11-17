@@ -155,6 +155,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         cmd.setResourceId(resourceId);
         cmd.setExpiration(expiration);
 
+        LOGGER.info("createAppPreOrder cmd={}", cmd);
         return  createPreOrder(cmd);
     }
 
