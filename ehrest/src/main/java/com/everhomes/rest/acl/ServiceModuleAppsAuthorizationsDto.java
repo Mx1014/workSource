@@ -8,6 +8,7 @@ public class ServiceModuleAppsAuthorizationsDto {
     private Long ownerId;
     private Long targetId;
     private String targetType;
+    private String contactName;
     private String nickName;
     private String identifierToken;
     private Byte allFlag;
@@ -98,5 +99,13 @@ public class ServiceModuleAppsAuthorizationsDto {
 
     public void setAllFlag(Byte allFlag) {
         this.allFlag = allFlag;
+    }
+
+    public String getContactName() {
+        return contactName;
+    }
+
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
     }
 }

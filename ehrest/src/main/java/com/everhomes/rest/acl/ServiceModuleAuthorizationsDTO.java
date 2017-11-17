@@ -2,11 +2,8 @@
 package com.everhomes.rest.acl;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.module.ControlTarget;
-import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.util.StringHelper;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -20,12 +17,6 @@ import java.util.List;
  * <li>allFlag：是否全部业务模块 1：是 0：否</li>
  * <li>modules：模块列表，{@link com.everhomes.rest.acl.ServiceModuleDTO}</li>
  * <li>projects：项目列表，{@link com.everhomes.rest.acl.ProjectDTO}</li>
- * <li>community_control_flag: 受项目控制的全部标识</li>
- * <li>org_control_flag：受OA控制的全部标识</li>
- * <li>unlimit_control_flag： 不受范围控制的全部标识</li>
- * <li>community_apps: 项目控制的应用</li>
- * <li>org_apps：OA控制的应用</li>
- * <li>unlimit_apps：不受范围控制的应用</li>
  * </ul>
  */
 public class ServiceModuleAuthorizationsDTO {
@@ -50,34 +41,6 @@ public class ServiceModuleAuthorizationsDTO {
 
     @ItemType(ServiceModuleDTO.class)
     private List<ServiceModuleDTO> modules;
-
-    private Byte communityControlFlag;
-
-    private Byte orgControlFlag;
-
-    private Byte unlimitControlFlag;
-
-    private Byte communityControlOption;
-
-    @NotNull
-    @ItemType(Long.class)
-    private List<Long> communityControlIds;
-
-    @ItemType(ServiceModuleAppDTO.class)
-    private List<ServiceModuleAppDTO> communityApps;
-
-    private Byte orgControlOption;
-
-
-    @ItemType(ControlTarget.class)
-    private List<ControlTarget> orgControlDetails;
-
-    @ItemType(ServiceModuleAppDTO.class)
-    private List<ServiceModuleAppDTO> orgApps;
-
-    @ItemType(ServiceModuleAppDTO.class)
-    private List<ServiceModuleAppDTO> unlimitApps;
-
 
     @ItemType(ProjectDTO.class)
     private List<ProjectDTO> projects;
@@ -178,84 +141,4 @@ public class ServiceModuleAuthorizationsDTO {
         return StringHelper.toJsonString(this);
     }
 
-    public Byte getCommunityControlFlag() {
-        return communityControlFlag;
-    }
-
-    public void setCommunityControlFlag(Byte communityControlFlag) {
-        this.communityControlFlag = communityControlFlag;
-    }
-
-
-    public Byte getUnlimitControlFlag() {
-        return unlimitControlFlag;
-    }
-
-    public void setUnlimitControlFlag(Byte unlimitControlFlag) {
-        this.unlimitControlFlag = unlimitControlFlag;
-    }
-
-    public List<ServiceModuleAppDTO> getCommunityApps() {
-        return communityApps;
-    }
-
-    public void setCommunityApps(List<ServiceModuleAppDTO> communityApps) {
-        this.communityApps = communityApps;
-    }
-
-    public List<ServiceModuleAppDTO> getOrgApps() {
-        return orgApps;
-    }
-
-    public void setOrgApps(List<ServiceModuleAppDTO> orgApps) {
-        this.orgApps = orgApps;
-    }
-
-    public List<ServiceModuleAppDTO> getUnlimitApps() {
-        return unlimitApps;
-    }
-
-    public void setUnlimitApps(List<ServiceModuleAppDTO> unlimitApps) {
-        this.unlimitApps = unlimitApps;
-    }
-
-    public Byte getOrgControlFlag() {
-        return orgControlFlag;
-    }
-
-    public void setOrgControlFlag(Byte orgControlFlag) {
-        this.orgControlFlag = orgControlFlag;
-    }
-
-    public List<Long> getCommunityControlIds() {
-        return communityControlIds;
-    }
-
-    public void setCommunityControlIds(List<Long> communityControlIds) {
-        this.communityControlIds = communityControlIds;
-    }
-
-    public List<ControlTarget> getOrgControlDetails() {
-        return orgControlDetails;
-    }
-
-    public void setOrgControlDetails(List<ControlTarget> orgControlDetails) {
-        this.orgControlDetails = orgControlDetails;
-    }
-
-    public Byte getCommunityControlOption() {
-        return communityControlOption;
-    }
-
-    public void setCommunityControlOption(Byte communityControlOption) {
-        this.communityControlOption = communityControlOption;
-    }
-
-    public Byte getOrgControlOption() {
-        return orgControlOption;
-    }
-
-    public void setOrgControlOption(Byte orgControlOption) {
-        this.orgControlOption = orgControlOption;
-    }
 }
