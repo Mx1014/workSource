@@ -57,13 +57,17 @@ public class ServiceModuleAuthorizationsDTO {
 
     private Byte unlimitControlFlag;
 
+    private Byte communityControlOption;
+
     @NotNull
     @ItemType(Long.class)
     private List<Long> communityControlIds;
 
-
     @ItemType(ServiceModuleAppDTO.class)
     private List<ServiceModuleAppDTO> communityApps;
+
+    private Byte orgControlOption;
+
 
     @ItemType(ControlTarget.class)
     private List<ControlTarget> orgControlDetails;
@@ -237,5 +241,21 @@ public class ServiceModuleAuthorizationsDTO {
 
     public void setOrgControlDetails(List<ControlTarget> orgControlDetails) {
         this.orgControlDetails = orgControlDetails;
+    }
+
+    public Byte getCommunityControlOption() {
+        return communityControlOption;
+    }
+
+    public void setCommunityControlOption(Byte communityControlOption) {
+        this.communityControlOption = communityControlOption;
+    }
+
+    public Byte getOrgControlOption() {
+        return orgControlOption;
+    }
+
+    public void setOrgControlOption(Byte orgControlOption) {
+        this.orgControlOption = orgControlOption;
     }
 }

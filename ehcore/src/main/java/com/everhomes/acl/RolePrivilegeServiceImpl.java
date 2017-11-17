@@ -3321,10 +3321,17 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			return authorizationsAppControl;
 		}
 
+		// 先获取authoization的controloption标识项
+
+		Byte controlOption = authorizations.get(0).getControlOption();
+		authorizationsAppControl.setControlOption(controlOption);
+
+
 		//获取userId和controlId对应一系列配置项
 		List<ControlTarget> configs = authorizationProvider.listAuthorizationControlConfigs(namespaceId,targetId,authorizations.get(0).getControlId());
 		authorizationsAppControl.setControlTargets(configs);
 
+		// 获取应用信息
 		for (Authorization authorization: authorizations) {
 			if(AllFlagType.fromCode(authorization.getAllControlFlag()) == AllFlagType.YES){
 				authorizationsAppControl.setServiceModuleApps(serviceModuleApps);
@@ -3393,6 +3400,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
                         }).collect(Collectors.toList()));
                     }
 
+                    // 放入option
+                    dto.setCommunityControlOption(authorizationsAppControl.getControlOption());
                     // todo:获取ControlCommunityIds
                     List<Long> communityIds = authorizationsAppControl.getControlTargets().stream().map(r->{
                     	//如果是r.getId()为0，则表示选择的是全部全区
@@ -3411,6 +3420,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
                         }).collect(Collectors.toList()));
                     }
 
+					// 放入option
+					dto.setOrgControlOption(authorizationsAppControl.getControlOption());
                     // todo:获取Org的ControlTargets
 					List<ControlTarget> orgControlTarget = authorizationsAppControl.getControlTargets();
                     // todo 根据标识处理
@@ -3541,21 +3552,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					// 将参数里的信息处理成config
 					List<AuthorizationControlConfig> configs_c = processAuthorizationControlConfig(namespaceId, control_id_c, targetId, cmd.getCommunityControlIds(), null);
 					authorizationProvider.createAuthorizationControlConfigs(configs_c);
-				}
 
-
-				if (AllFlagType.fromCode(cmd.getAllCommunityControlFlag()) == AllFlagType.YES) {
-					processAuthorization(authorization, 0L, 0L, ModuleManagementType.COMMUNITY_CONTROL.getCode(), cmd.getAllCommunityControlFlag(), control_id_c, cmd.getCommunityControlOption());
-					authorizationProvider.createAuthorization(authorization);
-					assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
-				} else {
-					for (ModuleAppTarget target : cmd.getCommunityTarget()) {
-						processAuthorization(authorization, target.getModuleId(), target.getAppId(), ModuleManagementType.COMMUNITY_CONTROL.getCode(), cmd.getAllCommunityControlFlag(), control_id_c, cmd.getCommunityControlOption());
+					if (AllFlagType.fromCode(cmd.getAllCommunityControlFlag()) == AllFlagType.YES) {
+						processAuthorization(authorization, 0L, 0L, ModuleManagementType.COMMUNITY_CONTROL.getCode(), cmd.getAllCommunityControlFlag(), control_id_c, cmd.getCommunityControlOption());
 						authorizationProvider.createAuthorization(authorization);
-						assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
+						assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
+					} else {
+						for (ModuleAppTarget target : cmd.getCommunityTarget()) {
+							processAuthorization(authorization, target.getModuleId(), target.getAppId(), ModuleManagementType.COMMUNITY_CONTROL.getCode(), cmd.getAllCommunityControlFlag(), control_id_c, cmd.getCommunityControlOption());
+							authorizationProvider.createAuthorization(authorization);
+							assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
+						}
 					}
 				}
-
 
 				// todo: 保存按OA范围控制的应用
 				List<ControlTarget> orgControlDetails = new ArrayList();

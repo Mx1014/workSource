@@ -18,9 +18,11 @@ import java.util.List;
  * <li>allFlag：是否全部业务模块 1：是 0：否，{@link com.everhomes.rest.common.AllFlagType}</li>
  * <li>moduleIds:  业务模块id集合</li>
  * <li>allCommunityControlFlag: 受community控制的应用的全部标识</li>
+ * <li>communityControlOption: 园区的控制标识</li>
  * <li>communityControlIds: 园区ids</>
  * <li>communityTarget: 园区控制范围下的个应用目标,参考{@link ModuleAppTarget}</li>
  * <li>allOrgControlFlag: 受OA控制的应用的全部标识</li>
+ * <li>orgControlOption: OA的控制标识</li>
  * <li>orgControlDetails: 具体的OA控制参数，参考{@link ControlTarget}</li>
  * <li>orgTarget: 受OA控制的应用目标，参考{@link ModuleAppTarget}</li>
  * <li>allUnlimitControlFlag: 不受限制的应用的全部标识</li>

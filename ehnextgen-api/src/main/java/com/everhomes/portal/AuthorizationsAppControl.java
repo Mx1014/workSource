@@ -8,6 +8,7 @@ import java.util.List;
 public class AuthorizationsAppControl {
     private List<ServiceModuleApp> serviceModuleApps;
     private List<ControlTarget> controlTargets;
+    private Byte controlOption;
 
     public List<ServiceModuleApp> getServiceModuleApps() {
         return serviceModuleApps;
@@ -28,5 +29,13 @@ public class AuthorizationsAppControl {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Byte getControlOption() {
+        return controlOption;
+    }
+
+    public void setControlOption(Byte controlOption) {
+        this.controlOption = controlOption;
     }
 }
