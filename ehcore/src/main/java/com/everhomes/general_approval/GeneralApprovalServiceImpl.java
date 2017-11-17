@@ -24,6 +24,7 @@ import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormTemplate;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.organization.OrganizationGroupType;
@@ -41,6 +42,7 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
@@ -989,7 +991,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         wrapStyle.setWrapText(true);
 
         //  1. basic data from flowCases
-        dataRow.createCell(0).setCellValue(data.getApprovalNo());
+        Cell approvalNoCell = dataRow.createCell(0);
+        approvalNoCell.setCellType(XSSFCell.CELL_TYPE_STRING);
+        approvalNoCell.setCellValue(data.getApprovalNo());
         dataRow.createCell(1).setCellValue(data.getCreateTime());
         dataRow.createCell(2).setCellValue(data.getCreatorName());
         dataRow.createCell(3).setCellValue(data.getCreatorDepartment());
@@ -1018,11 +1022,12 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         SearchFlowOperateLogsCommand logsCommand = new SearchFlowOperateLogsCommand();
         logsCommand.setFlowCaseId(data.getFlowCaseId());
         logsCommand.setPageSize(100000);
+        logsCommand.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
         List<FlowOperateLogDTO> operateLogLists = flowService.searchFlowOperateLogs(logsCommand).getLogs();
         if (operateLogLists != null && operateLogLists.size() > 0) {
             String operateLogs = "";
             for (int i = 0; i < operateLogLists.size(); i++) {
-                operateLogs += operateLogLists.get(i).getFlowCaseContent() + "\n";
+                operateLogs += operateLogLists.get(i).getLogContent() + "\n";
             }
             Cell logCell = dataRow.createCell(6);
             logCell.setCellStyle(wrapStyle);
