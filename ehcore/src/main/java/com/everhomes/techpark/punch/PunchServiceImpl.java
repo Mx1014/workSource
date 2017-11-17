@@ -30,10 +30,11 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
-import com.everhomes.rest.approval.ApprovalCategoryDTO;
+import com.everhomes.rest.approval.*;
 import com.everhomes.rest.general_approval.GeneralApprovalRecordDTO;
 import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.techpark.punch.*;
+import com.everhomes.rest.techpark.punch.ApprovalStatus;
 import com.everhomes.rest.techpark.punch.admin.*;
 import com.everhomes.rest.uniongroup.*;
 import com.everhomes.sequence.SequenceProvider;
@@ -104,7 +105,6 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.approval.ApprovalType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -1113,8 +1113,8 @@ public class PunchServiceImpl implements PunchService {
 			if(ht == HommizationType.FLEX|| ht == HommizationType.LATEARRIVE){
 				flexTimeLong = ptr.getFlexTimeLong();
 			}
-			Long beginTimeLong = punchDate.getTime()+onDutyLog.getRuleTime()+flexTimeLong;
-			calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,ptr.getWorkTimeLong(),beginTimeLong);
+			Long beginTimeLong = punchDate.getTime()+onDutyLog.getRuleTime();
+			calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,ptr.getWorkTimeLong(),beginTimeLong,flexTimeLong);
 			//算请假对下班打卡的影响
 			Long offDutyTimeLong = punchDate.getTime()+ ptr.getStartEarlyTimeLong() + ptr.getWorkTimeLong();
 			if (HommizationType.fromCode(ptr.getHommizationType()) == HommizationType.LATEARRIVE){
@@ -1183,8 +1183,8 @@ public class PunchServiceImpl implements PunchService {
 			if(ht == HommizationType.FLEX|| ht == HommizationType.LATEARRIVE){
 				flexTimeLong = ptr.getFlexTimeLong();
 			}
-			Long beginTimeLong = onDutyLog.getPunchDate().getTime()+onDutyLog.getRuleTime()+flexTimeLong;
-			calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,ptr.getNoonLeaveTimeLong() - ptr.getStartEarlyTimeLong(),beginTimeLong);
+			Long beginTimeLong = onDutyLog.getPunchDate().getTime()+onDutyLog.getRuleTime();
+			calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,ptr.getNoonLeaveTimeLong() - ptr.getStartEarlyTimeLong(),beginTimeLong,flexTimeLong);
 			//算请假对下班打卡的影响
 			Long offDutyTimeLong = punchDate.getTime()+ ptr.getNoonLeaveTimeLong();
 			Long punchLateTime = 0L;
@@ -1230,7 +1230,7 @@ public class PunchServiceImpl implements PunchService {
 //			}
 			beginTimeLong = punchDate.getTime()+ptr.getAfternoonArriveTimeLong();
 			calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,
-					ptr.getWorkTimeLong()-(ptr.getNoonLeaveTimeLong() - ptr.getStartEarlyTimeLong()),beginTimeLong);
+					ptr.getWorkTimeLong()-(ptr.getNoonLeaveTimeLong() - ptr.getStartEarlyTimeLong()),beginTimeLong,0L);
 			//算请假对下班打卡的影响
 			offDutyTimeLong = punchDate.getTime()+ ptr.getStartEarlyTimeLong() + ptr.getWorkTimeLong();
 			if (HommizationType.fromCode(ptr.getHommizationType()) == HommizationType.LATEARRIVE){
@@ -1276,16 +1276,12 @@ public class PunchServiceImpl implements PunchService {
 				//算请假对上班打卡的影响
 				HommizationType ht=HommizationType.fromCode(ptr.getHommizationType());
 				Long flexTimeLong = 0L;
-				if(ht == HommizationType.FLEX|| ht == HommizationType.LATEARRIVE){
+				if(punchIntervalNo == 1 && (ht == HommizationType.FLEX|| ht == HommizationType.LATEARRIVE)){
 					flexTimeLong = ptr.getFlexTimeLong();
 				}
 				
 				Long beginTimeLong = punchDate.getTime() + onDutyLog.getRuleTime();
-				if (punchIntervalNo == 1) {
-					//只有第一次上班有弹性时间
-					beginTimeLong += flexTimeLong;
-				}
-				calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,offDutyLog.getRuleTime()-onDutyLog.getRuleTime(),beginTimeLong);
+				calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,offDutyLog.getRuleTime()-onDutyLog.getRuleTime(),beginTimeLong,flexTimeLong);
 				//算请假对下班打卡的影响
 				Long offDutyTimeLong = punchDate.getTime() + offDutyLog.getRuleTime();
 				Long punchLateTime = 0L;
@@ -1385,12 +1381,12 @@ public class PunchServiceImpl implements PunchService {
 	 * 请假对上班打卡的影响
 	 * */
 	private void calculateOnDutyApprovalStatus(PunchLog onDutyLog, List<TimeInterval> tiDTOs,
-											   Long workTimeLong,Long beginTimeLong) {
+											   Long workTimeLong,Long beginTimeLong,Long flexTimeLong) {
 		if (null == tiDTOs) {
 			return;
 		}
 		// 用punchLog的ruletime和ptr的flex 计算上班结束时间
-		Date ruleBeginTime = new Date(beginTimeLong);
+		Date ruleBeginTime = new Date(beginTimeLong+flexTimeLong);
 		for (TimeInterval interval : tiDTOs) {
 			//最晚上班时间包含在interval中会对上班打卡造成影响
 			if (!interval.getBeginTime().after(ruleBeginTime) && !interval.getEndTime().before(ruleBeginTime)) {
@@ -7736,7 +7732,7 @@ public class PunchServiceImpl implements PunchService {
 		Long punchTimeLong = getTimeLong(punCalendar,punchDate);
 		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,enterpriseId, dateSF.get().format(punchDate),
 				ClockCode.SUCESS.getCode());
-		int PunchIntervalNo = 1;
+		int punchIntervalNo = 1;
 		//请假的汇总interval
 		List<TimeInterval> tiDTOs = null;
 
@@ -7748,14 +7744,19 @@ public class PunchServiceImpl implements PunchService {
 		}
 		if(ptr.getPunchTimesPerDay().equals((byte)2)){
 			//对于2次打卡:
-			return calculate2timePunchStatus(ptr,punchTimeLong,punchLogs,result,punchDate,tiDTOs);
+            result = calculate2timePunchStatus(ptr,punchTimeLong,punchLogs,result,punchDate,tiDTOs);
 		}else if(ptr.getPunchTimesPerDay().equals((byte)4)){
-			return calculate4timePunchStatus(ptr, punchTimeLong, punchLogs, result, PunchIntervalNo,punchDate,tiDTOs);
+            result = calculate4timePunchStatus(ptr, punchTimeLong, punchLogs, result, punchIntervalNo,punchDate,tiDTOs);
 		}else{
 			//对于多次打卡
-			return calculateMoretimePunchStatus(ptr, punchTimeLong, punchLogs, result, PunchIntervalNo,punchDate);
+            result = calculateMoretimePunchStatus(ptr, punchTimeLong, punchLogs, result, punchIntervalNo,punchDate);
 		}
-	}
+		PunchExceptionRequest request = punchProvider.findPunchExceptionRequest(userId, enterpriseId, punchDate, result.getPunchIntervalNo(), result.getPunchType());
+		if (null != request && request.getStatus().equals(com.everhomes.rest.approval.ApprovalStatus.AGREEMENT.getCode())) {
+			result.setApprovalStatus(PunchStatus.NORMAL.getCode());
+		}
+        return result;
+    }
 	class TimeInterval{
 
 		private Date beginTime;
