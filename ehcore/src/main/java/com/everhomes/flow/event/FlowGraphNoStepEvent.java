@@ -4,7 +4,7 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.flow.FlowCaseState;
 import com.everhomes.flow.FlowSubject;
 import com.everhomes.flow.FlowSubjectProvider;
-import com.everhomes.rest.flow.FlowAutoStepDTO;
+import com.everhomes.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowEntitySel;
 import com.everhomes.rest.flow.FlowEventType;
 import com.everhomes.rest.flow.FlowUserType;

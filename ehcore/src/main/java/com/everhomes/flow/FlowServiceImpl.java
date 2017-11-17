@@ -46,6 +46,7 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.FlowCaseDetailActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.rest.messaging.*;
@@ -1371,7 +1372,9 @@ public class FlowServiceImpl implements FlowService {
 
         Tuple<Boolean, Boolean> tuple = coordinationProvider.getNamedLock(lockKey).enter(() -> {
             // 查询看是否有原来已经开启的工作流
-            Flow enabledFlow = flowProvider.getEnabledConfigFlow(flow.getNamespaceId(), flow.getModuleId(), flow.getModuleType(), flow.getOwnerId(), flow.getOwnerType());
+            Flow enabledFlow = flowProvider.getEnabledConfigFlow(flow.getNamespaceId(), flow.getProjectType(), flow.getProjectId(),
+                    flow.getModuleId(), flow.getModuleType(), flow.getOwnerId(), flow.getOwnerType());
+
             if (enabledFlow != null && !enabledFlow.getId().equals(flowId)) {
                 dbProvider.execute(status -> {
                     enabledFlow.setStatus(FlowStatusType.STOP.getCode());
@@ -2466,7 +2469,19 @@ public class FlowServiceImpl implements FlowService {
      */
     @Override
     public Flow getEnabledFlow(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
-        Flow flow = flowProvider.getEnabledConfigFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+        Flow flow = flowProvider.getEnabledConfigFlow(namespaceId, null, null, moduleId, moduleType, ownerId, ownerType);
+        if (flow != null && flow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
+            return flowProvider.getSnapshotFlowById(flow.getId());
+        }
+        return null;
+    }
+
+    /**
+     * 获取正在启用的 Flow
+     */
+    @Override
+    public Flow getEnabledFlow(Integer namespaceId, String projectType, Long projectId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
+        Flow flow = flowProvider.getEnabledConfigFlow(namespaceId, projectType, projectId, moduleId, moduleType, ownerId, ownerType);
         if (flow != null && flow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
             return flowProvider.getSnapshotFlowById(flow.getId());
         }
@@ -5073,6 +5088,9 @@ public class FlowServiceImpl implements FlowService {
             List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
 
             for (GeneralFormFieldDTO fieldDTO : fieldDTOs) {
+                if (GeneralFormDataVisibleType.HIDDEN.getCode().equals(fieldDTO.getVisibleType())) {
+                    continue;
+                }
                 List<FlowConditionVariableDTO> dtoList = formFieldProcessorManager.convertFieldDtoToFlowConditionVariableDto(flow, fieldDTO);
                 if (dtoList != null) {
                     variables.addAll(dtoList);
@@ -5772,7 +5790,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public SearchFlowOperateLogResponse searchFlowOperateLogs(SearchFlowOperateLogsCommand cmd) {
         Long userId = cmd.getUserId();
-        if (userId == null) {
+        if (userId == null && TrueOrFalseFlag.fromCode(cmd.getAdminFlag()) != TrueOrFalseFlag.TRUE) {
             userId = UserContext.currentUserId();
         }
         ListingLocator locator = new ListingLocator();
