@@ -206,7 +206,7 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 		}
 
-        return parkingRechargeRateList;
+		return parkingRechargeRateList.stream().filter(r -> r.getPrice().compareTo(new BigDecimal(0)) == 1).collect(Collectors.toList());
     }
     
     private ParkingVendorHandler getParkingVendorHandler(String vendorName) {
