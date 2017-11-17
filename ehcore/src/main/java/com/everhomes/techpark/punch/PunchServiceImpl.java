@@ -1587,14 +1587,10 @@ public class PunchServiceImpl implements PunchService {
 		response.setClockStatus(punchType.getClockStatus());
 		punchLog.setRuleTime(punchType.getRuleTime());
 		punchLog.setStatus(punchType.getClockStatus());
-        if (null != punchType.getApprovalStatus()) {
-            punchLog.setApprovalStatus(punchType.getApprovalStatus());
-        }
         //如果是下班之后打卡当做下班打卡
 		if(punchType.getPunchType().equals(PunchType.FINISH.getCode())){
 			punchType.setPunchType(PunchType.OFF_DUTY.getCode());
 		}
-
 		punchLog.setPunchIntervalNo(punchType.getPunchIntervalNo());
 		if(null ==cmd.getPunchType()){
 			punchLog.setPunchType(punchType.getPunchType());
@@ -1616,6 +1612,12 @@ public class PunchServiceImpl implements PunchService {
 
 		response.setPunchCode(punchCode);
 		punchLog.setPunchStatus(punchCode);
+        //异常处理
+        PunchExceptionRequest request = punchProvider.findPunchExceptionRequest(userId, punchLog.getEnterpriseId(), punchLog.getPunchDate(),
+                punchLog.getPunchIntervalNo(), punchLog.getPunchType());
+        if (null != request && request.getStatus().equals(com.everhomes.rest.approval.ApprovalStatus.AGREEMENT.getCode())) {
+            punchLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
+        }
 		punchProvider.createPunchLog(punchLog);
 //		//刷新这一天的数据
 //		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_PUNCH_LOG.getCode()).enter(()-> {
@@ -7759,10 +7761,7 @@ public class PunchServiceImpl implements PunchService {
 			//对于多次打卡
             result = calculateMoretimePunchStatus(ptr, punchTimeLong, punchLogs, result, punchIntervalNo,punchDate);
 		}
-		PunchExceptionRequest request = punchProvider.findPunchExceptionRequest(userId, enterpriseId, punchDate, result.getPunchIntervalNo(), result.getPunchType());
-		if (null != request && request.getStatus().equals(com.everhomes.rest.approval.ApprovalStatus.AGREEMENT.getCode())) {
-			result.setApprovalStatus(PunchStatus.NORMAL.getCode());
-		}
+
         return result;
     }
 	class TimeInterval{
