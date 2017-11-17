@@ -65,7 +65,7 @@ UPDATE eh_configurations set `value` = '/park-entry/dist/index.html?hideNavigati
 UPDATE eh_configurations set `value` = '/park-entry/dist/index.html?hideNavigationBar=1#/rent_detail/%s/%s' where `name` = 'apply.entry.detail.url';
 
 -- 删除分类  add by yanjun 20171102 已在beta、alpha执行
-DELETE from eh_categories WHERE name in ('二手和租售', '免费物品', '失物招领', '紧急通知', '普通');
+DELETE from eh_categories WHERE name in ('二手和租售', '免费物品', '失物招领', '紧急通知');
 
 -- 缴费2.0的收费项目init data  by wentian
 TRUNCATE `eh_payment_charging_items`;
