@@ -189,7 +189,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	            }
 	        }
 		} catch(Exception e) {
-		    LOGGER.error("Failed to process the enterprise contact for the user, userId=" + identifier.getOwnerUid(), e);
+		    LOGGER.error("Failed to processStat the enterprise contact for the user, userId=" + identifier.getOwnerUid(), e);
 		}
 		return null;
 	}

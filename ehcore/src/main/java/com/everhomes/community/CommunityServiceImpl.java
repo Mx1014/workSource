@@ -2794,9 +2794,9 @@ public class CommunityServiceImpl implements CommunityService {
 		try {
 			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
 		} catch (IOException e) {
-			LOGGER.error("process Excel error, operatorId=" + userId + ", cmd=" + cmd);
+			LOGGER.error("processStat Excel error, operatorId=" + userId + ", cmd=" + cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_GENERAL_EXCEPTION, "process Excel error");
+					ErrorCodes.ERROR_GENERAL_EXCEPTION, "processStat Excel error");
 		}
 
 		if (resultList != null && resultList.size() > 0) {

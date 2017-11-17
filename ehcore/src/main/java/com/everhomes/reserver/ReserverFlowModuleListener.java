@@ -206,7 +206,7 @@ public class ReserverFlowModuleListener implements FlowModuleListener {
 		FlowCase flowCase = ctx.getFlowCase();
 
 		String stepType = ctx.getStepType().getCode();
-//		String params = flowNode.getParams();
+//		String params = flowNode.getGroupByParams();
 //
 //		JSONObject paramJson = JSONObject.parseObject(params);
 //		String nodeType = paramJson.getString("nodeType");
