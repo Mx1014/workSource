@@ -4623,6 +4623,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     public OrganizationOwnerDTO updateOrganizationOwner(UpdateOrganizationOwnerCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
+		User currentUser = UserContext.current().getUser();
+		if(currentUser.getNamespaceId() == 999971) {
+			LOGGER.error("Insufficient privilege, updateOrganizationOwner");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+					"Insufficient privilege");
+		}
         Tuple<CommunityPmOwner, Boolean> tuple =
                 coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ORGANIZATION_OWNER.getCode() + cmd.getId()).enter(() -> {
             CommunityPmOwner owner = propertyMgrProvider.findPropOwnerById(cmd.getId());
@@ -4708,14 +4714,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	public OrganizationOwnerDTO createOrganizationOwner(CreateOrganizationOwnerCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-
+		User currentUser = UserContext.current().getUser();
+		if(currentUser.getNamespaceId() == 999971) {
+			LOGGER.error("Insufficient privilege, createOrganizationOwner");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+					"Insufficient privilege");
+		}
         OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeById(cmd.getOrgOwnerTypeId());
         if (ownerType == null) {
             invalidParameterException("orgOwnerTypeId", cmd.getOrgOwnerTypeId());
         }
         checkContactTokenUnique(cmd.getCommunityId(), cmd.getContactToken());
 
-        User currentUser = UserContext.current().getUser();
         CommunityPmOwner owner = ConvertHelper.convert(cmd, CommunityPmOwner.class);
         if (cmd.getBirthday() != null) {
             owner.setBirthday(new java.sql.Date(cmd.getBirthday()));
@@ -5091,7 +5101,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	public void deleteOrganizationOwner(DeleteOrganizationOwnerCommand cmd) {
         validate(cmd);
 		checkCurrentUserNotInOrg(cmd.getOrganizationId());
-
+		User currentUser = UserContext.current().getUser();
+		if(currentUser.getNamespaceId() == 999971) {
+			LOGGER.error("Insufficient privilege, deleteOrganizationOwner");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+					"Insufficient privilege");
+		}
 		CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(cmd.getId());
 		if (pmOwner == null) {
 			LOGGER.error("OrganizationOwner is not exist. ownerId = {}", cmd.getId());
@@ -6059,6 +6074,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     @Override
     public void importOrganizationOwners(@Valid ImportOrganizationsOwnersCommand cmd, MultipartFile[] file) {
         User user = UserContext.current().getUser();
+		if(user.getNamespaceId() == 999971) {
+			LOGGER.error("Insufficient privilege, importOrganizationOwners");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+					"Insufficient privilege");
+		}
         Long communityId = cmd.getCommunityId();
         this.checkCommunityIdIsNull(communityId);
         this.checkCommunity(communityId);
