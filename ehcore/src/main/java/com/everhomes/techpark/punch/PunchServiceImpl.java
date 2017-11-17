@@ -1587,7 +1587,10 @@ public class PunchServiceImpl implements PunchService {
 		response.setClockStatus(punchType.getClockStatus());
 		punchLog.setRuleTime(punchType.getRuleTime());
 		punchLog.setStatus(punchType.getClockStatus());
-		//如果是下班之后打卡当做下班打卡
+        if (null != punchType.getApprovalStatus()) {
+            punchLog.setApprovalStatus(punchType.getApprovalStatus());
+        }
+        //如果是下班之后打卡当做下班打卡
 		if(punchType.getPunchType().equals(PunchType.FINISH.getCode())){
 			punchType.setPunchType(PunchType.OFF_DUTY.getCode());
 		}
