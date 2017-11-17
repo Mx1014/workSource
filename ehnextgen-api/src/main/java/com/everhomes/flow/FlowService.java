@@ -300,7 +300,9 @@ public interface FlowService {
 	Flow getEnabledFlow(Integer namespaceId, Long moduleId, String moduleType,
 			Long ownerId, String ownerType);
 
-	/**
+    Flow getEnabledFlow(Integer namespaceId, String projectType, Long projectId, Long moduleId, String moduleType, Long ownerId, String ownerType);
+
+    /**
 	 * 添加一个 Case 到工作流中，注意此时为 snapshotFlow，即为运行中的 Flow 副本。
 	 * @param flowCaseCmd
 	 * @return

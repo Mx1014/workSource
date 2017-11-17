@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Created by xq.tian on 2017/11/3.
+ * Created by R on 2017/11/16.
  */
 @Component
 public class FormFieldAskForLeaveProcessor implements FormFieldProcessor {
@@ -97,10 +97,4 @@ public class FormFieldAskForLeaveProcessor implements FormFieldProcessor {
         }
         return null;
     }
-
-    @Override
-    public String parseFieldName(Flow flow, String fieldName, String extra) {
-        return null;
-    }
-
 }

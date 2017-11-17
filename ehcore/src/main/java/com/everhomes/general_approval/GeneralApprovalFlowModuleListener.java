@@ -1,5 +1,6 @@
 package com.everhomes.general_approval;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +55,9 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     @Autowired
     protected OrganizationProvider organizationProvider;
 
-    private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+    private DecimalFormat decimalFormat = new DecimalFormat("#.000");
 
     public GeneralApprovalFlowModuleListener() {
         for (GeneralFormDataSourceType value : GeneralFormDataSourceType.values()) {
@@ -285,7 +288,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "申请时间"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
-        e.setValue(format.format(gf.getCreateTime()));
+        e.setValue(dateFormat.format(gf.getCreateTime()));
         entities.add(e);
 
         e = new FlowCaseEntity();
@@ -523,7 +526,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.ask_for_leave.key", "4", "zh_CN", "请假时长"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
-        e.setValue(leaveValue.getDuration() + " 天");
+        e.setValue(decimalFormat.format(leaveValue.getDuration()) + " 天");
         entities.add(3, e);
     }
 
@@ -544,7 +547,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.business_trip.key", "3", "zh_CN", "出差时长"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
-        e.setValue(tripValue.getDuration() + " 天");
+        e.setValue(decimalFormat.format(tripValue.getDuration()) + " 天");
         entities.add(2, e);
     }
 
@@ -565,7 +568,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.overtime.key", "3", "zh_CN", "加班时长"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
-        e.setValue(overTimeValue.getDuration() + " 天");
+        e.setValue(decimalFormat.format(overTimeValue.getDuration()) + " 天");
         entities.add(2, e);
     }
 
@@ -586,7 +589,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.go_out.key", "3", "zh_CN", "外出时长"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
-        e.setValue(outValue.getDuration() + " 天");
+        e.setValue(decimalFormat.format(outValue.getDuration()) + " 天");
         entities.add(2, e);
     }
 
