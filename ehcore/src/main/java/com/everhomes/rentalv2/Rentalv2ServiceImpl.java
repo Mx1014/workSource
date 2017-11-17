@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.flow.action.FlowTimeoutJob;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PayService;
 import com.everhomes.pay.order.PaymentType;
@@ -202,6 +203,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private DoorAccessService doorAccessService;
 	@Autowired
 	DoorAccessProvider doorAccessProvider;
+
 
 	/**cellList : 当前线程用到的单元格 */
 	private static ThreadLocal<List<RentalCell>> cellList = new ThreadLocal<List<RentalCell>>() {
@@ -1963,8 +1965,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				Long orderReminderTimeLong = order.getReminderTime()!=null?order.getReminderTime().getTime():0l;
 				Long orderEndTimeLong = order.getEndTime()!=null?order.getEndTime().getTime():0l;
 				Long orderReminderEndTimeLong = order.getReminderEndTime()!=null?order.getReminderEndTime().getTime():0l;
-				LOGGER.debug("rentalSchedule: orderId:"+order.getId()+"  orderReminderTimeLong:"+orderReminderTimeLong+"  orderEndTimeLong:"+orderEndTimeLong+
-						"  orderReminderEndTimeLong:"+orderReminderEndTimeLong);
 				//时间快到发推送
 				if(currTime<orderReminderTimeLong && currTime + 30*60*1000l >= orderReminderTimeLong){
 					Map<String, String> map = new HashMap<String, String>();  
@@ -1972,11 +1972,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			        map.put("startTime", order.getUseDetail()); 
 					String notifyTextForOther = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE, 
 							RentalNotificationTemplateCode.RENTAL_BEGIN_NOTIFY, RentalNotificationTemplateCode.locale, map, "");
-					final Job job3 = new Job(
-							SendMessageAction.class.getName(),
-							new Object[] {order.getRentalUid(),notifyTextForOther});
-					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
-							orderReminderTimeLong);
+
+					Map<String, Object> messageMap = new HashMap<>();
+					messageMap.put("userId",order.getRentalUid());
+					messageMap.put("content",notifyTextForOther);
+					scheduleProvider.scheduleSimpleJob(
+							queueName,
+							queueName,
+							new java.util.Date(orderReminderTimeLong),
+							RentalMessageJob.class,
+							messageMap
+					);
+					LOGGER.debug("rentalSchedule push reminderMessage uid:"+order.getRentalUid()+"  orderId:"+order.getId()+"  message:"+notifyTextForOther+"  time:"+orderReminderTimeLong);
+
 				}
 
 				//结束时间快到发推送
@@ -1997,11 +2005,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						notifyTextForOther = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
 								RentalNotificationTemplateCode.RENTAL_END_NOTIFY_DAY, RentalNotificationTemplateCode.locale, map, "");
 
-					final Job job3 = new Job(
-							SendMessageAction.class.getName(),
-							new Object[] {chargeUid,notifyTextForOther});
-					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
-							orderReminderEndTimeLong);
+					Map<String, Object> messageMap = new HashMap<>();
+					messageMap.put("userId",chargeUid);
+					messageMap.put("content",notifyTextForOther);
+					scheduleProvider.scheduleSimpleJob(
+							queueName,
+							queueName,
+							new java.util.Date(orderReminderEndTimeLong),
+							RentalMessageJob.class,
+							messageMap
+					);
+					LOGGER.debug("rentalSchedule push endReminderMessage id:"+chargeUid+"  orderId:"+order.getId()+"  message:"+notifyTextForOther+"  time:"+orderReminderTimeLong);
+
 				}
 				//订单过期,置状态
 				if(orderEndTimeLong <= currTime){
@@ -2012,7 +2027,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					final Job job1 = new Job(
 							IncompleteUnsuccessRentalBillAction.class.getName(),
 							new Object[] { String.valueOf(order.getId()) });
-		
+
 					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
 							orderEndTimeLong); 
 				}
@@ -3055,7 +3070,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 							if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
 								rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
-								order.setStatus(SiteBillStatus.REFUNDED.getCode());
+								order.setStatus(SiteBillStatus.REFUNDING.getCode());
 							} else{
 								LOGGER.error("Refund failed from vendor, cmd={}, response={}",
 										cmd, refundResponse);

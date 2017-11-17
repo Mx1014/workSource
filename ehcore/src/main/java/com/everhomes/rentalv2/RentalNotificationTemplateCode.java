@@ -14,7 +14,7 @@ public interface RentalNotificationTemplateCode {
 
 	public static final int RENTAL_PROCESSOR_SUCCESS_CODE = 9; // 正中会-预成功:【正在会】客户{客户姓名}（{客户联系方式}）完成支付，成功预约{使用时间}的{资源名称}，请提前做好相关准备工作。
 	public static final int RENTAL_END_NOTIFY_HOUR = 10;//预定快结束的推送(小时/半天):温馨提醒：{资源名称}资源的使用将在15分钟后结束，使用客户{客户姓名}（{客户联系方式}），请进行确认
-	public static final int RENTAL_END_NOTIFY_DAY = 10;//预定快结束的推送(天/月):温馨提醒：{资源名称}资源的使用将在今日结束，使用客户{客户姓名}（{客户联系方式}），请进行确认
+	public static final int RENTAL_END_NOTIFY_DAY = 11;//预定快结束的推送(天/月):温馨提醒：{资源名称}资源的使用将在今日结束，使用客户{客户姓名}（{客户联系方式}），请进行确认
 
     int RENTAL_TEXT_REMARK = 10; // 资源提交信息   请输入备注
     int RENTAL_SHOW_CONTENT = 11; // 资源提交信息  请输入显示内容
