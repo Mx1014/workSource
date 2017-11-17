@@ -3164,7 +3164,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     EnergyMeter meter = meterProvider.findById(task.getNamespaceId(), task.getMeterId());
                     dto.setBillCategoryId(meter.getBillCategoryId());
                     // 项目
-                    EnergyMeterCategory billCategory = meterCategoryProvider.findById(UserContext.getCurrentNamespaceId(namespaceId), meter.getBillCategoryId());
+                    EnergyMeterCategory billCategory = meterCategoryProvider.findById(UserContext.getCurrentNamespaceId(task.getNamespaceId()), meter.getBillCategoryId());
                     dto.setBillCategory(billCategory != null ? billCategory.getName() : null);
 
                     dto.setMeterName(meter.getName());
