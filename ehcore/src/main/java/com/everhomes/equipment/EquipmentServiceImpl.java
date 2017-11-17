@@ -3613,11 +3613,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 						updateItemIds.add(dto.getId());
 				}
 			}
-			
-			for(EquipmentInspectionTemplateItemMap map : maps) {
-				if(!updateItemIds.contains(map.getItemId())) {
-					equipmentProvider.deleteEquipmentInspectionTemplateItemMap(map.getId());
-				}
+			// check maps is null for nullPointException
+			if (maps != null && maps.size() > 0) {
+				for(EquipmentInspectionTemplateItemMap map : maps) {
+                    if(!updateItemIds.contains(map.getItemId())) {
+                        equipmentProvider.deleteEquipmentInspectionTemplateItemMap(map.getId());
+                    }
+                }
 			}
 		}
 		
