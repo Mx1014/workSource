@@ -260,6 +260,21 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             if (category != null) {
                 cmd21.setServiceType(category.getName());
             }
+
+            Long flowCaseId = flowService.getNextFlowCaseId();
+
+            // 把values 存起来
+            for (PostApprovalFormItem val : cmd.getValues()) {
+                GeneralApprovalVal obj = ConvertHelper.convert(ga, GeneralApprovalVal.class);
+                obj.setApprovalId(ga.getId());
+                obj.setFormVersion(form.getFormVersion());
+                obj.setFlowCaseId(flowCaseId);
+                obj.setFieldName(val.getFieldName());
+                obj.setFieldType(val.getFieldType());
+                obj.setFieldStr3(val.getFieldValue());
+                this.generalApprovalValProvider.createGeneralApprovalVal(obj);
+            }
+
             FlowCase flowCase = null;
             if (null == flow) {
                 // 给他一个默认哑的flow
@@ -270,19 +285,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             } else {
                 cmd21.setFlowMainId(flow.getFlowMainId());
                 cmd21.setFlowVersion(flow.getFlowVersion());
+                cmd21.setFlowCaseId(flowCaseId);
                 flowCase = flowService.createFlowCase(cmd21);
-            }
-
-            // 把values 存起来
-            for (PostApprovalFormItem val : cmd.getValues()) {
-                GeneralApprovalVal obj = ConvertHelper.convert(ga, GeneralApprovalVal.class);
-                obj.setApprovalId(ga.getId());
-                obj.setFormVersion(form.getFormVersion());
-                obj.setFlowCaseId(flowCase.getId());
-                obj.setFieldName(val.getFieldName());
-                obj.setFieldType(val.getFieldType());
-                obj.setFieldStr3(val.getFieldValue());
-                this.generalApprovalValProvider.createGeneralApprovalVal(obj);
             }
 
             GetTemplateByApprovalIdResponse response = ConvertHelper.convert(ga,
