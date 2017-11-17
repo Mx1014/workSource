@@ -7,6 +7,7 @@ import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.rest.activity.ActivityActionData;
 import com.everhomes.rest.activity.ActivityCategoryDTO;
 import com.everhomes.rest.activity.ActivityEntryConfigulation;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.user.UserContext;
@@ -205,6 +206,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 			ActivityCategoryDTO newDto = new ActivityCategoryDTO();
 			newDto.setAllFlag(AllFlagType.YES.getCode());
 			newDto.setName("all");
+			newDto.setEnabled(TrueOrFalseFlag.TRUE.getCode());
 			listDto.add(newDto);
 			config.setCategoryDTOList(listDto);
 
@@ -239,6 +241,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 				newCategory.setDefaultOrder(0);
 				newCategory.setStatus((byte)2);
 				newCategory.setCreatorUid(1L);
+				newCategory.setEnabled(dto.getEnabled());
 				if(newCategory.getName() == null){
 					newCategory.setName("default");
 				}
@@ -263,7 +266,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	 */
 	private void deleteContentCategory(ActivityEntryConfigulation config, Integer namespaceId){
 		//删除分类
-		List<ActivityCategories> oldContentCategories = activityProvider.listActivityCategory(namespaceId, config.getId());
+		List<ActivityCategories> oldContentCategories = activityProvider.listActivityCategory(namespaceId, config.getEntryId());
 
 		//原来没有则不用删除了
 		if(oldContentCategories == null || oldContentCategories.size() == 0){
