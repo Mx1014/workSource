@@ -794,6 +794,9 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
     @Override
     public CreateOrderRestResponse refund(String orderType, Long payOrderId, Long refundOrderId, Long amount) {
         PaymentOrderRecord payOrderRecord = payProvider.findOrderRecordByOrder(orderType, payOrderId);
+        LOGGER.debug("findOrderRecordByOrder  "+orderType+"  "+payOrderId+"  ");
+        if (payOrderRecord==null)
+            LOGGER.debug("payOrderRecord is null");
         CreateOrderCommand cmd = newCreateOrderCommandForRefund(payOrderRecord, amount);
         CreateOrderRestResponse response = refuncOrderPayV2(cmd);
 
