@@ -252,9 +252,4 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100012', 'zh_CN', '短号格式错误');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100013', 'zh_CN', '日期格式错误');
 	
--- 客户管理tab页 add by xiongying 20171117
-INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ('24', 'enterprise_customer', '0', '/24', '跟进信息', 'com.everhomes.customer.CustomerTracking', '0', NULL, '2', '1', '2017-08-18 02:24:20', NULL, NULL);
-INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ('25', 'enterprise_customer', '0', '/25', '计划信息', 'com.everhomes.customer.CustomerTrackingPlan', '0', NULL, '2', '1', '2017-08-18 02:24:20', NULL, NULL);
-INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ('27', 'enterprise_customer', '0', '/27', '客户合同', '', '0', NULL, '2', '1', '2017-11-14 02:10:33', NULL, NULL);
-
 
