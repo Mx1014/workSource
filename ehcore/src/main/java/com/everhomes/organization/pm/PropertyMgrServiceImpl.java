@@ -1930,6 +1930,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		this.checkCommunityIdIsNull(communityId);
 		Community community = this.checkCommunity(communityId);
 
+		// 科技园的从address表里统计，其它域空间还是按以前的方式统计
+		if (community.getNamespaceId() != 1000000) {
+			return getApartmentStatistics(cmd);
+		}
 		int familyCount = familyProvider.countFamiliesByCommunityId(communityId);
 		int userCount = familyProvider.countUserByCommunityId(communityId);
 //		Organization org = this.checkOrganizationByCommIdAndOrgType(communityId, OrganizationType.PM.getCode());
@@ -1964,11 +1968,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		int occupiedCount = (temp = result.get(AddressMappingStatus.OCCUPIED.getCode())) == null ? 0 : temp;
 		dto.setOccupiedCount(occupiedCount);
 		sum = defaultCount + livingCount + rentCount + freeCount + saledCount + unsaleCount + occupiedCount;
-		
-		// 科技园的从address表里统计，其它域空间还是按以前的方式统计
-		if (sum == 0) {
-			return getApartmentStatistics(cmd);
-		}
+
 		dto.setAptCount(sum);
 		dto.setHasOwnerCount(livingCount + rentCount + saledCount);
 		dto.setNoOwnerCount(freeCount + unsaleCount);
