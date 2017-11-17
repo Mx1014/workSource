@@ -5009,7 +5009,11 @@ public class PunchServiceImpl implements PunchService {
 			}
 		}
 		else{
-			result = statusToString(Byte.valueOf(statuList));
+            if(null != approvalStatusList){
+                result = statusToString(Byte.valueOf(approvalStatusList));
+            }else{
+			    result = statusToString(Byte.valueOf(statuList));
+            }
 		}
         return result;
     }
