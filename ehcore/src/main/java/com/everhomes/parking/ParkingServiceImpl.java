@@ -206,7 +206,7 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 		}
 
-        return parkingRechargeRateList;
+		return parkingRechargeRateList.stream().filter(r -> r.getPrice().compareTo(new BigDecimal(0)) == 1).collect(Collectors.toList());
     }
     
     private ParkingVendorHandler getParkingVendorHandler(String vendorName) {
@@ -661,6 +661,7 @@ public class ParkingServiceImpl implements ParkingService {
 //        preOrderCommand.setClientAppName(clientAppName);
 //
 //        PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+		LOGGER.info("createAppPreOrder clientAppName={}", clientAppName);
 		PreOrderDTO callBack = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(), clientAppName, OrderType.OrderTypeEnum.PARKING.getPycode(),
 				parkingRechargeOrder.getId(), parkingRechargeOrder.getPayerUid(), amount);
 

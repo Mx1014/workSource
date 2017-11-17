@@ -98,7 +98,7 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
 
     @Override
     public void onFlowCaseStateChanged(FlowCaseState ctx) {
-//        String params = ctx.getCurrentNode().getFlowNode().getParams();
+//        String params = ctx.getCurrentNode().getFlowNode().getGroupByParams();
 //        Map map = (Map)StringHelper.fromJsonString(params, HashMap.class);
 //
 //        if (map != null) {
@@ -162,7 +162,7 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
 
     @Override
     public void onFlowButtonFired(FlowCaseState ctx) {
-//        String params = ctx.getCurrentNode().getFlowNode().getParams();
+//        String params = ctx.getCurrentNode().getFlowNode().getGroupByParams();
 //        Map map = (Map)StringHelper.fromJsonString(params, HashMap.class);
 //
 //        if (map != null && ctx.getStepType() == FlowStepType.APPROVE_STEP) {

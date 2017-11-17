@@ -199,8 +199,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	private void updateContentCategory(ActivityEntryConfigulation config, ActivityCategories parentCategory, Integer namespaceId){
 
 		//如果没有则增加默认分类、或者子分类关闭
-		if(config.getCategoryDTOList() == null || config.getCategoryDTOList().size() == 0
-				|| config.getCategoryFlag() == null || config.getCategoryFlag().byteValue() == 0){
+		if(config.getCategoryDTOList() == null || config.getCategoryDTOList().size() == 0){
 
 			List<ActivityCategoryDTO> listDto = new ArrayList<>();
 			ActivityCategoryDTO newDto = new ActivityCategoryDTO();
@@ -209,8 +208,6 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 			newDto.setEnabled(TrueOrFalseFlag.TRUE.getCode());
 			listDto.add(newDto);
 			config.setCategoryDTOList(listDto);
-
-			config.setCategoryFlag((byte)1);
 		}
 
 		//新增、更新入口
@@ -273,8 +270,24 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 			return;
 		}
 
-		if(config.getCategoryFlag() == null || config.getCategoryFlag() == 0 || config.getCategoryDTOList() == null || config.getCategoryDTOList().size() == 0){
+		//如果主题分类是关闭的，则默认打开“全部”类型的主题分类，关闭其他主题分类。
+		if(config.getCategoryFlag() == null || config.getCategoryFlag() == 0){
 
+			if(config.getCategoryDTOList() != null ){
+				for(int i=0; i<config.getCategoryDTOList().size(); i++){
+					ActivityCategoryDTO dto = config.getCategoryDTOList().get(i);
+					if(dto.getAllFlag() != null && dto.getAllFlag() == 1){
+						dto.setEnabled((byte)1);
+					}else {
+						dto.setEnabled((byte)0);
+					}
+
+				}
+			}
+
+		}
+
+		if(config.getCategoryDTOList() == null || config.getCategoryDTOList().size() == 0){
 			//如果新发布的没有则删除全部
 			for(int i=0; i<oldContentCategories.size(); i++){
 				activityProvider.deleteActivityCategories(oldContentCategories.get(i).getId());

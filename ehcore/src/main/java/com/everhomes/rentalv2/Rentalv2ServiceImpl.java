@@ -1963,8 +1963,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				Long orderReminderTimeLong = order.getReminderTime()!=null?order.getReminderTime().getTime():0l;
 				Long orderEndTimeLong = order.getEndTime()!=null?order.getEndTime().getTime():0l;
 				Long orderReminderEndTimeLong = order.getReminderEndTime()!=null?order.getReminderEndTime().getTime():0l;
-				LOGGER.debug("rentalSchedule: orderId:"+order.getId()+"  orderReminderTimeLong:"+orderReminderTimeLong+"  orderEndTimeLong:"+orderEndTimeLong+
-						"  orderReminderEndTimeLong:"+orderReminderEndTimeLong);
 				//时间快到发推送
 				if(currTime<orderReminderTimeLong && currTime + 30*60*1000l >= orderReminderTimeLong){
 					Map<String, String> map = new HashMap<String, String>();  
@@ -1975,6 +1973,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					final Job job3 = new Job(
 							SendMessageAction.class.getName(),
 							new Object[] {order.getRentalUid(),notifyTextForOther});
+					LOGGER.debug("rentalSchedule push reminderMessage id:"+order.getRentalUid()+"  message:"+notifyTextForOther+"  time:"+orderReminderTimeLong);
 					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
 							orderReminderTimeLong);
 				}
@@ -2000,6 +1999,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					final Job job3 = new Job(
 							SendMessageAction.class.getName(),
 							new Object[] {chargeUid,notifyTextForOther});
+					LOGGER.debug("rentalSchedule push endReminderMessage id:"+chargeUid+"  message:"+notifyTextForOther+"  time:"+orderReminderTimeLong);
 					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
 							orderReminderEndTimeLong);
 				}
@@ -3055,7 +3055,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 							if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
 								rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
-								order.setStatus(SiteBillStatus.REFUNDED.getCode());
+								order.setStatus(SiteBillStatus.REFUNDING.getCode());
 							} else{
 								LOGGER.error("Refund failed from vendor, cmd={}, response={}",
 										cmd, refundResponse);
