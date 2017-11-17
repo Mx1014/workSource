@@ -3432,6 +3432,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						return null;
 					});
 		}else {
+			bill.setPaidVersion(version.getCode());
 			rentalv2Provider.updateRentalBill(bill);
 
 			if(bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())){
