@@ -19,19 +19,18 @@ import java.sql.Timestamp;
  *  <li>equipmentModel: 设备型号</li>
  *  <li>categoryId: 设备类型id</li>
  *  <li>categoryPath: 设备类型路径</li>
- *  <li>qrCodeToken: 设备二维码token</li>
  *  <li>qrCodeFlag: 二维码状态 0: inactive, 1: active</li>
  *  <li>location: 设备位置</li>
  *  <li>status: 设备状态</li>
- *  <li>installationTime: 安装时间</li>
+ *  <li>installationTime: 安装日期</li>
  *  <li>repairTime: 保修时间</li>
  *  <li>initialAssetValue: 资产原值</li>
- *  <li>customNumber: 自编号</li>
- *  <li>parameter: 参数</li>
+ *  <li>customNumber: 设备编号</li>
+ *  <li>parameter: 设备参数</li>
  *  <li>quantity: 数量</li>
- *  <li>sequenceNo: 编号</li>
+ *  <li>sequenceNo: 出厂编号</li>
  *  <li>versionNo: 版号</li>
- *  <li>manager: 责任人编号</li>
+ *  <li>manager: 联系人编号</li>
  *  <li>remarks: 备注</li>
  *  <li>brandName: 品牌名称</li>
  *  <li>constructionParty: 施工方</li>
@@ -73,8 +72,6 @@ public class ExportEquipmentData {
     private Long categoryId;
 
     private String categoryPath;
-
-    private String qrCodeToken;
 
     //转换成String
     private String  qrCodeFlag;
@@ -224,14 +221,6 @@ public class ExportEquipmentData {
 
     public void setCategoryPath(String categoryPath) {
         this.categoryPath = categoryPath;
-    }
-
-    public String getQrCodeToken() {
-        return qrCodeToken;
-    }
-
-    public void setQrCodeToken(String qrCodeToken) {
-        this.qrCodeToken = qrCodeToken;
     }
 
     public String  getQrCodeFlag() {

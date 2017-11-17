@@ -27,10 +27,10 @@ import java.util.List;
  *  <li>installationTime: 安装时间</li>
  *  <li>repairTime: 免保时间</li>
  *  <li>initialAssetValue: 资产原值</li>
- *  <li>customNumber: 自编号</li>
- *  <li>parameter: 参数</li>
+ *  <li>customNumber: 设备编号</li>
+ *  <li>parameter: 设备参数</li>
  *  <li>quantity: 数量</li>
- *  <li>sequenceNo: 编号</li>
+ *  <li>sequenceNo: 出厂编号</li>
  *  <li>versionNo: 版号</li>
  *  <li>manager: 联系人编号</li>
  *  <li>attachments: 操作图示&说明书 参考{@link com.everhomes.rest.equipment.EquipmentAttachmentDTO}</li>
