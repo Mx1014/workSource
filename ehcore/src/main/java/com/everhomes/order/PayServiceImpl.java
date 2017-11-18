@@ -17,10 +17,12 @@ import com.everhomes.query.QueryBuilder;
 import com.everhomes.query.QueryCondition;
 import com.everhomes.rest.MapListRestResponse;
 import com.everhomes.rest.StringRestResponse;
+import com.everhomes.rest.group.GroupServiceErrorCode;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.order.OrderPaymentStatus;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
+import com.everhomes.rest.pay.controller.QueryBalanceRestResponse;
 import com.everhomes.rest.pay.controller.RegisterBusinessUserRestResponse;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -839,26 +841,55 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
     }
     
     @Override
-    public SettlementAmountDTO getPaymentSettlementAmounts(String ownerType, Long ownerId)  {
+//    public PaymentBalanceDTO getPaymentSettlementAmounts(String ownerType, Long ownerId)  {
+//        PaymentUser paymentUser = payProvider.findPaymentUserByOwner(ownerType, ownerId);
+//        if(paymentUser == null) {
+//            LOGGER.error("Payment user not found, ownerType=%s, ownerId=%s", ownerType, ownerId);
+//            return null;
+//        }
+//
+//        Long notSettledAmount = getPaymentAmountBySettlement(paymentUser.getPaymentUserId(), SettlementStatus.NOT_SETTLED.getCode());
+//        Long settledAmount = getPaymentAmountBySettlement(paymentUser.getPaymentUserId(), SettlementStatus.SETTLED.getCode());
+//        Long withdrawAmount = getPaymentAmountByWithdraw(paymentUser.getPaymentUserId());
+//        Long refundAmount = getPaymentAmountByRefund(paymentUser.getPaymentUserId());
+//        if(LOGGER.isDebugEnabled()) {
+//            LOGGER.debug("Payment amounts info, notSettledAmount=%s, settledAmount=%s, withdrawAmount=%s, refundAmount=%s",
+//                    notSettledAmount, settledAmount, withdrawAmount, refundAmount);
+//        }
+//
+//        PaymentBalanceDTO result = new PaymentBalanceDTO();
+//        result.setSettlementAmount(notSettledAmount);
+//        result.setWithdrawableAmount(settledAmount - withdrawAmount - refundAmount);
+//                
+//        return result;
+//    }
+    public PaymentBalanceDTO getPaymentBalance(String ownerType, Long ownerId)  {
         PaymentUser paymentUser = payProvider.findPaymentUserByOwner(ownerType, ownerId);
         if(paymentUser == null) {
             LOGGER.error("Payment user not found, ownerType=%s, ownerId=%s", ownerType, ownerId);
             return null;
         }
+        
+        QueryBalanceCommand cmd = new QueryBalanceCommand();
+        cmd.setUserId(paymentUser.getPaymentUserId());
+        QueryBalanceRestResponse queryBalanceResp = restClient.restCall("POST", ApiConstants.ORDER_QUERYBALANCE_URL, cmd, QueryBalanceRestResponse.class);
 
-        Long notSettledAmount = getPaymentAmountBySettlement(paymentUser.getPaymentUserId(), SettlementStatus.NOT_SETTLED.getCode());
-        Long settledAmount = getPaymentAmountBySettlement(paymentUser.getPaymentUserId(), SettlementStatus.SETTLED.getCode());
-        Long withdrawAmount = getPaymentAmountByWithdraw(paymentUser.getPaymentUserId());
-        Long refundAmount = getPaymentAmountByRefund(paymentUser.getPaymentUserId());
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Payment amounts info, notSettledAmount=%s, settledAmount=%s, withdrawAmount=%s, refundAmount=%s",
-                    notSettledAmount, settledAmount, withdrawAmount, refundAmount);
+        PaymentBalanceDTO result = new PaymentBalanceDTO();
+        if(queryBalanceResp.getResponse() != null) {
+            result.setAllAmount(queryBalanceResp.getResponse().getAllAmount());
+            result.setFrozenAmount(queryBalanceResp.getResponse().getFrozenAmount());
+            result.setUnsettledPaymentAmount(queryBalanceResp.getResponse().getUnsettledPaymentAmount());
+            result.setUnsettledRechargeAmount(queryBalanceResp.getResponse().getUnsettledRechargeAmount());
+            result.setUnsettledWithdrawAmount(queryBalanceResp.getResponse().getUnsettledWithdrawAmount());
+            if(result.getAllAmount() != null && result.getFrozenAmount() != null && result.getUnsettledPaymentAmount() != null) {
+                result.setWithdrawableAmount(result.getAllAmount() - result.getFrozenAmount() - result.getUnsettledPaymentAmount());
+            }
         }
-
-        SettlementAmountDTO result = new SettlementAmountDTO();
-        result.setSettlementAmount(notSettledAmount);
-        result.setWithdrawableAmount(settledAmount - withdrawAmount - refundAmount);
-                
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Payment balance info, ownerType=%s, paymentUserId=%s, balance=%s", ownerType, ownerId, paymentUser.getPaymentUserId(), result);
+        }
+        
         return result;
     }
     
@@ -950,4 +981,53 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
             return -Long.valueOf(response.getResponse().get(0).get("amount"));
         }
     }
+    
+//    public PaymentWithdrawOrderResp requestWithdraw(BigDecimal amount,ValidationType validationType, String ownerType, Long ownerId) throws Exception{
+//        SettlementAmountDTO settlementAmount = getPaymentSettlementAmounts(ownerType, ownerId);
+//        Long withdrawableAmount = settlementAmount.getWithdrawableAmount();
+//        if(withdrawableAmount == null || withdrawableAmount.longValue() <= 0)  {
+//            LOGGER.error("Withdrawable amount insufficient, ownerType=%s, ownerId=%s, amount=%s, realAmount=%s", ownerType, ownerId, amount, settlementAmount);
+//            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_WITHDRAWABLE_AMOUNT_INSUFFICIENT,
+//                    "Withdrawable amount insufficient");
+//        }
+//        
+//        OrderCommandResponse orderResponse = remoteAccessService.payV2Withdraw(amount, ValidationType.NO_VERIFY, paymentUser);
+//        (CreateOrderRestResponse) callPaymentMethod(HTTP_POST, ApiConstants.ORDER_CREATEORDER_URL, cmd, CreateOrderRestResponse.class);
+//        PaymentWithdrawOrder withdrawOrder = new PaymentWithdrawOrder();
+//        withdrawOrder.setAmount(amount);
+//        withdrawOrder.setCreateTime(new Date());
+//        withdrawOrder.setId(orderResponse.getBizOrderNum());
+//        withdrawOrder.setPaymentStatus(OrderPaymentStatus.PENDING.getCode());
+//        withdrawOrder.setPaymentUserId(paymentUser.getPaymentUserId());
+//        paymentService.addPaymentWithdrawOrder(withdrawOrder);
+//        PaymentWithdrawOrderResp response = ObjectConvertUtil.convertForSampleType(withdrawOrder, PaymentWithdrawOrderResp.class);
+//        response.setOrderId(orderResponse.getOrderId());
+//        return response;
+//    }
+//    
+//    private OrderCommandResponse payV2Withdraw(Long amount,ValidationType validationType,PaymentUser paymentUser) throws Exception {
+//        String homeUrl = configurationService.getValue(ConfigName.HOME_URL);
+//        String backUri = configurationService.getValue(ConfigName.PAY_V2_BACK_URI);
+//        String backUrl = homeUrl + backUri;
+//        String withdrawOrderNo = getOrderNum(cmd.getOrderId(),cmd.getOrderType());
+//        CreateOrderCommand orderCmd = new CreateOrderCommand();
+//        orderCmd.setAmount(amount);
+//        orderCmd.setBizOrderNum(withdrawOrderNo);
+//        orderCmd.setPayeeUserId(paymentUser.getPaymentUserId());
+//        orderCmd.setSourceType(SourceType.MOBILE.getCode());
+//        orderCmd.setOrderType(com.everhomes.pay.order.OrderType.WITHDRAW.getCode());
+//        orderCmd.setValidationType(validationType.getCode());
+//        orderCmd.setBackUrl(backUrl);
+//        orderCmd.setCommitFlag(CommitFlag.YES.getCode());
+//        orderCmd.setPaymentType(PaymentType.WITHDRAW_AUTO.getCode());
+//        Map<String, String> paymentParams = new HashMap<>();
+//        paymentParams.put("bankCardNum", paymentUser.getBankCardNumber());
+//        paymentParams.put("bankCardPro", getBankCardPro(paymentUser.getPaymentUserType()).toString());
+//        orderCmd.setPaymentParams(paymentParams);
+//        CreateOrderRestResponse response = (CreateOrderRestResponse) restClient.restCall("POST", ApiConstants.ORDER_CREATEORDER_URL, orderCmd, CreateOrderRestResponse.class);     
+//        if(!CreateOrderRestResponse.isSuccess(response)){
+//            throw new BaseException(ErrorCodes.BASE_ERROR,response.getErrorDetails());
+//        }
+//        return response.getResponse();
+//    }
 }

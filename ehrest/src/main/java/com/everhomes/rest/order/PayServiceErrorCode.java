@@ -11,4 +11,6 @@ public interface PayServiceErrorCode {
     int ERROR_BIND_PHONE_FAIL=10005;
     int ERROR_SIGNATURE_VERIFY_FAIL=10006;
     int ERROR_REFUND_FAIL=10007;
+    /** 可提现金额不足 */
+    int ERROR_WITHDRAWABLE_AMOUNT_INSUFFICIENT  =10008;
 }

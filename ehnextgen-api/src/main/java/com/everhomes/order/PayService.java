@@ -7,7 +7,7 @@ import com.everhomes.rest.order.PaymentParamsDTO;
 
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.rest.order.SettlementAmountDTO;
+import com.everhomes.rest.order.PaymentBalanceDTO;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 
 import java.math.BigDecimal;
@@ -73,12 +73,12 @@ public interface PayService {
     PaymentUser createPaymentUser(int businessUserType, String ownerType, Long ownerId);
     
     /**
-     * 获取帐户结算金额和可提现金额信息
+     * 获取帐户余额信息
      * @param ownerType 帐户类型（如EhUsers、EhOrganizations）
      * @param ownerId 帐户对应的ID（如用户ID、企业ID）
-     * @return  结算金额和可提现金额信息
+     * @return  余额信息
      */
-    SettlementAmountDTO getPaymentSettlementAmounts(String ownerType, Long ownerId);
+    PaymentBalanceDTO getPaymentBalance(String ownerType, Long ownerId);
     
     /**
      * 获取帐户结算金额数量，通过指定的结算状态来获取对应的金额数量

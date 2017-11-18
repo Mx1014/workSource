@@ -14,7 +14,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.SettlementAmountCommand;
-import com.everhomes.rest.order.SettlementAmountDTO;
+import com.everhomes.rest.order.PaymentBalanceDTO;
 import com.everhomes.util.RequireAuthentication;
 
 
@@ -84,9 +84,9 @@ public class PayController extends ControllerBase {
      * <p>获取帐户结算金额和可提现金额</p>
      */
     @RequestMapping("getPaymentSettlementAmounts")
-    @RestReturn(value=SettlementAmountDTO.class)
+    @RestReturn(value=PaymentBalanceDTO.class)
     public RestResponse getPaymentSettlementAmounts(SettlementAmountCommand cmd) {
-        SettlementAmountDTO dto = payService.getPaymentSettlementAmounts(cmd.getOwnerType(), cmd.getOwnerId());
+        PaymentBalanceDTO dto = payService.getPaymentBalance(cmd.getOwnerType(), cmd.getOwnerId());
         
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
