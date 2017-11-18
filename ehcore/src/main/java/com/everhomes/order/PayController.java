@@ -1,19 +1,21 @@
 package com.everhomes.order;
 
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.controller.ControllerBase;
-import com.everhomes.discover.RestReturn;
-import com.everhomes.pay.order.OrderPaymentNotificationCommand;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.order.*;
-import com.everhomes.util.RequireAuthentication;
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.order.SettlementAmountCommand;
+import com.everhomes.rest.order.SettlementAmountDTO;
+import com.everhomes.util.RequireAuthentication;
 
 
 @RestController
@@ -76,4 +78,19 @@ public class PayController extends ControllerBase {
 //		response.setErrorDescription("OK");
 //		return response;
 //	}
+	
+	   /**
+     * <b>URL: /pay/getPaymentSettlementAmounts</b>
+     * <p>获取帐户结算金额和可提现金额</p>
+     */
+    @RequestMapping("getPaymentSettlementAmounts")
+    @RestReturn(value=SettlementAmountDTO.class)
+    public RestResponse getPaymentSettlementAmounts(SettlementAmountCommand cmd) {
+        SettlementAmountDTO dto = payService.getPaymentSettlementAmounts(cmd.getOwnerType(), cmd.getOwnerId());
+        
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

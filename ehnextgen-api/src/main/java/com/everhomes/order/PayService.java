@@ -7,6 +7,7 @@ import com.everhomes.rest.order.PaymentParamsDTO;
 
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.order.SettlementAmountDTO;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 
 import java.math.BigDecimal;
@@ -70,4 +71,34 @@ public interface PayService {
     CreateOrderRestResponse refund(String orderType, Long payOrderId, Long refundOrderId, Long amount);
     //把这个方法暴露出来，方便我的模块。--闻天
     PaymentUser createPaymentUser(int businessUserType, String ownerType, Long ownerId);
+    
+    /**
+     * 获取帐户结算金额和可提现金额信息
+     * @param ownerType 帐户类型（如EhUsers、EhOrganizations）
+     * @param ownerId 帐户对应的ID（如用户ID、企业ID）
+     * @return  结算金额和可提现金额信息
+     */
+    SettlementAmountDTO getPaymentSettlementAmounts(String ownerType, Long ownerId);
+    
+    /**
+     * 获取帐户结算金额数量，通过指定的结算状态来获取对应的金额数量
+     * @param paymentUserId 帐户ID（支付系统中使用的帐户ID）
+     * @param settlementStatus 结算状态：已结算、未结算
+     * @return 金额数量
+     */
+    Long getPaymentAmountBySettlement(Long paymentUserId, Integer settlementStatus);
+    
+    /**
+     * 获取帐户已提款金额数量
+     * @param paymentUserId 帐户ID（支付系统中使用的帐户ID）
+     * @return 金额数量
+     */
+    Long getPaymentAmountByWithdraw(Long paymentUserId);
+    
+    /**
+     * 获取帐户已退款金额数量
+     * @param paymentUserId 帐户ID（支付系统中使用的帐户ID）
+     * @return 金额数量
+     */
+    Long getPaymentAmountByRefund(Long paymentUserId);
 }

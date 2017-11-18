@@ -13,6 +13,9 @@ import com.everhomes.pay.rest.ApiConstants;
 import com.everhomes.pay.user.BindPhoneCommand;
 import com.everhomes.pay.user.BusinessUserType;
 import com.everhomes.pay.user.RegisterBusinessUserCommand;
+import com.everhomes.query.QueryBuilder;
+import com.everhomes.query.QueryCondition;
+import com.everhomes.rest.MapListRestResponse;
 import com.everhomes.rest.StringRestResponse;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.order.OrderPaymentStatus;
@@ -833,5 +836,118 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         cmd.setBizOrderNum(String.valueOf(orderRecordId));
 
         return cmd;
+    }
+    
+    @Override
+    public SettlementAmountDTO getPaymentSettlementAmounts(String ownerType, Long ownerId)  {
+        PaymentUser paymentUser = payProvider.findPaymentUserByOwner(ownerType, ownerId);
+        if(paymentUser == null) {
+            LOGGER.error("Payment user not found, ownerType=%s, ownerId=%s", ownerType, ownerId);
+            return null;
+        }
+
+        Long notSettledAmount = getPaymentAmountBySettlement(paymentUser.getPaymentUserId(), SettlementStatus.NOT_SETTLED.getCode());
+        Long settledAmount = getPaymentAmountBySettlement(paymentUser.getPaymentUserId(), SettlementStatus.SETTLED.getCode());
+        Long withdrawAmount = getPaymentAmountByWithdraw(paymentUser.getPaymentUserId());
+        Long refundAmount = getPaymentAmountByRefund(paymentUser.getPaymentUserId());
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Payment amounts info, notSettledAmount=%s, settledAmount=%s, withdrawAmount=%s, refundAmount=%s",
+                    notSettledAmount, settledAmount, withdrawAmount, refundAmount);
+        }
+
+        SettlementAmountDTO result = new SettlementAmountDTO();
+        result.setSettlementAmount(notSettledAmount);
+        result.setWithdrawableAmount(settledAmount - withdrawAmount - refundAmount);
+                
+        return result;
+    }
+    
+    @Override
+    public Long getPaymentAmountBySettlement(Long paymentUserId, Integer settlementStatus) {
+        QueryOrderPaymentsCommand payCmd = new QueryOrderPaymentsCommand();
+        QueryBuilder queryBuilder = payCmd.builder();
+        queryBuilder.select(PaymentAttributes.AMOUNT.sum("amount"));
+
+        // ORDERPAYMENT: 通过订单收到的款
+        // FEECHARGE: 交易手续费（可正可负）
+        // REFUND: 退款（可正可负，即含别人退给自己的，也含退给别人的）
+        // REFUND_FEECHARGE: 退款费用（可正可负）
+        QueryCondition condition = PaymentAttributes.TRASACTION_TYPE.eq(TransactionType.ORDERPAYMENT.getCode())
+                .or(PaymentAttributes.TRASACTION_TYPE.eq(TransactionType.FEECHARGE.getCode()))
+                .or(PaymentAttributes.TRASACTION_TYPE.eq(TransactionType.REFUND.getCode()))
+                .or(PaymentAttributes.TRASACTION_TYPE.eq(TransactionType.REFUND_FEECHARGE.getCode()));
+
+        condition = condition.and(PaymentAttributes.USER_ID.eq(paymentUserId))
+                .and(PaymentAttributes.SETTLEMENT_STATUS.eq(settlementStatus))
+                .and(PaymentAttributes.PAYMENT_STATUS.eq(com.everhomes.pay.order.OrderPaymentStatus.SUCCESS.getCode()));
+
+        queryBuilder.where(condition);
+
+        MapListRestResponse response = (MapListRestResponse) restClient.restCall(
+                "POST",
+                ApiConstants.ORDER_QUERYORDERPAYMENTS_URL,
+                payCmd.done(),
+                MapListRestResponse.class);
+
+        if(response.getResponse() == null || response.getResponse().isEmpty()  || response.getResponse().get(0).get("amount") == null) {
+            return 0L;
+        } else {
+            return Long.valueOf(response.getResponse().get(0).get("amount"));
+        }
+    }
+    
+    @Override
+    public Long getPaymentAmountByWithdraw(Long paymentUserId) {
+        QueryOrderPaymentsCommand payCmd = new QueryOrderPaymentsCommand();
+        QueryBuilder queryBuilder = payCmd.builder();
+        queryBuilder.select(PaymentAttributes.AMOUNT.sum("amount"));
+
+        // WITHDRAW: 已提现
+        QueryCondition condition = PaymentAttributes.TRASACTION_TYPE.eq(TransactionType.WITHDRAW.getCode())
+                .and(PaymentAttributes.USER_ID.eq(paymentUserId))
+                .and(PaymentAttributes.PAYMENT_STATUS.eq(com.everhomes.pay.order.OrderPaymentStatus.SUCCESS.getCode())
+                        .or(PaymentAttributes.PAYMENT_STATUS.eq(com.everhomes.pay.order.OrderPaymentStatus.PENDING.getCode())));
+        queryBuilder.where(condition);
+
+        MapListRestResponse response = (MapListRestResponse) restClient.restCall(
+                "POST",
+                ApiConstants.ORDER_QUERYORDERPAYMENTS_URL,
+                payCmd.done(),
+                MapListRestResponse.class);
+
+        if(response.getResponse() == null || response.getResponse().isEmpty() || response.getResponse().get(0).get("amount") == null) {
+            return 0L;
+        } else {
+            return -Long.valueOf(response.getResponse().get(0).get("amount"));
+        }
+    }
+    
+    @Override
+    public Long getPaymentAmountByRefund(Long paymentUserId) {
+        QueryOrderPaymentsCommand payCmd = new QueryOrderPaymentsCommand();
+        QueryBuilder queryBuilder = payCmd.builder();
+        queryBuilder.select(PaymentAttributes.AMOUNT.sum("amount"));
+
+        // REFUND: 已退款
+        // REFUND_FEECHARGE: 退款手续费
+        QueryCondition trasactionTypeCondition = PaymentAttributes.TRASACTION_TYPE.eq(TransactionType.REFUND.getCode())
+                .or(PaymentAttributes.TRASACTION_TYPE.eq(TransactionType.REFUND_FEECHARGE.getCode()));
+        
+        QueryCondition condition = PaymentAttributes.USER_ID.eq(paymentUserId)
+                .and(trasactionTypeCondition)
+                .and(PaymentAttributes.PAYMENT_STATUS.eq(com.everhomes.pay.order.OrderPaymentStatus.SUCCESS.getCode()));
+        queryBuilder.where(condition);
+
+        MapListRestResponse response = (MapListRestResponse) restClient.restCall(
+                "POST",
+                ApiConstants.ORDER_QUERYORDERPAYMENTS_URL,
+                payCmd.done(),
+                MapListRestResponse.class);
+
+        if(response.getResponse() == null || response.getResponse().isEmpty() || response.getResponse().get(0).get("amount") == null) {
+            return 0L;
+        } else {
+            return -Long.valueOf(response.getResponse().get(0).get("amount"));
+        }
     }
 }
