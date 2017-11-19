@@ -18,7 +18,7 @@ ALTER TABLE `eh_payment_users` ADD COLUMN `legal_person_identity_back_uri` VARCH
 ALTER TABLE `eh_payment_users` ADD COLUMN `status` TINYINT NOT NULL COMMENT '0-inactive, 1-waiting for approval, 2-active';
 ALTER TABLE `eh_payment_users` ADD COLUMN `creator_uid` BIGINT;
 ALTER TABLE `eh_payment_users` ADD COLUMN `operator_uid` BIGINT;
-ALTER TABLE `eh_payment_users` ADD COLUMN `update_time` DATETIME,
+ALTER TABLE `eh_payment_users` ADD COLUMN `update_time` DATETIME;
 
 -- record the withdraw orders
 DROP TABLE IF EXISTS `eh_payment_withdraw_orders`;
