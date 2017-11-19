@@ -35,4 +35,18 @@ public interface PayProvider {
      * @param order 订单信息
      */
     void createPaymentWithdrawOrder(PaymentWithdrawOrder order);
+    
+    /**
+     * 根据提现订单编号来查询订单信息。（订单编号与订单ID不是同一字段）
+     * @param orderNo 订单编号
+     * @return 订单信息
+     */
+    PaymentWithdrawOrder findPaymentWithdrawOrderByOrderNo(Long orderNo);
+    
+    /**
+     * 更新提现订单信息
+     * @param order 订单信息
+     */
+    void updatePaymentWithdrawOrder(PaymentWithdrawOrder order);
+    
 }

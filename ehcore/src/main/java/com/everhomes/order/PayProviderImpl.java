@@ -8,6 +8,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.pay.order.PaymentDTO;
 import com.everhomes.pay.order.PaymentType;
+import com.everhomes.print.SiyinPrintOrder;
 import com.everhomes.rest.order.PayMethodDTO;
 import com.everhomes.rest.order.PaymentParamsDTO;
 import com.everhomes.sequence.SequenceProvider;
@@ -26,6 +27,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -194,6 +197,31 @@ public class PayProviderImpl implements PayProvider {
         EhPaymentWithdrawOrdersDao dao = new EhPaymentWithdrawOrdersDao(context.configuration());
         dao.insert(order);
 
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPaymentWithdrawOrders.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPaymentWithdrawOrders.class, order.getId());
+    }
+    
+    @Override
+    public PaymentWithdrawOrder findPaymentWithdrawOrderByOrderNo(Long orderNo) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectConditionStep<Record> query = context.select().from(Tables.EH_PAYMENT_WITHDRAW_ORDERS)
+                .where(Tables.EH_PAYMENT_WITHDRAW_ORDERS.ID.eq(orderNo));
+        List<PaymentWithdrawOrder> list  = query.fetch().map((r)->{
+            return ConvertHelper.convert(r, PaymentWithdrawOrder.class);
+        });
+        
+        if(list !=null && list.size()>0) {
+            return list.get(0);
+        } else {
+            return null;
+        }
+    }
+    
+    @Override
+    public void updatePaymentWithdrawOrder(PaymentWithdrawOrder order) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentWithdrawOrdersDao dao = new EhPaymentWithdrawOrdersDao(context.configuration());
+        dao.update(order);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPaymentWithdrawOrders.class, order.getId());
     }
 }

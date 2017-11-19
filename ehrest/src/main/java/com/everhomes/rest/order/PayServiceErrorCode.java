@@ -17,4 +17,8 @@ public interface PayServiceErrorCode {
     int ERROR_INVALID_WITHDRAW_AMOUNT  =10009;
     /** 提现帐号不存在 */
     int ERROR_WITHDRAW_ACCOUNT_NOT_FOUND  =10010;
+    /** 提现失败 */
+    int ERROR_WITHDRAW_FAILED  =10011;
+    /** 提现订单不存在 */
+    int ERROR_WITHDRAW_ORDER_NOT_FOUND  =10012;
 }

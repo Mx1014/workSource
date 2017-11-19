@@ -25,6 +25,7 @@ DROP TABLE IF EXISTS `eh_payment_withdraw_orders`;
 CREATE TABLE `eh_payment_withdraw_orders` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `order_no` BIGINT NOT NULL DEFAULT 0,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'community',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'community id',
   `payment_user_type` INTEGER NOT NULL COMMENT 'the account type to withdraw the monty: 1-普通会员,2-企业会员',

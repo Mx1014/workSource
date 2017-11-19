@@ -4,10 +4,10 @@ package com.everhomes.rest.order;
 /**
  * <p>提现订单状态</p>
  *<ul>
- *  <li>0: 无效</li>
- *  <li>1: 已下单，等待提现结果</li>
- *  <li>2: 提现成功</li>
- *  <li>3: 提现失败</li>
+ *  <li>INACTIVE(0): 无效</li>
+ *  <li>WAITING_FOR_CONFIRM(1): 已下单，等待提现结果</li>
+ *  <li>SUCCESS(2): 提现成功</li>
+ *  <li>FAILED(3): 提现失败</li>
  *</ul>
  */
 public enum PaymentWithdrawOrderStatus {

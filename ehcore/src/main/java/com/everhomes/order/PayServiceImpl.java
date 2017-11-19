@@ -27,6 +27,7 @@ import com.everhomes.rest.pay.controller.RegisterBusinessUserRestResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
@@ -1017,12 +1018,19 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
                     "Withdrawable amount insufficient");
         }
         
+        Long orderNumber = createOrderNumberByTime();
+        String orderType = OrderType.OrderTypeEnum.PRINT_ORDER.getPycode();
+        Timestamp time = new Timestamp(DateHelper.currentGMTTime().getTime());
         PaymentWithdrawOrder order = new PaymentWithdrawOrder();
         order.setNamespaceId(operator.getNamespaceId());
         order.setAmount(changePayAmount(amount));
-        //order.setUserId(operator.getId());
+        order.setPaymentUserType(paymentUser.getPaymentUserType());
+        order.setPaymentUserId(paymentUser.getPaymentUserId());
+        order.setOperatorUid(operator.getId());
+        order.setOperateTime(time);
         order.setStatus(PaymentWithdrawOrderStatus.WAITING_FOR_CONFIRM.getCode());
         order.setCreatorUid(operator.getId());
+        order.setCreateTime(time);
         payProvider.createPaymentWithdrawOrder(order);
         
         
@@ -1041,14 +1049,53 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         orderCmd.setBackUrl(backUrl);
         orderCmd.setCommitFlag(PaymentCommitFlag.YES.getCode());
         orderCmd.setPaymentType(PaymentType.WITHDRAW_AUTO.getCode());
+
+        // 银行卡号和属性
         Map<String, String> paymentParams = new HashMap<>();
-//        paymentParams.put("bankCardNum", paymentUser.getBankCardNumber());
-//        paymentParams.put("bankCardPro", getBankCardPro(paymentUser.getPaymentUserType()).toString());
+        paymentParams.put("bankCardNum", paymentUser.getBankCardNumber());
+        paymentParams.put("bankCardPro", String.valueOf(getBankCardProperty(paymentUser.getPaymentUserType())));
         orderCmd.setPaymentParams(paymentParams);
-        CreateOrderRestResponse response = (CreateOrderRestResponse) restClient.restCall("POST", ApiConstants.ORDER_CREATEORDER_URL, orderCmd, CreateOrderRestResponse.class);     
-        if(!CreateOrderRestResponse.isSuccess(response)){
-//            throw new BaseException(ErrorCodes.BASE_ERROR,response.getErrorDetails());
+        
+        CreateOrderRestResponse createOrderResp = restClient.restCall(
+                "POST", 
+                ApiConstants.ORDER_CREATEORDER_URL, 
+                orderCmd, 
+                CreateOrderRestResponse.class);     
+        
+        if(!CreateOrderRestResponse.isSuccess(createOrderResp)){
+            Long serviceConfigId = 0L; // 提现时不分具体业务，故没有此ID信息
+            OrderCommandResponse  orderCommandResponse = createOrderResp.getResponse();
+            saveOrderRecord(orderCommandResponse, orderNumber, orderType,  serviceConfigId, com.everhomes.pay.order.OrderType.PURCHACE.getCode());
+        } else {
+            LOGGER.error("Failed to withdraw mony, ownerType={}, ownerId={}, operatorUid={}, amount={}, createOrderResp={}", 
+                    ownerType, ownerId, operator.getId(), amount, createOrderResp);
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_WITHDRAWABLE_AMOUNT_INSUFFICIENT,
+                    "Failed to withdraw mony");
         }
-//        return response.getResponse();
+    }
+    
+    private int getBankCardProperty(Integer paymentUserType) {
+        BusinessUserType userType = BusinessUserType.fromCode(paymentUserType);
+        int bankCardPro = PaymentBankCardType.PERSONAL.getCode();
+        if(userType == BusinessUserType.BUSINESS) {
+            bankCardPro = PaymentBankCardType.BUSINESS.getCode();
+        }
+        
+        return bankCardPro;
+    }
+    
+    public Long createOrderNumberByTime() {
+        String suffix = String.valueOf(generateRandomNumber(3));
+
+        return Long.valueOf(String.valueOf(System.currentTimeMillis()) + suffix);
+    }
+
+    /**
+     *
+     * @param n 创建n位随机数
+     * @return
+     */
+    private long generateRandomNumber(int n){
+        return (long)((Math.random() * 9 + 1) * Math.pow(10, n-1));
     }
 }
