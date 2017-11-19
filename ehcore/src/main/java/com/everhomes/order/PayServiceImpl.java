@@ -24,6 +24,7 @@ import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.pay.controller.QueryBalanceRestResponse;
 import com.everhomes.rest.pay.controller.RegisterBusinessUserRestResponse;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -982,52 +983,53 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         }
     }
     
-//    public PaymentWithdrawOrderResp requestWithdraw(BigDecimal amount,ValidationType validationType, String ownerType, Long ownerId) throws Exception{
-//        SettlementAmountDTO settlementAmount = getPaymentSettlementAmounts(ownerType, ownerId);
-//        Long withdrawableAmount = settlementAmount.getWithdrawableAmount();
-//        if(withdrawableAmount == null || withdrawableAmount.longValue() <= 0)  {
-//            LOGGER.error("Withdrawable amount insufficient, ownerType=%s, ownerId=%s, amount=%s, realAmount=%s", ownerType, ownerId, amount, settlementAmount);
-//            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_WITHDRAWABLE_AMOUNT_INSUFFICIENT,
-//                    "Withdrawable amount insufficient");
-//        }
-//        
-//        OrderCommandResponse orderResponse = remoteAccessService.payV2Withdraw(amount, ValidationType.NO_VERIFY, paymentUser);
-//        (CreateOrderRestResponse) callPaymentMethod(HTTP_POST, ApiConstants.ORDER_CREATEORDER_URL, cmd, CreateOrderRestResponse.class);
-//        PaymentWithdrawOrder withdrawOrder = new PaymentWithdrawOrder();
-//        withdrawOrder.setAmount(amount);
-//        withdrawOrder.setCreateTime(new Date());
-//        withdrawOrder.setId(orderResponse.getBizOrderNum());
-//        withdrawOrder.setPaymentStatus(OrderPaymentStatus.PENDING.getCode());
-//        withdrawOrder.setPaymentUserId(paymentUser.getPaymentUserId());
-//        paymentService.addPaymentWithdrawOrder(withdrawOrder);
-//        PaymentWithdrawOrderResp response = ObjectConvertUtil.convertForSampleType(withdrawOrder, PaymentWithdrawOrderResp.class);
-//        response.setOrderId(orderResponse.getOrderId());
-//        return response;
-//    }
-//    
-//    private OrderCommandResponse payV2Withdraw(Long amount,ValidationType validationType,PaymentUser paymentUser) throws Exception {
-//        String homeUrl = configurationService.getValue(ConfigName.HOME_URL);
-//        String backUri = configurationService.getValue(ConfigName.PAY_V2_BACK_URI);
-//        String backUrl = homeUrl + backUri;
-//        String withdrawOrderNo = getOrderNum(cmd.getOrderId(),cmd.getOrderType());
-//        CreateOrderCommand orderCmd = new CreateOrderCommand();
-//        orderCmd.setAmount(amount);
-//        orderCmd.setBizOrderNum(withdrawOrderNo);
+//    public PaymentWithdrawOrderResp requestWithdraw(Long amount,ValidationType validationType, String ownerType, Long ownerId) throws Exception{
+    public void requestWithdraw(String ownerType, Long ownerId, User operator, Long amount) throws Exception{
+        if(amount == null || amount.longValue() <= 0L) {
+            LOGGER.error("Invalid amount to withdraw, ownerType=%s, ownerId=%s, amount=%s", ownerType, ownerId, amount);
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_INVALID_WITHDRAW_AMOUNT,
+                    "Invalid amount to withdraw");
+        }
+        
+        PaymentBalanceDTO paymentBalance = getPaymentBalance(ownerType, ownerId);
+        Long withdrawableAmount = paymentBalance.getWithdrawableAmount();
+        if(withdrawableAmount == null || withdrawableAmount.longValue() <= 0)  {
+            LOGGER.error("Withdrawable amount insufficient, ownerType=%s, ownerId=%s, amount=%s, realAmount=%s", ownerType, ownerId, amount, paymentBalance);
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_WITHDRAWABLE_AMOUNT_INSUFFICIENT,
+                    "Withdrawable amount insufficient");
+        }
+        
+        PaymentWithdrawOrder order = new PaymentWithdrawOrder();
+        order.setNamespaceId(operator.getNamespaceId());
+        order.setAmount(changePayAmount(amount));
+        //order.setUserId(operator.getId());
+        order.setStatus(PaymentWithdrawOrderStatus.WAITING_FOR_CONFIRM.getCode());
+        order.setCreatorUid(operator.getId());
+        payProvider.createPaymentWithdrawOrder(order);
+        
+        
+        String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.callback.url", "");
+        String backUrl = homeUrl + contextPath + backUri;
+        String withdrawOrderNo = getOrderNum(order.getId(), OrderType.OrderTypeEnum.WITHDRAW_CODE.getPycode());
+        CreateOrderCommand orderCmd = new CreateOrderCommand();
+        orderCmd.setAmount(amount);
+        orderCmd.setBizOrderNum(withdrawOrderNo);
 //        orderCmd.setPayeeUserId(paymentUser.getPaymentUserId());
-//        orderCmd.setSourceType(SourceType.MOBILE.getCode());
-//        orderCmd.setOrderType(com.everhomes.pay.order.OrderType.WITHDRAW.getCode());
-//        orderCmd.setValidationType(validationType.getCode());
-//        orderCmd.setBackUrl(backUrl);
-//        orderCmd.setCommitFlag(CommitFlag.YES.getCode());
-//        orderCmd.setPaymentType(PaymentType.WITHDRAW_AUTO.getCode());
-//        Map<String, String> paymentParams = new HashMap<>();
+        orderCmd.setSourceType(SourceType.MOBILE.getCode());
+        orderCmd.setOrderType(com.everhomes.pay.order.OrderType.WITHDRAW.getCode());
+        orderCmd.setValidationType(ValidationType.NO_VERIFY.getCode());
+        orderCmd.setBackUrl(backUrl);
+        orderCmd.setCommitFlag(PaymentCommitFlag.COMMIT.getCode());
+        orderCmd.setPaymentType(PaymentType.WITHDRAW_AUTO.getCode());
+        Map<String, String> paymentParams = new HashMap<>();
 //        paymentParams.put("bankCardNum", paymentUser.getBankCardNumber());
 //        paymentParams.put("bankCardPro", getBankCardPro(paymentUser.getPaymentUserType()).toString());
-//        orderCmd.setPaymentParams(paymentParams);
-//        CreateOrderRestResponse response = (CreateOrderRestResponse) restClient.restCall("POST", ApiConstants.ORDER_CREATEORDER_URL, orderCmd, CreateOrderRestResponse.class);     
-//        if(!CreateOrderRestResponse.isSuccess(response)){
+        orderCmd.setPaymentParams(paymentParams);
+        CreateOrderRestResponse response = (CreateOrderRestResponse) restClient.restCall("POST", ApiConstants.ORDER_CREATEORDER_URL, orderCmd, CreateOrderRestResponse.class);     
+        if(!CreateOrderRestResponse.isSuccess(response)){
 //            throw new BaseException(ErrorCodes.BASE_ERROR,response.getErrorDetails());
-//        }
+        }
 //        return response.getResponse();
-//    }
+    }
 }

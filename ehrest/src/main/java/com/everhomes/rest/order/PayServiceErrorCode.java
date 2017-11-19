@@ -13,4 +13,6 @@ public interface PayServiceErrorCode {
     int ERROR_REFUND_FAIL=10007;
     /** 可提现金额不足 */
     int ERROR_WITHDRAWABLE_AMOUNT_INSUFFICIENT  =10008;
+    /** 希望提现的金额不合法（小于或等于0） */
+    int ERROR_INVALID_WITHDRAW_AMOUNT  =10009;
 }

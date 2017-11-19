@@ -26,6 +26,7 @@ import com.everhomes.schema.tables.pojos.EhNamespaces;
 import com.everhomes.schema.tables.pojos.EhServerShardMap;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
+import com.everhomes.server.schema.tables.EhPaymentWithdrawOrders;
 import com.everhomes.server.schema.tables.EhQuestionnaireRanges;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.pojos.EhAclinkFirmware;
@@ -2490,6 +2491,10 @@ public class SequenceServiceImpl implements SequenceService {
 
         syncTableSequence(null, EhRentalv2PricePackages.class, Tables.EH_RENTALV2_PRICE_PACKAGES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_RENTALV2_PRICE_PACKAGES.ID.max()).from(Tables.EH_RENTALV2_PRICE_PACKAGES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhPaymentWithdrawOrders.class, Tables.EH_PAYMENT_WITHDRAW_ORDERS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_WITHDRAW_ORDERS.ID.max()).from(Tables.EH_PAYMENT_WITHDRAW_ORDERS).fetchOne().value1();
         });
     }
 

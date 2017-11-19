@@ -29,4 +29,10 @@ public interface PayProvider {
     List<PayMethodDTO> listPayMethods(Integer namespaceId, Integer paymentType, String orderType, String ownerType, Long ownerId, String resourceType, Long resourceId);
 
     PaymentOrderRecord findOrderRecordByOrderNum(String bizOrderNum);
+    
+    /**
+     * 创建提现订单
+     * @param order 订单信息
+     */
+    void createPaymentWithdrawOrder(PaymentWithdrawOrder order);
 }
