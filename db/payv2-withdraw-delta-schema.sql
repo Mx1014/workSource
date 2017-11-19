@@ -1,3 +1,26 @@
+ALTER TABLE `eh_payment_users` ADD COLUMN `bank_name` VARCHAR(512) COMMENT 'the name of bank where enterprise has a account';
+ALTER TABLE `eh_payment_users` ADD COLUMN `bank_number` VARCHAR(128) COMMENT 'the number of bank where enterprise has a account';
+ALTER TABLE `eh_payment_users` ADD COLUMN `bank_card_number` VARCHAR(128) COMMENT 'the card number of enterprise bank account';
+
+ALTER TABLE `eh_payment_users` ADD COLUMN `enterprise_name` VARCHAR(512) COMMENT 'the name of enterprise';
+ALTER TABLE `eh_payment_users` ADD COLUMN `enterprise_business_licence` VARCHAR(128) COMMENT 'the business licence number of enterprise';
+ALTER TABLE `eh_payment_users` ADD COLUMN `enterprise_business_licence_uri` VARCHAR(128) COMMENT 'the image of business licence of enterprise';
+ALTER TABLE `eh_payment_users` ADD COLUMN `enterprise_account_licence_uri` VARCHAR(128) COMMENT 'the image of account licence of enterprise';
+ 
+ALTER TABLE `eh_payment_users` ADD COLUMN `legal_person_name` VARCHAR(512) COMMENT 'the real name of legal person in an enterprise';
+ALTER TABLE `eh_payment_users` ADD COLUMN `legal_person_phone` VARCHAR(512) COMMENT 'the phone number of legal person in an enterprise';
+ALTER TABLE `eh_payment_users` ADD COLUMN `legal_person_identity_type` VARCHAR(512) COMMENT 'the identity type of legal person in an enterprise';
+ALTER TABLE `eh_payment_users` ADD COLUMN `legal_person_identity_number` VARCHAR(512) COMMENT 'the identity number of legal person in an enterprise';
+ALTER TABLE `eh_payment_users` ADD COLUMN `legal_person_identity_front_uri` VARCHAR(1024) COMMENT 'the front side of identity image of legal person in an enterprise';
+ALTER TABLE `eh_payment_users` ADD COLUMN `legal_person_identity_back_uri` VARCHAR(1024) COMMENT 'the back side identity image of legal person in an enterprise';
+
+
+ALTER TABLE `eh_payment_users` ADD COLUMN `status` TINYINT NOT NULL COMMENT '0-inactive, 1-waiting for approval, 2-active';
+ALTER TABLE `eh_payment_users` ADD COLUMN `creator_uid` BIGINT;
+ALTER TABLE `eh_payment_users` ADD COLUMN `operator_uid` BIGINT;
+ALTER TABLE `eh_payment_users` ADD COLUMN `update_time` DATETIME,
+
+-- record the withdraw orders
 DROP TABLE IF EXISTS `eh_payment_withdraw_orders`;
 CREATE TABLE `eh_payment_withdraw_orders` (
   `id` BIGINT NOT NULL,
@@ -14,3 +37,6 @@ CREATE TABLE `eh_payment_withdraw_orders` (
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
+
