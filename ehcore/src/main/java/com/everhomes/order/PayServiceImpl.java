@@ -888,7 +888,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         }
         
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Payment balance info, ownerType=%s, paymentUserId=%s, balance=%s", ownerType, ownerId, paymentUser.getPaymentUserId(), result);
+            LOGGER.debug("Payment balance info, ownerType={}, paymentUserId={}, balance={}", ownerType, ownerId, paymentUser.getPaymentUserId(), result);
         }
         
         return result;
@@ -986,15 +986,33 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
 //    public PaymentWithdrawOrderResp requestWithdraw(Long amount,ValidationType validationType, String ownerType, Long ownerId) throws Exception{
     public void requestWithdraw(String ownerType, Long ownerId, User operator, Long amount) throws Exception{
         if(amount == null || amount.longValue() <= 0L) {
-            LOGGER.error("Invalid amount to withdraw, ownerType=%s, ownerId=%s, amount=%s", ownerType, ownerId, amount);
+            LOGGER.error("Invalid amount to withdraw, ownerType={}, ownerId={}, operatorUid={}, amount={}", 
+                    ownerType, ownerId, operator.getId(), amount);
             throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_INVALID_WITHDRAW_AMOUNT,
                     "Invalid amount to withdraw");
+        }
+        
+        PaymentAccount paymentAccount = findPaymentAccount(SYSTEMID);
+        if (paymentAccount == null) {
+            LOGGER.error("Payment account no found, ownerType={}, ownerId={}, operatorUid={}, amount={}, systemId={}", 
+                    ownerType, ownerId, operator.getId(), amount, SYSTEMID);
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_ACCOUNT_NO_FIND,
+                    "Payment account no found");
+        }
+        
+        PaymentUser paymentUser = payProvider.findPaymentUserByOwner(ownerType, ownerId);
+        if(paymentUser == null) {
+            LOGGER.error("Withdraw account not found, ownerType={}, ownerId={}, operatorUid={}, amount={}, realAmount={}", 
+                    ownerType, ownerId, operator.getId(), amount);
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_WITHDRAW_ACCOUNT_NOT_FOUND,
+                    "Withdraw account not found");
         }
         
         PaymentBalanceDTO paymentBalance = getPaymentBalance(ownerType, ownerId);
         Long withdrawableAmount = paymentBalance.getWithdrawableAmount();
         if(withdrawableAmount == null || withdrawableAmount.longValue() <= 0)  {
-            LOGGER.error("Withdrawable amount insufficient, ownerType=%s, ownerId=%s, amount=%s, realAmount=%s", ownerType, ownerId, amount, paymentBalance);
+            LOGGER.error("Withdrawable amount insufficient, ownerType={}, ownerId={}, operatorUid={}, amount={}, realAmount={}", 
+                    ownerType, ownerId, operator.getId(), amount, paymentBalance);
             throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_WITHDRAWABLE_AMOUNT_INSUFFICIENT,
                     "Withdrawable amount insufficient");
         }
@@ -1013,14 +1031,15 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         String backUrl = homeUrl + contextPath + backUri;
         String withdrawOrderNo = getOrderNum(order.getId(), OrderType.OrderTypeEnum.WITHDRAW_CODE.getPycode());
         CreateOrderCommand orderCmd = new CreateOrderCommand();
+        orderCmd.setBizSystemId(paymentAccount.getSystemId());
         orderCmd.setAmount(amount);
         orderCmd.setBizOrderNum(withdrawOrderNo);
-//        orderCmd.setPayeeUserId(paymentUser.getPaymentUserId());
+        orderCmd.setPayeeUserId(paymentUser.getPaymentUserId());
         orderCmd.setSourceType(SourceType.MOBILE.getCode());
         orderCmd.setOrderType(com.everhomes.pay.order.OrderType.WITHDRAW.getCode());
         orderCmd.setValidationType(ValidationType.NO_VERIFY.getCode());
         orderCmd.setBackUrl(backUrl);
-        orderCmd.setCommitFlag(PaymentCommitFlag.COMMIT.getCode());
+        orderCmd.setCommitFlag(PaymentCommitFlag.YES.getCode());
         orderCmd.setPaymentType(PaymentType.WITHDRAW_AUTO.getCode());
         Map<String, String> paymentParams = new HashMap<>();
 //        paymentParams.put("bankCardNum", paymentUser.getBankCardNumber());

@@ -27,13 +27,15 @@ CREATE TABLE `eh_payment_withdraw_orders` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'community',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'community id',
-  `user_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the user who widraw the money',
+  `payment_user_type` INTEGER NOT NULL COMMENT 'the account type to withdraw the monty: 1-普通会员,2-企业会员',
+  `payment_user_id` BIGINT NOT NULL COMMENT 'the account in pay-system to withdraw the monty',
   `amount` DECIMAL(10,2) COMMENT 'the amount to withdraw',
   `status` TINYINT NOT NULL COMMENT '0-inactive, 1-waiting for confirm, 2-success, 3-failed',
   `callback_time` DATETIME,
+  `operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the user who withdraw the money',
+  `operate_time` DATETIME COMMENT 'the time to withdraw the money',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
-  `update_time` DATETIME,
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
