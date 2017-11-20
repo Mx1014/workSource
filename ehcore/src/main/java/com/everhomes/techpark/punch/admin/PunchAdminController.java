@@ -1040,12 +1040,12 @@ public class PunchAdminController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: punch/listPunchStatistics</b>
+	 * <b>URL: punch/listPunchLogs</b>
 	 * <p>
-	 * 查询公司考勤的统计结果
+	 * 查询某人某天的真实打卡记录
 	 * </p>
 	 */
-	@RequestMapping("listPunchStatistics")
+	@RequestMapping("listPunchLogs")
 	@RestReturn(value = ListPunchLogsResponse.class)
 	public RestResponse listPunchLogs(@Valid ListPunchLogsCommand cmd) {
 		ListPunchLogsResponse commandResponse = punchService.listPunchLogs(cmd);
