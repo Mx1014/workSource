@@ -249,4 +249,6 @@ public interface PunchService {
 	PunchLog getAbnormalPunchLog(PunchExceptionRequest request);
 
 	void punchGroupAddNewEmployee(Long groupId);
+
+	ListPunchLogsResponse listPunchLogs(ListPunchLogsCommand cmd);
 }

@@ -8594,4 +8594,30 @@ public class PunchServiceImpl implements PunchService {
 			punchProvider.updatePunchRule(pr);
 		}
 	}
+
+    @Override
+    public ListPunchLogsResponse listPunchLogs(ListPunchLogsCommand cmd) {
+        List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(cmd.getUserId(),cmd.getEnterpriseId(),
+                dateSF.get().format(new Date(cmd.getQueryTime())), ClockCode.SUCESS.getCode());
+        if (null == punchLogs) {
+            return null;
+        }
+        ListPunchLogsResponse response = new ListPunchLogsResponse();
+        List<PunchLogDTO> dtos = punchLogs.stream().map(pl -> {
+            PunchLogDTO dto1 = new PunchLogDTO();
+            if(pl.getRuleTime()!=null) {
+                dto1 = ConvertHelper.convert(pl, PunchLogDTO.class);
+            }else{
+                dto1.setPunchType(pl.getPunchType());
+            }
+
+            if (null != pl.getPunchTime()) {
+                dto1.setPunchTime(pl.getPunchTime().getTime());
+            }
+            dto1.setClockStatus(pl.getStatus());
+            return dto1;
+        }).collect(Collectors.toList());
+        response.setPunchLogs(dtos);
+        return response;
+    }
 }

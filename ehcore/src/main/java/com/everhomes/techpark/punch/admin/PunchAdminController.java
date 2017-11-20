@@ -5,6 +5,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.rest.techpark.punch.admin.*;
 
 import org.slf4j.Logger;
@@ -22,11 +23,6 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.techpark.punch.GetPunchQRCodeCommand;
-import com.everhomes.rest.techpark.punch.ListPunchCountCommand;
-import com.everhomes.rest.techpark.punch.ListPunchCountCommandResponse;
-import com.everhomes.rest.techpark.punch.PunchRuleDTO;
-import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.UserService;
@@ -1043,4 +1039,19 @@ public class PunchAdminController extends ControllerBase {
 		return new RestResponse();
 	}
 
+	/**
+	 * <b>URL: punch/listPunchStatistics</b>
+	 * <p>
+	 * 查询公司考勤的统计结果
+	 * </p>
+	 */
+	@RequestMapping("listPunchStatistics")
+	@RestReturn(value = ListPunchLogsResponse.class)
+	public RestResponse listPunchLogs(@Valid ListPunchLogsCommand cmd) {
+		ListPunchLogsResponse commandResponse = punchService.listPunchLogs(cmd);
+		RestResponse response = new RestResponse(commandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }
