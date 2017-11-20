@@ -9545,7 +9545,7 @@ CREATE TABLE `eh_pm_tasks` (
   `organization_uid` BIGINT,
   `remark_source` VARCHAR(32),
   `remark` VARCHAR(1024),
-  
+  `organization_name` VARCHAR(128) COMMENT '报修的任务的公司名称',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
