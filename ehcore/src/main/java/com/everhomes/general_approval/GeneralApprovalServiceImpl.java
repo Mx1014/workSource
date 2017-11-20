@@ -966,6 +966,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         Row mainTitleRow = sheet.createRow(0);
         XSSFCellStyle mainTitleStyle = workbook.createCellStyle();
         mainTitleStyle.setAlignment(CellStyle.ALIGN_CENTER);
+        mainTitleStyle.setAlignment(CellStyle.VERTICAL_CENTER);
         //  1.Set the value of the main title
         Cell mainTitleCell = mainTitleRow.createCell(0);
         mainTitleCell.setCellStyle(mainTitleStyle);
@@ -975,6 +976,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         Row subTitleRow = sheet.createRow(1);
         XSSFCellStyle subTitleStyle = workbook.createCellStyle();
         subTitleStyle.setAlignment(CellStyle.ALIGN_CENTER);
+        subTitleStyle.setAlignment(CellStyle.VERTICAL_CENTER);
         //  2.Set the value of the subtitle
         Cell subTitleCell = subTitleRow.createCell(0);
         subTitleCell.setCellStyle(subTitleStyle);
@@ -983,7 +985,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         //  3.Set the title of the approval lists
         Row titleRow = sheet.createRow(2);
         for (int i = 0; i < list.size(); i++) {
-            sheet.setColumnWidth(i, 15 * 256);
+            sheet.setColumnWidth(i, 17 * 256);
             if (i == 4 || i == 6)
                 sheet.setColumnWidth(i, 30 * 256);
             Cell cell = titleRow.createCell(i);
@@ -998,8 +1000,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
         //  1. basic data from flowCases
         Cell approvalNoCell = dataRow.createCell(0);
-        approvalNoCell.setCellType(XSSFCell.CELL_TYPE_STRING);
-        approvalNoCell.setCellValue(data.getApprovalNo());
+        approvalNoCell.setCellValue(data.getApprovalNo().toString());
         dataRow.createCell(1).setCellValue(data.getCreateTime());
         dataRow.createCell(2).setCellValue(data.getCreatorName());
         dataRow.createCell(3).setCellValue(data.getCreatorDepartment());
