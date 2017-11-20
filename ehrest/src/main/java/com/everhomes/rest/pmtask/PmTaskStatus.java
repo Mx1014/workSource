@@ -11,6 +11,7 @@ package com.everhomes.rest.pmtask;
  * <li>5: 已回访</li>
  * </ul>
  */
+@Deprecated
 public enum PmTaskStatus {
 	INACTIVE((byte)0), UNPROCESSED((byte)1), PROCESSING((byte)2), PROCESSED((byte)3), CLOSED((byte)4), REVISITED((byte)5);
     

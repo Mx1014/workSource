@@ -41,6 +41,8 @@ import com.everhomes.util.StringHelper;
  * <li>billAttachments：订单附加信息</li> 
  * <li>unpayCancelTime：未支付取消时间</li>
  * <li>confirmationPrompt: 确认提示(非必填)</li>
+ * <li>doorAuthTime: 门禁二维码有效期</li>
+ * <li>packageName: 套餐名称</li>
  * </ul>
  */
 public class RentalBillDTO {
@@ -79,6 +81,8 @@ public class RentalBillDTO {
 	private java.lang.String     vendorType;
 	private java.lang.Long       resourceTypeId; 
 	private Long unpayCancelTime;
+	private String doorAuthTime;
+	private String packageName;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems; 
 
@@ -249,8 +253,14 @@ public class RentalBillDTO {
 	public void setStatus(Byte status) {
 		this.status = status;
 	}
- 
- 
+
+	public String getDoorAuthTime() {
+		return doorAuthTime;
+	}
+
+	public void setDoorAuthTime(String doorAuthTime) {
+		this.doorAuthTime = doorAuthTime;
+	}
 
 	public BigDecimal getSitePrice() {
 		return sitePrice;
@@ -331,9 +341,14 @@ public class RentalBillDTO {
 	public void setNotice(String notice) {
 		this.notice = notice;
 	}
- 
- 
 
+	public String getPackageName() {
+		return packageName;
+	}
+
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
+	}
 
 	public java.lang.String getUseDetail() {
 		return useDetail;

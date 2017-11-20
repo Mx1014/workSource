@@ -8,32 +8,36 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
+
+import java.util.concurrent.Executor;
 
 /**
  * Note
  *     We support a mixed-mode of bean configuration. You can both configure beans here
  *  or in applicationContext.xml.
- *  
+ *
  *  In general, use annotation based configuration if you can, but if you do need 
  *  more expressive way in the configuration, put them in applicationContext.xml 
- *  
+ *
  * @author Kelven Yang
  */
 @Configuration
-@ImportResource(value="classpath*:**/applicationContext.xml")
+@ImportResource(value = "classpath*:**/applicationContext.xml")
 @EnableWebSocket
 @EnableCaching
 @EnableAsync
 @EnableScheduling
-public class AppConfig {
+public class AppConfig implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
-    
+
     public static int DEFAULT_PAGINATION_PAGE_SIZE = 20;
-    
+
     @Value("${upload.max.size}")
     long maxUploadSize;
     
@@ -52,16 +56,26 @@ public class AppConfig {
         return resolver;
     }
     */
-    
+
     @Bean
     CharacterEncodingFilter encodingFilter() {
         CharacterEncodingFilter filter = new CharacterEncodingFilter();
-        
+
         filter.setEncoding("UTF-8");
         filter.setForceEncoding(true);
         return filter;
     }
-    
+
+    @Override
+    public Executor getAsyncExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(6);
+        executor.setMaxPoolSize(128);
+        executor.setThreadNamePrefix("AsyncMethodInvocation-");
+        executor.initialize();
+        return executor;
+    }
+
 //    @Bean
 //    public SchedulerFactoryBean quartz() {
 //        SchedulerFactoryBean factoryBean = new SchedulerFactoryBean();
@@ -69,5 +83,5 @@ public class AppConfig {
 //        factoryBean.setApplicationContextSchedulerContextKey("applicationContext");
 //        return factoryBean;
 //    }
-    
+
 }

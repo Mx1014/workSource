@@ -196,7 +196,7 @@ public interface FlowService {
 
     FlowCase getFlowCaseById(Long flowCaseId);
 
-    List<UserInfo> getCurrentProcessors(Long flowCaseId, boolean allFlowCaseFlag);
+    FlowCaseProcessorsProcessor getCurrentProcessors(Long flowCaseId, boolean allFlowCaseFlag);
 
     List<UserInfo> getSupervisor(FlowCase flowCase);
 
@@ -285,7 +285,7 @@ public interface FlowService {
 
 	void flushState(FlowCaseState ctx) throws FlowStepBusyException;
 
-	void createSnapshotNodeProcessors(FlowCaseState ctx, FlowGraphNode nextNode);
+	void createSnapshotNodeProcessors(FlowCaseState ctx, FlowGraphNode node);
 
 	void createSnapshotSupervisors(FlowCaseState ctx);
 	
@@ -300,7 +300,9 @@ public interface FlowService {
 	Flow getEnabledFlow(Integer namespaceId, Long moduleId, String moduleType,
 			Long ownerId, String ownerType);
 
-	/**
+    Flow getEnabledFlow(Integer namespaceId, String projectType, Long projectId, Long moduleId, String moduleType, Long ownerId, String ownerType);
+
+    /**
 	 * 添加一个 Case 到工作流中，注意此时为 snapshotFlow，即为运行中的 Flow 副本。
 	 * @param flowCaseCmd
 	 * @return
@@ -419,6 +421,8 @@ public interface FlowService {
 	List<Long> getApplierSelection(FlowCaseState ctx, FlowUserSelection sel);
 
 	void fixupUserInfoInContext(FlowCaseState ctx, UserInfo ui);
+
+    void fixupUserInfo(Long organizationId, UserInfo userInfo);
 
     /**
      * 删除flowCase

@@ -15,13 +15,13 @@ public interface PmTaskService {
 	
 	ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd);
 	
-	void evaluateTask(EvaluateTaskCommand cmd);
+//	void evaluateTask(EvaluateTaskCommand cmd);
 	
-	void completeTask(CompleteTaskCommand cmd);
+//	void completeTask(CompleteTaskCommand cmd);
 	
-	void closeTask(CloseTaskCommand cmd);
+//	void closeTask(CloseTaskCommand cmd);
 
-	void assignTask(AssignTaskCommand cmd);
+//	void assignTask(AssignTaskCommand cmd);
 	
 	PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd);
 	
@@ -45,21 +45,19 @@ public interface PmTaskService {
 	
 	GetStatisticsResponse getStatistics(GetStatisticsCommand cmd);
 	
-	PmTaskLogDTO getTaskLog(GetTaskLogCommand cmd);
+//	PmTaskLogDTO getTaskLog(GetTaskLogCommand cmd);
 	
-	void cancelTask(CancelTaskCommand cmd);
+//	void cancelTask(CancelTaskCommand cmd);
 	
-	GetPrivilegesDTO getPrivileges(GetPrivilegesCommand cmd);
+//	GetPrivilegesDTO getPrivileges(GetPrivilegesCommand cmd);
 	
 	void exportStatistics(GetStatisticsCommand cmd, HttpServletResponse resp);
 	
 	void exportListStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp);
 	
-	void createStatistics();
+//	ListOperatePersonnelsResponse listOperatePersonnels(ListOperatePersonnelsCommand cmd);
 	
-	ListOperatePersonnelsResponse listOperatePersonnels(ListOperatePersonnelsCommand cmd);
-	
-	void revisit(RevisitCommand cmd);
+//	void revisit(RevisitCommand cmd);
 	
 	SearchTaskCategoryStatisticsResponse searchTaskCategoryStatistics(SearchTaskStatisticsCommand cmd);
 	
@@ -75,7 +73,7 @@ public interface PmTaskService {
 
 	NamespaceHandlerDTO getNamespaceHandler(GetNamespaceHandlerCommand cmd);
 
-	void synchronizedData(SearchTasksCommand cmd);
+//	void synchronizedData(SearchTasksCommand cmd);
 
 	void deleteTaskHistoryAddress(DeleteTaskHistoryAddressCommand cmd);
 
@@ -88,4 +86,6 @@ public interface PmTaskService {
 	void changeTasksStatus(UpdateTasksStatusCommand cmd);
 
 	ListAuthorizationCommunityByUserResponse listOrganizationCommunityByUser(ListOrganizationCommunityByUserCommand cmd);
+
+	void syncTaskStatistics(HttpServletResponse resp);
 }

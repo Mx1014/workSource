@@ -1,6 +1,5 @@
 package com.everhomes.pmtask;
 
-import com.alibaba.fastjson.JSONObject;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -8,6 +7,7 @@ import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
@@ -15,13 +15,11 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.parking.ParkingVendorHandler;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
@@ -73,6 +71,8 @@ class PmTaskCommonServiceImpl {
     private CommunityProvider communityProvider;
     @Autowired
     private OrganizationProvider organizationProvider;
+    @Autowired
+    private ConfigurationProvider configProvider;
 
     List<PmTaskAttachmentDTO> convertAttachmentDTO(List<PmTaskAttachment> attachments) {
         return attachments.stream().map(r -> {
@@ -181,37 +181,6 @@ class PmTaskCommonServiceImpl {
 
     }
 
-    void sendMessageForCreateTask(List<PmTaskTarget> targets, String requestorName, String requestorPhone,
-                                        String taskCategoryName, User user) {
-        List<String> phones = new ArrayList<>();
-
-        //消息推送
-        String scope = PmTaskNotificationTemplateCode.SCOPE;
-        String locale = PmTaskNotificationTemplateCode.LOCALE;
-        for(PmTaskTarget p: targets) {
-            UserIdentifier sender = userProvider.findClaimedIdentifierByOwnerAndType(p.getTargetId(), IdentifierType.MOBILE.getCode());
-            phones.add(sender.getIdentifierToken());
-            //消息推送
-            Map<String, Object> map = new HashMap<>();
-            map.put("creatorName", requestorName);
-            map.put("creatorPhone", requestorPhone);
-            map.put("categoryName", taskCategoryName);
-            int code = PmTaskNotificationTemplateCode.CREATE_PM_TASK;
-            String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-            sendMessageToUser(p.getTargetId(), text);
-        }
-        int num = phones.size();
-        if(num > 0) {
-            String[] s = new String[num];
-            phones.toArray(s);
-            List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorName", requestorName);
-            smsProvider.addToTupleList(variables, "operatorPhone", requestorPhone);
-            smsProvider.addToTupleList(variables, "categoryName", taskCategoryName);
-            smsProvider.sendSms(user.getNamespaceId(), s, SmsTemplateCode.SCOPE,
-                    SmsTemplateCode.PM_TASK_CREATOR_CODE, user.getLocale(), variables);
-        }
-    }
-
     PmTask createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone) {
         if(null == cmd.getAddressType()){
             LOGGER.error("Invalid addressType parameter.");
@@ -240,7 +209,6 @@ class PmTaskCommonServiceImpl {
         task.setTaskCategoryId(taskCategoryId);
         task.setCategoryId(categoryId);
         task.setContent(content);
-        task.setStatus(PmTaskStatus.UNPROCESSED.getCode());
         task.setUnprocessedTime(now);
         task.setCreatorUid(user.getId());
         task.setCreateTime(now);
@@ -257,33 +225,21 @@ class PmTaskCommonServiceImpl {
         task.setOrganizationId(cmd.getOrganizationId());
         task.setRequestorName(requestorName);
         task.setRequestorPhone(requestorPhone);
+        task.setOrganizationName(cmd.getOrganizationName());
 
         //设置门牌地址,楼栋地址,服务地点
-        setPmTaskAddressInfo(cmd, task);
 
+        String handle = configProvider.getValue(PmTaskServiceImpl.HANDLER + namespaceId, PmTaskHandle.FLOW);
+        if(PmTaskHandle.YUE_KONG_JIAN.equals(handle)){
+            task.setAddress(cmd.getAddress());
+            task.setAddressType(cmd.getAddressType());
+        }
+        else {
+            setPmTaskAddressInfo(cmd, task);
+        }
         pmTaskProvider.createTask(task);
         //附件
         addAttachments(cmd.getAttachments(), user.getId(), task.getId(), PmTaskAttachmentType.TASK.getCode());
-
-        PmTaskLog pmTaskLog = new PmTaskLog();
-        pmTaskLog.setNamespaceId(task.getNamespaceId());
-        pmTaskLog.setOperatorTime(now);
-        pmTaskLog.setOperatorUid(requestorUid);
-        pmTaskLog.setOwnerId(task.getOwnerId());
-        pmTaskLog.setOwnerType(task.getOwnerType());
-        pmTaskLog.setStatus(task.getStatus());
-        pmTaskLog.setTaskId(task.getId());
-        pmTaskProvider.createTaskLog(pmTaskLog);
-
-        //查询园区执行人，发消息
-//        List<PmTaskTarget> targets = pmTaskProvider.listTaskTargets(cmd.getOwnerType(), cmd.getOwnerId(),
-//                PmTaskOperateType.EXECUTOR.getCode(), null, null);
-//        int size = targets.size();
-//        if(LOGGER.isDebugEnabled())
-//            LOGGER.debug("Create pmtask and send message, size={}, cmd={}", size, cmd);
-//        if(size > 0){
-//            sendMessageForCreateTask(targets, requestorName, requestorPhone, taskCategory.getName(), user);
-//        }
 
         return task;
     }
@@ -372,82 +328,82 @@ class PmTaskCommonServiceImpl {
 
         if (flag) {
             //查询task log
-            List<PmTaskLogDTO> taskLogDtos = listPmTaskLogs(dto);
-            dto.setTaskLogs(taskLogDtos);
+//            List<PmTaskLogDTO> taskLogDtos = listPmTaskLogs(dto);
+//            dto.setTaskLogs(taskLogDtos);
         }
 
         return dto;
     }
 
-    private List<PmTaskLogDTO> listPmTaskLogs(PmTaskDTO task) {
+//    private List<PmTaskLogDTO> listPmTaskLogs(PmTaskDTO task) {
+//
+//        List<PmTaskLog> taskLogs = pmTaskProvider.listPmTaskLogs(task.getId(), null);
+//        return taskLogs.stream().map(r -> {
+//
+//            PmTaskLogDTO pmTaskLogDTO = ConvertHelper.convert(r, PmTaskLogDTO.class);
+//
+//            Map<String, Object> map = new HashMap<>();
+//
+//            String scope = PmTaskNotificationTemplateCode.SCOPE;
+//            String locale = PmTaskNotificationTemplateCode.LOCALE;
+//
+//            if(r.getStatus().equals(PmTaskStatus.UNPROCESSED.getCode())){
+//
+//                if(null == task.getOrganizationId() || task.getOrganizationId() == 0){
+//                    setParam(map, task.getCreatorUid(), pmTaskLogDTO);
+//                }else{
+//                    map.put("operatorName", task.getRequestorName());
+//                    map.put("operatorPhone", task.getRequestorPhone());
+//                }
+//
+//                int code = PmTaskNotificationTemplateCode.UNPROCESS_TASK_LOG;
+//                String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+//                pmTaskLogDTO.setText(text);
+//
+//            }else if(r.getStatus().equals(PmTaskStatus.PROCESSING.getCode())){
+//                setParam(map, r.getOperatorUid(), pmTaskLogDTO);
+//                User target = userProvider.findUserById(r.getTargetId());
+//                UserIdentifier targetIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(target.getId(), IdentifierType.MOBILE.getCode());
+//                map.put("targetName", target.getNickName());
+//                map.put("targetPhone", targetIdentifier.getIdentifierToken());
+//
+//                int code = PmTaskNotificationTemplateCode.PROCESSING_TASK_LOG;
+//                String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+//                pmTaskLogDTO.setText(text);
+//
+//            }else if(r.getStatus().equals(PmTaskStatus.PROCESSED.getCode())){
+//                setParam(map, r.getOperatorUid(), pmTaskLogDTO);
+//                int code = PmTaskNotificationTemplateCode.PROCESSED_TASK_LOG;
+//                String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+//                pmTaskLogDTO.setText(text);
+//                List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(r.getId(), PmTaskAttachmentType.TASKLOG.getCode());
+//                List<PmTaskAttachmentDTO> attachmentDtos = convertAttachmentDTO(attachments);
+//                pmTaskLogDTO.setAttachments(attachmentDtos);
+//
+//            }else if(r.getStatus().equals(PmTaskStatus.CLOSED.getCode())){
+//                setParam(map, r.getOperatorUid(), pmTaskLogDTO);
+//                int code = PmTaskNotificationTemplateCode.CLOSED_TASK_LOG;
+//                String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+//                pmTaskLogDTO.setText(text);
+//            }else {
+//                setParam(map, r.getOperatorUid(), pmTaskLogDTO);
+//                int code = PmTaskNotificationTemplateCode.REVISITED_TASK_LOG;
+//                String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+//                pmTaskLogDTO.setText(text);
+//            }
+//
+//            return pmTaskLogDTO;
+//        }).collect(Collectors.toList());
+//    }
 
-        List<PmTaskLog> taskLogs = pmTaskProvider.listPmTaskLogs(task.getId(), null);
-        return taskLogs.stream().map(r -> {
-
-            PmTaskLogDTO pmTaskLogDTO = ConvertHelper.convert(r, PmTaskLogDTO.class);
-
-            Map<String, Object> map = new HashMap<>();
-
-            String scope = PmTaskNotificationTemplateCode.SCOPE;
-            String locale = PmTaskNotificationTemplateCode.LOCALE;
-
-            if(r.getStatus().equals(PmTaskStatus.UNPROCESSED.getCode())){
-
-                if(null == task.getOrganizationId() || task.getOrganizationId() == 0){
-                    setParam(map, task.getCreatorUid(), pmTaskLogDTO);
-                }else{
-                    map.put("operatorName", task.getRequestorName());
-                    map.put("operatorPhone", task.getRequestorPhone());
-                }
-
-                int code = PmTaskNotificationTemplateCode.UNPROCESS_TASK_LOG;
-                String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-                pmTaskLogDTO.setText(text);
-
-            }else if(r.getStatus().equals(PmTaskStatus.PROCESSING.getCode())){
-                setParam(map, r.getOperatorUid(), pmTaskLogDTO);
-                User target = userProvider.findUserById(r.getTargetId());
-                UserIdentifier targetIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(target.getId(), IdentifierType.MOBILE.getCode());
-                map.put("targetName", target.getNickName());
-                map.put("targetPhone", targetIdentifier.getIdentifierToken());
-
-                int code = PmTaskNotificationTemplateCode.PROCESSING_TASK_LOG;
-                String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-                pmTaskLogDTO.setText(text);
-
-            }else if(r.getStatus().equals(PmTaskStatus.PROCESSED.getCode())){
-                setParam(map, r.getOperatorUid(), pmTaskLogDTO);
-                int code = PmTaskNotificationTemplateCode.PROCESSED_TASK_LOG;
-                String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-                pmTaskLogDTO.setText(text);
-                List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(r.getId(), PmTaskAttachmentType.TASKLOG.getCode());
-                List<PmTaskAttachmentDTO> attachmentDtos = convertAttachmentDTO(attachments);
-                pmTaskLogDTO.setAttachments(attachmentDtos);
-
-            }else if(r.getStatus().equals(PmTaskStatus.CLOSED.getCode())){
-                setParam(map, r.getOperatorUid(), pmTaskLogDTO);
-                int code = PmTaskNotificationTemplateCode.CLOSED_TASK_LOG;
-                String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-                pmTaskLogDTO.setText(text);
-            }else {
-                setParam(map, r.getOperatorUid(), pmTaskLogDTO);
-                int code = PmTaskNotificationTemplateCode.REVISITED_TASK_LOG;
-                String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-                pmTaskLogDTO.setText(text);
-            }
-
-            return pmTaskLogDTO;
-        }).collect(Collectors.toList());
-    }
-
-    private void setParam(Map<String, Object> map, Long userId, PmTaskLogDTO dto) {
-        User user = userProvider.findUserById(userId);
-        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-        map.put("operatorName", user.getNickName());
-        map.put("operatorPhone", userIdentifier.getIdentifierToken());
-        dto.setOperatorName(user.getNickName());
-        dto.setOperatorPhone(userIdentifier.getIdentifierToken());
-    }
+//    private void setParam(Map<String, Object> map, Long userId, PmTaskLogDTO dto) {
+//        User user = userProvider.findUserById(userId);
+//        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+//        map.put("operatorName", user.getNickName());
+//        map.put("operatorPhone", userIdentifier.getIdentifierToken());
+//        dto.setOperatorName(user.getNickName());
+//        dto.setOperatorPhone(userIdentifier.getIdentifierToken());
+//    }
 
     void checkId(Long id){
         if(null == id) {
@@ -465,21 +421,6 @@ class PmTaskCommonServiceImpl {
                     "PmTask not found.");
         }
         return pmTask;
-    }
-
-    String convertStatus(Byte status){
-        if(status == 1)
-            return "处理中";
-        else if(status == 2)
-            return "已分派";
-        else if(status == 3)
-            return "已完成";
-        else if(status == 4)
-            return "已关闭";
-        else if(status == 5)
-            return "已回访";
-        else
-            return "";
     }
 
     void handoverTaskToTrd(PmTask task, String content, List<String> attachments) {

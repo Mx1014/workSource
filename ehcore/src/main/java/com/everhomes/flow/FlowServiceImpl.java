@@ -1041,16 +1041,12 @@ public class FlowServiceImpl implements FlowService {
             }
         }
 
-        List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(
-                cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType());
+        ListFlowUserSelectionCommand cmd1 = new ListFlowUserSelectionCommand();
+        cmd1.setBelongTo(cmd.getBelongTo());
+        cmd1.setFlowEntityType(cmd.getFlowEntityType());
+        cmd1.setFlowUserType(cmd.getFlowUserType());
 
-        ListFlowUserSelectionResponse resp = new ListFlowUserSelectionResponse();
-        resp.setSelections(
-                selections.stream()
-                        .map(r -> ConvertHelper.convert(r, FlowUserSelectionDTO.class))
-                .collect(Collectors.toList())
-        );
-        return resp;
+        return listFlowUserSelection(cmd1);
     }
 
     @Override
@@ -1060,7 +1056,7 @@ public class FlowServiceImpl implements FlowService {
         List<FlowUserSelectionDTO> selections = new ArrayList<>();
         resp.setSelections(selections);
         List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(
-                cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType(), 0);
+                cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType(), FlowConstants.FLOW_CONFIG_VER);
         if (seles != null && seles.size() > 0) {
             seles.forEach((sel) -> {
                 selections.add(ConvertHelper.convert(sel, FlowUserSelectionDTO.class));
@@ -1330,7 +1326,8 @@ public class FlowServiceImpl implements FlowService {
 
         Tuple<Boolean, Boolean> tuple = coordinationProvider.getNamedLock(lockKey).enter(() -> {
             // 查询看是否有原来已经开启的工作流
-            Flow enabledFlow = flowProvider.getEnabledConfigFlow(flow.getNamespaceId(), flow.getModuleId(), flow.getModuleType(), flow.getOwnerId(), flow.getOwnerType());
+            Flow enabledFlow = flowProvider.getEnabledConfigFlow(flow.getNamespaceId(), flow.getProjectType(),
+                    flow.getProjectId(), flow.getModuleId(), flow.getModuleType(), flow.getOwnerId(), flow.getOwnerType());
             if (enabledFlow != null && !enabledFlow.getId().equals(flowId)) {
                 dbProvider.execute(status -> {
                     enabledFlow.setStatus(FlowStatusType.STOP.getCode());
@@ -2421,7 +2418,19 @@ public class FlowServiceImpl implements FlowService {
      */
     @Override
     public Flow getEnabledFlow(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
-        Flow flow = flowProvider.getEnabledConfigFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+        Flow flow = flowProvider.getEnabledConfigFlow(namespaceId, null, null, moduleId, moduleType, ownerId, ownerType);
+        if (flow != null && flow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
+            return flowProvider.getSnapshotFlowById(flow.getId());
+        }
+        return null;
+    }
+
+    /**
+     * 获取正在启用的 Flow
+     */
+    @Override
+    public Flow getEnabledFlow(Integer namespaceId, String projectType, Long projectId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
+        Flow flow = flowProvider.getEnabledConfigFlow(namespaceId, projectType, projectId, moduleId, moduleType, ownerId, ownerType);
         if (flow != null && flow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
             return flowProvider.getSnapshotFlowById(flow.getId());
         }
@@ -2710,10 +2719,10 @@ public class FlowServiceImpl implements FlowService {
         dto.setFlowNodeName(flowNode.getNodeName());
 
         boolean allFlowCaseFlag = type != 3;
-        List<UserInfo> currentProcessors = getCurrentProcessors(flowCase.getId(), allFlowCaseFlag);
+        FlowCaseProcessorsProcessor processor = getCurrentProcessors(flowCase.getId(), allFlowCaseFlag);
         int i = 0;
         String name = "";
-        for (UserInfo userInfo : currentProcessors) {
+        for (UserInfo userInfo : processor.getProcessorsInfoList()) {
             if (i < 3) {
                 name += (userInfo.getNickName() + ",");
             } else {
@@ -2804,7 +2813,7 @@ public class FlowServiceImpl implements FlowService {
     }
 
     @Override
-    public List<UserInfo> getCurrentProcessors(Long flowCaseId, boolean allFlowCaseFlag) {
+    public FlowCaseProcessorsProcessor getCurrentProcessors(Long flowCaseId, boolean allFlowCaseFlag) {
         List<FlowCase> allFlowCase = new ArrayList<>();
         if (allFlowCaseFlag) {
             allFlowCase = getAllFlowCase(flowCaseId);
@@ -2825,14 +2834,7 @@ public class FlowServiceImpl implements FlowService {
         }
 
         List<Long> userIds = enterLogs.stream().map(FlowEventLog::getFlowUserId).distinct().collect(Collectors.toList());
-
-        List<UserInfo> userInfoList = new ArrayList<>();
-        for (Long userId : userIds) {
-            UserInfo userInfo = userService.getUserSnapshotInfo(userId);
-            fixupUserInfo(organizationId, userInfo);
-            userInfoList.add(userInfo);
-        }
-        return userInfoList;
+        return new FlowCaseProcessorsProcessorImpl(userIds, allFlowCase, allFlowCaseFlag, this, userService);
     }
 
     @Override
@@ -3075,11 +3077,11 @@ public class FlowServiceImpl implements FlowService {
                 nodeLogDTO.setNodeId(currNode.getId());
                 nodeLogDTO.setNodeLevel(currNode.getNodeLevel());
                 nodeLogDTO.setNodeName(currNode.getNodeName());
-                nodeLogDTO.setParams(currNode.getParams());
+                nodeLogDTO.setParams(currNode.getGroupByParams());
 
                 if (flowCase.getStepCount().equals(eventLog.getStepCount())) {
                     nodeLogDTO.setIsCurrentNode((byte) 1);
-                    dto.setCurrNodeParams(currNode.getParams());
+                    dto.setCurrNodeParams(currNode.getGroupByParams());
 
                     // 附言按钮
                     FlowButton commentBtn = flowButtonProvider.findFlowButtonByStepType(currNode.getId()
@@ -3599,7 +3601,7 @@ public class FlowServiceImpl implements FlowService {
     }
 
     @Override
-    public void createSnapshotNodeProcessors(FlowCaseState ctx, FlowGraphNode nextNode) {
+    public void createSnapshotNodeProcessors(FlowCaseState ctx, FlowGraphNode node) {
         FlowGraphEvent evt = ctx.getCurrentEvent();
         List<FlowUserSelection> selections = new ArrayList<>();
         List<Long> users = new ArrayList<>();
@@ -3621,7 +3623,7 @@ public class FlowServiceImpl implements FlowService {
         }
         // 驳回操作，驳回后的处理人为转到驳回节点时指定的处理人员
         else if (ctx.getStepType() == FlowStepType.REJECT_STEP) {
-            Long flowNodeId = nextNode.getFlowNode().getId();
+            Long flowNodeId = node.getFlowNode().getId();
             Long flowCaseId = ctx.getFlowCase().getId();
 
             // 因为REJECT_STEP步骤在event的fire方法里也会执行 stepCount += 1,
@@ -3638,7 +3640,7 @@ public class FlowServiceImpl implements FlowService {
                 selections.add(ul);
             }
         } else {
-            List<FlowUserSelection> subs = flowUserSelectionProvider.findSelectionByBelong(nextNode.getFlowNode().getId()
+            List<FlowUserSelection> subs = flowUserSelectionProvider.findSelectionByBelong(node.getFlowNode().getId()
                     , FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode());
             if (subs != null && subs.size() > 0) {
                 selections.addAll(subs);
@@ -3660,7 +3662,7 @@ public class FlowServiceImpl implements FlowService {
                     log.setFlowButtonId(ctx.getCurrentEvent().getFiredButtonId());
                 }
 
-                log.setFlowNodeId(nextNode.getFlowNode().getId());
+                log.setFlowNodeId(node.getFlowNode().getId());
                 log.setParentId(0L);
                 log.setFlowCaseId(ctx.getFlowCase().getId());
 
@@ -3679,7 +3681,7 @@ public class FlowServiceImpl implements FlowService {
                 ctx.getLogs().add(log);
             }
         } else {
-            LOGGER.warn("not processors for nodeId=" + nextNode.getFlowNode().getId() + " flowCaseId=" + ctx.getFlowCase().getId());
+            LOGGER.warn("not processors for nodeId=" + node.getFlowNode().getId() + " flowCaseId=" + ctx.getFlowCase().getId());
         }
     }
 
@@ -4591,7 +4593,8 @@ public class FlowServiceImpl implements FlowService {
         fixupUserInfo(ctx.getFlowGraph().getFlow().getOrganizationId(), ui);
     }
 
-    private void fixupUserInfo(Long organizationId, UserInfo userInfo) {
+    @Override
+    public void fixupUserInfo(Long organizationId, UserInfo userInfo) {
         if (userInfo != null) {
             OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(userInfo.getId(), organizationId);
             if (om != null && om.getContactName() != null && !om.getContactName().isEmpty()) {
@@ -5674,7 +5677,7 @@ public class FlowServiceImpl implements FlowService {
                 for (FlowCase aCase : allFlowCase) {
                     if (eventLog.getFlowCaseId().equals(aCase.getId()) && aCase.getStepCount().equals(eventLog.getStepCount())) {
                         nodeLogDTO.setIsCurrentNode((byte) 1);
-                        // dto.setCurrNodeParams(currNode.getParams());
+                        // dto.setCurrNodeParams(currNode.getGroupByParams());
 
                         // 下一步需要处理人选择下一步节点
                         // List<FlowLink> linksOut = flowLinkProvider.listFlowLinkByFromNodeId(currNode.getId(), aCase.getFlowVersion());

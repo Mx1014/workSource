@@ -15,9 +15,18 @@ public class ListBillExpectanciesOnContractCommand {
     private String contractNum;
     private Integer pageOffset;
     private Integer pageSize;
+    private Long contractId;
 
     public String getContractNum() {
         return contractNum;
+    }
+
+    public Long getContractId() {
+        return contractId;
+    }
+
+    public void setContractId(Long contractId) {
+        this.contractId = contractId;
     }
 
     public void setContractNum(String contractNum) {

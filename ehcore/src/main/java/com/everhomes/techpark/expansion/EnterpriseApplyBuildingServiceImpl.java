@@ -402,6 +402,13 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 			dto.setAreaName(leaseProject.getAreaName());
 			dto.setAddress(leaseProject.getAddress());
 			dto.setContactPhone(leaseProject.getContactPhone());
+			dto.setPosterUri(leaseProject.getPosterUri());
+			Long userId = UserContext.currentUserId();
+			//设置封面图url 和banner图
+			if (null != dto.getPosterUri()) {
+				dto.setPosterUrl(contentServerService.parserUri(dto.getPosterUri(), EntityType.USER.getCode(), userId));
+			}
+			dto.setDescription(leaseProject.getDescription());
 		}
 	}
 

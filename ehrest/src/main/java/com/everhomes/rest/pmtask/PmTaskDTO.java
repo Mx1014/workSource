@@ -39,6 +39,8 @@ import com.everhomes.util.StringHelper;
  * <li>flowCaseId: 工作流flowCaseId</li>
  * <li>remarkSource: 处理意见来源</li>
  * <li>remark: 处理意见</li>
+ * <li>attachments: 附件，参考{@link com.everhomes.rest.pmtask.AttachmentDescriptor}</li>
+ * <li>organizationName: 公司名称</li>
  * </ul>
  */
 public class PmTaskDTO {
@@ -86,6 +88,8 @@ public class PmTaskDTO {
 	
 	@ItemType(PmTaskLogDTO.class)
 	private List<PmTaskLogDTO> taskLogs;
+	
+	private String organizationName;
 	public Long getId() {
 		return id;
 	}
@@ -303,5 +307,11 @@ public class PmTaskDTO {
 	}
 	public void setBuildingName(String buildingName) {
 		this.buildingName = buildingName;
+	}
+	public String getOrganizationName() {
+		return organizationName;
+	}
+	public void setOrganizationName(String organizationName) {
+		this.organizationName = organizationName;
 	}
 }

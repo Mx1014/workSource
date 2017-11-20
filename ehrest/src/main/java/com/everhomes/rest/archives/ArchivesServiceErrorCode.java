@@ -16,5 +16,6 @@ public interface ArchivesServiceErrorCode {
     int ERROR_CONTACT_ENNAME_WRONG_FORMAT = 100010;  //  英文名格式错误
     int ERROR_WORK_EMAIL_WRONG_FORMAT = 100011;  //  邮箱格式错误
     int ERROR_CONTACT_SHORT_TOKEN_WRONG_FORMAT = 100012;  //  短号格式错误
+    int ERROR_DATE_WRONG_FORMAT = 100013;   //  日期格式错误
 
 }
