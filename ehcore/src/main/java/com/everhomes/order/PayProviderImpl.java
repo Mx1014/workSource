@@ -23,6 +23,7 @@ import com.everhomes.server.schema.tables.records.EhPaymentAccountsRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentOrderRecordsRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentTypesRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentUsersRecord;
+import com.everhomes.server.schema.tables.records.EhPaymentWithdrawOrdersRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
@@ -198,6 +199,31 @@ public class PayProviderImpl implements PayProvider {
         dao.insert(order);
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhPaymentWithdrawOrders.class, order.getId());
+    }
+    
+    @Override
+    public List<PaymentWithdrawOrder> listPaymentWithdrawOrders(String ownerType, Long ownerId, 
+            Long pageAnchor, int pageSize) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhPaymentWithdrawOrdersRecord>  query = context.selectQuery(Tables.EH_PAYMENT_WITHDRAW_ORDERS);
+        query.addConditions(Tables.EH_PAYMENT_WITHDRAW_ORDERS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_PAYMENT_WITHDRAW_ORDERS.OWNER_ID.eq(ownerId));
+        
+        if(pageAnchor != null) {
+            query.addConditions(Tables.EH_PAYMENT_WITHDRAW_ORDERS.ID.lt(pageAnchor));
+        }
+        query.addOrderBy(Tables.EH_PAYMENT_WITHDRAW_ORDERS.ID.desc());
+        query.addLimit(pageSize);
+        
+        List<PaymentWithdrawOrder> orderList = new ArrayList<>();
+
+        query.fetch().map(r -> {
+            PaymentWithdrawOrder order = ConvertHelper.convert(r, PaymentWithdrawOrder.class);
+            orderList.add(order);
+            return null;
+        });
+
+        return orderList;
     }
     
     @Override

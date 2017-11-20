@@ -4,11 +4,11 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>ownerType: 帐户类型（如EhUsers、EhOrganizations）</li>
+ *     <li>ownerType: 帐户类型（如EhUsers、EhOrganizations），{@link com.everhomes.rest.order.OwnerType}</li>
  *     <li>ownerId: 帐户对应的ID（如用户ID、企业ID）</li>
  * </ul>
  */
-public class SettlementAmountCommand {
+public class GetPaymentBalanceCommand {
 	private String ownerType;
 	
 	private Long ownerId;

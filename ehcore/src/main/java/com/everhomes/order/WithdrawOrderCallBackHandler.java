@@ -1,31 +1,17 @@
 // @formatter:off
 package com.everhomes.order;
 
-import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.order.PayService;
-import com.everhomes.order.PaymentCallBackHandler;
-
-import com.everhomes.rest.activity.ActivityCancelSignupCommand;
-import com.everhomes.rest.activity.ActivityCancelType;
-import com.everhomes.rest.activity.ActivityRosterPayFlag;
-import com.everhomes.rest.activity.ActivityServiceErrorCode;
-
-import com.everhomes.rest.activity.*;
-
-import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.order.PayServiceErrorCode;
-import com.everhomes.rest.order.PaymentWithdrawOrderStatus;
-import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
+import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.PayServiceErrorCode;
+import com.everhomes.rest.order.PaymentWithdrawOrderStatus;
+import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
+import com.everhomes.util.RuntimeErrorException;
 
 @Component(PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX + OrderType.WITHDRAW_CODE )
 public class WithdrawOrderCallBackHandler implements PaymentCallBackHandler {

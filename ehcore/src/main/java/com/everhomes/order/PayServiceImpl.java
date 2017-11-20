@@ -6,6 +6,8 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.base.RestClient;
 import com.everhomes.pay.order.*;
@@ -24,8 +26,12 @@ import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.pay.controller.QueryBalanceRestResponse;
 import com.everhomes.rest.pay.controller.RegisterBusinessUserRestResponse;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -44,6 +50,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +80,15 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
     private ContentServerService contentServerService;
 
     private RestClient restClient = null;
+    
+    @Autowired
+    private UserProvider userProvider;
+    
+    @Autowired
+    private OrganizationProvider organizationProvider;
+    
+    @Autowired
+    private ConfigurationProvider configProvider;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -984,8 +1000,16 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         }
     }
     
-//    public PaymentWithdrawOrderResp requestWithdraw(Long amount,ValidationType validationType, String ownerType, Long ownerId) throws Exception{
-    public void requestWithdraw(String ownerType, Long ownerId, User operator, Long amount) throws Exception{
+    public void withdraw(PaymentWithdrawCommand cmd) {
+        String ownerType = cmd.getOwnerType();
+        Long ownerId = cmd.getOwnerId();
+        Long amount = cmd.getAmount();
+        User operator = UserContext.current().getUser();
+        
+        withdraw(ownerType, ownerId, operator, amount);
+    }
+    
+    public CreateOrderRestResponse withdraw(String ownerType, Long ownerId, User operator, Long amount) {
         if(amount == null || amount.longValue() <= 0L) {
             LOGGER.error("Invalid amount to withdraw, ownerType={}, ownerId={}, operatorUid={}, amount={}", 
                     ownerType, ownerId, operator.getId(), amount);
@@ -1022,7 +1046,10 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         String orderType = OrderType.OrderTypeEnum.PRINT_ORDER.getPycode();
         Timestamp time = new Timestamp(DateHelper.currentGMTTime().getTime());
         PaymentWithdrawOrder order = new PaymentWithdrawOrder();
+        order.setOwnerType(ownerType);
+        order.setOwnerId(ownerId);
         order.setNamespaceId(operator.getNamespaceId());
+        order.setOrderNo(orderNumber);
         order.setAmount(changePayAmount(amount));
         order.setPaymentUserType(paymentUser.getPaymentUserType());
         order.setPaymentUserId(paymentUser.getPaymentUserId());
@@ -1062,16 +1089,18 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
                 orderCmd, 
                 CreateOrderRestResponse.class);     
         
-        if(!CreateOrderRestResponse.isSuccess(createOrderResp)){
+        if(CreateOrderRestResponse.isSuccess(createOrderResp)){
             Long serviceConfigId = 0L; // 提现时不分具体业务，故没有此ID信息
             OrderCommandResponse  orderCommandResponse = createOrderResp.getResponse();
             saveOrderRecord(orderCommandResponse, orderNumber, orderType,  serviceConfigId, com.everhomes.pay.order.OrderType.PURCHACE.getCode());
         } else {
             LOGGER.error("Failed to withdraw mony, ownerType={}, ownerId={}, operatorUid={}, amount={}, createOrderResp={}", 
-                    ownerType, ownerId, operator.getId(), amount, createOrderResp);
+                    ownerType, ownerId, operator.getId(), amount, StringHelper.toJsonString(createOrderResp));
             throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_WITHDRAWABLE_AMOUNT_INSUFFICIENT,
                     "Failed to withdraw mony");
         }
+        
+        return createOrderResp;
     }
     
     private int getBankCardProperty(Integer paymentUserType) {
@@ -1096,6 +1125,66 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
      * @return
      */
     private long generateRandomNumber(int n){
-        return (long)((Math.random() * 9 + 1) * Math.pow(10, n-1));
+        return (long)((Math.random() * 9 + 1) * Math.pow(10, n-1)); 
+    }
+    
+    @Override
+    public ListPaymentWithdrawOrderResponse listPaymentWithdrawOrders(ListPaymentWithdrawOrderCommand cmd) {
+        String ownerType = cmd.getOwnerType();
+        Long ownerId = cmd.getOwnerId();
+        
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        List<PaymentWithdrawOrder> orders = payProvider.listPaymentWithdrawOrders(ownerType, ownerId, cmd.getPageAnchor(), pageSize+1);
+        
+        ListPaymentWithdrawOrderResponse response = new ListPaymentWithdrawOrderResponse();
+        if(orders.size() > pageSize) {
+            orders.remove(orders.size() - 1);
+            response.setNextPageAnchor(orders.get(orders.size() - 1).getId());
+        }
+        response.setOrders(toPaymentWithdrawOrderDTO(orders));
+        
+        return response;
+    }
+    
+    private List<PaymentWithdrawOrderDTO> toPaymentWithdrawOrderDTO(List<PaymentWithdrawOrder> orders) {
+        List<PaymentWithdrawOrderDTO> dtos = new ArrayList<PaymentWithdrawOrderDTO>();
+        for(PaymentWithdrawOrder order : orders) {
+            dtos.add(toPaymentWithdrawOrderDTO(order));
+        }
+        
+        return dtos;
+    }
+    
+    private PaymentWithdrawOrderDTO toPaymentWithdrawOrderDTO(PaymentWithdrawOrder order) {
+        PaymentWithdrawOrderDTO orderDto = ConvertHelper.convert(order, PaymentWithdrawOrderDTO.class);
+        
+        UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(order.getOperatorUid(), order.getNamespaceId());
+        if(userIdentifier != null) {
+            orderDto.setOperatorPhone(userIdentifier.getIdentifierToken());
+        } else {
+            LOGGER.error("User identifier not found, ownerType={}, ownerId={}, withdrawOrderId={}, operatorUid={}", 
+                        order.getOwnerType(), order.getOwnerId(), order.getId(), order.getOperatorUid());
+        }
+        
+        User user = userProvider.findUserById(order.getOperatorUid());
+        if(user != null) {
+            orderDto.setOperatorName(user.getNickName());
+        } else {
+            LOGGER.error("User not found, ownerType={}, ownerId={}, withdrawOrderId={}, operatorUid={}", 
+                    order.getOwnerType(), order.getOwnerId(), order.getId(), order.getOperatorUid());
+        }
+        
+        OwnerType  ownerType = OwnerType.fromCode(order.getOwnerType());
+        if(ownerType == OwnerType.ORGANIZATION) {
+            Organization org = organizationProvider.findOrganizationById(order.getOwnerId());
+            if(org != null) {
+                orderDto.setEnterpriseName(org.getName());
+            } else {
+                LOGGER.error("Organization not found, ownerType={}, ownerId={}, withdrawOrderId={}", 
+                        order.getOwnerType(), order.getOwnerId(), order.getId());
+            }
+        }
+        
+        return orderDto;
     }
 }
