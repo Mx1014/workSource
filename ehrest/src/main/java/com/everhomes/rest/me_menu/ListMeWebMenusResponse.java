@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>namespaceId: namespaceId</li>
+ *     <li>dtos: dtos {@link com.everhomes.rest.me_menu.MeWebMenuDTO}</li>
  * </ul>
  */
 public class ListMeWebMenusResponse {
