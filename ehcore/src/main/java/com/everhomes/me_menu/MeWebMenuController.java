@@ -36,7 +36,7 @@ public class MeWebMenuController extends ControllerBase {
      */
     @RequestMapping("listMeWebMenus")
     @RestReturn(value=MeWebMenuDTO.class, collection = true)
-    public RestResponse listMeWebMenus(@Valid ListMeWebMenusCommand cmd) {
+    public RestResponse listMeWebMenus(ListMeWebMenusCommand cmd) {
         ListMeWebMenusResponse res = meWebMenuService.listMeWebMenus(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);

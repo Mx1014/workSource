@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.rest.me_menu;
 
-import com.everhomes.rest.common.PortalCommand;
 import com.everhomes.util.StringHelper;
 
 /**
