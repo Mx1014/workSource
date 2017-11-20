@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -2779,16 +2780,18 @@ long id = sequenceProvider.getNextSequence(key);
 	@Override
 	public Integer countExceptionRequests(Long userId, String ownerType, Long ownerId, String punchMonth) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-		Timestamp beginDate;
+		Date beginDate;
 		try {
-			beginDate = new Timestamp(dateFormat.parse(punchMonth+"01").getTime());
-
-			Timestamp endDate = new Timestamp(dateFormat.parse((Integer.valueOf(punchMonth)+1)+"01").getTime());
+			beginDate = new Date(dateFormat.parse(punchMonth+"01").getTime());
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(beginDate);
+			calendar.add(Calendar.MONTH, 1);
+			Date endDate = new Date(calendar.getTimeInMillis());
 			SelectConditionStep<Record1<Integer>> step = getReadOnlyContext().select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.count()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS)
 					.where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.CREATOR_UID.eq(userId))
 					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(ownerId))
-					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(beginDate))
-					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lt(endDate))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.greaterOrEqual(beginDate))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.lt(endDate))
 					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.ABNORMAL_PUNCH.getCode()))
 					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(com.everhomes.rest.approval.ApprovalStatus.AGREEMENT.getCode()));
 //			LOGGER.debug(step.toString());
@@ -2808,7 +2811,10 @@ long id = sequenceProvider.getNextSequence(key);
 		try {
 			beginDate = new Timestamp(dateFormat.parse(punchMonth+"01").getTime());
 			List<ExtDTO> result = null;
-			Timestamp endDate = new Timestamp(dateFormat.parse((Integer.valueOf(punchMonth)+1)+"01").getTime());
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(beginDate);
+			calendar.add(Calendar.MONTH, 1);
+			Timestamp endDate = new Timestamp(calendar.getTimeInMillis());
 			SelectHavingStep<Record2<String, BigDecimal>> step = getReadOnlyContext()
 					.select(Tables.EH_APPROVAL_CATEGORIES.CATEGORY_NAME,Tables.EH_PUNCH_EXCEPTION_REQUESTS.DURATION.sum())
 					.from(Tables.EH_APPROVAL_CATEGORIES).leftOuterJoin(Tables.EH_PUNCH_EXCEPTION_REQUESTS)
