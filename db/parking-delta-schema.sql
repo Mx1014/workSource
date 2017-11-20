@@ -10,6 +10,7 @@ CREATE TABLE `eh_relocation_requests` (
   `requestor_entperise_address` varchar(256) DEFAULT NULL COMMENT 'the enterprise address of requestor',
   `requestor_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'requestor id',
   `requestor_name` varchar(64) DEFAULT NULL COMMENT 'the name of requestor',
+  `relocation_date` datetime NOT NULL,
   `status` tinyint(4) DEFAULT NULL COMMENT '0: inactive, 1: processing, 2: completed',
   `creator_uid` bigint(20) NOT NULL DEFAULT '0',
   `create_time` datetime DEFAULT NULL,
