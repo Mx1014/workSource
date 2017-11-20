@@ -14,6 +14,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RecordHelper;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -43,6 +44,22 @@ public class GroupMemberLogProviderImpl implements GroupMemberLogProvider {
             return ConvertHelper.convert(records.get(0), GroupMemberLog.class);
         }
         return null;
+    }
+
+
+    @Override
+    public List<GroupMemberLog> listGroupMemberLogByGroupId(Long groupId, String keyword, Long from, int pageSize) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.select().from(Tables.EH_GROUP_MEMBER_LOGS).getQuery();
+        query.addConditions(Tables.EH_GROUP_MEMBER_LOGS.GROUP_ID.eq(groupId));
+        if(keyword != null){
+            query.addConditions(Tables.EH_GROUP_MEMBER_LOGS.MEMBER_NICK_NAME.like("%" + keyword + "%"));
+        }
+        query.addOrderBy(Tables.EH_GROUP_MEMBER_LOGS.ID.desc());
+        query.addLimit(from.intValue(), pageSize);
+        List<GroupMemberLog> list = query.fetch().map(r -> ConvertHelper.convert(r, GroupMemberLog.class));
+
+        return  list;
     }
 
     @Override

@@ -5,15 +5,12 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>namespaceId: 域空间id</li>
- *     <li>clubType: clubType 参考{@link ClubType}</li>
+ *     <li>namespaceId: namespaceId</li>
  * </ul>
  */
-public class GetGroupParametersCommand {
+public class ListIndustryTypesCommand {
 
-	private Integer namespaceId;
-
-	private Byte clubType;
+	Integer namespaceId;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -21,14 +18,6 @@ public class GetGroupParametersCommand {
 
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
-	}
-
-	public Byte getClubType() {
-		return clubType;
-	}
-
-	public void setClubType(Byte clubType) {
-		this.clubType = clubType;
 	}
 
 	@Override

@@ -4,21 +4,21 @@ package com.everhomes.rest.group;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * <ul>参数:
- * <li>namespaceId: 域空间id</li>
- * <li>createFlag: 是否允许创建，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
- * <li>verifyFlag: 创建是否需要审核，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
- * <li>memberPostFlag: 是否允许成员发帖，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
- * <li>memberCommentFlag: 是否允许成员回复，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
- * <li>adminBroadcastFlag: 是否允许管理发广播，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
- * <li>broadcastCount: 每天可发广播数</li>
+ * <ul>
+ *     <li>namespaceId: 域空间id</li>
+ *     <li>createFlag: 是否允许创建，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ *     <li>verifyFlag: 创建是否需要审核，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ *     <li>memberPostFlag: 是否允许成员发帖，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ *     <li>memberCommentFlag: 是否允许成员回复，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ *     <li>adminBroadcastFlag: 是否允许管理发广播，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ *     <li>broadcastCount: 每天可发广播数</li>
+ *     <li>clubType: clubType 参考{@link ClubType}</li>
  * </ul>
  */
 public class SetGroupParametersCommand {
-	
+
 	private Integer namespaceId;
-	
+
 	private Byte createFlag;
 
 	private Byte verifyFlag;
@@ -31,12 +31,14 @@ public class SetGroupParametersCommand {
 
 	private Integer broadcastCount;
 
+	private Byte clubType;
+
 	public SetGroupParametersCommand() {
 
 	}
 
 	public SetGroupParametersCommand(Integer namespaceId, Byte createFlag, Byte verifyFlag, Byte memberPostFlag,
-			Byte memberCommentFlag, Byte adminBroadcastFlag, Integer broadcastCount) {
+									 Byte memberCommentFlag, Byte adminBroadcastFlag, Integer broadcastCount, Byte clubType) {
 		super();
 		this.namespaceId = namespaceId;
 		this.createFlag = createFlag;
@@ -45,6 +47,7 @@ public class SetGroupParametersCommand {
 		this.memberCommentFlag = memberCommentFlag;
 		this.adminBroadcastFlag = adminBroadcastFlag;
 		this.broadcastCount = broadcastCount;
+		this.clubType = clubType;
 	}
 
 	public Integer getNamespaceId() {
@@ -101,6 +104,14 @@ public class SetGroupParametersCommand {
 
 	public void setBroadcastCount(Integer broadcastCount) {
 		this.broadcastCount = broadcastCount;
+	}
+
+	public Byte getClubType() {
+		return clubType;
+	}
+
+	public void setClubType(Byte clubType) {
+		this.clubType = clubType;
 	}
 
 	@Override
