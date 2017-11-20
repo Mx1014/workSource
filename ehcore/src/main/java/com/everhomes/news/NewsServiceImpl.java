@@ -1129,6 +1129,7 @@ public class NewsServiceImpl implements NewsService {
 					tag.setNamespaceId(parentTag.getNamespaceId());
 					tag.setOwnerType(parentTag.getOwnerType());
 					tag.setOwnerId(parentTag.getOwnerId());
+					tag.setCategoryId(cmd.getCategoryId());
 					if (tag.getId() == null) {
 						newsProvider.createNewsTag(tag);
 					} else
