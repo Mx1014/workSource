@@ -13,6 +13,7 @@ import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
+import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
@@ -669,11 +670,26 @@ public class AclController extends ControllerBase {
      * <p>业务模块应用管理员列表</p>
      */
     @RequestMapping("listServiceModuleAppsAdministrators")
-    @RestReturn(value=ServiceModuleAppsAuthorizationsDto.class, collection = true)
+    @RestReturn(value=ListServiceModuleAppsAdministratorResponse.class)
     public RestResponse listServiceModuleAppsAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
 //        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 //        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.MODULE_ADMIN_LIST);
         RestResponse response = new RestResponse(rolePrivilegeService.listServiceModuleAppsAdministrators(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /acl/listServiceModuleAppsAdministratorTargetIds</b>
+     * <p>业务模块应用管理员targetIds列表</p>
+     */
+    @RequestMapping("listServiceModuleAppsAdministratorTargetIds")
+    @RestReturn(value=Long.class, collection = true)
+    public RestResponse listServiceModuleAppsAdministratorTargetIds(@Valid ListServiceModuleAdministratorsCommand cmd) {
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.MODULE_ADMIN_LIST);
+        RestResponse response = new RestResponse(rolePrivilegeService.listServiceModuleAppsAdministratorTargetIds(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

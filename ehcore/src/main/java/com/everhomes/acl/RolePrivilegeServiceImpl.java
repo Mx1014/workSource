@@ -2678,7 +2678,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public ListServiceModuleAppsAdministratorResponse listServiceModuleAppsAdministrators(ListServiceModuleAdministratorsCommand cmd) {
 		ListServiceModuleAppsAdministratorResponse response = new ListServiceModuleAppsAdministratorResponse();
-//	    List<Authorization> authorizations = authorizationProvider.listManageAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), EntityType.SERVICE_MODULE_APP.getCode(), null);
 	    // 获取管理员 （分页版）
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		if(cmd.getPageAnchor() != null){
@@ -2726,7 +2725,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}).collect(Collectors.toList());
 
 		response.setDtos(dtos);
-		response.setNextAnchor(locator.getAnchor());
+		response.setNextPageAnchor(locator.getAnchor());
+		response.setPageSize(pageSize);
 		return response;
 	}
 
@@ -3658,6 +3658,16 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 //			}
 //			return null;
 //		});
+	}
+
+	@Override
+	public List<Long> listServiceModuleAppsAdministratorTargetIds(ListServiceModuleAdministratorsCommand cmd) {
+		List<Authorization> authorizations =  authorizationProvider.listAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), null, null, EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(), true, null, null);
+		List<Long> targetIds = authorizations.stream().map(r->{
+			return r.getTargetId();
+		}).collect(Collectors.toList());
+
+		return targetIds;
 	}
 
 	private void processAuthorization(Authorization authorization, Long authId, Long moduleAppId, String controlType, Byte controlFlag, Long controlId, Byte controlOption){

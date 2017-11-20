@@ -423,4 +423,7 @@ public interface RolePrivilegeService {
 
     // 新版设置模块管理员 added by lei.lv 20171101
 	void resetServiceModuleAdministrators(ResetServiceModuleAdministratorsCommand cmd);
+
+	// 获取所有应用管理员的targetIds
+	List<Long> listServiceModuleAppsAdministratorTargetIds(ListServiceModuleAdministratorsCommand cmd);
 }

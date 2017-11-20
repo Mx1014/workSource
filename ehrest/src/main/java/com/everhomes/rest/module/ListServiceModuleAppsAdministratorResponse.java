@@ -13,19 +13,11 @@ import java.util.List;
  * </ul>
  */
 public class ListServiceModuleAppsAdministratorResponse {
-    private Long nextAnchor;
+    private Long nextPageAnchor;
 
     private Integer pageSize;
 
     private List<ServiceModuleAppsAuthorizationsDto> dtos;
-
-    public Long getNextAnchor() {
-        return nextAnchor;
-    }
-
-    public void setNextAnchor(Long nextAnchor) {
-        this.nextAnchor = nextAnchor;
-    }
 
     public Integer getPageSize() {
         return pageSize;
@@ -46,5 +38,13 @@ public class ListServiceModuleAppsAdministratorResponse {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Long getNextPageAnchor() {
+        return nextPageAnchor;
+    }
+
+    public void setNextPageAnchor(Long nextPageAnchor) {
+        this.nextPageAnchor = nextPageAnchor;
     }
 }
