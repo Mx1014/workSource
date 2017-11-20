@@ -1905,7 +1905,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
         EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
         HashSet<PaymentExpectancyDTO> set = new HashSet<>();
-        List<Long> l = new ArrayList<>();
+
         List<Long> fetch = context.select(bill.ID)
                 .from(bill)
                 .where(bill.CONTRACT_NUM.eq(contractNum))
@@ -1919,7 +1919,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetch()
                 .map(r -> {
                     PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
-                    l.add(r.getValue(t.ID));
+
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
                     dto.setPropertyIdentifier(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
                     dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
@@ -3515,6 +3515,56 @@ public class AssetProviderImpl implements AssetProvider {
                     sb.append(r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME)+r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME)+",");
                 });
         return sb.toString();
+    }
+
+    @Override
+    public BigDecimal getBillExpectanciesAmountOnContract(String contractNum, Long contractId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
+        EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
+        EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
+        HashSet<PaymentExpectancyDTO> set = new HashSet<>();
+        List<Long> fetch = context.select(bill.ID)
+                .from(bill)
+                .where(bill.CONTRACT_NUM.eq(contractNum))
+                .fetch(bill.ID);
+        context.select(t.ID,t.AMOUNT_RECEIVABLE)
+                .from(t,t1)
+                .where(t.BILL_ID.in(fetch))
+                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
+                .orderBy(t1.NAME,t.DATE_STR)
+                .fetch()
+                .map(r -> {
+                    PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
+                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setBillItemId(r.getValue(t.ID));
+                    set.add(dto);
+                    return null;
+                });
+
+        List<Long> fetch1 = context.select(bill.ID)
+                .from(bill)
+                .where(bill.CONTRACT_ID.eq(contractId))
+                .fetch(bill.ID);
+        context.select(t.ID,t.AMOUNT_RECEIVABLE)
+                .from(t,t1)
+                .where(t.BILL_ID.in(fetch1))
+                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
+                .orderBy(t1.NAME,t.DATE_STR)
+                .fetch()
+                .map(r -> {
+                    PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
+                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setBillItemId(r.getValue(t.ID));
+                    set.add(dto);
+                    return null;
+                });
+        BigDecimal amount = new BigDecimal("0");
+        Iterator<PaymentExpectancyDTO> it = set.iterator();
+        while(it.hasNext()){
+            amount = amount.add(it.next().getAmountReceivable());
+        }
+        return amount;
     }
 
 

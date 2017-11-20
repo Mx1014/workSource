@@ -253,4 +253,6 @@ public interface AssetProvider {
     Collection<? extends Long> getAddressIdByBillId(Long id);
 
     String getAddressStrByIds(List<Long> collect);
+
+    BigDecimal getBillExpectanciesAmountOnContract(String contractNum, Long contractId);
 }
