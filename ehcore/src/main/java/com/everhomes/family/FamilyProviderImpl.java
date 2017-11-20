@@ -302,6 +302,8 @@ public class FamilyProviderImpl implements FamilyProvider {
 
 			Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
 			if(address != null){
+				//用address字段覆盖family name
+				family.setName(address.getAddress());
 				family.setBuildingName(address.getBuildingName());
 				family.setApartmentName(address.getApartmentName());
 				family.setAddressStatus(address.getStatus());

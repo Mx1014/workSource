@@ -13,7 +13,7 @@ import com.everhomes.rest.pmtask.*;
 public interface PmTaskService {
 	SearchTasksResponse searchTasks(SearchTasksCommand cmd);
 	
-//	ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd);
+	ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd);
 	
 //	void evaluateTask(EvaluateTaskCommand cmd);
 	
@@ -23,7 +23,7 @@ public interface PmTaskService {
 
 //	void assignTask(AssignTaskCommand cmd);
 	
-//	PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd);
+	PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd);
 	
 	PmTaskDTO createTask(CreateTaskCommand cmd);
 

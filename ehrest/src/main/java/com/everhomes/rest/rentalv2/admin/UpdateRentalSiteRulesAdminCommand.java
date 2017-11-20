@@ -1,8 +1,10 @@
 package com.everhomes.rest.rentalv2.admin;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <ul>
@@ -22,6 +24,8 @@ import java.math.BigDecimal;
  * <li>orgMemberPrice: 实际价格-打折则为折后价(企业内部价)</li>
  * <li>approvingUserOriginalPrice: 原价-如果打折则有（外部客户价）</li>
  * <li>approvingUserPrice: 实际价格-打折则为折后价（外部客户价）</li>
+ * <li>sitePackageId: 对应套餐id</li>
+ * <li>sitePackages: 套餐价格表{@link com.everhomes.rest.rentalv2.admin.PricePackageDTO}</li>
  * </ul>
  */
 public class UpdateRentalSiteRulesAdminCommand {
@@ -52,6 +56,9 @@ public class UpdateRentalSiteRulesAdminCommand {
 	private BigDecimal approvingUserPrice;
 	
 	private Byte rentalType;
+	@ItemType(PricePackageDTO.class)
+	private List<PricePackageDTO> sitePackages;
+	private Long sitePackageId;
 
 	public Byte getRentalType() {
 		return rentalType;
@@ -129,6 +136,15 @@ public class UpdateRentalSiteRulesAdminCommand {
 	public void setHalfsiteOriginalPrice(java.math.BigDecimal halfsiteOriginalPrice) {
 		this.halfsiteOriginalPrice = halfsiteOriginalPrice;
 	}
+
+	public List<PricePackageDTO> getSitePackages() {
+		return sitePackages;
+	}
+
+	public void setSitePackages(List<PricePackageDTO> sitePackages) {
+		this.sitePackages = sitePackages;
+	}
+
 	public Long getRuleId() {
 		return ruleId;
 	}
@@ -140,6 +156,14 @@ public class UpdateRentalSiteRulesAdminCommand {
 	}
 	public void setResourceId(Long resourceId) {
 		this.resourceId = resourceId;
+	}
+
+	public Long getSitePackageId() {
+		return sitePackageId;
+	}
+
+	public void setSitePackageId(Long sitePackageId) {
+		this.sitePackageId = sitePackageId;
 	}
 
 	public BigDecimal getOrgMemberOriginalPrice() {

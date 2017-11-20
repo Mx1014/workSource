@@ -14,7 +14,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.everhomes.contract.ContractService;
+import com.everhomes.organization.*;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.customer.*;
+import com.everhomes.rest.organization.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.tomcat.jni.Time;
@@ -42,122 +45,16 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.openapi.ZJGKOpenServiceImpl;
-import com.everhomes.organization.ExecuteImportTaskCallback;
-import com.everhomes.organization.ImportFileService;
-import com.everhomes.organization.ImportFileTask;
-import com.everhomes.organization.OrganizationMemberDetails;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.customer.AllotEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.CreateCustomerApplyProjectCommand;
-import com.everhomes.rest.customer.CreateCustomerCertificateCommand;
-import com.everhomes.rest.customer.CreateCustomerCommercialCommand;
-import com.everhomes.rest.customer.CreateCustomerEconomicIndicatorCommand;
-import com.everhomes.rest.customer.CreateCustomerInvestmentCommand;
-import com.everhomes.rest.customer.CreateCustomerPatentCommand;
-import com.everhomes.rest.customer.CreateCustomerTalentCommand;
-import com.everhomes.rest.customer.CreateCustomerTrackingCommand;
-import com.everhomes.rest.customer.CreateCustomerTrackingPlanCommand;
-import com.everhomes.rest.customer.CreateCustomerTrademarkCommand;
-import com.everhomes.rest.customer.CreateEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.CustomerApplyProjectDTO;
-import com.everhomes.rest.customer.CustomerCertificateDTO;
-import com.everhomes.rest.customer.CustomerCommercialDTO;
-import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
-import com.everhomes.rest.customer.CustomerErrorCode;
-import com.everhomes.rest.customer.CustomerEventDTO;
-import com.everhomes.rest.customer.CustomerIndustryStatisticsDTO;
-import com.everhomes.rest.customer.CustomerIndustryStatisticsResponse;
-import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsDTO;
-import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsResponse;
-import com.everhomes.rest.customer.CustomerInvestmentDTO;
-import com.everhomes.rest.customer.CustomerPatentDTO;
-import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
-import com.everhomes.rest.customer.CustomerProjectStatisticsResponse;
-import com.everhomes.rest.customer.CustomerSourceStatisticsDTO;
-import com.everhomes.rest.customer.CustomerSourceStatisticsResponse;
-import com.everhomes.rest.customer.CustomerTalentDTO;
-import com.everhomes.rest.customer.CustomerTalentStatisticsDTO;
-import com.everhomes.rest.customer.CustomerTalentStatisticsResponse;
-import com.everhomes.rest.customer.CustomerTrackingDTO;
-import com.everhomes.rest.customer.CustomerTrackingPlanDTO;
-import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
-import com.everhomes.rest.customer.CustomerTrademarkDTO;
-import com.everhomes.rest.customer.CustomerType;
-import com.everhomes.rest.customer.DeleteCustomerApplyProjectCommand;
-import com.everhomes.rest.customer.DeleteCustomerCertificateCommand;
-import com.everhomes.rest.customer.DeleteCustomerCommercialCommand;
-import com.everhomes.rest.customer.DeleteCustomerEconomicIndicatorCommand;
-import com.everhomes.rest.customer.DeleteCustomerInvestmentCommand;
-import com.everhomes.rest.customer.DeleteCustomerPatentCommand;
-import com.everhomes.rest.customer.DeleteCustomerTalentCommand;
-import com.everhomes.rest.customer.DeleteCustomerTrackingCommand;
-import com.everhomes.rest.customer.DeleteCustomerTrackingPlanCommand;
-import com.everhomes.rest.customer.DeleteCustomerTrademarkCommand;
-import com.everhomes.rest.customer.DeleteEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.EnterpriseCustomerStatisticsDTO;
-import com.everhomes.rest.customer.GetCustomerApplyProjectCommand;
-import com.everhomes.rest.customer.GetCustomerCertificateCommand;
-import com.everhomes.rest.customer.GetCustomerCommercialCommand;
-import com.everhomes.rest.customer.GetCustomerEconomicIndicatorCommand;
-import com.everhomes.rest.customer.GetCustomerInvestmentCommand;
-import com.everhomes.rest.customer.GetCustomerPatentCommand;
-import com.everhomes.rest.customer.GetCustomerTalentCommand;
-import com.everhomes.rest.customer.GetCustomerTrackingCommand;
-import com.everhomes.rest.customer.GetCustomerTrackingPlanCommand;
-import com.everhomes.rest.customer.GetCustomerTrademarkCommand;
-import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.GiveUpEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.ImportEnterpriseCustomerDataCommand;
-import com.everhomes.rest.customer.ImportEnterpriseCustomerDataDTO;
-import com.everhomes.rest.customer.ListCustomerApplyProjectsCommand;
-import com.everhomes.rest.customer.ListCustomerCertificatesCommand;
-import com.everhomes.rest.customer.ListCustomerCommercialsCommand;
-import com.everhomes.rest.customer.ListCustomerEconomicIndicatorsCommand;
-import com.everhomes.rest.customer.ListCustomerEventsCommand;
-import com.everhomes.rest.customer.ListCustomerInvestmentsCommand;
-import com.everhomes.rest.customer.ListCustomerPatentsCommand;
-import com.everhomes.rest.customer.ListCustomerTalentsCommand;
-import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
-import com.everhomes.rest.customer.ListCustomerTrackingPlansCommand;
-import com.everhomes.rest.customer.ListCustomerTrackingsCommand;
-import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
-import com.everhomes.rest.customer.ListEnterpriseCustomerStatisticsCommand;
-import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
-import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommandResponse;
-import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
-import com.everhomes.rest.customer.SyncCustomersCommand;
-import com.everhomes.rest.customer.TrackingNotifyTemplateCode;
-import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
-import com.everhomes.rest.customer.TrackingPlanReadStatus;
-import com.everhomes.rest.customer.UpdateCustomerApplyProjectCommand;
-import com.everhomes.rest.customer.UpdateCustomerCertificateCommand;
-import com.everhomes.rest.customer.UpdateCustomerCommercialCommand;
-import com.everhomes.rest.customer.UpdateCustomerEconomicIndicatorCommand;
-import com.everhomes.rest.customer.UpdateCustomerInvestmentCommand;
-import com.everhomes.rest.customer.UpdateCustomerPatentCommand;
-import com.everhomes.rest.customer.UpdateCustomerTalentCommand;
-import com.everhomes.rest.customer.UpdateCustomerTrackingCommand;
-import com.everhomes.rest.customer.UpdateCustomerTrackingPlanCommand;
-import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
-import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
-import com.everhomes.rest.organization.ImportFileResultLog;
-import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.organization.ImportFileTaskType;
-import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -364,18 +261,49 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private OrganizationDTO createOrganization(EnterpriseCustomer customer) {
+        Organization org = organizationProvider.findOrganizationByNameAndNamespaceId(customer.getName(), customer.getNamespaceId());
+        if(org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
+            //已存在则更新 地址、官网地址、企业logo
+            org.setWebsite(customer.getCorpWebsite());
+            organizationProvider.updateOrganization(org);
+            OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(org.getId());
+            if(detail != null) {
+                detail.setAvatar(customer.getCorpLogoUri());
+                detail.setAddress(customer.getContactAddress());
+                detail.setLatitude(customer.getLatitude());
+                detail.setLongitude(customer.getLongitude());
+                organizationProvider.updateOrganizationDetail(detail);
+            } else {
+                detail = new OrganizationDetail();
+                detail.setOrganizationId(org.getId());
+                detail.setAddress(customer.getContactAddress());
+                detail.setLatitude(customer.getLatitude());
+                detail.setLongitude(customer.getLongitude());
+                detail.setAvatar(customer.getCorpLogoUri());
+                detail.setCreateTime(org.getCreateTime());
+                organizationProvider.createOrganizationDetail(detail);
+            }
+            return ConvertHelper.convert(org, OrganizationDTO.class);
+        }
         CreateEnterpriseCommand command = new CreateEnterpriseCommand();
         command.setName(customer.getName());
-        command.setDisplayName(customer.getNickName());
+//        command.setDisplayName(customer.getNickName());
         command.setNamespaceId(customer.getNamespaceId());
         command.setAvatar(customer.getCorpLogoUri());
-        command.setDescription(customer.getCorpDescription());
+//        command.setDescription(customer.getCorpDescription());
         command.setCommunityId(customer.getCommunityId());
-        command.setMemberCount(customer.getCorpEmployeeAmount() == null ? 0 : customer.getCorpEmployeeAmount() + 0L);
-        command.setContactor(customer.getContactName());
-        command.setContactsPhone(customer.getContactPhone());
-        command.setEntries(customer.getContactMobile());
+//        command.setMemberCount(customer.getCorpEmployeeAmount() == null ? 0 : customer.getCorpEmployeeAmount() + 0L);
+//        command.setContactor(customer.getContactName());
+//        command.setContactsPhone(customer.getContactPhone());
+//        command.setEntries(customer.getContactMobile());
         command.setAddress(customer.getContactAddress());
+        if(customer.getLatitude() != null) {
+            command.setLatitude(customer.getLatitude().toString());
+        }
+        if(customer.getLongitude() != null) {
+            command.setLongitude(customer.getLongitude().toString());
+        }
+        command.setWebsite(customer.getCorpWebsite());
         return organizationService.createEnterprise(command);
     }
 
@@ -424,11 +352,15 @@ public class CustomerServiceImpl implements CustomerService {
             command.setDescription(updateCustomer.getCorpDescription());
             command.setCommunityId(updateCustomer.getCommunityId());
             command.setMemberCount(updateCustomer.getCorpEmployeeAmount() == null ? 0 : updateCustomer.getCorpEmployeeAmount() + 0L);
-            command.setContactor(updateCustomer.getContactName());
-            command.setContactsPhone(updateCustomer.getContactPhone());
-            command.setEntries(updateCustomer.getContactMobile());
             command.setAddress(updateCustomer.getContactAddress());
+            command.setLongitude(updateCustomer.getLongitude());
+            command.setLatitude(updateCustomer.getLatitude());
+            command.setWebsite(updateCustomer.getCorpWebsite());
             organizationService.updateEnterprise(command, false);
+        } else {//没有企业的要新增一个
+            OrganizationDTO dto = createOrganization(updateCustomer);
+            updateCustomer.setOrganizationId(dto.getId());
+            enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
         }
 
         //修改了客户名称则要同步修改合同里面的客户名称
@@ -613,23 +545,23 @@ public class CustomerServiceImpl implements CustomerService {
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
             //给企业账号添加管理员 默认添加联系人作为管理员 by xiongying20170909
-            Map<Long, List<String>> orgAdminAccounts = new HashMap<>();
-            if (orgAdminAccounts.get(organizationDTO.getId()) == null ||
-                    !orgAdminAccounts.get(organizationDTO.getId()).contains(str.getContactMobile())) {
-                if (!org.springframework.util.StringUtils.isEmpty(str.getContactMobile())) {
-                    CreateOrganizationAdminCommand createOrganizationAdminCommand = new CreateOrganizationAdminCommand();
-                    createOrganizationAdminCommand.setOrganizationId(organizationDTO.getId());
-                    createOrganizationAdminCommand.setContactToken(str.getContactMobile());
-                    createOrganizationAdminCommand.setContactName(str.getContactName());
-                    rolePrivilegeService.createOrganizationAdmin(createOrganizationAdminCommand, cmd.getNamespaceId());
-                }
-                if(orgAdminAccounts.get(organizationDTO.getId()) == null) {
-                    List<String> mobiles = new ArrayList<>();
-                    mobiles.add(str.getContactMobile());
-                    orgAdminAccounts.put(organizationDTO.getId(), mobiles);
-                }
-                orgAdminAccounts.get(organizationDTO.getId()).add(str.getContactMobile());
-            }
+//            Map<Long, List<String>> orgAdminAccounts = new HashMap<>();
+//            if (orgAdminAccounts.get(organizationDTO.getId()) == null ||
+//                    !orgAdminAccounts.get(organizationDTO.getId()).contains(str.getContactMobile())) {
+//                if (!org.springframework.util.StringUtils.isEmpty(str.getContactMobile())) {
+//                    CreateOrganizationAdminCommand createOrganizationAdminCommand = new CreateOrganizationAdminCommand();
+//                    createOrganizationAdminCommand.setOrganizationId(organizationDTO.getId());
+//                    createOrganizationAdminCommand.setContactToken(str.getContactMobile());
+//                    createOrganizationAdminCommand.setContactName(str.getContactName());
+//                    rolePrivilegeService.createOrganizationAdmin(createOrganizationAdminCommand, cmd.getNamespaceId());
+//                }
+//                if(orgAdminAccounts.get(organizationDTO.getId()) == null) {
+//                    List<String> mobiles = new ArrayList<>();
+//                    mobiles.add(str.getContactMobile());
+//                    orgAdminAccounts.put(organizationDTO.getId(), mobiles);
+//                }
+//                orgAdminAccounts.get(organizationDTO.getId()).add(str.getContactMobile());
+//            }
         }
         return errorDataLogs;
     }
@@ -1201,7 +1133,30 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void createCustomerEconomicIndicator(CreateCustomerEconomicIndicatorCommand cmd) {
         CustomerEconomicIndicator indicator = ConvertHelper.convert(cmd, CustomerEconomicIndicator.class);
+        if(cmd.getMonth() != null) {
+            indicator.setMonth(new Timestamp(cmd.getMonth()));
+        }
         enterpriseCustomerProvider.createCustomerEconomicIndicator(indicator);
+
+        //年月不为null 则填到年月所属对应的年度统计表里
+        if(cmd.getMonth() != null) {
+            CustomerEconomicIndicatorStatistic statistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), new Timestamp(cmd.getMonth()));
+            if(statistic == null) {
+                statistic = ConvertHelper.convert(indicator, CustomerEconomicIndicatorStatistic.class);
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(new Timestamp(cmd.getMonth()));
+                statistic.setStartTime(getDayBegin(cal));
+                statistic.setEndTime(getDayEnd(cal));
+                enterpriseCustomerProvider.createCustomerEconomicIndicatorStatistic(statistic);
+            } else {
+                BigDecimal tax = statistic.getTaxPayment() == null ? BigDecimal.ZERO : statistic.getTaxPayment();
+                statistic.setTaxPayment(tax.add(indicator.getTaxPayment() == null ? BigDecimal.ZERO : indicator.getTaxPayment()));
+                BigDecimal turnover = statistic.getTurnover() == null ? BigDecimal.ZERO : statistic.getTurnover();
+                statistic.setTurnover(turnover.add(indicator.getTurnover() == null ? BigDecimal.ZERO : indicator.getTurnover()));
+                enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+            }
+        }
+
     }
 
     @Override
@@ -1214,6 +1169,34 @@ public class CustomerServiceImpl implements CustomerService {
     public void deleteCustomerEconomicIndicator(DeleteCustomerEconomicIndicatorCommand cmd) {
         CustomerEconomicIndicator indicator = checkCustomerEconomicIndicator(cmd.getId(), cmd.getCustomerId());
         enterpriseCustomerProvider.deleteCustomerEconomicIndicator(indicator);
+
+        if(indicator.getMonth() != null) {
+            CustomerEconomicIndicatorStatistic statistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), indicator.getMonth());
+            if(statistic != null) {
+                if(statistic.getTaxPayment() != null && indicator.getTaxPayment() != null) {
+                    if(statistic.getTaxPayment().compareTo(indicator.getTaxPayment()) > 0) {
+                        statistic.setTaxPayment(statistic.getTaxPayment().subtract(indicator.getTaxPayment()));
+                    } else {
+                        statistic.setTaxPayment(BigDecimal.ZERO);
+                    }
+                }
+                if(statistic.getTurnover() != null && indicator.getTurnover() != null) {
+                    if(statistic.getTurnover().compareTo(indicator.getTurnover()) > 0) {
+                        statistic.setTurnover(statistic.getTurnover().subtract(indicator.getTurnover()));
+                    } else {
+                        statistic.setTurnover(BigDecimal.ZERO);
+                    }
+                }
+
+                if(statistic.getTaxPayment().compareTo(BigDecimal.ZERO) == 0
+                        && statistic.getTurnover().compareTo(BigDecimal.ZERO) == 0) {
+                    enterpriseCustomerProvider.deleteCustomerEconomicIndicatorStatistic(statistic);
+                } else {
+                    enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+                }
+
+            }
+        }
     }
 
     private CustomerEconomicIndicator checkCustomerEconomicIndicator(Long id, Long customerId) {
@@ -1282,9 +1265,99 @@ public class CustomerServiceImpl implements CustomerService {
     public void updateCustomerEconomicIndicator(UpdateCustomerEconomicIndicatorCommand cmd) {
         CustomerEconomicIndicator exist = checkCustomerEconomicIndicator(cmd.getId(), cmd.getCustomerId());
         CustomerEconomicIndicator indicator = ConvertHelper.convert(cmd, CustomerEconomicIndicator.class);
+        if(cmd.getMonth() != null) {
+            indicator.setMonth(new Timestamp(cmd.getMonth()));
+        }
         indicator.setCreateTime(exist.getCreateTime());
         indicator.setCreateUid(exist.getCreateUid());
         enterpriseCustomerProvider.updateCustomerEconomicIndicator(indicator);
+
+        if(isSameYear(indicator.getMonth(), exist.getMonth())) {
+            if(indicator.getMonth() != null) {
+                CustomerEconomicIndicatorStatistic statistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), new Timestamp(cmd.getMonth()));
+                if(statistic == null) {
+                    statistic = ConvertHelper.convert(indicator, CustomerEconomicIndicatorStatistic.class);
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(new Timestamp(cmd.getMonth()));
+                    statistic.setStartTime(getDayBegin(cal));
+                    statistic.setEndTime(getDayEnd(cal));
+                    enterpriseCustomerProvider.createCustomerEconomicIndicatorStatistic(statistic);
+                } else {
+                    BigDecimal tax = statistic.getTaxPayment() == null ? BigDecimal.ZERO : statistic.getTaxPayment();
+                    statistic.setTaxPayment(tax.add(indicator.getTaxPayment() == null ? BigDecimal.ZERO : indicator.getTaxPayment()).subtract(exist.getTaxPayment() == null ? BigDecimal.ZERO : exist.getTaxPayment()));
+                    BigDecimal turnover = statistic.getTurnover() == null ? BigDecimal.ZERO : statistic.getTurnover();
+                    statistic.setTurnover(turnover.add(indicator.getTurnover() == null ? BigDecimal.ZERO : indicator.getTurnover()).subtract(exist.getTurnover() == null ? BigDecimal.ZERO : exist.getTurnover()));
+                    if(statistic.getTaxPayment().compareTo(BigDecimal.ZERO) <= 0
+                            && statistic.getTurnover().compareTo(BigDecimal.ZERO) <= 0) {
+                        enterpriseCustomerProvider.deleteCustomerEconomicIndicatorStatistic(statistic);
+                    } else {
+                        enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+                    }
+                }
+            }
+        } else {
+            if(indicator.getMonth() == null) {
+                CustomerEconomicIndicatorStatistic statistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), exist.getMonth());
+                if(statistic != null) {
+                    BigDecimal tax = statistic.getTaxPayment() == null ? BigDecimal.ZERO : statistic.getTaxPayment();
+                    statistic.setTaxPayment(tax.subtract(exist.getTaxPayment() == null ? BigDecimal.ZERO : exist.getTaxPayment()));
+                    BigDecimal turnover = statistic.getTurnover() == null ? BigDecimal.ZERO : statistic.getTurnover();
+                    statistic.setTurnover(turnover.subtract(exist.getTurnover() == null ? BigDecimal.ZERO : exist.getTurnover()));
+                    if(statistic.getTaxPayment().compareTo(BigDecimal.ZERO) <= 0
+                            && statistic.getTurnover().compareTo(BigDecimal.ZERO) <= 0) {
+                        enterpriseCustomerProvider.deleteCustomerEconomicIndicatorStatistic(statistic);
+                    } else {
+                        enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+                    }
+                }
+            } else if(exist.getMonth() == null) {
+                CustomerEconomicIndicatorStatistic statistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), indicator.getMonth());
+                if(statistic == null) {
+                    statistic = ConvertHelper.convert(indicator, CustomerEconomicIndicatorStatistic.class);
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(new Timestamp(cmd.getMonth()));
+                    statistic.setStartTime(getDayBegin(cal));
+                    statistic.setEndTime(getDayEnd(cal));
+                    enterpriseCustomerProvider.createCustomerEconomicIndicatorStatistic(statistic);
+                } else {
+                    BigDecimal tax = statistic.getTaxPayment() == null ? BigDecimal.ZERO : statistic.getTaxPayment();
+                    statistic.setTaxPayment(tax.add(indicator.getTaxPayment() == null ? BigDecimal.ZERO : indicator.getTaxPayment()));
+                    BigDecimal turnover = statistic.getTurnover() == null ? BigDecimal.ZERO : statistic.getTurnover();
+                    statistic.setTurnover(turnover.add(indicator.getTurnover() == null ? BigDecimal.ZERO : indicator.getTurnover()));
+                    enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+                }
+            } else {
+                CustomerEconomicIndicatorStatistic existStatistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), exist.getMonth());
+                if(existStatistic != null) {
+                    BigDecimal tax = existStatistic.getTaxPayment() == null ? BigDecimal.ZERO : existStatistic.getTaxPayment();
+                    existStatistic.setTaxPayment(tax.subtract(exist.getTaxPayment() == null ? BigDecimal.ZERO : exist.getTaxPayment()));
+                    BigDecimal turnover = existStatistic.getTurnover() == null ? BigDecimal.ZERO : existStatistic.getTurnover();
+                    existStatistic.setTurnover(turnover.subtract(exist.getTurnover() == null ? BigDecimal.ZERO : exist.getTurnover()));
+                    if(existStatistic.getTaxPayment().compareTo(BigDecimal.ZERO) <= 0
+                            && existStatistic.getTurnover().compareTo(BigDecimal.ZERO) <= 0) {
+                        enterpriseCustomerProvider.deleteCustomerEconomicIndicatorStatistic(existStatistic);
+                    } else {
+                        enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(existStatistic);
+                    }
+                }
+                CustomerEconomicIndicatorStatistic newStatistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), indicator.getMonth());
+                if(newStatistic == null) {
+                    newStatistic = ConvertHelper.convert(indicator, CustomerEconomicIndicatorStatistic.class);
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(new Timestamp(cmd.getMonth()));
+                    newStatistic.setStartTime(getDayBegin(cal));
+                    newStatistic.setEndTime(getDayEnd(cal));
+                    enterpriseCustomerProvider.createCustomerEconomicIndicatorStatistic(newStatistic);
+                } else {
+                    BigDecimal tax = newStatistic.getTaxPayment() == null ? BigDecimal.ZERO : newStatistic.getTaxPayment();
+                    newStatistic.setTaxPayment(tax.add(indicator.getTaxPayment() == null ? BigDecimal.ZERO : indicator.getTaxPayment()));
+                    BigDecimal turnover = newStatistic.getTurnover() == null ? BigDecimal.ZERO : newStatistic.getTurnover();
+                    newStatistic.setTurnover(turnover.add(indicator.getTurnover() == null ? BigDecimal.ZERO : indicator.getTurnover()));
+                    enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(newStatistic);
+                }
+            }
+
+        }
     }
 
     @Override
@@ -1521,12 +1594,145 @@ public class CustomerServiceImpl implements CustomerService {
         dto.setTotalTaxAmount(BigDecimal.ZERO);
         indicators.forEach(indicator -> {
             BigDecimal turnover = indicator.getTurnover() == null ? BigDecimal.ZERO : indicator.getTurnover();
-            BigDecimal taxAmount = indicator.getTotalTaxAmount() == null ? BigDecimal.ZERO : indicator.getTotalTaxAmount();
+            BigDecimal taxPayment = indicator.getTaxPayment() == null ? BigDecimal.ZERO : indicator.getTaxPayment();
             dto.setTotalTurnover(dto.getTotalTurnover().add(turnover));
-            dto.setTotalTaxAmount(dto.getTotalTaxAmount().add(taxAmount));
+            dto.setTotalTaxAmount(dto.getTotalTaxAmount().add(taxPayment));
         });
 
         return dto;
+    }
+
+    @Override
+    public ListCustomerAnnualStatisticsResponse listCustomerAnnualStatistics(ListCustomerAnnualStatisticsCommand cmd) {
+        Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+        ListCustomerAnnualStatisticsResponse response = new ListCustomerAnnualStatisticsResponse();
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        if(cmd.getPageAnchor() != null) {
+            locator.setAnchor(cmd.getPageAnchor());
+        }
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        List<CustomerAnnualStatisticDTO> dtos = enterpriseCustomerProvider.listCustomerAnnualStatistics(cmd.getCommunityId(), now, locator, pageSize,
+                cmd.getTurnoverMinimum(), cmd.getTurnoverMaximum(), cmd.getTaxPaymentMinimum(), cmd.getTaxPaymentMaximum());
+        response.setStatisticDTOs(dtos);
+        response.setNextPageAnchor(locator.getAnchor());
+        return response;
+    }
+
+    private Boolean isSameYear(Timestamp newMonth, Timestamp oldMonth) {
+        if(newMonth == null && oldMonth == null) {
+            return true;
+        } else {
+            if(newMonth != null && oldMonth != null) {
+                Calendar newCal = Calendar.getInstance();
+                newCal.setTime(newMonth);
+
+                Calendar oldCal = Calendar.getInstance();
+                oldCal.setTime(oldMonth);
+                if(newCal.get(Calendar.YEAR) == oldCal.get(Calendar.YEAR)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    private Timestamp getDayBegin(Calendar cal) {
+        cal.set(Calendar.MONTH, 0);
+        cal.set(Calendar.DATE, 1);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.MILLISECOND, 001);
+        return new Timestamp(cal.getTimeInMillis());
+    }
+
+    private Timestamp getDayEnd(Calendar cal) {
+        cal.set(Calendar.MONTH, 11);
+        cal.set(Calendar.DATE, 31);
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.SECOND, 59);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.MILLISECOND, 999);
+        return new Timestamp(cal.getTimeInMillis());
+    }
+
+    private Timestamp getMonth(Timestamp time) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(time);
+        cal.set(Calendar.DATE, 1);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.MILLISECOND, 001);
+        return new Timestamp(cal.getTimeInMillis());
+    }
+    @Override
+    public ListCustomerAnnualDetailsResponse listCustomerAnnualDetails(ListCustomerAnnualDetailsCommand cmd) {
+        ListCustomerAnnualDetailsResponse response = new ListCustomerAnnualDetailsResponse();
+        List<CustomerEconomicIndicator> economicIndicators = enterpriseCustomerProvider.listCustomerEconomicIndicatorsByCustomerId(cmd.getCustomerId(), new Timestamp(cmd.getStartTime()), new Timestamp(cmd.getEndTime()));
+        if(economicIndicators != null && economicIndicators.size() > 0) {
+            Map<Timestamp, MonthStatistics> monthStatisticsMap = new HashMap<>();
+            economicIndicators.forEach(economicIndicator -> {
+                Timestamp month = getMonth(economicIndicator.getMonth());
+                MonthStatistics statistic = monthStatisticsMap.get(month);
+                if(statistic == null) {
+                    statistic = new MonthStatistics();
+                    statistic.setMonth(month.getTime());
+                    statistic.setTaxPayment(economicIndicator.getTaxPayment());
+                    statistic.setTurnover(economicIndicator.getTurnover());
+                } else {
+                    BigDecimal taxPayment = statistic.getTaxPayment() == null ? BigDecimal.ZERO : statistic.getTaxPayment();
+                    statistic.setTaxPayment(taxPayment.add(economicIndicator.getTaxPayment() == null ? BigDecimal.ZERO : economicIndicator.getTaxPayment()));
+                    BigDecimal turnover = statistic.getTurnover() == null ? BigDecimal.ZERO : statistic.getTurnover();
+                    statistic.setTurnover(turnover.add(economicIndicator.getTurnover() == null ? BigDecimal.ZERO : economicIndicator.getTurnover()));
+                }
+                monthStatisticsMap.put(month, statistic);
+            });
+            List<MonthStatistics> statistics = new ArrayList<>();
+            monthStatisticsMap.forEach((month, statistic) -> {
+                statistics.add(statistic);
+            });
+            response.setStatistics(statistics);
+
+            //季度
+            Map<Integer, QuarterStatistics> quarterStatisticsMap = new HashMap<>();
+            monthStatisticsMap.forEach((timestamp, statistic) -> {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(timestamp);
+                int month = cal.get(Calendar.MONTH);
+                int quarter = 0;
+                if(month <= 3) {
+                    quarter = YearQuarter.THE_FIRST_QUARTER.getCode();
+                } else if(month > 3 && month <= 6) {
+                    quarter = YearQuarter.THE_SECOND_QUARTER.getCode();
+                } else if(month > 6 && month <= 9) {
+                    quarter = YearQuarter.THE_THIRD_QUARTER.getCode();
+                } else if(month > 9 && month <= 12) {
+                    quarter = YearQuarter.THE_FOURTH_QUARTER.getCode();
+                }
+
+                QuarterStatistics qs = quarterStatisticsMap.get(quarter);
+                if(qs == null) {
+                    qs = new QuarterStatistics();
+                    qs.setQuarter(quarter);
+                    qs.setTaxPayment(statistic.getTaxPayment());
+                    qs.setTurnover(statistic.getTurnover());
+
+                } else {
+                    BigDecimal taxPayment = statistic.getTaxPayment() == null ? BigDecimal.ZERO : statistic.getTaxPayment();
+                    qs.setTaxPayment(taxPayment.add(qs.getTaxPayment() == null ? BigDecimal.ZERO : qs.getTaxPayment()));
+                    BigDecimal turnover = statistic.getTurnover() == null ? BigDecimal.ZERO : statistic.getTurnover();
+                    qs.setTurnover(turnover.add(qs.getTurnover() == null ? BigDecimal.ZERO : qs.getTurnover()));
+                }
+                quarterStatisticsMap.put(quarter, qs);
+            });
+
+            List<QuarterStatistics> quarterStatisticses = new ArrayList<>();
+            quarterStatisticsMap.forEach((quarter, statistic) -> {
+                quarterStatisticses.add(statistic);
+            });
+            response.setQuarterStatisticses(quarterStatisticses);
+        }
+        return response;
     }
 
     @Override

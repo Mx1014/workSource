@@ -10,7 +10,7 @@ public class StatusChecker {
     public static ProcessStatus getProcessStatus(Long startTime, Long endTime) {
         long current = DateHelper.currentGMTTime().getTime();
         if(LOGGER.isInfoEnabled()) {
-            LOGGER.info("Check activity process status, current=" + current + ", startTime=" + startTime + ", endTime=" + endTime);
+            LOGGER.info("Check activity processStat status, current=" + current + ", startTime=" + startTime + ", endTime=" + endTime);
         }
         
         if (startTime == null) {
