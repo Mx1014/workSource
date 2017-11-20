@@ -68,7 +68,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -2837,6 +2837,14 @@ public class PunchServiceImpl implements PunchService {
                 Byte isNormal = NormalFlag.YES.getCode();
                 if (pdl.getStatusList().contains(PunchConstants.STATUS_SEPARATOR)) {
                     String[] status = pdl.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
+                    if (pdl.getApprovalStatusList() != null && pdl.getApprovalStatusList().contains(PunchConstants.STATUS_SEPARATOR =)) {
+                        String[] asList = StringUtils.splitPreserveAllTokens(pdl.getApprovalStatusList(),PunchConstants.STATUS_SEPARATOR);
+                        for(int i =0;i<asList.length&&i<status.length;i++) {
+                            if (StringUtils.isNotBlank(asList[i])) {
+                                status[i] = asList[i];
+                            }
+                        }
+                    }
                     for (int i = 1; i <= status.length; i++) {
 
                         isNormal = countOneDayStatistic(status[i-1], statistic, isNormal,i,pdl.getTimeRuleId());
@@ -2846,7 +2854,11 @@ public class PunchServiceImpl implements PunchService {
                         //不上班跳过
                         continue;
                     }else{
-                        isNormal = countOneDayStatistic(pdl.getStatusList(),statistic,isNormal,1,pdl.getTimeRuleId());
+                        String status = pdl.getStatusList();
+                        if (StringUtils.isNotBlank(pdl.getApprovalStatusList())) {
+                            status = pdl.getApprovalStatusList();
+                        }
+                        isNormal = countOneDayStatistic(status,statistic,isNormal,1,pdl.getTimeRuleId());
                     }
                 }
 				if (NormalFlag.fromCode(isNormal).equals(NormalFlag.YES)) {
@@ -6987,7 +6999,7 @@ public class PunchServiceImpl implements PunchService {
 	public String getDepartment(Integer namespaceId, Long detailId){
 		Map<Long,String> departMap = this.organizationProvider.listOrganizationsOfDetail(namespaceId,detailId,OrganizationGroupType.DEPARTMENT.getCode());
 		String department = "";
-		if(!StringUtils.isEmpty(departMap)){
+		if(!org.springframework.util.StringUtils.isEmpty(departMap)){
 			for(Long k : departMap.keySet()){
 				department += (departMap.get(k) + ",");
 			}

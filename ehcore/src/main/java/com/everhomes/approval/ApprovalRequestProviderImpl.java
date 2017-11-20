@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -352,8 +353,10 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 		Timestamp beginDate;
 		try {
 			beginDate = new Timestamp(dateFormat.parse(punchMonth+"01").getTime());
-
-			Timestamp endDate = new Timestamp(dateFormat.parse((Integer.valueOf(punchMonth)+1)+"01").getTime());
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(beginDate);
+			calendar.add(Calendar.MONTH, 1);
+			Timestamp endDate = new Timestamp(calendar.getTimeInMillis());
 			SelectConditionStep<Record1<BigDecimal>> step = getReadOnlyContext()
 					.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.DURATION.sum()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS)
 					.where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.CREATOR_UID.eq(userId))
