@@ -57,7 +57,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
-    private DecimalFormat decimalFormat = new DecimalFormat("#.000");
+    private DecimalFormat decimalFormat = new DecimalFormat("0.000");
 
     public GeneralApprovalFlowModuleListener() {
         for (GeneralFormDataSourceType value : GeneralFormDataSourceType.values()) {
