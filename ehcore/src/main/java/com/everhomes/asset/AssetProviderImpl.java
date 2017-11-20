@@ -1904,7 +1904,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
         EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
         EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
-        HashSet<PaymentExpectancyDTO> set = new HashSet<>();
+        Set<PaymentExpectancyDTO> set = new LinkedHashSet<>();
 
         List<Long> fetch = context.select(bill.ID)
                 .from(bill)
