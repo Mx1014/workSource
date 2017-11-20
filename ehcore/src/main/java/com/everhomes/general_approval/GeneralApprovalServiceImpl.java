@@ -984,6 +984,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         Row titleRow = sheet.createRow(2);
         for (int i = 0; i < list.size(); i++) {
             sheet.setColumnWidth(i, 15 * 256);
+            if (i == 4 || i == 6)
+                sheet.setColumnWidth(i, 30 * 256);
             Cell cell = titleRow.createCell(i);
             cell.setCellValue(list.get(i));
         }
@@ -1003,11 +1005,11 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         dataRow.createCell(3).setCellValue(data.getCreatorDepartment());
 
         //  2. data from form
-        List<FlowCaseEntity> entitiyLists = getApprovalDetails(data.getFlowCaseId());
-        if (entitiyLists != null && entitiyLists.size() > 4) {
+        List<FlowCaseEntity> entityLists = getApprovalDetails(data.getFlowCaseId());
+        if (entityLists != null && entityLists.size() > 4) {
             String formLogs = "";
-            for (int i = 4; i < entitiyLists.size(); i++) {
-                formLogs += entitiyLists.get(i).getKey() + " : " + entitiyLists.get(i).getValue() + "\n";
+            for (int i = 4; i < entityLists.size(); i++) {
+                formLogs += entityLists.get(i).getKey() + " : " + entityLists.get(i).getValue() + "\n";
             }
             Cell formCell = dataRow.createCell(4);
             formCell.setCellStyle(wrapStyle);
@@ -1031,7 +1033,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         if (operateLogLists != null && operateLogLists.size() > 0) {
             String operateLogs = "";
             for (int i = 0; i < operateLogLists.size(); i++) {
-                operateLogs += operateLogLists.get(i).getLogContent() + "\n";
+                operateLogs += operateLogLists.get(i).getFlowUserName() + operateLogLists.get(i).getLogContent() + "\n";
             }
             Cell logCell = dataRow.createCell(6);
             logCell.setCellStyle(wrapStyle);
