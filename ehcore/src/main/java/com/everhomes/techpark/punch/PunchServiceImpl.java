@@ -2837,7 +2837,7 @@ public class PunchServiceImpl implements PunchService {
                 Byte isNormal = NormalFlag.YES.getCode();
                 if (pdl.getStatusList().contains(PunchConstants.STATUS_SEPARATOR)) {
                     String[] status = pdl.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
-                    if (pdl.getApprovalStatusList() != null && pdl.getApprovalStatusList().contains(PunchConstants.STATUS_SEPARATOR =)) {
+                    if (pdl.getApprovalStatusList() != null && pdl.getApprovalStatusList().contains(PunchConstants.STATUS_SEPARATOR)) {
                         String[] asList = StringUtils.splitPreserveAllTokens(pdl.getApprovalStatusList(),PunchConstants.STATUS_SEPARATOR);
                         for(int i =0;i<asList.length&&i<status.length;i++) {
                             if (StringUtils.isNotBlank(asList[i])) {
