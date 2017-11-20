@@ -1,20 +1,26 @@
 package com.everhomes.pmtask;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.general_form.GeneralForm;
-import com.everhomes.general_form.GeneralFormModuleHandler;
-import com.everhomes.general_form.GeneralFormProvider;
-import com.everhomes.general_form.GeneralFormService;
+import com.everhomes.entity.EntityType;
+import com.everhomes.flow.*;
+import com.everhomes.general_form.*;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.StringHelper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,7 +35,16 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
     private PmTaskProvider pmTaskProvider;
     @Autowired
     private GeneralFormService generalFormService;
+    @Autowired
+    private FlowCaseProvider flowCaseProvider;
+    @Autowired
+    private FlowService flowService;
+    @Autowired
+    FlowEventLogProvider flowEventLogProvider;
+    @Autowired
+    private GeneralFormValProvider generalFormValProvider;
 
+    private Long moduleId = FlowConstants.PM_TASK_MODULE;
     @Override
     public PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd) {
         if (cmd.getOwnerType()==null)
@@ -37,19 +52,100 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
         GetTemplateBySourceIdCommand cmd2 = ConvertHelper.convert(cmd,GetTemplateBySourceIdCommand.class);
         GeneralForm form = getGeneralForm(cmd2);
         PmTask pmTask = pmTaskProvider.findTaskById(cmd.getSourceId());
-        if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
-            // 使用表单/审批 注意状态 config
-            form.setStatus(GeneralFormStatus.RUNNING.getCode());
-            this.generalFormProvider.updateGeneralForm(form);
-        }
+
         addGeneralFormValuesCommand cmd3 = new addGeneralFormValuesCommand();
         cmd3.setGeneralFormId(form.getFormOriginId());
         cmd3.setSourceId(cmd.getSourceId());
         cmd3.setSourceType(cmd.getSourceType());
         cmd3.setValues(cmd.getValues());
-
+        //将旧的清单删除
+        generalFormValProvider.deleteGeneralFormVals(EntityType.PM_TASK.getCode(),pmTask.getId());
         generalFormService.addGeneralFormValues(cmd3);
+        PostGeneralFormDTO response = ConvertHelper.convert(cmd,PostGeneralFormDTO.class);
+        String url ="";
+        if (pmTask.getFlowCaseId()!=null){
+            url = processFlowURL(pmTask.getFlowCaseId(), FlowUserType.PROCESSOR.getCode(), moduleId);
+        }
+        List<PostApprovalFormItem> items = new ArrayList<>();
+        PostApprovalFormItem item = new PostApprovalFormItem();
+        item.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+        item.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
+        JSONObject obj = new JSONObject();
+        obj.put("url",url);
+        item.setFieldValue(obj.toJSONString());
+
+        items.add(item);
+        response.setValues(items);
+
+        //修改任务跟踪
+        FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(pmTask.getId(), EntityType.PM_TASK.getCode(), moduleId);
+        FlowAutoStepDTO dto = new FlowAutoStepDTO();
+        dto.setAutoStepType(FlowStepType.NO_STEP.getCode());
+        dto.setFlowCaseId(flowCase.getId());
+        dto.setFlowMainId(flowCase.getFlowMainId());
+        dto.setFlowNodeId(flowCase.getCurrentNodeId());
+        dto.setFlowVersion(flowCase.getFlowVersion());
+        dto.setStepCount(flowCase.getStepCount());
+        dto.setEventType(FlowEventType.STEP_MODULE.getCode());
+
+        List<FlowEventLog> eventLogs = new ArrayList<>();
+        FlowEventLog log = new FlowEventLog();
+        log.setId(flowEventLogProvider.getNextId());
+        log.setFlowMainId(flowCase.getFlowMainId());
+        log.setFlowVersion(flowCase.getFlowVersion());
+        log.setNamespaceId(flowCase.getNamespaceId());
+        log.setFlowNodeId(flowCase.getCurrentNodeId());
+        log.setFlowCaseId(flowCase.getId());
+        log.setStepCount(flowCase.getStepCount());
+        log.setFlowUserId(UserContext.current().getUser().getId());
+        log.setFlowUserName(UserContext.current().getUser().getNickName());
+        log.setSubjectId(0L);
+        log.setParentId(0L);
+        log.setLogType(FlowLogType.NODE_TRACKER.getCode());
+        log.setButtonFiredStep(FlowStepType.NO_STEP.getCode());
+        log.setTrackerApplier(1L);
+        log.setTrackerProcessor(1L);
+
+        String content = "";
+        content += "本次服务的费用清单如下，请进行确认\n";
+        Long total = Long.valueOf(getFormItem(cmd.getValues(),"总计").getFieldValue());
+        content += "总计:"+total+"元\n";
+        Long serviceFee = Long.valueOf(getFormItem(cmd.getValues(),"服务费").getFieldValue());
+        content += "服务费:"+total+"元\n";
+        content += "物品费:"+(total-serviceFee)+"元\n";
+        PostApprovalFormItem subForm = getFormItem(cmd.getValues(),"物品");
+        if (subForm!=null) {
+            JSONArray array = JSONArray.parseArray(JSONObject.parseObject(subForm.getFieldValue()).getString("forms"));
+            if (array.size()!=0) {
+                content += "物品费详情：\n";
+                Gson g=new Gson();
+                for (int i=0;i<array.size();i++){
+                    JSONArray itemIterator = JSONArray.parseArray(array.getJSONObject(i).getString("values"));
+                    List<PostApprovalFormItem> itemAttri = g.fromJson(itemIterator.toJSONString(),
+                            new TypeToken<List<PostApprovalFormItem>>(){}.getType());
+                    content += getFormItem(itemAttri,"物品名称")+":";
+                    content += getFormItem(itemAttri,"小计")+"元";
+                    content += "("+getFormItem(itemAttri,"单价")+"元*"+getFormItem(itemAttri,"数量")+")";
+                }
+                content += "如对上述费用有疑义请附言说明";
+            }
+        }
+        log.setLogContent(content);
+        eventLogs.add(log);
+        dto.setEventLogs(eventLogs);
+        flowService.processAutoStep(dto);
+        return response;
+    }
+
+    private PostApprovalFormItem getFormItem(List<PostApprovalFormItem> values,String name){
+        for (PostApprovalFormItem p:values)
+            if (p.getFieldName().equals(name))
+                return p;
         return null;
+    }
+
+    private String processFlowURL(Long flowCaseId, String string, Long moduleId) {
+        return "zl://workflow/detail?flowCaseId="+flowCaseId+"&flowUserType="+string+"&moduleId="+moduleId  ;
     }
 
     //目前所有报修使用同一个费用清单

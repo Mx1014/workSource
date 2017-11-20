@@ -1,14 +1,22 @@
 package com.everhomes.pmtask;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
+import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.flow.node.FlowGraphNodeEnd;
+import com.everhomes.general_form.GeneralFormVal;
+import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -20,7 +28,10 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +67,10 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	private UserProvider userProvider;
 	@Autowired
 	private ConfigurationProvider configProvider;
+	@Autowired
+	private PmTaskService pmTaskService;
+	@Autowired
+	private GeneralFormValProvider generalFormValProvider;
 
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
 
@@ -205,7 +220,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 		}
 
-		flowCase.setCustomObject(JSONObject.toJSONString(dto));
+
 
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		FlowCaseEntity e;
@@ -262,7 +277,63 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			entities.add(e);
 		}
 
+		//填写费用清单
+		List<GeneralFormVal> list = generalFormValProvider.queryGeneralFormVals(EntityType.PM_TASK.getCode(),task.getId());
+		if (list!=null && list.size()>0){
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.TEXT.getCode());
+			e.setKey("费用清单");
+			String content = "";
+			List<PostApprovalFormItem> items = list.stream().map(p->ConvertHelper.convert(p, PostApprovalFormItem.class))
+					.collect(Collectors.toList());
+			content += "本次服务的费用清单如下，请进行确认\n";
+			Long total = Long.valueOf(getFormItem(items,"总计").getFieldValue());
+			content += "总计:"+total+"元\n";
+			Long serviceFee = Long.valueOf(getFormItem(items,"服务费").getFieldValue());
+			content += "服务费:"+total+"元\n";
+			content += "物品费:"+(total-serviceFee)+"元\n";
+			PostApprovalFormItem subForm = getFormItem(items,"物品");
+			if (subForm!=null) {
+				JSONArray array = JSONArray.parseArray(JSONObject.parseObject(subForm.getFieldValue()).getString("forms"));
+				if (array.size()!=0) {
+					content += "物品费详情：\n";
+					Gson g=new Gson();
+					for (int i=0;i<array.size();i++){
+						JSONArray itemIterator = JSONArray.parseArray(array.getJSONObject(i).getString("values"));
+						List<PostApprovalFormItem> itemAttri = g.fromJson(itemIterator.toJSONString(),
+								new TypeToken<List<PostApprovalFormItem>>(){}.getType());
+						content += getFormItem(itemAttri,"物品名称")+":";
+						content += getFormItem(itemAttri,"小计")+"元";
+						content += "("+getFormItem(itemAttri,"单价")+"元*"+getFormItem(itemAttri,"数量")+")";
+					}
+				}
+			}
+			e.setValue(content);
+			entities.add(e);
+		}else if (flowCase.getStatus() == FlowCaseStatus.FINISHED.getCode()){
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.LIST.getCode());
+			e.setKey("费用清单");
+			e.setValue("本次服务没有产生维修费");
+			entities.add(e);
+		}
+		JSONObject jo = JSONObject.parseObject(JSONObject.toJSONString(dto));
+		jo.put("formUrl",processFormURL(EntityType.PM_TASK.getCode(),task.getId(),cmd.getOwnerType(),cmd.getOwnerId(),"费用确认"));
+		flowCase.setCustomObject(JSONObject.toJSONString(dto));
+
 		return entities;
+	}
+
+	private String processFormURL(String sourceType, Long sourceId, String ownerType,Long ownerId,String displayName) {
+		return "zl://form/create?sourceType="+sourceType+"&sourceId="+sourceId+"&ownerType="+ownerType+"&ownerId="+ownerId
+				+"&displayName="+displayName;
+	}
+
+	private PostApprovalFormItem getFormItem(List<PostApprovalFormItem> values,String name){
+		for (PostApprovalFormItem p:values)
+			if (p.getFieldName().equals(name))
+				return p;
+		return null;
 	}
 
 	@Override
@@ -458,5 +529,39 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			dto.setServiceName(c.getName());
 			return dto;
 		}).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+		List<FlowConditionVariableDTO> list = new ArrayList<>();
+		FlowConditionVariableDTO dto = new FlowConditionVariableDTO();
+		dto.setDisplayName("报修类型");
+		dto.setName("taskCategoryId");
+		dto.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+		dto.setOperators(new ArrayList<>());
+		dto.getOperators().add(FlowConditionRelationalOperatorType.EQUAL.getCode());
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		ListTaskCategoriesCommand cmd = new ListTaskCategoriesCommand();
+		cmd.setNamespaceId(namespaceId);
+		ListTaskCategoriesResponse response = pmTaskService.listTaskCategories(cmd);
+		dto.setOptions(new ArrayList<>());
+		response.getRequests().forEach(p->{
+			dto.getOptions().add(p.getName());
+		});
+		list.add(dto);
+		return list;
+	}
+
+	@Override
+	public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) {
+		//目前只有类型一个分支参数
+		if ("taskCategoryId".equals(variable)) {
+			FlowCase flowcase = ctx.getFlowCase();
+			PmTask pmTask = pmTaskProvider.findTaskById(flowcase.getReferId());
+			Category category = categoryProvider.findCategoryById(pmTask.getTaskCategoryId());
+			FlowConditionStringVariable flowConditionStringVariable = new FlowConditionStringVariable(category.getName());
+			return flowConditionStringVariable;
+		}
+		return null;
 	}
 }
