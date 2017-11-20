@@ -5008,7 +5008,7 @@ public class PunchServiceImpl implements PunchService {
 					}
 				}
 				if (null != approvalStatuArray) {
-					if (approvalStatuArray.length > i && approvalStatuArray[i] != null) {
+					if (approvalStatuArray.length > i &&StringUtils.isNotBlank(approvalStatuArray[i])) {
 						statusByte = Byte.valueOf(approvalStatuArray[i]);
 					}
 				}
