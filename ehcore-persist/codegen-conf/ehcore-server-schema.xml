@@ -248,6 +248,7 @@
             eh_questionnaire_ranges | eh_payment_formula | eh_customer_economic_indicator_statistics |
 
             eh_rentalv2_price_packages |
+            eh_me_web_menus |
         </includes>
 
             <!-- All elements that are excluded from your schema
