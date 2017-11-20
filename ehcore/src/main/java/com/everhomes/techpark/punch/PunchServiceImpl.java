@@ -4997,7 +4997,7 @@ public class PunchServiceImpl implements PunchService {
 			String[] statulist = statuList.split(PunchConstants.STATUS_SEPARATOR);
 			String[] approvalStatuArray = null;
 			if (null != approvalStatusList) {
-				approvalStatuArray = approvalStatusList.split(PunchConstants.STATUS_SEPARATOR);
+				approvalStatuArray =StringUtils.splitPreserveAllTokens(approvalStatusList,PunchConstants.STATUS_SEPARATOR);
 			}
 			int arrayLength = approvalStatuArray != null ? approvalStatuArray.length : statulist.length;
 			for (int i = 0; i < arrayLength; i++) {
@@ -5012,12 +5012,11 @@ public class PunchServiceImpl implements PunchService {
 						statusByte = Byte.valueOf(approvalStatuArray[i]);
 					}
 				}
-				if (null != approvalStatuArray)
-					if (i == 0) {
-						result = statusToString(statusByte);
-					} else {
-						result = result + PunchConstants.STATUS_SEPARATOR + statusToString(statusByte);
-					}
+                if (i == 0) {
+                    result = statusToString(statusByte);
+                } else {
+                    result = result + PunchConstants.STATUS_SEPARATOR + statusToString(statusByte);
+                }
 			}
 		}
 		else{
