@@ -1,9 +1,6 @@
 package com.everhomes.acl;
 
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.community.ResourceCategory;
-import com.everhomes.community.ResourceCategoryAssignment;
+import com.everhomes.community.*;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -23,6 +20,7 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.ActivationFlag;
 import com.everhomes.rest.common.AllFlagType;
+import com.everhomes.rest.community.ListChildProjectCommand;
 import com.everhomes.rest.community.ResourceCategoryType;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.module.AssignmentTarget;
@@ -108,6 +106,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
     @Autowired
     private LocaleTemplateService localeTemplateService;
+
+    @Autowired
+    private CommunityService communityService;
 
 	@Override
 	public ListWebMenuResponse listWebMenu(ListWebMenuCommand cmd) {
@@ -2363,6 +2364,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 						Community community = communityProvider.findCommunityById(r.getResourceId());
 						if(community != null){
 							dto.setProjectName(community.getName());
+							//获取园区下的子项目
+							ListChildProjectCommand cmd = new ListChildProjectCommand();
+							cmd.setProjectType(EntityType.COMMUNITY.getCode());
+							cmd.setProjectId(community.getId());
+							List<ProjectDTO> childDto = this.communityService.listChildProjects(cmd);
+							if(childDto != null && childDto.size() > 0)
+								dto.setProjects(childDto);
 						}
 					}
 					dto.setProjectType(r.getResourceType());

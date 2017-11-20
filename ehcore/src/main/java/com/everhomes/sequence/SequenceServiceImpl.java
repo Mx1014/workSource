@@ -2487,6 +2487,12 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_DOOR_AUTH_LEVEL.ID.max()).from(Tables.EH_DOOR_AUTH_LEVEL).fetchOne().value1();
         });
 
+		syncTableSequence(null, EhGuildApplies.class, Tables.EH_GUILD_APPLIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_GUILD_APPLIES.ID.max()).from(Tables.EH_GUILD_APPLIES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhIndustryTypes.class, Tables.EH_INDUSTRY_TYPES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_INDUSTRY_TYPES.ID.max()).from(Tables.EH_INDUSTRY_TYPES).fetchOne().value1();
+        });
 
         syncTableSequence(null, EhRentalv2PricePackages.class, Tables.EH_RENTALV2_PRICE_PACKAGES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_RENTALV2_PRICE_PACKAGES.ID.max()).from(Tables.EH_RENTALV2_PRICE_PACKAGES).fetchOne().value1();

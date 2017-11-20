@@ -1,5 +1,3 @@
--- from club 3.2 start
-
 -- 俱乐部详情页  add by yanjun 20171107
 SET @id = (SELECT MAX(id) from eh_configurations);
 INSERT INTO `ehcore`.`eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@id := @id + 1), 'club.description.url', '/mobile/static/club_detail/index.html', 'club description url', '0', NULL);
@@ -34,6 +32,5 @@ SET @id = (SELECT MAX(id) from eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id := @id + 1), 'group', '10036', 'zh_CN', '俱乐部创建者无法被删除');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id := @id + 1), 'group', '10037', 'zh_CN', '行业协会创建者无法被删除');
 
--- from club 3.2 end
 
 

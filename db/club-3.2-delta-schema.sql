@@ -1,4 +1,3 @@
--- from club 3.2 start
 -- 行业协会类型
 CREATE TABLE `eh_industry_types` (
   `id` bigint(20) NOT NULL,
@@ -42,5 +41,3 @@ ALTER TABLE `eh_groups`  ADD COLUMN `description_type`  tinyint(4) NULL DEFAULT 
 
 -- 拒绝理由
 ALTER TABLE `eh_group_member_logs` ADD COLUMN `reject_text`  varchar(255) NULL;
-
--- from club 3.2 end

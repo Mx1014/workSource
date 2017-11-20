@@ -59,9 +59,10 @@ public class GroupSettingProviderImpl implements GroupSettingProvider {
 	}
 	
 	@Override
-	public GroupSetting findGroupSettingByNamespaceId(Integer namespaceId) {
+	public GroupSetting findGroupSettingByNamespaceId(Integer namespaceId, Byte clubType) {
 		Record record = getReadOnlyContext().select().from(Tables.EH_GROUP_SETTINGS)
-				.where(Tables.EH_GROUP_SETTINGS.NAMESPACE_ID.eq(namespaceId))
+				.where(Tables.EH_GROUP_SETTINGS.NAMESPACE_ID.eq(namespaceId)
+						.and(Tables.EH_GROUP_SETTINGS.CLUB_TYPE.eq(clubType)))
 				.orderBy(Tables.EH_GROUP_SETTINGS.ID.asc())
 				.fetchAny();
 		
