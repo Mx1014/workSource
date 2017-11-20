@@ -1,9 +1,10 @@
 
 CREATE TABLE `eh_relocation_requests` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
-  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
-  `owner_id` bigint(20) NOT NULL DEFAULT '0',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` varchar(128) NOT NULL DEFAULT '0',
+  `request_no` varchar NOT NULL,
   `requestor_enterprise_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'the id of organization where the requestor is in',
   `requestor_entperise_name` varchar(64) DEFAULT NULL COMMENT 'the enterprise name of requestor',
   `requestor_entperise_address` varchar(256) DEFAULT NULL COMMENT 'the enterprise address of requestor',
@@ -18,6 +19,30 @@ CREATE TABLE `eh_relocation_requests` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `eh_relocation_request_items` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0',
+
+  `item_name` varchar(64) DEFAULT NULL COMMENT 'the name of item',
+  `item_quantity` int(11) DEFAULT 0 COMMENT 'the quantity of item',
+  `status` tinyint(4) DEFAULT NULL COMMENT '0: inactive, 1: , 2: active',
+  `creator_uid` bigint(20) NOT NULL DEFAULT '0',
+  `create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_relocation_request_attachments` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `owner_type` varchar(32) DEFAULT NULL COMMENT 'attachment object owner type',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'owner id, e.g comment_id',
+  `content_type` varchar(32) DEFAULT NULL COMMENT 'attachment object content type',
+  `content_uri` varchar(1024) DEFAULT NULL COMMENT 'attachment object link info on storage',
+  `creator_uid` bigint(20) NOT NULL DEFAULT '0',
+  `create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- bydengs,20171114 服务联盟加客服id service_alliance2.9.3
 ALTER TABLE `eh_service_alliances` ADD COLUMN `online_service_uid` BIGINT COMMENT 'online service user id';
