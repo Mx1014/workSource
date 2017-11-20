@@ -1246,13 +1246,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 //		return download(filePath,response);
 
 		//把DTO中状态代码转换成映射String
-		List<ExportEquipmentData>  data= dtos.stream().map(this::toExportEquipment).collect(Collectors.toList());
-		if (data != null && dtos.size()>0){
+		List<ExportEquipmentData> data = dtos.stream().map(this::toExportEquipment).collect(Collectors.toList());
+		if (data != null && dtos.size() > 0) {
 			String fileName = String.format("巡检对象%s", DateUtil.dateToStr(new java.util.Date(), DateUtil.DATE_TIME_NO_SLASH));
-			ExcelUtils  excelUtils =new ExcelUtils(response,fileName,"巡检对象");
+			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "巡检对象");
 
 			ListFieldCommand listFieldCommand = ConvertHelper.convert(cmd, ListFieldCommand.class);
-			List<FieldDTO>  fields =fieldService.listFields(listFieldCommand);
+			List<FieldDTO> fields = fieldService.listFields(listFieldCommand);
 			List<String> propertyNames = new ArrayList<>();
 			List<String> titleNames = new ArrayList<>();
 			List<Integer> titleSizes = new ArrayList<>();
@@ -1260,36 +1260,36 @@ public class EquipmentServiceImpl implements EquipmentService {
 			//fieldService.listFields();
 			for (FieldDTO field : fields) {
 				//去除附件cell
-				if(!Objects.equals(field.getFieldName(), "attachments")) {
+				if (!Objects.equals(field.getFieldName(), "attachments")) {
 					propertyNames.add(field.getFieldName());
 					titleNames.add(field.getFieldDisplayName());
 					titleSizes.add(20);
 				}
 			}
 
-			excelUtils.writeExcel(propertyNames,titleNames,titleSizes,data);
-		}else {
+			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, data);
+		} else {
 			throw RuntimeErrorException.errorWith(ParkingLocalStringCode.SCOPE_STRING,
 					Integer.parseInt(ParkingLocalStringCode.NO_DATA), "no data");
 		}
 	}
 
-	private ExportEquipmentData  toExportEquipment(EquipmentsDTO equipmentsDTO) {
+	private ExportEquipmentData toExportEquipment(EquipmentsDTO equipmentsDTO) {
 		ExportEquipmentData data = ConvertHelper.convert(equipmentsDTO, ExportEquipmentData.class);
 		//convert status
-		if (equipmentsDTO.getQrCodeFlag()!=null){
-			if (equipmentsDTO.getQrCodeFlag()== 0){
+		if (equipmentsDTO.getQrCodeFlag() != null) {
+			if (equipmentsDTO.getQrCodeFlag() == 0) {
 				data.setQrCodeFlag("停用");
-			}else {
+			} else {
 				data.setQrCodeFlag("启用");
 			}
 		}
 
-		if (equipmentsDTO.getStatus()!=null) {
-				data.setStatus(EquipmentStatus.fromStatus(equipmentsDTO.getStatus()).getName());
+		if (equipmentsDTO.getStatus() != null) {
+			data.setStatus(EquipmentStatus.fromStatus(equipmentsDTO.getStatus()).getName());
 		}
 
-		return  data;
+		return data;
 	}
 
 	public void createEquipmentsBook(String path,List<EquipmentsDTO> dtos) {
@@ -2610,7 +2610,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	}
 
-	private List<String> importEquipmentsData( List<EquipmentInspectionEquipments> datas,ImportOwnerCommand cmd) {
+	private List<String> importEquipmentsData(List<EquipmentInspectionEquipments> datas, ImportOwnerCommand cmd) {
 		List<String> erroLogs = new ArrayList<String>();
 		Integer namespaceId = cmd.getNamespaceId();
 		Long userId = UserContext.currentUserId();
@@ -2635,7 +2635,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		return erroLogs;
 	}
 
-	private  List<EquipmentInspectionEquipments> handleImportEquipmentsData(ImportOwnerCommand cmd, List resultList) {
+	private List<EquipmentInspectionEquipments> handleImportEquipmentsData(ImportOwnerCommand cmd, List resultList) {
 
 		ListFieldCommand listFieldCommand = ConvertHelper.convert(cmd, ListFieldCommand.class);
 		// field 和 name 对应关系DTO
