@@ -51,6 +51,8 @@ import java.util.List;
  *  <li>commentToken : 评论token，评论当前机构需要使用此参数。</li>
  *  <li>summaryDescription : 概要描述字段。</li>
  *  <li>jumpServiceAllianceRouting : "grid" 样式下，点击服务联盟的banner图跳转到其他服务联盟的路由</li>
+ *  <li>onlineServiceUid : 在线服务用户的id</li>
+ *  <li>onlineServiceUname : 在线服务用户的名称</li>
  * </ul>
  */
 public class ServiceAllianceDTO {
@@ -147,6 +149,25 @@ public class ServiceAllianceDTO {
 	
 	private String jumpServiceAllianceRouting;
 	
+	private Long onlineServiceUid;
+	private String onlineServiceUname;
+	
+	public Long getOnlineServiceUid() {
+		return onlineServiceUid;
+	}
+
+	public void setOnlineServiceUid(Long onlineServiceUid) {
+		this.onlineServiceUid = onlineServiceUid;
+	}
+
+	public String getOnlineServiceUname() {
+		return onlineServiceUname;
+	}
+
+	public void setOnlineServiceUname(String onlineServiceUname) {
+		this.onlineServiceUname = onlineServiceUname;
+	}
+
 	public String getCommentToken() {
 		return commentToken;
 	}

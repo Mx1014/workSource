@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentalBillId：订单id</li>
  * <li>rentalItems：List<SiteItemDTO> 商品列表</li>
  * <li>rentalAttachments：List<AttachmentDTO> 附件列表</li>
+ * <li>paymentType: 支付方式，微信公众号支付方式必填，9-公众号支付 参考{@link com.everhomes.rest.order.PaymentType}</li>
  * </ul>
  */
 public class AddRentalBillItemCommand {

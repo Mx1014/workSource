@@ -1497,7 +1497,7 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhEquipmentInspectionItemResults.class, Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS).fetchOne().value1();
         });
-        syncTableSequence(null, EhOrganizationOwnerAddress.class, Tables.EH_ORGANIZATION_ADDRESSES.getName(), (dbContext) -> {
+        syncTableSequence(null, EhOrganizationAddresses.class, Tables.EH_ORGANIZATION_ADDRESSES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ORGANIZATION_ADDRESSES.ID.max()).from(Tables.EH_ORGANIZATION_ADDRESSES).fetchOne().value1();
         });
         syncTableSequence(null, EhOrganizationOwnerCars.class, Tables.EH_ORGANIZATION_OWNER_CARS.getName(), (dbContext) -> {
@@ -2477,13 +2477,20 @@ public class SequenceServiceImpl implements SequenceService {
         });
         syncTableSequence(null, EhDefaultChargingItems.class, Tables.EH_DEFAULT_CHARGING_ITEMS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_DEFAULT_CHARGING_ITEMS.ID.max()).from(Tables.EH_DEFAULT_CHARGING_ITEMS).fetchOne().value1();
-
         });
-        
+        syncTableSequence(null, EhCustomerEconomicIndicatorStatistics.class, Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.ID.max()).from(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS).fetchOne().value1();
+        });
+
+
         syncTableSequence(null, EhDoorAuthLevel.class, Tables.EH_DOOR_AUTH_LEVEL.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_DOOR_AUTH_LEVEL.ID.max()).from(Tables.EH_DOOR_AUTH_LEVEL).fetchOne().value1();
         });
 
+
+        syncTableSequence(null, EhRentalv2PricePackages.class, Tables.EH_RENTALV2_PRICE_PACKAGES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_RENTALV2_PRICE_PACKAGES.ID.max()).from(Tables.EH_RENTALV2_PRICE_PACKAGES).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")

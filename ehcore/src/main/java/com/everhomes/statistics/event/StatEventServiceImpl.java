@@ -148,7 +148,7 @@ public class StatEventServiceImpl implements StatEventService {
                     namespaceId, cmd.getParentId(), cmd.getStatType(), startDate, endDate);
         }
 
-        boolean isPortalItemGroupType = StatEventPortalStatType.fromCode(cmd.getStatType()) == StatEventPortalStatType.PORTAL_ITEM_GROUP;
+        StatEventPortalStatType statType = StatEventPortalStatType.fromCode(cmd.getStatType());
         List<StatEventPortalStatDTO> list = new ArrayList<>();
         for (StatEventPortalStatistic statistic : statistics) {
             StatEventPortalStatDTO dto = new StatEventPortalStatDTO();
@@ -159,7 +159,7 @@ public class StatEventServiceImpl implements StatEventService {
             dto.setOwnerType(statistic.getOwnerType());
             dto.setOwnerId(statistic.getOwnerId());
             dto.setSceneType(statistic.getSceneType());
-            if (isPortalItemGroupType) {
+            if (statType == StatEventPortalStatType.PORTAL_ITEM_GROUP) {
                 processWidget(statistic, dto);
             }
             list.add(dto);

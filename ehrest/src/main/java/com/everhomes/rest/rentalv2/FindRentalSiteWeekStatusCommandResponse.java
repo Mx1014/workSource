@@ -42,8 +42,8 @@ public class FindRentalSiteWeekStatusCommandResponse {
 	private String introduction;  
 	private String notice;
 	private String address;
-	private double longitude;
-	private double latitude;
+	private java.lang.Double longitude;
+	private java.lang.Double latitude;
 	private String contactPhonenum;
 	private java.lang.Byte       discountType;
 	private java.math.BigDecimal fullPrice;
@@ -287,25 +287,21 @@ public class FindRentalSiteWeekStatusCommandResponse {
 	}
 
 
-	public double getLongitude() {
+	public Double getLongitude() {
 		return longitude;
 	}
 
-
-	public void setLongitude(double longitude) {
+	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
 
-
-	public double getLatitude() {
+	public Double getLatitude() {
 		return latitude;
 	}
 
-
-	public void setLatitude(double latitude) {
+	public void setLatitude(Double latitude) {
 		this.latitude = latitude;
 	}
-
 
 	public String getContactPhonenum() {
 		return contactPhonenum;
