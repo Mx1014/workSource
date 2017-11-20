@@ -4347,7 +4347,7 @@ public class PunchServiceImpl implements PunchService {
 				organizationId,months,
 				cmd.getExceptionStatus(),userIds, locator, pageSize + 1 );
 		response.setExtColumns(new ArrayList<>());
-		List<ApprovalCategory> categories = approvalCategoryProvider.listApprovalCategory(UserContext.getCurrentNamespaceId(), cmd.getOwnerType(),  organizationId, ApprovalType.ABSENCE.getCode());
+		List<ApprovalCategory> categories = approvalCategoryProvider.listApprovalCategory();
 		if(null != categories){
 			for(ApprovalCategory category : categories){
 				response.getExtColumns().add(category.getCategoryName());

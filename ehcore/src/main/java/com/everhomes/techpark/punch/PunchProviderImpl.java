@@ -2792,8 +2792,8 @@ long id = sequenceProvider.getNextSequence(key);
 					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(ownerId))
 					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.greaterOrEqual(beginDate))
 					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.lt(endDate))
-					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.ABNORMAL_PUNCH.getCode()))
-					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(com.everhomes.rest.approval.ApprovalStatus.AGREEMENT.getCode()));
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.ABNORMAL_PUNCH.getCode()));
+//					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(com.everhomes.rest.approval.ApprovalStatus.AGREEMENT.getCode()));
 //			LOGGER.debug(step.toString());
 			return step.fetchOneInto(Integer.class);
 		} catch (ParseException e) {
