@@ -320,6 +320,41 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		});
 	}
 
+	@Override
+	public List<Authorization> listAuthorizations(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType, Boolean targetFlag, CrossShardListingLocator locator, Integer pageSize){
+		return listAuthorizations(locator, pageSize, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+				if(!StringUtils.isEmpty(ownerType) && null != ownerId){
+					query.addConditions(Tables.EH_AUTHORIZATIONS.OWNER_TYPE.eq(ownerType));
+					query.addConditions(Tables.EH_AUTHORIZATIONS.OWNER_ID.eq(ownerId));
+				}
+
+				if(!StringUtils.isEmpty(targetType) && null != targetId){
+					query.addConditions(Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(targetType));
+					query.addConditions(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(targetId));
+				}
+
+				if(!StringUtils.isEmpty(authType)){
+					query.addConditions(Tables.EH_AUTHORIZATIONS.AUTH_TYPE.eq(authType));
+				}
+
+				if(!StringUtils.isEmpty(authType) && null != authId){
+					query.addConditions(Tables.EH_AUTHORIZATIONS.AUTH_ID.eq(authId));
+				}
+
+				if(!StringUtils.isEmpty(identityType)){
+					query.addConditions(Tables.EH_AUTHORIZATIONS.IDENTITY_TYPE.eq(identityType));
+				}
+
+				if(targetFlag){
+					query.addGroupBy(Tables.EH_AUTHORIZATIONS.TARGET_TYPE);
+					query.addGroupBy(Tables.EH_AUTHORIZATIONS.TARGET_ID);
+				}
+				return query;
+			}
+		});
+	}
 
 	@Override
 	public List<Authorization> listAuthorizations(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType, Long appId, String moduleControlType, Byte all_control_flag, Boolean targetFlag){

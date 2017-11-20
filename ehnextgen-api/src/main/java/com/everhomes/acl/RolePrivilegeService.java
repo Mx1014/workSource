@@ -4,14 +4,13 @@ package com.everhomes.acl;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 
 import com.everhomes.module.ServiceModulePrivilegeType;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -180,7 +179,7 @@ public interface RolePrivilegeService {
 	 * @param cmd
 	 * @return
 	 */
-	List<ServiceModuleAppsAuthorizationsDto> listServiceModuleAppsAdministrators(ListServiceModuleAdministratorsCommand cmd);
+	ListServiceModuleAppsAdministratorResponse listServiceModuleAppsAdministrators(ListServiceModuleAdministratorsCommand cmd);
 
 	/**
 	 * 超级管理员列表

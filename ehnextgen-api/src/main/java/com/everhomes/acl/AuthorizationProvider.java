@@ -14,6 +14,8 @@ public interface AuthorizationProvider {
 
     List<Authorization> listAuthorizations(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType, Boolean targetFlag);
 
+    List<Authorization> listAuthorizations(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType, Boolean targetFlag, CrossShardListingLocator locator, Integer pageSize);
+
     List<Authorization> listAuthorizations(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType);
 
     List<Authorization> listAuthorizations(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType, Long appId, String moduleControlType, Byte all_control_flag, Boolean targetFlag);

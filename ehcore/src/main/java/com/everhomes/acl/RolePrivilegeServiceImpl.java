@@ -28,6 +28,7 @@ import com.everhomes.rest.community.ResourceCategoryType;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.module.AssignmentTarget;
 import com.everhomes.rest.module.ControlTarget;
+import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
 import com.everhomes.rest.module.Project;
 import com.everhomes.rest.oauth2.ControlTargetOption;
 import com.everhomes.rest.oauth2.ModuleManagementType;
@@ -2675,10 +2676,20 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 
 	@Override
-	public List<ServiceModuleAppsAuthorizationsDto> listServiceModuleAppsAdministrators(ListServiceModuleAdministratorsCommand cmd) {
-
-	    List<Authorization> authorizations = authorizationProvider.listManageAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), EntityType.SERVICE_MODULE_APP.getCode(), null);
-		return authorizations.stream().map((r) ->{
+	public ListServiceModuleAppsAdministratorResponse listServiceModuleAppsAdministrators(ListServiceModuleAdministratorsCommand cmd) {
+		ListServiceModuleAppsAdministratorResponse response = new ListServiceModuleAppsAdministratorResponse();
+//	    List<Authorization> authorizations = authorizationProvider.listManageAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), EntityType.SERVICE_MODULE_APP.getCode(), null);
+	    // 获取管理员 （分页版）
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		if(cmd.getPageAnchor() != null){
+			locator.setAnchor(cmd.getPageAnchor());
+		}
+		Integer pageSize = 20;//默认20条
+		if(cmd.getPageSize() != null){
+			pageSize = cmd.getPageSize();
+		}
+		List<Authorization> authorizations =  authorizationProvider.listAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), null, null, EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(), true, locator, pageSize);
+		List<ServiceModuleAppsAuthorizationsDto> dtos = authorizations.stream().map((r) ->{
             ServiceModuleAppsAuthorizationsDto dto = new ServiceModuleAppsAuthorizationsDto();
 
 			// 添加用户信息
@@ -2713,6 +2724,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			return dto;
 
 		}).collect(Collectors.toList());
+
+		response.setDtos(dtos);
+		response.setNextAnchor(locator.getAnchor());
+		return response;
 	}
 
 	@Override
