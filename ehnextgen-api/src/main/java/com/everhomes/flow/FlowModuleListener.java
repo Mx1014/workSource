@@ -91,20 +91,40 @@ public interface FlowModuleListener {
     /**
      * FlowCase 的变量渲染, 见 onFlowVariableRender(FlowCaseState ctx, List<String> vars)
      */
-    @Deprecated
     default String onFlowVariableRender(FlowCaseState ctx, String variable) {
         return null;
     }
 
     /**
-     * 获取预定义的参数
+     * 获取工作流条件参数
      * @param flow  工作流
      * @param flowEntityType 不同地方的参数，比如条件，节点，按钮等
      * @param ownerType 归属类型
      * @param ownerId   归属id
      * @return  返回参数列表
      */
-    default List<FlowPredefinedParamDTO> listPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+    default List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
         return null;
     }
+
+    /**
+     * 这个和上面的是不一样的
+     */
+    default List<FlowPredefinedParamDTO> listFlowPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+        return null;
+    }
+
+    /**
+     * 业务变量渲染
+     * @param ctx
+     * @param variable  变量名称
+     * @param extra
+     * @return
+     */
+    default FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) { return null;}
+
+    /**
+     * 需要在工作流里使用表单功能，需要实现此方法
+     */
+    default List<FlowFormDTO> listFlowForms(Flow flow) {return null;}
 }

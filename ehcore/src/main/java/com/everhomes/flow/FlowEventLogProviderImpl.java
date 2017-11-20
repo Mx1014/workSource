@@ -630,8 +630,8 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
         com.everhomes.server.schema.tables.EhFlowEventLogs log = Tables.EH_FLOW_EVENT_LOGS;
         com.everhomes.server.schema.tables.EhFlowCases flowCase = Tables.EH_FLOW_CASES;
 
-        SelectQuery<Record8<Long, Long, String, String, Long, String, String, Timestamp>> query = context
-                .select(log.ID, flowCase.ID, flowCase.TITLE, flowCase.MODULE_NAME, flowCase.MODULE_ID, flowCase.CONTENT, log.LOG_CONTENT, log.CREATE_TIME)
+        SelectQuery<Record9<Long, Long, String, String, Long, String, String, String, Timestamp>> query = context
+                .select(log.ID, flowCase.ID, flowCase.TITLE, flowCase.MODULE_NAME, flowCase.MODULE_ID, flowCase.CONTENT, log.LOG_CONTENT, log.FLOW_USER_NAME, log.CREATE_TIME)
                 .from(log)
                 .join(flowCase).on(log.FLOW_CASE_ID.eq(flowCase.ID))
                 .getQuery();
@@ -677,6 +677,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
             dto.setFlowCaseContent(r.getValue(flowCase.CONTENT));
             dto.setLogContent(r.getValue(log.LOG_CONTENT));
             dto.setCreateTime(r.getValue(log.CREATE_TIME));
+            dto.setFlowUserName(r.getValue(log.FLOW_USER_NAME));
             return dto;
         });
         if (dtoList.size() > pageSize) {

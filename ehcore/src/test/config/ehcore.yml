@@ -1,0 +1,141 @@
+#
+# Core service configuration
+#
+logging.path: ./
+logging.file: ehcore.log
+logging.level.: INFO
+
+#spring.view.prefix: /WEB-INF/jsp/
+#spring.view.suffix: .jsp
+
+#
+# Server configuration
+#
+
+#server.address:
+#server.port:
+#server.sessionTimeout:
+
+#server.port: 8443
+#server.ssl.key-store:keystore.p12
+#server.ssl.key-store-password: password
+#server.ssl.keyStoreType: PKCS12
+#server.ssl.keyAlias: tomcat
+
+#
+# Uncommit follow to use a different context path other than /
+#
+server.contextPath: /evh
+
+
+upload.max.size: 10000000
+heartbeat.interval: 10000
+scheduler.pool.size: 100
+
+#
+# Server production management/monitoring configuration
+# server management URL
+#   http://<management.address>:<management.port>/<mangement.context_path>/<endpoint name>
+# JMX management URL
+#   http://<management.address>:<management.port>/<mangement.context_path>/jolokia
+#
+security.basic.enabled: false
+security.user.name: admin
+security.user.password: password
+
+endpoint.health.enabled: true
+endpoint.autoconfig: true
+endpoint.dump: true
+endpoint.metrics: true
+endpoint.configprops: true
+endpoint.beans: true
+endpoint.trace: true
+endpoint.mappings: true
+            
+management.security.enabled: false
+management.security.role: SUPERUSER
+management.context-path: /manage
+management.port: 8082
+
+spring.jmx.enabled: true
+endpoints.jmx.domain: ehcore
+endpoints.jmx.uniqueNames: true
+
+jolokia.config.debug: true
+endpoints.jolokia.enabled: true
+
+spring.freemarker.check-template-location: false
+
+#
+# Messaging
+#
+messaging.msgbox.size: 1000
+messaging.batch.size: 1000
+messaging.routing.block.size: 1000
+
+#
+# iOS cert
+#
+apns.certname: apns-product
+
+forum.postbox.size: 1000
+forum.flush.interval: 3000
+
+javadoc.root: http://localhost:8080/apidocs
+javadoc.location: file:///Users/kelveny/archive/ehng/apidocs/
+web.location: /resources/
+
+#
+# Redis configuration
+#
+redis.bus.host: redis-server
+redis.bus.port: 6380
+redis.store.master.host: redis-server
+redis.store.master.port: 6380
+
+#
+# Database configuration
+#
+db.driver: com.mysql.jdbc.Driver
+db.master: jdbc:mysql://ehcore:ehcore@db-master:3306/ehcore?characterEncoding=UTF-8&encrypted=0
+db.conn.pool: 8
+db.conn.borrow.timeout: 60
+db.jta: true
+db.tx.timeout: 600
+        
+#
+# ElasticSearch configuration
+#
+elastic:    
+    index: everhomesv31x
+    nodes:
+        hosts: elasticsearch
+        ports: 9300
+        httpports: 9200
+
+#
+# for API code generation
+#
+serialization.serializable: EvhJsonSerializable
+serialization.helper: EvhJsonSerializationHelper
+
+objc.header.ext: .h
+objc.source.ext: .m
+objc.response.base: EvhRestResponseBase
+
+class.name.prefix: Evh
+
+source.jars: ${EVH_HOME}/ehrest/target/ehrest-3.4.0-SNAPSHOT.jar
+source.excludes: com.everhomes.rest.rpc.*, com.everhomes.rest.RestResponse, com.everhomes.rest.RestResponseBase, com.everhomes.rest.RestVersion
+destination.dir: ${EVH_IOS_HOME}/ehrest-respios/src/main/ios/API-objects
+destination.dir.java: ${EVH_HOME}/ehrest-response/src/main/java/
+
+src.path: E:/workspace/ehnextgen
+
+equipment.ip: 127.0.0.1
+
+#A1234567890Z为测试账号
+ems.sys.account: A1234567890Z
+ems.sys.password: e10adc3949ba59abbe56e057f20f883e
+
+schedule.running.flag: 1
