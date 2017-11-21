@@ -1,22 +1,21 @@
 package com.everhomes.menu;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.everhomes.acl.AuthorizationProvider;
 import com.everhomes.acl.WebMenuScope;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.db.DbProvider;
 import com.everhomes.domain.Domain;
 import com.everhomes.entity.EntityType;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.acl.WebMenuLeafFlag;
 import com.everhomes.rest.acl.WebMenuScopeApplyPolicy;
-import com.everhomes.rest.menu.ListUserRelatedWebMenusCommand;
-import com.everhomes.rest.menu.WebMenuCategory;
+import com.everhomes.rest.menu.*;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.user.UserContext;
@@ -54,6 +53,9 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 	@Autowired
 	private ServiceModuleService serviceModuleService;
+
+	@Autowired
+	private DbProvider dbProvider;
 
 	@Override
 	public List<WebMenuDTO> listUserRelatedWebMenus(ListUserRelatedWebMenusCommand cmd){
@@ -293,5 +295,123 @@ public class WebMenuServiceImpl implements WebMenuService {
 		dto.setDtos(dtos);
 		
 		return dto;
+	}
+
+	@Override
+	public GetTreeWebMenusByNamespaceResponse getTreeWebMenusByNamespace(GetTreeWebMenusByNamespaceCommand cmd) {
+
+		//获取已经配置的菜单
+		List<WebMenuScope> webMenuScopes = webMenuProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(cmd.getNamespaceId()));
+
+		//获取菜单的树状结构，并在菜单中加入上述的配置状态
+		List<WebMenuDTO> tree = getTree(0L, WebMenuType.PARK.getCode(), webMenuScopes);
+
+		GetTreeWebMenusByNamespaceResponse response = new GetTreeWebMenusByNamespaceResponse();
+		response.setDtos(tree);
+		return response;
+	}
+
+
+	/**
+	 * 获取菜单的树状结构，并在菜单中加入上述的配置状态
+	 * @param parentId
+	 * @param type
+	 * @param scopes
+	 * @return
+	 */
+	public List<WebMenuDTO> getTree(Long parentId, String type, List<WebMenuScope> scopes){
+		List<WebMenuDTO> dtos = new ArrayList<>();
+		//获取当前层级的菜单
+		List<WebMenu> webMenus = webMenuProvider.listWebMenus(parentId, type);
+		if(webMenus != null){
+			for (WebMenu m: webMenus){
+
+				WebMenuDTO dto = ConvertHelper.convert(m, WebMenuDTO.class);
+
+				//在菜单中加入配置状态
+				popuScopeToMenuDto(dto, scopes);
+
+				if(WebMenuLeafFlag.fromCode(dto.getLeafFlag()) == WebMenuLeafFlag.NOT_LEAF){
+
+					//获取子菜单
+					List<WebMenuDTO> leafDtos = getTree(dto.getId(), type, scopes);
+					dto.setDtos(leafDtos);
+				}
+				dtos.add(dto);
+			}
+		}
+		return dtos;
+	}
+
+	/**
+	 * 在菜单中加入配置状态
+	 * @param dto
+	 * @param scopes
+	 */
+	private void popuScopeToMenuDto(WebMenuDTO dto, List<WebMenuScope> scopes){
+		for (WebMenuScope s: scopes){
+			if(s.getMenuId().longValue() == dto.getId().longValue()){
+				dto.setSelected(true);
+				dto.setApplyPolicy(s.getApplyPolicy());
+				if(WebMenuScopeApplyPolicy.fromCode(s.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
+					dto.setName(s.getMenuName());
+				}
+			}
+		}
+	}
+
+	/**
+	 * 更新菜单
+	 * @param cmd
+	 */
+	@Override
+	public void updateMenuScopesByNamespace(UpdateMenuScopesByNamespaceCommand cmd){
+
+		//从树状结构中获取需要配置的菜单
+		List<WebMenuScope> newScopes = fromTree(cmd.getDtos(), cmd.getNamespaceId());
+
+		//查询已经配置的菜单
+		List<WebMenuScope> oldScopes = webMenuProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(cmd.getNamespaceId()));
+		List<Long> oldIds = oldScopes.stream().map(r -> r.getId()).collect(Collectors.toList());
+
+		//更新菜单
+		dbProvider.execute(status -> {
+			webMenuProvider.deleteWebMenuScopes(oldIds);
+			webMenuProvider.createWebMenuScopes(newScopes);
+			return true;
+		});
+	}
+
+	/**
+	 * 从树状结构中获取需要配置的菜单
+	 * @param dtos
+	 * @param namespaceId
+	 * @return
+	 */
+	private List<WebMenuScope> fromTree(List<WebMenuDTO> dtos, Integer namespaceId){
+		List<WebMenuScope> webMenuScopes = new ArrayList<>();
+		if(dtos != null && dtos.size() > 0){
+			for (WebMenuDTO dto: dtos){
+				if(dto.getSelected()){
+					WebMenuScope scope = new WebMenuScope();
+					scope.setApplyPolicy(dto.getApplyPolicy());
+					if(WebMenuScopeApplyPolicy.fromCode(dto.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
+						scope.setMenuName(dto.getName());
+					}
+					scope.setMenuId(dto.getId());
+					scope.setOwnerType(EntityType.NAMESPACE.getCode());
+					scope.setOwnerId((long)namespaceId);
+					webMenuScopes.add(scope);
+
+					//获取子菜单
+					if(WebMenuLeafFlag.fromCode(dto.getLeafFlag()) == WebMenuLeafFlag.NOT_LEAF){
+						List<WebMenuScope> leafScopes = fromTree(dto.getDtos(), namespaceId);
+						webMenuScopes.addAll(leafScopes);
+					}
+				}
+			}
+		}
+
+		return webMenuScopes;
 	}
 }
