@@ -5755,7 +5755,7 @@ public class FlowServiceImpl implements FlowService {
                 namespaceId, cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), FlowServiceTypeDTO.class);
         if (nsServiceTypes.size() == 0) {
             nsServiceTypes = flowServiceTypeProvider.listFlowServiceType(
-                    Namespace.DEFAULT_NAMESPACE, cmd.getModuleId(), , cmd.getOwnerType(), cmd.getOwnerId(), FlowServiceTypeDTO.class);
+                    Namespace.DEFAULT_NAMESPACE, cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), FlowServiceTypeDTO.class);
         }
         serviceTypes.addAll(nsServiceTypes);
 
