@@ -52,7 +52,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	@RestReturn(value=ListEnterpriseDetailResponse.class)
 	public RestResponse listEnterpriseDetails(ListEnterpriseDetailCommand cmd){
 		ListEnterprisesCommand command = ConvertHelper.convert(cmd, ListEnterprisesCommand.class);
-		command.setPageSize(10000);
+		command.setPageSize(100000);
 		ListEnterprisesCommandResponse r = organizationService.listEnterprises(command);
 		List<OrganizationDetailDTO> dtos = r.getDtos();
 		
