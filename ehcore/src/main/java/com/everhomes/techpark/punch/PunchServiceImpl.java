@@ -4365,7 +4365,8 @@ public class PunchServiceImpl implements PunchService {
 		for(PunchStatistic statistic : results){
 			PunchCountDTO dto =ConvertHelper.convert(statistic, PunchCountDTO.class);
 			if (dto.getExceptionDayCount() == null) {
-				dto.setExceptionDayCount((int) (dto.getWorkDayCount() - dto.getWorkCount()));
+				dto.setExceptionDayCount((int) ((dto.getWorkDayCount()==null?0:dto.getWorkDayCount())
+                        -(dto.getWorkCount()==null?0:dto.getWorkCount())));
 				if (dto.getExceptionDayCount() < 0) {
 					dto.setExceptionDayCount(0);
 				}

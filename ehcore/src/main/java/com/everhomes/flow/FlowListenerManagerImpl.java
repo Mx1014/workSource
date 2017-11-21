@@ -374,6 +374,9 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     }
 
     private void wrapError(Exception e, FlowModuleListener listener) {
+        if (e instanceof RuntimeErrorException) {
+            throw ((RuntimeErrorException) e);
+        }
         throw RuntimeErrorException.errorWith(e, ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                 "Flow module listener error, listener=%s, cause=%s", listener.getClass().getSimpleName(), e);
     }

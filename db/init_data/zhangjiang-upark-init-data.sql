@@ -2343,4 +2343,36 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@id:=@id+1), '49130', '', 'EhNamespaces', '999971', '2');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@id:=@id+1), '49140', '', 'EhNamespaces', '999971', '2');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@id:=@id+1), '49150', '', 'EhNamespaces', '999971', '2');
+
+-- 能耗管理
+SET @eh_service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999971, 49100, '', 'EhNamespaces', 999971, NULL, 2);
+-- 客户资料
+SET @eh_service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999971, 37000, '', 'EhNamespaces', 999971, NULL, 2);
+
+-- 园区政策（快讯）
+SET @eh_service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999971, 13000, '园区政策', 'EhNamespaces', 999971, NULL, 2);
+
+update eh_web_menus SET module_id = 13000 WHERE id =13000;
+update eh_service_modules SET parent_id = 10000,path='/10000/13000',name='园区政策' WHERE id = 13000;
+
+-- 问卷调查
+set @menu_id = 40150;
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`) 
+VALUES (@menu_id, '问卷调查', 40000, '/40000/40150', '1', '2', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL);
+
+SET @eh_service_module_privileges_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id + 1), @menu_id, 1, 20025, NULL, '0', UTC_TIMESTAMP());
+
+SET @eh_service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999971, @menu_id, '', 'EhNamespaces', 999971, NULL, 2);
+
 -- end  by dengs.
+
