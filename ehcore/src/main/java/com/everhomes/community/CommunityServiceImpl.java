@@ -245,6 +245,10 @@ public class CommunityServiceImpl implements CommunityService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid areaId parameter,area is not found.");
 		}
+		if(StringUtils.isNotBlank(cmd.getCommunityNumber())) {
+			checkCommunityNumberUnique(community.getId(), cmd.getCommunityNumber(), community.getNamespaceId());
+		}
+		community.setCommunityNumber(cmd.getCommunityNumber());
 		community.setAreaId(cmd.getAreaId());
 		community.setCityId(cmd.getCityId());
 		community.setOperatorUid(userId);
@@ -299,6 +303,25 @@ public class CommunityServiceImpl implements CommunityService {
 			return null;
 		});
 	}
+
+	private void checkCommunityNumberUnique(Long id, String communityNumber, Integer namespaceId) {
+		Community community = communityProvider.findCommunityByCommunityNumber(communityNumber, namespaceId);
+		if(community != null && !community.getId().equals(id)) {
+			LOGGER.error("Community number is already exsit.communityNumber=" + communityNumber);
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NUMBER_EXIST,
+					"Community number is already exsit.");
+		}
+	}
+
+	private void checkBuildingNumberUnique(Long id, String buildingNumber, Long communityId) {
+		Building building = communityProvider.findBuildingByCommunityIdAndNumber(communityId, buildingNumber);
+		if(building != null && !building.getId().equals(id)) {
+			LOGGER.error("building number is already exsit.buildingNumber=" + buildingNumber);
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_BUILDING_NUMBER_EXIST,
+					"building number is already exsit.");
+		}
+	}
+
 	@Override
 	public void approveCommuniy(ApproveCommunityAdminCommand cmd){
 		if(cmd.getCommunityId() == null){
@@ -793,7 +816,12 @@ public class CommunityServiceImpl implements CommunityService {
 		if(cmd.getEntryDate() != null) {
 			building.setEntryDate(new Timestamp(cmd.getEntryDate()));
 		}
-		
+
+		if(StringUtils.isNotBlank(cmd.getBuildingNumber())){
+			checkBuildingNumberUnique(building.getId(), cmd.getBuildingNumber(), building.getCommunityId());
+		}
+		building.setBuildingNumber(cmd.getBuildingNumber());
+
 		Long userId = UserContext.currentUserId();
 
 		dbProvider.execute((TransactionStatus status) -> {
