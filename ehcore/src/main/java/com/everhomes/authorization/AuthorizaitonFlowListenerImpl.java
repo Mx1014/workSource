@@ -294,7 +294,7 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 	}
 
 	@Override
-	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
 		if(namespaceId == 999971) {
 			List<FlowServiceTypeDTO> dtos = new ArrayList<FlowServiceTypeDTO>();
 			FlowServiceTypeDTO dto = new FlowServiceTypeDTO();

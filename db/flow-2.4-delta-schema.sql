@@ -7,3 +7,6 @@ ALTER TABLE eh_flow_event_logs ADD COLUMN `extra` TEXT COMMENT 'extra data, json
 
 ALTER TABLE eh_flow_condition_expressions ADD COLUMN `variable_extra1` VARCHAR(256) COMMENT 'variable 1 extra';
 ALTER TABLE eh_flow_condition_expressions ADD COLUMN `variable_extra2` VARCHAR(256) COMMENT 'variable 2 extra';
+
+ALTER TABLE eh_flow_service_types ADD COLUMN `owner_type` VARCHAR(64) COMMENT 'ownerType, e.g: EhOrganizations';
+ALTER TABLE eh_flow_service_types ADD COLUMN `owner_id` BIGINT COMMENT 'ownerId, e.g: eh_organizations id';

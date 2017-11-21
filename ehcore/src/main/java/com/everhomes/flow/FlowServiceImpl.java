@@ -5747,10 +5747,12 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public ListFlowServiceTypeResponse listFlowServiceTypes(ListFlowServiceTypesCommand cmd) {
         List<FlowServiceTypeDTO> serviceTypes = new ArrayList<>();
-        serviceTypes.addAll(flowListenerManager.listFlowServiceTypes(UserContext.getCurrentNamespaceId(), cmd.getModuleId()));
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        serviceTypes.addAll(flowListenerManager.listFlowServiceTypes(namespaceId, cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId()));
 
         List<FlowServiceTypeDTO> nsServiceTypes = flowServiceTypeProvider.listFlowServiceType(
-                UserContext.getCurrentNamespaceId(), cmd.getModuleId(), FlowServiceTypeDTO.class);
+                namespaceId, cmd.getModuleId(), FlowServiceTypeDTO.class);
         if (nsServiceTypes.size() == 0) {
             nsServiceTypes = flowServiceTypeProvider.listFlowServiceType(
                     Namespace.DEFAULT_NAMESPACE, cmd.getModuleId(), FlowServiceTypeDTO.class);

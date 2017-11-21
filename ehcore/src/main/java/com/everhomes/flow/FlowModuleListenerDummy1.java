@@ -17,7 +17,7 @@ public class FlowModuleListenerDummy1 implements FlowModuleListener {
     private Long moduleId = 40100L;
 
     @Override
-    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
         return null;
     }
 

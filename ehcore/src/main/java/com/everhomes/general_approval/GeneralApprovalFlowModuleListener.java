@@ -650,7 +650,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     }
 
     @Override
-    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
         ListGeneralApprovalCommand command = new ListGeneralApprovalCommand();
         List<GeneralApproval> gas = this.generalApprovalProvider.queryGeneralApprovals(new ListingLocator(),
                 Integer.MAX_VALUE - 1, (locator, query) -> {
@@ -659,6 +659,11 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
                             GeneralApprovalStatus.RUNNING.getCode(),
                             GeneralApprovalStatus.INVALID.getCode())
                     );
+
+                    if (ownerType != null && ownerId != null) {
+                        query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ownerType));
+                        query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(ownerId));
+                    }
                     return query;
                 });
         if(gas != null) {

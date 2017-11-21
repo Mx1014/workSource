@@ -82,7 +82,7 @@ public interface FlowListenerManager {
 
     List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId);
 
-    List<FlowServiceTypeDTO> listFlowServiceTypes(Integer namespaceId, Long moduleId);
+    List<FlowServiceTypeDTO> listFlowServiceTypes(Integer namespaceId, Long moduleId, String ownerType, Long ownerId);
 
     FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra);
 
