@@ -1,11 +1,12 @@
 package com.everhomes.util.excel;
 
-import com.everhomes.user.UserContact;
-import com.everhomes.user.UserContext;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.usermodel.HSSFRichTextString;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -13,7 +14,6 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.boot.test.IntegrationTest;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -416,15 +416,15 @@ public class ExcelUtils {
      * @param result   （表格的数据）
      * @throws Exception
      */
-    public void exportExcel(HSSFWorkbook workbook, int sheetNum,
+    public void exportExcel(org.apache.poi.ss.usermodel.Workbook workbook, int sheetNum,
                             String sheetTitle, String[] headers, List<List<String>> result,String[] mandatory) throws Exception {
         // 生成一个表格
-        HSSFSheet sheet = workbook.createSheet();
+        Sheet sheet = workbook.createSheet();
         workbook.setSheetName(sheetNum, sheetTitle);
         // 设置表格默认列宽度为20个字节
         sheet.setDefaultColumnWidth((short) 20);
         // 生成一个样式
-        HSSFCellStyle style_non_m = workbook.createCellStyle();
+        CellStyle style_non_m = workbook.createCellStyle();
         // 设置这些样式
 //        style.setFillForegroundColor(HSSFColor.GREEN.index);
 //        style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
@@ -434,20 +434,20 @@ public class ExcelUtils {
         style_non_m.setBorderTop(HSSFCellStyle.BORDER_THIN);
         style_non_m.setAlignment(HSSFCellStyle.ALIGN_CENTER);
         // 生成一个内容字体
-        HSSFCellStyle style_content = workbook.createCellStyle();
-        HSSFFont font = workbook.createFont();
+        CellStyle style_content = workbook.createCellStyle();
+        Font font = workbook.createFont();
         font.setColor(HSSFColor.BLACK.index);
         font.setFontHeightInPoints((short) 12);
         style_content.setFont(font);
         //非必填的标题的样式
-        HSSFFont font2 = workbook.createFont();
+        Font font2 = workbook.createFont();
         font2.setColor(HSSFColor.BLACK.index);
         font2.setFontHeightInPoints((short) 16);
         font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
         style_non_m.setFont(font2);
         //必填的字体和样式
 
-        HSSFCellStyle style_m = workbook.createCellStyle();
+        CellStyle style_m = workbook.createCellStyle();
         // 设置这些样式
 //        style.setFillForegroundColor(HSSFColor.GREEN.index);
 //        style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
@@ -457,7 +457,7 @@ public class ExcelUtils {
         style_m.setBorderTop(HSSFCellStyle.BORDER_THIN);
         style_m.setAlignment(HSSFCellStyle.ALIGN_CENTER);
 
-        HSSFFont font4 = workbook.createFont();
+        Font font4 = workbook.createFont();
         font4.setColor(HSSFColor.RED.index);
         font4.setFontHeightInPoints((short) 16);
         font4.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
@@ -467,21 +467,21 @@ public class ExcelUtils {
         style_non_m.setWrapText(true);
         style_content.setWrapText(true);
         //产生说明
-        HSSFFont font3 = workbook.createFont();
+        Font font3 = workbook.createFont();
         font3.setColor(HSSFColor.BLACK.index);
         font3.setFontHeightInPoints((short) 12);
         font3.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
 
-        HSSFCellStyle introStyle = workbook.createCellStyle();
+        CellStyle introStyle = workbook.createCellStyle();
         introStyle.setWrapText(true);
         introStyle.setAlignment(HorizontalAlignment.LEFT);
         introStyle.setFillBackgroundColor(HSSFColor.YELLOW.index);
         introStyle.setFont(font3);
         CellRangeAddress cra = new CellRangeAddress(0,0,0,11);
         sheet.addMergedRegion(cra);
-        HSSFRow introRow = sheet.createRow(0);
+        Row introRow = sheet.createRow(0);
         introRow.setHeightInPoints(130);
-        HSSFCell introCell = introRow.createCell(0);
+        Cell introCell = introRow.createCell(0);
         introCell.setCellStyle(introStyle);
         //这里可以根据sheet决定怎么显示枚举，晚上搞这个
         String instruction = "";
@@ -548,11 +548,11 @@ public class ExcelUtils {
 //                "表计类型: 应收部分、应付部分、自用部分、公共计量部分、其他 \n"
 
         // 产生表格标题行
-        HSSFRow row = sheet.createRow(1);
+        Row row = sheet.createRow(1);
         // 把字体应用到当前的样式,标题为加粗的
 
         for (int i = 0; i < headers.length; i++) {
-            HSSFCell cell = row.createCell((short) i);
+            Cell cell = row.createCell((short) i);
             if(mandatory[i].equals("1")){
                 cell.setCellStyle(style_m);
             }else{
@@ -569,7 +569,7 @@ public class ExcelUtils {
                 row = sheet.createRow(index+1);
                 int cellIndex = 0;
                 for (String str : m) {
-                    HSSFCell cell = row.createCell((short) cellIndex);
+                    Cell cell = row.createCell((short) cellIndex);
                     cell.setCellStyle(style_content);
                     cell.setCellValue(str.toString());
                     cellIndex++;
