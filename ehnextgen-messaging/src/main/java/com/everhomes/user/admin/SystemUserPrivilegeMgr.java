@@ -19,6 +19,7 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.blacklist.BlacklistErrorCode;
 import com.everhomes.rest.common.IncludeChildFlagType;
 import com.everhomes.rest.module.ControlTarget;
+import com.everhomes.rest.oauth2.ControlTargetOption;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.organization.OrganizationType;
@@ -211,10 +212,14 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         if(app != null && p_moduleId != 0L && p_moduleId == app.getModuleId()){//如果权限对应的moduleId和appId对应的模块Id相等，再校验是否对应用有权
             List<Authorization> authorizations = this.authorizationProvider.listAuthorizations(ownerType, ownerId, OwnerType.USER.getCode(), userId, EntityType.SERVICE_MODULE.getCode(), p_moduleId, IdentityType.MANAGE.getCode(), appId, null, null, false);
             List<ControlTarget> controlTargets = this.authorizationProvider.listAuthorizationControlConfigs(namespaceId, userId, authorizations.get(0).getControlId());
+            Byte controlOption = authorizations.get(0).getControlOption();
             if(authorizations != null && authorizations.size() > 0){
                 switch (ModuleManagementType.fromCode(authorizations.get(0).getModuleControlType())){
                     case COMMUNITY_CONTROL:
                         if(communityId != null && communityId != 0L){
+                            if(controlOption == ControlTargetOption.ALL_COMMUNITY.getCode()){//配置为全园区时，返回true
+                                return true;
+                            }
                             for (ControlTarget controlTarget : controlTargets) {
                                 if(controlTarget.getId() == communityId){
                                     return true;
