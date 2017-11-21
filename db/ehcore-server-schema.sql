@@ -2782,6 +2782,22 @@ CREATE TABLE `eh_customer_commercials` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_customer_economic_indicator_statistics`;
+
+
+CREATE TABLE `eh_customer_economic_indicator_statistics` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
+  `customer_id` BIGINT,
+  `turnover` DECIMAL(10,2) COMMENT '营业额',
+  `tax_payment` DECIMAL(10,2) COMMENT '纳税额',
+  `start_time` DATETIME,
+  `end_time` DATETIME,
+  `status` TINYINT NOT NULL DEFAULT 2,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 DROP TABLE IF EXISTS `eh_customer_economic_indicators`;
 
 
@@ -2810,6 +2826,7 @@ CREATE TABLE `eh_customer_economic_indicators` (
   `update_time` DATETIME,
   `delete_uid` BIGINT,
   `delete_time` DATETIME,
+  `month` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -9528,7 +9545,7 @@ CREATE TABLE `eh_pm_tasks` (
   `organization_uid` BIGINT,
   `remark_source` VARCHAR(32),
   `remark` VARCHAR(1024),
-  
+  `organization_name` VARCHAR(128) COMMENT '报修的任务的公司名称',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -11330,6 +11347,7 @@ CREATE TABLE `eh_rentalv2_cells` (
   `half_org_member_price` DECIMAL(10,2) COMMENT '半场-实际价格-打折则为折后价(企业内部价)',
   `half_approving_user_original_price` DECIMAL(10,2) COMMENT '半场-原价-如果打折则有（外部客户价）',
   `half_approving_user_price` DECIMAL(10,2) COMMENT '半场-实际价格-打折则为折后价（外部客户价）',
+  `price_package_id` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -11411,6 +11429,8 @@ CREATE TABLE `eh_rentalv2_default_rules` (
   `resource_counts` DOUBLE COMMENT '可预约个数',
   `begin_date` DATE COMMENT '开始日期',
   `end_date` DATE COMMENT '结束日期',
+  `day_open_time` DOUBLE,
+  `day_close_time` DOUBLE,
   `open_weekday` VARCHAR(7) COMMENT '7位二进制，0000000每一位表示星期7123456',
   `time_step` DOUBLE COMMENT '步长，每个单元格是多少小时（半小时是0.5）',
   `rental_start_time_flag` TINYINT DEFAULT 0 COMMENT '至少提前预约时间标志: 1-限制, 0-不限制',
@@ -11566,6 +11586,11 @@ CREATE TABLE `eh_rentalv2_orders` (
   `refund_ratio` INTEGER COMMENT '退款比例',
   `cancel_flag` TINYINT COMMENT '是否允许取消 1是 0否',
   `reminder_time` DATETIME COMMENT '消息提醒时间',
+  `reminder_end_time` DATETIME,
+  `auth_start_time` DATETIME,
+  `auth_end_time` DATETIME,
+  `door_auth_id` BIGINT,
+  `package_name` VARCHAR(45),
   `pay_mode` TINYINT DEFAULT 0 COMMENT 'pay mode :0-online pay 1-offline',
   `offline_cashier_address` VARCHAR(200),
   `offline_payee_uid` BIGINT,
@@ -11576,6 +11601,39 @@ CREATE TABLE `eh_rentalv2_orders` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_rentalv2_price_packages`;
+
+
+CREATE TABLE `eh_rentalv2_price_packages` (
+  `id` BIGINT NOT NULL,
+  `owner_type` VARCHAR(32) NOT NULL,
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `name` VARCHAR(45),
+  `rental_type` TINYINT,
+  `price` DECIMAL(10,2),
+  `original_price` DECIMAL(10,2),
+  `org_member_price` DECIMAL(10,2),
+  `org_member_original_price` DECIMAL(10,2),
+  `approving_user_price` DECIMAL(10,2),
+  `approving_user_original_price` DECIMAL(10,2),
+  `discount_type` TINYINT,
+  `full_price` DECIMAL(10,2),
+  `cut_price` DECIMAL(10,2),
+  `discount_ratio` DOUBLE,
+  `org_member_discount_type` TINYINT,
+  `org_member_full_price` DECIMAL(10,2),
+  `org_member_cut_price` DECIMAL(10,2),
+  `org_member_discount_ratio` DOUBLE,
+  `approving_user_discount_type` TINYINT,
+  `approving_user_full_price` DECIMAL(10,2),
+  `approving_user_cut_price` DECIMAL(10,2),
+  `approving_user_discount_ratio` DOUBLE,
+  `cell_begin_id` BIGINT NOT NULL DEFAULT 0,
+  `cell_end_id` BIGINT NOT NULL DEFAULT 0,
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_rentalv2_price_rules`;
 
@@ -11595,6 +11653,14 @@ CREATE TABLE `eh_rentalv2_price_rules` (
   `full_price` DECIMAL(10,2) COMMENT '满XX',
   `cut_price` DECIMAL(10,2) COMMENT '减XX元',
   `discount_ratio` DOUBLE COMMENT '折扣比例',
+  `org_member_discount_type` TINYINT,
+  `org_member_full_price` DECIMAL(10,2),
+  `org_member_cut_price` DECIMAL(10,2),
+  `org_member_discount_ratio` DOUBLE,
+  `approving_user_discount_type` TINYINT,
+  `approving_user_full_price` DECIMAL(10,2),
+  `approving_user_cut_price` DECIMAL(10,2),
+  `approving_user_discount_ratio` DOUBLE,
   `cell_begin_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'cells begin id',
   `cell_end_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'cells end id',
   `creator_uid` BIGINT,
@@ -11784,6 +11850,8 @@ CREATE TABLE `eh_rentalv2_resources` (
   `unit` DOUBLE DEFAULT 1 COMMENT '1-整租, 0.5-可半个租',
   `begin_date` DATE COMMENT '开始日期',
   `end_date` DATE COMMENT '结束日期',
+  `day_open_time` DOUBLE,
+  `day_close_time` DOUBLE,
   `open_weekday` VARCHAR(7) COMMENT '7位二进制，0000000每一位表示星期7123456',
   `avg_price_str` VARCHAR(1024) COMMENT '平均价格计算好的字符串',
   `confirmation_prompt` VARCHAR(200),
@@ -11792,6 +11860,7 @@ CREATE TABLE `eh_rentalv2_resources` (
   `rental_start_time_flag` TINYINT DEFAULT 0 COMMENT '至少提前预约时间标志: 1-限制, 0-不限制',
   `rental_end_time_flag` TINYINT DEFAULT 0 COMMENT '最多提前预约时间标志: 1-限制, 0-不限制',
   `default_order` BIGINT NOT NULL DEFAULT 0 COMMENT 'order',
+  `aclink_id` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -12727,6 +12796,8 @@ CREATE TABLE `eh_service_alliances` (
   `summary_description` VARCHAR(1024),
   `enable_comment` TINYINT DEFAULT 0 COMMENT '1,enable;0,disable',
   `jump_service_alliance_routing` VARCHAR(2048) COMMENT 'jump to other service alliance routing',
+  `online_service_uid` BIGINT COMMENT 'online service user id',
+  `online_service_uname` VARCHAR(64) COMMENT 'online service user name',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
