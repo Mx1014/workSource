@@ -13989,5 +13989,15 @@ public class OrganizationServiceImpl implements OrganizationService {
             return null;
         }
     }
+
+    @Override
+    public Byte getOrganizationDetailFlag(GetOrganizationDetailFlagCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public Byte setOrganizationDetailFlag(SetOrganizationDetailFlagCommand cmd) {
+        return null;
+    }
 }
 
