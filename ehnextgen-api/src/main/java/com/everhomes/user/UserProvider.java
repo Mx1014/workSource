@@ -76,8 +76,10 @@ public interface UserProvider {
 	UserCommunity findUserCommunityByOwnerAndCommunity(long ownerUid, long communityId);
 	List<User> findUserByNamespaceId(Integer namespaceId, CrossShardListingLocator locator, int pageSize);
 	List<User> listUserByKeywords(String keyword);
-	
-	int countUserByNamespaceId(Integer namespaceId, Boolean isAuth);
+
+    int countUserByNamespaceIdAndGender(Integer namespaceId, Byte gender);
+
+    int countUserByNamespaceId(Integer namespaceId, Boolean isAuth);
 	List<User> listUserByNickNameOrIdentifier(String keyword);
 	List<UserIdentifier> listUserIdentifierByIdentifier(String identifier);
 	List<User> listUserByIds(Integer namespaceId, List<Long> userIds);

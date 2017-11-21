@@ -54,6 +54,7 @@ public class UpdateEquipmentStandardCommand {
 	@Deprecated
 	private Byte standardType;
 	@Deprecated
+	@ItemType(RepeatSettingsDTO.class)
 	private RepeatSettingsDTO repeat;
 	@Deprecated
 	private Long templateId;

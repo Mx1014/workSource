@@ -20,6 +20,10 @@ public class ModifyChargingStandardCommand {
     private String instruction;
     private BigDecimal suggestUnitPrice;
     private Integer areaSizeType;
+    private Long ownerId;
+    private String ownerType;
+    private Integer namespaceId;
+
 
     @Override
     public String toString() {
@@ -28,6 +32,7 @@ public class ModifyChargingStandardCommand {
 
     public ModifyChargingStandardCommand() {
     }
+
 
     public BigDecimal getSuggestUnitPrice() {
         return suggestUnitPrice;
@@ -44,6 +49,33 @@ public class ModifyChargingStandardCommand {
     public void setAreaSizeType(Integer areaSizeType) {
         this.areaSizeType = areaSizeType;
     }
+
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+
 
     public Long getChargingStandardId() {
         return chargingStandardId;

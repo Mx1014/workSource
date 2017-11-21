@@ -156,20 +156,21 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	public List<OfficeCubicleSpace> searchSpaces(String keyWords, CrossShardListingLocator locator, int pageSize,
 			Integer currentNamespaceId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_SPACES);
+		SelectJoinStep<Record> step = context.select(Tables.EH_OFFICE_CUBICLE_SPACES.fields()).from(Tables.EH_OFFICE_CUBICLE_SPACES);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_SPACES.NAMESPACE_ID.eq(currentNamespaceId) ;
 		condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.STATUS.eq(OfficeStatus.NORMAL.getCode()));
-		if (StringUtils.isNotBlank(keyWords))
-			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.NAME.like("%" + keyWords + "%").or(
-					Tables.EH_OFFICE_CUBICLE_SPACES.CONTACT_PHONE.like("%" + keyWords + "%")));
+		if (StringUtils.isNotBlank(keyWords)) {
+			step.join(Tables.EH_USERS).on(Tables.EH_USERS.ID.eq(Tables.EH_OFFICE_CUBICLE_SPACES.MANAGER_UID));
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.NAME.like("%" + keyWords + "%")
+					.or(Tables.EH_OFFICE_CUBICLE_SPACES.CONTACT_PHONE.like("%" + keyWords + "%"))
+					.or(Tables.EH_USERS.NICK_NAME.like("%" + keyWords + "%")));
+		}
 
 		if (null != locator && locator.getAnchor() != null)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.ID.lt(locator.getAnchor()));
 		step.limit(pageSize);
 		step.where(condition);
-		List<OfficeCubicleSpace> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_SPACES.ID.desc()).fetch().map((r) -> {
-			return ConvertHelper.convert(r, OfficeCubicleSpace.class);
-		});
+		List<OfficeCubicleSpace> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_SPACES.ID.desc()).fetchInto(OfficeCubicleSpace.class);
 		if (null != result && result.size() > 0)
 			return result;
 		return null;

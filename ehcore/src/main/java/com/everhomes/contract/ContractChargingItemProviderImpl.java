@@ -46,17 +46,17 @@ public class ContractChargingItemProviderImpl implements ContractChargingItemPro
 
         LOGGER.info("createContractChargingItem: " + item);
 
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractChargingItems.class, id));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractChargingItems.class));
         EhContractChargingItemsDao dao = new EhContractChargingItemsDao(context.configuration());
         dao.insert(item);
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhContractChargingItems.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhContractChargingItems.class, id);
     }
 
     @Override
     public void updateContractChargingItem(ContractChargingItem item) {
         assert(item.getId() != null);
 
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractChargingItems.class, item.getId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractChargingItems.class));
         EhContractChargingItemsDao dao = new EhContractChargingItemsDao(context.configuration());
         item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         item.setOperatorUid(UserContext.current().getUser().getId());

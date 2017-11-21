@@ -1602,5 +1602,14 @@ public class NewsServiceImpl implements NewsService {
 		setNewsLikeFlag(userId, cmd.getNewsToken());
 	}
 
+	@Override
+	public GetCategoryIdByEntryIdResponse getCategoryIdByEntryId(GetCategoryIdByEntryIdCommand cmd) {
+		NewsCategory category = newsProvider.getCategoryIdByEntryId(cmd.getEntryId(),UserContext.getCurrentNamespaceId());
+		if(category == null){
+			return new GetCategoryIdByEntryIdResponse(0L);
+		}
+		return new GetCategoryIdByEntryIdResponse(category.getId());
+	}
+
 
 }

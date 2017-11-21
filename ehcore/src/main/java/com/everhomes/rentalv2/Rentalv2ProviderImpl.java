@@ -1183,13 +1183,20 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		if (null != rentalSiteId)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID
 					.equal(rentalSiteId));
-		if (null != endTime)
-			condition = condition.and(Tables.EH_RENTALV2_ORDERS.START_TIME
-					.lessThan(new Timestamp(endTime)));
-		if (null !=  startTime)
-			condition = condition.and(Tables.EH_RENTALV2_ORDERS.END_TIME
-					.greaterThan(new Timestamp(startTime)));
-		 
+//		if (null != endTime)
+//			condition = condition.and(Tables.EH_RENTALV2_ORDERS.START_TIME
+//					.lt(new Timestamp(endTime)));
+//		if (null != startTime)
+//			condition = condition.and(Tables.EH_RENTALV2_ORDERS.END_TIME
+//					.gt(new Timestamp(startTime)));
+
+		if (null != startTime) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.gt(new Timestamp(startTime)));
+		}
+		if (null != endTime) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(endTime)));
+		}
+
 		if (null != billStatus)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
 					.equal(billStatus));
@@ -1201,8 +1208,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_UID
 								.equal(userId)); 
 		if(null!=locator && locator.getAnchor() != null)
-			condition=condition.and(Tables.EH_RENTALV2_ORDERS.ID.lt(locator.getAnchor()));
-								
+			condition=condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(locator.getAnchor())));
+
+		step.orderBy(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.desc());
 		step.limit(pageSize);
 		step.where(condition);
 		List<RentalOrder> result = step

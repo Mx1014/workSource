@@ -4,6 +4,9 @@ package com.everhomes.rest.questionnaire;
 /**
  * 
  * <ul>
+ <li>NAMESPACE_ALL:namespace_all 域空间全部用户</li>
+ <li>NAMESPACE_AUTHENTICATED:namespace_authenticated 域空间认证用户</li>
+ <li>NAMESPACE_UNAUTHORIZED:namespace_unauthorized 域空间非认证用户</li>
  <li>COMMUNITY_ALL:community_all 园区全部用户</li>
  <li>COMMUNITY_AUTHENTICATED:community_authenticated 园区认证用户</li>
  <li>COMMUNITY_UNAUTHORIZED:community_unauthorized 园区非认证用户</li>
@@ -15,6 +18,9 @@ package com.everhomes.rest.questionnaire;
  * </ul>
  */
 public enum QuestionnaireRangeType {
+	NAMESPACE_ALL("namespace_all"),
+	NAMESPACE_AUTHENTICATED("namespace_authenticated"),
+	NAMESPACE_UNAUTHORIZED("namespace_unauthorized"),
 	COMMUNITY_ALL("community_all"),
 	COMMUNITY_AUTHENTICATED("community_authenticated"),
 	COMMUNITY_UNAUTHORIZED("community_unauthorized"),

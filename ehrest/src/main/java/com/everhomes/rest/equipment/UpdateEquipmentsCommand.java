@@ -37,15 +37,16 @@ import java.util.List;
  *  <li>eqAccessoryMap: 设备备品配件 参考{@link com.everhomes.rest.equipment.EquipmentAccessoryMapDTO}</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
  *  <li>pictureFlag: 是否需要拍照 0：否 1：是</li>
- *  <li>brand_name 品牌
- *  <li>construction_party :施工方</li>
- *  <li>discard_time :废弃时间</li>
- *  <li>manager_contact :联系方式</li>
- *  <li>Detail:设备详情</li>
- *  <li>factory_time: 出厂时间</li>
- *  <li>Price: 采购价格</li>
- *  <li>buy_time: 采购时间</li>
- *  <li>depreciation_years: 折旧年限</li>
+ *  <li>brandName 品牌
+ *  <li>constructionParty :施工方</li>
+ *  <li>discardTime :废弃时间</li>
+ *  <li>managerContact :联系方式</li>
+ *  <li>detail:设备详情</li>
+ *  <li>factoryTime: 出厂时间</li>
+ *  <li>price: 采购价格</li>
+ *  <li>buyTime: 采购时间</li>
+ *  <li>depreciationYears: 折旧年限</li>
+ *  <li>provenance: 产地</li>
 
  * </ul>
  */
@@ -101,21 +102,23 @@ public class UpdateEquipmentsCommand {
     
     private String manager;
 
-	private  String brand_name ;
+	private  String brandName ;
 
-	private  String construction_party ;
+	private  String constructionParty ;
 
-	private  Long discard_time ;
+	private  Long discardTime ;
 
-	private  String manager_contact ;
+	private  String managerContact ;
 
-	private  String Detail ;
+	private  String detail ;
 
-	private  String Price ;
+	private  Long  factoryTime;
 
-	private  Long buy_time;
+	private  String price ;
 
-	private  Integer depreciation_years;
+	private  Long buyTime;
+
+	private  Integer depreciationYears;
 
 
 	@ItemType(EquipmentAttachmentDTO.class)
@@ -374,68 +377,76 @@ public class UpdateEquipmentsCommand {
 		this.eqStandardMap = eqStandardMap;
 	}
 
-	public String getBrand_name() {
-		return brand_name;
+	public String getBrandName() {
+		return brandName;
 	}
 
-	public void setBrand_name(String brand_name) {
-		this.brand_name = brand_name;
+	public void setBrandName(String brandName) {
+		this.brandName = brandName;
 	}
 
-	public String getConstruction_party() {
-		return construction_party;
+	public String getConstructionParty() {
+		return constructionParty;
 	}
 
-	public void setConstruction_party(String construction_party) {
-		this.construction_party = construction_party;
+	public void setConstructionParty(String constructionParty) {
+		this.constructionParty = constructionParty;
 	}
 
-	public Long getDiscard_time() {
-		return discard_time;
+	public Long getDiscardTime() {
+		return discardTime;
 	}
 
-	public void setDiscard_time(Long discard_time) {
-		this.discard_time = discard_time;
+	public void setDiscardTime(Long discardTime) {
+		this.discardTime = discardTime;
 	}
 
-	public String getManager_contact() {
-		return manager_contact;
+	public String getManagerContact() {
+		return managerContact;
 	}
 
-	public void setManager_contact(String manager_contact) {
-		this.manager_contact = manager_contact;
+	public void setManagerContact(String managerContact) {
+		this.managerContact = managerContact;
 	}
 
 	public String getDetail() {
-		return Detail;
+		return detail;
 	}
 
 	public void setDetail(String detail) {
-		Detail = detail;
+		this.detail = detail;
+	}
+
+	public Long getFactoryTime() {
+		return factoryTime;
+	}
+
+	public void setFactoryTime(Long factoryTime) {
+		this.factoryTime = factoryTime;
 	}
 
 	public String getPrice() {
-		return Price;
+		return price;
 	}
 
 	public void setPrice(String price) {
-		Price = price;
+		this.price = price;
 	}
 
-	public Long getBuy_time() {
-		return buy_time;
+	public Long getBuyTime() {
+		return buyTime;
 	}
 
-	public void setBuy_time(Long buy_time) {
-		this.buy_time = buy_time;
+	public void setBuyTime(Long buyTime) {
+		this.buyTime = buyTime;
 	}
 
-	public Integer getDepreciation_years() {
-		return depreciation_years;
+	public Integer getDepreciationYears() {
+		return depreciationYears;
 	}
 
-	public void setDepreciation_years(Integer depreciation_years) {
-		this.depreciation_years = depreciation_years;
+	public void setDepreciationYears(Integer depreciationYears) {
+		this.depreciationYears = depreciationYears;
 	}
 
 	@Override
