@@ -279,44 +279,45 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 		//填写费用清单
 		List<GeneralFormVal> list = generalFormValProvider.queryGeneralFormVals(EntityType.PM_TASK.getCode(),task.getId());
-		if (list!=null && list.size()>0){
-			e = new FlowCaseEntity();
-			e.setEntityType(FlowCaseEntityType.TEXT.getCode());
-			e.setKey("费用清单");
-			String content = "";
-			List<PostApprovalFormItem> items = list.stream().map(p->ConvertHelper.convert(p, PostApprovalFormItem.class))
-					.collect(Collectors.toList());
-			content += "本次服务的费用清单如下，请进行确认\n";
-			Long total = Long.valueOf(getFormItem(items,"总计").getFieldValue());
-			content += "总计:"+total+"元\n";
-			Long serviceFee = Long.valueOf(getFormItem(items,"服务费").getFieldValue());
-			content += "服务费:"+total+"元\n";
-			content += "物品费:"+(total-serviceFee)+"元\n";
-			PostApprovalFormItem subForm = getFormItem(items,"物品");
-			if (subForm!=null) {
-				JSONArray array = JSONArray.parseArray(JSONObject.parseObject(subForm.getFieldValue()).getString("forms"));
-				if (array.size()!=0) {
-					content += "物品费详情：\n";
-					Gson g=new Gson();
-					for (int i=0;i<array.size();i++){
-						JSONArray itemIterator = JSONArray.parseArray(array.getJSONObject(i).getString("values"));
-						List<PostApprovalFormItem> itemAttri = g.fromJson(itemIterator.toJSONString(),
-								new TypeToken<List<PostApprovalFormItem>>(){}.getType());
-						content += getFormItem(itemAttri,"物品名称")+":";
-						content += getFormItem(itemAttri,"小计")+"元";
-						content += "("+getFormItem(itemAttri,"单价")+"元*"+getFormItem(itemAttri,"数量")+")";
+		if (flowCase.getStatus() == FlowCaseStatus.FINISHED.getCode())
+			if (list!=null && list.size()>0){
+				e = new FlowCaseEntity();
+				e.setEntityType(FlowCaseEntityType.TEXT.getCode());
+				e.setKey("费用清单");
+				String content = "";
+				List<PostApprovalFormItem> items = list.stream().map(p->ConvertHelper.convert(p, PostApprovalFormItem.class))
+						.collect(Collectors.toList());
+				content += "本次服务的费用清单如下，请进行确认\n";
+				Long total = Long.valueOf(getFormItem(items,"总计").getFieldValue());
+				content += "总计:"+total+"元\n";
+				Long serviceFee = Long.valueOf(getFormItem(items,"服务费").getFieldValue());
+				content += "服务费:"+total+"元\n";
+				content += "物品费:"+(total-serviceFee)+"元\n";
+				PostApprovalFormItem subForm = getFormItem(items,"物品");
+				if (subForm!=null) {
+					JSONArray array = JSONArray.parseArray(JSONObject.parseObject(subForm.getFieldValue()).getString("forms"));
+					if (array.size()!=0) {
+						content += "物品费详情：\n";
+						Gson g=new Gson();
+						for (int i=0;i<array.size();i++){
+							JSONArray itemIterator = JSONArray.parseArray(array.getJSONObject(i).getString("values"));
+							List<PostApprovalFormItem> itemAttri = g.fromJson(itemIterator.toJSONString(),
+									new TypeToken<List<PostApprovalFormItem>>(){}.getType());
+							content += getFormItem(itemAttri,"物品名称")+":";
+							content += getFormItem(itemAttri,"小计")+"元";
+							content += "("+getFormItem(itemAttri,"单价")+"元*"+getFormItem(itemAttri,"数量")+")";
+						}
 					}
 				}
+				e.setValue(content);
+				entities.add(e);
+			}else {
+				e = new FlowCaseEntity();
+				e.setEntityType(FlowCaseEntityType.LIST.getCode());
+				e.setKey("费用清单");
+				e.setValue("本次服务没有产生维修费");
+				entities.add(e);
 			}
-			e.setValue(content);
-			entities.add(e);
-		}else if (flowCase.getStatus() == FlowCaseStatus.FINISHED.getCode()){
-			e = new FlowCaseEntity();
-			e.setEntityType(FlowCaseEntityType.LIST.getCode());
-			e.setKey("费用清单");
-			e.setValue("本次服务没有产生维修费");
-			entities.add(e);
-		}
 		JSONObject jo = JSONObject.parseObject(JSONObject.toJSONString(dto));
 		jo.put("formUrl",processFormURL(EntityType.PM_TASK.getCode(),task.getId(),cmd.getOwnerType(),cmd.getOwnerId(),"费用确认"));
 
