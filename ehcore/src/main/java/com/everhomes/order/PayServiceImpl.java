@@ -7,6 +7,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.base.RestClient;
@@ -1158,6 +1159,10 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
     private PaymentWithdrawOrderDTO toPaymentWithdrawOrderDTO(PaymentWithdrawOrder order) {
         PaymentWithdrawOrderDTO orderDto = ConvertHelper.convert(order, PaymentWithdrawOrderDTO.class);
         
+        // 在数据库取出来时amount是BigDecimal类型，给客户端时则是Long型，故需要特殊转一下
+        Long amount = changePayAmount(order.getAmount());
+        orderDto.setAmount(amount);
+        
         UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(order.getOperatorUid(), order.getNamespaceId());
         if(userIdentifier != null) {
             orderDto.setOperatorPhone(userIdentifier.getIdentifierToken());
@@ -1176,9 +1181,9 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         
         OwnerType  ownerType = OwnerType.fromCode(order.getOwnerType());
         if(ownerType == OwnerType.ORGANIZATION) {
-            Organization org = organizationProvider.findOrganizationById(order.getOwnerId());
-            if(org != null) {
-                orderDto.setEnterpriseName(org.getName());
+            OrganizationMemberDetails orgMember = organizationProvider.findOrganizationMemberDetailsByTargetId(order.getOperatorUid());
+            if(orgMember != null && orgMember.getContactName() != null && orgMember.getContactName().length() > 0) {
+                orderDto.setEnterpriseName(orgMember.getContactName());
             } else {
                 LOGGER.error("Organization not found, ownerType={}, ownerId={}, withdrawOrderId={}", 
                         order.getOwnerType(), order.getOwnerId(), order.getId());
