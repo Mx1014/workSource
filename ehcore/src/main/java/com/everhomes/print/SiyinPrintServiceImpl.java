@@ -1059,4 +1059,25 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	private String getSiyinData(String result){
         return result.substring(result.indexOf(":") + 1);
     }
+
+
+	@Override
+	public ListQueueJobsResponse listQueueJobs(ListQueueJobsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public void releaseQueueJobs(ReleaseQueueJobsCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void deleteQueueJobs(DeleteQueueJobsCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
 }

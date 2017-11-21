@@ -46,4 +46,10 @@ public interface SiyinPrintService {
 	void unlockPrinter(UnlockPrinterCommand cmd);
 
 	void jobLogNotification(String jobData);
+
+	ListQueueJobsResponse listQueueJobs(ListQueueJobsCommand cmd);
+
+	void releaseQueueJobs(ReleaseQueueJobsCommand cmd);
+
+	void deleteQueueJobs(DeleteQueueJobsCommand cmd);
 }

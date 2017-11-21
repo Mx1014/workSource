@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.rest.print;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -9,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType : 打印所属类型，此处为community, 参考{@link com.everhomes.rest.print.PrintOwnerType}</li>
  * <li>ownerId : 所属id</li>
  * <li>readerName : 打印机readerName</li>
+ * <li>privileges : 权限列表，参考 {@link com.everhomes.rest.print.PrintJobTypeType}</li>
  * </ul>
  *
  *  @author:dengs 2017年6月20日
@@ -17,6 +21,17 @@ public class UnlockPrinterCommand {
 	private String ownerType;
 	private Long ownerId;
 	private String readerName;
+	
+	@ItemType(Byte.class)
+	private List<Byte> privileges;
+
+	public List<Byte> getPrivileges() {
+		return privileges;
+	}
+
+	public void setPrivileges(List<Byte> privileges) {
+		this.privileges = privileges;
+	}
 
 	public String getOwnerType() {
 		return ownerType;
