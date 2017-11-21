@@ -166,7 +166,10 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 
 	@Override
 	public void refundSuccess(SrvOrderPaymentNotificationCommand cmd) {
-
+		RentalOrderPayorderMap orderMap= rentalProvider.findRentalBillPaybillMapByOrderNo(String.valueOf(cmd.getOrderId()));
+		RentalOrder order = rentalProvider.findRentalBillById(orderMap.getOrderId());
+		order.setStatus(SiteBillStatus.REFUNDED.getCode());
+		rentalProvider.updateRentalBill(order);
 	}
 
 	@Override

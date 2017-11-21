@@ -1043,23 +1043,23 @@ public class PunchServiceImpl implements PunchService {
 			pdl.setPunchStatus(ApprovalStatus.RESIGNED.getCode());
 			return pdl;
 		}else{
-			//查找是否未入职 --通过log的时间
-			List<Long> orgIds = new ArrayList<>();
-			for(OrganizationMember member : organizationMembers){
-				orgIds.add(member.getOrganizationId());
-			}
-			List<OrganizationMemberLog> memberLogs = organizationProvider.listOrganizationMemberLogs(userId,orgIds, OperationType.JOIN.getCode()) ;
-			if (null != memberLogs ){
-				if(memberLogs.get(0).getOperateTime().after(logDay.getTime())){
-					pdl.setStatusList(PunchStatus.NONENTRY.getCode()+"");
-					pdl.setPunchTimesPerDay(PunchTimesPerDay.TWICE.getCode());
-					pdl.setMorningPunchStatus(PunchStatus.NONENTRY.getCode());
-					pdl.setAfternoonPunchStatus(PunchStatus.NONENTRY.getCode());
-					punchDayLog.setStatus(ApprovalStatus.NONENTRY.getCode());
-					pdl.setPunchStatus(ApprovalStatus.NONENTRY.getCode());
-					return pdl;
-				}
-			}
+//			//查找是否未入职 --通过log的时间
+//			List<Long> orgIds = new ArrayList<>();
+//			for(OrganizationMember member : organizationMembers){
+//				orgIds.add(member.getOrganizationId());
+//			}
+//			List<OrganizationMemberLog> memberLogs = organizationProvider.listOrganizationMemberLogs(userId,orgIds, OperationType.JOIN.getCode()) ;
+//			if (null != memberLogs ){
+//				if(memberLogs.get(0).getOperateTime().after(logDay.getTime())){
+//					pdl.setStatusList(PunchStatus.NONENTRY.getCode()+"");
+//					pdl.setPunchTimesPerDay(PunchTimesPerDay.TWICE.getCode());
+//					pdl.setMorningPunchStatus(PunchStatus.NONENTRY.getCode());
+//					pdl.setAfternoonPunchStatus(PunchStatus.NONENTRY.getCode());
+//					punchDayLog.setStatus(ApprovalStatus.NONENTRY.getCode());
+//					pdl.setPunchStatus(ApprovalStatus.NONENTRY.getCode());
+//					return pdl;
+//				}
+//			}
 		}
 
 //		if (null == punchLogs || punchLogs.size() == 0) {
@@ -4985,7 +4985,7 @@ public class PunchServiceImpl implements PunchService {
 
 		Long t3= System.currentTimeMillis();
 
-		LOGGER.debug("process pdls   "+  t3 + "cost: "+ (t3-t2));
+		LOGGER.debug("processStat pdls   "+  t3 + "cost: "+ (t3-t2));
 		return response;
 	}
 	String processStatus(String statuList, String approvalStatusList){

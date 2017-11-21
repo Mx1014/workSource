@@ -94,7 +94,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
                 listUserByCommunity(child, callback);
             }
             
-            //Break after first process
+            //Break after first processStat
             if(locator.getAnchor() == null || comunities == null || comunities.size() < pageSize) {
                 break;
             }
@@ -130,7 +130,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
                     }
                 }
 
-                //break after first process
+                //break after first processStat
                 if(resp.getNextPageAnchor() == null || resp.getDtos() == null || resp.getDtos().size() < cmd.getPageSize()) {
                     break;
                 }

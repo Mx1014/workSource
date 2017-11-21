@@ -483,7 +483,7 @@ public class UserActivityController extends ControllerBase {
         try {
             LOGGER.debug("App log report, log={}", scene);
         } catch (Exception e) {
-            LOGGER.error("Failed to process app log reports", e);
+            LOGGER.error("Failed to processStat app log reports", e);
         } 
         
         RestResponse response = new RestResponse();

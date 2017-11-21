@@ -275,6 +275,7 @@ public class FlowProviderImpl implements FlowProvider {
                 query.addConditions(Tables.EH_FLOWS.PROJECT_TYPE.eq(projectType));
                 query.addConditions(Tables.EH_FLOWS.PROJECT_ID.eq(projectId));
             }
+
             query.addConditions(Tables.EH_FLOWS.MODULE_ID.eq(moduleId));
             if (moduleType != null) {
                 query.addConditions(Tables.EH_FLOWS.MODULE_TYPE.eq(moduleType));

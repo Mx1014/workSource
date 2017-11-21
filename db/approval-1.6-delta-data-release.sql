@@ -31,4 +31,14 @@ INSERT INTO `eh_approval_categories` (`id`, `namespace_id`, `owner_type`, `owner
 INSERT INTO `eh_approval_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `approval_type`, `category_name`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@cat_id := @cat_id + 1, '0', NULL, '0', '1', '工伤假', '2', '212500', '2017-11-03 09:00:10', '2017-11-03 09:00:10', '212500');
 INSERT INTO `eh_approval_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `approval_type`, `category_name`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@cat_id := @cat_id + 1, '0', NULL, '0', '1', '路途假', '2', '212500', '2017-11-03 09:00:11', '2017-11-03 09:00:11', '212500');
 
+-- 增加普通公司的对应的菜单
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+VALUES ('520000', '审批管理', '500000', NULL, null, '0', '2', '/500000/520000', 'organization', '591', '52000', '2', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+VALUES ('520100', '审批记录', '520000', NULL, 'react:/approval-management/approval-records?approvalModuleId=52000', '0', '2', '/500000/520000/520100', 'organization', '592', '52000', '3', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+VALUES ('520200', '审批设置', '520000', NULL, 'react:/approval-management/approval-list/52000/EhOrganizations', '0', '2', '/500000/520000/520200', 'organization', '593', '52000', '3', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+VALUES ('520300', '表单管理', '520000', NULL, 'react:/form-management/form-list?moduleId=52000&moduleType=any-module', '0', '2', '/500000/520000/520300', 'organization', '594', '52000', '3', NULL, 'module');
+
 -- ended by R

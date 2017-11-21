@@ -389,6 +389,7 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
         FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
         dto.setNamespaceId(namespaceId);
         dto.setServiceName("园区入驻");
+        result.add(dto);
         return result;
     }
 }

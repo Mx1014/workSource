@@ -54,7 +54,7 @@ public class UsedAndRentalEmbeddedHandler implements ForumEmbeddedHandler {
                 });
             }
         } catch(Exception e) {
-            LOGGER.error("Failed to process use and rental embedded json info, postId=" + post.getId() + ", json=" + embeddedJson, e);
+            LOGGER.error("Failed to processStat use and rental embedded json info, postId=" + post.getId() + ", json=" + embeddedJson, e);
         }
         
         return post;

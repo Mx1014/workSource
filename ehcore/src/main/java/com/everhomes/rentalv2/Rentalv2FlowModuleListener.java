@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import com.everhomes.flow.*;
 import com.everhomes.flow.node.FlowGraphNodeEnd;
@@ -238,6 +240,33 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		e.setValue(order.getUseDetail());
 		entities.add(e);
 
+		if (!StringUtils.isEmpty(order.getPackageName())){
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
+					"packageName", RentalNotificationTemplateCode.locale, ""));
+			e.setValue(order.getPackageName());
+			entities.add(e);
+		}
+
+		if (order.getDoorAuthId()!=null){
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
+					"authKey", RentalNotificationTemplateCode.locale, ""));
+			e.setValue(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
+					"authValue", RentalNotificationTemplateCode.locale, ""));
+			entities.add(e);
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
+					"authTime", RentalNotificationTemplateCode.locale, ""));
+			SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd HH:mm");
+			e.setValue(dateFormat.format(new Date(order.getAuthStartTime().getTime()))+"到"+
+			dateFormat.format(new Date(order.getAuthEndTime().getTime())));
+			entities.add(e);
+		}
+
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
 		if (rs != null && NormalFlag.NONEED.getCode() == rs.getExclusiveFlag()
 				&& NormalFlag.NONEED.getCode() == rs.getAutoAssign()) {
@@ -386,9 +415,9 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		// 
 		
 //		FlowGraphNode currentNode = ctx.getCurrentNode();
-//		LOGGER.debug("buttun fire params : " + currentNode.getFlowNode().getParams()+"step type "+ctx.getStepType());
+//		LOGGER.debug("buttun fire params : " + currentNode.getFlowNode().getGroupByParams()+"step type "+ctx.getStepType());
 //		//当前节点是同意待支付节点并且事件是催办的时候
-//		if(currentNode.getFlowNode().getParams()!=null && currentNode.getFlowNode().getParams()  .equals(RentalFlowNodeParams.PAID.getCode())
+//		if(currentNode.getFlowNode().getGroupByParams()!=null && currentNode.getFlowNode().getGroupByParams()  .equals(RentalFlowNodeParams.PAID.getCode())
 //				&& FlowStepType.REMINDER_STEP.getCode().equals(ctx.getStepType().getCode())){
 //			FlowLogType logType = FlowLogType.NODE_REMIND;
 //			FlowEventLog log = new FlowEventLog();
