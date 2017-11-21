@@ -8,6 +8,8 @@ CREATE TABLE `eh_community_organization_detail_display` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+ALTER TABLE `eh_communities` ADD COLUMN `community_number` VARCHAR(64) COMMENT '项目编号';
+ALTER TABLE `eh_buildings` ADD COLUMN `building_number` VARCHAR(64) COMMENT '楼栋编号';
 -- club
 -- 行业协会类型
 CREATE TABLE `eh_industry_types` (
