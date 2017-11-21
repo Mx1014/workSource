@@ -1,3 +1,4 @@
+--
 CREATE TABLE `eh_me_web_menus` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) NOT NULL,
@@ -5,6 +6,8 @@ CREATE TABLE `eh_me_web_menus` (
   `action_path` varchar(255) NOT NULL,
   `action_data` varchar(255) DEFAULT NULL,
   `icon_uri` varchar(255) DEFAULT NULL,
+  `position_flag` tinyint(4) DEFAULT '1' COMMENT 'position, 1-NORMAL, 2-bottom',
+  `sort_num` int(11) DEFAULT '0',
   `status` tinyint(4) DEFAULT '2' COMMENT '0: inactive, 2: active',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
