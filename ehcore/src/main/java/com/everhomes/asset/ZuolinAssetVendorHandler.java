@@ -733,6 +733,11 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         return tabBills;
     }
 
+    @Override
+    public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
+        return assetProvider.listAllBillsForClient(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getOwnerType().equals(AssetPaymentStrings.EH_USER)?UserContext.currentUserId():cmd.getTargetId());
+    }
+
 
     @Override
     public ShowBillDetailForClientResponse getBillDetailForClient(String billId,String targetType) {

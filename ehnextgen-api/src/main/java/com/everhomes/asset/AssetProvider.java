@@ -255,4 +255,6 @@ public interface AssetProvider {
     String getAddressStrByIds(List<Long> collect);
 
     BigDecimal getBillExpectanciesAmountOnContract(String contractNum, Long contractId);
+
+    List<ListAllBillsForClientDTO> listAllBillsForClient(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId);
 }

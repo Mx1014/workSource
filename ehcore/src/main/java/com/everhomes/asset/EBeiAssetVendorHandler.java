@@ -273,6 +273,11 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         return null;
     }
 
+    @Override
+    public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
+        return null;
+    }
+
 
     private Timestamp covertStrToTimestamp(String str) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");

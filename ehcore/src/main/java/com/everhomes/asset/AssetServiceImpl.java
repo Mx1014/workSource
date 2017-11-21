@@ -2566,6 +2566,13 @@ public class AssetServiceImpl implements AssetService {
         return handler.showBillForClientV2(cmd);
     }
 
+    @Override
+    public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
+        AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId());
+        AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
+        return handler.listAllBillsForClient(cmd);
+    }
+
 
     @Override
     public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {

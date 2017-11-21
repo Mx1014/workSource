@@ -895,6 +895,22 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
+    // this is for 显示一个用户的物业账单          4
+    /**
+     * <p>显示一个用户的物业账单</p>
+     * <b>URL: /asset/listAllBillsForClient</b>
+     */
+    @RequestMapping("listAllBillsForClient")
+    @RestReturn(value = ListAllBillsForClientDTO.class,collection = true)
+    public RestResponse listAllBillsForClient(ListAllBillsForClientCommand cmd) {
+        List<ListAllBillsForClientDTO> dtos = assetService.listAllBillsForClient(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+
     //this is for 查看缴费详情
     /**
      * <p>查看缴费详情</p>
@@ -916,6 +932,7 @@ public class AssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
+
 
     //this is for app选择切换月份查看账单      4
     /**

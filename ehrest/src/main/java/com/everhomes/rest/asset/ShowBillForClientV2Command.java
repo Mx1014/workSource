@@ -19,6 +19,23 @@ public class ShowBillForClientV2Command {
     private String targetType;
     private Long targetId;
     private Integer namespaceId;
+    private Byte isPendingPayment;
+
+    public Byte getIsPendingPayment() {
+        return isPendingPayment;
+    }
+
+    public void setIsPendingPayment(Byte isPendingPayment) {
+        this.isPendingPayment = isPendingPayment;
+    }
+
+    public Byte getIsOwed() {
+        return isOwed;
+    }
+
+    public void setIsOwed(Byte isOwed) {
+        this.isOwed = isOwed;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;

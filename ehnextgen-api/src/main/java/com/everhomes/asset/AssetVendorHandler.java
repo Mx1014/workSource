@@ -63,4 +63,6 @@ public interface AssetVendorHandler {
     PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd);
 
     List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd);
+
+    List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd);
 }
