@@ -80,3 +80,8 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 VALUES ('520300', '表单管理', '520000', NULL, 'react:/form-management/form-list?moduleId=52000&moduleType=any-module', '0', '2', '/500000/520000/520300', 'organization', '594', '52000', '3', NULL, 'module');
 
 -- ended by R
+
+-- 运营后台菜单配置的菜单  add by yanjun 201711211550  
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`) VALUES ('70300', '菜单配置', '70000', '/70000/70300', '1', '2', '2', '0', NOW(), NULL, null, NOW(), '0', '0', '0', '0');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('4200000', '菜单配置', '4000000', NULL, 'menu-config', '1', '2', '/4000000/4200000', 'zuolin', '2', '0', '2', 'namespace', 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('4210000', '菜单配置', '4200000', NULL, 'menu-config', '0', '2', '/4000000/4200000/4210000', 'zuolin', '1', '70300', '3', 'namespace', 'page');
