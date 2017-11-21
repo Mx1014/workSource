@@ -3675,6 +3675,7 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setProjectName(category.getName());
 			dto.setProjectId(category.getId());
 			dto.setProjectType(EntityType.CHILD_PROJECT.getCode());
+			dto.setParentId(cmd.getProjectId());
 			List<ResourceCategoryAssignment> buildingCategorys = communityProvider.listResourceCategoryAssignment(category.getId(), namespaceId);
 			List<ProjectDTO> buildingProjects = new ArrayList<>();
 			for (ResourceCategoryAssignment buildingCategory: buildingCategorys) {
@@ -3682,6 +3683,7 @@ public class CommunityServiceImpl implements CommunityService {
 					Building building = communityProvider.findBuildingById(buildingCategory.getResourceId());
 					if(null != building){
 						ProjectDTO buildingProject = new ProjectDTO();
+						buildingProject.setParentId(category.getId());
 						buildingProject.setProjectId(building.getId());
 						buildingProject.setProjectName(building.getName());
 						buildingProject.setProjectType(EntityType.BUILDING.getCode());

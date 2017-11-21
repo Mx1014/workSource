@@ -15,12 +15,14 @@ import com.everhomes.server.schema.tables.daos.EhGeneralFormsDao;
 import com.everhomes.server.schema.tables.pojos.EhGeneralFormGroups;
 import com.everhomes.server.schema.tables.pojos.EhGeneralForms;
 import com.everhomes.server.schema.tables.records.EhGeneralFormGroupsRecord;
+import com.everhomes.server.schema.tables.records.EhGeneralFormTemplatesRecord;
 import com.everhomes.server.schema.tables.records.EhGeneralFormsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
+import org.jooq.Select;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -210,4 +212,52 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhGeneralFormGroups.class, group.getId());
 	}
 
+	@Override
+	public List<GeneralFormTemplate> listGeneralFormTemplate(Long moduleId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhGeneralFormTemplatesRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_TEMPLATES);
+		query.addConditions(Tables.EH_GENERAL_FORM_TEMPLATES.MODULE_ID.eq(moduleId));
+		List<GeneralFormTemplate> results = query.fetch().map(r -> {
+			return ConvertHelper.convert(r, GeneralFormTemplate.class);
+		});
+		if (results != null && results.size() > 0)
+			return results;
+		return null;
+	}
+
+	@Override
+	public GeneralFormTemplate findGeneralFormTemplateByIdAndModuleId(Long id, Long moduleId){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhGeneralFormTemplatesRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_TEMPLATES);
+		query.addConditions(Tables.EH_GENERAL_FORM_TEMPLATES.MODULE_ID.eq(moduleId));
+		query.addConditions(Tables.EH_GENERAL_FORM_TEMPLATES.ID.eq(id));
+		return query.fetchOneInto(GeneralFormTemplate.class);
+	}
+
+	@Override
+	public GeneralForm getActiveGeneralFormByName(Long moduleId, Long ownerId, String ownerType, String formName) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec
+				.readOnly());
+		SelectQuery<EhGeneralFormsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORMS);
+		query.addConditions(Tables.EH_GENERAL_FORMS.MODULE_ID.eq(moduleId));
+		query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_GENERAL_FORMS.FORM_NAME.eq(formName));
+		query.addConditions(Tables.EH_GENERAL_FORMS.STATUS.ne(GeneralFormStatus.INVALID.getCode()));
+		return query.fetchAnyInto(GeneralForm.class);
+	}
+
+    @Override
+    public GeneralForm getGeneralFormByTemplateId(Long moduleId, Long ownerId, String ownerType, Long templateId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhGeneralFormsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORMS);
+        query.addConditions(Tables.EH_GENERAL_FORMS.MODULE_ID.eq(moduleId));
+        query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_GENERAL_FORMS.FORM_TEMPLATE_ID.eq(templateId));
+        query.addConditions(Tables.EH_GENERAL_FORMS.STATUS.ne(GeneralFormStatus.INVALID.getCode()));
+        query.addOrderBy(Tables.EH_GENERAL_FORMS.FORM_VERSION.desc());
+        return query.fetchAnyInto(GeneralForm.class);
+    }
 }

@@ -120,7 +120,27 @@ public class GeneralApprovalValProviderImpl implements GeneralApprovalValProvide
 					}
 				});
 	}
-	
+
+    @Override
+    public GeneralApprovalVal getGeneralApprovalByFlowCaseAndFeildType(Long id, String feildType){
+        try {
+            GeneralApprovalVal[] result = new GeneralApprovalVal[1];
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovalVals.class));
+
+            result[0] = context.select().from(Tables.EH_GENERAL_APPROVAL_VALS)
+                    .where(Tables.EH_GENERAL_APPROVAL_VALS.FLOW_CASE_ID.eq(id))
+                    .and(Tables.EH_GENERAL_APPROVAL_VALS.FIELD_TYPE.eq(feildType))
+                    .fetchAny().map((r) -> {
+                        return ConvertHelper.convert(r, GeneralApprovalVal.class);
+                    });
+
+            return result[0];
+        } catch (Exception ex) {
+            //fetchAny() maybe return null
+            return null;
+        }
+
+    }
 	@Override
 	public GeneralApprovalVal getGeneralApprovalByFlowCaseAndName(Long id, String fieldName){
 		try {
