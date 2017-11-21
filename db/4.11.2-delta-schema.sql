@@ -69,7 +69,6 @@ ALTER TABLE `eh_general_approvals` ADD COLUMN `modify_flag` TINYINT DEFAULT 1 CO
 ALTER TABLE `eh_general_approvals` ADD COLUMN `delete_flag` TINYINT DEFAULT 1 COMMENT 'whether the approval can be deleted from desk, 0: no, 1: yes';
 ALTER TABLE `eh_general_approvals` ADD COLUMN `icon_uri` VARCHAR(1024) COMMENT 'the avatar of the approval';
 
-DROP TABLE IF EXISTS `eh_general_approval_templates`;
 CREATE TABLE `eh_general_approval_templates` (
 	`id` BIGINT NOT NULL COMMENT 'id of the record',
 	`namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -92,7 +91,6 @@ CREATE TABLE `eh_general_approval_templates` (
 	PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 
-DROP TABLE IF EXISTS `eh_general_form_templates`;
 CREATE TABLE `eh_general_form_templates` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
