@@ -3,6 +3,7 @@ package com.everhomes.techpark.punch;
 import javax.validation.Valid;
 
 import com.everhomes.rest.techpark.punch.*;
+import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
 
 import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
 import org.slf4j.Logger;

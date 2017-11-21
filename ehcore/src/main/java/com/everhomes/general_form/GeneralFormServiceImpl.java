@@ -26,9 +26,11 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -484,6 +486,14 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 		form.setNamespaceId(UserContext.getCurrentNamespaceId());
 		form.setFormVersion(0L);
 		form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
+
+		if(cmd.getDeleteFlag() == null)
+			form.setDeleteFlag(Byte.valueOf("1"));
+		if(cmd.getModifyFlag() == null)
+			form.setModifyFlag(Byte.valueOf("1"));
+		if(cmd.getFormAttribute() == null)
+			form.setFormAttribute(GeneralApprovalAttribute.CUSTOMIZE.getCode());
+
 		this.generalFormProvider.createGeneralForm(form);
 
 		//  创建字段组(此时表单已经建立，故在建立字段组时即可同步)
@@ -564,13 +574,12 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 						query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(cmd.getOwnerId()));
 						query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(cmd
 								.getOwnerType()));
-//						Condition condititon = DSL.trueCondition();
-						if (cmd.getModuleId()!=null && cmd.getModuleType()!=null){
-							query.addConditions(Tables.EH_GENERAL_FORMS.MODULE_ID.eq(cmd.getModuleId()).and(Tables.EH_GENERAL_FORMS.MODULE_TYPE.eq(cmd.getModuleType())));
-//							if(FlowModuleType.SERVICE_ALLIANCE.getCode().equals(cmd.getModuleType())){
-//								condititon = condititon.or(Tables.EH_GENERAL_FORMS.MODULE_ID.isNull().and(Tables.EH_GENERAL_FORMS.MODULE_TYPE.isNull()));
-//							}
-						}
+						Condition condition = DSL.trueCondition();
+                        if (cmd.getModuleId()!=null && cmd.getModuleType()!=null){
+                            condition = condition.and(Tables.EH_GENERAL_FORMS.MODULE_ID.eq(cmd.getModuleId()));
+                            condition = condition.and(Tables.EH_GENERAL_FORMS.MODULE_TYPE.eq(cmd.getModuleType()));
+                        }
+						query.addConditions(condition);
 						query.addConditions(Tables.EH_GENERAL_FORMS.STATUS
 								.ne(GeneralFormStatus.INVALID.getCode()));
 						return query;
@@ -607,6 +616,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         //  added by R 20170830, 获取字段组
         GeneralFormGroup group = generalFormProvider.findGeneralFormGroupByFormOriginId(form.getFormOriginId());
 		GeneralFormDTO result = processGeneralFormDTO(form,group);
+		//	added by LiMingDang for approval1.6
+		if (cmd.getModuleType() != null)
+			result.setModuleType(cmd.getModuleType());
 		return result;
 	}
 
@@ -626,6 +638,15 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         return null;
     }
 
+    @Override
+    public GeneralFormDTO verifyApprovalFormName(VerifyApprovalFormNameCommand cmd) {
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByName(cmd.getModuleId(),
+                cmd.getOwnerId(), cmd.getOwnerType(), cmd.getFormName());
+        if (form != null)
+            return ConvertHelper.convert(form, GeneralFormDTO.class);
+        return null;
+    }
+
     //  表单控件组的修改(与表单绑定故作为私有方法)
 	@Override
     public void updateGeneralFormGroupByFormId(GeneralFormGroup group, GeneralForm form, List<GeneralFormGroupDTO> groupDTOS) {
@@ -635,3 +656,4 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         generalFormProvider.updateGeneralFormGroup(group);
     }
 }
+
