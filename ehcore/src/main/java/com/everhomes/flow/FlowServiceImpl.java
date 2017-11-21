@@ -5752,10 +5752,10 @@ public class FlowServiceImpl implements FlowService {
         serviceTypes.addAll(flowListenerManager.listFlowServiceTypes(namespaceId, cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId()));
 
         List<FlowServiceTypeDTO> nsServiceTypes = flowServiceTypeProvider.listFlowServiceType(
-                namespaceId, cmd.getModuleId(), FlowServiceTypeDTO.class);
+                namespaceId, cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), FlowServiceTypeDTO.class);
         if (nsServiceTypes.size() == 0) {
             nsServiceTypes = flowServiceTypeProvider.listFlowServiceType(
-                    Namespace.DEFAULT_NAMESPACE, cmd.getModuleId(), FlowServiceTypeDTO.class);
+                    Namespace.DEFAULT_NAMESPACE, cmd.getModuleId(), , cmd.getOwnerType(), cmd.getOwnerId(), FlowServiceTypeDTO.class);
         }
         serviceTypes.addAll(nsServiceTypes);
 
