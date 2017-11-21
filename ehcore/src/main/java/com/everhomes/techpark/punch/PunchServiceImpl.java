@@ -2901,9 +2901,9 @@ public class PunchServiceImpl implements PunchService {
 			statistic.setBelateCount(statistic.getBelateCount() + 1);
 			statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 			isNormal = NormalFlag.NO.getCode();
-		} else  if (status.equals(String.valueOf(PunchStatus.BELATE.getCode()))) {
-			statistic.setBelateCount(statistic.getBelateCount() + 1);
-			statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+		} else  if (status.equals(String.valueOf(PunchStatus.FORGOT.getCode()))) {
+            statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount() + 1);
+            statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 			isNormal = NormalFlag.NO.getCode();
 		}
         return  isNormal;
