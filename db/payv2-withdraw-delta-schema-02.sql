@@ -1,5 +1,5 @@
 -- bydengs,20171114 服务联盟加客服id service_alliance2.9.3
-ALTER TABLE `eh_service_alliances` ADD COLUMN `online_service_uid` BIGINT COMMENT 'online service user id';
+-- ALTER TABLE `eh_service_alliances` ADD COLUMN `online_service_uid` BIGINT COMMENT 'online service user id';
 ALTER TABLE `eh_service_alliances` ADD COLUMN `online_service_uname` varchar(64) COMMENT 'online service user name';
 
 -- bydengs,20171114 物业报修2.9.3
@@ -84,3 +84,5 @@ CREATE TABLE `eh_customer_economic_indicator_statistics` (
   `status` TINYINT NOT NULL DEFAULT 2,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE eh_news_tag ADD COLUMN `category_id` BIGINT default 0;
