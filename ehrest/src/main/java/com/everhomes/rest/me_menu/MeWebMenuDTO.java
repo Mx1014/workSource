@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  *     <li>actionPath: actionPath</li>
  *     <li>actionData: actionData</li>
  *     <li>iconUri: iconUri</li>
+ *     <li>positionFlag: 位置标识 1-普通的，2-底部的 {@link PositionFlag}</li>
  *     <li>status: status</li>
  * </ul>
  */
@@ -22,6 +23,7 @@ public class MeWebMenuDTO {
 	private String actionPath;
 	private String actionData;
 	private String iconUri;
+	private Byte positionFlag;
 	private Byte status;
 
 	public Long getId() {
@@ -70,6 +72,14 @@ public class MeWebMenuDTO {
 
 	public void setIconUri(String iconUri) {
 		this.iconUri = iconUri;
+	}
+
+	public Byte getPositionFlag() {
+		return positionFlag;
+	}
+
+	public void setPositionFlag(Byte positionFlag) {
+		this.positionFlag = positionFlag;
 	}
 
 	public Byte getStatus() {
