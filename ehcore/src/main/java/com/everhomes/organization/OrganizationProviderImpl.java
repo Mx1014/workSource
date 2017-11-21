@@ -5299,7 +5299,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if(null == results || results.size() == 0)
 			return  null ;
 		return results.get(0);
-	}q
+	}
 
 	@Override
 	public List<Organization> listHeadEnterprises() {
