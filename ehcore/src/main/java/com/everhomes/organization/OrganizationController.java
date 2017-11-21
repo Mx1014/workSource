@@ -1891,4 +1891,30 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /org/setOrganizationDetailFlag</b>
+     * <p>设置是否开启查看园区企业详情开关</p>
+     */
+    @RequestMapping("setOrganizationDetailFlag")
+    @RestReturn(value = Byte.class)
+    public RestResponse setOrganizationDetailFlag(@Valid SetOrganizationDetailFlagCommand cmd) {
+        RestResponse response = new RestResponse(organizationService.setOrganizationDetailFlag(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/getOrganizationDetailFlag</b>
+     * <p>查看是否开启查看园区企业详情</p>
+     */
+    @RequestMapping("getOrganizationDetailFlag")
+    @RestReturn(value = Byte.class)
+    public RestResponse getOrganizationDetailFlag(@Valid GetOrganizationDetailFlagCommand cmd) {
+        RestResponse response = new RestResponse(organizationService.getOrganizationDetailFlag(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
