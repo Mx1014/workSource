@@ -13992,11 +13992,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public Byte getOrganizationDetailFlag(GetOrganizationDetailFlagCommand cmd) {
+        CommunityOrganizationDetailDisplay display = organizationProvider.findOrganizationDetailFlag(cmd.getNamespaceId(), cmd.getCommunityId());
         return null;
     }
 
     @Override
     public Byte setOrganizationDetailFlag(SetOrganizationDetailFlagCommand cmd) {
+        CommunityOrganizationDetailDisplay display = organizationProvider.findOrganizationDetailFlag(cmd.getNamespaceId(), cmd.getCommunityId());
+        if(display == null) {
+            organizationProvider.createCommunityOrganizationDetailDisplay(display);
+        } else {
+            organizationProvider.updateCommunityOrganizationDetailDisplay(display);
+        }
         return null;
     }
 }
