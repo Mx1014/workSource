@@ -13,14 +13,18 @@ import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.acl.WebMenuLeafFlag;
-import com.everhomes.rest.acl.WebMenuScopeApplyPolicy;
+import com.everhomes.rest.acl.*;
+import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.menu.*;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +32,6 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.acl.WebMenu;
 import com.everhomes.acl.WebMenuPrivilegeProvider;
-import com.everhomes.rest.acl.WebMenuDTO;
-import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.acl.admin.ListWebMenuResponse;
 import com.everhomes.util.ConvertHelper;
 import org.springframework.util.StringUtils;
@@ -323,7 +325,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 		List<WebMenuDTO> dtos = new ArrayList<>();
 		//获取当前层级的菜单
 		List<WebMenu> webMenus = webMenuProvider.listWebMenus(parentId, type);
-		if(webMenus != null){
+		if(webMenus != null && webMenus.size() > 0){
 			for (WebMenu m: webMenus){
 
 				WebMenuDTO dto = ConvertHelper.convert(m, WebMenuDTO.class);
@@ -331,12 +333,10 @@ public class WebMenuServiceImpl implements WebMenuService {
 				//在菜单中加入配置状态
 				popuScopeToMenuDto(dto, scopes);
 
-				if(WebMenuLeafFlag.fromCode(dto.getLeafFlag()) == WebMenuLeafFlag.NOT_LEAF){
-
 					//获取子菜单
-					List<WebMenuDTO> leafDtos = getTree(dto.getId(), type, scopes);
-					dto.setDtos(leafDtos);
-				}
+				List<WebMenuDTO> leafDtos = getTree(dto.getId(), type, scopes);
+				dto.setDtos(leafDtos);
+
 				dtos.add(dto);
 			}
 		}
@@ -351,7 +351,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 	private void popuScopeToMenuDto(WebMenuDTO dto, List<WebMenuScope> scopes){
 		for (WebMenuScope s: scopes){
 			if(s.getMenuId().longValue() == dto.getId().longValue()){
-				dto.setSelected(true);
+				dto.setSelected(WebMenuSelectedFlag.YES.getCode());
 				dto.setApplyPolicy(s.getApplyPolicy());
 				if(WebMenuScopeApplyPolicy.fromCode(s.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
 					dto.setName(s.getMenuName());
@@ -367,8 +367,12 @@ public class WebMenuServiceImpl implements WebMenuService {
 	@Override
 	public void updateMenuScopesByNamespace(UpdateMenuScopesByNamespaceCommand cmd){
 
+		Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+		List<WebMenuDTO> webMenuDTOS = gson.fromJson(cmd.getJsonDtos(), new TypeToken<List<WebMenuDTO>>() {
+		}.getType());
+
 		//从树状结构中获取需要配置的菜单
-		List<WebMenuScope> newScopes = fromTree(cmd.getDtos(), cmd.getNamespaceId());
+		List<WebMenuScope> newScopes = fromTree(webMenuDTOS, cmd.getNamespaceId());
 
 		//查询已经配置的菜单
 		List<WebMenuScope> oldScopes = webMenuProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(cmd.getNamespaceId()));
@@ -392,10 +396,12 @@ public class WebMenuServiceImpl implements WebMenuService {
 		List<WebMenuScope> webMenuScopes = new ArrayList<>();
 		if(dtos != null && dtos.size() > 0){
 			for (WebMenuDTO dto: dtos){
-				if(dto.getSelected()){
+				if(WebMenuSelectedFlag.fromCode(dto.getSelected()) == WebMenuSelectedFlag.YES){
 					WebMenuScope scope = new WebMenuScope();
 					scope.setApplyPolicy(dto.getApplyPolicy());
-					if(WebMenuScopeApplyPolicy.fromCode(dto.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
+					if(WebMenuScopeApplyPolicy.fromCode(dto.getApplyPolicy()) == null){
+						scope.setApplyPolicy(WebMenuScopeApplyPolicy.REVERT.getCode());
+					}else if(WebMenuScopeApplyPolicy.fromCode(dto.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
 						scope.setMenuName(dto.getName());
 					}
 					scope.setMenuId(dto.getId());
@@ -404,7 +410,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 					webMenuScopes.add(scope);
 
 					//获取子菜单
-					if(WebMenuLeafFlag.fromCode(dto.getLeafFlag()) == WebMenuLeafFlag.NOT_LEAF){
+					if(dto.getLeafFlag() != null && dto.getLeafFlag() == 1){
 						List<WebMenuScope> leafScopes = fromTree(dto.getDtos(), namespaceId);
 						webMenuScopes.addAll(leafScopes);
 					}
