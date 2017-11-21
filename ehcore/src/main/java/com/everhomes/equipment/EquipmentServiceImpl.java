@@ -49,7 +49,6 @@ import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
-import com.everhomes.rest.repeat.RepeatServiceErrorCode;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.rest.user.MessageChannelType;
@@ -180,8 +179,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	private UserProvider userProvider;
 
 	@Override
-	public EquipmentStandardsDTO updateEquipmentStandard(
-			UpdateEquipmentStandardCommand cmd) {
+	public EquipmentStandardsDTO updateEquipmentStandard(UpdateEquipmentStandardCommand cmd) {
 		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_UPDATE, 0L);
 		if(cmd.getTargetId() != null) {
 			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
@@ -191,7 +189,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 
 		User user = UserContext.current().getUser();
-		RepeatSettings repeat = null;
+		//RepeatSettings repeat = null;
 		EquipmentInspectionStandards standard = null;
 		if(LOGGER.isInfoEnabled()) {
 			LOGGER.info("updateEquipmentStandard: userId = " + user.getId() + "time = " + DateHelper.currentGMTTime()
@@ -202,25 +200,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 			standard.setCreatorUid(user.getId());
 			standard.setOperatorUid(user.getId());
 			standard.setNamespaceId(UserContext.getCurrentNamespaceId());
-			if(cmd.getRepeat() == null) {
-				throw RuntimeErrorException.errorWith(RepeatServiceErrorCode.SCOPE,
-						RepeatServiceErrorCode.ERROR_REPEAT_SETTING_NOT_EXIST,
-	 				"执行周期为空");
-			}
-			if(cmd.getRepeat() !=null) {
-				repeat = ConvertHelper.convert(cmd.getRepeat(), RepeatSettings.class);
-				if(cmd.getRepeat().getStartDate() != null)
-					repeat.setStartDate(new Date(cmd.getRepeat().getStartDate()));
-				if(cmd.getRepeat().getEndDate() != null)
-					repeat.setEndDate(new Date(cmd.getRepeat().getEndDate()));
-				
-				repeat.setCreatorUid(user.getId());
-				repeatService.createRepeatSettings(repeat);
-				
-				standard.setRepeatSettingId(repeat.getId());
-				standard.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
-			}
+			standard.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
+
+			//创建标准的模板表和item关系表
+			createEquipmentStandardItems(standard, cmd.getItems());
 			equipmentProvider.creatEquipmentStandard(standard);
+			equipmentStandardSearcher.feedDoc(standard);
+			//创建设备巡检对象和标准关系表
+			createEquipmentStandardsEquipmentsMap(standard, cmd.getEquipments());
 			
 		} else {
 			EquipmentInspectionStandards exist = verifyEquipmentStandard(cmd.getId());
@@ -229,60 +216,75 @@ public class EquipmentServiceImpl implements EquipmentService {
 			standard.setStatus(exist.getStatus());
 			standard.setOperatorUid(user.getId());
 			standard.setNamespaceId(UserContext.getCurrentNamespaceId());
-			
-			if(EquipmentStandardStatus.NOT_COMPLETED.equals(EquipmentStandardStatus.fromStatus(standard.getStatus()))) {
-				if(cmd.getRepeat() == null) {
-					throw RuntimeErrorException.errorWith(RepeatServiceErrorCode.SCOPE,
-							RepeatServiceErrorCode.ERROR_REPEAT_SETTING_NOT_EXIST,
-		 				"执行周期为空");
-				}
-				if(cmd.getRepeat() !=null) {
-					repeat = ConvertHelper.convert(cmd.getRepeat(), RepeatSettings.class);
-					if(cmd.getRepeat().getStartDate() != null)
-						repeat.setStartDate(new Date(cmd.getRepeat().getStartDate()));
-					if(cmd.getRepeat().getEndDate() != null)
-						repeat.setEndDate(new Date(cmd.getRepeat().getEndDate()));
-					
-					repeat.setCreatorUid(user.getId());
-					repeatService.createRepeatSettings(repeat);
-					
-					standard.setRepeatSettingId(repeat.getId());
-					standard.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
-				}
-			}
+			standard.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
+
+			//创建标准的模板表和item关系表
+			createEquipmentStandardItems(standard, cmd.getItems());
 			equipmentProvider.updateEquipmentStandard(standard);
-			
-			/*List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
-			if(maps != null && maps.size() > 0) {
-				for(EquipmentStandardMap map : maps) {
-					if(EquipmentReviewStatus.REVIEWED.equals(EquipmentReviewStatus.fromStatus(map.getReviewStatus()))) {
-						unReviewEquipmentStandardRelations(map);
-					}
+			equipmentStandardSearcher.feedDoc(standard);
+			// 上版的关系表inActive
+			List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
+			if (maps != null && maps.size() > 0) {
+				for (EquipmentStandardMap map : maps) {
+					map.setStatus(Status.INACTIVE.getCode());
+					equipmentProvider.inActiveEquipmentStandardMap(map);
 				}
 			}
-			
-			inactiveTasksByStandardId(standard.getId());*/
+			//创建新的巡检对象和标准关系表
+			createEquipmentStandardsEquipmentsMap(standard, cmd.getEquipments());
+
+			/**
+			 * TODO:需要inactive所有的 equipment plans  and equipment tasks
+			 */
+			//inactiveTasksByStandardId(standard.getId());
 			
 		}
-		
-		processRepeatSetting(standard);
-		
-		List<StandardGroupDTO> groupList = cmd.getGroup();
-		processStandardGroups(groupList, standard);
-		
-		equipmentStandardSearcher.feedDoc(standard);
-		
+
 		EquipmentStandardsDTO dto = converStandardToDto(standard);
 		return dto;
 	}
 
-	private void unReviewEquipmentStandardRelations(EquipmentStandardMap map) {
+	private void createEquipmentStandardsEquipmentsMap(EquipmentInspectionStandards standard, List<EquipmentsDTO> equipments) {
+
+		EquipmentStandardMap equipmentStandardMap = new EquipmentStandardMap();
+		equipmentStandardMap.setStandardId(standard.getId());
+		List<EquipmentInspectionEquipments> createdEquipments = new ArrayList<>();
+		for (EquipmentsDTO equipment : equipments) {
+			equipmentStandardMap.setTargetId(equipment.getId());
+			equipmentProvider.createEquipmentStandardMap(equipmentStandardMap);
+			createdEquipments.add(ConvertHelper.convert(equipment,EquipmentInspectionEquipments.class));
+		}
+		standard.setEquipments(createdEquipments);
+	}
+
+	private void createEquipmentStandardItems(EquipmentInspectionStandards standards, List<InspectionItemDTO> itemDTOS) {
+
+		EquipmentInspectionTemplates templates = new EquipmentInspectionTemplates();
+		templates.setName(standards.getName());
+		Long templateId = equipmentProvider.createEquipmentInspectionTemplates(templates);
+		standards.setTemplateId(templateId);
+		EquipmentInspectionTemplateItemMap templateItemMap = new EquipmentInspectionTemplateItemMap();
+		templateItemMap.setTemplateId(templateId);
+
+		List<EquipmentInspectionItems> items = new ArrayList<>();
+		for (InspectionItemDTO itemDTO : itemDTOS) {
+			EquipmentInspectionItems item = ConvertHelper.convert(itemDTO, EquipmentInspectionItems.class);
+			equipmentProvider.createEquipmentInspectionItems(item);
+			items.add(item);
+
+			templateItemMap.setItemId(item.getId());
+			equipmentProvider.createEquipmentInspectionTemplateItemMap(templateItemMap);
+		}
+		standards.setItems(items);
+	}
+
+	/*private void unReviewEquipmentStandardRelations(EquipmentStandardMap map) {
 		map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
 		map.setReviewResult(ReviewResult.NONE.getCode());
 		equipmentProvider.updateEquipmentStandardMap(map);
 		equipmentStandardMapSearcher.feedDoc(map);
 
-	}
+	}*/
 	
 	private EquipmentStandardsDTO converStandardToDto(EquipmentInspectionStandards standard) {
 		processRepeatSetting(standard);
