@@ -2779,9 +2779,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	private void setToObj(String fieldName, Object dto,Object value) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
-		Class<?> clz = dto.getClass();
+		Class<?> clz = dto.getClass().getSuperclass();
 		Object val = value;
-		String type = dto.getClass().getDeclaredField(fieldName).getType().getSimpleName();
+		String type = clz.getDeclaredField(fieldName).getType().getSimpleName();
 		System.out.println(type);
 		System.out.println("==============");
 		if(StringUtils.isEmpty((String)value)){
