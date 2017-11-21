@@ -169,4 +169,14 @@ public interface GroupService {
     void deleteBroadcastByToken(DeleteBroadcastByTokenCommand cmd);
 
     public String getGroupAlias(Long groupId);
+
+    GuildApplyDTO findGuildApply(FindGuildApplyCommand cmd);
+
+    GuildApplyDTO findGuildApplyByGroupMemberId(FindGuildApplyByGroupMemberIdCommand cmd);
+
+    IndustryTypeDTO findIndustryType(FindIndustryTypeCommand cmd);
+
+    ListIndustryTypesResponse listIndustryTypes(ListIndustryTypesCommand cmd);
+
+    ListGuildAppliesResponse listGuildApplies(ListGuildAppliesCommand cmd);
 }

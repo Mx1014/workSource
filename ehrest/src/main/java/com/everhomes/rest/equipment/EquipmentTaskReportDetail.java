@@ -2,6 +2,7 @@ package com.everhomes.rest.equipment;
 
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
@@ -18,18 +19,18 @@ public class EquipmentTaskReportDetail {
 
     @NotNull
     @ItemType(Attachment.class)
-    private List<Attachment> attachments;
+    private List<AttachmentDescriptor> attachments;
 
     private String message;
 
     @ItemType(InspectionItemResult.class)
     private List<InspectionItemResult> itemResults;
 
-    public List<Attachment> getAttachments() {
+    public List<AttachmentDescriptor> getAttachments() {
         return attachments;
     }
 
-    public void setAttachments(List<Attachment> attachments) {
+    public void setAttachments(List<AttachmentDescriptor> attachments) {
         this.attachments = attachments;
     }
 

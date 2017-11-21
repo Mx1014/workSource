@@ -155,6 +155,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         cmd.setResourceId(resourceId);
         cmd.setExpiration(expiration);
 
+        LOGGER.info("createAppPreOrder cmd={}", cmd);
         return  createPreOrder(cmd);
     }
 
@@ -620,6 +621,10 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         createOrderCmd.setOrderRemark4(null);
         createOrderCmd.setOrderRemark5(null);
         createOrderCmd.setCommitFlag(0);
+        if(cmd.getCommitFlag() != null){
+            createOrderCmd.setCommitFlag(cmd.getCommitFlag());
+        }
+        //为微信公众号新增commitFlag
 
         return createOrderCmd;
     }

@@ -54,6 +54,7 @@ public class UpdateEquipmentStandardCommand {
 	@Deprecated
 	private Byte standardType;
 	@Deprecated
+	@ItemType(RepeatSettingsDTO.class)
 	private RepeatSettingsDTO repeat;
 	@Deprecated
 	private Long templateId;
@@ -216,15 +217,15 @@ public class UpdateEquipmentStandardCommand {
         this.items = items;
     }
 
-    public List<EquipmentsDTO> getEquipments() {
-        return equipments;
-    }
+	public List<EquipmentsDTO> getEquipments() {
+		return equipments;
+	}
 
-    public void setEquipments(List<EquipmentsDTO> equipments) {
-        this.equipments = equipments;
-    }
+	public void setEquipments(List<EquipmentsDTO> equipments) {
+		this.equipments = equipments;
+	}
 
-    @Override
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

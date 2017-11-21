@@ -100,6 +100,14 @@ public class ReportEquipmentTaskCommand {
 		this.ownerType = ownerType;
 	}
 
+	public List<EquipmentTaskReportDetail> getEquipmentTaskReportDetails() {
+		return equipmentTaskReportDetails;
+	}
+
+	public void setEquipmentTaskReportDetails(List<EquipmentTaskReportDetail> equipmentTaskReportDetails) {
+		this.equipmentTaskReportDetails = equipmentTaskReportDetails;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

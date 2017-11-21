@@ -1,6 +1,7 @@
 package com.everhomes.rest.customer;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 
 /**
  * <ul>
@@ -19,6 +20,7 @@ import java.math.BigDecimal;
  *     <li>foreignCompanyIncomeTax: 外企所得税</li>
  *     <li>individualIncomeTax: 个人所得税</li>
  *     <li>totalTaxAmount: 税额合计</li>
+ *     <li>month: 年月</li>
  * </ul>
  * Created by ying.xiong on 2017/8/24.
  */
@@ -39,6 +41,15 @@ public class CustomerEconomicIndicatorDTO {
     private BigDecimal foreignCompanyIncomeTax;
     private BigDecimal individualIncomeTax;
     private BigDecimal totalTaxAmount;
+    private Timestamp month;
+
+    public Timestamp getMonth() {
+        return month;
+    }
+
+    public void setMonth(Timestamp month) {
+        this.month = month;
+    }
 
     public BigDecimal getBusinessIncomeTax() {
         return businessIncomeTax;

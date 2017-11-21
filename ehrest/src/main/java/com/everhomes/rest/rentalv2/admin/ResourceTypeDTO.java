@@ -24,6 +24,7 @@ public class ResourceTypeDTO {
 	private java.lang.String  iconUrl;
 	private java.lang.Byte    status;
 	private java.lang.Integer namespaceId;
+
 	private Byte payMode;
 	
 	@Override
@@ -94,5 +95,6 @@ public class ResourceTypeDTO {
 	public void setPayMode(Byte payMode) {
 		this.payMode = payMode;
 	}
-	
+
+
 }
