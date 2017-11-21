@@ -328,7 +328,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	private String processFormURL(String sourceType, Long sourceId, String ownerType,Long ownerId,String displayName) {
 		return "zl://form/create?sourceType="+sourceType+"&sourceId="+sourceId+"&ownerType="+ownerType+"&ownerId="+ownerId
-				+"&displayName="+displayName;
+				+"&displayName="+displayName+"&metaObject=";
 	}
 
 	private PostApprovalFormItem getFormItem(List<PostApprovalFormItem> values,String name){
