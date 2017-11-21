@@ -1,47 +1,47 @@
 -- from club 3.2 start
 -- 行业协会类型
 CREATE TABLE `eh_industry_types` (
-  `id` bigint(20) NOT NULL,
-  `uuid` varchar(128) NOT NULL,
-  `namespace_id` int(11) NOT NULL,
-  `name` varchar(32) NOT NULL,
-  `create_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `id` BIGINT(20) NOT NULL,
+  `uuid` VARCHAR(128) NOT NULL,
+  `namespace_id` INT(11) NOT NULL,
+  `name` VARCHAR(32) NOT NULL,
+  `create_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `eh_guild_applies` (
-  `id` bigint(20) NOT NULL,
-  `uuid` varchar(128) NOT NULL,
-  `namespace_id` int(11) NOT NULL,
-  `group_id` bigint(22) NOT NULL,
-  `applicant_uid` bigint(22) NOT NULL,
-  `group_member_id` bigint(22) NOT NULL,
-  `avatar` varchar(255) DEFAULT NULL,
-  `name` varchar(255) DEFAULT NULL,
-  `phone` varchar(18) DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `organization_name` varchar(255) DEFAULT NULL,
-  `registered_capital` varchar(255) DEFAULT NULL,
-  `industry_type` varchar(255) DEFAULT NULL,
-  `create_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `update_uid` bigint(22) DEFAULT NULL,
+  `id` BIGINT(20) NOT NULL,
+  `uuid` VARCHAR(128) NOT NULL,
+  `namespace_id` INT(11) NOT NULL,
+  `group_id` BIGINT(22) NOT NULL,
+  `applicant_uid` BIGINT(22) NOT NULL,
+  `group_member_id` BIGINT(22) NOT NULL,
+  `avatar` VARCHAR(255) DEFAULT NULL,
+  `name` VARCHAR(255) DEFAULT NULL,
+  `phone` VARCHAR(18) DEFAULT NULL,
+  `email` VARCHAR(255) DEFAULT NULL,
+  `organization_name` VARCHAR(255) DEFAULT NULL,
+  `registered_capital` VARCHAR(255) DEFAULT NULL,
+  `industry_type` VARCHAR(255) DEFAULT NULL,
+  `create_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `update_uid` BIGINT(22) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 俱乐部类型，普通俱乐部、行业协会
-ALTER TABLE `eh_group_settings` ADD COLUMN `club_type`  tinyint(4) NOT NULL DEFAULT 0 COMMENT '0-normal club, 1-guild club' ;
+ALTER TABLE `eh_group_settings` ADD COLUMN `club_type`  TINYINT(4) NOT NULL DEFAULT 0 COMMENT '0-normal club, 1-guild club' ;
 -- 未加入俱乐部成员在俱乐部论坛的权限 0-不可见，1-可见，2-可交互
-ALTER TABLE `eh_groups` ADD COLUMN `tourist_post_policy`  tinyint(4) NULL DEFAULT 2 COMMENT '0-hide, 1-see only, 2-interact';
+ALTER TABLE `eh_groups` ADD COLUMN `tourist_post_policy`  TINYINT(4) NULL DEFAULT 2 COMMENT '0-hide, 1-see only, 2-interact';
 -- 俱乐部类型，普通俱乐部、行业协会
-ALTER TABLE `eh_groups` ADD COLUMN `club_type`  tinyint(4) NULL DEFAULT 0 COMMENT '0-normal club, 1-guild club' ;
+ALTER TABLE `eh_groups` ADD COLUMN `club_type`  TINYINT(4) NULL DEFAULT 0 COMMENT '0-normal club, 1-guild club' ;
 
-ALTER TABLE `eh_groups` ADD COLUMN `phone_number`  varchar(18) NULL ;
+ALTER TABLE `eh_groups` ADD COLUMN `phone_number`  VARCHAR(18) NULL ;
 
-ALTER TABLE `eh_groups`  ADD COLUMN `description_type`  tinyint(4) NULL DEFAULT 0;
+ALTER TABLE `eh_groups`  ADD COLUMN `description_type`  TINYINT(4) NULL DEFAULT 0;
 
 -- 拒绝理由
-ALTER TABLE `eh_group_member_logs` ADD COLUMN `reject_text`  varchar(255) NULL;
+ALTER TABLE `eh_group_member_logs` ADD COLUMN `reject_text`  VARCHAR(255) NULL;
 
 -- from club 3.2 end
 
@@ -79,7 +79,7 @@ CREATE TABLE `eh_general_approval_templates` (
 	`module_type` VARCHAR(64),
 	`project_id` BIGINT NOT NULL DEFAULT 0,
   `project_type` VARCHAR(64),
-  `form_template_id` bigint(20) NOT NULL DEFAULT 0 COMMENT 'The id of the template form',
+  `form_template_id` BIGINT(20) NOT NULL DEFAULT 0 COMMENT 'The id of the template form',
   `support_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'APP:0, WEB:1, APP_WEB: 2',
   `approval_name` VARCHAR(128) NOT NULL,
   `approval_attribute` VARCHAR(128) DEFAULT 'CUSTOMIZE' COMMENT 'DEFAULT,CUSTOMIZE',
@@ -108,6 +108,32 @@ CREATE TABLE `eh_general_form_templates` (
   `update_time` DATETIME DEFAULT NULL COMMENT 'last update time',
   `create_time` DATETIME DEFAULT NULL COMMENT 'record create time',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- ended by R
+
+
+
+
+
+
+
+
+
+
+
+
+-- added by wh punch-3.4
+ALTER TABLE `eh_punch_exception_requests` ADD COLUMN `punch_type` TINYINT DEFAULT 2 COMMENT ' 0- 上班打卡 ; 1- 下班打卡';  
+ALTER TABLE `eh_punch_exception_requests` ADD COLUMN `begin_time` DATETIME COMMENT ' 请假/加班 生效开始时间';  
+ALTER TABLE `eh_punch_exception_requests` ADD COLUMN `end_time` DATETIME COMMENT ' 请假/加班 生效结束时间';  
+ALTER TABLE `eh_punch_exception_requests` ADD COLUMN `duration` DOUBLE COMMENT ' 请假/加班 时长-可供计算';  
+ALTER TABLE `eh_punch_exception_requests` ADD COLUMN `category_id` BIGINT COMMENT ' 请假类型';  
+ALTER TABLE `eh_punch_exception_requests` ADD COLUMN `approval_attribute` VARCHAR(128) COMMENT 'DEFAULT,CUSTOMIZE'; 
+ALTER TABLE `eh_punch_exception_requests` CHANGE `view_flag` `view_flag` TINYINT DEFAULT '1' COMMENT 'is view(0) not view(1)';
+
+ALTER TABLE `eh_punch_exception_approvals` ADD COLUMN `punch_type` TINYINT DEFAULT 2 COMMENT ' 0- 上班打卡 ; 1- 下班打卡';  
+
+ALTER TABLE `eh_punch_logs` ADD COLUMN `approval_status` TINYINT DEFAULT NULL COMMENT '校正后的打卡状态 0-正常 null-没有异常校准';
+ALTER TABLE `eh_punch_logs` ADD COLUMN `smart_alignment` TINYINT DEFAULT 0 COMMENT '只能校准状态 0-非校准 1-校准';
+ALTER TABLE `eh_punch_day_logs` ADD COLUMN `smart_alignment` VARCHAR(128) DEFAULT NULL COMMENT '智能校准状态:1-未智能校准 0-未校准 例如:0;1/0;1/1/0/1';
