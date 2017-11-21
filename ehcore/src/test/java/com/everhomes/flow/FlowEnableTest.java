@@ -1,7 +1,14 @@
 package com.everhomes.flow;
 
+import com.alibaba.fastjson.JSON;
+import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.general_approval.GeneralApprovalProvider;
+import com.everhomes.general_approval.GeneralApprovalService;
+import com.everhomes.general_form.GeneralForm;
+import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.general_approval.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -67,6 +74,15 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     
     @Autowired
     private FlowEvaluateItemProvider flowEvaluateItemProvider;
+
+    @Autowired
+    private GeneralFormProvider generalFormProvider;
+
+    @Autowired
+    private GeneralApprovalProvider generalApprovalProvider;
+
+    @Autowired
+    private GeneralApprovalService generalApprovalService;
     
     private User testUser1;
     private User testUser2;
@@ -1443,5 +1459,86 @@ public class FlowEnableTest  extends LoginAuthTestCase {
                 assertTrue(graphNode.getLinksIn().size() == 1);
             }
         }
+    }
+
+    @Test
+    public void testFlowCondition() {
+        FlowCaseState ctx = new FlowCaseState();
+        FlowModuleInfo module = flowListenerManager.getModule(52000L);
+        ctx.setModule(module);
+        ctx.setFlowCase(createFlowCase());
+
+        GeneralApproval generalApproval = generalApprovalProvider.getGeneralApprovalById(527L);
+        GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(generalApproval.getFormOriginId());
+
+        List<GeneralFormFieldDTO> fieldDTOList = JSON.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+
+        FlowGraphCondition condition = new FlowGraphConditionNormal();
+        FlowCondition cond = new FlowCondition();
+        cond.setConditionLevel(1);
+        cond.setNextNodeId(1L);
+        cond.setFlowNodeLevel(1);
+        condition.setCondition(cond);
+
+        List<FlowConditionExpression> expressions = new ArrayList<>();
+        for (int i = fieldDTOList.size() - 4; i < fieldDTOList.size(); i+=2) {
+            FlowConditionExpression exp1 = new FlowConditionExpression();
+            exp1.setVariable1(fieldDTOList.get(i).getFieldName());
+            exp1.setVariable2(fieldDTOList.get(i+1).getFieldName());
+            exp1.setLogicOperator("||");
+            exp1.setRelationalOperator("==");
+            exp1.setVariableType1(FlowConditionExpressionVarType.FORM.getCode());
+            exp1.setVariableType2(FlowConditionExpressionVarType.FORM.getCode());
+            expressions.add(exp1);
+        }
+
+        condition.setExpressions(expressions);
+
+        boolean ok = condition.isTrue(ctx);
+        assertTrue(!ok);
+    }
+
+    private FlowCase createFlowCase() {
+        setTestContext(testUser1.getId());
+
+        GeneralApproval generalApproval = generalApprovalProvider.getGeneralApprovalById(527L);
+        GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(generalApproval.getFormOriginId());
+
+        List<GeneralFormFieldDTO> fieldDTOList = JSON.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+
+        PostApprovalFormCommand cmd1 = new PostApprovalFormCommand();
+        cmd1.setApprovalId(527L);
+        cmd1.setOrganizationId(orgId);
+        cmd1.setValues(new ArrayList<>());
+
+        for (GeneralFormFieldDTO fieldDTO : fieldDTOList) {
+            PostApprovalFormItem item = new PostApprovalFormItem();
+            cmd1.getValues().add(item);
+            item.setFieldDisplayName(fieldDTO.getFieldDisplayName());
+            item.setFieldName(fieldDTO.getFieldName());
+            item.setFieldType(fieldDTO.getFieldType());
+
+            String value = "";
+            GeneralFormFieldType fieldType = GeneralFormFieldType.fromCode(item.getFieldType());
+            switch (fieldType) {
+                case DATE:
+                    value = "2017/11/11 17:50";
+                    break;
+                case NUMBER_TEXT:
+                    value = "1112.666";
+                    break;
+                case SINGLE_LINE_TEXT:
+                case DROP_BOX:
+                    value = "2017/11/11 17:50";
+                    break;
+                default:
+                    value = "1";
+            }
+
+            item.setFieldValue(String.format("{\"text\":\"%s\"}", value));
+        }
+
+        GetTemplateByApprovalIdResponse approvalForm = generalApprovalService.postApprovalForm(cmd1);
+        return flowService.getFlowCaseById(approvalForm.getFlowCaseId());
     }
 }

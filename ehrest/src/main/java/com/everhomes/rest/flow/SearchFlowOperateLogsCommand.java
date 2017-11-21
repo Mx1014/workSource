@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  *     <li>keyword: 搜索关键字</li>
  *     <li>pageAnchor: pageAnchor</li>
  *     <li>pageSize: pageSize</li>
+ *     <li>adminFlag: adminFlag</li>
  * </ul>
  */
 public class SearchFlowOperateLogsCommand {
@@ -22,6 +23,8 @@ public class SearchFlowOperateLogsCommand {
     private String keyword;
     private Long pageAnchor;
     private Integer pageSize;
+
+    private Byte adminFlag;
 
     public String getServiceType() {
         return serviceType;
@@ -77,6 +80,14 @@ public class SearchFlowOperateLogsCommand {
 
     public void setModuleId(Long moduleId) {
         this.moduleId = moduleId;
+    }
+
+    public Byte getAdminFlag() {
+        return adminFlag;
+    }
+
+    public void setAdminFlag(Byte adminFlag) {
+        this.adminFlag = adminFlag;
     }
 
     @Override

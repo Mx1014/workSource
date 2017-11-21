@@ -4,10 +4,10 @@ package com.everhomes.rest.group;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * <ul>参数:
- * <li>pageAnchor: 锚点</li>
- * <li>pageSize: 每页大小</li>
+ * <ul>
+ *     <li>pageAnchor: 锚点</li>
+ *     <li>pageSize: 每页大小</li>
+ *     <li>clubType: clubType  NORMAL-0, Guild(行业协会)-1 参考{@link ClubType}</li>
  * </ul>
  */
 public class ListUserGroupPostCommand {
@@ -16,15 +16,7 @@ public class ListUserGroupPostCommand {
 
 	private Integer pageSize;
 
-	public ListUserGroupPostCommand() {
-
-	}
-
-	public ListUserGroupPostCommand(Long pageAnchor, Integer pageSize) {
-		super();
-		this.pageAnchor = pageAnchor;
-		this.pageSize = pageSize;
-	}
+	private Byte clubType;
 
 	public Long getPageAnchor() {
 		return pageAnchor;
@@ -40,6 +32,14 @@ public class ListUserGroupPostCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public Byte getClubType() {
+		return clubType;
+	}
+
+	public void setClubType(Byte clubType) {
+		this.clubType = clubType;
 	}
 
 	@Override
