@@ -16,7 +16,7 @@ import com.everhomes.discover.ItemType;
  *     <li>conditionType: 模块需要的条件类型目前定义四个值。  system：跟系统直接相关不需要条件（不需要有筛选条件）， namespace：前提必须要有域空间（有域空间的筛选条件），才能查看到内容， project：前提条件是项目，而查询项目的前提条件要有域空间（有域空间的筛选条件，联动出项目筛选条件）， organization：前提条件是机构，机构的前提条件要有域空间（有域空间的筛选条件，联动出机构的筛选条件）</li>
  *     <li>category: 类别，classify 菜单归类，module 模块， page 页面</li>
  *     <li>dtos: 子菜单 {@link com.everhomes.rest.acl.WebMenuDTO}</li>
- *     <li>selected: 是否别选中</li>
+ *     <li>selected: 是否别选中 {@link WebMenuSelectedFlag}</li>
  *     <li>applyPolicy: 名称覆盖政策 {@link WebMenuScopeApplyPolicy}</li>
  * </ul>
  */
@@ -37,7 +37,7 @@ public class WebMenuDTO {
 	@ItemType(WebMenuDTO.class)
 	private List<WebMenuDTO> dtos;
 
-	private Boolean selected;
+	private Byte selected;
 
 	private Byte applyPolicy;
 
@@ -121,11 +121,11 @@ public class WebMenuDTO {
 		this.dtos = dtos;
 	}
 
-	public Boolean getSelected() {
+	public Byte getSelected() {
 		return selected;
 	}
 
-	public void setSelected(Boolean selected) {
+	public void setSelected(Byte selected) {
 		this.selected = selected;
 	}
 

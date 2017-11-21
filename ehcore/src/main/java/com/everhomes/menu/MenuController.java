@@ -72,18 +72,18 @@ public class MenuController extends ControllerBase {
         return response;
     }
 
-//    /**
-//     * <b>URL: /menu/updateMenuScopesByNamespace</b>
-//     * <p>根据树状结构更新菜单scope</p>
-//     */
-//    @RequestMapping("updateMenuScopesByNamespace")
-//    @RestReturn(value=String.class)
-//    public RestResponse updateMenuScopesByNamespace(UpdateMenuScopesByNamespaceCommand cmd) {
-//        webMenuService.updateMenuScopesByNamespace(cmd);
-//        RestResponse response =  new RestResponse();
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
+    /**
+     * <b>URL: /menu/updateMenuScopesByNamespace</b>
+     * <p>根据树状结构更新菜单scope</p>
+     */
+    @RequestMapping("updateMenuScopesByNamespace")
+    @RestReturn(value=String.class)
+    public RestResponse updateMenuScopesByNamespace(UpdateMenuScopesByNamespaceCommand cmd) {
+        webMenuService.updateMenuScopesByNamespace(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }
