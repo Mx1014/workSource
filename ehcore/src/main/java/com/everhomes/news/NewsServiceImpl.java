@@ -345,9 +345,9 @@ public class NewsServiceImpl implements NewsService {
 		try {
 			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
 		} catch (IOException e) {
-			LOGGER.error("process Excel error, operatorId=" + userId + ", cmd=" + cmd);
+			LOGGER.error("processStat Excel error, operatorId=" + userId + ", cmd=" + cmd);
 			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_NEWS_PROCESS_EXCEL_ERROR, "process Excel error");
+					NewsServiceErrorCode.ERROR_NEWS_PROCESS_EXCEL_ERROR, "processStat Excel error");
 		}
 
 		if (resultList != null && resultList.size() > 0) {

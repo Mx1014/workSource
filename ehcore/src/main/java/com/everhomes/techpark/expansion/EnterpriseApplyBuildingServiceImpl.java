@@ -408,6 +408,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 			if (null != dto.getPosterUri()) {
 				dto.setPosterUrl(contentServerService.parserUri(dto.getPosterUri(), EntityType.USER.getCode(), userId));
 			}
+			dto.setDescription(leaseProject.getDescription());
 		}
 	}
 

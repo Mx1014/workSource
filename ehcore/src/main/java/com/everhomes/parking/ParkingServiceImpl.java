@@ -206,13 +206,13 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 		}
 
-		return parkingRechargeRateList;
-	}
-
-	private ParkingVendorHandler getParkingVendorHandler(String vendorName) {
-		ParkingVendorHandler handler = null;
-
-		if(vendorName != null && vendorName.length() > 0) {
+		return parkingRechargeRateList.stream().filter(r -> r.getPrice().compareTo(new BigDecimal(0)) == 1).collect(Collectors.toList());
+    }
+    
+    private ParkingVendorHandler getParkingVendorHandler(String vendorName) {
+        ParkingVendorHandler handler = null;
+        
+        if(vendorName != null && vendorName.length() > 0) {
 			String handlerPrefix = ParkingVendorHandler.PARKING_VENDOR_PREFIX;
 			handler = PlatformContext.getComponent(handlerPrefix + vendorName);
 		}
@@ -539,6 +539,7 @@ public class ParkingServiceImpl implements ParkingService {
 		param.setPlateNumber(cmd.getPlateNumber());
 		param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
 		param.setPrice(cmd.getPrice());
+		param.setClientAppName(cmd.getClientAppName());
 
 		return (CommonOrderDTO) createGeneralOrder(param, ParkingRechargeType.TEMPORARY.getCode(), ActivityRosterPayVersionFlag.V1);
 
@@ -661,6 +662,7 @@ public class ParkingServiceImpl implements ParkingService {
 //        preOrderCommand.setClientAppName(clientAppName);
 //
 //        PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+		LOGGER.info("createAppPreOrder clientAppName={}", clientAppName);
 		PreOrderDTO callBack = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(), clientAppName, OrderType.OrderTypeEnum.PARKING.getPycode(),
 				parkingRechargeOrder.getId(), parkingRechargeOrder.getPayerUid(), amount);
 

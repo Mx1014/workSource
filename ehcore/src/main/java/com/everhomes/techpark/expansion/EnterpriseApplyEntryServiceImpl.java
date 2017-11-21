@@ -637,6 +637,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		flowCaseCmd.setProjectType(projectType);
 		flowCaseCmd.setProjectId(projectId);
 		flowCaseCmd.setCurrentOrganizationId(request.getEnterpriseId());
+		flowCaseCmd.setServiceType("园区入驻");
 
 		return flowService.createFlowCase(flowCaseCmd);
 

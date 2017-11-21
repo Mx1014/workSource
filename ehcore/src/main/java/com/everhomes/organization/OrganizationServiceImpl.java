@@ -15,11 +15,15 @@ import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.ResourceCategory;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.customer.CustomerService;
+import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
@@ -64,6 +68,7 @@ import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
@@ -75,6 +80,7 @@ import com.everhomes.rest.common.QuestionMetaActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.customer.DeleteEnterpriseCustomerCommand;
 import com.everhomes.rest.enterprise.*;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.family.ParamType;
@@ -106,10 +112,7 @@ import com.everhomes.rest.uniongroup.UniongroupType;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
-import com.everhomes.search.OrganizationSearcher;
-import com.everhomes.search.PostAdminQueryFilter;
-import com.everhomes.search.PostSearcher;
-import com.everhomes.search.UserWithoutConfAccountSearcher;
+import com.everhomes.search.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
@@ -281,6 +284,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Autowired
     private ArchivesProvider archivesProvider;
+    @Autowired
+    private EnterpriseCustomerProvider enterpriseCustomerProvider;
+
+    @Autowired
+    private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
+
+    @Autowired
+    private CustomerService customerService;
+
 
     private int getPageCount(int totalCount, int pageSize) {
         int pageCount = totalCount / pageSize;
@@ -734,6 +746,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         dto.setUnifiedSocialCreditCode(organization.getUnifiedSocialCreditCode());
         dto.setWebsite(organization.getWebsite());
         dto.setEmailDomain(org.getEmailDomain());
+        dto.setWebsite(organization.getWebsite());
         dto.setName(organization.getName());
         dto.setCommunityId(organizationDTO.getCommunityId());
         dto.setCommunityName(organizationDTO.getCommunityName());
@@ -1100,15 +1113,38 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     }
 
+    private void checkOrgNameUnique(Long id, Integer namespaceId, String orgName) {
+        if(org.apache.commons.lang.StringUtils.isNotBlank(orgName)) {
+            Organization org = organizationProvider.findOrganizationByName(orgName, namespaceId);
+            if(org != null) {
+                if(id != null) {
+                    if(id.equals(org.getId())) {
+                        return;
+                    }
+                }
+                LOGGER.error("organizationName {} in namespace {} already exist!", orgName, namespaceId);
+                throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_EXIST,
+                        "organizationName is already exist");
+            }
+        }
+
+    }
+
     @Override
     public OrganizationDTO createEnterprise(CreateEnterpriseCommand cmd) {
         User user = UserContext.current().getUser();
 
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        if(namespaceId == 999971) {
+            LOGGER.error("Insufficient privilege, createEnterprise");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
 
         if(org.apache.commons.lang.StringUtils.isNotBlank(cmd.getUnifiedSocialCreditCode())) {
             checkUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode(), namespaceId, null);
         }
+        checkOrgNameUnique(null, cmd.getNamespaceId(), cmd.getName());
         Organization organization = new Organization();
 
         dbProvider.execute((TransactionStatus status) -> {
@@ -1142,6 +1178,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organization.setGroupId(group.getId());
+            organization.setWebsite(cmd.getWebsite());
             organization.setEmailDomain(cmd.getEmailDomain());
             organization.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
             organizationProvider.createOrganization(organization);
@@ -1198,12 +1235,50 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (null != addressDTOs && 0 != addressDTOs.size()) {
                 this.addAddresses(organization.getId(), addressDTOs, user.getId());
             }
+
+            createEnterpriseCustomer(organization, cmd.getAvatar(), enterprise, cmd.getCommunityId());
             return null;
         });
 
         organizationSearcher.feedDoc(organization);
 
+
         return ConvertHelper.convert(organization, OrganizationDTO.class);
+    }
+
+    private void createEnterpriseCustomer(Organization organization, String logo, OrganizationDetail enterprise, Long communityId) {
+        if(organization.getNamespaceId() == 999971) {
+            LOGGER.error("Insufficient privilege, createEnterpriseCustomer");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
+        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(organization.getNamespaceId(), organization.getName());
+        if(customers != null && customers.size() > 0) {
+            EnterpriseCustomer customer = customers.get(0);
+            customer.setOrganizationId(organization.getId());
+            customer.setCorpWebsite(organization.getWebsite());
+            customer.setCorpLogoUri(logo);
+            customer.setContactAddress(enterprise.getAddress());
+            customer.setLatitude(enterprise.getLatitude());
+            customer.setLongitude(enterprise.getLongitude());
+            enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+            enterpriseCustomerSearcher.feedDoc(customer);
+
+        } else {
+            EnterpriseCustomer customer = new EnterpriseCustomer();
+            customer.setCommunityId(communityId);
+            customer.setNamespaceId(organization.getNamespaceId());
+            customer.setOrganizationId(organization.getId());
+            customer.setName(organization.getName());
+            customer.setCorpWebsite(organization.getWebsite());
+            customer.setCorpLogoUri(logo);
+            customer.setContactAddress(enterprise.getAddress());
+            customer.setLatitude(enterprise.getLatitude());
+            customer.setLongitude(enterprise.getLongitude());
+            enterpriseCustomerProvider.createEnterpriseCustomer(customer);
+            enterpriseCustomerSearcher.feedDoc(customer);
+        }
+
     }
 
     private void createActiveOrganizationCommunityRequest(Long creatorId, Long organizationId, Long communityId) {
@@ -1281,18 +1356,25 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public void updateEnterprise(UpdateEnterpriseCommand cmd, boolean updateAttachmentAndAddress) {
+        if(cmd.getNamespaceId() == 999971) {
+            LOGGER.error("Insufficient privilege, createEnterprise");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
         //先判断，后台管理员才能创建。状态直接设为正常
         Organization organization = checkOrganization(cmd.getId());
         User user = UserContext.current().getUser();
         if(org.apache.commons.lang.StringUtils.isNotBlank(cmd.getUnifiedSocialCreditCode())) {
             checkUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode(), cmd.getNamespaceId(), cmd.getId());
         }
+        checkOrgNameUnique(cmd.getId(), cmd.getNamespaceId(), cmd.getName());
         dbProvider.execute((TransactionStatus status) -> {
             organization.setId(cmd.getId());
             organization.setName(cmd.getName());
             organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organization.setEmailDomain(cmd.getEmailDomain());
             organization.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
+            organization.setWebsite(cmd.getWebsite());
             organizationProvider.updateOrganization(organization);
 
             OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
@@ -1354,6 +1436,21 @@ public class OrganizationServiceImpl implements OrganizationService {
             // organization.setCommunityId(cmd.getCommunityId());
             organization.setDescription(organizationDetail.getDescription());
             organizationSearcher.feedDoc(organization);
+
+            //查到有关联的客户则同步修改过去
+            EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(organization.getId());
+            if(customer != null) {
+                customer.setName(organization.getName());
+                customer.setNickName(organizationDetail.getDisplayName());
+                customer.setContactAddress(organizationDetail.getAddress());
+                customer.setLatitude(organizationDetail.getLatitude());
+                customer.setLongitude(organizationDetail.getLongitude());
+                customer.setCorpWebsite(organization.getWebsite());
+                customer.setCorpLogoUri(organizationDetail.getAvatar());
+                enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+                enterpriseCustomerSearcher.feedDoc(customer);
+            }
+
             return null;
         });
 
@@ -1374,9 +1471,28 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public void deleteEnterpriseById(DeleteOrganizationIdCommand cmd) {
         Organization organization = checkOrganization(cmd.getId());
+        if(organization.getNamespaceId() == 999971) {
+            LOGGER.error("Insufficient privilege, createEnterprise");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
         User user = UserContext.current().getUser();
 
-        dbProvider.execute((TransactionStatus status) -> {
+		dbProvider.execute((TransactionStatus status) -> {
+            //已删除则直接跳出
+            if(OrganizationStatus.DELETED.equals(OrganizationStatus.fromCode(organization.getStatus()))) {
+                return null;
+            }
+
+            //如在客户管理中有则同步删除
+            EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(organization.getId());
+            if(customer != null) {
+                DeleteEnterpriseCustomerCommand command = new DeleteEnterpriseCustomerCommand();
+                command.setId(customer.getId());
+                command.setCommunityId(customer.getCommunityId());
+                customerService.deleteEnterpriseCustomer(command);
+            }
+
             organization.setStatus(OrganizationStatus.DELETED.getCode());
             Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
             organization.setUpdateTime(now);
@@ -4708,7 +4824,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //	public void processPartnerOrganizationUser(Long userId, Long partnerId) {
 //	    long startTime = System.currentTimeMillis();
 //	    if(userId == null || userId <= 0) {
-//	        LOGGER.info("User id is null, ignore to process partner organization user, userId=" + userId + ", partnerId=" + partnerId);
+//	        LOGGER.info("User id is null, ignore to processStat partner organization user, userId=" + userId + ", partnerId=" + partnerId);
 //	        return;
 //	    }
 //	    User user = userProvider.findUserById(userId);
@@ -4718,7 +4834,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //        }
 //
 //	    if(partnerId == null || partnerId <= 0) {
-//            LOGGER.info("Partner id is null, ignore to process partner organization user, userId=" + userId + ", partnerId=" + partnerId);
+//            LOGGER.info("Partner id is null, ignore to processStat partner organization user, userId=" + userId + ", partnerId=" + partnerId);
 //            return;
 //	    }
 //        Organization organization = organizationProvider.findOrganizationById(partnerId);
@@ -5849,10 +5965,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         leaveOrganizationMembers(members);
         deleteUserOrganizationWithMembers(members);
 
-        // 删除考勤规则的操作
-        if(members != null && members.size() > 0)
-            this.uniongroupService.syncUniongroupAfterLeaveTheJob(members.get(0).getDetailId());
-
     }
 
     /**
@@ -5893,7 +6005,11 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
             return null;
         });
-        
+
+        // 删除考勤规则的操作
+        if(members != null && members.size() > 0)
+            this.uniongroupService.syncUniongroupAfterLeaveTheJob(members.get(0).getDetailId());
+
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         //执行太慢，开一个线程来做
@@ -7130,7 +7246,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
             return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
         } catch (Exception e) {
-            LOGGER.error("Failed to process the enterprise contact for the user, userId=" + identifier.getOwnerUid(), e);
+            LOGGER.error("Failed to processStat the enterprise contact for the user, userId=" + identifier.getOwnerUid(), e);
         }
         return null;
     }
@@ -7369,7 +7485,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<ImportFileResultLog<ImportEnterpriseDataDTO>> errorDataLogs = new ArrayList<>();
 
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-
+        if(namespaceId == 999971) {
+            LOGGER.error("Insufficient privilege, createEnterprise");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
         Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 
         // 业务太复杂，导入企业时如果本身系统里面已存在，要覆盖掉，如果是本次导入了同一企业多行，要合并门牌及管理员
@@ -7456,6 +7576,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (null == org) {
                 OrganizationDTO dto = this.createEnterprise(enterpriseCommand);
                 org = ConvertHelper.convert(dto, Organization.class);
+
             } else {
                 UpdateEnterpriseCommand updateEnterpriseCommand = ConvertHelper.convert(enterpriseCommand, UpdateEnterpriseCommand.class);
                 updateEnterpriseCommand.setId(org.getId());
@@ -8453,6 +8574,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         Map<String, String> map = new HashMap<String, String>();
         map.put("enterpriseName", org.getName());
         map.put("userName", null == member.getContactName() ? member.getContactToken().replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2") : member.getContactName());
+        map.put("userToken", member.getContactToken());
         if (member.getContactDescription() != null && member.getContactDescription().length() > 0) {
             map.put("description", String.format("(%s)", member.getContactDescription()));
         } else {
@@ -10587,7 +10709,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 trees.add(organizationTreeDTO);
             }
         }
-
+        //同级排序
+        trees.sort(Comparator.comparingInt(OrganizationTreeDTO::getOrder));
         dto.setTrees(trees);
         return dto;
     }
@@ -11167,6 +11290,13 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<ServiceModuleAssignment> assignments = serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getModuleId());
         assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(com.everhomes.rest.common.EntityType.ALL.getCode(), 0L, cmd.getModuleId()));//负责全部业务范围的对象，也要查询出来
         assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(), cmd.getOwnerId(), 0L)); //负责全部业务模块的对象，也要查询出来
+        //如果本身是子项目,则查询其父项目对应的assignments
+        ResourceCategory rc = communityProvider.findResourceCategoryById(cmd.getOwnerId());
+        if(rc != null){//是子项目
+            Long parentOwnerId = rc.getOwnerId();
+            assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(), parentOwnerId, cmd.getModuleId()));
+            assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(), parentOwnerId, 0L)); //负责全部业务模块的对象，也要查询出来
+        }
 
         List<String> groupTypes = new ArrayList<>();
 

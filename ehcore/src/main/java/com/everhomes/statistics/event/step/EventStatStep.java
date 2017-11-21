@@ -6,9 +6,9 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.rest.statistics.event.StatEventStatTimeInterval;
 import com.everhomes.statistics.event.*;
+import com.everhomes.statistics.event.handler.StatEventHandlerManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,20 +18,14 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by xq.tian on 2017/8/14.
  */
 @Component
-public class EventStatStep extends AbstractStatEventStep implements InitializingBean {
+public class EventStatStep extends AbstractStatEventStep {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventStatStep.class);
-
-    @Autowired
-    private List<StatEventHandler> handlers;
-
-    private final Map<String, StatEventHandler> handlerMap = new ConcurrentHashMap<>();
 
     @Autowired
     private DbProvider dbProvider;
@@ -56,7 +50,7 @@ public class EventStatStep extends AbstractStatEventStep implements Initializing
         Map<String, Object> stepMeta = new HashMap<>();
         boolean success = true;
         for (StatEvent statEvent : statEvents) {
-            StatEventHandler handler = handlerMap.get(statEvent.getEventName());
+            StatEventHandler handler = StatEventHandlerManager.getHandler(statEvent.getEventName());
             if (handler == null) {
                 continue;
             }
@@ -105,7 +99,7 @@ public class EventStatStep extends AbstractStatEventStep implements Initializing
     }
 
     private List<StatEventStatistic> process(LocalDate statDate, StatEvent statEvent, StatEventHandler handler, Namespace namespace, StatEventStatTimeInterval interval) {
-        return handler.process(namespace, statEvent, statDate, interval);
+        return handler.processStat(namespace, statEvent, statDate, interval);
     }
 
     private String getHandlerStepName(StatEventHandler handler, Integer namespaceId) {
@@ -122,20 +116,5 @@ public class EventStatStep extends AbstractStatEventStep implements Initializing
 
     protected void after(StatEventStepExecution execution) {
         execution.setEndTime(System.currentTimeMillis());
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        handlerInit();
-    }
-
-    private void handlerInit() {
-        if (handlers != null) {
-            for (StatEventHandler handler : handlers) {
-                handlerMap.put(handler.getEventName(), handler);
-            }
-        } else {
-            LOGGER.warn("not found stat event handler");
-        }
     }
 }

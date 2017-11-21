@@ -183,7 +183,7 @@ public class GroupServiceImpl implements GroupService {
     	//创建俱乐部需要从后台获取设置的参数判断允不允许创建俱乐部， add by tt, 20161102
     	GroupSetting groupSetting = null;
     	if (cmd.getPrivateFlag() != null && GroupPrivacy.fromCode(cmd.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
-    		groupSetting = groupSettingProvider.findGroupSettingByNamespaceId(namespaceId);
+    		groupSetting = groupSettingProvider.findGroupSettingByNamespaceId(namespaceId, cmd.getClubType());
         	if (groupSetting != null && groupSetting.getCreateFlag() != null && TrueOrFalseFlag.fromCode(groupSetting.getCreateFlag()) == TrueOrFalseFlag.FALSE && !checkAdmin(cmd.getVisibleRegionId())) {
         		Map<String, Object> map = new HashMap<String, Object>();
                 map.put("clubPlaceholderName", getClubPlaceholderName(namespaceId));
@@ -200,6 +200,11 @@ public class GroupServiceImpl implements GroupService {
     					"description length cannot be less than 10!");
 			}
 		}
+
+		if(cmd.getClubType() == null){
+    	    cmd.setClubType(ClubType.NORMAL.getCode());
+        }
+
     	return new RestResponse(createGroup(cmd, groupSetting));
     }
     
@@ -241,6 +246,8 @@ public class GroupServiceImpl implements GroupService {
             group.setName(cmd.getName());
             group.setAvatar(cmd.getAvatar());
             group.setDescription(cmd.getDescription());
+            group.setDescriptionType(cmd.getDescriptionType());
+
             group.setDiscriminator(GroupDiscriminator.GROUP.getCode());
             group.setMemberCount(1L); // 创建者也参与人数计算
             
@@ -335,6 +342,10 @@ public class GroupServiceImpl implements GroupService {
             if (group.getStatus() == null) {
             	group.setStatus(GroupAdminStatus.ACTIVE.getCode());
 			}
+
+			group.setTouristPostPolicy(cmd.getTouristPostPolicy());
+            group.setClubType(cmd.getClubType());
+            group.setPhoneNumber(cmd.getPhoneNumber());
 
             this.groupProvider.createGroup(group);
     
@@ -527,8 +538,10 @@ public class GroupServiceImpl implements GroupService {
         if(cmd.getAvatar() != null)
             group.setAvatar(cmd.getAvatar());
         
-        if(cmd.getDescription() != null)
+        if(cmd.getDescription() != null){
             group.setDescription(cmd.getDescription());
+            group.setDescriptionType(cmd.getDescriptionType());
+        }
         
         if(cmd.getName() != null)
             group.setName(cmd.getName());
@@ -553,6 +566,12 @@ public class GroupServiceImpl implements GroupService {
         if (cmd.getJoinPolicy() != null) {
 			group.setJoinPolicy(cmd.getJoinPolicy());
 		}
+
+		if(cmd.getTouristPostPolicy() != null){
+            group.setTouristPostPolicy(cmd.getTouristPostPolicy());
+        }
+
+        group.setPhoneNumber(cmd.getPhoneNumber());
         
         group.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_GROUP.getCode()).enter(()-> {
@@ -639,6 +658,11 @@ public class GroupServiceImpl implements GroupService {
          int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
          CrossShardListingLocator locator = new CrossShardListingLocator();
          locator.setAnchor(cmd.getPageAnchor());
+
+        //妹的，老客户有没有参数，满世界都要写这种判断 add by yanjun 20171107
+        if(cmd.getClubType() == null){
+            cmd.setClubType(ClubType.NORMAL.getCode());
+        }
          
          List<Group> groups = this.groupProvider.queryGroups(locator, pageSize + 1, (loc, query)-> {
              query.addConditions(Tables.EH_GROUPS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
@@ -656,6 +680,8 @@ public class GroupServiceImpl implements GroupService {
              }
              if(!StringUtils.isEmpty(cmd.getPrivateFlag()))
             	 query.addConditions(Tables.EH_GROUPS.PRIVATE_FLAG.eq(cmd.getPrivateFlag()));
+
+             query.addConditions(Tables.EH_GROUPS.CLUB_TYPE.eq(cmd.getClubType()));
              
              return query;
          });
@@ -918,6 +944,11 @@ public class GroupServiceImpl implements GroupService {
         
         User operator = UserContext.current().getUser();
         long operatorId = operator.getId();
+
+        //妹的，老客户有没有参数，满世界都要写这种判断 add by yanjun 20171107
+        if(cmd.getClubType() == null){
+            cmd.setClubType(ClubType.NORMAL.getCode());
+        }
         
         List<GroupDTO> groupDtoList = new ArrayList<GroupDTO>();
         
@@ -927,26 +958,35 @@ public class GroupServiceImpl implements GroupService {
         if(size > 0) {
             for(UserGroup userGroup : userGroupList) {
                 tmpGroup = groupProvider.findGroupById(userGroup.getGroupId());
+
+                //加这一句，把后面的不等于null都删掉  add by yanjun 20171108
+                if(tmpGroup == null){
+                    LOGGER.error("The group is not found, userId=" + operatorId + ", groupId=" + userGroup.getGroupId());
+                    continue;
+                }
+
                 // 过滤掉意见反馈圈 by lqs 20160416
-                if(tmpGroup != null && tmpGroup.getOwningForumId() != null && tmpGroup.getOwningForumId().longValue() == ForumConstants.FEEDBACK_FORUM) {
+                if(tmpGroup.getOwningForumId() != null && tmpGroup.getOwningForumId().longValue() == ForumConstants.FEEDBACK_FORUM) {
+                    continue;
+                }
+
+                // 判断行业协会或者俱乐部  add by yanjun 20171107
+                if(ClubType.fromCode(cmd.getClubType()) != ClubType.fromCode(tmpGroup.getClubType())){
                     continue;
                 }
                 // 且这个成员在这个已经审批通过了, add by tt, 20161112
-                if(tmpGroup != null && Byte.valueOf(GroupPrivacy.PUBLIC.getCode()).equals(tmpGroup.getPrivateFlag()) 
+                if(Byte.valueOf(GroupPrivacy.PUBLIC.getCode()).equals(tmpGroup.getPrivateFlag())
                 		&& Byte.valueOf(GroupAdminStatus.ACTIVE.getCode()).equals(tmpGroup.getStatus())
                 		&& GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.ACTIVE) {
                 	groupDtoList.add(toGroupDTO(operatorId, tmpGroup));
                 } 
                 // 审核中的俱乐部也要显示，add by tt, 20161103
-                else if (tmpGroup != null && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(tmpGroup.getPrivateFlag()) 
+                else if (GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(tmpGroup.getPrivateFlag())
                 		&& GroupAdminStatus.INACTIVE == GroupAdminStatus.fromCode(tmpGroup.getStatus()) 
                 		&& ApprovalStatus.WAITING_FOR_APPROVING == ApprovalStatus.fromCode(tmpGroup.getApprovalStatus())
                 		&& operatorId == tmpGroup.getCreatorUid().longValue()) {
                 	groupDtoList.add(toGroupDTO(operatorId, tmpGroup));
 				}
-                else {
-                    LOGGER.error("The group is not found, userId=" + operatorId + ", groupId=" + userGroup.getGroupId());
-                }
             }
         }
         
@@ -1140,6 +1180,10 @@ public class GroupServiceImpl implements GroupService {
         Long userId = user.getId();
         
         Long groupId = cmd.getGroupId();
+        //以前业务会传这个字段，新业务可能不传，后面加入行业协会发消息会用到这个字段，不能为null   add by yanjun 20171113
+        if(cmd.getRequestText() ==null){
+            cmd.setRequestText("");
+        }
         Group group = checkGroupParameter(groupId, userId, "requestToJoinGroup");
         
     	GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(groupId, EntityType.USER.getCode(), user.getId());
@@ -1181,6 +1225,13 @@ public class GroupServiceImpl implements GroupService {
                 member.setPhonePrivateFlag(GroupMemberPhonePrivacy.PUBLIC.getCode());
             }
 
+            //行业协会需要增加额外表单 add by yanjun 20171108
+            if(GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator())
+                    && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())
+                    && ClubType.fromCode(group.getClubType()) == ClubType.GUILD){
+                addGuildApply(cmd, member, userId);
+            }
+
             // send notifications to applicant and other members
             if (needNotify) {
             	if(GroupJoinPolicy.fromCode(group.getJoinPolicy()) == GroupJoinPolicy.FREE) {
@@ -1211,13 +1262,39 @@ public class GroupServiceImpl implements GroupService {
                 // 在后台俱乐部成员要显示手机号 #11814 update by xq.tian  2017/06/28
                 member.setPhonePrivateFlag(GroupMemberPhonePrivacy.PUBLIC.getCode());
             	groupProvider.updateGroupMember(member);
+
+                //行业协会需要增加额外表单 add by yanjun 20171108
+                if(ClubType.fromCode(group.getClubType()) == ClubType.GUILD){
+                    addGuildApply(cmd, member, userId);
+                }
+
             	if (needNotify) {
             		sendGroupNotificationForReqToJoinGroupWaitingApproval(group, member);
 				}
 			}
             
         }
+
+
     }
+
+    //行业协会需要增加额外表单
+    private void addGuildApply(RequestToJoinGroupCommand cmd, GroupMember member, Long userId){
+        GuildApply guildApply = ConvertHelper.convert(cmd, GuildApply.class);
+        guildApply.setNamespaceId(UserContext.getCurrentNamespaceId());
+        guildApply.setApplicantUid(userId);
+        guildApply.setGroupMemberId(member.getId());
+
+        GuildApply oldGuildApply = groupProvider.findGuildApplyByGroupMemberId(member.getId());
+        if(oldGuildApply != null){
+            guildApply.setId(oldGuildApply.getId());
+            guildApply.setUuid(oldGuildApply.getUuid());
+            groupProvider.updateGuildApply(guildApply);
+        }else {
+            groupProvider.createGuildApply(guildApply);
+        }
+    }
+
     
     @Override
     public void requestToJoinGroupByQRCode(RequestToJoinGroupCommand cmd) {
@@ -1531,7 +1608,7 @@ public class GroupServiceImpl implements GroupService {
         case WAITING_FOR_ACCEPTANCE:
             deletePendingGroupMember(operatorUid, member);
             member.setMemberStatus(GroupMemberStatus.REJECT.getCode());
-            addGroupMemberLog(member, group);
+            addGroupMemberLog(member, group, cmd.getRejectText());
             
             GroupMember inviter = this.groupProvider.findGroupMemberByMemberInfo(groupId, 
                 EntityType.USER.getCode(), member.getInviterUid());
@@ -1548,7 +1625,7 @@ public class GroupServiceImpl implements GroupService {
         }
     }
     
-    private void addGroupMemberLog(GroupMember member, Group group) {
+    private void addGroupMemberLog(GroupMember member, Group group, String rejectText) {
         GroupMemberLog memberLog = ConvertHelper.convert(member, GroupMemberLog.class);
         memberLog.setNamespaceId(group.getNamespaceId());
         memberLog.setMemberStatus(member.getMemberStatus());
@@ -1559,6 +1636,7 @@ public class GroupServiceImpl implements GroupService {
         memberLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         memberLog.setCommunityId(group.getFamilyCommunityId());
         memberLog.setAddressId(group.getFamilyAddressId());
+        memberLog.setRejectText(rejectText);
         groupMemberLogProvider.createGroupMemberLog(memberLog);
 	}
 
@@ -1571,8 +1649,13 @@ public class GroupServiceImpl implements GroupService {
         Long groupId = cmd.getGroupId();
         Group group = checkGroupParameter(groupId, operatorUid, tag);
 
-        checkGroupPrivilege(operator.getId(), groupId, PrivilegeConstants.GroupApproveMember);
-        
+        //行业协会做特殊处理，超级管理员也可以审核
+        if(GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag()) && ClubType.GUILD == ClubType.fromCode(group.getClubType())){
+            checkGroupPrivilegeForGuild(operator.getId(), groupId, PrivilegeConstants.GroupApproveMember, cmd.getOrganizationId());
+        }else {
+            checkGroupPrivilege(operator.getId(), groupId, PrivilegeConstants.GroupApproveMember);
+        }
+
         Long userId = cmd.getUserId();
         GroupMember member = checkGroupMemberParameter(group, operatorUid, userId, tag);
         
@@ -1606,7 +1689,7 @@ public class GroupServiceImpl implements GroupService {
             break;
         }
     }
-    
+
     @Override
     public void rejectJoinGroupRequest(RejectJoinGroupRequestCommand cmd) {
     	User operator = UserContext.current().getUser();
@@ -1616,7 +1699,12 @@ public class GroupServiceImpl implements GroupService {
     	Long groupId = cmd.getGroupId();
     	Group group = checkGroupParameter(groupId, operatorUid, tag);
 
-        checkGroupPrivilege(operator.getId(), groupId, PrivilegeConstants.GroupRejectMember);
+        //行业协会做特殊处理，超级管理员也可以审核
+        if(GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag()) && ClubType.GUILD == ClubType.fromCode(group.getClubType())){
+            checkGroupPrivilegeForGuild(operator.getId(), groupId, PrivilegeConstants.GroupApproveMember, cmd.getOrganizationId());
+        }else {
+            checkGroupPrivilege(operator.getId(), groupId, PrivilegeConstants.GroupRejectMember);
+        }
         
         Long userId = cmd.getUserId();
         GroupMember member = checkGroupMemberParameter(group, operatorUid, userId, tag);
@@ -1634,11 +1722,11 @@ public class GroupServiceImpl implements GroupService {
         case WAITING_FOR_APPROVAL:
             deletePendingGroupMember(operatorUid, member);
             member.setMemberStatus(GroupMemberStatus.REJECT.getCode());
-            addGroupMemberLog(member, group);
+            addGroupMemberLog(member, group, cmd.getRejectText());
 
             GroupMember rejecter = this.groupProvider.findGroupMemberByMemberInfo(groupId, 
                 EntityType.USER.getCode(), operatorUid);
-            sendGroupNotificationForRejectJoinGroupRequest(group, rejecter, member);
+            sendGroupNotificationForRejectJoinGroupRequest(group, rejecter, member, cmd.getRejectText());
             break;
         default:
             LOGGER.error("Group member is not in waiting approval state, operatorUid=" + operatorUid + ", groupId=" + groupId 
@@ -1715,10 +1803,22 @@ public class GroupServiceImpl implements GroupService {
         case ACTIVE:
             Long memberRole = member.getMemberRole();
             if(memberRole != null && memberRole.longValue() == Role.ResourceCreator) {
+
+                int code = GroupServiceErrorCode.ERROR_GROUP_CREATOR_REVOKED_NOT_ALLOW;
+
+                //俱乐部和行业协会使用自己的文案  add by yanjun 20171115
+                if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+                    if(ClubType.GUILD == ClubType.fromCode(group.getClubType())){
+                        code = GroupServiceErrorCode.ERROR_GROUP_CREATOR_REVOKED_NOT_ALLOW_FOR_GUILD;
+                    }else {
+                        code = GroupServiceErrorCode.ERROR_GROUP_CREATOR_REVOKED_NOT_ALLOW_FOR_CLUB;
+                    }
+                }
+
                 LOGGER.error("Creator can't be revoked from the group, userId=" + userId 
                     + ", groupId=" + groupId + ", memberId=" + userId + ", memberRole=" + memberRole);
-                throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, 
-                    GroupServiceErrorCode.ERROR_GROUP_CREATOR_REVOKED_NOT_ALLOW, 
+                throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE,
+                        code,
                         "Creator can't be revoked from the group");
             } else {
                 deleteActiveGroupMember(userId, member, cmd.getRevokeText());
@@ -1926,7 +2026,27 @@ public class GroupServiceImpl implements GroupService {
 //				query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.ne(group.getCreatorUid()));
 //			}
 //			query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ROLE.asc());
+
 			Long from = pageAnchor * pageSize;
+
+            //俱乐部删除的成员在groupmember中已经不存在，被放到groupmemberlog中，现在只能去log表查了
+            // 此接口返回的数据是GroupMemberDTO，实际上在groupMember中已经不存在，因此此数据仅用于展现不可用于其他逻辑  add by yanjun 20171114
+            if(GroupMemberStatus.REJECT == GroupMemberStatus.fromCode(cmd.getStatus())){
+                List<GroupMemberLog> list = groupMemberLogProvider.listGroupMemberLogByGroupId(cmd.getGroupId(), cmd.getKeyword(), from, pageSize+1);
+                if(list.size() > pageSize) {
+                    list.remove(list.size() - 1);
+                    nextPageAnchor = pageAnchor + 1;
+                }
+
+                List<GroupMemberDTO> dtos = getGroupMemberDtoFromLog(list);
+
+                ListMemberCommandResponse response = new ListMemberCommandResponse();
+                response.setMembers(dtos);
+                response.setNextPageAnchor(nextPageAnchor);
+                return response;
+            }
+
+
             boolean includeCreator = TrueOrFalseFlag.fromCode(cmd.getIncludeCreator()) == TrueOrFalseFlag.TRUE;
             members = groupProvider.listPublicGroupMembersByStatus(
                     cmd.getGroupId(), cmd.getKeyword(), cmd.getStatus(),
@@ -1965,6 +2085,47 @@ public class GroupServiceImpl implements GroupService {
         }
         return new ListMemberCommandResponse(nextPageAnchor, memberDtos);
     }
+
+    private List<GroupMemberDTO> getGroupMemberDtoFromLog(List<GroupMemberLog> listLog){
+
+        if(listLog == null || listLog.size() ==0){
+            return null;
+        }
+
+        List<GroupMemberDTO> dtos = new ArrayList<>();
+        for(GroupMemberLog log: listLog){
+            GroupMemberDTO dto = ConvertHelper.convert(log, GroupMemberDTO.class);
+            dto.setRejectTime(log.getApproveTime());
+            dto.setId(log.getGroupMemberId());
+
+            User user = userProvider.findUserById(log.getMemberId());
+            if(user != null){
+                dto.setGender(user.getGender());
+                dto.setMemberNickName(user.getNickName());
+            }
+
+            UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(log.getMemberId(), IdentifierType.MOBILE.getCode());
+            if(userIdentifier != null){
+                dto.setCellPhone(userIdentifier.getIdentifierToken());
+            }
+
+            Group group = groupProvider.findGroupById(dto.getGroupId());
+            //行业协会加入申请时的信息，包括企业等  add by yanjun 20171107
+            if(ClubType.fromCode(group.getClubType()) == ClubType.GUILD){
+                GuildApply guildApply = groupProvider.findGuildApplyByGroupMemberId(log.getGroupMemberId());
+                GuildApplyDTO guildApplyDTO = ConvertHelper.convert(guildApply, GuildApplyDTO.class);
+                populateGuildApplyDTO(guildApplyDTO);
+                dto.setGuildApplyDTO(guildApplyDTO);
+            }
+
+            dtos.add(dto);
+
+        }
+        return dtos;
+
+
+    }
+
     
     @Override
     public void requestToBeAdmin(RequestAdminRoleCommand cmd) {
@@ -2605,6 +2766,24 @@ public class GroupServiceImpl implements GroupService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, 
                     "Insufficient privilege");
     }
+
+    //给行业协会开一个小门，超级管理员也可以审核
+    private void checkGroupPrivilegeForGuild(long uid, long groupId, long privilege, Long organizationId) {
+        ResourceUserRoleResolver resolver = PlatformContext.getComponent(EntityType.GROUP.getCode());
+        List<Long> roles = resolver.determineRoleInResource(uid, groupId, EntityType.GROUP.getCode(), groupId);
+        if(this.aclProvider.checkAccess(EntityType.GROUP.getCode(), groupId, EntityType.USER.getCode(), uid, privilege,
+                roles)){
+           return;
+        }
+
+        SystemUserPrivilegeMgr sysResolver = PlatformContext.getComponent("SystemUser");
+        boolean result = sysResolver.checkSuperAdmin(uid, organizationId);
+        if (!result) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
+
+    }
     
     private void populateGroupDTOs(long userId, List<GroupDTO> groups) {
         if(groups != null) {
@@ -2665,6 +2844,9 @@ public class GroupServiceImpl implements GroupService {
                             + ", groupMember=" + groupMember, e);
                 }
             }
+
+            groupMember.setGender(user.getGender());
+            groupMember.setUserNickName(user.getNickName());
         } else {
             LOGGER.error("The user related to the member not existed, userId=" + userId
                     + ", memberId=" + groupMember.getMemberId() + ", groupMember=" + groupMember);
@@ -2705,6 +2887,14 @@ public class GroupServiceImpl implements GroupService {
                     }
                 }
             }
+        }
+
+        //行业协会加入申请时的信息，包括企业等  add by yanjun 20171107
+        if(ClubType.fromCode(group.getClubType()) == ClubType.GUILD){
+            GuildApply guildApply = groupProvider.findGuildApplyByGroupMemberId(groupMember.getId());
+            GuildApplyDTO guildApplyDTO = ConvertHelper.convert(guildApply, GuildApplyDTO.class);
+            populateGuildApplyDTO(guildApplyDTO);
+            groupMember.setGuildApplyDTO(guildApplyDTO);
         }
     }
     
@@ -2795,8 +2985,18 @@ public class GroupServiceImpl implements GroupService {
         memberInfoToGroupDTO(operatorId, groupDto, group);
 
         populateGroupDTO(operatorId, groupDto);
+
+        groupDto.setDescriptionUrl(getDescriptionUrl(group.getId()));
         
         return groupDto;
+    }
+
+
+    private String getDescriptionUrl(Long id){
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String homeUrl = configProvider.getValue(namespaceId, ConfigConstants.HOME_URL, "");
+        String descriptionUrl = configProvider.getValue(namespaceId, ConfigConstants.CLUB_DESCRIPTION_URL, "");
+        return homeUrl + descriptionUrl + "?groupId=" + id;
     }
     
     private String getShareUrl(Group group) {
@@ -3367,9 +3567,32 @@ public class GroupServiceImpl implements GroupService {
                 }
             map.put("userName", userName);
             String locale = user.getLocale();
-            
+
             // send notification to who is requesting to join the group
             String scope = GroupNotificationTemplateCode.SCOPE;
+
+            //俱乐部和行业协会使用自己的文案  add by yanjun 20171115
+            if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+
+                int code;
+                map.put("groupName", group.getName());
+                if (ClubType.GUILD == ClubType.fromCode(group.getClubType())) {
+                    code = GroupNotificationTemplateCode.GROUP_MEMBER_JOIN_FREE_FOR_GUILD;
+                } else {
+                    code = GroupNotificationTemplateCode.GROUP_MEMBER_JOIN_FREE_FOR_CLUB;
+                }
+
+                String notifyTextForAdmin = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+                List<Long> includeList = getGroupAdminIncludeList(group.getId(), member.getMemberId(), null);
+                if(includeList.size() > 0) {
+                    sendGroupNotification(group.getId(), includeList, null, notifyTextForAdmin, null, null);
+                }
+
+                return;
+
+            }
+
+
             int code = GroupNotificationTemplateCode.GROUP_MEMBER_PUBLIC_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
             sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
@@ -3407,10 +3630,12 @@ public class GroupServiceImpl implements GroupService {
         if(group.getPrivateFlag().equals(GroupPrivacy.PRIVATE.getCode())) {
             this.sendGroupNotificationPrivateForReqToJoinGroupFreely(group, member);
         } else {
-        	//加入俱乐部时，如果不需要审核，不发消息，add by tt, 20161104
-        	if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
-				return;
-			}
+
+            //产品要求需要发消息   add by yanjun 20171115
+//        	//加入俱乐部时，如果不需要审核，不发消息，add by tt, 20161104
+//        	if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+//        	    return;
+//			}
             this.sendGroupNotificationPublicForReqToJoinGroupFreely(group, member);
         }
     }
@@ -3439,8 +3664,17 @@ public class GroupServiceImpl implements GroupService {
             code = GroupNotificationTemplateCode.GROUP_AUTH_JOIN_REQ_FOR_OPERATOR;
             // 如果是俱乐部，则按以下模板发送消息，add by tt, 20161104
             if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
-				map.put("reason", member.getRequestorComment());
-				code = GroupNotificationTemplateCode.GROUP_MEMBER_TO_ADMIN_WHEN_REQUEST_TO_JOIN;
+                if(ClubType.GUILD == ClubType.fromCode(group.getClubType())){
+                    code = GroupNotificationTemplateCode.GROUP_MEMBER_TO_ADMIN_WHEN_REQUEST_TO_JOIN_FOR_GUILD;
+                    GuildApply guildApply = groupProvider.findGuildApplyByGroupMemberId(member.getId());
+                    map.put("userName", guildApply.getName());
+                    map.put("organizationName", guildApply.getOrganizationName());
+                }else {
+                    map.put("reason", member.getRequestorComment());
+                    code = GroupNotificationTemplateCode.GROUP_MEMBER_TO_ADMIN_WHEN_REQUEST_TO_JOIN;
+                }
+
+
 			}
             String notifyTextForAdmin = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
             List<Long> includeList = getGroupAdminIncludeList(group.getId(), member.getMemberId(), null);
@@ -3448,6 +3682,18 @@ public class GroupServiceImpl implements GroupService {
 
                 QuestionMetaObject metaObject = createGroupQuestionMetaObject(group, member, null);
                 metaObject.setRequestInfo(notifyTextForAdmin);
+
+                //在信息中增加审批信息 add by yanjun 20171108
+                GuildApply guildApply = groupProvider.findGuildApplyByGroupMemberId(member.getId());
+                GuildApplyDTO guildApplyDTO = ConvertHelper.convert(guildApply, GuildApplyDTO.class);
+                populateGuildApplyDTO(guildApplyDTO);
+                metaObject.setJsonInfo(StringHelper.toJsonString(guildApplyDTO));
+
+                if(GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator())
+                        && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())
+                        && ClubType.GUILD == ClubType.fromCode(group.getClubType())){
+                    metaObject.setDetailType(DetailType.GUILD.getCode());
+                }
 
                 // 下面的应该写错了，这里不影响以前逻辑的情况下，把俱乐部的metaObjectType换成GROUP_REQUEST_TO_JOIN，add by tt, 20161104
                 if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
@@ -3670,6 +3916,11 @@ public class GroupServiceImpl implements GroupService {
             
             String scope = GroupNotificationTemplateCode.SCOPE;
             int code = GroupNotificationTemplateCode.GROUP_MEMBER_APPROVE_REQUEST_TO_JOIN;
+            if(ClubType.GUILD == ClubType.fromCode(group.getClubType())){
+                code = GroupNotificationTemplateCode.GROUP_MEMBER_APPROVE_REQUEST_TO_JOIN_FOR_GUILD;
+                GuildApply guildApply = groupProvider.findGuildApplyByGroupMemberId(requestor.getId());
+                map.put("organizationName", guildApply.getOrganizationName());
+            }
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
             sendGroupNotificationToIncludeUser(group.getId(), requestor.getMemberId(), notifyTextForApplicant);
     		
@@ -3700,7 +3951,7 @@ public class GroupServiceImpl implements GroupService {
         sendGroupNotificationToExcludeUsers(group.getId(), opeartor.getMemberId(), requestor.getMemberId(), notifyTextForOther);
     }
     
-    private void sendGroupNotificationForRejectJoinGroupRequest(Group group, GroupMember opeartor, GroupMember requestor) {
+    private void sendGroupNotificationForRejectJoinGroupRequest(Group group, GroupMember opeartor, GroupMember requestor, String rejectText) {
         if(opeartor == null || requestor == null) {
             LOGGER.error("The opeartor or requestor should not be null, opeartor=" + opeartor + ", requestor=" + requestor);
             return;
@@ -3713,6 +3964,14 @@ public class GroupServiceImpl implements GroupService {
             
             String scope = GroupNotificationTemplateCode.SCOPE;
             int code = GroupNotificationTemplateCode.GROUP_MEMBER_REJECT_REQUEST_TO_JOIN;
+
+            if(ClubType.GUILD == ClubType.fromCode(group.getClubType())){
+                code = GroupNotificationTemplateCode.GROUP_MEMBER_REJECT_REQUEST_TO_JOIN_FOR_GUILD;
+                GuildApply guildApply = groupProvider.findGuildApplyByGroupMemberId(requestor.getId());
+                map.put("organizationName", guildApply.getOrganizationName());
+                map.put("rejectText", rejectText);
+            }
+
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
             sendGroupNotificationToIncludeUser(group.getId(), requestor.getMemberId(), notifyTextForApplicant);
     		
@@ -3797,9 +4056,26 @@ public class GroupServiceImpl implements GroupService {
         
         // send notification to all members in the group
         int code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETE_MEMBER;
+
+        //俱乐部和行业协会使用自己的文案
+        if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+
+            if(ClubType.GUILD == ClubType.fromCode(group.getClubType())){
+                code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETE_MEMBER_FOR_GUILD;
+            }else {
+                code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETE_MEMBER_FOR_CLUB;
+            }
+
+        }
+
         String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
         sendMessageToUser(member.getMemberId(), notifyTextForOther, null);
-        
+
+        //俱乐部和行业协会不在发送人数有变化的信息 add by yanjun 20171115
+        if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+            return;
+        }
+
         code = GroupNotificationTemplateCode.GROUP_MEMBER_PUBLIC_MEMBER_CHANGE;
         notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
         
@@ -4148,6 +4424,12 @@ public class GroupServiceImpl implements GroupService {
                 }
             }
             metaObject.setRequestId(requestor.getId());
+
+            //增加电话信息 add by yanjun 20171114
+            UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(requestor.getMemberId(), IdentifierType.MOBILE.getCode());
+            if(userIdentifier != null){
+                metaObject.setRequestorPhone(userIdentifier.getIdentifierToken());
+            }
         }
         
         if(target != null) {
@@ -4317,6 +4599,20 @@ public class GroupServiceImpl implements GroupService {
        
         String scope = GroupNotificationTemplateCode.SCOPE;
         int code = GroupNotificationTemplateCode.GROUP_DELETE;
+
+
+        //俱乐部和行业协会使用自己的文案
+        if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+
+            if(ClubType.GUILD == ClubType.fromCode(group.getClubType())){
+                code = GroupNotificationTemplateCode.GROUP_DELETE_FOR_GUILD;
+            }else {
+                code = GroupNotificationTemplateCode.GROUP_DELETE_FOR_CLUB;
+            }
+
+        }
+
+
 //        int code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETE_MEMBER;
 //        //如果是解散群聊，提示普通人${userName}已删除群聊“${groupName}”，update by tt, 20160811
 //        if(GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PRIVATE){
@@ -4792,6 +5088,27 @@ public class GroupServiceImpl implements GroupService {
 
         String scope = GroupNotificationTemplateCode.SCOPE;
         int code = GroupNotificationTemplateCode.GROUP_MEMBER_LEAVE;
+
+        //俱乐部和行业协会使用自己的文案
+        if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+
+            map.put("groupName", group.getName());
+            if (ClubType.GUILD == ClubType.fromCode(group.getClubType())) {
+                code = GroupNotificationTemplateCode.GROUP_MEMBER_LEAVE_FOR_GUILD;
+            } else {
+                code = GroupNotificationTemplateCode.GROUP_MEMBER_LEAVE_FOR_CLUB;
+            }
+
+            String notifyTextForAdmin = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+            List<Long> includeList = getGroupAdminIncludeList(group.getId(), leaveMember.getMemberId(), null);
+            if(includeList.size() > 0) {
+                sendGroupNotification(group.getId(), includeList, null, notifyTextForAdmin, null, null);
+            }
+
+            return;
+
+        }
+
         String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 
         //发送会话内提示时间
@@ -4892,8 +5209,16 @@ public class GroupServiceImpl implements GroupService {
 		if (user == null || user.getId() == null || user.getId().longValue() == 0L) {
 			return new ListUserGroupPostResponse();
 		}
+
+        //妹的，老客户有没有参数，满世界都要写这种判断 add by yanjun 20171107
+        if(cmd.getClubType() == null){
+            cmd.setClubType(ClubType.NORMAL.getCode());
+        }
 		
 		List<GroupDTO> groupList = listUserRelatedGroups();
+
+        groupList = groupList.stream().filter( r  -> ClubType.fromCode(r.getClubType()) == ClubType.fromCode(cmd.getClubType())).collect(Collectors.toList());
+
 		List<Long> forumIdList = groupList.stream().map(g->g.getOwningForumId()).collect(Collectors.toList());
 		
 		ListUserGroupPostResponse response = forumService.listUserGroupPost(VisibilityScope.COMMUNITY, 0L, forumIdList, user.getId(), cmd.getPageAnchor(), cmd.getPageSize());
@@ -5020,7 +5345,7 @@ public class GroupServiceImpl implements GroupService {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"not exist group!");
 			}
-			Integer remainCount = getRemainBroadcastCount(group.getNamespaceId(), group.getId());
+			Integer remainCount = getRemainBroadcastCount(group.getNamespaceId(), group.getId(), group.getClubType());
 			if (remainCount <= 0) {
 				throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_GROUP_BEYOND_BROADCAST_COUNT,
 						"beyond avalable count!");
@@ -5084,6 +5409,7 @@ public class GroupServiceImpl implements GroupService {
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		
 		List<Broadcast> broadcastList = broadcastProvider.listBroadcastByOwner(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getPageAnchor(), pageSize+1);
+		Integer count = broadcastProvider.countBroadcastByOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		Long nextPageAnchor = null;
 		if (broadcastList != null && broadcastList.size() > pageSize) {
 			broadcastList.remove(broadcastList.size()-1);
@@ -5094,7 +5420,7 @@ public class GroupServiceImpl implements GroupService {
 			return toBroadcastDTO(b);
 		}).collect(Collectors.toList());
 		
-		return new ListBroadcastsResponse(resultList, nextPageAnchor);
+		return new ListBroadcastsResponse(resultList, nextPageAnchor, count);
 	}
 	
 	private BroadcastDTO toBroadcastDTO(Broadcast broadcast){
@@ -5119,8 +5445,13 @@ public class GroupServiceImpl implements GroupService {
 		groupSetting.setCreatorUid(UserContext.current().getUser().getId());
 		groupSetting.setUpdateTime(groupSetting.getCreateTime());
 		groupSetting.setOperatorUid(groupSetting.getCreatorUid());
+
+		//妹的，老客户有没有参数，满世界都要写这种判断 add by yanjun 20171107
+		if(cmd.getClubType() == null){
+		    cmd.setClubType(ClubType.NORMAL.getCode());
+        }
 		GroupSetting old = null;
-		if ((old = getGroupSetting(cmd.getNamespaceId())) == null) {
+		if ((old = getGroupSetting(cmd.getNamespaceId(), cmd.getClubType())) == null) {
 			groupSettingProvider.createGroupSetting(groupSetting);
 		}else {
 			groupSetting.setCreateTime(old.getCreateTime());
@@ -5138,17 +5469,22 @@ public class GroupServiceImpl implements GroupService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters");
 		}
-		return getGroupParameters(cmd.getNamespaceId());
+
+        //妹的，老客户有没有参数，满世界都要写这种判断 add by yanjun 20171107
+        if(cmd.getClubType() == null){
+            cmd.setClubType(ClubType.NORMAL.getCode());
+        }
+		return getGroupParameters(cmd.getNamespaceId(), cmd.getClubType());
 	}
 
-	private GroupSetting getGroupSetting(Integer namespaceId){
-		return groupSettingProvider.findGroupSettingByNamespaceId(namespaceId);
+	private GroupSetting getGroupSetting(Integer namespaceId, Byte clubType){
+		return groupSettingProvider.findGroupSettingByNamespaceId(namespaceId, clubType);
 	}
 	
-	private GroupParametersResponse getGroupParameters(Integer namespaceId) {
-		GroupSetting groupSetting = getGroupSetting(namespaceId);
+	private GroupParametersResponse getGroupParameters(Integer namespaceId, Byte clubType) {
+		GroupSetting groupSetting = getGroupSetting(namespaceId, clubType);
 		if (groupSetting == null) {
-			return new GroupParametersResponse(namespaceId, TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), 1);
+			return new GroupParametersResponse(namespaceId, TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), 1, clubType);
 		}
 		return ConvertHelper.convert(groupSetting, GroupParametersResponse.class);
 	}
@@ -5268,6 +5604,11 @@ public class GroupServiceImpl implements GroupService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters");
 		}
+
+        //妹的，老客户有没有参数，满世界都要写这种判断 add by yanjun 20171107
+        if(cmd.getClubType() == null){
+            cmd.setClubType(ClubType.NORMAL.getCode());
+        }
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -5288,7 +5629,9 @@ public class GroupServiceImpl implements GroupService {
 				query.addConditions(Tables.EH_GROUPS.APPROVAL_STATUS.eq(ApprovalStatus.REJECTION.getCode()));
            		query.addConditions(Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.INACTIVE.getCode()));
 			}
-            
+
+			query.addConditions(Tables.EH_GROUPS.CLUB_TYPE.eq(cmd.getClubType()));
+
             return query;
         });
         
@@ -5403,12 +5746,14 @@ public class GroupServiceImpl implements GroupService {
 	                ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters, groupId"+cmd.getGroupId());
 		}
 		checkGroupExists(userId, cmd.getGroupId());
+
+		Group group = groupProvider.findGroupById(cmd.getGroupId());
 		
-		return new GetRemainBroadcastCountResponse(getRemainBroadcastCount(cmd.getNamespaceId(), cmd.getGroupId()));
+		return new GetRemainBroadcastCountResponse(getRemainBroadcastCount(cmd.getNamespaceId(), cmd.getGroupId(), ClubType.fromCode(group.getClubType()).getCode()));
 	}
 
-	private Integer getRemainBroadcastCount(Integer namespaceId, Long groupId) {
-		Integer availableCount = getGroupParameters(namespaceId).getBroadcastCount();
+	private Integer getRemainBroadcastCount(Integer namespaceId, Long groupId, Byte clubType) {
+		Integer availableCount = getGroupParameters(namespaceId, clubType).getBroadcastCount();
 		
 		Integer usedCount = broadcastProvider.selectBroadcastCountToday(namespaceId, BroadcastOwnerType.GROUP.getCode(), groupId);
 		
@@ -5522,4 +5867,81 @@ public class GroupServiceImpl implements GroupService {
             broadcastProvider.deleteBroadcast(broadcast);
         }
     }
+
+    @Override
+    public GuildApplyDTO findGuildApply(FindGuildApplyCommand cmd) {
+        GuildApply guildApply = groupProvider.findGuildApplyById(cmd.getId());
+        GuildApplyDTO dto = ConvertHelper.convert(guildApply, GuildApplyDTO.class);
+        populateGuildApplyDTO(dto);
+        return dto;
+    }
+
+    @Override
+    public GuildApplyDTO findGuildApplyByGroupMemberId(FindGuildApplyByGroupMemberIdCommand cmd) {
+        GuildApply guildApply = groupProvider.findGuildApplyByGroupMemberId(cmd.getGroupMemberId());
+        return ConvertHelper.convert(guildApply, GuildApplyDTO.class);
+    }
+
+    @Override
+    public IndustryTypeDTO findIndustryType(FindIndustryTypeCommand cmd) {
+        IndustryType industryType = groupProvider.findIndustryTypeById(cmd.getId());
+        return ConvertHelper.convert(industryType, IndustryTypeDTO.class);
+    }
+
+    @Override
+    public ListIndustryTypesResponse listIndustryTypes(ListIndustryTypesCommand cmd) {
+        ListIndustryTypesResponse response = new ListIndustryTypesResponse();
+        List<IndustryType> list = groupProvider.listIndustryTypes(cmd.getNamespaceId());
+        if(list != null){
+            List<IndustryTypeDTO> dtos =  list.stream().map(r-> ConvertHelper.convert(r, IndustryTypeDTO.class))
+                    .collect(Collectors.toList());
+            response.setDtos(dtos);
+        }
+        return response;
+    }
+
+    @Override
+    public ListGuildAppliesResponse listGuildApplies(ListGuildAppliesCommand cmd) {
+        ListGuildAppliesResponse response = new ListGuildAppliesResponse();
+
+        List<GuildApply> list = groupProvider.listGuildApplies(cmd.getNamespaceId(), cmd.getGroupId(), cmd.getApplicantUid());
+        if(list != null){
+            List<GuildApplyDTO> dtos =  list.stream().map(r-> {
+                GuildApplyDTO dto = ConvertHelper.convert(r, GuildApplyDTO.class);
+                populateGuildApplyDTO(dto);
+                return dto;
+            }).collect(Collectors.toList());
+            response.setDtos(dtos);
+        }
+        return response;
+    }
+
+    private void populateGuildApplyDTO(GuildApplyDTO dto) {
+	    if(dto == null){
+	        return;
+        }
+        if(dto.getAvatar() != null){
+
+            Long userId = UserContext.currentUserId();
+	        if(userId == null){
+	            userId = dto.getApplicantUid();
+            }
+            String url = contentServerService.parserUri(dto.getAvatar(), EntityType.USER.getCode(), userId);
+            dto.setAvatarUrl(url);
+        }
+
+        Group group = groupProvider.findGroupById(dto.getGroupId());
+
+        if(group != null){
+            dto.setGroupName(group.getName());
+        }
+
+    }
+
+
+
+
+
+
+
 }

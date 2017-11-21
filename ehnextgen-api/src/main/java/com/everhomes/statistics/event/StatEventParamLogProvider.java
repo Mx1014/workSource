@@ -53,4 +53,6 @@ public interface StatEventParamLogProvider {
         GROUP BY subT.v1, subT.v2;
     */
     Map<Map<String, String>, StatEventCountDTO> countParamLogs(Integer namespaceId, String eventName, String eventVersion, List<String> paramKeys, Timestamp minTime, Timestamp maxTime);
+
+    void createStatEventParamLogs(List<StatEventParamLog> paramLogs);
 }

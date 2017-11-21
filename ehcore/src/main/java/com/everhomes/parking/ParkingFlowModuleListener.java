@@ -462,6 +462,8 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
 		dto.setNamespaceId(namespaceId);
 		dto.setServiceName("停车月卡申请");
+		result.add(dto);
+
 		return result;
 	}
 }
