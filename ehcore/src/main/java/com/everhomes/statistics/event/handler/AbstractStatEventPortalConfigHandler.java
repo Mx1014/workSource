@@ -2,9 +2,7 @@
 package com.everhomes.statistics.event.handler;
 
 import com.everhomes.namespace.Namespace;
-import com.everhomes.rest.statistics.event.StatEventPortalConfigType;
-import com.everhomes.rest.statistics.event.StatEventPortalStatType;
-import com.everhomes.rest.statistics.event.StatEventStatTimeInterval;
+import com.everhomes.rest.statistics.event.*;
 import com.everhomes.server.schema.tables.EhStatEventPortalConfigs;
 import com.everhomes.statistics.event.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +43,7 @@ abstract public class AbstractStatEventPortalConfigHandler extends AbstractStatE
     protected PortalItemGroupProvider portalItemGroupProvider;
 
     @Override
-    public List<StatEventStatistic> process(Namespace namespace, StatEvent statEvent, LocalDate statDate, StatEventStatTimeInterval interval) {
+    public List<StatEventStatistic> processStat(Namespace namespace, StatEvent statEvent, LocalDate statDate, StatEventStatTimeInterval interval) {
         Timestamp minTime = Timestamp.valueOf(LocalDateTime.of(statDate, LocalTime.MIN));
         Timestamp maxTime = Timestamp.valueOf(LocalDateTime.of(statDate, LocalTime.MAX));
         Date date = Date.valueOf(statDate);
@@ -109,6 +107,34 @@ abstract public class AbstractStatEventPortalConfigHandler extends AbstractStatE
             statList.add(eventStat);
         }
         return statList;
+    }
+
+    @Override
+    public List<StatEventParamLog> processEventParamLogs(StatEventLog log, Map<String, String> param) {
+        List<StatEventParamLog> paramLogs = new ArrayList<>();
+        for (Map.Entry<String, String> entry : param.entrySet()) {
+            StatEventParam statEventParam = statEventParamProvider.findStatEventParam(log.getEventName(), entry.getKey());
+            if (statEventParam != null) {
+                StatEventParamLog paramLog = new StatEventParamLog();
+                paramLog.setStatus(StatEventCommonStatus.ACTIVE.getCode());
+                paramLog.setSessionId(log.getSessionId());
+                paramLog.setNamespaceId(log.getNamespaceId());
+                paramLog.setEventType(log.getEventType());
+                paramLog.setEventName(log.getEventName());
+                paramLog.setUid(log.getUid());
+                paramLog.setEventLogId(log.getId());
+                paramLog.setParamKey(entry.getKey());
+                paramLog.setEventVersion(log.getEventVersion());
+                paramLog.setUploadTime(log.getUploadTime());
+                if (statEventParam.getParamType() == StatEventParamType.NUMBER.getCode()) {
+                    paramLog.setNumberValue(Integer.valueOf(entry.getValue()));
+                } else {
+                    paramLog.setStringValue(entry.getValue());
+                }
+                paramLogs.add(paramLog);
+            }
+        }
+        return paramLogs;
     }
 
     abstract protected StatEventPortalStatType getStatType();

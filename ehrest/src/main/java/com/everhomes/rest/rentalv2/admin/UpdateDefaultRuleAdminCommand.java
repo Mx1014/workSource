@@ -27,7 +27,9 @@ import com.everhomes.util.StringHelper;
  * <li>rentalStartTime: 最多提前预约时间</li>
  * <li>timeStep: 最短可预约时长</li>
  * <li>timeIntervals: 开放时段</li>
- * <li>beginDate: 开放日期始</li>
+ * <li>dayOpenTime: 每天的开放时间</li>
+ * <li>dayCloseTime: 每天的关闭时间</li>
+ * <li>endDate: 开放日期终</li>
  * <li>endDate: 开放日期终</li>
  * <li>openWeekday: 开放日期，从周日到周六是0123456，开放哪天就在数组传哪天</li>
  * <li>closeDates: 关闭日期</li>
@@ -47,6 +49,7 @@ import com.everhomes.util.StringHelper;
  * <li>halfDayTimeIntervals: 半天时间设置 {@link com.everhomes.rest.rentalv2.admin.TimeIntervalDTO}</li>
  * <li>rentalTypes: 时间单元类型列表 {@link com.everhomes.rest.rentalv2.RentalType}</li>
  * <li>priceRules: 价格策略列表 {@link com.everhomes.rest.rentalv2.admin.PriceRuleDTO}</li>
+ * <li>pricePackages: 套餐价格表{@link com.everhomes.rest.rentalv2.admin.PricePackageDTO}</li>
  * </ul>
  */
 public class UpdateDefaultRuleAdminCommand {
@@ -71,6 +74,8 @@ public class UpdateDefaultRuleAdminCommand {
 	private List<TimeIntervalDTO> timeIntervals;
 	private Long beginDate;
 	private Long endDate;
+	private Double dayOpenTime;
+	private Double dayCloseTime;
 
 	@ItemType(Integer.class)
 	private List<Integer> openWeekday;
@@ -90,6 +95,8 @@ public class UpdateDefaultRuleAdminCommand {
 	private List<Byte> rentalTypes;
 	@ItemType(PriceRuleDTO.class)
 	private List<PriceRuleDTO> priceRules;
+	@ItemType(PricePackageDTO.class)
+	private List<PricePackageDTO> pricePackages;
 //	
 //	@Deprecated
 //	private Byte rentalType;
@@ -259,7 +266,23 @@ public class UpdateDefaultRuleAdminCommand {
 	public void setEndDate(Long endDate) {
 		this.endDate = endDate;
 	}
- 
+
+	public Double getDayOpenTime() {
+		return dayOpenTime;
+	}
+
+	public void setDayOpenTime(Double dayOpenTime) {
+		this.dayOpenTime = dayOpenTime;
+	}
+
+	public Double getDayCloseTime() {
+		return dayCloseTime;
+	}
+
+	public void setDayCloseTime(Double dayCloseTime) {
+		this.dayCloseTime = dayCloseTime;
+	}
+
 	public List<Integer> getOpenWeekday() {
 		return openWeekday;
 	}
@@ -343,7 +366,16 @@ public class UpdateDefaultRuleAdminCommand {
 	public void setRentalEndTimeFlag(Byte rentalEndTimeFlag) {
 		this.rentalEndTimeFlag = rentalEndTimeFlag;
 	}
-//
+
+	public List<PricePackageDTO> getPricePackages() {
+		return pricePackages;
+	}
+
+	public void setPricePackages(List<PricePackageDTO> pricePackages) {
+		this.pricePackages = pricePackages;
+	}
+
+	//
 //	public BigDecimal getOrgMemberWorkdayPrice() {
 //		return orgMemberWorkdayPrice;
 //	}

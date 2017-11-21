@@ -7,27 +7,30 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * <ul>返回值:
- * <li>broadcasts: 广播消息列表</li>
- * <li>nextPageAnchor:下页锚点</li>
+ * <ul>
+ *     <li>broadcasts: 广播消息列表 {@link com.everhomes.rest.group.BroadcastDTO}</li>
+ *     <li>nextPageAnchor: 下页锚点</li>
+ *     <li>count: count</li>
  * </ul>
  */
 public class ListBroadcastsResponse {
 
 	@ItemType(BroadcastDTO.class)
 	private List<BroadcastDTO> broadcasts;
-	
+
 	private Long nextPageAnchor;
+
+	private Integer count;
 
 	public ListBroadcastsResponse() {
 
 	}
 
-	public ListBroadcastsResponse(List<BroadcastDTO> broadcasts, Long nextPageAnchor) {
+	public ListBroadcastsResponse(List<BroadcastDTO> broadcasts, Long nextPageAnchor, Integer count) {
 		super();
 		this.broadcasts = broadcasts;
 		this.nextPageAnchor = nextPageAnchor;
+		this.count = count;
 	}
 
 	public Long getNextPageAnchor() {
@@ -44,6 +47,14 @@ public class ListBroadcastsResponse {
 
 	public void setBroadcasts(List<BroadcastDTO> broadcasts) {
 		this.broadcasts = broadcasts;
+	}
+
+	public Integer getCount() {
+		return count;
+	}
+
+	public void setCount(Integer count) {
+		this.count = count;
 	}
 
 	@Override

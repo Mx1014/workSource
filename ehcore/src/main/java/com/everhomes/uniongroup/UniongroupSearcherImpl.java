@@ -158,7 +158,7 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
                 }
             }
             this.bulkUpdate(details);
-            LOGGER.info("uniongroupDetails process count: " + details.size());
+            LOGGER.info("uniongroupDetails processStat count: " + details.size());
         }
     }
 

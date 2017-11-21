@@ -3,6 +3,8 @@ package com.everhomes.statistics.event.handler;
 
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.launchpad.Widget;
+import com.everhomes.rest.statistics.event.StatEventCommonStatus;
+import com.everhomes.rest.statistics.event.StatEventParamType;
 import com.everhomes.rest.statistics.event.StatEventPortalStatType;
 import com.everhomes.rest.statistics.event.StatEventStatTimeInterval;
 import com.everhomes.server.schema.tables.EhPortalItemGroups;
@@ -44,14 +46,14 @@ abstract public class AbstractStatEventPortalItemGroupHandler extends AbstractSt
     protected PortalItemGroupProvider portalItemGroupProvider;
 
     @Override
-    public List<StatEventStatistic> process(Namespace namespace, StatEvent statEvent, LocalDate statDate, StatEventStatTimeInterval interval) {
+    public List<StatEventStatistic> processStat(Namespace namespace, StatEvent statEvent, LocalDate statDate, StatEventStatTimeInterval interval) {
         Timestamp minTime = Timestamp.valueOf(LocalDateTime.of(statDate, LocalTime.MIN));
         Timestamp maxTime = Timestamp.valueOf(LocalDateTime.of(statDate, LocalTime.MAX));
         Date date = Date.valueOf(statDate);
 
         List<StatEventParam> params = statEventParamProvider.listParam(statEvent.getEventName(), statEvent.getEventVersion());
 
-        List<StatEventParam> processedParams = getParams(params);
+        List<StatEventParam> processedParams = getGroupByParams(params);
         if (processedParams == null) {
             throw new RuntimeException("processedParams not found");
         }
@@ -117,13 +119,41 @@ abstract public class AbstractStatEventPortalItemGroupHandler extends AbstractSt
         return statList;
     }
 
-    protected abstract String getItemGroup(Map<String, String> paramsToValueMap);
+    @Override
+    public List<StatEventParamLog> processEventParamLogs(StatEventLog log, Map<String, String> param) {
+        List<StatEventParamLog> paramLogs = new ArrayList<>();
+        for (Map.Entry<String, String> entry : param.entrySet()) {
+            StatEventParam statEventParam = statEventParamProvider.findStatEventParam(log.getEventName(), entry.getKey());
+            if (statEventParam != null) {
+                StatEventParamLog paramLog = new StatEventParamLog();
+                paramLog.setStatus(StatEventCommonStatus.ACTIVE.getCode());
+                paramLog.setSessionId(log.getSessionId());
+                paramLog.setNamespaceId(log.getNamespaceId());
+                paramLog.setEventType(log.getEventType());
+                paramLog.setEventName(log.getEventName());
+                paramLog.setUid(log.getUid());
+                paramLog.setEventLogId(log.getId());
+                paramLog.setParamKey(entry.getKey());
+                paramLog.setEventVersion(log.getEventVersion());
+                paramLog.setUploadTime(log.getUploadTime());
+                if (statEventParam.getParamType() == StatEventParamType.NUMBER.getCode()) {
+                    paramLog.setNumberValue(Integer.valueOf(entry.getValue()));
+                } else {
+                    paramLog.setStringValue(entry.getValue());
+                }
+                paramLogs.add(paramLog);
+            }
+        }
+        return paramLogs;
+    }
+
+    protected List<StatEventParam> getGroupByParams(List<StatEventParam> params) {
+        return params;
+    }
 
     abstract protected Widget getWidget();
 
-    abstract protected StatEventStatistic getEventStat(Map<String, String> paramsToValueMap);
+    abstract protected String getItemGroup(Map<String, String> paramsToValueMap);
 
-    protected List<StatEventParam> getParams(List<StatEventParam> params) {
-        return params;
-    }
+    abstract protected StatEventStatistic getEventStat(Map<String, String> paramsToValueMap);
 }

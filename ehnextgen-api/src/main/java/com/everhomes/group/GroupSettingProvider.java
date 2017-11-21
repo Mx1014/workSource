@@ -13,6 +13,6 @@ public interface GroupSettingProvider {
 
 	List<GroupSetting> listGroupSetting();
 
-	GroupSetting findGroupSettingByNamespaceId(Integer namespaceId);
+	GroupSetting findGroupSettingByNamespaceId(Integer namespaceId, Byte clubType);
 
 }

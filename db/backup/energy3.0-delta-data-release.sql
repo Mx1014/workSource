@@ -1,3 +1,15 @@
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('49150', '计划管理', '49100', NULL, 'react:/energy-management/plan-list', '0', '2', '/20000/49100/49150', 'park', '491', '49100', '3', NULL, 'module');
+
+set @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '49150', '', 'EhNamespaces', '0', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '49150', '', 'EhNamespaces', '999967', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '49150', '', 'EhNamespaces', '999970', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '49150', '', 'EhNamespaces', '999975', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '49150', '', 'EhNamespaces', '999988', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '49150', '', 'EhNamespaces', '999992', '2');
+
+
+
 -- 能耗权限细化
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `operator_uid`, `creator_uid`) VALUES(49100,'能耗管理',49100,'/20000/49100','1','2','2','0',NOW(), 1, 1); 
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `operator_uid`, `creator_uid`) VALUES(49110,'表计管理',49100,'/20000/49100/49110','1','3','2','0',NOW(), 1, 1); 
