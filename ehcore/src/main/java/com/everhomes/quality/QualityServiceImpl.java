@@ -1,56 +1,5 @@
 package com.everhomes.quality;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-
-
-import javax.servlet.http.HttpServletResponse;
-
-
-
-import com.everhomes.rest.equipment.*;
-import com.everhomes.rest.quality.*;
-import com.everhomes.rest.quality.ExecuteGroupAndPosition;
-import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
-import com.everhomes.rest.quality.StandardGroupDTO;
-import com.everhomes.rest.quality.TaskCountDTO;
-import com.everhomes.user.UserPrivilegeMgr;
-
-import com.everhomes.rest.equipment.Status;
-import com.everhomes.search.QualityInspectionSampleSearcher;
-import com.everhomes.search.QualityTaskSearcher;
-
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-
-
-
-
-
-
-
-
-
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.RoleAssignment;
 import com.everhomes.community.Community;
@@ -65,39 +14,55 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationJobPosition;
-import com.everhomes.organization.OrganizationJobPositionMap;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.*;
 import com.everhomes.rentalv2.Rentalv2ServiceImpl;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.equipment.ReviewResult;
+import com.everhomes.rest.equipment.Status;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.organization.ListOrganizationContactByJobPositionIdCommand;
-import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.organization.*;
+import com.everhomes.rest.quality.*;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.search.QualityInspectionSampleSearcher;
+import com.everhomes.search.QualityTaskSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.mysql.jdbc.StringUtils;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.net.URL;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -3107,7 +3072,8 @@ public class QualityServiceImpl implements QualityService {
 		Collections.sort(list, new Comparator<Map.Entry<Long, Timestamp>>() {
 			public int compare(Map.Entry<Long, Timestamp> o1,
 							   Map.Entry<Long, Timestamp> o2) {
-				if(o2.getValue().after(o1.getValue()))
+				//change to before fix history tasks order
+				if(o2.getValue().before(o1.getValue()))
 					return 1;
 				return -1;
 			}
@@ -3681,12 +3647,34 @@ public class QualityServiceImpl implements QualityService {
 					}
 
 					scoreGroupDto.setScores(scores);
+					//fix order
+					Double totalScore = 0D;
+					for (ScoreDTO score : scores) {
+						totalScore = totalScore + score.getScore();
+					}
+					scoreGroupDto.setTotalScore(totalScore);
 				}
 				scoresByTarget.add(scoreGroupDto);
 			}
 		}
+		//sort  scoreByTarget
+		List<ScoreGroupByTargetDTO> sortedScoresByTarget = scoresByTarget.stream()
+				.sorted(Comparator.comparing(ScoreGroupByTargetDTO::getTotalScore).reversed())
+				.collect(Collectors.toList());
+		//add orderId for  ScoresByTarget
+		Integer previousOrder = 0;
+		Double total = 0D;
+		for (int i = 0; i < sortedScoresByTarget.size(); i++) {
+			if (total.doubleValue() == sortedScoresByTarget.get(i).getTotalScore().doubleValue() && sortedScoresByTarget.get(i).getTotalScore() != 0) {
+				sortedScoresByTarget.get(i).setOrderId(previousOrder);
+			} else {
+				sortedScoresByTarget.get(i).setOrderId(i + 1);
+				previousOrder++;
+				total = sortedScoresByTarget.get(i).getTotalScore();
+			}
+		}
 
-		response.setScores(scoresByTarget);
+		response.setScores(sortedScoresByTarget);
 		return response;
 	}
 
