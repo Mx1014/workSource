@@ -3675,6 +3675,7 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setProjectName(category.getName());
 			dto.setProjectId(category.getId());
 			dto.setProjectType(EntityType.CHILD_PROJECT.getCode());
+			dto.setProjectId(cmd.getProjectId());
 			List<ResourceCategoryAssignment> buildingCategorys = communityProvider.listResourceCategoryAssignment(category.getId(), namespaceId);
 			List<ProjectDTO> buildingProjects = new ArrayList<>();
 			for (ResourceCategoryAssignment buildingCategory: buildingCategorys) {
