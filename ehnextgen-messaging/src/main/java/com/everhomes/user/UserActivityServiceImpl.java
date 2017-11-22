@@ -26,12 +26,14 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.namespace.NamespacesService;
+import com.everhomes.point.PointService;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.promotion.BizHttpRestCallProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.business.BusinessServiceErrorCode;
 import com.everhomes.rest.common.ActivityListStyleFlag;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
@@ -41,8 +43,10 @@ import com.everhomes.rest.forum.*;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.point.*;
 import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.*;
+import com.everhomes.rest.user.GetUserTreasureResponse;
 import com.everhomes.rest.version.VersionRequestCommand;
 import com.everhomes.rest.version.VersionUrlResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
@@ -162,6 +166,10 @@ public class UserActivityServiceImpl implements UserActivityService {
 
     @Autowired
     private YellowPageProvider yellowPageProvider;
+
+    @Autowired
+    private PointService pointService;
+
     @Override
     public CommunityStatusResponse listCurrentCommunityStatus() {
         User user = UserContext.current().getUser();
@@ -715,6 +723,8 @@ public class UserActivityServiceImpl implements UserActivityService {
             rsp.setBusinessRealm(getBusinessRealm());
             //设置活动列表的默认列表样式, add by tt, 20170116
             rsp.setActivityDefaultListStyle(getActivityDefaultListStyle());
+            rsp.setPoints(0L);
+            rsp.setPointsUrlStatus(TrueOrFalseFlag.FALSE.getCode());
             return rsp;
         }
         //2016-07-29:modify by liujinwen.get orderCount's value like couponCount
@@ -786,10 +796,103 @@ public class UserActivityServiceImpl implements UserActivityService {
         }else{
         	rsp.setShakeOpenDoorNamespace(Byte.parseByte("0"));
         }
-        
         return rsp;
     }
-    
+
+    @Override
+    public GetUserTreasureResponse getUserTreasureV2() {
+        GetUserTreasureResponse rsp = new GetUserTreasureResponse();
+        UserTreasureDTO point = new UserTreasureDTO();
+        point.setCount(0L);
+        point.setStatus(TrueOrFalseFlag.TRUE.getCode());
+        point.setUrlStatus(TrueOrFalseFlag.FALSE.getCode());
+
+        UserTreasureDTO coupon = new UserTreasureDTO();
+        coupon.setCount(0L);
+        coupon.setStatus(TrueOrFalseFlag.TRUE.getCode());
+        coupon.setUrlStatus(TrueOrFalseFlag.FALSE.getCode());
+
+        UserTreasureDTO order = new UserTreasureDTO();
+        order.setCount(0L);
+        order.setStatus(TrueOrFalseFlag.TRUE.getCode());
+        order.setUrlStatus(TrueOrFalseFlag.FALSE.getCode());
+
+        rsp.setCoupon(coupon);
+        rsp.setPoint(point);
+        rsp.setOrder(order);
+
+        if(!userService.isLogon()) {
+            return rsp;
+        }
+
+        User user = UserContext.current().getUser();
+
+        UserProfile couponCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.RECEIVED_COUPON_COUNT);
+        UserProfile orderCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.RECEIVED_ORDER_COUNT);
+
+        if(couponCount != null) {
+            coupon.setCount(NumberUtils.toLong(couponCount.getItemValue(), 0));
+        }
+        if(orderCount != null) {
+            order.setCount(NumberUtils.toLong(orderCount.getItemValue(), 0));
+        }
+
+        coupon.setUrl(getMyCoupon());
+        coupon.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
+
+        order.setUrl(getMyOrderUrl());
+        order.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
+
+        processUserPoint(point);
+
+        return rsp;
+    }
+
+    private void processUserPoint(UserTreasureDTO point) {
+        GetEnabledPointSystemCommand cmd = new GetEnabledPointSystemCommand();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        cmd.setNamespaceId(namespaceId);
+        GetEnabledPointSystemResponse pointSystemResponse = pointService.getEnabledPointSystem(cmd);
+
+        if (pointSystemResponse == null || pointSystemResponse.getSystems() == null || pointSystemResponse.getSystems().size() == 0) {
+            point.setStatus(TrueOrFalseFlag.FALSE.getCode());
+
+
+
+
+            point.setUrl(String.format("http://10.1.10.79/integral-management/build/index.html?systemId=%s&ehnavigatorstyle=2#/home#sign_suffix", 1));
+            point.setStatus(TrueOrFalseFlag.TRUE.getCode());
+            point.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
+            point.setCount(UserContext.currentUserId());
+
+
+
+
+            return;
+        }
+
+        PointSystemDTO system = pointSystemResponse.getSystems().get(0);
+
+        GetUserPointCommand pointCommand = new GetUserPointCommand();
+        pointCommand.setNamespaceId(namespaceId);
+        pointCommand.setUid(UserContext.currentUserId());
+        pointCommand.setSystemId(system.getId());
+        PointScoreDTO userPoint = pointService.getUserPoint(pointCommand);
+        if (userPoint != null) {
+            point.setCount(userPoint.getScore());
+        }
+        String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
+        String pointUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.POINT_MALL_PATH, "");
+        point.setUrl(homeUrl + pointUrl + String.format("?systemId=%s", system.getId()));
+
+        point.setUrl(String.format("http://10.1.10.79/integral-management/build/index.html?systemId=%s&ehnavigatorstyle=2#/home#sign_suffix", 1));
+
+        TrueOrFalseFlag flag = TrueOrFalseFlag.fromCode(system.getPointExchangeFlag());
+        if (flag != null) {
+            point.setUrlStatus(flag.getCode());
+        }
+    }
+
     @Override
 	public ListBusinessTreasureResponse getUserBusinessTreasure() {
     	// 检查是否登陆，没登陆则只返回游客访问的电商url by sfyan 20161009
@@ -1620,7 +1723,6 @@ public class UserActivityServiceImpl implements UserActivityService {
 		}
 		
 	}
-	
 
     public static void main(String[] args) {
         System.out.println(ActivityType.fromString("logon").getCode());

@@ -243,6 +243,7 @@
 
             eh_flow_conditions|eh_flow_condition_expressions|eh_flow_lanes|eh_flow_links|eh_flow_predefined_params|eh_flow_branches|eh_flow_service_types|
             eh_default_charging_items | eh_default_charging_item_properties | eh_payment_notice_config |
+            eh_point_systems | eh_point_modules | eh_point_scores | eh_point_rules | eh_point_logs | eh_point_goods | eh_point_tutorials | eh_point_tutorial_to_point_rule_mappings | eh_point_event_logs |
 
         </includes>
 

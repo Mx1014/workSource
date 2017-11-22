@@ -129,4 +129,6 @@ public interface ConfigConstants {
 
     String PARKING_CAR_VERIFICATION_FLOWCASE_URL = "parking.car.verification.flowCase.url";
 
+    String POINT_MALL_PATH = "point.path";
+
 }

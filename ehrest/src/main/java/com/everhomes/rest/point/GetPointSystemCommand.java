@@ -6,23 +6,13 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
- *     <li>systemId: systemId</li>
- *     <li>uid: 用户ID</li>
+ *     <li>systemId: 配置id</li>
  * </ul>
  */
-public class GetUserPointCommand {
+public class GetPointSystemCommand {
 
     @NotNull
     private Long systemId;
-    private Long uid;
-
-    public Long getUid() {
-        return uid;
-    }
-
-    public void setUid(Long uid) {
-        this.uid = uid;
-    }
 
     public Long getSystemId() {
         return systemId;
