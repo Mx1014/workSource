@@ -12,10 +12,11 @@ CREATE TABLE `eh_me_web_menus` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- added by Janson
 ALTER TABLE `eh_door_access` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT 0 AFTER `id`;
 ALTER TABLE `eh_door_access` ADD COLUMN `display_name` VARCHAR(128) NULL DEFAULT NULL AFTER `name`;
 ALTER TABLE `eh_door_auth` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT 0 AFTER `id`;
-ALTER TABLE `eh_door_auth_level` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT 0 AFTER `id`;
+-- ALTER TABLE `eh_door_auth_level` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT 0 AFTER `id`;
 ALTER TABLE `eh_door_auth_logs` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT 0 AFTER `id`;
 ALTER TABLE `eh_door_auth_command` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT 0 AFTER `id`;
 ALTER TABLE `eh_door_auth_user_permission` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT 0 AFTER `id`;

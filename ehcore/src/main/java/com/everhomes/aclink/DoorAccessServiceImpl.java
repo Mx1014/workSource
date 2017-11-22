@@ -1012,6 +1012,22 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public DoorMessage activatingDoorAccess(DoorAccessActivingCommand cmd) {        
         User user = UserContext.current().getUser();
         cmd.setHardwareId(cmd.getHardwareId().toUpperCase());
+        if(cmd.getDisplayName() == null || cmd.getDisplayName().isEmpty()) {
+            cmd.setDisplayName(cmd.getName());
+        }
+        if(cmd.getDisplayName() == null || cmd.getDisplayName().isEmpty()) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "aclink param error");
+        }
+        if(cmd.getName() == null || cmd.getName().isEmpty()) {
+            String displayName = cmd.getDisplayName();
+            String pinyin = PinYinHelper.getPinYin(displayName);
+            String[] pinyins = pinyin.split("\\s+");
+            pinyin = String.join("", pinyins);
+            if(pinyin.length() > 6) {
+                pinyin = pinyin.substring(0, 6);
+            }
+            cmd.setName(pinyin);
+        }
         
 //        DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getHardwareId());
 //        if(doorAccess != null && !doorAccess.getStatus().equals(DoorAccessStatus.ACTIVING.getCode())) {
@@ -1069,6 +1085,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 doorAcc.setCreatorUserId(user.getId());
                 doorAcc.setAesIv(aesIv);
                 doorAcc.setGroupid(cmd.getGroupId());
+                doorAcc.setDisplayName(cmd.getDisplayName());
+                doorAcc.setNamespaceId(UserContext.getCurrentNamespaceId());
                 doorAccessProvider.createDoorAccess(doorAcc);
                 
                 OwnerDoor ownerDoor = new OwnerDoor();
