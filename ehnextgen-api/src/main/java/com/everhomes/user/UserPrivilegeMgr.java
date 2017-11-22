@@ -180,4 +180,16 @@ public interface UserPrivilegeMgr {
      * @return
      */
     boolean checkModuleAppAdmin(String ownerType, Long ownerId, Long userId, Long privilegeId, Long appId, Long communityId, Long organizationId);
+
+    /**
+     * 检查应用管理员
+     * @param ownerType
+     * @param ownerId
+     * @param userId
+     * @param moduleId
+     * @param appId  @return
+     * @param communityId
+     * @param organizationId
+     */
+    boolean checkModuleAppAdmin(Integer namespaceId, String ownerType, Long ownerId, Long userId, Long moduleId, Long appId, Long communityId, Long organizationId);
 }
