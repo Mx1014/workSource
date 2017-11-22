@@ -3,7 +3,6 @@ package com.everhomes.util.excel;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -422,17 +421,17 @@ public class ExcelUtils {
         Sheet sheet = workbook.createSheet();
         workbook.setSheetName(sheetNum, sheetTitle);
         // 设置表格默认列宽度为20个字节
-        sheet.setDefaultColumnWidth((short) 20);
+        sheet.setDefaultColumnWidth((short) 30);
         // 生成一个样式
         CellStyle style_non_m = workbook.createCellStyle();
         // 设置这些样式
 //        style.setFillForegroundColor(HSSFColor.GREEN.index);
 //        style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
-        style_non_m.setBorderBottom(HSSFCellStyle.BORDER_THIN);
-        style_non_m.setBorderLeft(HSSFCellStyle.BORDER_THIN);
-        style_non_m.setBorderRight(HSSFCellStyle.BORDER_THIN);
-        style_non_m.setBorderTop(HSSFCellStyle.BORDER_THIN);
-        style_non_m.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+        style_non_m.setBorderBottom(CellStyle.BORDER_THIN);
+        style_non_m.setBorderLeft(CellStyle.BORDER_THIN);
+        style_non_m.setBorderRight(CellStyle.BORDER_THIN);
+        style_non_m.setBorderTop(CellStyle.BORDER_THIN);
+        style_non_m.setAlignment(CellStyle.ALIGN_CENTER);
         // 生成一个内容字体
         CellStyle style_content = workbook.createCellStyle();
         Font font = workbook.createFont();
@@ -451,21 +450,22 @@ public class ExcelUtils {
         // 设置这些样式
 //        style.setFillForegroundColor(HSSFColor.GREEN.index);
 //        style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
-        style_m.setBorderBottom(HSSFCellStyle.BORDER_THIN);
-        style_m.setBorderLeft(HSSFCellStyle.BORDER_THIN);
-        style_m.setBorderRight(HSSFCellStyle.BORDER_THIN);
-        style_m.setBorderTop(HSSFCellStyle.BORDER_THIN);
-        style_m.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+        style_m.setBorderBottom(CellStyle.BORDER_THIN);
+        style_m.setBorderLeft(CellStyle.BORDER_THIN);
+        style_m.setBorderRight(CellStyle.BORDER_THIN);
+        style_m.setBorderTop(CellStyle.BORDER_THIN);
+        style_m.setAlignment(CellStyle.ALIGN_CENTER);
 
         Font font4 = workbook.createFont();
         font4.setColor(HSSFColor.RED.index);
         font4.setFontHeightInPoints((short) 16);
-        font4.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+        font4.setBoldweight(Font.BOLDWEIGHT_BOLD);
 
         style_m.setFont(font4);
         // 指定当单元格内容显示不下时自动换行
         style_non_m.setWrapText(true);
         style_content.setWrapText(true);
+        style_m.setWrapText(true);
         //产生说明
         Font font3 = workbook.createFont();
         font3.setColor(HSSFColor.BLACK.index);
@@ -525,43 +525,11 @@ public class ExcelUtils {
             case "计划信息":
                 break;
             //物业巡检中添加 备注信息 暂时在注意事项中协商select的byte值  列出
-            case "设备":
+            default:
                 instruction =
-                        "二维码状态： 0：停用  1：启用 \n"+
-                        "设备状态：1:不完整  2：使用中 3：维修中 4：报废 5：停用  6：备用 \n";
-                break;
-            case "装修":
-                instruction =
-                        "类型： \n";
-                break;
-            case "空置房":
-                instruction =
-                        "类型： \n";
-                break;
-            case "安保":
-                instruction =
-                        "类型： \n";
-                break;
-            case "日常工作检查":
-                instruction =
-                        "类型： \n";
-                break;
-            case "公共设施检查":
-                instruction =
-                        "类型： \n";
-                break;
-            case "周末值班":
-                instruction =
-                        "类型： \n";
-                break;
-            case "安全检查":
-                instruction =
-                        "类型： \n";
-                break;
-            case "其他":
-                instruction =
-                        "设备类型： \n";
-                break;
+                        "二维码状态： 停用 、启用 \n"+
+                        "当前状态：不完整 、使用中 、维修中 、报废 、停用  、备用 \n"+
+                        "设备类型：消防 、强电 、弱电 、电梯 、空调 、给排水、空置房、装修、安保、日常工作检查、公共设施检查、周末值班、安全检查、其他 \n";
         }
         introCell.setCellValue("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
                 "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +
