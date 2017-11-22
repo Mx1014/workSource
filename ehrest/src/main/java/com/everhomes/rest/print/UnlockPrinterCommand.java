@@ -11,8 +11,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>ownerType : 打印所属类型，此处为community, 参考{@link com.everhomes.rest.print.PrintOwnerType}</li>
  * <li>ownerId : 所属id</li>
- * <li>readerName : 打印机readerName</li>
- * <li>privileges : 权限列表，参考 {@link com.everhomes.rest.print.PrintJobTypeType}</li>
+ * <li>readerName : 刷卡器</li>
+ * <li>privileges : 权限列表，参考 {@link com.everhomes.rest.print.PrintJobTypeType} // 暂时无用</li>
  * </ul>
  *
  *  @author:dengs 2017年6月20日

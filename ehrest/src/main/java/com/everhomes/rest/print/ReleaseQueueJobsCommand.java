@@ -9,23 +9,22 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>
- * <li>jobIds : 任务集合</li>
+ * <li>任务列表，参考 {@link com.everhomes.rest.print.ListQueueJobsDTO}</li>
  * </ul>
  *
- *  @author:dengs 2017年6月16日
  */
 public class ReleaseQueueJobsCommand {
-	@ItemType(String.class)
-	private List<String> jobIds;
+	@ItemType(ListQueueJobsDTO.class)
+	private List<ListQueueJobsDTO> jobs;
 
-	public List<String> getJobIds() {
-		return jobIds;
+	public List<ListQueueJobsDTO> getJobs() {
+		return jobs;
 	}
 
-	public void setJobIds(List<String> jobIds) {
-		this.jobIds = jobIds;
+	public void setJobs(List<ListQueueJobsDTO> jobs) {
+		this.jobs = jobs;
 	}
-
+	
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

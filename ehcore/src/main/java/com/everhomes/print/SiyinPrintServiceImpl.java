@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -19,12 +18,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import com.alibaba.fastjson.JSONObject;
-import com.everhomes.bus.*;
-import com.everhomes.order.PayService;
-import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.rest.print.*;
-import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +28,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.bus.BusBridgeProvider;
+import com.everhomes.bus.LocalBus;
+import com.everhomes.bus.LocalBusOneshotSubscriber;
+import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
+import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -45,6 +44,7 @@ import com.everhomes.http.HttpUtils;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.order.OrderUtil;
+import com.everhomes.order.PayService;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -53,8 +53,55 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
+import com.everhomes.rest.print.DeleteQueueJobsCommand;
+import com.everhomes.rest.print.GetPrintLogonUrlCommand;
+import com.everhomes.rest.print.GetPrintLogonUrlResponse;
+import com.everhomes.rest.print.GetPrintSettingCommand;
+import com.everhomes.rest.print.GetPrintSettingResponse;
+import com.everhomes.rest.print.GetPrintStatCommand;
+import com.everhomes.rest.print.GetPrintStatResponse;
+import com.everhomes.rest.print.GetPrintUnpaidOrderCommand;
+import com.everhomes.rest.print.GetPrintUnpaidOrderResponse;
+import com.everhomes.rest.print.GetPrintUserEmailCommand;
+import com.everhomes.rest.print.GetPrintUserEmailResponse;
+import com.everhomes.rest.print.InformPrintCommand;
+import com.everhomes.rest.print.InformPrintResponse;
+import com.everhomes.rest.print.ListPrintJobTypesCommand;
+import com.everhomes.rest.print.ListPrintJobTypesResponse;
+import com.everhomes.rest.print.ListPrintOrderStatusCommand;
+import com.everhomes.rest.print.ListPrintOrderStatusResponse;
+import com.everhomes.rest.print.ListPrintOrdersCommand;
+import com.everhomes.rest.print.ListPrintOrdersResponse;
+import com.everhomes.rest.print.ListPrintRecordsCommand;
+import com.everhomes.rest.print.ListPrintRecordsResponse;
+import com.everhomes.rest.print.ListPrintUserOrganizationsCommand;
+import com.everhomes.rest.print.ListPrintUserOrganizationsResponse;
+import com.everhomes.rest.print.ListPrintingJobsCommand;
+import com.everhomes.rest.print.ListPrintingJobsResponse;
+import com.everhomes.rest.print.ListQueueJobsCommand;
+import com.everhomes.rest.print.ListQueueJobsResponse;
+import com.everhomes.rest.print.PayPrintOrderCommand;
+import com.everhomes.rest.print.PayPrintOrderCommandV2;
+import com.everhomes.rest.print.PrintErrorCode;
+import com.everhomes.rest.print.PrintJobTypeType;
+import com.everhomes.rest.print.PrintLogonStatusType;
+import com.everhomes.rest.print.PrintOrderDTO;
+import com.everhomes.rest.print.PrintOrderLockType;
+import com.everhomes.rest.print.PrintOrderStatusType;
+import com.everhomes.rest.print.PrintOwnerType;
+import com.everhomes.rest.print.PrintPaperSizeType;
+import com.everhomes.rest.print.PrintRecordDTO;
+import com.everhomes.rest.print.PrintSettingColorTypeDTO;
+import com.everhomes.rest.print.PrintSettingPaperSizePriceDTO;
+import com.everhomes.rest.print.PrintSettingType;
+import com.everhomes.rest.print.PrintStatDTO;
+import com.everhomes.rest.print.ReleaseQueueJobsCommand;
+import com.everhomes.rest.print.UnlockPrinterCommand;
+import com.everhomes.rest.print.UpdatePrintSettingCommand;
+import com.everhomes.rest.print.UpdatePrintUserEmailCommand;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -289,7 +336,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public DeferredResult<RestResponse> logonPrint(String identifierToken) {
-		// TODO 
 		//不知道这里对不对
 		DeferredResult<RestResponse> deferredResult = new DeferredResult<>();
 		RestResponse response =  new RestResponse();
@@ -321,7 +367,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	@Override
 	public InformPrintResponse informPrint(InformPrintCommand cmd) {
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-		if(PrintLogonStatusType.HAVE_UNPAID_ORDER.getCode() == checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId())){
+		if(PrintLogonStatusType.HAVE_UNPAID_ORDER == checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId())){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "have unpaid orders");
 		}
 
@@ -369,7 +415,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	public void addPrintingTaskCount(InformPrintCommand cmd) {
 		Long id = UserContext.current().getUser().getId();
 		
-		PrintLogonStatusType statusType = PrintLogonStatusType.fromCode(checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId()));
+		PrintLogonStatusType statusType = checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId());
 		if(statusType == PrintLogonStatusType.HAVE_UNPAID_ORDER){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "have unpaid orders");
 		}
@@ -418,7 +464,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	@Override
 	public GetPrintUnpaidOrderResponse getPrintUnpaidOrder(GetPrintUnpaidOrderCommand cmd) {
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-		return new GetPrintUnpaidOrderResponse(checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId()));
+		return new GetPrintUnpaidOrderResponse(checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId()).getCode());
 	}
 
 	@Override
@@ -500,7 +546,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		//解锁打印机之前检查是否存在未支付订单。
 		//前端必须先调用接口 /siyinprint/getPrintUnpaidOrder,如此处存在未支付订单，那么抛出异常
-		if(PrintLogonStatusType.HAVE_UNPAID_ORDER.getCode() == checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId())){
+		if(PrintLogonStatusType.HAVE_UNPAID_ORDER == checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId())){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "Have unpaid order");
 		}
 		unlockPrinter(cmd,false);
@@ -1025,15 +1071,15 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	 * @param ownerId 
 	 * @param ownerType 
 	 */
-	private Byte checkUnpaidOrder(String ownerType, Long ownerId) {
+	private PrintLogonStatusType checkUnpaidOrder(String ownerType, Long ownerId) {
 		User user = UserContext.current().getUser();
 		
 		List<SiyinPrintOrder> list = siyinPrintOrderProvider.listSiyinPrintUnpaidOrderByUserId(user.getId(),ownerType,ownerId);
 		
 		if(list == null || list.size() == 0){
-			return PrintLogonStatusType.LOGON_SUCCESS.getCode();
+			return PrintLogonStatusType.LOGON_SUCCESS;
 		}
-		return PrintLogonStatusType.HAVE_UNPAID_ORDER.getCode();
+		return PrintLogonStatusType.HAVE_UNPAID_ORDER;
 	}
 	
 	/**
@@ -1063,21 +1109,19 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public ListQueueJobsResponse listQueueJobs(ListQueueJobsCommand cmd) {
-		// TODO Auto-generated method stub
+        String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
 		return null;
 	}
 
 
 	@Override
 	public void releaseQueueJobs(ReleaseQueueJobsCommand cmd) {
-		// TODO Auto-generated method stub
 		
 	}
 
 
 	@Override
 	public void deleteQueueJobs(DeleteQueueJobsCommand cmd) {
-		// TODO Auto-generated method stub
 		
 	}
 }

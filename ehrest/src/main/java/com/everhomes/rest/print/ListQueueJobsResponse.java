@@ -1,55 +1,28 @@
 // @formatter:off
 package com.everhomes.rest.print;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
  * 
  * <ul>
- * <li>jobId : 任务id</li>
- * <li>jobName : 任务名称</li>
- * <li>totalPage : 打印页数量</li>
- * <li>printTime : 任务上传时间</li>
+ * <li>jobs : 任务列表，参考 {@link com.everhomes.rest.print.ListQueueJobsDTO}</li>
  * </ul>
  *
- *  @author:dengs 2017年6月16日
  */
 public class ListQueueJobsResponse {
-	private String jobId;
-	private String jobName;
-	private String totalPage;
-	private String printTime;
-	
-	public String getJobId() {
-		return jobId;
+	@ItemType(ListQueueJobsDTO.class)
+	private List<ListQueueJobsDTO> jobs;
+
+	public List<ListQueueJobsDTO> getJobs() {
+		return jobs;
 	}
 
-	public void setJobId(String jobId) {
-		this.jobId = jobId;
-	}
-
-	public String getJobName() {
-		return jobName;
-	}
-
-	public void setJobName(String jobName) {
-		this.jobName = jobName;
-	}
-
-	public String getTotalPage() {
-		return totalPage;
-	}
-
-	public void setTotalPage(String totalPage) {
-		this.totalPage = totalPage;
-	}
-
-	public String getPrintTime() {
-		return printTime;
-	}
-
-	public void setPrintTime(String printTime) {
-		this.printTime = printTime;
+	public void setJobs(List<ListQueueJobsDTO> jobs) {
+		this.jobs = jobs;
 	}
 
 	@Override
