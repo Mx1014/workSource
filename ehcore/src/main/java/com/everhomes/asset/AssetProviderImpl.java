@@ -3581,6 +3581,7 @@ public class AssetProviderImpl implements AssetProvider {
         query.addSelect(bill.DATE_STR_BEGIN);
         query.addSelect(bill.DATE_STR_END);
         query.addSelect(bill.STATUS);
+        query.addSelect(bill.ID);
         if(namespaceId!=null){
             query.addConditions(bill.NAMESPACE_ID.eq(namespaceId));
         }
@@ -3596,6 +3597,7 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setDateStrBegin(r.getValue(bill.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(bill.DATE_STR_END));
                     dto.setChargeStatus(r.getValue(bill.STATUS));
+                    dto.setBillId(r.getValue(bill.ID));
                     list.add(dto);
                     return null;
                 });
