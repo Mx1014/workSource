@@ -11,6 +11,6 @@ ADD COLUMN `price` decimal  ,
 ADD COLUMN `buy_time` datetime ,
 ADD COLUMN `depreciation_years` bigint(10) COMMENT '折旧年限' ;
 
---增加字段
+-- 选项表增加业务自定义枚举值字段
 ALTER TABLE `eh_var_field_items` ADD COLUMN `business_value` TINYINT COMMENT 'the value defined in special business like status';
 ALTER TABLE `eh_var_field_item_scopes` ADD COLUMN `business_value` TINYINT COMMENT 'the value defined in special business like status';
