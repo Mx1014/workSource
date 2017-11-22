@@ -140,9 +140,11 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleAppsWithConditon(ListServiceModuleAppsCommand cmd) {
 		List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getActionType(), cmd.getCustomTag(), cmd.getCustomPath());
-		return new ListServiceModuleAppsResponse(moduleApps.stream().map(r ->{
-			return processServiceModuleAppDTO(r);
-		}).collect(Collectors.toList()));
+		if(moduleApps != null && moduleApps.size() > 0){
+			List dtos = Collections.singletonList( processServiceModuleAppDTO(moduleApps.get(0)));
+			return new ListServiceModuleAppsResponse(dtos);
+		}
+		return null;
 	}
 
 
