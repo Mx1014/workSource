@@ -3580,6 +3580,7 @@ public class AssetProviderImpl implements AssetProvider {
         query.addSelect(bill.AMOUNT_RECEIVABLE);
         query.addSelect(bill.DATE_STR_BEGIN);
         query.addSelect(bill.DATE_STR_END);
+        query.addSelect(bill.STATUS);
         if(namespaceId!=null){
             query.addConditions(bill.NAMESPACE_ID.eq(namespaceId));
         }
