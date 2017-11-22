@@ -524,6 +524,44 @@ public class ExcelUtils {
                 break;
             case "计划信息":
                 break;
+            //物业巡检中添加 备注信息 暂时在注意事项中协商select的byte值  列出
+            case "设备":
+                instruction =
+                        "二维码状态： 0：停用  1：启用 \n"+
+                        "设备状态：";
+                break;
+            case "装修":
+                instruction =
+                        "设备状态： \n";
+                break;
+            case "空置房":
+                instruction =
+                        "设备状态： \n";
+                break;
+            case "安保":
+                instruction =
+                        "设备状态： \n";
+                break;
+            case "日常工作检查":
+                instruction =
+                        "设备状态： \n";
+                break;
+            case "公共设施检查":
+                instruction =
+                        "设备状态： \n";
+                break;
+            case "周末值班":
+                instruction =
+                        "设备状态： \n";
+                break;
+            case "安全检查":
+                instruction =
+                        "设备状态： \n";
+                break;
+            case "其他":
+                instruction =
+                        "设备状态： \n";
+                break;
         }
         introCell.setCellValue("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
                 "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +

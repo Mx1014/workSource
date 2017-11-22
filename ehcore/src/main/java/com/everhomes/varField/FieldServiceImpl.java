@@ -239,6 +239,15 @@ public class FieldServiceImpl implements FieldService {
     @Override
     public void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response){
         List<FieldGroupDTO> groups = listFieldGroups(cmd);
+        //设备巡检中字段 暂时单sheet
+        if (cmd.getEquipmentCategoryName() != null) {
+            for (int m = 0; m < groups.size(); m++) {
+                if (!groups.get(m).getGroupDisplayName().equals(cmd.getEquipmentCategoryName())) {
+                    //groups 中只有一个sheet 只保留传过来的那个（物业巡检）
+                    groups.remove(m);
+                }
+            }
+        }
         //先去掉 名为“基本信息” 的sheet，建议使用stream的方式
         if(groups==null){
             groups = new ArrayList<FieldGroupDTO>();
@@ -262,8 +271,15 @@ public class FieldServiceImpl implements FieldService {
         ServletOutputStream out;
         ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-        String fileName = "客户数据模板导出"+sdf.format(Calendar.getInstance().getTime());
-        fileName = fileName + ".xls";
+        String fileName=null;
+        if (cmd.getEquipmentCategoryName()!=null){
+            fileName = cmd.getEquipmentCategoryName()+"数据模板导出"+sdf.format(Calendar.getInstance().getTime());
+            fileName = fileName + ".xls";
+        }else {
+            fileName = "客户数据模板导出"+sdf.format(Calendar.getInstance().getTime());
+            fileName = fileName + ".xls";
+        }
+
         response.setContentType("application/msexcel");
         try {
             response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
