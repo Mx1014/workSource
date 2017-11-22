@@ -2,6 +2,8 @@
 CREATE TABLE `eh_relocation_requests` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` varchar(32) DEFAULT NULL COMMENT 'attachment object owner type',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'owner id',
   `request_no` varchar(128) NOT NULL,
   `requestor_enterprise_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'the id of organization where the requestor is in',
   `requestor_enterprise_name` varchar(64) DEFAULT NULL COMMENT 'the enterprise name of requestor',
@@ -22,6 +24,8 @@ CREATE TABLE `eh_relocation_requests` (
 CREATE TABLE `eh_relocation_request_items` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` varchar(32) DEFAULT NULL COMMENT 'attachment object owner type',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'owner id',
   `request_id` bigint(20) NOT NULL COMMENT 'id of the relocation request record',
   `item_name` varchar(64) DEFAULT NULL COMMENT 'the name of item',
   `item_quantity` int(11) DEFAULT 0 COMMENT 'the quantity of item',
@@ -34,7 +38,7 @@ CREATE TABLE `eh_relocation_request_items` (
 CREATE TABLE `eh_relocation_request_attachments` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `owner_type` varchar(32) DEFAULT NULL COMMENT 'attachment object owner type',
-  `owner_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'owner id, e.g comment_id',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'owner id',
   `content_type` varchar(32) DEFAULT NULL COMMENT 'attachment object content type',
   `content_uri` varchar(1024) DEFAULT NULL COMMENT 'attachment object link info on storage',
   `status` tinyint(4) DEFAULT NULL COMMENT '0: inactive, 1: , 2: active',
