@@ -2087,6 +2087,14 @@ public class PortalServiceImpl implements PortalService {
 				}
 			}
 			scope.setScopeId(scopeId);
+		}else if(ScopeType.RESIDENTIAL == ScopeType.fromCode(scopeType)){
+			scope.setScopeType(PortalScopeType.RESIDENTIAL.getCode());
+			scope.setScopeId(scopeId);
+
+		}else if(ScopeType.PM == ScopeType.fromCode(scopeType)){
+			scope.setScopeType(PortalScopeType.PM.getCode());
+			scope.setScopeId(scopeId);
+
 		}else{
 			LOGGER.debug("data error. scopeType = " + scopeType);
 			return null;
