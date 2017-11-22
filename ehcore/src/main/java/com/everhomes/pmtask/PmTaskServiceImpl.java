@@ -172,6 +172,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
+		//检查多入口应用权限
+		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.COMMUNITY.getCode(), cmd.getOwnerId(),
+				cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST, 3L, null, cmd.getOwnerId());
+		//检查权限细化
 		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST);
 
 		Integer namespaceId = cmd.getNamespaceId();
@@ -693,6 +697,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public void deleteTaskCategory(DeleteTaskCategoryCommand cmd) {
 		Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
 		if(cmd.getParentId() == null || defaultId.equals(cmd.getParentId())) {
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.COMMUNITY.getCode(), cmd.getOwnerId(),
+//					cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST, 3L, null, cmd.getOwnerId());
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_SERVICE_CATEGORY_DELETE);
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_DETAIL_CATEGORY_DELETE);
@@ -722,8 +728,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Override
 	public CategoryDTO createTaskCategory(CreateTaskCategoryCommand cmd) {
 		if(cmd.getParentId() == null) {
+			userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), null, null,
+					cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_SERVICE_CATEGORY_CREATE, 3L, null, null);
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_SERVICE_CATEGORY_CREATE);
 		} else {
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), null, null,
+//					cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_DETAIL_CATEGORY_CREATE, 3L, null, null);
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_DETAIL_CATEGORY_CREATE);
 		}
 
