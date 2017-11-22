@@ -68,7 +68,9 @@ import com.everhomes.util.doc.DocUtil;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
+import com.everhomes.varField.ScopeFieldItem;
 import com.google.zxing.WriterException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
@@ -195,6 +197,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Autowired
 	private   ImportFileService  importFileService;
+
+	@Autowired
+	private FieldProvider fieldProvider;
 
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(
@@ -1287,6 +1292,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		if (equipmentsDTO.getStatus() != null) {
 			data.setStatus(EquipmentStatus.fromStatus(equipmentsDTO.getStatus()).getName());
+		}
+		if(equipmentsDTO.getCategoryId()!=null){
+			data.setCategoryId(equipmentsDTO.getCategoryPath());
 		}
 
 		return data;
@@ -2606,7 +2614,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			e.printStackTrace();
 		}
 
-		return  null;
+		return  response;
 
 	}
 
@@ -4736,5 +4744,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 			return userIds;
 		}
 		return null;
+	}
+
+	@Override
+	public  ScopeFieldItem findScopeFieldItemByFieldItemId(findScopeFieldItemCommand cmd) {
+		 return  fieldProvider.findScopeFieldItemByBusinessValue(cmd.getNamespaceId(),cmd.getCommunityId(),cmd.getModuleName(),cmd.getFieldId(),cmd.getBusinessValue());
 	}
 }

@@ -8,6 +8,7 @@ import com.everhomes.rest.pmNotify.ListPmNotifyParamsCommand;
 import com.everhomes.rest.pmNotify.PmNotifyParamDTO;
 import com.everhomes.rest.pmNotify.SetPmNotifyParamsCommand;
 import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.varField.ScopeFieldItem;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -83,4 +84,6 @@ public interface EquipmentService {
 	void deletePmNotifyParams(DeletePmNotifyParamsCommand cmd);
 
 	Set<Long> getTaskGroupUsers(Long taskId, byte groupType);
+
+	ScopeFieldItem findScopeFieldItemByFieldItemId(findScopeFieldItemCommand cmd);
 }

@@ -21,6 +21,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.varField.ScopeFieldItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1129,6 +1130,20 @@ public class EquipmentController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /equipment/findScopeFieldItemByBusinessValue</b>
+	 * <p>根据业务值获取item信息</p>
+	 */
+	@RequestMapping("findScopeFieldItemByBusinessValue")
+	@RestReturn(value = ScopeFieldItem.class)
+	public RestResponse findScopeFieldItemByBusinessValue (findScopeFieldItemCommand cmd) {
+		RestResponse response = new RestResponse(equipmentService.findScopeFieldItemByFieldItemId(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 
 
 }

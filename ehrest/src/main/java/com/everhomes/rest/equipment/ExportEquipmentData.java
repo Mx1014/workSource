@@ -69,7 +69,8 @@ public class ExportEquipmentData {
 
     private String equipmentModel;
 
-    private Long categoryId;
+    //导出excel时候转换成String
+    private String categoryId;
 
     private String categoryPath;
 
@@ -207,11 +208,11 @@ public class ExportEquipmentData {
         this.equipmentModel = equipmentModel;
     }
 
-    public Long getCategoryId() {
+    public String getCategoryId() {
         return categoryId;
     }
 
-    public void setCategoryId(Long categoryId) {
+    public void setCategoryId(String categoryId) {
         this.categoryId = categoryId;
     }
 
