@@ -322,14 +322,14 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				entities.add(e);
 			}
 		JSONObject jo = JSONObject.parseObject(JSONObject.toJSONString(dto));
-		jo.put("formUrl",processFormURL(EntityType.PM_TASK.getCode(),task.getId(),cmd.getOwnerType(),cmd.getOwnerId(),"费用确认"));
+		jo.put("formUrl",processFormURL(EntityType.PM_TASK.getCode(),""+task.getId(),FlowOwnerType.PMTASK.getCode(),"","费用确认"));
 		jo.put("flowUserType",flowUserType.getCode());
 		flowCase.setCustomObject(jo.toJSONString());
 
 		return entities;
 	}
 
-	private String processFormURL(String sourceType, Long sourceId, String ownerType,Long ownerId,String displayName) {
+	private String processFormURL(String sourceType, String sourceId, String ownerType,String ownerId,String displayName) {
 		return "zl://form/create?sourceType="+sourceType+"&sourceId="+sourceId+"&ownerType="+ownerType+"&ownerId="+ownerId
 				+"&displayName="+displayName+"&metaObject=";
 	}
