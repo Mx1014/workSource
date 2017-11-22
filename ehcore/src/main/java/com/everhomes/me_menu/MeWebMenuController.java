@@ -31,7 +31,7 @@ public class MeWebMenuController extends ControllerBase {
 
 
     /**
-     * <b>URL: /menu/listMeWebMenus</b>
+     * <b>URL: /mewebmenu/listMeWebMenus</b>
      * <p>获取菜单</p>
      */
     @RequestMapping("listMeWebMenus")
