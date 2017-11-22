@@ -2786,6 +2786,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 		return objList;
 	}
 
+	private void convertValueToCode(String field) {
+		//将excel文案转成code
+		if (field.equals("categoryId")){
+
+		}
+
+	}
+
 	private void setToObj(String fieldName, Object dto,Object value) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
 		Class<?> clz = dto.getClass().getSuperclass();
 		Object val = value;
@@ -2822,7 +2830,21 @@ public class EquipmentServiceImpl implements EquipmentService {
 					val = Integer.parseInt((String)value);
 					break;
 				case "Byte":
-					val = Byte.parseByte((String)value);
+					//转换成byte类型入库
+					if(fieldName.equals("status")){
+						val =EquipmentStatus.valueOf((String)value).getCode();
+					}
+					if(fieldName.equals("categotyId")){
+						val =EquipmentCategorys.valueOf((String)value).getCode();
+					}
+					if(fieldName.equals("qrCodeFlag")){
+						if("启用".equals((String)value)){
+							val=Byte.parseByte("1");
+						}else if("停用".equals((String)value)){
+							val = Byte.parseByte("0");
+						}
+					}
+					//val = Byte.parseByte((String)value);
 					break;
 				case "String":
 					if(((String)val).trim().length()<1){
