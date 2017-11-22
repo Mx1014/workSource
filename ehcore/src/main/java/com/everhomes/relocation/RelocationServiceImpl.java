@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -222,6 +223,10 @@ public class RelocationServiceImpl implements RelocationService {
 					}
 				});
 			}
+
+			FlowCase flowCase = createFlowCase(request, cmd.getItems());
+			request.setFlowCaseId(flowCase.getId());
+			relocationProvider.updateRelocationRequest(request);
 			return null;
 		});
 
@@ -231,7 +236,7 @@ public class RelocationServiceImpl implements RelocationService {
 		return dto;
 	}
 
-	private FlowCase createFlowCase(RelocationRequest request, Long userId) {
+	private FlowCase createFlowCase(RelocationRequest request, List<RelocationRequestItemDTO> items) {
 
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 
@@ -245,7 +250,7 @@ public class RelocationServiceImpl implements RelocationService {
 					"Enable flow not found.");
 		}
 		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
-		createFlowCaseCommand.setApplyUserId(userId);
+		createFlowCaseCommand.setApplyUserId(request.getRequestorUid());
 		createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
 		createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
 		createFlowCaseCommand.setReferId(request.getId());
@@ -253,11 +258,16 @@ public class RelocationServiceImpl implements RelocationService {
 
 		String locale = UserContext.current().getUser().getLocale();
 
-		String jsonStr = localeTemplateService.getLocaleTemplateString(RelocationTemplateCode.SCOPE, RelocationTemplateCode.FLOW_APPLICANT_CONTENT,
+
+		Map<String, Object> map = new HashMap<>();
+
+		map.put("items", getItemName(items));
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		map.put("relocationDate", sdf.format(request.getRelocationDate()));
+		String content = localeTemplateService.getLocaleTemplateString(RelocationTemplateCode.SCOPE, RelocationTemplateCode.FLOW_APPLICANT_CONTENT,
 				locale, map, "[]");
 
-		createFlowCaseCommand.setContent("车牌号码：" + parkingCardRequest.getPlateNumber() + "\n"
-				+ "车主电话：" + parkingCardRequest.getPlateOwnerPhone());
+		createFlowCaseCommand.setContent(content);
 		createFlowCaseCommand.setCurrentOrganizationId(request.getRequestorEnterpriseId());
 
 		String serviceName = localeStringService.getLocalizedString(RelocationTemplateCode.SCOPE,
@@ -266,5 +276,22 @@ public class RelocationServiceImpl implements RelocationService {
 		FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
 
 		return flowCase;
+	}
+
+	private String getItemName(List<RelocationRequestItemDTO> items) {
+		if (null == items) {
+			return "";
+		}else {
+			StringBuilder sb = new StringBuilder();
+			int size = items.size();
+			for (int i = 0; i < size; i++) {
+				if (i == size -1) {
+					sb.append(items.get(i).getItemName());
+				}else {
+					sb.append(items.get(i).getItemName()).append("、");
+				}
+			}
+			return sb.toString();
+		}
 	}
 }

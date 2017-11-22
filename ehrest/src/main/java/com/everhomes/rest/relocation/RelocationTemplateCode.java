@@ -9,4 +9,6 @@ public interface RelocationTemplateCode {
     int FLOW_APPLICANT_CONTENT = 2;
 
     int FLOW_PROCESSOR_CONTENT = 3;
+
+    int FLOW_DETAIL_CONTENT = 4;
 }
