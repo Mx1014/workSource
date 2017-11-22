@@ -410,10 +410,11 @@ public class WebMenuServiceImpl implements WebMenuService {
 					webMenuScopes.add(scope);
 
 					//获取子菜单
-					if(dto.getLeafFlag() != null && dto.getLeafFlag() == 1){
-						List<WebMenuScope> leafScopes = fromTree(dto.getDtos(), namespaceId);
+					List<WebMenuScope> leafScopes = fromTree(dto.getDtos(), namespaceId);
+					if(leafScopes != null && leafScopes.size() > 0){
 						webMenuScopes.addAll(leafScopes);
 					}
+
 				}
 			}
 		}
