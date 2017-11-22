@@ -54,7 +54,7 @@ public class FlowConditionStringVariable implements FlowConditionVariable<String
 
             @Override
             public boolean compareNumber(Number number1, Number number2) {
-                return Math.abs(number1.floatValue() - number2.floatValue()) > 0.00001;
+                return number1.floatValue() - number2.floatValue() > 0;
             }
 
             @Override
@@ -74,7 +74,7 @@ public class FlowConditionStringVariable implements FlowConditionVariable<String
 
             @Override
             public boolean compareNumber(Number number1, Number number2) {
-                return Math.abs(number1.floatValue() - number2.floatValue()) < 0;
+                return number1.floatValue() - number2.floatValue() < 0;
             }
 
             @Override
