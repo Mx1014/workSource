@@ -2059,7 +2059,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         qrKeys.add(qr);
     }
     
-    private void doZuolinQRKey(User user, DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys) {
+    private void doZuolinQRKey(boolean generate, User user, DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys) {
         List<String> hardwares = new ArrayList<String>();
         int maxCount = 32;
         
@@ -2104,6 +2104,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         qr.setQrCodeKey(aesUserKey.getSecret());
         
+        qr.setWebQRCode(getWebQrByAuthId(UserContext.getCurrentNamespaceId(), user, doorAccess, auth, aesUserKey));
+        
         qrKeys.add(qr);
     }
     
@@ -2135,14 +2137,14 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         qrKeys.add(qr);
     }
-
-    /**
-     * <ul> 获取二维码列表。 TODO 优化函数，太长了。
-     * <li></li>
-     * </ul>
-     */
+    
     @Override
     public ListDoorAccessQRKeyResponse listDoorAccessQRKey() {
+        return listDoorAccessQRKeyAndGenerateQR(false);
+    }
+
+    @Override
+    public ListDoorAccessQRKeyResponse listDoorAccessQRKeyAndGenerateQR(boolean generate) {
         User user = UserContext.current().getUser();
         
         ListingLocator locator = new ListingLocator();
@@ -2197,7 +2199,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             		}
             	}
             	resp.setQrTimeout(this.getQrTimeout()/1000l);
-                doZuolinQRKey(user, doorAccess, auth, qrKeys);
+                doZuolinQRKey(generate, user, doorAccess, auth, qrKeys);
                 }
            
             }
@@ -2506,6 +2508,24 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         return ConvertHelper.convert(doorAccess, DoorAccessDTO.class);
     }
     
+    private String createZuolinQrV1(String secret) {
+        byte[] type = new byte[]{0, 1};
+        byte[] cmdArr = new byte[]{8, 0};
+        byte[] qrArr = Base64.decodeBase64(secret);
+        byte[] lengthArr = DataUtil.shortToByteArray((short) (qrArr.length + cmdArr.length));
+        long curTimeMill = System.currentTimeMillis();
+        byte[] timeArr = DataUtil.longToByteArray(curTimeMill);
+        byte[] resultArr = new byte[cmdArr.length + type.length + lengthArr.length + qrArr.length + timeArr.length];
+        System.arraycopy(type, 0, resultArr, 0, type.length);
+        System.arraycopy(lengthArr, 0, resultArr, type.length, lengthArr.length);
+        System.arraycopy(cmdArr, 0, resultArr, type.length + lengthArr.length, cmdArr.length);
+        System.arraycopy(qrArr, 0, resultArr, cmdArr.length + type.length + lengthArr.length, qrArr.length);
+        System.arraycopy(timeArr, 0, resultArr, cmdArr.length + type.length + lengthArr.length + qrArr.length, timeArr.length);
+        String resultStr = Base64.encodeBase64String(resultArr);
+        
+        return resultStr;
+    }
+    
     //zuolin device qr. normal visitor auth
     private DoorAuthDTO createZuolinDeviceQr(CreateDoorVisitorCommand cmd) {
         User user = UserContext.current().getUser();
@@ -2567,19 +2587,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         auth.setLinglingUuid(uuid + "-" + auth.getId().toString());
         
         //convert to qr, move it to CmdUtil ?
-        byte[] type = new byte[]{0, 1};
-        byte[] cmdArr = new byte[]{8, 0};
-        byte[] qrArr = Base64.decodeBase64(aesUserKey.getSecret());
-        byte[] lengthArr = DataUtil.shortToByteArray((short) (qrArr.length + cmdArr.length));
-        long curTimeMill = System.currentTimeMillis();
-        byte[] timeArr = DataUtil.longToByteArray(curTimeMill);
-        byte[] resultArr = new byte[cmdArr.length + type.length + lengthArr.length + qrArr.length + timeArr.length];
-        System.arraycopy(type, 0, resultArr, 0, type.length);
-        System.arraycopy(lengthArr, 0, resultArr, type.length, lengthArr.length);
-        System.arraycopy(cmdArr, 0, resultArr, type.length + lengthArr.length, cmdArr.length);
-        System.arraycopy(qrArr, 0, resultArr, cmdArr.length + type.length + lengthArr.length, qrArr.length);
-        System.arraycopy(timeArr, 0, resultArr, cmdArr.length + type.length + lengthArr.length + qrArr.length, timeArr.length);
-        String resultStr = Base64.encodeBase64String(resultArr);
+        String resultStr = createZuolinQrV1(aesUserKey.getSecret()); 
         
         auth.setQrKey(resultStr);
         doorAuthProvider.updateDoorAuth(auth);
@@ -2901,6 +2909,39 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         smsProvider.sendSms(cmd.getNamespaceId(), cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, templateLocale, variables);
         
         return ConvertHelper.convert(auth, DoorAuthDTO.class);
+    }
+    
+    private String getWebQrByAuthId(Integer namespaceId, User user, DoorAccess doorAccess, DoorAuth auth, AesUserKey aesUserKey) {
+        if(doorAccess.getOwnerType() != null && doorAccess.getDoorType() != null 
+                && ( doorAccess.getDoorType().equals(DoorAccessType.ZLACLINK_WIFI.getCode())
+                        || doorAccess.getDoorType().equals(DoorAccessType.ZLACLINK_NOWIFI.getCode())
+                        || doorAccess.getDoorType().equals(DoorAccessType.ACLINK_ZL_GROUP.getCode())
+                        || doorAccess.getDoorType().equals(DoorAccessType.ZLACLINK_WIFI.getCode()) ) ) {
+            DoorAccessDriverType driverType = getQrDriverZuolinInner(namespaceId);
+            if(driverType == DoorAccessDriverType.ZUOLIN) {
+                if(aesUserKey == null) {
+                    aesUserKey = generateAesUserKey(user, auth);    
+                }
+                if(aesUserKey == null) {
+                    return null;
+                    }
+                return createZuolinQrV1(aesUserKey.getSecret());
+                
+            } else if (driverType == DoorAccessDriverType.ZUOLIN_V2) {
+                if(aesUserKey == null) {
+                    aesUserKey = generateAesUserKey(user, auth);    
+                }
+                if(aesUserKey == null) {
+                    return null;
+                    }
+                Long qrImageTimeout = this.configProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_TIMEOUTS, 10*60l);
+                byte[] qrArr = Base64.decodeBase64(aesUserKey.getSecret());
+                return AclinkUtils.createZlQrCodeForFlapDoor(qrArr, System.currentTimeMillis(), qrImageTimeout*1000l);
+            }
+            
+        }
+        
+        return null;
     }
     
     @Override

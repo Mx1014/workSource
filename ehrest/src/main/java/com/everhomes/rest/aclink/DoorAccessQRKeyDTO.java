@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>qrDriver: QR 门禁类型 参考 {@link com.everhomes.rest.aclink.DoorAccessDriverType}</li>
  * <li>hardwares: 钥匙支持的设备列表 </li>
  * <li>extra: 额外对象描述</li>
+ * <li>webQRCode: web 端可以直接用这个参数生成二维码</li>
  * </ul>
  * @author janson
  *
@@ -42,6 +43,8 @@ public class DoorAccessQRKeyDTO {
     private List<String> hardwares;
     
     private String extra;
+    
+    private String webQRCode;
 
     public Long getId() {
         return id;
@@ -161,6 +164,14 @@ public class DoorAccessQRKeyDTO {
 
     public void setDoorOwnerType(Byte doorOwnerType) {
         this.doorOwnerType = doorOwnerType;
+    }
+
+    public String getWebQRCode() {
+        return webQRCode;
+    }
+
+    public void setWebQRCode(String webQRCode) {
+        this.webQRCode = webQRCode;
     }
 
     @Override

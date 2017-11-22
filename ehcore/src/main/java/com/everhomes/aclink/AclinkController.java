@@ -398,6 +398,24 @@ public class AclinkController extends ControllerBase {
     
     /**
      * 
+     * <b>URL: /aclink/listDoorAccessWebQRKey</b>
+     * <p>列出所有二维码门禁列表 </p>
+     * @return
+     */
+    @RequestMapping("listDoorAccessWebQRKey")
+    @RestReturn(value=ListDoorAccessQRKeyResponse.class)
+    public RestResponse listDoorAccessWebQRKey() {
+        RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.listDoorAccessQRKeyAndGenerateQR(true));
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
      * <b>URL: /aclink/getVisitor</b>
      * <p> 设备访客二维码 </p>
      * @return
@@ -600,7 +618,7 @@ public class AclinkController extends ControllerBase {
     
     /**
      * 
-     * <b>URL: /aclink/remoteOpen</b>
+     * <b>URL: /aclink/updateAndQueryQR</b>
      * <p>删除一个组或者单独一个门禁设备</p>
      * @return
      */
