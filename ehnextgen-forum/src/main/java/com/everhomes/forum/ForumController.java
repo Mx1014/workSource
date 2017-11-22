@@ -439,4 +439,49 @@ public class ForumController extends ControllerBase {
         return response;
     }
 
+
+    /**
+     * <b>URL: /forum/getForumSetting</b>
+     * <p>获取论坛基本配置</p>
+     * @return
+     */
+    @RequestMapping("getForumSetting")
+    @RestReturn(value=GetForumSettingResponse.class)
+    public RestResponse getForumSetting(GetForumSettingCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /forum/updateForumSetting</b>
+     * <p>更新论坛基本配置</p>
+     * @return
+     */
+    @RequestMapping("updateForumSetting")
+    @RestReturn(value=String.class)
+    public RestResponse updateForumSetting(UpdateForumSettingCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /forum/listForumServiceTypes</b>
+     * <p>获取论坛服务类型</p></p>
+     * @return
+     */
+    @RequestMapping("listForumServiceTypes")
+    @RestReturn(value=ListForumServiceTypesResponse.class)
+    public RestResponse listForumServiceTypes(ListForumServiceTypesCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+
 }
