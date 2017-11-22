@@ -365,15 +365,19 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 		String stepType = ctx.getStepType().getCode();
 		String params = flowNode.getParams();
+//motify by st.zheng 节点参数改为非必填
+//		if(StringUtils.isBlank(params)) {
+//			LOGGER.error("Invalid flowNode param.");
+//			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+//					"Invalid flowNode param.");
+//		}
 
-		if(StringUtils.isBlank(params)) {
-			LOGGER.error("Invalid flowNode param.");
-			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
-					"Invalid flowNode param.");
+		String nodeType = "";
+		if (!StringUtils.isBlank(params)) {
+			JSONObject paramJson = JSONObject.parseObject(params);
+			nodeType = paramJson.getString("nodeType");
 		}
 
-		JSONObject paramJson = JSONObject.parseObject(params);
-		String nodeType = paramJson.getString("nodeType");
 
 		LOGGER.debug("update pmtask request, stepType={}, nodeType={}", stepType, nodeType);
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
