@@ -17,6 +17,8 @@ import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.general_approval.PostApprovalFormSubformItemValue;
+import com.everhomes.rest.general_approval.PostApprovalFormSubformValue;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -291,25 +293,26 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				List<PostApprovalFormItem> items = list.stream().map(p->ConvertHelper.convert(p, PostApprovalFormItem.class))
 						.collect(Collectors.toList());
 				content += "本次服务的费用清单如下，请进行确认\n";
-				Long total = Long.valueOf(getFormItem(items,"总计").getFieldValue());
+				Long total = Long.valueOf(getTextString(getFormItem(items,"总计").getFieldValue()));
 				content += "总计:"+total+"元\n";
-				Long serviceFee = Long.valueOf(getFormItem(items,"服务费").getFieldValue());
+				Long serviceFee = Long.valueOf(getTextString(getFormItem(items,"服务费").getFieldValue()));
 				content += "服务费:"+total+"元\n";
 				content += "物品费:"+(total-serviceFee)+"元\n";
 				PostApprovalFormItem subForm = getFormItem(items,"物品");
 				if (subForm!=null) {
-					JSONArray array = JSONArray.parseArray(JSONObject.parseObject(subForm.getFieldValue()).getString("forms"));
+					PostApprovalFormSubformValue subFormValue = JSON.parseObject(subForm.getFieldValue(), PostApprovalFormSubformValue.class);
+					List<PostApprovalFormSubformItemValue> array = subFormValue.getForms();
 					if (array.size()!=0) {
 						content += "物品费详情：\n";
 						Gson g=new Gson();
-						for (int i=0;i<array.size();i++){
-							JSONArray itemIterator = JSONArray.parseArray(array.getJSONObject(i).getString("values"));
-							List<PostApprovalFormItem> itemAttri = g.fromJson(itemIterator.toJSONString(),
-									new TypeToken<List<PostApprovalFormItem>>(){}.getType());
-							content += getFormItem(itemAttri,"物品名称")+":";
-							content += getFormItem(itemAttri,"小计")+"元";
-							content += "("+getFormItem(itemAttri,"单价")+"元*"+getFormItem(itemAttri,"数量")+")";
+						for (PostApprovalFormSubformItemValue itemValue : array){
+							List<PostApprovalFormItem> values = itemValue.getValues();
+							content += getTextString(getFormItem(values,"物品名称").getFieldValue())+":";
+							content += getTextString(getFormItem(values,"小计").getFieldValue())+"元";
+							content += "("+getTextString(getFormItem(values,"单价").getFieldValue())+"元*"+
+									getTextString(getFormItem(values,"数量").getFieldValue())+")";
 						}
+						content += "如对上述费用有疑义请附言说明";
 					}
 				}
 				e.setValue(content);
@@ -327,6 +330,12 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		flowCase.setCustomObject(jo.toJSONString());
 
 		return entities;
+	}
+
+	private String getTextString(String json){
+		if (StringUtils.isEmpty(json))
+			return "";
+		return JSONObject.parseObject(json).getString("text");
 	}
 
 	private String processFormURL(String sourceType, String sourceId, String ownerType,String ownerId,String displayName) {

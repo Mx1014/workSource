@@ -1,5 +1,6 @@
 package com.everhomes.pmtask;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.entity.EntityType;
@@ -15,6 +16,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.apache.commons.lang.StringUtils;
+import org.apache.poi.util.StringUtil;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +82,7 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
         response.setValues(items);
 
         FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(pmTask.getId(), EntityType.PM_TASK.getCode(), moduleId);
-        if (vals!=null && vals.size()>0){ //第一次提交表单 执行下一步
+        if (vals==null || vals.size()==0){ //第一次提交表单 执行下一步
             FlowAutoStepDTO dto = new FlowAutoStepDTO();
             dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
             dto.setFlowCaseId(flowCase.getId());
@@ -119,24 +122,24 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
 
         String content = "";
         content += "本次服务的费用清单如下，请进行确认\n";
-        Long total = Long.valueOf(getFormItem(cmd.getValues(),"总计").getFieldValue());
+        Long total = Long.valueOf(getTextString(getFormItem(cmd.getValues(),"总计").getFieldValue()));
         content += "总计:"+total+"元\n";
-        Long serviceFee = Long.valueOf(getFormItem(cmd.getValues(),"服务费").getFieldValue());
+        Long serviceFee = Long.valueOf(getTextString(getFormItem(cmd.getValues(),"服务费").getFieldValue()));
         content += "服务费:"+total+"元\n";
         content += "物品费:"+(total-serviceFee)+"元\n";
         PostApprovalFormItem subForm = getFormItem(cmd.getValues(),"物品");
         if (subForm!=null) {
-            JSONArray array = JSONArray.parseArray(JSONObject.parseObject(subForm.getFieldValue()).getString("forms"));
+            PostApprovalFormSubformValue subFormValue = JSON.parseObject(subForm.getFieldValue(), PostApprovalFormSubformValue.class);
+            List<PostApprovalFormSubformItemValue> array = subFormValue.getForms();
             if (array.size()!=0) {
                 content += "物品费详情：\n";
                 Gson g=new Gson();
-                for (int i=0;i<array.size();i++){
-                    JSONArray itemIterator = JSONArray.parseArray(array.getJSONObject(i).getString("values"));
-                    List<PostApprovalFormItem> itemAttri = g.fromJson(itemIterator.toJSONString(),
-                            new TypeToken<List<PostApprovalFormItem>>(){}.getType());
-                    content += getFormItem(itemAttri,"物品名称")+":";
-                    content += getFormItem(itemAttri,"小计")+"元";
-                    content += "("+getFormItem(itemAttri,"单价")+"元*"+getFormItem(itemAttri,"数量")+")";
+                for (PostApprovalFormSubformItemValue itemValue : array){
+                    List<PostApprovalFormItem> values = itemValue.getValues();
+                    content += getTextString(getFormItem(values,"物品名称").getFieldValue())+":";
+                    content += getTextString(getFormItem(values,"小计").getFieldValue())+"元";
+                    content += "("+getTextString(getFormItem(values,"单价").getFieldValue())+"元*"+
+                            getTextString(getFormItem(values,"数量").getFieldValue())+")";
                 }
                 content += "如对上述费用有疑义请附言说明";
             }
@@ -148,11 +151,18 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
         return response;
     }
 
+
     private PostApprovalFormItem getFormItem(List<PostApprovalFormItem> values,String name){
         for (PostApprovalFormItem p:values)
             if (p.getFieldName().equals(name))
                 return p;
         return null;
+    }
+
+    private String getTextString(String json){
+        if (StringUtils.isEmpty(json))
+            return "";
+       return JSONObject.parseObject(json).getString("text");
     }
 
     private String processFlowURL(Long flowCaseId, String string, Long moduleId) {
