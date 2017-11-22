@@ -29,13 +29,7 @@ public class ShowBillForClientV2Command {
         this.isPendingPayment = isPendingPayment;
     }
 
-    public Byte getIsOwed() {
-        return isOwed;
-    }
 
-    public void setIsOwed(Byte isOwed) {
-        this.isOwed = isOwed;
-    }
 
     public Integer getNamespaceId() {
         return namespaceId;
