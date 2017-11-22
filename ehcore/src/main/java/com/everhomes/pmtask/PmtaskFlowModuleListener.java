@@ -123,14 +123,17 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 			if (currentNode instanceof FlowGraphNodeEnd)
 				return;
-
-			if(StringUtils.isBlank(params)) {
-				LOGGER.error("Invalid flowNode param.");
-				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
-						"Invalid flowNode param.");
+//motify by st.zheng 修改为非每个节点都必须配参数值
+//			if(StringUtils.isBlank(params)) {
+//				LOGGER.error("Invalid flowNode param.");
+//				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+//						"Invalid flowNode param.");
+//			}
+			String nodeType = "";
+			if (!StringUtils.isBlank(params)) {
+				JSONObject paramJson = JSONObject.parseObject(params);
+				nodeType = paramJson.getString("nodeType");
 			}
-			JSONObject paramJson = JSONObject.parseObject(params);
-			String nodeType = paramJson.getString("nodeType");
 			LOGGER.debug("update pmtask request, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
 
 			if ("ACCEPTING".equals(nodeType)) {

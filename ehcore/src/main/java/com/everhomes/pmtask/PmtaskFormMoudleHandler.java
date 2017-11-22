@@ -58,6 +58,7 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
         cmd3.setSourceId(cmd.getSourceId());
         cmd3.setSourceType(cmd.getSourceType());
         cmd3.setValues(cmd.getValues());
+        List<GeneralFormVal> vals = generalFormValProvider.queryGeneralFormVals(EntityType.PM_TASK.getCode(),pmTask.getId());
         //将旧的清单删除
         generalFormValProvider.deleteGeneralFormVals(EntityType.PM_TASK.getCode(),pmTask.getId());
         generalFormService.addGeneralFormValues(cmd3);
@@ -77,8 +78,18 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
         items.add(item);
         response.setValues(items);
 
-        //修改任务跟踪
         FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(pmTask.getId(), EntityType.PM_TASK.getCode(), moduleId);
+        if (vals!=null && vals.size()>0){ //第一次提交表单 执行下一步
+            FlowAutoStepDTO dto = new FlowAutoStepDTO();
+            dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+            dto.setFlowCaseId(flowCase.getId());
+            dto.setFlowMainId(flowCase.getFlowMainId());
+            dto.setFlowNodeId(flowCase.getCurrentNodeId());
+            dto.setFlowVersion(flowCase.getFlowVersion());
+            dto.setStepCount(flowCase.getStepCount());
+            flowService.processAutoStep(dto);
+        }
+        //修改任务跟踪
         FlowAutoStepDTO dto = new FlowAutoStepDTO();
         dto.setAutoStepType(FlowStepType.NO_STEP.getCode());
         dto.setFlowCaseId(flowCase.getId());
