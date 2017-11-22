@@ -2809,7 +2809,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 					val = new BigDecimal((String)value);
 					break;
 				case "Long":
-					val = Long.parseLong((String)value);
+					if (fieldName.equals("categoryId")) {
+						val = EquipmentCategories.fromName((String) value).getCode();
+					} else {
+						val = Long.parseLong((String) value);
+					}
 					break;
 				case "Timestamp":
 					if(((String)value).length()<1){
@@ -2833,10 +2837,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				case "Byte":
 					//转换成byte类型入库
 					if(fieldName.equals("status")){
-						val =EquipmentStatus.valueOf((String)value).getCode();
-					}
-					if(fieldName.equals("categotyId")){
-						val =EquipmentCategorys.valueOf((String)value).getCode();
+						val =EquipmentStatus.fromName((String)value).getCode();
 					}
 					if(fieldName.equals("qrCodeFlag")){
 						if("启用".equals((String)value)){
