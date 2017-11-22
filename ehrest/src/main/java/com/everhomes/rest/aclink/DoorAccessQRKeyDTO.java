@@ -25,6 +25,7 @@ public class DoorAccessQRKeyDTO {
     private Long id;
     private Long doorGroupId;
     private String doorName;
+    private String doorDisplayName;
     private Long doorOwnerId;
     private Byte doorOwnerType;
     
@@ -172,6 +173,14 @@ public class DoorAccessQRKeyDTO {
 
     public void setWebQRCode(String webQRCode) {
         this.webQRCode = webQRCode;
+    }
+
+    public String getDoorDisplayName() {
+        return doorDisplayName;
+    }
+
+    public void setDoorDisplayName(String doorDisplayName) {
+        this.doorDisplayName = doorDisplayName;
     }
 
     @Override
