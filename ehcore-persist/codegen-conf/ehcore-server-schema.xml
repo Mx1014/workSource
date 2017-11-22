@@ -249,6 +249,7 @@
 
 	    eh_industry_types | eh_guild_applies |
             eh_rentalv2_price_packages |
+            eh_forum_service_types |
         </includes>
 
             <!-- All elements that are excluded from your schema
