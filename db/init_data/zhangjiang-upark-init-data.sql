@@ -2374,5 +2374,6 @@ SET @eh_service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scope
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
 VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999971, @menu_id, '', 'EhNamespaces', 999971, NULL, 2);
 
+update eh_service_alliance_categories SET entry_id = 14 WHERE namespace_id = 999971 AND `name` = '服务联盟' AND entry_id = 10;
 -- end  by dengs.
 
