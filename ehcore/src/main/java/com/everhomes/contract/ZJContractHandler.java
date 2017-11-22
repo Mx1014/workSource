@@ -135,11 +135,12 @@ public class ZJContractHandler implements ContractService{
             return response;
         }
         ShenzhouJsonEntity<List<ZJContract>> entity = JSONObject.parseObject(enterprises, new TypeReference<ShenzhouJsonEntity<List<ZJContract>>>(){});
+        if(entity.getNextPageOffset() != null && !"".equals(entity.getNextPageOffset())) {
+            response.setNextPageAnchor(entity.getNextPageOffset().longValue());
+        }
+
         List<ZJContract> contracts = entity.getResponse();
         if(contracts != null && contracts.size() > 0) {
-            if(contracts.size() > cmd.getPageSize()) {
-                response.setNextPageAnchor(cmd.getPageAnchor() + 1);
-            }
             List<ContractDTO> dtos = contracts.stream().map(contract -> {
                 ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
                 if(dto.getContractNumber() == null) {
