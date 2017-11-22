@@ -153,4 +153,5 @@ public interface AssetService {
 
     void activeAutoBillNotice();
 
+    CheckEnterpriseHasArrearageResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd);
 }

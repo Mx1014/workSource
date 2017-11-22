@@ -27,6 +27,16 @@ public class PaymentExpectancyDTO {
     private BigDecimal amountReceivable;
     private String dueDateStr;
 
+    private Long billItemId;
+
+    public Long getBillItemId() {
+        return billItemId;
+    }
+
+    public void setBillItemId(Long billItemId) {
+        this.billItemId = billItemId;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

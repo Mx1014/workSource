@@ -6278,6 +6278,7 @@ public class FlowServiceImpl implements FlowService {
             flowLane.setFlowMainId(flow.getId());
             flowLane.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
             flowLane.setLaneLevel(flowLaneCmd.getLaneLevel());
+            flowLane.setFlowNodeLevel(flowLaneCmd.getFlowNodeLevel());
             flowLane.setNamespaceId(flow.getNamespaceId());
             flowLane.setStatus(FlowCommonStatus.ACTIVE.getCode());
             flowLane.setIdentifierNodeLevel(flowLaneCmd.getIdentifierNodeLevel());
