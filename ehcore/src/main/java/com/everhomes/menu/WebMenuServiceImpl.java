@@ -398,22 +398,35 @@ public class WebMenuServiceImpl implements WebMenuService {
 			for (WebMenuDTO dto: dtos){
 				if(WebMenuSelectedFlag.fromCode(dto.getSelected()) == WebMenuSelectedFlag.YES){
 					WebMenuScope scope = new WebMenuScope();
+
+					//关于名字的配置
 					scope.setApplyPolicy(dto.getApplyPolicy());
 					if(WebMenuScopeApplyPolicy.fromCode(dto.getApplyPolicy()) == null){
 						scope.setApplyPolicy(WebMenuScopeApplyPolicy.REVERT.getCode());
 					}else if(WebMenuScopeApplyPolicy.fromCode(dto.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
-						scope.setMenuName(dto.getName());
+						//如果覆盖，去查下是否真的覆盖了。
+						WebMenu menu = webMenuProvider.getWebMenuById(dto.getId());
+						if(menu.getName().equals(dto.getName())){
+							//其实并没有修改
+							scope.setApplyPolicy(WebMenuScopeApplyPolicy.REVERT.getCode());
+							scope.setMenuName(null);
+						}else {
+							//真的修改了
+							scope.setMenuName(dto.getName());
+						}
 					}
+
 					scope.setMenuId(dto.getId());
 					scope.setOwnerType(EntityType.NAMESPACE.getCode());
 					scope.setOwnerId((long)namespaceId);
 					webMenuScopes.add(scope);
 
 					//获取子菜单
-					if(dto.getLeafFlag() != null && dto.getLeafFlag() == 1){
-						List<WebMenuScope> leafScopes = fromTree(dto.getDtos(), namespaceId);
+					List<WebMenuScope> leafScopes = fromTree(dto.getDtos(), namespaceId);
+					if(leafScopes != null && leafScopes.size() > 0){
 						webMenuScopes.addAll(leafScopes);
 					}
+
 				}
 			}
 		}
