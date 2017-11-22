@@ -97,7 +97,7 @@ public class ZJContractHandler implements ContractService{
         Community community = communityProvider.findCommunityById(cmd.getCommunityId());
         String communityIdentifier = community == null ? "" : community.getNamespaceCommunityToken();
         String pageOffset = cmd.getPageAnchor() == null ? "" : cmd.getPageAnchor().toString();
-        String pageSize = cmd.getPageSize() == null ? "" : cmd.getPageSize().toString();
+        String pageSize = cmd.getPageSize() == null ? "" : String.valueOf(cmd.getPageSize()+1);
         Map<String, String> params = new HashMap<>();
         if(cmd.getCategoryItemId() == null) {
             String categoryName = "";
@@ -137,6 +137,9 @@ public class ZJContractHandler implements ContractService{
         ShenzhouJsonEntity<List<ZJContract>> entity = JSONObject.parseObject(enterprises, new TypeReference<ShenzhouJsonEntity<List<ZJContract>>>(){});
         List<ZJContract> contracts = entity.getResponse();
         if(contracts != null && contracts.size() > 0) {
+            if(contracts.size() > cmd.getPageSize()) {
+                response.setNextPageAnchor(cmd.getPageAnchor() + 1);
+            }
             List<ContractDTO> dtos = contracts.stream().map(contract -> {
                 ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
                 if(dto.getContractNumber() == null) {
