@@ -45,6 +45,7 @@ public class MeWebMenuProviderImpl implements MeWebMenuProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhMeWebMenusRecord> query = context.selectQuery(Tables.EH_ME_WEB_MENUS);
         query.addConditions(Tables.EH_ME_WEB_MENUS.NAMESPACE_ID.eq(namespaceId));
+        query.addOrderBy(Tables.EH_ME_WEB_MENUS.POSITION_FLAG.asc());
         query.addOrderBy(Tables.EH_ME_WEB_MENUS.SORT_NUM.asc());
         List<MeWebMenu> list = query.fetch().map(r ->
                 ConvertHelper.convert(r, MeWebMenu.class)
