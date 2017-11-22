@@ -1738,7 +1738,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void syncEnterpriseCustomers(SyncCustomersCommand cmd) {
         if(cmd.getNamespaceId() == 999971) {
-            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode()).tryEnter(()-> {
+            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId()).tryEnter(()-> {
                 ExecutorUtil.submit(new Runnable() {
                     @Override
                     public void run() {
