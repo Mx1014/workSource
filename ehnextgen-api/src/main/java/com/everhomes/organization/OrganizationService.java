@@ -578,4 +578,6 @@ public interface OrganizationService {
 
 	// todo 0:本部门；1:上级部门; 2:上上级部门; 3:上上上级部门
 	List<OrganizationManagerDTO> getManagerByTargetIdAndOrgId(Long orgId, Long targetId, Integer level);
+
+	List<Organization> listUserOrganizations(Integer namespaceId, Long userId, OrganizationGroupType groupType);
 }

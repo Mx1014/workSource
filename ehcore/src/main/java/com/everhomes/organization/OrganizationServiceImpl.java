@@ -2769,10 +2769,32 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public List<OrganizationDTO> listUserRelateOrganizations(Integer namespaceId, Long userId, OrganizationGroupType groupType) {
         Long startTime = System.currentTimeMillis();
+
+        List<Organization> organizations = listUserOrganizations(namespaceId, userId, groupType);
+
+        List<OrganizationDTO> dtos = new ArrayList<>();
+
+        for (Organization org: organizations) {
+            OrganizationDTO dto = toOrganizationDTO(userId, org);
+        }
+
+        //：todo 去重
+        dtos = new ArrayList<>(new HashSet<>(dtos));
+
+        Long endTime = System.currentTimeMillis();
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("TrackUserRelatedCost:listUserRelateOrganizations:elapse:{}", endTime - startTime);
+        }
+        return dtos;
+    }
+
+    @Override
+    public List<Organization> listUserOrganizations(Integer namespaceId, Long userId, OrganizationGroupType groupType) {
+        OrganizationGroupType tempGroupType = null;
+
         List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(userId);
 
-        OrganizationGroupType tempGroupType = null;
-        List<OrganizationDTO> dtos = new ArrayList<OrganizationDTO>();
+        List<Organization> dtos = new ArrayList<>();
         for (OrganizationMember member : orgMembers) {
             // 如果机构不存在，则丢弃该成员对应的机构
             Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
@@ -2800,18 +2822,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                         + ", namespaceId=" + namespaceId + ", groupType=" + groupType + ", orgStatus" + orgStatus);
                 continue;
             }
-
-            OrganizationDTO dto = toOrganizationDTO(userId, org);
-            dtos.add(dto);
+            dtos.add(org);
         }
 
-        //：todo 去重
-        dtos = new ArrayList<>(new HashSet<>(dtos));
-
-        Long endTime = System.currentTimeMillis();
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("TrackUserRelatedCost:listUserRelateOrganizations:elapse:{}", endTime - startTime);
-        }
         return dtos;
     }
 

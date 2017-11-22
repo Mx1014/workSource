@@ -39,7 +39,7 @@ public class RelocationController extends ControllerBase {
     @RestReturn(value=SearchRelocationRequestsResponse.class)
     public RestResponse searchRelocationRequests(SearchRelocationRequestsCommand cmd) {
         
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(relocationService.searchRelocationRequests(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -53,7 +53,7 @@ public class RelocationController extends ControllerBase {
     @RestReturn(value=RelocationRequestDTO.class)
     public RestResponse getRelocationRequestDetail(GetRelocationRequestDetailCommand cmd) {
 
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(relocationService.getRelocationRequestDetail(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -67,7 +67,7 @@ public class RelocationController extends ControllerBase {
     @RestReturn(value=RelocationInfoDTO.class)
     public RestResponse getRelocationUserInfo(GetRelocationUserInfoCommand cmd) {
 
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(relocationService.getRelocationUserInfo(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -81,7 +81,7 @@ public class RelocationController extends ControllerBase {
     @RestReturn(value=RelocationRequestDTO.class)
     public RestResponse requestRelocation(RequestRelocationCommand cmd) {
 
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(relocationService.requestRelocation(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

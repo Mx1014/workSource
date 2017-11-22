@@ -2,18 +2,17 @@
 package com.everhomes.rest.relocation;
 
 /**
- * <ul>物品搬迁申请状态
- * <li>CANCELED(0): 已取消</li>
- * <li>COMPLETED(1): 处理中</li>
- * <li>PROCESSING(2): 已完成</li>
+ * <ul>物品搬迁通用状态
+ * <li>INACTIVE(0): 无效</li>
+ * <li>ACTIVE(2): 正常使用中</li>
  * </ul>
  */
-public enum RelocationRequestStatus {
-	CANCELED((byte)0), COMPLETED((byte)1), PROCESSING((byte)2);
+public enum RelocationCommonStatus {
+	INACTIVE((byte)0), ACTIVE((byte)2);
 
     private byte code;
 
-    private RelocationRequestStatus(byte code) {
+    private RelocationCommonStatus(byte code) {
         this.code = code;
     }
     
@@ -21,10 +20,10 @@ public enum RelocationRequestStatus {
         return this.code;
     }
     
-    public static RelocationRequestStatus fromCode(Byte code) {
+    public static RelocationCommonStatus fromCode(Byte code) {
         if(code != null) {
-            RelocationRequestStatus[] values = RelocationRequestStatus.values();
-            for(RelocationRequestStatus value : values) {
+            RelocationCommonStatus[] values = RelocationCommonStatus.values();
+            for(RelocationCommonStatus value : values) {
                 if(value.code == code.byteValue()) {
                     return value;
                 }

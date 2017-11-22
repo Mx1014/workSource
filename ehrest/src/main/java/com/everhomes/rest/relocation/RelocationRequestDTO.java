@@ -15,10 +15,11 @@ public class RelocationRequestDTO {
     private Integer namespaceId;
     private String requestNo;
     private Long requestorEnterpriseId;
-    private String requestorEntperiseName;
-    private String requestorEntperiseAddress;
+    private String requestorEnterpriseName;
+    private String requestorEnterpriseAddress;
     private Long requestorUid;
     private String requestorName;
+    private String contactPhone;
     private Timestamp relocationDate;
     private Byte status;
     private Long creatorUid;
@@ -26,6 +27,7 @@ public class RelocationRequestDTO {
     private Long flowCaseId;
     private Timestamp cancelTime;
     private Long cancelUid;
+
     @ItemType(RelocationRequestItemDTO.class)
     private List<RelocationRequestItemDTO> items;
 
@@ -69,20 +71,36 @@ public class RelocationRequestDTO {
         this.requestorEnterpriseId = requestorEnterpriseId;
     }
 
-    public String getRequestorEntperiseName() {
-        return requestorEntperiseName;
+    public String getRequestorEnterpriseName() {
+        return requestorEnterpriseName;
     }
 
-    public void setRequestorEntperiseName(String requestorEntperiseName) {
-        this.requestorEntperiseName = requestorEntperiseName;
+    public void setRequestorEnterpriseName(String requestorEnterpriseName) {
+        this.requestorEnterpriseName = requestorEnterpriseName;
     }
 
-    public String getRequestorEntperiseAddress() {
-        return requestorEntperiseAddress;
+    public String getRequestorEnterpriseAddress() {
+        return requestorEnterpriseAddress;
     }
 
-    public void setRequestorEntperiseAddress(String requestorEntperiseAddress) {
-        this.requestorEntperiseAddress = requestorEntperiseAddress;
+    public void setRequestorEnterpriseAddress(String requestorEnterpriseAddress) {
+        this.requestorEnterpriseAddress = requestorEnterpriseAddress;
+    }
+
+    public Timestamp getCancelTime() {
+        return cancelTime;
+    }
+
+    public void setCancelTime(Timestamp cancelTime) {
+        this.cancelTime = cancelTime;
+    }
+
+    public Long getCancelUid() {
+        return cancelUid;
+    }
+
+    public void setCancelUid(Long cancelUid) {
+        this.cancelUid = cancelUid;
     }
 
     public Long getRequestorUid() {
@@ -141,20 +159,12 @@ public class RelocationRequestDTO {
         this.flowCaseId = flowCaseId;
     }
 
-    public Timestamp getCancelTime() {
-        return cancelTime;
+    public String getContactPhone() {
+        return contactPhone;
     }
 
-    public void setCancelTime(Timestamp cancelTime) {
-        this.cancelTime = cancelTime;
-    }
-
-    public Long getCancelUid() {
-        return cancelUid;
-    }
-
-    public void setCancelUid(Long cancelUid) {
-        this.cancelUid = cancelUid;
+    public void setContactPhone(String contactPhone) {
+        this.contactPhone = contactPhone;
     }
 
     @Override
