@@ -241,12 +241,14 @@ public class FieldServiceImpl implements FieldService {
         List<FieldGroupDTO> groups = listFieldGroups(cmd);
         //设备巡检中字段 暂时单sheet
         if (cmd.getEquipmentCategoryName() != null) {
-            for (int m = 0; m < groups.size(); m++) {
-                if (!groups.get(m).getGroupDisplayName().equals(cmd.getEquipmentCategoryName())) {
+            List<FieldGroupDTO> temp = new ArrayList<>();
+            for (FieldGroupDTO  group :groups) {
+                if (group.getGroupDisplayName().equals(cmd.getEquipmentCategoryName())) {
                     //groups 中只有一个sheet 只保留传过来的那个（物业巡检）
-                    groups.remove(m);
+                    temp.add(group);
                 }
             }
+            groups = temp;
         }
         //先去掉 名为“基本信息” 的sheet，建议使用stream的方式
         if(groups==null){

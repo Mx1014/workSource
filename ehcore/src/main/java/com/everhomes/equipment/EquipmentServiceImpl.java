@@ -2672,7 +2672,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 			fieldOrders.add(field.getFieldName());
 		}
 		int flag = 0;
-		for (int i = 1; i < resultList.size(); i++) {
+		//因为有注释事项一行 从第二行开始
+		for (int i = 2; i < resultList.size(); i++) {
 			RowResult r = (RowResult) resultList.get(i);
 
 			if (flag < fieldOrders.size()) {
