@@ -20,13 +20,13 @@ public class GetForumSettingResponse {
     @ItemType(ForumServiceTypeDTO.class)
     private List<ForumServiceTypeDTO> serviceTypes;
 
-    @ItemType(ForumServiceTypeDTO.class)
+    @ItemType(TagDTO.class)
     private List<TagDTO> topicTags;
 
-    @ItemType(ForumServiceTypeDTO.class)
+    @ItemType(TagDTO.class)
     private List<TagDTO> activityTags;
 
-    @ItemType(ForumServiceTypeDTO.class)
+    @ItemType(TagDTO.class)
     private List<TagDTO> pollTags;
 
     private Byte interactFlag;

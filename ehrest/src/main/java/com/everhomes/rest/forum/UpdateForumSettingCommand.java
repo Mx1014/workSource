@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.forum;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.hotTag.TagDTO;
 import com.everhomes.util.StringHelper;
 
@@ -23,9 +24,13 @@ public class UpdateForumSettingCommand {
     private Integer namespaceId;
     private Long forumId;
     private Long entryId;
+    @ItemType(ForumServiceTypeDTO.class)
     private List<ForumServiceTypeDTO> serviceTypes;
+    @ItemType(TagDTO.class)
     private List<TagDTO> topicTags;
+    @ItemType(TagDTO.class)
     private List<TagDTO> activityTags;
+    @ItemType(TagDTO.class)
     private List<TagDTO> pollTags;
     private Byte interactFlag;
 
