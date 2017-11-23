@@ -8,3 +8,6 @@ CREATE TABLE `eh_forum_service_types` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 热门标签，增加模块类型，1-论坛、2-活动、3-俱乐部...等等  add by yanjun 20171123
+ALTER TABLE `eh_hot_tags`
+ADD COLUMN `module_type`  tinyint(4) NULL DEFAULT 1 COMMENT 'module type, 1-forum 2-activity...........';
