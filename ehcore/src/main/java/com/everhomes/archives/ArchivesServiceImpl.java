@@ -20,7 +20,6 @@ import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.sms.DateUtil;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -2400,7 +2399,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             Map<Integer, List<ArchivesNotifications>> notifyMap = results.stream().collect(Collectors.groupingBy
                     (ArchivesNotifications::getNotifyHour));
             for (Integer key : notifyMap.keySet()) {
-                archivesConfigurationService.sendingMail(key, notifyMap.get(key));
+                archivesConfigurationService.sendingMailJob(key, notifyMap.get(key));
             }
         }
     }
