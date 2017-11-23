@@ -279,6 +279,7 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 		SelectQuery<EhWebMenusRecord> query = context.selectQuery(Tables.EH_WEB_MENUS);
 		query.addConditions(Tables.EH_WEB_MENUS.PARENT_ID.eq(parentId));
 		query.addConditions(Tables.EH_WEB_MENUS.TYPE.eq(type));
+		query.addConditions(Tables.EH_WEB_MENUS.STATUS.eq(WebMenuStatus.ACTIVE.getCode()));
 		query.addOrderBy(Tables.EH_WEB_MENUS.SORT_NUM.asc());
 
 		List<WebMenu> objs = query.fetch().map((r) -> ConvertHelper.convert(r, WebMenu.class));
