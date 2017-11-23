@@ -991,14 +991,16 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 
 			List<EquipmentStandardMap> maps = equipmentProvider.findByTarget(equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
-			for(EquipmentStandardMap map : maps) {
-				if(!updateStandardIds.contains(map.getStandardId())) {
-					map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
-					equipmentProvider.updateEquipmentStandardMap(map);
-					equipmentStandardMapSearcher.feedDoc(map);
+			if (maps.size() > 0 && maps != null) {
+				for(EquipmentStandardMap map : maps) {
+                    if(!updateStandardIds.contains(map.getStandardId())) {
+                        map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
+                        equipmentProvider.updateEquipmentStandardMap(map);
+                        equipmentStandardMapSearcher.feedDoc(map);
 
-					inactiveTasks(equipment.getId(), map.getStandardId());
-				}
+                        inactiveTasks(equipment.getId(), map.getStandardId());
+                    }
+                }
 			}
 
 			List<EquipmentAttachmentDTO> attachments = new ArrayList<EquipmentAttachmentDTO>();
