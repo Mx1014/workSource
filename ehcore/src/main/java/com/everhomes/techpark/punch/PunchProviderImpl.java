@@ -174,7 +174,9 @@ public class PunchProviderImpl implements PunchProvider {
 		condition = condition.and(condition3);
 		condition = condition.and(condition4);
 		step.where(condition);
-		List<PunchLog> result = step.orderBy(Tables.EH_PUNCH_LOGS.ID.asc())
+		List<PunchLog> result = step.orderBy(Tables.EH_PUNCH_LOGS.USER_ID.asc(),
+				Tables.EH_PUNCH_LOGS.PUNCH_DATE.asc(),Tables.EH_PUNCH_LOGS.PUNCH_INTERVAL_NO.asc(),
+				Tables.EH_PUNCH_LOGS.PUNCH_TYPE.asc())
 				.fetch().map((r) -> {
 					return ConvertHelper.convert(r, PunchLog.class);
 				});
