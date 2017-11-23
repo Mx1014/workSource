@@ -1294,7 +1294,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			data.setStatus(EquipmentStatus.fromStatus(equipmentsDTO.getStatus()).getName());
 		}
 		if(equipmentsDTO.getCategoryId()!=null){
-			data.setCategoryId(equipmentsDTO.getCategoryPath());
+				data.setCategoryId(EquipmentCategories.fromStatus(equipmentsDTO.getCategoryId().byteValue()).getName());
 		}
 
 		return data;
