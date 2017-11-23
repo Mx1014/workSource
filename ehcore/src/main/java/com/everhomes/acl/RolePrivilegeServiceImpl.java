@@ -3543,7 +3543,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 
 	@Override
-	public void resetServiceModuleAdministrators(ResetServiceModuleAdministratorsCommand cmd) {
+	public void  resetServiceModuleAdministrators(ResetServiceModuleAdministratorsCommand cmd) {
 		User user = UserContext.current().getUser();
 		dbProvider.execute((TransactionStatus status) -> {
 
@@ -3596,11 +3596,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				}else if(cmd.getOrgControlOption() == ControlTargetOption.CURRENT_DEPARTMENT.getCode()){
 					// 当选择本部门及以下时，对config进行处理 （获取部门）
 					List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByUId(targetId);
-					members = members.stream().filter(r->r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()) && r.getStatus() == OrganizationMemberStatus.ACTIVE.getCode())
+					// 尝试获取部门id
+					List<OrganizationMember> members_depart = members.stream().filter(r->r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()) && r.getStatus() == OrganizationMemberStatus.ACTIVE.getCode())
 							.collect(Collectors.toList());
-					if(members != null && members.size() > 0){
-						orgControlDetails = Collections.singletonList(new ControlTarget(members.get(0).getOrganizationId(),IncludeChildFlagType.YES.getCode()));
+					if(members_depart != null && members_depart.size() > 0){
+						orgControlDetails = Collections.singletonList(new ControlTarget(members_depart.get(0).getOrganizationId(),IncludeChildFlagType.YES.getCode()));
+					}else{//尝试获取部门失败，获取公司id
+						List<OrganizationMember> members_enterprise = members.stream().filter(r->r.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode()) && r.getStatus() == OrganizationMemberStatus.ACTIVE.getCode())
+								.collect(Collectors.toList());
+						if(members_enterprise != null && members_enterprise.size() > 0){
+							orgControlDetails = Collections.singletonList(new ControlTarget(members_depart.get(0).getOrganizationId(),IncludeChildFlagType.YES.getCode()));
+						}
 					}
+
 				}else if(cmd.getOrgControlOption() == ControlTargetOption.SPECIFIC_ORGS.getCode()){
 					orgControlDetails = cmd.getOrgControlDetails();
 				}
