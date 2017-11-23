@@ -2824,6 +2824,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
 
+        //检查应用管理员 add by lei.lv
+        List<Project> projects_app = authorizationProvider.getManageAuthorizationProjectsByAuthAndTargets(EntityType.SERVICE_MODULE_APP.getCode(), null, targets);
+        for (Project project : projects_app) {
+            if (EntityType.fromCode(project.getProjectType()) == EntityType.ORGANIZATIONS) {
+                organizationIds.add(project.getProjectId());
+            }
+        }
+
         List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(userId);
         for (OrganizationMember member : orgMembers) {
             if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus())) {
@@ -2833,14 +2841,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
             }
 
-        }
-
-        //检查应用管理员 add by lei.lv
-        List<Project> projects_app = authorizationProvider.getManageAuthorizationProjectsByAuthAndTargets(EntityType.SERVICE_MODULE_APP.getCode(), null, targets);
-        for (Project project : projects_app) {
-            if (EntityType.fromCode(project.getProjectType()) == EntityType.ORGANIZATIONS) {
-                organizationIds.add(project.getProjectId());
-            }
         }
 
         //把用户 所有关联的部门放到targets里面查询
