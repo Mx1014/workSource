@@ -133,4 +133,6 @@ public interface CommunityProvider {
 
     List<Community> listCommunitiesByCityIdAndAreaId(Integer namespaceId, Long cityId, Long areaId, String keyword, Long pageAnchor,
                                                      Integer pageSize);
+
+    String getCommunityToken(String tokenType, Long communityId);
 }

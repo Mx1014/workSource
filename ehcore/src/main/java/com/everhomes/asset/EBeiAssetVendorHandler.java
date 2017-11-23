@@ -12,12 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by ying.xiong on 2017/4/12.
@@ -28,6 +27,9 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
 
     @Autowired
     private PmKeXingBillService keXingBillService;
+
+    @Autowired
+    private AssetProvider assetProvider;
 
     private static ZuolinAssetVendorHandler zuolinAssetVendorHandler = new ZuolinAssetVendorHandler();
 
@@ -125,16 +127,102 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public List<ListBillsDTO> listBills(String communityIdentifier, String contractNum, Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName, String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Integer pageOffSet, Integer pageSize, String targetName, Byte status, String targetType, ListBillsResponse response) {
-        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
-        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                "Insufficient privilege");
+        if(pageOffSet==null){
+            pageOffSet = 1;
+        }
+        if(pageSize == null){
+            pageSize = 20;
+        }
+        List<ListBillsDTO> list = new ArrayList<>();
+        PaymentBillGroup group = assetProvider.getBillGroupById(billGroupId);
+        String fiProperty = getFiPropertyName(group.getName());
+        Long targetId = null;
+        GetLeaseContractBillOnFiPropertyRes res = keXingBillService.getFiPropertyBills(communityIdentifier,contractNum,dateStrBegin,dateStrEnd,fiProperty,billStatus,targetName,targetId,pageSize,pageOffSet);
+        //处理responseCode
+        if(!res.getResponseCode().equals("200")){
+            LOGGER.error("http get for ke xing failed, reason is : {}",res.getErrorMsg());
+            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.HTTP_EBEI_ERROR,"http to eBei error");
+        }
+        //处理数据
+        List<GetLeaseContractBillOnFiPropertyData> data = res.getData();
+        for(int i = 0; i < data.size(); i ++){
+            GetLeaseContractBillOnFiPropertyData source = data.get(i);
+            ListBillsDTO dto = new ListBillsDTO();
+            dto.setNoticeTel(source.getNoticeTels());
+            dto.setOwnerType("community");
+            dto.setDateStr(source.getChargePeriod());
+            dto.setTargetName(source.getCustomerName());
+//            dto.setTargetId();
+            dto.setTargetType("eh_organization");
+            dto.setContractNum(source.getContractNum());
+            dto.setContractId(source.getContractId());
+            dto.setAmountReceived(new BigDecimal(source.getAmountReceived()));
+            dto.setAmountReceivable(new BigDecimal(source.getShouldMoney()));
+            dto.setAmountOwed(new BigDecimal(source.getActualMoney()));
+            dto.setBuildingName(source.getBuildingRename());
+//            dto.setApartmentName();
+            dto.setBillGroupName(getFiPropertyName(source.getFiProperty()));
+            dto.setBillStatus(Byte.parseByte(source.getIsPay()));
+            dto.setBillId(source.getBillId());
+            list.add(dto);
+        }
+        if(res.getHasNextPag().equals("1")){
+            response.setNextPageAnchor(pageOffSet.longValue()+1l);
+        }else{
+            response.setNextPageAnchor(null);
+        }
+        return list;
+    }
+
+    private String getFiPropertyName(String name) {
+        if(name.equals("开发商")){
+            return "租金";
+        }else if(name.equals("物业")){
+            return "物业管理费";
+        }else if(name.equals("租金")){
+            return "开发商";
+        }else if(name.equals("物业管理费")){
+            return "物业";
+        }
+        return "";
     }
 
     @Override
-    public List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageOffSet, Integer pageSize) {
-        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
-        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                "Insufficient privilege");
+    public List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageOffSet, Integer pageSize,Long ownerId, ListBillItemsResponse response) {
+        List<BillDTO> list = new ArrayList<>();
+        if (pageOffSet == null) {
+            pageOffSet = 1;
+        }
+        if(pageSize == null){
+            pageSize = 100;
+        }
+        GetLeaseContractReceivableRes res = keXingBillService.listFiCategoryBills(billId,ownerId,pageOffSet,pageSize);
+        //处理responseCode
+        if(!res.getResponseCode().equals("200")){
+            LOGGER.error("http get for ke xing failed, reason is : {}",res.getErrorMsg());
+            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.HTTP_EBEI_ERROR,"http to eBei error");
+        }
+        List<GetLeaseContractReceivableData> data =  res.getData();
+        for(int i = 0; i < data.size(); i++){
+            GetLeaseContractReceivableData source = data.get(i);
+            BillDTO dto = new BillDTO();
+            dto.setBillItemName(source.getFiCategory());
+            dto.setTargetName(source.getCustomerName());
+            dto.setDateStr(source.getChargePeriod());
+            dto.setBillStatus(Byte.valueOf(source.getIsPay()));
+            dto.setAmountReceived(new BigDecimal(source.getReceivedMoney()));
+            dto.setAmountReceivable(new BigDecimal(source.getShouldMoney()));
+            dto.setAmountOwed(new BigDecimal(source.getActualMoney()));
+            dto.setApartmentName(source.getBuildingRename());
+            dto.setBuildingName(source.getBuildingRename());
+            dto.setTargetType("eh_organization");
+
+            list.add(dto);
+        }
+        if(res.getHasNextPag().equals("1")){
+            response.setNextPageAnchor(pageOffSet.longValue()+1l);
+        }
+        return list;
     }
 
     @Override
@@ -266,6 +354,71 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     @Override
     public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
         return null;
+    }
+
+    @Override
+    public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
+        List<ShowBillForClientV2DTO> list = new ArrayList<>();
+        GetLeaseContractBillOnFiPropertyRes res = keXingBillService.getAllFiPropertyBills(cmd.getNamespaceId(),cmd.getOwnerId(),cmd.getTargetId(),cmd.getTargetType(),(byte)0);
+        //处理数据
+        List<GetLeaseContractBillOnFiPropertyData> data = res.getData();
+        Map<String,List<GetLeaseContractBillOnFiPropertyData>> tabs = new HashMap<>();
+        for(int i = 0; i < data.size(); i++){
+            GetLeaseContractBillOnFiPropertyData source = data.get(i);
+            String key = source.getContractId()+"-"+source.getFiProperty();
+            if(tabs.containsKey(key)){
+                tabs.get(key).add(source);
+            }else{
+                ArrayList<GetLeaseContractBillOnFiPropertyData> values = new ArrayList<>();
+                values.add(source);
+                tabs.put(key,values);
+            }
+        }
+        for(Map.Entry<String,List<GetLeaseContractBillOnFiPropertyData>> entry : tabs.entrySet()){
+            String[] fiPropertyAndContractId = entry.getKey().split("-");
+            ShowBillForClientV2DTO dto = new ShowBillForClientV2DTO(getFiPropertyName(fiPropertyAndContractId[0]),fiPropertyAndContractId[1]);
+            List<GetLeaseContractBillOnFiPropertyData> values = entry.getValue();
+            List<BillForClientV2> bills = new ArrayList<>();
+            BigDecimal overallOwedAmount = new BigDecimal("0");
+            StringBuilder addresses = new StringBuilder();
+            for(int i = 0; i < values.size(); i++){
+                GetLeaseContractBillOnFiPropertyData value = values.get(i);
+                BillForClientV2 bill = new BillForClientV2();
+                bill.setBillId(value.getBillId());
+                bill.setAmountOwed(value.getActualMoney());
+                overallOwedAmount = overallOwedAmount.add(new BigDecimal(value.getActualMoney()));
+                bill.setAmountReceivable(value.getShouldMoney());
+                bill.setBillDuration(value.getDateStrBegin()+"至"+value.getDateStrEnd());
+                addresses.append(value.getBuildingRename());
+                if(i != values.size()-1) addresses.append(",");
+                bills.add(bill);
+            }
+            dto.setBills(bills);
+            dto.setOverAllAmountOwed(overallOwedAmount.toString());
+            dto.setAddressStr(addresses.toString());
+            list.add(dto);
+        }
+        return list;
+    }
+
+    @Override
+    public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
+        List<ListAllBillsForClientDTO> list = new ArrayList<>();
+        GetLeaseContractBillOnFiPropertyRes res = keXingBillService.getAllFiPropertyBills(cmd.getNamespaceId(),cmd.getOwnerId(),cmd.getTargetId(),cmd.getTargetType(),null);
+        List<GetLeaseContractBillOnFiPropertyData> data = res.getData();
+        for(int i = 0; i < data.size(); i ++){
+            GetLeaseContractBillOnFiPropertyData source = data.get(i);
+            ListAllBillsForClientDTO dto = new ListAllBillsForClientDTO();
+            dto.setBillGroupName(getFiPropertyName(source.getFiProperty()));
+            dto.setDateStrEnd(source.getDateStrEnd());
+            dto.setDateStrBegin(source.getDateStrBegin());
+            dto.setAmountReceivable(source.getShouldMoney());
+            dto.setAmountOwed(source.getActualMoney());
+            dto.setBillId(source.getBillId());
+            dto.setChargeStatus(Byte.valueOf(source.getIsPay()));
+            list.add(dto);
+        }
+        return list;
     }
 
 

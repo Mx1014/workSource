@@ -875,6 +875,39 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
+    // this is for 显示一个用户的物业账单          4
+    /**
+     * <p>显示一个用户的物业账单</p>
+     * <b>URL: /asset/showBillForClientV2</b>
+     */
+    @RequestMapping("showBillForClientV2")
+    @RestReturn(value = ShowBillForClientV2DTO.class,collection = true)
+    public RestResponse showBillForClientV2(ShowBillForClientV2Command cmd) {
+        if(cmd.getNamespaceId()!=UserContext.getCurrentNamespaceId()){
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        }
+        List<ShowBillForClientV2DTO> dtos = assetService.showBillForClientV2(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 显示一个用户的物业账单          4
+    /**
+     * <p>显示一个用户的物业账单</p>
+     * <b>URL: /asset/listAllBillsForClient</b>
+     */
+    @RequestMapping("listAllBillsForClient")
+    @RestReturn(value = ListAllBillsForClientDTO.class,collection = true)
+    public RestResponse listAllBillsForClient(ListAllBillsForClientCommand cmd) {
+        List<ListAllBillsForClientDTO> dtos = assetService.listAllBillsForClient(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
     //this is for 查看缴费详情
     /**
      * <p>查看缴费详情</p>

@@ -242,4 +242,6 @@ public interface AssetProvider {
     List<PaymentNoticeConfig> listAllNoticeConfigs();
 
     List<PaymentBills> getAllBillsByCommunity(Long key);
+
+    List<ListAllBillsForClientDTO> listAllBillsForClient(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long aLong);
 }

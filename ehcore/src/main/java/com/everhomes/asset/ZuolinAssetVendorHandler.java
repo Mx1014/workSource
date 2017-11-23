@@ -293,12 +293,30 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     @Override
     public List<ListBillsDTO> listBills(String communityIdentifier,String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Integer pageOffSet, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse response) {
         List<ListBillsDTO> list = assetProvider.listBills(contractNum,currentNamespaceId,ownerId,ownerType, billGroupName,billGroupId,billStatus,dateStrBegin,dateStrEnd,pageOffSet,pageSize,targetName,status,targetType);
+        if(list.size() <= pageSize){
+            response.setNextPageAnchor(null);
+        }else {
+                response.setNextPageAnchor(((Integer)(pageOffSet+pageSize)).longValue());
+            list.remove(list.size()-1);
+        }
         return list;
     }
 
     @Override
-    public List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageOffSet, Integer pageSize) {
+    public List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageOffSet, Integer pageSize,Long ownerId, ListBillItemsResponse response) {
+        if (pageOffSet == null) {
+            pageOffSet = 0;
+        }
+        if(pageSize == null){
+            pageSize = 20;
+        }
         List<BillDTO> list = assetProvider.listBillItems(Long.parseLong(billId),targetName,pageOffSet,pageSize);
+        if(list.size() <= pageSize) {
+            response.setNextPageAnchor(null);
+        }else {
+            response.setNextPageAnchor(((Integer)(pageOffSet+pageSize)).longValue());
+            list.remove(list.size()-1);
+        }
         return list;
     }
 
@@ -669,6 +687,16 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 //        response.setPayMethod(preOrder.getPayMethod());
 
         return preOrder;
+    }
+
+    @Override
+    public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
+        return null;
+    }
+
+    @Override
+    public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
+        return assetProvider.listAllBillsForClient(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getOwnerType().equals(AssetPaymentStrings.EH_USER)?UserContext.currentUserId():cmd.getTargetId());
     }
 
 

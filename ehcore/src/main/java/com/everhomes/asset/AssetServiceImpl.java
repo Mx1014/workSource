@@ -250,14 +250,6 @@ public class AssetServiceImpl implements AssetService {
         }
         int pageOffSet = cmd.getPageAnchor().intValue();
         List<ListBillsDTO> list = handler.listBills(cmd.getCommunityIdentifier(),cmd.getContractNum(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus(),cmd.getTargetType(), response);
-
-        if(list.size() <= cmd.getPageSize() && UserContext.getCurrentNamespaceId()!=999971){
-            response.setNextPageAnchor(null);
-
-        }else if(UserContext.getCurrentNamespaceId()!=999971){
-            response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
-            list.remove(list.size()-1);
-        }
         response.setListBillsDTOS(list);
         return response;
     }
@@ -268,25 +260,8 @@ public class AssetServiceImpl implements AssetService {
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListBillItemsResponse response = new ListBillItemsResponse();
-        if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
-            if(UserContext.getCurrentNamespaceId()!=999971){
-                cmd.setPageAnchor(0l);
-//                cmd.setPageAnchor(1l);
-            }else{
-                cmd.setPageAnchor(1l);
-            }
-        }
-        if(cmd.getPageSize() == null){
-            cmd.setPageSize(20);
-        }
         Integer pageOffSet = cmd.getPageAnchor().intValue();
-        List<BillDTO> billDTOS = handler.listBillItems(cmd.getTargetType(),cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
-        if(billDTOS.size() <= cmd.getPageSize() && UserContext.getCurrentNamespaceId()!=99971) {
-            response.setNextPageAnchor(null);
-        }else if(UserContext.getCurrentNamespaceId()!=99971){
-            response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
-            billDTOS.remove(billDTOS.size()-1);
-        }
+        List<BillDTO> billDTOS = handler.listBillItems(cmd.getTargetType(),cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize(),cmd.getOwnerId(),response);
         response.setBillDTOS(billDTOS);
         return response;
     }
@@ -2553,6 +2528,21 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public void activeAutoBillNotice() {
         autoBillNotice();
+    }
+
+    @Override
+    public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vendorName = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vendorName);
+        return handler.showBillForClientV2(cmd);
+    }
+
+    @Override
+    public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
+        AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId());
+        AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
+        return handler.listAllBillsForClient(cmd);
     }
 
 

@@ -3401,6 +3401,58 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetchInto(PaymentBills.class);
     }
 
+    @Override
+    public List<ListAllBillsForClientDTO> listAllBillsForClient(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId) {
+        List<ListAllBillsForClientDTO> list = new ArrayList<>();
+        DSLContext context = getReadOnlyContext();
+        ArrayList<Long> groupIds = new ArrayList<>();
+        EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(bill);
+        query.addSelect(bill.BILL_GROUP_ID);
+        query.addSelect(bill.AMOUNT_OWED);
+        query.addSelect(bill.AMOUNT_RECEIVABLE);
+        query.addSelect(bill.DATE_STR_BEGIN);
+        query.addSelect(bill.DATE_STR_END);
+        query.addSelect(bill.STATUS);
+        query.addSelect(bill.ID);
+        if(namespaceId!=null){
+            query.addConditions(bill.NAMESPACE_ID.eq(namespaceId));
+        }
+        query.addConditions(bill.OWNER_ID.eq(ownerId));
+        query.addConditions(bill.TARGET_TYPE.eq(targetType));
+        query.addConditions(bill.TARGET_ID.eq(targetId));
+        query.fetch()
+                .map(r -> {
+                    ListAllBillsForClientDTO dto = new ListAllBillsForClientDTO();
+                    groupIds.add(r.getValue(bill.BILL_GROUP_ID));
+                    dto.setAmountOwed(r.getValue(bill.AMOUNT_OWED).toString());
+                    dto.setAmountReceivable(r.getValue(bill.AMOUNT_RECEIVABLE).toString());
+                    dto.setDateStrBegin(r.getValue(bill.DATE_STR_BEGIN));
+                    dto.setDateStrEnd(r.getValue(bill.DATE_STR_END));
+                    dto.setChargeStatus(r.getValue(bill.STATUS));
+                    dto.setBillId(String.valueOf(r.getValue(bill.ID)));
+                    list.add(dto);
+                    return null;
+                });
+        Map<Long,String> groupNames = getGroupNames(groupIds);
+        for(int i = 0 ; i < list.size(); i ++){
+            list.get(i).setBillGroupName(groupNames.get(groupIds.get(i)));
+        }
+        return list;
+    }
+
+    private Map<Long,String> getGroupNames(ArrayList<Long> groupIds) {
+        Map<Long,String> map = new HashMap<>();
+        EhPaymentBillGroups group = Tables.EH_PAYMENT_BILL_GROUPS.as("group");
+        for(int i = 0 ; i < groupIds.size(); i++ ){
+            Long groupId = groupIds.get(i);
+            if(map.containsKey(groupId)) continue;
+            map.put(groupId,getReadOnlyContext().select(group.NAME).from(group).where(group.ID.eq(groupId)).fetchOne(group.NAME));
+        }
+        return map;
+    }
+
 
     private DSLContext getReadOnlyContext(){
         return this.dbProvider.getDslContext(AccessSpec.readOnly());
