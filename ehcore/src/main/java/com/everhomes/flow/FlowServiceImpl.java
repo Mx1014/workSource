@@ -5821,7 +5821,7 @@ public class FlowServiceImpl implements FlowService {
         if (flowUserTypes.size() > 0) {
             return flowListenerManager.onFlowCaseDetailRender(flowCase, flowUserTypes.get(0));
         }
-        return flowListenerManager.onFlowCaseDetailRender(flowCase, null);
+        return flowListenerManager.onFlowCaseDetailRender(flowCase, FlowUserType.NO_USER);
     }
 
     private List<FlowButtonDTO> getFlowButtonDTOList(FlowGraph flowGraph, Long userId, List<FlowUserType> flowUserTypes, boolean checkProcessor, FlowCase flowCase, List<FlowNode> nodes, List<FlowLane> laneList) {
