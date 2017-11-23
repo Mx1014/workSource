@@ -1393,7 +1393,7 @@ public class PunchServiceImpl implements PunchService {
 		// 用punchLog的ruletime和ptr的flex 计算上班结束时间
 		Date ruleBeginTime = new Date(beginTimeLong+flexTimeLong);
 		for (TimeInterval interval : tiDTOs) {
-			//最晚上班时间包含在interval中会对上班打卡造成影响
+			//最晚上班时间包含在interval中会对上班打卡造成影响最晚上班时间包含在interval中会对上班打卡造成影响
 			if (!interval.getBeginTime().after(ruleBeginTime) && !interval.getEndTime().before(ruleBeginTime)) {
 				//如果全天请假,打卡状态为正常
 				if (!interval.getEndTime().before(new Date(beginTimeLong + workTimeLong))) {
@@ -2830,9 +2830,20 @@ public class PunchServiceImpl implements PunchService {
 
 		statistic.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 		for (PunchDayLog pdl : list) {
+            List<TimeInterval> tiDTOs = null;
+            PunchTimeRule ptr = null;
             if (pdl.getTimeRuleId() != null && pdl.getTimeRuleId().longValue() != 0L) {
                 statistic.setWorkDayCount(statistic.getWorkDayCount() + 1);
+                ptr = punchProvider.getPunchTimeRuleById(pdl.getTimeRuleId());
+                if (null != ptr) {
+
+                    Timestamp dayStart = new Timestamp(pdl.getPunchDate().getTime() - (ptr.getBeginPunchTime()==null?14400000L:ptr.getBeginPunchTime()));
+                    Timestamp dayEnd = new Timestamp(pdl.getPunchDate().getTime() +(ptr.getDaySplitTimeLong()==null?104400000L:ptr.getDaySplitTimeLong()));
+                    tiDTOs = processTimeRuleDTO(tiDTOs, pdl.getUserId(), pdl.getEnterpriseId(), dayStart, dayEnd);
+                }
             }
+            PunchTimeRuleDTO ptrDTO = convertPunchTimeRule2DTO(ptr);
+
             if(pdl.getStatusList()!=null){
                 Byte isNormal = NormalFlag.YES.getCode();
                 if (pdl.getStatusList().contains(PunchConstants.STATUS_SEPARATOR)) {
@@ -2847,7 +2858,7 @@ public class PunchServiceImpl implements PunchService {
                     }
                     for (int i = 1; i <= status.length; i++) {
 
-                        isNormal = countOneDayStatistic(status[i-1], statistic, isNormal,i,pdl.getTimeRuleId());
+                        isNormal = countOneDayStatistic(status[i - 1], statistic, isNormal, i, tiDTOs, pdl.getPunchDate(), ptrDTO);
                     }
                 }else{
                     if (pdl.getStatusList().equals(String.valueOf(PunchStatus.NOTWORKDAY.getCode()))) {
@@ -2858,7 +2869,23 @@ public class PunchServiceImpl implements PunchService {
                         if (StringUtils.isNotBlank(pdl.getApprovalStatusList())) {
                             status = pdl.getApprovalStatusList();
                         }
-                        isNormal = countOneDayStatistic(status,statistic,isNormal,1,pdl.getTimeRuleId());
+
+                        if(status.equals(String.valueOf(PunchStatus.UNPUNCH.getCode()))
+                                && ptrDTO != null && ptrDTO.getAfternoonArriveTime() != null && ptrDTO.getNoonLeaveTime()!=null){
+                            PunchTimeIntervalDTO dto1 = new PunchTimeIntervalDTO();
+                            dto1.setArriveTime(ptrDTO.getPunchTimeIntervals().get(0).getArriveTime());
+                            dto1.setLeaveTime(ptrDTO.getNoonLeaveTime());
+                            PunchTimeIntervalDTO dto2 = new PunchTimeIntervalDTO();
+                            dto2.setArriveTime(ptrDTO.getAfternoonArriveTime());
+                            dto2.setLeaveTime(ptrDTO.getPunchTimeIntervals().get(0).getLeaveTime());
+                            ptrDTO.setPunchTimeIntervals(new ArrayList<>());
+                            ptrDTO.getPunchTimeIntervals().add(dto1);
+                            ptrDTO.getPunchTimeIntervals().add(dto2);
+                            isNormal = countOneDayStatistic(status, statistic, isNormal, 1, tiDTOs, pdl.getPunchDate(),ptrDTO);
+                            isNormal = countOneDayStatistic(status, statistic, isNormal, 2, tiDTOs, pdl.getPunchDate(),ptrDTO);
+                        }else {
+                            isNormal = countOneDayStatistic(status, statistic, isNormal, 1, tiDTOs, pdl.getPunchDate(),ptrDTO);
+                        }
                     }
                 }
 				if (NormalFlag.fromCode(isNormal).equals(NormalFlag.YES)) {
@@ -2873,18 +2900,41 @@ public class PunchServiceImpl implements PunchService {
     }
 
     private Byte countOneDayStatistic(String status, PunchStatistic statistic, Byte isNormal,
-                                      int punchTimeNo, Long timeRuleId) {
+                                      int punchTimeNo,  List<TimeInterval> tiDTOs, java.sql.Date punchDate,PunchTimeRuleDTO ptrDTO) {
         if (status.equals(String.valueOf(PunchStatus.UNPUNCH.getCode()))) {
             statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
             isNormal = NormalFlag.NO.getCode();
             //缺勤计算小时
-            PunchTimeRule r1 = punchProvider.findPunchTimeRuleById(timeRuleId);
-            if(null != r1) {
-                PunchTimeRuleDTO dto1 = convertPunchTimeRule2DTO(r1);
-                PunchTimeIntervalDTO interval = dto1.getPunchTimeIntervals().get(punchTimeNo - 1);
-                long unpunchTimeLong =interval.getLeaveTime() - interval.getArriveTime();
-                if(dto1.getPunchTimeIntervals().size()==1 && dto1.getAfternoonArriveTime() != null && dto1.getNoonLeaveTime()!=null){
-                	unpunchTimeLong = unpunchTimeLong -dto1.getAfternoonArriveTime()+dto1.getNoonLeaveTime();
+            if(null != ptrDTO) {
+                PunchTimeIntervalDTO interval = ptrDTO.getPunchTimeIntervals().get(punchTimeNo - 1);
+                Long leaveTime  = interval.getLeaveTime();
+                Long arrvieTime = interval.getArriveTime();
+                long unpunchTimeLong =leaveTime - arrvieTime;
+                if (null != tiDTOs) {
+                    for(TimeInterval ti : tiDTOs) {
+                        Long tiBeginTime = ti.getBeginTime().getTime() - punchDate.getTime();
+                        Long tiEndTime = ti.getEndTime().getTime() - punchDate.getTime();
+                        if (tiBeginTime <= arrvieTime) {
+                            if (tiEndTime >= leaveTime) {
+                                //如果请假开始时间比打卡开始时间小,结束时间比打卡结束时间晚,缺勤时间0
+                                unpunchTimeLong = 0L;
+                            }else{
+                                //如果请假开始时间比打卡开始时间小,结束时间比打卡结束时间早,缺勤时间-(请假结束-打卡开始)
+                                unpunchTimeLong -= (tiEndTime - arrvieTime);
+                            }
+                        }else{
+                            if (tiEndTime >= leaveTime) {
+                                //如果请假开始时间比打卡开始时间大,结束时间比打卡结束时间晚,缺勤时间-(打卡结束-请假开始)
+                                unpunchTimeLong -= (leaveTime - tiBeginTime);
+                            }else{
+                                //如果请假开始时间比打卡开始时间大,结束时间比打卡结束时间早,缺勤时间-(请假结束-请假开始)
+                                unpunchTimeLong -= (tiEndTime - tiBeginTime);
+                            }
+                        }
+                    }
+                }
+                if (unpunchTimeLong < 0L) {
+                    unpunchTimeLong = 0L;
                 }
 				BigDecimal b = new BigDecimal(unpunchTimeLong);
 				statistic.setUnpunchCount(statistic.getUnpunchCount()+b.divide(new BigDecimal(3600000), 2, RoundingMode.HALF_UP).doubleValue());
@@ -7277,7 +7327,10 @@ public class PunchServiceImpl implements PunchService {
 		return null;
 	}
 	private PunchTimeRuleDTO convertPunchTimeRule2DTO(PunchTimeRule r) {
-		PunchTimeRuleDTO dto = ConvertHelper.convert(r, PunchTimeRuleDTO.class);
+        if (null == r) {
+            return null;
+        }
+        PunchTimeRuleDTO dto = ConvertHelper.convert(r, PunchTimeRuleDTO.class);
 		dto.setFlexTime(r.getFlexTimeLong());
 		dto.setNoonLeaveTime(r.getNoonLeaveTimeLong());
 		dto.setBeginPunchTime(r.getBeginPunchTime());
