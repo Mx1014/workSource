@@ -2,11 +2,10 @@ package com.everhomes.flow.conditionvariable;
 
 import com.everhomes.flow.FlowConditionVariable;
 
-import java.util.Date;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
+import java.util.Date;
 
 /**
  * Created by xq.tian on 2017/11/2.
@@ -14,6 +13,10 @@ import java.time.temporal.TemporalAccessor;
 public class FlowConditionStringVariable implements FlowConditionVariable<String> {
 
     private String text;
+    private static final String DATE_TIME_REGEX_SLASH = "\\d{4}/\\d{1,2}/\\d{1,2}\\s\\d{1,2}:\\d{1,2}";
+    private static final String DATE_TIME_REGEX_CENTER = "\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}:\\d{1,2}";
+    private static final String DATE_REGEX_CENTER = "\\d{4}-\\d{1,2}-\\d{1,2}";
+    private static final String DATE_REGEX_SLASH = "\\d{4}/\\d{1,2}/\\d{1,2}";
 
     @Override
     public String getVariable() {
@@ -103,21 +106,60 @@ public class FlowConditionStringVariable implements FlowConditionVariable<String
 
     public FlowConditionDateVariable toDateVariable() {
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
-            TemporalAccessor accessor = formatter.parse(text);
-            LocalDateTime dateTime = LocalDateTime.from(accessor);
-            return new FlowConditionDateVariable(Date.from(dateTime.toInstant(ZoneOffset.UTC)));
+            String temp = text;
+            String pattern;
+            if (temp.matches(DATE_TIME_REGEX_SLASH)) {
+                pattern = "yyyy/MM/dd HH:mm:ss";
+                temp += ":00";
+            } else if (temp.matches(DATE_TIME_REGEX_CENTER)) {
+                pattern = "yyyy-MM-dd HH:mm:ss";
+                temp += ":00";
+            } else if (temp.matches(DATE_REGEX_SLASH)) {
+                pattern = "yyyy/MM/dd HH:mm:ss";
+                temp += " 00:00:00";
+            } else if (temp.matches(DATE_REGEX_CENTER)) {
+                pattern = "yyyy-MM-dd HH:mm:ss";
+                temp += " 00:00:00";
+            } else {
+                pattern = "yyyy/MM/dd HH:mm:ss";
+            }
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+            LocalDateTime dateTime = LocalDateTime.parse(temp, formatter);
+            return new FlowConditionDateVariable(Date.from(dateTime.toInstant(OffsetDateTime.now().getOffset())));
         } catch (Exception e) {
             // e.printStackTrace();
         }
         return null;
     }
 
+    /*public static void main(String[] args) {
+        String text = "2017/11/11";
+        String pattern;
+        if (text.matches(DATE_TIME_REGEX_SLASH)) {
+            pattern = "yyyy/MM/dd HH:mm:ss";
+            text += ":00";
+        } else if (text.matches(DATE_TIME_REGEX_CENTER)) {
+            pattern = "yyyy-MM-dd HH:mm:ss";
+            text += ":00";
+        } else if (text.matches(DATE_REGEX_SLASH)) {
+            pattern = "yyyy/MM/dd HH:mm:ss";
+            text += " 00:00:00";
+        } else if (text.matches(DATE_REGEX_CENTER)) {
+            pattern = "yyyy-MM-dd HH:mm:ss";
+            text += " 00:00:00";
+        } else {
+            pattern = "yyyy/MM/dd HH:mm:ss";
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        LocalDateTime dateTime = LocalDateTime.parse(text, formatter);
+        System.out.println(Date.from(dateTime.toInstant(OffsetDateTime.now().getOffset())).toLocaleString());
+    }*/
+
     public FlowConditionNumberVariable toNumberVariable() {
         try {
             Float number = Float.valueOf(text);
             return new FlowConditionNumberVariable(number);
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
             // e.printStackTrace();
         }
         return null;
