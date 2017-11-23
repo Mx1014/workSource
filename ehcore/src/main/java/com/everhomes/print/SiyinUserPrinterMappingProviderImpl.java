@@ -36,7 +36,7 @@ public class SiyinUserPrinterMappingProviderImpl implements SiyinUserPrinterMapp
 		siyinUserPrinterMapping.setId(id);
 		siyinUserPrinterMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		siyinUserPrinterMapping.setCreatorUid(UserContext.current().getUser().getId());
-		siyinUserPrinterMapping.setUpdateTime(siyinUserPrinterMapping.getCreateTime());
+		siyinUserPrinterMapping.setOperateTime(siyinUserPrinterMapping.getCreateTime());
 		siyinUserPrinterMapping.setOperatorUid(siyinUserPrinterMapping.getCreatorUid());
 		getReadWriteDao().insert(siyinUserPrinterMapping);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSiyinUserPrinterMappings.class, null);
@@ -45,7 +45,7 @@ public class SiyinUserPrinterMappingProviderImpl implements SiyinUserPrinterMapp
 	@Override
 	public void updateSiyinUserPrinterMapping(SiyinUserPrinterMapping siyinUserPrinterMapping) {
 		assert (siyinUserPrinterMapping.getId() != null);
-		siyinUserPrinterMapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		siyinUserPrinterMapping.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		siyinUserPrinterMapping.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(siyinUserPrinterMapping);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSiyinUserPrinterMappings.class, siyinUserPrinterMapping.getId());

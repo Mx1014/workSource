@@ -6,6 +6,7 @@ CREATE TABLE `eh_siyin_user_printer_mappings` (
   `user_id` BIGINT,
   `reader_name` VARCHAR(128) COMMENT 'printer reader name',
   `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0:INACTIVE,2:ACTIVE',
+  `unlock_times` BIGINT,
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `operator_uid` BIGINT,
