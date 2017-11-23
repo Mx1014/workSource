@@ -282,7 +282,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 this.generalApprovalValProvider.createGeneralApprovalVal(obj);
             }
 
-            FlowCase flowCase = null;
+            FlowCase flowCase;
             if (null == flow) {
                 // 给他一个默认哑的flow
                 GeneralModuleInfo gm = ConvertHelper.convert(ga, GeneralModuleInfo.class);
@@ -299,8 +299,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             GetTemplateByApprovalIdResponse response = ConvertHelper.convert(ga,
                     GetTemplateByApprovalIdResponse.class);
             response.setFlowCaseId(flowCase.getId());
-            List<GeneralFormFieldDTO> fieldDTOs = new ArrayList<GeneralFormFieldDTO>();
-            fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
             response.setFormFields(fieldDTOs);
             response.setValues(cmd.getValues());
 
