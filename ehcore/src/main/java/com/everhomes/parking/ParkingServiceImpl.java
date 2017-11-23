@@ -1655,52 +1655,60 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingCarVerification verification = parkingProvider.findParkingCarVerificationByUserId(cmd.getOwnerType(), cmd.getOwnerId(),
 				parkingLotId, cmd.getPlateNumber(), userId);
 
+		ParkingCarLockInfoDTO dto = new ParkingCarLockInfoDTO();
+
 		if (null == verification || verification.getStatus() == ParkingCarVerificationStatus.INACTIVE.getCode()
 				|| verification.getStatus() == ParkingCarVerificationStatus.FAILED.getCode()
 				|| verification.getStatus() == ParkingCarVerificationStatus.UN_AUTHORIZED.getCode()) {
-			ParkingCarLockInfoDTO dto = new ParkingCarLockInfoDTO();
 			dto.setCarVerificationFlag(ParkingCarVerificationStatus.UN_AUTHORIZED.getCode());
-			return dto;
 		}else if (verification.getStatus() == ParkingCarVerificationStatus.AUDITING.getCode()) {
-			ParkingCarLockInfoDTO dto = new ParkingCarLockInfoDTO();
 			dto.setCarVerificationFlag(ParkingCarVerificationStatus.AUDITING.getCode());
 
 			String flowCaseUrl = configProvider.getValue(ConfigConstants.PARKING_CAR_VERIFICATION_FLOWCASE_URL, "");
 
 			dto.setFlowCaseUrl(String.format(flowCaseUrl, verification.getFlowCaseId()));
-			return dto;
 		}else if (verification.getStatus() == ParkingCarVerificationStatus.SUCCEED.getCode()) {
-			String vendorName = parkingLot.getVendorName();
-			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
 
-			ParkingCarLockInfoDTO dto = handler.getParkingCarLockInfo(cmd);
+			dto.setCarVerificationFlag(ParkingCarVerificationStatus.SUCCEED.getCode());
 
-			if (null != dto) {
-				dto.setOwnerId(cmd.getOwnerId());
-				dto.setOwnerType(cmd.getOwnerType());
-				dto.setParkingLotId(cmd.getParkingLotId());
-				dto.setPlateNumber(cmd.getPlateNumber());
-				dto.setParkingLotName(parkingLot.getName());
-
-				Long organizationId = cmd.getOrganizationId();
-
-				String plateOwnerName = user.getNickName();
-
-				if(null != organizationId) {
-					OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
-					if(null != organizationMember) {
-						plateOwnerName = organizationMember.getContactName();
-					}
-				}
-				if(StringUtils.isBlank(dto.getPlateOwnerName())) {
-					dto.setPlateOwnerName(plateOwnerName);
-				}
-				dto.setCarVerificationFlag(ParkingCarVerificationStatus.SUCCEED.getCode());
-
-			}
-			return dto;
 		}
-		return null;
+
+		ParkingCarLockInfoDTO temp = getParkingCarLockInfoDTO(cmd, parkingLot, user);
+		temp.setCarVerificationFlag(dto.getCarVerificationFlag());
+		temp.setFlowCaseUrl(dto.getFlowCaseUrl());
+		//兼容老版本app, 不论认证是什么状态，都返回锁车数据, 注意：前提是客户端根据carVerificationFlag标志来跳转
+		BeanUtils.copyProperties(temp, dto);
+		return dto;
+	}
+
+	private ParkingCarLockInfoDTO getParkingCarLockInfoDTO(GetParkingCarLockInfoCommand cmd, ParkingLot parkingLot, User user) {
+		String vendorName = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+
+		ParkingCarLockInfoDTO dto = handler.getParkingCarLockInfo(cmd);
+
+		if (null != dto) {
+			dto.setOwnerId(cmd.getOwnerId());
+			dto.setOwnerType(cmd.getOwnerType());
+			dto.setParkingLotId(cmd.getParkingLotId());
+			dto.setPlateNumber(cmd.getPlateNumber());
+			dto.setParkingLotName(parkingLot.getName());
+
+			Long organizationId = cmd.getOrganizationId();
+
+			String plateOwnerName = user.getNickName();
+
+			if(null != organizationId) {
+				OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organizationId);
+				if(null != organizationMember) {
+					plateOwnerName = organizationMember.getContactName();
+				}
+			}
+			if(StringUtils.isBlank(dto.getPlateOwnerName())) {
+				dto.setPlateOwnerName(plateOwnerName);
+			}
+		}
+		return dto;
 	}
 
 	@Override
