@@ -3563,7 +3563,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				this.authorizationProvider.deleteAuthorizationWithConditon(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), targetId, authorization.getAuthType(), null, authorization.getIdentityType(), null, null, null);
 				this.authorizationProvider.delteAuthorizationControlConfigsWithCondition(namespaceId, targetId);
 
-				if(cmd.getCommunityTarget() != null && cmd.getCommunityTarget().size() > 0){
+				if((cmd.getCommunityTarget() != null && cmd.getCommunityTarget().size() > 0) || (cmd.getAllCommunityControlFlag() ==  AllFlagType.YES.getCode())){
 					// todo: 保存按园区范围控制的应用
 					Long control_id_c = this.sequenceProvider.getNextSequence("authControlId");
 					if(cmd.getCommunityControlOption() == ControlTargetOption.ALL_COMMUNITY.getCode()){
@@ -3590,7 +3590,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				}
 
 
-				if(cmd.getOrgTarget() != null && cmd.getOrgTarget().size() > 0){
+				if((cmd.getOrgTarget() != null && cmd.getOrgTarget().size() > 0) || (cmd.getAllOrgControlFlag() ==  AllFlagType.YES.getCode())){
 					// todo: 保存按OA范围控制的应用
 					List<ControlTarget> orgControlDetails = new ArrayList();
 					// 当选择全公司时，对config进行处理 (获取公司)
@@ -3636,7 +3636,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				}
 
 
-				if(cmd.getUnlimitTarget() != null && cmd.getUnlimitTarget().size() > 0){
+				if((cmd.getUnlimitTarget() != null && cmd.getUnlimitTarget().size() > 0) || (cmd.getAllUnlimitControlFlag() ==  AllFlagType.YES.getCode())){
 					// todo: 保存无范围控制的应用
 					if (AllFlagType.fromCode(cmd.getAllUnlimitControlFlag()) == AllFlagType.YES) {
 						processAuthorization(authorization, 0L, 0L, ModuleManagementType.UNLIMIT_CONTROL.getCode(), cmd.getAllUnlimitControlFlag(), 0L,null);

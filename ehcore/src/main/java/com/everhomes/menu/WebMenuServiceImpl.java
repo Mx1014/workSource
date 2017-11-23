@@ -140,7 +140,8 @@ public class WebMenuServiceImpl implements WebMenuService {
 			}
 
 			//拼上菜单的所有父级菜单
-			menus = appendParentMenus(menus);
+			if(menus != null)
+				menus = appendParentMenus(menus);
 
 		}
 
