@@ -138,7 +138,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         for (int i = 0; i < entities.size(); i++) {
             if (i == 3)
                 break;
-            content += entities.get(i).getKey() + " : " + entities.get(i).getValue() + "\n";
+            content += entities.get(i).getKey() + " : " + entities.get(i).getValue() != null ? entities.get(i).getValue() : "" + "\n";
         }
         flowCase.setContent(content);
     }
@@ -148,49 +148,52 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         for (PostApprovalFormItem value : values) {
             FlowCaseEntity e = new FlowCaseEntity();
             e.setKey(value.getFieldDisplayName() == null ? value.getFieldName() : value.getFieldDisplayName());
-            switch (GeneralFormFieldType.fromCode(value.getFieldType())) {
-                case SINGLE_LINE_TEXT:
-                case NUMBER_TEXT:
-                case DATE:
-                case DROP_BOX:
-                    processDropBoxField(entities, e, value.getFieldValue());
-                    break;
-                case MULTI_LINE_TEXT:
-                    processMultiLineTextField(entities, e, value.getFieldValue());
-                    break;
-                case IMAGE:
-                    break;
-                case FILE:
-                    break;
-                case INTEGER_TEXT:
-                    processIntegerTextField(entities, e, value.getFieldValue());
-                    break;
-                case SUBFORM:
-                    break;
-                case CONTACT:
-                    //企业联系人
-                    processContactField(entities, e, value.getFieldValue());
-                    break;
-                case ASK_FOR_LEAVE:
-                    //请假
-                    processAskForLeaveField(entities, e, value.getFieldValue());
-                    break;
-                case BUSINESS_TRIP:
-                    //出差
-                    processBusinessTripField(entities, e, value.getFieldValue());
-                    break;
-                case OVERTIME:
-                    //加班
-                    processOverTimeField(entities, e, value.getFieldValue());
-                    break;
-                case GO_OUT:
-                    //外出
-                    processGoOutField(entities, e, value.getFieldValue());
-                    break;
-                case ABNORMAL_PUNCH:
-                    //打卡异常
-                    processAbnormalPunchField(entities, e, value.getFieldValue());
-                    break;
+            if (!DEFUALT_FIELDS.contains(value.getFieldName())) {
+                // 不在默认fields的就是自定义字符串，组装这些
+                switch (GeneralFormFieldType.fromCode(value.getFieldType())) {
+                    case SINGLE_LINE_TEXT:
+                    case NUMBER_TEXT:
+                    case DATE:
+                    case DROP_BOX:
+                        processDropBoxField(entities, e, value.getFieldValue());
+                        break;
+                    case MULTI_LINE_TEXT:
+                        processMultiLineTextField(entities, e, value.getFieldValue());
+                        break;
+                    case IMAGE:
+                        break;
+                    case FILE:
+                        break;
+                    case INTEGER_TEXT:
+                        processIntegerTextField(entities, e, value.getFieldValue());
+                        break;
+                    case SUBFORM:
+                        break;
+                    case CONTACT:
+                        //企业联系人
+                        processContactField(entities, e, value.getFieldValue());
+                        break;
+                    case ASK_FOR_LEAVE:
+                        //请假
+                        processAskForLeaveField(entities, e, value.getFieldValue());
+                        break;
+                    case BUSINESS_TRIP:
+                        //出差
+                        processBusinessTripField(entities, e, value.getFieldValue());
+                        break;
+                    case OVERTIME:
+                        //加班
+                        processOverTimeField(entities, e, value.getFieldValue());
+                        break;
+                    case GO_OUT:
+                        //外出
+                        processGoOutField(entities, e, value.getFieldValue());
+                        break;
+                    case ABNORMAL_PUNCH:
+                        //打卡异常
+                        processAbnormalPunchField(entities, e, value.getFieldValue());
+                        break;
+                }
             }
         }
         return entities;
