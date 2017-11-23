@@ -78,7 +78,7 @@ public interface FlowListenerManager {
 
     String onFlowVariableRender(FlowCaseState ctx, String variable);
 
-    List<FlowPredefinedParamDTO> listFlowPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId);
+    // List<FlowPredefinedParamDTO> listFlowPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId);
 
     List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId);
 

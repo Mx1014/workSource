@@ -5749,13 +5749,13 @@ public class FlowServiceImpl implements FlowService {
         List<FlowServiceTypeDTO> serviceTypes = new ArrayList<>();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-        serviceTypes.addAll(flowListenerManager.listFlowServiceTypes(namespaceId, cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId()));
+        serviceTypes.addAll(flowListenerManager.listFlowServiceTypes(namespaceId, cmd.getModuleId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId()));
 
         List<FlowServiceTypeDTO> nsServiceTypes = flowServiceTypeProvider.listFlowServiceType(
-                namespaceId, cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), FlowServiceTypeDTO.class);
+                namespaceId, cmd.getModuleId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), FlowServiceTypeDTO.class);
         if (nsServiceTypes.size() == 0) {
             nsServiceTypes = flowServiceTypeProvider.listFlowServiceType(
-                    Namespace.DEFAULT_NAMESPACE, cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), FlowServiceTypeDTO.class);
+                    Namespace.DEFAULT_NAMESPACE, cmd.getModuleId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), FlowServiceTypeDTO.class);
         }
         serviceTypes.addAll(nsServiceTypes);
 
@@ -6278,6 +6278,7 @@ public class FlowServiceImpl implements FlowService {
             flowLane.setFlowMainId(flow.getId());
             flowLane.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
             flowLane.setLaneLevel(flowLaneCmd.getLaneLevel());
+            flowLane.setFlowNodeLevel(flowLaneCmd.getFlowNodeLevel());
             flowLane.setNamespaceId(flow.getNamespaceId());
             flowLane.setStatus(FlowCommonStatus.ACTIVE.getCode());
             flowLane.setIdentifierNodeLevel(flowLaneCmd.getIdentifierNodeLevel());

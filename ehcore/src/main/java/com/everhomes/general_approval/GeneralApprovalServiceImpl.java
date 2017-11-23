@@ -31,6 +31,7 @@ import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.User;
 import com.everhomes.util.DateHelper;
 import com.everhomes.yellowPage.ServiceAllianceCategories;
@@ -138,6 +139,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Autowired
     private ContentServerService contentServerService;
+
+    @Autowired
+    private PunchService punchService;
 
     private StringTemplateLoader templateLoader;
 
@@ -278,7 +282,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 this.generalApprovalValProvider.createGeneralApprovalVal(obj);
             }
 
-            FlowCase flowCase = null;
+            FlowCase flowCase;
             if (null == flow) {
                 // 给他一个默认哑的flow
                 GeneralModuleInfo gm = ConvertHelper.convert(ga, GeneralModuleInfo.class);
@@ -295,8 +299,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             GetTemplateByApprovalIdResponse response = ConvertHelper.convert(ga,
                     GetTemplateByApprovalIdResponse.class);
             response.setFlowCaseId(flowCase.getId());
-            List<GeneralFormFieldDTO> fieldDTOs = new ArrayList<GeneralFormFieldDTO>();
-            fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
             response.setFormFields(fieldDTOs);
             response.setValues(cmd.getValues());
 
@@ -864,6 +867,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Override
     public ListGeneralApprovalResponse listActiveGeneralApproval(
             ListActiveGeneralApprovalCommand cmd) {
+        //  updated by wcg at 11/22/2017. find the top enterprise.
+        if (cmd.getOwnerId() != null)
+            cmd.setOwnerId(punchService.getTopEnterpriseId(cmd.getOwnerId()));
         ListGeneralApprovalCommand cmd2 = ConvertHelper.convert(cmd, ListGeneralApprovalCommand.class);
         cmd2.setStatus(GeneralApprovalStatus.RUNNING.getCode());
         if (null == cmd2.getModuleType())
