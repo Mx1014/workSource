@@ -17,6 +17,7 @@ import com.everhomes.portal.ServiceModuleAppProvider;
 import com.everhomes.rest.acl.IdentityType;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.blacklist.BlacklistErrorCode;
+import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.IncludeChildFlagType;
 import com.everhomes.rest.module.ControlTarget;
 import com.everhomes.rest.oauth2.ControlTargetOption;
@@ -218,14 +219,26 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
     @Override
     public boolean checkModuleAppAdmin(Integer namespaceId, String ownerType, Long ownerId, Long userId, Long moduleId, Long appId, Long communityId, Long organizationId) {
         if(moduleId != null && appId != null){
-            List<Authorization> authorizations = this.authorizationProvider.listAuthorizations(ownerType, ownerId, OwnerType.USER.getCode(), userId, EntityType.SERVICE_MODULE_APP.getCode(), moduleId, IdentityType.MANAGE.getCode(), appId, null, null, false);
-            if (authorizations.size() == 0){
-                return false;
+            // 检查模块对应范围内（园区控制、OA控制、无限制控制）的全部应用权限
+            ServiceModule module = this.serviceModuleProvider.findServiceModuleById(moduleId);
+            Authorization authorization_target = new Authorization();
+            List<Authorization> authorizations_Total = this.authorizationProvider.listAuthorizations(ownerType, ownerId, OwnerType.USER.getCode(), userId, EntityType.SERVICE_MODULE_APP.getCode(), 0L, IdentityType.MANAGE.getCode(), 0L, module.getModuleControlType(), AllFlagType.YES.getCode(), false);
+            if(authorizations_Total.size() > 0){
+                authorization_target = authorizations_Total.get(0);
+            }else{ // 如果是单个分配的应用权限
+                List<Authorization> authorizations = this.authorizationProvider.listAuthorizations(ownerType, ownerId, OwnerType.USER.getCode(), userId, EntityType.SERVICE_MODULE_APP.getCode(), moduleId, IdentityType.MANAGE.getCode(), appId, null, null, false);
+                if (authorizations.size() == 0){
+                    return false;
+                }else {
+                    authorization_target = authorizations.get(0);
+                }
             }
-            List<ControlTarget> controlTargets = this.authorizationProvider.listAuthorizationControlConfigs(namespaceId, userId, authorizations.get(0).getControlId());
-            Byte controlOption = authorizations.get(0).getControlOption();
-            if(authorizations != null && authorizations.size() > 0){
-                switch (ModuleManagementType.fromCode(authorizations.get(0).getModuleControlType())){
+
+            List<ControlTarget> controlTargets = this.authorizationProvider.listAuthorizationControlConfigs(userId, authorization_target.getControlId());
+            Byte controlOption = authorization_target.getControlOption();
+
+            if(authorization_target != null ){
+                switch (ModuleManagementType.fromCode(authorization_target.getModuleControlType())){
                     case COMMUNITY_CONTROL:
                         if(communityId != null && communityId != 0L){
                             if(controlOption == ControlTargetOption.ALL_COMMUNITY.getCode()){//配置为全园区时，返回true

@@ -130,13 +130,12 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 	}
 
 	@Override
-	public List<ControlTarget> listAuthorizationControlConfigs(Integer namespaceId, Long userId, Long controlId) {
+	public List<ControlTarget> listAuthorizationControlConfigs(Long userId, Long controlId) {
 		List<ControlTarget> result = new ArrayList<>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		context.select()
 				.from(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS)
-				.where(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS.CONTROL_ID.eq(controlId))
+				.where(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS.CONTROL_ID.eq(controlId))
 				.and(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS.USER_ID.eq(userId)).fetch()
 				.map(r -> {
 					result.add(new ControlTarget(r.getValue(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS.TARGET_ID), r.getValue(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS.INCLUDE_CHILD_FLAG)));

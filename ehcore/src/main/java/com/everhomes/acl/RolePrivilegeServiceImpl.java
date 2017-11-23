@@ -33,7 +33,6 @@ import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
 import com.everhomes.rest.module.Project;
 import com.everhomes.rest.oauth2.ControlTargetOption;
 import com.everhomes.rest.oauth2.ModuleManagementType;
-import com.everhomes.rest.openapi.techpark.AllFlag;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.PmMemberTargetType;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
@@ -3350,7 +3349,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 
 		//获取userId和controlId对应一系列配置项
-		List<ControlTarget> configs = authorizationProvider.listAuthorizationControlConfigs(namespaceId,targetId,authorizations.get(0).getControlId());
+		List<ControlTarget> configs = authorizationProvider.listAuthorizationControlConfigs(targetId,authorizations.get(0).getControlId());
 		authorizationsAppControl.setControlTargets(configs);
 
 		// 获取应用信息
