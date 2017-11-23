@@ -120,4 +120,6 @@ public interface EnterpriseCustomerProvider {
 	
 	void updateCustomerLastTrackingTime(EnterpriseCustomer customer);
 
+    String findLastEnterpriseCustomerVersionByCommunity(Integer namespaceId, Long communityId);
+
 }

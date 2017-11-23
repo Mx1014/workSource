@@ -3,11 +3,12 @@ package com.everhomes.rest.community;
 /**
  * <ul>来自于第三方楼栋的类型，对应eh_communities表的 namespace_community_type字段
  * <li>SHENZHOU("shenzhou"): 神州数码</li>
+ * <li>EBEI("ebei"): 一碑</li>
  * </ul>
  * Created by ying.xiong on 2017/8/9.
  */
 public enum NamespaceCommunityType {
-    SHENZHOU("shenzhou");
+    SHENZHOU("shenzhou"), EBEI("ebei");
 
     private String code;
     private NamespaceCommunityType(String code) {

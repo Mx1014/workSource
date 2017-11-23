@@ -2,6 +2,9 @@ package com.everhomes.customer;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.address.Address;
+import com.everhomes.building.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -10,8 +13,9 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.openapi.ZjSyncdataBackup;
 import com.everhomes.openapi.ZjSyncdataBackupProvider;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.*;
+import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
+import com.everhomes.rest.address.NamespaceAddressType;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.community.NamespaceCommunityType;
 import com.everhomes.rest.customer.EbeiCustomer;
@@ -19,8 +23,11 @@ import com.everhomes.rest.customer.EbeiJsonEntity;
 import com.everhomes.rest.customer.NamespaceCustomerType;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.openapi.shenzhou.SyncFlag;
+import com.everhomes.rest.organization.*;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.search.OrganizationSearcher;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
@@ -30,9 +37,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
 import java.io.IOException;
+import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -78,6 +88,9 @@ public class EbeiCustomerHandle implements CustomerHandle {
     @Autowired
     private EnterpriseCustomerProvider enterpriseCustomerProvider;
 
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
+
     @Override
     public void syncEnterprises(String pageOffset, String version, String communityIdentifier) {
         Map<String, String> params= new HashMap<String,String>();
@@ -121,7 +134,7 @@ public class EbeiCustomerHandle implements CustomerHandle {
 
             //如果到最后一页了，则开始更新到我们数据库中
             if("0".equals(entity.getHasNextPag())) {
-                syncDataToDb(DataType.ENTERPRISE.getCode());
+                syncDataToDb(DataType.ENTERPRISE.getCode(), communityIdentifier);
             }
         }
     }
@@ -154,13 +167,13 @@ public class EbeiCustomerHandle implements CustomerHandle {
         zjSyncdataBackupProvider.createZjSyncdataBackup(backup);
     }
 
-    private void syncDataToDb(Byte dataType) {
+    private void syncDataToDb(Byte dataType, String communityIdentifier) {
 //        queueThreadPool.execute(()->{
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("dataType {} enter into thread=================", dataType);
-        }
+//        if (LOGGER.isDebugEnabled()) {
+//            LOGGER.debug("dataType {} enter into thread=================", dataType);
+//        }
 
-        List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, dataType);
+        List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, dataType);
 
         if (backupList == null || backupList.isEmpty()) {
             LOGGER.debug("syncDataToDb backupList is empty, NAMESPACE_ID: {}, dataType: {}", NAMESPACE_ID, dataType);
@@ -168,7 +181,7 @@ public class EbeiCustomerHandle implements CustomerHandle {
         }
         try {
             LOGGER.debug("syncDataToDb backupList size：{}", backupList.size());
-            updateAllData(dataType, NAMESPACE_ID , backupList);
+            updateAllData(dataType, NAMESPACE_ID, communityIdentifier, backupList);
         } finally {
             zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
         }
@@ -179,13 +192,13 @@ public class EbeiCustomerHandle implements CustomerHandle {
 //        });
     }
 
-    private void updateAllData(Byte dataType, Integer namespaceId, List<ZjSyncdataBackup> backupList) {
+    private void updateAllData(Byte dataType, Integer namespaceId, String communityIdentifier, List<ZjSyncdataBackup> backupList) {
         DataType ebeiDataType = DataType.fromCode(dataType);
         LOGGER.debug("ebei DataType : {}", ebeiDataType);
         switch (ebeiDataType) {
             case ENTERPRISE:
                 LOGGER.debug("syncDataToDb SYNC ENTERPRISE");
-                syncAllEnterprises(namespaceId, backupList);
+                syncAllEnterprises(namespaceId, communityIdentifier, backupList);
                 break;
 
             default:
@@ -194,26 +207,63 @@ public class EbeiCustomerHandle implements CustomerHandle {
         }
     }
 
-    private void syncAllEnterprises(Integer namespaceId, List<ZjSyncdataBackup> backupList) {
+    private void syncAllEnterprises(Integer namespaceId, String communityIdentifier, List<ZjSyncdataBackup> backupList) {
         //必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
         //allFlag为part时，仅更新单个特定的项目数据即可
-        List<EnterpriseCustomer> myEnterpriseCustomerList = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceType(namespaceId, NamespaceCustomerType.SHENZHOU.getCode(), specialCommunityId);
+        Community community = communityProvider.findCommunityByNamespaceToken(NamespaceCommunityType.EBEI.getCode(), communityIdentifier);
+        if(community == null) {
+            return ;
+        }
+        List<EnterpriseCustomer> myEnterpriseCustomerList = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceType(namespaceId, NamespaceCustomerType.EBEI.getCode(), community.getId());
 
         List<EbeiCustomer> mergeEnterpriseList = mergeBackupList(backupList, EbeiCustomer.class);
-        List<EbeiCustomer> theirEnterpriseList = new ArrayList<EbeiCustomer>();
 
         LOGGER.debug("syncDataToDb namespaceId: {}, myEnterpriseCustomerList size: {}, theirEnterpriseList size: {}",
-                namespaceId, myEnterpriseCustomerList.size(), theirEnterpriseList.size());
+                namespaceId, myEnterpriseCustomerList.size(), mergeEnterpriseList.size());
         dbProvider.execute(s->{
-            syncAllEnterprises(namespaceId, myEnterpriseCustomerList, theirEnterpriseList);
+            syncAllEnterprises(namespaceId, community.getId(), myEnterpriseCustomerList, mergeEnterpriseList);
             return true;
         });
     }
 
     //ebei同步数据规则：两次之间所有的改动会同步过来，所以以一碑同步过来数据作为参照：
     // state为0的数据删除，state为1的数据：我们有，更新；我们没有则新增
-    private void syncAllEnterprises(Integer namespaceId, List<EnterpriseCustomer> myEnterpriseCustomerList, List<EbeiCustomer> theirEnterpriseList) {
+    private void syncAllEnterprises(Integer namespaceId, Long communityId, List<EnterpriseCustomer> myEnterpriseCustomerList, List<EbeiCustomer> theirEnterpriseList) {
+        if (theirEnterpriseList != null) {
+            for (EbeiCustomer ebeiCustomer : theirEnterpriseList) {
+                if("0".equals(ebeiCustomer.getState())) {
+                        if (myEnterpriseCustomerList != null) {
+                            for (EnterpriseCustomer enterpriseCustomer : myEnterpriseCustomerList) {
+                                if (NamespaceCustomerType.EBEI.getCode().equals(enterpriseCustomer.getNamespaceCustomerType())
+                                        && enterpriseCustomer.getNamespaceCustomerToken().equals(ebeiCustomer.getOwnerId())) {
+                                    deleteEnterpriseCustomer(enterpriseCustomer);
+                                }
+                            }
+                        }
+                } else if("1".equals(ebeiCustomer.getState())) {
+                    Boolean notdeal = true;
+                    if (myEnterpriseCustomerList != null) {
+                        for (EnterpriseCustomer enterpriseCustomer : myEnterpriseCustomerList) {
+                            if (NamespaceCustomerType.EBEI.getCode().equals(enterpriseCustomer.getNamespaceCustomerType())
+                                    && enterpriseCustomer.getNamespaceCustomerToken().equals(ebeiCustomer.getOwnerId())) {
+                                notdeal = false;
+                                updateEnterpriseCustomer(enterpriseCustomer, communityId, ebeiCustomer);
+                            }
+                        }
+                    }
+                    if(notdeal){
+                        // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
+                        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, ebeiCustomer.getCompanyName());
+                        if (customers == null || customers.size() == 0) {
+                            insertEnterpriseCustomer(NAMESPACE_ID, communityId, ebeiCustomer);
+                        }else {
+                            updateEnterpriseCustomer(customers.get(0), communityId, ebeiCustomer);
+                        }
+                    }
 
+                }
+            }
+        }
     }
 
     private <T> List<T> mergeBackupList(List<ZjSyncdataBackup> backupList, Class<T> targetClz) {
@@ -227,6 +277,191 @@ public class EbeiCustomerHandle implements CustomerHandle {
             }
         }
         return resultList;
+    }
+
+    private void insertEnterpriseCustomer(Integer namespaceId, Long communityId, EbeiCustomer ebeiCustomer) {
+        LOGGER.debug("syncDataToDb insertEnterpriseCustomer namespaceId: {}, zjEnterprise: {}",
+                namespaceId, StringHelper.toJsonString(ebeiCustomer));
+        this.dbProvider.execute((TransactionStatus status) -> {
+            EnterpriseCustomer customer = new EnterpriseCustomer();
+            customer.setCommunityId(communityId);
+            customer.setNamespaceId(namespaceId);
+            customer.setNamespaceCustomerType(NamespaceCustomerType.EBEI.getCode());
+            customer.setNamespaceCustomerToken(ebeiCustomer.getOwnerId());
+            customer.setName(ebeiCustomer.getCompanyName());
+            customer.setNickName(ebeiCustomer.getCompanyName());
+            customer.setContactName(ebeiCustomer.getContactPerson());
+            customer.setContactPhone(ebeiCustomer.getContactPhone());
+            customer.setStatus(CommonStatus.ACTIVE.getCode());
+            customer.setCreatorUid(1L);
+            customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            customer.setOperatorUid(1L);
+            customer.setUpdateTime(customer.getCreateTime());
+            customer.setVersion(ebeiCustomer.getVersion());
+
+            //给企业客户创建一个对应的企业账号
+            Organization organization = insertOrganization(customer);
+            customer.setOrganizationId(organization.getId());
+            enterpriseCustomerProvider.createEnterpriseCustomer(customer);
+            enterpriseCustomerSearcher.feedDoc(customer);
+
+            insertOrUpdateOrganizationDetail(organization, customer);
+            insertOrUpdateOrganizationCommunityRequest(communityId, organization);
+            insertOrUpdateOrganizationMembers(namespaceId, organization, customer.getContactName(), customer.getContactPhone());
+            organizationSearcher.feedDoc(organization);
+            return null;
+        });
+
+    }
+
+    // 需要把同步过来的业务人员添加为我司系统对应组织的管理员
+    private void insertOrUpdateOrganizationMembers(Integer namespaceId, Organization organization, String contact, String contactPhone) {
+        //非11位手机号也跳过此步
+        if (StringUtils.isBlank(contact) || StringUtils.isBlank(contactPhone)
+                || contact.length() != 11 || !StringUtils.isNumeric(contactPhone) || organization == null) {
+            return ;
+        }
+        try {
+            User user = new User();
+            user.setId(1L);
+            UserContext.setCurrentUser(user);
+            UserContext.setCurrentNamespaceId(namespaceId);
+
+            CreateOrganizationAdminCommand cmd = new CreateOrganizationAdminCommand();
+            cmd.setContactName(contact);
+            cmd.setContactToken(contactPhone);
+            cmd.setOrganizationId(organization.getId());
+            rolePrivilegeService.createOrganizationAdmin(cmd, namespaceId);
+        } catch (Exception e) {
+            LOGGER.error("sync organization members error: organizationId="+organization.getId()+", contact="+contact+", contactPhone="+contactPhone, e);
+        }
+    }
+
+    private Organization insertOrganization(EnterpriseCustomer customer) {
+        Organization org = organizationProvider.findOrganizationByNameAndNamespaceId(customer.getName(), customer.getNamespaceId());
+        if(org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
+            return org;
+        }
+        Organization organization = new Organization();
+        organization.setParentId(0L);
+        organization.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
+        organization.setName(customer.getName());
+        organization.setAddressId(0L);
+        organization.setPath("");
+        organization.setLevel(1);
+        organization.setStatus(OrganizationStatus.ACTIVE.getCode());
+        organization.setGroupType(OrganizationGroupType.ENTERPRISE.getCode());
+        organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        organization.setUpdateTime(organization.getCreateTime());
+        organization.setDirectlyEnterpriseId(0L);
+        organization.setNamespaceId(customer.getNamespaceId());
+        organization.setShowFlag((byte)1);
+        organization.setNamespaceOrganizationType(NamespaceOrganizationType.EBEI.getCode());
+        organization.setNamespaceOrganizationToken(customer.getNamespaceCustomerToken());
+        organizationProvider.createOrganization(organization);
+        return organization;
+    }
+
+    private void insertOrUpdateOrganizationDetail(Organization organization, EnterpriseCustomer customer) {
+        OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
+        if (organizationDetail == null) {
+            organizationDetail = new OrganizationDetail();
+            organizationDetail.setOrganizationId(organization.getId());
+            organizationDetail.setDescription(organization.getDescription());
+            organizationDetail.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            organizationDetail.setDisplayName(organization.getName());
+            organizationDetail.setAddress(customer.getContactAddress());
+            organizationProvider.createOrganizationDetail(organizationDetail);
+        }else {
+            organizationDetail.setOrganizationId(organization.getId());
+            organizationDetail.setDescription(organization.getDescription());
+            organizationDetail.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            organizationDetail.setDisplayName(organization.getName());
+            organizationDetail.setAddress(customer.getContactAddress());
+            organizationProvider.updateOrganizationDetail(organizationDetail);
+        }
+        organizationSearcher.feedDoc(organization);
+    }
+
+    private void insertOrUpdateOrganizationCommunityRequest(Long communityId, Organization organization) {
+        if(communityId != null) {
+            OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.findOrganizationCommunityRequestByOrganizationId(communityId, organization.getId());
+            if (organizationCommunityRequest == null) {
+                organizationCommunityRequest = new OrganizationCommunityRequest();
+                organizationCommunityRequest.setCommunityId(communityId);
+                organizationCommunityRequest.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
+                organizationCommunityRequest.setMemberId(organization.getId());
+                organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
+                organizationCommunityRequest.setCreatorUid(1L);
+                organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                organizationCommunityRequest.setOperatorUid(1L);
+                organizationCommunityRequest.setApproveTime(organizationCommunityRequest.getCreateTime());
+                organizationCommunityRequest.setUpdateTime(organizationCommunityRequest.getCreateTime());
+                organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
+            }else {
+                organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
+                organizationCommunityRequest.setOperatorUid(1L);
+                organizationCommunityRequest.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                organizationProvider.updateOrganizationCommunityRequest(organizationCommunityRequest);
+            }
+        }
+    }
+
+    private void deleteEnterpriseCustomer(EnterpriseCustomer customer) {
+        LOGGER.debug("syncDataToDb deleteEnterpriseCustomer customer: {}",
+                StringHelper.toJsonString(customer));
+        if (CommonStatus.fromCode(customer.getStatus()) != CommonStatus.INACTIVE) {
+            customer.setOperatorUid(1L);
+            customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            customer.setStatus(CommonStatus.INACTIVE.getCode());
+            enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+            enterpriseCustomerSearcher.feedDoc(customer);
+        }
+
+        DeleteOrganizationIdCommand deleteOrganizationIdCommand = new DeleteOrganizationIdCommand();
+        deleteOrganizationIdCommand.setId(customer.getOrganizationId());
+        organizationService.deleteEnterpriseById(deleteOrganizationIdCommand);
+
+    }
+
+    private void updateEnterpriseCustomer(EnterpriseCustomer customer, Long communityId, EbeiCustomer ebeiCustomer) {
+        LOGGER.debug("syncDataToDb updateEnterpriseCustomer customer: {}, ebeiCustomer: {}",
+                StringHelper.toJsonString(customer), StringHelper.toJsonString(ebeiCustomer));
+        this.dbProvider.execute((TransactionStatus status) -> {
+            customer.setCommunityId(communityId);
+            customer.setNamespaceCustomerType(NamespaceCustomerType.SHENZHOU.getCode());
+            customer.setNamespaceCustomerToken(ebeiCustomer.getOwnerId());
+            customer.setName(ebeiCustomer.getCompanyName());
+            customer.setNickName(ebeiCustomer.getCompanyName());
+            customer.setContactName(ebeiCustomer.getContactPerson());
+            customer.setContactPhone(ebeiCustomer.getContactPhone());
+            customer.setStatus(CommonStatus.ACTIVE.getCode());
+            customer.setOperatorUid(1L);
+            customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            customer.setVersion(ebeiCustomer.getVersion());
+            enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+            enterpriseCustomerSearcher.feedDoc(customer);
+
+            //查找对应的企业账号
+            Organization organization = organizationProvider.findOrganizationById(customer.getOrganizationId());
+            if (organization == null) {
+                organization = insertOrganization(customer);
+                customer.setOrganizationId(organization.getId());
+                enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+            } else if (CommonStatus.fromCode(organization.getStatus()) != CommonStatus.ACTIVE || !organization.getName().equals(customer.getName())) {
+                organization.setName(customer.getName());
+                organization.setStatus(CommonStatus.ACTIVE.getCode());
+                organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                organization.setOperatorUid(1L);
+                organizationProvider.updateOrganization(organization);
+            }
+
+            insertOrUpdateOrganizationDetail(organization, customer);
+            insertOrUpdateOrganizationCommunityRequest(communityId, organization);
+            insertOrUpdateOrganizationMembers(customer.getNamespaceId(), organization, customer.getContactName(), customer.getContactPhone());
+            organizationSearcher.feedDoc(organization);
+            return null;
+        });
     }
 
 }

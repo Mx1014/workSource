@@ -400,6 +400,37 @@ public class ContractProviderImpl implements ContractProvider {
 
 	}
 
+	@Override
+	public String findLastContractVersionByCommunity(Integer namespaceId, Long communityId) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId))
+				.orderBy(Tables.EH_CONTRACTS.VERSION.desc())
+				.limit(1)
+				.fetchOne();
+		if (record != null) {
+			return record.getValue(Tables.EH_CONTRACTS.VERSION);
+		}
+		return null;
+	}
+
+	@Override
+	public List<Contract> listContractByNamespaceType(Integer namespaceId, String namespaceType, Long communityId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
+		query.addConditions(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TYPE.eq(namespaceType));
+		query.addConditions(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId));
+
+		List<Contract> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, Contract.class));
+			return null;
+		});
+
+		return result;
+	}
+
 	private EhContractsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
