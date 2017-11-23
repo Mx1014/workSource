@@ -22,12 +22,15 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
+import com.everhomes.hotTag.HotTags;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplate;
 import com.everhomes.locale.LocaleTemplateService;
@@ -46,6 +49,8 @@ import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.comment.OwnerTokenDTO;
+import com.everhomes.rest.comment.OwnerType;
 import com.everhomes.rest.common.ActivityDetailActionData;
 import com.everhomes.rest.common.PostDetailActionData;
 import com.everhomes.rest.community.CommunityType;
@@ -54,8 +59,11 @@ import com.everhomes.rest.forum.*;
 import com.everhomes.rest.forum.admin.PostAdminDTO;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
+import com.everhomes.rest.forum.StickPostCommand;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.common.Router;
+import com.everhomes.rest.hotTag.HotFlag;
+import com.everhomes.rest.hotTag.HotTagServiceType;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.*;
@@ -68,6 +76,7 @@ import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.visibility.VisibilityScope;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.search.HotTagSearcher;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.server.schema.Tables;
@@ -78,6 +87,7 @@ import com.everhomes.user.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import net.greghaines.jesque.Job;
+import org.apache.xmlbeans.impl.xb.xsdschema.Public;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.elasticsearch.common.text.Text;
@@ -112,6 +122,9 @@ public class ForumServiceImpl implements ForumService {
     
     @Autowired
     private ActivityService activityService;
+    
+    @Autowired
+    private ActivityProivider activityProvider;
     
     @Autowired
     private DbProvider dbProvider;
@@ -187,6 +200,9 @@ public class ForumServiceImpl implements ForumService {
 
     @Value("${server.contextPath:}")
     private String serverContectPath;
+
+    @Autowired
+    private HotTagSearcher hotTagSearcher;
     
     @Override
     public boolean isSystemForum(long forumId, Long communityId) {
@@ -208,8 +224,81 @@ public class ForumServiceImpl implements ForumService {
     
     @Override
     public PostDTO createTopic(NewTopicCommand cmd) {
-        return createTopic(cmd, UserContext.current().getUser().getId());
+
+        //全部都加上论坛入口Id为0，现在没办法真的区分不了这个帖子时属于哪个应用模块，活动、论坛、俱乐部、公告  add by yanjun 20171109
+        if(cmd.getForumEntryId() == null){
+            cmd.setForumEntryId(0L);
+        }
+
+        //这个原来只用一行代码的方法终于要发挥他的作用啦。
+        PostDTO dto = new PostDTO();
+
+        if(cmd.getVisibleRegionIds() != null && cmd.getVisibleRegionIds().size() == 1){
+            cmd.setVisibleRegionId(cmd.getVisibleRegionIds().get(0));
+            cmd.setVisibleRegionIds(null);
+        }
+
+        //发送到一个特定对象的帖子或者全部范围的帖子
+        if(cmd.getVisibleRegionId() != null || cmd.getVisibleRegionType() == VisibleRegionType.ALL.getCode()){
+            cmd.setCloneFlag(PostCloneFlag.NORMAL.getCode());
+            dto = createTopic(cmd, UserContext.current().getUser().getId());
+        }else if(cmd.getVisibleRegionIds() != null && cmd.getVisibleRegionIds().size() > 1){
+
+            //else发送到多个目标的帖子，需要发送一个真身帖，一个全部范围的帖子，以及各个目标的帖子
+            cmd.setVisibleRegionId(null);
+            cmd.setCloneFlag(PostCloneFlag.REAL.getCode());
+            dto = createTopic(cmd, UserContext.current().getUser().getId());
+
+            cmd.setCloneFlag(PostCloneFlag.CLONE.getCode());
+            cmd.setRealPostId(dto.getId());
+
+            for(int i= 0; i<cmd.getVisibleRegionIds().size(); i++){
+                cmd.setVisibleRegionId(cmd.getVisibleRegionIds().get(i));
+                createTopic(cmd, UserContext.current().getUser().getId());
+            }
+
+            cmd.setVisibleRegionId(null);
+            cmd.setVisibleRegionType(VisibleRegionType.ALL.getCode());
+            createTopic(cmd, UserContext.current().getUser().getId());
+        }
+
+
+
+        return dto;
     }
+
+//
+//
+//    private void checkVersionForforumEntry(NewTopicCommand cmd){
+//
+//        if(cmd.getForumEntryId() != null){
+//            return;
+//        }
+//
+//        String versionRealm = UserContext.current().getVersionRealm();
+//        LOGGER.info("UserContext current getVersion , versionRealm = {}", versionRealm);
+//
+//        //来自客户端的请求
+//        if(versionRealm != null && (versionRealm.contains("Android_") || versionRealm.contains("iOS_"))){
+//
+//            String version = UserContext.current().getVersion();
+//
+//            LOGGER.info("UserContext current getVersion , version = {}", version);
+//            if(version == null){
+//                return;
+//            }
+//            VersionRange versionRange = new VersionRange("["+version+","+version+")");
+//            VersionRange versionRangeMin = new VersionRange("[4.10.4,4.10.4)");
+//
+//
+//            //来自客户端小于4.10.4的版本
+//            if(((int)versionRange.getUpperBound()) < ((int)versionRangeMin.getUpperBound())){
+//                cmd.setForumEntryId(0L);
+//            }
+//
+//        }
+//    }
+
 
     @Override
     public PostDTO createTopic(NewTopicCommand cmd, Long creatorUid) {
@@ -235,6 +324,12 @@ public class ForumServiceImpl implements ForumService {
 
         // 阻止黑名单用户发帖(临时解决方案)
         this.checkUserBlacklist(creatorUid);
+        
+        //如果是之前暂存过的帖子，参数中要传oldId，用户删除老数据  add by yanjun 20170515  ----start
+        if(cmd.getOldId() != null){
+        	this.deletePost(cmd.getForumId(), cmd.getOldId(), true, null, null, null);
+        }
+        //如果是之前暂存过的帖子，参数中要传oldId，用户删除老数据  add by yanjun 20170515  ----end
 
         Post post = processTopicCommand(creatorUid, cmd);
 
@@ -246,6 +341,10 @@ public class ForumServiceImpl implements ForumService {
             handler.postProcessEmbeddedObject(post);
         } else {
             forumProvider.createPost(post);
+
+            //将tag保存到搜索引擎，此处仅用于普通话题，因为活动和投票已经在自己的postProcessEmbeddedObject中处理
+            // add by yanjun 20170613
+            feedDocTopicTag(post);
         }
 
 
@@ -259,14 +358,18 @@ public class ForumServiceImpl implements ForumService {
         }
         populatePost(creatorUid, post, communityId, false);
 
-        try {
-            postSearcher.feedDoc(post);
+        //暂存的帖子不添加到搜索引擎，到发布的时候添加到搜索引擎，不计算积分    add by yanjun 20170609
+        //客户端传来的status可能为空，edit by yanjun
+        if(PostStatus.fromCode(post.getStatus()) == PostStatus.ACTIVE || PostStatus.fromCode(post.getStatus()) == null) {
+            try {
+                postSearcher.feedDoc(post);
 
-            AddUserPointCommand pointCmd = new AddUserPointCommand(creatorUid, PointType.CREATE_TOPIC.name(),
-                userPointService.getItemPoint(PointType.CREATE_TOPIC), creatorUid);
-            userPointService.addPoint(pointCmd);
-        } catch(Exception e) {
-            LOGGER.error("Failed to add post to search engine, userId=" + creatorUid + ", postId=" + post.getId(), e);
+                AddUserPointCommand pointCmd = new AddUserPointCommand(creatorUid, PointType.CREATE_TOPIC.name(),
+                        userPointService.getItemPoint(PointType.CREATE_TOPIC), creatorUid);
+                userPointService.addPoint(pointCmd);
+            } catch (Exception e) {
+                LOGGER.error("Failed to add post to search engine, userId=" + creatorUid + ", postId=" + post.getId(), e);
+            }
         }
 
         /**
@@ -296,6 +399,27 @@ public class ForumServiceImpl implements ForumService {
         return postDto;
     }
 
+    /**
+     * 将tag保存到搜索引擎，此处仅用于普通话题，因为活动和投票已经在自己的postProcessEmbeddedObject中处理  add by yanjun 20170613
+     * @param post
+     */
+    private void feedDocTopicTag(Post post){
+        if(post.getEmbeddedAppId()!=null && post.getEmbeddedAppId() == 0L && !StringUtils.isEmpty(post.getTag())){
+            try{
+                HotTags tag = new HotTags();
+
+                Integer namespaceId = UserContext.getCurrentNamespaceId(post.getNamespaceId());
+                tag.setNamespaceId(namespaceId);
+
+                tag.setName(post.getTag());
+                tag.setHotFlag(HotFlag.NORMAL.getCode());
+                tag.setServiceType(HotTagServiceType.TOPIC.getCode());
+                hotTagSearcher.feedDoc(tag);
+            }catch (Exception e){
+                LOGGER.error("feedDoc topic tag error",e);
+            }
+        }
+    }
     private void checkUserBlacklist(Long userId) {
         String blackListStr = configProvider.getValue(UserContext.getCurrentNamespaceId(), "createTopic.blacklist", "");
         if (org.apache.commons.lang.StringUtils.isNotEmpty(blackListStr)) {
@@ -315,7 +439,7 @@ public class ForumServiceImpl implements ForumService {
     	if (activity == null) {
 			return;
 		}
-    	ActivityWarningResponse queryActivityWarningResponse = activityService.queryActivityWarning(new GetActivityWarningCommand(activity.getNamespaceId()));
+    	ActivityWarningResponse queryActivityWarningResponse = activityService.queryActivityWarning(new GetActivityWarningCommand(activity.getNamespaceId(), activity.getCategoryId()));
     	//判断如果提醒时间大于当前时间并且要落在使用轮循+定时的方式无法找到区间内才设置提醒
     	if (activity.getStartTime().getTime() - queryActivityWarningResponse.getTime() > new Date().getTime() 
     			&& DateUtils.getCurrentHour().getTime() == DateUtils.formatHour(new Date(activity.getStartTime().getTime() - queryActivityWarningResponse.getTime())).getTime()) {
@@ -392,7 +516,7 @@ public class ForumServiceImpl implements ForumService {
 				if(EntityType.fromCode(target.getTargetType()) == EntityType.ORGANIZATIONS){
 					Organization org =  organizationProvider.findOrganizationById(target.getId());
 					org.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-					List<OrganizationMember> members = organizationProvider.listOrganizationPersonnels(null, org, null, null,new CrossShardListingLocator(), 10000);
+					List<OrganizationMember> members = organizationProvider.listOrganizationPersonnels(namespaceId,null, org, null, null,new CrossShardListingLocator(), 10000);
 					for (OrganizationMember member : members) {
 						if(MessageType.fromCode(target.getMessageType()) == MessageType.PUSH){
 							if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
@@ -454,11 +578,15 @@ public class ForumServiceImpl implements ForumService {
             userId = user.getId();
         }
         
-        Long forumId = cmd.getForumId();
-        checkForumParameter(userId, forumId, "getTopic");
-        
         Long postId = cmd.getTopicId();
-        Post post = checkPostParameter(userId, forumId, postId, "getTopic");
+        Post post = checkPostParameter(userId, null, postId, "getTopic");
+        cmd.setForumId(post.getForumId());
+        cmd.setCommunityId(post.getCommunityId());
+
+        //先查帖子再查论坛，可能没有forumId  edit by yanjun 20170830
+        checkForumParameter(userId, cmd.getForumId(), "getTopic");
+
+
         if(post != null) {
             try {
                 this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
@@ -489,7 +617,10 @@ public class ForumServiceImpl implements ForumService {
                 LOGGER.error("Failed to update the view count of post, userId=" + userId + ", postId=" + postId, e);
             }
             PostDTO postDto =  getTopicById(postId, cmd.getCommunityId(), true, true);
-            
+
+            //填充VisibleRegionIds，用于编辑活动  add by yanjun 20170830
+            fillVisibleRegionIds(postDto);
+
             /*根据客户端的要求 控制任务操作*/
             if(null != postDto && null != postDto.getEmbeddedAppId()){
             	if(postDto.getEmbeddedAppId().equals(AppConstants.APPID_ORGTASK)){
@@ -526,7 +657,7 @@ public class ForumServiceImpl implements ForumService {
 //            
 //            return ConvertHelper.convert(post, PostDTO.class);
         } else {
-            LOGGER.error("Forum post not found, userId=" + userId + ", forumId=" + forumId 
+            LOGGER.error("Forum post not found, userId=" + userId + ", forumId=" + cmd.getForumId()
                 + ", postId=" + postId);
             throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
                 ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "Forum post not found");
@@ -582,7 +713,7 @@ public class ForumServiceImpl implements ForumService {
         if(topicId != null) {
         	Post post = this.forumProvider.findPostById(topicId);
 	        if(post != null) {
-	            if(PostStatus.ACTIVE != PostStatus.fromCode(post.getStatus())) {
+	            if(PostStatus.ACTIVE != PostStatus.fromCode(post.getStatus()) && PostStatus.WAITING_FOR_CONFIRMATION != PostStatus.fromCode(post.getStatus())) {
 	            	
 	            	//查我发的贴&&当前用户=发帖人 && 发帖人=删帖人时 可以看到该帖 modified by xiongying 20160617
 	            	if(getByOwnerId && post.getCreatorUid().equals(userId) && post.getCreatorUid().equals(post.getDeleterUid())) {
@@ -682,11 +813,13 @@ public class ForumServiceImpl implements ForumService {
     public void deletePost(Long forumId, Long postId, boolean deleteUserPost, Long currentOrgId, String ownerType, Long ownerId) {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
-        
-        checkForumParameter(userId, forumId, "getTopic");
-        
-        Post post = checkPostParameter(userId, forumId, postId, "deletePost");
 
+        //为了兼容新的统一评论接口，先检查post再检查forum，因为新的统一接口没有传来forumId  add by yanjun 20170601
+        Post post = checkPostParameter(userId, forumId, postId, "deletePost");
+        if(forumId == null && post!= null){
+            forumId = post.getForumId();
+        }
+        checkForumParameter(userId, forumId, "getTopic");
 
         Post pPost = null;
         if(post.getParentPostId() != null && post.getParentPostId() != 0) {
@@ -752,20 +885,73 @@ public class ForumServiceImpl implements ForumService {
                     	}
                     }
                     //如果是活动创建者删除活动，通知到已报名的人，add by tt, 20161012
-                    if (post.getCreatorUid().longValue() == userId.longValue() && embededAppId.longValue() == AppConstants.APPID_ACTIVITY) {
+                    if (post.getCreatorUid().longValue() == userId.longValue() &&  embededAppId != null && embededAppId.longValue() == AppConstants.APPID_ACTIVITY) {
 						sendMessageWhenCreatorDeleteActivity(post.getEmbeddedId(), userId);
 					}
+                    
                    return null;
                 });
                 
                 this.postSearcher.deleteById(post.getId());
+
                 if(handler != null) {
                     handler.postProcessEmbeddedObject(post);
                 } 
+                
+                //进行退款，取消报名   add by yanjun 20170519
+                if (embededAppId.longValue() == AppConstants.APPID_ACTIVITY) {
+                	Activity activity = activityProivider.findActivityById(post.getEmbeddedId());
+                	if (activity != null) {
+                		List<ActivityRoster> activityRosters = activityProivider.listRosters(activity.getId(), ActivityRosterStatus.NORMAL);
+                		for( int i=0; i< activityRosters.size(); i++){
+                			//如果有退款，先退款再取消订单
+                			ActivityRoster tempRoster = activityRosters.get(i);
+                			if(tempRoster.getStatus() != null && tempRoster.getStatus().byteValue() == ActivityRosterStatus.NORMAL.getCode()){
+                				activityService.signupOrderRefund(activity, tempRoster.getUid());
+                				
+                				tempRoster.setStatus(ActivityRosterStatus.CANCEL.getCode());
+                				tempRoster.setCancelTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+      			             	activityProvider.updateRoster(tempRoster);
+                			}
+                			
+                		}
+
+                        activity.setStatus(PostStatus.INACTIVE.getCode());
+                        activity.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        activityProvider.updateActivity(activity);
+            		}
+				}
+
+                //删除克隆帖子  add by yanjun 20170830
+                deletePostAndActivity(post, userId);
+                
             } catch(Exception e) {
                 LOGGER.error("Failed to update the post status, userId=" + userId + ", postId=" + postId, e);
             }
-        } else {
+        }else if(PostStatus.fromCode(post.getStatus()) == PostStatus.WAITING_FOR_CONFIRMATION) {
+        	post.setStatus(PostStatus.INACTIVE.getCode());
+            post.setDeleterUid(userId);
+            post.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            try {
+                this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
+                    this.forumProvider.updatePost(post);
+                    return null;
+                });
+                this.postSearcher.deleteById(post.getId());
+                Activity activity = activityProvider.findSnapshotByPostId(postId);
+                if(activity != null){
+                	activity.setStatus((byte)0);
+            		activity.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            		activityProvider.updateActivity(activity);
+                }
+
+                //删除克隆帖子  add by yanjun 20170830
+                deletePostAndActivity(post, userId);
+                
+            } catch(Exception e) {
+                LOGGER.error("Failed to update the post status, userId=" + userId + ", postId=" + postId, e);
+            }
+        }else {
             //Added by Janson
             if(deleteUserPost) {
                 try {
@@ -798,13 +984,49 @@ public class ForumServiceImpl implements ForumService {
         }
     }
     
+    private Long getFamilyId() {
+        User user = UserContext.current().getUser();
+        if (user != null && user.getAddressId() != null) {
+            Family family = familyProvider.findFamilyByAddressId(user.getAddressId());
+            if (family == null) {
+                return null;
+            }
+            return family.getId();
+        }
+        return null;
+    }
+
+    private void deletePostAndActivity(Post post, Long userId){
+        //删除克隆帖子  add by yanjun 20170830
+        if(post.getCloneFlag() != null && post.getCloneFlag().byteValue() == PostCloneFlag.REAL.getCode()){
+            List<Post> listClone= forumProvider.listPostsByRealPostId(post.getId());
+
+            if(listClone != null && listClone.size() >0){
+                listClone.forEach(r->{
+                    r.setStatus(PostStatus.INACTIVE.getCode());
+                    r.setDeleterUid(userId);
+                    r.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    this.forumProvider.updatePost(r);
+
+                    this.postSearcher.deleteById(r.getId());
+
+                    //删除活动
+                    Activity r_activity = activityProvider.findSnapshotByPostId(r.getId());
+                    r_activity.setStatus(PostStatus.INACTIVE.getCode());
+                    r_activity.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    activityProvider.updateActivity(r_activity);
+
+                });
+            }
+        }
+    }
     //当创建者删除活动时发消息通知已报名的人
     private void sendMessageWhenCreatorDeleteActivity(Long activityId, Long userId){
     	Activity activity = activityProivider.findActivityById(activityId);
     	if (activity == null) {
 			return ;
 		}
-    	List<ActivityRoster> activityRosters = activityProivider.listRosters(activityId);
+    	List<ActivityRoster> activityRosters = activityProivider.listRosters(activityId, ActivityRosterStatus.NORMAL);
     	String scope = ActivityNotificationTemplateCode.SCOPE;
 		int code = ActivityNotificationTemplateCode.CREATOR_DELETE_ACTIVITY;
 		Map<String, Object> map = new HashMap<>();
@@ -930,7 +1152,11 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            //nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
+
+            // MD，加上置顶功能后无法使用锚点排序，一页页来 add by yanjun 20171031
+            nextPageAnchor = locator.getAnchor() == null ? 2 : locator.getAnchor() + 1;
         }
         
         populatePosts(userId, posts, communityId, false);
@@ -1080,7 +1306,11 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            //nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
+
+            // MD，加上置顶功能后无法使用锚点排序，一页页来 add by yanjun 20171031
+            nextPageAnchor = locator.getAnchor() == null ? 2 : locator.getAnchor() + 1;
         }
         
         populatePosts(operatorId, posts, communityId, false);
@@ -1132,7 +1362,9 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            // MD，加上置顶功能后无法使用锚点排序，一页页来 add by yanjun 20171031
+            nextPageAnchor = locator.getAnchor() == null ? 2 : locator.getAnchor() + 1;
         }
         List<PostDTO> postDtoList = posts.stream().map((r) -> {
         	
@@ -1234,32 +1466,16 @@ public class ForumServiceImpl implements ForumService {
     	 Long operatorId = operator.getId();
     	 Long organizationId = cmd.getOrganizationId();
          Long communityId = cmd.getCommunityId();
+        Integer namespaceId = cmd.getNamespaceId();
+        if(namespaceId == null){
+            namespaceId = UserContext.getCurrentNamespaceId();
+        }
          List<Long> forumIds = new ArrayList<Long>();
-         Organization organization = checkOrganizationParameter(operatorId, organizationId, "listOrganizationTopics");
+         //Organization organization = checkOrganizationParameter(operatorId, organizationId, "listOrganizationTopics");
          List<Long> communityIdList = new ArrayList<Long>();
-         if(null == communityId){
-//        	 ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
-//         	command.setCommunityId(organization.getId());;
-//         	List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
-        	// 如果发送范围选择的公司圈，需要加上公司的论坛，add by tt, 20170307
-        	if (organization.getGroupId() != null) {
-				Group group = groupProvider.findGroupById(organization.getGroupId());
-				if (group != null) {
-					forumIds.add(group.getOwningForumId());
-				}
-			}
-         	List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organization.getId());
-         	if(null != communities){
-         		for (CommunityDTO communityDTO : communities) {
-         			communityIdList.add(communityDTO.getId());
-         			forumIds.add(communityDTO.getDefaultForumId());
- 				}
-         	}
-         }else{
-        	Community community = communityProvider.findCommunityById(communityId);
-         	communityIdList.add(community.getId());
-         	forumIds.add(community.getDefaultForumId());
-         }
+
+         //获取园区id和论坛Id,并返回orgId，因为当查询域空间时需要orgid来查发送到“全部”的帖子 edit by yanjun 20170830
+         organizationId = populateCommunityIdAndForumId(communityId, organizationId, namespaceId, communityIdList, forumIds);
          
          if(null != cmd.getEmbeddedAppId() && cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY) {
         	 ListActivitiesReponse response = activityService.listOfficialActivities(cmd);
@@ -1281,7 +1497,10 @@ public class ForumServiceImpl implements ForumService {
         			 populatePosts(operatorId, posts, communityId, false);
          	        
          	        List<PostDTO> postDtoList = posts.stream().map((r) -> {
-         	          return ConvertHelper.convert(r, PostDTO.class);  
+         	          PostDTO dto = ConvertHelper.convert(r, PostDTO.class);
+         	          //填充VisibleRegionIds，用于编辑活动  add by yanjun 20170830
+                      fillVisibleRegionIds(dto);
+         	          return dto;
          	        }).collect(Collectors.toList());
          	        
          	       postResponse.setPosts(postDtoList);
@@ -1305,9 +1524,22 @@ public class ForumServiceImpl implements ForumService {
 	         
 	         Condition communityCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
 	         communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(communityIdList));
+
+             //全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）  add by yanjun 20170807
+             communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode()));
+
 	         Condition regionCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
 	         regionCondition = regionCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(organizationId));
-	         Condition condition = communityCondition.or(regionCondition).and(Tables.EH_FORUM_POSTS.FORUM_ID.in(forumIds));
+
+             //全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）  add by yanjun 20170807
+             regionCondition = regionCondition.and(Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode()));
+
+             //全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）  add by yanjun 20170807
+	         Condition condition = communityCondition
+                     .or(regionCondition)
+                     .or(Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()))
+                     .and(Tables.EH_FORUM_POSTS.FORUM_ID.in(forumIds));
+
 	         if(null != cmd.getEmbeddedAppId()){
 	        	 condition = condition.and(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(cmd.getEmbeddedAppId()));
 	        	 //如果是活动且查询官方活动，则加上官方活动条件
@@ -1335,8 +1567,25 @@ public class ForumServiceImpl implements ForumService {
 	         if(null != privateCond){
 	        	 condition = condition.and(privateCond);
 	         }
-	         
-	         List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
+
+             //支持按话题、活动、投票来查询数据   add by yanjun 20170612
+             if(cmd.getCategoryId() != null){
+                 condition = condition.and(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+             }
+
+             //支持标签搜索  add by yanjun 20170712
+             if(!StringUtils.isEmpty(cmd.getTag())){
+                 condition = condition.and(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
+             }
+
+             //论坛多入口，老客户端没有这个参数，默认入口为0  add by yanjun 20171025
+             if(StringUtils.isEmpty(cmd.getForumEntryId())){
+                 condition = condition.and(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(0L));
+             }else {
+                 condition = condition.and(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(cmd.getForumEntryId()));
+             }
+
+	         List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus(), cmd.getNeedTemporary());
 	    	 if(LOGGER.isInfoEnabled()) {
 	             long endTime = System.currentTimeMillis();
 	             LOGGER.info("Query organization topics, userId=" + operatorId + ", size=" + dtos.size() 
@@ -1345,7 +1594,76 @@ public class ForumServiceImpl implements ForumService {
 	    	 return new ListPostCommandResponse(locator.getAnchor(), dtos); 
 	    }
     }
-    
+    @Override
+    public Long populateCommunityIdAndForumId(Long communityId, Long organizationId, Integer namespaceId, List<Long> communityIds, List<Long> forumIds){
+        if(communityId != null){
+            Community community = communityProvider.findCommunityById(communityId);
+            communityIds.add(community.getId());
+            forumIds.add(community.getDefaultForumId());
+        }else if(organizationId != null){
+            // 如果发送范围选择的公司圈，需要加上公司的论坛，add by tt, 20170307
+            Organization organization = organizationProvider.findOrganizationById(organizationId);
+            if (organization.getGroupId() != null) {
+                Group group = groupProvider.findGroupById(organization.getGroupId());
+                if (group != null) {
+                    forumIds.add(group.getOwningForumId());
+                }
+            }
+
+
+            // 因为左邻管理后台的原因
+            // 左邻0域空间只传一个organizationId则只查organization和organization所在园区，
+            // 其他情况下沿用原来的逻辑查organization和底下管理的园区   add by yanjun 20170911
+            Integer currentNamespaceId = UserContext.getCurrentNamespaceId();
+            if(currentNamespaceId != null && currentNamespaceId == 0){
+                OrganizationCommunityRequest OrganizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organizationId);
+                if(OrganizationCommunityRequest != null){
+                    communityIds.add(OrganizationCommunityRequest.getCommunityId());
+                    Community community = communityProvider.findCommunityById(OrganizationCommunityRequest.getCommunityId());
+                    if(community != null){
+                        forumIds.add(community.getDefaultForumId());
+                    }
+                }
+            }else {
+                List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organization.getId());
+                if(null != communities){
+                    for (CommunityDTO communityDTO : communities) {
+                        communityIds.add(communityDTO.getId());
+                        forumIds.add(communityDTO.getDefaultForumId());
+                    }
+                }
+            }
+
+        }else if(namespaceId != null && namespaceId != 0){
+            //0域空间有25万园区，直接会把系统搞挂了  add by yanjun 20170906
+            ListingLocator locator = new CrossShardListingLocator();
+            locator.setAnchor(null);
+            List<Community> communities = communityProvider.listCommunitiesByKeyWord(locator, 1000000, null, namespaceId, null);
+            if(null != communities){
+                for (Community community : communities) {
+                    communityIds.add(community.getId());
+                    forumIds.add(community.getDefaultForumId());
+
+                    // 如果发送范围选择的公司圈，需要加上管理公司的论坛
+                    GetOrgDetailCommand getOrgDetailCommand = new GetOrgDetailCommand();
+                    getOrgDetailCommand.setCommunityId(community.getId());
+                    getOrgDetailCommand.setOrganizationType(PostEntityTag.PM.getCode());
+                    OrganizationDTO organization = organizationService.getOrganizationByComunityidAndOrgType(getOrgDetailCommand);
+                    if (organization != null && organization.getGroupId() != null) {
+                        //加上发送到全部的
+                        organizationId = organization.getId();
+
+                        Group group = groupProvider.findGroupById(organization.getGroupId());
+                        if (group != null) {
+                            forumIds.add(group.getOwningForumId());
+                        }
+                    }
+                }
+            }
+        }
+        return organizationId;
+    }
+
     /**
      * 独立出一个方法来专门查询官方活动，以简化帖子条件的查询条件；而原来使用listOrgTopics(QueryOrganizationTopicCommand cmd)
      * 存在着BUG：当一个机构没有管理小区或者以普通机构的身份访问时会查不到帖子；
@@ -1419,7 +1737,7 @@ public class ForumServiceImpl implements ForumService {
         CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
         locator.setAnchor(cmd.getPageAnchor());
         
-        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
+        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus(), null);
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
             LOGGER.info("Query offical activity topics, userId=" + operatorId + ", size=" + dtos.size() 
@@ -1506,7 +1824,7 @@ public class ForumServiceImpl implements ForumService {
         if(null != cond){
         	condition = condition.and(cond);
         }
-        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
+        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus(), cmd.getNeedTemporary());
         
         
         if(LOGGER.isInfoEnabled()) {
@@ -1518,7 +1836,7 @@ public class ForumServiceImpl implements ForumService {
         return new ListPostCommandResponse(locator.getAnchor(), dtos);
     }
     
-    private List<PostDTO> getOrgTopics(CrossShardListingLocator locator,Integer pageSize, Condition condition, String publishStatus){
+    private List<PostDTO> getOrgTopics(CrossShardListingLocator locator,Integer pageSize, Condition condition, String publishStatus, Byte needTemporary ){
     	User user = UserContext.current().getUser();
         Long userId = user.getId();
     	
@@ -1528,7 +1846,19 @@ public class ForumServiceImpl implements ForumService {
             query.addJoin(Tables.EH_FORUM_ASSIGNED_SCOPES, JoinType.LEFT_OUTER_JOIN, 
                 Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
-            query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+
+//            //新增暂存活动，后台管理员在web端要看到暂存的活动  add by yanjun 20170518
+//            if(needTemporary != null && needTemporary.byteValue() == 1){
+//            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
+//            }else{
+//            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+//            }
+
+            Condition temporaryCondition = getTemporaryCondition(needTemporary);
+            if(temporaryCondition != null){
+                query.addConditions(temporaryCondition);
+            }
+
             
             if(TopicPublishStatus.fromCode(publishStatus) == TopicPublishStatus.UNPUBLISHED){
             	query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.gt(timestemp));
@@ -1550,12 +1880,22 @@ public class ForumServiceImpl implements ForumService {
             
             return query;
         });
+
+        // 如果是clone帖子，则寻找它的真身帖子和真身活动   add by yanjun 20170807
+        populateRealPost(posts);
+
+
         this.forumProvider.populatePostAttachments(posts);
-        
-        locator.setAnchor(null);
+
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            locator.setAnchor(posts.get(posts.size() - 1).getId());
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+
+            // MD，加上置顶功能后无法使用锚点排序，一页页来 add by yanjun 20171031
+            Long nextpageAnchor = locator.getAnchor() == null ? 2 : locator.getAnchor() + 1;
+            locator.setAnchor(nextpageAnchor);
+        }else {
+            locator.setAnchor(null);
         }
         
         populatePosts(user.getId(), posts, null, false);
@@ -1564,7 +1904,10 @@ public class ForumServiceImpl implements ForumService {
         	Timestamp s = r.getStartTime();
         	Timestamp e = r.getEndTime();
         	PostDTO dto= ConvertHelper.convert(r, PostDTO.class);
-        	
+
+            //填充VisibleRegionIds，用于编辑活动  add by yanjun 20170830
+            fillVisibleRegionIds(dto);
+
         	if(null != s && null != e){
         		dto.setStartTime(s.getTime());
             	dto.setEndTime(e.getTime());
@@ -1593,7 +1936,46 @@ public class ForumServiceImpl implements ForumService {
           return dto;  
         }).collect(Collectors.toList());
     }
-    
+
+
+    private Condition getTemporaryCondition(Byte needTemporary){
+
+        Condition condition = null;
+        //新增暂存活动，后台管理员在web端要看到暂存的活动 add by yanjun 20170513
+        if(needTemporary == null || needTemporary.byteValue() == NeedTemporaryType.PUBLISH.getCode()){
+            condition = Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode());
+        }else if(needTemporary.byteValue() == NeedTemporaryType.ALL.getCode()){
+            condition = Tables.EH_FORUM_POSTS.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode());
+        }else if(needTemporary.byteValue() == NeedTemporaryType.TEMPORARY.getCode()){
+            condition = Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.WAITING_FOR_CONFIRMATION.getCode());
+        }
+        return  condition;
+    }
+
+    private void fillVisibleRegionIds(PostDTO dto){
+        if(dto == null){
+            return;
+        }
+
+        List<Long> visibleRegionIds = new ArrayList<>();
+        if(dto.getCloneFlag() != null && dto.getCloneFlag().byteValue() == PostCloneFlag.REAL.getCode()){
+            List<Post> list= forumProvider.listPostsByRealPostId(dto.getId());
+            if (list != null && list.size() >0){
+                list.forEach(r->{
+                    if(r.getVisibleRegionId() != null){
+                        visibleRegionIds.add(r.getVisibleRegionId());
+                    }
+                });
+            }
+        }else if(dto.getVisibleRegionId() != null){
+            visibleRegionIds.add(dto.getVisibleRegionId());
+        }
+
+        if(visibleRegionIds.size() > 0){
+            dto.setVisibleRegionIds(visibleRegionIds);
+        }
+    }
+
     @Override
     public void likeTopic(LikeTopicCommand cmd) {
         User operator = UserContext.current().getUser();
@@ -1653,7 +2035,73 @@ public class ForumServiceImpl implements ForumService {
             LOGGER.error("Failed to update the dislike count of post, userId=" + operatorId + ", topicId=" + topicId, e);
         }
     }
-    
+
+    @Override
+    public void stickPost(StickPostCommand cmd) {
+        User operator = UserContext.current().getUser();
+        Long operatorId = operator.getId();
+
+        checkStickPostPrivilege(operatorId, cmd.getOrganizationId());
+        checkStickPostParameter(operatorId, cmd.getPostId(), cmd.getStickFlag());
+
+        dbProvider.execute((status) -> {
+            Post post = this.forumProvider.findPostById(cmd.getPostId());
+
+            post.setStickFlag(cmd.getStickFlag());
+
+            if(StickFlag.fromCode(cmd.getStickFlag()) == StickFlag.TOP){
+                post.setStickTime(new Timestamp(System.currentTimeMillis()));
+            }else {
+                post.setStickTime(null);
+            }
+
+            forumProvider.updatePost(post);
+            if(post.getEmbeddedAppId() != null &&  post.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY){
+                Activity activity = activityProvider.findSnapshotByPostId(cmd.getPostId());
+                activity.setStickFlag(cmd.getStickFlag());
+
+                if(StickFlag.fromCode(cmd.getStickFlag()) == StickFlag.TOP){
+                    activity.setStickTime(new Timestamp(System.currentTimeMillis()));
+                }else {
+                    activity.setStickTime(null);
+                }
+
+                activityProivider.updateActivity(activity);
+            }
+            return null;
+        });
+    }
+
+    private void checkStickPostPrivilege(Long operatorId, Long organizationId) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+
+        //检查园区企业管理员
+        if(resolver.checkSuperAdmin(operatorId, organizationId)){
+            return;
+        }
+        //检查超级管理员，此处不成立会报错
+        resolver.checkUserPrivilege(operatorId, 0);
+
+    }
+
+    private Post checkStickPostParameter(Long operatorId, Long postId, Byte stickFlag) {
+        if(postId == null || StickFlag.fromCode(stickFlag) == null) {
+            LOGGER.error("invalid parameter, postId or stickFlag is invalid, operatorId={}, postId={}, stickFlag={}", operatorId, postId, stickFlag);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter, postId or stickFlag is null");
+        }
+
+        Post post = this.forumProvider.findPostById(postId);
+        if(post == null) {
+            LOGGER.error("Forum post not found, operatorId={}, postId={}, stickFlag={}", operatorId, postId, stickFlag);
+            throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE,
+                    ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "Forum post not found");
+        }
+
+        return post;
+    }
+
     @Override
     public ListPostCommandResponse listTopicComments(ListTopicCommentCommand cmd) {
     	// 非登录用户只能看第一页 add by xiongying20161009
@@ -1670,12 +2118,16 @@ public class ForumServiceImpl implements ForumService {
         User operator = UserContext.current().getUser();
         Long operatorId = operator.getId();
         String tag = "listTopicComments";
-        
+
+        //为了兼容新的统一评论接口，先检查post再检查forum，因为新的统一接口没有传来forumId  add by yanjun 20170601
+        Long topicId = cmd.getTopicId();
+        Post post = checkPostParameter(operatorId, null, topicId, tag);
+        if(post != null && cmd.getForumId() == null){
+            cmd.setForumId(post.getForumId());
+        }
         Long forumId = cmd.getForumId();
         Forum forum = checkForumParameter(operatorId, forumId, tag);
-        
-        Long topicId = cmd.getTopicId();
-        Post post = checkPostParameter(operatorId, forumId, topicId, tag);
+
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator(forumId);
@@ -1693,13 +2145,27 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            //nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
+
+            // MD，加上置顶功能后无法使用锚点排序，一页页来 add by yanjun 20171031
+            nextPageAnchor = locator.getAnchor() == null ? 2 : locator.getAnchor() + 1;
         }
         
         populatePosts(operatorId, posts, null, true);
-        
+
         List<PostDTO> postDtoList = posts.stream().map((r) -> {
-          return ConvertHelper.convert(r, PostDTO.class);  
+            PostDTO postdto = ConvertHelper.convert(r, PostDTO.class);
+
+            //如果有附件，则将附件也转换一下，不转换的话可能会报错。 例如：postDTO.getAttachments().get(0)   add by yanjun 20170605
+            if(r.getAttachments() != null && r.getAttachments().size() > 0){
+                List<AttachmentDTO> listAttachementdto = r.getAttachments().stream().map((tt) -> {
+                    return ConvertHelper.convert(tt, AttachmentDTO.class);
+                }).collect(Collectors.toList());
+                postdto.setAttachments(listAttachementdto);
+            }
+            return postdto;
+
         }).collect(Collectors.toList());
         
         //add commentCount when listTopicComments modified by xiongying 20160629
@@ -1744,7 +2210,11 @@ public class ForumServiceImpl implements ForumService {
         
         User user = UserContext.current().getUser();
         Long userId = user.getId();
-                
+
+        //为了兼容新的统一评论接口，先检查活动, 因为新的统一接口没有传来forumId  add by yanjun 20170601
+        Post ownerPost = checkPostParameter(userId, null, cmd.getTopicId(), "createComment");
+        cmd.setForumId(ownerPost.getForumId());
+
         Post post = processCommentCommand(userId, cmd);
 
         //黑名单权限校验 by sfyan20161213
@@ -1786,8 +2256,19 @@ public class ForumServiceImpl implements ForumService {
         
         //发表评论发消息给创建者或父评论者，add by tt, 20170314
         sendMessageToCreatorOrParent(user, post);
-        
-        return ConvertHelper.convert(post, PostDTO.class);
+
+//        return ConvertHelper.convert(post, PostDTO.class);
+
+        //如果有附件，则将附件也转换一下，不转换的话可能会报错。 例如：AttachmentDTO at = postDTO.getAttachments().get(0)   add by yanjun 20170605
+        PostDTO postdto = ConvertHelper.convert(post, PostDTO.class);
+        if(post.getAttachments() != null && post.getAttachments().size() > 0){
+            List<AttachmentDTO> listAttachementdto = post.getAttachments().stream().map((tt) -> {
+                return ConvertHelper.convert(tt, AttachmentDTO.class);
+            }).collect(Collectors.toList());
+            postdto.setAttachments(listAttachementdto);
+        }
+        return postdto;
+
     }
     
     private void sendMessageToCreatorOrParent(User user, Post comment) {
@@ -1862,6 +2343,13 @@ public class ForumServiceImpl implements ForumService {
 //		
 //		sendMessageToUser(toUserId, content, meta, MessageBodyType.INNER_LINK.getCode());
 	}
+
+	@Override
+    public void sendMessageToUserWhenCommentNotSupport(User user) {
+        String text = localeStringService.getLocalizedString(ForumLocalStringCode.SCOPE,String.valueOf(ForumLocalStringCode.POST_COMMENT_NOT_SUPPORT), user.getLocale(), "comment not support");
+
+        sendMessageToUser(user.getId(), text, null, MessageBodyType.TEXT.getCode());
+    }
 	
 	private String getPostNameUrl(Post post) {
 		if (null != post.getEmbeddedAppId() && AppConstants.APPID_ACTIVITY == post.getEmbeddedAppId().longValue()) {
@@ -2405,7 +2893,7 @@ public class ForumServiceImpl implements ForumService {
         if(organization == null) {
             LOGGER.error("Organization is not found, operatorId=" + operatorId + ", organizationId=" + organizationId
                 + ", tag=" + tag);
-            throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
+            throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE,
                 ForumServiceErrorCode.ERROR_FORUM_ORGANIZATION_NOT_FOUND, "Organization not found");
         } 
         
@@ -2449,7 +2937,7 @@ public class ForumServiceImpl implements ForumService {
 //        Long nextPageAnchor = null;
 //        if(posts.size() > pageSize) {
 //            posts.remove(posts.size() - 1);
-//            nextPageAnchor = posts.get(posts.size() - 1).getId();
+//            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
 //        }
 //        
 //        populatePosts(userId, posts, communityId, false);
@@ -2479,7 +2967,11 @@ public class ForumServiceImpl implements ForumService {
         // 根据查帖指定的可见性创建查询条件
         VisibilityScope scope = VisibilityScope.fromCode(cmd.getVisibilityScope());
         Condition visibilityCondition = buildDefaultForumPostQryConditionForCommunity(user, community, scope);
-        
+
+        //单个 -- 查询单个目标的（正常、clone），或者发送到“全部”的（正常）   add by yanjun 20170809
+        Condition cloneCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode())
+                .and(Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode()));
+
         Condition condition= this.notEqPostCategoryCondition(cmd.getExcludeCategories(), null);
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -2490,23 +2982,60 @@ public class ForumServiceImpl implements ForumService {
                 Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
             query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forum.getId()));
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
-            query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            
+//            //新增暂存活动，后台管理员在web端要看到暂存的活动  add by yanjun 20170518
+//            if(cmd.getNeedTemporary() != null && cmd.getNeedTemporary().byteValue() == 1){
+//            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
+//            }else{
+//            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+//            }
+            Condition temporaryCondition = getTemporaryCondition(cmd.getNeedTemporary());
+            if(temporaryCondition != null){
+                query.addConditions(temporaryCondition);
+            }
+
+            //支持按话题、活动、投票来查询数据   add by yanjun 20170612
+            if(cmd.getCategoryId() != null){
+                query.addConditions(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+            }
+
+            //支持标签搜索  add by yanjun 20170712
+            if(!StringUtils.isEmpty(cmd.getTag())){
+                query.addConditions(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
+            }
+
+            //论坛多入口，老客户端没有这个参数，默认入口为0  add by yanjun 20171025
+            if(StringUtils.isEmpty(cmd.getForumEntryId())){
+                query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(0L));
+            }else {
+                query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(cmd.getForumEntryId()));
+            }
+            
             if(visibilityCondition != null) {
-                query.addConditions(visibilityCondition);
+                //单个 -- 查询单个目标的（正常、clone），或者发送到“全部”的（正常）   add by yanjun 20170809
+                query.addConditions(visibilityCondition.or(cloneCondition));
             }
             
             if(null != condition){
             	query.addConditions(condition);
             }
-            
+
             return query;
         });
+
+        // 如果是clone帖子，则寻找它的真身帖子和真身活动   add by yanjun 20170809
+        populateRealPost(posts);
+
         this.forumProvider.populatePostAttachments(posts);
         
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            //nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
+
+            // MD，加上置顶功能后无法使用锚点排序，一页页来 add by yanjun 20171031
+            nextPageAnchor = locator.getAnchor() == null ? 2 : locator.getAnchor() + 1;
         }
         
         populatePosts(userId, posts, communityId, false);
@@ -2639,24 +3168,68 @@ public class ForumServiceImpl implements ForumService {
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         
         Condition condition = this.notEqPostCategoryCondition(cmd.getExcludeCategories(), null);
+
+        //整个论坛 -- 该论坛的正常帖（正常），或者发送到“全部”的（clone、正常） add by yanjun 20170809
+        Condition cloneConditin = Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())
+                .or(Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()));
         
         CrossShardListingLocator locator = new CrossShardListingLocator(forum.getId());
         locator.setAnchor(cmd.getPageAnchor());
         List<Post> posts = this.forumProvider.queryPosts(locator, pageSize + 1, (loc, query) -> {
             query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forum.getId())); 
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
-            query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            
+//            //新增暂存活动，后台管理员在web端要看到暂存的活动  add by yanjun 20170518
+//            if(cmd.getNeedTemporary() != null && cmd.getNeedTemporary().byteValue() == 1){
+//            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
+//            }else{
+//            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+//            }
+            Condition temporaryCondition = getTemporaryCondition(cmd.getNeedTemporary());
+            if(temporaryCondition != null){
+                query.addConditions(temporaryCondition);
+            }
+
+            //支持按话题、活动、投票来查询数据   add by yanjun 20170612
+            if(cmd.getCategoryId() != null){
+                query.addConditions(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+            }
+            //支持标签搜索  add by yanjun 20170712
+            if(!StringUtils.isEmpty(cmd.getTag())){
+                query.addConditions(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
+            }
+
+            //论坛多入口，老客户端没有这个参数，默认入口为0  add by yanjun 20171025
+            if(StringUtils.isEmpty(cmd.getForumEntryId())){
+                query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(0L));
+            }else {
+                query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(cmd.getForumEntryId()));
+            }
+
             if(null != condition){
             	query.addConditions(condition);
             }
+
+            //整个论坛 -- 该论坛的正常帖（正常），或者发送到“全部”的（clone、正常） add by yanjun 20170809
+            if(cloneConditin != null){
+                query.addConditions(cloneConditin);
+            }
             return query;
         });
+
+        // 如果是clone帖子，则寻找它的真身帖子和真身活动   add by yanjun 20170808
+        populateRealPost(posts);
+
         this.forumProvider.populatePostAttachments(posts);
         
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            //nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
+
+            // MD，加上置顶功能后无法使用锚点排序，一页页来 add by yanjun 20171031
+            nextPageAnchor = locator.getAnchor() == null ? 2 : locator.getAnchor() + 1;
         }
         
         populatePosts(userId, posts, cmd.getCommunityId(), false);
@@ -2733,6 +3306,23 @@ public class ForumServiceImpl implements ForumService {
         //添加人数限制，add by tt, 20161012
         post.setMaxQuantity(cmd.getMaxQuantity());
         
+        //添加活动状态，用于暂存或者立刻发布，不传默认2是立刻发布 add by yanjun 20170510
+        if(cmd.getStatus() != null){
+        	post.setStatus(cmd.getStatus());
+        }
+
+        //添加标签普通话题的标签通过此字段从前台出来。 add by yanjun 20170613
+        post.setTag(cmd.getTag());
+
+        //设置帖子的克隆状态和真身帖   add by yanjun 20170807
+        post.setCloneFlag(cmd.getCloneFlag());
+        post.setRealPostId(cmd.getRealPostId());
+
+        post.setForumEntryId(cmd.getForumEntryId());
+
+        post.setInteractFlag(InteractFlag.SUPPORT.getCode());
+        post.setStickFlag(StickFlag.DEFAULT.getCode());
+
         return post;
     }
     
@@ -3470,6 +4060,8 @@ public class ForumServiceImpl implements ForumService {
                     }
                     post.setEmbeddedJson(snapshot);
                 }
+
+
                 
                 post.setCommunityId(communityId);
                 
@@ -3486,6 +4078,13 @@ public class ForumServiceImpl implements ForumService {
                 populatePostForumNameInfo(userId, post);
                 
                 processLocation(post);
+
+                //添加ownerToken, 当前字段在评论时使用 add by yanjun 20170601
+                populateOwnerToken(post);
+
+                //添加是否支持评论字段 add by yanjun 20171025
+                Byte flag = getInteractFlag(post);
+                post.setInteractFlag(flag);
                 
                 String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
                 String relativeUrl = configProvider.getValue(ConfigConstants.POST_SHARE_URL, "");
@@ -3496,11 +4095,21 @@ public class ForumServiceImpl implements ForumService {
                 	//单独处理活动的分享链接 modified by xiongying 20160622
                 	if(post.getCategoryId() != null && post.getCategoryId() == 1010) {
                 		relativeUrl = configProvider.getValue(ConfigConstants.ACTIVITY_SHARE_URL, "");
-                		ActivityTokenDTO dto = new ActivityTokenDTO();
-                		dto.setPostId(post.getId());
-                		dto.setForumId(post.getForumId());
-                		String encodeStr = WebTokenGenerator.getInstance().toWebToken(dto);
-                		post.setShareUrl(homeUrl + relativeUrl + "?id=" + encodeStr);
+//                		ActivityTokenDTO dto = new ActivityTokenDTO();
+//                		dto.setPostId(post.getId());
+//                		dto.setForumId(post.getForumId());
+//                		String encodeStr = WebTokenGenerator.getInstance().toWebToken(dto);
+//                		post.setShareUrl(homeUrl + relativeUrl + "?id=" + encodeStr);
+
+                        //改用直接传输的方式。因为增加微信报名活动后，涉及到报名取消支付等操作，这些操作都要编码的话，工作量会巨大。
+                        //添加命名空间ns
+                        // 增加是否支持微信报名wechatSignup  add by yanjun 20170620
+                        ActivityDTO activity = activityService.findSnapshotByPostId(post.getId());
+                        Byte wechatSignup = 0;
+                        if(activity != null && activity.getWechatSignup() != null){
+                            wechatSignup = activity.getWechatSignup();
+                        }
+                        post.setShareUrl(homeUrl + relativeUrl + "?ns=" + post.getNamespaceId()+"&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup);
                 	} else {
                 		post.setShareUrl(homeUrl + relativeUrl + "?forumId=" + post.getForumId() + "&topicId=" + post.getId());
                 	}
@@ -3514,6 +4123,64 @@ public class ForumServiceImpl implements ForumService {
         if(LOGGER.isInfoEnabled()) {
             LOGGER.info("Populate post, userId=" + userId + ", postId=" + post.getId() + ", elapse=" + (endTime - startTime));
         }
+    }
+
+    /**
+     *添加是否支持评论字段 add by yanjun 20171025
+     * @param post
+     */
+    @Override
+    public Byte getInteractFlag(Post post){
+        //如果帖子时关闭评论的，直接是关闭
+        if(post.getInteractFlag() != null && InteractFlag.fromCode(post.getInteractFlag()) == InteractFlag.UNSUPPORT){
+            return InteractFlag.UNSUPPORT.getCode();
+        }
+
+        //帖子时开放的，查看入口配置，没有配置或者配置成1的话是开放的，其他时候关闭
+        InteractSetting setting = findInteractSettingByPost(post);
+        if(setting == null || InteractFlag.fromCode(setting.getInteractFlag()) == InteractFlag.SUPPORT){
+            return InteractFlag.SUPPORT.getCode();
+        }else {
+            return InteractFlag.UNSUPPORT.getCode();
+        }
+    }
+
+
+    @Override
+    public InteractSetting findInteractSettingByPost(Post post){
+        InteractSetting setting = null;
+
+        Integer namespaceId = post.getNamespaceId();
+        if(namespaceId == null){
+            namespaceId = UserContext.getCurrentNamespaceId();
+        }
+
+        //非常不靠谱的判断，可是真的没有其他办法，急需在创建帖子的时候从来源处传来是哪个应用的  add by yanjun 20171109
+        if(post.getActivityCategoryId() != null && post.getActivityCategoryId().longValue() != 0){
+            //活动应用的帖子
+            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.ACTIVITY.getCode(), post.getActivityCategoryId());
+        }else if(post.getForumEntryId() != null && (post.getCategoryId() == null || post.getCategoryId() != 1003)){
+            //论坛应用的帖子
+            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.FORUM.getCode(), post.getForumEntryId());
+        }else if(post.getCategoryId() != null && post.getCategoryId() == 1003){
+            //公告应用的帖子
+            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.ANNOUNCEMENT.getCode(), null);
+        }
+
+        return setting;
+    }
+
+    /**
+     *添加ownerToken, 当前字段在评论时使用 add by yanjun 20170601
+     * @param post
+     */
+    private void populateOwnerToken(Post post){
+        OwnerTokenDTO ownerTokenDto = new OwnerTokenDTO();
+        ownerTokenDto.setId(post.getId());
+        ownerTokenDto.setType(OwnerType.FORUM.getCode());
+
+        String ownerTokenStr = WebTokenGenerator.getInstance().toWebToken(ownerTokenDto);
+        post.setOwnerToken(ownerTokenStr);
     }
 
     private void processLocation(Post post){
@@ -3644,7 +4311,13 @@ public class ForumServiceImpl implements ForumService {
         post.setCreatorAvatar(creatorAvatar);
         /*解决web 帖子头像问题，当帖子创建者没有头像时，取默认头像   by sw */
         if(StringUtils.isEmpty(creatorAvatar)) {
-        	creatorAvatar = configProvider.getValue(creator.getNamespaceId(), "user.avatar.default.url", "");
+
+            //防止creator空指针  add by yanjun 20171011
+            Integer namespaceId = 0;
+            if(creator != null && creator.getNamespaceId() != null){
+                namespaceId = creator.getNamespaceId();
+            }
+        	creatorAvatar = configProvider.getValue(namespaceId, "user.avatar.default.url", "");
         }
         
         if(creatorAvatar != null && creatorAvatar.length() > 0) {
@@ -3741,6 +4414,7 @@ public class ForumServiceImpl implements ForumService {
     private void populatePostForumNameInfo(long userId, Post post) {
         Long forumId = post.getForumId();
         Forum forum = forumProvider.findForumById(forumId);
+
         // 补充namespaceId，使得在分享的时候可以根据域空间ID来获取版本信息以便确定是否要下载APP  by lqs 20170418
         if(forum != null) {
             post.setNamespaceId(forum.getNamespaceId());
@@ -4156,7 +4830,7 @@ public class ForumServiceImpl implements ForumService {
         }
         topicCmd.setVisibleRegionId(visibleRegionId);
         
-        return this.createTopic((NewTopicCommand) topicCmd);
+        return this.createTopic(topicCmd);
     }
     
     @Override
@@ -4308,7 +4982,7 @@ public class ForumServiceImpl implements ForumService {
 		}
     	
     	condition = condition.and(visibleCondition);
-        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, publishStatus);
+        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, publishStatus, null);
         
         ListPostCommandResponse response = new ListPostCommandResponse();
         response.setPosts(dtos);
@@ -5145,9 +5819,38 @@ public class ForumServiceImpl implements ForumService {
                 if(null != cond){
                 	query.addConditions(cond);
                 }
+
+                //支持按话题、活动、投票来查询数据   add by yanjun 20170612
+                if(cmd.getCategoryId() != null){
+                    query.addConditions(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+                }
+
+                //支持标签搜索  add by yanjun 20170712
+                if(!StringUtils.isEmpty(cmd.getTag())){
+                    query.addConditions(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
+                }
+
+                //论坛多入口，老客户端没有这个参数，默认入口为0  add by yanjun 20171025
+                if(StringUtils.isEmpty(cmd.getForumEntryId())){
+                    query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(0L));
+                }else {
+                    query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(cmd.getForumEntryId()));
+                }
+
+                //全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）   add by yanjun 20170807
+                Condition cloneCondition = Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())
+                        .or(Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()));
+
+                query.addConditions(cloneCondition);
+
                 
                 return query;
             }, new PostCreateTimeDescComparator());
+
+
+            // 如果是clone帖子，则寻找它的真身帖子和真身活动   add by yanjun 20170808
+            populateRealPost(posts);
+
 
             Long nextPageAnchor = null;
             // 在queryPosts已经进行附件填充，故可去掉 by lqs 20160429
@@ -5155,7 +5858,7 @@ public class ForumServiceImpl implements ForumService {
             
             if(posts.size() > pageSize) {
                 posts.remove(posts.size() - 1);
-                nextPageAnchor = posts.get(posts.size() - 1).getId();
+                nextPageAnchor = cmd.getPageAnchor() == null ? 2 : cmd.getPageAnchor() + 1;
             }
             
             populatePosts(userId, posts, communityId, false);
@@ -5250,7 +5953,14 @@ public class ForumServiceImpl implements ForumService {
             if(condition != null){
                 query.addConditions(condition);
             }
-            
+
+            //论坛多入口，老客户端没有这个参数，默认入口为0  add by yanjun 20171025
+            if(StringUtils.isEmpty(cmd.getForumEntryId())){
+                query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(0L));
+            }else {
+                query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(cmd.getForumEntryId()));
+            }
+
             return query;
         });
         this.forumProvider.populatePostAttachments(posts);
@@ -5258,7 +5968,11 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            //nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
+
+            // MD，加上置顶功能后无法使用锚点排序，一页页来 add by yanjun 20171031
+            nextPageAnchor = locator.getAnchor() == null ? 2 : locator.getAnchor() + 1;
         }
         
         populatePosts(userId, posts, communityId, false);
@@ -5334,8 +6048,16 @@ public class ForumServiceImpl implements ForumService {
 	private SearchContentsBySceneReponse analyzeSearchResponse(SearchResponse rsp, int pageSize, Long anchor, String searchContentType) {
     	SearchContentsBySceneReponse response = new SearchContentsBySceneReponse();
     	
-    	SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(UserContext.getCurrentNamespaceId(), searchContentType);
     	List<ContentBriefDTO> dtos  = new ArrayList<ContentBriefDTO>();
+
+        SearchTypes searchType = userService.getSearchTypes(UserContext.getCurrentNamespaceId(), searchContentType);
+
+        //找不到直接返回，没有searchType客户端会报错的。 add by yanjun 20170816
+        if(searchType == null){
+            response.setDtos(dtos);
+            return response;
+        }
+
     	SearchHit[] docs = rsp.getHits().getHits();
     	
         for (SearchHit sd : docs) {
@@ -5442,7 +6164,7 @@ public class ForumServiceImpl implements ForumService {
         CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
         locator.setAnchor(cmd.getPageAnchor());
         
-        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, null);
+        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, null, null);
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
             LOGGER.info("Query offical activity topics, userId=" + operatorId + ", size=" + dtos.size() 
@@ -5512,7 +6234,9 @@ public class ForumServiceImpl implements ForumService {
         });
         
         //此处按id排序而不是创建时间，因为有可能创建时间是一样的，那样在分界点的数据就会有问题
-        totalPostList.sort((post1, post2)->post1.getId().longValue() > post2.getId().longValue()?-1:1);
+        
+        //上面的注释已经过期，此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+        totalPostList.sort((post1, post2)->post1.getCreateTime().getTime() > post2.getCreateTime().getTime()?-1:1);
         
         //取前21条，多一条是为了后面判断是否有下一页
         List<Post> resultPostList = totalPostList.subList(0, totalPostList.size()>thisPageSize+1?thisPageSize+1:totalPostList.size());
@@ -5522,7 +6246,11 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(resultPostList.size() > thisPageSize) {
         	resultPostList.remove(resultPostList.size() - 1);
-            nextPageAnchor = resultPostList.get(resultPostList.size() - 1).getId();
+        	 //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            //nextPageAnchor = resultPostList.get(resultPostList.size() - 1).getCreateTime().getTime();
+
+            // MD，加上置顶功能后无法使用锚点排序，一页页来 add by yanjun 20171031
+            nextPageAnchor = pageAnchor == null ? 2 : pageAnchor + 1;
         }
         
         populatePosts(userId, resultPostList, communityId, false);
@@ -5533,5 +6261,91 @@ public class ForumServiceImpl implements ForumService {
         
         return new ListUserGroupPostResponse(nextPageAnchor, postDtoList);
 	}
+
+	@Override
+	public void publisTopic(PublishTopicCommand cmd) {
+		Activity activity = activityProvider.findSnapshotByPostId(cmd.getTopicId());
+		if(activity == null){
+			 LOGGER.error("invalid post id=", cmd.getTopicId());
+	            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+	                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id=" + cmd.getTopicId());
+		}
+
+		Post post = forumProvider.findPostById(activity.getPostId());
+		if(post == null){
+			LOGGER.error("Forum post not found, topicId=" + activity.getPostId());
+			throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE,
+	        		ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "post not found"); 
+		}
+
+        this.dbProvider.execute((status) -> {
+
+		    //把真身帖子和克隆帖一块发布   edit by yanjun 20170830
+            List<Post> list = new ArrayList<>();
+		    if(post.getCloneFlag() != null && post.getCloneFlag().byteValue() == PostCloneFlag.REAL.getCode()){
+                list= forumProvider.listPostsByRealPostId(post.getId());
+            }
+            list.add(post);
+
+		    list.forEach(r ->{
+		        //更新帖子
+                r.setStatus(PostStatus.ACTIVE.getCode());
+                forumProvider.updatePost(r);
+
+                //更新活动
+                Activity r_activity = activityProvider.findSnapshotByPostId(r.getId());
+                r_activity.setStatus(PostStatus.ACTIVE.getCode());
+                activityProvider.updateActivity(r_activity);
+
+                //暂存的帖子不添加到搜索引擎，到发布的时候添加到搜索引擎，不计算积分    add by yanjun 20170609
+                try {
+                    postSearcher.feedDoc(r);
+
+                    AddUserPointCommand pointCmd = new AddUserPointCommand(r.getCreatorUid(), PointType.CREATE_TOPIC.name(),
+                            userPointService.getItemPoint(PointType.CREATE_TOPIC), r.getCreatorUid());
+                    userPointService.addPoint(pointCmd);
+                } catch (Exception e) {
+                    LOGGER.error("Failed to add post to search engine, userId=" + r.getCreatorUid() + ", postId=" + r.getId(), e);
+                }
+            });
+
+			return null;
+		});
+		
+	}
+
+    // 如果是clone帖子，则寻找它的真身帖子和真身活动   add by yanjun 20170807
+	private void populateRealPost(List<Post> posts){
+        if(posts != null && posts.size()> 0){
+            for(int i = 0; i < posts.size(); i++){
+                if(PostCloneFlag.fromCode(posts.get(i).getCloneFlag()) == PostCloneFlag.CLONE){
+                    Post temp = forumProvider.findPostById(posts.get(i).getRealPostId());
+                    posts.set(i, temp);
+                }
+            }
+        }
+    }
+
+    @Override
+    public Forum findFourmByNamespaceId(Integer namespaceId){
+        Forum forum = forumProvider.findForumByNamespaceId(namespaceId);
+        return forum;
+    }
+
+    @Override
+    public ListForumCategoryResponse listForumCategory(ListForumCategoryCommand cmd) {
+        List<ForumCategory> list = forumProvider.listForumCategoryByForumId(cmd.getForumId());
+        List<ForumCategoryDTO> dtos = list.stream().map(r -> ConvertHelper.convert(r, ForumCategoryDTO.class)).collect(Collectors.toList());
+
+        ListForumCategoryResponse response = new ListForumCategoryResponse();
+        response.setDtos(dtos);
+        return response;
+    }
+
+    @Override
+    public ForumCategoryDTO findForumCategory(FindForumCategoryCommand cmd) {
+         ForumCategory category = forumProvider.findForumCategoryById(cmd.getId());
+        return ConvertHelper.convert(category, ForumCategoryDTO.class);
+    }
     
 }

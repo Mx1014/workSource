@@ -8,11 +8,13 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>groupId：group id</li>
+ * <li>userId：user id</li>
  * </ul>
  */
 public class GetGroupCommand {
     @NotNull
     private Long groupId;
+    private Long userId;
 
     public GetGroupCommand() {
     }
@@ -23,6 +25,14 @@ public class GetGroupCommand {
 
     public void setGroupId(Long groupId) {
         this.groupId = groupId;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     @Override

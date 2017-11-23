@@ -1,6 +1,8 @@
 package com.everhomes.rest.techpark.expansion;
 
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>pageAnchor：锚点</li>
@@ -10,7 +12,9 @@ package com.everhomes.rest.techpark.expansion;
  * <li>applyType：申请类型  APPLY(1):申请 EXPANSION(2): 扩租 RENEW(3)</li>
  * <li>sourceType：招租类型{@link com.everhomes.rest.techpark.expansion.ApplyEntrySourceType}</li> 
  * <li>status：  参考{@link com.everhomes.rest.techpark.expansion.ApplyEntryStatus}}</li>
- * <li>buildingId： 楼栋id-如果为空就是搜全部</li> 
+ * <li>buildingId： 楼栋id-如果为空就是搜全部</li>
+ * <li>issuerType：发布人类型  {@link com.everhomes.rest.techpark.expansion.LeaseIssuerType  NORMAL_USER：普通用户或公司，ORGANIZATION：物业公司}</li>
+ * <li>LeaseIssuerId： 发布人id</li>
  * </ul>
  */
 public class ListEnterpriseApplyEntryCommand {
@@ -98,5 +102,9 @@ public class ListEnterpriseApplyEntryCommand {
 	public void setBuildingId(Long buildingId) {
 		this.buildingId = buildingId;
 	}
-    
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

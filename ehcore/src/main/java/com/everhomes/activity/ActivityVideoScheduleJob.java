@@ -1,5 +1,6 @@
 package com.everhomes.activity;
 
+import com.everhomes.scheduler.RunningFlag;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -24,13 +25,16 @@ public class ActivityVideoScheduleJob extends QuartzJobBean {
     
     @Override
     protected void executeInternal(JobExecutionContext context) {
-        JobDataMap jobMap = context.getJobDetail().getJobDataMap();
-        
-        String idStr = (String)jobMap.get("id");
-        Long id = Long.parseLong(idStr);
-        String endTimeStr = (String)jobMap.get("endTime");
-        Long endTime = Long.parseLong(endTimeStr);
-        
-        activityService.onActivityFinished(id, endTime);
+
+        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+            JobDataMap jobMap = context.getJobDetail().getJobDataMap();
+
+            String idStr = (String) jobMap.get("id");
+            Long id = Long.parseLong(idStr);
+            String endTimeStr = (String) jobMap.get("endTime");
+            Long endTime = Long.parseLong(endTimeStr);
+
+            activityService.onActivityFinished(id, endTime);
+        }
     }
 }

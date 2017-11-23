@@ -4,6 +4,7 @@ package com.everhomes.entity;
 import com.everhomes.schema.tables.pojos.EhAclRoles;
 import com.everhomes.schema.tables.pojos.EhNamespaces;
 import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.techpark.expansion.LeasePromotion;
 
 /**
  * <p>实体类型:</p>
@@ -23,6 +24,7 @@ import com.everhomes.server.schema.tables.pojos.*;
  * <li>BUILDING: 楼栋</li>
  * <li>APPURLS: app 信息</li>
  * <li>NEWS: 新闻</li>
+ * <li>EhZuolinAdmins: 左邻管理</li>
  * </ul>
  */
 public enum EntityType {
@@ -52,7 +54,38 @@ public enum EntityType {
     PARKING_CLEARANCE_LOG(EhParkingClearanceLogs.class.getSimpleName()),
     ENTERPRISE_OP_REQUEST(EhEnterpriseOpRequests.class.getSimpleName()),
     PM_TASK(EhPmTasks.class.getSimpleName()),
-    ORGANIZATION_FILE("EhOrganizationFiles");
+    SERVICE_MODULE(EhServiceModules.class.getSimpleName()),
+    AUTHORIZATION_RELATION(EhAuthorizationRelations.class.getSimpleName()),
+    ZUOLIN_ADMIN("EhZuolinAdmins"),
+    ALL("EhAll"),
+    LEASE_PROMOTION(EhLeasePromotions.class.getSimpleName()),
+    WAREHOUSE_REQUEST(EhWarehouseRequests.class.getSimpleName()),
+    CONTRACT(EhContracts.class.getSimpleName()),
+    ENTERPRISE_CUSTOMER(EhEnterpriseCustomers.class.getSimpleName()),
+    PORTAL_ITEM(EhPortalItems.class.getSimpleName()),
+    PORTAL_ITEM_CATEGORY(EhPortalItemCategories.class.getSimpleName()),
+    PORTAL_LAYOUT(EhPortalLayouts.class.getSimpleName()),
+    PORTAL_ITEM_GROUP(EhPortalItemGroups.class.getSimpleName()),
+    SERVICE_MODULE_APP(EhServiceModuleApps.class.getSimpleName()),
+    SERVICE_ALLIANCE(EhServiceAlliances.class.getSimpleName()),
+    BIZ("EhBizs"),
+    ORGANIZATION_FILE("EhOrganizationFiles"),
+    COMMUNITY_APPROVE(EhCommunityApprove.class.getSimpleName()),
+	TALENT_REQUEST(EhTalentRequests.class.getSimpleName()),
+
+	EQUIPMENT_TASK(EhEquipmentInspectionTasks.class.getSimpleName()),
+    CHILD_PROJECT("child_project"),
+    LEASE_BUILDING(EhLeaseBuildings.class.getSimpleName()),
+
+    LEASE_PROJECT(EhLeaseProjects.class.getSimpleName()),
+	CUSTOMER_TRACKING(EhCustomerTrackings.class.getSimpleName()),
+
+    PARKING_CAR_VERIFICATION(EhParkingCarVerifications.class.getSimpleName()),
+
+    ENERGY_TASK(EhEnergyMeterTasks.class.getSimpleName());
+
+
+
 
     private String code;
     

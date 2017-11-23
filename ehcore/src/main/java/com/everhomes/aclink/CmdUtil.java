@@ -18,7 +18,7 @@ public class CmdUtil {
     private final static int SINGLE_PACKAGE_DATA_LENGTH = 18;
     private final static int MULTI_PACKAGE_HEAD_DATA_LENGTH = 16;
     private final static int MULTI_PACKAGE_OTHER_DATA_LENGTH = 19;
-    private final static int EXPIRE_TIME = (30*24*3600);
+    private final static int EXPIRE_TIME = (2*30*24*3600);//2 months
     
     private static final Logger LOGGER = LoggerFactory.getLogger(CmdUtil.class);
 
@@ -158,14 +158,17 @@ public class CmdUtil {
     public static byte[] updateTime(byte[] curServerKey, byte ver) {
         byte cmd = 0x5;
         int curTime = (int) Math.ceil((System.currentTimeMillis() / 1000));
-        int expireTime = curTime + EXPIRE_TIME;
+        int expireTime = curTime + 50*6*EXPIRE_TIME;//50 years
         byte[] extTimeBytes = DataUtil.intToByteArray(expireTime);
-        byte[] curTimeBytes = DataUtil.intToByteArray(curTime + EXPIRE_TIME);
+        byte[] curTimeBytes = DataUtil.intToByteArray(curTime);
         byte[] dataArr = new byte[extTimeBytes.length + curTimeBytes.length];
         System.arraycopy(extTimeBytes, 0, dataArr, 0, extTimeBytes.length);
         System.arraycopy(curTimeBytes, 0, dataArr, extTimeBytes.length, curTimeBytes.length);
         try {
             dataArr = addPaddingTo16Bytes(dataArr);
+            byte[] chk = DataUtil.shortToByteArray(CmdUtil.getCheckSum(dataArr, 14));
+            dataArr[14] = chk[0];
+            dataArr[15] = chk[1];
             
             LOGGER.info("updateTime dataArr = " + StringHelper.toHexString(dataArr));
             
@@ -353,9 +356,12 @@ public class CmdUtil {
         return null;
     }
 
-    public static short getCheckSum(byte[] data) {
+    public static short getCheckSum(byte[] data, int len) {
+        if(len <= 0 || len > data.length) {
+            len = data.length;
+        }
         short sum = 0;
-        for (int i = 0; i < data.length; i++) {
+        for (int i = 0; i < len; i++) {
             sum += (data[i] & 0xFF);
         }
         return sum;

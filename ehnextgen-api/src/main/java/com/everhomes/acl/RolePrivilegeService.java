@@ -46,19 +46,19 @@ public interface RolePrivilegeService {
 	 * 创建角色权限
 	 * @param cmd
 	 */
-	void createRolePrivilege(CreateRolePrivilegeCommand cmd);
+	void createRolePrivileges(CreateRolePrivilegesCommand cmd);
 	
 	/**
 	 * 修改角色权限
 	 * @param cmd
 	 */
-	void updateRolePrivilege(UpdateRolePrivilegeCommand cmd);
+	void updateRolePrivileges(UpdateRolePrivilegesCommand cmd);
 	
 	/**
 	 * 删除角色权限
 	 * @param cmd
 	 */
-	void deleteRolePrivilege(DeleteRolePrivilegeCommand cmd);
+	void deleteRolePrivileges(DeleteRolePrivilegesCommand cmd);
 	
 	/**
 	 * 获取角色权限
@@ -68,11 +68,11 @@ public interface RolePrivilegeService {
 	List<ListWebMenuPrivilegeDTO> qryRolePrivileges(QryRolePrivilegesCommand cmd);
 	
 	/**
-	 * 根据机构获取角色列表
+	 * 获取角色列表
 	 * @param cmd
 	 * @return
 	 */
-	List<RoleDTO> listAclRoleByOrganizationId(ListAclRolesCommand cmd);
+	ListRolesResponse listRoles(ListRolesCommand cmd);
 	
 	/**
 	 * 判断是否是系统管理员
@@ -80,6 +80,8 @@ public interface RolePrivilegeService {
 	 * @return
 	 */
 	boolean checkAdministrators(Long organizationId);
+
+	GetPrivilegeByRoleIdResponse getPrivilegeByRoleId(ListPrivilegesByRoleIdCommand cmd);
 	
 	/**
 	 * 校验是否有权限
@@ -94,7 +96,7 @@ public interface RolePrivilegeService {
 	 * 创建超级管理员
 	 * @param cmd
 	 */
-	void createOrganizationSuperAdmin(CreateOrganizationAdminCommand cmd);
+	OrganizationContactDTO createOrganizationSuperAdmin(CreateOrganizationAdminCommand cmd);
 	
 	/**
 	 * 创建普通管理员
@@ -120,12 +122,6 @@ public interface RolePrivilegeService {
 	 * @return
 	 */
 	ListOrganizationMemberCommandResponse listOrganizationAdministrators(ListOrganizationAdministratorCommand cmd);
-	
-	/**
-	 * 删除管理员
-	 * @param cmd
-	 */
-	void deleteOrganizationAdmin(DeleteOrganizationAdminCommand cmd);
 	
 	/**
 	 * 删除角色人员
@@ -163,13 +159,13 @@ public interface RolePrivilegeService {
 	 * 创建公司管理员
 	 * @param cmd
      */
-	void createOrganizationAdmin(CreateOrganizationAdminCommand cmd);
+	OrganizationContactDTO createOrganizationAdmin(CreateOrganizationAdminCommand cmd);
 
 	/**
 	 * 创建业务模块管理员
 	 * @param cmd
      */
-	void createServiceModuleAdmin(CreateServiceModuleAdminCommand cmd);
+	void createServiceModuleAdministrators(CreateServiceModuleAdministratorsCommand cmd);
 
 
 	/**
@@ -177,7 +173,7 @@ public interface RolePrivilegeService {
 	 * @param cmd
 	 * @return
      */
-	List<OrganizationContactDTO> listServiceModuleAdministrators(ListServiceModuleAdministratorsCommand cmd);
+	List<ServiceModuleAuthorizationsDTO> listServiceModuleAdministrators(ListServiceModuleAdministratorsCommand cmd);
 
 	/**
 	 * 超级管理员列表
@@ -262,6 +258,17 @@ public interface RolePrivilegeService {
 	List<ProjectDTO> listUserRelatedProjectByMenuId(ListUserRelatedProjectByMenuIdCommand cmd);
 
 	/**
+	 *
+	 * @param ownerType
+	 * @param ownerId
+	 * @param targetType
+	 * @param targetId
+	 * @param scope
+     * @param privilegeId
+     */
+	void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope,  Long privilegeId);
+
+	/**
 	 * 分配权限
 	 * @param ownerType
 	 * @param ownerId
@@ -270,7 +277,7 @@ public interface RolePrivilegeService {
 	 * @param scope
      * @param privilegeIds
      */
-	void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope,  List<Long> privilegeIds);
+	void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope,  List<Long> privilegeIds, String tag);
 
 	/**
 	 * 分配模块权限
@@ -282,15 +289,64 @@ public interface RolePrivilegeService {
 	 * @param moduleId
      * @param privilegeType
      */
-	void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, Long moduleId, ServiceModulePrivilegeType privilegeType);
+	void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, Long moduleId, ServiceModulePrivilegeType privilegeType, String tag);
 
-	void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, Long moduleId, List<Long> privilegeIds);
+	void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope,  List<Long> privilegeIds);
 
+	/**
+	 *
+	 * @param resourceType
+	 * @param resourceId
+	 * @param targetType
+	 * @param targetId
+	 * @param moduleId
+     * @param type
+     */
+	void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, Long moduleId, ServiceModulePrivilegeType type);
+
+	/**
+	 *
+	 * @param resourceType
+	 * @param resourceId
+	 * @param targetType
+	 * @param targetId
+	 * @param moduleId
+	 * @param privilegeIds
+     * @param type
+     */
+	void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, Long moduleId, List<Long> privilegeIds, ServiceModulePrivilegeType type);
+
+	/**
+	 *
+	 * @param resourceType
+	 * @param resourceId
+	 * @param targetType
+	 * @param targetId
+     * @param privilegeIds
+     */
 	void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, List<Long> privilegeIds);
 
+	/**
+	 *
+	 * @param resourceType
+	 * @param resourceId
+	 * @param targetType
+	 * @param targetId
+     */
 	void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId);
 
-	void createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId);
+	/**
+	 *
+	 * @param resourceType
+	 * @param resourceId
+	 * @param targetType
+	 * @param targetId
+	 * @param moduleIds
+     * @param type
+     */
+	void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, List<Long> moduleIds, ServiceModulePrivilegeType type);
+
+	OrganizationContactDTO createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId);
 
 	/**
 	 * 获取权限列表
@@ -308,6 +364,11 @@ public interface RolePrivilegeService {
 
 	List<Long> listUserPrivilegeByModuleId(String ownerType, Long ownerId, Long organizationId, Long userId, Long moduleId);
 
+	List<Long> getPrivilegeIdsByRoleId(ListPrivilegesByRoleIdCommand cmd);
+
+	void createRole(CreateRoleCommand cmd);
+
+	void updateRole(UpdateRoleCommand cmd);
 	/**
 	 * 获取项目分类的树状数据结构
 	 * @param namespaceId
@@ -315,4 +376,36 @@ public interface RolePrivilegeService {
      * @return
      */
 	List<ProjectDTO> getTreeProjectCategories(Integer namespaceId, List<ProjectDTO> projects);
+
+	List<RoleAuthorizationsDTO> listRoleAdministrators(ListRoleAdministratorsCommand cmd);
+
+	void deleteRoleAdministrators(DeleteRoleAdministratorsCommand cmd);
+
+	void createRoleAdministrators(CreateRoleAdministratorsCommand cmd);
+
+	void updateRoleAdministrators(CreateRoleAdministratorsCommand cmd);
+
+	RoleAuthorizationsDTO checkRoleAdministrators(CheckRoleAdministratorsCommand cmd);
+
+	AclPrivilegeInfoResponse getPrivilegeInfosByRoleId(
+			ListPrivilegesByRoleIdCommand cmd);
+
+	void updateServiceModuleAdministrators(UpdateServiceModuleAdministratorsCommand cmd);
+
+	void createAuthorizationRelation(CreateAuthorizationRelationCommand cmd);
+
+	ListAuthorizationRelationsResponse listAuthorizationRelations(ListAuthorizationRelationsCommand cmd);
+
+	void updateAuthorizationRelation(UpdateAuthorizationRelationCommand cmd);
+
+	void deleteAuthorizationRelation(DeleteAuthorizationRelationCommand cmd);
+
+	List<ServiceModuleDTO> listServiceModulesByTarget(ListServiceModulesByTargetCommand cmd);
+
+	void assignmentAclRole(String ownerType, Long ownerId, String targetType, Long targetId, Integer namespaceId, Long creatorUid, Long roleId);
+
+	//	批量增加管理员 added by R 20170912.
+	void createOrganizationSuperAdmins(CreateOrganizationAdminsCommand cmd);
+	//	移交管理员权限 added by R 20170912.
+    void transferOrganizationSuperAdmin(TransferOrganizationSuperAdminCommand cmd);
 }

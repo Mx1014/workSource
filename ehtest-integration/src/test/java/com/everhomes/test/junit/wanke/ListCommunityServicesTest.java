@@ -16,6 +16,8 @@ import com.everhomes.server.schema.tables.records.EhCommunityServicesRecord;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.StringHelper;
 
+import static com.sun.xml.internal.ws.dump.LoggingDumpTube.Position.Before;
+
 public class ListCommunityServicesTest extends BaseLoginAuthTestCase {
     @Before
     public void setUp() {

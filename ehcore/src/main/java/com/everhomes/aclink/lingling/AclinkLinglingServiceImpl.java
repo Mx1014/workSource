@@ -103,7 +103,7 @@ public class AclinkLinglingServiceImpl implements AclinkLinglingService {
             ListenableFuture<ResponseEntity<String>> future = this.restCall(cmd, params, null);
             return future.get().getBody();
         } catch (UnsupportedEncodingException | InterruptedException | ExecutionException e) {
-            LOGGER.error("request error", e);
+            LOGGER.error("lingling request error", e);
             return "";
         }
         
@@ -133,9 +133,35 @@ public class AclinkLinglingServiceImpl implements AclinkLinglingService {
         Object o = redisTemplate.opsForValue().get(key);
         
         String body = "";
+        AclinkLinglingMapResponse resp = null;
+        Map<Long, String> keys = null;
+        
         if(o != null) {
             body = (String)o;
-        } else {
+            resp = (AclinkLinglingMapResponse)StringHelper.fromJsonString(body, AclinkLinglingMapResponse.class);
+            keys = new HashMap<Long, String>();
+            for(Entry<String, String> item : resp.getResponseResult().entrySet()) {
+                keys.put(Long.parseLong(item.getKey()), item.getValue());
+            }
+            
+            //check cache
+            int cache = 0;
+            for(Long deviceId : sdkKey.getDeviceIds()) {
+                if (keys.get(deviceId) != null) {
+                    cache++;
+                }
+            }
+            
+            if(cache != sdkKey.getDeviceIds().size()) {
+                body = "";
+                resp = null;
+                keys = null;
+                LOGGER.warn("lingling cache failed, sdkKey=" + sdkKey);
+            }
+            
+        }
+        
+        if(resp == null) {
             body = this.restCall(AclinkLinglingConstant.MAKE_SDK_KEY, sdkKey);
             if(body == "") {
                 return null;
@@ -143,12 +169,13 @@ public class AclinkLinglingServiceImpl implements AclinkLinglingService {
             
             //manual cache it to redis
             redisTemplate.opsForValue().set(key, body, 10*60, TimeUnit.SECONDS);
-        }
-
-        AclinkLinglingMapResponse resp = (AclinkLinglingMapResponse)StringHelper.fromJsonString(body, AclinkLinglingMapResponse.class);
-        Map<Long, String> keys = new HashMap<Long, String>();
-        for(Entry<String, String> item : resp.getResponseResult().entrySet()) {
-            keys.put(Long.parseLong(item.getKey()), item.getValue());
+            
+            resp = (AclinkLinglingMapResponse)StringHelper.fromJsonString(body, AclinkLinglingMapResponse.class);
+            keys = new HashMap<Long, String>();
+            for(Entry<String, String> item : resp.getResponseResult().entrySet()) {
+                keys.put(Long.parseLong(item.getKey()), item.getValue());
+            }
+            
         }
         
         return keys;

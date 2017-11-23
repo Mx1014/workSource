@@ -1,6 +1,8 @@
+
 package com.everhomes.energy;
 
 import com.everhomes.rest.energy.*;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 
@@ -8,9 +10,12 @@ import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 能耗管理的service
@@ -34,7 +39,7 @@ public interface EnergyConsumptionService {
     /**
      * meter转dto
      */
-    EnergyMeterDTO toEnergyMeterDTO(EnergyMeter meter);
+    EnergyMeterDTO toEnergyMeterDTO(EnergyMeter meter , Integer namespaceId);
 
     /**
      * 修改表记
@@ -122,7 +127,7 @@ public interface EnergyConsumptionService {
      * @param cmd   cmd
      * @param file  Excel文件
      */
-    void importEnergyMeter(ImportEnergyMeterCommand cmd, MultipartFile file);
+    ImportFileTaskDTO importEnergyMeter(ImportEnergyMeterCommand cmd, MultipartFile mfile, Long userId);
 
     /**
      * 水电能耗每日报表
@@ -239,4 +244,26 @@ public interface EnergyConsumptionService {
     List<EnergyMeterDefaultSettingTemplateDTO> listEnergyDefaultSettingTemplates();
 
     ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd);
+
+    EnergyMeterDTO findEnergyMeterByQRCode(FindEnergyMeterByQRCodeCommand cmd);
+    void batchReadEnergyMeter(BatchReadEnergyMeterCommand cmd);
+
+    String getEnergyMeterQRCode(GetEnergyMeterQRCodeCommand cmd);
+    void exportEnergyMeterQRCode(ExportEnergyMeterQRCodeCommand cmd, HttpServletResponse response);
+    void exportSearchEnergyMeterQRCode(SearchEnergyMeterCommand cmd, HttpServletResponse response);
+
+    EnergyPlanDTO updateEnergyPlan(UpdateEnergyPlanCommand cmd);
+    EnergyPlanDTO findEnergyPlanDetails(FindEnergyPlanDetailsCommand cmd);
+    void deleteEnergyPlan(DeleteEnergyPlanCommand cmd);
+    ListEnergyPlanMetersResponse listEnergyPlanMeters(ListEnergyPlanMetersCommand cmd);
+    ListEnergyPlanMetersResponse setEnergyPlanMeterOrder(SetEnergyPlanMeterOrderCommand cmd);
+    ListUserEnergyPlanTasksResponse listUserEnergyPlanTasks(ListUserEnergyPlanTasksCommand cmd);
+    void readTaskMeter(ReadTaskMeterCommand cmd);
+
+    void createTask(CreateEnergyTaskCommand cmd);
+    void creatMeterTask(EnergyPlanMeterMap map, EnergyPlan plan);
+    Set<Long> getTaskGroupUsers(Long taskId);
+
+    BigDecimal processMonthPrompt(EnergyMeter meter,Integer namespaceId);
+    BigDecimal processDayPrompt(EnergyMeter meter,Integer namespaceId);
 }

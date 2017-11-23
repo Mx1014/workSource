@@ -138,6 +138,22 @@ public class GroupController extends ControllerBase {
     	response.setErrorDescription("OK");
     	return response;
     }
+
+    /**
+     * <b>URL: /group/listUserGroups</b>
+     * <p>获取自己所有拥有的group，含成员的不同状态，参考{@link com.everhomes.rest.group.GroupMemberStatus}</p>
+     */
+    @RequestMapping("listUserGroups")
+    @RestReturn(value=GroupDTO.class, collection=true)
+    public RestResponse listUserGroups() {
+        List<GroupDTO> groups = this.groupService.listUserGroups();
+
+        RestResponse response = new RestResponse(groups);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     
     /**
      * <b>URL: /group/listGroupsByNamespaceId</b>
@@ -384,6 +400,22 @@ public class GroupController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /group/revokeMemberList</b>
+     * <p>把指定成员从group里踢出</p>
+     */
+    @RequestMapping("revokeMemberList")
+    @RestReturn(value=String.class)
+    public RestResponse revokeMemberList(@Valid RevokeGroupMemberListCommand cmd) {
+
+        this.groupService.revokeGroupMemberList(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     
     /**
      * <b>URL: /group/listGroupWaitingAcceptances</b>
@@ -864,4 +896,85 @@ public class GroupController extends ControllerBase {
 		groupService.cancelGroupRequest(cmd);
 		return new RestResponse();
 	}
+
+    /**
+     * <p>获取行业协会申请信息</p>
+     * <b>URL: /group/findGuildApply</b>
+     */
+    @RequestMapping("findGuildApply")
+    @RestReturn(GuildApplyDTO.class)
+    public RestResponse findGuildApply(FindGuildApplyCommand cmd){
+
+        GuildApplyDTO cmdResponse = groupService.findGuildApply(cmd);
+
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <p>获取行业协会申请信息</p>
+     * <b>URL: /group/findGuildApplyByGroupMemberId</b>
+     */
+    @RequestMapping("findGuildApplyByGroupMemberId")
+    @RestReturn(GuildApplyDTO.class)
+    public RestResponse findGuildApplyByGroupMemberId(FindGuildApplyByGroupMemberIdCommand cmd){
+
+        GuildApplyDTO cmdResponse = groupService.findGuildApplyByGroupMemberId(cmd);
+
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <p>获取行业协会申请信息</p>
+     * <b>URL: /group/listGuildApplies</b>
+     */
+    @RequestMapping("listGuildApplies")
+    @RestReturn(ListGuildAppliesResponse.class)
+    public RestResponse listGuildApplies(ListGuildAppliesCommand cmd){
+
+        ListGuildAppliesResponse cmdResponse = groupService.listGuildApplies(cmd);
+
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <p>获取所述行业类型</p>
+     * <b>URL: /group/findIndustryType</b>
+     */
+    @RequestMapping("findIndustryType")
+    @RestReturn(IndustryTypeDTO.class)
+    public RestResponse findIndustryType(FindIndustryTypeCommand cmd){
+
+        IndustryTypeDTO cmdResponse = groupService.findIndustryType(cmd);
+
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <p>获取所述行业类型</p>
+     * <b>URL: /group/listIndustryTypes</b>
+     */
+    @RequestMapping("listIndustryTypes")
+    @RestReturn(ListIndustryTypesResponse.class)
+    public RestResponse listIndustryTypes(ListIndustryTypesCommand cmd){
+
+        ListIndustryTypesResponse cmdResponse = groupService.listIndustryTypes(cmd);
+
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

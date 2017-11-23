@@ -1,3 +1,4 @@
+
 package com.everhomes.rest.energy;
 
 import com.everhomes.util.StringHelper;
@@ -12,8 +13,26 @@ import javax.validation.constraints.NotNull;
  */
 public class DeleteEnergyMeterReadingLogCommand {
 
+    private Long communityId;
     @NotNull private Long organizationId;
     @NotNull private Long logId;
+    private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Long getLogId() {
         return logId;
@@ -36,3 +55,4 @@ public class DeleteEnergyMeterReadingLogCommand {
         return StringHelper.toJsonString(this);
     }
 }
+

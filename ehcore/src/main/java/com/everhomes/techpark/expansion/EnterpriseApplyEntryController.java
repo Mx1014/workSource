@@ -3,10 +3,15 @@ package com.everhomes.techpark.expansion;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GetTemplateByFormIdCommand;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.util.RequireAuthentication;
+import com.mysql.jdbc.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,9 +26,12 @@ import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
 import com.everhomes.util.ConvertHelper;
 
+import javax.validation.Valid;
+
 @RestDoc(value = "entry controller", site = "ehcore")
 @RestController
 @RequestMapping("/techpark/entry")
+@Validated
 public class EnterpriseApplyEntryController extends ControllerBase{
 
 	@Autowired
@@ -31,6 +39,9 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	
 	@Autowired
 	private OrganizationService organizationService;
+
+	@Autowired
+	private GeneralFormService generalFormService;
 	
 	/**
 	 * <b>URL: /techpark/entry/listEnterpriseDetails
@@ -53,9 +64,9 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 				dto.setLongitude(Double.valueOf(c.getLongitude()));
 			//end
 			dto.setEnterpriseId(c.getOrganizationId());
-			dto.setEnterpriseName(c.getDisplayName());
-			if(dto.getEnterpriseName() == null)
-				dto.setEnterpriseName(c.getName());
+			dto.setEnterpriseName(c.getName());//优先展示企业名而非昵称 by xiongying20170826
+			if(dto.getEnterpriseName() == null || StringUtils.isNullOrEmpty(dto.getEnterpriseName()))
+				dto.setEnterpriseName(c.getDisplayName());
 			dto.setContactPhone(c.getAccountPhone());
 			return dto;
 		}).collect(Collectors.toList()));
@@ -81,21 +92,6 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 		return response;
 	}
 	
-//	/**
-//	续租也用上面那个 applyEntry
-//	 * <b>URL: /techpark/entry/applyRenew
-//	 * <p>
-//	 */
-//	@RequestMapping("applyRenew")
-//	@RestReturn(value=String.class)
-//	public RestResponse applyRenew(EnterpriseApplyRenewCommand cmd){
-//		boolean b = enterpriseApplyEntryService.applyRenew(cmd);
-//		RestResponse response = new RestResponse(b);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-	
 	/**
 	 * <b>URL: /techpark/entry/listForRents
 	 * <p>招租列表
@@ -109,15 +105,43 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
+	/**
+	 * <b>URL: /techpark/entry/createLeasePromotionForAdmin
+	 * <p>创建招租(后台管理用)
+	 */
+	@RequestMapping("createLeasePromotionForAdmin")
+	@RestReturn(value=BuildingForRentDTO.class)
+	public RestResponse createLeasePromotionForAdmin(CreateLeasePromotionCommand cmd){
+		BuildingForRentDTO res = enterpriseApplyEntryService.createLeasePromotion(cmd, (byte)1);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/entry/updateLeasePromotionForAdmin
+	 * <p>修改招租（后台管理用）
+	 */
+	@RequestMapping("updateLeasePromotionForAdmin")
+	@RestReturn(value=BuildingForRentDTO.class)
+	public RestResponse updateLeasePromotionForAdmin(UpdateLeasePromotionCommand cmd){
+		BuildingForRentDTO res = enterpriseApplyEntryService.updateLeasePromotion(cmd, (byte)1);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	/**
 	 * <b>URL: /techpark/entry/createLeasePromotion
-	 * <p>创建招租
+	 * <p>创建招租（app用）
 	 */
 	@RequestMapping("createLeasePromotion")
 	@RestReturn(value=BuildingForRentDTO.class)
 	public RestResponse createLeasePromotion(CreateLeasePromotionCommand cmd){
-		BuildingForRentDTO res = enterpriseApplyEntryService.createLeasePromotion(cmd);
+		BuildingForRentDTO res = enterpriseApplyEntryService.createLeasePromotion(cmd, (byte)2);
 		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -126,12 +150,12 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /techpark/entry/updateLeasePromotion
-	 * <p>修改招租
+	 * <p>修改招租（app用）
 	 */
 	@RequestMapping("updateLeasePromotion")
 	@RestReturn(value=BuildingForRentDTO.class)
 	public RestResponse updateLeasePromotion(UpdateLeasePromotionCommand cmd){
-		BuildingForRentDTO res = enterpriseApplyEntryService.updateLeasePromotion(cmd);
+		BuildingForRentDTO res = enterpriseApplyEntryService.updateLeasePromotion(cmd, (byte)2);
 		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -230,6 +254,21 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	@RestReturn(value=String.class)
 	public RestResponse deleteApplyEntry(DeleteApplyEntryCommand cmd){
 		RestResponse response = new RestResponse(enterpriseApplyEntryService.deleteApplyEntry(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/entry/setLeasePromotionConfig
+	 * <p>修改园区入驻设置
+	 */
+	@RequestMapping("setLeasePromotionConfig")
+	@RestReturn(value=String.class)
+	public RestResponse setLeasePromotionConfig(SetLeasePromotionConfigCommand cmd){
+
+		enterpriseApplyEntryService.setLeasePromotionConfig(cmd);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -341,4 +380,71 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /techpark/entry/getFormTemplateByFormId</b>
+	 * <p> 获取表单的信息 </p>
+	 * @return GeneralFormDTO 表单的数据信息
+	 */
+	@RequestMapping("getFormTemplateByFormId")
+	@RestReturn(value=GeneralFormDTO.class)
+	public RestResponse getFormTemplateByFormId(@Valid GetTemplateByFormIdCommand cmd) {
+
+		GeneralFormDTO dto = generalFormService.getTemplateByFormId(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/entry/updateLeasePromotionRequestForm</b>
+	 * <p> 添加租赁表单 </p>
+	 */
+	@RequestMapping("updateLeasePromotionRequestForm")
+	@RestReturn(value=String.class)
+	public RestResponse updateLeasePromotionRequestForm(@Valid UpdateLeasePromotionRequestFormCommand cmd) {
+
+		enterpriseApplyEntryService.updateLeasePromotionRequestForm(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/entry/getLeasePromotionRequestForm</b>
+	 * <p> 获取租赁表单 </p>
+	 */
+	@RequestMapping("getLeasePromotionRequestForm")
+	@RestReturn(value=LeaseFormRequestDTO.class)
+	public RestResponse getLeasePromotionRequestForm(@Valid GetLeasePromotionRequestFormCommand cmd) {
+
+		LeaseFormRequestDTO dto = enterpriseApplyEntryService.getLeasePromotionRequestForm(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
+
+	/**
+	 *
+	 * <b>URL: /techpark/entry/updateLeasePromotionOrder<b>
+	 * <p>
+	 * 更新招租顺序
+	 * </p>
+	 */
+	@RequestMapping("updateLeasePromotionOrder")
+	@RestReturn(String.class)
+	public RestResponse updateLeasePromotionOrder(@Valid UpdateLeasePromotionOrderCommand cmd){
+		enterpriseApplyEntryService.updateLeasePromotionOrder(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

@@ -12,6 +12,7 @@ import java.io.Serializable;
  *     <li>subjectHeight：标题显示行数</li>
  *     <li>descriptionHeight：描述显示行数</li>
  *     <li>newsSize：显示多少条</li>
+ *     <li>recommendType：推荐类型</li>
  * </ul>
  */
 public class OPPushInstanceConfig implements Serializable {
@@ -21,6 +22,7 @@ public class OPPushInstanceConfig implements Serializable {
     private Integer subjectHeight;
     private Integer descriptionHeight;
     private Integer newsSize;
+    private Byte recommendType;
 
     public String getItemGroup() {
         return itemGroup;
@@ -60,6 +62,14 @@ public class OPPushInstanceConfig implements Serializable {
 
     public void setNewsSize(Integer newsSize) {
         this.newsSize = newsSize;
+    }
+
+    public Byte getRecommendType() {
+        return recommendType;
+    }
+
+    public void setRecommendType(Byte recommendType) {
+        this.recommendType = recommendType;
     }
 
     @Override

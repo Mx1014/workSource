@@ -181,9 +181,15 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
-        
+
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("ListEnterpriseVideoConfAccount query : {}", builder);
+		}
         SearchResponse rsp = builder.execute().actionGet();
 
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("ListEnterpriseVideoConfAccount query result: {}", rsp);
+		}
         List<Long> ids = getIds(rsp);
         
         ListEnterpriseVideoConfAccountResponse response = new ListEnterpriseVideoConfAccountResponse();
@@ -199,6 +205,8 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
         for(Long id : ids) {
         	ConfAccountDTO dto = new ConfAccountDTO();
         	ConfAccounts account = vcProvider.findVideoconfAccountById(id);
+        	if(null == account)
+        		continue;
         	dto.setId(account.getId());
 			dto.setUserId(account.getOwnerId());
 			dto.setValidDate(account.getExpiredDate());

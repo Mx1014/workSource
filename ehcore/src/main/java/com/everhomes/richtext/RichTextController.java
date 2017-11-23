@@ -44,6 +44,7 @@ public class RichTextController extends ControllerBase {
    	 * <p> 后台获取富文本信息 </p>
    	 */
 	@RequestMapping("getRichText")
+	@RequireAuthentication(false)
     @RestReturn(value=RichTextDTO.class)
     public RestResponse getRichText(@Valid GetRichTextCommand cmd) {
 		RichTextDTO dto = this.richTextService.getRichText(cmd);
@@ -58,6 +59,7 @@ public class RichTextController extends ControllerBase {
    	 * <b>URL: /richText/getRichTextByToken</b>
    	 * <p> 客户端获取富文本信息 </p>
    	 */
+	@Deprecated
 	@RequestMapping("getRichTextByToken")
 	@RequireAuthentication(false)
     @RestReturn(value=RichTextDTO.class)

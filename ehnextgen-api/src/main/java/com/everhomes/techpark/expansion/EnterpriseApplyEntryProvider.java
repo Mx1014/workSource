@@ -20,13 +20,13 @@ public interface EnterpriseApplyEntryProvider {
 	List<LeasePromotion> listLeasePromotions(LeasePromotion leasePromotion,
 			ListingLocator locator, int pageSize);
 
-	LeasePromotion createLeasePromotion(LeasePromotion leasePromotion);
+	void createLeasePromotion(LeasePromotion leasePromotion);
 	
 	LeasePromotion getLeasePromotionById(Long id);
 	
 	boolean updateLeasePromotion(LeasePromotion leasePromotion);
 	
-	boolean deleteLeasePromotionAttachment(Long leaseId);
+	boolean deleteLeasePromotionAttachment(String ownerTYpe, Long ownerId);
 	
 	boolean addPromotionAttachment(LeasePromotionAttachment attachment);
 	
@@ -48,11 +48,23 @@ public interface EnterpriseApplyEntryProvider {
 
 	void updateApplyEntry(EnterpriseOpRequest request);
 
-	List<LeasePromotionAttachment> getAttachmentsByLeaseId(Long leaseId);
+	List<LeasePromotionAttachment> findAttachmentsByOwnerTypeAndOwnerId(String ownerType, Long ownerId);
 
 	void deleteLeasePromotionByUidAndIssuerType(long id, String issuerType);
 
 	List<LeasePromotion> listLeasePromotionsByUidAndIssuerType(long id, String issuerType);
 
 	void deleteApplyEntrysByLeasePromotionIds(List<Long> idList);
+
+	void createLeaseRequestForm(LeaseFormRequest leaseFormRequest);
+
+	void updateLeaseRequestForm(LeaseFormRequest leaseFormRequest);
+
+	void deleteLeaseRequestForm(LeaseFormRequest leaseFormRequest);
+
+	LeaseFormRequest findLeaseRequestFormById(Long id);
+
+	LeaseFormRequest findLeaseRequestForm(Integer namespaceId, Long ownerId, String ownerType, String sourceType);
+	
+	List<LeaseFormRequest> listLeaseRequestForm(Integer namespaceId, Long ownerId, String ownerType);
 }

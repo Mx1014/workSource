@@ -1,37 +1,17 @@
 package com.everhomes.flow;
 
-import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.flow.FlowButtonDTO;
-import com.everhomes.rest.flow.FlowCaseDetailDTO;
-import com.everhomes.rest.flow.FlowCaseSearchType;
-import com.everhomes.rest.flow.FlowEvaluateDTO;
-import com.everhomes.rest.flow.FlowFireButtonCommand;
-import com.everhomes.rest.flow.FlowGetSubjectDetailById;
-import com.everhomes.rest.flow.FlowPostEvaluateCommand;
-import com.everhomes.rest.flow.FlowPostSubjectCommand;
-import com.everhomes.rest.flow.FlowPostSubjectDTO;
-import com.everhomes.rest.flow.FlowSubjectDTO;
-import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.flow.GetFlowCaseDetailByIdCommand;
-import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
-import com.everhomes.rest.flow.ListFlowModulesCommand;
-import com.everhomes.rest.flow.ListFlowModulesResponse;
-import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
-import com.everhomes.rest.flow.ListSelectUsersCommand;
-import com.everhomes.rest.flow.ListSelectUsersResponse;
-import com.everhomes.rest.flow.SearchFlowCaseCommand;
-import com.everhomes.rest.flow.SearchFlowCaseResponse;
+import com.everhomes.rest.flow.*;
 import com.everhomes.user.UserContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
 
 @RestDoc(value="Flow controller", site="core")
 @RestController
@@ -66,8 +46,7 @@ public class FlowController extends ControllerBase {
 
     /**
      * <b>URL: /flow/getFlowCaseDetailById</b>
-     * <p> 显示用户所有的 FlowCase </p>
-     * @return FlowCase 的列表信息
+     * <p> flowCase详细信息 </p>
      */
     @RequestMapping("getFlowCaseDetailById")
     @RestReturn(value=FlowCaseDetailDTO.class)
@@ -81,7 +60,94 @@ public class FlowController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * <b>URL: /flow/getFlowCaseDetailByIdV2</b>
+     * <p> flowCase详细信息(替换旧版本的getFlowCaseDetailById)</p>
+     */
+    @RequestMapping("getFlowCaseDetailByIdV2")
+    @RestReturn(value=FlowCaseDetailDTOV2.class)
+    public RestResponse getFlowCaseDetailByIdV2(@Valid GetFlowCaseDetailByIdV2Command cmd) {
+        Long userId = UserContext.current().getUser().getId();
+        FlowCaseDetailDTOV2 flowCaseDetail = flowService.getFlowCaseDetailByIdV2(
+                cmd.getFlowCaseId(), userId, FlowUserType.fromCode(cmd.getFlowUserType()), true,
+                true);
+        RestResponse response = new RestResponse(flowCaseDetail);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /flow/getFlowCaseBrief</b>
+     * <p> 获取flowCase的简单详情 </p>
+     */
+    @RequestMapping("getFlowCaseBrief")
+    @RestReturn(value=FlowCaseBriefDTO.class)
+    public RestResponse getFlowCaseBrief(@Valid GetFlowCaseBriefCommand cmd) {
+        FlowCaseBriefDTO dto = flowService.getFlowCaseBrief(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /flow/getFlowCaseTrack</b>
+     * <p> 获取flowCase的跟踪信息 </p>
+     */
+    @RequestMapping("getFlowCaseTrack")
+    @RestReturn(value=FlowCaseTrackDTO.class)
+    public RestResponse getFlowCaseTrack(@Valid GetFlowCaseTrackCommand cmd) {
+        FlowCaseTrackDTO dto = flowService.getFlowCaseTrack(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /flow/listFlowServiceTypes</b>
+     * <p> 获取服务类别列表 </p>
+     */
+    @RequestMapping("listFlowServiceTypes")
+    @RestReturn(value=ListFlowServiceTypeResponse.class)
+    public RestResponse listFlowServiceTypes(@Valid ListFlowServiceTypesCommand cmd) {
+        ListFlowServiceTypeResponse resp = flowService.listFlowServiceTypes(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /flow/listNextBranches</b>
+     * <p> 获取下一个分支列表 </p>
+     */
+    @RequestMapping("listNextBranches")
+    @RestReturn(value=ListNextBranchesResponse.class)
+    public RestResponse listNextBranches(@Valid ListNextBranchesCommand cmd) {
+        ListNextBranchesResponse resp = flowService.listNextBranches(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /flow/searchFlowOperateLogs</b>
+     * <p> 搜索操作日志 </p>
+     */
+    @RequestMapping("searchFlowOperateLogs")
+    @RestReturn(value=SearchFlowOperateLogResponse.class)
+    public RestResponse searchFlowOperateLogs(@Valid SearchFlowOperateLogsCommand cmd) {
+        SearchFlowOperateLogResponse resp = flowService.searchFlowOperateLogs(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /flow/postSubject</b>
      * <p> 显示用户所有的 FlowCase </p>
@@ -112,8 +178,7 @@ public class FlowController extends ControllerBase {
     
     /**
      * <b>URL: /flow/fireButton</b>
-     * <p> 显示用户所有的 FlowCase </p>
-     * @return FlowCase 的列表信息
+     * <p>按钮触发操作</p>
      */
     @RequestMapping("fireButton")
     @RestReturn(value=FlowButtonDTO.class)
@@ -173,7 +238,7 @@ public class FlowController extends ControllerBase {
      */
     @RequestMapping("getEvaluateInfo")
     @RestReturn(value=FlowEvaluateDTO.class)
-    public RestResponse getEvaluateInfo(@Valid GetFlowCaseDetailByIdCommand cmd) {
+    public RestResponse getEvaluateInfo(@Valid GetEvaluateInfoCommand cmd) {
         RestResponse response = new RestResponse(flowService.getEvaluateInfo(cmd.getFlowCaseId()));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -193,7 +258,21 @@ public class FlowController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * <b>URL: /flow/deleteFlowCase</b>
+     * <p> 删除flowCase </p>
+     */
+    @RequestMapping("deleteFlowCase")
+    @RestReturn(value=String.class)
+    public RestResponse deleteFlowCase(@Valid DeleteFlowCaseCommand cmd) {
+        flowService.deleteFlowCase(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /flow/testCase</b>
      * <p> 仅仅用于测试 </p>
@@ -208,5 +287,4 @@ public class FlowController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
 }

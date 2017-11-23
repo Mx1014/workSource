@@ -4,7 +4,6 @@ package com.everhomes.rest.activity;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
  * <ul>
  * <li>activityId: 活动id</li>
  * <li>phone: 手机</li>
@@ -15,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>position: 职位</li>
  * <li>leaderFlag: 是否高管，1是0否</li>
  * <li>email: 邮箱</li>
+ * <li>payFlag: 支付标志  参考{@link com.everhomes.rest.activity.ActivityRosterPayFlag}</li>
  * </ul>
  */
 public class ManualSignupCommand {
@@ -27,6 +27,7 @@ public class ManualSignupCommand {
 	private String position;
 	private Byte leaderFlag;
 	private String email;
+    private String payFlag;
 
 	public Long getActivityId() {
 		return activityId;
@@ -98,6 +99,14 @@ public class ManualSignupCommand {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public String getPayFlag() {
+		return payFlag;
+	}
+
+	public void setPayFlag(String payFlag) {
+		this.payFlag = payFlag;
 	}
 
 	@Override

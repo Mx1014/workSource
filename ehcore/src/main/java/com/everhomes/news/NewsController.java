@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.news;
 
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.rest.news.*;
+import com.everhomes.util.StringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,28 +15,6 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.news.AddNewsCommentCommand;
-import com.everhomes.rest.news.AddNewsCommentForWebCommand;
-import com.everhomes.rest.news.AddNewsCommentResponse;
-import com.everhomes.rest.news.CreateNewsCommand;
-import com.everhomes.rest.news.CreateNewsResponse;
-import com.everhomes.rest.news.DeleteNewsCommand;
-import com.everhomes.rest.news.DeleteNewsCommentCommand;
-import com.everhomes.rest.news.GetNewsContentCommand;
-import com.everhomes.rest.news.GetNewsContentResponse;
-import com.everhomes.rest.news.GetNewsDetailInfoCommand;
-import com.everhomes.rest.news.GetNewsDetailInfoResponse;
-import com.everhomes.rest.news.ImportNewsCommand;
-import com.everhomes.rest.news.ListNewsCommand;
-import com.everhomes.rest.news.ListNewsCommentCommand;
-import com.everhomes.rest.news.ListNewsCommentResponse;
-import com.everhomes.rest.news.ListNewsResponse;
-import com.everhomes.rest.news.SearchNewsCommand;
-import com.everhomes.rest.news.SearchNewsResponse;
-import com.everhomes.rest.news.SetNewsLikeFlagCommand;
-import com.everhomes.rest.news.SetNewsLikeFlagForWebCommand;
-import com.everhomes.rest.news.SetNewsTopFlagCommand;
-import com.everhomes.rest.news.SyncNewsCommand;
 import com.everhomes.util.RequireAuthentication;
 
 @RestDoc(value = "News Controller", site = "core")
@@ -56,6 +37,23 @@ public class NewsController extends ControllerBase {
 		CreateNewsResponse createNewsResponse = newsService.createNews(cmd);
 
 		RestResponse response = new RestResponse(createNewsResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /news/updateNews</b>
+	 * <p>
+	 * 修改一条新闻
+	 * </p>
+	 */
+	@RequestMapping("updateNews")
+	@RestReturn(String.class)
+	public RestResponse updateNews(UpdateNewsCommand cmd) {
+		newsService.updateNews(cmd);
+
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -141,6 +139,24 @@ public class NewsController extends ControllerBase {
 		GetNewsDetailInfoResponse getNewsDetailInfoResponse = newsService.getNewsDetailInfo(cmd);
 
 		RestResponse response = new RestResponse(getNewsDetailInfoResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /news/getNewsDetail</b>
+	 * <p>
+	 * 查询新闻详情（编辑用）
+	 * </p>
+	 */
+	@RequestMapping("getNewsDetail")
+	@RestReturn(GetNewsDetailResponse.class)
+	@RequireAuthentication(false)
+	public RestResponse getNewsDetail(GetNewsDetailInfoCommand cmd) {
+		GetNewsDetailResponse getNewsDetailResponse = newsService.getNewsDetail(cmd);
+
+		RestResponse response = new RestResponse(getNewsDetailResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -299,6 +315,39 @@ public class NewsController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /news/updateNewsTag</b>
+	 * <p>
+	 * 新建/修改标签
+	 * </p>
+	 */
+	@RequestMapping("updateNewsTag")
+	@RestReturn(String.class)
+	public RestResponse updateNewsTag(UpdateNewsTagCommand cmd){
+		newsService.updateNewsTag(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /news/getNewsTag</b>
+	 * <p>
+	 * 查询标签
+	 * </p>
+	 */
+	@RequestMapping("getNewsTag")
+	@RestReturn(GetNewsTagResponse.class)
+	public RestResponse getNewsTag(GetNewsTagCommand cmd){
+		GetNewsTagResponse getNewsTagResponse = newsService.getNewsTag(cmd);
+
+		RestResponse response = new RestResponse(getNewsTagResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
 	 * <b>URL: /news/syncNews</b>
 	 * <p>
 	 * 同步新闻
@@ -310,6 +359,21 @@ public class NewsController extends ControllerBase {
 		newsService.syncNews(cmd);
 
 		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /news/getCategoryIdByEntryId</b>
+	 * <p>
+	 * 根据入口id获取新闻分类id
+	 * </p>
+	 */
+	@RequestMapping("getCategoryIdByEntryId")
+	@RestReturn(GetCategoryIdByEntryIdResponse.class)
+	public RestResponse syncNews(GetCategoryIdByEntryIdCommand cmd){
+		RestResponse response = new RestResponse(newsService.getCategoryIdByEntryId(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

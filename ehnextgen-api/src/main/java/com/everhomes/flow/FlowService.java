@@ -3,67 +3,8 @@ package com.everhomes.flow;
 import java.util.List;
 import java.util.Map;
 
-import com.everhomes.general_approval.GeneralApproval;
-import com.everhomes.rest.flow.ActionStepType;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.CreateFlowCommand;
-import com.everhomes.rest.flow.CreateFlowNodeCommand;
-import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
-import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
-import com.everhomes.rest.flow.DisableFlowButtonCommand;
-import com.everhomes.rest.flow.FlowAutoStepDTO;
-import com.everhomes.rest.flow.FlowButtonDTO;
-import com.everhomes.rest.flow.FlowButtonDetailDTO;
-import com.everhomes.rest.flow.FlowCaseDetailDTO;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowDTO;
-import com.everhomes.rest.flow.FlowEntityType;
-import com.everhomes.rest.flow.FlowEvaluateDTO;
-import com.everhomes.rest.flow.FlowEvaluateDetailDTO;
-import com.everhomes.rest.flow.FlowFireButtonCommand;
-import com.everhomes.rest.flow.FlowGraphDetailDTO;
-import com.everhomes.rest.flow.FlowModuleDTO;
-import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowNodeDTO;
-import com.everhomes.rest.flow.FlowNodeDetailDTO;
-import com.everhomes.rest.flow.FlowPostEvaluateCommand;
-import com.everhomes.rest.flow.FlowPostSubjectCommand;
-import com.everhomes.rest.flow.FlowPostSubjectDTO;
-import com.everhomes.rest.flow.FlowResolveUsersResponse;
-import com.everhomes.rest.flow.FlowSMSTemplateResponse;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowSubjectDTO;
-import com.everhomes.rest.flow.FlowUserSelectionDTO;
-import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.flow.FlowVariableResponse;
-import com.everhomes.rest.flow.GeneralModuleInfo;
-import com.everhomes.rest.flow.GetFlowButtonDetailByIdCommand;
-import com.everhomes.rest.flow.GetFlowGraphDetailCommand;
-import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
-import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
-import com.everhomes.rest.flow.ListFlowBriefResponse;
-import com.everhomes.rest.flow.ListFlowButtonResponse;
-import com.everhomes.rest.flow.ListFlowModulesCommand;
-import com.everhomes.rest.flow.ListFlowModulesResponse;
-import com.everhomes.rest.flow.ListSMSTemplateCommand;
-import com.everhomes.rest.flow.ListScriptsCommand;
-import com.everhomes.rest.flow.ListScriptsResponse;
-import com.everhomes.rest.flow.ListSelectUsersCommand;
-import com.everhomes.rest.flow.ListSelectUsersResponse;
-import com.everhomes.rest.flow.SearchFlowCaseCommand;
-import com.everhomes.rest.flow.SearchFlowCaseResponse;
-import com.everhomes.rest.flow.ListFlowCaseLogsCommand;
-import com.everhomes.rest.flow.ListFlowCommand;
-import com.everhomes.rest.flow.ListFlowUserSelectionCommand;
-import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
-import com.everhomes.rest.flow.ListFlowVariablesCommand;
-import com.everhomes.rest.flow.UpdateFlowButtonCommand;
-import com.everhomes.rest.flow.UpdateFlowEvaluateCommand;
-import com.everhomes.rest.flow.UpdateFlowNameCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeCommand;
-import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.user.UserInfo;
 
 public interface FlowService {
@@ -253,7 +194,13 @@ public interface FlowService {
 	 */
 	FlowVariableResponse listFlowVariables(ListFlowVariablesCommand cmd);
 
-	/**
+    FlowCase getFlowCaseById(Long flowCaseId);
+
+    FlowCaseProcessorsProcessor getCurrentProcessors(Long flowCaseId, boolean allFlowCaseFlag);
+
+    List<UserInfo> getSupervisor(FlowCase flowCase);
+
+    /**
 	 * 搜索 FlowCase 的信息
 	 * @param cmd
 	 * @return
@@ -338,7 +285,7 @@ public interface FlowService {
 
 	void flushState(FlowCaseState ctx) throws FlowStepBusyException;
 
-	void createSnapshotNodeProcessors(FlowCaseState ctx, FlowGraphNode nextNode);
+	void createSnapshotNodeProcessors(FlowCaseState ctx, FlowGraphNode node);
 
 	void createSnapshotSupervisors(FlowCaseState ctx);
 	
@@ -353,7 +300,9 @@ public interface FlowService {
 	Flow getEnabledFlow(Integer namespaceId, Long moduleId, String moduleType,
 			Long ownerId, String ownerType);
 
-	/**
+    Flow getEnabledFlow(Integer namespaceId, String projectType, Long projectId, Long moduleId, String moduleType, Long ownerId, String ownerType);
+
+    /**
 	 * 添加一个 Case 到工作流中，注意此时为 snapshotFlow，即为运行中的 Flow 副本。
 	 * @param flowCaseCmd
 	 * @return
@@ -362,7 +311,9 @@ public interface FlowService {
 
 	FlowModuleDTO getModuleById(Long moduleId);
 
-	/**
+    SearchFlowCaseResponse searchFlowCases(SearchFlowCaseCommand cmd, ListingQueryBuilderCallback callback);
+
+    /**
 	 * 获取 FlowCase 的详细日志信息
 	 * @param flowCaseId
 	 * @return
@@ -445,16 +396,22 @@ public interface FlowService {
 
 	FlowResolveUsersResponse resolveSelectionUsers(Long flowId, Long selectionUserId);
 
-	FlowCase createDumpFlowCase(GeneralModuleInfo ga,
-			CreateFlowCaseCommand flowCaseCmd);
+    /**
+     * 预先申请一个flowCaseId
+     */
+    Long getNextFlowCaseId();
+
+    FlowCase createDumpFlowCase(GeneralModuleInfo ga,
+                                CreateFlowCaseCommand flowCaseCmd);
  
 	List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId,
 			List<FlowUserSelection> selections);
  
 	void processSMSTimeout(FlowTimeout ft);
 
-	String getStepMessageTemplate(FlowStepType fromStep,
-			FlowCaseStatus nextStatus, FlowUserType flowUserType, Map<String, Object> map);
+    String getButtonFireEventContentTemplate(FlowStepType step, Map<String, Object> map);
+
+    String getStepMessageTemplate(FlowStepType fromStep, FlowCaseStatus nextStatus, FlowGraphEvent event, Map<String, Object> map);
 
 	ListSelectUsersResponse listUserSelections(ListSelectUsersCommand cmd);
 
@@ -469,5 +426,65 @@ public interface FlowService {
 	List<Long> getApplierSelection(FlowCaseState ctx, FlowUserSelection sel);
 
 	void fixupUserInfoInContext(FlowCaseState ctx, UserInfo ui);
-	
+
+    void fixupUserInfo(Long organizationId, UserInfo userInfo);
+
+    /**
+     * 删除flowCase
+     */
+    void deleteFlowCase(DeleteFlowCaseCommand cmd);
+
+    ListFlowPredefinedParamResponse listPredefinedParam(ListPredefinedParamCommand cmd);
+
+    void updateFlowButtonOrder(UpdateFlowButtonOrderCommand cmd);
+
+    FlowLaneDTO updateFlowLane(UpdateFlowLaneCommand cmd);
+
+    FlowButtonDTO createFlowButton(CreateFlowButtonCommand cmd);
+
+    FlowGraphDTO getFlowGraphNew(FlowIdCommand cmd);
+
+    FlowGraphDTO createOrUpdateFlowGraph(CreateFlowGraphCommand cmd);
+
+    FlowGraphDTO createOrUpdateFlowGraph(CreateFlowGraphJsonCommand cmd);
+
+    FlowCaseDetailDTOV2 getFlowCaseDetailByIdV2(Long flowCaseId, Long userId, FlowUserType flowUserType, boolean checkProcessor, boolean needButton);
+
+    FlowCaseTrackDTO getFlowCaseTrack(GetFlowCaseTrackCommand cmd);
+
+    FlowCaseBriefDTO getFlowCaseBrief(GetFlowCaseBriefCommand cmd);
+
+    void deleteFlowButton(DeleteFlowButtonCommand cmd);
+
+    ListFlowServiceTypeResponse listFlowServiceTypes(ListFlowServiceTypesCommand cmd);
+
+    ListNextBranchesResponse listNextBranches(ListNextBranchesCommand cmd);
+
+    SearchFlowOperateLogResponse searchFlowOperateLogs(SearchFlowOperateLogsCommand cmd);
+
+    FlowEvaluateItemDTO createFlowEvaluateItem(CreateFlowEvaluateItemCommand cmd);
+
+    void deleteFlowEvaluateItem(DeleteFlowEvaluateItemCommand cmd);
+
+    FlowEvaluateItemDTO updateFlowEvaluateItem(CreateFlowEvaluateItemCommand cmd);
+
+    List<FlowCase> getAllFlowCase(Long flowCaseId);
+
+    FlowGraphDTO createOrUpdateFlowCondition(CreateFlowConditionCommand cmd);
+
+    void updateFlowValidationStatus(UpdateFlowValidationStatusCommand cmd);
+
+    FlowConditionVariable getFormFieldValueByVariable(FlowCaseState ctx, String variable, String extra);
+
+    ListFlowConditionVariablesResponse listFlowConditionVariables(ListFlowConditionVariablesCommand cmd);
+
+    ListFlowFormsResponse listFlowForms(ListFlowFormsCommand cmd);
+
+    FlowFormDTO updateFlowFormVersion(UpdateFlowFormCommand cmd);
+
+    FlowFormDTO createFlowForm(UpdateFlowFormCommand cmd);
+
+    void deleteFlowForm(UpdateFlowFormCommand cmd);
+
+    FlowFormDTO getFlowForm(FlowIdCommand cmd);
 }

@@ -61,6 +61,8 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.admin.AppCreateCommand;
 import com.everhomes.rest.admin.DecodeContentPathCommand;
 import com.everhomes.rest.admin.EncodeWebTokenCommand;
+import com.everhomes.rest.admin.GetSequenceCommand;
+import com.everhomes.rest.admin.GetSequenceDTO;
 import com.everhomes.rest.admin.NamespaceDTO;
 import com.everhomes.rest.admin.SampleCommand;
 import com.everhomes.rest.admin.SampleEmbedded;
@@ -74,6 +76,7 @@ import com.everhomes.rest.persist.server.UpdatePersistServerCommand;
 import com.everhomes.rest.repeat.ExpressionDTO;
 import com.everhomes.rest.rpc.server.PingRequestPdu;
 import com.everhomes.rest.rpc.server.PingResponsePdu;
+import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.ListLoginByPhoneCommand;
@@ -363,6 +366,19 @@ public class AdminController extends ControllerBase {
 
          sequenceService.syncSequence();
         return new RestResponse("OK");
+    }
+    
+    @RequestMapping("getSequence")
+    @RestReturn(GetSequenceDTO.class)
+    public RestResponse getSequence(GetSequenceCommand cmd) {
+        if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(),
+            UserContext.current().getUser().getId(), Privilege.Write, null)) {
+
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
+        }
+
+        GetSequenceDTO dto = sequenceService.getSequence(cmd);
+        return new RestResponse(dto);
     }
     
     @RequestMapping("addBorder")
@@ -939,6 +955,20 @@ public class AdminController extends ControllerBase {
         MailHandler handler = PlatformContext.getComponent(handlerName);
         handler.sendMail(0, null, toMail, "the mail subject", "the mail body");
     	return new RestResponse();
+    }
+    
+    /**
+     * <b>URL: /user/checkCpnStatus</b>
+     * <p>用于检查一些关键组件的状态，比如是否有内存可创建对象、是否可以正常连接redis，是否可以正常连接数据库等；</p>
+     */
+    @RequestMapping("checkCpnStatus")
+    @RestReturn(value = String.class )
+    @RequireAuthentication(false)
+    public RestResponse checkCpnStatus() {
+        RestResponse response = new RestResponse(userService.checkServerStatus());
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
     
 }

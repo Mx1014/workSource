@@ -11,25 +11,47 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>rentalSiteId：场所id</li>
+ * <li>rentalType：类型</li>
  * <li>rentalDate：预定日期</li>
  * <li>startTime：开始时间</li>
  * <li>endTime：结束时间</li>
- * <li>rules：预定单元格列表{@link com.everhomes.rest.rentalv2.RentalBillRuleDTO}</li>  
+ * <li>rules：预定单元格列表{@link com.everhomes.rest.rentalv2.RentalBillRuleDTO}</li>
+ * <li>packageName：套餐名称</li>
  * </ul>
  */
 public class AddRentalBillCommand {
 	@NotNull
 	private Long rentalSiteId;   
+	private Byte rentalType;
 	private Long rentalDate;
-	@NotNull
-	private Long startTime;
-	@NotNull
-	private Long endTime;
+//	@NotNull
+//	private Long startTime;
+//	@NotNull
+//	private Long endTime;
 	@NotNull
 	@ItemType(RentalBillRuleDTO.class)
 	private List<RentalBillRuleDTO> rules; 
 //	@ItemType(SiteItemDTO.class)
 //	private List<SiteItemDTO> rentalItems;
+	private String sceneToken;
+	private String packageName;
+
+
+	public Byte getRentalType() {
+		return rentalType;
+	}
+
+	public void setRentalType(Byte rentalType) {
+		this.rentalType = rentalType;
+	}
+
+	public String getSceneToken() {
+		return sceneToken;
+	}
+
+	public void setSceneToken(String sceneToken) {
+		this.sceneToken = sceneToken;
+	}
 
 	@Override
 	public String toString() {
@@ -52,21 +74,29 @@ public class AddRentalBillCommand {
 		this.rentalDate = rentalDate;
 	}
 
-	public Long getStartTime() {
-		return startTime;
+	public String getPackageName() {
+		return packageName;
 	}
 
-	public void setStartTime(Long startTime) {
-		this.startTime = startTime;
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
 	}
 
-	public Long getEndTime() {
-		return endTime;
-	}
-
-	public void setEndTime(Long endTime) {
-		this.endTime = endTime;
-	}
+	//	public Long getStartTime() {
+//		return startTime;
+//	}
+//
+//	public void setStartTime(Long startTime) {
+//		this.startTime = startTime;
+//	}
+//
+//	public Long getEndTime() {
+//		return endTime;
+//	}
+//
+//	public void setEndTime(Long endTime) {
+//		this.endTime = endTime;
+//	}
 
 	public List<RentalBillRuleDTO> getRules() {
 		return rules;

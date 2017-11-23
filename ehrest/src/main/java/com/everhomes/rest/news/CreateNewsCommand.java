@@ -3,9 +3,11 @@
 package com.everhomes.rest.news;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -22,6 +24,9 @@ import com.everhomes.util.StringHelper;
  * <li>publishTime: 发布时间</li>
  * <li>sourceDesc: 来源</li>
  * <li>sourceUrl: 原文链接</li>
+ * <li>phone: 联系方式</li>
+ * <li>communityIds: 可见范围</li>
+ * <li>newsTagVals: 标签</li>
  * </ul>
  */
 public class CreateNewsCommand {
@@ -40,6 +45,28 @@ public class CreateNewsCommand {
 	private Long publishTime;
 	private String sourceDesc;
 	private String sourceUrl;
+	private String phone;
+	@ItemType(Long.class)
+	private List<Long> communityIds;
+	@ItemType(NewsTagValsDTO.class)
+	private List<NewsTagValsDTO> newsTagVals;
+	private String visibleType;
+
+	public String getVisibleType() {
+		return visibleType;
+	}
+
+	public void setVisibleType(String visibleType) {
+		this.visibleType = visibleType;
+	}
+
+	public List<Long> getCommunityIds() {
+		return communityIds;
+	}
+
+	public void setCommunityIds(List<Long> communityIds) {
+		this.communityIds = communityIds;
+	}
 
 	public String getOwnerType() {
 		return ownerType;
@@ -134,4 +161,19 @@ public class CreateNewsCommand {
 		this.categoryId = categoryId;
 	}
 
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public List<NewsTagValsDTO> getNewsTagVals() {
+		return newsTagVals;
+	}
+
+	public void setNewsTagVals(List<NewsTagValsDTO> newsTagVals) {
+		this.newsTagVals = newsTagVals;
+	}
 }

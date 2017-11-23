@@ -42,6 +42,36 @@ public interface MessagingService {
      *              的值为消息的标题
      *
      * 具体可以参考 com.everhomes.group.GroupServiceImpl#sendRouterGroupNotificationUseSystemUser 方式
+     *
+     * {@code
+     *
+     *    // 组装消息体
+     *    MessageDTO messageDto = new MessageDTO();
+     *    messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+     *    messageDto.setBody(messageBody);
+     *    ...
+     *
+     *    // 组装路由
+     *    ThirdPartActionData actionData = new ThirdPartActionData();
+     *    actionData.setUrl("xxx.zuolin.com");
+     *
+     *    // 拼装路由参数
+     *    String url = RouterBuilder.build(Router.BROWSER_I, actionData);
+     *
+     *    RouterMetaObject metaObject = new RouterMetaObject();
+     *    metaObject.setUrl(url);
+     *
+     *    // 组装消息 meta
+     *    Map<String, String> meta = new HashMap<>();
+     *    meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+     *    meta.put(MessageMetaConstant.MESSAGE_SUBJECT, messageSubject);
+     *    meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
+     *
+     *    messageDto.setMeta(meta);
+     *
+     *    // 发送消息
+     *    messagingService.routeMessage(...);
+     * }
      * </pre>
      * @param senderLogin       发送方
      * @param appId             appId

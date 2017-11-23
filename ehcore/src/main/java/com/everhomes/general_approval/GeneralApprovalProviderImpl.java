@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.approval.ApprovalStatus;
+import com.everhomes.rest.general_approval.GeneralApprovalStatus;
+import com.everhomes.server.schema.tables.records.EhGeneralApprovalTemplatesRecord;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,16 +70,17 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
     @Override
     public GeneralApproval getGeneralApprovalById(Long id) {
         try {
-        GeneralApproval[] result = new GeneralApproval[1];
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovals.class));
+            GeneralApproval[] result = new GeneralApproval[1];
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovals.class));
 
-        result[0] = context.select().from(Tables.EH_GENERAL_APPROVALS)
-            .where(Tables.EH_GENERAL_APPROVALS.ID.eq(id))
-            .fetchAny().map((r) -> {
-                return ConvertHelper.convert(r, GeneralApproval.class);
-            });
+            result[0] = context.select().from(Tables.EH_GENERAL_APPROVALS)
+                    .where(Tables.EH_GENERAL_APPROVALS.ID.eq(id))
+                    .fetchAny().map((r) -> {
 
-        return result[0];
+                        return ConvertHelper.convert(r, GeneralApproval.class);
+                    });
+
+            return result[0];
         } catch (Exception ex) {
             //fetchAny() maybe return null
             return null;
@@ -88,19 +92,19 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovals.class));
 
         SelectQuery<EhGeneralApprovalsRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVALS);
-        if(queryBuilderCallback != null)
+        if (queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
 
-        if(locator.getAnchor() != null) {
+        if (locator.getAnchor() != null) {
             query.addConditions(Tables.EH_GENERAL_APPROVALS.ID.gt(locator.getAnchor()));
-            }
+        }
 
         query.addLimit(count);
         List<GeneralApproval> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, GeneralApproval.class);
         });
 
-        if(objs.size() >= count) {
+        if (objs.size() >= count) {
             locator.setAnchor(objs.get(objs.size() - 1).getId());
         } else {
             locator.setAnchor(null);
@@ -114,4 +118,56 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         obj.setCreateTime(new Timestamp(l2));
         obj.setUpdateTime(new Timestamp(l2));
     }
+
+    @Override
+    public List<GeneralApprovalTemplate> listGeneralApprovalTemplateByModuleId(Long moduleId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectQuery<EhGeneralApprovalTemplatesRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVAL_TEMPLATES);
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_TEMPLATES.MODULE_ID.eq(moduleId));
+        List<GeneralApprovalTemplate> results = query.fetch().map(r -> {
+            return ConvertHelper.convert(r, GeneralApprovalTemplate.class);
+        });
+        if (results != null && results.size() > 0)
+            return results;
+        return null;
+    }
+
+    @Override
+    public GeneralApproval getGeneralApprovalByName(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, String approvalName){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhGeneralApprovalsRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVALS);
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(moduleId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.APPROVAL_NAME.eq(approvalName));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.ne(GeneralApprovalStatus.DELETED.getCode()));
+        return query.fetchAnyInto(GeneralApproval.class);
+    }
+
+    @Override
+    public GeneralApproval getGeneralApprovalByTemplateId(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long templateId){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhGeneralApprovalsRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVALS);
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(moduleId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.APPROVAL_TEMPLATE_ID.eq(templateId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.ne(GeneralApprovalStatus.DELETED.getCode()));
+        return query.fetchOneInto(GeneralApproval.class);
+    }
+
+    @Override
+    public GeneralApproval getGeneralApprovalByAttribute(Integer namespaceId, Long ownerId, String attribute){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhGeneralApprovalsRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVALS);
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.APPROVAL_ATTRIBUTE.eq(attribute));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.ne(GeneralApprovalStatus.DELETED.getCode()));
+        return query.fetchOneInto(GeneralApproval.class);
+    }
+
 }

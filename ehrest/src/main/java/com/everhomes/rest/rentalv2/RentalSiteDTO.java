@@ -51,12 +51,23 @@ import com.everhomes.util.StringHelper;
  * <li>	siteNumbers：资源编号列表 {String}</li>
  * <li>	siteItems：资源物品列表 {@link com.everhomes.rest.rentalv2.SiteItemDTO}</li>
  * <li>	sitePics： List资源图片列表 {@link com.everhomes.rest.rentalv2.RentalSitePicDTO}</li>
- * <li>	owners： List资源可显示的园区范围列表 {@link com.everhomes.rest.techpark.rental.SiteOwnerDTO}</li> 
+ * <li>	owners： List资源可显示的园区范围列表 {@link com.everhomes.rest.rentalv2.admin.SiteOwnerDTO}</li>
  * <li>attachments: 可添加的附件{@link com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO}</li>
  * <li>confirmationPrompt: 确认提示(非必填)</li>
  * <li>offlineCashierAddress: 线下支付收银地址</li>
  * <li>offlinePayeeUid: 线下支付收款人id</li>
  * <li>offlinePayeeName: 线下支付收款人姓名</li>
+ * <li>detailUrl: 详情Url</li>
+ * <li>rentalEndTime: 至少提前预约时间</li>
+ * <li>rentalStartTime: 最多提前预约时间</li>
+ * <li>rentalEndTimeFlag: 至少提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
+ * <li>rentalStartTimeFlag: 最多提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
+ * <li>resourceTypeId: 资源类型id</li>
+ * <li>payMode: 支付模式</li>
+ * <li>sitePriceRules: 价格策略，参考{@link com.everhomes.rest.rentalv2.SitePriceRuleDTO}</li>
+ * <li>unauthVisible: 非认证用户是否可见，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ * <li>AclinkId: 门禁组id</li>
+ * <li>AclinkName: 门禁组名</li>
  * </ul>
  */
 public class RentalSiteDTO {
@@ -80,11 +91,6 @@ public class RentalSiteDTO {
 	private String notice; 
 	private java.lang.String     coverUri;
 	private java.lang.String     coverUrl;
-	private java.lang.Byte       discountType;
-	private java.math.BigDecimal fullPrice;
-	private java.math.BigDecimal cutPrice;
-	private java.lang.Double     discountRatio;
-	private java.lang.Byte       rentalType;
 	private Double   timeStep;
 	private Long  dayBeginTime;
 	private Long  dayEndTime;
@@ -113,11 +119,87 @@ public class RentalSiteDTO {
     private String offlineCashierAddress;
     private Long offlinePayeeUid;
     private String offlinePayeeName;
+
+	private Byte rentalStartTimeFlag;
+	private Byte rentalEndTimeFlag;
+	private Long rentalStartTime;
+	private Long rentalEndTime;
+    private String detailUrl;
+    private String reserveRouteUrl;
+
+    private Long resourceTypeId;
+    private Byte payMode;
+
+    private Byte unauthVisible;
+
+	private Long aclinkId;
+	private String aclinkName;
+    @ItemType(SitePriceRuleDTO.class)
+    private List<SitePriceRuleDTO> sitePriceRules;
+    
+//    @Deprecated
+//	private java.lang.Byte       discountType;
+//    @Deprecated
+//	private java.math.BigDecimal fullPrice;
+//    @Deprecated
+//	private java.math.BigDecimal cutPrice;
+//    @Deprecated
+//	private java.lang.Double     discountRatio;
+    @Deprecated
+	private java.lang.Byte       rentalType;
+    
+	public Byte getUnauthVisible() {
+		return unauthVisible;
+	}
+
+	public void setUnauthVisible(Byte unauthVisible) {
+		this.unauthVisible = unauthVisible;
+	}
+
+	public List<SitePriceRuleDTO> getSitePriceRules() {
+		return sitePriceRules;
+	}
+
+	public void setSitePriceRules(List<SitePriceRuleDTO> sitePriceRules) {
+		this.sitePriceRules = sitePriceRules;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-  
+
+	public Long getResourceTypeId() {
+		return resourceTypeId;
+	}
+
+	public void setResourceTypeId(Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
+	}
+
+	public Byte getPayMode() {
+		return payMode;
+	}
+
+	public void setPayMode(Byte payMode) {
+		this.payMode = payMode;
+	}
+
+	public String getReserveRouteUrl() {
+		return reserveRouteUrl;
+	}
+
+	public void setReserveRouteUrl(String reserveRouteUrl) {
+		this.reserveRouteUrl = reserveRouteUrl;
+	}
+
+	public String getDetailUrl() {
+		return detailUrl;
+	}
+
+	public void setDetailUrl(String detailUrl) {
+		this.detailUrl = detailUrl;
+	}
 
 	public String getBuildingName() {
 		return buildingName;
@@ -313,44 +395,44 @@ public class RentalSiteDTO {
 	}
 
 
-	public java.lang.Byte getDiscountType() {
-		return discountType;
-	}
-
-
-	public void setDiscountType(java.lang.Byte discountType) {
-		this.discountType = discountType;
-	}
-
-
-	public java.math.BigDecimal getFullPrice() {
-		return fullPrice;
-	}
-
-
-	public void setFullPrice(java.math.BigDecimal fullPrice) {
-		this.fullPrice = fullPrice;
-	}
-
-
-	public java.math.BigDecimal getCutPrice() {
-		return cutPrice;
-	}
-
-
-	public void setCutPrice(java.math.BigDecimal cutPrice) {
-		this.cutPrice = cutPrice;
-	}
-
-
-	public java.lang.Double getDiscountRatio() {
-		return discountRatio;
-	}
-
-
-	public void setDiscountRatio(java.lang.Double discountRatio) {
-		this.discountRatio = discountRatio;
-	}
+//	public java.lang.Byte getDiscountType() {
+//		return discountType;
+//	}
+//
+//
+//	public void setDiscountType(java.lang.Byte discountType) {
+//		this.discountType = discountType;
+//	}
+//
+//
+//	public java.math.BigDecimal getFullPrice() {
+//		return fullPrice;
+//	}
+//
+//
+//	public void setFullPrice(java.math.BigDecimal fullPrice) {
+//		this.fullPrice = fullPrice;
+//	}
+//
+//
+//	public java.math.BigDecimal getCutPrice() {
+//		return cutPrice;
+//	}
+//
+//
+//	public void setCutPrice(java.math.BigDecimal cutPrice) {
+//		this.cutPrice = cutPrice;
+//	}
+//
+//
+//	public java.lang.Double getDiscountRatio() {
+//		return discountRatio;
+//	}
+//
+//
+//	public void setDiscountRatio(java.lang.Double discountRatio) {
+//		this.discountRatio = discountRatio;
+//	}
 
 
 	public java.lang.Byte getRentalType() {
@@ -575,5 +657,51 @@ public class RentalSiteDTO {
 		this.offlinePayeeName = offlinePayeeName;
 	}
 
- 
+	public Byte getRentalStartTimeFlag() {
+		return rentalStartTimeFlag;
+	}
+
+	public void setRentalStartTimeFlag(Byte rentalStartTimeFlag) {
+		this.rentalStartTimeFlag = rentalStartTimeFlag;
+	}
+
+	public Byte getRentalEndTimeFlag() {
+		return rentalEndTimeFlag;
+	}
+
+	public void setRentalEndTimeFlag(Byte rentalEndTimeFlag) {
+		this.rentalEndTimeFlag = rentalEndTimeFlag;
+	}
+
+	public Long getRentalStartTime() {
+		return rentalStartTime;
+	}
+
+	public void setRentalStartTime(Long rentalStartTime) {
+		this.rentalStartTime = rentalStartTime;
+	}
+
+	public Long getRentalEndTime() {
+		return rentalEndTime;
+	}
+
+	public void setRentalEndTime(Long rentalEndTime) {
+		this.rentalEndTime = rentalEndTime;
+	}
+
+	public Long getAclinkId() {
+		return aclinkId;
+	}
+
+	public void setAclinkId(Long aclinkId) {
+		this.aclinkId = aclinkId;
+	}
+
+	public String getAclinkName() {
+		return aclinkName;
+	}
+
+	public void setAclinkName(String aclinkName) {
+		this.aclinkName = aclinkName;
+	}
 }

@@ -129,7 +129,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
 	        }
  	       
            tasks.clear();
-           LOGGER.info("Sync pmtask(syncupdate), process count: " + tasks.size());
+           LOGGER.info("Sync pmtask(syncupdate), processStat count: " + tasks.size());
            
         }
         //TODO merge ?
@@ -161,7 +161,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         
         RangeQueryBuilder rb = null;
         if(null !=pageAnchor){
-        	rb = QueryBuilders.rangeQuery("createTime").lt(pageAnchor);
+        	rb = QueryBuilders.rangeQuery("createTime").lte(pageAnchor);
             qb = qb.must(rb);	
         }
         if(null != startDate){

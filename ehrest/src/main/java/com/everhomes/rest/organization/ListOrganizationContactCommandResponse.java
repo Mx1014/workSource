@@ -19,6 +19,8 @@ public class ListOrganizationContactCommandResponse {
 	private Long nextPageAnchor;
 	
 	private Integer totalCount;
+
+	private Integer namespaceId;
 	
 	@ItemType(OrganizationContactDTO.class)
     private List<OrganizationContactDTO> members;
@@ -55,6 +57,14 @@ public class ListOrganizationContactCommandResponse {
 
 	public void setTotalCount(Integer totalCount) {
 		this.totalCount = totalCount;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 	
 	@Override

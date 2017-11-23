@@ -1,10 +1,10 @@
 package com.everhomes.flow;
 
-import java.util.List;
-
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.*;
+import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.util.Tuple;
+
+import java.util.List;
 
 public interface FlowListenerManager {
 
@@ -43,9 +43,10 @@ public interface FlowListenerManager {
 	/**
 	 * FlowCase 的描述性内容
 	 * @param flowCase
-	 * @return
+	 * @param flowUserType
+     * @return
 	 */
-	String onFlowCaseBriefRender(FlowCase flowCase);
+	String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType);
 	
 	/**
 	 * FlowCase 的详细信息列表
@@ -54,14 +55,6 @@ public interface FlowListenerManager {
 	 * @return
 	 */
 	List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType);
-	
-	/**
-	 * FlowCase 的变量渲染
-	 * @param ctx
-	 * @param variable
-	 * @return
-	 */
-	String onFlowVariableRender(FlowCaseState ctx, String variable);
 
 	/**
 	 * 当时间触发的时候
@@ -69,7 +62,7 @@ public interface FlowListenerManager {
 	 */
 	void onFlowButtonFired(FlowCaseState ctx);
 
-	FlowModuleInfo getModule(String module);
+	FlowModuleInfo getModule(Long module);
 	
 	List<FlowModuleInfo> getModules();
 
@@ -79,6 +72,19 @@ public interface FlowListenerManager {
 
 	void onFlowCaseCreated(FlowCase flowCase);
 
-	void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
-			List<Tuple<String, Object>> variables);
+	void onFlowSMSVariableRender(FlowCaseState ctx, int templateId, List<Tuple<String, Object>> variables);
+
+    void onFlowMessageSend(FlowCaseState ctx, MessageDTO messageDto);
+
+    String onFlowVariableRender(FlowCaseState ctx, String variable);
+
+    // List<FlowPredefinedParamDTO> listFlowPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId);
+
+    List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId);
+
+    List<FlowServiceTypeDTO> listFlowServiceTypes(Integer namespaceId, Long moduleId, String ownerType, Long ownerId);
+
+    FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra);
+
+    List<FlowFormDTO> listFlowForms(Flow flow);
 }

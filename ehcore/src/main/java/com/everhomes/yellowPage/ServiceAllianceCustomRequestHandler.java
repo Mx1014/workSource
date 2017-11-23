@@ -93,7 +93,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 	private ContentServerService contentServerService;
 			
 	@Override
-	public void addCustomRequest(AddRequestCommand cmd) {
+	public Long addCustomRequest(AddRequestCommand cmd) {
 		LOGGER.info("ServiceAllianceCustomRequestHandler addCustomRequest cmd:" + cmd);
 		
 		ServiceAllianceRequests request = GsonUtil.fromJson(cmd.getRequestJson(), ServiceAllianceRequests.class);
@@ -115,7 +115,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 			request.setCreatorMobile(identifier.getIdentifierToken());
 		  
 		LOGGER.info("ServiceAllianceCustomRequestHandler addCustomRequest request:" + request);
-		yellowPageProvider.createServiceAllianceRequests(request);
+		Long id = yellowPageProvider.createServiceAllianceRequests(request);
 		ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
 		requestInfo.setTemplateType(cmd.getTemplateType());
 		requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
@@ -127,7 +127,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 				att.setOwnerType(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM);
 				att.setOwnerId(request.getId());
 				att.setCreatorUid(user.getId());
-				
+				att.setFilename(attachment.getFileName());
 				userActivityProvider.createRequestAttachments(att);
 				return att;
 			}).collect(Collectors.toList());
@@ -155,6 +155,8 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		//modify by dengs,20170425  更换模板，发送html邮件
 //		notifyMap.put("note", getNote(request)); 
 		notifyMap.put("note", changeRequestToHtml(request)); 
+		notifyMap.put("serviceAllianceName", "");
+		notifyMap.put("notemessage", getNote(request));
 		Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
 		
 		String creatorOrganization = "";
@@ -166,11 +168,11 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 				ServiceAllianceRequestNotificationTemplateCode.AN_APPLICATION_FORM, UserContext.current().getUser().getLocale(), "");
 		if(serviceOrg != null) {
 			notifyMap.put("serviceOrgName", serviceOrg.getName());
+			notifyMap.put("serviceAllianceName", serviceOrg.getName());
 			title = serviceOrg.getName() + title;
 		}
 		notifyMap.put("title", title);
 		//modify by dengs,20170425  更换模板，发送html邮件
-//		int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ORG;
 		int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_MAIL_ORG_ADMIN_IN_HTML;
 		String notifyTextForOrg = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
 		
@@ -181,7 +183,9 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		if(serviceOrg != null) {
 			OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
 			if(member != null) {
-				sendMessageToUser(member.getTargetId(), notifyTextForOrg);
+				code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ORG;
+				String notifyText = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
+				sendMessageToUser(member.getTargetId(), notifyText);
 			}
 			sendEmail(serviceOrg.getEmail(), title, notifyTextForOrg,stringAttementList);
 		}
@@ -216,6 +220,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		}
 		//删除生成的pdf文件，附件
 		attementList.stream().forEach(file->{file.delete();});
+		return id;
 	}
 		
 
@@ -226,7 +231,8 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 			StringBuilder sb = new StringBuilder();
 			for(RequestFieldDTO field : fieldList) {
 				String fieldValue = (field.getFieldValue() == null) ? "" : field.getFieldValue();
-				sb.append(field.getFieldName() + ":" + fieldValue + "\n");
+				String fieldName = field.getFieldName()==null?"":field.getFieldName();
+				sb.append(" ").append(fieldName.trim()).append("：").append(fieldValue).append("\n");
 			}
 			
 			return sb.toString();
@@ -316,6 +322,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 										dto.setFieldContentType(attachment.getContentType());
 										dto.setFieldName(attachment.getTargetFieldName());
 										dto.setFieldValue(attachment.getContentUri());
+										dto.setFileName(attachment.getFilename());
 									}
 								}
 							}

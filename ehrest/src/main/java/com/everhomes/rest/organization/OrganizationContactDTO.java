@@ -1,10 +1,9 @@
 // @formatter:off
 package com.everhomes.rest.organization;
 
-import java.sql.Timestamp;
-import java.util.List;
-
 import com.everhomes.util.StringHelper;
+
+import java.sql.Timestamp;
 
 /**
  * <ul>
@@ -15,161 +14,205 @@ import com.everhomes.util.StringHelper;
  * <li>contactToken：联系方式:手机号/邮箱</li>
  * <li>creatorUid：创建者uId</li>
  * <li>createTime：创建时间</li>
+ * <li>jobPosition: 岗位</li>
+ * <li>detailId: 用户档案id</li>
+ * <li>visibleFlag: 隐私保护: 0-显示(不受保护) 1-隐藏(保护) 参考{@link com.everhomes.rest.organization.VisibleFlag} </li>
+ * <li>departmentName: 部门名字</li>
  * </ul>
  */
 public class OrganizationContactDTO {
-	private Long     id;
-	private Long     organizationId;
-	private String   contactName;
-	private Byte     contactType;
-	private String   contactToken;
-	private Long     creatorUid;
-	private Timestamp createTime;
+    private Long id;
+    private Long organizationId;
+    private String contactName;
+    private Byte contactType;
+    private String contactToken;
+    private Long creatorUid;
+    private Timestamp createTime;
 
-	private String initial;
-	private String fullPinyin;
-	private String fullInitial;
-	private String   nickName;
-	private String   avatar;
-	private Long   employeeNo;
-	private Byte   gender;
-	private Long targetId;
+    private String initial;
+    private String fullPinyin;
+    private String fullInitial;
+    private String nickName;
+    private String avatar;
+    private String employeeNo;
+    private Byte gender;
+    private Long targetId;
 
-	private String targetType;
+    private String targetType;
 
-	public OrganizationContactDTO() {
+    //added by R 20120713 增加岗位信息
+    private String jobPosition;
+    private Long detailId;
+    private Byte visibleFlag;
+
+    private String departmentName;
+
+    public OrganizationContactDTO() {
     }
-	
-	public Long getId() {
-		return id;
-	}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public Long getOrganizationId() {
-		return organizationId;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setOrganizationId(Long organizationId) {
-		this.organizationId = organizationId;
-	}
+    public Long getOrganizationId() {
+        return organizationId;
+    }
 
-	public String getContactName() {
-		return contactName;
-	}
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
-	public void setContactName(String contactName) {
-		this.contactName = contactName;
-	}
+    public String getContactName() {
+        return contactName;
+    }
 
-	public Byte getContactType() {
-		return contactType;
-	}
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
+    }
 
-	public void setContactType(Byte contactType) {
-		this.contactType = contactType;
-	}
+    public Byte getContactType() {
+        return contactType;
+    }
 
-	public String getContactToken() {
-		return contactToken;
-	}
+    public void setContactType(Byte contactType) {
+        this.contactType = contactType;
+    }
 
-	public void setContactToken(String contactToken) {
-		this.contactToken = contactToken;
-	}
+    public String getContactToken() {
+        return contactToken;
+    }
 
-	public Long getCreatorUid() {
-		return creatorUid;
-	}
+    public void setContactToken(String contactToken) {
+        this.contactToken = contactToken;
+    }
 
-	public void setCreatorUid(Long creatorUid) {
-		this.creatorUid = creatorUid;
-	}
+    public Long getCreatorUid() {
+        return creatorUid;
+    }
 
-	public Timestamp getCreateTime() {
-		return createTime;
-	}
+    public void setCreatorUid(Long creatorUid) {
+        this.creatorUid = creatorUid;
+    }
 
-	public void setCreateTime(Timestamp createTime) {
-		this.createTime = createTime;
-	}
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
 
-	public String getInitial() {
-		return initial;
-	}
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
+    }
 
-	public void setInitial(String initial) {
-		this.initial = initial;
-	}
+    public String getInitial() {
+        return initial;
+    }
 
-	public String getFullPinyin() {
-		return fullPinyin;
-	}
+    public void setInitial(String initial) {
+        this.initial = initial;
+    }
 
-	public void setFullPinyin(String fullPinyin) {
-		this.fullPinyin = fullPinyin;
-	}
+    public String getFullPinyin() {
+        return fullPinyin;
+    }
 
-	public String getFullInitial() {
-		return fullInitial;
-	}
+    public void setFullPinyin(String fullPinyin) {
+        this.fullPinyin = fullPinyin;
+    }
 
-	public void setFullInitial(String fullInitial) {
-		this.fullInitial = fullInitial;
-	}
+    public String getFullInitial() {
+        return fullInitial;
+    }
 
-	public String getNickName() {
-		return nickName;
-	}
+    public void setFullInitial(String fullInitial) {
+        this.fullInitial = fullInitial;
+    }
 
-	public void setNickName(String nickName) {
-		this.nickName = nickName;
-	}
+    public String getNickName() {
+        return nickName;
+    }
 
-	public String getAvatar() {
-		return avatar;
-	}
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
 
-	public void setAvatar(String avatar) {
-		this.avatar = avatar;
-	}
+    public String getAvatar() {
+        return avatar;
+    }
 
-	public Long getEmployeeNo() {
-		return employeeNo;
-	}
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
 
-	public void setEmployeeNo(Long employeeNo) {
-		this.employeeNo = employeeNo;
-	}
 
-	public Byte getGender() {
-		return gender;
-	}
+    public Byte getGender() {
+        return gender;
+    }
 
-	public void setGender(Byte gender) {
-		this.gender = gender;
-	}
+    public void setGender(Byte gender) {
+        this.gender = gender;
+    }
 
-	public Long getTargetId() {
-		return targetId;
-	}
+    public Long getTargetId() {
+        return targetId;
+    }
 
-	public void setTargetId(Long targetId) {
-		this.targetId = targetId;
-	}
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
+    }
 
-	public String getTargetType() {
-		return targetType;
-	}
+    public String getTargetType() {
+        return targetType;
+    }
 
-	public void setTargetType(String targetType) {
-		this.targetType = targetType;
-	}
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
+    }
 
-	@Override
+    public String getJobPosition() {
+        return jobPosition;
+    }
+
+    public void setJobPosition(String jobPosition) {
+        this.jobPosition = jobPosition;
+    }
+
+    public Long getDetailId() {
+        return detailId;
+    }
+
+    public void setDetailId(Long detailId) {
+        this.detailId = detailId;
+    }
+
+    public Byte getVisibleFlag() {
+        return visibleFlag;
+    }
+
+    public void setVisibleFlag(Byte visibleFlag) {
+        this.visibleFlag = visibleFlag;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
+    }
+
+    public String getEmployeeNo() {
+        return employeeNo;
+    }
+
+    public void setEmployeeNo(String employeeNo) {
+        this.employeeNo = employeeNo;
     }
 }

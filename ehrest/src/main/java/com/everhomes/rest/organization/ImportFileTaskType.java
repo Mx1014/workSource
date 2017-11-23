@@ -5,11 +5,19 @@ package com.everhomes.rest.organization;
  * <ul>
  * <li>ORGANIZATION_CONTACT("organization_contact"): 机构通讯录导入</li>
  * <li>ENGERPRISE("enterprise"): 企业信息导入</li>
+ * <li>PERSONNEL_FILE("personnel_file"): 人事档案导入</li>
+ * <li>ENERGY_METER("energy_meter"): 能耗表计</li>
  * </ul>
  */
 public enum ImportFileTaskType {
 
-    ORGANIZATION_CONTACT("organization_contact"), ENGERPRISE("enterprise");
+    ORGANIZATION_CONTACT("organization_contact"), ENGERPRISE("enterprise"), BUILDING("building"), APARTMENT("apartment"),
+    WAREHOUSE_MATERIAL("warehouse_material"),
+    WAREHOUSE_MATERIAL_CATEGORY("warehouse_material_category"),
+    ENTERPRISE_CUSTOMER("enterprise_customer"),
+    PERSONNEL_FILE("psersonnel_file"),
+    PERSONNEL_ARCHIVES("personnel_archives"),
+    SALARY_GROUP("salary_group"), ENERGY_METER("energy_meter");
 
 	private String code;
 

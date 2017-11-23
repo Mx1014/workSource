@@ -28,9 +28,9 @@ public class GetServiceAllianceEnterpriseListCommand {
 	private String keywords;
 
 	private Long parentId;
-	
+
 	private Long nextPageAnchor;
-    
+
 	private Integer pageSize;
 
 	private Long categoryId;
@@ -38,7 +38,7 @@ public class GetServiceAllianceEnterpriseListCommand {
 	private Long type;
 	
 	private Byte sourceRequestType;
-	
+
 	public Long getCommunityId() {
 		return communityId;
 	}

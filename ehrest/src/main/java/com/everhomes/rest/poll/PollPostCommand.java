@@ -5,28 +5,35 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
 /**
- * 
- * @author elians
- *<ul>
- * <li>namespaceId:命名空间</li>
- * <li>startTime:开始时间，时间格式为:YYYY-MM-DD hh:mm:ss</li>
- * <li>multiChoiceFlag:多选标记</li>
- * <li>anonymousFlag:匿名标记,1 为匿名,0为公开</li>
- *<li>endTime:结束时间,时间格式为:YYYY-MM-DD hh:mm:ss</li>
- *</li>
+ * <ul>
+ *     <li>namespaceId: 命名空间</li>
+ *     <li>startTime: 开始时间，时间格式为:YYYY-MM-DD hh:mm:ss</li>
+ *     <li>stopTime: stopTime</li>
+ *     <li>multiChoiceFlag: 多选标记</li>
+ *     <li>anonymousFlag: 匿名标记,1 为匿名,0为公开</li>
+ *     <li>id: id</li>
+ *     <li>tag: tag</li>
+ *     <li>repeatFlag: 是否支持重复投票 0-否，1-是 {@link com.everhomes.rest.poll.RepeatFlag}</li>
+ *     <li>repeatPeriod: 重复投票的时间间隔，单位是天。</li>
+ *     <li>itemList: itemList {@link com.everhomes.rest.poll.PollItemDTO}</li>
+ * </ul>
  */
-public class PollPostCommand{
+public class PollPostCommand {
     private Integer namespaceId;
     private String startTime;
     private String stopTime;
     private Integer multiChoiceFlag;
     private Integer anonymousFlag;
     private transient Long id;
-    
+    private String tag;
+    private Byte repeatFlag;
+    private Integer repeatPeriod;
+
     @ItemType(PollItemDTO.class)
     private List<PollItemDTO> itemList;
-    
+
     public PollPostCommand() {
     }
 
@@ -69,7 +76,7 @@ public class PollPostCommand{
     public void setAnonymousFlag(Integer anonymousFlag) {
         this.anonymousFlag = anonymousFlag;
     }
-    
+
     public List<PollItemDTO> getItemList() {
         return itemList;
     }
@@ -77,7 +84,14 @@ public class PollPostCommand{
     public void setItemList(List<PollItemDTO> itemList) {
         this.itemList = itemList;
     }
-    
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
 
     public Long getId() {
         return id;
@@ -87,8 +101,24 @@ public class PollPostCommand{
         this.id = id;
     }
 
+    public Byte getRepeatFlag() {
+        return repeatFlag;
+    }
+
+    public void setRepeatFlag(Byte repeatFlag) {
+        this.repeatFlag = repeatFlag;
+    }
+
+    public Integer getRepeatPeriod() {
+        return repeatPeriod;
+    }
+
+    public void setRepeatPeriod(Integer repeatPeriod) {
+        this.repeatPeriod = repeatPeriod;
+    }
+
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-    
+
 }

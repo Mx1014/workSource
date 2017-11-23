@@ -2,37 +2,26 @@ package com.everhomes.flow;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.flow.*;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhFlowUserSelectionsDao;
+import com.everhomes.server.schema.tables.pojos.EhFlowUserSelections;
+import com.everhomes.server.schema.tables.records.EhFlowUserSelectionsRecord;
+import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.rest.flow.FlowEntityType;
-import com.everhomes.rest.flow.FlowStatusType;
-import com.everhomes.rest.flow.FlowUserSelectionType;
-import com.everhomes.rest.flow.FlowUserSourceType;
-import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.tables.daos.EhFlowUserSelectionsDao;
-import com.everhomes.server.schema.tables.pojos.EhFlowUserSelections;
-import com.everhomes.server.schema.tables.records.EhFlowUserSelectionsRecord;
-import com.everhomes.sharding.ShardIterator;
-import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import java.sql.Timestamp;
+import java.util.List;
 
 @Component
 public class FlowUserSelectionProviderImpl implements FlowUserSelectionProvider {

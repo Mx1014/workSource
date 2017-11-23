@@ -1,10 +1,15 @@
 package com.everhomes.equipment;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.pmNotify.DeletePmNotifyParamsCommand;
+import com.everhomes.rest.pmNotify.ListPmNotifyParamsCommand;
+import com.everhomes.rest.pmNotify.PmNotifyParamDTO;
+import com.everhomes.rest.pmNotify.SetPmNotifyParamsCommand;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.rest.category.CategoryDTO;
@@ -66,7 +71,7 @@ public interface EquipmentService {
 	ListEquipmentTasksResponse listUserHistoryTasks(ListUserHistoryTasksCommand cmd);
 	
 	StatEquipmentTasksResponse statEquipmentTasks(StatEquipmentTasksCommand cmd);
-	void sendTaskMsg(Long startTime, Long endTime);
+	void sendTaskMsg(Long startTime, Long endTime, Byte groupType);
 	void exportEquipmentsCard(ExportEquipmentsCardCommand cmd, HttpServletResponse response);
 
 	StatTodayEquipmentTasksResponse statTodayEquipmentTasks(StatTodayEquipmentTasksCommand cmd);
@@ -74,4 +79,10 @@ public interface EquipmentService {
 	StatIntervalAllEquipmentTasksResponse statIntervalAllEquipmentTasks(StatIntervalAllEquipmentTasksCommand cmd);
 	StatItemResultsInEquipmentTasksResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd);
 	ListEquipmentTasksResponse listAbnormalTasks(ListAbnormalTasksCommand cmd);
+
+	void setPmNotifyParams(SetPmNotifyParamsCommand cmd);
+	List<PmNotifyParamDTO> listPmNotifyParams(ListPmNotifyParamsCommand cmd);
+	void deletePmNotifyParams(DeletePmNotifyParamsCommand cmd);
+
+	Set<Long> getTaskGroupUsers(Long taskId, byte groupType);
 }

@@ -2,17 +2,28 @@ package com.everhomes.rest.flow;
 
 /**
  * <ul>
- * <li>NODE_TRACKER: 节点的跟踪日志信息，包括评论，主要是信息显示</li>
  * <li>STEP_TRACKER: 节点的跳转信息，记录经过多少个具体的节点</li>
+ * <li>NODE_TRACKER: 节点的跟踪日志信息，包括评论，主要是信息显示</li>
  * <li>NODE_ENTER: 确认是否有处理 Case 的权限，确定节点处理人</li>
  * <li>BUTTON_FIRED: 是否已经处理过 Case，确定节点执行人 </li>
  * <li>FLOW_SUPERVISOR: 确定节点的督办人员 </li>
+ * <li>NODE_SUPERVISE: 督办次数 </li>
+ * <li>REJECT_TRACKER: 驳回跟踪 </li>
  * </ul>
  * @author janson
  *
  */
 public enum FlowLogType {
-	BUTTON_FIRED("button_fired"), AUTO_STEP("auto_step"), NODE_ENTER("node_enter"), STEP_TRACKER("step_tracker"), NODE_TRACKER("node_tracker"), FLOW_SUPERVISOR("flow_supervisor"), NODE_REMIND("flow_remind");
+    STEP_TRACKER("step_tracker"),
+    NODE_TRACKER("node_tracker"),
+    NODE_ENTER("node_enter"),
+    BUTTON_FIRED("button_fired"),
+    FLOW_SUPERVISOR("flow_supervisor"),
+    AUTO_STEP("auto_step"),
+    NODE_REMIND("flow_remind"),
+    NODE_SUPERVISE("node_supervise"),
+    REJECT_TRACKER("reject_tracker"),
+    ;
 	
 	private String code;
     private FlowLogType(String code) {

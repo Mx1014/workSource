@@ -6,5 +6,5 @@ package com.everhomes.rest.techpark.expansion;
 public interface ExpansionConst {
 
     Long MODULE_ID = 40100L;// 园区入驻模块id
-
+    
 }

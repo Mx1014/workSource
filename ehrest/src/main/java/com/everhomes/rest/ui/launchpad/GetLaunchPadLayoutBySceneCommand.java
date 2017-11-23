@@ -17,7 +17,7 @@ public class GetLaunchPadLayoutBySceneCommand {
     private Long     versionCode;
     @NotNull
     private String   name;
-    
+
     private String sceneToken;
 
     public GetLaunchPadLayoutBySceneCommand() {

@@ -13,6 +13,17 @@ public class FlowCaseEntity {
 	private String value;
 	private String entityType;
 
+	public FlowCaseEntity() {
+		super();
+	}
+
+	public FlowCaseEntity(String key, String value, String entityType) {
+		super();
+		this.key = key;
+		this.value = value;
+		this.entityType = entityType;
+	}
+
 	public String getKey() {
 		return key;
 	}

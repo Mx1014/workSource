@@ -273,7 +273,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         if(posts.size() > 0) {
             this.bulkUpdate(posts);
             posts.clear();
-            LOGGER.info("posts process count: " + posts.size());
+            LOGGER.info("posts processStat count: " + posts.size());
         }
         
         this.optimize(1);

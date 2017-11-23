@@ -150,4 +150,8 @@ public interface ScheduleProvider {
      * @return job信息列表 
      */
     List<ScheduleJobInfoDTO> listScheduleJobs();
+
+    Byte getRunningFlag();
+
+    void setRunningFlag(Byte runningFlag);
 }

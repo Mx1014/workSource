@@ -12,6 +12,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.controller.WebRequestInterceptor;
 import com.everhomes.device.DeviceProvider;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
@@ -23,15 +24,13 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
 import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
 import com.everhomes.rest.scene.SceneTypeInfoDTO;
-import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
-import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
-import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
-import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
+import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.scene.SceneService;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
@@ -239,6 +238,27 @@ public class UserController extends ControllerBase {
 		SignupToken token = userService.signup(cmd, request);
 		return new RestResponse(WebTokenGenerator.getInstance().toWebToken(token));
 	}
+	
+    /**
+     * <b>URL: /user/signupByAppKey</b>
+     * <p>注册，由于注册接口配有@RequireAuthentication(false)，也就是不需要登录即可以调用，这导致会有人攻击服务器而不停消耗短信。
+     *        为了防止被攻击，假定只有APP才能够注册发验证码（若WEB需要发验证码，需要添加额外的图片验证码来防止机器攻击。由于老版本
+     *        仍然在使用，故老版本还是使用老接口而不能直接改老接口，从而新增加一个接口去掉@RequireAuthentication(false)。客户端对所有
+     *        接口都加上签名，而把需要发短信的两个接口都换成新的接口。 by lqs 20170626</p>
+     * @return 注册临时token
+     */
+    @RequestMapping("signupByAppKey")
+    @RestReturn(String.class)
+    public RestResponse signupByAppKey(@Valid SignupCommandByAppKey cmd, HttpServletRequest request) {
+        // 手机号或者邮箱，SignupCommandByAppKey拷贝自com.everhomes.rest.user.SignupCommand， 由于原来使用token字段来填手机号，
+        // 但token属于特殊字段，会导致Webtoken解释异常，故在新接口把字段名称修改一下，但在service仍然用回原来的command
+        // by lqs 20170714
+        SignupCommand newCmd = ConvertHelper.convert(cmd, SignupCommand.class);
+        newCmd.setToken(cmd.getUserIdentifier());
+        
+        SignupToken token = userService.signup(newCmd, request);
+        return new RestResponse(WebTokenGenerator.getInstance().toWebToken(token));
+    }
 
 	/**
 	 * <b>URL: /user/resendVerificationCode</b>
@@ -259,6 +279,29 @@ public class UserController extends ControllerBase {
 		this.userService.resendVerficationCode(namespaceId, token, cmd.getRegionCode(), request);
 		return new RestResponse("OK");
 	}
+
+    /**
+     * <b>URL: /user/resendVerificationCodeByAppKey</b>
+     * <p>重新发送验证码，由于注册接口配有@RequireAuthentication(false)，也就是不需要登录即可以调用，这导致会有人攻击服务器而不停消耗短信。
+     *        为了防止被攻击，假定只有APP才能够注册发验证码（若WEB需要发验证码，需要添加额外的图片验证码来防止机器攻击。由于老版本
+     *        仍然在使用，故老版本还是使用老接口而不能直接改老接口，从而新增加一个接口去掉@RequireAuthentication(false)。客户端对所有
+     *        接口都加上签名，而把需要发短信的两个接口都换成新的接口。 by lqs 20170626</p>
+     * @return 如果正常则返回OK，错误则返回错误信息
+     */
+    @RequestMapping("resendVerificationCodeByAppKey")
+    @RequireAuthentication(false)
+    @RestReturn(String.class)
+    public RestResponse resendVerificationCodeByAppKey(@Valid ResendVerificationCodeCommand cmd, HttpServletRequest request) {
+        SignupToken token = WebTokenGenerator.getInstance().fromWebToken(cmd.getSignupToken(), SignupToken.class);
+        if(token == null) {
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+                    UserServiceErrorCode.ERROR_INVALID_SIGNUP_TOKEN, "Invalid signup token");
+        }
+
+        int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        this.userService.resendVerficationCode(namespaceId, token, cmd.getRegionCode(), request);
+        return new RestResponse("OK");
+    }
 
 	/**
 	 * <b>URL: /user/verifyAndLogon</b>
@@ -328,10 +371,11 @@ public class UserController extends ControllerBase {
 	@RestReturn(LogonCommandResponse.class)
 	public RestResponse logon(@Valid LogonCommand cmd, HttpServletRequest request, HttpServletResponse response) {
 	    long startTime = System.currentTimeMillis();
-	    
 	    long loginStartTime = System.currentTimeMillis();
-		UserLogin login = this.userService.logon(cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId(),
-				cmd.getUserIdentifier(), cmd.getPassword(), cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
+
+        int regionCode = cmd.getRegionCode() != null ? cmd.getRegionCode() : 86;
+        UserLogin login = this.userService.logon(cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId(),
+                regionCode, cmd.getUserIdentifier(), cmd.getPassword(), cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
 		long loginEndTime = System.currentTimeMillis();
 		
 		LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
@@ -698,6 +742,79 @@ public class UserController extends ControllerBase {
 		return new RestResponse("OK");
 	}
 
+    /**
+     * <b>URL: /user/resendVerificationCodeByIdentifierAndAppKey</b>
+     * <p>忘记密码，由于注册接口配有@RequireAuthentication(false)，也就是不需要登录即可以调用，这导致会有人攻击服务器而不停消耗短信。
+     *        为了防止被攻击，假定只有APP才能够注册发验证码（若WEB需要发验证码，需要添加额外的图片验证码来防止机器攻击。由于老版本
+     *        仍然在使用，故老版本还是使用老接口而不能直接改老接口，从而新增加一个接口去掉@RequireAuthentication(false)。客户端对所有
+     *        接口都加上签名，而把需要发短信的两个接口都换成新的接口。 by lqs 20170626</p>
+     * @return OK
+     */
+    @RequestMapping("resendVerificationCodeByIdentifierAndAppKey")
+    @RestReturn(String.class)
+    public RestResponse resendVerificationCodeByIdentifierAndAppKey(@Valid ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request){
+        assert StringUtils.isNotEmpty(cmd.getIdentifier());
+
+        userService.resendVerficationCode(cmd, request);
+        return new RestResponse("OK");
+    }
+
+	/**
+	 * <b>URL: /user/sendVerificationCodeByResetIdentifier</b>
+	 * <p>发送修改手机号的短信验证码</p>
+	 */
+	@RequestMapping("sendVerificationCodeByResetIdentifier")
+	@RestReturn(String.class)
+	public RestResponse sendVerificationCodeByResetIdentifier(@Valid SendVerificationCodeByResetIdentifierCommand cmd, HttpServletRequest request){
+		userService.sendVerificationCodeByResetIdentifier(cmd, request);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+
+	/**
+	 * <b>URL: /user/verifyResetIdentifierCode</b>
+	 * <p>核实修改手机号的短信验证码</p>
+	 */
+	@RequestMapping("verifyResetIdentifierCode")
+	@RestReturn(String.class)
+	public RestResponse verifyResetIdentifierCode(@Valid VerifyResetIdentifierCodeCommand cmd){
+		userService.verifyResetIdentifierCode(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+
+	/**
+	 * <b>URL: /user/listResetIdentifierCode</b>
+	 * <p>获取修改手机号的短信验证码</p>
+	 */
+	@RequestMapping("listResetIdentifierCode")
+	@RestReturn(value = UserIdentifierLogDTO.class)
+	public RestResponse listResetIdentifierCode(@Valid ListResetIdentifierCodeCommand cmd){
+		UserIdentifierLogDTO log = userService.listResetIdentifierCode(cmd);
+        RestResponse response = new RestResponse(log);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+
+	/**
+	 * <b>URL: /user/createResetIdentifierAppeal</b>
+	 * <p>申诉修改手机号</p>
+	 */
+	@RequestMapping("createResetIdentifierAppeal")
+	@RestReturn(UserAppealLogDTO.class)
+	public RestResponse createResetIdentifierAppeal(@Valid CreateResetIdentifierAppealCommand cmd){
+        UserAppealLogDTO dto = userService.createResetIdentifierAppeal(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 	/**
 	 * <b>URL: /user/verfiyAndReset</b>
 	 * <p>忘记密码，重新设置</p>
@@ -924,8 +1041,10 @@ public class UserController extends ControllerBase {
 	@RequireAuthentication(false)
 	@RestReturn(LogonCommandResponse.class)
 	public RestResponse adminLogon(@Valid LogonCommand cmd, HttpServletRequest request, HttpServletResponse response) {
-		UserLogin login = this.userService.logon(cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId(),
-				cmd.getUserIdentifier(), cmd.getPassword(), cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
+        int regionCode = cmd.getRegionCode() != null ? cmd.getRegionCode() : 86;
+        int namespaceId = cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
+        UserLogin login = this.userService.logon(namespaceId, regionCode, cmd.getUserIdentifier(),
+                cmd.getPassword(), cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
 
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 		resolver.checkUserPrivilege(login.getUserId(), 0);
@@ -1159,4 +1278,122 @@ public class UserController extends ControllerBase {
 		userProvider.updateUser(user);
 		return new RestResponse("OK");
 	}
+
+	/**
+	 * <b>URL: /user/searchUsers</b>
+	 * <p>搜索用户</p>
+	 */
+	@RequestMapping(value = "searchUsers")
+	@RestReturn(value = SearchUsersResponse.class)
+	public RestResponse searchUsers(@Valid SearchUsersCommand cmd) {
+		RestResponse resp = new RestResponse(userService.searchUsers(cmd));
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
+	/**
+	 * <b>URL: /user/findTargetByNameAndAddress</b>
+	 * <p>根据个人用户电话，客户名称，合同号，来确认唯一用户，若无法定位到改域空间下指定园区的唯一用户，则返回null</p>
+	 */
+	@RequestMapping(value = "findTargetByNameAndAddress")
+	@RestReturn(value = TargetDTO.class)
+	public RestResponse findTargetByNameAndAddress(FindTargetByNameAndAddressCommand cmd) {
+		RestResponse resp = new RestResponse(userService.findTargetByNameAndAddress(cmd.getContractNum(),cmd.getTargetName(),cmd.getOwnerId(),cmd.getTel(),cmd.getOwnerType(),cmd.getTargetType()));
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+/**
+	 * <b>URL: /user/verificationCodeForBindPhone</b>
+	 * <p>发送验证码</p>
+	 */
+	@RequestMapping("verificationCodeForBindPhone")
+	@RestReturn(value = VerificationCodeForBindPhoneResponse.class)
+	public RestResponse verificationCodeForBindPhone(@Valid VerificationCodeForBindPhoneCommand cmd) {
+		VerificationCodeForBindPhoneResponse response = userService.verificationCodeForBindPhone(cmd);
+		RestResponse resp = new RestResponse(response);
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
+
+	/**
+	 * <b>URL: /user/bindPhone</b>
+	 * <p>验证并登录</p>
+	 * @return
+	 */
+	@RequestMapping("bindPhone")
+	@RestReturn(String.class)
+	public RestResponse bindPhone(@Valid BindPhoneCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+		UserLogin login = this.userService.bindPhone(cmd);
+		if(login != null){
+
+			LoginToken loginToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
+			String tokenString = WebTokenGenerator.getInstance().toWebToken(loginToken);
+			
+			//微信公众号的accessToken过期时间是7200秒，需要设置cookie小于7200。
+			//防止用户在coreserver处于登录状态而accessToken已过期，重新登录之后会刷新accessToken   add by yanjun 20170906
+			WebRequestInterceptor.setCookieInResponse("token", tokenString, request, response, 7000);
+
+		}
+
+
+//		LogonCommandResponse cmdResponse = new LogonCommandResponse(login.getUserId(), tokenString);
+//		cmdResponse.setAccessPoints(listAllBorderAccessPoints());
+//		cmdResponse.setContentServer(contentServerService.getContentServer());
+
+		RestResponse resp = new RestResponse();
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+	/**
+	 * <b>URL: /user/checkVerifyCodeAndResetPassword</b>
+	 * <p>校验验证码并重置密码</p>
+	 * @return  OK
+	 */
+	@RequestMapping(value = "checkVerifyCodeAndResetPassword")
+	@RestReturn(String.class)
+	public RestResponse checkVerifyCodeAndResetPassword(@Valid CheckVerifyCodeAndResetPasswordCommand cmd) {
+		userService.checkVerifyCodeAndResetPassword(cmd);
+		RestResponse resp = new RestResponse();
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
+	/**
+	 * <b>URL: /user/checkUserTemporaryToken</b>
+	 * 检验用户临时token，标准是：1、是本系统加密的token，2、token未过期
+	 * 成功会返回改token内容
+	 * @return  OK
+	 */
+	@RequestMapping(value = "checkUserTemporaryToken")
+	@RequireAuthentication(false)
+	@RestReturn(UserTemporaryTokenDTO.class)
+	public RestResponse checkUserTemporaryToken(@Valid CheckUserTemporaryTokenCommand cmd) {
+		UserTemporaryTokenDTO token =  userService.checkUserTemporaryToken(cmd);
+		RestResponse resp = new RestResponse(token);
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+
+	}
+	
+	/**
+     * <b>URL: /user/systemInfo</b>
+     * <p>登录</p>
+     * @return {@link SystemInfoResponse}
+     */
+    @RequestMapping("systemInfo")
+    @RestReturn(SystemInfoResponse.class)
+    public RestResponse systemInfo(@Valid SystemInfoCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+        SystemInfoResponse obj = userService.updateUserBySystemInfo(cmd, request, response);
+        RestResponse resp = new RestResponse(obj);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp; 
+    }
 }

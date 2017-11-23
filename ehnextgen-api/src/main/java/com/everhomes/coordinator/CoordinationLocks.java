@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.coordinator;
 
+import com.everhomes.organization.Organization;
+
 public enum CoordinationLocks {
     CREATE_FAMILY("family.create"),
     LEAVE_FAMILY("family.leave"),
@@ -14,8 +16,10 @@ public enum CoordinationLocks {
     CREATE_F_BILL_ACCOUNT("family.bill.account.create"),
     CREATE_RENTAL_BILL("techpark.rental.bill.create"),
     CREATE_PUNCH_LOG("techpark.punch.log.create"),
+    REFRESH_PUNCH_RULE("techpark.punch.rule.refresh"),
     DOOR_ACCESS("aclink.door.access"),
     SCHEDULE_QUALITY_TASK("quality.task.schedule"),
+    SCHEDULE_QUALITY_STAT("quality.task.stat"),
     CREATE_QUALITY_TASK("quality.task.create"),
     PAYMENT_CARD("payment.card"),
 	UPDATE_NEWS("news.update"),
@@ -48,6 +52,7 @@ public enum CoordinationLocks {
     PARKING_UPDATE_ORDER_STATUS("parking.update.order.status"),
 
     PARKING_CLEARANCE_LOG("parking.clearance.log"),
+    PARKING_CLEARANCE_LOG_STATISTICS("parking.clearance.log.statistics"),
     PARKING_CLEARANCE_OPERATOR("parking.clearance.operator"),
 
     ENERGY_DAY_STAT_SCHEDULE("energy.day.stat.schedule"),
@@ -65,13 +70,45 @@ public enum CoordinationLocks {
     WARNING_QUALITY_TASK("warning.quality.task"),
 
     OS_OBJECT("os.object"),
-
     ENERGY_METER_PRICE_CONFIG("energyMeter.price.config"),
+ 
+    UPDATE_EXPRESS_ORDER("update.express.order"),
 
-    USER_NOTIFICATION_SETTING("user.notification.setting")
-    ;
+    USER_NOTIFICATION_SETTING("user.notification.setting"),
+    UPDATE_WAREHOUSE("warehouse.update"),
+    UPDATE_WAREHOUSE_CATEGORY("warehouse.category.update"),
+    UPDATE_WAREHOUSE_MATERIAL("warehouse.material.update"),
 
+    FLOW_CASE_UPDATE("flowCase.update"),
+    FLOW_NODE_UPDATE("flowNode.update"),
+    PUNCH_DAY_SCHEDULE("punch.day.schedule"),
 
+    PRINT_ORDER_LOCK_FLAG("print.order.lock.flag"),
+    PRINT_UPDATE_ORDER_STATUS("print.update.order.status"),
+
+    USER_APPEAL_LOG("user.appeal.log"),
+	SALARY_GROUP_LOCK("salary.group"), 
+    UNION_GROUP_LOCK("union.group"),
+    UNION_GROUP_CLONE_LOCK("union_group_clone"),
+
+    PAY_CREATE_PREORDER("pay.create.preorder"),
+
+    BILL_STATUS_UPDATE("bill.status.update"),
+    SYNC_ENTERPRISE_CUSTOMER("sync.enterprise.customer"),
+
+    TRACKING_PLAN_WARNING_SCHEDULE("tracking.plan.warning.schedule"),
+ 
+    EVENT_STAT_SCHEDULE("event.stat.schedule"),
+    ORGANIZATION_ORDER_LOCK("organization.order.lock"),
+
+    FLOW_LANE("flow.lane"),
+    FLOW("flow"),
+
+    CLEANWRONGSTATUS_ORGANIZATIONMEMBERS("cleanwrongstatus.organizationmembers"),
+    CREATE_ENERGY_TASK("energy.task.create"),
+    SCHEDULE_ENERGY_TASK("energy.task.schedule"),
+        
+	ADD_ORGANIZATION_PERSONEL("add.organization.personel");
     private String code;
     private CoordinationLocks(String code) {
         this.code = code;

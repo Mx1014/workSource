@@ -7,16 +7,16 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServer;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.domain.Domain;
+import com.everhomes.domain.DomainService;
 import com.everhomes.messaging.MessagingKickoffService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.oauth2.CommonRestResponse;
+import com.everhomes.rest.domain.DomainDTO;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +29,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -70,6 +67,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
     @Autowired
     private ContentServerService contentServerService;
+
+    @Autowired
+    private DomainService domainService;
 
     public WebRequestInterceptor() {
     }
@@ -123,9 +123,8 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 //			}
 //		}else
 //			LOGGER.debug("preHandle-parameter is null");
-
+        Map<String, String> userAgents = getUserAgent(request);
         try {
-            Map<String, String> userAgents = getUserAgent(request);
             // 由于服务器注册接口被攻击，从日志分析来看IP和手机号都不一样，但useragent并没有按标准的形式，故可以通过useragent来做限制，
             // 通过配置一黑名单，含黑名单关键字的useragent会被禁止掉 by lqs 20170516
             checkUserAgent(request.getRequestURI(), userAgents);
@@ -133,28 +132,54 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             setupNamespaceIdContext(userAgents);
             setupVersionContext(userAgents);
             setupScheme(userAgents);
+            setupDomain(request);
             if (isProtected(handler)) {
                 LoginToken token = userService.getLoginToken(request);
                 // isValid转移到UserServiceImpl，使得其它地方也可以调（如第三方登录WebRequestWeixinInterceptor） by lqs 20160922
                 if (!userService.isValid(token)) {
+                    // 由于客户端已经在全部接口上加上签名，按原来的逻辑是先检验签名，若签名校验通过则不再往下执行而直接返回校验通过；
+                    // 但如果用户是在被踢出状态，则会导致客户端仍然能够访问，但此时用户ID为0，会导致一部分接口出问题，
+                    // 故把校验签名与校验踢出的代码换一下位置。 by lqs 20170816
+//                    if (this.isInnerSignLogon(request)) {
+//                        token = this.innerSignLogon(request, response);
+//                        setupUserContext(token);
+//                        MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
+//                        return true;
+//                    } else if (this.checkRequestSignature(request)) {
+//                        setupUserContextForApp(UserContext.current().getCallerApp());
+//                        //TODO Added by Janson
+//                        if (null != UserContext.current().getUser()) {
+//                            MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
+//                        }
+//                        return true;
+//                    }
+//
+//                    //Kickoff state support
+//                    if (kickoffService.isKickoff(UserContext.current().getNamespaceId(), token)) {
+//                        throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+//                                UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others");
+//                    }
                     if (this.isInnerSignLogon(request)) {
                         token = this.innerSignLogon(request, response);
                         setupUserContext(token);
                         MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
                         return true;
-                    } else if (this.checkRequestSignature(request)) {
+                    } 
+
+                    //Kickoff state support
+                    // 把踢出校验这一步移到checkRequestSignature前面
+                    if (kickoffService.isKickoff(UserContext.current().getNamespaceId(), token)) {
+                        throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+                                UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others");
+                    }
+                    
+                    if (this.checkRequestSignature(request)) {
                         setupUserContextForApp(UserContext.current().getCallerApp());
                         //TODO Added by Janson
                         if (null != UserContext.current().getUser()) {
                             MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
                         }
                         return true;
-                    }
-
-                    //Kickoff state support
-                    if (kickoffService.isKickoff(UserContext.current().getNamespaceId(), token)) {
-                        throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
-                                UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others");
                     }
 
                     //Update by Janson, when the request is using apiKey, we generate a 403 response to app.
@@ -201,7 +226,10 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                 }
                 sb.append("}");
 
-                LOGGER.debug("Pre handling request: {}, headers: {}", getRequestInfo(request, true), sb.toString());
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Pre handling request: {}, headers: {}", getRequestInfo(request, true), sb.toString());
+                    LOGGER.debug("User Agents: {}", userAgents);
+                }
             }
         }
     }
@@ -222,16 +250,26 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 //		return this.userService.isValidLoginToken(token);
 //	}
 
+    private void setupDomain(HttpServletRequest request){
+        DomainDTO domain = domainService.getDomainInfo(null, request);
+        UserContext context = UserContext.current();
+        if(null != domain)
+            context.setDomain(ConvertHelper.convert(domain, Domain.class));
+    }
+
     private void setupScheme(Map<String, String> userAgents) {
+        // if (LOGGER.isDebugEnabled()) {
+        //     LOGGER.debug("Setup userAgents = {}", userAgents);
+        // }
         UserContext context = UserContext.current();
         if(org.springframework.util.StringUtils.isEmpty(context.getVersion()) || context.getVersion().equals("0.0.0")){
             context.setScheme(userAgents.get("scheme"));
         }else{
             VersionRange versionRange = new VersionRange("[" + context.getVersion() + "," + context.getVersion() + ")");
 
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("setup scheme, version={}, versionUpperBound={}", context.getVersion(), versionRange.getUpperBound());
-            }
+            // if (LOGGER.isDebugEnabled()) {
+            //     LOGGER.debug("setup scheme, version={}, versionUpperBound={}", context.getVersion(), versionRange.getUpperBound());
+            // }
             if (versionRange.getUpperBound() < VERSION_UPPERBOUND) {
                 context.setScheme(HTTP);
             } else {
@@ -341,14 +379,17 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         }
         // String scheme = request.getScheme();
         String scheme = request.getHeader("X-Forwarded-Scheme");
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Strip the scheme from header, X-Forwarded-Scheme={}, scheme={}", scheme, request.getScheme());
-        }
+        // if (LOGGER.isDebugEnabled()) {
+        //     LOGGER.debug("Strip the scheme from header, X-Forwarded-Scheme={}, scheme={}", scheme, request.getScheme());
+        // }
         // 当请求没有过nginx的时候scheme为null，则需要根据数据库的content server配置项来决定scheme by sfyan 20170221
         if (scheme == null || scheme.isEmpty()) {
             try {
                 ContentServer server = contentServerService.selectContentServer();
                 Integer port = server.getPublicPort();
+                // if (LOGGER.isDebugEnabled()) {
+                //     LOGGER.debug("Final selectContentServer port = {}", port);
+                // }
                 if (80 == port || 443 == port) {
                     scheme = HTTPS;
                 } else {
@@ -357,9 +398,11 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             } catch (Exception e) {
                 LOGGER.error("Get user agent. Failed to find content server", e);
                 scheme = HTTP;
-                return null;
             }
         }
+        // if (LOGGER.isDebugEnabled()) {
+        //     LOGGER.debug("Final parsed schema = {}", scheme);
+        // }
         map.put("scheme", scheme);
         return map;
     }
@@ -436,6 +479,10 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         if (app.getAppKey().equalsIgnoreCase(AppConstants.APPKEY_BORDER)) {
             User user = this.userProvider.findUserById(User.ROOT_UID);
             UserContext.current().setUser(user);
+        } else  {
+            // 由于把发短信的相关接口加入到使用签名的行列来，此时由于使用了UserContext会引起空指针，
+            // 故需要为这个场景加上UserContext， by lqs 20170629
+            setupAnnonymousUserContext();
         }
     }
 
@@ -575,6 +622,24 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         else
             cookie.setValue(value);
         cookie.setPath("/");
+        if (value == null || value.isEmpty())
+            cookie.setMaxAge(0);
+
+        response.addCookie(cookie);
+    }
+
+    //微信公众号的accessToken过期时间是7200秒，需要设置cookie小于7200。防止用户在coreserver处于登录状态而accessToken已过期，重新登录之后会刷新accessToken
+    public static void setCookieInResponse(String name, String value, HttpServletRequest request,
+                                           HttpServletResponse response, int age) {
+
+        Cookie cookie = findCookieInRequest(name, request);
+        if (cookie == null)
+            cookie = new Cookie(name, value);
+        else
+            cookie.setValue(value);
+        cookie.setPath("/");
+        //微信
+        cookie.setMaxAge(age);
         if (value == null || value.isEmpty())
             cookie.setMaxAge(0);
 

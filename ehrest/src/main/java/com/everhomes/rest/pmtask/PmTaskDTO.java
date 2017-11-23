@@ -37,6 +37,10 @@ import com.everhomes.util.StringHelper;
  * <li>revisitTime: 回访时间</li>
  * <li>operatorStar: 操作人员评价分数</li>
  * <li>flowCaseId: 工作流flowCaseId</li>
+ * <li>remarkSource: 处理意见来源</li>
+ * <li>remark: 处理意见</li>
+ * <li>attachments: 附件，参考{@link com.everhomes.rest.pmtask.AttachmentDescriptor}</li>
+ * <li>organizationName: 公司名称</li>
  * </ul>
  */
 public class PmTaskDTO {
@@ -74,12 +78,18 @@ public class PmTaskDTO {
 	private Long flowCaseId;
 	
 	private String buildingName;
+
+	private String remarkSource;
+
+	private String remark;
 	
 	@ItemType(PmTaskAttachmentDTO.class)
 	private List<PmTaskAttachmentDTO> attachments;
 	
 	@ItemType(PmTaskLogDTO.class)
 	private List<PmTaskLogDTO> taskLogs;
+	
+	private String organizationName;
 	public Long getId() {
 		return id;
 	}
@@ -265,7 +275,23 @@ public class PmTaskDTO {
 	public void setOperatorStar(Byte operatorStar) {
 		this.operatorStar = operatorStar;
 	}
-	
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+
+	public String getRemarkSource() {
+		return remarkSource;
+	}
+
+	public void setRemarkSource(String remarkSource) {
+		this.remarkSource = remarkSource;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
@@ -281,5 +307,11 @@ public class PmTaskDTO {
 	}
 	public void setBuildingName(String buildingName) {
 		this.buildingName = buildingName;
+	}
+	public String getOrganizationName() {
+		return organizationName;
+	}
+	public void setOrganizationName(String organizationName) {
+		this.organizationName = organizationName;
 	}
 }

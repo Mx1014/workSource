@@ -133,6 +133,7 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
             avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.community_only", "");
             filterDto.setAvatar(avatarUri);
             filterDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+            filterDto.setForumId(community.getDefaultForumId());
             filterList.add(filterDto);
 
 

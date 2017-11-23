@@ -95,11 +95,14 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 	private ContentServerService contentServerService;
 	
 	@Override
-	public void addCustomRequest(AddRequestCommand cmd) {
+	public Long addCustomRequest(AddRequestCommand cmd) {
 		SettleRequests request = GsonUtil.fromJson(cmd.getRequestJson(), SettleRequests.class);
 		
 		request.setNamespaceId(UserContext.getCurrentNamespaceId());
 
+//		request.setOwnerType(com.everhomes.rest.common.EntityType.ORGANIZATIONS.getCode());
+//		List<Organization> communityList = organizationProvider.findOrganizationByCommunityId(cmd.getOwnerId());
+//		request.setOwnerId(communityList.get(0).getId());
 		request.setOwnerType(cmd.getOwnerType());
 		request.setOwnerId(cmd.getOwnerId());
 		request.setType(cmd.getType());
@@ -116,7 +119,7 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 			request.setCreatorMobile(identifier.getIdentifierToken());
 		
 		LOGGER.info("SettleCustomRequestHandler addCustomRequest request:" + request);
-		yellowPageProvider.createSettleRequests(request);
+		Long id = yellowPageProvider.createSettleRequests(request);
 		ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
 		requestInfo.setTemplateType(cmd.getTemplateType());
 		requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
@@ -145,6 +148,8 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 		//modify by dengs,20170425  更换模板，发送html邮件
 //		notifyMap.put("note", getNote(request));
 		notifyMap.put("note", changeRequestToHtml(request));
+		notifyMap.put("serviceAllianceName", "");
+		notifyMap.put("notemessage", getNote(request));
 		Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
         String creatorOrganization = "";
 		if(org != null) {
@@ -156,6 +161,7 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 				ServiceAllianceRequestNotificationTemplateCode.AN_APPLICATION_FORM, UserContext.current().getUser().getLocale(), "");
 		if(serviceOrg != null) {
 			notifyMap.put("serviceOrgName", serviceOrg.getName());
+			notifyMap.put("serviceAllianceName", serviceOrg.getName());
 			title = serviceOrg.getName() + title;
 		}
 		notifyMap.put("title", title);
@@ -176,7 +182,9 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 			
 			OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
 			if(member != null) {
-				sendMessageToUser(member.getTargetId(), notifyTextForOrg);
+				code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ORG;
+				String notifyText = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
+				sendMessageToUser(member.getTargetId(), notifyText);
 			}
 			
 			sendEmail(serviceOrg.getEmail(), title, notifyTextForOrg,stringAttementList);
@@ -187,7 +195,7 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 		code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ADMIN;
 		String notifyTextForAdmin = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
 		CrossShardListingLocator locator = new CrossShardListingLocator();
-		List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(request.getOwnerType(), request.getOwnerId(), ContactType.MOBILE.getCode(), 
+		List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(cmd.getOwnerType(), cmd.getOwnerId(), ContactType.MOBILE.getCode(),
 				request.getType(),locator, Integer.MAX_VALUE);
 		if(targets != null && targets.size() > 0) {
 			for(ServiceAllianceNotifyTargets target : targets) {
@@ -201,7 +209,7 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 		}
 		
 		//发邮件给服务联盟机构管理员
-		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(request.getOwnerType(), request.getOwnerId(), ContactType.EMAIL.getCode(), 
+		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(cmd.getOwnerType(), cmd.getOwnerId(), ContactType.EMAIL.getCode(),
 				request.getType(), locator, Integer.MAX_VALUE);
 		if(emails != null && emails.size() > 0) {
 			for(ServiceAllianceNotifyTargets email : emails) {
@@ -213,8 +221,15 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 		}
 		//删除生成的pdf文件，附件
 		attementList.stream().forEach(file->{file.delete();});
+		return id;
 	}
 	
+
+	private String deleteSignal(String s){
+		s = s.replaceAll("<p>","");
+		s = s.replaceAll("</p>","\n");
+		return s;
+	}
 
 	private String getNote(SettleRequests request) {
 		List<RequestFieldDTO> fieldList = toFieldDTOList(request);
@@ -222,7 +237,8 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 			StringBuilder sb = new StringBuilder();
 			for(RequestFieldDTO field : fieldList) {
 				String fieldValue = (field.getFieldValue() == null) ? "" : field.getFieldValue();
-				sb.append(field.getFieldName() + ":" + fieldValue + "\n");
+				String fieldName = field.getFieldName()==null?"":field.getFieldName();
+				sb.append(" ").append(fieldName.trim()).append("：").append(fieldValue).append("\n");
 			}
 			
 			return sb.toString();
@@ -243,7 +259,7 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
         messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-        messageDto.setBody(content);
+        messageDto.setBody(deleteSignal(content));
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
         
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 

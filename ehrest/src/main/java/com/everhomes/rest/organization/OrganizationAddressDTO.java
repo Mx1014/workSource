@@ -5,6 +5,7 @@ public class OrganizationAddressDTO {
 	private java.lang.Long     addressId;
 	private java.lang.Long     buildingId;
 	private java.lang.String   buildingName;
+
 	public java.lang.Long getEnterpriseId() {
 		return enterpriseId;
 	}

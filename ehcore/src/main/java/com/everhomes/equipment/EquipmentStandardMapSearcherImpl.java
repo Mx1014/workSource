@@ -6,8 +6,10 @@ import java.util.List;
 
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -57,6 +59,9 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 
 	@Autowired
 	private CommunityProvider communityProvider;
+
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
 	
 	@Override
 	public void deleteById(Long id) {
@@ -120,18 +125,25 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 	@Override
 	public SearchEquipmentStandardRelationsResponse query(
 			SearchEquipmentStandardRelationsCommand cmd) {
+		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_RELATION_LIST, 0L);
+		if(cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
+			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
+		} else {
+			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
+		}
+
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 		QueryBuilder qb = null;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
             qb = QueryBuilders.matchAllQuery();
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-            		.field("name", 1.2f)
+            		.field("equipmentName", 1.2f)
                     .field("standardNumber", 1.0f);
             
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("name").addHighlightedField("standardNumber");
+            builder.addHighlightedField("equipmentName").addHighlightedField("standardNumber");
         }
 
         FilterBuilder fb = null;
@@ -166,6 +178,10 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
         
         SearchResponse rsp = builder.execute().actionGet();
 
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("SearchEquipmentStandardRelations query : {}", builder);
+			LOGGER.debug("SearchEquipmentStandardRelations rsp : {}", rsp);
+		}
         List<Long> ids = getIds(rsp);
         
         SearchEquipmentStandardRelationsResponse response = new SearchEquipmentStandardRelationsResponse();

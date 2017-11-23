@@ -4,11 +4,13 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.rest.activity.ActivityAttachmentDTO;
+import com.everhomes.rest.activity.ActivityRosterStatus;
 import org.jooq.Condition;
 import org.jooq.Operator;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.user.UserGender;
 
 public interface ActivityProivider {
     Activity findActivityById(Long id);
@@ -27,29 +29,43 @@ public interface ActivityProivider {
 
     ActivityRoster findRosterById(Long rosterId);
 
-    ActivityRoster findRosterByUidAndActivityId(Long activityId, Long uid);
+    ActivityRoster findRosterByUidAndActivityId(Long activityId, Long uid, Byte status);
+    
+    ActivityRoster findRosterByPhoneAndActivityId(Long activityId, String phone, Byte status);
+    
+    ActivityRoster findRosterByOrderNo(Long orderNo);
 
-    List<ActivityRoster> listRosterPagination(CrossShardListingLocator locator, int count, Long activityId);
+    List<ActivityRoster> listRosterPagination(CrossShardListingLocator locator, int count, Long activityId, boolean onlyConfirm);
 
-    List<ActivityRoster> listRosters(Long activityId);
+    List<ActivityRoster> listRosters(Long activityId, ActivityRosterStatus status);
+    
+    /**
+     * 按条件统计报名人数 add by yanjun 20170502
+     * @param activityId
+     * @param flagCondition
+     * @return
+     */
+    Integer countActivityRosterByCondition(Long activityId, Condition flagCondition);
 
     Activity findSnapshotByPostId(Long postId);
 
     void deleteRoster(ActivityRoster createRoster);
 
-    List<Activity> listActivities(CrossShardListingLocator locator, int count, Condition condition, Boolean orderByCreateTime);
+    List<Activity> listActivities(CrossShardListingLocator locator, int count, Condition condition, Boolean orderByCreateTime, Byte needTemporary);
     
     Activity findActivityByUuid(String uuid);
     
-    List<ActivityRoster> findRostersByUid(Long uid, CrossShardListingLocator locator, int count);
+    List<ActivityRoster> findRostersByUid(Long uid, CrossShardListingLocator locator, int count, Byte rosterStatus);
     
     List<Activity> listNewActivities(CrossShardListingLocator locator, int count, Timestamp lastViewedTime, Condition condition);
 
-	List<Activity> listActivitiesForWarning(Integer namespaceId, Timestamp queryStartTime, Timestamp queryEndTime);
+	List<Activity> listActivitiesForWarning(Integer namespaceId, Long categoryId, Timestamp queryStartTime, Timestamp queryEndTime);
 	
 	List<ActivityCategories> listActivityEntryCategories(Integer namespaceId, String ownerType, Long ownerId, Long parentId, CategoryAdminStatus status);
 
     ActivityCategories findActivityCategoriesById(Long id);
+    
+    ActivityCategories findActivityCategoriesByEntryId(Long entryId, Integer namespaceId);
 
     void createActivityAttachment(ActivityAttachment attachment);
 
@@ -86,7 +102,72 @@ public interface ActivityProivider {
 
 	List<ActivityRoster> listActivityRoster(Long activityId, Long pageAnchor, int pageSize);
 	
-	List<ActivityRoster> listActivityRoster(Long activityId, Integer status, Integer offset, int pageSize);
+	List<ActivityRoster> listActivityRoster(Long activityId, Long excludeUserId, Integer status, Integer cancelStatus, Integer offset, int pageSize);
 	
 	Integer countActivityRoster(Long activityId, Integer status);
+	
+	
+	Integer countActivity(Integer namespaceId, Long categoryId, Long contentCategoryId, Timestamp startTime, Timestamp endTime, boolean isDelete);
+	
+	Integer countActivityRoster(Integer namespaceId, Long categoryId, Long contentCategoryId, Timestamp startTime, Timestamp endTime, UserGender userGender, boolean isCancel);
+	
+	List<Activity> statisticsActivity(Integer namespaceId, Long categoryId, Long contentCategoryId, Long startTime, Long endTime, String tag);
+	
+	/**
+	 * 返回值object[]的格式如下：{Long, Integer} - {活动Id，报名人数}
+	 * @return
+	 */
+	List<Object[]> statisticsRosterPay(List<Long> activityIds);
+	
+	/**
+	 * 返回值object[]的格式如下：{String, Integer} - {标签名称，报名人数}
+	 * @return
+	 */
+	List<Object[]> statisticsRosterTag(Integer namespaceId, Long categoryId, Long contentCategoryId);
+	
+	/**
+	 * 返回值object[]的格式如下：{String, Integer} - {标签名称，报名活动数}
+	 * @return
+	 */
+	List<Object[]> statisticsActivityTag(Integer namespaceId, Long categoryId, Long contentCategoryId);
+	
+	/**
+	 * 返回值object[]的格式如下：{Long, String, Integer, Integer} - {机构Id， 机构名称， 报名人数，报名活动数}
+	 * @return
+	 */
+	List<Object[]> statisticsOrganization(Integer namespaceId, Long categoryId, Long contentCategoryId);
+	
+	List<ActivityRoster> findExpireRostersByActivityId(Long activityId);
+	
+	List<Long> listActivityIds();
+
+	/**
+	 * 新建ActivityCategories
+	 * @param activityCategory
+	 */
+	void createActivityCategories(ActivityCategories activityCategory);
+
+	/**
+	 * 更新ActivityCategories
+	 * @param activityCategory
+	 */
+	void updateActivityCategories(ActivityCategories activityCategory);
+
+	/**
+	 * 获取当前域空间最大的EntryId
+	 * @param namespaceId
+	 * @return
+	 */
+	Long findActivityCategoriesMaxEntryId(Integer namespaceId);
+
+	/**
+	 * 删除ActivityCategories
+	 * @param id
+	 */
+	void deleteActivityCategories(Long id);
+	
+//	void createActivityRosterError(ActivityRosterError rosterError);
+//
+//	List<ActivityRosterError> listActivityRosterErrorByJobId(Long jobId);
+
 }

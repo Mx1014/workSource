@@ -15,7 +15,7 @@ public interface EnergyMeterCategoryProvider {
     /**
      * 根据显示名称获取category
      */
-    EnergyMeterCategory findByName(Integer namespaceId, String name);
+    EnergyMeterCategory findByName(Integer namespaceId, Long communityId, String name);
 
     /**
      * 获取表记分类列表

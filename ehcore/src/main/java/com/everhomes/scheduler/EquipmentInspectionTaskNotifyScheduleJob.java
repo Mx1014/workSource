@@ -7,6 +7,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.equipment.EquipmentInspectionTasks;
 import com.everhomes.equipment.EquipmentProvider;
 import com.everhomes.equipment.EquipmentService;
+import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.util.CronDateUtils;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -44,19 +45,25 @@ public class EquipmentInspectionTaskNotifyScheduleJob extends QuartzJobBean {
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         this.coordinationProvider.getNamedLock(CoordinationLocks.WARNING_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
             LOGGER.info("in EquipmentInspectionTaskNotifyScheduleJob " + System.currentTimeMillis());
-            //默认提前十分钟通知
-            long executiveStartTime = System.currentTimeMillis()+(configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 10) * 60000);
+//            //默认提前十分钟通知
+//            long executiveStartTime = System.currentTimeMillis()+(configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 10) * 60000);
+            long executiveExpireTime = System.currentTimeMillis()-1000;
+//
+//            equipmentService.sendTaskMsg(executiveStartTime, executiveStartTime+60000, QualityGroupType.EXECUTIVE_GROUP.getCode());
+            equipmentService.sendTaskMsg(executiveExpireTime, System.currentTimeMillis(), QualityGroupType.REVIEW_GROUP.getCode());
 
-            equipmentService.sendTaskMsg(executiveStartTime, executiveStartTime+60000);
-
-            EquipmentInspectionTasks task = equipmentProvider.findLastestEquipmentInspectionTask(executiveStartTime+60000);
+            EquipmentInspectionTasks task = equipmentProvider.findLastestEquipmentInspectionTask(executiveExpireTime+1000);
+            //最近的即将过期任务
+//            EquipmentInspectionTasks task = equipmentProvider.findLastestDelayEquipmentInspectionTask(executiveExpireTime+1000);
             //没有新任务时，等到零点生成任务之后再发通知
             if(task != null) {
-                Timestamp taskStartTime = task.getExecutiveStartTime();
+//                Timestamp taskStartTime = task.getExecutiveStartTime();
+                Timestamp taskExpireTime = task.getExecutiveExpireTime();
                 //默认提前十分钟
-                long nextNotifyTime = taskStartTime.getTime() - (configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 10) * 60000);
+//                long nextNotifyTime = taskStartTime.getTime() - (configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 10) * 60000);
 
-                String cronExpression = CronDateUtils.getCron(new Timestamp(nextNotifyTime));
+//                String cronExpression = CronDateUtils.getCron(new Timestamp(nextNotifyTime));
+                String cronExpression = CronDateUtils.getCron(taskExpireTime);
 
                 String equipmentInspectionNotifyTriggerName = "EquipmentInspectionNotify ";
                 String equipmentInspectionNotifyJobName = "EquipmentInspectionNotify " + System.currentTimeMillis();

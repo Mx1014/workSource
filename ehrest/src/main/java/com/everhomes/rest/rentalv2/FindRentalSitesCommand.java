@@ -23,6 +23,9 @@ public class FindRentalSitesCommand {
 	private Long communityId; 
 	private Long resourceTypeId;
 	private String keyword;
+
+	private String sceneToken;
+
 	private Long anchor;
 	private Integer pageSize;
 	@ItemType(Byte.class)
@@ -83,5 +86,13 @@ public class FindRentalSitesCommand {
 
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
-	} 
+	}
+
+	public String getSceneToken() {
+		return sceneToken;
+	}
+
+	public void setSceneToken(String sceneToken) {
+		this.sceneToken = sceneToken;
+	}
 }

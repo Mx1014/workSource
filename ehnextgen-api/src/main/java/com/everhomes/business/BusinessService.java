@@ -1,12 +1,9 @@
 package com.everhomes.business;
 
-import com.everhomes.rest.address.ApartmentDTO;
-import com.everhomes.rest.address.ApartmentFloorDTO;
-import com.everhomes.rest.address.BuildingDTO;
-import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.address.ListApartmentFloorCommand;
-import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
+import com.everhomes.rest.asset.CheckPaymentUserCommand;
+import com.everhomes.rest.asset.CheckPaymentUserResponse;
 import com.everhomes.rest.business.*;
 import com.everhomes.rest.business.admin.*;
 import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
@@ -25,6 +22,7 @@ import com.everhomes.rest.user.UserDtoForBiz;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.util.Tuple;
 
+import javax.validation.Valid;
 import java.util.List;
 
 public interface BusinessService {
@@ -60,6 +58,8 @@ public interface BusinessService {
 	UserProfileDTO getReceivedCouponCount(GetReceivedCouponCountCommand cmd);
 	void reSyncBusiness(ReSyncBusinessCommand cmd);
 	List<BuildingDTO> listBuildingsByKeyword(ListBuildingByCommunityIdsCommand cmd);
+
+	List<BuildingDTO> listBuildingsByKeywordAndNameSpace(@Valid ListBuildingsByKeywordAndNameSpaceCommand cmd);
 	Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeyword(ListPropApartmentsByKeywordCommand cmd);
 	List<CommunityDTO> getCommunitiesByNameAndCityId(GetCommunitiesByNameAndCityIdCommand cmd);
 	CommunityDTO getCommunityById(GetCommunityByIdCommand cmd);
@@ -98,4 +98,10 @@ public interface BusinessService {
     SearchContentsBySceneReponse searchShops(SearchContentsBySceneCommand cmd);
 
     void testTransaction();
+
+	UserAddressDTO getUserAddress(GetUserDefaultAddressCommand cmd);
+
+	List<OrganizationDTO> getUserOrganizations(GetUserDefaultAddressCommand cmd);
+
+    CheckPaymentUserResponse checkPaymentUser(CheckPaymentUserCommand cmd);
 }

@@ -11,19 +11,19 @@ public enum SpecificationInspectionType {
 
 	CATEGORY((byte)0), SPECIFICATION((byte)1), SPECIFICATION_ITEM((byte)2);
 	
-	private byte code;
+	private Byte code;
 	
-	private SpecificationInspectionType(byte code){
+	private SpecificationInspectionType(Byte code){
 		this.code = code;
 	}
 	
-	public byte getCode() {
+	public Byte getCode() {
 		return code;
 	}
 	
-	public static SpecificationInspectionType fromStatus(byte code) {
+	public static SpecificationInspectionType fromStatus(Byte code) {
 		for(SpecificationInspectionType v : SpecificationInspectionType.values()) {
-			if(v.getCode() == code)
+			if(v.getCode().equals(code))
 				return v;
 		}
 		return null;

@@ -13,4 +13,6 @@ public interface WeChatService {
 	GetSignatureResponse getSignature(GetSignatureCommand cmd);
 	
 	String getContentServerUrl(GetContentServerUrlCommand cmd);
+
+	String getAppIdByNamespaceId(Integer namespaceId);
 }

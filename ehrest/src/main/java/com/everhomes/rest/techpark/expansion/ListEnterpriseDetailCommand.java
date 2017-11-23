@@ -1,5 +1,7 @@
 package com.everhomes.rest.techpark.expansion;
 
+import com.everhomes.util.StringHelper;
+
 public class ListEnterpriseDetailCommand {
     private Long pageAnchor;
     private Integer pageSize;
@@ -34,7 +36,10 @@ public class ListEnterpriseDetailCommand {
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
     }
-    
-    
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
     
 }

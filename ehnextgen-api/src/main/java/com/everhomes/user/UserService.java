@@ -1,7 +1,10 @@
 // @formatter:off
 package com.everhomes.user;
 
+import com.everhomes.community.Community;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.asset.TargetDTO;
+import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -12,6 +15,7 @@ import com.everhomes.rest.user.admin.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.util.List;
 
 /**
@@ -29,7 +33,7 @@ public interface UserService {
     UserLogin verifyAndLogonByIdentifier(VerifyAndLogonByIdentifierCommand cmd);
     
     User logonDryrun(String userIdentifierToken, String password);
-    UserLogin logon(int namespaceId, String userIdentifierToken, String password, String deviceIdentifier, String pusherIdentify);
+    UserLogin logon(int namespaceId, Integer regionCode, String userIdentifierToken, String password, String deviceIdentifier, String pusherIdentify);
     UserLogin logonByToken(LoginToken loginToken);
     UserLogin findLoginByToken(LoginToken loginToken);
     void logoff(UserLogin login);
@@ -80,9 +84,9 @@ public interface UserService {
 	List<UserInfo> listUserByKeyword(String keyword);
 	List<User> listUserByIdentifier(String identifier);
 	List<UserInfo> listUserInfoByIdentifier(String identifier);
-	
 
-	List<SceneDTO> listUserRelatedScenes();
+    List<SceneDTO> listUserRelatedScenes();
+	List<SceneDTO> listUserRelatedScenes(ListUserRelatedScenesCommand cmd);
 	void toFamilySceneDTO(Integer namespaceId, Long userId, List<SceneDTO> sceneList, List<FamilyDTO> familyDtoList);
 	SceneDTO toFamilySceneDTO(Integer namespaceId, Long userId, FamilyDTO familyDto);
 	SceneTokenDTO toSceneTokenDTO(Integer namespaceId, Long userId, FamilyDTO familyDto, SceneType sceneType);
@@ -105,6 +109,9 @@ public interface UserService {
 
     
     SearchContentsBySceneReponse searchContentsByScene(SearchContentsBySceneCommand cmd);
+
+    SearchTypes getSearchTypes(Integer namespaceId, String searchContentType);
+
     ListSearchTypesBySceneReponse listSearchTypesByScene(ListSearchTypesBySceneCommand cmd);
 
 
@@ -165,4 +172,118 @@ public interface UserService {
      * @return
      */
     MessageSessionInfoDTO getMessageSessionInfo(GetMessageSessionInfoCommand cmd);
+    
+    SearchUsersResponse searchUsers(SearchUsersCommand cmd);
+
+    /**
+     * 检查短信黑名单
+     * @param smsAction     标识是从哪里发出的短信，目前没什么用
+     * @param identifierToken   手机号
+     */
+    void checkSmsBlackList(String smsAction, String identifierToken);
+ 
+    /**
+     * 用户修改手机号时发送短信验证码，两步短信验证码都是这个接口
+     * @param cmd
+     * @param request
+     */
+    void sendVerificationCodeByResetIdentifier(SendVerificationCodeByResetIdentifierCommand cmd, HttpServletRequest request);
+
+    /**
+     * 核实修改手机号的验证码
+     * @param cmd
+     */
+    void verifyResetIdentifierCode(VerifyResetIdentifierCodeCommand cmd);
+
+    /**
+     * 申诉修改手机号
+     * @param cmd
+     * @return
+     */
+    UserAppealLogDTO createResetIdentifierAppeal(CreateResetIdentifierAppealCommand cmd);
+
+    /**
+     * 申诉列表
+     * @param cmd
+     * @return
+     */
+    ListUserAppealLogsResponse listUserAppealLogs(ListUserAppealLogsCommand cmd);
+
+    /**
+     * 修改申诉状态
+     * @param cmd
+     * @return
+     */
+    UserAppealLogDTO updateUserAppealLog(UpdateUserAppealLogCommand cmd);
+
+    /**
+     * 获取修改手机号的验证码
+     * @param cmd
+     * @return
+     */
+    UserIdentifierLogDTO listResetIdentifierCode(ListResetIdentifierCodeCommand cmd);
+	
+	//added by R 20170713, 通讯录2.4增加
+ 
+    SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd);
+
+	//added by R 20170824, 人事1.4,  判断管理员
+    CheckContactAdminResponse checkContactAdmin(CheckContactAdminCommand cmd);
+
+    //added by R 20170803, 消息2.1增加
+    SceneContactV2DTO getContactInfoByUserId(GetContactInfoByUserIdCommand cmd);
+
+    ListAuthFormsResponse listAuthForms();
+
+	GetFamilyButtonStatusResponse getFamilyButtonStatus();
+
+
+    /**
+     *
+     */
+    List<String[]> listBuildingAndApartmentById(Long uid);
+    /**
+     * created by wentian
+     * 根据客户名和地址定位唯一用户
+     */
+    TargetDTO findTargetByNameAndAddress(String contractNum, String targetName , Long ownerId,String tel,String ownerType,String targetType);
+
+    Long getCommunityIdBySceneToken(SceneTokenDTO sceneTokenDTO);
+
+    List<SceneDTO> listUserRelatedScenesByCurrentType(ListUserRelatedScenesByCurrentTypeCommand cmd);
+	
+    UserIdentifier getUserIdentifier(Long userId);
+
+    VerificationCodeForBindPhoneResponse verificationCodeForBindPhone(VerificationCodeForBindPhoneCommand cmd);
+
+    UserLogin bindPhone(BindPhoneCommand cmd);
+
+    void checkVerifyCodeAndResetPassword(CheckVerifyCodeAndResetPasswordCommand cmd);
+
+    UserTemporaryTokenDTO checkUserTemporaryToken(CheckUserTemporaryTokenCommand cmd);
+
+    SceneDTO getProfileScene();
+
+    List<SceneDTO> listUserRelateScenesByCommunityId(ListUserRelateScenesByCommunityId cmd);
+
+    List<SceneDTO> listAllCommunityScenesIfGeoExist(ListAllCommunityScenesIfGeoExistCommand cmd);
+
+    SceneDTO convertCommunityToScene(Integer namespaceId, Long userId, Community default_community);
+
+    List<SceneDTO> listAllCommunityScenes();
+    
+    /**
+     * 用于测试服务器状态，不要用于业务使用 by lqs 20171019
+     */
+    String checkServerStatus();
+    
+    /** 
+     * 客户端更新设备信息到服务器端
+     * @param cmd
+     * @param request
+     * @param response
+     * @return 返回服务器端的信息
+     */
+    SystemInfoResponse updateUserBySystemInfo(SystemInfoCommand cmd,
+            HttpServletRequest request, HttpServletResponse response);
 }

@@ -8,11 +8,8 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.address.BuildingDTO;
-import com.everhomes.rest.address.ListBuildingByKeywordCommand;
-import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.family.FamilyBillingTransactionDTO;
-import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -1004,7 +1001,7 @@ public class PropertyMgrController extends ControllerBase {
 
 	/*@RequestMapping("deletePmComment")
 	@RestReturn(value=String.class)
-	public RestResponse deletePmComment(DeleteCommentCommand cmd) {
+	public RestResponse deletePmComment(DeleteCommonCommentCommand cmd) {
 
 		// ???
 		RestResponse response = new RestResponse();
@@ -1022,6 +1019,91 @@ public class PropertyMgrController extends ControllerBase {
 		List<PropFamilyDTO> results =  propertyMgrService.listPropApartmentsByKeyword(cmd);
 		RestResponse response = new RestResponse(results);
 
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/listApartments</b>
+	 * <p>根据小区Id、楼栋号、门牌状态和关键字查询门牌</p>
+	 */
+	@RequestMapping("listApartments")
+	@RestReturn(value=ListApartmentsResponse.class)
+	public RestResponse listApartments(@Valid ListApartmentsCommand cmd) {
+		ListApartmentsResponse results =  propertyMgrService.listApartments(cmd);
+		RestResponse response = new RestResponse(results);
+		
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /pm/listPropApartments</b>
+	 * <p>根据小区Id、楼栋号和关键字查询门牌(物业)</p>
+	 */
+	@RequestMapping("listPropApartments")
+	@RestReturn(value=ListPropApartmentsResponse.class)
+	public RestResponse listPropApartments(@Valid ListPropApartmentsByKeywordCommand cmd) {
+		ListPropApartmentsResponse results =  propertyMgrService.listNewPropApartmentsByKeyword(cmd);
+		RestResponse response = new RestResponse(results);
+
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/createApartment</b>
+	 * <p>创建一个门牌</p>
+	 */
+	@RequestMapping("createApartment")
+	@RestReturn(value=String.class)
+	public RestResponse createApartment(CreateApartmentCommand cmd) {
+		propertyMgrService.createApartment(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/updateApartment</b>
+	 * <p>更新一个门牌</p>
+	 */
+	@RequestMapping("updateApartment")
+	@RestReturn(value=String.class)
+	public RestResponse updateApartment(UpdateApartmentCommand cmd) {
+		propertyMgrService.updateApartment(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/deleteApartment</b>
+	 * <p>删除一个门牌</p>
+	 */
+	@RequestMapping("deleteApartment")
+	@RestReturn(value=String.class)
+	public RestResponse deleteApartment(DeleteApartmentCommand cmd) {
+		propertyMgrService.deleteApartment(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/getApartmentDetail</b>
+	 * <p>获取门牌详情</p>
+	 */
+	@RequestMapping("getApartmentDetail")
+	@RestReturn(value=GetApartmentDetailResponse.class)
+	public RestResponse getApartmentDetail(GetApartmentDetailCommand cmd) {
+		RestResponse response = new RestResponse(propertyMgrService.getApartmentDetail(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -1987,4 +2069,40 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <p>设置计价条款</p>
+	 * <b>URL: /pm/updateDefaultChargingItem</b>
+	 */
+	@RequestMapping("updateDefaultChargingItem")
+	@RestReturn(DefaultChargingItemDTO.class)
+	public RestResponse updateDefaultChargingItem(UpdateDefaultChargingItemCommand cmd){
+		return new RestResponse(propertyMgrService.updateDefaultChargingItem(cmd));
+	}
+
+	/**
+	 * <p>删除计价条款</p>
+	 * <b>URL: /pm/deleteDefaultChargingItem</b>
+	 */
+	@RequestMapping("deleteDefaultChargingItem")
+	@RestReturn(String.class)
+	public RestResponse deleteDefaultChargingItem(DeleteDefaultChargingItemCommand cmd){
+		propertyMgrService.deleteDefaultChargingItem(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>列出计价条款</p>
+	 * <b>URL: /pm/listDefaultChargingItems</b>
+	 */
+	@RequestMapping("listDefaultChargingItems")
+	@RestReturn(value = DefaultChargingItemDTO.class, collection = true)
+	public RestResponse listDefaultChargingItems(ListDefaultChargingItemsCommand cmd){
+		return new RestResponse(propertyMgrService.listDefaultChargingItems(cmd));
+	}
+
 }

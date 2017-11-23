@@ -3,10 +3,10 @@ package com.everhomes.rest.ui.user;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+
 /**
  * <ul>
- * <li>contacts : 联系人列表，{@link com.everhomes.rest.user.ContactV2DTO}</li>
- * <li>nextPageAnchor : 下一页页码</li>
+ * <li>contacts: 联系人列表，{@link com.everhomes.rest.ui.user.SceneContactDTO}</li>
  * </ul>
  */
 public class ListContactBySceneRespose {

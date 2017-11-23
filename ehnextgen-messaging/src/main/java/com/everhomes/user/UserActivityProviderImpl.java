@@ -1,73 +1,41 @@
 package com.everhomes.user;
 
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.group.GroupAdminStatus;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.group.GroupMemberStatus;
+import com.everhomes.rest.organization.OrganizationCommunityRequestType;
+import com.everhomes.rest.organization.UserOrganizationStatus;
+import com.everhomes.rest.user.*;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.sharding.ShardIterator;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.DeleteQuery;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.activity.ActivityRoster;
-import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DaoAction;
-import com.everhomes.db.DaoHelper;
-import com.everhomes.db.DbProvider;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.SearchTypesStatus;
-import com.everhomes.rest.user.UserFavoriteDTO;
-import com.everhomes.rest.user.UserFavoriteTargetType;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhFeedbacksDao;
-import com.everhomes.server.schema.tables.daos.EhRequestAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhSearchTypesDao;
-import com.everhomes.server.schema.tables.daos.EhStatActiveUsersDao;
-import com.everhomes.server.schema.tables.daos.EhUserActivitiesDao;
-import com.everhomes.server.schema.tables.daos.EhUserBehaviorsDao;
-import com.everhomes.server.schema.tables.daos.EhUserContactsDao;
-import com.everhomes.server.schema.tables.daos.EhUserFavoritesDao;
-import com.everhomes.server.schema.tables.daos.EhUserIdentifiersDao;
-import com.everhomes.server.schema.tables.daos.EhUserInstalledAppsDao;
-import com.everhomes.server.schema.tables.daos.EhUserInvitationRosterDao;
-import com.everhomes.server.schema.tables.daos.EhUserLocationsDao;
-import com.everhomes.server.schema.tables.daos.EhUserPostsDao;
-import com.everhomes.server.schema.tables.daos.EhUserProfilesDao;
-import com.everhomes.server.schema.tables.daos.EhUserServiceAddressesDao;
-import com.everhomes.server.schema.tables.pojos.EhRequestAttachments;
-import com.everhomes.server.schema.tables.pojos.EhSearchTypes;
-import com.everhomes.server.schema.tables.pojos.EhStatActiveUsers;
-import com.everhomes.server.schema.tables.pojos.EhUserContacts;
-import com.everhomes.server.schema.tables.pojos.EhUserFavorites;
-import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
-import com.everhomes.server.schema.tables.pojos.EhUserInstalledApps;
-import com.everhomes.server.schema.tables.pojos.EhUserPosts;
-import com.everhomes.server.schema.tables.pojos.EhUserProfiles;
-import com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
-import com.everhomes.sharding.ShardIterator;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class UserActivityProviderImpl implements UserActivityProvider {
@@ -261,6 +229,84 @@ public class UserActivityProviderImpl implements UserActivityProvider {
         result.addAll(dao.fetchByOwnerId(uid).stream().map(r -> ConvertHelper.convert(r, UserProfile.class))
                 .collect(Collectors.toList()));
         return result;
+    }
+
+    @Override
+    public List<User> listUnAuthUsersByProfileCommunityId(Integer namespaceId, Long communityId, Long anchor, int pagesize, Byte communityType, Byte userSourceType, String keywords) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
+
+        SelectQuery<Record> query = context.select(Tables.EH_USERS.fields()).from(Tables.EH_USERS).getQuery();
+        query.addJoin(Tables.EH_USER_PROFILES, JoinType.JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_PROFILES.OWNER_ID));
+        query.addConditions(Tables.EH_USER_PROFILES.ITEM_NAME.in(UserCurrentEntityType.COMMUNITY_COMMERCIAL.getUserProfileKey(), UserCurrentEntityType.COMMUNITY_RESIDENTIAL.getUserProfileKey()));
+
+        if(communityId != null){
+            query.addConditions(Tables.EH_USER_PROFILES.ITEM_VALUE.eq(String.valueOf(communityId)));
+        }
+        if(namespaceId != null){
+            query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
+        }
+
+        if(UserSourceType.WEIXIN == UserSourceType.fromCode(userSourceType)){
+            query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode()));
+        }else if(UserSourceType.APP == UserSourceType.fromCode(userSourceType)){
+            query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.isNull());
+        }
+
+        excludeAuthUser(context, query, namespaceId, communityType);
+
+        if (anchor != null){
+            query.addConditions(Tables.EH_USERS.ID.lt(anchor));
+        }
+
+        if(StringUtils.isNotEmpty(keywords)){
+            query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
+            Condition cond = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%" + keywords + "%");
+            cond = cond.or(Tables.EH_USERS.NICK_NAME.like("%" + keywords + "%"));
+            query.addConditions(cond);
+        }
+
+        query.addOrderBy(Tables.EH_USERS.ID.desc());
+        query.addLimit(pagesize);
+
+        return query.fetch().map((Record record) -> record.into(User.class));
+    }
+
+    private void excludeAuthUser(DSLContext context, SelectQuery<Record> query, Integer namespaceId, Byte communityType){
+        if(CommunityType.fromCode(communityType) == CommunityType.COMMERCIAL){
+            //子查询的条件
+            Condition subQueryCondition =Tables.EH_USER_ORGANIZATIONS.STATUS.in(UserOrganizationStatus.ACTIVE.getCode(), UserOrganizationStatus.WAITING_FOR_APPROVAL.getCode())
+                    .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()));
+            if(namespaceId != null){
+                subQueryCondition = subQueryCondition.and(Tables.EH_USER_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+            }
+            //子查询排除已认证的
+            query.addConditions(Tables.EH_USERS.ID.notIn(
+                    context.select(Tables.EH_USER_ORGANIZATIONS.USER_ID).from(Tables.EH_USER_ORGANIZATIONS)
+                            .join(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS)
+                            .on(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID))
+                            .where(subQueryCondition))
+            );
+        }else {
+
+            //子查询的条件
+            Condition subQueryCondition = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode())
+                    .and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.notIn(GroupMemberStatus.INACTIVE.getCode(), GroupMemberStatus.REJECT.getCode()))
+                    .and(Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode()));
+
+            if(namespaceId != null){
+                subQueryCondition = subQueryCondition.and(Tables.EH_GROUPS.NAMESPACE_ID.eq(namespaceId));
+            }
+
+            //子查询排除已认证、认证中的
+            query.addConditions(Tables.EH_USERS.ID.notIn(
+                    context.select(Tables.EH_GROUP_MEMBERS.MEMBER_ID).from(Tables.EH_GROUP_MEMBERS)
+                            .join(Tables.EH_GROUPS)
+                            .on(Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID))
+                            .where(subQueryCondition))
+            );
+
+        }
+
     }
 
     @Override
@@ -704,7 +750,7 @@ public class UserActivityProviderImpl implements UserActivityProvider {
         
         if(locator.getAnchor() != null) {
         	//修改EH_FORUM_POSTS为EH_USER_POSTS，by tt, 20160930
-            query.addConditions(Tables.EH_USER_POSTS.ID.lt(locator.getAnchor()));
+            query.addConditions(Tables.EH_USER_POSTS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
         }
         
         query.addOrderBy(Tables.EH_USER_POSTS.CREATE_TIME.desc());
@@ -719,8 +765,10 @@ public class UserActivityProviderImpl implements UserActivityProvider {
             return ConvertHelper.convert(r, UserPost.class);
         });
         
-        if(posts.size() > 0) {
-            locator.setAnchor(posts.get(posts.size() -1).getId());
+        if(posts.size() == count) {
+            locator.setAnchor(posts.get(count -2).getCreateTime().getTime());
+        }else {
+            locator.setAnchor(null);
         }
         
         return posts;
@@ -1032,5 +1080,49 @@ public class UserActivityProviderImpl implements UserActivityProvider {
             locator.setAnchor(results.get(results.size() - 1).getId());
         }
         return results;
+    }
+
+    @Override
+    public List<UserActivity> listUserActivetys(Long userId, Integer pageSize) {
+        List<UserActivity> results = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhUserActivitiesRecord> query = context.selectQuery(Tables.EH_USER_ACTIVITIES);
+        query.addConditions(Tables.EH_USER_ACTIVITIES.UID.eq(userId));
+        query.addOrderBy(Tables.EH_USER_ACTIVITIES.CREATE_TIME.desc());
+
+        if (null != pageSize) {
+            query.addLimit(pageSize);
+        }
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, UserActivity.class));
+            return null;
+        });
+        return results;
+    }
+
+    @Override
+    public UserActivity findLastUserActivity(Long uid) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_USER_ACTIVITIES)
+                .where(Tables.EH_USER_ACTIVITIES.UID.eq(uid))
+                .orderBy(Tables.EH_USER_ACTIVITIES.CREATE_TIME.desc())
+                .fetchAnyInto(UserActivity.class);
+    }
+
+    @Override
+    public List<User> listNotInUserActivityUsers(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectConditionStep<Record1<Long>> uidCond = context
+                .selectDistinct(Tables.EH_USER_ACTIVITIES.UID)
+                .from(Tables.EH_USER_ACTIVITIES)
+                .where(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
+
+        return context.select(Tables.EH_USERS.fields())
+                .from(Tables.EH_USERS)
+                .where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_USERS.NAMESPACE_USER_TYPE.isNull())
+                .and(Tables.EH_USERS.ID.notIn(uidCond))
+                .fetchInto(User.class);
     }
 }

@@ -20,8 +20,8 @@ public class GetUserRelatedAddressResponse {
     
     @ItemType(OrganizationDetailDTO.class)
     private List<OrganizationDTO> organizationList;
-
-    public List<FamilyDTO> getFamilyList() {
+    
+	public List<FamilyDTO> getFamilyList() {
         return familyList;
     }
 

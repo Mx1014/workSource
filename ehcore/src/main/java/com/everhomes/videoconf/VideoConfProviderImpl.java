@@ -3,9 +3,12 @@ package com.everhomes.videoconf;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+
 
 
 
@@ -40,6 +43,8 @@ import org.springframework.stereotype.Component;
 
 
 
+
+
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -48,6 +53,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.techpark.onlinePay.PayStatus;
+import com.everhomes.rest.videoconf.ConfAccountStatus;
 import com.everhomes.rest.videoconf.CountAccountOrdersAndMonths;
 import com.everhomes.rest.videoconf.InvoiceDTO;
 import com.everhomes.rest.videoconf.OrderBriefDTO;
@@ -465,7 +471,7 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 
 	@Override
 	public List<ConfOrderAccountMap> findOrderAccountByOrderId(Long orderId,
-			CrossShardListingLocator locator, Integer pageSize) {
+			CrossShardListingLocator locator, Integer pageSize,Byte assigedFlag) {
 		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
 		List<ConfOrderAccountMap> accounts=new ArrayList<ConfOrderAccountMap>();
 		if (locator.getShardIterator() == null) {
@@ -482,8 +488,9 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             
             if(orderId != null)
             	query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ORDER_ID.eq(orderId));
-            
-            query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ASSIGED_FLAG.eq((byte)1));
+
+            if(assigedFlag != null)
+            	query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ASSIGED_FLAG.eq(assigedFlag));
             query.addLimit(pageSize - accounts.size());
             
             query.fetch().map((r) -> {
@@ -1561,6 +1568,82 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 		}
 
 		return null;
+	}
+
+	@Override
+	public ConfAccounts findAccountByUserIdAndEnterpriseIdAndStatus(Long userId,
+			Long enterpriseId,Byte status) {
+		List<ConfAccounts> accounts = new ArrayList<ConfAccounts>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
+		query.addConditions(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId));
+		query.addConditions(Tables.EH_CONF_ACCOUNTS.OWNER_ID.eq(userId));
+		query.addConditions(Tables.EH_CONF_ACCOUNTS.DELETE_UID.eq(0L));
+		query.addConditions(Tables.EH_CONF_ACCOUNTS.STATUS.eq(status));
+		 
+		
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query findAccountByUserIdAndEnterpriseId, sql=" + query.getSQL());
+            LOGGER.debug("Query findAccountByUserIdAndEnterpriseId, bindValues=" + query.getBindValues());
+        }
+		
+		
+		query.fetch().map((r) -> {
+			accounts.add(ConvertHelper.convert(r, ConfAccounts.class));
+            return null;
+		});
+
+		if(accounts != null && accounts.size() > 0) {
+			return accounts.get(0);
+		}
+
+		return null;
+	}
+	@Override
+	public List<Long> findAccountCategoriesByNotInConfType(Byte confType) {
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfAccountCategories.class));
+		List<Long> accountCategories = new ArrayList<Long>();
+		
+		SelectQuery<EhConfAccountCategoriesRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNT_CATEGORIES);
+		
+		if(confType != null)
+			query.addConditions(Tables.EH_CONF_ACCOUNT_CATEGORIES.CONF_TYPE.ne(confType));
+		
+		query.fetch().map((r) ->{
+			accountCategories.add(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.ID));
+			return null;
+        });
+		
+		return accountCategories;
+	}
+
+	@Override
+	public List<ConfOrders> findConfOrdersByCategoriesAndDate(List<Long> categories,
+			Calendar calendar1) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(calendar1.getTime());
+		List<ConfOrders> results = new ArrayList<ConfOrders>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhConfOrdersRecord> query = context.selectQuery(Tables.EH_CONF_ORDERS);
+		query.addConditions(Tables.EH_CONF_ORDERS.ACCOUNT_CATEGORY_ID.in(categories));
+		query.addConditions(Tables.EH_CONF_ORDERS.EXPIRED_DATE.greaterOrEqual(new Timestamp(calendar.getTimeInMillis())));
+		calendar.add(Calendar.DAY_OF_MONTH, 1); 
+		query.addConditions(Tables.EH_CONF_ORDERS.EXPIRED_DATE.lt(new Timestamp(calendar.getTimeInMillis()))); 
+		
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query findAccountByUserIdAndEnterpriseId, sql=" + query.getSQL());
+            LOGGER.debug("Query findAccountByUserIdAndEnterpriseId, bindValues=" + query.getBindValues());
+        }
+		
+		
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, ConfOrders.class));
+            return null;
+		});
+ 
+
+		return results;
 	}
 	
 }

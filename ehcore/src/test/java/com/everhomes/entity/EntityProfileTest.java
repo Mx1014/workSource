@@ -21,7 +21,6 @@ public class EntityProfileTest extends CoreServerTestCase {
     
     @Value("${db.master}")
     private String dbUrl;
-    
     @Ignore @Test
     public void testJooqDiscovery() {
         Class<?> pojoClz = EhActivities.class;

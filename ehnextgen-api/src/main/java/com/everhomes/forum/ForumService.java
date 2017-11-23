@@ -7,6 +7,7 @@ import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
+import com.everhomes.rest.forum.StickPostCommand;
 import com.everhomes.rest.group.ListUserGroupPostResponse;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.ui.forum.*;
@@ -14,6 +15,7 @@ import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
 import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.visibility.VisibilityScope;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.user.User;
 
 import java.util.List;
 
@@ -48,6 +50,9 @@ public interface ForumService {
     ListPostCommandResponse listUserRelatedTopics(ListUserRelatedTopicCommand cmd);
     ListPostCommandResponse listActivityPostByCategoryAndTag(ListActivityTopicByCategoryAndTagCommand cmd);
     CheckUserPostDTO checkUserPostStatus(CheckUserPostCommand cmd);
+
+    Long populateCommunityIdAndForumId(Long communityId, Long organizationId, Integer namespaceId, List<Long> communityIds, List<Long> forumIds);
+
     /**
      * 机构查询自己可看的帖子列表
      * @param cmd 命令
@@ -56,6 +61,8 @@ public interface ForumService {
     ListPostCommandResponse queryOrganizationTopics(QueryOrganizationTopicCommand cmd);
     void likeTopic(LikeTopicCommand cmd);
     void cancelLikeTopic(CancelLikeTopicCommand cmd);
+
+    void stickPost(StickPostCommand cmd);
 
     ListPostCommandResponse listTopicComments(ListTopicCommentCommand cmd);
     /**
@@ -66,6 +73,9 @@ public interface ForumService {
      */
     void updatePostPrivacy(Long forumId, Long postId, PostPrivacy privacy);
     PostDTO createComment(NewCommentCommand cmd);
+
+    void sendMessageToUserWhenCommentNotSupport(User user);
+
     void assignTopicScope(AssignTopicScopeCommand cmd);
     List<AssignedScopeDTO> listTopicAssignedScope(ListTopicAssignedScopeCommand cmd);
     
@@ -75,6 +85,11 @@ public interface ForumService {
      * @return 帖子列表
      */
     SearchTopicAdminCommandResponse searchTopic(SearchTopicAdminCommand cmd);
+
+    Byte getInteractFlag(Post post);
+
+    InteractSetting findInteractSettingByPost(Post post);
+
     SearchTopicAdminCommandResponse searchComment(SearchTopicAdminCommand cmd);
     
     void updateUsedAndRental(UsedAndRentalCommand cmd);
@@ -99,4 +114,13 @@ public interface ForumService {
 	ListPostCommandResponse listOfficialActivityByNamespace(ListOfficialActivityByNamespaceCommand cmd);
 	GetActivityDetailByIdResponse getActivityDetailById(GetActivityDetailByIdCommand cmd); 
 	ListUserGroupPostResponse listUserGroupPost(VisibilityScope scope, Long communityId, List<Long> forumIdList, Long userId, Long pageAnchor, Integer pageSize); 
+	
+	//发布暂存的帖子
+	void publisTopic(PublishTopicCommand cmd);
+
+    Forum findFourmByNamespaceId(Integer namespaceId);
+
+    ListForumCategoryResponse listForumCategory(ListForumCategoryCommand cmd);
+
+    ForumCategoryDTO findForumCategory(FindForumCategoryCommand cmd);
 }

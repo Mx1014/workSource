@@ -3,11 +3,14 @@ package com.everhomes.techpark.expansion;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.techpark.expansion.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 
 public interface EnterpriseApplyEntryService {
-	
+
+	long OTHER_BUILDING_ID = 0L;
+
 	GetEnterpriseDetailByIdResponse getEnterpriseDetailById(GetEnterpriseDetailByIdCommand cmd);
 	
 	ListEnterpriseApplyEntryResponse listApplyEntrys(ListEnterpriseApplyEntryCommand cmd);
@@ -18,9 +21,9 @@ public interface EnterpriseApplyEntryService {
 	
 	ListBuildingForRentResponse listLeasePromotions(ListBuildingForRentCommand cmd);
 
-	BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd);
+	BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd, Byte adminFlag);
 
-	BuildingForRentDTO updateLeasePromotion(UpdateLeasePromotionCommand cmd);
+	BuildingForRentDTO updateLeasePromotion(UpdateLeasePromotionCommand cmd, Byte adminFlag);
 	
 	BuildingForRentDTO findLeasePromotionById(Long id);
 	
@@ -40,10 +43,20 @@ public interface EnterpriseApplyEntryService {
 
 	LeasePromotionConfigDTO getLeasePromotionConfig(GetLeasePromotionConfigCommand cmd);
 
+	void setLeasePromotionConfig(SetLeasePromotionConfigCommand cmd);
+
 	CheckIsLeaseIssuerDTO checkIsLeaseIssuer(CheckIsLeaseIssuerCommand cmd);
 
 	ListLeaseIssuerBuildingsResponse listBuildings(ListLeaseIssuerBuildingsCommand cmd);
 
 	List<AddressDTO>  listLeaseIssuerApartments(ListLeaseIssuerApartmentsCommand cmd);
+
+	void updateLeasePromotionRequestForm(@Valid UpdateLeasePromotionRequestFormCommand cmd);
+
+	LeaseFormRequestDTO getLeasePromotionRequestForm(@Valid GetLeasePromotionRequestFormCommand cmd);
+
+	void updateLeasePromotionOrder(@Valid UpdateLeasePromotionOrderCommand cmd);
+
+	String getSourceTypeName(String type);
 	
 }

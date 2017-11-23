@@ -47,14 +47,19 @@ public class RestCallTemplate {
     private String body;
     private Gson gson = new Gson();
 
+    private RestEntityHandler restEntityHandler;
     private RestHasErrorHandler hasErrorHandler;
     private RestErrorHandler restErrorHandler;
 
-    interface RestErrorHandler<E> {
+    public interface RestErrorHandler<E> {
         void error(HttpErrorEntity<E> e);
     }
 
-    interface RestHasErrorHandler {
+    public interface RestEntityHandler<E> {
+        void success(HttpResponseEntity<E> e);
+    }
+
+    public interface RestHasErrorHandler {
         boolean hasError(HttpStatus statusCode);
     }
 
@@ -116,6 +121,15 @@ public class RestCallTemplate {
         return this;
     }
 
+    public <E> RestCallTemplate onSuccess(RestEntityHandler<E> restEntityHandler) {
+        this.restEntityHandler = restEntityHandler;
+        return this;
+    }
+    public <E> RestCallTemplate onError(RestErrorHandler<E> restErrorHandler) {
+        this.restErrorHandler = restErrorHandler;
+        return this;
+    }
+
     public RestCallTemplate errorHandler(RestErrorHandler restErrorHandler) {
         this.restErrorHandler = restErrorHandler;
         return this;
@@ -163,9 +177,21 @@ public class RestCallTemplate {
         return this;
     }
 
+    public <R> HttpResponseEntity<R> get() {
+        return execute(HttpMethod.GET);
+    }
+
+    public <R> HttpResponseEntity<R> post() {
+        return execute(HttpMethod.POST);
+    }
+
     public <R> HttpResponseEntity<R> execute() {
+        return execute(httpMethod);
+    }
+
+    private <R> HttpResponseEntity<R> execute(HttpMethod method) {
         HttpEntity httpEntity = new HttpEntity(body, headers);
-        ResponseEntity<String> result = template.exchange(url, httpMethod, httpEntity, String.class, variables);
+        ResponseEntity<String> result = template.exchange(url, method, httpEntity, String.class, variables);
         // handle error
         if (hasError(result.getStatusCode())) {
             Object errorObj;
@@ -184,17 +210,11 @@ public class RestCallTemplate {
             return (HttpResponseEntity<R>) new HttpResponseEntity<>(result.getBody(), result.getHeaders(), result.getStatusCode());
         }
         R r = gson.fromJson(result.getBody(), (Class<R>) responseType);
-        return new HttpResponseEntity<>(r, result.getHeaders(), result.getStatusCode());
-    }
-
-    public <R> HttpResponseEntity<R> post() {
-        this.httpMethod = HttpMethod.POST;
-        return execute();
-    }
-
-    public <R> HttpResponseEntity<R> get() {
-        this.httpMethod = HttpMethod.GET;
-        return execute();
+        HttpResponseEntity<R> responseEntity = new HttpResponseEntity<>(r, result.getHeaders(), result.getStatusCode());
+        if (restEntityHandler != null) {
+            restEntityHandler.success(responseEntity);
+        }
+        return responseEntity;
     }
 
     public static QueryStringBuilder queryStringBuilder() {

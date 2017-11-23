@@ -52,6 +52,26 @@ public class SearchUtils {
     public static final String ENERGY_METER = "energyMeter";
 
     public static final String ENERGY_METER_READING_LOG = "energyMeterReadingLog";
+    public static final String QUALITY_TASK = "qualityTask";
+    public static final String QUALITY_SAMPLE = "qualitySample";
+
+    public static final String WAREHOUSE = "warehouse";
+
+    public static final String WAREHOUSE_MATERIAL = "warehouseMaterial";
+
+    public static final String WAREHOUSE_MATERIAL_CATEGORY = "warehouseMaterialCategory";
+
+    public static final String WAREHOUSE_STOCK = "warehouseStock";
+
+    public static final String WAREHOUSE_STOCK_LOG = "warehouseStockLog";
+
+    public static final String WAREHOUSE_REQUEST_MATERIAL= "warehouseRequestMaterial";
+    public static final String CONTRACT= "contract";
+    public static final String ENTERPRISE_CUSTOMER= "enterpriseCustomer";
+
+    public static final String UNIONGROUP_DETAILS= "uniongroupDetails";
+    public static final String ENERGY_PLAN= "energyPlan";
+    public static final String ENERGY_TASK= "energyTask";
 
     public static Long getLongField(Object o) {
         Long v = -1l;

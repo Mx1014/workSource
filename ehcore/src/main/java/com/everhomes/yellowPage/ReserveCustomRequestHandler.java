@@ -94,7 +94,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 	private ContentServerService contentServerService;
 	
 	@Override
-	public void addCustomRequest(AddRequestCommand cmd) {
+	public Long addCustomRequest(AddRequestCommand cmd) {
 		ReservationRequests request = GsonUtil.fromJson(cmd.getRequestJson(), ReservationRequests.class);
 		
 		request.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -114,7 +114,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 			request.setCreatorMobile(identifier.getIdentifierToken());
 
 		LOGGER.info("ReserveCustomRequestHandler addCustomRequest request:" + request);
-		yellowPageProvider.createReservationRequests(request);
+		Long id = yellowPageProvider.createReservationRequests(request);
 		ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
 		requestInfo.setTemplateType(cmd.getTemplateType());
 		requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
@@ -141,6 +141,8 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 		notifyMap.put("creatorName", creatorName);
 		notifyMap.put("creatorMobile", creatorMobile);
 		notifyMap.put("note", changeRequestToHtml(request));
+		notifyMap.put("serviceAllianceName", "");
+		notifyMap.put("notemessage", getNote(request));
 		Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
         String creatorOrganization = "";
 		if(org != null) {
@@ -151,6 +153,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 				ServiceAllianceRequestNotificationTemplateCode.AN_APPLICATION_FORM, UserContext.current().getUser().getLocale(), "");
 		if(serviceOrg != null) {
 			notifyMap.put("serviceOrgName", serviceOrg.getName());
+			notifyMap.put("serviceAllianceName", serviceOrg.getName());
 			title = serviceOrg.getName() + title;
 		}
 		notifyMap.put("title", title);
@@ -169,7 +172,9 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 			
 			OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
 			if(member != null) {
-				sendMessageToUser(member.getTargetId(), notifyTextForOrg);
+				code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ORG;
+				String notifyText = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
+				sendMessageToUser(member.getTargetId(), notifyText);
 			}
 			
 			sendEmail(serviceOrg.getEmail(), title, notifyTextForOrg,stringAttementList);
@@ -206,6 +211,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 		}
 		//删除生成的pdf文件，附件
 		attementList.stream().forEach(file->{file.delete();});
+		return id;
 	}
 	
 
@@ -216,7 +222,8 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 			StringBuilder sb = new StringBuilder();
 			for(RequestFieldDTO field : fieldList) {
 				String fieldValue = (field.getFieldValue() == null) ? "" : field.getFieldValue();
-				sb.append(field.getFieldName() + ":" + fieldValue + "\n");
+				String fieldName = field.getFieldName()==null?"":field.getFieldName();
+				sb.append(" ").append(fieldName.trim()).append("：").append(fieldValue).append("\n");
 			}
 			
 			return sb.toString();

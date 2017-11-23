@@ -4,10 +4,11 @@ package com.everhomes.rest.organization;
  * 
  * <ul>来自于第三方楼栋的类型，对应eh_organizations表听 namespace_organization_type字段
  * <li>JINDIE("jindie"): 金蝶</li>
+ * <li>SHENZHOU("shenzhou"): 神州数码</li>
  * </ul>
  */
 public enum NamespaceOrganizationType {
-	JINDIE("jindie");
+	JINDIE("jindie"), SHENZHOU("shenzhou");
     
     private String code;
     private NamespaceOrganizationType(String code) {

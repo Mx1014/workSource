@@ -132,4 +132,63 @@ public interface PrivilegeConstants {
     
     long FEEDBACK_MANAGEMENT    = 10160L;// 举报管理模块权限
 
+    long ALL_SERVICE_MODULE = 10000L;
+
+    long AUTH_RELATION_LIST = 40001L; //授权关系列表
+    long AUTH_RELATION_CREATE = 40002L; //创建授权关系
+    long AUTH_RELATION_UPDATE = 40003L; //修改授权关系
+    long AUTH_RELATION_DELETE = 40004L; //删除授权关系
+
+    long SUPER_ADMIN_LIST = 40007L; //超级管理员列表
+    long SUPER_ADMIN_CREATE = 40008L; //创建超级管理员
+    long SUPER_ADMIN_UPDATE = 40009L; //修改超级管理员
+    long SUPER_ADMIN_DELETE = 40010L; //删除超级管理员
+
+    long ORG_ADMIN_LIST = 40013L; //公司管理员列表
+    long ORG_ADMIN_CREATE = 40014L; //创建公司管理员
+    long ORG_ADMIN_UPDATE = 40015L; //修改公司管理员
+    long ORG_ADMIN_DELETE = 40016L; //删除公司管理员
+
+    long MODULE_ADMIN_LIST = 40019L; //模块管理员列表
+    long MODULE_ADMIN_CREATE = 40020L; //创建模块管理员
+    long MODULE_ADMIN_UPDATE = 40021L; //修改模块管理员
+    long MODULE_ADMIN_DELETE = 40022L; //删除模块管理员
+
+    long MODULE_CONF_RELATION_LIST = 40023L; //模块配置关系列表
+    long MODULE_CONF_RELATION_CREATE = 40024L; //创建模块配置关系
+    long MODULE_CONF_RELATION_UPDATE = 40025L; //修改模块配置关系
+    long MODULE_CONF_RELATION_DELETE = 40026L; //删除模块配置关系
+
+    // ----------- 物业报修权限 --------------
+    long PMTASK_LIST = 30090L;
+    long PMTASK_AGENCY_SERVICE = 30091L;
+    long PMTASK_SERVICE_CATEGORY_CREATE = 30092L;
+    long PMTASK_SERVICE_CATEGORY_DELETE = 30093L;
+    long PMTASK_DETAIL_CATEGORY_CREATE = 30094L;
+    long PMTASK_DETAIL_CATEGORY_DELETE = 30095L;
+    long PMTASK_TASK_STATISTICS_LIST = 30096L;
+    long PMTASK_ALL_TASK_STATISTICS_LIST = 30097L;
+    
+    // ---------------- 门禁权限 -----------------------
+    long MODULE_ACLINK_MANAGER = 10041L; //公司门禁 管理员
+
+    // 能耗权限
+    long METER_CREATE = 21000L;
+    long METER_BATCHUPDATE = 21001L;
+    long METER_IMPORT = 21002L;
+    long METER_READ = 21003L;
+    long METER_LIST = 21004L;
+    long METER_CHANGE = 21005L;
+    long METER_INACTIVE = 21006L;
+    long METER_READING_SEARCH = 21007L;
+    long METER_READING_DELETE = 21008L;
+    long ENERGY_STAT_BY_DAY = 21009L;
+    long ENERGY_STAT_BY_MONTH = 21010L;
+    long ENERGY_STAT_BY_YEAR = 21011L;
+    long ENERGY_STAT_BY_YOY = 21012L;
+    long ENERGY_SETTING = 21013L;
+    long ENERGY_PLAN_CREATE = 21014L;
+    long ENERGY_PLAN_LIST = 21015L;
+    long ENERGY_PLAN_DELETE = 21016L;
+
 }

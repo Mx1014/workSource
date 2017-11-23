@@ -21,6 +21,8 @@ public class ReviewEquipmentStandardRelationsCommand {
 	
 	@NotNull
 	private String ownerType;
+
+	private Long targetId;
 	@NotNull
 	private Long id;
 	@NotNull
@@ -29,7 +31,15 @@ public class ReviewEquipmentStandardRelationsCommand {
 	private Long standardId;
 	@NotNull
 	private Byte reviewResult;
-	
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
+	}
+
 	public Long getEquipmentId() {
 		return equipmentId;
 	}

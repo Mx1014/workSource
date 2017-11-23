@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>addressId: 门牌id</li>
  * <li>pageAnchor: 分页瞄</li>
  * <li>pageSize: 每页条数</li>
+ * <li>currentOrgId: 当前机构id</li>
  * </ul>
  */
 public class SearchTasksCommand {
@@ -31,6 +32,8 @@ public class SearchTasksCommand {
 	private Long addressId;
 	private Long pageAnchor;
 	private Integer pageSize;
+
+	private  Long currentOrgId;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -110,5 +113,13 @@ public class SearchTasksCommand {
 	}
 	public void setBuildingName(String buildingName) {
 		this.buildingName = buildingName;
+	}
+
+	public Long getCurrentOrgId() {
+		return currentOrgId;
+	}
+
+	public void setCurrentOrgId(Long currentOrgId) {
+		this.currentOrgId = currentOrgId;
 	}
 }

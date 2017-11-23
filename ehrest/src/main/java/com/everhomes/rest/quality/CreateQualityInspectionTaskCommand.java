@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *  <li>templateId: 从模板进入时填模板id</li>
+ *  <li>sampleId: 从例行检查进入时填例行检查id</li>
  *  <li>ownerId: 任务所属的主体id</li>
  *  <li>ownerType: 任务所属的主体，com.everhomes.rest.quality.OwnerType</li>
  *  <li>targetId: 任务所属的项目id</li>
@@ -25,6 +26,8 @@ import com.everhomes.util.StringHelper;
 public class CreateQualityInspectionTaskCommand {
 	
 	private Long templateId;
+
+	private Long sampleId;
 
 	@NotNull
 	private Long ownerId;
@@ -52,7 +55,15 @@ public class CreateQualityInspectionTaskCommand {
 	private Long executorId;
 	
 	private Boolean templateFlag;
-	
+
+	public Long getSampleId() {
+		return sampleId;
+	}
+
+	public void setSampleId(Long sampleId) {
+		this.sampleId = sampleId;
+	}
+
 	public Long getTemplateId() {
 		return templateId;
 	}

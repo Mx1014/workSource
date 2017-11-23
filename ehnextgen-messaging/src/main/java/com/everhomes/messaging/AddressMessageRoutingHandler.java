@@ -1,21 +1,9 @@
 package com.everhomes.messaging;
 
-import java.sql.Timestamp;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.address.AddressMessage;
 import com.everhomes.address.AddressMessageProvider;
-import com.everhomes.address.AddressProvider;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
-import com.everhomes.bus.LocalBusSubscriber.Action;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.family.Family;
@@ -29,10 +17,19 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.server.schema.tables.pojos.EhGroupMembers;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.Name;
 import com.everhomes.util.StringHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.sql.Timestamp;
+import java.util.List;
 
 @Component
 @Name("address")
@@ -125,11 +122,12 @@ public class AddressMessageRoutingHandler implements MessageRoutingHandler, Loca
             ListingLocator locator = new ListingLocator();
             List<AddressMessage> messages = addressMessageProvider.findMessageByAddressId(groupMember.getGroupId(), locator, 100);
             if(null != messages && messages.size() > 0) {
+                String appVersion = UserContext.current().getVersion();
                 for(AddressMessage adMsg : messages) {
                     UserLogin userLogin = new UserLogin(Namespace.DEFAULT_NAMESPACE
                             , Long.parseLong(adMsg.getSenderToken())
                             , adMsg.getSenderLoginId()
-                            , adMsg.getSenderIdentify(), null);
+                            , adMsg.getSenderIdentify(), null, appVersion);
                     MessageDTO msg = (MessageDTO) StringHelper.fromJsonString(adMsg.getMeta(), MessageDTO.class);
                     if(null != msg) {
                         for(MessageChannel mc: msg.getChannels()) {

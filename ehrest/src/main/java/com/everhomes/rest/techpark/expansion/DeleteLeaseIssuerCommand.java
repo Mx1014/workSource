@@ -1,7 +1,11 @@
 package com.everhomes.rest.techpark.expansion;
 
+import com.everhomes.util.StringHelper;
+
 /**
- * Created by Administrator on 2017/3/15.
+ * <ul>
+ * <li>id：id</li>
+ * </ul>
  */
 public class DeleteLeaseIssuerCommand {
     private Long id;
@@ -12,5 +16,10 @@ public class DeleteLeaseIssuerCommand {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

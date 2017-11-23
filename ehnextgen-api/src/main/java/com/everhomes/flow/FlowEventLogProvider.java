@@ -1,12 +1,12 @@
 package com.everhomes.flow;
 
-import java.util.List;
-
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.FlowOperateLogDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
+
+import java.util.List;
 
 public interface FlowEventLogProvider {
 
@@ -26,10 +26,9 @@ public interface FlowEventLogProvider {
 	void createFlowEventLogs(List<FlowEventLog> objs);
 
 	List<FlowCaseDetail> findProcessorFlowCases(ListingLocator locator,
-			int count, SearchFlowCaseCommand cmd);
+                                                int count, SearchFlowCaseCommand cmd, ListingQueryBuilderCallback callback);
 
-	List<FlowEventLog> findEventLogsByNodeId(Long nodeId, Long caseId,
-			Long stepCount, FlowUserType flowUserType);
+	List<FlowEventLog> findEventLogsByNodeId(Long nodeId, Long caseId, Long stepCount, List<FlowUserType> flowUserTypes);
 
 	List<FlowEventLog> findStepEventLogs(Long caseId);
 
@@ -73,4 +72,18 @@ public interface FlowEventLogProvider {
 	List<FlowEventLog> findCurrentNodeEnterLogs(Long nodeId, Long caseId,
 			Long stepCount);
 
+    /**
+     * 查询flowCase的某个节点的最大stepCount
+     */
+    Long findMaxStepCountByNodeEnterLog(Long nodeId, Long caseId);
+
+    FlowEventLog findNodeLastStepTrackerLog(Long nodeId, Long caseId);
+
+    List<FlowEventLog> findStepEventLogs(List<Long> flowCaseIdList);
+
+    List<FlowOperateLogDTO> searchOperateLogs(Long moduleId, Long flowCaseId, Long userId, String serviceType, String keyword, Integer pageSize, ListingLocator locator);
+
+    FlowEventLog isSupervisors(Long userId, FlowCase flowCase);
+
+    List<FlowEventLog> findRejectEventLogsByNodeId(Long nodeId, Long flowCaseId, Long stepCount);
 }

@@ -1,0 +1,1475 @@
+package com.everhomes.customer;
+
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.everhomes.rest.customer.*;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
+import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.jooq.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ReflectionUtils;
+
+import com.everhomes.activity.Activity;
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.address.CommunityAdminStatus;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus;
+import com.everhomes.rest.varField.FieldDTO;
+import com.everhomes.rest.varField.ListFieldCommand;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.sharding.ShardIterator;
+import com.everhomes.sms.DateUtil;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.IterationMapReduceCallback;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.FieldService;
+import com.everhomes.varField.ScopeFieldItem;
+
+/**
+ * Created by ying.xiong on 2017/8/11.
+ */
+@Component
+public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseCustomerProviderImpl.class);
+
+    @Autowired
+    private DbProvider dbProvider;
+
+    @Autowired
+    private SequenceProvider sequenceProvider;
+    
+    @Autowired
+	private LocaleTemplateService localeTemplateService;
+    
+    @Autowired
+    private FieldService fieldService;
+    
+    @Autowired
+    private FieldProvider fieldProvider;
+
+    @Override
+    public void createEnterpriseCustomer(EnterpriseCustomer customer) {
+        LOGGER.info("create customer: {}", StringHelper.toJsonString(customer));
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomers.class));
+        customer.setId(id);
+        customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        customer.setStatus(CommonStatus.ACTIVE.getCode());
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+//        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, id));
+        EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
+        dao.insert(customer);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEnterpriseCustomers.class, null);
+    }
+
+
+	@Override
+    public void updateEnterpriseCustomer(EnterpriseCustomer customer) {
+        LOGGER.debug("updateEnterpriseCustomer customer: {}",
+                StringHelper.toJsonString(customer));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
+        customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(customer);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
+    }
+
+    @Override
+    public void deleteEnterpriseCustomer(EnterpriseCustomer customer) {
+        assert(customer.getId() != null);
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
+        dao.delete(customer);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
+    }
+
+    @Override
+    public List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceType(Integer namespaceId, String namespaceType, Long communityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_CUSTOMER_TYPE.eq(namespaceType));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<EnterpriseCustomer> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, EnterpriseCustomer.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndName(Integer namespaceId, String name) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAME.eq(name));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<EnterpriseCustomer> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, EnterpriseCustomer.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndNumber(Integer namespaceId, String number) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.CUSTOMER_NUMBER.eq(number));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<EnterpriseCustomer> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, EnterpriseCustomer.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public EnterpriseCustomer findById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), EnterpriseCustomer.class);
+    }
+
+    @Override
+    public EnterpriseCustomer findByOrganizationId(Long organizationId) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.ORGANIZATION_ID.eq(organizationId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<EnterpriseCustomer> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, EnterpriseCustomer.class));
+            return null;
+        });
+
+        if(result.size() == 0) {
+            return null;
+        }
+        return result.get(0);
+    }
+
+    @Override
+    public List<EnterpriseCustomer> listEnterpriseCustomers(CrossShardListingLocator locator, Integer pageSize) {
+        List<EnterpriseCustomer> customers = new ArrayList<>();
+
+        if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhEnterpriseCustomers.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+
+            if(locator.getAnchor() != null && locator.getAnchor() != 0L){
+                query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.ID.lt(locator.getAnchor()));
+            }
+
+            query.addOrderBy(Tables.EH_ENTERPRISE_CUSTOMERS.ID.desc());
+            query.addLimit(pageSize - customers.size());
+
+            query.fetch().map((r) -> {
+                customers.add(ConvertHelper.convert(r, EnterpriseCustomer.class));
+                return null;
+            });
+
+            if (customers.size() >= pageSize) {
+                locator.setAnchor(customers.get(customers.size() - 1).getId());
+                return IterationMapReduceCallback.AfterAction.done;
+            } else {
+                locator.setAnchor(null);
+            }
+            return IterationMapReduceCallback.AfterAction.next;
+        });
+
+        return customers;
+    }
+
+    @Override
+    public Map<Long, EnterpriseCustomer> listEnterpriseCustomersByIds(List<Long> ids) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.ID.in(ids));
+
+        Map<Long, EnterpriseCustomer> result = new HashMap<>();
+        query.fetch().map((r) -> {
+            result.put(r.getId(),ConvertHelper.convert(r, EnterpriseCustomer.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public Map<Long, Long> listEnterpriseCustomerSourceByCommunityId(Long communityId) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listEnterpriseCustomerSourceByCommunityId, sql=" + query.getSQL());
+            LOGGER.debug("listEnterpriseCustomerSourceByCommunityId, bindValues=" + query.getBindValues());
+        }
+
+        Map<Long, Long> result = new HashMap<>();
+        query.fetch().map((r) -> {
+            if(result.get(r.getSourceItemId()) == null) {
+                result.put(r.getSourceItemId(), 1L);
+            } else {
+                result.put(r.getSourceItemId(), result.get(r.getSourceItemId()) + 1);
+            }
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public Map<Long, Long> listEnterpriseCustomerIndustryByCommunityId(Long communityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listEnterpriseCustomerIndustryByCommunityId, sql=" + query.getSQL());
+            LOGGER.debug("listEnterpriseCustomerIndustryByCommunityId, bindValues=" + query.getBindValues());
+        }
+
+        Map<Long, Long> result = new HashMap<>();
+        query.fetch().map((r) -> {
+            if(result.get(r.getCorpIndustryItemId()) == null) {
+                result.put(r.getCorpIndustryItemId(), 1L);
+            } else {
+                result.put(r.getCorpIndustryItemId(), result.get(r.getCorpIndustryItemId()) + 1);
+            }
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public List<EnterpriseCustomer> listEnterpriseCustomerByCommunity(Long communityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<EnterpriseCustomer> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, EnterpriseCustomer.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public void createCustomerTalent(CustomerTalent talent) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerTalents.class));
+        talent.setId(id);
+        talent.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        talent.setCreatorUid(UserContext.current().getUser().getId());
+        talent.setStatus(CommonStatus.ACTIVE.getCode());
+
+        LOGGER.info("createCustomerTalent: " + talent);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTalents.class, id));
+        EhCustomerTalentsDao dao = new EhCustomerTalentsDao(context.configuration());
+        dao.insert(talent);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerTalents.class, null);
+    }
+
+    @Override
+    public void deleteCustomerTalent(CustomerTalent talent) {
+        assert(talent.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTalents.class, talent.getId()));
+        EhCustomerTalentsDao dao = new EhCustomerTalentsDao(context.configuration());
+        dao.delete(talent);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerTalents.class, talent.getId());
+    }
+
+    @Override
+    public CustomerTalent findCustomerTalentById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerTalentsDao dao = new EhCustomerTalentsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerTalent.class);
+    }
+
+    @Override
+    public void updateCustomerTalent(CustomerTalent talent) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTalents.class, talent.getId()));
+        EhCustomerTalentsDao dao = new EhCustomerTalentsDao(context.configuration());
+
+        talent.setOperatorUid(UserContext.current().getUser().getId());
+        talent.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(talent);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerTalents.class, talent.getId());
+    }
+
+    @Override
+    public List<CustomerTalent> listCustomerTalentsByCustomerId(Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerTalentsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TALENTS);
+        query.addConditions(Tables.EH_CUSTOMER_TALENTS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_TALENTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerTalent> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerTalent.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public Map<Long, Long> listCustomerTalentCountByCustomerIds(List<Long> customerIds) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerTalentsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TALENTS);
+        query.addConditions(Tables.EH_CUSTOMER_TALENTS.CUSTOMER_ID.in(customerIds));
+        query.addConditions(Tables.EH_CUSTOMER_TALENTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listGroupCustomerTalentsByCustomerIds, sql=" + query.getSQL());
+            LOGGER.debug("listGroupCustomerTalentsByCustomerIds, bindValues=" + query.getBindValues());
+        }
+
+        Map<Long, Long> result = new HashMap<>();
+        query.fetch().map((r) -> {
+            if(result.get(r.getIndividualEvaluationItemId()) == null) {
+                result.put(r.getIndividualEvaluationItemId(), 1L);
+            } else {
+                result.put(r.getIndividualEvaluationItemId(), result.get(r.getIndividualEvaluationItemId()) + 1);
+            }
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public void createCustomerApplyProject(CustomerApplyProject project) {
+
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerApplyProjects.class));
+        project.setId(id);
+        project.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        project.setCreateUid(UserContext.current().getUser().getId());
+//        project.setStatus(CommonStatus.ACTIVE.getCode());
+
+        LOGGER.info("createCustomerApplyProject: " + project);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerApplyProjects.class, id));
+        EhCustomerApplyProjectsDao dao = new EhCustomerApplyProjectsDao(context.configuration());
+        dao.insert(project);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerApplyProjects.class, null);
+    }
+
+    @Override
+    public void createCustomerCommercial(CustomerCommercial commercial) {
+
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerCommercials.class));
+        commercial.setId(id);
+        commercial.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        commercial.setCreateUid(UserContext.current().getUser().getId());
+        commercial.setStatus(CommonStatus.ACTIVE.getCode());
+
+        LOGGER.info("createCustomerCommercial: " + commercial);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerCommercials.class, id));
+        EhCustomerCommercialsDao dao = new EhCustomerCommercialsDao(context.configuration());
+        dao.insert(commercial);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerCommercials.class, null);
+    }
+
+    @Override
+    public void createCustomerEconomicIndicator(CustomerEconomicIndicator economicIndicator) {
+
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerEconomicIndicators.class));
+        economicIndicator.setId(id);
+        economicIndicator.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        economicIndicator.setCreateUid(UserContext.current().getUser().getId());
+        economicIndicator.setStatus(CommonStatus.ACTIVE.getCode());
+
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEconomicIndicators.class));
+        EhCustomerEconomicIndicatorsDao dao = new EhCustomerEconomicIndicatorsDao(context.configuration());
+        dao.insert(economicIndicator);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerEconomicIndicators.class, id);
+    }
+
+    @Override
+    public void createCustomerEconomicIndicatorStatistic(CustomerEconomicIndicatorStatistic statistic) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerEconomicIndicatorStatistics.class));
+        statistic.setId(id);
+        statistic.setStatus(CommonStatus.ACTIVE.getCode());
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEconomicIndicatorStatistics.class));
+        EhCustomerEconomicIndicatorStatisticsDao dao = new EhCustomerEconomicIndicatorStatisticsDao(context.configuration());
+        dao.insert(statistic);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerEconomicIndicatorStatistics.class, id);
+    }
+
+    @Override
+    public void updateCustomerEconomicIndicatorStatistic(CustomerEconomicIndicatorStatistic statistic) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEconomicIndicatorStatistics.class));
+        EhCustomerEconomicIndicatorStatisticsDao dao = new EhCustomerEconomicIndicatorStatisticsDao(context.configuration());
+
+        dao.update(statistic);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerEconomicIndicatorStatistics.class, statistic.getId());
+    }
+
+    @Override
+    public void deleteCustomerEconomicIndicatorStatistic(CustomerEconomicIndicatorStatistic statistic) {
+        assert(statistic.getId() != null);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEconomicIndicatorStatistics.class, statistic.getId()));
+        EhCustomerEconomicIndicatorStatisticsDao dao = new EhCustomerEconomicIndicatorStatisticsDao(context.configuration());
+        dao.delete(statistic);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerEconomicIndicatorStatistics.class, statistic.getId());
+
+    }
+
+    @Override
+    public CustomerEconomicIndicatorStatistic listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(Long customerId, Timestamp time) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerEconomicIndicatorStatisticsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS);
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.START_TIME.le(time));
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.END_TIME.ge(time));
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerEconomicIndicatorStatistic> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerEconomicIndicatorStatistic.class));
+            return null;
+        });
+        if(result.size() == 0) {
+            return null;
+        }
+        return result.get(0);
+    }
+
+    @Override
+    public void createCustomerInvestment(CustomerInvestment investment) {
+
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerInvestments.class));
+        investment.setId(id);
+        investment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        investment.setCreateUid(UserContext.current().getUser().getId());
+        investment.setStatus(CommonStatus.ACTIVE.getCode());
+
+        LOGGER.info("createCustomerInvestment: " + investment);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerInvestments.class, id));
+        EhCustomerInvestmentsDao dao = new EhCustomerInvestmentsDao(context.configuration());
+        dao.insert(investment);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerInvestments.class, null);
+    }
+
+    @Override
+    public void createCustomerPatent(CustomerPatent patent) {
+
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerPatents.class));
+        patent.setId(id);
+        patent.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        patent.setCreateUid(UserContext.current().getUser().getId());
+        patent.setStatus(CommonStatus.ACTIVE.getCode());
+
+        LOGGER.info("createCustomerPatent: " + patent);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerPatents.class, id));
+        EhCustomerPatentsDao dao = new EhCustomerPatentsDao(context.configuration());
+        dao.insert(patent);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerPatents.class, null);
+    }
+
+    @Override
+    public void createCustomerTrademark(CustomerTrademark trademark) {
+
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerTrademarks.class));
+        trademark.setId(id);
+        trademark.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        trademark.setCreateUid(UserContext.current().getUser().getId());
+        trademark.setStatus(CommonStatus.ACTIVE.getCode());
+
+        LOGGER.info("createCustomerTrademark: " + trademark);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTrademarks.class, id));
+        EhCustomerTrademarksDao dao = new EhCustomerTrademarksDao(context.configuration());
+        dao.insert(trademark);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerTrademarks.class, null);
+    }
+
+    @Override
+    public void deleteCustomerApplyProject(CustomerApplyProject project) {
+        assert(project.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerApplyProjects.class, project.getId()));
+        EhCustomerApplyProjectsDao dao = new EhCustomerApplyProjectsDao(context.configuration());
+        dao.delete(project);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerApplyProjects.class, project.getId());
+
+    }
+
+    @Override
+    public void deleteCustomerCommercial(CustomerCommercial commercial) {
+        assert(commercial.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerCommercials.class, commercial.getId()));
+        EhCustomerCommercialsDao dao = new EhCustomerCommercialsDao(context.configuration());
+        dao.delete(commercial);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerCommercials.class, commercial.getId());
+
+    }
+
+    @Override
+    public void deleteCustomerEconomicIndicator(CustomerEconomicIndicator economicIndicator) {
+        assert(economicIndicator.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEconomicIndicators.class, economicIndicator.getId()));
+        EhCustomerEconomicIndicatorsDao dao = new EhCustomerEconomicIndicatorsDao(context.configuration());
+        dao.delete(economicIndicator);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerEconomicIndicators.class, economicIndicator.getId());
+
+    }
+
+    @Override
+    public void deleteCustomerInvestment(CustomerInvestment investment) {
+        assert(investment.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerInvestments.class, investment.getId()));
+        EhCustomerInvestmentsDao dao = new EhCustomerInvestmentsDao(context.configuration());
+        dao.delete(investment);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerInvestments.class, investment.getId());
+
+    }
+
+    @Override
+    public void deleteCustomerPatent(CustomerPatent patent) {
+        assert(patent.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerPatents.class, patent.getId()));
+        EhCustomerPatentsDao dao = new EhCustomerPatentsDao(context.configuration());
+        dao.delete(patent);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerPatents.class, patent.getId());
+
+    }
+
+    @Override
+    public void deleteCustomerTrademark(CustomerTrademark trademark) {
+        assert(trademark.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTrademarks.class, trademark.getId()));
+        EhCustomerTrademarksDao dao = new EhCustomerTrademarksDao(context.configuration());
+        dao.delete(trademark);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerTrademarks.class, trademark.getId());
+
+    }
+
+    @Override
+    public CustomerApplyProject findCustomerApplyProjectById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerApplyProjectsDao dao = new EhCustomerApplyProjectsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerApplyProject.class);
+    }
+
+    @Override
+    public CustomerCommercial findCustomerCommercialById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerCommercialsDao dao = new EhCustomerCommercialsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerCommercial.class);
+    }
+
+    @Override
+    public CustomerEconomicIndicator findCustomerEconomicIndicatorById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerEconomicIndicatorsDao dao = new EhCustomerEconomicIndicatorsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerEconomicIndicator.class);
+    }
+
+    @Override
+    public CustomerInvestment findCustomerInvestmentById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerInvestmentsDao dao = new EhCustomerInvestmentsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerInvestment.class);
+    }
+
+    @Override
+    public CustomerPatent findCustomerPatentById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerPatentsDao dao = new EhCustomerPatentsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerPatent.class);
+    }
+
+    @Override
+    public CustomerTrademark findCustomerTrademarkById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerTrademarksDao dao = new EhCustomerTrademarksDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerTrademark.class);
+    }
+
+    @Override
+    public List<CustomerApplyProject> listCustomerApplyProjectsByCustomerId(Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerApplyProjectsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_APPLY_PROJECTS);
+        query.addConditions(Tables.EH_CUSTOMER_APPLY_PROJECTS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_APPLY_PROJECTS.STATUS.ne(CommonStatus.INACTIVE.getCode()));
+
+        List<CustomerApplyProject> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerApplyProject.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public Map<Long, CustomerProjectStatisticsDTO> listCustomerApplyProjectsByCustomerIds(List<Long> customerIds) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerApplyProjectsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_APPLY_PROJECTS);
+        query.addConditions(Tables.EH_CUSTOMER_APPLY_PROJECTS.CUSTOMER_ID.in(customerIds));
+        query.addConditions(Tables.EH_CUSTOMER_APPLY_PROJECTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        Map<Long, CustomerProjectStatisticsDTO> result = new HashMap<>();
+        query.fetch().map((r) -> {
+            if(r != null && r.getProjectSource() != null) {
+                String[] ids = r.getProjectSource().split(",");
+                for(String id : ids) {
+                    BigDecimal projectAmount = r.getProjectAmount() == null ? BigDecimal.ZERO : r.getProjectAmount();
+                    if(result.get(Long.valueOf(id)) == null) {
+                        CustomerProjectStatisticsDTO dto = new CustomerProjectStatisticsDTO();
+                        dto.setProjectAmount(projectAmount);
+                        dto.setProjectCount(1L);
+                        dto.setProjectSourceItemId(Long.valueOf(id));
+                        result.put(Long.valueOf(id), dto);
+                    } else {
+                        CustomerProjectStatisticsDTO dto = result.get(Long.valueOf(id));
+                        BigDecimal oldAmount = dto.getProjectAmount() == null ? BigDecimal.ZERO : dto.getProjectAmount();
+                        dto.setProjectAmount(oldAmount.add(projectAmount));
+                        dto.setProjectCount(dto.getProjectCount() + 1);
+                        result.put(Long.valueOf(id), dto);
+                    }
+                }
+            }
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public List<CustomerCommercial> listCustomerCommercialsByCustomerId(Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerCommercialsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_COMMERCIALS);
+        query.addConditions(Tables.EH_CUSTOMER_COMMERCIALS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_COMMERCIALS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerCommercial> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerCommercial.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerId(Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerEconomicIndicatorsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS);
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerEconomicIndicator> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerEconomicIndicator.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerId(Long customerId, Timestamp startTime, Timestamp endTime) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerEconomicIndicatorsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS);
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.MONTH.ge(startTime));
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.MONTH.le(endTime));
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerEconomicIndicator> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerEconomicIndicator.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerIds(List<Long> customerIds) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerEconomicIndicatorsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS);
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.CUSTOMER_ID.in(customerIds));
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerEconomicIndicator> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerEconomicIndicator.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public List<CustomerAnnualStatisticDTO> listCustomerAnnualStatistics(Long communityId, Timestamp now, CrossShardListingLocator locator, Integer pageSize,
+               BigDecimal turnoverMinimum, BigDecimal turnoverMaximum, BigDecimal taxPaymentMinimum, BigDecimal taxPaymentMaximum) {
+        Integer size = pageSize + 1;
+        List<CustomerAnnualStatisticDTO> result = new ArrayList<>();
+        dbProvider.mapReduce(AccessSpec.readOnly(), null,
+                (DSLContext context, Object reducingContext) -> {
+                    SelectQuery<Record> query = context.selectQuery();
+                    query.addSelect(Tables.EH_ENTERPRISE_CUSTOMERS.ID,Tables.EH_ENTERPRISE_CUSTOMERS.NAME,
+                            Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.TURNOVER,
+                            Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.TAX_PAYMENT);
+                    query.addFrom(Tables.EH_ENTERPRISE_CUSTOMERS);
+                    query.addJoin(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS, JoinType.LEFT_OUTER_JOIN,
+                            Tables.EH_ENTERPRISE_CUSTOMERS.ID.eq(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.CUSTOMER_ID));
+
+                    query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(communityId));
+                    query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+                    query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.START_TIME.le(now));
+                    query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.END_TIME.ge(now));
+
+                    if(turnoverMinimum != null) {
+                        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.TURNOVER.ge(turnoverMinimum));
+                    }
+                    if(turnoverMaximum != null) {
+                        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.TURNOVER.le(turnoverMaximum));
+                    }
+                    if(taxPaymentMinimum != null) {
+                        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.TAX_PAYMENT.ge(taxPaymentMinimum));
+                    }
+                    if(taxPaymentMaximum != null) {
+                        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.TAX_PAYMENT.le(taxPaymentMaximum));
+                    }
+                    if (null != locator && null != locator.getAnchor())
+                        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.ID.lt(locator.getAnchor()));
+
+                    query.addOrderBy(Tables.EH_ENTERPRISE_CUSTOMERS.ID.desc());
+                    query.addLimit(size);
+                    LOGGER.debug("query sql:{}", query.getSQL());
+                    LOGGER.debug("query param:{}", query.getBindValues());
+                    query.fetch().map((r) -> {
+                        CustomerAnnualStatisticDTO statisticDTO = new CustomerAnnualStatisticDTO();
+                        statisticDTO.setEnterpriseCustomerId(r.getValue(Tables.EH_ENTERPRISE_CUSTOMERS.ID));
+                        statisticDTO.setEnterpriseCustomerName(r.getValue(Tables.EH_ENTERPRISE_CUSTOMERS.NAME));
+                        statisticDTO.setTurnover(r.getValue(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.TURNOVER));
+                        statisticDTO.setTaxPayment(r.getValue(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.TAX_PAYMENT));
+                        result.add(statisticDTO);
+                        return null;
+                    });
+                    return true;
+                });
+
+        locator.setAnchor(null);
+        if (result.size() > pageSize) {
+            result.remove(result.size() - 1);
+            locator.setAnchor(result.get(result.size() - 1).getEnterpriseCustomerId());
+        }
+
+        return result;
+    }
+
+    @Override
+    public List<CustomerInvestment> listCustomerInvestmentsByCustomerId(Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerInvestmentsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_INVESTMENTS);
+        query.addConditions(Tables.EH_CUSTOMER_INVESTMENTS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_INVESTMENTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerInvestment> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerInvestment.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public List<CustomerPatent> listCustomerPatentsByCustomerId(Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerPatentsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_PATENTS);
+        query.addConditions(Tables.EH_CUSTOMER_PATENTS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_PATENTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerPatent> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerPatent.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public Map<Long, Long> listCustomerPatentsByCustomerIds(List<Long> customerIds) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerPatentsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_PATENTS);
+        query.addConditions(Tables.EH_CUSTOMER_PATENTS.CUSTOMER_ID.in(customerIds));
+        query.addConditions(Tables.EH_CUSTOMER_PATENTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        Map<Long, Long> result = new HashMap<>();
+        query.fetch().map((r) -> {
+            if(result.get(r.getPatentStatusItemId()) == null) {
+                result.put(r.getPatentStatusItemId(), 1L);
+            } else {
+                result.put(r.getPatentStatusItemId(), result.get(r.getPatentStatusItemId()) + 1);
+            }
+            return null;
+        });
+        return result;
+    }
+
+    @Override
+    public List<CustomerTrademark> listCustomerTrademarksByCustomerId(Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerTrademarksRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TRADEMARKS);
+        query.addConditions(Tables.EH_CUSTOMER_TRADEMARKS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_TRADEMARKS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerTrademark> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerTrademark.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public Long countTrademarksByCustomerIds(List<Long> customerIds) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectCount().from(Tables.EH_CUSTOMER_TRADEMARKS)
+                .where(Tables.EH_CUSTOMER_TRADEMARKS.CUSTOMER_ID.in(customerIds))
+                .and(Tables.EH_CUSTOMER_TRADEMARKS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                .fetchAnyInto(Long.class);
+    }
+
+    @Override
+    public Long countCertificatesByCustomerIds(List<Long> customerIds) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectCount().from(Tables.EH_CUSTOMER_CERTIFICATES)
+                .where(Tables.EH_CUSTOMER_CERTIFICATES.CUSTOMER_ID.in(customerIds))
+                .and(Tables.EH_CUSTOMER_CERTIFICATES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                .fetchAnyInto(Long.class);
+    }
+
+    @Override
+    public void updateCustomerApplyProject(CustomerApplyProject project) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerApplyProjects.class, project.getId()));
+        EhCustomerApplyProjectsDao dao = new EhCustomerApplyProjectsDao(context.configuration());
+
+        project.setOperatorUid(UserContext.current().getUser().getId());
+        project.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(project);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerApplyProjects.class, project.getId());
+    }
+
+    @Override
+    public void updateCustomerCommercial(CustomerCommercial commercial) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerCommercials.class, commercial.getId()));
+        EhCustomerCommercialsDao dao = new EhCustomerCommercialsDao(context.configuration());
+
+        commercial.setOperatorUid(UserContext.current().getUser().getId());
+        commercial.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(commercial);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerCommercials.class, commercial.getId());
+    }
+
+    @Override
+    public void updateCustomerEconomicIndicator(CustomerEconomicIndicator economicIndicator) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEconomicIndicators.class));
+        EhCustomerEconomicIndicatorsDao dao = new EhCustomerEconomicIndicatorsDao(context.configuration());
+
+        economicIndicator.setOperatorUid(UserContext.current().getUser().getId());
+        economicIndicator.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(economicIndicator);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerEconomicIndicators.class, economicIndicator.getId());
+    }
+
+    @Override
+    public void updateCustomerInvestment(CustomerInvestment investment) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerInvestments.class, investment.getId()));
+        EhCustomerInvestmentsDao dao = new EhCustomerInvestmentsDao(context.configuration());
+
+        investment.setOperatorUid(UserContext.current().getUser().getId());
+        investment.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(investment);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerInvestments.class, investment.getId());
+    }
+
+    @Override
+    public void updateCustomerPatent(CustomerPatent patent) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerPatents.class, patent.getId()));
+        EhCustomerPatentsDao dao = new EhCustomerPatentsDao(context.configuration());
+
+        patent.setOperatorUid(UserContext.current().getUser().getId());
+        patent.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(patent);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerPatents.class, patent.getId());
+    }
+
+    @Override
+    public void updateCustomerTrademark(CustomerTrademark trademark) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTrademarks.class, trademark.getId()));
+        EhCustomerTrademarksDao dao = new EhCustomerTrademarksDao(context.configuration());
+
+        trademark.setOperatorUid(UserContext.current().getUser().getId());
+        trademark.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(trademark);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerTrademarks.class, trademark.getId());
+    }
+
+    @Override
+    public void createCustomerCertificate(CustomerCertificate certificate) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerCertificates.class));
+        certificate.setId(id);
+        certificate.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        certificate.setCreateUid(UserContext.current().getUser().getId());
+        certificate.setStatus(CommonStatus.ACTIVE.getCode());
+
+        LOGGER.info("createCustomerCertificate: " + certificate);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerCertificates.class, id));
+        EhCustomerCertificatesDao dao = new EhCustomerCertificatesDao(context.configuration());
+        dao.insert(certificate);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerCertificates.class, null);
+    }
+
+    @Override
+    public void deleteCustomerCertificate(CustomerCertificate certificate) {
+        assert(certificate.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerCertificates.class, certificate.getId()));
+        EhCustomerCertificatesDao dao = new EhCustomerCertificatesDao(context.configuration());
+        dao.delete(certificate);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerCertificates.class, certificate.getId());
+    }
+
+    @Override
+    public CustomerCertificate findCustomerCertificateById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerCertificatesDao dao = new EhCustomerCertificatesDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerCertificate.class);
+    }
+
+    @Override
+    public List<CustomerCertificate> listCustomerCertificatesByCustomerId(Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerCertificatesRecord> query = context.selectQuery(Tables.EH_CUSTOMER_CERTIFICATES);
+        query.addConditions(Tables.EH_CUSTOMER_CERTIFICATES.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_CERTIFICATES.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerCertificate> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerCertificate.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public void updateCustomerCertificate(CustomerCertificate certificate) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerCertificates.class, certificate.getId()));
+        EhCustomerCertificatesDao dao = new EhCustomerCertificatesDao(context.configuration());
+
+        certificate.setOperatorUid(UserContext.current().getUser().getId());
+        certificate.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(certificate);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerCertificates.class, certificate.getId());
+    }
+
+	@Override
+	public void createCustomerTracking(CustomerTracking tracking) {
+	    long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerTrackings.class));
+	    tracking.setId(id);
+	    tracking.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	    tracking.setCreatorUid(UserContext.current().getUser().getId());
+	    tracking.setStatus(CommonStatus.ACTIVE.getCode());
+
+        LOGGER.info("createCustomerTracking: " + tracking);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTrackings.class, id));
+        EhCustomerTrackingsDao dao = new EhCustomerTrackingsDao(context.configuration());
+        dao.insert(tracking);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerTrackings.class, null);
+	}
+
+	@Override
+	public CustomerTracking findCustomerTrackingById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerTrackingsDao dao = new EhCustomerTrackingsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerTracking.class);
+	}
+
+	@Override
+	public void deleteCustomerTracking(CustomerTracking tracking) {
+		assert(tracking.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTrackings.class, tracking.getId()));
+        context.update(Tables.EH_CUSTOMER_TRACKINGS)
+        	   .set(Tables.EH_CUSTOMER_TRACKINGS.STATUS,CommonStatus.INACTIVE.getCode())
+        	   .set(Tables.EH_CUSTOMER_TRACKINGS.DELETE_UID,UserContext.current().getUser().getId())
+        	   .set(Tables.EH_CUSTOMER_TRACKINGS.DELETE_TIME , new Timestamp(DateHelper.currentGMTTime().getTime()))
+        	   .where(Tables.EH_CUSTOMER_TRACKINGS.ID.eq(tracking.getId()))
+        	   .execute();
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerTrackings.class, tracking.getId());
+	}
+
+	@Override
+	public void updateCustomerTracking(CustomerTracking tracking) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTrackings.class, tracking.getId()));
+        EhCustomerTrackingsDao dao = new EhCustomerTrackingsDao(context.configuration());
+
+        tracking.setUpdateUid(UserContext.current().getUser().getId());
+        tracking.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(tracking);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerTrackings.class, tracking.getId());
+	}
+
+	@Override
+	public List<CustomerTracking> listCustomerTrackingsByCustomerId(Long customerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerTrackingsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TRACKINGS);
+        query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.TRACKING_UID.eq(UserContext.currentUserId()));
+        List<CustomerTracking> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerTracking.class));
+            return null;
+        });
+        return result;
+	}
+
+	@Override
+	public void createCustomerTrackingPlan(CustomerTrackingPlan plan) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerTrackingPlans.class));
+		plan.setId(id);
+		plan.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		plan.setCreatorUid(UserContext.current().getUser().getId());
+		plan.setStatus(CommonStatus.ACTIVE.getCode());
+
+        LOGGER.info("createCustomerTrackingPlan: " + plan);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTrackingPlans.class, id));
+        EhCustomerTrackingPlansDao dao = new EhCustomerTrackingPlansDao(context.configuration());
+        dao.insert(plan);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerTrackingPlans.class, null);
+	}
+
+	@Override
+	public CustomerTrackingPlan findCustomerTrackingPlanById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerTrackingPlansDao dao = new EhCustomerTrackingPlansDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerTrackingPlan.class);
+	}
+
+	@Override
+	public void deleteCustomerTrackingPlan(CustomerTrackingPlan plan) {
+		assert(plan.getId() != null);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTrackingPlans.class, plan.getId()));
+        context.update(Tables.EH_CUSTOMER_TRACKING_PLANS)
+        	   .set(Tables.EH_CUSTOMER_TRACKING_PLANS.STATUS,CommonStatus.INACTIVE.getCode())
+        	   .set(Tables.EH_CUSTOMER_TRACKING_PLANS.DELETE_UID,UserContext.current().getUser().getId())
+        	   .set(Tables.EH_CUSTOMER_TRACKING_PLANS.DELETE_TIME , new Timestamp(DateHelper.currentGMTTime().getTime()))
+        	   .where(Tables.EH_CUSTOMER_TRACKING_PLANS.ID.eq(plan.getId()))
+        	   .execute();
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerTrackingPlans.class, plan.getId());
+	}
+
+	@Override
+	public void updateCustomerTrackingPlan(CustomerTrackingPlan plan) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTrackingPlans.class, plan.getId()));
+        EhCustomerTrackingPlansDao dao = new EhCustomerTrackingPlansDao(context.configuration());
+
+        plan.setUpdateUid(UserContext.current().getUser().getId());
+        plan.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(plan);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerTrackingPlans.class, plan.getId());
+	}
+
+	@Override
+	public List<CustomerTrackingPlan> listCustomerTrackingPlans(Long customerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerTrackingPlansRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TRACKING_PLANS);
+        query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.CREATOR_UID.eq(UserContext.currentUserId()));
+        
+        List<CustomerTrackingPlan> result = new ArrayList<CustomerTrackingPlan>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerTrackingPlan.class));
+            return null;
+        });
+        return result;
+	}
+
+
+	@Override
+	public void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerEvents.class));
+		CustomerEvent event = new CustomerEvent(); 
+		event.setId(id);
+		event.setNamespaceId(UserContext.getCurrentNamespaceId());
+		event.setCustomerType(CustomerType.ENTERPRISE.getCode());
+		event.setCustomerId(customer.getId());
+		event.setCustomerName(customer.getName());
+		event.setContactName(customer.getContactName());
+		String content = null;
+		switch(i){
+		case 1 : 
+			content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.ADD , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+			break;
+		case 2 :
+			content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.DELETE , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+			break;
+		case 3 :
+			content = compareEnterpriseCustomer(customer,exist);
+			break;
+		default :break;
+		}
+		if(StringUtils.isNotEmpty(content)){
+			event.setContent(content);
+			event.setCreatorUid(UserContext.currentUserId());
+			event.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEvents.class, id));
+	        EhCustomerEventsDao dao = new EhCustomerEventsDao(context.configuration());
+	        LOGGER.info("saveCustomerEventWithInsert: " + event);
+	        dao.insert(event);
+	        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerEvents.class, null);
+		}
+	}
+
+
+	@Override
+	public List<CustomerEvent> listCustomerEvents(Long customerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerEventsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_EVENTS);
+        query.addConditions(Tables.EH_CUSTOMER_EVENTS.CUSTOMER_ID.eq(customerId));
+        List<CustomerEvent> result = new ArrayList<CustomerEvent>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerEvent.class));
+            return null;
+        });
+        return result;
+	}
+	
+	private String compareEnterpriseCustomer(EnterpriseCustomer customer, EnterpriseCustomer exist) {
+		//查出模板配置的参数
+		ListFieldCommand command = new ListFieldCommand();
+		command.setNamespaceId(CustomerTrackingTemplateCode.NAMESPACE);
+		command.setModuleName(CustomerTrackingTemplateCode.MODULE_NAME);
+		command.setGroupPath(CustomerTrackingTemplateCode.GROUP_PATH);
+		command.setCommunityId(customer.getCommunityId());
+		List<FieldDTO> fields = fieldService.listFields(command);
+		String  getPrefix = "get";
+		StringBuffer buffer = new StringBuffer();
+		if(null != fields && fields.size() > 0){
+			for(FieldDTO field : fields){
+				String getter = getPrefix + StringUtils.capitalize(field.getFieldName());
+				Method methodNew = ReflectionUtils.findMethod(customer.getClass(), getter);
+				Method methodOld = ReflectionUtils.findMethod(exist.getClass(), getter);
+				Object objNew = null;
+				Object objOld = null;
+				try {
+					if(null != methodNew && null != exist){
+						objNew = methodNew.invoke(customer, new Object[] {});
+						objOld = methodOld.invoke(exist, new Object[] {});
+					}
+				} catch (Exception e) {
+					throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_TRACKING_NOT_EXIST,
+		                    "reflect exception");
+				}
+				if(null != objNew || null != objOld){
+					if(!(objNew == null ? "" : objNew).equals((objOld == null ? "" : objOld))){
+						String  content = "";
+						String  newData = objNew == null ? "null" : objNew.toString();
+						String  oldData = objOld == null ? "null" : objOld.toString();
+						if(field.getFieldName().lastIndexOf("ItemId") > -1){
+							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
+					        if(levelItemNew != null) {
+					        	newData = levelItemNew.getItemDisplayName();
+					        }
+					        ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),customer.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
+					        if(levelItemOld != null) {
+					        	oldData = levelItemOld.getItemDisplayName();
+					        }
+						}
+						if("propertyType".equals(field.getFieldName())){
+							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
+					        if(levelItemNew != null) {
+					        	newData = levelItemNew.getItemDisplayName();
+					        }
+					        ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),customer.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
+					        if(levelItemOld != null) {
+					        	oldData = levelItemOld.getItemDisplayName();
+					        }
+						}
+						Map<String,Object> map = new HashMap<String,Object>();
+						map.put("display", field.getFieldDisplayName());
+						map.put("oldData", oldData);
+						map.put("newData", newData);
+						content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.UPDATE , UserContext.current().getUser().getLocale(), map, "");
+						buffer.append(content);
+						buffer.append(";");
+					}
+				}
+			}
+		}
+		return buffer.toString().length() > 0 ? buffer.toString().substring(0,buffer.toString().length() -1) : buffer.toString();
+	}
+
+
+	@Override
+	public void allotEnterpriseCustomer(EnterpriseCustomer customer) {
+		assert(customer.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, customer.getId()));
+        context.update(Tables.EH_ENTERPRISE_CUSTOMERS)
+        	   .set(Tables.EH_ENTERPRISE_CUSTOMERS.TRACKING_UID, customer.getTrackingUid())
+        	   .set(Tables.EH_ENTERPRISE_CUSTOMERS.TRACKING_NAME,customer.getTrackingName())
+        	   .where(Tables.EH_ENTERPRISE_CUSTOMERS.ID.eq(customer.getId()))
+        	   .execute();
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
+	}
+
+
+	@Override
+	public void giveUpEnterpriseCustomer(EnterpriseCustomer customer) {
+		assert(customer.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, customer.getId()));
+        context.update(Tables.EH_ENTERPRISE_CUSTOMERS)
+        	   .set(Tables.EH_ENTERPRISE_CUSTOMERS.TRACKING_UID, -1l)
+        	   .set(Tables.EH_ENTERPRISE_CUSTOMERS.TRACKING_NAME, "")
+        	   .where(Tables.EH_ENTERPRISE_CUSTOMERS.ID.eq(customer.getId()))
+        	   .execute();
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
+	}
+
+
+	@Override
+	public List<EnterpriseCustomerDTO> findEnterpriseCustomersByDistance(ListNearbyEnterpriseCustomersCommand cmd , ListingLocator locator , int pageSize) {
+		List<EnterpriseCustomerDTO> list = new ArrayList<EnterpriseCustomerDTO>();
+	        String geoHashStr = GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude()).substring(0, 6);
+	        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhEnterpriseCustomers.class), null,
+	                (DSLContext context, Object reducingContext)-> {
+	                    String likeVal = geoHashStr + "%";
+	                    Condition cond = Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode());
+	                    cond = cond.and(Tables.EH_ENTERPRISE_CUSTOMERS.GEOHASH.like(likeVal));
+	                    cond = cond.and(Tables.EH_ENTERPRISE_CUSTOMERS.ID.ge(locator.getAnchor()));
+	                    SelectOffsetStep<Record> query = context.select().from(Tables.EH_ENTERPRISE_CUSTOMERS)
+	    	        		    .where(cond).limit(pageSize);
+	                    if(LOGGER.isDebugEnabled()) {
+		                    LOGGER.debug("Query enterpriseCustomer nearby, sql=" + query.getSQL());
+		                    LOGGER.debug("Query enterpriseCustomer nearby, bindValues=" + query.getBindValues());
+		                }
+	                    query.fetch().map((r) -> {
+	                    EnterpriseCustomerDTO customerDTO = ConvertHelper.convert(r, EnterpriseCustomerDTO.class);
+	                    list.add(customerDTO);
+	                    	return null;
+	                    });
+
+	                return true;
+	                
+	            });
+	        return list;
+	}
+
+
+	@Override
+	public boolean updateTrackingPlanNotify(Long recordId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTrackingPlans.class));
+
+        int effect = context.update(Tables.EH_CUSTOMER_TRACKING_PLANS)
+                .set(Tables.EH_CUSTOMER_TRACKING_PLANS.NOTIFY_STATUS, TrackingPlanNotifyStatus.ALREADY_SENDED.getCode())
+                .where(Tables.EH_CUSTOMER_TRACKING_PLANS.NOTIFY_STATUS.eq(TrackingPlanNotifyStatus.WAITING_FOR_SEND_OUT.getCode())
+                .and(Tables.EH_CUSTOMER_TRACKING_PLANS.ID.eq(recordId)))
+                .execute();
+
+        if(effect > 0) {
+            return true;
+        }
+
+        return false;
+	}
+
+
+	@Override
+	public List<CustomerTrackingPlan> listWaitNotifyTrackingPlans(Timestamp queryStartTime, Timestamp queryEndTime) {
+		List<CustomerTrackingPlan> plans = new ArrayList<>();
+		List<CustomerTrackingPlan> futurePlan =  dbProvider.getDslContext(AccessSpec.readOnly())
+				.select()
+				.from(Tables.EH_CUSTOMER_TRACKING_PLANS)
+				.where(Tables.EH_CUSTOMER_TRACKING_PLANS.NOTIFY_STATUS.eq(TrackingPlanNotifyStatus.WAITING_FOR_SEND_OUT.getCode()))
+				.and(Tables.EH_CUSTOMER_TRACKING_PLANS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.and(Tables.EH_CUSTOMER_TRACKING_PLANS.NOTIFY_TIME.gt(queryStartTime))
+				.and(Tables.EH_CUSTOMER_TRACKING_PLANS.NOTIFY_TIME.le(queryEndTime))
+				.fetch()
+				.map(r->ConvertHelper.convert(r, CustomerTrackingPlan.class));
+		List<CustomerTrackingPlan> passPlan =  dbProvider.getDslContext(AccessSpec.readOnly())
+				.select()
+				.from(Tables.EH_CUSTOMER_TRACKING_PLANS)
+				.where(Tables.EH_CUSTOMER_TRACKING_PLANS.NOTIFY_STATUS.eq(TrackingPlanNotifyStatus.WAITING_FOR_SEND_OUT.getCode()))
+				.and(Tables.EH_CUSTOMER_TRACKING_PLANS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.and(Tables.EH_CUSTOMER_TRACKING_PLANS.NOTIFY_TIME.le(queryStartTime))
+				.fetch()
+				.map(r->ConvertHelper.convert(r, CustomerTrackingPlan.class));
+		plans.addAll(futurePlan);
+		plans.addAll(passPlan);
+		return plans;
+	}
+
+
+	@Override
+	public void createTrackingNotifyLog(TrackingNotifyLog log) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhTrackingNotifyLogs.class));
+
+        log.setId(id);
+        log.setStatus(PmNotifyConfigurationStatus.VAILD.getCode());
+        log.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        LOGGER.info("createTrackingNotifyLog: " + log);
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhTrackingNotifyLogsDao dao = new EhTrackingNotifyLogsDao(context.configuration());
+        dao.insert(log);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerTrackingPlans.class, null);
+	}
+
+
+	@Override
+	public void updateTrackingPlanReadStatus(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTrackingPlans.class, id));
+		context.update(Tables.EH_CUSTOMER_TRACKING_PLANS)
+				.set(Tables.EH_CUSTOMER_TRACKING_PLANS.READ_STATUS , TrackingPlanReadStatus.READED.getCode())
+				.where(Tables.EH_CUSTOMER_TRACKING_PLANS.ID.eq(id))
+				.execute();
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerTrackingPlans.class, id);
+	}
+
+
+	@Override
+	public List<CustomerTrackingPlan> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd , Timestamp todayFirst) {
+		List<CustomerTrackingPlan> result = new ArrayList<CustomerTrackingPlan>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerTrackingPlansRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TRACKING_PLANS);
+        query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.CREATOR_UID.eq(UserContext.currentUserId()));
+        query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.TRACKING_TIME.ge(todayFirst));
+        if(StringUtils.isNotEmpty(cmd.getCustomerName())){
+			String customerName = "%" + cmd.getCustomerName() + "%";
+			query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.CUSTOMER_NAME.like(customerName));
+		}
+        if(null != cmd.getCustomerId()){
+        	query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.CUSTOMER_ID.eq(cmd.getCustomerId()));
+        }
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerTrackingPlan.class));
+            return null;
+        });
+        return result;
+	}
+
+
+	@Override
+	public List<CustomerTrackingPlan> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd,Long todayFirst) {
+		List<CustomerTrackingPlan> result = new ArrayList<CustomerTrackingPlan>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerTrackingPlansRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TRACKING_PLANS);
+        query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.CREATOR_UID.eq(UserContext.currentUserId()));
+        query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.TRACKING_TIME.lt(new Timestamp(todayFirst)));
+        Calendar calc =Calendar.getInstance(); 
+        calc.setTime(new Date(todayFirst));
+        calc.add(Calendar.DAY_OF_MONTH, -30);
+        query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.TRACKING_TIME.gt(new Timestamp(calc.getTime().getTime())));
+        if(StringUtils.isNotEmpty(cmd.getCustomerName())){
+			String customerName = "%" + cmd.getCustomerName() + "%";
+			query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.CUSTOMER_NAME.like(customerName));
+		}
+        if(null != cmd.getCustomerId()){
+        	query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.CUSTOMER_ID.eq(cmd.getCustomerId()));
+        }
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerTrackingPlan.class));
+            return null;
+        });
+        return result;
+	}
+
+
+	@Override
+	public void updateCustomerLastTrackingTime(EnterpriseCustomer customer) {
+		assert(customer.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, customer.getId()));
+        context.update(Tables.EH_ENTERPRISE_CUSTOMERS)
+        	   .set(Tables.EH_ENTERPRISE_CUSTOMERS.LAST_TRACKING_TIME, customer.getLastTrackingTime())
+        	   .where(Tables.EH_ENTERPRISE_CUSTOMERS.ID.eq(customer.getId()))
+        	   .execute();
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
+	}
+	
+}

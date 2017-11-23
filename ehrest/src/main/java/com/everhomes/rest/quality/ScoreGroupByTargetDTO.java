@@ -1,9 +1,9 @@
 package com.everhomes.rest.quality;
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
@@ -20,6 +20,12 @@ public class ScoreGroupByTargetDTO {
 	private Long targetId;
 
 	private String targetName;
+
+	//fix order
+	private  Integer OrderId;
+
+	//fix order
+	private  Double totalScore;
 	
 	public List<ScoreDTO> getScores() {
 		return scores;
@@ -43,6 +49,22 @@ public class ScoreGroupByTargetDTO {
 
 	public void setTargetName(String targetName) {
 		this.targetName = targetName;
+	}
+
+	public Integer getOrderId() {
+		return OrderId;
+	}
+
+	public void setOrderId(Integer orderId) {
+		OrderId = orderId;
+	}
+
+	public Double getTotalScore() {
+		return totalScore;
+	}
+
+	public void setTotalScore(Double totalScore) {
+		this.totalScore = totalScore;
 	}
 
 	@Override

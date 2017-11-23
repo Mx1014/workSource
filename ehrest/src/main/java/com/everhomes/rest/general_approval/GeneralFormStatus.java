@@ -1,7 +1,5 @@
 package com.everhomes.rest.general_approval;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.everhomes.util.StringHelper;
 
 /**

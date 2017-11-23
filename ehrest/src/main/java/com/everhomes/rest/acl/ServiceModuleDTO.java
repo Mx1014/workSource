@@ -15,6 +15,11 @@ import java.util.List;
  * <li>path: 层次关系</li>
  * <li>level: 级别</li>
  * <li>serviceModules: 子业务模块</li>
+ * <li>description: 描述</li>
+ * <li>updateTime: 更新时间</li>
+ * <li>createTime: 创建时间</li>
+ * <li>operatorUName: 操作人</li>
+ * <li>instanceConfig: 参数，比如第三方链接值就是{"url":"http......."}</li>
  * </ul>
  */
 public class ServiceModuleDTO implements Serializable {
@@ -32,6 +37,22 @@ public class ServiceModuleDTO implements Serializable {
 
 	@ItemType(ServiceModuleDTO.class)
 	private List<ServiceModuleDTO> serviceModules;
+
+	private Byte type;
+
+	private String description;
+
+	private Long updateTime;
+
+	private Long createTime;
+
+	private Long operatorUid;
+
+	private String operatorUName;
+
+	private String instanceConfig;
+
+	private Byte multipleFlag;
 
 	public Long getId() {
 		return id;
@@ -87,5 +108,69 @@ public class ServiceModuleDTO implements Serializable {
 
 	public void setServiceModules(List<ServiceModuleDTO> serviceModules) {
 		this.serviceModules = serviceModules;
+	}
+
+	public Byte getType() {
+		return type;
+	}
+
+	public void setType(Byte type) {
+		this.type = type;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public Long getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(Long updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	public Long getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Long createTime) {
+		this.createTime = createTime;
+	}
+
+	public Long getOperatorUid() {
+		return operatorUid;
+	}
+
+	public void setOperatorUid(Long operatorUid) {
+		this.operatorUid = operatorUid;
+	}
+
+	public String getOperatorUName() {
+		return operatorUName;
+	}
+
+	public void setOperatorUName(String operatorUName) {
+		this.operatorUName = operatorUName;
+	}
+
+	public String getInstanceConfig() {
+		return instanceConfig;
+	}
+
+	public void setInstanceConfig(String instanceConfig) {
+		this.instanceConfig = instanceConfig;
+	}
+
+	public Byte getMultipleFlag() {
+		return multipleFlag;
+	}
+
+	public void setMultipleFlag(Byte multipleFlag) {
+		this.multipleFlag = multipleFlag;
 	}
 }

@@ -11,7 +11,7 @@ import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.FlowServiceTypeDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.parking.ParkingLocalStringCode;
 import com.everhomes.rest.parking.clearance.ParkingClearanceLogStatus;
@@ -25,15 +25,13 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 
 import static com.everhomes.rest.parking.clearance.ParkingClearanceConst.MODULE_ID;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
@@ -99,7 +97,35 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
 
     @Override
     public void onFlowCaseStateChanged(FlowCaseState ctx) {
-
+//        String params = ctx.getCurrentNode().getFlowNode().getGroupByParams();
+//        Map map = (Map)StringHelper.fromJsonString(params, HashMap.class);
+//
+//        if (map != null) {
+//            String nodeConfigStatus = String.valueOf(map.get("status"));
+//            ParkingClearanceLogStatus status = ParkingClearanceLogStatus.fromName(nodeConfigStatus);
+//            if (status == null) {
+//                if (LOGGER.isWarnEnabled()) {
+//                    LOGGER.warn("ParkingClearanceLogStatus config error, nodeConfig = {}", params);
+//                }
+//                return;
+//            }
+//            Long logId = ctx.getFlowCase().getReferId();
+//            coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
+//                ParkingClearanceLog log = clearanceLogProvider.findById(logId);
+//                if (log == null) {
+//                    if (LOGGER.isWarnEnabled()) {
+//                        LOGGER.warn("can not find clearance log, id = {}", logId);
+//                    }
+//                    return null;
+//                }
+//                if (ParkingClearanceLogStatus.fromCode(log.getStatus()) != status) {
+//                    log.setStatus(status.getCode());
+//                    clearanceLogProvider.updateClearanceLog(log);
+//
+//                }
+//                return null;
+//            });
+//        }
     }
 
     @Override
@@ -107,7 +133,15 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
         Long logId = ctx.getFlowCase().getReferId();
         coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
             ParkingClearanceLog log = clearanceLogProvider.findById(logId);
-            if (ParkingClearanceLogStatus.fromCode(log.getStatus()) == ParkingClearanceLogStatus.PROCESSING) {
+            if (log == null) {
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("can not find clearance log, id = {}", logId);
+                }
+                return null;
+            }
+            ParkingClearanceLogStatus status = ParkingClearanceLogStatus.fromCode(log.getStatus());
+            if (status != ParkingClearanceLogStatus.COMPLETED
+                    && status != ParkingClearanceLogStatus.CANCELLED) {
                 log.setStatus(ParkingClearanceLogStatus.COMPLETED.getCode());
                 clearanceLogProvider.updateClearanceLog(log);
             }
@@ -121,29 +155,41 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
     }
 
     @Override
-    public String onFlowCaseBriefRender(FlowCase flowCase) {
+    public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
         return flowCase.getContent();
     }
 
     @Override
     public void onFlowButtonFired(FlowCaseState ctx) {
-        String params = ctx.getCurrentNode().getFlowNode().getParams();
-        Map map = (Map)StringHelper.fromJsonString(params, HashMap.class);
-        ParkingClearanceLogStatus status = null;
-        if (map != null) {
-            status = ParkingClearanceLogStatus.valueOf(((String) map.get("node")));
-        }
-        if (status == ParkingClearanceLogStatus.PENDING && ctx.getStepType() == FlowStepType.APPROVE_STEP) {
-            Long logId = ctx.getFlowCase().getReferId();
-            coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
-                ParkingClearanceLog log = clearanceLogProvider.findById(logId);
-                if (ParkingClearanceLogStatus.fromCode(log.getStatus()) == ParkingClearanceLogStatus.PENDING) {
-                    log.setStatus(ParkingClearanceLogStatus.PROCESSING.getCode());
-                    clearanceLogProvider.updateClearanceLog(log);
-                }
-                return null;
-            });
-        }
+//        String params = ctx.getCurrentNode().getFlowNode().getGroupByParams();
+//        Map map = (Map)StringHelper.fromJsonString(params, HashMap.class);
+//
+//        if (map != null && ctx.getStepType() == FlowStepType.APPROVE_STEP) {
+//            String nodeConfigStatus = String.valueOf(map.get("status"));
+//            ParkingClearanceLogStatus status = ParkingClearanceLogStatus.fromName(nodeConfigStatus);
+//            if (status == null) {
+//                if (LOGGER.isWarnEnabled()) {
+//                    LOGGER.warn("ParkingClearanceLogStatus config error, nodeConfig = {}", params);
+//                }
+//                return;
+//            }
+//            Long logId = ctx.getFlowCase().getReferId();
+//            coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
+//                ParkingClearanceLog log = clearanceLogProvider.findById(logId);
+//                if (log == null) {
+//                    if (LOGGER.isWarnEnabled()) {
+//                        LOGGER.warn("can not find clearance log, id = {}", logId);
+//                    }
+//                    return null;
+//                }
+//                ParkingClearanceLogStatus logStatus = ParkingClearanceLogStatus.fromCode(log.getStatus());
+//                if (logStatus != status) {
+//                    log.setStatus(status.getCode());
+//                    clearanceLogProvider.updateClearanceLog(log);
+//                }
+//                return null;
+//            });
+//        }
     }
 
     @Override
@@ -162,7 +208,7 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
         String dateStr = DateHelper.getDateDisplayString(TimeZone.getDefault(), log.getClearanceTime().getTime(), "yyyy-MM-dd");
         map.put("clearanceTime", defaultIfNull(dateStr, ""));
         // 如果remarks为空，显示 "无"
-        if (log.getRemarks() == null) {
+        if (StringUtils.isBlank(log.getRemarks())) {
             String remarksNoneValue = localeStringService.getLocalizedString(ParkingLocalStringCode.SCOPE_STRING,
                     ParkingLocalStringCode.NONE_CODE, currLocale(), "");
             map.put("remarks", defaultIfNull(remarksNoneValue, ""));
@@ -192,7 +238,7 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
     }
 
     private String buildCustomObjectStr(Map<String, Object> map, Long createTime) {
-        String dateStr = DateHelper.getDateDisplayString(TimeZone.getDefault(), createTime, "yyyy-MM-dd");
+        String dateStr = DateHelper.getDateDisplayString(TimeZone.getDefault(), createTime, "yyyy-MM-dd HH:mm:ss");
         map.put("createTime", dateStr);
         return StringHelper.toJsonString(map);
     }
@@ -251,4 +297,13 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
 		// TODO Auto-generated method stub
 		
 	}
+
+    @Override
+    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
+        List<FlowServiceTypeDTO> result = new ArrayList<>();
+        FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+        dto.setNamespaceId(namespaceId);
+        dto.setServiceName("车辆放行");
+        return result;
+    }
 }

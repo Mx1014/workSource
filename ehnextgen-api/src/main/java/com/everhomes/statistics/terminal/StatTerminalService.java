@@ -15,9 +15,13 @@ public interface StatTerminalService {
 
     List<TerminalDayStatisticsDTO> listTerminalDayStatisticsByDate(String startDate, String endDate);
 
-    List<TerminalStatisticsTaskDTO> executeStatTask(String startDate, String endDate);
+    List<TerminalStatisticsTaskDTO> executeStatTask(Integer namespaceId, String startDate, String endDate);
 
     List<TerminalAppVersionStatisticsDTO> listTerminalAppVersionStatistics(String Date);
 
     PieChart getTerminalAppVersionPieChart(String Date, TerminalStatisticsType type);
+
+    List<Long> executeUserSyncTask(Integer namespaceId);
+
+    void deleteStatTaskLog(DeleteStatTaskLogCommand cmd);
 }

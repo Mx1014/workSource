@@ -1,14 +1,21 @@
 package com.everhomes.user.admin;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.validation.Valid;
-
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.messaging.MessagingService;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.link.RichLinkDTO;
+import com.everhomes.rest.user.*;
+import com.everhomes.rest.user.admin.*;
+import com.everhomes.user.*;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RequireAuthentication;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,56 +24,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.acl.Privilege;
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.controller.ControllerBase;
-import com.everhomes.discover.RestReturn;
-import com.everhomes.messaging.MessagingService;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.link.RichLinkDTO;
-import com.everhomes.rest.user.CreateUserImpersonationCommand;
-import com.everhomes.rest.user.DeleteUserImpersonationCommand;
-import com.everhomes.rest.user.EncriptInfoDTO;
-import com.everhomes.rest.user.FetchMessageCommandResponse;
-import com.everhomes.rest.user.FetchRecentToPastMessageAdminCommand;
-import com.everhomes.rest.user.ListRegisterUsersResponse;
-import com.everhomes.rest.user.ListVerfyCodeResponse;
-import com.everhomes.rest.user.ListVestResponse;
-import com.everhomes.rest.user.PaginationCommand;
-import com.everhomes.rest.user.SearchUserByNamespaceCommand;
-import com.everhomes.rest.user.SearchUserImpersonationCommand;
-import com.everhomes.rest.user.SearchUserImpersonationResponse;
-import com.everhomes.rest.user.UserIdentifierDTO;
-import com.everhomes.rest.user.UserImpersonationDTO;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.user.admin.EncryptPlainTextCommand;
-import com.everhomes.rest.user.admin.ImportDataResponse;
-import com.everhomes.rest.user.admin.ListInvitatedUserCommand;
-import com.everhomes.rest.user.admin.ListInvitatedUserResponse;
-import com.everhomes.rest.user.admin.ListUsersWithAddrCommand;
-import com.everhomes.rest.user.admin.ListUsersWithAddrResponse;
-import com.everhomes.rest.user.admin.SearchInvitatedUserCommand;
-import com.everhomes.rest.user.admin.SearchUsersWithAddrCommand;
-import com.everhomes.rest.user.admin.SendUserTestMailCommand;
-import com.everhomes.rest.user.admin.SendUserTestRichLinkMessageCommand;
-import com.everhomes.rest.user.admin.SendUserTestSmsCommand;
-import com.everhomes.rest.user.admin.UsersWithAddrResponse;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
-import com.everhomes.user.EncryptionUtils;
-import com.everhomes.user.User;
-import com.everhomes.user.UserAdminService;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserLogin;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RequireAuthentication;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.excel.RowResult;
-import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import javax.validation.Valid;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequireAuthentication(true)
@@ -500,6 +462,40 @@ public class UserAdminController extends ControllerBase {
             }
         }
         
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/user/listUserAppealLogs</b>
+     * <p>用户申诉列表</p>
+     */
+    @RequestMapping("listUserAppealLogs")
+    @RestReturn(ListUserAppealLogsResponse.class)
+    public RestResponse listUserAppealLogs(@Valid ListUserAppealLogsCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        // resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        ListUserAppealLogsResponse resp = userService.listUserAppealLogs(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/user/updateUserAppealLog</b>
+     * <p>修改用户申诉状态</p>
+     */
+    @RequestMapping("updateUserAppealLog")
+    @RestReturn(UserAppealLogDTO.class)
+    public RestResponse listUserAppealLogs(@Valid UpdateUserAppealLogCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        // resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        UserAppealLogDTO dto = userService.updateUserAppealLog(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
         return response;
     }
 }

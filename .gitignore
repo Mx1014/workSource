@@ -14,6 +14,8 @@ ehtest-integration/target/
 *.project
 *.iml
 
+.DS_Store
+/.DS_Store
 ehcore/atomikos
 ehrest/target
 .gitignore
@@ -36,6 +38,7 @@ ehcore/output
 ehcore/statistics
 /bin/
 ehcore/src/main/config/ehcore_custom.yml
+ehcore/src/test/config/ehcore_custom.yml
 ehcore/logs
 
 ehrest/src/test/java/com/everhomes/generate
@@ -46,6 +49,7 @@ ehtest-integration/src/test/config/ehcore.properties
 
 ehborder/pom.xml
 ehcore/pom.xml
+ehcore/pom.xml.template
 ehcore-persist/pom.xml
 ehnextgen-api/pom.xml
 ehnextgen-forum/pom.xml
@@ -57,3 +61,6 @@ ehtest-integration/pom.xml
 oauth2-client/pom.xml
 pom.properties
 
+*.xml.bak
+*rebel.xml
+rebel-*.xml

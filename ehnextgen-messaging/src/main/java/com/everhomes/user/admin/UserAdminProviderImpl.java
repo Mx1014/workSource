@@ -1,21 +1,6 @@
 package com.everhomes.user.admin;
 
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
-import org.jooq.impl.DefaultRecordMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.address.Address;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
@@ -23,8 +8,6 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.group.Group;
-import com.everhomes.group.GroupMember;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.namespace.Namespace;
@@ -49,6 +32,16 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import org.jooq.*;
+import org.jooq.impl.DefaultRecordMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public class UserAdminProviderImpl implements UserAdminProvider {
@@ -137,6 +130,7 @@ public class UserAdminProviderImpl implements UserAdminProvider {
             if (conditons != null) {
                 query.addConditions(conditons);
             }
+            query.addOrderBy(Tables.EH_USER_IDENTIFIERS.NOTIFY_TIME.desc());
             query.addOrderBy(Tables.EH_USER_IDENTIFIERS.CREATE_TIME.desc());
             query.addLimit(count - userIdentifiers.size());
 

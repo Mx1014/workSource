@@ -1,10 +1,24 @@
 package com.everhomes.rest.techpark.expansion;
 
+import com.everhomes.util.StringHelper;
+
 /**
- * Created by Administrator on 2017/3/21.
+ * <ul>
+ * <li>organizationId：公司id</li>
+ * </ul>
  */
 public class CheckIsLeaseIssuerCommand {
     private Long organizationId;
+
+    private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Long getOrganizationId() {
         return organizationId;
@@ -12,5 +26,10 @@ public class CheckIsLeaseIssuerCommand {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

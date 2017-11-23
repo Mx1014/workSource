@@ -100,7 +100,7 @@ db.driver: com.mysql.jdbc.Driver
 db.master: jdbc:mysql://ehcore:ehcore@db-master:3306/ehcore?characterEncoding=UTF-8&encrypted=0
 db.conn.pool: 8
 db.conn.borrow.timeout: 60
-db.jta: true
+db.jta: false
 db.tx.timeout: 600
         
 #
@@ -133,3 +133,9 @@ destination.dir.java: ${EVH_HOME}/ehrest-response/src/main/java/
 src.path: E:/workspace/ehnextgen
 
 equipment.ip: 127.0.0.1
+
+#A1234567890Z为测试账号
+ems.sys.account: A1234567890Z
+ems.sys.password: e10adc3949ba59abbe56e057f20f883e
+
+schedule.running.flag: 1

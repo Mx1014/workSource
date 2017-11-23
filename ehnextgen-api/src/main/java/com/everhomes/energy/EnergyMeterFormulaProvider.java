@@ -15,7 +15,7 @@ public interface EnergyMeterFormulaProvider {
     /**
      * 根据名称查找
      */
-    EnergyMeterFormula findByName(Integer namespaceId, String name);
+    EnergyMeterFormula findByName(Integer namespaceId, Long communityId, String name);
 
     /**
      * 获取公式列表

@@ -6,14 +6,26 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.energy.*;
+import com.everhomes.rest.equipment.ExportEquipmentsCardCommand;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.scheduler.EnergyTaskScheduleJob;
+import com.everhomes.search.EnergyMeterTaskSearcher;
+import com.everhomes.search.EnergyPlanSearcher;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.RuntimeErrorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.Date;
 
@@ -25,9 +37,19 @@ import java.util.Date;
 @RequestMapping("/energy")
 @RestController
 public class EnergyConsumptionController extends ControllerBase {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnergyConsumptionController.class);
 
     @Autowired
     private EnergyConsumptionService energyConsumptionService;
+
+    @Autowired
+    private EnergyPlanSearcher energyPlanSearcher;
+
+    @Autowired
+    private EnergyMeterTaskSearcher energyMeterTaskSearcher;
+
+    @Autowired
+    private EnergyTaskScheduleJob energyTaskScheduleJob;
 
     /**
      * <b>URL: /energy/listAuthorizationCommunityByUser</b>
@@ -202,11 +224,17 @@ public class EnergyConsumptionController extends ControllerBase {
      * <p>导入表记(Excel)</p>
      * <b>URL: /energy/importEnergyMeter</b>
      */
-    @RestReturn(String.class)
+    @RestReturn(ImportFileTaskDTO.class)
     @RequestMapping("importEnergyMeter")
-    public RestResponse importEnergyMeter(ImportEnergyMeterCommand cmd, @RequestParam("attachment") MultipartFile file) {
-        energyConsumptionService.importEnergyMeter(cmd, file);
-        return success();
+    public RestResponse importEnergyMeter(ImportEnergyMeterCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
+        User manaUser = UserContext.current().getUser();
+        Long userId = manaUser.getId();
+        if (null == files || null == files[0]) {
+            LOGGER.error("files is null。userId=" + userId);
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+                    "files is null");
+        }
+        return response(energyConsumptionService.importEnergyMeter(cmd, files[0], userId));
     }
 
     /**
@@ -450,6 +478,220 @@ public class EnergyConsumptionController extends ControllerBase {
         return response(energyConsumptionService.listEnergyDefaultSettingTemplates());
     }
 
+    /**
+     * <p>通过二维码获取表记的信息</p>
+     * <b>URL: /energy/findEnergyMeterByQRCode</b>
+     */
+    @RestReturn(EnergyMeterDTO.class)
+    @RequestMapping("findEnergyMeterByQRCode")
+    public RestResponse findEnergyMeterByQRCode(FindEnergyMeterByQRCodeCommand cmd) {
+        return response(energyConsumptionService.findEnergyMeterByQRCode(cmd));
+    }
 
+    /**
+     * <p>获取表记的二维码</p>
+     * <b>URL: /energy/getEnergyMeterQRCode</b>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("getEnergyMeterQRCode")
+    public RestResponse getEnergyMeterQRCode(GetEnergyMeterQRCodeCommand cmd) {
+        return response(energyConsumptionService.getEnergyMeterQRCode(cmd));
+    }
+
+    /**
+     * <b>URL: /energy/exportEnergyMeterQRCode</b>
+     * <p>导出表记二维码</p>
+     */
+    @RequestMapping("exportEnergyMeterQRCode")
+    @RestReturn(value = String.class)
+    public RestResponse exportEnergyMeterQRCode(ExportEnergyMeterQRCodeCommand cmd, HttpServletResponse response) {
+
+        energyConsumptionService.exportEnergyMeterQRCode(cmd, response);
+
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL: /energy/exportSearchEnergyMeterQRCode</b>
+     * <p>导出全部表记二维码</p>
+     */
+    @RequestMapping("exportSearchEnergyMeterQRCode")
+    @RestReturn(value = String.class)
+    public RestResponse exportSearchEnergyMeterQRCode(SearchEnergyMeterCommand cmd, HttpServletResponse response) {
+
+        energyConsumptionService.exportSearchEnergyMeterQRCode(cmd, response);
+
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <p>批量抄表</p>
+     * <b>URL: /energy/batchReadEnergyMeter</b>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("batchReadEnergyMeter")
+    public RestResponse batchReadEnergyMeter(BatchReadEnergyMeterCommand cmd) {
+        energyConsumptionService.batchReadEnergyMeter(cmd);
+
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <p>新建、修改计划 修改不会影响已生成的任务</p>
+     * <b>URL: /energy/updateEnergyPlan</b>
+     */
+    @RestReturn(EnergyPlanDTO.class)
+    @RequestMapping("updateEnergyPlan")
+    public RestResponse updateEnergyPlan(UpdateEnergyPlanCommand cmd) {
+        return response(energyConsumptionService.updateEnergyPlan(cmd));
+    }
+
+    /**
+     * <p>删除计划</p>
+     * <b>URL: /energy/deleteEnergyPlan</b>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("deleteEnergyPlan")
+    public RestResponse deleteEnergyPlan(DeleteEnergyPlanCommand cmd) {
+        energyConsumptionService.deleteEnergyPlan(cmd);
+
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <p>列出计划列表 搜索</p>
+     * <b>URL: /energy/searchEnergyPlans</b>
+     */
+    @RestReturn(SearchEnergyPlansResponse.class)
+    @RequestMapping("searchEnergyPlans")
+    public RestResponse searchEnergyPlans(SearchEnergyPlansCommand cmd) {
+        return response(energyPlanSearcher.query(cmd));
+    }
+
+    /**
+     * <p>列出计划详情</p>
+     * <b>URL: /energy/findEnergyPlanDetails</b>
+     */
+    @RestReturn(EnergyPlanDTO.class)
+    @RequestMapping("findEnergyPlanDetails")
+    public RestResponse findEnergyPlanDetails(FindEnergyPlanDetailsCommand cmd) {
+        return response(energyConsumptionService.findEnergyPlanDetails(cmd));
+    }
+
+    /**
+     * <p>列出计划关联的表计</p>
+     * <b>URL: /energy/listEnergyPlanMeters</b>
+     */
+    @RestReturn(ListEnergyPlanMetersResponse.class)
+    @RequestMapping("listEnergyPlanMeters")
+    public RestResponse listEnergyPlanMeters(ListEnergyPlanMetersCommand cmd) {
+        return response(energyConsumptionService.listEnergyPlanMeters(cmd));
+    }
+
+    /**
+     * <p>创建计划的任务</p>
+     * <b>URL: /energy/createTask</b>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("createTask")
+    public RestResponse createTask(CreateEnergyTaskCommand cmd) {
+        energyConsumptionService.createTask(cmd);
+
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <p>计划关联的表计排序 实时</p>
+     * <b>URL: /energy/setEnergyPlanMeterOrder</b>
+     */
+    @RestReturn(ListEnergyPlanMetersResponse.class)
+    @RequestMapping("setEnergyPlanMeterOrder")
+    public RestResponse setEnergyPlanMeterOrder(SetEnergyPlanMeterOrderCommand cmd) {
+        return response(energyConsumptionService.setEnergyPlanMeterOrder(cmd));
+    }
+
+    /**
+     * <p>查看计划的任务</p>
+     * <b>URL: /energy/searchTasksByEnergyPlan</b>
+     */
+    @RestReturn(SearchTasksByEnergyPlanResponse.class)
+    @RequestMapping("searchTasksByEnergyPlan")
+    public RestResponse searchTasksByEnergyPlan(SearchTasksByEnergyPlanCommand cmd) {
+        return response(energyMeterTaskSearcher.searchTasksByEnergyPlan(cmd));
+    }
+
+    /**
+     * <p>列出抄表任务 app</p>
+     * <b>URL: /energy/listUserEnergyPlanTasks</b>
+     */
+    @RestReturn(ListUserEnergyPlanTasksResponse.class)
+    @RequestMapping("listUserEnergyPlanTasks")
+    public RestResponse listUserEnergyPlanTasks(ListUserEnergyPlanTasksCommand cmd) {
+        return response(energyConsumptionService.listUserEnergyPlanTasks(cmd));
+    }
+
+    //执行抄表任务
+    /**
+     * <p>执行抄表任务</p>
+     * <b>URL: /energy/readTaskMeter</b>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("readTaskMeter")
+    public RestResponse readTaskMeter(ReadTaskMeterCommand cmd) {
+        energyConsumptionService.readTaskMeter(cmd);
+
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <p>同步计划索引</p>
+     * <b>URL: /energy/syncEnergyPlanIndex</b>
+     */
+    @RestReturn(value = String.class)
+    @RequestMapping("syncEnergyPlanIndex")
+    public RestResponse syncEnergyPlanIndex() {
+        energyPlanSearcher.syncFromDb();
+        return success();
+    }
+
+    /**
+     * <p>同步任务索引</p>
+     * <b>URL: /energy/syncEnergyTaskIndex</b>
+     */
+    @RestReturn(value = String.class)
+    @RequestMapping("syncEnergyTaskIndex")
+    public RestResponse syncEnergyTaskIndex() {
+        energyMeterTaskSearcher.syncFromDb();
+        return success();
+    }
+
+    /**
+     * <p>计算任务费用</p>
+     * <b>URL: /energy/calculateTaskFeeByTaskId</b>
+     */
+    @RestReturn(value = String.class)
+    @RequestMapping("calculateTaskFeeByTaskId")
+    public RestResponse calculateTaskFeeByTaskId(CalculateTaskFeeByTaskIdCommand cmd) {
+        energyTaskScheduleJob.calculateTaskFeeByTaskId(cmd.getTaskId());
+        return success();
+    }
 
 }

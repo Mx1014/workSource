@@ -1,25 +1,23 @@
 package com.everhomes.contentserver;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.jooq.DSLContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhContentServer;
 import com.everhomes.server.schema.tables.daos.EhContentServerDao;
 import com.everhomes.server.schema.tables.daos.EhContentServerResourcesDao;
+import com.everhomes.server.schema.tables.pojos.EhContentServer;
 import com.everhomes.server.schema.tables.pojos.EhContentServerResources;
-import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import org.jooq.DSLContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class ContentServerProviderImpl implements ContentServerProvider {
@@ -92,14 +90,10 @@ public class ContentServerProviderImpl implements ContentServerProvider {
     public ContentServerResource findByResourceId(String resourceId) {
         ContentServerResource[] resources = new ContentServerResource[1];
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhContentServerResources.class), null, (context, object) -> {
-            EhContentServerResourcesDao dao = new EhContentServerResourcesDao(context.configuration());
-            dao.fetchByResourceId(resourceId).forEach(r -> {
-                resources[0] = ConvertHelper.convert(r, ContentServerResource.class);
-            });
-            if (resources[0] != null) {
-                return false;
-            }
-            return true;
+            resources[0] = context.selectFrom(Tables.EH_CONTENT_SERVER_RESOURCES)
+                    .where(Tables.EH_CONTENT_SERVER_RESOURCES.RESOURCE_ID.eq(resourceId))
+                    .fetchAnyInto(ContentServerResource.class);
+            return resources[0] == null;
         });
         return resources[0];
     }

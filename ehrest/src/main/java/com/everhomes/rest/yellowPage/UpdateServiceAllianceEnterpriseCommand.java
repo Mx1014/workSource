@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  *  <li>parentId: 父id</li>
  *  <li>ownerType: 拥有者类型 参考 {@link com.everhomes.rest.yellowPage.ServiceAllianceBelongType}</li>
  *  <li>ownerId: 拥有者ID</li>
+ *  <li>range: 可见范围</li>
  *  <li>name: 企业名称</li>
  *  <li>displayName: 简称</li>
  *  <li>address: 地址</li>
@@ -37,6 +38,9 @@ import com.everhomes.util.StringHelper;
  *  <li>moduleUrl : 跳转模块路径</li>
  *  <li>jumpId : 跳转模块id</li>
  *  <li>supportType : 是否支持申请 参考{@link com.everhomes.rest.general_approval.GeneralApprovalSupportType}</li>
+ *  <li>summaryDescription : 概要描述</li>
+ *  <li>onlineServiceUid : 在线服务用户的id</li>
+ *  <li>onlineServiceUname : 在线服务用户的名称</li>
  * </ul>
  */
 public class UpdateServiceAllianceEnterpriseCommand {
@@ -48,7 +52,9 @@ public class UpdateServiceAllianceEnterpriseCommand {
 	private String   ownerType;
 	@NotNull
 	private Long     ownerId;
-	
+
+	private String   range;
+
 	private String   name;
 	
 	private String   displayName;
@@ -100,6 +106,26 @@ public class UpdateServiceAllianceEnterpriseCommand {
 	private Byte supportType;
 
 	private String buttonTitle;
+	
+	private String summaryDescription;
+	private Long onlineServiceUid;
+	private String onlineServiceUname;
+	
+	public Long getOnlineServiceUid() {
+		return onlineServiceUid;
+	}
+
+	public void setOnlineServiceUid(Long onlineServiceUid) {
+		this.onlineServiceUid = onlineServiceUid;
+	}
+
+	public String getOnlineServiceUname() {
+		return onlineServiceUname;
+	}
+
+	public void setOnlineServiceUname(String onlineServiceUname) {
+		this.onlineServiceUname = onlineServiceUname;
+	}
 
 	public String getButtonTitle() {
 		return buttonTitle;
@@ -139,6 +165,14 @@ public class UpdateServiceAllianceEnterpriseCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public String getRange() {
+		return range;
+	}
+
+	public void setRange(String range) {
+		this.range = range;
 	}
 
 	public String getName() {
@@ -331,6 +365,14 @@ public class UpdateServiceAllianceEnterpriseCommand {
 
 	public void setJumpId(Long jumpId) {
 		this.jumpId = jumpId;
+	}
+
+	public String getSummaryDescription() {
+		return summaryDescription;
+	}
+
+	public void setSummaryDescription(String summaryDescription) {
+		this.summaryDescription = summaryDescription;
 	}
 
 	@Override

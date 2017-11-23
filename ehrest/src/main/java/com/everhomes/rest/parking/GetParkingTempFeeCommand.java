@@ -1,5 +1,7 @@
 package com.everhomes.rest.parking;
 
+import com.everhomes.util.StringHelper;
+
 import javax.validation.constraints.NotNull;
 
 /**
@@ -51,6 +53,9 @@ public class GetParkingTempFeeCommand {
 	public void setPlateNumber(String plateNumber) {
 		this.plateNumber = plateNumber;
 	}
-	
-	
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

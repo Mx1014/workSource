@@ -2,38 +2,27 @@ package com.everhomes.flow;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
-import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhFlowCasesDao;
 import com.everhomes.server.schema.tables.pojos.EhFlowCases;
-import com.everhomes.server.schema.tables.pojos.EhFlowTimeouts;
 import com.everhomes.server.schema.tables.records.EhFlowCasesRecord;
-import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import org.jooq.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 @Component
 public class FlowCaseProviderImpl implements FlowCaseProvider {
@@ -65,6 +54,46 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
         EhFlowCasesDao dao = new EhFlowCasesDao(context.configuration());
         dao.insert(obj);
         return obj.getId();
+    }
+
+    @Override
+    public List<FlowCase> findFlowCaseByNode(Long originalNodeId, Long convergenceNodeId) {
+        return this.queryFlowCases(new ListingLocator(), 100, (locator, query) -> {
+            com.everhomes.server.schema.tables.EhFlowCases t = Tables.EH_FLOW_CASES;
+            query.addConditions(t.START_NODE_ID.eq(originalNodeId));
+            query.addConditions(t.END_NODE_ID.eq(convergenceNodeId));
+            return query;
+        });
+    }
+
+    @Override
+    public List<FlowCase> listFlowCaseByParentId(Long parentId) {
+        return this.queryFlowCases(new ListingLocator(), 100, (locator, query) -> {
+            com.everhomes.server.schema.tables.EhFlowCases t = Tables.EH_FLOW_CASES;
+            query.addConditions(t.PARENT_ID.eq(parentId));
+            return query;
+        });
+    }
+
+    @Override
+    public FlowCase findFlowCaseByStartLinkId(Long parentId, Long startNodeId, Long endNodeId, Long startLinkId) {
+        List<FlowCase> flowCases = this.queryFlowCases(new ListingLocator(), 1, (locator, query) -> {
+            com.everhomes.server.schema.tables.EhFlowCases t = Tables.EH_FLOW_CASES;
+            query.addConditions(t.PARENT_ID.eq(parentId));
+            query.addConditions(t.START_NODE_ID.eq(startNodeId));
+            query.addConditions(t.END_NODE_ID.eq(endNodeId));
+            query.addConditions(t.START_LINK_ID.eq(startLinkId));
+            return query;
+        });
+        if (flowCases.size() > 0) {
+            return flowCases.get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public Long getNextId() {
+        return this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowCases.class));
     }
 
     @Override
@@ -134,7 +163,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     }
     
     @Override
-    public List<FlowCaseDetail> findApplierFlowCases(ListingLocator locator, int count, SearchFlowCaseCommand cmd) {
+    public List<FlowCaseDetail> findApplierFlowCases(ListingLocator locator, int count, SearchFlowCaseCommand cmd, ListingQueryBuilderCallback callback) {
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhFlowCases.class));
     	Condition cond = Tables.EH_FLOW_CASES.STATUS.ne(FlowCaseStatus.INVALID.getCode())
     			.and(Tables.EH_FLOW_CASES.NAMESPACE_ID.eq(cmd.getNamespaceId()));
@@ -146,13 +175,18 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     	FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
     	if(searchType.equals(FlowCaseSearchType.APPLIER)) {
     		cond = cond.and(Tables.EH_FLOW_CASES.APPLY_USER_ID.eq(cmd.getUserId()));
-    		
+    		cond = cond.and(Tables.EH_FLOW_CASES.PARENT_ID.eq(0L));
+    		cond = cond.and(Tables.EH_FLOW_CASES.DELETE_FLAG.eq(TrueOrFalseFlag.FALSE.getCode()));
+
     	    if(locator.getAnchor() != null) {
     	    	cond = cond.and(Tables.EH_FLOW_CASES.ID.lt(locator.getAnchor()));
-    	        }
+            }
     	    
         	if(cmd.getModuleId() != null) {
         		cond = cond.and(Tables.EH_FLOW_CASES.MODULE_ID.eq(cmd.getModuleId()));
+        	}
+        	if(cmd.getOrganizationId() != null) {
+        		cond = cond.and(Tables.EH_FLOW_CASES.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
         	}
         	if(cmd.getOwnerId() != null) {
         		cond = cond.and(Tables.EH_FLOW_CASES.OWNER_ID.eq(cmd.getOwnerId()));
@@ -163,23 +197,47 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
         	if(cmd.getFlowCaseStatus() != null) {
         		cond = cond.and(Tables.EH_FLOW_CASES.STATUS.eq(cmd.getFlowCaseStatus()));
         	}
-        	if(cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
+        	if(cmd.getServiceType() != null) {
+                cond = cond.and(
+                        Tables.EH_FLOW_CASES.TITLE.eq(cmd.getServiceType())
+                                .or(Tables.EH_FLOW_CASES.MODULE_NAME.eq(cmd.getServiceType())
+                                        .or(Tables.EH_FLOW_CASES.SERVICE_TYPE.eq(cmd.getServiceType())))
+                );
+        	}
+
+            if(cmd.getStartTime() != null && cmd.getEndTime() == null) {
+                cond = cond.and(Tables.EH_FLOW_CASES.CREATE_TIME.ge(new Timestamp(cmd.getStartTime())));
+            } else if(cmd.getEndTime() != null && cmd.getStartTime() == null) {
+                cond = cond.and(Tables.EH_FLOW_CASES.CREATE_TIME.le(new Timestamp(cmd.getEndTime())));
+            } else if(cmd.getEndTime() != null && cmd.getStartTime() != null) {
+                cond = cond.and(Tables.EH_FLOW_CASES.CREATE_TIME.between(new Timestamp(cmd.getStartTime()), new Timestamp(cmd.getEndTime())));
+            }
+            if(cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
         		cond = cond.and(
         				Tables.EH_FLOW_CASES.MODULE_NAME.like(cmd.getKeyword() + "%")
         				.or(Tables.EH_FLOW_CASES.APPLIER_NAME.like(cmd.getKeyword() + "%"))
         				.or(Tables.EH_FLOW_CASES.APPLIER_PHONE.like(cmd.getKeyword() + "%"))
-        				);
+                );
         	}
-    		
-    		List<EhFlowCasesRecord> records = context.select().from(Tables.EH_FLOW_CASES).leftOuterJoin(Tables.EH_FLOWS)
-    		    	.on(Tables.EH_FLOW_CASES.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID).and(Tables.EH_FLOW_CASES.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
-    		    	.where(cond).orderBy(Tables.EH_FLOW_CASES.ID.desc())
-    		    	.limit(count).fetch().map(new FlowCaseRecordMapper());
-    		
-    		List<FlowCaseDetail> objs = records.stream().map((r) -> {
-    			return ConvertHelper.convert(r, FlowCaseDetail.class);
-    		}).collect(Collectors.toList());
-    		
+
+            SelectQuery<Record> query = context.select(Tables.EH_FLOW_CASES.fields())
+                    .from(Tables.EH_FLOW_CASES).leftOuterJoin(Tables.EH_FLOWS)
+                    .on(Tables.EH_FLOW_CASES.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID)
+                            .and(Tables.EH_FLOW_CASES.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
+                    .where(cond).getQuery();
+
+            if (callback != null) {
+                callback.buildCondition(locator, query);
+            }
+            query.addOrderBy(Tables.EH_FLOW_CASES.ID.desc());
+            query.addLimit(count);
+
+            List<FlowCaseDetail> objs = query.fetchInto(FlowCaseDetail.class);
+
+            // List<FlowCaseDetail> objs = records.stream().map((r) -> {
+    		// 	return ConvertHelper.convert(r, FlowCaseDetail.class);
+    		// }).collect(Collectors.toList());
+
             if(objs.size() >= count) {
                 locator.setAnchor(objs.get(objs.size() - 1).getId());
             } else {
@@ -192,9 +250,40 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     		return null;
     	}   	
     }
+
+	public List<FlowCaseDetail> listFlowCasesByModuleId(ListingLocator locator,
+												 int count, SearchFlowCaseCommand cmd){
+			DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhFlowCases.class));
+			Condition cond = Tables.EH_FLOW_CASES.STATUS.ne(FlowCaseStatus.INVALID.getCode());
+			if(locator.getAnchor() == null) {
+				locator.setAnchor(cmd.getPageAnchor());
+			}
+			if(locator.getAnchor() != null) {
+				cond = cond.and(Tables.EH_FLOW_CASES.ID.lt(locator.getAnchor()));
+			}
+			FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
+			if(searchType.equals(FlowCaseSearchType.APPLIER)) {
+				cond = cond.and(Tables.EH_FLOW_CASES.MODULE_ID.eq(cmd.getModuleId()));
+
+				List<FlowCaseDetail> records = context.select().from(Tables.EH_FLOW_CASES)
+						.where(cond).orderBy(Tables.EH_FLOW_CASES.ID.desc())
+						.limit(count).fetch().map(r->ConvertHelper.convert(r, FlowCaseDetail.class));
+
+				if(records.size() >= count) {
+					locator.setAnchor(records.get(records.size() - 1).getId());
+				} else {
+					locator.setAnchor(null);
+				}
+
+				return records;
+
+			} else {
+				return null;
+			}
+	}
     
     @Override
-    public List<FlowCaseDetail> findAdminFlowCases(ListingLocator locator, int count, SearchFlowCaseCommand cmd) {
+    public List<FlowCaseDetail> findAdminFlowCases(ListingLocator locator, int count, SearchFlowCaseCommand cmd, ListingQueryBuilderCallback callback) {
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhFlowCases.class));
     	Condition cond = Tables.EH_FLOW_CASES.STATUS.ne(FlowCaseStatus.INVALID.getCode())
     			.and(Tables.EH_FLOW_CASES.NAMESPACE_ID.eq(cmd.getNamespaceId()));
@@ -205,7 +294,10 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     	
     	FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
     	if(searchType.equals(FlowCaseSearchType.ADMIN)) { //enum equal
-    		if(cmd.getUserId() != null) {
+
+            cond = cond.and(Tables.EH_FLOW_CASES.PARENT_ID.eq(0L));
+
+            if(cmd.getUserId() != null) {
     			cond = cond.and(Tables.EH_FLOW_CASES.APPLY_USER_ID.eq(cmd.getUserId()));	
     		}
     		
@@ -225,11 +317,13 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     		
     	    if(locator.getAnchor() != null) {
     	    	cond = cond.and(Tables.EH_FLOW_CASES.ID.lt(locator.getAnchor()));
-    	        }
-    	    
+            }
         	if(cmd.getModuleId() != null) {
         		cond = cond.and(Tables.EH_FLOW_CASES.MODULE_ID.eq(cmd.getModuleId()));
         	}
+            if(cmd.getOrganizationId() != null) {
+                cond = cond.and(Tables.EH_FLOW_CASES.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
+            }
         	if(cmd.getOwnerId() != null) {
         		cond = cond.and(Tables.EH_FLOW_CASES.OWNER_ID.eq(cmd.getOwnerId()));
         	}
@@ -239,6 +333,13 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
         	if(cmd.getFlowCaseStatus() != null) {
         		cond = cond.and(Tables.EH_FLOW_CASES.STATUS.eq(cmd.getFlowCaseStatus()));
         	}
+        	if(cmd.getServiceType() != null) {
+                cond = cond.and(
+                        Tables.EH_FLOW_CASES.TITLE.eq(cmd.getServiceType())
+                                .or(Tables.EH_FLOW_CASES.MODULE_NAME.eq(cmd.getServiceType())
+                                .or(Tables.EH_FLOW_CASES.SERVICE_TYPE.eq(cmd.getServiceType())))
+                );
+        	}
         	if(cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
         		cond = cond.and(
         				Tables.EH_FLOW_CASES.MODULE_NAME.like(cmd.getKeyword() + "%")
@@ -246,15 +347,22 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
         				.or(Tables.EH_FLOW_CASES.APPLIER_PHONE.like(cmd.getKeyword() + "%"))
         				);
         	}
+
+            SelectQuery<Record> query = context.select(Tables.EH_FLOW_CASES.fields())
+                    .from(Tables.EH_FLOW_CASES).join(Tables.EH_FLOWS)
+                    .on(Tables.EH_FLOW_CASES.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID)
+                            .and(Tables.EH_FLOW_CASES.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
+                    .where(cond).orderBy(Tables.EH_FLOW_CASES.ID.desc()).limit(count).getQuery();
+
+            if (callback != null) {
+                callback.buildCondition(locator, query);
+            }
+
+            List<FlowCaseDetail> objs = query.fetchInto(FlowCaseDetail.class);
     		
-    		List<EhFlowCasesRecord> records = context.select().from(Tables.EH_FLOW_CASES).join(Tables.EH_FLOWS)
-    		    	.on(Tables.EH_FLOW_CASES.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID).and(Tables.EH_FLOW_CASES.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
-    		    	.where(cond).orderBy(Tables.EH_FLOW_CASES.ID.desc()).limit(count)
-    		    	.fetch().map(new FlowCaseRecordMapper());
-    		
-    		List<FlowCaseDetail> objs = records.stream().map((r) -> {
+    		/*List<FlowCaseDetail> objs = records.stream().map((r) -> {
     			return ConvertHelper.convert(r, FlowCaseDetail.class);
-    		}).collect(Collectors.toList());
+    		}).collect(Collectors.toList());*/
     		
             if(objs.size() >= count) {
                 locator.setAnchor(objs.get(objs.size() - 1).getId());

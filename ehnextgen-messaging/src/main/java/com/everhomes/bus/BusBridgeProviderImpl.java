@@ -50,6 +50,7 @@ public class BusBridgeProviderImpl implements BusBridgeProvider, LocalBusSubscri
     public void onCoreBusMessage(Object message) {
         if(message != null && message instanceof BusBridgeMessage) {
             BusBridgeMessage bridgeMesssage = (BusBridgeMessage)message;
+            //this 实现了LocalBusSubscriber 订阅了 global 主题，避免死循环
             if(!bridgeUuid.equals(bridgeMesssage.getInitiator())) {
                 localBusProvider.publish(null, bridgeMesssage.getSubject(), bridgeMesssage.getArgs());
             } else {

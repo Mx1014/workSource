@@ -2,9 +2,7 @@
 package com.everhomes.organization.pm;
 
 import com.everhomes.community.Community;
-import com.everhomes.rest.address.BuildingDTO;
-import com.everhomes.rest.address.ListBuildingByKeywordCommand;
-import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.order.CommonOrderDTO;
@@ -455,4 +453,20 @@ public interface PropertyMgrService {
 	PropAptStatisticDTO getNewApartmentStatistics(PropCommunityIdCommand cmd);
 
 	GetRequestInfoResponse getRequestInfo(GetRequestInfoCommand cmd);
+
+	ListPropApartmentsResponse listNewPropApartmentsByKeyword(ListPropApartmentsByKeywordCommand cmd);
+
+	void createApartment(CreateApartmentCommand cmd);
+
+	void updateApartment(UpdateApartmentCommand cmd);
+
+	void deleteApartment(DeleteApartmentCommand cmd);
+
+	GetApartmentDetailResponse getApartmentDetail(GetApartmentDetailCommand cmd);
+
+    ListApartmentsResponse listApartments(ListApartmentsCommand cmd);
+
+    void deleteDefaultChargingItem(DeleteDefaultChargingItemCommand cmd);
+    DefaultChargingItemDTO updateDefaultChargingItem(UpdateDefaultChargingItemCommand cmd);
+    List<DefaultChargingItemDTO> listDefaultChargingItems(ListDefaultChargingItemsCommand cmd);
 }

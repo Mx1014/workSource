@@ -13,7 +13,7 @@ public class NewsTest extends CoreServerTestCase {
 	
 	@Test
 	public void testListNews(){
-		List<News> list = newsProvider.listNews(0L, 0, 0L, 20);
+		List<News> list = newsProvider.listNews(0L,0L, 0, 0L, 20);
 		list.forEach(s->System.err.println(s));
 	}
 }

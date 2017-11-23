@@ -110,6 +110,33 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
 
         return objs;
     }
+    
+    @Override
+    public List<AclinkLog> queryAclinkLogsByTime(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkLogs.class));
+
+        SelectQuery<EhAclinkLogsRecord> query = context.selectQuery(Tables.EH_ACLINK_LOGS);
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+
+        query.addOrderBy(Tables.EH_ACLINK_LOGS.ID.desc());
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_ACLINK_LOGS.ID.lt(locator.getAnchor()));
+            }
+
+        query.addLimit(count);
+        List<AclinkLog> objs = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, AclinkLog.class);
+        });
+
+        if(objs.size() >= count) {
+            locator.setAnchor(objs.get(objs.size() - 1).getId());
+        } else {
+            locator.setAnchor(null);
+        }
+
+        return objs;
+    }
 
     private void prepareObj(AclinkLog obj) {
         Long l2 = DateHelper.currentGMTTime().getTime();

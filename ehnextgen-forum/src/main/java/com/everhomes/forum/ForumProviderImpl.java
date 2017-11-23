@@ -12,10 +12,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SelectQuery;
+import com.everhomes.server.schema.tables.records.EhInteractSettingsRecord;
+import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -607,8 +605,19 @@ public class ForumProviderImpl implements ForumProvider {
                 if(queryBuilderCallback != null) {
                     queryBuilderCallback.buildCondition(locator, query);
                 }
+
+                //置顶的优先排序  add by yanjun 20171023
+                query.addOrderBy(Tables.EH_FORUM_POSTS.STICK_FLAG.desc());
+                query.addOrderBy(Tables.EH_FORUM_POSTS.STICK_TIME.desc());
+
                 query.addOrderBy(Tables.EH_FORUM_POSTS.CREATE_TIME.desc());
-                query.addLimit(limit[0]);
+
+                Integer offset = 0;
+                if(locator.getAnchor() != null) {
+                    // MD，加上置顶功能后无法使用锚点排序，一页页来 add by yanjun 20171031
+                    offset = (locator.getAnchor().intValue() - 1 ) * (count-1);
+                }
+                query.addLimit(offset, limit[0]);
                 
                 if(LOGGER.isDebugEnabled()) {
                     LOGGER.debug("Query posts by forum, sql=" + query.getSQL());
@@ -670,13 +679,24 @@ public class ForumProviderImpl implements ForumProvider {
         if(queryBuilderCallback != null) {
             queryBuilderCallback.buildCondition(locator, query);
         }
-            
+
+        Integer offset = 0;
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_FORUM_POSTS.ID.lt(locator.getAnchor()));
+        	//后台发布活动：开放时间选择可早于当前时间（包括开始、结束及报名截止时间，同时刷新活动发布时间为活动开始时间前24小时） (活动2.6.0的)
+        	//此时ID和CREATE_TIME的顺序不一致，此处改用创建时间排序 ，  add by yanjun 20170522
+        	//query.addConditions(Tables.EH_FORUM_POSTS.ID.lt(locator.getAnchor()));
+            //query.addConditions(Tables.EH_FORUM_POSTS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
+
+            // MD，加上置顶功能后无法使用锚点排序，一页页来 add by yanjun 20171031
+            offset = (locator.getAnchor().intValue() - 1 ) * (count-1);
         }
-        
+
+        //置顶的优先排序  add by yanjun 20171023
+        query.addOrderBy(Tables.EH_FORUM_POSTS.STICK_FLAG.desc());
+        query.addOrderBy(Tables.EH_FORUM_POSTS.STICK_TIME.desc());
+
         query.addOrderBy(Tables.EH_FORUM_POSTS.CREATE_TIME.desc());
-        query.addLimit(count);
+        query.addLimit(offset, count);
         
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Query posts by count, sql=" + query.getSQL());
@@ -687,10 +707,16 @@ public class ForumProviderImpl implements ForumProvider {
         List<Post> posts = records.stream().map((r) -> {
             return ConvertHelper.convert(r, Post.class);
         }).collect(Collectors.toList());
-        
-        if(posts.size() > 0) {
-            locator.setAnchor(posts.get(posts.size() -1).getId());
-        }
+
+//        locator.setAnchor(null);
+//        if(posts.size() == count) {
+//        	//后台发布活动：开放时间选择可早于当前时间（包括开始、结束及报名截止时间，同时刷新活动发布时间为活动开始时间前24小时） (活动2.6.0的)
+//        	//此时ID和CREATE_TIME的顺序不一致，此处改用创建时间排序 ，  add by yanjun 20170522
+//
+//            // MD，加上置顶功能后无法使用锚点排序，一页页来     此处删掉 由service自己处理  add by yanjun 20171031
+//            Long nextpageAnchor = locator.getAnchor() == null ? 2 : locator.getAnchor() + 1;
+//            locator.setAnchor(nextpageAnchor);
+//        }
         
         long endTime = System.currentTimeMillis();
         if(LOGGER.isInfoEnabled()) {
@@ -763,7 +789,7 @@ public class ForumProviderImpl implements ForumProvider {
                 // if there are still more records in db
                 if(postList.size() > count) {
                     maxIndex = postList.size() - 2;
-                    pageAnchor = postList.get(postList.size() - 2).getId();
+                    pageAnchor = pageAnchor == null ? 2 : pageAnchor + 1;
                 } else {
                     // no more record in db
                     maxIndex = postList.size() - 1;
@@ -1027,6 +1053,72 @@ public class ForumProviderImpl implements ForumProvider {
 		}
 		return new ArrayList<Post>();
 	}
-	
+
+	@Override
+    public Forum findForumByNamespaceId(Integer namespaceId){
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Result<Record> result = context.select(Tables.EH_FORUMS.fields()).from(Tables.EH_FORUMS)
+                .join(Tables.EH_COMMUNITIES)
+                .on(Tables.EH_FORUMS.ID.eq(Tables.EH_COMMUNITIES.DEFAULT_FORUM_ID))
+                .where(Tables.EH_FORUMS.NAMESPACE_ID.eq(namespaceId))
+                .limit(1)
+                .fetch();
+
+        if (result != null && result.isNotEmpty()) {
+            return RecordHelper.convert(result.get(0), Forum.class);
+        }
+	    return null;
+    }
+
+
+    @Override
+    public List<Post> listPostsByRealPostId(Long realPostId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Result<Record> result = context.select().from(Tables.EH_FORUM_POSTS)
+                .where(Tables.EH_FORUM_POSTS.REAL_POST_ID.eq(realPostId))
+                .fetch();
+
+        if (result != null && result.isNotEmpty()) {
+            return result.map(r->RecordHelper.convert(r, Post.class));
+        }
+        return new ArrayList<Post>();
+    }
+
+    @Override
+    public List<ForumCategory> listForumCategoryByForumId(Long forumId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Result<Record> result = context.select().from(Tables.EH_FORUM_CATEGORIES)
+                .where(Tables.EH_FORUM_CATEGORIES.FORUM_ID.eq(forumId))
+                .fetch();
+
+        if (result != null && result.isNotEmpty()) {
+            return result.map(r->RecordHelper.convert(r, ForumCategory.class));
+        }
+        return new ArrayList<ForumCategory>();
+    }
+
+    @Override
+    public ForumCategory findForumCategoryById(Long Id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_FORUM_CATEGORIES)
+                .where(Tables.EH_FORUM_CATEGORIES.ID.eq(Id))
+                .fetchOneInto(ForumCategory.class);
+    }
+
+    @Cacheable(value="findInteractSetting", key="{#namespaceId, #forumId, #type, #entryId}", unless="#result == null")
+    @Override
+    public InteractSetting findInteractSetting(Integer namespaceId, Long forumId, String type, Long entryId) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhInteractSettingsRecord> query = context.selectQuery(Tables.EH_INTERACT_SETTINGS);
+        query.addConditions(Tables.EH_INTERACT_SETTINGS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_INTERACT_SETTINGS.FORUM_ID.eq(forumId));
+        query.addConditions(Tables.EH_INTERACT_SETTINGS.TYPE.eq(type));
+        if(entryId != null){
+            query.addConditions(Tables.EH_INTERACT_SETTINGS.ENTRY_ID.eq(entryId));
+        }
+        return query.fetchAnyInto(InteractSetting.class);
+    }
 	
  }

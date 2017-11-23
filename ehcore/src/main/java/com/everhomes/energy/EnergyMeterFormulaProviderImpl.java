@@ -39,9 +39,10 @@ public class EnergyMeterFormulaProviderImpl implements EnergyMeterFormulaProvide
     }
 
     @Override
-    public EnergyMeterFormula findByName(Integer namespaceId, String name) {
+    public EnergyMeterFormula findByName(Integer namespaceId, Long communityId, String name) {
         return context().selectFrom(EH_ENERGY_METER_FORMULAS)
                 .where(EH_ENERGY_METER_FORMULAS.NAMESPACE_ID.eq(namespaceId))
+                .and(EH_ENERGY_METER_FORMULAS.COMMUNITY_ID.eq(communityId))
                 .and(EH_ENERGY_METER_FORMULAS.NAME.eq(name))
                 .and(EH_ENERGY_METER_FORMULAS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
                 .orderBy(EH_ENERGY_METER_FORMULAS.CREATE_TIME.desc())

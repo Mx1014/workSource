@@ -22,6 +22,7 @@ import com.everhomes.util.StringHelper;
  *                            所管理的片区ID（片区ID实际上为机构ID）；contentCategory选公告/报修/咨询与求助/投诉与建议，actionCategory不填；</li>
  * </ul>
  * <ul>字段：
+ * <li>oldId: 老ID，当暂存过后提交时要传来老的Id用于删除老数据</li>
  * <li>forumId: 论坛ID</li>
  * <li>creatorTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
  * <li>targetTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
@@ -29,6 +30,7 @@ import com.everhomes.util.StringHelper;
  * <li>actionCategory: 操作类型ID，如拼车中的“我搭车”、“我开车”</li>
  * <li>visibleRegionType: 区域范围类型，{@link com.everhomes.rest.visibility.VisibleRegionType}</li>
  * <li>visibleRegionId: 区域范围类型对应的ID</li>
+ * <li>visibleRegionIds: 区域范围类型对应的IDs。新版的活动发布时出现了范围的概念，比如“园区A、园区C和小区A”。visibleRegionId和visibleRegionIds只传一个</li>
  * <li>longitude: 帖子内容涉及到的经度如活动</li>
  * <li>latitude: 帖子内容涉及到的纬度如活动</li>
  * <li>subject: 帖子标题</li>
@@ -47,9 +49,17 @@ import com.everhomes.util.StringHelper;
  * <li>isVideoSupport: 为空则不开启，为 1 则开启直播 </li>
  * <li>videoUrl: TODO 需要么？</li>
  * <li>maxQuantity: 限制人数</li>
+ * <li>status: 活动状态，0-已删除，1-待确认，2-正常。用于暂存或者立刻发布，不传默认2立刻发布，参考{@link com.everhomes.rest.forum.PostStatus}</li>
+ * <li>tag: 帖子标签</li>
+ * <li>cloneFlag: 克隆标识，参考{@link com.everhomes.rest.forum.PostCloneFlag}</li>
+ * <li>realPostId: 真身帖的Id</li>
+ * <li>namespaceId: 域空间Id</li>
+ * <li>forumEntryId: 论坛应用入口Id</li>
  * </ul>
  */
 public class NewTopicCommand {
+	private Long oldId;
+	
     private String ownerType;
 
     private Long ownerId;
@@ -70,6 +80,9 @@ public class NewTopicCommand {
     private Byte visibleRegionType;
 
     private Long visibleRegionId;
+
+    @ItemType(Long.class)
+    private List<Long> visibleRegionIds;
     
     private Double longitude;
     
@@ -107,6 +120,26 @@ public class NewTopicCommand {
     private Byte mediaDisplayFlag;
     
     private Integer maxQuantity;
+    
+    private Byte status;
+
+    private String tag;
+
+    private Byte cloneFlag;
+
+    private Long realPostId;
+
+    private Integer namespaceId;
+
+    private Long forumEntryId;
+    
+	public Long getOldId() {
+		return oldId;
+	}
+
+	public void setOldId(Long oldId) {
+		this.oldId = oldId;
+	}
 
 	public Integer getMaxQuantity() {
 		return maxQuantity;
@@ -189,6 +222,14 @@ public class NewTopicCommand {
 
     public void setVisibleRegionId(Long visibleRegionId) {
         this.visibleRegionId = visibleRegionId;
+    }
+
+    public List<Long> getVisibleRegionIds() {
+        return visibleRegionIds;
+    }
+
+    public void setVisibleRegionIds(List<Long> visibleRegionIds) {
+        this.visibleRegionIds = visibleRegionIds;
     }
 
     public Double getLongitude() {
@@ -279,7 +320,6 @@ public class NewTopicCommand {
         this.privateFlag = privateFlag;
     }
     
-    
 
     public Long getStartTime() {
 		return startTime;
@@ -319,6 +359,54 @@ public class NewTopicCommand {
 
     public void setCurrentOrgId(Long currentOrgId) {
         this.currentOrgId = currentOrgId;
+    }
+
+    public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    public Byte getCloneFlag() {
+        return cloneFlag;
+    }
+
+    public void setCloneFlag(Byte cloneFlag) {
+        this.cloneFlag = cloneFlag;
+    }
+
+    public Long getRealPostId() {
+        return realPostId;
+    }
+
+    public void setRealPostId(Long realPostId) {
+        this.realPostId = realPostId;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getForumEntryId() {
+        return forumEntryId;
+    }
+
+    public void setForumEntryId(Long forumEntryId) {
+        this.forumEntryId = forumEntryId;
     }
 
     @Override

@@ -7,9 +7,12 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
+ * <li>ownerType：范围类型，固定EhOrganizations，如果是左邻运营后台的域名可以定义一个类型, 参考{@link com.everhomes.rest.common.EntityType}</li>
+ * <li>ownerId：范围具体Id，域名对应的机构id，后面需要讨论是否直接通过域名来获取当前公司, 如果是左邻后台传0即可</li>
  * <li>organizationId: 机构id</li>
  * <li>moduleId: 业务模块id</li>
  * <li>keywords: 关键字</li>
+ * <li>activationFlag: 是否激活，参考{@link com.everhomes.rest.common.ActivationFlag}</li>
  * </ul>
  */
 public class ListServiceModuleAdministratorsCommand {
@@ -27,6 +30,8 @@ public class ListServiceModuleAdministratorsCommand {
     private Long moduleId;
 
     private String keywords;
+
+    private Byte activationFlag;
 
     public Long getOrganizationId() {
         return organizationId;
@@ -66,6 +71,14 @@ public class ListServiceModuleAdministratorsCommand {
 
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public Byte getActivationFlag() {
+        return activationFlag;
+    }
+
+    public void setActivationFlag(Byte activationFlag) {
+        this.activationFlag = activationFlag;
     }
 
     @Override

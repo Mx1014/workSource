@@ -8,16 +8,25 @@ package com.everhomes.rest.flow;
  * <li>flow_button: 工作流按钮</li>
  * <li>flow_selection: 工作流的用户选择项</li>
  * <li>flow_user: 工作流的某个选择用户</li>
- * 
+ * <li>flow_condition: 工作流条件</li>
  * </ul>
  * @author janson
- *
  */
 public enum FlowEntityType {
-	FLOW("flow"), FLOW_NODE("flow_node"), FLOW_ACTION("flow_action"), FLOW_BUTTON("flow_button"), FLOW_SELECTION("flow_selection"), FLOW_USER("flow_user"), FLOW_EVALUATE("flow_evaluate");
+
+	FLOW("flow"),
+    FLOW_NODE("flow_node"),
+    FLOW_ACTION("flow_action"),
+    FLOW_BUTTON("flow_button"),
+    FLOW_SELECTION("flow_selection"),
+    FLOW_USER("flow_user"),
+    FLOW_EVALUATE("flow_evaluate"),
+    FLOW_CONDITION("flow_condition"),
+    ;
 	
 	private String code;
-    private FlowEntityType(String code) {
+
+    FlowEntityType(String code) {
         this.code = code;
     }
     

@@ -18,4 +18,7 @@ public interface AclinkLogProvider {
 
     List<AclinkLog> queryAclinkLogs(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
 
+	List<AclinkLog> queryAclinkLogsByTime(ListingLocator locator, int count,
+			ListingQueryBuilderCallback queryBuilderCallback);
+
 }

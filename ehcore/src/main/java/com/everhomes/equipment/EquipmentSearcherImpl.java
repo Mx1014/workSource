@@ -1,13 +1,22 @@
 package com.everhomes.equipment;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
-import com.everhomes.techpark.punch.PunchTimeRule;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.quality.OwnerType;
+import com.everhomes.search.AbstractElasticSearch;
+import com.everhomes.search.EquipmentSearcher;
+import com.everhomes.search.SearchUtils;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.util.ConvertHelper;
+import com.mysql.jdbc.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -24,28 +33,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.equipment.EquipmentReviewStatus;
-import com.everhomes.rest.equipment.EquipmentStandardRelationDTO;
-import com.everhomes.rest.equipment.EquipmentStandardsDTO;
-import com.everhomes.rest.equipment.EquipmentStatus;
-import com.everhomes.rest.equipment.EquipmentsDTO;
-import com.everhomes.rest.equipment.ReviewResult;
-import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsCommand;
-import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsResponse;
-import com.everhomes.rest.equipment.SearchEquipmentsCommand;
-import com.everhomes.rest.equipment.SearchEquipmentsResponse;
-import com.everhomes.rest.quality.OwnerType;
-import com.everhomes.search.AbstractElasticSearch;
-import com.everhomes.search.EquipmentSearcher;
-import com.everhomes.search.SearchUtils;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.videoconf.ConfOrders;
-import com.mysql.jdbc.StringUtils;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class EquipmentSearcherImpl extends AbstractElasticSearch implements EquipmentSearcher{
@@ -63,6 +53,9 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
 
     @Autowired
     private CommunityProvider communityProvider;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 	
 	@Override
 	public void deleteById(Long id) {
@@ -120,6 +113,8 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
 
 	@Override
 	public SearchEquipmentsResponse queryEquipments(SearchEquipmentsCommand cmd) {
+        Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_LIST, 0L);
+        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 		QueryBuilder qb = null;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
@@ -127,11 +122,14 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
             		.field("name", 1.2f)
-                    .field("standardName", 1.0f);
+                    .field("standardName", 1.0f)
+                    .field("customNumber",1.2f);
             
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("name").addHighlightedField("standardName");
+            builder.addHighlightedField("name")
+                    .addHighlightedField("standardName")
+                    .addHighlightedField("customNumber");
         }
 
         FilterBuilder fb = null;
@@ -210,11 +208,12 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
             		.field("name", 1.2f)
+            		.field("customNumber", 1.2f)
                     .field("standardName", 1.0f);
             
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("name").addHighlightedField("standardName");
+            builder.addHighlightedField("name").addHighlightedField("customNumber").addHighlightedField("standardName");
         }
 
         FilterBuilder fb = null;
@@ -300,6 +299,7 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
             b.field("status", equipment.getStatus());
             b.field("categoryId", equipment.getCategoryId());
             b.field("name", equipment.getName());
+            b.field("customNumber", equipment.getCustomNumber());
             b.field("inspectionCategoryId", equipment.getInspectionCategoryId());
 //            b.field("reviewResult", equipment.getReviewResult());
 //            b.field("reviewStatus", equipment.getReviewStatus());

@@ -19,6 +19,8 @@ public class DeleteEquipmentStandardRelationsCommand {
 	
 	@NotNull
 	private String ownerType;
+
+	private Long targetId;
 	
 	@NotNull
 	private Long id;
@@ -26,7 +28,15 @@ public class DeleteEquipmentStandardRelationsCommand {
 	private Long equipmentId;
 	@NotNull
 	private Long standardId;
-	
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
+	}
+
 	public Long getEquipmentId() {
 		return equipmentId;
 	}

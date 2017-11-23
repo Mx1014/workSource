@@ -1,65 +1,19 @@
 package com.everhomes.flow.admin;
 
-import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.flow.FlowService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.aclink.ListDoorAccessResponse;
-import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
-import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
-import com.everhomes.rest.flow.CreateFlowCommand;
-import com.everhomes.rest.flow.CreateFlowNodeCommand;
-import com.everhomes.rest.flow.DeleteFlowNodeCommand;
-import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
-import com.everhomes.rest.flow.DisableFlowButtonCommand;
-import com.everhomes.rest.flow.FlowButtonDTO;
-import com.everhomes.rest.flow.FlowButtonDetailDTO;
-import com.everhomes.rest.flow.FlowCaseDetailDTO;
-import com.everhomes.rest.flow.FlowCaseSearchType;
-import com.everhomes.rest.flow.FlowDTO;
-import com.everhomes.rest.flow.FlowEvaluateDetailDTO;
-import com.everhomes.rest.flow.FlowGraphDetailDTO;
-import com.everhomes.rest.flow.FlowIdCommand;
-import com.everhomes.rest.flow.FlowNodeDTO;
-import com.everhomes.rest.flow.FlowNodeDetailDTO;
-import com.everhomes.rest.flow.FlowResolveUsersCommand;
-import com.everhomes.rest.flow.FlowResolveUsersResponse;
-import com.everhomes.rest.flow.FlowSMSTemplateResponse;
-import com.everhomes.rest.flow.FlowUserSelectionDTO;
-import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.flow.FlowVariableResponse;
-import com.everhomes.rest.flow.GetFlowButtonDetailByIdCommand;
-import com.everhomes.rest.flow.GetFlowCaseDetailByIdCommand;
-import com.everhomes.rest.flow.GetFlowGraphDetailCommand;
-import com.everhomes.rest.flow.GetFlowNodeDetailCommand;
-import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
-import com.everhomes.rest.flow.ListFlowBriefResponse;
-import com.everhomes.rest.flow.ListFlowButtonResponse;
-import com.everhomes.rest.flow.ListFlowCommand;
-import com.everhomes.rest.flow.ListFlowUserSelectionCommand;
-import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
-import com.everhomes.rest.flow.ListFlowVariablesCommand;
-import com.everhomes.rest.flow.ListSMSTemplateCommand;
-import com.everhomes.rest.flow.ListScriptsCommand;
-import com.everhomes.rest.flow.ListScriptsResponse;
-import com.everhomes.rest.flow.SearchFlowCaseCommand;
-import com.everhomes.rest.flow.SearchFlowCaseResponse;
-import com.everhomes.rest.flow.UpdateFlowButtonCommand;
-import com.everhomes.rest.flow.UpdateFlowEvaluateCommand;
-import com.everhomes.rest.flow.UpdateFlowNameCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeCommand;
-import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.flow.*;
 import com.everhomes.user.UserContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
 
 @RestDoc(value="Flow Admin controller", site="core")
 @RestController
@@ -80,10 +34,11 @@ public class FlowAdminController extends ControllerBase {
     	RestResponse response = new RestResponse();
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");
-    	
-    	Byte admin = FlowCaseSearchType.ADMIN.getCode();
-    	cmd.setFlowCaseSearchType(admin);
-    	
+
+        if (cmd.getFlowCaseSearchType() == null) {
+            Byte admin = FlowCaseSearchType.ADMIN.getCode();
+            cmd.setFlowCaseSearchType(admin);
+        }
     	response.setResponseObject(flowService.searchFlowCases(cmd));
     	
     	return response;
@@ -91,17 +46,18 @@ public class FlowAdminController extends ControllerBase {
     
     /**
      * <b>URL: /admin/flow/getFlowCaseDetailById</b>
-     * <p> 显示用户所有的 FlowCase </p>
+     * <p> 获取 FlowCase 详情</p>
      * @return FlowCase 的列表信息
      */
     @RequestMapping("getFlowCaseDetailById")
-    @RestReturn(value=FlowCaseDetailDTO.class)
+    @RestReturn(value=FlowCaseDetailDTOV2.class)
     public RestResponse getFlowCaseDetailById(@Valid GetFlowCaseDetailByIdCommand cmd) {
     	Long userId = UserContext.current().getUser().getId();
-        RestResponse response = new RestResponse(flowService.getFlowCaseDetail(cmd.getFlowCaseId()
+        boolean needFlowButton = TrueOrFalseFlag.fromCode(cmd.getNeedFlowButton()) == TrueOrFalseFlag.TRUE;
+        RestResponse response = new RestResponse(flowService.getFlowCaseDetailByIdV2(cmd.getFlowCaseId()
         		, userId
         		, FlowUserType.fromCode(cmd.getFlowUserType())
-        		, false));
+        		, true, needFlowButton));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -152,12 +108,11 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/enableFlow</b>
      * <p> 启用某一个业务模块下的工作流，会自动把之前的工作流禁用 </p>
-     * @return
      */
     @RequestMapping("enableFlow")
     @RestReturn(value=String.class)
     public RestResponse enableFlow(@Valid FlowIdCommand cmd) {
-    		flowService.enableFlow(cmd.getFlowId());
+        flowService.enableFlow(cmd.getFlowId());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -166,13 +121,12 @@ public class FlowAdminController extends ControllerBase {
     
     /**
      * <b>URL: /admin/flow/disableFlow</b>
-     * <p> 启用某一个业务模块下的工作流 </p>
-     * @return
+     * <p> 禁用某一个业务模块下的工作流 </p>
      */
     @RequestMapping("disableFlow")
     @RestReturn(value=String.class)
     public RestResponse disableFlow(@Valid FlowIdCommand cmd) {
-    		flowService.disableFlow(cmd.getFlowId());
+        flowService.disableFlow(cmd.getFlowId());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -182,7 +136,6 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/deleteFlow</b>
      * <p> 删除某一个工作流 </p>
-     * @return
      */
     @RequestMapping("deleteFlow")
     @RestReturn(value=String.class)
@@ -196,8 +149,7 @@ public class FlowAdminController extends ControllerBase {
     
     /**
      * <b>URL: /admin/flow/updateFlowName</b>
-     * <p> 修改工作流的名字 </p>
-     * @return
+     * <p> 修改工作流的属性 </p>
      */
     @RequestMapping("updateFlowName")
     @RestReturn(value=FlowDTO.class)
@@ -213,6 +165,7 @@ public class FlowAdminController extends ControllerBase {
      * <p> 修改工作流的名字 </p>
      * @return
      */
+    @Deprecated
     @RequestMapping("createFlowNode")
     @RestReturn(value=FlowNodeDTO.class)
     public RestResponse createFlowNode(@Valid CreateFlowNodeCommand cmd) {
@@ -227,6 +180,7 @@ public class FlowAdminController extends ControllerBase {
      * <p> 修改工作流的名字 </p>
      * @return
      */
+    @Deprecated
     @RequestMapping("deleteFlowNode")
     @RestReturn(value=FlowNodeDTO.class)
     public RestResponse deleteFlowNode(@Valid DeleteFlowNodeCommand cmd) {
@@ -239,8 +193,8 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/listFlowNodes</b>
      * <p> 显示工作流下的所有节点 </p>
-     * @return
      */
+    @Deprecated
     @RequestMapping("listFlowNodes")
     @RestReturn(value=ListBriefFlowNodeResponse.class)
     public RestResponse listFlowNodes(@Valid FlowIdCommand cmd) {
@@ -253,8 +207,8 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/updateNodePriority</b>
      * <p> 重新修改工作流下的优先级 </p>
-     * @return
      */
+    @Deprecated
     @RequestMapping("updateFlowNodePriority")
     @RestReturn(value=ListBriefFlowNodeResponse.class)
     public RestResponse updateNodePriority(@Valid UpdateFlowNodePriorityCommand cmd) {
@@ -266,8 +220,7 @@ public class FlowAdminController extends ControllerBase {
     
     /**
      * <b>URL: /admin/flow/updateFlowNode</b>
-     * <p> 修改工作节点的名字 </p>
-     * @return
+     * <p>修改节点设置属性</p>
      */
     @RequestMapping("updateFlowNode")
     @RestReturn(value=FlowNodeDTO.class)
@@ -281,7 +234,6 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/createFlowUserSelection</b>
      * <p> 创建一波用户选择项 </p>
-     * @return
      */
     @RequestMapping("createFlowUserSelection")
     @RestReturn(value=ListFlowUserSelectionResponse.class)
@@ -322,8 +274,7 @@ public class FlowAdminController extends ControllerBase {
     
     /**
      * <b>URL: /admin/flow/updateFlowNodeReminder</b>
-     * <p> 创建一波用户选择项 </p>
-     * @return
+     * <p>设置用户提醒</p>
      */
     @RequestMapping("updateFlowNodeReminder")
     @RestReturn(value=FlowNodeDetailDTO.class)
@@ -393,7 +344,6 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/updateFlowButton</b>
      * <p> 修改节点按钮信息 </p>
-     * @return
      */
     @RequestMapping("updateFlowButton")
     @RestReturn(value=FlowButtonDetailDTO.class)
@@ -405,9 +355,22 @@ public class FlowAdminController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /admin/flow/disableFlowButton</b>
-     * <p> 禁用节点中的某一个按钮应用 </p>
-     * @return
+     * <b>URL: /admin/flow/deleteFlowButton</b>
+     * <p> 删除按钮 </p>
+     */
+    @RequestMapping("deleteFlowButton")
+    @RestReturn(value=String.class)
+    public RestResponse deleteFlowButton(@Valid DeleteFlowButtonCommand cmd) {
+        flowService.deleteFlowButton(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/enableFlowButton</b>
+     * <p> 启用节点中的某一个按钮应用 </p>
      */
     @RequestMapping("enableFlowButton")
     @RestReturn(value=FlowButtonDTO.class)
@@ -417,11 +380,10 @@ public class FlowAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /admin/flow/disableFlowButton</b>
      * <p> 禁用节点中的某一个按钮应用 </p>
-     * @return
      */
     @RequestMapping("disableFlowButton")
     @RestReturn(value=FlowButtonDTO.class)
@@ -435,7 +397,6 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/listVariables</b>
      * <p> 显示某个位置的变量 </p>
-     * @return
      */
     @RequestMapping("listVariables")
     @RestReturn(value=FlowVariableResponse.class)
@@ -477,22 +438,62 @@ public class FlowAdminController extends ControllerBase {
     
     /**
      * <b>URL: /admin/flow/updateFlowEvaluate</b>
-     * <p> 修改工作流的评分属性 </p>
-     * @return
+     * <p> 修改工作流评分项 </p>
      */
     @RequestMapping("updateFlowEvaluate")
-    @RestReturn(value=FlowEvaluateDetailDTO.class)
+    @RestReturn(value=String.class)
     public RestResponse updateFlowEvaluate(@Valid UpdateFlowEvaluateCommand cmd) {
         RestResponse response = new RestResponse(flowService.updateFlowEvaluate(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * <b>URL: /admin/flow/createFlowEvaluateItem</b>
+     * <p> 新增评价项 </p>
+     */
+    @RequestMapping("createFlowEvaluateItem")
+    @RestReturn(value=FlowEvaluateItemDTO.class)
+    public RestResponse createFlowEvaluateItem(@Valid CreateFlowEvaluateItemCommand cmd) {
+        FlowEvaluateItemDTO dto = flowService.createFlowEvaluateItem(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/updateFlowEvaluateItem</b>
+     * <p> 修改评价项 </p>
+     */
+    @RequestMapping("updateFlowEvaluateItem")
+    @RestReturn(value=FlowEvaluateItemDTO.class)
+    public RestResponse updateFlowEvaluateItem(@Valid CreateFlowEvaluateItemCommand cmd) {
+        FlowEvaluateItemDTO dto = flowService.updateFlowEvaluateItem(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/deleteFlowEvaluateItem</b>
+     * <p> 删除评价项 </p>
+     */
+    @RequestMapping("deleteFlowEvaluateItem")
+    @RestReturn(value=String.class)
+    public RestResponse deleteFlowEvaluateItem(@Valid DeleteFlowEvaluateItemCommand cmd) {
+        flowService.deleteFlowEvaluateItem(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /admin/flow/getFlowEvaluate</b>
      * <p> 获取工作流的评分信息 </p>
-     * @return
      */
     @RequestMapping("getFlowEvaluate")
     @RestReturn(value=FlowEvaluateDetailDTO.class)
@@ -506,11 +507,10 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/listScripts</b>
      * <p> 获取工作流的评分信息 </p>
-     * @return
      */
     @RequestMapping("listScripts")
     @RestReturn(value=ListScriptsResponse.class)
-    public RestResponse getFlowEvaluate(@Valid ListScriptsCommand cmd) {
+    public RestResponse listScripts(@Valid ListScriptsCommand cmd) {
         RestResponse response = new RestResponse(flowService.listScripts(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -519,8 +519,7 @@ public class FlowAdminController extends ControllerBase {
     
     /**
      * <b>URL: /admin/flow/listSMSTemplates</b>
-     * <p> 获取工作流的评分信息 </p>
-     * @return
+     * <p>获取消息提醒里的短信模板</p>
      */
     @RequestMapping("listSMSTemplates")
     @RestReturn(value=FlowSMSTemplateResponse.class)
@@ -534,12 +533,207 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/resolveUsers</b>
      * <p> 获取工作流的评分信息 </p>
-     * @return
      */
     @RequestMapping("resolveUsers")
     @RestReturn(value=FlowResolveUsersResponse.class)
     public RestResponse resolveUsers(@Valid FlowResolveUsersCommand cmd) {
         RestResponse response = new RestResponse(flowService.resolveSelectionUsers(cmd.getFlowId(), cmd.getSelectionId()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/createOrUpdateFlowGraph</b>
+     * <p>保存或修改流程图</p>
+     */
+    @RequestMapping("createOrUpdateFlowGraph")
+    @RestReturn(value=FlowGraphDTO.class)
+    public RestResponse createOrUpdateFlowGraph(@Valid CreateFlowGraphCommand cmd) {
+        FlowGraphDTO flowGraphDTO = flowService.createOrUpdateFlowGraph(cmd);
+        RestResponse response = new RestResponse(flowGraphDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/createOrUpdateFlowCondition</b>
+     * <p>保存或修改条件</p>
+     */
+    @RequestMapping("createOrUpdateFlowCondition")
+    @RestReturn(value=FlowGraphDTO.class)
+    public RestResponse createOrUpdateFlowCondition(@Valid CreateFlowConditionCommand cmd) {
+        FlowGraphDTO flowGraphDTO = flowService.createOrUpdateFlowCondition(cmd);
+        RestResponse response = new RestResponse(flowGraphDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/updateFlowValidationStatus</b>
+     * <p>修改工作流校验状态</p>
+     */
+    @RequestMapping("updateFlowValidationStatus")
+    @RestReturn(value=String.class)
+    public RestResponse updateFlowValidationStatus(@Valid UpdateFlowValidationStatusCommand cmd) {
+        flowService.updateFlowValidationStatus(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/getFlowGraph</b>
+     * <p>获取工作流流程图</p>
+     */
+    @RequestMapping("getFlowGraph")
+    @RestReturn(value=FlowGraphDTO.class)
+    public RestResponse getFlowGraph(@Valid FlowIdCommand cmd) {
+        FlowGraphDTO flowGraphDTO = flowService.getFlowGraphNew(cmd);
+        RestResponse response = new RestResponse(flowGraphDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/createFlowButton</b>
+     * <p>新增按钮</p>
+     */
+    @RequestMapping("createFlowButton")
+    @RestReturn(value=FlowButtonDTO.class)
+    public RestResponse createFlowButton(@Valid CreateFlowButtonCommand cmd) {
+        FlowButtonDTO buttonDTO = flowService.createFlowButton(cmd);
+        RestResponse response = new RestResponse(buttonDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/updateFlowButtonOrder</b>
+     * <p>调整按钮的顺序</p>
+     */
+    @RequestMapping("updateFlowButtonOrder")
+    @RestReturn(value=String.class)
+    public RestResponse updateFlowButtonOrder(@Valid UpdateFlowButtonOrderCommand cmd) {
+        flowService.updateFlowButtonOrder(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/updateFlowLane</b>
+     * <p>修改泳道属性</p>
+     */
+    @RequestMapping("updateFlowLane")
+    @RestReturn(value=FlowLaneDTO.class)
+    public RestResponse updateFlowLane(@Valid UpdateFlowLaneCommand cmd) {
+        FlowLaneDTO laneDTO = flowService.updateFlowLane(cmd);
+        RestResponse response = new RestResponse(laneDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/listPredefinedParam</b>
+     * <p>预定义的参数列表</p>
+     */
+    @RequestMapping("listPredefinedParam")
+    @RestReturn(value=ListFlowPredefinedParamResponse.class)
+    public RestResponse listPredefinedParam(@Valid ListPredefinedParamCommand cmd) {
+        ListFlowPredefinedParamResponse resp = flowService.listPredefinedParam(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/listFlowConditionVariables</b>
+     * <p>获取条件变量</p>
+     */
+    @RequestMapping("listFlowConditionVariables")
+    @RestReturn(value=ListFlowConditionVariablesResponse.class)
+    public RestResponse listFlowConditionVariables(@Valid ListFlowConditionVariablesCommand cmd) {
+        ListFlowConditionVariablesResponse resp = flowService.listFlowConditionVariables(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/listFlowForms</b>
+     * <p>表单列表</p>
+     */
+    @RequestMapping("listFlowForms")
+    @RestReturn(value=ListFlowFormsResponse.class)
+    public RestResponse listFlowForms(@Valid ListFlowFormsCommand cmd) {
+        ListFlowFormsResponse resp = flowService.listFlowForms(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/updateFlowFormVersion</b>
+     * <p>更新表单版本号</p>
+     */
+    @RequestMapping("updateFlowFormVersion")
+    @RestReturn(value=FlowFormDTO.class)
+    public RestResponse updateFlowFormVersion(@Valid UpdateFlowFormCommand cmd) {
+        FlowFormDTO resp = flowService.updateFlowFormVersion(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/createFlowForm</b>
+     * <p>建立表单关联</p>
+     */
+    @RequestMapping("createFlowForm")
+    @RestReturn(value=FlowFormDTO.class)
+    public RestResponse createFlowForm(@Valid UpdateFlowFormCommand cmd) {
+        FlowFormDTO resp = flowService.createFlowForm(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/deleteFlowForm</b>
+     * <p>取消表单关联</p>
+     */
+    @RequestMapping("deleteFlowForm")
+    @RestReturn(value=String.class)
+    public RestResponse deleteFlowForm(@Valid UpdateFlowFormCommand cmd) {
+        flowService.deleteFlowForm(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/getFlowForm</b>
+     * <p>获取工作流关联的表单</p>
+     */
+    @RequestMapping("getFlowForm")
+    @RestReturn(value=FlowFormDTO.class)
+    public RestResponse getFlowForm(@Valid FlowIdCommand cmd) {
+        FlowFormDTO flowFormDTO = flowService.getFlowForm(cmd);
+        RestResponse response = new RestResponse(flowFormDTO);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

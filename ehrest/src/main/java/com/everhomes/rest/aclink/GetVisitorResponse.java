@@ -18,6 +18,8 @@ import com.everhomes.util.StringHelper;
  *
  */
 public class GetVisitorResponse {
+	Long id;
+	Long doorId;
     String userName;
     String doorName;
     String phone;
@@ -29,6 +31,8 @@ public class GetVisitorResponse {
     String description;
     String approveName;
     Byte permissionDeny;
+    Long validEndMs;
+    String namespaceName;
     
     public String getUserName() {
         return userName;
@@ -96,6 +100,31 @@ public class GetVisitorResponse {
     }
     public void setPermissionDeny(Byte permissionDeny) {
         this.permissionDeny = permissionDeny;
+    }
+
+    public Long getValidEndMs() {
+		return validEndMs;
+	}
+	public void setValidEndMs(Long validEndMs) {
+		this.validEndMs = validEndMs;
+	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public Long getDoorId() {
+		return doorId;
+	}
+	public void setDoorId(Long doorId) {
+		this.doorId = doorId;
+	}
+	public String getNamespaceName() {
+        return namespaceName;
+    }
+    public void setNamespaceName(String namespaceName) {
+        this.namespaceName = namespaceName;
     }
     @Override
     public String toString() {

@@ -1,6 +1,9 @@
 package com.everhomes.rest.techpark.expansion;
 
 
+import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 /**
@@ -12,6 +15,13 @@ import java.math.BigDecimal;
  * <li>buildingId：建筑id</li>
  * <li>rentType：招租类型{@link com.everhomes.rest.techpark.expansion.LeasePromotionType}</li> 
  * <li>status：  参考{@link com.everhomes.rest.techpark.expansion.LeasePromotionStatus}}</li> 
+ * <li>startRentArea：搜索开始面积</li>
+ * <li>endRentArea：搜索结束面积</li>
+ * <li>startRentAmount：开始金额</li>
+ * <li>endRentAmount：结束金额</li>
+ * <li>userId：查询业主发布的招租</li>
+ * <li>organizationId：公司id</li>
+ * <li>issuerType：发布人类型  {@link com.everhomes.rest.techpark.expansion.LeaseIssuerType  NORMAL_USER：普通用户或公司，ORGANIZATION：物业公司}</li>
  * </ul>
  */
 public class ListBuildingForRentCommand {
@@ -24,9 +34,11 @@ public class ListBuildingForRentCommand {
     private Long communityId;
     
     private Byte status;
-    
+	@NotNull
     private Long buildingId;
-    
+
+	private Long leaseBuildingId;
+
     private String rentType;
 
 	private BigDecimal startRentArea;
@@ -36,6 +48,14 @@ public class ListBuildingForRentCommand {
 	private Long userId;
 	private Long organizationId;
 	private String issuerType;
+
+	public Long getLeaseBuildingId() {
+		return leaseBuildingId;
+	}
+
+	public void setLeaseBuildingId(Long leaseBuildingId) {
+		this.leaseBuildingId = leaseBuildingId;
+	}
 
 	public Long getOrganizationId() {
 		return organizationId;
@@ -135,5 +155,9 @@ public class ListBuildingForRentCommand {
 	public void setRentType(String rentType) {
 		this.rentType = rentType;
 	}
-    
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

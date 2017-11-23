@@ -8,6 +8,15 @@ package com.everhomes.rest.techpark.expansion;
 public class ApplyEntryResponse {
 	private String url;
 
+	public ApplyEntryResponse() {
+		super();
+	}
+
+	public ApplyEntryResponse(String url) {
+		super();
+		this.url = url;
+	}
+
 	public String getUrl() {
 		return url;
 	}

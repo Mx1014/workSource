@@ -1,14 +1,18 @@
 package com.everhomes.flow;
 
-import java.util.Map;
-
 import com.everhomes.util.StringHelper;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class FlowModuleInfo implements Comparable<FlowModuleInfo> {
+
+    public static final String META_KEY_FORM_FLAG = "formSupportFlag";// meta里的表单标志, 对应的值为：1：有表单， 0：没有表单
+
 	private Long moduleId;
 	private String moduleName;
 	private Integer priority;
-	private Map<String, String> meta;
+	private Map<String, Object> meta;
 	
 	public FlowModuleInfo() {
 		priority = 0;
@@ -38,11 +42,21 @@ public class FlowModuleInfo implements Comparable<FlowModuleInfo> {
 		this.moduleName = moduleName;
 	}
 
-	public Map<String, String> getMeta() {
+	public Map<String, Object> getMeta() {
+        if (this.meta == null) {
+            this.meta = new HashMap<>();
+        }
 		return meta;
 	}
 
-	public void setMeta(Map<String, String> meta) {
+    public void addMeta(String key, String value) {
+        if (this.meta == null) {
+            this.meta = new HashMap<>();
+        }
+        this.meta.put(key, value);
+    }
+
+	public void setMeta(Map<String, Object> meta) {
 		this.meta = meta;
 	}
 

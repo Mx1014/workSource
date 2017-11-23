@@ -1,187 +1,269 @@
 package com.everhomes.rest.flow;
 
-import java.sql.Timestamp;
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * 节点的详细信息，包括名字，包括消息提醒，包括任务跟踪，其它信息
- * @author janson
- *
+ * <ul>
+ *     <li>id: id</li>
+ *     <li>status: status</li>
+ *     <li>description: description</li>
+ *     <li>flowMainId: flowMainId</li>
+ *     <li>createTime: createTime</li>
+ *     <li>namespaceId: namespaceId</li>
+ *     <li>flowVersion: flowVersion</li>
+ *     <li>nodeLevel: nodeLevel</li>
+ *     <li>nodeName: nodeName</li>
+ *     <li>params: params</li>
+ *     <li>autoStepType: autoStepType</li>
+ *     <li>allowApplierUpdate: allowApplierUpdate</li>
+ *     <li>autoStepMinute: autoStepMinute</li>
+ *     <li>allowTimeoutAction: allowTimeoutAction</li>
+ *     <li>reminder: reminder {@link com.everhomes.rest.flow.FlowNodeReminderDTO}</li>
+ *     <li>tracker: tracker {@link com.everhomes.rest.flow.FlowNodeTrackerDTO}</li>
+ *     <li>flowLaneId: flowLaneId</li>
+ *     <li>nodeType: nodeType</li>
+ *     <li>gotoProcessButtonName: gotoProcessButtonName</li>
+ *     <li>needAllProcessorComplete: needAllProcessorComplete</li>
+ *     <li>branch: branch {@link com.everhomes.rest.flow.FlowBranchDTO}</li>
+ *     <li>processors: processors {@link com.everhomes.rest.flow.FlowUserSelectionDTO}</li>
+ *     <li>processButtons: processButtons {@link com.everhomes.rest.flow.FlowButtonDetailDTO}</li>
+ *     <li>conditions: conditions {@link com.everhomes.rest.flow.FlowConditionDTO}</li>
+ * </ul>
  */
 public class FlowNodeDetailDTO {
-	 private Long     id;
-    private Byte     status;
-    private String     description;
-    private Long     flowMainId;
-    private Timestamp     createTime;
-    private Integer     namespaceId;
-    private Integer     flowVersion;
-    private Integer     nodeLevel;
-    private String     nodeName;
+
+    private Long id;
+    private Byte status;
+    private String description;
+    private Long flowMainId;
+    private Timestamp createTime;
+    private Integer namespaceId;
+    private Integer flowVersion;
+    private Integer nodeLevel;
+    private String nodeName;
     private String params;
     private String autoStepType;
     private Byte allowApplierUpdate;
     private Integer autoStepMinute;
     private Byte allowTimeoutAction;
-    
-	@ItemType(FlowUserSelectionDTO.class)
-	List<FlowUserSelectionDTO> processors;
-	
-	FlowNodeReminderDTO reminder;
-	
-	FlowNodeTrackerDTO tracker;
-	
-	@ItemType(FlowButtonDetailDTO.class)
-	List<FlowButtonDetailDTO> processButtons;
 
-	public Long getId() {
-		return id;
-	}
+    private FlowNodeReminderDTO reminder;
+    private FlowNodeTrackerDTO tracker;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    private Long flowLaneId;
+    private String nodeType;
+    private String gotoProcessButtonName;
+    private Byte needAllProcessorComplete;
 
-	public Byte getStatus() {
-		return status;
-	}
+    private FlowBranchDTO branch;
 
-	public String getAutoStepType() {
-		return autoStepType;
-	}
+    @ItemType(FlowUserSelectionDTO.class)
+    private List<FlowUserSelectionDTO> processors = new ArrayList<>();
 
-	public void setAutoStepType(String autoStepType) {
-		this.autoStepType = autoStepType;
-	}
+    @ItemType(FlowButtonDetailDTO.class)
+    private List<FlowButtonDetailDTO> processButtons = new ArrayList<>();
 
-	public Byte getAllowApplierUpdate() {
-		return allowApplierUpdate;
-	}
+    @ItemType(FlowConditionDTO.class)
+    private List<FlowConditionDTO> conditions = new ArrayList<>();
 
-	public void setAllowApplierUpdate(Byte allowApplierUpdate) {
-		this.allowApplierUpdate = allowApplierUpdate;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public Integer getAutoStepMinute() {
-		return autoStepMinute;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setAutoStepMinute(Integer autoStepMinute) {
-		this.autoStepMinute = autoStepMinute;
-	}
+    public Byte getStatus() {
+        return status;
+    }
 
-	public void setStatus(Byte status) {
-		this.status = status;
-	}
+    public String getAutoStepType() {
+        return autoStepType;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public void setAutoStepType(String autoStepType) {
+        this.autoStepType = autoStepType;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
-	
-	public Long getFlowMainId() {
-		return flowMainId;
-	}
+    public Byte getAllowApplierUpdate() {
+        return allowApplierUpdate;
+    }
 
-	public void setFlowMainId(Long flowMainId) {
-		this.flowMainId = flowMainId;
-	}
+    public void setAllowApplierUpdate(Byte allowApplierUpdate) {
+        this.allowApplierUpdate = allowApplierUpdate;
+    }
 
-	public Timestamp getCreateTime() {
-		return createTime;
-	}
+    public Integer getAutoStepMinute() {
+        return autoStepMinute;
+    }
 
-	public void setCreateTime(Timestamp createTime) {
-		this.createTime = createTime;
-	}
+    public void setAutoStepMinute(Integer autoStepMinute) {
+        this.autoStepMinute = autoStepMinute;
+    }
 
-	public Integer getNamespaceId() {
-		return namespaceId;
-	}
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
 
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public Integer getFlowVersion() {
-		return flowVersion;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public void setFlowVersion(Integer flowVersion) {
-		this.flowVersion = flowVersion;
-	}
+    public Long getFlowMainId() {
+        return flowMainId;
+    }
 
-	public Integer getNodeLevel() {
-		return nodeLevel;
-	}
+    public void setFlowMainId(Long flowMainId) {
+        this.flowMainId = flowMainId;
+    }
 
-	public void setNodeLevel(Integer nodeLevel) {
-		this.nodeLevel = nodeLevel;
-	}
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
 
-	public String getNodeName() {
-		return nodeName;
-	}
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
+    }
 
-	public void setNodeName(String nodeName) {
-		this.nodeName = nodeName;
-	}
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
 
-	public List<FlowUserSelectionDTO> getProcessors() {
-		return processors;
-	}
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
-	public void setProcessors(List<FlowUserSelectionDTO> processors) {
-		this.processors = processors;
-	}
+    public Integer getFlowVersion() {
+        return flowVersion;
+    }
 
-	public FlowNodeReminderDTO getReminder() {
-		return reminder;
-	}
+    public void setFlowVersion(Integer flowVersion) {
+        this.flowVersion = flowVersion;
+    }
 
-	public void setReminder(FlowNodeReminderDTO reminder) {
-		this.reminder = reminder;
-	}
+    public String getGotoProcessButtonName() {
+        return gotoProcessButtonName;
+    }
 
-	public FlowNodeTrackerDTO getTracker() {
-		return tracker;
-	}
+    public void setGotoProcessButtonName(String gotoProcessButtonName) {
+        this.gotoProcessButtonName = gotoProcessButtonName;
+    }
 
-	public void setTracker(FlowNodeTrackerDTO tracker) {
-		this.tracker = tracker;
-	}
+    public Integer getNodeLevel() {
+        return nodeLevel;
+    }
 
-	public List<FlowButtonDetailDTO> getProcessButtons() {
-		return processButtons;
-	}
+    public void setNodeLevel(Integer nodeLevel) {
+        this.nodeLevel = nodeLevel;
+    }
 
-	public void setProcessButtons(List<FlowButtonDetailDTO> processButtons) {
-		this.processButtons = processButtons;
-	}
+    public String getNodeName() {
+        return nodeName;
+    }
 
-	public String getParams() {
-		return params;
-	}
+    public void setNodeName(String nodeName) {
+        this.nodeName = nodeName;
+    }
 
-	public void setParams(String params) {
-		this.params = params;
-	}
+    public List<FlowUserSelectionDTO> getProcessors() {
+        return processors;
+    }
 
-	public Byte getAllowTimeoutAction() {
-		return allowTimeoutAction;
-	}
+    public void setProcessors(List<FlowUserSelectionDTO> processors) {
+        this.processors = processors;
+    }
 
-	public void setAllowTimeoutAction(Byte allowTimeoutAction) {
-		this.allowTimeoutAction = allowTimeoutAction;
-	}
+    public FlowNodeReminderDTO getReminder() {
+        return reminder;
+    }
 
-	@Override
+    public void setReminder(FlowNodeReminderDTO reminder) {
+        this.reminder = reminder;
+    }
+
+    public FlowNodeTrackerDTO getTracker() {
+        return tracker;
+    }
+
+    public void setTracker(FlowNodeTrackerDTO tracker) {
+        this.tracker = tracker;
+    }
+
+    public List<FlowButtonDetailDTO> getProcessButtons() {
+        return processButtons;
+    }
+
+    public void setProcessButtons(List<FlowButtonDetailDTO> processButtons) {
+        this.processButtons = processButtons;
+    }
+
+    public String getParams() {
+        return params;
+    }
+
+    public void setParams(String params) {
+        this.params = params;
+    }
+
+    public Byte getAllowTimeoutAction() {
+        return allowTimeoutAction;
+    }
+
+    public void setAllowTimeoutAction(Byte allowTimeoutAction) {
+        this.allowTimeoutAction = allowTimeoutAction;
+    }
+
+    public String getNodeType() {
+        return nodeType;
+    }
+
+    public void setNodeType(String nodeType) {
+        this.nodeType = nodeType;
+    }
+
+    public FlowBranchDTO getBranch() {
+        return branch;
+    }
+
+    public void setBranch(FlowBranchDTO branch) {
+        this.branch = branch;
+    }
+
+    public Long getFlowLaneId() {
+        return flowLaneId;
+    }
+
+    public void setFlowLaneId(Long flowLaneId) {
+        this.flowLaneId = flowLaneId;
+    }
+
+    public Byte getNeedAllProcessorComplete() {
+        return needAllProcessorComplete;
+    }
+
+    public void setNeedAllProcessorComplete(Byte needAllProcessorComplete) {
+        this.needAllProcessorComplete = needAllProcessorComplete;
+    }
+
+    public List<FlowConditionDTO> getConditions() {
+        return conditions;
+    }
+
+    public void setConditions(List<FlowConditionDTO> conditions) {
+        this.conditions = conditions;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

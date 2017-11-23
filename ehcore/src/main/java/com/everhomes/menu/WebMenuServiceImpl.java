@@ -1,0 +1,436 @@
+package com.everhomes.menu;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import com.everhomes.acl.AuthorizationProvider;
+import com.everhomes.acl.WebMenuScope;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.db.DbProvider;
+import com.everhomes.domain.Domain;
+import com.everhomes.entity.EntityType;
+import com.everhomes.module.ServiceModuleService;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.acl.*;
+import com.everhomes.rest.acl.WebMenuType;
+import com.everhomes.rest.menu.*;
+import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.everhomes.acl.WebMenu;
+import com.everhomes.acl.WebMenuPrivilegeProvider;
+import com.everhomes.rest.acl.admin.ListWebMenuResponse;
+import com.everhomes.util.ConvertHelper;
+import org.springframework.util.StringUtils;
+
+@Component
+public class WebMenuServiceImpl implements WebMenuService {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(WebMenuServiceImpl.class);
+
+	@Autowired
+	private WebMenuPrivilegeProvider webMenuProvider;
+
+	@Autowired
+	private OrganizationProvider organizationProvider;
+
+	@Autowired
+	private OrganizationService organizationService;
+
+	@Autowired
+	private AuthorizationProvider authorizationProvider;
+
+	@Autowired
+	private ServiceModuleService serviceModuleService;
+
+	@Autowired
+	private DbProvider dbProvider;
+
+	@Override
+	public List<WebMenuDTO> listUserRelatedWebMenus(ListUserRelatedWebMenusCommand cmd){
+		Long userId = cmd.getUserId();
+		if(null == userId)
+			userId = UserContext.current().getUser().getId();
+
+		List<String> categories = new ArrayList<>();
+		WebMenu menu = null;
+		if(null == cmd.getMenuId()){
+			categories.add(WebMenuCategory.CLASSIFY.getCode());
+			categories.add(WebMenuCategory.MODULE.getCode());
+		}else{
+			menu = webMenuProvider.getWebMenuById(cmd.getMenuId());
+			categories.add(WebMenuCategory.PAGE.getCode());
+		}
+		Domain domain = UserContext.current().getDomain();
+		Long currentOrgId = cmd.getCurrentOrgId();
+		if(null == domain){
+			LOGGER.error("domain not configured, userId = {}", userId);
+			domain = new Domain();
+			domain.setPortalType(EntityType.ORGANIZATIONS.getCode());
+//			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.DOMAIN_NOT_CONFIGURED,
+//					"domain not configured");
+		}
+		if(null == cmd.getCurrentOrgId()){
+			currentOrgId = domain.getPortalId();
+		}
+		if(EntityType.fromCode(domain.getPortalType()) == EntityType.ORGANIZATIONS){
+			Organization organization = organizationProvider.findOrganizationById(currentOrgId);
+			if(null != organization){
+				if(OrganizationType.fromCode(organization.getOrganizationType()) == OrganizationType.PM){
+					return listPmWebMenu(userId, menu, categories, currentOrgId);
+				}else{
+					return listEnterpriseWebMenu(userId, menu, categories, currentOrgId);
+				}
+			}
+
+		}else /*if(EntityType.fromCode(UserContext.getCurrentSceneType()) == EntityType.ZUOLIN_ADMIN) */{
+			 return listZuolinAdminWebMenu(userId, menu, categories);
+		}
+		return null;
+	}
+
+	private List<WebMenuDTO> listPmWebMenu(Long userId, WebMenu menu, List<String> categories, Long organizationId){
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		List<WebMenu> menus = null;
+		String path = null;
+		if(null != menu){
+			path = menu.getPath() + "/%";
+		}
+		List<Target> targets = new ArrayList<>();
+		targets.add(new Target(EntityType.USER.getCode(), userId));
+
+		//物业超级管理员拿所有菜单
+		if(resolver.checkSuperAdmin(userId, organizationId) || null != path){
+			menus = webMenuProvider.listWebMenuByType(WebMenuType.PARK.getCode(), categories, path, null);
+			if(null != menu && menus.size() > 0){
+				menus.add(menu);
+			}
+		}else{
+			//获取人员的所有相关机构
+			List<Long> orgIds = organizationService.getIncludeOrganizationIdsByUserId(userId, organizationId);
+			for (Long orgId: orgIds) {
+				targets.add(new Target(EntityType.ORGANIZATIONS.getCode(), orgId));
+			}
+			//获取人员和人员所有机构所赋予的权限模块
+			List<Long> moduleIds = authorizationProvider.getAuthorizationModuleIdsByTarget(targets);
+			if(null != moduleIds && moduleIds.size() > 0)
+				if(moduleIds.contains(0L)){
+					moduleIds = serviceModuleService.filterByScopes(UserContext.getCurrentNamespaceId(), null, null).stream().map(r ->{
+						return r.getId();
+					}).collect(Collectors.toList());
+				}
+				menus = webMenuProvider.listWebMenuByType(WebMenuType.PARK.getCode(), categories, null, moduleIds);
+
+			//拼上菜单的所有父级菜单
+			menus = appendParentMenus(menus);
+
+		}
+
+		if(null == menus || menus.size() == 0){
+			if(null != menu)
+				menus.add(menu);
+			else
+				return new ArrayList<>();
+		}
+		menus = filterMenus(menus, organizationId);
+		return processWebMenus(menus.stream().map(r->{
+			return ConvertHelper.convert(r, WebMenuDTO.class);
+		}).collect(Collectors.toList()), ConvertHelper.convert(menu, WebMenuDTO.class)).getDtos();
+	}
+
+	private List<WebMenuDTO> listEnterpriseWebMenu(Long userId, WebMenu menu, List<String> categories, Long organizationId){
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		List<WebMenu> menus = null;
+		String path = null;
+		if(null != menu){
+			path = menu.getPath() + "/%";
+		}
+		Boolean isAdmin = resolver.checkOrganizationAdmin(userId, organizationId);
+		LOGGER.debug("listEnterpriseWebMenu: userId: {}, organizationId: {}, isAdmin: {}", userId, organizationId, isAdmin);
+		if(isAdmin){
+			menus = webMenuProvider.listWebMenuByType(WebMenuType.ORGANIZATION.getCode(), categories, path, null);
+		}
+		LOGGER.debug("listEnterpriseWebMenu menus: {}", menus);
+		if(null == menus || menus.size() == 0){
+			if(null != menu)
+				menus.add(menu);
+			else
+				return new ArrayList<>();
+		}
+		menus = filterMenus(menus, organizationId);
+		LOGGER.debug("listEnterpriseWebMenu after filter menus: {}", menus);
+		return processWebMenus(menus.stream().map(r->{
+			return ConvertHelper.convert(r, WebMenuDTO.class);
+		}).collect(Collectors.toList()), ConvertHelper.convert(menu, WebMenuDTO.class)).getDtos();
+	}
+
+	private List<WebMenuDTO> listZuolinAdminWebMenu(Long userId, WebMenu menu, List<String> categories) {
+
+		//超级管理员才能获取左邻的菜单  add by yanjun 20171110
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+		String path = null;
+		if(null != menu){
+			path = menu.getPath() + "/%";
+		}
+		List<WebMenu> menus = webMenuProvider.listWebMenuByType(WebMenuType.ZUOLIN.getCode(), categories, path, null);
+		if(null == menus || menus.size() == 0){
+			if(null != menu)
+				menus.add(menu);
+			else
+				return new ArrayList<>();
+		}
+		return processWebMenus(menus.stream().map(r->{
+			return ConvertHelper.convert(r, WebMenuDTO.class);
+		}).collect(Collectors.toList()), ConvertHelper.convert(menu, WebMenuDTO.class)).getDtos();
+	}
+
+	private List<WebMenu> appendParentMenus(List<WebMenu> menus){
+		List<Long> menuIds = new ArrayList<>();
+		for (WebMenu menu: menus) {
+			String[] menuIdStrs = menu.getPath().split("/");
+			for (String menuIdStr: menuIdStrs) {
+				if(!StringUtils.isEmpty(menuIdStr)){
+					Long menuId = Long.valueOf(menuIdStr);
+					if(!menuIds.contains(menuId)){
+						menuIds.add(menuId);
+					}
+				}
+			}
+		}
+		return webMenuProvider.listWebMenuByMenuIds(menuIds);
+	}
+
+
+
+	@Override
+	public ListWebMenuResponse listZuolinAdminWebMenu() {
+		List<WebMenu> menus = webMenuProvider.listWebMenuByType(WebMenuType.ZUOLIN.getCode());
+		
+		List<WebMenuDTO> menuDtos =  menus.stream().map(r->{
+			return ConvertHelper.convert(r, WebMenuDTO.class);
+		}).collect(Collectors.toList());
+		
+		ListWebMenuResponse res = new ListWebMenuResponse();
+		res.setMenus(this.processWebMenus(menuDtos, null).getDtos());
+		
+		return res;
+	}
+
+	/**
+	 * 过滤菜单
+	 * @param menus
+	 * @param filterMap
+     * @return
+     */
+	private List<WebMenu> filterMenus(List<WebMenu> menus, Map<Long, WebMenuScope> filterMap){
+		List<WebMenu> filterMenus = new ArrayList<>();
+		for (WebMenu menu: menus) {
+			WebMenuScope scope = filterMap.get(menu.getId());
+			LOGGER.debug("listEnterpriseWebMenu filterMenus scope: {}", scope);
+			if(null != scope){
+				if(WebMenuScopeApplyPolicy.fromCode(scope.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
+					//override menu
+					menu.setName(scope.getMenuName());
+					filterMenus.add(menu);
+				}else if(WebMenuScopeApplyPolicy.fromCode(scope.getApplyPolicy()) == WebMenuScopeApplyPolicy.REVERT){
+					filterMenus.add(menu);
+				}
+
+			}
+		}
+		filterMenus.sort((o1, o2) -> o1.getSortNum() - o2.getSortNum());
+		LOGGER.debug("listEnterpriseWebMenu filterMenus: {}", filterMenus);
+		return filterMenus;
+	}
+
+	/**
+	 * 根据对应的机构过滤菜单
+	 * @param menus
+	 * @param organizationId
+     * @return
+     */
+	private List<WebMenu> filterMenus(List<WebMenu> menus, Long organizationId){
+		Map<Long, WebMenuScope> filterMap = webMenuProvider.getWebMenuScopeMapByOwnerId(EntityType.ORGANIZATIONS.getCode(), organizationId);
+		if(filterMap.size() == 0 ){
+			filterMap = webMenuProvider.getWebMenuScopeMapByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(UserContext.getCurrentNamespaceId()));
+		}
+		return filterMenus(menus, filterMap);
+	}
+	
+    /**
+     * 转换成菜单
+     * @param menuDtos
+     * @param dto
+     * @param dto
+     * @return
+     */
+	private WebMenuDTO processWebMenus(List<WebMenuDTO> menuDtos, WebMenuDTO dto){
+		
+		List<WebMenuDTO> dtos = new ArrayList<WebMenuDTO>();
+		
+		if(null == dto){
+			dto = new WebMenuDTO();
+			dto.setId(0l);
+		}
+		
+		for (WebMenuDTO webMenuDTO : menuDtos) {
+			if(dto.getId().equals(webMenuDTO.getParentId())){
+				WebMenuDTO menuDto = this.processWebMenus(menuDtos, webMenuDTO);
+				dtos.add(menuDto);
+			}
+		}
+		dto.setDtos(dtos);
+		
+		return dto;
+	}
+
+	@Override
+	public GetTreeWebMenusByNamespaceResponse getTreeWebMenusByNamespace(GetTreeWebMenusByNamespaceCommand cmd) {
+
+		//获取已经配置的菜单
+		List<WebMenuScope> webMenuScopes = webMenuProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(cmd.getNamespaceId()));
+
+		//获取菜单的树状结构，并在菜单中加入上述的配置状态
+		List<WebMenuDTO> tree = getTree(0L, WebMenuType.PARK.getCode(), webMenuScopes);
+
+		GetTreeWebMenusByNamespaceResponse response = new GetTreeWebMenusByNamespaceResponse();
+		response.setDtos(tree);
+		return response;
+	}
+
+
+	/**
+	 * 获取菜单的树状结构，并在菜单中加入上述的配置状态
+	 * @param parentId
+	 * @param type
+	 * @param scopes
+	 * @return
+	 */
+	public List<WebMenuDTO> getTree(Long parentId, String type, List<WebMenuScope> scopes){
+		List<WebMenuDTO> dtos = new ArrayList<>();
+		//获取当前层级的菜单
+		List<WebMenu> webMenus = webMenuProvider.listWebMenus(parentId, type);
+		if(webMenus != null && webMenus.size() > 0){
+			for (WebMenu m: webMenus){
+
+				WebMenuDTO dto = ConvertHelper.convert(m, WebMenuDTO.class);
+
+				//在菜单中加入配置状态
+				popuScopeToMenuDto(dto, scopes);
+
+					//获取子菜单
+				List<WebMenuDTO> leafDtos = getTree(dto.getId(), type, scopes);
+				dto.setDtos(leafDtos);
+
+				dtos.add(dto);
+			}
+		}
+		return dtos;
+	}
+
+	/**
+	 * 在菜单中加入配置状态
+	 * @param dto
+	 * @param scopes
+	 */
+	private void popuScopeToMenuDto(WebMenuDTO dto, List<WebMenuScope> scopes){
+		for (WebMenuScope s: scopes){
+			if(s.getMenuId().longValue() == dto.getId().longValue()){
+				dto.setSelected(WebMenuSelectedFlag.YES.getCode());
+				dto.setApplyPolicy(s.getApplyPolicy());
+				if(WebMenuScopeApplyPolicy.fromCode(s.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
+					dto.setName(s.getMenuName());
+				}
+			}
+		}
+	}
+
+	/**
+	 * 更新菜单
+	 * @param cmd
+	 */
+	@Override
+	public void updateMenuScopesByNamespace(UpdateMenuScopesByNamespaceCommand cmd){
+
+		Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+		List<WebMenuDTO> webMenuDTOS = gson.fromJson(cmd.getJsonDtos(), new TypeToken<List<WebMenuDTO>>() {
+		}.getType());
+
+		//从树状结构中获取需要配置的菜单
+		List<WebMenuScope> newScopes = fromTree(webMenuDTOS, cmd.getNamespaceId());
+
+		//查询已经配置的菜单
+		List<WebMenuScope> oldScopes = webMenuProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(cmd.getNamespaceId()));
+		List<Long> oldIds = oldScopes.stream().map(r -> r.getId()).collect(Collectors.toList());
+
+		//更新菜单
+		dbProvider.execute(status -> {
+			webMenuProvider.deleteWebMenuScopes(oldIds);
+			webMenuProvider.createWebMenuScopes(newScopes);
+			return true;
+		});
+	}
+
+	/**
+	 * 从树状结构中获取需要配置的菜单
+	 * @param dtos
+	 * @param namespaceId
+	 * @return
+	 */
+	private List<WebMenuScope> fromTree(List<WebMenuDTO> dtos, Integer namespaceId){
+		List<WebMenuScope> webMenuScopes = new ArrayList<>();
+		if(dtos != null && dtos.size() > 0){
+			for (WebMenuDTO dto: dtos){
+				if(WebMenuSelectedFlag.fromCode(dto.getSelected()) == WebMenuSelectedFlag.YES){
+					WebMenuScope scope = new WebMenuScope();
+
+					//关于名字的配置
+					scope.setApplyPolicy(dto.getApplyPolicy());
+					if(WebMenuScopeApplyPolicy.fromCode(dto.getApplyPolicy()) == null){
+						scope.setApplyPolicy(WebMenuScopeApplyPolicy.REVERT.getCode());
+					}else if(WebMenuScopeApplyPolicy.fromCode(dto.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
+						//如果覆盖，去查下是否真的覆盖了。
+						WebMenu menu = webMenuProvider.getWebMenuById(dto.getId());
+						if(menu.getName().equals(dto.getName())){
+							//其实并没有修改
+							scope.setApplyPolicy(WebMenuScopeApplyPolicy.REVERT.getCode());
+							scope.setMenuName(null);
+						}else {
+							//真的修改了
+							scope.setMenuName(dto.getName());
+						}
+					}
+
+					scope.setMenuId(dto.getId());
+					scope.setOwnerType(EntityType.NAMESPACE.getCode());
+					scope.setOwnerId((long)namespaceId);
+					webMenuScopes.add(scope);
+
+					//获取子菜单
+					List<WebMenuScope> leafScopes = fromTree(dto.getDtos(), namespaceId);
+					if(leafScopes != null && leafScopes.size() > 0){
+						webMenuScopes.addAll(leafScopes);
+					}
+
+				}
+			}
+		}
+
+		return webMenuScopes;
+	}
+}

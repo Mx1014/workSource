@@ -3,8 +3,8 @@ package com.everhomes.parking;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.bosigao2.ParkWebService;
-import com.bosigao2.ParkWebServiceSoap;
+import com.everhomes.parking.bosigao2.ParkWebService;
+import com.everhomes.parking.bosigao2.ParkWebServiceSoap;
 import com.everhomes.util.StringHelper;
 
 

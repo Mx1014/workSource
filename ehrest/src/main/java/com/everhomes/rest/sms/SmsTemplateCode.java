@@ -5,6 +5,9 @@ public interface SmsTemplateCode {
     String SCOPE = "sms.default";
 
     String YZX_SUFFIX = "yzx";
+    String YOU_XUN_TONG_SUFFIX = "YouXunTong";
+    String LIAN_XIN_TONG_SUFFIX = "LianXinTong";
+
     String SCOPE_YZX = SCOPE + "." + YZX_SUFFIX;
 
     String KEY_VCODE = "vcode";
@@ -28,6 +31,8 @@ public interface SmsTemplateCode {
     String KEY_PHONE = "phone";
     String KEY_TOPICTYPE = "topicType";
     String KEY_MSG = "msg";
+
+    int SIGN_CODE = 0; // 签名code
 
     int VERIFICATION_CODE = 1; // 验证码
     int WY_BILL_CODE = 3; //物业账单信息
@@ -61,16 +66,17 @@ public interface SmsTemplateCode {
     int PARKING_CANCEL_PROCESSING = 26; // 办理
 
     // 资源预约短信模板
+    // 线下支付模式 审批通过短信
     int RENTAL_APPLY_SUCCESS_CODE = 28; // 申请成功短信：【正中会】您申请预约的{使用时间}的{资源名称}已通过审批，为确保您成功预约，请尽快完成支付，支付方式支持：1. 请联系{收款人姓名}（{收款人手机号}）上门收费，2. 到{收银台地址}付款；感谢您的使用。
     int RENTAL_APPLY_FAILURE_CODE = 29; // 申请失败短信：【正在会】您申请预约的{使用时间}的{资源名称}没有通过审批，您可以申请预约其他空闲资源，由此给您造成的不便，敬请谅解，感谢您的使用。
     int RENTAL_PAY_SUCCESS_CODE = 30; // 支付成功短信：【正中会】您已完成支付，成功预约{使用时间}的{资源名称}，请按照预约的时段使用资源，感谢您的使用。
-    int RENTAL_SUBSCRIBE_FAILURE_CODE = 31; // 预约失败短信：【正中会】您申请预约的{使用时间}的{资源名称}已经被其他客户抢先预约成功，您可以继续申请预约其他时段，由此给您造成的不便，敬请谅解，感谢您的使用。
- 
-//    int RENTAL_TIMEOUT_AND_CANCEL_CODE = 32; // 超时自动取消短信：【正中会】您申请预约的{使用时间}的{资源名称}由于超时未支付，已自动取消，由此给您造成的不便，敬请谅解，感谢您的使用。
+//    int RENTAL_SUBSCRIBE_FAILURE_CODE = 31; // 预约失败短信：【正中会】您申请预约的{使用时间}的{资源名称}已经被其他客户抢先预约成功，您可以继续申请预约其他时段，由此给您造成的不便，敬请谅解，感谢您的使用。
+    // 审批线上支付模式 审批通过短信
+    int APPROVE_RENTAL_APPLY_SUCCESS_CODE = 31; // 申请成功短信：【正中会】您申请预约的{使用时间}的{资源名称}已通过审批，为确保您成功预约，请尽快到APP完成在线支付，感谢您的使用。
+
+    //    int RENTAL_TIMEOUT_AND_CANCEL_CODE = 32; // 超时自动取消短信：【正中会】您申请预约的{使用时间}的{资源名称}由于超时未支付，已自动取消，由此给您造成的不便，敬请谅解，感谢您的使用。
     int RENTAL_CANCEL_CODE = 32; // 取消短信：【正中会】您申请预约的{使用时间}的{资源名称}由于超时未支付或被其他客户抢先预约，已自动取消，由此给您造成的不便，敬请谅解，感谢您的使用。
     int RENTAL_REMIND_CODE = 33; // 资催办-正中会:【正中发】客户（{申请人姓名}{申请人联系电话}）提交资源预约的线下支付申请，预约{资源名称}，使用时间：{使用时间}，订单金额{订单金额}，请尽快联系客户完成支付
- 
-    int RENTAL_TIMEOUT_AND_CANCEL_CODE = 32; // 超时自动取消短信：【正中会】您申请预约的{使用时间}的{资源名称}由于超时未支付，已自动取消，由此给您造成的不便，敬请谅解，感谢您的使用。
 
     //物业报修，工作流短信模版
     int PM_TASK_FLOW_ASSIGN_CODE = 34;
@@ -98,7 +104,24 @@ public interface SmsTemplateCode {
 
     int PM_TASK_ASSIGN_NODE_CODE= 47;
     int PM_TASK_ASSIGN_NODE_SUPERVISE_CODE= 48;
-    int PM_TASK_PROCESSING_BUTTON_APPROVE_CODE= 49;
+    int PM_TASK_PROCESSING_BUTTON_APPROVE_CODE= 49; 
+    
+    // 视频会议短信
+    int VIDEO_EXPIRATION_REMINDER = 51;
+    int VIDEO_TRIAL_EXPIRATION_REMINDER = 52;
+    
+    // 资源预约短信模板
+    int RENTAL_PROCESSOR_SUCCESS_CODE = 50; // 正中会-预成功:【正在会】客户{客户姓名}（{客户联系方式}）完成支付，成功预约{使用时间}的{资源名称}，请提前做好相关准备工作。
 
+    // 申诉修改手机号审核成功
+    int RESET_IDENTIFIER_APPEAL_SUCCESS_CODE = 53;// 申诉手机号：【深圳科技园】您的申诉已通过，账号手机已更新为{newIdentifier}，若非本人操作请联系客服，感谢您的使用。
+
+    //物业缴费催款
+    int PAYMENT_NOTICE_CODE = 54;
+
+    //任务消息提醒短信
+    int PM_NOTIFY_BEFORE_TASK = 55;
+    int PM_NOTIFY_BEFORE_TASK_DELAY = 56;
+    int PM_NOTIFY_AFTER_TASK_DELAY = 57;
 
 }

@@ -1,0 +1,74 @@
+package com.everhomes.varField;
+
+
+import java.util.List;
+
+import com.everhomes.rest.asset.ImportFieldsExcelResponse;
+import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.varField.*;
+import org.springframework.web.multipart.MultipartFile;
+
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.varField.FieldDTO;
+import com.everhomes.rest.varField.FieldGroupDTO;
+import com.everhomes.rest.varField.FieldItemDTO;
+import com.everhomes.rest.varField.ImportFieldExcelCommand;
+import com.everhomes.rest.varField.ListFieldCommand;
+import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.rest.varField.ListFieldItemCommand;
+import com.everhomes.rest.varField.ListSystemFieldCommand;
+import com.everhomes.rest.varField.ListSystemFieldGroupCommand;
+import com.everhomes.rest.varField.ListSystemFieldItemCommand;
+import com.everhomes.rest.varField.SystemFieldDTO;
+import com.everhomes.rest.varField.SystemFieldGroupDTO;
+import com.everhomes.rest.varField.SystemFieldItemDTO;
+import com.everhomes.rest.varField.UpdateFieldGroupsCommand;
+import com.everhomes.rest.varField.UpdateFieldItemsCommand;
+import com.everhomes.rest.varField.UpdateFieldsCommand;
+
+/**
+ * Created by ying.xiong on 2017/8/3.
+ */
+public interface FieldService {
+
+    List<FieldDTO> listFields(ListFieldCommand cmd);
+    List<FieldGroupDTO> listFieldGroups(ListFieldGroupCommand cmd);
+    List<FieldItemDTO> listFieldItems(ListFieldItemCommand cmd);
+
+    /**
+     * 更新动态组、字段、选项的方式：
+     * 1、查出所有符合的map列表
+     * 2、处理 没有id的增加，有的在数据库中查询找到则更新,且在列表中去掉对应的，没找到则增加
+     * 3、将map列表中剩下的置为inactive
+     * @param cmd
+     */
+    void updateFields(UpdateFieldsCommand cmd);
+    void updateFieldGroups(UpdateFieldGroupsCommand cmd);
+    void updateFieldItems(UpdateFieldItemsCommand cmd);
+
+
+
+    ImportFieldsExcelResponse importFieldsExcel(ImportFieldExcelCommand cmd, MultipartFile file);
+
+
+    void exportFieldsExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response);
+
+    void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response);
+
+
+
+
+    ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long communityId, Long itemId);
+    ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, String displayName);
+
+    List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd);
+    List<SystemFieldDTO> listSystemFields(ListSystemFieldCommand cmd);
+    List<SystemFieldItemDTO> listSystemFieldItems(ListSystemFieldItemCommand cmd);
+
+
+}

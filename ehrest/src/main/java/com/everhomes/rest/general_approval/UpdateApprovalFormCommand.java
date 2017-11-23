@@ -1,9 +1,9 @@
 package com.everhomes.rest.general_approval;
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>moduleType: 模块类型 默认"any-module" {@link com.everhomes.rest.flow.FlowModuleType}</li>
  * <li>formName: 表单名字</li>
  * <li>formFields: 表单控件数据 {@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
+ * <li>formGroups: 表单控件组 {@link com.everhomes.rest.general_approval.GeneralFormGroupDTO}</li>
  * </ul>
  * @author janson
  *
@@ -30,6 +31,9 @@ public class UpdateApprovalFormCommand {
     
     @ItemType(GeneralFormFieldDTO.class)
     List<GeneralFormFieldDTO> formFields;
+
+	@ItemType(GeneralFormGroupDTO.class)
+	List<GeneralFormGroupDTO> formGroups;
 
 	public Long getFormOriginId() {
 		return formOriginId;
@@ -93,6 +97,14 @@ public class UpdateApprovalFormCommand {
 
 	public void setFormFields(List<GeneralFormFieldDTO> formFields) {
 		this.formFields = formFields;
+	}
+
+	public List<GeneralFormGroupDTO> getFormGroups() {
+		return formGroups;
+	}
+
+	public void setFormGroups(List<GeneralFormGroupDTO> formGroups) {
+		this.formGroups = formGroups;
 	}
 
 	@Override

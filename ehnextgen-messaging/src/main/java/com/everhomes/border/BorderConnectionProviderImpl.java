@@ -84,7 +84,8 @@ public class BorderConnectionProviderImpl implements BorderConnectionProvider {
         List<Border> allBorders = borderProvider.listAllBorders();
         boolean ok = true;
         
-        LOGGER.info("broacastToAll, len: " + allBorders.size());
+        // 日志过多，先注释掉 by lqs 20171102
+        // LOGGER.info("broacastToAll, len: " + allBorders.size());
         
         //outside synchronized      
         for(Border border : allBorders) {
@@ -92,7 +93,8 @@ public class BorderConnectionProviderImpl implements BorderConnectionProvider {
             if(conn != null) {
                 try {
                     conn.sendMessage(requestId, obj);
-                    LOGGER.info("sended to border, i= " + border.getId());
+                    // 日志过多，先注释掉 by lqs 20171102
+                    // LOGGER.info("sended to border, i= " + border.getId());
                 } catch (IOException e) {
                     LOGGER.error("BroadcastToAllBorders got unexpected exception", e);
                     ok = false;

@@ -13,6 +13,7 @@ import java.util.List;
  *  <li>parentId: 父id</li>
  *  <li>ownerType: 拥有者类型 参考{@link com.everhomes.rest.yellowPage.ServiceAllianceBelongType}</li>
  *  <li>ownerId: 拥有者ID</li>
+ *  <li>range:可见范围</li>
  *  <li>name: 企业名称</li>
  *  <li>displayName: 简称</li>
  *  <li>address: 地址</li>
@@ -43,6 +44,15 @@ import java.util.List;
  *  <li>moduleUrl : 跳转模块路径</li>
  *  <li>supportType : 是否支持申请 参考{@link com.everhomes.rest.general_approval.GeneralApprovalSupportType}</li>
  *  <li>jumpId : 跳转模块id</li>
+ *  <li>descriptionHeight : 折叠服务联盟高度  0:全部展开 大于0:折叠相应高度</li>
+ *  <li>displayFlag : 是否在app端显示服务联盟企业, 参考 {@link com.everhomes.rest.yellowPage.DisplayFlagType}</li>
+ *  <li>defaultOrder : 排序序号</li>
+ *  <li>commentCount : 评论数量</li>
+ *  <li>commentToken : 评论token，评论当前机构需要使用此参数。</li>
+ *  <li>summaryDescription : 概要描述字段。</li>
+ *  <li>jumpServiceAllianceRouting : "grid" 样式下，点击服务联盟的banner图跳转到其他服务联盟的路由</li>
+ *  <li>onlineServiceUid : 在线服务用户的id</li>
+ *  <li>onlineServiceUname : 在线服务用户的名称</li>
  * </ul>
  */
 public class ServiceAllianceDTO {
@@ -56,7 +66,11 @@ public class ServiceAllianceDTO {
 	private String   ownerType;
 	@NotNull
 	private Long     ownerId;
-	
+
+	private String   range;
+
+	private String   rangeDisplay;
+
 	private String   name;
 	
 	private String   displayName;
@@ -102,7 +116,7 @@ public class ServiceAllianceDTO {
 	private String discountDesc;
 	
 	private Byte     status;
-	private Integer  defaultOrder;
+	private Long  defaultOrder;
 	
 	private String templateType;
 	
@@ -121,6 +135,55 @@ public class ServiceAllianceDTO {
 	private Byte supportType;
 
 	private Long jumpId;
+	
+	private Integer descriptionHeight;
+	
+	private Byte displayFlag;
+
+	
+	private Integer commentCount;
+	
+	private String commentToken;
+	
+	private String summaryDescription;
+	
+	private String jumpServiceAllianceRouting;
+	
+	private Long onlineServiceUid;
+	private String onlineServiceUname;
+	
+	public Long getOnlineServiceUid() {
+		return onlineServiceUid;
+	}
+
+	public void setOnlineServiceUid(Long onlineServiceUid) {
+		this.onlineServiceUid = onlineServiceUid;
+	}
+
+	public String getOnlineServiceUname() {
+		return onlineServiceUname;
+	}
+
+	public void setOnlineServiceUname(String onlineServiceUname) {
+		this.onlineServiceUname = onlineServiceUname;
+	}
+
+	public String getCommentToken() {
+		return commentToken;
+	}
+
+	public void setCommentToken(String commentToken) {
+		this.commentToken = commentToken;
+	}
+
+
+	public Byte getDisplayFlag() {
+		return displayFlag;
+	}
+
+	public void setDisplayFlag(Byte displayFlag) {
+		this.displayFlag = displayFlag;
+	}
 
 	public String getDisplayServiceUrl() {
 		return displayServiceUrl;
@@ -169,7 +232,23 @@ public class ServiceAllianceDTO {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
+	public String getRange() {
+		return range;
+	}
+
+	public void setRange(String range) {
+		this.range = range;
+	}
+
+	public String getRangeDisplay() {
+		return rangeDisplay;
+	}
+
+	public void setRangeDisplay(String rangeDisplay) {
+		this.rangeDisplay = rangeDisplay;
+	}
+
 	public String getDisplayName() {
 		return displayName;
 	}
@@ -293,10 +372,10 @@ public class ServiceAllianceDTO {
 	public void setStatus(Byte status) {
 		this.status = status;
 	}
-	public Integer getDefaultOrder() {
+	public Long getDefaultOrder() {
 		return defaultOrder;
 	}
-	public void setDefaultOrder(Integer defaultOrder) {
+	public void setDefaultOrder(Long defaultOrder) {
 		this.defaultOrder = defaultOrder;
 	}
 	
@@ -362,6 +441,38 @@ public class ServiceAllianceDTO {
 
 	public void setJumpId(Long jumpId) {
 		this.jumpId = jumpId;
+	}
+
+	public Integer getDescriptionHeight() {
+		return descriptionHeight;
+	}
+
+	public void setDescriptionHeight(Integer descriptionHeight) {
+		this.descriptionHeight = descriptionHeight;
+	}
+
+	public Integer getCommentCount() {
+		return commentCount;
+	}
+
+	public void setCommentCount(Integer commentCount) {
+		this.commentCount = commentCount;
+	}
+
+	public String getSummaryDescription() {
+		return summaryDescription;
+	}
+
+	public void setSummaryDescription(String summaryDescription) {
+		this.summaryDescription = summaryDescription;
+	}
+
+	public String getJumpServiceAllianceRouting() {
+		return jumpServiceAllianceRouting;
+	}
+
+	public void setJumpServiceAllianceRouting(String jumpServiceAllianceRouting) {
+		this.jumpServiceAllianceRouting = jumpServiceAllianceRouting;
 	}
 
 	@Override

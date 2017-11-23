@@ -11,9 +11,11 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>rentalSiteId：场所id</li>   
+ * <li>rentalType：类型</li>   
  * <li>rentalBillId：订单id</li>
  * <li>rentalItems：List<SiteItemDTO> 商品列表</li>
- * <li>rentalAttachments：List<AttachmentDTO> 附件列表</li> 
+ * <li>rentalAttachments：List<AttachmentDTO> 附件列表</li>
+ * <li>paymentType: 支付方式，微信公众号支付方式必填，9-公众号支付 参考{@link com.everhomes.rest.order.PaymentType}</li>
  * </ul>
  */
 public class AddRentalBillItemCommand {
@@ -21,10 +23,21 @@ public class AddRentalBillItemCommand {
 //	private Long rentalSiteId;   
 	@NotNull
 	private Long rentalBillId; 
+	private Byte rentalType;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> rentalItems;
 	@ItemType(AttachmentDTO.class)
-	private List<AttachmentDTO> rentalAttachments; 
+	private List<AttachmentDTO> rentalAttachments;
+
+	private String clientAppName;
+	private Integer paymentType;
+	public String getClientAppName() {
+		return clientAppName;
+	}
+
+	public void setClientAppName(String clientAppName) {
+		this.clientAppName = clientAppName;
+	}
 
 	@Override
 	public String toString() {
@@ -43,6 +56,14 @@ public class AddRentalBillItemCommand {
 	 
 	public Long getRentalBillId() {
 		return rentalBillId;
+	}
+
+	public Byte getRentalType() {
+		return rentalType;
+	}
+
+	public void setRentalType(Byte rentalType) {
+		this.rentalType = rentalType;
 	}
 
 	public void setRentalBillId(Long rentalBillId) {
@@ -64,8 +85,13 @@ public class AddRentalBillItemCommand {
 
 	public void setRentalAttachments(List<AttachmentDTO> rentalAttachments) {
 		this.rentalAttachments = rentalAttachments;
-	} 
- 
- 
- 
+	}
+
+	public Integer getPaymentType() {
+		return paymentType;
+	}
+
+	public void setPaymentType(Integer paymentType) {
+		this.paymentType = paymentType;
+	}
 }

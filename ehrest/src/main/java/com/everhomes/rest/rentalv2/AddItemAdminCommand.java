@@ -8,10 +8,10 @@ import com.everhomes.util.StringHelper;
  * <li>rentalSiteId：场所id</li>
  * <li>itemName：商品名称</li>
  * <li>itemPrice：商品价格</li>
- * <li>counts：商品数量</li> 
- * <li>imgUri：商品图片uri</li> 
- * <li>defaultOrder：商品排序</li> 
- * <li>itemType：商品类型 参考{@link com.everhomes.rest.rentalv2.RentalItemType}}</li> 
+ * <li>counts：商品数量</li>
+ * <li>imgUri：商品图片uri</li>
+ * <li>defaultOrder：商品排序</li>
+ * <li>itemType：商品类型 参考{@link com.everhomes.rest.rentalv2.RentalItemType}}</li>
  * </ul>
  */
 public class AddItemAdminCommand { 
@@ -26,6 +26,7 @@ public class AddItemAdminCommand {
 	private java.lang.String     imgUri;
 	private java.lang.Integer    defaultOrder;
 	private java.lang.Byte       itemType;
+	private String description;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -72,5 +73,13 @@ public class AddItemAdminCommand {
 	}
 	public void setItemType(java.lang.Byte itemType) {
 		this.itemType = itemType;
-	} 
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
 }

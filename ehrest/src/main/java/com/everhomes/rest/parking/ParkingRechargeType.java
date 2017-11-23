@@ -4,11 +4,11 @@ package com.everhomes.rest.parking;
 /**
  * <ul>
  * <li>MONTHLY(1): 月卡充值</li>
- * <li>TEMPORARY(2): 临时缴费</li>
+ * <li>TEMPORARY(2): 临时车缴费</li>
  * </ul>
  */
 public enum ParkingRechargeType {
-	MONTHLY((byte)1, "月卡充值"), TEMPORARY((byte)2, "临时缴费");
+	MONTHLY((byte)1, "月卡充值"), TEMPORARY((byte)2, "临时车缴费");
     
     private byte code;
     private String describe;

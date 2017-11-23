@@ -17,10 +17,19 @@ import com.everhomes.util.StringHelper;
  */
 
 public class GetUserRelatedAddressByCommunityResponse {
+    private String userName;
     @ItemType(FamilyDTO.class)
     private List<FamilyDTO> familyList;
     @ItemType(PmTaskHistoryAddressDTO.class)
     private List<PmTaskHistoryAddressDTO> historyAddresses;
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
     public List<OrgAddressDTO> getOrganizationList() {
 		return organizationList;

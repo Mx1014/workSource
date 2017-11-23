@@ -1,88 +1,40 @@
+// @formatter:off
 package com.everhomes.rest.flow;
 
-import java.util.List;
-
-import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ *     <li>flowId: 工作流id</li>
+ *     <li>allowFlowCaseEndEvaluate: 允许结束后评价开关</li>
+ * </ul>
+ */
 public class UpdateFlowEvaluateCommand {
-	private Long flowId;
-	private Byte needEvaluate;
-	private Long evaluateStart;
-	private Long evaluateEnd;
-	private String evaluateStep;
-	
-	private FlowActionInfo messageAction;
-	private FlowActionInfo smsAction;
-	
-	@ItemType(String.class)
-	private List<String> items;
 
-	public Byte getNeedEvaluate() {
-		return needEvaluate;
-	}
+    private Long flowId;
 
-	public void setNeedEvaluate(Byte needEvaluate) {
-		this.needEvaluate = needEvaluate;
-	}
+    private Byte allowFlowCaseEndEvaluate;
 
-	public Long getEvaluateStart() {
-		return evaluateStart;
-	}
+    // @ItemType(FlowEvaluateItemDTO.class)
+    // private List<FlowEvaluateItemDTO> items;
 
-	public void setEvaluateStart(Long evaluateStart) {
-		this.evaluateStart = evaluateStart;
-	}
+    public Long getFlowId() {
+        return flowId;
+    }
 
-	public Long getEvaluateEnd() {
-		return evaluateEnd;
-	}
+    public void setFlowId(Long flowId) {
+        this.flowId = flowId;
+    }
 
-	public void setEvaluateEnd(Long evaluateEnd) {
-		this.evaluateEnd = evaluateEnd;
-	}
+    public Byte getAllowFlowCaseEndEvaluate() {
+        return allowFlowCaseEndEvaluate;
+    }
 
-	public String getEvaluateStep() {
-		return evaluateStep;
-	}
+    public void setAllowFlowCaseEndEvaluate(Byte allowFlowCaseEndEvaluate) {
+        this.allowFlowCaseEndEvaluate = allowFlowCaseEndEvaluate;
+    }
 
-	public void setEvaluateStep(String evaluateStep) {
-		this.evaluateStep = evaluateStep;
-	}
-
-	public FlowActionInfo getMessageAction() {
-		return messageAction;
-	}
-
-	public void setMessageAction(FlowActionInfo messageAction) {
-		this.messageAction = messageAction;
-	}
-
-	public FlowActionInfo getSmsAction() {
-		return smsAction;
-	}
-
-	public void setSmsAction(FlowActionInfo smsAction) {
-		this.smsAction = smsAction;
-	}
-
-	public List<String> getItems() {
-		return items;
-	}
-
-	public void setItems(List<String> items) {
-		this.items = items;
-	}
-
-	public Long getFlowId() {
-		return flowId;
-	}
-
-	public void setFlowId(Long flowId) {
-		this.flowId = flowId;
-	}
-
-	@Override
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

@@ -26,17 +26,20 @@ public class SiteItemDTO {
 
 	private java.lang.Byte       itemType;
 	private Integer soldCount;
+	private String description;
 	
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
+	public String getDescription() {
+		return description;
+	}
 
- 
- 
-
-
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
 	public Integer getCounts() {
 		return counts;
