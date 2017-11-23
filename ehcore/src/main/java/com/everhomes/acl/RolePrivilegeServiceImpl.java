@@ -3609,7 +3609,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 							List<OrganizationMember> members_enterprise = members.stream().filter(r->r.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode()) && r.getStatus() == OrganizationMemberStatus.ACTIVE.getCode())
 									.collect(Collectors.toList());
 							if(members_enterprise != null && members_enterprise.size() > 0){
-								orgControlDetails = Collections.singletonList(new ControlTarget(members_depart.get(0).getOrganizationId(),IncludeChildFlagType.YES.getCode()));
+								orgControlDetails = Collections.singletonList(new ControlTarget(members_enterprise.get(0).getOrganizationId(),IncludeChildFlagType.YES.getCode()));
 							}
 						}
 
