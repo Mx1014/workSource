@@ -231,7 +231,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         return null;
     }
 
-    @Override
+    /*@Override
     public List<FlowPredefinedParamDTO> listFlowPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
         FlowModuleInst inst = moduleMap.get(flow.getModuleId());
         if (inst != null) {
@@ -247,7 +247,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
             }
         }
         return new ArrayList<>();
-    }
+    }*/
 
     @Override
     public List<FlowServiceTypeDTO> listFlowServiceTypes(Integer namespaceId, Long moduleId, String ownerType, Long ownerId) {

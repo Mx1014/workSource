@@ -2005,6 +2005,10 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhRentalv2PricePackages.class, Tables.EH_RENTALV2_PRICE_PACKAGES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_RENTALV2_PRICE_PACKAGES.ID.max()).from(Tables.EH_RENTALV2_PRICE_PACKAGES).fetchOne().value1();
         });
+
+        syncTableSequence(null, EhBanners.class, Tables.EH_BANNERS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_BANNERS.ID.max()).from(Tables.EH_BANNERS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
