@@ -138,8 +138,10 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         for (int i = 0; i < entities.size(); i++) {
             if (i == 3)
                 break;
+            String key = entities.get(i).getKey();
             //  将"null"屏蔽为空字符串
-            content += entities.get(i).getKey() + " : " + entities.get(i).getValue() != null ? entities.get(i).getValue() : "" + "\n";
+            String value = entities.get(i).getValue() != null ? entities.get(i).getValue() : "";
+            content += (key + " : " + value + "\n");
         }
         flowCase.setContent(content);
     }
