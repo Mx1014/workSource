@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  *     <li>namespaceId: 域空间Id</li>
  *     <li>moduleType: 模块类型  参考 {@link com.everhomes.rest.forum.ForumModuleType}</li>
  *     <li>categoryId: categoryId</li>
+ *     <li>serviceType: 标签服务类型 参考{@link com.everhomes.rest.hotTag.HotTagServiceType}</li>
  * </ul>
  */
 public class TagDTO {
@@ -22,6 +23,8 @@ public class TagDTO {
 	private Byte moduleType;
 
 	private Long categoryId;
+
+	private String serviceType;
 
 	public Long getId() {
 		return id;
@@ -61,6 +64,14 @@ public class TagDTO {
 
 	public void setModuleType(Byte moduleType) {
 		this.moduleType = moduleType;
+	}
+
+	public String getServiceType() {
+		return serviceType;
+	}
+
+	public void setServiceType(String serviceType) {
+		this.serviceType = serviceType;
 	}
 
 	@Override

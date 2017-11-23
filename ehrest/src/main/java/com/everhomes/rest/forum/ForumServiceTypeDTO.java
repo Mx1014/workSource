@@ -12,7 +12,7 @@ import java.util.List;
  *     <li>id: ID</li>
  *     <li>namespaceId: 域空间ID</li>
  *     <li>moduleType: 模块类型  参考 {@link com.everhomes.rest.forum.ForumModuleType}</li>
- *     <li>serviceType: serviceType</li>
+ *     <li>serviceType: 服务类型 参考 {@link com.everhomes.rest.forum.ForumServiceType}</li>
  *     <li>createTime: 创建时间</li>
  * </ul>
  */
