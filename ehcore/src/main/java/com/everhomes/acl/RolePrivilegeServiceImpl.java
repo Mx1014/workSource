@@ -33,6 +33,7 @@ import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
 import com.everhomes.rest.module.Project;
 import com.everhomes.rest.oauth2.ControlTargetOption;
 import com.everhomes.rest.oauth2.ModuleManagementType;
+import com.everhomes.rest.openapi.techpark.AllFlag;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.PmMemberTargetType;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
@@ -2716,11 +2717,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			// 无限制范围数据
             ServiceModuleAuthorizationsDTO u_dto = processServiceModuleApps(r, ModuleManagementType.UNLIMIT_CONTROL.getCode());
 
-
-            dto.setCommunityControlApps(c_dto);
-            dto.setOrgControlApps(o_dto);
-            dto.setUnlimitControlApps(u_dto);
-
+			if(c_dto.getCommunityControlFlag() == AllFlagType.NO.getCode() && c_dto.getCommunityApps().size() == 0)
+            	dto.setCommunityControlApps(c_dto);
+			if(o_dto.getOrgControlFlag() == AllFlagType.NO.getCode() && o_dto.getOrgApps().size() == 0)
+				dto.setOrgControlApps(o_dto);
+			if(u_dto.getUnlimitControlFlag() == AllFlagType.NO.getCode() && u_dto.getUnlimitApps().size() == 0)
+				dto.setUnlimitControlApps(u_dto);
 			return dto;
 
 		}).collect(Collectors.toList());
