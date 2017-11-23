@@ -1962,6 +1962,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	 * 每半小时的50秒钟时候开始执行
 	 * */
 	@Scheduled(cron = "50 0/30 * * * ?")
+	@Override
 	public void rentalSchedule(){
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
 			//把所有状态为success-已预约的捞出来 

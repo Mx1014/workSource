@@ -161,4 +161,6 @@ public interface Rentalv2Service {
 	FindAutoAssignRentalSiteYearStatusResponse findAutoAssignRentalSiteYearStatus(
 			FindAutoAssignRentalSiteYearStatusCommand cmd);
 
+	void rentalSchedule();
+
 }
