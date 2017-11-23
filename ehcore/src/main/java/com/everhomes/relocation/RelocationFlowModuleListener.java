@@ -8,6 +8,8 @@ import com.everhomes.flow.*;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.relocation.GetRelocationRequestDetailCommand;
+import com.everhomes.rest.relocation.RelocationRequestDTO;
 import com.everhomes.rest.relocation.RelocationRequestStatus;
 import com.everhomes.rest.relocation.RelocationTemplateCode;
 import com.everhomes.rest.techpark.expansion.*;
@@ -25,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Component
@@ -45,7 +48,7 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
     @Autowired
     private AddressProvider addressProvider;
     @Autowired
-    private UserProvider userProvider;
+    private RelocationService relocationService;
 
     @Override
     public void onFlowCaseStart(FlowCaseState ctx) {
@@ -97,56 +100,30 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
 
     @Override
     public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
-        return flowCase.getContent();
+
+        String content = flowCase.getContent();
+        if (flowUserType == FlowUserType.APPLIER) {
+            int lineBreak = content.indexOf("\\r\\n");
+            content = content.substring(lineBreak + 4);
+        }
+        return content;
     }
 
     @Override
     public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
-        RelocationRequest request = relocationProvider.findRelocationRequestById(flowCase.getReferId());
-        if (request != null) {
-            String locale = UserContext.current().getUser().getLocale();
 
-            String defaultValue = localeStringService.getLocalizedString(ApplyEntryErrorCodes.SCOPE, String.valueOf(ApplyEntryErrorCodes.WU), locale, "");
+        GetRelocationRequestDetailCommand cmd = new GetRelocationRequestDetailCommand();
+        cmd.setId(flowCase.getReferId());
 
-            EnterpriseApplyEntryDTO dto = ConvertHelper.convert(applyEntry, EnterpriseApplyEntryDTO.class);
+        RelocationRequestDTO dto = relocationService.getRelocationRequestDetail(cmd);
+        if (null != dto) {
 
-            if (null != applyEntry.getAddressId()) {
-                Address address = addressProvider.findAddressById(applyEntry.getAddressId());
-                if (null != address) {
-                    dto.setApartmentName(address.getApartmentName());
-                    dto.setBuildingName(address.getBuildingName());
-                }
-            }
             flowCase.setCustomObject(JSONObject.toJSONString(dto));
 
-            Map<String, Object> map = new HashMap<>();
-
-            String buildingName = processBuildingName(applyEntry);
-
-            map.put("applyBuilding", defaultIfNull(buildingName, ""));
-            map.put("applyUserName", defaultIfNull(applyEntry.getApplyUserName(), ""));
-
-            UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(applyEntry.getApplyUserId(), IdentifierType.MOBILE.getCode());
-
-            map.put("contactPhone", defaultIfNull(userIdentifier.getIdentifierToken(), ""));
-            map.put("enterpriseName", defaultIfNull(applyEntry.getEnterpriseName(), ""));
-
-            map.put("sourceType", defaultIfNull(enterpriseApplyEntryService.getSourceTypeName(applyEntry.getSourceType()), ""));
-
-            map.put("description", StringUtils.isBlank(applyEntry.getDescription()) ? defaultValue : applyEntry.getDescription());
-
-            String jsonStr = localeTemplateService.getLocaleTemplateString(ApplyEntryErrorCodes.SCOPE, ApplyEntryErrorCodes.FLOW_DETAIL_CONTENT_CODE, locale, map, "[]");
-
-            FlowCaseEntityList result = (FlowCaseEntityList) StringHelper.fromJsonString(jsonStr, FlowCaseEntityList.class);
-            return result;
         } else {
             LOGGER.warn("RelocationRequest ot found flowCase: {}", StringHelper.toJsonString(flowCase));
         }
         return new ArrayList<>();
-    }
-
-    private String defaultIfNull(String obj, String defaultValue) {
-        return obj != null ? obj : defaultValue;
     }
 
     @Override

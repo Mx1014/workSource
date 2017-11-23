@@ -19,6 +19,7 @@ import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.relocation.*;
 import com.everhomes.rest.relocation.AttachmentDescriptor;
 
+import com.everhomes.rest.techpark.expansion.ExpansionConst;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 
@@ -199,6 +200,9 @@ public class RelocationServiceImpl implements RelocationService {
 		request.setOwnerId(orgRequest.getCommunityId());
 		request.setOwnerType(RelocationOwnerType.COMMUNITY.getCode());
 
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+
+		request.setRequestNo(sdf.format(new Date()) + String.valueOf(generateRandomNumber(3)));
 		dbProvider.execute(status -> {
 			relocationProvider.createRelocationRequest(request);
 
@@ -219,6 +223,7 @@ public class RelocationServiceImpl implements RelocationService {
 							RelocationRequestAttachment att = ConvertHelper.convert(a, RelocationRequestAttachment.class);
 							att.setOwnerType(EntityType.RELOCATION_REQUEST_ITEM.getCode());
 							att.setOwnerId(item.getId());
+							relocationProvider.createRelocationRequestAttachment(att);
 						});
 					}
 				});
@@ -236,18 +241,29 @@ public class RelocationServiceImpl implements RelocationService {
 		return dto;
 	}
 
+	/**
+	 *
+	 * @param n 创建n位随机数
+	 * @return
+	 */
+	private long generateRandomNumber(int n){
+		return (long)((Math.random() * 9 + 1) * Math.pow(10, n-1));
+	}
+
 	private FlowCase createFlowCase(RelocationRequest request, List<RelocationRequestItemDTO> items) {
 
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 
 		String ownerType = FlowOwnerType.COMMUNITY.getCode();
-		Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.RELOCATION_MODULE,
-				FlowModuleType.NO_MODULE.getCode(), request.getOwnerId(), ownerType);
-
+//		Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.RELOCATION_MODULE,
+//				FlowModuleType.NO_MODULE.getCode(), request.getOwnerId(), ownerType);
+		Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ExpansionConst.MODULE_ID,
+				null, request.getOwnerId(), ownerType);
 		if(null == flow) {
 			LOGGER.error("Enable flow not found, moduleId={}", FlowConstants.RELOCATION_MODULE);
 			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
 					"Enable flow not found.");
+
 		}
 		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
 		createFlowCaseCommand.setApplyUserId(request.getRequestorUid());
@@ -258,14 +274,14 @@ public class RelocationServiceImpl implements RelocationService {
 
 		String locale = UserContext.current().getUser().getLocale();
 
-
 		Map<String, Object> map = new HashMap<>();
-
+		map.put("requestorName", request.getRequestorName());
+		map.put("requestorEnterpriseName", request.getRequestorEnterpriseName());
 		map.put("items", getItemName(items));
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		map.put("relocationDate", sdf.format(request.getRelocationDate()));
-		String content = localeTemplateService.getLocaleTemplateString(RelocationTemplateCode.SCOPE, RelocationTemplateCode.FLOW_APPLICANT_CONTENT,
-				locale, map, "[]");
+		String content = localeTemplateService.getLocaleTemplateString(RelocationTemplateCode.SCOPE, RelocationTemplateCode.FLOW_PROCESSOR_CONTENT,
+				locale, map, "");
 
 		createFlowCaseCommand.setContent(content);
 		createFlowCaseCommand.setCurrentOrganizationId(request.getRequestorEnterpriseId());
