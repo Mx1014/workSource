@@ -6,7 +6,8 @@ package com.everhomes.rest.flow;
  * <li>multi_line: 多行类型</li>
  * <li>text: 大段文字类型</li>
  * <li>image: 图片类型</li>
- * 
+ * <li>file: 附件类型</li>
+ *
  * </ul>
  * @author janson
  *

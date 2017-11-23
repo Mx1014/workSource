@@ -12,11 +12,12 @@ import java.util.Date;
  */
 public class FlowConditionStringVariable implements FlowConditionVariable<String> {
 
+    public static final String DATE_TIME_REGEX_SLASH = "\\d{4}/\\d{1,2}/\\d{1,2}\\s\\d{1,2}:\\d{1,2}";
+    public static final String DATE_TIME_REGEX_CENTER = "\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}:\\d{1,2}";
+    public static final String DATE_REGEX_CENTER = "\\d{4}-\\d{1,2}-\\d{1,2}";
+    public static final String DATE_REGEX_SLASH = "\\d{4}/\\d{1,2}/\\d{1,2}";
+
     private String text;
-    private static final String DATE_TIME_REGEX_SLASH = "\\d{4}/\\d{1,2}/\\d{1,2}\\s\\d{1,2}:\\d{1,2}";
-    private static final String DATE_TIME_REGEX_CENTER = "\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}:\\d{1,2}";
-    private static final String DATE_REGEX_CENTER = "\\d{4}-\\d{1,2}-\\d{1,2}";
-    private static final String DATE_REGEX_SLASH = "\\d{4}/\\d{1,2}/\\d{1,2}";
 
     @Override
     public String getVariable() {
