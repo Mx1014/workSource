@@ -47,89 +47,146 @@ CREATE TABLE `eh_relocation_request_attachments` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- bydengs,20171114 服务联盟加客服id service_alliance2.9.3
-ALTER TABLE `eh_service_alliances` ADD COLUMN `online_service_uid` BIGINT COMMENT 'online service user id';
-ALTER TABLE `eh_service_alliances` ADD COLUMN `online_service_uname` varchar(64) COMMENT 'online service user name';
-
--- bydengs,20171114 物业报修2.9.3
-ALTER TABLE `eh_pm_tasks` ADD COLUMN `organization_name` VARCHAR(128) COMMENT '报修的任务的公司名称';
-
-
--- 增加结束时间提醒门禁时间 by st.zheng
-ALTER TABLE `eh_rentalv2_orders`
-ADD COLUMN `reminder_end_time` DATETIME NULL DEFAULT NULL AFTER `reminder_time`,
-ADD COLUMN `auth_start_time` DATETIME NULL DEFAULT NULL AFTER `reminder_end_time`,
-ADD COLUMN `auth_end_time` DATETIME NULL DEFAULT NULL AFTER `auth_start_time`,
-ADD COLUMN `door_auth_id` BIGINT(20) NULL DEFAULT NULL AFTER `auth_end_time`,
-ADD COLUMN `package_name` VARCHAR(45) NULL DEFAULT NULL AFTER `door_auth_id`;
--- 资源预定增加门禁 by st.zheng
-ALTER TABLE `eh_rentalv2_resources`
-ADD COLUMN `aclink_id` BIGINT(20) NULL DEFAULT NULL AFTER `default_order`;
-
--- 增加套餐 by st.zheng
-CREATE TABLE `eh_rentalv2_price_packages` (
+-- from club 3.2 start
+-- 行业协会类型
+CREATE TABLE `eh_industry_types` (
   `id` BIGINT(20) NOT NULL,
-  `owner_type` VARCHAR(32) NOT NULL,
-  `owner_id` BIGINT(20) NOT NULL DEFAULT '0',
-  `name` VARCHAR(45) NULL DEFAULT NULL,
-  `rental_type` TINYINT(4) NULL DEFAULT NULL,
-  `price` DECIMAL(10,2) NULL DEFAULT NULL,
-  `original_price` DECIMAL(10,2) NULL DEFAULT NULL,
-  `org_member_price` DECIMAL(10,2) NULL DEFAULT NULL,
-  `org_member_original_price` DECIMAL(10,2) NULL DEFAULT NULL,
-  `approving_user_price` DECIMAL(10,2) NULL DEFAULT NULL,
-  `approving_user_original_price` DECIMAL(10,2) NULL DEFAULT NULL,
-  `discount_type` TINYINT(4) NULL DEFAULT NULL,
-  `full_price` DECIMAL(10,2) NULL DEFAULT NULL,
-  `cut_price` DECIMAL(10,2) NULL DEFAULT NULL,
-  `discount_ratio` DOUBLE NULL DEFAULT NULL,
-  `org_member_discount_type` TINYINT(4) NULL DEFAULT NULL,
-  `org_member_full_price` DECIMAL(10,2) NULL DEFAULT NULL,
-  `org_member_cut_price` DECIMAL(10,2) NULL DEFAULT NULL,
-  `org_member_discount_ratio` DOUBLE NULL DEFAULT NULL,
-  `approving_user_discount_type` TINYINT(4) NULL DEFAULT NULL,
-  `approving_user_full_price` DECIMAL(10,2) NULL DEFAULT NULL,
-  `approving_user_cut_price` DECIMAL(10,2) NULL DEFAULT NULL,
-  `approving_user_discount_ratio` DOUBLE NULL DEFAULT NULL,
-  `cell_begin_id` BIGINT(20) NOT NULL DEFAULT '0',
-  `cell_end_id` BIGINT(20) NOT NULL DEFAULT '0',
-  `creator_uid` BIGINT(20) NULL DEFAULT NULL,
-  `create_time` DATETIME NULL DEFAULT NULL,
-  PRIMARY KEY (`id`));
-
-ALTER TABLE `eh_rentalv2_cells`
-ADD COLUMN `price_package_id` BIGINT(20) NULL DEFAULT NULL AFTER `half_approving_user_price`;
-
-ALTER TABLE `eh_rentalv2_price_rules`
-ADD COLUMN `org_member_discount_type` TINYINT(4) NULL DEFAULT NULL AFTER `discount_ratio`,
-ADD COLUMN `org_member_full_price` DECIMAL(10,2) NULL DEFAULT NULL AFTER `org_member_discount_type`,
-ADD COLUMN `org_member_cut_price` DECIMAL(10,2) NULL DEFAULT NULL AFTER `org_member_full_price`,
-ADD COLUMN `org_member_discount_ratio` DOUBLE NULL DEFAULT NULL AFTER `org_member_cut_price`,
-ADD COLUMN `approving_user_discount_type` TINYINT(4) NULL DEFAULT NULL AFTER `org_member_discount_ratio`,
-ADD COLUMN `approving_user_full_price` DECIMAL(10,2) NULL DEFAULT NULL AFTER `approving_user_discount_type`,
-ADD COLUMN `approving_user_cut_price` DECIMAL(10,2) NULL DEFAULT NULL AFTER `approving_user_full_price`,
-ADD COLUMN `approving_user_discount_ratio` DOUBLE NULL DEFAULT NULL AFTER `approving_user_cut_price`;
-
-ALTER TABLE `eh_rentalv2_default_rules`
-ADD COLUMN `day_open_time` DOUBLE NULL DEFAULT NULL AFTER `end_date`,
-ADD COLUMN `day_close_time` DOUBLE NULL DEFAULT NULL AFTER `day_open_time`;
-
-ALTER TABLE `eh_rentalv2_resources`
-ADD COLUMN `day_open_time` DOUBLE NULL DEFAULT NULL AFTER `end_date`,
-ADD COLUMN `day_close_time` DOUBLE NULL DEFAULT NULL AFTER `day_open_time`;
-
--- merge from customer20171108 add by xiongying
-ALTER TABLE `eh_customer_economic_indicators` ADD COLUMN `month` DATETIME;
-
-CREATE TABLE `eh_customer_economic_indicator_statistics` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
-  `customer_id` BIGINT,
-  `turnover` DECIMAL(10,2) COMMENT '营业额',
-  `tax_payment` DECIMAL(10,2) COMMENT '纳税额',
-  `start_time` DATETIME,
-  `end_time` DATETIME,
-  `status` TINYINT NOT NULL DEFAULT 2,
+  `uuid` VARCHAR(128) NOT NULL,
+  `namespace_id` INT(11) NOT NULL,
+  `name` VARCHAR(32) NOT NULL,
+  `create_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_guild_applies` (
+  `id` BIGINT(20) NOT NULL,
+  `uuid` VARCHAR(128) NOT NULL,
+  `namespace_id` INT(11) NOT NULL,
+  `group_id` BIGINT(22) NOT NULL,
+  `applicant_uid` BIGINT(22) NOT NULL,
+  `group_member_id` BIGINT(22) NOT NULL,
+  `avatar` VARCHAR(255) DEFAULT NULL,
+  `name` VARCHAR(255) DEFAULT NULL,
+  `phone` VARCHAR(18) DEFAULT NULL,
+  `email` VARCHAR(255) DEFAULT NULL,
+  `organization_name` VARCHAR(255) DEFAULT NULL,
+  `registered_capital` VARCHAR(255) DEFAULT NULL,
+  `industry_type` VARCHAR(255) DEFAULT NULL,
+  `create_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `update_uid` BIGINT(22) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 俱乐部类型，普通俱乐部、行业协会
+ALTER TABLE `eh_group_settings` ADD COLUMN `club_type`  TINYINT(4) NOT NULL DEFAULT 0 COMMENT '0-normal club, 1-guild club' ;
+-- 未加入俱乐部成员在俱乐部论坛的权限 0-不可见，1-可见，2-可交互
+ALTER TABLE `eh_groups` ADD COLUMN `tourist_post_policy`  TINYINT(4) NULL DEFAULT 2 COMMENT '0-hide, 1-see only, 2-interact';
+-- 俱乐部类型，普通俱乐部、行业协会
+ALTER TABLE `eh_groups` ADD COLUMN `club_type`  TINYINT(4) NULL DEFAULT 0 COMMENT '0-normal club, 1-guild club' ;
+
+ALTER TABLE `eh_groups` ADD COLUMN `phone_number`  VARCHAR(18) NULL ;
+
+ALTER TABLE `eh_groups`  ADD COLUMN `description_type`  TINYINT(4) NULL DEFAULT 0;
+
+-- 拒绝理由
+ALTER TABLE `eh_group_member_logs` ADD COLUMN `reject_text`  VARCHAR(255) NULL;
+
+-- from club 3.2 end
+
+-- 加表单关联字段  add by xq.tian  2017/11/20
+ALTER TABLE eh_flows ADD COLUMN `form_origin_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'flow ref form id';
+ALTER TABLE eh_flows ADD COLUMN `form_version` BIGINT NOT NULL DEFAULT 1 COMMENT 'flow ref form version';
+ALTER TABLE eh_flows ADD COLUMN `form_update_time` DATETIME COMMENT 'form update time';
+
+ALTER TABLE eh_flow_event_logs ADD COLUMN `extra` TEXT COMMENT 'extra data, json format';
+
+ALTER TABLE eh_flow_condition_expressions ADD COLUMN `variable_extra1` VARCHAR(256) COMMENT 'variable 1 extra';
+ALTER TABLE eh_flow_condition_expressions ADD COLUMN `variable_extra2` VARCHAR(256) COMMENT 'variable 2 extra';
+
+-- added by R for approval-1.6
+ALTER TABLE `eh_general_forms` ADD COLUMN `form_template_id` BIGINT COMMENT 'the id in eh_general_form_templates';
+ALTER TABLE `eh_general_forms` ADD COLUMN `form_template_version` BIGINT COMMENT 'the version in eh_general_form_templates';
+ALTER TABLE `eh_general_forms` ADD COLUMN `form_attribute` VARCHAR(128) DEFAULT 'CUSTOMIZE' COMMENT 'DEFAULT,CUSTOMIZE';
+ALTER TABLE `eh_general_forms` ADD COLUMN `modify_flag` TINYINT DEFAULT 1 COMMENT 'whether the form can be modified from desk, 0: no, 1: yes';
+ALTER TABLE `eh_general_forms` ADD COLUMN `delete_flag` TINYINT DEFAULT 1 COMMENT 'whether the form can be deleted from desk, 0: no, 1: yes';
+
+ALTER TABLE `eh_general_approvals` ADD COLUMN `approval_template_id` BIGINT COMMENT 'the id in eh_general_approval_templates';
+ALTER TABLE `eh_general_approvals` ADD COLUMN `approval_template_version` BIGINT COMMENT 'the version in eh_general_approval_templates';
+ALTER TABLE `eh_general_approvals` ADD COLUMN `approval_attribute` VARCHAR(128) DEFAULT 'CUSTOMIZE' COMMENT 'DEFAULT,CUSTOMIZE';
+ALTER TABLE `eh_general_approvals` ADD COLUMN `modify_flag` TINYINT DEFAULT 1 COMMENT 'whether the approval can be modified from desk, 0: no, 1: yes';
+ALTER TABLE `eh_general_approvals` ADD COLUMN `delete_flag` TINYINT DEFAULT 1 COMMENT 'whether the approval can be deleted from desk, 0: no, 1: yes';
+ALTER TABLE `eh_general_approvals` ADD COLUMN `icon_uri` VARCHAR(1024) COMMENT 'the avatar of the approval';
+
+CREATE TABLE `eh_general_approval_templates` (
+	`id` BIGINT NOT NULL COMMENT 'id of the record',
+	`namespace_id` INTEGER NOT NULL DEFAULT 0,
+	`owner_id` BIGINT,
+	`owner_type` VARCHAR(64),
+	`organization_id` BIGINT NOT NULL DEFAULT 0,
+	`module_id` BIGINT DEFAULT 0 COMMENT 'the module id',
+	`module_type` VARCHAR(64),
+	`project_id` BIGINT NOT NULL DEFAULT 0,
+  `project_type` VARCHAR(64),
+  `form_template_id` BIGINT(20) NOT NULL DEFAULT 0 COMMENT 'The id of the template form',
+  `support_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'APP:0, WEB:1, APP_WEB: 2',
+  `approval_name` VARCHAR(128) NOT NULL,
+  `approval_attribute` VARCHAR(128) DEFAULT 'CUSTOMIZE' COMMENT 'DEFAULT,CUSTOMIZE',
+  `modify_flag` TINYINT DEFAULT 1 COMMENT 'whether the approval can be modified from desk, 0: no, 1: yes',
+  `delete_flag` TINYINT DEFAULT 1 COMMENT 'whether the approval can be deleted from desk, 0: no, 1: yes',
+  `icon_uri` VARCHAR(1024) COMMENT 'the avatar of the approval',
+  `update_time` DATETIME DEFAULT NULL COMMENT 'last update time',
+  `create_time` DATETIME COMMENT 'record create time',
+	PRIMARY KEY (`id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
+
+CREATE TABLE `eh_general_form_templates` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `organization_id` BIGINT NOT NULL DEFAULT '0',
+  `owner_id` BIGINT NOT NULL,
+  `owner_type` VARCHAR(64) NOT NULL,
+  `module_id` BIGINT DEFAULT 0 COMMENT 'the module id',
+  `module_type` VARCHAR(64),
+  `form_name` VARCHAR(64) NOT NULL,
+  `version` BIGINT NOT NULL DEFAULT '0' COMMENT 'the version of the form template',
+  `template_type` VARCHAR(128) NOT NULL COMMENT 'the type of template text',
+  `template_text` TEXT COMMENT 'json 存放表单字段',
+  `modify_flag` TINYINT DEFAULT 1 COMMENT 'whether the form can be modified from desk, 0: no, 1: yes',
+  `delete_flag` TINYINT DEFAULT 1 COMMENT 'whether the form can be deleted from desk, 0: no, 1: yes',
+  `update_time` DATETIME DEFAULT NULL COMMENT 'last update time',
+  `create_time` DATETIME DEFAULT NULL COMMENT 'record create time',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- ended by R
+
+
+
+
+
+
+
+
+
+
+
+
+-- added by wh punch-3.4
+ALTER TABLE `eh_punch_exception_requests` ADD COLUMN `punch_type` TINYINT DEFAULT 2 COMMENT ' 0- 上班打卡 ; 1- 下班打卡';
+ALTER TABLE `eh_punch_exception_requests` ADD COLUMN `begin_time` DATETIME COMMENT ' 请假/加班 生效开始时间';
+ALTER TABLE `eh_punch_exception_requests` ADD COLUMN `end_time` DATETIME COMMENT ' 请假/加班 生效结束时间';
+ALTER TABLE `eh_punch_exception_requests` ADD COLUMN `duration` DOUBLE COMMENT ' 请假/加班 时长-可供计算';
+ALTER TABLE `eh_punch_exception_requests` ADD COLUMN `category_id` BIGINT COMMENT ' 请假类型';
+ALTER TABLE `eh_punch_exception_requests` ADD COLUMN `approval_attribute` VARCHAR(128) COMMENT 'DEFAULT,CUSTOMIZE';
+ALTER TABLE `eh_punch_exception_requests` CHANGE `view_flag` `view_flag` TINYINT DEFAULT '1' COMMENT 'is view(0) not view(1)';
+
+ALTER TABLE `eh_punch_exception_approvals` ADD COLUMN `punch_type` TINYINT DEFAULT 2 COMMENT ' 0- 上班打卡 ; 1- 下班打卡';
+
+ALTER TABLE `eh_punch_logs` ADD COLUMN `approval_status` TINYINT DEFAULT NULL COMMENT '校正后的打卡状态 0-正常 null-没有异常校准';
+ALTER TABLE `eh_punch_logs` ADD COLUMN `smart_alignment` TINYINT DEFAULT 0 COMMENT '只能校准状态 0-非校准 1-校准';
+ALTER TABLE `eh_punch_day_logs` ADD COLUMN `smart_alignment` VARCHAR(128) DEFAULT NULL COMMENT '智能校准状态:1-未智能校准 0-未校准 例如:0;1/0;1/1/0/1';
+
+-- 工作流业务类型字段 add by xq.tian 2017/22/21
+ALTER TABLE eh_flow_service_types ADD COLUMN `owner_type` VARCHAR(64) COMMENT 'ownerType, e.g: EhOrganizations';
+ALTER TABLE eh_flow_service_types ADD COLUMN `owner_id` BIGINT COMMENT 'ownerId, e.g: eh_organizations id';
