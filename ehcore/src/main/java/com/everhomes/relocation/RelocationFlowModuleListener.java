@@ -7,6 +7,8 @@ import com.everhomes.flow.*;
 import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.rest.asset.CheckEnterpriseHasArrearageCommand;
+import com.everhomes.rest.asset.CheckEnterpriseHasArrearageResponse;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.relocation.*;
 import com.everhomes.user.UserContext;
@@ -190,15 +192,21 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
 
         FlowCase flowCase = ctx.getFlowCase();
 
+        String mode = RelocationFlowMode.TRADITIONAL.getCode();
         RelocationRequest request = relocationProvider.findRelocationRequestById(flowCase.getReferId());
         if (null != request) {
 
-//            assetService.checkEnterpriseHasArrearage
+            CheckEnterpriseHasArrearageCommand cmd = new CheckEnterpriseHasArrearageCommand();
+            cmd.setCommunityId(request.getOwnerId());
+            cmd.setNamespaceId(request.getNamespaceId());
+            cmd.setOrganizationId(request.getRequestorEnterpriseId());
+            CheckEnterpriseHasArrearageResponse response = assetService.checkEnterpriseHasArrearage(cmd);
 
-            FlowConditionStringVariable stringVariable = new FlowConditionStringVariable(RelocationFlowMode.INTELLIGENT.getCode());
-            return stringVariable;
+            if (null != response && response.getHasArrearage() == 0) {
+                mode = RelocationFlowMode.INTELLIGENT.getCode();
+            }
+
         }
-        FlowConditionStringVariable stringVariable = new FlowConditionStringVariable(RelocationFlowMode.TRADITIONAL.getCode());
-        return stringVariable;
+        return new FlowConditionStringVariable(mode);
     }
 }
