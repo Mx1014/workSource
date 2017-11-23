@@ -2717,11 +2717,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			// 无限制范围数据
             ServiceModuleAuthorizationsDTO u_dto = processServiceModuleApps(r, ModuleManagementType.UNLIMIT_CONTROL.getCode());
 
-			if(c_dto.getCommunityControlFlag() == AllFlagType.NO.getCode() && c_dto.getCommunityApps().size() == 0)
+			if(c_dto.getCommunityControlFlag() != null)
             	dto.setCommunityControlApps(c_dto);
-			if(o_dto.getOrgControlFlag() == AllFlagType.NO.getCode() && o_dto.getOrgApps().size() == 0)
+			if(o_dto.getOrgControlFlag() != null)
 				dto.setOrgControlApps(o_dto);
-			if(u_dto.getUnlimitControlFlag() == AllFlagType.NO.getCode() && u_dto.getUnlimitApps().size() == 0)
+			if(u_dto.getUnlimitControlFlag() != null)
 				dto.setUnlimitControlApps(u_dto);
 			return dto;
 
