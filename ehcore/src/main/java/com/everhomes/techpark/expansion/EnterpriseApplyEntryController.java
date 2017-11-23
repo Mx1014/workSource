@@ -8,6 +8,7 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GetTemplateByFormIdCommand;
 import com.everhomes.rest.techpark.expansion.*;
+import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RequireAuthentication;
 import com.mysql.jdbc.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	@RestReturn(value=ListEnterpriseDetailResponse.class)
 	public RestResponse listEnterpriseDetails(ListEnterpriseDetailCommand cmd){
 		ListEnterprisesCommand command = ConvertHelper.convert(cmd, ListEnterprisesCommand.class);
+		command.setPageSize(100000);
 		ListEnterprisesCommandResponse r = organizationService.listEnterprises(command);
 		List<OrganizationDetailDTO> dtos = r.getDtos();
 		
@@ -68,6 +70,13 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 			if(dto.getEnterpriseName() == null || StringUtils.isNullOrEmpty(dto.getEnterpriseName()))
 				dto.setEnterpriseName(c.getDisplayName());
 			dto.setContactPhone(c.getAccountPhone());
+
+
+			String pinyin = PinYinHelper.getPinYin(dto.getEnterpriseName());
+			dto.setFullInitial(PinYinHelper.getFullCapitalInitial(pinyin));
+			dto.setFullPinyin(pinyin.replaceAll(" ", ""));
+			dto.setInitial(PinYinHelper.getCapitalInitial(dto.getFullPinyin()));
+
 			return dto;
 		}).collect(Collectors.toList()));
 		res.setNextPageAnchor(r.getNextPageAnchor());

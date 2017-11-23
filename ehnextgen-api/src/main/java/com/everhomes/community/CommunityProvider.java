@@ -134,5 +134,9 @@ public interface CommunityProvider {
     List<Community> listCommunitiesByCityIdAndAreaId(Integer namespaceId, Long cityId, Long areaId, String keyword, Long pageAnchor,
                                                      Integer pageSize);
 
+
     String getCommunityToken(String tokenType, Long communityId);
+
+    Community findCommunityByCommunityNumber(String communityNumber, Integer namespaceId);
+    Building findBuildingByCommunityIdAndNumber(Long communityId, String buildingNumber);
 }

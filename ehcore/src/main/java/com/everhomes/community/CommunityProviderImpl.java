@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.*;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -807,7 +808,23 @@ public class CommunityProviderImpl implements CommunityProvider {
         return ConvertHelper.convert(query.fetchOne(), Building.class);
 	}
 
-	@Override
+    @Override
+    public Building findBuildingByCommunityIdAndNumber(Long communityId, String buildingNumber) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBuildings.class));
+        SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
+        query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_BUILDINGS.BUILDING_NUMBER.eq(buildingNumber));
+        query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        return ConvertHelper.convert(query.fetchOne(), Building.class);
+    }
+
+    @Override
+    public Community findCommunityByCommunityNumber(String communityNumber, Integer namespaceId) {
+        return null;
+    }
+
+    @Override
 	public void populateBuildingAttachments(final Building building) {
         if(building == null) {
             return;

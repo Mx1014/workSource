@@ -23,6 +23,10 @@ public class EnterpriseDetailDTO {
     @ItemType(EnterpriseAttachmentDTO.class)
     private List<EnterpriseAttachmentDTO> attachments;
 
+	private String fullInitial;
+	private String fullPinyin;
+	private String initial;
+
 	public Long getId() {
 		return id;
 	}
@@ -128,7 +132,31 @@ public class EnterpriseDetailDTO {
         this.attachments = attachments;
     }
 
-    @Override
+	public String getFullInitial() {
+		return fullInitial;
+	}
+
+	public void setFullInitial(String fullInitial) {
+		this.fullInitial = fullInitial;
+	}
+
+	public String getFullPinyin() {
+		return fullPinyin;
+	}
+
+	public void setFullPinyin(String fullPinyin) {
+		this.fullPinyin = fullPinyin;
+	}
+
+	public String getInitial() {
+		return initial;
+	}
+
+	public void setInitial(String initial) {
+		this.initial = initial;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
