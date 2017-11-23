@@ -482,6 +482,4 @@ public class ForumController extends ControllerBase {
         return response;
     }
 
-
-
 }

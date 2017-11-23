@@ -3,21 +3,26 @@ package com.everhomes.rest.hotTag;
 import com.everhomes.util.StringHelper;
 
 /**
- *<ul>
- *<li>id:标签ID</li>
- *<li>name:标签名</li>
- *<li>namespaceId: 域空间Id</li>
- *</ul>
+ * <ul>
+ *     <li>id: 标签ID</li>
+ *     <li>name: 标签名</li>
+ *     <li>namespaceId: 域空间Id</li>
+ *     <li>moduleType: 模块类型  参考 {@link com.everhomes.rest.forum.ForumModuleType}</li>
+ *     <li>categoryId: categoryId</li>
+ * </ul>
  */
 public class TagDTO {
-	
+
 	private Long id;
 
 	private String name;
 
 	private Integer namespaceId;
 
+	private Byte moduleType;
+
 	private Long categoryId;
+
 	public Long getId() {
 		return id;
 	}
@@ -50,9 +55,17 @@ public class TagDTO {
 		this.categoryId = categoryId;
 	}
 
+	public Byte getModuleType() {
+		return moduleType;
+	}
+
+	public void setModuleType(Byte moduleType) {
+		this.moduleType = moduleType;
+	}
+
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 
 }
