@@ -120,15 +120,24 @@ public class WebMenuServiceImpl implements WebMenuService {
 			for (Long orgId: orgIds) {
 				targets.add(new Target(EntityType.ORGANIZATIONS.getCode(), orgId));
 			}
-			//获取人员和人员所有机构所赋予的权限模块
+			//获取人员和人员所有机构所赋予的权限模块(模块管理员)
 			List<Long> moduleIds = authorizationProvider.getAuthorizationModuleIdsByTarget(targets);
-			if(null != moduleIds && moduleIds.size() > 0)
+			//获取人员和人员所有机构所赋予的应用模块权限(应用管理员)
+			List<Long> moduleIds_app = authorizationProvider.getAuthorizationAppModuleIdsByTarget(targets);
+
+			if(null != moduleIds && moduleIds.size() > 0){
+				if (moduleIds_app != null && moduleIds_app.size() > 0){
+					moduleIds.addAll(moduleIds_app);
+				}
+				//获取这些模块对应的菜单
 				if(moduleIds.contains(0L)){
 					moduleIds = serviceModuleService.filterByScopes(UserContext.getCurrentNamespaceId(), null, null).stream().map(r ->{
 						return r.getId();
 					}).collect(Collectors.toList());
 				}
+
 				menus = webMenuProvider.listWebMenuByType(WebMenuType.PARK.getCode(), categories, null, moduleIds);
+			}
 
 			//拼上菜单的所有父级菜单
 			menus = appendParentMenus(menus);

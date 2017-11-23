@@ -34,6 +34,8 @@ public interface AuthorizationProvider {
 
     List<Long> getAuthorizationModuleIdsByTarget(List<Target> targets);
 
+    List<Long> getAuthorizationAppModuleIdsByTarget(List<Target> targets);
+
     List<Authorization> listTargetAuthorizations(String ownerType, Long ownerId, String authType, Long authId, String identityType);
 
     List<Authorization> listManageAuthorizations(String ownerType, Long ownerId, String authType, Long authId);

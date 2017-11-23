@@ -233,6 +233,30 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 	}
 
 	@Override
+	public List<Long> getAuthorizationAppModuleIdsByTarget(List<Target> targets) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Long> result  = new ArrayList<>();
+		SelectQuery<EhAuthorizationsRecord> query = context.selectQuery(Tables.EH_AUTHORIZATIONS);
+		Condition cond = Tables.EH_AUTHORIZATIONS.AUTH_TYPE.eq(EntityType.SERVICE_MODULE_APP.getCode());
+		Condition targetCond = null;
+		for (Target target:targets) {
+			if(null == targetCond){
+				targetCond = Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(target.getTargetType()).and(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(target.getTargetId()));
+			}else{
+				targetCond = targetCond.or(Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(target.getTargetType()).and(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(target.getTargetId())));
+			}
+		}
+		cond = cond.and(targetCond);
+		query.addConditions(cond);
+		query.fetch().map((r) -> {
+			if(!result.contains(r.getAuthId()))
+				result.add(r.getAuthId());
+			return null;
+		});
+		return result;
+	}
+
+	@Override
 	public List<AuthorizationRelation> listAuthorizationRelations(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		if(null != pageSize)
