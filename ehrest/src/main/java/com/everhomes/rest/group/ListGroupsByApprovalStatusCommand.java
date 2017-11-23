@@ -4,19 +4,19 @@ package com.everhomes.rest.group;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * <ul>参数:
- * <li>namespaceId: 域空间id</li>
- * <li>approvalStatus: 审核状态，参考{@link com.everhomes.rest.group.ApprovalStatus}</li>
- * <li>privateFlag: 公有私有圈标记，参考{@link com.everhomes.rest.organization.PrivateFlag}</li>
- * <li>pageAnchor: 锚点</li>
- * <li>pageSize: 每页大小</li>
+ * <ul>
+ *     <li>namespaceId: 域空间id</li>
+ *     <li>approvalStatus: 审核状态，参考{@link com.everhomes.rest.group.ApprovalStatus}</li>
+ *     <li>privateFlag: 公有私有圈标记，参考{@link com.everhomes.rest.organization.PrivateFlag}</li>
+ *     <li>pageAnchor: 锚点</li>
+ *     <li>pageSize: 每页大小</li>
+ *     <li>clubType: clubType  NORMAL-0, Guild(行业协会)-1 参考{@link ClubType}</li>
  * </ul>
  */
 public class ListGroupsByApprovalStatusCommand {
 
 	private Integer namespaceId;
-	
+
 	private Byte approvalStatus;
 
 	private Byte privateFlag;
@@ -25,12 +25,14 @@ public class ListGroupsByApprovalStatusCommand {
 
 	private Integer pageSize;
 
+	private Byte clubType;
+
 	public ListGroupsByApprovalStatusCommand() {
 
 	}
 
 	public ListGroupsByApprovalStatusCommand(Integer namespaceId, Byte approvalStatus, Byte privateFlag,
-			Long pageAnchor, Integer pageSize) {
+											 Long pageAnchor, Integer pageSize, Byte clubType) {
 		super();
 		this.namespaceId = namespaceId;
 		this.approvalStatus = approvalStatus;
@@ -77,6 +79,14 @@ public class ListGroupsByApprovalStatusCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public Byte getClubType() {
+		return clubType;
+	}
+
+	public void setClubType(Byte clubType) {
+		this.clubType = clubType;
 	}
 
 	@Override

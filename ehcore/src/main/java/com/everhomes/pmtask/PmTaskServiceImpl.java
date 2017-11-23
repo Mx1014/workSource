@@ -93,7 +93,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	private static final String CATEGORY_SEPARATOR = "/";
 
-	private static final String HANDLER = "pmtask.handler-";
+	public static final String HANDLER = "pmtask.handler-";
 	
     private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
@@ -174,25 +174,19 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 
 	
-//	@Override
-//	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
-//
+	@Override
+	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
+
 //		Integer namespaceId = cmd.getNamespaceId();
 //		if (null == namespaceId) {
 //			namespaceId = UserContext.getCurrentNamespaceId();
 //		}
 //		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
-//
-//		//TODO:为科兴与一碑对接
-//		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() &&
-//				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
-//			handle = PmTaskHandle.EBEI;
-//		}
-//
-//		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
-//
-//		return handler.listUserTasks(cmd);
-//	}
+
+		YueKongJianPmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.YUE_KONG_JIAN);
+
+		return handler.listUserTasks(cmd);
+	}
 
 //	@Override
 //	public void evaluateTask(EvaluateTaskCommand cmd) {
@@ -533,19 +527,19 @@ public class PmTaskServiceImpl implements PmTaskService {
 				"non-privileged.");
     }
 	
-//	@Override
-//	public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
-//
+	@Override
+	public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
+
 //		Integer namespaceId = cmd.getNamespaceId();
 //		if (null == namespaceId) {
 //			namespaceId = UserContext.getCurrentNamespaceId();
 //		}
 //		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
-//
-//		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
-//
-//		return handler.getTaskDetail(cmd);
-//	}
+
+		YueKongJianPmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.YUE_KONG_JIAN);
+
+		return handler.getTaskDetail(cmd);
+	}
 
 	private void checkBlacklist(String ownerType, Long ownerId){
 		ownerType = org.springframework.util.StringUtils.isEmpty(ownerType) ? "" : ownerType;
@@ -581,13 +575,16 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if (null == cmd.getOrganizationId()) {
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 			OrganizationMember member = null;
-			if (cmd.getFlowOrganizationId()!=null)
-				member = organizationProvider.findOrganizationMemberByOrgIdAndToken(userIdentifier.getIdentifierToken(),cmd.getFlowOrganizationId());
+			if (cmd.getFlowOrganizationId()!=null) {
+				member = organizationProvider.findOrganizationMemberByOrgIdAndToken(userIdentifier.getIdentifierToken(), cmd.getFlowOrganizationId());
+			}
 			//真实姓名
-			if (member==null )
-				return handler.createTask(cmd, user.getId(), user.getNickName(), userIdentifier.getIdentifierToken());
-			else
-				return handler.createTask(cmd, user.getId(), member.getContactName(), userIdentifier.getIdentifierToken());
+			if (member==null ) {
+				return handler.createTask(cmd, user.getId(), user.getNickName(), userIdentifier==null?"":userIdentifier.getIdentifierToken());
+			}
+			else {
+				return handler.createTask(cmd, user.getId(), member.getContactName(), userIdentifier==null?"":userIdentifier.getIdentifierToken());
+			}
 		}else {
 			String requestorPhone = cmd.getRequestorPhone();
 			String requestorName = cmd.getRequestorName();
@@ -2088,7 +2085,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 //
 //				}
 //				FlowNode flowNode = flowNodeProvider.getFlowNodeById(flowCase.getCurrentNodeId());
-//				task.setStatus(pmTaskCommonService.convertFlowStatus(flowNode.getParams()));
+//				task.setStatus(pmTaskCommonService.convertFlowStatus(flowNode.getGroupByParams()));
 //				task.setFlowCaseId(flowCase.getId());
 //				pmTaskProvider.updateTask(task);
 //

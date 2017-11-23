@@ -9,39 +9,48 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>id: group ID</li>
- * <li>uuid: group对应的UUID</li>
- * <li>owningForumId: 拥有的论坛ID</li>
- * <li>name: group名称</li>
- * <li>avatar: group头像URI</li>
- * <li>avatarUrl: group头像URL</li>
- * <li>description: group描述</li>
- * <li>creatorUid: group创建者ID</li>
- * <li>createTime: group创建时间</li>
- * <li>privateFlag: group公有、私有标记，0-公有、1-私有</li>
- * <li>joinPolicy: 加入策略，参考{@link com.everhomes.rest.group.GroupJoinPolicy}</li>
- * <li>memberCount: group成员数</li>
- * <li>tag: group标签</li>
- * <li>categoryId: group类别ID</li>
- * <li>categoryName: group类别名称</li>
- * <li>memberOf: 是否是group成员，1-是(成员状态为待审核时也置为1，也就是服务器有记录则为1，还需要根据<code>memberStatus</code>来判断是否是正常成员)、0-否</li>
- * <li>memberStatus: group成员状态，{@link com.everhomes.rest.group.GroupMemberStatus}</li>
- * <li>memberNickName: group成员在group内的昵称，是group成员时字段才有效</li>
- * <li>memberRole: group成员角色，用于判断是否为管理员，参考{@link com.everhomes.rest.acl.RoleConstants}</li>
- * <li>phonePrivateFlag: group成员是否显示手机号标记，{@link com.everhomes.rest.group.GroupMemberPhonePrivacy}</li>
- * <li>muteNotificationFlag: group成员是否免打扰标记，{@link com.everhomes.rest.group.GroupMemberMuteNotificationFlag}</li>
- * <li>memberGroupPrivileges: group成员的权限列表，是group成员时字段才有效，参考{@link com.everhomes.rest.acl.PrivilegeConstants}</li>
- * <li>memberForumPrivileges: group成员的论坛权限列表，是group成员时字段才有效，参考{@link com.everhomes.rest.acl.PrivilegeConstants}</li>
- * <li>discriminator: group标识，参考{@link com.everhomes.rest.group.GroupDiscriminator}</li>
- * <li>approvalStatus: 审核的状态，针对需要验证的才有此标记，参考{@link com.everhomes.rest.group.ApprovalStatus}</li>
- * <li>operatorName: 操作人</li>
- * <li>joinTime: 加入时间</li>
- * <li>shareUrl: 分享链接</li>
- * <li>scanJoinUrl:扫描入群页面链接</li>
- * <li>scanDownloadUrl:扫描下载页面链接</li>
- * <li>alias: group别名，获取群列表时如果name为空的时候会返回一个别名：用户1、用户2、用户3、用户4、用户5</li>
- * <li>isNameEmptyBefore: 原来的name字段是否为空，0-非空，1-空, {@link com.everhomes.rest.group.GroupNameEmptyFlag}</li>
- * <li>ogrId: orgId公司Id</li>
+ *     <li>id: group ID</li>
+ *     <li>uuid: group对应的UUID</li>
+ *     <li>owningForumId: 拥有的论坛ID</li>
+ *     <li>name: group名称</li>
+ *     <li>avatar: group头像URI</li>
+ *     <li>avatarUrl: group头像URL</li>
+ *     <li>description: group描述</li>
+ *     <li>creatorUid: group创建者ID</li>
+ *     <li>createTime: group创建时间</li>
+ *     <li>privateFlag: group公有、私有标记，0-公有、1-私有</li>
+ *     <li>joinPolicy: 加入策略，参考{@link com.everhomes.rest.group.GroupJoinPolicy}</li>
+ *     <li>memberCount: group成员数</li>
+ *     <li>tag: group标签</li>
+ *     <li>categoryId: group类别ID</li>
+ *     <li>categoryName: group类别名称</li>
+ *     <li>memberOf: 是否是group成员，1-是(成员状态为待审核时也置为1，也就是服务器有记录则为1，还需要根据<code>memberStatus</code>来判断是否是正常成员)、0-否</li>
+ *     <li>memberStatus: group成员状态，{@link com.everhomes.rest.group.GroupMemberStatus}</li>
+ *     <li>memberNickName: group成员在group内的昵称，是group成员时字段才有效</li>
+ *     <li>memberRole: group成员角色，用于判断是否为管理员，参考{@link com.everhomes.rest.acl.RoleConstants}</li>
+ *     <li>phonePrivateFlag: group成员是否显示手机号标记，{@link com.everhomes.rest.group.GroupMemberPhonePrivacy}</li>
+ *     <li>muteNotificationFlag: group成员是否免打扰标记，{@link com.everhomes.rest.group.GroupMemberMuteNotificationFlag}</li>
+ *     <li>postFlag: postFlag</li>
+ *     <li>creatorName: creatorName</li>
+ *     <li>creatorFamilyName: creatorFamilyName</li>
+ *     <li>operatorName: 操作人</li>
+ *     <li>joinTime: 加入时间</li>
+ *     <li>shareUrl: 分享链接</li>
+ *     <li>scanJoinUrl: 扫描入群页面链接</li>
+ *     <li>scanDownloadUrl: 扫描下载页面链接</li>
+ *     <li>alias: group别名，获取群列表时如果name为空的时候会返回一个别名：用户1、用户2、用户3、用户4、用户5</li>
+ *     <li>isNameEmptyBefore: 原来的name字段是否为空，0-非空，1-空, {@link com.everhomes.rest.group.GroupNameEmptyFlag}</li>
+ *     <li>orgId: orgId</li>
+ *     <li>memberGroupPrivileges: group成员的权限列表，是group成员时字段才有效，参考{@link com.everhomes.rest.acl.PrivilegeConstants}</li>
+ *     <li>memberForumPrivileges: group成员的论坛权限列表，是group成员时字段才有效，参考{@link com.everhomes.rest.acl.PrivilegeConstants}</li>
+ *     <li>updateTime: updateTime</li>
+ *     <li>discriminator: group标识，参考{@link com.everhomes.rest.group.GroupDiscriminator}</li>
+ *     <li>approvalStatus: 审核的状态，针对需要验证的才有此标记，参考{@link com.everhomes.rest.group.ApprovalStatus}</li>
+ *     <li>touristPostPolicy: touristPostPolicy 参考{@link TouristPostPolicyFlag}</li>
+ *     <li>clubType: clubType 参考{@link ClubType}</li>
+ *     <li>descriptionUrl: 详情页面的url</li>
+ *     <li>descriptionType: group描述的载体类型  参考{@link com.everhomes.rest.group.DescriptionType}</li>
+ *     <li>phoneNumber: 联系电话</li>
  * </ul>
  */
 public class GroupDTO {
@@ -77,68 +86,78 @@ public class GroupDTO {
     private String alias;
     private Byte isNameEmptyBefore;
     private Long orgId;
-    
+
     @ItemType(Long.class)
     private List<Long> memberGroupPrivileges;
-    
+
     @ItemType(Long.class)
     private List<Long> memberForumPrivileges;
-    
+
     private Timestamp updateTime;
-    
+
     private String discriminator;
-    
+
     private Byte approvalStatus;
-    
+
+    private Byte touristPostPolicy;
+
+    private Byte clubType;
+
+    private String descriptionUrl;
+
+    private Byte descriptionType;
+
+    private String phoneNumber;
+
     public String getShareUrl() {
-		return shareUrl;
-	}
+        return shareUrl;
+    }
 
-	public void setShareUrl(String shareUrl) {
-		this.shareUrl = shareUrl;
-	}
+    public void setShareUrl(String shareUrl) {
+        this.shareUrl = shareUrl;
+    }
 
-	public Timestamp getJoinTime() {
-		return joinTime;
-	}
+    public Timestamp getJoinTime() {
+        return joinTime;
+    }
 
-	public void setJoinTime(Timestamp joinTime) {
-		this.joinTime = joinTime;
-	}
+    public void setJoinTime(Timestamp joinTime) {
+        this.joinTime = joinTime;
+    }
 
-	public String getOperatorName() {
-		return operatorName;
-	}
+    public String getOperatorName() {
+        return operatorName;
+    }
 
-	public void setOperatorName(String operatorName) {
-		this.operatorName = operatorName;
-	}
+    public void setOperatorName(String operatorName) {
+        this.operatorName = operatorName;
+    }
 
-	public Byte getApprovalStatus() {
-		return approvalStatus;
-	}
+    public Byte getApprovalStatus() {
+        return approvalStatus;
+    }
 
-	public void setApprovalStatus(Byte approvalStatus) {
-		this.approvalStatus = approvalStatus;
-	}
+    public void setApprovalStatus(Byte approvalStatus) {
+        this.approvalStatus = approvalStatus;
+    }
 
-	public String getCreatorName() {
-		return creatorName;
-	}
+    public String getCreatorName() {
+        return creatorName;
+    }
 
-	public void setCreatorName(String creatorName) {
-		this.creatorName = creatorName;
-	}
+    public void setCreatorName(String creatorName) {
+        this.creatorName = creatorName;
+    }
 
-	public String getCreatorFamilyName() {
-		return creatorFamilyName;
-	}
+    public String getCreatorFamilyName() {
+        return creatorFamilyName;
+    }
 
-	public void setCreatorFamilyName(String creatorFamilyName) {
-		this.creatorFamilyName = creatorFamilyName;
-	}
+    public void setCreatorFamilyName(String creatorFamilyName) {
+        this.creatorFamilyName = creatorFamilyName;
+    }
 
-	public GroupDTO() {
+    public GroupDTO() {
     }
 
     public Long getId() {
@@ -246,14 +265,14 @@ public class GroupDTO {
     }
 
     public Byte getMemberStatus() {
-		return memberStatus;
-	}
+        return memberStatus;
+    }
 
-	public void setMemberStatus(Byte memberStatus) {
-		this.memberStatus = memberStatus;
-	}
+    public void setMemberStatus(Byte memberStatus) {
+        this.memberStatus = memberStatus;
+    }
 
-	public String getMemberNickName() {
+    public String getMemberNickName() {
         return memberNickName;
     }
 
@@ -387,6 +406,46 @@ public class GroupDTO {
 
     public void setOrgId(Long orgId) {
         this.orgId = orgId;
+    }
+
+    public Byte getTouristPostPolicy() {
+        return touristPostPolicy;
+    }
+
+    public void setTouristPostPolicy(Byte touristPostPolicy) {
+        this.touristPostPolicy = touristPostPolicy;
+    }
+
+    public Byte getClubType() {
+        return clubType;
+    }
+
+    public void setClubType(Byte clubType) {
+        this.clubType = clubType;
+    }
+
+    public String getDescriptionUrl() {
+        return descriptionUrl;
+    }
+
+    public void setDescriptionUrl(String descriptionUrl) {
+        this.descriptionUrl = descriptionUrl;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public Byte getDescriptionType() {
+        return descriptionType;
+    }
+
+    public void setDescriptionType(Byte descriptionType) {
+        this.descriptionType = descriptionType;
     }
 
     @Override

@@ -862,7 +862,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			response.getDtos().add(dto);
 
         }
-        this.processCommentCount(sourceRequestType,cmd.getType(),cmd.getOwnerType(),cmd.getOwnerId(),response.getDtos());
+        this.processCommentCount(sourceRequestType,cmd.getParentId(),cmd.getOwnerType(),cmd.getOwnerId(),response.getDtos());
         this.processRange(response.getDtos());
 		return response;
 	}

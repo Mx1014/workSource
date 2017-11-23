@@ -168,3 +168,10 @@ DELETE from eh_pm_task_logs where target_id = 0;
 update eh_pm_task_logs set status = 3 where target_id != 0;
 DELETE from eh_pm_task_statistics where date_str = '2017-11-01 00:00:00';
 
+-- 人事档案 add by sw 20171115
+DELETE FROM `eh_service_module_scopes` where module_id IN (50200,50400);
+SET @scope_id = (SELECT MAX(id) FROM eh_service_module_scopes);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES (@scope_id := @scope_id + 1, '1', '50400', '', 'EhOrganizations', '1', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES (@scope_id := @scope_id + 1, '999992', '50400', '', 'EhOrganizations', '999992', NULL, '2');
+
+UPDATE eh_service_modules SET `name` = '人事档案' where id = 50400;

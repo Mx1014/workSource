@@ -1083,16 +1083,12 @@ public class FlowServiceImpl implements FlowService {
             }
         }
 
-        List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(
-                cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType());
+        ListFlowUserSelectionCommand cmd1 = new ListFlowUserSelectionCommand();
+        cmd1.setBelongTo(cmd.getBelongTo());
+        cmd1.setFlowEntityType(cmd.getFlowEntityType());
+        cmd1.setFlowUserType(cmd.getFlowUserType());
 
-        ListFlowUserSelectionResponse resp = new ListFlowUserSelectionResponse();
-        resp.setSelections(
-                selections.stream()
-                        .map(r -> ConvertHelper.convert(r, FlowUserSelectionDTO.class))
-                .collect(Collectors.toList())
-        );
-        return resp;
+        return listFlowUserSelection(cmd1);
     }
 
     @Override
@@ -1102,7 +1098,7 @@ public class FlowServiceImpl implements FlowService {
         List<FlowUserSelectionDTO> selections = new ArrayList<>();
         resp.setSelections(selections);
         List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(
-                cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType(), 0);
+                cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType(), FlowConstants.FLOW_CONFIG_VER);
         if (seles != null && seles.size() > 0) {
             seles.forEach((sel) -> {
                 selections.add(ConvertHelper.convert(sel, FlowUserSelectionDTO.class));
@@ -3137,11 +3133,11 @@ public class FlowServiceImpl implements FlowService {
                 nodeLogDTO.setNodeId(currNode.getId());
                 nodeLogDTO.setNodeLevel(currNode.getNodeLevel());
                 nodeLogDTO.setNodeName(currNode.getNodeName());
-                nodeLogDTO.setParams(currNode.getParams());
+                nodeLogDTO.setParams(currNode.getGroupByParams());
 
                 if (flowCase.getStepCount().equals(eventLog.getStepCount())) {
                     nodeLogDTO.setIsCurrentNode((byte) 1);
-                    dto.setCurrNodeParams(currNode.getParams());
+                    dto.setCurrNodeParams(currNode.getGroupByParams());
 
                     // 附言按钮
                     FlowButton commentBtn = flowButtonProvider.findFlowButtonByStepType(currNode.getId()
@@ -6001,7 +5997,7 @@ public class FlowServiceImpl implements FlowService {
                 for (FlowCase aCase : allFlowCase) {
                     if (eventLog.getFlowCaseId().equals(aCase.getId()) && aCase.getStepCount().equals(eventLog.getStepCount())) {
                         nodeLogDTO.setIsCurrentNode((byte) 1);
-                        // dto.setCurrNodeParams(currNode.getParams());
+                        // dto.setCurrNodeParams(currNode.getGroupByParams());
 
                         // 下一步需要处理人选择下一步节点
                         // List<FlowLink> linksOut = flowLinkProvider.listFlowLinkByFromNodeId(currNode.getId(), aCase.getFlowVersion());

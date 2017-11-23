@@ -1,32 +1,49 @@
 // @formatter:off
 package com.everhomes.rest.group;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
 
 /**
  * <ul>
- * <li>id：group与成员关系ID</li>
- * <li>uuid：group与成员关系UUID</li>
- * <li>groupId：group ID</li>
- * <li>groupName：group名称</li>
- * <li>memberType：成员类型，参考{@link com.everhomes.entity.EntityType}</li>
- * <li>memberId：成员ID</li>
- * <li>memberRole：成员在group内的角色</li>
- * <li>memberNickName：成员在group内的昵称</li>
- * <li>memberAvatar：成员在group内的头像URI</li>
- * <li>memberAvatarUrl：成员在group内的头像URL</li>
- * <li>memberStatus：成员在group内的状态，参考{@link com.everhomes.rest.group.GroupMemberStatus}</li>
- * <li>inviterUid：被邀请人用户ID，有邀请人时才有效</li>
- * <li>inviterNickName：被邀请人用户昵称，有邀请人时才有效</li>
- * <li>inviterAvatar：被邀请人用户头像URI，有邀请人时才有效</li>
- * <li>inviterAvatarUrl：被邀请人用户头像URL，有邀请人时才有效</li>
- * <li>inviteTime：被邀请时间，有邀请人时才有效</li>
- * <li>createTime：成员加入group的时间</li>
- * <li>phonePrivateFlag: group成员是否显示手机号标记，{@link com.everhomes.rest.group.GroupMemberPhonePrivacy}</li>
- * <li>cellPhone: group成员手机码，当<code>phonePrivateFlag</code>设置为公开手机号时才有效</li>
- * <li>muteNotificationFlag: group成员是否免打扰标记，{@link com.everhomes.rest.group.GroupMemberMuteNotificationFlag}</li>
+ *     <li>id: group与成员关系ID</li>
+ *     <li>uuid: group与成员关系UUID</li>
+ *     <li>groupId: group ID</li>
+ *     <li>groupName: group名称</li>
+ *     <li>memberType: 成员类型，参考{@link com.everhomes.entity.EntityType}</li>
+ *     <li>memberId: 成员ID</li>
+ *     <li>memberRole: 成员在group内的角色</li>
+ *     <li>memberNickName: 成员在group内的昵称</li>
+ *     <li>memberAvatar: 成员在group内的头像URI</li>
+ *     <li>memberAvatarUrl: 成员在group内的头像URL</li>
+ *     <li>memberStatus: 成员在group内的状态，参考{@link com.everhomes.rest.group.GroupMemberStatus}</li>
+ *     <li>inviterUid: 被邀请人用户ID，有邀请人时才有效</li>
+ *     <li>inviterNickName: 被邀请人用户昵称，有邀请人时才有效</li>
+ *     <li>inviterAvatar: 被邀请人用户头像URI，有邀请人时才有效</li>
+ *     <li>inviterAvatarUrl: 被邀请人用户头像URL，有邀请人时才有效</li>
+ *     <li>inviteTime: 被邀请时间，有邀请人时才有效</li>
+ *     <li>createTime: 成员加入group的时间</li>
+ *     <li>rejectTime: 拒绝时间</li>
+ *     <li>rejectText: 拒绝原因</li>
+ *     <li>approveTime: approveTime</li>
+ *     <li>operatorName: operatorName</li>
+ *     <li>operatorPhone: operatorPhone</li>
+ *     <li>updateTime: updateTime</li>
+ *     <li>phonePrivateFlag: group成员是否显示手机号标记，{@link com.everhomes.rest.group.GroupMemberPhonePrivacy}</li>
+ *     <li>cellPhone: group成员手机码，当<code>phonePrivateFlag</code>设置为公开手机号时才有效</li>
+ *     <li>muteNotificationFlag: group成员是否免打扰标记，{@link com.everhomes.rest.group.GroupMemberMuteNotificationFlag}</li>
+ *     <li>addressId: addressId</li>
+ *     <li>buildingName: buildingName</li>
+ *     <li>apartmentName: apartmentName</li>
+ *     <li>communityName: communityName</li>
+ *     <li>areaName: areaName</li>
+ *     <li>cityName: cityName</li>
+ *     <li>gender: 性别  {@link com.everhomes.rest.user.UserGender}</li>
+ *     <li>userNickName: 用户的昵称</li>
+ *     <li>guildApplyDTO: guildApplyDTO 行业协会公司相关信息 {@link GuildApplyDTO}</li>
+ *     <li>createTime: 成员加入group的时间</li>
  * </ul>
  */
 public class GroupMemberDTO {
@@ -47,6 +64,8 @@ public class GroupMemberDTO {
     private String inviterAvatarUrl;
     private Timestamp inviteTime;
     private Timestamp createTime;
+    private Timestamp rejectTime;
+    private String rejectText;
     private Timestamp approveTime;
     private String operatorName;
     private String operatorPhone;
@@ -54,13 +73,20 @@ public class GroupMemberDTO {
     private Byte phonePrivateFlag;
     private String cellPhone;
     private Byte muteNotificationFlag;
-    
+
     private Long addressId;
     private String buildingName;
     private String apartmentName;
     private String communityName;
     private String areaName;
     private String cityName;
+
+    private Byte gender;
+
+    private String userNickName;
+
+    @ItemType(GuildApplyDTO.class)
+    private GuildApplyDTO guildApplyDTO;
 
     public GroupMemberDTO() {
     }
@@ -168,7 +194,7 @@ public class GroupMemberDTO {
     public void setMemberRole(Long memberRole) {
         this.memberRole = memberRole;
     }
-    
+
     public String getMemberAvatar() {
         return memberAvatar;
     }
@@ -241,6 +267,22 @@ public class GroupMemberDTO {
         this.createTime = createTime;
     }
 
+    public Timestamp getRejectTime() {
+        return rejectTime;
+    }
+
+    public void setRejectTime(Timestamp rejectTime) {
+        this.rejectTime = rejectTime;
+    }
+
+    public String getRejectText() {
+        return rejectText;
+    }
+
+    public void setRejectText(String rejectText) {
+        this.rejectText = rejectText;
+    }
+
     public Timestamp getApproveTime() {
         return approveTime;
     }
@@ -282,30 +324,54 @@ public class GroupMemberDTO {
     }
 
     public Long getAddressId() {
-		return addressId;
-	}
+        return addressId;
+    }
 
-	public void setAddressId(Long addressId) {
-		this.addressId = addressId;
-	}
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
 
-	public String getBuildingName() {
-		return buildingName;
-	}
+    public String getBuildingName() {
+        return buildingName;
+    }
 
-	public void setBuildingName(String buildingName) {
-		this.buildingName = buildingName;
-	}
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
+    }
 
-	public String getApartmentName() {
-		return apartmentName;
-	}
+    public String getApartmentName() {
+        return apartmentName;
+    }
 
-	public void setApartmentName(String apartmentName) {
-		this.apartmentName = apartmentName;
-	}
+    public void setApartmentName(String apartmentName) {
+        this.apartmentName = apartmentName;
+    }
 
-	@Override
+    public GuildApplyDTO getGuildApplyDTO() {
+        return guildApplyDTO;
+    }
+
+    public void setGuildApplyDTO(GuildApplyDTO guildApplyDTO) {
+        this.guildApplyDTO = guildApplyDTO;
+    }
+
+    public Byte getGender() {
+        return gender;
+    }
+
+    public void setGender(Byte gender) {
+        this.gender = gender;
+    }
+
+    public String getUserNickName() {
+        return userNickName;
+    }
+
+    public void setUserNickName(String userNickName) {
+        this.userNickName = userNickName;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

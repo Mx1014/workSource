@@ -1,10 +1,10 @@
 package com.everhomes.flow;
 
-import java.util.List;
-
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.flow.ListFlowCommand;
+
+import java.util.List;
 
 public interface FlowProvider {
 
@@ -32,6 +32,7 @@ public interface FlowProvider {
 
 	Flow getEnabledConfigFlow(Integer namespaceId, String projectType, Long projectId, Long moduleId,
                               String moduleType, Long ownerId, String ownerType);
+
 
     Flow getSnapshotFlow(Long flowId, Byte status);
 }

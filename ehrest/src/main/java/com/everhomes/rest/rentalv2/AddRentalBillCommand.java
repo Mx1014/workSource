@@ -15,7 +15,8 @@ import com.everhomes.util.StringHelper;
  * <li>rentalDate：预定日期</li>
  * <li>startTime：开始时间</li>
  * <li>endTime：结束时间</li>
- * <li>rules：预定单元格列表{@link com.everhomes.rest.rentalv2.RentalBillRuleDTO}</li>  
+ * <li>rules：预定单元格列表{@link com.everhomes.rest.rentalv2.RentalBillRuleDTO}</li>
+ * <li>packageName：套餐名称</li>
  * </ul>
  */
 public class AddRentalBillCommand {
@@ -33,6 +34,8 @@ public class AddRentalBillCommand {
 //	@ItemType(SiteItemDTO.class)
 //	private List<SiteItemDTO> rentalItems;
 	private String sceneToken;
+	private String packageName;
+
 
 	public Byte getRentalType() {
 		return rentalType;
@@ -71,7 +74,15 @@ public class AddRentalBillCommand {
 		this.rentalDate = rentalDate;
 	}
 
-//	public Long getStartTime() {
+	public String getPackageName() {
+		return packageName;
+	}
+
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
+	}
+
+	//	public Long getStartTime() {
 //		return startTime;
 //	}
 //
