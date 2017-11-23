@@ -654,4 +654,88 @@ public class FlowAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /admin/flow/listFlowConditionVariables</b>
+     * <p>获取条件变量</p>
+     */
+    @RequestMapping("listFlowConditionVariables")
+    @RestReturn(value=ListFlowConditionVariablesResponse.class)
+    public RestResponse listFlowConditionVariables(@Valid ListFlowConditionVariablesCommand cmd) {
+        ListFlowConditionVariablesResponse resp = flowService.listFlowConditionVariables(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/listFlowForms</b>
+     * <p>表单列表</p>
+     */
+    @RequestMapping("listFlowForms")
+    @RestReturn(value=ListFlowFormsResponse.class)
+    public RestResponse listFlowForms(@Valid ListFlowFormsCommand cmd) {
+        ListFlowFormsResponse resp = flowService.listFlowForms(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/updateFlowFormVersion</b>
+     * <p>更新表单版本号</p>
+     */
+    @RequestMapping("updateFlowFormVersion")
+    @RestReturn(value=FlowFormDTO.class)
+    public RestResponse updateFlowFormVersion(@Valid UpdateFlowFormCommand cmd) {
+        FlowFormDTO resp = flowService.updateFlowFormVersion(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/createFlowForm</b>
+     * <p>建立表单关联</p>
+     */
+    @RequestMapping("createFlowForm")
+    @RestReturn(value=FlowFormDTO.class)
+    public RestResponse createFlowForm(@Valid UpdateFlowFormCommand cmd) {
+        FlowFormDTO resp = flowService.createFlowForm(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/deleteFlowForm</b>
+     * <p>取消表单关联</p>
+     */
+    @RequestMapping("deleteFlowForm")
+    @RestReturn(value=String.class)
+    public RestResponse deleteFlowForm(@Valid UpdateFlowFormCommand cmd) {
+        flowService.deleteFlowForm(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/getFlowForm</b>
+     * <p>获取工作流关联的表单</p>
+     */
+    @RequestMapping("getFlowForm")
+    @RestReturn(value=FlowFormDTO.class)
+    public RestResponse getFlowForm(@Valid FlowIdCommand cmd) {
+        FlowFormDTO flowFormDTO = flowService.getFlowForm(cmd);
+        RestResponse response = new RestResponse(flowFormDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

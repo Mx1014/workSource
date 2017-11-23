@@ -15,6 +15,7 @@ import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.ResourceCategory;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -11245,6 +11246,13 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (null == cmd.getNamespaceId()) {
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         }
+        // add 2017.11.22
+//        if(cmd.getId() == null){
+//            groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
+//            organizationProvider.listOrganizationMemberByPath()
+//            List<Organization> list = organizationProvider.listOrganizationByGroupTypes(cmd.getId(), groupTypes, cmd.getKeywords(), cmd.getPageAnchor(), pageSize);
+//        }
+
         checkId(cmd.getId());
         Organization organization = organizationProvider.findOrganizationById(cmd.getId());
         if (null == organization) {
@@ -11252,13 +11260,19 @@ public class OrganizationServiceImpl implements OrganizationService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "Organization not found.");
         }
+
         Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
         ListChildrenOrganizationJobPositionResponse response = new ListChildrenOrganizationJobPositionResponse();
 
         List<String> groupTypes = new ArrayList<String>();
         groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
-        List<Organization> list = organizationProvider.listOrganizationByGroupTypes(cmd.getId(), groupTypes, cmd.getKeywords(), cmd.getPageAnchor(), pageSize);
+        List<Organization> list = new ArrayList<>();
+        if(organization.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode()) && organization.getParentId() == 0L) {//传入的id为总公司时
+            list = organizationProvider.listOrganizationByGroupTypesAndPath(organization.getPath(),groupTypes, cmd.getKeywords(), cmd.getPageAnchor(), pageSize);
+        }else{
+            list = organizationProvider.listOrganizationByGroupTypes(cmd.getId(), groupTypes, cmd.getKeywords(), cmd.getPageAnchor(), pageSize);
+        }
 
         int size = list.size();
         if (size > 0) {
@@ -11303,6 +11317,13 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<ServiceModuleAssignment> assignments = serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getModuleId());
         assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(com.everhomes.rest.common.EntityType.ALL.getCode(), 0L, cmd.getModuleId()));//负责全部业务范围的对象，也要查询出来
         assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(), cmd.getOwnerId(), 0L)); //负责全部业务模块的对象，也要查询出来
+        //如果本身是子项目,则查询其父项目对应的assignments
+        ResourceCategory rc = communityProvider.findResourceCategoryById(cmd.getOwnerId());
+        if(rc != null){//是子项目
+            Long parentOwnerId = rc.getOwnerId();
+            assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(), parentOwnerId, cmd.getModuleId()));
+            assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(), parentOwnerId, 0L)); //负责全部业务模块的对象，也要查询出来
+        }
 
         List<String> groupTypes = new ArrayList<>();
 

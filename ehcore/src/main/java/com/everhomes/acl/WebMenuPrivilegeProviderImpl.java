@@ -11,7 +11,9 @@ import com.everhomes.rest.acl.WebMenuStatus;
 import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhWebMenuScopesDao;
 import com.everhomes.server.schema.tables.daos.EhWebMenusDao;
+import com.everhomes.server.schema.tables.pojos.EhWebMenuScopes;
 import com.everhomes.server.schema.tables.pojos.EhWebMenus;
 import com.everhomes.server.schema.tables.records.EhWebMenuPrivilegesRecord;
 import com.everhomes.server.schema.tables.records.EhWebMenuScopesRecord;
@@ -268,4 +270,42 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
     private void prepareObj(WebMenu obj) {
     	obj.setStatus(WebMenuStatus.ACTIVE.getCode());
     }
+
+
+	@Override
+	public List<WebMenu> listWebMenus(Long parentId, String type) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWebMenus.class));
+
+		SelectQuery<EhWebMenusRecord> query = context.selectQuery(Tables.EH_WEB_MENUS);
+		query.addConditions(Tables.EH_WEB_MENUS.PARENT_ID.eq(parentId));
+		query.addConditions(Tables.EH_WEB_MENUS.TYPE.eq(type));
+		query.addOrderBy(Tables.EH_WEB_MENUS.SORT_NUM.asc());
+
+		List<WebMenu> objs = query.fetch().map((r) -> ConvertHelper.convert(r, WebMenu.class));
+
+		return objs;
+	}
+
+
+	@Override
+	public void deleteWebMenuScopes(List<Long> ids) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		EhWebMenuScopesDao dao = new EhWebMenuScopesDao(context.configuration());
+		dao.deleteById(ids);
+
+	}
+
+	@Override
+	public void createWebMenuScopes(List<WebMenuScope> scopes) {
+		for(WebMenuScope s: scopes){
+			if(s.getId() == null){
+				long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWebMenuScopes.class));
+				s.setId(id);
+			}
+		}
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		EhWebMenuScopesDao dao = new EhWebMenuScopesDao(context.configuration());
+		dao.insert(scopes.toArray(new WebMenuScope[scopes.size()]));
+	}
+
 }

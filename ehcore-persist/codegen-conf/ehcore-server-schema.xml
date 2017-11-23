@@ -241,12 +241,13 @@
             eh_flow_conditions|eh_flow_condition_expressions|eh_flow_lanes|eh_flow_links|eh_flow_predefined_params|eh_flow_branches|eh_flow_service_types|
 
             eh_questionnaire_ranges | eh_payment_formula | eh_servers |
-
+	    eh_general_approval_templates | eh_general_form_templates |
             eh_flow_conditions|eh_flow_condition_expressions|eh_flow_lanes|eh_flow_links|eh_flow_predefined_params|eh_flow_branches|eh_flow_service_types|
             eh_default_charging_items | eh_default_charging_item_properties | eh_payment_notice_config |
 
             eh_questionnaire_ranges | eh_payment_formula | eh_customer_economic_indicator_statistics |
 
+	    eh_industry_types | eh_guild_applies |
             eh_rentalv2_price_packages |
             eh_relocation_requests | eh_relocation_request_items | eh_relocation_request_attachments |
         </includes>

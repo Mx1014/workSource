@@ -13,7 +13,11 @@ import com.everhomes.util.StringHelper;
  * <li>projectId : </li>
  * <li>supportType: APP可用，WEB 可用，APP 与 WEB 都可用 {@link com.everhomes.rest.general_approval.GeneralApprovalSupportType}</li>
  * <li>formOriginId: 原始 formId，如果修改了版本，则原始的数据保留</li>
- * <li>approvalName : 审批名称</li> 
+ * <li>approvalName : 审批名称</li>
+ * <li>approvalAttribute: 审批属性 比如: DEFAULT-系统默认 参考{@link com.everhomes.rest.general_approval.GeneralApprovalAttribute}</li>
+ * <li>modifyFlag: 是否可修改 0-不可修改 1-可以修改</li>
+ * <li>deleteFlag: 是否可修改 0-不可删除 1-可以删除</li>
+ * <li>iconUri: 图标的uri</li>
  * </ul>
  * @author janson
  *
@@ -29,6 +33,12 @@ public class CreateGeneralApprovalCommand {
     private Byte supportType;
     private	Long formOriginId;
     private	String approvalName;
+
+    //added by R.
+	private String approvalAttribute;
+	private Byte modifyFlag;
+	private Byte deleteFlag;
+	private String iconUri;
 
 	public Byte getSupportType() {
 		return supportType;
@@ -108,6 +118,38 @@ public class CreateGeneralApprovalCommand {
 
 	public void setProjectId(Long projectId) {
 		this.projectId = projectId;
+	}
+
+	public String getApprovalAttribute() {
+		return approvalAttribute;
+	}
+
+	public void setApprovalAttribute(String approvalAttribute) {
+		this.approvalAttribute = approvalAttribute;
+	}
+
+	public Byte getModifyFlag() {
+		return modifyFlag;
+	}
+
+	public void setModifyFlag(Byte modifyFlag) {
+		this.modifyFlag = modifyFlag;
+	}
+
+	public Byte getDeleteFlag() {
+		return deleteFlag;
+	}
+
+	public void setDeleteFlag(Byte deleteFlag) {
+		this.deleteFlag = deleteFlag;
+	}
+
+	public String getIconUri() {
+		return iconUri;
+	}
+
+	public void setIconUri(String iconUri) {
+		this.iconUri = iconUri;
 	}
 
 	@Override

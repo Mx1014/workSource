@@ -1897,15 +1897,13 @@ public class ArchivesServiceImpl implements ArchivesService {
                 continue;
 
             //  4.导入基础数据
-            Long detailId = null;
-            boolean flag = false;
-            detailId = saveArchivesEmployeesMember(organizationId, basicDataMap, flag);
+            ImportArchivesJudgments judge = saveArchivesEmployeesMember(organizationId, basicDataMap);
             //  5.导入详细信息
-            if (detailId == null)
+            if (judge.getDetailId() == null)
                 continue;
-            saveArchivesEmployeesDetail(formOriginId, organizationId, detailId, itemValues);
+            saveArchivesEmployeesDetail(formOriginId, organizationId, judge.getDetailId(), itemValues);
             //  6.记录重复数据
-            if (flag)
+            if (judge.isDuplicateFlag())
                 coverCount++;
         }
         //  7.存储所有数据行数
@@ -1991,8 +1989,10 @@ public class ArchivesServiceImpl implements ArchivesService {
         return map;
     }
 
-    private Long saveArchivesEmployeesMember(
-            Long organizationId, Map<String, Object> basicDataMap, boolean flag) {
+    private ImportArchivesJudgments saveArchivesEmployeesMember(
+            Long organizationId, Map<String, Object> basicDataMap) {
+        ImportArchivesJudgments judge = new ImportArchivesJudgments();
+
         AddArchivesEmployeeCommand addCommand = new AddArchivesEmployeeCommand();
         addCommand.setOrganizationId(organizationId);
         addCommand.setContactName((String) basicDataMap.get(ArchivesParameter.CONTACT_NAME));
@@ -2013,13 +2013,14 @@ public class ArchivesServiceImpl implements ArchivesService {
             addCommand.setCheckInTime((String) basicDataMap.get(ArchivesParameter.CHECK_IN_TIME));
 
         //  2.先校验是否已存在手机号，否则的话添加完后再校验，结果肯定是覆盖导入
-        flag = verifyPersonnelByPhone(organizationId, addCommand.getContactToken());
+        judge.setDuplicateFlag(verifyPersonnelByPhone(organizationId, addCommand.getContactToken()));
         //  3.添加人员
         ArchivesEmployeeDTO dto = addArchivesEmployee(addCommand);
         Long detailId = null;
         if (dto != null)
             detailId = dto.getDetailId();
-        return detailId;
+        judge.setDetailId(detailId);
+        return judge;
     }
 
     private void saveArchivesEmployeesDetail(Long formOriginId, Long organizationId, Long detailId, List<PostApprovalFormItem> itemValues) {
@@ -2399,7 +2400,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             Map<Integer, List<ArchivesNotifications>> notifyMap = results.stream().collect(Collectors.groupingBy
                     (ArchivesNotifications::getNotifyHour));
             for (Integer key : notifyMap.keySet()) {
-                archivesConfigurationService.sendingMail(notifyMap.get(key));
+                archivesConfigurationService.sendingMail(key, notifyMap.get(key));
             }
         }
     }

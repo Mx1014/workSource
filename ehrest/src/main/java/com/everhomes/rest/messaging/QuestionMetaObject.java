@@ -14,11 +14,14 @@ import com.everhomes.util.StringHelper;
  * <li>targetId: 目标ID</li>
  * <li>requestorUid: 请求者用户ID</li>
  * <li>requestorNickName: 请求者昵称</li>
+ * <li>requestorPhone: 请求者手机</li>
  * <li>requestorAvatar: 请求者头像URI</li>
  * <li>requestorAvatarUrl: 请求者头像URL</li>
  * <li>requestTime: 请求时间</li>
  * <li>requestInfo: 申请描述</li>
  * <li>requestId: 申请id</li>
+ * <li>detailType: 详细类型 {@link DetailType} </li>
+ * <li>jsonInfo: 附带信息</li>
  * </ul>
  */
 public class QuestionMetaObject {
@@ -28,11 +31,15 @@ public class QuestionMetaObject {
     private Long targetId;
     private Long requestorUid;
     private String requestorNickName;
+    private String requestorPhone;
     private String requestorAvatar;
     private String requestorAvatarUrl;
     private Timestamp requestTime;
     private String requestInfo;
     private Long requestId;
+    private Byte detailType;
+    private String jsonInfo;
+
     
     public Long getRequestId() {
 		return requestId;
@@ -90,6 +97,14 @@ public class QuestionMetaObject {
         this.requestorNickName = requestorNickName;
     }
 
+    public String getRequestorPhone() {
+        return requestorPhone;
+    }
+
+    public void setRequestorPhone(String requestorPhone) {
+        this.requestorPhone = requestorPhone;
+    }
+
     public String getRequestorAvatar() {
         return requestorAvatar;
     }
@@ -120,6 +135,22 @@ public class QuestionMetaObject {
 
     public void setRequestInfo(String requestInfo) {
         this.requestInfo = requestInfo;
+    }
+
+    public Byte getDetailType() {
+        return detailType;
+    }
+
+    public void setDetailType(Byte detailType) {
+        this.detailType = detailType;
+    }
+
+    public String getJsonInfo() {
+        return jsonInfo;
+    }
+
+    public void setJsonInfo(String jsonInfo) {
+        this.jsonInfo = jsonInfo;
     }
 
     @Override

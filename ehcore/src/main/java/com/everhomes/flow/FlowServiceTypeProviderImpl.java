@@ -52,12 +52,16 @@ public class FlowServiceTypeProviderImpl implements FlowServiceTypeProvider {
 	}
 
     @Override
-    public <T> List<T> listFlowServiceType(Integer namespaceId, Long moduleId, Class<T> clazz) {
+    public <T> List<T> listFlowServiceType(Integer namespaceId, Long moduleId, String ownerType, Long ownerId, Class<T> clazz) {
         com.everhomes.server.schema.tables.EhFlowServiceTypes t = Tables.EH_FLOW_SERVICE_TYPES;
         SelectQuery<EhFlowServiceTypesRecord> query = context().selectFrom(t).getQuery();
         query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
         if (moduleId != null) {
             query.addConditions(t.MODULE_ID.eq(moduleId));
+        }
+        if (ownerType != null && ownerId != null) {
+            query.addConditions(t.OWNER_TYPE.eq(ownerType));
+            query.addConditions(t.OWNER_ID.eq(ownerId));
         }
         return query.fetchInto(clazz);
     }

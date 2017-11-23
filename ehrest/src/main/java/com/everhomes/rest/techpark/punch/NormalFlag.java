@@ -12,7 +12,7 @@ public enum NormalFlag {
 	YES((byte)1),NO((byte)0);
     
     private byte code;
-    private NormalFlag(byte code) {
+    private NormalFlag(Byte code) {
         this.code = code;
     }
     
@@ -20,7 +20,10 @@ public enum NormalFlag {
         return this.code;
     }
     
-    public static NormalFlag fromCode(byte code) {
+    public static NormalFlag fromCode(Byte code) {
+        if (null == code) {
+            return null;
+        }
         for(NormalFlag t : NormalFlag.values()) {
             if (t.code == code) {
                 return t;

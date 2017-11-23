@@ -24,7 +24,7 @@ import com.everhomes.util.StringHelper;
  * <li>blandleCount：迟到且早退天数</li> 
  * <li>exts：附加请假exts {@link com.everhomes.rest.techpark.punch.ExtDTO}</li>
  * <li>userStatus：用户状态{@link com.everhomes.rest.techpark.punch.PunchUserStatus} </li> 
- * <li>exceptionDayCount：异常天数 </li>
+ * <li>exceptionRequestCount：异常天数 </li>
  * </ul>
  */
 public class PunchCountDTO {
@@ -53,6 +53,7 @@ public class PunchCountDTO {
 	private List<ExtDTO> exts;
 	private Byte userStatus;
 	private Integer exceptionDayCount;
+	private Integer exceptionRequestCount;
 
 
 	public Integer getExceptionDayCount() {
@@ -199,5 +200,13 @@ public class PunchCountDTO {
 	}
 	public void setPunchMonth(String punchMonth) {
 		this.punchMonth = punchMonth;
+	}
+
+	public Integer getExceptionRequestCount() {
+		return exceptionRequestCount;
+	}
+
+	public void setExceptionRequestCount(Integer exceptionRequestCount) {
+		this.exceptionRequestCount = exceptionRequestCount;
 	}
 }
