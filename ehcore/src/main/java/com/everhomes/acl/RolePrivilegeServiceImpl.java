@@ -3563,87 +3563,93 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				this.authorizationProvider.deleteAuthorizationWithConditon(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), targetId, authorization.getAuthType(), null, authorization.getIdentityType(), null, null, null);
 				this.authorizationProvider.delteAuthorizationControlConfigsWithCondition(namespaceId, targetId);
 
-				// todo: 保存按园区范围控制的应用
-				Long control_id_c = this.sequenceProvider.getNextSequence("authControlId");
-				if(cmd.getCommunityControlOption() == ControlTargetOption.ALL_COMMUNITY.getCode()){
-					//不保存config信息
-					control_id_c = 0L;
-				}else if(cmd.getCommunityControlOption() == ControlTargetOption.SPECIFIC_COMMUNITIES.getCode()){
-					// 保存control_config表
-					control_id_c = this.sequenceProvider.getNextSequence("authControlId");
-					// 将参数里的信息处理成config
-					List<AuthorizationControlConfig> configs_c = processAuthorizationControlConfig(namespaceId, control_id_c, targetId, cmd.getCommunityControlIds(), null);
-					authorizationProvider.createAuthorizationControlConfigs(configs_c);
-				}
-				if (AllFlagType.fromCode(cmd.getAllCommunityControlFlag()) == AllFlagType.YES) {
-					processAuthorization(authorization, 0L, 0L, ModuleManagementType.COMMUNITY_CONTROL.getCode(), cmd.getAllCommunityControlFlag(), control_id_c, cmd.getCommunityControlOption());
-					authorizationProvider.createAuthorization(authorization);
-					assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
-				} else {
-					for (ModuleAppTarget target : cmd.getCommunityTarget()) {
-						processAuthorization(authorization, target.getModuleId(), target.getAppId(), ModuleManagementType.COMMUNITY_CONTROL.getCode(), cmd.getAllCommunityControlFlag(), control_id_c, cmd.getCommunityControlOption());
-						authorizationProvider.createAuthorization(authorization);
-						assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
+				if(cmd.getCommunityTarget() != null && cmd.getCommunityTarget().size() > 0){
+					// todo: 保存按园区范围控制的应用
+					Long control_id_c = this.sequenceProvider.getNextSequence("authControlId");
+					if(cmd.getCommunityControlOption() == ControlTargetOption.ALL_COMMUNITY.getCode()){
+						//不保存config信息
+						control_id_c = 0L;
+					}else if(cmd.getCommunityControlOption() == ControlTargetOption.SPECIFIC_COMMUNITIES.getCode()){
+						// 保存control_config表
+						control_id_c = this.sequenceProvider.getNextSequence("authControlId");
+						// 将参数里的信息处理成config
+						List<AuthorizationControlConfig> configs_c = processAuthorizationControlConfig(namespaceId, control_id_c, targetId, cmd.getCommunityControlIds(), null);
+						authorizationProvider.createAuthorizationControlConfigs(configs_c);
 					}
-				}
-
-				// todo: 保存按OA范围控制的应用
-				List<ControlTarget> orgControlDetails = new ArrayList();
-				// 当选择全公司时，对config进行处理 (获取公司)
-				if(cmd.getOrgControlOption() == ControlTargetOption.CURRENT_ORGANIZATION.getCode()){
-					OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByTargetId(targetId);
-					orgControlDetails = Collections.singletonList(new ControlTarget(detail.getOrganizationId(),IncludeChildFlagType.YES.getCode()));
-				}else if(cmd.getOrgControlOption() == ControlTargetOption.CURRENT_DEPARTMENT.getCode()){
-					// 当选择本部门及以下时，对config进行处理 （获取部门）
-					List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByUId(targetId);
-					// 尝试获取部门id
-					List<OrganizationMember> members_depart = members.stream().filter(r->r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()) && r.getStatus() == OrganizationMemberStatus.ACTIVE.getCode())
-							.collect(Collectors.toList());
-					if(members_depart != null && members_depart.size() > 0){
-						orgControlDetails = Collections.singletonList(new ControlTarget(members_depart.get(0).getOrganizationId(),IncludeChildFlagType.YES.getCode()));
-					}else{//尝试获取部门失败，获取公司id
-						List<OrganizationMember> members_enterprise = members.stream().filter(r->r.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode()) && r.getStatus() == OrganizationMemberStatus.ACTIVE.getCode())
-								.collect(Collectors.toList());
-						if(members_enterprise != null && members_enterprise.size() > 0){
-							orgControlDetails = Collections.singletonList(new ControlTarget(members_depart.get(0).getOrganizationId(),IncludeChildFlagType.YES.getCode()));
+					if (AllFlagType.fromCode(cmd.getAllCommunityControlFlag()) == AllFlagType.YES) {
+						processAuthorization(authorization, 0L, 0L, ModuleManagementType.COMMUNITY_CONTROL.getCode(), cmd.getAllCommunityControlFlag(), control_id_c, cmd.getCommunityControlOption());
+						authorizationProvider.createAuthorization(authorization);
+						assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
+					} else {
+						for (ModuleAppTarget target : cmd.getCommunityTarget()) {
+							processAuthorization(authorization, target.getModuleId(), target.getAppId(), ModuleManagementType.COMMUNITY_CONTROL.getCode(), cmd.getAllCommunityControlFlag(), control_id_c, cmd.getCommunityControlOption());
+							authorizationProvider.createAuthorization(authorization);
+							assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
 						}
 					}
-
-				}else if(cmd.getOrgControlOption() == ControlTargetOption.SPECIFIC_ORGS.getCode()){
-					orgControlDetails = cmd.getOrgControlDetails();
 				}
-				// 保存control_config表
-				Long control_id_oa = this.sequenceProvider.getNextSequence("authControlId");
-				// 将参数里的信息处理成config
-				List<AuthorizationControlConfig> configs_oa = processAuthorizationControlConfig(namespaceId, control_id_oa, targetId, null, orgControlDetails);
-				authorizationProvider.createAuthorizationControlConfigs(configs_oa);
 
-				if (AllFlagType.fromCode(cmd.getAllOrgControlFlag()) == AllFlagType.YES) {
-					processAuthorization(authorization, 0L, 0L, ModuleManagementType.ORG_CONTROL.getCode(), cmd.getAllOrgControlFlag(), control_id_oa, cmd.getOrgControlOption());
-					authorizationProvider.createAuthorization(authorization);
-					assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
-				} else {
-					for (ModuleAppTarget target : cmd.getOrgTarget()) {
-						processAuthorization(authorization, target.getModuleId(), target.getAppId(), ModuleManagementType.ORG_CONTROL.getCode(), cmd.getAllOrgControlFlag(), control_id_oa, cmd.getOrgControlOption());
+
+				if(cmd.getOrgTarget() != null && cmd.getOrgTarget().size() > 0){
+					// todo: 保存按OA范围控制的应用
+					List<ControlTarget> orgControlDetails = new ArrayList();
+					// 当选择全公司时，对config进行处理 (获取公司)
+					if(cmd.getOrgControlOption() == ControlTargetOption.CURRENT_ORGANIZATION.getCode()){
+						OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByTargetId(targetId);
+						orgControlDetails = Collections.singletonList(new ControlTarget(detail.getOrganizationId(),IncludeChildFlagType.YES.getCode()));
+					}else if(cmd.getOrgControlOption() == ControlTargetOption.CURRENT_DEPARTMENT.getCode()){
+						// 当选择本部门及以下时，对config进行处理 （获取部门）
+						List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByUId(targetId);
+						// 尝试获取部门id
+						List<OrganizationMember> members_depart = members.stream().filter(r->r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()) && r.getStatus() == OrganizationMemberStatus.ACTIVE.getCode())
+								.collect(Collectors.toList());
+						if(members_depart != null && members_depart.size() > 0){
+							orgControlDetails = Collections.singletonList(new ControlTarget(members_depart.get(0).getOrganizationId(),IncludeChildFlagType.YES.getCode()));
+						}else{//尝试获取部门失败，获取公司id
+							List<OrganizationMember> members_enterprise = members.stream().filter(r->r.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode()) && r.getStatus() == OrganizationMemberStatus.ACTIVE.getCode())
+									.collect(Collectors.toList());
+							if(members_enterprise != null && members_enterprise.size() > 0){
+								orgControlDetails = Collections.singletonList(new ControlTarget(members_depart.get(0).getOrganizationId(),IncludeChildFlagType.YES.getCode()));
+							}
+						}
+
+					}else if(cmd.getOrgControlOption() == ControlTargetOption.SPECIFIC_ORGS.getCode()){
+						orgControlDetails = cmd.getOrgControlDetails();
+					}
+					// 保存control_config表
+					Long control_id_oa = this.sequenceProvider.getNextSequence("authControlId");
+					// 将参数里的信息处理成config
+					List<AuthorizationControlConfig> configs_oa = processAuthorizationControlConfig(namespaceId, control_id_oa, targetId, null, orgControlDetails);
+					authorizationProvider.createAuthorizationControlConfigs(configs_oa);
+
+					if (AllFlagType.fromCode(cmd.getAllOrgControlFlag()) == AllFlagType.YES) {
+						processAuthorization(authorization, 0L, 0L, ModuleManagementType.ORG_CONTROL.getCode(), cmd.getAllOrgControlFlag(), control_id_oa, cmd.getOrgControlOption());
 						authorizationProvider.createAuthorization(authorization);
-						assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
+						assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
+					} else {
+						for (ModuleAppTarget target : cmd.getOrgTarget()) {
+							processAuthorization(authorization, target.getModuleId(), target.getAppId(), ModuleManagementType.ORG_CONTROL.getCode(), cmd.getAllOrgControlFlag(), control_id_oa, cmd.getOrgControlOption());
+							authorizationProvider.createAuthorization(authorization);
+							assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
+						}
 					}
 				}
 
 
-				// todo: 保存无范围控制的应用
-				if (AllFlagType.fromCode(cmd.getAllUnlimitControlFlag()) == AllFlagType.YES) {
-					processAuthorization(authorization, 0L, 0L, ModuleManagementType.UNLIMIT_CONTROL.getCode(), cmd.getAllUnlimitControlFlag(), 0L,null);
-					authorizationProvider.createAuthorization(authorization);
-					assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
-				} else {
-					for (ModuleAppTarget target : cmd.getUnlimitTarget()) {
-						processAuthorization(authorization, target.getModuleId(), target.getAppId(), ModuleManagementType.UNLIMIT_CONTROL.getCode(), cmd.getAllUnlimitControlFlag(), 0L, null);
+				if(cmd.getUnlimitTarget() != null && cmd.getUnlimitTarget().size() > 0){
+					// todo: 保存无范围控制的应用
+					if (AllFlagType.fromCode(cmd.getAllUnlimitControlFlag()) == AllFlagType.YES) {
+						processAuthorization(authorization, 0L, 0L, ModuleManagementType.UNLIMIT_CONTROL.getCode(), cmd.getAllUnlimitControlFlag(), 0L,null);
 						authorizationProvider.createAuthorization(authorization);
-						assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
+						assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
+					} else {
+						for (ModuleAppTarget target : cmd.getUnlimitTarget()) {
+							processAuthorization(authorization, target.getModuleId(), target.getAppId(), ModuleManagementType.UNLIMIT_CONTROL.getCode(), cmd.getAllUnlimitControlFlag(), 0L, null);
+							authorizationProvider.createAuthorization(authorization);
+							assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
+						}
 					}
 				}
-
 				return null;
 			}).collect(Collectors.toList());
 			return null;
