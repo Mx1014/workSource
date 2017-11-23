@@ -34,6 +34,7 @@ import com.everhomes.organization.*;
 import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.pmtask.ebei.EbeiPmTaskDTO;
 import com.everhomes.pmtask.ebei.EbeiPmtaskLogDTO;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.ListBuildingCommand;
@@ -44,6 +45,8 @@ import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.organization.*;
 
 import com.everhomes.rest.pmtask.*;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.user.*;
@@ -169,19 +172,24 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private UserPrivilegeMgr userPrivilegeMgr;
 	@Autowired
 	private CommunityService communityService;
+	@Autowired
+	private PortalService portalService;
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
-		//检查多入口应用权限
-		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.COMMUNITY.getCode(), cmd.getOwnerId(),
-				cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST, 3L, null, cmd.getOwnerId());
-		//检查权限细化
-		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST);
 
 		Integer namespaceId = cmd.getNamespaceId();
 		if (null == namespaceId) {
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
+
+		//检查多入口应用权限
+		checkAppPrivilege(namespaceId, cmd.getTaskCategoryId(), cmd.getCurrentOrgId(), EntityType.COMMUNITY.getCode(), cmd.getOwnerId());
+
+		//检查权限细化
+		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST);
+
+
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		
 		//TODO:为科兴与一碑对接
@@ -649,8 +657,30 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return response;
 	}
 
+	private void checkAppPrivilege(Integer namespaceId, Long taskCategoryId, Long orgId, String ownerType, Long ownerId) {
+		if (null != taskCategoryId) {
+			ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+			listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+			listServiceModuleAppsCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
+			listServiceModuleAppsCommand.setCustomTag(String.valueOf(taskCategoryId));
+			ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+			if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+				userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), ownerType, ownerId,
+						orgId, PrivilegeConstants.PMTASK_LIST, apps.getServiceModuleApps().get(0).getId(), null, ownerId);
+			}
+		}
+	}
+
 	@Override
 	public PmTaskDTO createTaskByOrg(CreateTaskCommand cmd) {
+
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		if (null == namespaceId) {
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+		//检查多入口应用权限
+		checkAppPrivilege(namespaceId, cmd.getTaskCategoryId(), cmd.getOrganizationId(), EntityType.COMMUNITY.getCode(), cmd.getOwnerId());
+
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 		User user = UserContext.current().getUser();
 		if(!resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE)) {
@@ -676,11 +706,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 		checkOrganizationId(cmd.getOrganizationId());
 		
 		cmd.setAddressType(PmTaskAddressType.FAMILY.getCode());
-
-		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		if (null == namespaceId) {
-			namespaceId = UserContext.getCurrentNamespaceId();
-		}
 
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		//Todo:为科兴与一碑对接

@@ -5,7 +5,7 @@ import com.everhomes.rest.portal.*;
 
 import java.util.List;
 
-interface PortalService {
+public interface PortalService {
 
 
 	//todo
