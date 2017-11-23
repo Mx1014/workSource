@@ -2811,6 +2811,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 				case "Long":
 					if (fieldName.equals("categoryId")) {
 						val = EquipmentCategories.fromName((String) value).getCode();
+						//此处兼容旧版本物业巡检 冗余设备类型名称
+						PropertyDescriptor pd = new PropertyDescriptor("categoryPath",clz);
+						Method writeMethod = pd.getWriteMethod();
+						writeMethod.invoke(dto,value);
 					} else {
 						val = Long.parseLong((String) value);
 					}
