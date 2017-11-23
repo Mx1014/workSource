@@ -47,7 +47,7 @@ ALTER TABLE `eh_group_member_logs` ADD COLUMN `reject_text`  VARCHAR(255) NULL;
 
 -- 加表单关联字段  add by xq.tian  2017/11/20
 ALTER TABLE eh_flows ADD COLUMN `form_origin_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'flow ref form id';
-ALTER TABLE eh_flows ADD COLUMN `form_version` BIGINT NOT NULL DEFAULT 0 COMMENT 'flow ref form version';
+ALTER TABLE eh_flows ADD COLUMN `form_version` BIGINT NOT NULL DEFAULT 1 COMMENT 'flow ref form version';
 ALTER TABLE eh_flows ADD COLUMN `form_update_time` DATETIME COMMENT 'form update time';
 
 ALTER TABLE eh_flow_event_logs ADD COLUMN `extra` TEXT COMMENT 'extra data, json format';
@@ -141,13 +141,3 @@ ALTER TABLE `eh_punch_day_logs` ADD COLUMN `smart_alignment` VARCHAR(128) DEFAUL
 -- 工作流业务类型字段 add by xq.tian 2017/22/21
 ALTER TABLE eh_flow_service_types ADD COLUMN `owner_type` VARCHAR(64) COMMENT 'ownerType, e.g: EhOrganizations';
 ALTER TABLE eh_flow_service_types ADD COLUMN `owner_id` BIGINT COMMENT 'ownerId, e.g: eh_organizations id';
-
--- 条件表达式的默认值  add by xq.tian  2017/11/20
-ALTER TABLE eh_flow_condition_expressions MODIFY variable1 VARCHAR(64) NOT NULL DEFAULT '';
-ALTER TABLE eh_flow_condition_expressions MODIFY variable2 VARCHAR(64) NOT NULL DEFAULT '';
-
-ALTER TABLE eh_flow_condition_expressions MODIFY variable_type1 VARCHAR(64) NOT NULL DEFAULT '';
-ALTER TABLE eh_flow_condition_expressions MODIFY variable_type2 VARCHAR(64) NOT NULL DEFAULT '';
-
--- by dengs, 20171120 已在线网执行的sql，放这里只是产生对应的persist包
-ALTER TABLE eh_news_tag ADD COLUMN `category_id` BIGINT default 0;

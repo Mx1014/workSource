@@ -332,7 +332,9 @@ public class QualityServiceImpl implements QualityService {
 	
 	private QualityInspectionStandards verifiedStandardById(Long id) {
 		QualityInspectionStandards standard = qualityProvider.findStandardById(id);
-		if(standard == null || standard.getStatus() == null || standard.getStatus() == QualityStandardStatus.INACTIVE.getCode()) {
+//		if(standard == null || standard.getStatus() == null || standard.getStatus() == QualityStandardStatus.INACTIVE.getCode()) {
+		//fix bug 1123  #15610
+		if(standard == null || standard.getStatus() == null) {
 			LOGGER.error("the standard which id="+id+" don't exist!");
 			throw RuntimeErrorException
 					.errorWith(
