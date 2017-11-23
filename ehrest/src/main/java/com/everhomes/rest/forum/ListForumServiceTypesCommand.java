@@ -6,15 +6,17 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>namespaceId: namespaceId</li>
- *     <li>forumId: forumId</li>
- *     <li>entryId: entryId</li>
+ *     <li>moduleType: 模块类型  参考 {@link com.everhomes.rest.forum.ForumModuleType}</li>
+ *     <li>categoryId: 模块入口id，活动、论坛等多入口的模块需要传</li>
  * </ul>
  */
 public class ListForumServiceTypesCommand {
 
     private Integer namespaceId;
-    private Long forumId;
-    private Long entryId;
+
+    private String moduleType;
+
+    private Long categoryId;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -24,20 +26,20 @@ public class ListForumServiceTypesCommand {
         this.namespaceId = namespaceId;
     }
 
-    public Long getForumId() {
-        return forumId;
+    public String getModuleType() {
+        return moduleType;
     }
 
-    public void setForumId(Long forumId) {
-        this.forumId = forumId;
+    public void setModuleType(String moduleType) {
+        this.moduleType = moduleType;
     }
 
-    public Long getEntryId() {
-        return entryId;
+    public Long getCategoryId() {
+        return categoryId;
     }
 
-    public void setEntryId(Long entryId) {
-        this.entryId = entryId;
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
     }
 
     @Override
