@@ -3597,7 +3597,7 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setDateStrBegin(r.getValue(bill.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(bill.DATE_STR_END));
                     dto.setChargeStatus(r.getValue(bill.STATUS));
-                    dto.setBillId(r.getValue(bill.ID));
+                    dto.setBillId(String.valueOf(r.getValue(bill.ID)));
                     list.add(dto);
                     return null;
                 });
@@ -3605,7 +3605,7 @@ public class AssetProviderImpl implements AssetProvider {
         for(int i = 0 ; i < list.size(); i ++){
             list.get(i).setBillGroupName(groupNames.get(groupIds.get(i)));
         }
-         return list;
+        return list;
     }
 
     private Map<Long,String> getGroupNames(ArrayList<Long> groupIds) {

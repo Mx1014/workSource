@@ -19,6 +19,7 @@ public class ShowBillForClientV2Command {
     private String targetType;
     private Long targetId;
     private Integer namespaceId;
+
     private Byte isPendingPayment;
 
     public Byte getIsPendingPayment() {
@@ -28,6 +29,7 @@ public class ShowBillForClientV2Command {
     public void setIsPendingPayment(Byte isPendingPayment) {
         this.isPendingPayment = isPendingPayment;
     }
+
 
 
 

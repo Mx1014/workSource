@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.flow.action.FlowTimeoutJob;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PayService;
 import com.everhomes.pay.order.PaymentType;
@@ -39,6 +40,7 @@ import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.order.*;
+import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.rest.rentalv2.admin.AttachmentType;
@@ -201,6 +203,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private DoorAccessService doorAccessService;
 	@Autowired
 	DoorAccessProvider doorAccessProvider;
+
 
 	/**cellList : 当前线程用到的单元格 */
 	private static ThreadLocal<List<RentalCell>> cellList = new ThreadLocal<List<RentalCell>>() {
@@ -1736,7 +1739,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return null;
 		});
 
-
+		cellList.get().clear();
 		return billDTO;
 	}
 
@@ -1958,9 +1961,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			Long currTime = DateHelper.currentGMTTime().getTime();
 			List<RentalOrder>  orders = rentalv2Provider.listSuccessRentalBills();
 			for(RentalOrder order : orders ){
-				Long orderReminderTimeLong = order.getReminderTime().getTime();
-				Long orderEndTimeLong = order.getEndTime().getTime();
-				Long orderReminderEndTimeLong = order.getReminderEndTime().getTime();
+				Long orderReminderTimeLong = order.getReminderTime()!=null?order.getReminderTime().getTime():0l;
+				Long orderEndTimeLong = order.getEndTime()!=null?order.getEndTime().getTime():0l;
+				Long orderReminderEndTimeLong = order.getReminderEndTime()!=null?order.getReminderEndTime().getTime():0l;
 				//时间快到发推送
 				if(currTime<orderReminderTimeLong && currTime + 30*60*1000l >= orderReminderTimeLong){
 					Map<String, String> map = new HashMap<String, String>();  
@@ -1968,11 +1971,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			        map.put("startTime", order.getUseDetail()); 
 					String notifyTextForOther = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE, 
 							RentalNotificationTemplateCode.RENTAL_BEGIN_NOTIFY, RentalNotificationTemplateCode.locale, map, "");
-					final Job job3 = new Job(
-							SendMessageAction.class.getName(),
-							new Object[] {order.getRentalUid(),notifyTextForOther});
-					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
-							orderReminderTimeLong);
+
+					Map<String, Object> messageMap = new HashMap<>();
+					messageMap.put("userId",order.getRentalUid());
+					messageMap.put("content",notifyTextForOther);
+					scheduleProvider.scheduleSimpleJob(
+							queueName,
+							queueName,
+							new java.util.Date(orderReminderTimeLong),
+							RentalMessageJob.class,
+							messageMap
+					);
+					LOGGER.debug("rentalSchedule push reminderMessage uid:"+order.getRentalUid()+"  orderId:"+order.getId()+"  message:"+notifyTextForOther+"  time:"+orderReminderTimeLong);
+
 				}
 
 				//结束时间快到发推送
@@ -1993,11 +2004,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						notifyTextForOther = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
 								RentalNotificationTemplateCode.RENTAL_END_NOTIFY_DAY, RentalNotificationTemplateCode.locale, map, "");
 
-					final Job job3 = new Job(
-							SendMessageAction.class.getName(),
-							new Object[] {chargeUid,notifyTextForOther});
-					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
-							orderReminderEndTimeLong);
+					Map<String, Object> messageMap = new HashMap<>();
+					messageMap.put("userId",chargeUid);
+					messageMap.put("content",notifyTextForOther);
+					scheduleProvider.scheduleSimpleJob(
+							queueName,
+							queueName,
+							new java.util.Date(orderReminderEndTimeLong),
+							RentalMessageJob.class,
+							messageMap
+					);
+					LOGGER.debug("rentalSchedule push endReminderMessage id:"+chargeUid+"  orderId:"+order.getId()+"  message:"+notifyTextForOther+"  time:"+orderReminderEndTimeLong);
+
 				}
 				//订单过期,置状态
 				if(orderEndTimeLong <= currTime){
@@ -2008,7 +2026,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					final Job job1 = new Job(
 							IncompleteUnsuccessRentalBillAction.class.getName(),
 							new Object[] { String.valueOf(order.getId()) });
-		
+
 					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
 							orderEndTimeLong); 
 				}
@@ -3008,35 +3026,35 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					.errorWith(RentalServiceErrorCode.SCOPE,
 							RentalServiceErrorCode.ERROR_CANCEL_OVERTIME,"cancel bill over time");
 		}else{
-			this.dbProvider.execute((TransactionStatus status) -> {
+		this.dbProvider.execute((TransactionStatus status) -> {
 				//默认是已退款
 				order.setStatus(SiteBillStatus.REFUNDED.getCode());
 				if (rs.getRefundFlag().equals(NormalFlag.NEED.getCode())&&(order.getPaidMoney().compareTo(new BigDecimal(0))==1)){ 
 					List<RentalOrderPayorderMap>  billmaps = this.rentalv2Provider.findRentalBillPaybillMapByBillId(order.getId());
-					for(RentalOrderPayorderMap billMap : billmaps){
+					for(RentalOrderPayorderMap billMap : billmaps) {
 						//循环退款
 						PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
-						String refoundApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
-						String appKey = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.appKey", "");
+						String refoundApi = this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
+						String appKey = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "pay.appKey", "");
 						refundCmd.setAppKey(appKey);
 						Long timestamp = System.currentTimeMillis();
 						refundCmd.setTimestamp(timestamp);
-						Integer randomNum = (int) (Math.random()*1000);
+						Integer randomNum = (int) (Math.random() * 1000);
 						refundCmd.setNonce(randomNum);
 						Long refoundOrderNo = this.onlinePayService.createBillId(DateHelper
 								.currentGMTTime().getTime());
 						refundCmd.setRefundOrderNo(String.valueOf(refoundOrderNo));
 						refundCmd.setOrderNo(String.valueOf(billMap.getOrderNo()));
-						refundCmd.setOnlinePayStyleNo(VendorType.fromCode(billMap.getVendorType()).getStyleNo()); 
+						refundCmd.setOnlinePayStyleNo(VendorType.fromCode(billMap.getVendorType()).getStyleNo());
 						refundCmd.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
 						//已付金额乘以退款比例除以100
-						refundCmd.setRefundAmount(order.getPaidMoney().multiply(new BigDecimal(rs.getRefundRatio()/100)));
+						refundCmd.setRefundAmount(order.getPaidMoney().multiply(new BigDecimal(rs.getRefundRatio() / 100)));
 						refundCmd.setRefundMsg("预订单取消退款");
 						this.setSignatureParam(refundCmd);
-						RentalRefundOrder rentalRefundOrder = ConvertHelper.convert(refundCmd,RentalRefundOrder.class);
+						RentalRefundOrder rentalRefundOrder = ConvertHelper.convert(refundCmd, RentalRefundOrder.class);
 						rentalRefundOrder.setOrderNo(billMap.getOrderNo());
 						rentalRefundOrder.setRefundOrderNo(refoundOrderNo);
-						rentalRefundOrder.setOrderId(order.getId()); 
+						rentalRefundOrder.setOrderId(order.getId());
 						rentalRefundOrder.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 						rentalRefundOrder.setCreatorUid(UserContext.current().getUser().getId());
 						rentalRefundOrder.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -3045,20 +3063,37 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						rentalRefundOrder.setAmount(refundCmd.getRefundAmount());
 						//微信直接退款，支付宝置为退款中 
 						//update by wuhan 2017-5-15 :支付宝也和微信一样退款
+						if (order.getPaidVersion() == ActivityRosterPayVersionFlag.V2.getCode()) { //新支付退款
+							Long amount = payService.changePayAmount(refundCmd.getRefundAmount());
+							CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.RENTALORDER.getPycode(), Long.valueOf(order.getOrderNo()), refoundOrderNo, amount);
+
+							if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+								rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
+								order.setStatus(SiteBillStatus.REFUNDING.getCode());
+							} else{
+								LOGGER.error("Refund failed from vendor, cmd={}, response={}",
+										cmd, refundResponse);
+								throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+										RentalServiceErrorCode.ERROR_REFUND_ERROR,
+										"bill refund error");
+							}
+							this.rentalv2Provider.createRentalRefundOrder(rentalRefundOrder);
+						} else {
 							PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refoundApi, refundCmd, PayZuolinRefundResponse.class);
-							if(refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+							if (refundResponse != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())) {
 								//退款成功保存退款单信息，修改bill状态
 								rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
 								order.setStatus(SiteBillStatus.REFUNDED.getCode());
-							}
-							else{
-								LOGGER.error("bill id=["+order.getId()+"] refound error param is "+refundCmd.toString());
+							} else {
+								LOGGER.error("bill id=[" + order.getId() + "] refound error param is " + refundCmd.toString());
 								throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 										RentalServiceErrorCode.ERROR_REFUND_ERROR,
-												"bill  refound error"); 
-							}	
+										"bill  refound error");
+							}
 
-						this.rentalv2Provider.createRentalRefundOrder(rentalRefundOrder);
+							this.rentalv2Provider.createRentalRefundOrder(rentalRefundOrder);
+
+						}
 					}
 				}
 				else{
@@ -3078,6 +3113,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			});
 		}
 	}
+
+
+
+	private Long createOrderNo(Long time) {
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+//		String prefix = sdf.format(new Date());
+		String suffix = String.valueOf(generateRandomNumber(3));
+
+		return Long.valueOf(String.valueOf(time) + suffix);
+	}
+
+	private long generateRandomNumber(int n){
+		return (long)((Math.random() * 9 + 1) * Math.pow(10, n-1));
+	}
+
 	/**
 	 * 取消订单发推送
 	 * 
@@ -3393,12 +3443,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							bill.setFlowCaseId(flowCase.getId());
 						}
 
-
+						bill.setPaidVersion(version.getCode());
 						rentalv2Provider.updateRentalBill(bill);
 
 						return null;
 					});
 		}else {
+			bill.setPaidVersion(version.getCode());
 			rentalv2Provider.updateRentalBill(bill);
 
 			if(bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())){
@@ -3448,7 +3499,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		String moduleType = FlowModuleType.NO_MODULE.getCode();
 		Long ownerId = order.getResourceTypeId();
 		String ownerType = FlowOwnerType.RENTALRESOURCETYPE.getCode();
-		Flow flow = flowService.getEnabledFlow(order.getNamespaceId(), Rentalv2Controller.moduleId, moduleType, ownerId, ownerType);
+		Flow flow = flowService.getEnabledFlow(order.getNamespaceId(),EntityType.COMMUNITY.getCode(),order.getCommunityId(),
+                Rentalv2Controller.moduleId, moduleType, ownerId, ownerType);
 		LOGGER.debug("parames : " +order.getNamespaceId()+"*"+ Rentalv2Controller.moduleId+"*"+ moduleType+"*"+ ownerId+"*"+ ownerType );
 		LOGGER.debug("\n flow is "+flow);
 
@@ -3735,6 +3787,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		response.setDiscountType(dto.getDiscountType());
 		response.setDiscountRatio(dto.getDiscountRatio());
 
+		cellList.get().clear();
 		return response;
 	}
 	
@@ -3783,6 +3836,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	 		Collections.sort(dayTimes);
 	 		response.setDayTimes(dayTimes);
  		}
+
+		cellList.get().clear();
 		return response;
 	}
 
@@ -3886,6 +3941,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		response.setCutPrice(dto.getCutPrice());
 		response.setDiscountType(dto.getDiscountType());
 		response.setDiscountRatio(dto.getDiscountRatio());
+		
+
+		cellList.get().clear();
 		return response;
 	}
 
@@ -4331,6 +4389,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 		}
 
+		cellList.get().clear();
 		return response;
 	}
 
@@ -4483,6 +4542,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		}
 
+		cellList.get().clear();
 		return response;
 	}
 
@@ -4635,6 +4695,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		}
 
+		cellList.get().clear();
 		return response;
 	}
 
@@ -4777,6 +4838,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Collections.sort(dayTimes);
  		response.setDayTimes(dayTimes);
 
+		cellList.get().clear();
 		return response;
 	}
 
@@ -5164,6 +5226,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			resource.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
 			resource.setCreatorUid( UserContext.current().getUser().getId());
+			resource.setAclinkId(cmd.getAclinkId());
 			QueryDefaultRuleAdminCommand cmd2 = new QueryDefaultRuleAdminCommand();
 			cmd2.setOwnerType(RentalOwnerType.ORGANIZATION.getCode());
 			cmd2.setOwnerId(resource.getOrganizationId());
@@ -5602,7 +5665,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return null;
 		});
 		
-		
+
+		cellList.get().clear();
 	}
 	private  Long createCellPricePackage(List<PricePackageDTO> pricePackages){
 		Rentalv2PricePackage rentalv2PricePackage = new Rentalv2PricePackage();

@@ -15,6 +15,9 @@ update eh_locale_templates set text = '${userName}(${userToken})已加入公司�
 update eh_locale_templates set text = '${userName}(${userToken})已离开公司“${enterpriseName}”。' where scope = 'enterprise.notification' and code = 5;
 
 -- merge from customer20171108 add by xiongying
+INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`) 
+VALUES (27, 'enterprise_customer', '0', '/27', '客户合同', '', '0', NULL, '2', '1', NOW());
+
 set @field_id = (SELECT MAX(id) from eh_var_fields);
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
 VALUES ((@field_id := @field_id + 1), 'enterprise_customer', 'month', '年月', 'Long', '9', '/9', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"datetime\", \"length\": 32}');
@@ -238,9 +241,22 @@ update eh_addresses set namespace_address_type = 'shenzhou', namespace_address_t
 update eh_addresses set namespace_address_type = 'shenzhou', namespace_address_token = '8D9E03E2-0E05-4C25-AD4C-B8467BF34639' where namespace_id = 999971 and building_name = '张东路1388号2幢' and apartment_name = '201';
 update eh_addresses set namespace_address_type = 'shenzhou', namespace_address_token = '0D874418-2127-416C-BCB6-CE0F3CF06511' where namespace_id = 999971 and building_name = '张东路1388号2幢' and apartment_name = '301';
 
+-- added by R 11/16/2017
+-- 更新导入错误提示语
+update eh_locale_strings set text = '岗位不存在' where scope = 'archives' and `code` = 100009;
+-- added by R 11/16/2017 17:36
+-- 导入错误提示信息
+SET @string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100010', 'zh_CN', '英文名格式错误');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100011', 'zh_CN', '邮箱格式错误');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100012', 'zh_CN', '短号格式错误');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100013', 'zh_CN', '日期格式错误');
 	
-	
-	
+-- 表计管理的menu换链接，fix bug 18412 by xiongying20171117
+update eh_web_menus set data_type = 'react:/energy-management/table-list' where id = 49110;
 
+delete from `eh_var_field_scopes`  WHERE `module_name` = 'contract' AND `field_id` = (select id from `eh_var_fields` WHERE `module_name` = 'contract' AND `display_name` = '租赁总额');
+delete from `eh_var_fields` WHERE `module_name` = 'contract' AND `display_name` = '租赁总额';
 
-
+-- 删除用户行为统计错误数据 add by xq.tian  2017/11/17
+DELETE FROM eh_stat_event_statistics WHERE event_name='launchpad_on_launch_pad_item_click';

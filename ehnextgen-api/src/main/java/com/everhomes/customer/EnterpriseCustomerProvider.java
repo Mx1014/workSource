@@ -85,6 +85,7 @@ public interface EnterpriseCustomerProvider {
 
     void createCustomerEconomicIndicatorStatistic(CustomerEconomicIndicatorStatistic statistic);
     void updateCustomerEconomicIndicatorStatistic(CustomerEconomicIndicatorStatistic statistic);
+    void deleteCustomerEconomicIndicatorStatistic(CustomerEconomicIndicatorStatistic statistic);
     CustomerEconomicIndicatorStatistic listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(Long customerId, Timestamp time);
 
     List<EnterpriseCustomer> listEnterpriseCustomerByCommunity(Long communityId);

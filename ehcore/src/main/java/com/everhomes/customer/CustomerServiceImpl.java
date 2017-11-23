@@ -1187,7 +1187,14 @@ public class CustomerServiceImpl implements CustomerService {
                         statistic.setTurnover(BigDecimal.ZERO);
                     }
                 }
-                enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+
+                if(statistic.getTaxPayment().compareTo(BigDecimal.ZERO) == 0
+                        && statistic.getTurnover().compareTo(BigDecimal.ZERO) == 0) {
+                    enterpriseCustomerProvider.deleteCustomerEconomicIndicatorStatistic(statistic);
+                } else {
+                    enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+                }
+
             }
         }
     }
@@ -1280,7 +1287,12 @@ public class CustomerServiceImpl implements CustomerService {
                     statistic.setTaxPayment(tax.add(indicator.getTaxPayment() == null ? BigDecimal.ZERO : indicator.getTaxPayment()).subtract(exist.getTaxPayment() == null ? BigDecimal.ZERO : exist.getTaxPayment()));
                     BigDecimal turnover = statistic.getTurnover() == null ? BigDecimal.ZERO : statistic.getTurnover();
                     statistic.setTurnover(turnover.add(indicator.getTurnover() == null ? BigDecimal.ZERO : indicator.getTurnover()).subtract(exist.getTurnover() == null ? BigDecimal.ZERO : exist.getTurnover()));
-                    enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+                    if(statistic.getTaxPayment().compareTo(BigDecimal.ZERO) <= 0
+                            && statistic.getTurnover().compareTo(BigDecimal.ZERO) <= 0) {
+                        enterpriseCustomerProvider.deleteCustomerEconomicIndicatorStatistic(statistic);
+                    } else {
+                        enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+                    }
                 }
             }
         } else {
@@ -1291,7 +1303,12 @@ public class CustomerServiceImpl implements CustomerService {
                     statistic.setTaxPayment(tax.subtract(exist.getTaxPayment() == null ? BigDecimal.ZERO : exist.getTaxPayment()));
                     BigDecimal turnover = statistic.getTurnover() == null ? BigDecimal.ZERO : statistic.getTurnover();
                     statistic.setTurnover(turnover.subtract(exist.getTurnover() == null ? BigDecimal.ZERO : exist.getTurnover()));
-                    enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+                    if(statistic.getTaxPayment().compareTo(BigDecimal.ZERO) <= 0
+                            && statistic.getTurnover().compareTo(BigDecimal.ZERO) <= 0) {
+                        enterpriseCustomerProvider.deleteCustomerEconomicIndicatorStatistic(statistic);
+                    } else {
+                        enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(statistic);
+                    }
                 }
             } else if(exist.getMonth() == null) {
                 CustomerEconomicIndicatorStatistic statistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), indicator.getMonth());
@@ -1316,7 +1333,12 @@ public class CustomerServiceImpl implements CustomerService {
                     existStatistic.setTaxPayment(tax.subtract(exist.getTaxPayment() == null ? BigDecimal.ZERO : exist.getTaxPayment()));
                     BigDecimal turnover = existStatistic.getTurnover() == null ? BigDecimal.ZERO : existStatistic.getTurnover();
                     existStatistic.setTurnover(turnover.subtract(exist.getTurnover() == null ? BigDecimal.ZERO : exist.getTurnover()));
-                    enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(existStatistic);
+                    if(existStatistic.getTaxPayment().compareTo(BigDecimal.ZERO) <= 0
+                            && existStatistic.getTurnover().compareTo(BigDecimal.ZERO) <= 0) {
+                        enterpriseCustomerProvider.deleteCustomerEconomicIndicatorStatistic(existStatistic);
+                    } else {
+                        enterpriseCustomerProvider.updateCustomerEconomicIndicatorStatistic(existStatistic);
+                    }
                 }
                 CustomerEconomicIndicatorStatistic newStatistic = enterpriseCustomerProvider.listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(cmd.getCustomerId(), indicator.getMonth());
                 if(newStatistic == null) {
@@ -1670,6 +1692,45 @@ public class CustomerServiceImpl implements CustomerService {
                 statistics.add(statistic);
             });
             response.setStatistics(statistics);
+
+            //季度
+            Map<Integer, QuarterStatistics> quarterStatisticsMap = new HashMap<>();
+            monthStatisticsMap.forEach((timestamp, statistic) -> {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(timestamp);
+                int month = cal.get(Calendar.MONTH);
+                int quarter = 0;
+                if(month <= 3) {
+                    quarter = YearQuarter.THE_FIRST_QUARTER.getCode();
+                } else if(month > 3 && month <= 6) {
+                    quarter = YearQuarter.THE_SECOND_QUARTER.getCode();
+                } else if(month > 6 && month <= 9) {
+                    quarter = YearQuarter.THE_THIRD_QUARTER.getCode();
+                } else if(month > 9 && month <= 12) {
+                    quarter = YearQuarter.THE_FOURTH_QUARTER.getCode();
+                }
+
+                QuarterStatistics qs = quarterStatisticsMap.get(quarter);
+                if(qs == null) {
+                    qs = new QuarterStatistics();
+                    qs.setQuarter(quarter);
+                    qs.setTaxPayment(statistic.getTaxPayment());
+                    qs.setTurnover(statistic.getTurnover());
+
+                } else {
+                    BigDecimal taxPayment = statistic.getTaxPayment() == null ? BigDecimal.ZERO : statistic.getTaxPayment();
+                    qs.setTaxPayment(taxPayment.add(qs.getTaxPayment() == null ? BigDecimal.ZERO : qs.getTaxPayment()));
+                    BigDecimal turnover = statistic.getTurnover() == null ? BigDecimal.ZERO : statistic.getTurnover();
+                    qs.setTurnover(turnover.add(qs.getTurnover() == null ? BigDecimal.ZERO : qs.getTurnover()));
+                }
+                quarterStatisticsMap.put(quarter, qs);
+            });
+
+            List<QuarterStatistics> quarterStatisticses = new ArrayList<>();
+            quarterStatisticsMap.forEach((quarter, statistic) -> {
+                quarterStatisticses.add(statistic);
+            });
+            response.setQuarterStatisticses(quarterStatisticses);
         }
         return response;
     }

@@ -2,21 +2,35 @@ package com.everhomes.rest.group;
 
 import javax.validation.constraints.NotNull;
 
+/**
+ * <ul>
+ *     <li>pageAnchor: pageAnchor</li>
+ *     <li>pageSize: pageSize</li>
+ *     <li>communityId: communityId</li>
+ *     <li>namespaceId: namespaceId</li>
+ *     <li>privateFlag: privateFlag</li>
+ *     <li>keywords: keywords</li>
+ *     <li>categoryId: categoryId</li>
+ *     <li>clubType: clubType  NORMAL-0, Guild(行业协会)-1 参考{@link ClubType}</li>
+ * </ul>
+ */
 public class ListGroupsByNamespaceIdCommand {
 	private Long pageAnchor;
-    
-    private Integer pageSize;
-    
-    private Long communityId;
-    
-    @NotNull
-    private Integer namespaceId;
-    
-    private Byte privateFlag;
-    
-    private String keywords;
-    
-    private Long categoryId;
+
+	private Integer pageSize;
+
+	private Long communityId;
+
+	@NotNull
+	private Integer namespaceId;
+
+	private Byte privateFlag;
+
+	private String keywords;
+
+	private Long categoryId;
+
+	private Byte clubType;
 
 	public Long getPageAnchor() {
 		return pageAnchor;
@@ -73,7 +87,12 @@ public class ListGroupsByNamespaceIdCommand {
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
 	}
-    
-    
 
+	public Byte getClubType() {
+		return clubType;
+	}
+
+	public void setClubType(Byte clubType) {
+		this.clubType = clubType;
+	}
 }

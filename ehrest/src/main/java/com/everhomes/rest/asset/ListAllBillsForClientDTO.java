@@ -21,13 +21,14 @@ public class ListAllBillsForClientDTO {
     private String amountReceivable;
     private String amountOwed;
     private Byte chargeStatus;
-    private Long billId;
 
-    public Long getBillId() {
+    private String billId;
+
+    public String getBillId() {
         return billId;
     }
 
-    public void setBillId(Long billId) {
+    public void setBillId(String billId) {
         this.billId = billId;
     }
 

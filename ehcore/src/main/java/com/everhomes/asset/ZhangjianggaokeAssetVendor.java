@@ -868,7 +868,13 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     }
 
     @Override
-    public List<BillDTO> listBillItems(String targetType,String billId, String targetName, Integer pageOffSet, Integer pageSize) {
+    public List<BillDTO> listBillItems(String targetType,String billId, String targetName, Integer pageOffSet, Integer pageSize,Long ownerId, ListBillItemsResponse res) {
+        if (pageOffSet == null) {
+            pageOffSet = 1;
+        }
+        if(pageSize == null){
+            pageSize = 20;
+        }
         List<BillDTO> list = new ArrayList<>();
         String postJson = "";
         Map<String, String> params=new HashMap<String, String> ();

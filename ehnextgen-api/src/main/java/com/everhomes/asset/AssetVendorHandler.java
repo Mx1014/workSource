@@ -22,7 +22,7 @@ public interface AssetVendorHandler {
 
     List<ListBillsDTO> listBills(String communityIdentifier,String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType,String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Integer pageOffSet, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse response);
 
-    List<BillDTO> listBillItems(String targetType,String billId, String targetName, Integer pageOffSet, Integer pageSize);
+    List<BillDTO> listBillItems(String targetType,String billId, String targetName, Integer pageOffSet, Integer pageSize, Long ownerId, ListBillItemsResponse response);
 
     List<NoticeInfo> listNoticeInfoByBillId(List<BillIdAndType> billIdAndTypes);
 

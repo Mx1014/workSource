@@ -1326,7 +1326,8 @@ public class FlowServiceImpl implements FlowService {
 
         Tuple<Boolean, Boolean> tuple = coordinationProvider.getNamedLock(lockKey).enter(() -> {
             // 查询看是否有原来已经开启的工作流
-            Flow enabledFlow = flowProvider.getEnabledConfigFlow(flow.getNamespaceId(), flow.getModuleId(), flow.getModuleType(), flow.getOwnerId(), flow.getOwnerType());
+            Flow enabledFlow = flowProvider.getEnabledConfigFlow(flow.getNamespaceId(), flow.getProjectType(),
+                    flow.getProjectId(), flow.getModuleId(), flow.getModuleType(), flow.getOwnerId(), flow.getOwnerType());
             if (enabledFlow != null && !enabledFlow.getId().equals(flowId)) {
                 dbProvider.execute(status -> {
                     enabledFlow.setStatus(FlowStatusType.STOP.getCode());
@@ -2417,7 +2418,19 @@ public class FlowServiceImpl implements FlowService {
      */
     @Override
     public Flow getEnabledFlow(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
-        Flow flow = flowProvider.getEnabledConfigFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+        Flow flow = flowProvider.getEnabledConfigFlow(namespaceId, null, null, moduleId, moduleType, ownerId, ownerType);
+        if (flow != null && flow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
+            return flowProvider.getSnapshotFlowById(flow.getId());
+        }
+        return null;
+    }
+
+    /**
+     * 获取正在启用的 Flow
+     */
+    @Override
+    public Flow getEnabledFlow(Integer namespaceId, String projectType, Long projectId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
+        Flow flow = flowProvider.getEnabledConfigFlow(namespaceId, projectType, projectId, moduleId, moduleType, ownerId, ownerType);
         if (flow != null && flow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
             return flowProvider.getSnapshotFlowById(flow.getId());
         }
@@ -3064,11 +3077,11 @@ public class FlowServiceImpl implements FlowService {
                 nodeLogDTO.setNodeId(currNode.getId());
                 nodeLogDTO.setNodeLevel(currNode.getNodeLevel());
                 nodeLogDTO.setNodeName(currNode.getNodeName());
-                nodeLogDTO.setParams(currNode.getParams());
+                nodeLogDTO.setParams(currNode.getGroupByParams());
 
                 if (flowCase.getStepCount().equals(eventLog.getStepCount())) {
                     nodeLogDTO.setIsCurrentNode((byte) 1);
-                    dto.setCurrNodeParams(currNode.getParams());
+                    dto.setCurrNodeParams(currNode.getGroupByParams());
 
                     // 附言按钮
                     FlowButton commentBtn = flowButtonProvider.findFlowButtonByStepType(currNode.getId()
@@ -5664,7 +5677,7 @@ public class FlowServiceImpl implements FlowService {
                 for (FlowCase aCase : allFlowCase) {
                     if (eventLog.getFlowCaseId().equals(aCase.getId()) && aCase.getStepCount().equals(eventLog.getStepCount())) {
                         nodeLogDTO.setIsCurrentNode((byte) 1);
-                        // dto.setCurrNodeParams(currNode.getParams());
+                        // dto.setCurrNodeParams(currNode.getGroupByParams());
 
                         // 下一步需要处理人选择下一步节点
                         // List<FlowLink> linksOut = flowLinkProvider.listFlowLinkByFromNodeId(currNode.getId(), aCase.getFlowVersion());

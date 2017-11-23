@@ -172,7 +172,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
-//		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST);
+		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST);
 
 		Integer namespaceId = cmd.getNamespaceId();
 		if (null == namespaceId) {
@@ -2103,7 +2103,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 //
 //				}
 //				FlowNode flowNode = flowNodeProvider.getFlowNodeById(flowCase.getCurrentNodeId());
-//				task.setStatus(pmTaskCommonService.convertFlowStatus(flowNode.getParams()));
+//				task.setStatus(pmTaskCommonService.convertFlowStatus(flowNode.getGroupByParams()));
 //				task.setFlowCaseId(flowCase.getId());
 //				pmTaskProvider.updateTask(task);
 //

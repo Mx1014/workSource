@@ -909,8 +909,7 @@ public class AssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
-
-
+    
     //this is for 查看缴费详情
     /**
      * <p>查看缴费详情</p>

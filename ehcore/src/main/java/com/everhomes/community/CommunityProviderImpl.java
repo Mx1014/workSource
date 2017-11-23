@@ -1473,6 +1473,15 @@ public class CommunityProviderImpl implements CommunityProvider {
     }
 
     @Override
+    public String getCommunityToken(String tokenType, Long communityId) {
+        return this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class))
+                .select(Tables.EH_COMMUNITIES.NAMESPACE_COMMUNITY_TOKEN)
+                .where(Tables.EH_COMMUNITIES.NAMESPACE_COMMUNITY_TYPE.eq(tokenType))
+                .and(Tables.EH_COMMUNITIES.ID.eq(communityId))
+                .fetchOne(Tables.EH_COMMUNITIES.NAMESPACE_COMMUNITY_TOKEN);
+    }
+
+    @Override
     public List<Community> listCommunitiesByFeedbackForumId(Long feedbackForumId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
         final List<Community> communities = new ArrayList<Community>();

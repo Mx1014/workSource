@@ -29,7 +29,7 @@ import com.everhomes.util.StringHelper;
  * <li>confirmationPrompt: 确认提示(非必填)</li>
  * <li>offlineCashierAddress: 线下支付收银地址</li>
  * <li>offlinePayeeUid: 线下支付收款人id</li>
- * <li>AclinkId: 门禁组id</li>
+ * <li>aclinkId: 门禁组id</li>
  * </ul>
  */
 public class AddResourceAdminCommand { 
@@ -227,6 +227,6 @@ public class AddResourceAdminCommand {
 	}
 
 	public void setAclinkId(Long aclinkId) {
-		aclinkId = aclinkId;
+		this.aclinkId = aclinkId;
 	}
 }

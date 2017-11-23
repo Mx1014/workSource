@@ -74,7 +74,9 @@ public interface ConfigConstants {
 	public static final String OAUTH_SERVER = "oauth.server";
 	public static final String PAY_SERVER = "pay.server";
 	
-	public static final String ACTIVITY_CONTENT_URL = "activity.content.url"; 
+	public static final String ACTIVITY_CONTENT_URL = "activity.content.url";
+
+    public static final String CLUB_DESCRIPTION_URL = "club.description.url";
 	
 	public static final String CLUB_PLACEHOLDER_NAME = "club.placeholder.name"; 
 	
@@ -128,5 +130,11 @@ public interface ConfigConstants {
     public static final String QUESTIONNAIRE_REMIND_TIME_INTERVAL = "questionnaire.remind.time.interval";
 
     String PARKING_CAR_VERIFICATION_FLOWCASE_URL = "parking.car.verification.flowCase.url";
+    String ARCHIVES_FORM_ORIGIN_ID = "archives.form.origin.id";
 
+    public static final String ASSET_PAYMENT_ZJH_URL = "asset.payment.zjh.url";
+    public static final String ASSET_PAYMENT_ZJH_API_8 = "asset.payment.zjh.api.2.2.4.8";
+    public static final String ASSET_PAYMENT_ZJH_API_9 = "asset.payment.zjh.api.2.2.4.9";
+    public static final String ASSET_PAYMENT_ZJH_API_10 = "asset.payment.zjh.api.2.2.4.10";
+    public static final String ASSET_PAYMENT_ZJH_API_15 = "asset.payment.zjh.api.2.2.4.15";
 }

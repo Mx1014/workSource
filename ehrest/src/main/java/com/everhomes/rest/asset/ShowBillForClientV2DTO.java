@@ -32,6 +32,13 @@ public class ShowBillForClientV2DTO {
         this.contractId = contractId;
     }
 
+
+    public ShowBillForClientV2DTO(String billGroupName,String contractId) {
+        this.billGroupName = billGroupName;
+        this.contractId = contractId;
+    }
+
+
     @Override
 
     public boolean equals(Object o) {

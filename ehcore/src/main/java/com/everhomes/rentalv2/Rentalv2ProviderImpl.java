@@ -1485,7 +1485,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				Tables.EH_RENTALV2_ORDERS);
 		//TODO：
 		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS
-				.eq(SiteBillStatus.SUCCESS.getCode()); 
+				.eq(SiteBillStatus.SUCCESS.getCode());
 		step.where(condition);
 		List<RentalOrder> result = step
 				.orderBy(Tables.EH_RENTALV2_ORDERS.ID.desc()).fetch().map((r) -> {

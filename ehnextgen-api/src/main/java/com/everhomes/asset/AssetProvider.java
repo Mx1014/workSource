@@ -244,6 +244,7 @@ public interface AssetProvider {
 
     List<PaymentBills> getAllBillsByCommunity(Long key);
 
+
     List<EhPaymentBillGroupsRules> getBillGroupRuleByCommunityWithBro(Long ownerId, String ownerType, boolean b);
 
     List<PaymentBills> findBillsByContractIds(List<Long> contractIds);
