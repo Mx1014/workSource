@@ -2776,6 +2776,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         for (Organization org: organizations) {
             OrganizationDTO dto = toOrganizationDTO(userId, org);
+            dtos.add(dto);
         }
 
         //：todo 去重
