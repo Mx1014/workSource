@@ -326,7 +326,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			}
 		JSONObject jo = JSONObject.parseObject(JSONObject.toJSONString(dto));
 		jo.put("formUrl",processFormURL(EntityType.PM_TASK.getCode(),""+task.getId(),FlowOwnerType.PMTASK.getCode(),"","费用确认"));
-		jo.put("flowUserType",flowUserType.getCode());
+		if (flowUserType!=null)
+			jo.put("flowUserType",flowUserType.getCode());
 		flowCase.setCustomObject(jo.toJSONString());
 
 		return entities;
