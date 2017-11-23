@@ -2,7 +2,6 @@
 package com.everhomes.relocation;
 
 
-import com.everhomes.community.Community;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;

@@ -8,6 +8,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
+import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -17,10 +18,7 @@ import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowModuleDTO;
-import com.everhomes.rest.flow.FlowServiceTypeDTO;
-import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.expansion.*;
@@ -389,5 +387,27 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
         dto.setServiceName("园区入驻");
         result.add(dto);
         return result;
+    }
+
+    /**
+     * 获取工作流条件参数
+     * @param flow  工作流
+     * @param flowEntityType 不同地方的参数，比如条件，节点，按钮等
+     * @param ownerType 归属类型
+     * @param ownerId   归属id
+     * @return  返回参数列表
+     */
+    public List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+
+        FlowConditionVariableDTO dto = new FlowConditionVariableDTO();
+        dto.setName("test");
+        dto.setDisplayName("test111");
+        dto.setOperators(Collections.singletonList("="));
+        return Collections.singletonList(dto);
+    }
+
+    public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) {
+        FlowConditionStringVariable stringVariable = new FlowConditionStringVariable("intelligent");
+        return stringVariable;
     }
 }

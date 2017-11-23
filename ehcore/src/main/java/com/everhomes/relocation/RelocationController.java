@@ -5,23 +5,11 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.parking.ParkingService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.order.CommonOrderDTO;
-import com.everhomes.rest.order.PayCallbackCommand;
-import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.rest.parking.*;
 import com.everhomes.rest.relocation.*;
-import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.async.DeferredResult;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.util.List;
 
 @RestDoc(value="Relocation controller", site="relocation")
 @RestController

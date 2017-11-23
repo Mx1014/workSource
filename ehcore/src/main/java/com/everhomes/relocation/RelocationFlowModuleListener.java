@@ -2,32 +2,21 @@
 package com.everhomes.relocation;
 
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.address.Address;
-import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.AssetService;
 import com.everhomes.flow.*;
+import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.rest.flow.*;
-import com.everhomes.rest.relocation.GetRelocationRequestDetailCommand;
-import com.everhomes.rest.relocation.RelocationRequestDTO;
-import com.everhomes.rest.relocation.RelocationRequestStatus;
-import com.everhomes.rest.relocation.RelocationTemplateCode;
-import com.everhomes.rest.techpark.expansion.*;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.techpark.expansion.*;
+import com.everhomes.rest.relocation.*;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Component
@@ -42,13 +31,11 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
     @Autowired
     private LocaleStringService localeStringService;
     @Autowired
-    private EnterpriseApplyEntryService enterpriseApplyEntryService;
-    @Autowired
     private FlowService flowService;
     @Autowired
-    private AddressProvider addressProvider;
-    @Autowired
     private RelocationService relocationService;
+    @Autowired
+    private AssetService assetService;
 
     @Override
     public void onFlowCaseStart(FlowCaseState ctx) {
@@ -167,7 +154,7 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
                                         List<Tuple<String, Object>> variables) {}
 
     @Override
-    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
         List<FlowServiceTypeDTO> result = new ArrayList<>();
         FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
         dto.setNamespaceId(namespaceId);
@@ -180,5 +167,38 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
         dto.setServiceName(serviceName);
         result.add(dto);
         return result;
+    }
+
+    /**
+     * 获取工作流条件参数
+     * @param flow  工作流
+     * @param flowEntityType 不同地方的参数，比如条件，节点，按钮等
+     * @param ownerType 归属类型
+     * @param ownerId   归属id
+     * @return  返回参数列表
+     */
+    public List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+
+        FlowConditionVariableDTO dto = new FlowConditionVariableDTO();
+        dto.setName("relocationMode");
+        dto.setDisplayName("relocationMode");
+        dto.setOperators(Collections.singletonList("="));
+        return Collections.singletonList(dto);
+    }
+
+    public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) {
+
+        FlowCase flowCase = ctx.getFlowCase();
+
+        RelocationRequest request = relocationProvider.findRelocationRequestById(flowCase.getReferId());
+        if (null != request) {
+
+//            assetService.checkEnterpriseHasArrearage
+
+            FlowConditionStringVariable stringVariable = new FlowConditionStringVariable(RelocationFlowMode.INTELLIGENT.getCode());
+            return stringVariable;
+        }
+        FlowConditionStringVariable stringVariable = new FlowConditionStringVariable(RelocationFlowMode.TRADITIONAL.getCode());
+        return stringVariable;
     }
 }
