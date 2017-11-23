@@ -7598,15 +7598,16 @@ public class PunchServiceImpl implements PunchService {
                     dto2 = convertPunchLog2DTO(pl);
                 }
                 intervalDTO.getPunchLogs().add(dto2);
+                if (NormalFlag.fromCode(dto1.getSmartAlignment()) == NormalFlag.YES ||
+                        NormalFlag.fromCode(dto2.getSmartAlignment()) == NormalFlag.YES){
+                    intervalDTO.setSmartAlignment(NormalFlag.YES.getCode());
+                }
                 if (null == statusList) {
                     intervalDTO.setStatus(processIntevalStatus(String.valueOf(dto1.getClockStatus()),String.valueOf(dto2.getClockStatus())));
                 }else{
 					intervalDTO.setStatus(statusList[punchIntervalNo - 1]);
 					if (approvalStatus != null && approvalStatus.length >= punchIntervalNo && !StringUtils.isEmpty(approvalStatus[punchIntervalNo - 1])) {
-						if (NormalFlag.fromCode(dto1.getSmartAlignment()) == NormalFlag.YES ||
-								NormalFlag.fromCode(dto2.getSmartAlignment()) == NormalFlag.YES){
-							intervalDTO.setSmartAlignment(NormalFlag.YES.getCode());
-						}
+
 						if (intervalDTO.getStatus().equals(PunchStatus.NORMAL.getCode() + "")) {
 							dto1.setClockStatus(PunchStatus.NORMAL.getCode());
 							dto2.setClockStatus(PunchStatus.NORMAL.getCode());
