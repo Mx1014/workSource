@@ -14,6 +14,9 @@ ALTER TABLE `eh_buildings` ADD COLUMN `building_number` VARCHAR(64) COMMENT '楼
 ALTER TABLE `eh_enterprise_customers` ADD COLUMN `version` VARCHAR(32) COMMENT '版本号';
 ALTER TABLE `eh_contracts` ADD COLUMN `version` VARCHAR(32) COMMENT '版本号';
 
+ALTER TABLE `eh_contracts` ADD COLUMN `namespace_contract_type` VARCHAR(128);
+ALTER TABLE `eh_contracts` ADD COLUMN `namespace_contract_token` VARCHAR(128);
+
 -- club
 -- 行业协会类型
 CREATE TABLE `eh_industry_types` (
