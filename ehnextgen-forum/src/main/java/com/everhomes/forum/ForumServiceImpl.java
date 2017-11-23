@@ -6347,5 +6347,31 @@ public class ForumServiceImpl implements ForumService {
          ForumCategory category = forumProvider.findForumCategoryById(cmd.getId());
         return ConvertHelper.convert(category, ForumCategoryDTO.class);
     }
+
+    @Override
+    public GetForumSettingResponse getForumSetting(GetForumSettingCommand cmd) {
+
+        return null;
+    }
+
+    @Override
+    public void updateForumSetting(UpdateForumSettingCommand cmd) {
+
+    }
+
+    @Override
+    public ListForumServiceTypesResponse listForumServiceTypes(ListForumServiceTypesCommand cmd) {
+
+        List<ForumServiceType> types = forumProvider.listForumServiceTypes(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId());
+
+        ListForumServiceTypesResponse response = new ListForumServiceTypesResponse();
+
+        if(types != null){
+            List<ForumServiceTypeDTO> dtos = types.stream().map(r -> ConvertHelper.convert(r, ForumServiceTypeDTO.class)).collect(Collectors.toList());
+            response.setDtos(dtos);
+        }
+        return response;
+
+    }
     
 }

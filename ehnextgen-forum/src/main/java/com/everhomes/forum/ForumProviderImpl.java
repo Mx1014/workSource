@@ -1115,40 +1115,39 @@ public class ForumProviderImpl implements ForumProvider {
         return query.fetchAnyInto(InteractSetting.class);
     }
 
-//
-//    @Override
-//    public List<ForumServiceType> listForumServiceTypes(Integer namespaceId, Byte moduleType, Long categoryId) {
-//        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-//        SelectQuery<EhForumServiceTypesRecord> query = context.selectQuery(Tables.EH_FORUM_SERVICE_TYPES);
-//        query.addConditions(Tables.EH_FORUM_SERVICE_TYPES.NAMESPACE_ID.eq(namespaceId));
-//        query.addConditions(Tables.EH_FORUM_SERVICE_TYPES.MODULE_TYPE.eq(moduleType));
-//        if(categoryId != null){
-//            query.addConditions(Tables.EH_FORUM_SERVICE_TYPES.CATEGORY_ID.eq(categoryId));
-//        }
-//
-//        List<ForumServiceType> res = query.fetch().map(record -> ConvertHelper.convert(record, ForumServiceType.class));
-//        return res;
-//    }
+    @Override
+    public void createForumServiceTypes(List<ForumServiceType> list) {
+        for(ForumServiceType s: list){
+            if(s.getId() == null){
+                long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhForumServiceTypes.class));
+                s.setId(id);
+            }
+        }
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhForumServiceTypesDao dao = new EhForumServiceTypesDao(context.configuration());
+        dao.insert(list.toArray(new ForumServiceType[list.size()]));
+    }
 
+    @Override
+    public List<ForumServiceType> listForumServiceTypes(Integer namespaceId, Byte moduleType, Long categoryId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhForumServiceTypesRecord> query = context.selectQuery(Tables.EH_FORUM_SERVICE_TYPES);
+        query.addConditions(Tables.EH_FORUM_SERVICE_TYPES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_FORUM_SERVICE_TYPES.MODULE_TYPE.eq(moduleType));
+        if(categoryId != null){
+            query.addConditions(Tables.EH_FORUM_SERVICE_TYPES.CATEGORY_ID.eq(categoryId));
+        }
 
-//    @Override
-//    public void createForumServiceType(List<ForumServiceType> list) {
-//
-//        for (ForumServiceType serviceType: list){
-//            long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhForumServiceTypes.class));
-//            serviceType.setId(id);
-//            serviceType.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//        }
-//
-//
-//        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhHotTags.class, id));
-//        EhForumServiceTypesDao dao = new EhForumServiceTypesDao(context.configuration());
-//        dao.insert();
-//
-//        DaoHelper.publishDaoAction(DaoAction.CREATE, EhHotTags.class, null);
-//    }
+        List<ForumServiceType> res = query.fetch().map(record -> ConvertHelper.convert(record, ForumServiceType.class));
+        return res;
+    }
 
+    @Override
+    public void deleteForumServiceTypes(List<Long> ids) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhForumServiceTypesDao dao = new EhForumServiceTypesDao(context.configuration());
+        dao.deleteById(ids);
 
+    }
 
-	
  }

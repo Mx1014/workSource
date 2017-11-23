@@ -14,7 +14,7 @@ public class ListForumServiceTypesCommand {
 
     private Integer namespaceId;
 
-    private String moduleType;
+    private Byte moduleType;
 
     private Long categoryId;
 
@@ -26,11 +26,11 @@ public class ListForumServiceTypesCommand {
         this.namespaceId = namespaceId;
     }
 
-    public String getModuleType() {
+    public Byte getModuleType() {
         return moduleType;
     }
 
-    public void setModuleType(String moduleType) {
+    public void setModuleType(Byte moduleType) {
         this.moduleType = moduleType;
     }
 

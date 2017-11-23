@@ -448,7 +448,9 @@ public class ForumController extends ControllerBase {
     @RequestMapping("getForumSetting")
     @RestReturn(value=GetForumSettingResponse.class)
     public RestResponse getForumSetting(GetForumSettingCommand cmd) {
-        RestResponse response = new RestResponse();
+
+        GetForumSettingResponse res = forumService.getForumSetting(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -462,6 +464,7 @@ public class ForumController extends ControllerBase {
     @RequestMapping("updateForumSetting")
     @RestReturn(value=String.class)
     public RestResponse updateForumSetting(UpdateForumSettingCommand cmd) {
+        forumService.updateForumSetting(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -476,7 +479,9 @@ public class ForumController extends ControllerBase {
     @RequestMapping("listForumServiceTypes")
     @RestReturn(value=ListForumServiceTypesResponse.class)
     public RestResponse listForumServiceTypes(ListForumServiceTypesCommand cmd) {
-        RestResponse response = new RestResponse();
+
+        ListForumServiceTypesResponse res = forumService.listForumServiceTypes(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

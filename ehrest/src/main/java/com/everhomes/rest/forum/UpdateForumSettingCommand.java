@@ -22,7 +22,9 @@ import java.util.List;
 public class UpdateForumSettingCommand {
 
     private Integer namespaceId;
-    private String moduleType;
+
+    private Byte moduleType;
+
     private Long categoryId;
 
     @ItemType(ForumServiceTypeDTO.class)
@@ -44,11 +46,7 @@ public class UpdateForumSettingCommand {
         this.namespaceId = namespaceId;
     }
 
-    public String getModuleType() {
-        return moduleType;
-    }
-
-    public void setModuleType(String moduleType) {
+    public void setModuleType(Byte moduleType) {
         this.moduleType = moduleType;
     }
 

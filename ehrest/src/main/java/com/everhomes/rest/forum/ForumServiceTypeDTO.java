@@ -11,6 +11,7 @@ import java.util.List;
  * <ul>
  *     <li>id: ID</li>
  *     <li>namespaceId: 域空间ID</li>
+ *     <li>moduleType: 模块类型  参考 {@link com.everhomes.rest.forum.ForumModuleType}</li>
  *     <li>serviceType: serviceType</li>
  *     <li>createTime: 创建时间</li>
  * </ul>
@@ -19,6 +20,8 @@ public class ForumServiceTypeDTO {
     private Long id;
 
     private Integer namespaceId;
+
+    private Byte moduleType;
 
     private String serviceType;
 
@@ -54,6 +57,14 @@ public class ForumServiceTypeDTO {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+
+    public Byte getModuleType() {
+        return moduleType;
+    }
+
+    public void setModuleType(Byte moduleType) {
+        this.moduleType = moduleType;
     }
 
     @Override

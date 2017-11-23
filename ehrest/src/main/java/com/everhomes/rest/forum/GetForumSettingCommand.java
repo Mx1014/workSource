@@ -16,7 +16,9 @@ import java.util.List;
 public class GetForumSettingCommand {
 
     private Integer namespaceId;
-    private String moduleType;
+
+    private Byte moduleType;
+
     private Long categoryId;
 
     public Integer getNamespaceId() {
@@ -27,11 +29,11 @@ public class GetForumSettingCommand {
         this.namespaceId = namespaceId;
     }
 
-    public String getModuleType() {
+    public Byte getModuleType() {
         return moduleType;
     }
 
-    public void setModuleType(String moduleType) {
+    public void setModuleType(Byte moduleType) {
         this.moduleType = moduleType;
     }
 
