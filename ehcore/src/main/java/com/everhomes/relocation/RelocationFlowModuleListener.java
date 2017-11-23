@@ -184,7 +184,7 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
         FlowConditionVariableDTO dto = new FlowConditionVariableDTO();
         dto.setName("relocationMode");
         dto.setDisplayName("relocationMode");
-        dto.setOperators(Collections.singletonList("="));
+//        dto.setOperators(Collections.singletonList("="));
         return Collections.singletonList(dto);
     }
 
