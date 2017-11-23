@@ -97,3 +97,6 @@ INSERT INTO `eh_industry_types` (`id`, `uuid`, `namespace_id`, `name`, `create_t
 INSERT INTO `eh_industry_types` (`id`, `uuid`, `namespace_id`, `name`, `create_time`) VALUES ('8', '8', '999971', '新能源与环保', NOW());
 INSERT INTO `eh_industry_types` (`id`, `uuid`, `namespace_id`, `name`, `create_time`) VALUES ('9', '9', '999971', '文化创意', NOW());
 INSERT INTO `eh_industry_types` (`id`, `uuid`, `namespace_id`, `name`, `create_time`) VALUES ('10', '10', '999971', '其他', NOW());
+
+-- 条件表达式的默认值  add by xq.tian  2017/11/20
+UPDATE eh_flow_condition_expressions SET variable1='', variable2='' WHERE variable1='1' OR variable2='1';

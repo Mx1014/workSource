@@ -1,13 +1,14 @@
 package com.everhomes.flow;
 
-import com.everhomes.rest.flow.*;
+import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowCaseEntityType;
+import com.everhomes.rest.flow.FlowServiceTypeDTO;
+import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.util.Tuple;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 // @Component
 public class FlowModuleListenerDummy1 implements FlowModuleListener {
@@ -132,12 +133,12 @@ public class FlowModuleListenerDummy1 implements FlowModuleListener {
 
     }
 
-    @Override
+    /*@Override
     public Map<String, String> onFlowVariableRender(FlowCaseState ctx, List<String> vars) {
         Map<String, String> map = new HashMap<>();
         for (String var : vars) {
             map.put(var, "1");
         }
         return map;
-    }
+    }*/
 }

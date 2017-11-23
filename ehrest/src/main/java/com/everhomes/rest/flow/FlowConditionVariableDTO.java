@@ -11,7 +11,7 @@ import java.util.List;
  *     <li>displayName: 显示名称</li>
  *     <li>name: 传给后台的参数值</li>
  *     <li>fieldType: 字段类型 {@link com.everhomes.rest.general_approval.GeneralFormFieldType}</li>
- *     <li>operators: 运算符列表</li>
+ *     <li>operators: 运算符列表 {@link com.everhomes.rest.flow.FlowConditionRelationalOperatorType}</li>
  *     <li>options: 如果是选项的话就是选项列表</li>
  *     <li>extra: 附加选项</li>
  * </ul>
