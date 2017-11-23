@@ -209,7 +209,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         }
         // 查询app关联的moduleId
         ServiceModuleApp app = this.serviceModuleAppProvider.findServiceModuleAppById(appId);
-        if(app != null && p_moduleId != 0L && p_moduleId == app.getModuleId()){//如果权限对应的moduleId和appId对应的模块Id相等，再校验是否对应用有权
+        if(app != null && p_moduleId != 0L && p_moduleId.longValue() == app.getModuleId().longValue()){//如果权限对应的moduleId和appId对应的模块Id相等，再校验是否对应用有权
           return checkModuleAppAdmin(namespaceId, ownerType, ownerId, userId, p_moduleId, appId, communityId, organizationId);
         }
         return false;
@@ -218,7 +218,10 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
     @Override
     public boolean checkModuleAppAdmin(Integer namespaceId, String ownerType, Long ownerId, Long userId, Long moduleId, Long appId, Long communityId, Long organizationId) {
         if(moduleId != null && appId != null){
-            List<Authorization> authorizations = this.authorizationProvider.listAuthorizations(ownerType, ownerId, OwnerType.USER.getCode(), userId, EntityType.SERVICE_MODULE.getCode(), moduleId, IdentityType.MANAGE.getCode(), appId, null, null, false);
+            List<Authorization> authorizations = this.authorizationProvider.listAuthorizations(ownerType, ownerId, OwnerType.USER.getCode(), userId, EntityType.SERVICE_MODULE_APP.getCode(), moduleId, IdentityType.MANAGE.getCode(), appId, null, null, false);
+            if (authorizations.size() == 0){
+                return false;
+            }
             List<ControlTarget> controlTargets = this.authorizationProvider.listAuthorizationControlConfigs(namespaceId, userId, authorizations.get(0).getControlId());
             Byte controlOption = authorizations.get(0).getControlOption();
             if(authorizations != null && authorizations.size() > 0){
