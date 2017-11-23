@@ -1899,19 +1899,18 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize,Long contractId) {
-        List<PaymentExpectancyDTO> dtos = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
         EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
         EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
-        List<Long> l = new ArrayList<>();
+        Set<PaymentExpectancyDTO> set = new LinkedHashSet<>();
+
         List<Long> fetch = context.select(bill.ID)
                 .from(bill)
                 .where(bill.CONTRACT_NUM.eq(contractNum))
                 .fetch(bill.ID);
-        context.select(t.ID,t.DATE_STR,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
+        context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
                 .from(t,t1)
-//                .where(t.CONTRACT_NUM.eq(contractNum))
                 .where(t.BILL_ID.in(fetch))
                 .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
                 .orderBy(t1.NAME,t.DATE_STR)
@@ -1919,46 +1918,45 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetch()
                 .map(r -> {
                     PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
-                    l.add(r.getValue(t.ID));
-                    dto.setDateStrEnd(r.getValue(t.DATE_STR));
+
+                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
                     dto.setPropertyIdentifier(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
                     dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
                     dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dto.setChargingItemName(r.getValue(t1.NAME));
-                    dtos.add(dto);
+                    dto.setBillItemId(r.getValue(t.ID));
+                    set.add(dto);
                     return null;
                 });
-        if(l.size() < 1 || l.get(0) == null){
-            List<Long> fetch1 = context.select(bill.ID)
-                    .from(bill)
-                    .where(bill.CONTRACT_ID.eq(contractId))
-                    .fetch(bill.ID);
-            List<PaymentExpectancyDTO> dtos1 = new ArrayList<>();
-            context.select(t.DATE_STR,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
-                    .from(t,t1)
-//                    .where(t.CONTRACT_ID.eq(contractId))
-                    .where(t.BILL_ID.in(fetch1))
-                    .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
-                    .orderBy(t1.NAME,t.DATE_STR)
-                    .limit(pageOffset,pageSize+1)
-                    .fetch()
-                    .map(r -> {
-                        PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
-                        dto.setDateStrEnd(r.getValue(t.DATE_STR));
-                        dto.setPropertyIdentifier(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
-                        dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
-                        dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
-                        dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
-                        dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
-                        dto.setChargingItemName(r.getValue(t1.NAME));
-                        dtos1.add(dto);
-                        return null;
-                    });
-            return dtos1;
-        }
-        return dtos;
+
+        List<Long> fetch1 = context.select(bill.ID)
+                .from(bill)
+                .where(bill.CONTRACT_ID.eq(contractId))
+                .fetch(bill.ID);
+        context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
+                .from(t,t1)
+                .where(t.BILL_ID.in(fetch1))
+                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
+                .orderBy(t1.NAME,t.DATE_STR)
+                .limit(pageOffset,pageSize+1)
+                .fetch()
+                .map(r -> {
+                    PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
+                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+                    dto.setPropertyIdentifier(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
+                    dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
+                    dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
+                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setChargingItemName(r.getValue(t1.NAME));
+                    dto.setBillItemId(r.getValue(t.ID));
+                    set.add(dto);
+                    return null;
+                });
+
+        return set.stream().collect(Collectors.toList());
     }
 
     @Override
