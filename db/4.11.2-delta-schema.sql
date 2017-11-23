@@ -148,3 +148,6 @@ ALTER TABLE eh_flow_condition_expressions MODIFY variable2 VARCHAR(64) NOT NULL 
 
 ALTER TABLE eh_flow_condition_expressions MODIFY variable_type1 VARCHAR(64) NOT NULL DEFAULT '';
 ALTER TABLE eh_flow_condition_expressions MODIFY variable_type2 VARCHAR(64) NOT NULL DEFAULT '';
+
+-- by dengs, 20171120 已在线网执行的sql，放这里只是产生对应的persist包
+ALTER TABLE eh_news_tag ADD COLUMN `category_id` BIGINT default 0;
