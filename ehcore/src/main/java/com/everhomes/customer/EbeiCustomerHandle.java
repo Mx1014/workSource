@@ -112,8 +112,8 @@ public class EbeiCustomerHandle implements CustomerHandle {
         String enterprises = null;
         String url = configurationProvider.getValue("ebei.url", "");
         try {
-            enterprises = HttpUtils.get(url+SYNC_ENTERPRISES, params);
-        } catch (IOException e) {
+            enterprises = HttpUtils.get(url+SYNC_ENTERPRISES, params, 600, "UTF-8");
+        } catch (Exception e) {
             LOGGER.error("sync customer from ebei error: {}", e);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "sync customer from ebei error");
         }

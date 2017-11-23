@@ -3885,4 +3885,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         return ts;
     }
+
+    @Override
+    public void exportTasksByEnergyPlan(SearchTasksByEnergyPlanCommand cmd, HttpServletResponse response) {
+
+    }
+
+    @Override
+    public ImportFileTaskDTO importTasksByEnergyPlan(ImportTasksByEnergyPlanCommand cmd, MultipartFile mfile, Long userId) {
+        return null;
+    }
 }
