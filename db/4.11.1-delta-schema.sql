@@ -19,7 +19,7 @@ ALTER TABLE `eh_payment_users` ADD COLUMN `legal_person_identity_front_uri` VARC
 ALTER TABLE `eh_payment_users` ADD COLUMN `legal_person_identity_back_uri` VARCHAR(1024) COMMENT 'the back side identity image of legal person in an enterprise';
 
 
-ALTER TABLE `eh_payment_users` ADD COLUMN `status` TINYINT NOT NULL COMMENT '0-inactive, 1-waiting for approval, 2-active';
+ALTER TABLE `eh_payment_users` ADD COLUMN `status` TINYINT COMMENT '0-inactive, 1-waiting for approval, 2-active';
 ALTER TABLE `eh_payment_users` ADD COLUMN `creator_uid` BIGINT;
 ALTER TABLE `eh_payment_users` ADD COLUMN `operator_uid` BIGINT;
 ALTER TABLE `eh_payment_users` ADD COLUMN `update_time` DATETIME;
