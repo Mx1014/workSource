@@ -1231,8 +1231,10 @@ public class ContractServiceImpl implements ContractService {
 			if(contractApartments != null && contractApartments.size() > 0) {
 				contractApartments.forEach(contractApartment -> {
 					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(contractApartment.getAddressId());
-					addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
-					propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+					if(addressMapping != null) {
+						addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+						propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+					}
 				});
 			}
 		}

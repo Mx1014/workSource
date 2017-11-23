@@ -2,24 +2,31 @@ package com.everhomes.contract;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
-import com.everhomes.openapi.Contract;
-import com.everhomes.openapi.ContractProvider;
-import com.everhomes.openapi.ZjSyncdataBackup;
-import com.everhomes.openapi.ZjSyncdataBackupProvider;
+import com.everhomes.openapi.*;
+import com.everhomes.organization.pm.CommunityAddressMapping;
+import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.rest.address.NamespaceAddressType;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.community.NamespaceCommunityType;
-import com.everhomes.rest.contract.EbeiContract;
-import com.everhomes.rest.contract.NamespaceContractType;
+import com.everhomes.rest.contract.*;
+import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.EbeiJsonEntity;
 import com.everhomes.rest.customer.NamespaceCustomerType;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.openapi.shenzhou.SyncFlag;
+import com.everhomes.rest.organization.pm.AddressMappingStatus;
+import com.everhomes.search.ContractSearcher;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
@@ -30,11 +37,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/11/22.
@@ -48,7 +59,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
     private static final Integer NAMESPACE_ID = 999983;
 
     private static final String SYNC_CONTRACTS = "/rest/LeaseContractChargeInfo/getLeaseContractInfo";
-
+    DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     @Autowired
     private ConfigurationProvider configurationProvider;
 
@@ -59,7 +70,25 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
     private CommunityProvider communityProvider;
 
     @Autowired
+    private ContractService contractService;
+
+    @Autowired
+    private ContractSearcher contractSearcher;
+
+    @Autowired
     private ContractProvider contractProvider;
+
+    @Autowired
+    private ContractBuildingMappingProvider contractBuildingMappingProvider;
+
+    @Autowired
+    private EnterpriseCustomerProvider customerProvider;
+
+    @Autowired
+    private AddressProvider addressProvider;
+
+    @Autowired
+    private PropertyMgrProvider propertyMgrProvider;
 
     @Autowired
     private DbProvider dbProvider;
@@ -174,7 +203,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
 
     //ebei同步数据规则：两次之间所有的改动会同步过来，所以以一碑同步过来数据作为参照：
     // state为0的数据删除，state为1的数据：我们有，更新；我们没有则新增
-    private void syncAllEnterprises(Integer namespaceId, Long communityId, List<Contract> myContractList, List<EbeiContract> theirContractList) {
+    private void syncAllContracts(Integer namespaceId, Long communityId, List<Contract> myContractList, List<EbeiContract> theirContractList) {
         if (theirContractList != null) {
             for (EbeiContract ebeiContract : theirContractList) {
                 if("0".equals(ebeiContract.getState())) {
@@ -247,5 +276,156 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         backup.setUpdateCommunity(communityIdentifier);
 
         zjSyncdataBackupProvider.createZjSyncdataBackup(backup);
+    }
+
+    private void deleteContract(Contract contract) {
+        DeleteContractCommand command = new DeleteContractCommand();
+        command.setId(contract.getId());
+        contractService.deleteContract(command);
+    }
+
+    private Timestamp dateStrToTimestamp(String str) {
+        LocalDate localDate = LocalDate.parse(str,dateSF);
+        Timestamp ts = new Timestamp(Date.valueOf(localDate).getTime());
+        return ts;
+    }
+
+    private void insertContract(Integer namespaceId, Long communityId, EbeiContract ebeiContract) {
+        Contract contract = new Contract();
+        contract.setNamespaceId(namespaceId);
+        contract.setCommunityId(communityId);
+        contract.setNamespaceContractType(NamespaceContractType.EBEI.getCode());
+        contract.setNamespaceContractToken(ebeiContract.getContractId());
+        contract.setContractNumber(ebeiContract.getSerialNumber());
+        if(StringUtils.isNotBlank(ebeiContract.getStartDate())) {
+            contract.setContractStartDate(dateStrToTimestamp(ebeiContract.getStartDate()));
+        }
+        if(StringUtils.isNotBlank(ebeiContract.getEndDate())) {
+            contract.setContractEndDate(dateStrToTimestamp(ebeiContract.getEndDate()));
+        }
+        if(StringUtils.isNotBlank(ebeiContract.getSignDate())) {
+            contract.setSignedTime(dateStrToTimestamp(ebeiContract.getSignDate()));
+        }
+        if(StringUtils.isNotBlank(ebeiContract.getQuitDate())) {
+            contract.setDenunciationTime(dateStrToTimestamp(ebeiContract.getQuitDate()));
+        }
+        contract.setVersion(ebeiContract.getVersion());
+        if(StringUtils.isNotBlank(ebeiContract.getTotalArea())) {
+            contract.setRentSize(Double.valueOf(ebeiContract.getTotalArea()));
+        }
+        contract.setStatus(convertContractStatus(ebeiContract.getContractStatus()));
+        contract.setCustomerName(ebeiContract.getCompanyName());
+        contract.setCustomerType(CustomerType.ENTERPRISE.getCode());
+        EnterpriseCustomer customer = customerProvider.findByNamespaceToken(NamespaceCustomerType.EBEI.getCode(), ebeiContract.getOwnerId());
+        if(customer != null) {
+            contract.setCustomerId(customer.getId());
+        }
+        contractProvider.createContract(contract);
+        dealContractApartments(contract, ebeiContract.getHouseInfoList());
+        contractSearcher.feedDoc(contract);
+    }
+
+    private void dealContractApartments(Contract contract, List<EbeiContractRoomInfo> ebeiContractRoomInfos) {
+        List<ContractBuildingMapping> existApartments = contractBuildingMappingProvider.listByContract(contract.getId());
+        Map<String, ContractBuildingMapping> map = new HashMap<>();
+        if(existApartments != null && existApartments.size() > 0) {
+            existApartments.forEach(apartment -> {
+                if(apartment.getAddressId() != null) {
+                    Address address = addressProvider.findAddressById(apartment.getAddressId());
+                    map.put(address.getNamespaceAddressToken(), apartment);
+                }
+
+            });
+        }
+
+        Double totalSize = 0.0;
+        if(ebeiContractRoomInfos != null && ebeiContractRoomInfos.size() > 0) {
+            for(EbeiContractRoomInfo ebeiContractRoomInfo : ebeiContractRoomInfos) {
+                ContractBuildingMapping mapping = map.get(ebeiContractRoomInfo.getInfoId());
+                if(mapping == null) {
+                    mapping = new ContractBuildingMapping();
+                    mapping.setNamespaceId(contract.getNamespaceId());
+                    mapping.setContractId(contract.getId());
+                    mapping.setAreaSize(Double.valueOf(ebeiContractRoomInfo.getPaidArea()));
+                    mapping.setContractNumber(contract.getContractNumber());
+                    Address address = addressProvider.findAddressByNamespaceTypeAndName(NamespaceAddressType.EBEI.getCode(), ebeiContractRoomInfo.getInfoId());
+                    if(address != null) {
+                        mapping.setAddressId(address.getId());
+                        mapping.setBuildingName(address.getBuildingName());
+                        mapping.setApartmentName(address.getApartmentName());
+                    }
+
+                    mapping.setStatus(CommonStatus.ACTIVE.getCode());
+                    mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    contractBuildingMappingProvider.createContractBuildingMapping(mapping);
+
+                    if(address != null) {
+                        CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(address.getId());
+                        addressMapping.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
+                        propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+                    }
+
+                } else {
+                    map.remove(ebeiContractRoomInfo.getInfoId());
+                }
+            }
+        }
+        if(map.size() > 0) {
+            map.forEach((namespaceAddressToken, apartment) -> {
+                contractBuildingMappingProvider.deleteContractBuildingMapping(apartment);
+
+                CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(apartment.getAddressId());
+                addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+                propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+            });
+        }
+
+    }
+
+    private Byte convertContractStatus(String ebeiContractStatus) {
+        if(ebeiContractStatus != null) {
+            switch (ebeiContractStatus) {
+                case "进行中": return ContractStatus.ACTIVE.getCode();
+                case "已终止": return ContractStatus.INVALID.getCode();
+                case "已超期": return ContractStatus.EXPIRED.getCode();
+                case "已归档": return ContractStatus.HISTORY.getCode();
+
+                default: return null;
+            }
+        }
+        return null;
+    }
+
+    private void updateContract(Contract contract, Long communityId, EbeiContract ebeiContract) {
+        contract.setCommunityId(communityId);
+        contract.setNamespaceContractType(NamespaceContractType.EBEI.getCode());
+        contract.setNamespaceContractToken(ebeiContract.getContractId());
+        contract.setContractNumber(ebeiContract.getSerialNumber());
+        if(StringUtils.isNotBlank(ebeiContract.getStartDate())) {
+            contract.setContractStartDate(dateStrToTimestamp(ebeiContract.getStartDate()));
+        }
+        if(StringUtils.isNotBlank(ebeiContract.getEndDate())) {
+            contract.setContractEndDate(dateStrToTimestamp(ebeiContract.getEndDate()));
+        }
+        if(StringUtils.isNotBlank(ebeiContract.getSignDate())) {
+            contract.setSignedTime(dateStrToTimestamp(ebeiContract.getSignDate()));
+        }
+        if(StringUtils.isNotBlank(ebeiContract.getQuitDate())) {
+            contract.setDenunciationTime(dateStrToTimestamp(ebeiContract.getQuitDate()));
+        }
+        contract.setVersion(ebeiContract.getVersion());
+        if(StringUtils.isNotBlank(ebeiContract.getTotalArea())) {
+            contract.setRentSize(Double.valueOf(ebeiContract.getTotalArea()));
+        }
+        contract.setStatus(convertContractStatus(ebeiContract.getContractStatus()));
+        contract.setCustomerName(ebeiContract.getCompanyName());
+        contract.setCustomerType(CustomerType.ENTERPRISE.getCode());
+        EnterpriseCustomer customer = customerProvider.findByNamespaceToken(NamespaceCustomerType.EBEI.getCode(), ebeiContract.getOwnerId());
+        if(customer != null) {
+            contract.setCustomerId(customer.getId());
+        }
+        contractProvider.updateContract(contract);
+        dealContractApartments(contract, ebeiContract.getHouseInfoList());
+        contractSearcher.feedDoc(contract);
     }
 }
