@@ -2555,6 +2555,14 @@ public class AssetServiceImpl implements AssetService {
         autoBillNotice();
     }
 
+    @Override
+    public CheckEnterpriseHasArrearageResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd) {
+        CheckEnterpriseHasArrearageResponse response = new CheckEnterpriseHasArrearageResponse();
+        List<PaymentBills> assetArrearage = assetProvider.findAssetArrearage(cmd.getNamespaceId(),cmd.getCommunityId(),cmd.getOrganizationId());
+        response.setHasArrearage(assetArrearage.size()>0?(byte)1:(byte)0);
+        return response;
+    }
+
 
     @Override
     public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {

@@ -285,6 +285,8 @@ public interface OrganizationProvider {
 
 	List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes, String keyword, Long pageAnchor, Integer pageSize);
 
+	List<Organization> listOrganizationByGroupTypesAndPath(String path, List<String> groupTypes, String keyword, Long pageAnchor, Integer pageSize);
+
 	List<OrganizationCommunityRequest> listOrganizationCommunityRequests(List<Long> communityIds);
 
 	OrganizationMember getOrganizationMemberByContactToken(Integer currentNamespaceId, String email);

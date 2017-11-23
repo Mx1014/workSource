@@ -12,10 +12,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.group.GroupDiscriminator;
-import com.everhomes.rest.group.GroupMemberStatus;
-import com.everhomes.rest.group.GroupOpRequestStatus;
-import com.everhomes.rest.group.GroupPrivacy;
+import com.everhomes.rest.group.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
@@ -362,6 +359,12 @@ public class GroupProviderImpl implements GroupProvider {
             Group group = this.findGroupById(groupMember.getGroupId());
             if(group != null) {
                 long memberCount = group.getMemberCount().longValue() - 1;
+
+                //group拒绝加入的接口也调用了这里，对行业协会和俱乐部来说，如果是拒绝加入是不用减少人数的。 add by yanjun 20171123
+                if(GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag()) && GroupMemberStatus.fromCode(groupMember.getMemberStatus()) == GroupMemberStatus.WAITING_FOR_APPROVAL){
+                    return null;
+                }
+
                 memberCount = (memberCount < 0) ? 0L : memberCount;
                 group.setMemberCount(memberCount);
                 this.updateGroup(group);

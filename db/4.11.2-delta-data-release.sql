@@ -85,3 +85,15 @@ VALUES ('520300', '表单管理', '520000', NULL, 'react:/form-management/form-l
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`) VALUES ('70300', '菜单配置', '70000', '/70000/70300', '1', '2', '2', '0', NOW(), NULL, null, NOW(), '0', '0', '0', '0');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('4200000', '菜单配置', '4000000', NULL, 'menu-config', '1', '2', '/4000000/4200000', 'zuolin', '2', '0', '2', 'namespace', 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('4210000', '菜单配置', '4200000', NULL, 'menu-config', '0', '2', '/4000000/4200000/4210000', 'zuolin', '1', '70300', '3', 'namespace', 'page');
+
+-- 行业协会-所属行业  add by yanjun 20171121
+INSERT INTO `eh_industry_types` (`id`, `uuid`, `namespace_id`, `name`, `create_time`) VALUES ('1', '1', '999971', '集成电路', NOW());
+INSERT INTO `eh_industry_types` (`id`, `uuid`, `namespace_id`, `name`, `create_time`) VALUES ('2', '2', '999971', '软件', NOW());
+INSERT INTO `eh_industry_types` (`id`, `uuid`, `namespace_id`, `name`, `create_time`) VALUES ('3', '3', '999971', '通信技术', NOW());
+INSERT INTO `eh_industry_types` (`id`, `uuid`, `namespace_id`, `name`, `create_time`) VALUES ('4', '4', '999971', '生物医药', NOW());
+INSERT INTO `eh_industry_types` (`id`, `uuid`, `namespace_id`, `name`, `create_time`) VALUES ('5', '5', '999971', '医疗器械', NOW());
+INSERT INTO `eh_industry_types` (`id`, `uuid`, `namespace_id`, `name`, `create_time`) VALUES ('6', '6', '999971', '光机电', NOW());
+INSERT INTO `eh_industry_types` (`id`, `uuid`, `namespace_id`, `name`, `create_time`) VALUES ('7', '7', '999971', '金融服务', NOW());
+INSERT INTO `eh_industry_types` (`id`, `uuid`, `namespace_id`, `name`, `create_time`) VALUES ('8', '8', '999971', '新能源与环保', NOW());
+INSERT INTO `eh_industry_types` (`id`, `uuid`, `namespace_id`, `name`, `create_time`) VALUES ('9', '9', '999971', '文化创意', NOW());
+INSERT INTO `eh_industry_types` (`id`, `uuid`, `namespace_id`, `name`, `create_time`) VALUES ('10', '10', '999971', '其他', NOW());

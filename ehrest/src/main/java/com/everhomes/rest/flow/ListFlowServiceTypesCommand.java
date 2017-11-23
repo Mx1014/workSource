@@ -6,16 +6,14 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>flowUserType: 目前该参数没用 {@link com.everhomes.rest.flow.FlowUserType}</li>
  *     <li>moduleId: 模块id</li>
- *     <li>ownerId: ownerId</li>
- *     <li>ownerType: ownerType</li>
+ *     <li>organizationId: organizationId</li>
  * </ul>
  */
 public class ListFlowServiceTypesCommand {
 
     private String flowUserType;
     private Long moduleId;
-    private String ownerType;
-    private Long ownerId;
+    private Long organizationId;
 
     public String getFlowUserType() {
         return flowUserType;
@@ -33,20 +31,12 @@ public class ListFlowServiceTypesCommand {
         this.moduleId = moduleId;
     }
 
-    public Long getOwnerId() {
-        return ownerId;
+    public Long getOrganizationId() {
+        return organizationId;
     }
 
-    public void setOwnerId(Long ownerId) {
-        this.ownerId = ownerId;
-    }
-
-    public String getOwnerType() {
-        return ownerType;
-    }
-
-    public void setOwnerType(String ownerType) {
-        this.ownerType = ownerType;
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     @Override

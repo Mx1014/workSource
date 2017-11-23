@@ -11232,6 +11232,13 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (null == cmd.getNamespaceId()) {
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         }
+        // add 2017.11.22
+//        if(cmd.getId() == null){
+//            groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
+//            organizationProvider.listOrganizationMemberByPath()
+//            List<Organization> list = organizationProvider.listOrganizationByGroupTypes(cmd.getId(), groupTypes, cmd.getKeywords(), cmd.getPageAnchor(), pageSize);
+//        }
+
         checkId(cmd.getId());
         Organization organization = organizationProvider.findOrganizationById(cmd.getId());
         if (null == organization) {
@@ -11239,13 +11246,19 @@ public class OrganizationServiceImpl implements OrganizationService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "Organization not found.");
         }
+
         Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
         ListChildrenOrganizationJobPositionResponse response = new ListChildrenOrganizationJobPositionResponse();
 
         List<String> groupTypes = new ArrayList<String>();
         groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
-        List<Organization> list = organizationProvider.listOrganizationByGroupTypes(cmd.getId(), groupTypes, cmd.getKeywords(), cmd.getPageAnchor(), pageSize);
+        List<Organization> list = new ArrayList<>();
+        if(organization.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode()) && organization.getParentId() == 0L) {//传入的id为总公司时
+            list = organizationProvider.listOrganizationByGroupTypesAndPath(organization.getPath(),groupTypes, cmd.getKeywords(), cmd.getPageAnchor(), pageSize);
+        }else{
+            list = organizationProvider.listOrganizationByGroupTypes(cmd.getId(), groupTypes, cmd.getKeywords(), cmd.getPageAnchor(), pageSize);
+        }
 
         int size = list.size();
         if (size > 0) {

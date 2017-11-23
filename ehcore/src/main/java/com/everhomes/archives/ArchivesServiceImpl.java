@@ -2400,7 +2400,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             Map<Integer, List<ArchivesNotifications>> notifyMap = results.stream().collect(Collectors.groupingBy
                     (ArchivesNotifications::getNotifyHour));
             for (Integer key : notifyMap.keySet()) {
-                archivesConfigurationService.sendingMail(notifyMap.get(key));
+                archivesConfigurationService.sendingMail(key, notifyMap.get(key));
             }
         }
     }
