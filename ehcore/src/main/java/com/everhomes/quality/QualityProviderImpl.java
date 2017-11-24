@@ -1,159 +1,7 @@
 package com.everhomes.quality;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import java.util.Set;
-
-import javax.annotation.PostConstruct;
-
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.equipment.Status;
-import com.everhomes.rest.launchpad.ApplyPolicy;
-import com.everhomes.rest.quality.*;
-import com.everhomes.scheduler.QualityInspectionStatScheduleJob;
-import com.everhomes.scheduler.QualityInspectionTaskNotifyScheduleJob;
-import com.everhomes.search.QualityTaskSearcher;
-import com.everhomes.server.schema.tables.*;
-import com.everhomes.server.schema.tables.EhAssetBills;
-import com.everhomes.server.schema.tables.daos.*;
-import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.pojos.EhOrganizations;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionCategories;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionEvaluationFactors;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionEvaluations;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionLogs;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSampleCommunityMap;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSampleCommunitySpecificationStat;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSampleGroupMap;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSampleScoreStat;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSamples;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSpecificationItemResults;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSpecifications;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandardGroupMap;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandardSpecificationMap;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskAttachments;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskRecords;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskTemplates;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks;
-import com.everhomes.server.schema.tables.records.*;
-import com.everhomes.util.CronDateUtils;
-import org.jooq.*;
-import org.jooq.impl.DSL;
-import org.jooq.impl.DefaultRecordMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Component;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -164,17 +12,37 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.equipment.ReviewResult;
+import com.everhomes.rest.equipment.Status;
+import com.everhomes.rest.quality.*;
 import com.everhomes.scheduler.QualityInspectionScheduleJob;
+import com.everhomes.scheduler.QualityInspectionStatScheduleJob;
+import com.everhomes.scheduler.QualityInspectionTaskNotifyScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.search.QualityTaskSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.CronDateUtils;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.mysql.jdbc.StringUtils;
+import org.jooq.*;
+import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.sql.Timestamp;
+import java.util.*;
 
 
 
@@ -368,9 +236,10 @@ public class QualityProviderImpl implements QualityProvider {
 			//fix bug :byte to long ...MANUAL_FLAG.eq(manualFlag));
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG.eq(Long.valueOf(manualFlag)));
 		}
-//        query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.ID.desc());
-		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
-//        query.addLimit(count);
+		//query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.ID.desc());
+		// add desc  11/20
+		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.desc());
+        //query.addLimit(count);
 		query.addLimit(offset * (count-1), count);
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Query tasks by count, sql=" + query.getSQL());

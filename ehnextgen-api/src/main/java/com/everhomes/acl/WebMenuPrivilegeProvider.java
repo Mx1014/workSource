@@ -50,5 +50,10 @@ public interface WebMenuPrivilegeProvider {
 	void createWebMenus(List<WebMenu> objs);
 
 	Map<Long, WebMenuScope> getWebMenuScopeMapByOwnerId(String ownerType, Long ownerId);
-	
+
+	List<WebMenu> listWebMenus(Long parentId, String type);
+
+	void deleteWebMenuScopes(List<Long> ids);
+
+	void createWebMenuScopes(List<WebMenuScope> scopes);
 }

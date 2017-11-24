@@ -8,10 +8,13 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>categoryList：请假类型的List</li>
+ * <li>categoryList：请假类型的List{@link com.everhomes.rest.approval.ApprovalCategoryDTO}</li>
  * </ul>
  */
 public class ListApprovalCategoriesResponse {
+	@ItemType(ApprovalCategoryDTO.class)
+    List<ApprovalCategoryDTO> categoryList;
+    
     public ListApprovalCategoriesResponse() {
 
     }
@@ -19,8 +22,6 @@ public class ListApprovalCategoriesResponse {
     public ListApprovalCategoriesResponse(List<ApprovalCategoryDTO> categoryList) {
         this.categoryList = categoryList;
     }
-    @ItemType(ApprovalCategoryDTO.class)
-    List<ApprovalCategoryDTO> categoryList;
 
     @Override
     public String toString() {

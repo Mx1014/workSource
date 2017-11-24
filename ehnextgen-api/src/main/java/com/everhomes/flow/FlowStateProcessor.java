@@ -1,6 +1,5 @@
 package com.everhomes.flow;
 
-import com.everhomes.rest.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
 import com.everhomes.rest.user.UserInfo;
 

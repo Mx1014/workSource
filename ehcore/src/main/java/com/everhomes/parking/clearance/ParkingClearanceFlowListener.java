@@ -12,7 +12,6 @@ import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowServiceTypeDTO;
-import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.parking.ParkingLocalStringCode;
 import com.everhomes.rest.parking.clearance.ParkingClearanceLogStatus;
@@ -300,7 +299,7 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
 	}
 
     @Override
-    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
         List<FlowServiceTypeDTO> result = new ArrayList<>();
         FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
         dto.setNamespaceId(namespaceId);

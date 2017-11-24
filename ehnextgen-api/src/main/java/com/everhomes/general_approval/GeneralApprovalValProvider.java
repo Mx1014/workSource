@@ -20,6 +20,8 @@ public interface GeneralApprovalValProvider {
 
 	List<GeneralApprovalVal> queryGeneralApprovalValsByFlowCaseId(Long id);
 
+	GeneralApprovalVal getGeneralApprovalByFlowCaseAndFeildType(Long id, String feildType);
+
 	GeneralApprovalVal getGeneralApprovalByFlowCaseAndName(Long id, String fieldName);
 
 }

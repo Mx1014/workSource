@@ -443,7 +443,8 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                     Organization organization = this.organizationProvider.findOrganizationById(target.getTargetId());
                     if (organization == null) {
                         LOGGER.error("JsonParse Organization is not matched. cmd = {}", cmd);
-                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "JsonParse Organization is not matched.");
+//                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "JsonParse Organization is not matched.");
+                        continue;
                     }
                     target.setTargetName(organization.getName());
                 }

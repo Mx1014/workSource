@@ -1,14 +1,13 @@
 package com.everhomes.parking.handler;
 
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.address.AddressProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.flow.*;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.*;
-import com.everhomes.rest.flow.FlowAutoStepDTO;
+import com.everhomes.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.parking.*;
 import com.everhomes.user.User;
@@ -18,7 +17,6 @@ import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import java.math.BigDecimal;
