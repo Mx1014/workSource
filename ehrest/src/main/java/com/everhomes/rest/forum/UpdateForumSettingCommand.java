@@ -27,14 +27,18 @@ public class UpdateForumSettingCommand {
 
     private Long categoryId;
 
-    @ItemType(String.class)
-    private List<String> serviceTypes;
-    @ItemType(String.class)
-    private List<String> topicTags;
-    @ItemType(String.class)
-    private List<String> activityTags;
-    @ItemType(String.class)
-    private List<String> pollTags;
+    @ItemType(ForumServiceTypeDTO.class)
+    private List<ForumServiceTypeDTO> serviceTypes;
+
+    @ItemType(TagDTO.class)
+    private List<TagDTO> topicTags;
+
+    @ItemType(TagDTO.class)
+    private List<TagDTO> activityTags;
+
+    @ItemType(TagDTO.class)
+    private List<TagDTO> pollTags;
+
     private Byte interactFlag;
 
     public Integer getNamespaceId() {
@@ -61,35 +65,35 @@ public class UpdateForumSettingCommand {
         this.categoryId = categoryId;
     }
 
-    public List<String> getServiceTypes() {
+    public List<ForumServiceTypeDTO> getServiceTypes() {
         return serviceTypes;
     }
 
-    public void setServiceTypes(List<String> serviceTypes) {
+    public void setServiceTypes(List<ForumServiceTypeDTO> serviceTypes) {
         this.serviceTypes = serviceTypes;
     }
 
-    public List<String> getTopicTags() {
+    public List<TagDTO> getTopicTags() {
         return topicTags;
     }
 
-    public void setTopicTags(List<String> topicTags) {
+    public void setTopicTags(List<TagDTO> topicTags) {
         this.topicTags = topicTags;
     }
 
-    public List<String> getActivityTags() {
+    public List<TagDTO> getActivityTags() {
         return activityTags;
     }
 
-    public void setActivityTags(List<String> activityTags) {
+    public void setActivityTags(List<TagDTO> activityTags) {
         this.activityTags = activityTags;
     }
 
-    public List<String> getPollTags() {
+    public List<TagDTO> getPollTags() {
         return pollTags;
     }
 
-    public void setPollTags(List<String> pollTags) {
+    public void setPollTags(List<TagDTO> pollTags) {
         this.pollTags = pollTags;
     }
 

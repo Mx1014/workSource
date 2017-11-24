@@ -23,12 +23,28 @@ public class DeleteHotTagByNameCommand {
 
 	private String name;
 
-	public String getName() {
-		return name;
+	public Integer getNamespaceId() {
+		return namespaceId;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Byte getModuleType() {
+		return moduleType;
+	}
+
+	public void setModuleType(Byte moduleType) {
+		this.moduleType = moduleType;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
 	}
 
 	public String getServiceType() {
@@ -39,20 +55,12 @@ public class DeleteHotTagByNameCommand {
 		this.serviceType = serviceType;
 	}
 
-	public Integer getNamespaceId() {
-		return namespaceId;
+	public String getName() {
+		return name;
 	}
 
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
-
-	public Long getCategoryId() {
-		return categoryId;
-	}
-
-	public void setCategoryId(Long categoryId) {
-		this.categoryId = categoryId;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	@Override

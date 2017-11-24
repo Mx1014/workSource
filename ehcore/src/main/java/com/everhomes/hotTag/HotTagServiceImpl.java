@@ -47,11 +47,11 @@ public class HotTagServiceImpl implements HotTagService{
 		}
 
 
-		List<TagDTO> tags = hotTagProvider.listHotTag(cmd.getNamespaceId(), cmd.getCategoryId(), cmd.getServiceType(), cmd.getPageSize());
+		List<TagDTO> tags = hotTagProvider.listHotTag(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId(), cmd.getServiceType(), cmd.getPageSize());
 
-		//查询没有标签，则使用0域空间、入口为null的数据，即以前默认的数据
+		//查询没有标签，则使用0域空间、默认类型，入口为null的数据，即以前默认的数据
 		if(tags == null || tags.size() == 0){
-			tags = hotTagProvider.listHotTag(0, null, cmd.getServiceType(), cmd.getPageSize());
+			tags = hotTagProvider.listHotTag(0, null,null, cmd.getServiceType(), cmd.getPageSize());
 			tags = tags.stream().filter(r -> r.getCategoryId() == null).collect(Collectors.toList());
 		}
 
@@ -85,39 +85,14 @@ public class HotTagServiceImpl implements HotTagService{
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
 
-		HotTags tag = hotTagProvider.findByName(cmd.getNamespaceId(), cmd.getCategoryId(), cmd.getServiceType(), cmd.getName());
+		HotTag tag = hotTagProvider.findByName(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId(), cmd.getServiceType(), cmd.getName());
 		if(tag != null) {
-//			if(tag.getStatus() == HotTagStatus.ACTIVE.getCode()) {
-//				LOGGER.error("the tag which name = "+cmd.getName()+" and serviceType = "+cmd.getServiceType()+" is already hot tag!");
-//				throw RuntimeErrorException
-//						.errorWith(
-//								HotTagServiceErrorCode.SCOPE,
-//								HotTagServiceErrorCode.ERROR_HOTTAG_EXIST,
-//								localeStringService.getLocalizedString(
-//										String.valueOf(HotTagServiceErrorCode.SCOPE),
-//										String.valueOf(HotTagServiceErrorCode.ERROR_HOTTAG_EXIST),
-//										UserContext.current().getUser().getLocale(),
-//										"the tag is already hot tag!"));
-//			} else {
 			tag.setStatus(HotTagStatus.ACTIVE.getCode());
-//			tag.setCreateUid(user.getId());
-//			tag.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//			tag.setDeleteUid(0L);
-//			tag.setDeleteTime(null);
-//			tag.setNamespaceId(cmd.getNamespaceId());
-//			tag.setCategoryId(cmd.getCategoryId());
 			hotTagProvider.updateHotTag(tag);
-
 			tag.setHotFlag(HotTagStatus.ACTIVE.getCode());
 			hotTagSearcher.feedDoc(tag);
-//			}
-		}
-		else {
-			tag = new HotTags();
-			tag.setNamespaceId(cmd.getNamespaceId());
-			tag.setCategoryId(cmd.getCategoryId());
-			tag.setName(cmd.getName());
-			tag.setServiceType(cmd.getServiceType());
+		} else {
+			tag = ConvertHelper.convert(cmd, HotTag.class);
 			tag.setCreateUid(user.getId());
 			hotTagProvider.createHotTag(tag);
 			
@@ -137,15 +112,16 @@ public class HotTagServiceImpl implements HotTagService{
 		}
 
 		dbProvider.execute((status) -> {
-			List<TagDTO> oldHotTag = hotTagProvider.listHotTag(cmd.getNamespaceId(), cmd.getCategoryId(), cmd.getServiceType(), 1000);
+			List<TagDTO> oldHotTag = hotTagProvider.listHotTag(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId(), cmd.getServiceType(), 1000);
 			if (oldHotTag != null) {
 				oldHotTag.forEach(r -> {
-					DeleteHotTagByNameCommand deleteCmd = new DeleteHotTagByNameCommand();
-					deleteCmd.setNamespaceId(cmd.getNamespaceId());
-					deleteCmd.setServiceType(cmd.getServiceType());
-					deleteCmd.setName(r.getName());
-					deleteCmd.setCategoryId(cmd.getCategoryId());
-					this.deleteHotTagByName(deleteCmd);
+					//别更新了，又不是用户数据，直接删了多好  add by yanjun 201711241506
+					//淡淡的忧伤，provider返回的是dto
+					HotTag tag = hotTagProvider.findById(r.getId());
+					hotTagProvider.deleteHotTag(tag);
+
+					tag.setHotFlag(HotTagStatus.INACTIVE.getCode());
+					hotTagSearcher.feedDoc(tag);
 				});
 			}
 
@@ -159,7 +135,7 @@ public class HotTagServiceImpl implements HotTagService{
 					this.setHotTag(setCmd);
 
 					//如果0域空间(标签库)没有加一条数据，加数据的时候在其他入口加，0域空间、categoryId为null是默认标签
-					HotTags tag = hotTagProvider.findByName(0, null, cmd.getServiceType(), r);
+					HotTag tag = hotTagProvider.findByName(0, null,null, cmd.getServiceType(), r);
 					if(tag == null){
 						setCmd.setNamespaceId(0);
 						setCmd.setCategoryId(0L);
@@ -174,35 +150,41 @@ public class HotTagServiceImpl implements HotTagService{
 
 	@Override
 	public void deleteHotTag(DeleteHotTagCommand cmd) {
-		User user = UserContext.current().getUser();
+//		User user = UserContext.current().getUser();
 		
-		HotTags tag = hotTagProvider.findById(cmd.getId());
-		tag.setStatus(HotTagStatus.INACTIVE.getCode());
-		tag.setDeleteUid(user.getId());
-		tag.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		hotTagProvider.updateHotTag(tag);
-		
+		HotTag tag = hotTagProvider.findById(cmd.getId());
+//		tag.setStatus(HotTagStatus.INACTIVE.getCode());
+//		tag.setDeleteUid(user.getId());
+//		tag.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		hotTagProvider.updateHotTag(tag);
+
+		//别更新了，又不是用户数据直接删了多好  add by yanjun 201711241506
+		hotTagProvider.deleteHotTag(tag);
+
 		tag.setHotFlag(HotTagStatus.INACTIVE.getCode());
 		hotTagSearcher.feedDoc(tag);
 	}
 
 	@Override
 	public void deleteHotTagByName(DeleteHotTagByNameCommand cmd) {
-		User user = UserContext.current().getUser();
+//		User user = UserContext.current().getUser();
 
 		if(cmd.getNamespaceId() == null){
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
 
-		HotTags tag = hotTagProvider.findByName(cmd.getNamespaceId(), cmd.getCategoryId(), cmd.getServiceType(), cmd.getName());
+		HotTag tag = hotTagProvider.findByName(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId(), cmd.getServiceType(), cmd.getName());
 		if(tag == null){
 			LOGGER.error("the tag which name = "+cmd.getName()+" and serviceType = "+cmd.getServiceType()+" not found!");
 			return;
 		}
-		tag.setStatus(HotTagStatus.INACTIVE.getCode());
-		tag.setDeleteUid(user.getId());
-		tag.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		hotTagProvider.updateHotTag(tag);
+//		tag.setStatus(HotTagStatus.INACTIVE.getCode());
+//		tag.setDeleteUid(user.getId());
+//		tag.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		hotTagProvider.updateHotTag(tag);
+
+		//别更新了，又不是用户数据直接删了多好  add by yanjun 201711241506
+		hotTagProvider.deleteHotTag(tag);
 
 		tag.setHotFlag(HotTagStatus.INACTIVE.getCode());
 		hotTagSearcher.feedDoc(tag);

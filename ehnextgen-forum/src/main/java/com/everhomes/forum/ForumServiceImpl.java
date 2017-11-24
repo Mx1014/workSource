@@ -29,7 +29,7 @@ import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
 import com.everhomes.hotTag.HotTagService;
-import com.everhomes.hotTag.HotTags;
+import com.everhomes.hotTag.HotTag;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -408,14 +408,17 @@ public class ForumServiceImpl implements ForumService {
     private void feedDocTopicTag(Post post){
         if(post.getEmbeddedAppId()!=null && post.getEmbeddedAppId() == 0L && !StringUtils.isEmpty(post.getTag())){
             try{
-                HotTags tag = new HotTags();
+                HotTag tag = new HotTag();
 
                 Integer namespaceId = UserContext.getCurrentNamespaceId(post.getNamespaceId());
                 tag.setNamespaceId(namespaceId);
 
+                //TODO 业务类型、入口ID
+                tag.setServiceType(HotTagServiceType.TOPIC.getCode());
+
                 tag.setName(post.getTag());
                 tag.setHotFlag(HotFlag.NORMAL.getCode());
-                tag.setServiceType(HotTagServiceType.TOPIC.getCode());
+
                 hotTagSearcher.feedDoc(tag);
             }catch (Exception e){
                 LOGGER.error("feedDoc topic tag error",e);
@@ -6399,11 +6402,8 @@ public class ForumServiceImpl implements ForumService {
 
         if(cmd.getServiceTypes() != null){
             for (int i= 0; i<cmd.getServiceTypes().size(); i++){
-                ForumServiceType type = new ForumServiceType();
-                type.setNamespaceId(cmd.getNamespaceId());
-                type.setModuleType(cmd.getModuleType());
-                type.setCategoryId(cmd.getCategoryId());
-                type.setServiceType(cmd.getServiceTypes().get(i));
+                ForumServiceType type = ConvertHelper.convert(cmd.getServiceTypes().get(i), ForumServiceType.class);
+                type.setId(null);
                 type.setSortNum(i);
                 type.setCreateTime(new Timestamp(System.currentTimeMillis()));
                 newTypes.add(type);
@@ -6422,18 +6422,27 @@ public class ForumServiceImpl implements ForumService {
             resetHotTagCommand.setCategoryId(cmd.getCategoryId());
 
             //话题的热门标签
+            if(cmd.getTopicTags() == null){
+                cmd.setTopicTags(new ArrayList<>());
+            }
             resetHotTagCommand.setServiceType(HotTagServiceType.TOPIC.getCode());
-            resetHotTagCommand.setNames(cmd.getTopicTags());
+            resetHotTagCommand.setNames(cmd.getTopicTags().stream().map(r -> r.getName()).collect(Collectors.toList()));
             hotTagService.resetHotTag(resetHotTagCommand);
 
             //活动的热门标签
+            if(cmd.getActivityTags() == null){
+                cmd.setActivityTags(new ArrayList<>());
+            }
             resetHotTagCommand.setServiceType(HotTagServiceType.ACTIVITY.getCode());
-            resetHotTagCommand.setNames(cmd.getActivityTags());
+            resetHotTagCommand.setNames(cmd.getActivityTags().stream().map(r -> r.getName()).collect(Collectors.toList()));
             hotTagService.resetHotTag(resetHotTagCommand);
 
             //投票的热门标签
+            if(cmd.getPollTags() == null){
+                cmd.setPollTags(new ArrayList<>());
+            }
             resetHotTagCommand.setServiceType(HotTagServiceType.POLL.getCode());
-            resetHotTagCommand.setNames(cmd.getPollTags());
+            resetHotTagCommand.setNames(cmd.getPollTags().stream().map(r -> r.getName()).collect(Collectors.toList()));
             hotTagService.resetHotTag(resetHotTagCommand);
 
             //暂时不对评论做处理。
