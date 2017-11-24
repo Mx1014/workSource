@@ -5037,7 +5037,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public FlowConditionVariable getFormFieldValueByVariable(FlowCaseState ctx, String variable, String extra) {
         String fieldName = formFieldProcessorManager.parseFormFieldName(ctx, variable, extra);
-        FlowCase flowCase = ctx.getFlowCase();
+        FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
         GeneralFormFieldDTO fieldDTO = generalFormService.getGeneralFormValueByOwner(
                 flowCase.getModuleType(),
                 flowCase.getModuleId(),
