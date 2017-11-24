@@ -37,13 +37,16 @@ public class UpdateForumSettingCommand {
     private List<TagDTO> pollTags;
     private Byte interactFlag;
 
-
     public Integer getNamespaceId() {
         return namespaceId;
     }
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public Byte getModuleType() {
+        return moduleType;
     }
 
     public void setModuleType(Byte moduleType) {

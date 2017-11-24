@@ -6385,16 +6385,19 @@ public class ForumServiceImpl implements ForumService {
         tagCommand.setServiceType(HotTagServiceType.POLL.getCode());
         tagDTOS = hotTagService.listHotTag(tagCommand);
         response.setPollTags(tagDTOS);
-        
 
-
-
+        //暂时不对评论做处理。
+        response.setInteractFlag(InteractFlag.SUPPORT.getCode());
 
         return response;
     }
 
     @Override
     public void updateForumSetting(UpdateForumSettingCommand cmd) {
+
+        List<ForumServiceType> types = forumProvider.listForumServiceTypes(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId());
+
+        hotTagService.resetHotTag();
 
     }
 
