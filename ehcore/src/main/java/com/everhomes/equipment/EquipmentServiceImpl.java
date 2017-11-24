@@ -2663,7 +2663,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	private List<EquipmentInspectionEquipments> getImportEquipmentData(List resultList, List<FieldDTO> fieldsDTO) throws Exception {
-		EquipmentInspectionEquipments eq = new EquipmentInspectionEquipments();
+
 		List<EquipmentInspectionEquipments> objList = new ArrayList<>();
 		//获取导入Excel的的title
 		/*RowResult titleNames = (RowResult)resultList.get(0);
@@ -2675,8 +2675,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 			fieldOrders.add(field.getFieldName());
 		}
 		int flag = 0;
-		//因为有注释事项一行 从第二行开始
+		//因为有注意事项  一行 从第二行开始
 		for (int i = 2; i < resultList.size(); i++) {
+
+			EquipmentInspectionEquipments eq = new EquipmentInspectionEquipments();
+
 			RowResult r = (RowResult) resultList.get(i);
 
 			if (flag < fieldOrders.size()) {
