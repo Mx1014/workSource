@@ -1346,7 +1346,7 @@ public class ZJGKOpenServiceImpl {
             insertOrUpdateOrganizationDetail(organization, customer);
             insertOrUpdateOrganizationCommunityRequest(zjEnterprise.getCommunityId(), organization);
             insertOrUpdateOrganizationAddresses(zjEnterprise.getAddressList(), customer);
-            insertOrUpdateOrganizationMembers(namespaceId, organization, customer.getContactName(), customer.getContactPhone());
+            insertOrUpdateOrganizationMembers(namespaceId, organization, customer.getContactName(), customer.getContactMobile());
             organizationSearcher.feedDoc(organization);
             return null;
         });
@@ -1620,7 +1620,7 @@ public class ZJGKOpenServiceImpl {
             insertOrUpdateOrganizationDetail(organization, customer);
             insertOrUpdateOrganizationCommunityRequest(zjEnterprise.getCommunityId(), organization);
             insertOrUpdateOrganizationAddresses(zjEnterprise.getAddressList(), customer);
-            insertOrUpdateOrganizationMembers(customer.getNamespaceId(), organization, customer.getContactName(), customer.getContactPhone());
+            insertOrUpdateOrganizationMembers(customer.getNamespaceId(), organization, customer.getContactName(), customer.getContactMobile());
             organizationSearcher.feedDoc(organization);
             return null;
         });

@@ -15,3 +15,6 @@ UPDATE `eh_communities` SET namespace_community_type='kexing', namespace_communi
 
 SET @locale_id = (SELECT MAX(`id`) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@locale_id:=@locale_id+1,'assetv2','10006','zh_CN','远程请求一碑系统错误');
+
+SET @config_id = (SELECT MAX(id) from `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@config_id:=@config_id+1, 'ebei.url', 'http://183.62.222.87:5902/sf', '一碑url', '0', NULL);
