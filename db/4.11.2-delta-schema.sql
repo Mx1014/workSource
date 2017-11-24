@@ -151,3 +151,7 @@ ALTER TABLE eh_flow_condition_expressions MODIFY variable_type2 VARCHAR(64) NOT 
 
 -- by dengs, 20171120 已在线网执行的sql，放这里只是产生对应的persist包
 ALTER TABLE eh_news_tag ADD COLUMN `category_id` BIGINT default 0;
+
+-- 工作流条件字段 add by xq.tian 2017/22/24
+ALTER TABLE eh_flow_conditions MODIFY next_node_id BIGINT;
+ALTER TABLE eh_flow_conditions MODIFY next_node_level INTEGER;
