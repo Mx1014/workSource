@@ -254,10 +254,8 @@ public class RelocationServiceImpl implements RelocationService {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 
 		String ownerType = FlowOwnerType.COMMUNITY.getCode();
-//		Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.RELOCATION_MODULE,
-//				FlowModuleType.NO_MODULE.getCode(), request.getOwnerId(), ownerType);
-		Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ExpansionConst.MODULE_ID,
-				null, request.getOwnerId(), ownerType);
+		Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.RELOCATION_MODULE,
+				FlowModuleType.NO_MODULE.getCode(), request.getOwnerId(), ownerType);
 		if(null == flow) {
 			LOGGER.error("Enable flow not found, moduleId={}", FlowConstants.RELOCATION_MODULE);
 			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
