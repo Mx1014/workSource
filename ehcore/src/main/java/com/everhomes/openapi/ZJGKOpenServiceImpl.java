@@ -1490,6 +1490,20 @@ public class ZJGKOpenServiceImpl {
 
     private void insertOrUpdateOrganizationCommunityRequest(Long communityId, Organization organization) {
         if(communityId != null) {
+            Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+            //删除不在本园区的
+            List<OrganizationCommunityRequest> requests = organizationProvider.listOrganizationCommunityRequestsByOrganizationId(organization.getId());
+            if(requests != null && requests.size() > 0) {
+                for(OrganizationCommunityRequest request : requests) {
+                    if(!request.getCommunityId().equals(communityId)) {
+                        request.setMemberStatus(OrganizationCommunityRequestStatus.INACTIVE.getCode());
+                        request.setOperatorUid(1L);
+                        request.setUpdateTime(now);
+                        organizationProvider.updateOrganizationCommunityRequest(request);
+                    }
+                }
+            }
+
             OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.findOrganizationCommunityRequestByOrganizationId(communityId, organization.getId());
             if (organizationCommunityRequest == null) {
                 organizationCommunityRequest = new OrganizationCommunityRequest();
@@ -1498,7 +1512,7 @@ public class ZJGKOpenServiceImpl {
                 organizationCommunityRequest.setMemberId(organization.getId());
                 organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
                 organizationCommunityRequest.setCreatorUid(1L);
-                organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                organizationCommunityRequest.setCreateTime(now);
                 organizationCommunityRequest.setOperatorUid(1L);
                 organizationCommunityRequest.setApproveTime(organizationCommunityRequest.getCreateTime());
                 organizationCommunityRequest.setUpdateTime(organizationCommunityRequest.getCreateTime());
@@ -1506,7 +1520,7 @@ public class ZJGKOpenServiceImpl {
             }else {
                 organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
                 organizationCommunityRequest.setOperatorUid(1L);
-                organizationCommunityRequest.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                organizationCommunityRequest.setUpdateTime(now);
                 organizationProvider.updateOrganizationCommunityRequest(organizationCommunityRequest);
             }
         }
