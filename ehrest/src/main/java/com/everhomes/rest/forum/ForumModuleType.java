@@ -13,7 +13,7 @@ package com.everhomes.rest.forum;
  */
 public enum ForumModuleType {
 
-    FORUM((byte) 1), ACTIVITY((byte) 2), ANNOUNCEMENT((byte) 3), CLUB((byte) 3), GUILD((byte) 4), FEEDBACK((byte) 5);
+    FORUM((byte) 1), ACTIVITY((byte) 2), ANNOUNCEMENT((byte) 3), CLUB((byte) 4), GUILD((byte) 5), FEEDBACK((byte) 6);
 
     private Byte code;
 
