@@ -916,6 +916,13 @@ public class PunchServiceImpl implements PunchService {
 					if (!status.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
 						pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 					}
+
+                    if (i == 0) {
+                        asList = approvalStatus;
+                    } else {
+                        asList = asList + PunchConstants.STATUS_SEPARATOR + approvalStatus;
+                    }
+                    continue;
 				}else if(StringUtils.isBlank(a1)||StringUtils.isBlank(a2)){
 					//2个有一个为空就要拿status来匹配
 					if (StringUtils.isBlank(a1)) {
