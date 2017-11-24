@@ -1490,6 +1490,19 @@ public class ZJGKOpenServiceImpl {
 
     private void insertOrUpdateOrganizationCommunityRequest(Long communityId, Organization organization) {
         if(communityId != null) {
+            //删除不在本园区的
+            List<OrganizationCommunityRequest> requests = organizationProvider.listOrganizationCommunityRequestsByOrganizationId(organization.getId());
+            if(requests != null && requests.size() > 0) {
+                for(OrganizationCommunityRequest request : requests) {
+                    if(!request.getCommunityId().equals(communityId)) {
+                        request.setMemberStatus(OrganizationCommunityRequestStatus.INACTIVE.getCode());
+                        request.setOperatorUid(1L);
+                        request.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        organizationProvider.updateOrganizationCommunityRequest(request);
+                    }
+                }
+            }
+
             OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.findOrganizationCommunityRequestByOrganizationId(communityId, organization.getId());
             if (organizationCommunityRequest == null) {
                 organizationCommunityRequest = new OrganizationCommunityRequest();
