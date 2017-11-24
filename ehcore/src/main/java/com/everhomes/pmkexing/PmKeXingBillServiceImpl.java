@@ -222,12 +222,12 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
     }
 
     @Override
-    public GetLeaseContractBillOnFiPropertyRes getFiPropertyBills(String communityIdentifier, String contractNum, String dateStrBegin, String dateStrEnd, String fiProperty, Byte billStatus, String targetName, Long targetId, Integer pageSize, Integer pageOffSet) {
+    public GetLeaseContractBillOnFiPropertyRes getFiPropertyBills(Long ownerId, String contractNum, String dateStrBegin, String dateStrEnd, String fiProperty, Byte billStatus, String targetName, Long targetId, Integer pageSize, Integer pageOffSet) {
         //从eh_config表中获得api
         String api = getBillAPI(ConfigConstants.ASSET_PAYMENT_ZJH_API_15);
         //组装参数，判断非空
         Map<String,String> params = new HashMap<>();
-        params.put("projectId",communityProvider.getCommunityToken("kexing",Long.parseLong(communityIdentifier)));
+        params.put("projectId",communityProvider.getCommunityToken("ebei",ownerId));
         params.put("pageSize",String.valueOf(pageSize));
         params.put("currentPage",String.valueOf(pageOffSet));
         if(StringUtils.isNotBlank(targetName)){
@@ -242,7 +242,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         if(StringUtils.isNotBlank(fiProperty)){
             params.put("fiProperty",fiProperty);
         }
-        if(StringUtils.isNotBlank(String.valueOf(billStatus))){
+        if(billStatus!=null){
             params.put("isPay",String.valueOf(billStatus));
         }
         String json = get(api,params);
@@ -274,9 +274,13 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         }else if(targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
             contracts = contractProvider.listContractByCustomerId(ownerId, UserContext.currentUserId(), CustomerType.ENTERPRISE.getCode());
         }
+//        Contract experimentSample = new Contract();
+//        experimentSample.setNamespaceContractType("ebei");
+//        experimentSample.setNamespaceContractToken("002285da-4796-495d-aaa3-742bb2ae5b39");
+//        contracts.add(experimentSample);
         //从eh_config表中获得api
         String api = getBillAPI(ConfigConstants.ASSET_PAYMENT_ZJH_API_15);
-        String projectId = communityProvider.getCommunityToken("kexing", ownerId);
+        String projectId = communityProvider.getCommunityToken("ebei", ownerId);
         Integer currentPage = 1;
         String isPayStr = null;
         if(StringUtils.isNotBlank(String.valueOf(isPay))){
@@ -368,8 +372,8 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
     }
 
     private String getBillAPI(String configName){
-        String host = configurationProvider.getValue(currNamespaceId(),ConfigConstants.ASSET_PAYMENT_ZJH_URL,"");
-        String api = configurationProvider.getValue(currNamespaceId(),configName,"");
+        String host = configurationProvider.getValue(999983,ConfigConstants.ASSET_PAYMENT_ZJH_URL,"");
+        String api = configurationProvider.getValue(999983,configName,"");
         return host + api;
     }
 

@@ -706,7 +706,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     }
 
     @Override
-    public List<ListBillsDTO> listBills(String communityIdentifier,String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Integer pageOffSet, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse carrier) {
+    public List<ListBillsDTO> listBills(String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Integer pageOffSet, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse carrier) {
         List<ListBillGroupsDTO> listBillGroupsDTOS = assetProvider.listBillGroups(ownerId, ownerType);
         List<ListBillsDTO> list = new ArrayList<>();
         if(status!=1){

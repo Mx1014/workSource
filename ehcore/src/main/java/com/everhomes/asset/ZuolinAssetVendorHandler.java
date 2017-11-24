@@ -294,7 +294,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public List<ListBillsDTO> listBills(String communityIdentifier,String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Integer pageOffSet, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse response) {
+    public List<ListBillsDTO> listBills(String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Integer pageOffSet, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse response) {
         List<ListBillsDTO> list = assetProvider.listBills(contractNum,currentNamespaceId,ownerId,ownerType, billGroupName,billGroupId,billStatus,dateStrBegin,dateStrEnd,pageOffSet,pageSize,targetName,status,targetType);
         if(list.size() <= pageSize){
             response.setNextPageAnchor(null);
@@ -702,6 +702,9 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         List<ShowBillForClientV2DTO> tabBills = new ArrayList<>();
         //find contracts
         List<ContractDTO> contracts = listCustomerContracts(cmd.getTargetType(), cmd.getTargetId(), cmd.getNamespaceId(), cmd.getOwnerId());
+        if(contracts == null || contracts.size() < 1){
+            return null;
+        }
         List<Long> contractIds = new ArrayList<>();
         Map<Long,ContractDTO> contractMap = new HashMap<>();
         contracts.stream().forEach(r -> contractMap.put(r.getId(),r));

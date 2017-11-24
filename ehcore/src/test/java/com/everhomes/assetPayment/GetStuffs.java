@@ -21,7 +21,7 @@ public class GetStuffs extends CoreServerTestCase{
         Long ownerId = 8728341232l;
         Byte status = 1;
         zhangjianggaokeAssetVendor.listBills(
-                "","",999971, ownerId, "community", "","", 1l, "", 1l, billStatus, "", "", 1, 1000000, "",status,"eh_organization", response
+                "",999971, ownerId, "community", "","", 1l, "", 1l, billStatus, "", "", 1, 1000000, "",status,"eh_organization", response
         );
     }
 

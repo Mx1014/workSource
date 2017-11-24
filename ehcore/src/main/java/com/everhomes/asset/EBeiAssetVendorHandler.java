@@ -126,7 +126,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public List<ListBillsDTO> listBills(String communityIdentifier, String contractNum, Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName, String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Integer pageOffSet, Integer pageSize, String targetName, Byte status, String targetType, ListBillsResponse response) {
+    public List<ListBillsDTO> listBills(String contractNum, Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName, String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Integer pageOffSet, Integer pageSize, String targetName, Byte status, String targetType, ListBillsResponse response) {
         if(pageOffSet==null){
             pageOffSet = 1;
         }
@@ -137,7 +137,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         PaymentBillGroup group = assetProvider.getBillGroupById(billGroupId);
         String fiProperty = getFiPropertyName(group.getName());
         Long targetId = null;
-        GetLeaseContractBillOnFiPropertyRes res = keXingBillService.getFiPropertyBills(communityIdentifier,contractNum,dateStrBegin,dateStrEnd,fiProperty,billStatus,targetName,targetId,pageSize,pageOffSet);
+        GetLeaseContractBillOnFiPropertyRes res = keXingBillService.getFiPropertyBills(ownerId,contractNum,dateStrBegin,dateStrEnd,fiProperty,billStatus,targetName,targetId,pageSize,pageOffSet);
         //处理responseCode
         if(!res.getResponseCode().equals("200")){
             LOGGER.error("http get for ke xing failed, reason is : {}",res.getErrorMsg());
@@ -162,7 +162,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
             dto.setBuildingName(source.getBuildingRename());
 //            dto.setApartmentName();
             dto.setBillGroupName(getFiPropertyName(source.getFiProperty()));
-            dto.setBillStatus(Byte.parseByte(source.getIsPay()));
+            dto.setBillStatus(source.getIsPay().equals("已缴纳")?(byte)1:(byte)0);
             dto.setBillId(source.getBillId());
             list.add(dto);
         }
@@ -175,6 +175,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     private String getFiPropertyName(String name) {
+        if(name == null) return null;
         if(name.equals("开发商")){
             return "租金";
         }else if(name.equals("物业")){
@@ -184,7 +185,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         }else if(name.equals("物业管理费")){
             return "物业";
         }
-        return "";
+        return null;
     }
 
     @Override
@@ -209,7 +210,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
             dto.setBillItemName(source.getFiCategory());
             dto.setTargetName(source.getCustomerName());
             dto.setDateStr(source.getChargePeriod());
-            dto.setBillStatus(Byte.valueOf(source.getIsPay()));
+            dto.setBillStatus(source.getIsPay().equals("已缴纳")?(byte)1:(byte)0);
             dto.setAmountReceived(new BigDecimal(source.getReceivedMoney()));
             dto.setAmountReceivable(new BigDecimal(source.getShouldMoney()));
             dto.setAmountOwed(new BigDecimal(source.getActualMoney()));
@@ -415,7 +416,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
             dto.setAmountReceivable(source.getShouldMoney());
             dto.setAmountOwed(source.getActualMoney());
             dto.setBillId(source.getBillId());
-            dto.setChargeStatus(Byte.valueOf(source.getIsPay()));
+            dto.setChargeStatus(source.getIsPay().equals("已缴纳")?(byte)1:(byte)0);
             list.add(dto);
         }
         return list;

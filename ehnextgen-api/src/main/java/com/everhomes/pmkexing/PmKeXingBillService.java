@@ -35,7 +35,7 @@ public interface PmKeXingBillService {
 
     /**
      * 对接一碑系统，在后台查询正中会的账单列表， by Wentian.Wang
-     * @param communityIdentifier 园区id
+     * @param ownerId 园区id
      * @param contractNum   合同编号（不使用）
      * @param dateStrBegin  开始日期
      * @param dateStrEnd    截止日期
@@ -47,7 +47,7 @@ public interface PmKeXingBillService {
      * @param pageOffSet    页码
      * @return              远程接口请求的json的dto
      */
-    GetLeaseContractBillOnFiPropertyRes getFiPropertyBills(String communityIdentifier, String contractNum, String dateStrBegin, String dateStrEnd, String fiProperty, Byte billStatus, String targetName, Long targetId, Integer pageSize, Integer pageOffSet);
+    GetLeaseContractBillOnFiPropertyRes getFiPropertyBills(Long ownerId, String contractNum, String dateStrBegin, String dateStrEnd, String fiProperty, Byte billStatus, String targetName, Long targetId, Integer pageSize, Integer pageOffSet);
 
     /**
      * 根据拼接的账单id来查询对应客户的fiCategory维度的账单 by Wentian.Wang
