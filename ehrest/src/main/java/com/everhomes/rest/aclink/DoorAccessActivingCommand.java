@@ -37,6 +37,8 @@ public class DoorAccessActivingCommand {
     @NotNull
     String name;
     
+    String displayName;
+    
     Long groupId;
     
     String description;
@@ -97,6 +99,12 @@ public class DoorAccessActivingCommand {
     }
     public void setGroupId(Long groupId) {
         this.groupId = groupId;
+    }
+    public String getDisplayName() {
+        return displayName;
+    }
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
     @Override
     public String toString() {

@@ -319,6 +319,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             User user = userProvider.findUserById(da.getCreatorUserId());
             String nickName = (user.getNickName() == null ? user.getNickName(): user.getAccountName());
             dto.setCreatorName(nickName);
+            if(da.getDisplayName() == null) {
+                da.setDisplayName(da.getName());
+            }
             dtos.add(dto);
         }
         return dtos;
@@ -394,6 +397,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     dto.setGroupId(group.getId());
                     dto.setGroupName(group.getName());
                 }
+            }
+            
+            if(da.getDisplayName() == null) {
+                da.setDisplayName(da.getName());
             }
             
             dtos.add(dto);
@@ -1012,6 +1019,22 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public DoorMessage activatingDoorAccess(DoorAccessActivingCommand cmd) {        
         User user = UserContext.current().getUser();
         cmd.setHardwareId(cmd.getHardwareId().toUpperCase());
+        if(cmd.getDisplayName() == null || cmd.getDisplayName().isEmpty()) {
+            cmd.setDisplayName(cmd.getName());
+        }
+        if(cmd.getDisplayName() == null || cmd.getDisplayName().isEmpty()) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "aclink param error");
+        }
+        if(cmd.getName() == null || cmd.getName().isEmpty()) {
+            String displayName = cmd.getDisplayName();
+            String pinyin = PinYinHelper.getPinYin(displayName);
+            String[] pinyins = pinyin.split("\\s+");
+            pinyin = String.join("", pinyins);
+            if(pinyin.length() > 6) {
+                pinyin = pinyin.substring(0, 6);
+            }
+            cmd.setName(pinyin);
+        }
         
 //        DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getHardwareId());
 //        if(doorAccess != null && !doorAccess.getStatus().equals(DoorAccessStatus.ACTIVING.getCode())) {
@@ -1069,6 +1092,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 doorAcc.setCreatorUserId(user.getId());
                 doorAcc.setAesIv(aesIv);
                 doorAcc.setGroupid(cmd.getGroupId());
+                doorAcc.setDisplayName(cmd.getDisplayName());
+                doorAcc.setNamespaceId(UserContext.getCurrentNamespaceId());
                 doorAccessProvider.createDoorAccess(doorAcc);
                 
                 OwnerDoor ownerDoor = new OwnerDoor();
@@ -1272,10 +1297,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         if(cmd.getDescription() != null) {
             doorAccess.setDescription(cmd.getDescription());
         }
+        if(cmd.getDisplayName() != null) {
+            doorAccess.setDisplayName(cmd.getDisplayName());
+        }
         
         doorAccess.setLatitude(cmd.getLatitude());
         doorAccess.setLongitude(cmd.getLongitude());
-        
         
         doorAccessProvider.updateDoorAccess(doorAccess);
         if(doorCommand != null) {
@@ -1591,6 +1618,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             dto.setRole((byte)1);    
         } else {
             dto.setRole((byte)0);
+        }
+        
+        if(dto.getDisplayName() == null) {
+            dto.setDisplayName(dto.getName());
         }
         
         dto.setVersion("1.1.0.0");
@@ -2276,6 +2307,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 DoorAccess doorAcc = new DoorAccess();
                 
                 doorAcc.setName(cmd.getName());
+                doorAcc.setDisplayName(cmd.getName());
                 doorAcc.setHardwareId(groupHardwareId);
                 doorAcc.setActiveUserId(user.getId());
                 doorAcc.setCreatorUserId(user.getId());
@@ -2329,6 +2361,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 String aesKey = AclinkUtils.generateAESKey();
                 
                 doorAcc.setName(cmd.getName());
+                doorAcc.setDisplayName(cmd.getName());
                 doorAcc.setHardwareId(groupHardwareId);
                 doorAcc.setActiveUserId(user.getId());
                 doorAcc.setCreatorUserId(user.getId());
@@ -2387,6 +2420,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             public DoorAccess doInTransaction(TransactionStatus arg0) {
                 DoorAccess doorAcc = new DoorAccess();
                 doorAcc.setName(cmd.getName());
+                doorAcc.setDisplayName(cmd.getName());
                 doorAcc.setHardwareId(groupHardwareId);
                 doorAcc.setActiveUserId(user.getId());
                 doorAcc.setCreatorUserId(user.getId());
@@ -2460,6 +2494,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 }
                 doorAcc = new DoorAccess();
                 doorAcc.setName(cmd.getName());
+                doorAcc.setDisplayName(cmd.getName());
                 doorAcc.setHardwareId(cmd.getHardwareId());
                 doorAcc.setActiveUserId(user.getId());
                 doorAcc.setCreatorUserId(user.getId());
