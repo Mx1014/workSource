@@ -843,15 +843,15 @@ public class QualityController extends ControllerBase {
 	/**
 	 * <b>URL: /quality/getCurrentUserInfo</b>
 	 * <p>获取当前登录人contactName</p>
-	 * @return {OrganizationMember.class}
+	 * @return {CurrentUserInfoDTO.class}
 	 */
-/*	@RequestMapping("getCurrentUserInfo")
-	@RestReturn(value=OrganizationMember.class)
+	@RequestMapping("getCurrentUserInfo")
+	@RestReturn(value=CurrentUserInfoDTO.class)
 	public RestResponse getCurrentUserInfo() {
-		OrganizationMember organizationMember = qualityService.getCurrentUserInfo();
-		RestResponse res = new RestResponse(organizationMember);
+		CurrentUserInfoDTO currentUserInfo = qualityService.getCurrentUserInfo();
+		RestResponse res = new RestResponse(currentUserInfo);
 		res.setErrorCode(ErrorCodes.SUCCESS);
 		res.setErrorDescription("OK");
 		return res;
-	}*/
+	}
 }
