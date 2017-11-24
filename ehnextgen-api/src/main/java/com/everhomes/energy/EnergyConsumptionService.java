@@ -267,6 +267,6 @@ public interface EnergyConsumptionService {
     BigDecimal processMonthPrompt(EnergyMeter meter,Integer namespaceId);
     BigDecimal processDayPrompt(EnergyMeter meter,Integer namespaceId);
 
-    void exportTasksByEnergyPlan(SearchTasksByEnergyPlanCommand cmd, HttpServletResponse response);
+    HttpServletResponse exportTasksByEnergyPlan(SearchTasksByEnergyPlanCommand cmd, HttpServletResponse response);
     ImportFileTaskDTO importTasksByEnergyPlan(ImportTasksByEnergyPlanCommand cmd, MultipartFile mfile, Long userId);
 }

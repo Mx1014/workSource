@@ -698,14 +698,10 @@ public class EnergyConsumptionController extends ControllerBase {
      * <p>导出计划的任务</p>
      * <b>URL: /energy/exportTasksByEnergyPlan</b>
      */
-    @RestReturn(String.class)
     @RequestMapping("exportTasksByEnergyPlan")
-    public RestResponse exportTasksByEnergyPlan(SearchTasksByEnergyPlanCommand cmd, HttpServletResponse response) {
-        energyConsumptionService.exportTasksByEnergyPlan(cmd, response);
+    public HttpServletResponse exportTasksByEnergyPlan(SearchTasksByEnergyPlanCommand cmd, HttpServletResponse response) {
+        HttpServletResponse resp = energyConsumptionService.exportTasksByEnergyPlan(cmd, response);
 
-        RestResponse resp = new RestResponse();
-        resp.setErrorCode(ErrorCodes.SUCCESS);
-        resp.setErrorDescription("OK");
         return resp;
     }
 

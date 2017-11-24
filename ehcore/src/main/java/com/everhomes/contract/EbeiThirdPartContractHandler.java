@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -68,9 +69,6 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
 
     @Autowired
     private CommunityProvider communityProvider;
-
-    @Autowired
-    private ContractService contractService;
 
     @Autowired
     private ContractSearcher contractSearcher;
@@ -281,7 +279,12 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
     private void deleteContract(Contract contract) {
         DeleteContractCommand command = new DeleteContractCommand();
         command.setId(contract.getId());
-        contractService.deleteContract(command);
+        getContractService(contract.getNamespaceId()).deleteContract(command);
+    }
+
+    private ContractService getContractService(Integer namespaceId) {
+        String handler = configurationProvider.getValue(namespaceId, "contractService", "");
+        return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
     }
 
     private Timestamp dateStrToTimestamp(String str) {
