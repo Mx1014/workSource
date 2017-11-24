@@ -127,13 +127,13 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
                 syncData(entity, DataType.CONTRACT.getCode(), communityIdentifier);
 
                 //数据有下一页则继续请求
-                if("1".equals(entity.getHasNextPag())) {
+                if(entity.getHasNextPag() == 1) {
                     syncContractsFromThirdPart(String.valueOf(entity.getCurrentPage()+1), version, communityIdentifier);
                 }
             }
 
             //如果到最后一页了，则开始更新到我们数据库中
-            if("0".equals(entity.getHasNextPag())) {
+            if(entity.getHasNextPag() == 0) {
                 syncDataToDb(DataType.CONTRACT.getCode(), communityIdentifier);
             }
         }
