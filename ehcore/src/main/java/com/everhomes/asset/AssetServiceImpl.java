@@ -233,6 +233,8 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillsResponse listBills(ListBillsCommand cmd) {
+//        Integer namespaceId = 999983;
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
@@ -249,7 +251,7 @@ public class AssetServiceImpl implements AssetService {
             cmd.setPageSize(20);
         }
         int pageOffSet = cmd.getPageAnchor().intValue();
-        List<ListBillsDTO> list = handler.listBills(cmd.getCommunityIdentifier(),cmd.getContractNum(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus(),cmd.getTargetType(), response);
+        List<ListBillsDTO> list = handler.listBills(cmd.getContractNum(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus(),cmd.getTargetType(), response);
         response.setListBillsDTOS(list);
         return response;
     }
@@ -2536,6 +2538,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+//        AssetVendor assetVendor = checkAssetVendor(999983);
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
         return handler.showBillForClientV2(cmd);
