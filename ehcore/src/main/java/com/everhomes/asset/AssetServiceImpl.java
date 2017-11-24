@@ -2540,6 +2540,34 @@ public class AssetServiceImpl implements AssetService {
         return handler.listAllBillsForClient(cmd);
     }
 
+    /**
+     * 暂时性方案，通过域空间来定义功能是否可用
+     */
+    @Override
+    public FunctionDisableListDto functionDisableList(FunctionDisableListCommand cmd) {
+        FunctionDisableListDto dto = new FunctionDisableListDto();
+        Integer namespaceId = cmd.getNamespaceId();
+        Byte hasContractView = 1;
+        Byte hasPay = 1;
+        if(namespaceId==null){
+            namespaceId = UserContext.getCurrentNamespaceId();
+        }
+        switch (namespaceId){
+            case 999971:
+                if(cmd.getOwnerType()!=null && cmd.getOwnerType().equals(AssetPaymentStrings.EH_USER)) hasPay = 0;
+                break;
+            case 999983:
+                hasContractView = 0;
+                hasPay = 0;
+                break;
+            default:
+                break;
+        }
+        dto.setHasPay(hasPay);
+        dto.setHasContractView(hasContractView);
+        return dto;
+    }
+
 
     @Override
     public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
