@@ -2,6 +2,7 @@ package com.everhomes.rest.order;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -11,7 +12,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ListPaymentWithdrawOrderResponse {
-	private List<PaymentWithdrawOrderDTO> orders;
+    @ItemType(PaymentWithdrawOrderDTO.class)
+    private List<PaymentWithdrawOrderDTO> orders;
 	
     private Long nextPageAnchor;
 
