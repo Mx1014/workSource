@@ -259,6 +259,7 @@ public interface OrganizationProvider {
 	List<OrganizationMember> listOrganizationMembers(Long orgId,List<Long> memberUids);
 
 	List<OrganizationCommunityRequest> listOrganizationCommunityRequests(Long communityId);
+	List<OrganizationCommunityRequest> listOrganizationCommunityRequestsByOrganizationId(Long organizationId);
 
 	void createOrganizationMemberLog(OrganizationMemberLog orgLog);
 	List<OrganizationMemberLog> listOrganizationMemberLogs(Long id);

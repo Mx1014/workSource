@@ -7,7 +7,6 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.module.ServiceModuleService;
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.ListUserRelatedProjectByModuleIdCommand;
 import com.everhomes.rest.address.CommunityDTO;
@@ -844,13 +843,13 @@ public class QualityController extends ControllerBase {
 	/**
 	 * <b>URL: /quality/getCurrentUserInfo</b>
 	 * <p>获取当前登录人contactName</p>
-	 * @return {OrganizationMember.class}
+	 * @return {CurrentUserInfoDTO.class}
 	 */
 	@RequestMapping("getCurrentUserInfo")
-	@RestReturn(value=OrganizationMember.class)
+	@RestReturn(value=CurrentUserInfoDTO.class)
 	public RestResponse getCurrentUserInfo() {
-		OrganizationMember organizationMember = qualityService.getCurrentUserInfo();
-		RestResponse res = new RestResponse(organizationMember);
+		CurrentUserInfoDTO currentUserInfo = qualityService.getCurrentUserInfo();
+		RestResponse res = new RestResponse(currentUserInfo);
 		res.setErrorCode(ErrorCodes.SUCCESS);
 		res.setErrorDescription("OK");
 		return res;

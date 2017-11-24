@@ -1,6 +1,5 @@
 package com.everhomes.quality;
 
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.quality.*;
 
@@ -72,5 +71,5 @@ public interface QualityService {
 	void updateSampleScoreStat();
 	QualityInspectionTaskDTO findQualityInspectionTask(FindQualityInspectionTaskCommand cmd);
 
-	OrganizationMember getCurrentUserInfo();
+	CurrentUserInfoDTO getCurrentUserInfo();
 }

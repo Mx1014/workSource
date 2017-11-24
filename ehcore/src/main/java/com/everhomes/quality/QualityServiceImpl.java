@@ -773,10 +773,11 @@ public class QualityServiceImpl implements QualityService {
 	}
 
 	@Override
-	public OrganizationMember getCurrentUserInfo() {
+	public CurrentUserInfoDTO getCurrentUserInfo() {
 		//fix bug #15603 暂时没有公共API
 		Long currentUserId = UserContext.current().getUser().getId();
-		return organizationProvider.listOrganizationMembers(currentUserId).get(0);
+		OrganizationMember organizationMember = organizationProvider.listOrganizationMembers(currentUserId).get(0);
+		return ConvertHelper.convert(organizationMember, CurrentUserInfoDTO.class);
 	}
 
 	@Override
@@ -3676,8 +3677,8 @@ public class QualityServiceImpl implements QualityService {
 			if (total.doubleValue() == sortedScoresByTarget.get(i).getTotalScore().doubleValue() && sortedScoresByTarget.get(i).getTotalScore() != 0) {
 				sortedScoresByTarget.get(i).setOrderId(previousOrder);
 			} else {
-				Integer tempOrder = previousOrder +1;
-				sortedScoresByTarget.get(i).setOrderId(tempOrder);
+				previousOrder++;
+				sortedScoresByTarget.get(i).setOrderId(previousOrder);
 				total = sortedScoresByTarget.get(i).getTotalScore();
 			}
 		}

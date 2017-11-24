@@ -27,6 +27,7 @@ public class OrderType {
 	public static final int ZJGK_RENTAL_CODE = 10000010;
 	public static final int VIDEOCONF_CODE = 10000011;
 	public static final int WUYE_CODE = 10000088;
+	public static final int WITHDRAW_CODE = 10000012;
 
 	public static enum OrderTypeEnum{
 		WUYETEST(OrderType.WU_YE_TEST_CODE,"wuyetest","物业支付-测试用",""),
@@ -40,7 +41,8 @@ public class OrderType {
 		ACTIVITYSIGNUPORDERWECHAT(OrderType.ACTIVITY_SIGNUP_ORDER_WECHAT_CODE,"activitysignuporderwechat","活动报名（微信）缴费","ACW"),
 		ZJGK_RENTAL_CODE(OrderType.ZJGK_RENTAL_CODE,"zjgkrentalcode","张江高科租金缴费","ZJW"),
 		VIDEOCONF_CODE(OrderType.VIDEOCONF_CODE,"videoConf","视频会议","VMT"),
-		WUYE_CODE(OrderType.WUYE_CODE,"wuyeCode","物业缴费","WUF");
+		WUYE_CODE(OrderType.WUYE_CODE,"wuyeCode","物业缴费","WUF"),
+		WITHDRAW_CODE(OrderType.WITHDRAW_CODE,"withdrawCode","提现","WDW");
 
 		private int code;
 		private String pycode;
