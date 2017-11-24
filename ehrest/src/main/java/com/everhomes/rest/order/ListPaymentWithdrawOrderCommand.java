@@ -1,29 +1,23 @@
-package com.everhomes.rest.news;
+package com.everhomes.rest.order;
 
-import javax.validation.constraints.NotNull;
+import com.everhomes.util.StringHelper;
 
 /**
- * <li>isSearch: 传1只显示筛选项 为空都显示</li>
- * <li>categoryId: 分类id</li>
+ * <ul>
+ *     <li>ownerType: 帐户类型（如EhUsers、EhOrganizations），{@link com.everhomes.rest.order.OwnerType}</li>
+ *     <li>ownerId: 帐户对应的ID（如用户ID、企业ID）</li>
+ *     <li>pageAnchor: 本页开始的锚点</li>
+ *     <li>pageSize: 每页的数量</li>
+ * </ul>
  */
-public class GetNewsTagCommand {
-    @NotNull
-    private String ownerType;
-    @NotNull
-    private Long ownerId;
-    private Byte isSearch;
+public class ListPaymentWithdrawOrderCommand {
+	private String ownerType;
+	
+	private Long ownerId;
+	
     private Long pageAnchor;
+    
     private Integer pageSize;
-
-    private Long categoryId;
-
-    public Long getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
-    }
 
     public String getOwnerType() {
         return ownerType;
@@ -57,11 +51,8 @@ public class GetNewsTagCommand {
         this.pageSize = pageSize;
     }
 
-    public Byte getIsSearch() {
-        return isSearch;
-    }
-
-    public void setIsSearch(Byte isSearch) {
-        this.isSearch = isSearch;
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
