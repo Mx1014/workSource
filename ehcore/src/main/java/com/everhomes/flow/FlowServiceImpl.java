@@ -944,9 +944,8 @@ public class FlowServiceImpl implements FlowService {
             if (actionInfo.getTemplateId() != null) {
                 action.setTemplateId(actionInfo.getTemplateId());
             }
-            if (actionInfo.getRenderText() != null) {
-                action.setRenderText(actionInfo.getRenderText());
-            }
+            action.setRenderText(actionInfo.getRenderText());
+
             flowActionProvider.updateFlowAction(action);
 
             flowUserSelectionProvider.deleteSelectionByBelong(action.getId(), FlowEntityType.FLOW_ACTION.getCode(), FlowUserType.PROCESSOR.getCode());

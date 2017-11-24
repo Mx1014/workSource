@@ -1787,7 +1787,13 @@ public class ParkingServiceImpl implements ParkingService {
 
 		Long refoundOrderNo = createOrderNo(System.currentTimeMillis());
 
-		Long amount = payService.changePayAmount(order.getPrice());
+		BigDecimal price = order.getPrice();
+
+		if (configProvider.getBooleanValue("parking.refund.amount", false)) {
+			price = price.divide(new BigDecimal(2), 2, RoundingMode.HALF_UP);
+		}
+		Long amount = payService.changePayAmount(price);
+
 		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.PARKING.getPycode(), order.getOrderNo(), refoundOrderNo, amount);
 
 		if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
