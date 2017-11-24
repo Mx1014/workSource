@@ -204,7 +204,8 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
         }
     	if(cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
     		cond = cond.and(
-    				Tables.EH_FLOW_CASES.MODULE_NAME.like(cmd.getKeyword() + "%")
+                    Tables.EH_FLOW_CASES.TITLE.like(cmd.getKeyword() + "%")
+                            .or(Tables.EH_FLOW_CASES.CONTENT.like("%" + cmd.getKeyword() + "%"))
     				.or(Tables.EH_FLOW_CASES.APPLIER_NAME.like(cmd.getKeyword() + "%"))
     				.or(Tables.EH_FLOW_CASES.APPLIER_PHONE.like(cmd.getKeyword() + "%"))
             );
