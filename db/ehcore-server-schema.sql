@@ -7045,6 +7045,7 @@ CREATE TABLE `eh_news_tag` (
   `delete_flag` TINYINT(8) NOT NULL DEFAULT 0,
   `default_order` BIGINT DEFAULT 0,
   `create_time` DATETIME,
+  `category_id` BIGINT DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 -- oauth2 client AccessToken
@@ -9313,7 +9314,23 @@ CREATE TABLE `eh_payment_users` (
   `payment_user_type` INTEGER NOT NULL COMMENT '1-普通会员,2-企业会员',
   `payment_user_id` BIGINT NOT NULL,
   `create_time` DATETIME NOT NULL,
-	
+  `bank_name` VARCHAR(512) COMMENT 'the name of bank where enterprise has a account',
+  `bank_number` VARCHAR(128) COMMENT 'the number of bank where enterprise has a account',
+  `bank_card_number` VARCHAR(128) COMMENT 'the card number of enterprise bank account',
+  `enterprise_name` VARCHAR(512) COMMENT 'the name of enterprise',
+  `enterprise_business_licence` VARCHAR(128) COMMENT 'the business licence number of enterprise',
+  `enterprise_business_licence_uri` VARCHAR(128) COMMENT 'the image of business licence of enterprise',
+  `enterprise_account_licence_uri` VARCHAR(128) COMMENT 'the image of account licence of enterprise',
+  `legal_person_name` VARCHAR(512) COMMENT 'the real name of legal person in an enterprise',
+  `legal_person_phone` VARCHAR(512) COMMENT 'the phone number of legal person in an enterprise',
+  `legal_person_identity_type` VARCHAR(512) COMMENT 'the identity type of legal person in an enterprise',
+  `legal_person_identity_number` VARCHAR(512) COMMENT 'the identity number of legal person in an enterprise',
+  `legal_person_identity_front_uri` VARCHAR(1024) COMMENT 'the front side of identity image of legal person in an enterprise',
+  `legal_person_identity_back_uri` VARCHAR(1024) COMMENT 'the back side identity image of legal person in an enterprise',
+  `status` TINYINT COMMENT '0-inactive, 1-waiting for approval, 2-active',
+  `creator_uid` BIGINT,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
   PRIMARY KEY (`id`),
   UNIQUE KEY `i_owner` (`owner_type`,`owner_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -9333,6 +9350,28 @@ CREATE TABLE `eh_payment_variables` (
   `identifier` VARCHAR(255),
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='变量表';
+
+-- record the withdraw orders
+DROP TABLE IF EXISTS `eh_payment_withdraw_orders`;
+
+
+CREATE TABLE `eh_payment_withdraw_orders` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `order_no` BIGINT NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'community',
+  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'community id',
+  `payment_user_type` INTEGER NOT NULL COMMENT 'the account type to withdraw the monty: 1-普通会员,2-企业会员',
+  `payment_user_id` BIGINT NOT NULL COMMENT 'the account in pay-system to withdraw the monty',
+  `amount` DECIMAL(10,2) COMMENT 'the amount to withdraw',
+  `status` TINYINT NOT NULL COMMENT '0-inactive, 1-waiting for confirm, 2-success, 3-failed',
+  `callback_time` DATETIME,
+  `operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the user who withdraw the money',
+  `operate_time` DATETIME COMMENT 'the time to withdraw the money',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_pm_notify_configurations`;
 
