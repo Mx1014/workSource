@@ -100,3 +100,6 @@ INSERT INTO `eh_industry_types` (`id`, `uuid`, `namespace_id`, `name`, `create_t
 
 -- 条件表达式的默认值  add by xq.tian  2017/11/20
 UPDATE eh_flow_condition_expressions SET variable1='', variable2='' WHERE variable1='1' OR variable2='1';
+
+-- 行业协会的actiontype改为38  add by yanjun 201711241009
+UPDATE eh_launch_pad_items set action_type = 38 where namespace_id = 999971 and item_label = '行业协会';

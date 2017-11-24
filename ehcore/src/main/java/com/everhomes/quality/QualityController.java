@@ -1,36 +1,31 @@
 package com.everhomes.quality;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-
-import com.everhomes.rest.quality.*;
-
-import com.everhomes.module.ServiceModuleService;
-import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
-import com.everhomes.util.ConvertHelper;
-
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.search.QualityInspectionSampleSearcher;
-import com.everhomes.search.QualityTaskSearcher;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.module.ServiceModuleService;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.ListUserRelatedProjectByModuleIdCommand;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.quality.*;
+import com.everhomes.search.QualityInspectionSampleSearcher;
+import com.everhomes.search.QualityTaskSearcher;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.ConvertHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.util.List;
 
 @RestDoc(value = "Quality Controller", site = "core")
 @RestController
@@ -842,6 +837,20 @@ public class QualityController extends ControllerBase {
 
 		qualityService.updateSampleScoreStat();
 		RestResponse res = new RestResponse();
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+	/**
+	 * <b>URL: /quality/getCurrentUserInfo</b>
+	 * <p>获取当前登录人contactName</p>
+	 * @return {OrganizationMember.class}
+	 */
+	@RequestMapping("getCurrentUserInfo")
+	@RestReturn(value=OrganizationMember.class)
+	public RestResponse getCurrentUserInfo() {
+		OrganizationMember organizationMember = qualityService.getCurrentUserInfo();
+		RestResponse res = new RestResponse(organizationMember);
 		res.setErrorCode(ErrorCodes.SUCCESS);
 		res.setErrorDescription("OK");
 		return res;
