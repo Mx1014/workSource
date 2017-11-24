@@ -902,7 +902,7 @@ public class PunchServiceImpl implements PunchService {
 				String approvalStatus = "";
 				String a1 = asArrary[2 * i];
 				String a2 = asArrary[2 * i + 1];
-				if (StringUtils.isEmpty(a1) && StringUtils.isEmpty(a2)) {
+				if (StringUtils.isBlank(a1) && StringUtils.isBlank(a2)) {
 					//俩都是空,那就空
 					a1 = "";
 					a2 = "";
@@ -916,9 +916,9 @@ public class PunchServiceImpl implements PunchService {
 					if (!status.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
 						pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 					}
-				}else if(StringUtils.isEmpty(a1)||StringUtils.isEmpty(a2)){
+				}else if(StringUtils.isBlank(a1)||StringUtils.isBlank(a2)){
 					//2个有一个为空就要拿status来匹配
-					if (StringUtils.isEmpty(a1)) {
+					if (StringUtils.isBlank(a1)) {
 						a1 = findPunchStatus(2 * i, statusArrary, pdl.getStatusList());
 					}else{
 						a2 = findPunchStatus(2 * i + 1, statusArrary, pdl.getStatusList());
@@ -1231,7 +1231,7 @@ public class PunchServiceImpl implements PunchService {
 //			}
 			beginTimeLong = punchDate.getTime()+ptr.getAfternoonArriveTimeLong();
 			calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,
-					ptr.getWorkTimeLong()-(ptr.getNoonLeaveTimeLong() - ptr.getStartEarlyTimeLong()),beginTimeLong,0L);
+					ptr.getWorkTimeLong()-(ptr.getAfternoonArriveTimeLong() - ptr.getStartEarlyTimeLong()),beginTimeLong,0L);
 			//算请假对下班打卡的影响
 			offDutyTimeLong = punchDate.getTime()+ ptr.getStartEarlyTimeLong() + ptr.getWorkTimeLong();
 			if (HommizationType.fromCode(ptr.getHommizationType()) == HommizationType.LATEARRIVE){
