@@ -102,6 +102,8 @@ import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.search.OrganizationQueryResult;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
+import com.everhomes.rest.techpark.expansion.EnterpriseDetailDTO;
+import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
 import com.everhomes.rest.ui.privilege.EntrancePrivilege;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
@@ -833,6 +835,57 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         addExtraInfo(dtos);
         resp.setDtos(dtos);
+        resp.setNextPageAnchor(rlt.getPageAnchor());
+        return resp;
+    }
+
+    @Override
+    public ListEnterpriseDetailResponse listEnterprisesAbstract(ListEnterprisesCommand cmd) {
+        ListEnterpriseDetailResponse resp = new ListEnterpriseDetailResponse();
+        List<EnterpriseDetailDTO> dtos = new ArrayList<>();
+        SearchOrganizationCommand command = ConvertHelper.convert(cmd, SearchOrganizationCommand.class);
+        command.setKeyword(cmd.getKeywords());  //两个字段不一样，操蛋
+        GroupQueryResult rlt = organizationSearcher.query(command);
+        for (Long id : rlt.getIds()) {
+            EnterpriseDetailDTO dto = new EnterpriseDetailDTO();
+            Organization organization = organizationProvider.findOrganizationById(id);
+            OrganizationDetail org = organizationProvider.findOrganizationDetailByOrganizationId(id);
+            if (null == organization) {
+                LOGGER.debug("organization is null, id = " + id);
+                return null;
+            } else if (OrganizationGroupType.fromCode(organization.getGroupType()) != OrganizationGroupType.ENTERPRISE) {
+                LOGGER.debug("organization not is enterprise, id = " + id);
+                return null;
+            } else if (organization.getParentId() != 0L) {
+                LOGGER.debug("organization is children organization, id = " + id);
+                return null;
+            }
+            dto.setEnterpriseName(organization.getName());
+            if(dto.getEnterpriseName() == null || com.mysql.jdbc.StringUtils.isNullOrEmpty(dto.getEnterpriseName()))
+                dto.setEnterpriseName(org.getDisplayName());
+
+            String pinyin = PinYinHelper.getPinYin(dto.getEnterpriseName());
+            dto.setFullInitial(PinYinHelper.getFullCapitalInitial(pinyin));
+            dto.setFullPinyin(pinyin.replaceAll(" ", ""));
+            dto.setInitial(PinYinHelper.getCapitalInitial(dto.getFullPinyin()));
+
+            dto.setAvatarUri(org.getAvatar());
+            if (!StringUtils.isEmpty(org.getAvatar()))
+                dto.setAvatarUrl(contentServerService.parserUri(dto.getAvatarUri(), EntityType.ORGANIZATIONS.getCode(), organization.getId()));
+
+            List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organization.getId());
+            List<AddressDTO> addresses = organizationAddresses.stream().map(r -> {
+                OrganizationAddressDTO address = ConvertHelper.convert(r, OrganizationAddressDTO.class);
+                Address addr = addressProvider.findAddressById(address.getAddressId());
+                AddressDTO addressDTO = ConvertHelper.convert(addr, AddressDTO.class);
+                return addressDTO;
+            }).collect(Collectors.toList());
+
+            dto.setAddresses(addresses);
+            dtos.add(dto);
+        }
+
+        resp.setDetails(dtos);
         resp.setNextPageAnchor(rlt.getPageAnchor());
         return resp;
     }
@@ -9827,6 +9880,24 @@ public class OrganizationServiceImpl implements OrganizationService {
     public OrganizationDetailDTO getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd) {
 
         return toOrganizationDetailDTO(cmd.getId(), false);
+    }
+
+    @Override
+    public OrganizationDetailDTO getOrganizationDetailWithDefaultAttachmentById(GetOrganizationDetailByIdCommand cmd) {
+        OrganizationDetailDTO dto = toOrganizationDetailDTO(cmd.getId(), false);
+        if(dto.getAttachments() == null || dto.getAttachments().size() == 0) {
+            List<AttachmentDescriptor> attachmentDescriptors = new ArrayList<>();
+            AttachmentDescriptor ad = new AttachmentDescriptor();
+            ad.setContentType(PostContentType.IMAGE.getCode());
+            String uri = configurationProvider.getValue("enterprise.default.attachment", "");
+            ad.setContentUri(uri);
+            if(uri != null) {
+                ad.setContentUrl(contentServerService.parserUri(uri, EntityType.ORGANIZATIONS.getCode(), dto.getOrganizationId()));
+            }
+            attachmentDescriptors.add(ad);
+            dto.setAttachments(attachmentDescriptors);
+        }
+        return dto;
     }
 
     @Override

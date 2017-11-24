@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
 import com.everhomes.util.StringHelper;
 
@@ -22,6 +23,9 @@ public class EnterpriseDetailDTO {
     private Timestamp createTime;
     @ItemType(EnterpriseAttachmentDTO.class)
     private List<EnterpriseAttachmentDTO> attachments;
+
+	@ItemType(AddressDTO.class)
+	private List<AddressDTO> addresses;
 
 	private String fullInitial;
 	private String fullPinyin;
@@ -154,6 +158,14 @@ public class EnterpriseDetailDTO {
 
 	public void setInitial(String initial) {
 		this.initial = initial;
+	}
+
+	public List<AddressDTO> getAddresses() {
+		return addresses;
+	}
+
+	public void setAddresses(List<AddressDTO> addresses) {
+		this.addresses = addresses;
 	}
 
 	@Override
