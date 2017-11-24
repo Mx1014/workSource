@@ -1231,7 +1231,7 @@ public class PunchServiceImpl implements PunchService {
 //			}
 			beginTimeLong = punchDate.getTime()+ptr.getAfternoonArriveTimeLong();
 			calculateOnDutyApprovalStatus(onDutyLog,tiDTOs,
-					ptr.getWorkTimeLong()-(ptr.getNoonLeaveTimeLong() - ptr.getStartEarlyTimeLong()),beginTimeLong,0L);
+					ptr.getWorkTimeLong()-(ptr.getAfternoonArriveTimeLong() - ptr.getStartEarlyTimeLong()),beginTimeLong,0L);
 			//算请假对下班打卡的影响
 			offDutyTimeLong = punchDate.getTime()+ ptr.getStartEarlyTimeLong() + ptr.getWorkTimeLong();
 			if (HommizationType.fromCode(ptr.getHommizationType()) == HommizationType.LATEARRIVE){
