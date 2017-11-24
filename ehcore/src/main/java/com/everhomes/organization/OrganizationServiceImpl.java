@@ -2803,7 +2803,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
 
             //Filter out the inactive organization add by lei.lv 20171124
-            Long parentId = OrganizationStatus.fromCode(org.getParentId());
+            Long parentId = org.getParentId();
             if (parentId != 0L) {
                 LOGGER.error("The member's organization is child-enterprise, userId=" + userId
                         + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId()
