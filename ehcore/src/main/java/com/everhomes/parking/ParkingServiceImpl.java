@@ -1789,7 +1789,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		BigDecimal price = order.getPrice();
 
-		if (configProvider.getBooleanValue("parking.order.amount", false)) {
+		if (configProvider.getBooleanValue("parking.refund.amount", false)) {
 			price = price.divide(new BigDecimal(2), 2, RoundingMode.HALF_UP);
 		}
 		Long amount = payService.changePayAmount(price);
