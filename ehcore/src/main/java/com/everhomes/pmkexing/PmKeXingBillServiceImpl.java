@@ -4,10 +4,7 @@ package com.everhomes.pmkexing;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
-import com.everhomes.asset.AssetPaymentStrings;
-import com.everhomes.asset.GetLeaseContractBillOnFiPropertyData;
-import com.everhomes.asset.GetLeaseContractBillOnFiPropertyRes;
-import com.everhomes.asset.GetLeaseContractReceivableRes;
+import com.everhomes.asset.*;
 import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
 import com.everhomes.community.Community;
@@ -254,9 +251,9 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         String api = getBillAPI(ConfigConstants.ASSET_PAYMENT_ZJH_API_8);
         Map<String,String> params = new HashMap<>();
         params.put("billId",billId);
-        params.put("projectId",communityProvider.getCommunityToken("kexing",ownerId));
-        params.put("pageSize",String.valueOf(pageOffSet));
-        params.put("currentPage",String.valueOf(pageSize));
+        params.put("projectId",communityProvider.getCommunityToken("ebei",ownerId));
+        params.put("currentPage",String.valueOf(pageOffSet));
+        params.put("pageSize",String.valueOf(pageSize>100?100:pageSize));
         String contractId = billId.split(",")[0];
         params.put("contractId",contractId==null?"1":contractId);
         String json = get(api,params);
@@ -314,6 +311,27 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         }
         res.setData(data);
         return res;
+    }
+
+    @Override
+    public GetLeaseContractReceivableGroupForStatisticsRes listBillStatistics(Long communityId, Byte dimension, String beginLimit, String endLimit) {
+        GetLeaseContractReceivableGroupForStatisticsRes res = new GetLeaseContractReceivableGroupForStatisticsRes();
+        String api = getBillAPI(ConfigConstants.ASSET_PAYMENT_ZJH_API_10);
+        Map<String,String> params = new HashMap<>();
+        if(communityId!=null){
+            params.put("projectId",communityProvider.getCommunityToken("ebei",communityId));
+        }
+        if(dimension!=null){
+            params.put("dimension",dimension.toString());
+        }
+        if(beginLimit!=null){
+            params.put("beginMonth",beginLimit);
+        }
+        if(endLimit!=null){
+            params.put("endMonth",endLimit);
+        }
+        String json = get(api, params);
+        return (GetLeaseContractReceivableGroupForStatisticsRes)StringHelper.fromJsonString(json,GetLeaseContractReceivableGroupForStatisticsRes.class);
     }
 
     private OrganizationDTO currentOrganization(Long organizationId) {

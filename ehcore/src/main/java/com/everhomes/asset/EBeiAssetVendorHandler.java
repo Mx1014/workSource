@@ -126,17 +126,23 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public List<ListBillsDTO> listBills(String contractNum, Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName, String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Integer pageOffSet, Integer pageSize, String targetName, Byte status, String targetType, ListBillsResponse response) {
-        if(pageOffSet==null){
-            pageOffSet = 1;
+    public List<ListBillsDTO> listBills(String contractNum, Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName, String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Long pageAnchor, Integer pageSize, String targetName, Byte status, String targetType, ListBillsResponse response) {
+        if(pageAnchor==null || pageAnchor == 0l){
+            pageAnchor = 1l;
         }
         if(pageSize == null){
             pageSize = 20;
         }
         List<ListBillsDTO> list = new ArrayList<>();
-        PaymentBillGroup group = assetProvider.getBillGroupById(billGroupId);
-        String fiProperty = getFiPropertyName(group.getName());
+        String fiProperty = null;
+        if(billGroupId != null){
+            PaymentBillGroup group = assetProvider.getBillGroupById(billGroupId);
+            if(group!=null){
+                fiProperty = getFiPropertyName(group.getName());
+            }
+        }
         Long targetId = null;
+        Integer pageOffSet = pageAnchor.intValue();
         GetLeaseContractBillOnFiPropertyRes res = keXingBillService.getFiPropertyBills(ownerId,contractNum,dateStrBegin,dateStrEnd,fiProperty,billStatus,targetName,targetId,pageSize,pageOffSet);
         //处理responseCode
         if(!res.getResponseCode().equals("200")){
@@ -326,9 +332,21 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd) {
-        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
-        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                "Insufficient privilege");
+        List<BillStaticsDTO> list = new ArrayList<>();
+        GetLeaseContractReceivableGroupForStatisticsRes res = keXingBillService.listBillStatistics(cmd.getOwnerId(),cmd.getDimension(),cmd.getBeginLimit(),cmd.getEndLimit());
+        if(res.getResponseCode().equals("200")){
+            List<GetLeaseContractReceivableGroupForStatisticsData> data = res.getData();
+            for(int i = 0; i < data.size(); i++){
+                GetLeaseContractReceivableGroupForStatisticsData source = data.get(i);
+                BillStaticsDTO dto = new BillStaticsDTO();
+                dto.setValueOfX(source.getHorizationalAxisName());
+                dto.setAmountReceived(new BigDecimal(source.getAlreadyMoney()));
+                dto.setAmountReceivable(new BigDecimal(source.getAmountReceivable()));
+                dto.setAmountOwed(new BigDecimal(source.getArrearageMoney()));
+                list.add(dto);
+            }
+        }
+        return list;
     }
 
     @Override

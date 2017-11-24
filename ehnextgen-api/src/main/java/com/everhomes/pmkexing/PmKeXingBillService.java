@@ -1,6 +1,7 @@
 package com.everhomes.pmkexing;
 
 import com.everhomes.asset.GetLeaseContractBillOnFiPropertyRes;
+import com.everhomes.asset.GetLeaseContractReceivableGroupForStatisticsRes;
 import com.everhomes.asset.GetLeaseContractReceivableRes;
 import com.everhomes.rest.pmkexing.*;
 
@@ -58,4 +59,10 @@ public interface PmKeXingBillService {
      * 根据用户获得所有fiProperty维度的账单 by Vladimir Putin
      */
     GetLeaseContractBillOnFiPropertyRes getAllFiPropertyBills(Integer namespaceId, Long ownerId, Long targetId, String targetType,Byte isPay);
+
+    /**
+     *
+     * 正中会统计账单接口 by Kansas King in NewLondon, planet kik
+     */
+    GetLeaseContractReceivableGroupForStatisticsRes listBillStatistics(Long communityId,Byte dimension, String beginLimit, String endLimit);
 }

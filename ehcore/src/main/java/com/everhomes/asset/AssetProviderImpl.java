@@ -3477,9 +3477,10 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<PaymentBills> findBillsByContractIds(List<Long> contractIds) {
+    public List<PaymentBills> findSettledBillsByContractIds(List<Long> contractIds) {
         return getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
                 .where(Tables.EH_PAYMENT_BILLS.CONTRACT_ID.in(contractIds))
+                .and(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte)1))
                 .fetchInto(PaymentBills.class);
     }
 

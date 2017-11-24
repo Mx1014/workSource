@@ -706,7 +706,13 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     }
 
     @Override
-    public List<ListBillsDTO> listBills(String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Integer pageOffSet, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse carrier) {
+    public List<ListBillsDTO> listBills(String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Long pageAnchor, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse carrier) {
+        if(pageAnchor ==null || pageAnchor == 0l){
+            pageAnchor = 1l;
+        }
+        if(pageSize == null){
+            pageSize = 20;
+        }
         List<ListBillGroupsDTO> listBillGroupsDTOS = assetProvider.listBillGroups(ownerId, ownerType);
         List<ListBillsDTO> list = new ArrayList<>();
         if(status!=1){
@@ -734,7 +740,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 params.put("payFlag", billStatus==null?"":String.valueOf(billStatus));
                 params.put("sdateFrom",StringUtils.isEmpty(dateStrBegin)==true?"":dateStrBegin);
                 params.put("sdateTo",StringUtils.isEmpty(dateStrEnd)==true?"":dateStrEnd);
-                params.put("pageOffset",pageOffSet==null?"":String.valueOf(pageOffSet));
+                params.put("pageOffset",pageAnchor==null?"":String.valueOf(pageAnchor));
                 params.put("pageSize",pageSize==null?"":String.valueOf(pageSize));
                 params.put("contractNum", StringUtils.isEmpty(contractNum)?"":contractNum);
                 String json = generateJson(params);
@@ -760,7 +766,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     params.put("payFlag", billStatus==null?"":String.valueOf(billStatus));
                     params.put("sdateFrom",StringUtils.isEmpty(dateStrBegin)==true?"":dateStrBegin);
                     params.put("sdateTo",StringUtils.isEmpty(dateStrEnd)==true?"":dateStrEnd);
-                    params.put("pageOffset",pageOffSet==null?"":String.valueOf(pageOffSet));
+                    params.put("pageOffset",pageAnchor==null?"":String.valueOf(pageAnchor));
                     params.put("pageSize",pageSize==null?"":String.valueOf(pageSize));
                     params.put("contractNum", StringUtils.isEmpty(contractNum)?"":contractNum);
                     json = generateJson(params);
@@ -772,7 +778,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                             carrier.setNextPageAnchor(null);
                         }
                     }else{
-                        Integer next = pageOffSet+1;
+                        Long next = pageAnchor+1l;
                         carrier.setNextPageAnchor(next.longValue());
                     }
                     return list;

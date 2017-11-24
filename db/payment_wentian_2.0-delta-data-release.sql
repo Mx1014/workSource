@@ -15,3 +15,8 @@ UPDATE `eh_communities` SET namespace_community_type='ebei', namespace_community
 
 SET @locale_id = (SELECT MAX(`id`) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@locale_id:=@locale_id+1,'assetv2','10006','zh_CN','远程请求一碑系统错误');
+-- 正中会 配置账单管理和账单统计 by Wentian Wang
+SET @eh_menu_scope_id = (SELECT MAX(id) from `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@eh_menu_scope_id:=@eh_menu_scope_id+1, '20400', '', 'EhNamespaces', '999983', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@eh_menu_scope_id:=@eh_menu_scope_id+1, '204011', '', 'EhNamespaces', '999983', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@eh_menu_scope_id:=@eh_menu_scope_id+1, '204021', '', 'EhNamespaces', '999983', '2');

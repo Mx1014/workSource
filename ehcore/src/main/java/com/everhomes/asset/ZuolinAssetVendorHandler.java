@@ -294,12 +294,19 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public List<ListBillsDTO> listBills(String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Integer pageOffSet, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse response) {
+    public List<ListBillsDTO> listBills(String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Long pageAnchor, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse response) {
+        if (pageAnchor == null || pageAnchor < 1l) {
+            pageAnchor = 0l;
+        }
+        if(pageSize == null){
+            pageSize = 20;
+        }
+        Integer pageOffSet = pageAnchor.intValue();
         List<ListBillsDTO> list = assetProvider.listBills(contractNum,currentNamespaceId,ownerId,ownerType, billGroupName,billGroupId,billStatus,dateStrBegin,dateStrEnd,pageOffSet,pageSize,targetName,status,targetType);
         if(list.size() <= pageSize){
             response.setNextPageAnchor(null);
         }else {
-                response.setNextPageAnchor(((Integer)(pageOffSet+pageSize)).longValue());
+                response.setNextPageAnchor(pageAnchor+pageSize.longValue());
             list.remove(list.size()-1);
         }
         return list;
@@ -709,7 +716,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         Map<Long,ContractDTO> contractMap = new HashMap<>();
         contracts.stream().forEach(r -> contractMap.put(r.getId(),r));
         contracts.stream().forEach(r -> contractIds.add(r.getId()));
-        List<PaymentBills> bills = assetProvider.findBillsByContractIds(contractIds);
+        List<PaymentBills> bills = assetProvider.findSettledBillsByContractIds(contractIds);
         Map<ShowBillForClientV2DTO,List<PaymentBills>> map = new HashMap<>();
         // extract tab bills from bills
         long start1 = System.currentTimeMillis();
