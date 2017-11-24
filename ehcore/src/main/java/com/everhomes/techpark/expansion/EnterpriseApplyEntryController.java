@@ -69,7 +69,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	@RestReturn(OrganizationDetailDTO.class)
 	public RestResponse getOrganizationDetailWithDefaultAttachmentById(GetOrganizationDetailByIdCommand cmd){
 
-		OrganizationDetailDTO org = organizationService.getOrganizationDetailById(cmd);
+		OrganizationDetailDTO org = organizationService.getOrganizationDetailWithDefaultAttachmentById(cmd);
 		RestResponse response = new RestResponse(org);
 
 		response.setErrorCode(ErrorCodes.SUCCESS);
