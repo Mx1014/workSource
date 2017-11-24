@@ -2632,7 +2632,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 			equipment.setTargetType(cmd.getTargetType());
 			equipment.setTargetId(cmd.getTargetId());
 			equipment.setInspectionCategoryId(cmd.getInspectionCategoryId());
-			equipment.setStatus(EquipmentStatus.INCOMPLETE.getCode());
+			//物业巡检V3.0.1 动态excel中设置好设备状态 删除
+			//equipment.setStatus(EquipmentStatus.INCOMPLETE.getCode());
 			String tokenString = UUID.randomUUID().toString();
 			equipment.setQrCodeToken(tokenString);
 			equipment.setCreatorUid(userId);
