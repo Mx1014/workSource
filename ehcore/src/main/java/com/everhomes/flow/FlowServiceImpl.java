@@ -2500,6 +2500,8 @@ public class FlowServiceImpl implements FlowService {
             flowCase.setApplyUserId(UserContext.current().getUser().getId());
         }
         UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(flowCase.getApplyUserId());
+        fixupUserInfo(snapshotFlow.getOrganizationId(), userInfo);
+
         flowCase.setApplierName(userInfo.getNickName());
         if (userInfo.getPhones() != null && userInfo.getPhones().size() > 0) {
             flowCase.setApplierPhone(userInfo.getPhones().get(0));
