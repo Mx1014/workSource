@@ -28,6 +28,7 @@ import com.everhomes.group.Group;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
+import com.everhomes.hotTag.HotTagService;
 import com.everhomes.hotTag.HotTags;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -64,6 +65,8 @@ import com.everhomes.rest.group.*;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.hotTag.HotFlag;
 import com.everhomes.rest.hotTag.HotTagServiceType;
+import com.everhomes.rest.hotTag.ListHotTagCommand;
+import com.everhomes.rest.hotTag.TagDTO;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.*;
@@ -203,6 +206,9 @@ public class ForumServiceImpl implements ForumService {
 
     @Autowired
     private HotTagSearcher hotTagSearcher;
+
+    @Autowired
+    private HotTagService hotTagService;
     
     @Override
     public boolean isSystemForum(long forumId, Long communityId) {
@@ -6350,8 +6356,41 @@ public class ForumServiceImpl implements ForumService {
 
     @Override
     public GetForumSettingResponse getForumSetting(GetForumSettingCommand cmd) {
+        GetForumSettingResponse response = new GetForumSettingResponse();
 
-        return null;
+        //获取服务类型
+        ListForumServiceTypesCommand serviceTypesCommand = new ListForumServiceTypesCommand();
+        serviceTypesCommand.setNamespaceId(cmd.getNamespaceId());
+        serviceTypesCommand.setModuleType(cmd.getModuleType());
+        serviceTypesCommand.setCategoryId(cmd.getCategoryId());
+        ListForumServiceTypesResponse serviceTypesDtos = listForumServiceTypes(serviceTypesCommand);
+        response.setServiceTypes(serviceTypesDtos.getDtos());
+
+        //话题的热门标签
+        ListHotTagCommand tagCommand = new ListHotTagCommand();
+        tagCommand.setNamespaceId(cmd.getNamespaceId());
+        tagCommand.setModuleType(cmd.getModuleType());
+        tagCommand.setCategoryId(cmd.getCategoryId());
+        tagCommand.setServiceType(HotTagServiceType.TOPIC.getCode());
+        List<TagDTO> tagDTOS = hotTagService.listHotTag(tagCommand);
+        response.setTopicTags(tagDTOS);
+
+
+        //活动的热门标签
+        tagCommand.setServiceType(HotTagServiceType.ACTIVITY.getCode());
+        tagDTOS = hotTagService.listHotTag(tagCommand);
+        response.setActivityTags(tagDTOS);
+
+        //投票的热门标签
+        tagCommand.setServiceType(HotTagServiceType.POLL.getCode());
+        tagDTOS = hotTagService.listHotTag(tagCommand);
+        response.setPollTags(tagDTOS);
+        
+
+
+
+
+        return response;
     }
 
     @Override
@@ -6363,6 +6402,10 @@ public class ForumServiceImpl implements ForumService {
     public ListForumServiceTypesResponse listForumServiceTypes(ListForumServiceTypesCommand cmd) {
 
         List<ForumServiceType> types = forumProvider.listForumServiceTypes(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId());
+
+        if(types == null || types.size() == 0){
+            types = forumProvider.listForumServiceTypes(0, cmd.getModuleType(), cmd.getCategoryId());
+        }
 
         ListForumServiceTypesResponse response = new ListForumServiceTypesResponse();
 
