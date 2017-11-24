@@ -12,10 +12,10 @@ import java.util.List;
  *     <li>namespaceId: namespaceId</li>
  *     <li>moduleType: 模块类型  参考 {@link com.everhomes.rest.forum.ForumModuleType}</li>
  *     <li>categoryId: 模块入口id，活动、论坛等多入口的模块需要传</li>
- *     <li>serviceTypes: 服务类型 {@link com.everhomes.rest.forum.ForumServiceTypeDTO}</li>
- *     <li>topicTags: 话题热门标签 {@link com.everhomes.rest.hotTag.TagDTO}</li>
- *     <li>activityTags: 活动热门标签 {@link com.everhomes.rest.hotTag.TagDTO}</li>
- *     <li>pollTags: 投票热门标签 {@link com.everhomes.rest.hotTag.TagDTO}</li>
+ *     <li>serviceTypes: 服务类型 {@link com.everhomes.rest.forum.ForumServiceType}</li>
+ *     <li>topicTags: 话题热门标签 </li>
+ *     <li>activityTags: 活动热门标签</li>
+ *     <li>pollTags: 投票热门标签</li>
  *     <li>interactFlag: 是否支持交互 {@link com.everhomes.rest.forum.InteractFlag}</li>
  * </ul>
  */
@@ -27,14 +27,14 @@ public class UpdateForumSettingCommand {
 
     private Long categoryId;
 
-    @ItemType(ForumServiceTypeDTO.class)
-    private List<ForumServiceTypeDTO> serviceTypes;
-    @ItemType(TagDTO.class)
-    private List<TagDTO> topicTags;
-    @ItemType(TagDTO.class)
-    private List<TagDTO> activityTags;
-    @ItemType(TagDTO.class)
-    private List<TagDTO> pollTags;
+    @ItemType(String.class)
+    private List<String> serviceTypes;
+    @ItemType(String.class)
+    private List<String> topicTags;
+    @ItemType(String.class)
+    private List<String> activityTags;
+    @ItemType(String.class)
+    private List<String> pollTags;
     private Byte interactFlag;
 
     public Integer getNamespaceId() {
@@ -61,35 +61,35 @@ public class UpdateForumSettingCommand {
         this.categoryId = categoryId;
     }
 
-    public List<ForumServiceTypeDTO> getServiceTypes() {
+    public List<String> getServiceTypes() {
         return serviceTypes;
     }
 
-    public void setServiceTypes(List<ForumServiceTypeDTO> serviceTypes) {
+    public void setServiceTypes(List<String> serviceTypes) {
         this.serviceTypes = serviceTypes;
     }
 
-    public List<TagDTO> getTopicTags() {
+    public List<String> getTopicTags() {
         return topicTags;
     }
 
-    public void setTopicTags(List<TagDTO> topicTags) {
+    public void setTopicTags(List<String> topicTags) {
         this.topicTags = topicTags;
     }
 
-    public List<TagDTO> getActivityTags() {
+    public List<String> getActivityTags() {
         return activityTags;
     }
 
-    public void setActivityTags(List<TagDTO> activityTags) {
+    public void setActivityTags(List<String> activityTags) {
         this.activityTags = activityTags;
     }
 
-    public List<TagDTO> getPollTags() {
+    public List<String> getPollTags() {
         return pollTags;
     }
 
-    public void setPollTags(List<TagDTO> pollTags) {
+    public void setPollTags(List<String> pollTags) {
         this.pollTags = pollTags;
     }
 

@@ -63,10 +63,7 @@ import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
 import com.everhomes.rest.forum.StickPostCommand;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.common.Router;
-import com.everhomes.rest.hotTag.HotFlag;
-import com.everhomes.rest.hotTag.HotTagServiceType;
-import com.everhomes.rest.hotTag.ListHotTagCommand;
-import com.everhomes.rest.hotTag.TagDTO;
+import com.everhomes.rest.hotTag.*;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.*;
@@ -90,7 +87,6 @@ import com.everhomes.user.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import net.greghaines.jesque.Job;
-import org.apache.xmlbeans.impl.xb.xsdschema.Public;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.elasticsearch.common.text.Text;
@@ -6395,9 +6391,56 @@ public class ForumServiceImpl implements ForumService {
     @Override
     public void updateForumSetting(UpdateForumSettingCommand cmd) {
 
-        List<ForumServiceType> types = forumProvider.listForumServiceTypes(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId());
+        List<ForumServiceType> oldTypes = forumProvider.listForumServiceTypes(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId());
 
-        hotTagService.resetHotTag();
+        List<Long> oldTypeIds = oldTypes.stream().map(r -> r.getId()).collect(Collectors.toList());
+
+        List<ForumServiceType> newTypes = new ArrayList<>();
+
+        if(cmd.getServiceTypes() != null){
+            for (int i= 0; i<cmd.getServiceTypes().size(); i++){
+                ForumServiceType type = new ForumServiceType();
+                type.setNamespaceId(cmd.getNamespaceId());
+                type.setModuleType(cmd.getModuleType());
+                type.setCategoryId(cmd.getCategoryId());
+                type.setServiceType(cmd.getServiceTypes().get(i));
+                type.setSortNum(i);
+                type.setCreateTime(new Timestamp(System.currentTimeMillis()));
+                newTypes.add(type);
+            }
+        }
+
+        dbProvider.execute(status -> {
+
+            //更新服务类型
+            forumProvider.deleteForumServiceTypes(oldTypeIds);
+            forumProvider.createForumServiceTypes(newTypes);
+
+            ResetHotTagCommand resetHotTagCommand = new ResetHotTagCommand();
+            resetHotTagCommand.setNamespaceId(cmd.getNamespaceId());
+            resetHotTagCommand.setModuleType(cmd.getModuleType());
+            resetHotTagCommand.setCategoryId(cmd.getCategoryId());
+
+            //话题的热门标签
+            resetHotTagCommand.setServiceType(HotTagServiceType.TOPIC.getCode());
+            resetHotTagCommand.setNames(cmd.getTopicTags());
+            hotTagService.resetHotTag(resetHotTagCommand);
+
+            //活动的热门标签
+            resetHotTagCommand.setServiceType(HotTagServiceType.ACTIVITY.getCode());
+            resetHotTagCommand.setNames(cmd.getActivityTags());
+            hotTagService.resetHotTag(resetHotTagCommand);
+
+            //投票的热门标签
+            resetHotTagCommand.setServiceType(HotTagServiceType.POLL.getCode());
+            resetHotTagCommand.setNames(cmd.getPollTags());
+            hotTagService.resetHotTag(resetHotTagCommand);
+
+            //暂时不对评论做处理。
+
+            return null;
+
+        });
 
     }
 

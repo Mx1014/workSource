@@ -2,21 +2,25 @@ package com.everhomes.rest.forum;
 
 
 /**
- *<ul>
- *<li>ACTIVITY("activity"):活动</li>
- *<li>TOPIC("topic"):活动</li>
- *<li>POLL("poll"):活动</li>
- *</ul>
+ * <ul>
+ *     <li>FORUM((byte)1): 论坛</li>
+ *     <li>ACTIVITY((byte)2): 活动</li>
+ *     <li>ANNOUNCEMENT((byte)3): 公告</li>
+ *     <li>CLUB((byte)4): 俱乐部</li>
+ *     <li>GUILD((byte)5): 行业协会</li>
+ *     <li>FEEDBACK((byte)6): 意见反馈</li>
+ * </ul>
  */
 public enum ForumModuleType {
 
-    FORUM((byte)1), ACTIVITY((byte)2), CLUB((byte)3), GUILD((byte)4), FEEDBACK((byte)5);
+    FORUM((byte) 1), ACTIVITY((byte) 2), ANNOUNCEMENT((byte) 3), CLUB((byte) 3), GUILD((byte) 4), FEEDBACK((byte) 5);
 
     private Byte code;
+
     private ForumModuleType(Byte code) {
         this.code = code;
     }
-    
+
     public Byte getCode() {
         return this.code;
     }

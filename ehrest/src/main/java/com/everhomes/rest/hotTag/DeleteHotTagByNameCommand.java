@@ -4,21 +4,24 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>name: 标签名</li>
- *     <li>serviceType: 标签服务类型 参考{@link com.everhomes.rest.hotTag.HotTagServiceType}</li>
  *     <li>namespaceId: 域空间Id，不传则取当前域空间的</li>
+ *     <li>moduleType: 模块类型  参考 {@link com.everhomes.rest.forum.ForumModuleType}</li>
  *     <li>categoryId: categoryId</li>
+ *     <li>serviceType: 标签服务类型 参考{@link com.everhomes.rest.hotTag.HotTagServiceType}</li>
+ *     <li>name: 标签名</li>
  * </ul>
  */
 public class DeleteHotTagByNameCommand {
 
-	private String name;
+	private Integer namespaceId;
+
+	private Byte moduleType;
+
+	private Long categoryId;
 
 	private String serviceType;
 
-	private Integer namespaceId;
-
-	private Long categoryId;
+	private String name;
 
 	public String getName() {
 		return name;

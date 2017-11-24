@@ -1,12 +1,10 @@
 package com.everhomes.hotTag;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.everhomes.db.DbProvider;
-import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.hotTag.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +19,6 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import scala.Int;
 
 @Component
 public class HotTagServiceImpl implements HotTagService{
@@ -134,7 +130,7 @@ public class HotTagServiceImpl implements HotTagService{
 	}
 
 	@Override
-	public void resetHotTag(resetHotTagCommand cmd) {
+	public void resetHotTag(ResetHotTagCommand cmd) {
 
 		if(cmd.getNamespaceId() == null){
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
