@@ -860,6 +860,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 LOGGER.debug("organization is children organization, id = " + id);
                 return null;
             }
+            dto.setId(organization.getId());
             dto.setEnterpriseName(organization.getName());
             if(dto.getEnterpriseName() == null || com.mysql.jdbc.StringUtils.isNullOrEmpty(dto.getEnterpriseName()))
                 dto.setEnterpriseName(org.getDisplayName());
