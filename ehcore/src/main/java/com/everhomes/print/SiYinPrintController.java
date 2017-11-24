@@ -1,10 +1,13 @@
 // @formatter:off
 package com.everhomes.print;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.order.PreOrderDTO;
@@ -328,15 +331,9 @@ public class SiYinPrintController extends ControllerBase {
 	 * <p>21.司印方调用，任务日志处理</p>
 	 */
     @RequestMapping("mfpLogNotification")
-    @RestReturn(String.class)
     @RequireAuthentication(false)
-    public RestResponse mfpLogNotification(@RequestParam(value="jobData", required=true) String jobData){
-    	Map<String, PrintSettingColorTypeDTO> map = new HashMap<String, PrintSettingColorTypeDTO>();
-    	map.put("athree", new PrintSettingColorTypeDTO());
-    	map.put("afour", new PrintSettingColorTypeDTO());
-    	map.put("afive", new PrintSettingColorTypeDTO());
-        RestResponse restResponse = new RestResponse(map);
-        return restResponse;
+    public void mfpLogNotification(@RequestParam(value="jobData", required=true) String jobData, HttpServletResponse response){
+    	siyinPrintService.mfpLogNotification(jobData,response);
     }
     
     /**

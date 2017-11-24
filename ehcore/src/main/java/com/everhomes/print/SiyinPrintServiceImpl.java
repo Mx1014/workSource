@@ -16,7 +16,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +43,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
@@ -82,6 +86,7 @@ import com.everhomes.rest.print.ListPrintUserOrganizationsResponse;
 import com.everhomes.rest.print.ListPrintingJobsCommand;
 import com.everhomes.rest.print.ListPrintingJobsResponse;
 import com.everhomes.rest.print.ListQueueJobsCommand;
+import com.everhomes.rest.print.ListQueueJobsDTO;
 import com.everhomes.rest.print.ListQueueJobsResponse;
 import com.everhomes.rest.print.PayPrintOrderCommand;
 import com.everhomes.rest.print.PayPrintOrderCommandV2;
@@ -110,6 +115,8 @@ import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.xml.XMLToJSON;
+
+import sun.misc.BASE64Decoder;
 /**
  * 
  *  @author:dengs 2017年6月22日
@@ -173,6 +180,12 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Autowired
 	private PayService payService;
+	
+	@Autowired
+	private SiyinUserPrinterMappingProvider siyinUserPrinterMappingProvider;
+	
+	@Autowired
+	private DbProvider dbProvider;
 
 	@Override
 	public GetPrintSettingResponse getPrintSetting(GetPrintSettingCommand cmd) {
@@ -668,8 +681,27 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unknown readerName = "+cmd.getReaderName());
         }
         directLogin(moduleIp,printer,loginData);
+        mappingReaderToUser(cmd.getReaderName());
 	}
 	
+	private void mappingReaderToUser(String readerName) {
+		//理论上应该给这里加锁，但是解锁打印机应该是低频率，这里上锁。
+		SiyinUserPrinterMapping mapping = siyinUserPrinterMappingProvider.findSiyinUserPrinterMappingByUserAndPrinter(UserContext.current().getUser().getId(),readerName);
+		if(mapping==null){
+			mapping = new SiyinUserPrinterMapping();
+			mapping.setUserId(UserContext.current().getUser().getId());
+			mapping.setReaderName(readerName);
+			mapping.setNamespaceId(UserContext.getCurrentNamespaceId());
+			mapping.setUnlockTimes(1L);
+			siyinUserPrinterMappingProvider.createSiyinUserPrinterMapping(mapping);
+		}else{
+			mapping.setUnlockTimes(mapping.getUnlockTimes()+1);
+			siyinUserPrinterMappingProvider.updateSiyinUserPrinterMapping(mapping);
+		}
+		
+	}
+
+
 	/**
 	 * 解锁打印机
 	 */
@@ -1110,18 +1142,176 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	@Override
 	public ListQueueJobsResponse listQueueJobs(ListQueueJobsCommand cmd) {
         String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
-		return null;
+        List<SiyinUserPrinterMapping> mappings = siyinUserPrinterMappingProvider.listSiyinUserPrinterMappingByUserId(UserContext.current().getUser().getId(), UserContext.getCurrentNamespaceId());
+        List<String> readers = new ArrayList<>(5);
+        if(mappings == null || mappings.size() == 0){
+        	List<SiyinPrintPrinter> lists = siyinPrintPrinterProvider.listSiyinPrintPrinter();
+        	for (SiyinPrintPrinter printer : lists) {
+				readers.add(printer.getReaderName());
+			}
+        }else{
+        	for (SiyinUserPrinterMapping mapping : mappings) {
+        		readers.add(mapping.getReaderName());
+			}
+        }
+        List<ListQueueJobsDTO> jobs = getQueueJobs(readers,siyinUrl,cmd.getOwnerId());
+        return new ListQueueJobsResponse(jobs);
+	}
+
+
+	private List<ListQueueJobsDTO> getQueueJobs(List<String> printers, String siyinUrl, Long communityId) {
+		List<ListQueueJobsDTO> list = new ArrayList<>();
+		readerLoop:
+		for (String printer : printers) {
+			Map<String, String> params = new HashMap<>();
+	        params.put("host_name", printer);
+	        params.put("mode", "USERLIST");
+	        params.put("card_id", new StringBuffer().append(UserContext.current().getUser().getId()).append(PRINT_LOGON_ACCOUNT_SPLIT).append(communityId).toString());
+//	        params.put("card_id", "310183-240111044331058733");
+	        params.put("language", "zh-cn");
+	        String result;
+			try {
+				result = HttpUtils.post(siyinUrl + "/console/cardListener", params, 30);
+				String siyinCode = getSiyinCode(result);
+				if(siyinCode!=null && siyinCode.startsWith("INF")){
+					if(siyinCode.equals("INF0008") || siyinCode.equals("INF0009")){
+						continue readerLoop;
+					}else{
+						LOGGER.error("siyin api:/console/cardListener request failed, result = {} ",result);
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/cardListener return failed, result = "+result);
+					}
+				}else if(siyinCode!=null){
+					addjobs(list,result,printer);
+				}else{
+					LOGGER.error("siyin api:/console/cardListener request failed, result = {} ",result);
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/cardListener return failed, result = "+result);
+				}
+			} catch (IOException e) {
+				LOGGER.error("siyin api:/console/cardListener request exception : "+e.getMessage());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/cardListener return exception, message = "+e.getMessage());
+				
+			}
+		}
+		return list;
+	}
+
+
+	private void addjobs(List<ListQueueJobsDTO> list, String result,String printer) {
+		Map<String, Object> object = XMLToJSON.convertOriginalMap(result);
+		Map<?, ?> data = (Map<?,?>)object.get("brocadesoft");
+		Object job_list = data.get("job_list");
+		List<Map<?,?>> jobList = new ArrayList<>();
+		if(job_list instanceof Map){
+			@SuppressWarnings("unchecked")
+			Map<String,Map<?,?>> map = (Map<String,Map<?,?>>)job_list;
+			jobList.add(map.get("job"));
+		}else{
+		    jobList = (List<Map<?,?>>)job_list;
+		}
+		list.addAll(jobList.stream().map(map->{
+			ListQueueJobsDTO dto = new ListQueueJobsDTO();
+			dto.setJobId(map.get("job_id").toString());
+			dto.setJobName(map.get("job_name").toString());
+			dto.setPrintTime(map.get("print_time").toString());
+			dto.setReaderName(printer);
+			dto.setTotalPage(map.get("total_page").toString());
+        	return dto;
+        }).collect(Collectors.toList()));
 	}
 
 
 	@Override
 	public void releaseQueueJobs(ReleaseQueueJobsCommand cmd) {
+		checkPrinters(cmd.getJobs());
+		Map<String,String> rmjobsMap = generateXmlData(cmd.getJobs());
+		releaseQueueJobs(rmjobsMap,cmd.getOwnerId());
+	}
+
+	private void releaseQueueJobs(Map<String, String> rmjobsMap, Long communityId) {
+		String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
+		rmjobsMap.entrySet().forEach(r->{
+			Map<String, String> params = new HashMap<>();
+	        params.put("host_name", r.getKey());
+	        params.put("mode", "USERLIST");
+	        params.put("card_id", new StringBuffer().append(UserContext.current().getUser().getId()).append(PRINT_LOGON_ACCOUNT_SPLIT).append(communityId).toString());
+//	        params.put("card_id", "310183-240111044331058733");
+	        params.put("language", "zh-cn");
+	        params.put("data", r.getValue());
+			try {
+				String result = HttpUtils.post(siyinUrl + "/console/cardListener", params, 30);
+			} catch (IOException e) {
+				LOGGER.error("siyin api:/console/cardListener request exception : "+e.getMessage());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/cardListener return exception, message = "+e.getMessage());
+			}
+		});
+	}
+
+	static final String rootxml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><xml><job_list>#{job}</job_list></xml>";
+	static final String jobxml = "<job><job_id>#{job_id}</job_id></job>";
+	private Map<String, String> generateXmlData(List<ListQueueJobsDTO> jobs) {
+		Map<String, List<ListQueueJobsDTO>> printerMap = new HashMap<>();
+		for (ListQueueJobsDTO job : jobs) {
+			List<ListQueueJobsDTO> printerJobs = printerMap.get(job.getReaderName());
+			if(printerJobs == null){
+				printerJobs = new ArrayList<>();
+				printerMap.put(job.getReaderName(), printerJobs);
+			}
+			printerJobs.add(job);
+		}
 		
+		Map<String, String> xmlMap = new HashMap<String,String>();
+		printerMap.entrySet().forEach(r->{
+			StringBuffer buffer = new StringBuffer();
+			r.getValue().forEach(dto->{
+				buffer.append(jobxml.replace("#{job_id}", dto.getJobId()));
+			});
+			xmlMap.put(r.getKey(), rootxml.replace("#{job}", buffer.toString()));
+		});
+		return xmlMap;
+	}
+
+
+	private void checkPrinters(List<ListQueueJobsDTO> jobs) {
+		for (ListQueueJobsDTO job : jobs) {
+			if(job.getJobId() == null || job.getReaderName() == null){
+				LOGGER.error("jobs data error");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, " job = "+job);
+			}
+		}
 	}
 
 
 	@Override
 	public void deleteQueueJobs(DeleteQueueJobsCommand cmd) {
-		
+		checkPrinters(cmd.getJobs());
+		String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
+		Map<String, String> params = new HashMap<>();
+        params.put("format", "String");
+        params.put("action", "Cancel");
+        StringBuffer buffer = new StringBuffer();
+        cmd.getJobs().forEach(r->{
+        	buffer.append(r.getJobId()).append(',');
+        });
+        params.put("job_data", buffer.substring(0,buffer.length()-1));
+		try {
+			String result = HttpUtils.post(siyinUrl + "/console/jobHandler", params, 30);
+		} catch (IOException e) {
+			LOGGER.error("siyin api:/console/cardListener request exception : "+e.getMessage());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/jobHandler return exception, message = "+e.getMessage());
+		}
+	
+	}
+
+
+	public void mfpLogNotification(String jobData, HttpServletResponse response) {
+		try {
+			if(siyinJobValidateServiceImpl.mfpLogNotification(jobData)){
+				response.getOutputStream().write("OK".getBytes());
+				return ;
+			}
+			response.getOutputStream().write("FAIL".getBytes());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

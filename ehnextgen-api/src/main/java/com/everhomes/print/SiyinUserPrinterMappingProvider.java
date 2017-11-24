@@ -10,6 +10,10 @@ public interface SiyinUserPrinterMappingProvider {
 	void updateSiyinUserPrinterMapping(SiyinUserPrinterMapping siyinUserPrinterMapping);
 
 	SiyinUserPrinterMapping findSiyinUserPrinterMappingById(Long id);
+	
+	SiyinUserPrinterMapping findSiyinUserPrinterMappingByUserAndPrinter(Long userId, String readerName);
+	
+	List<SiyinUserPrinterMapping> listSiyinUserPrinterMappingByUserId(Long userId, Integer namespaceId);
 
 	List<SiyinUserPrinterMapping> listSiyinUserPrinterMapping();
 

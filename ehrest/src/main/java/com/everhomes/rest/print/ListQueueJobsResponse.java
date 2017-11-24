@@ -17,6 +17,13 @@ public class ListQueueJobsResponse {
 	@ItemType(ListQueueJobsDTO.class)
 	private List<ListQueueJobsDTO> jobs;
 
+	public ListQueueJobsResponse(List<ListQueueJobsDTO> jobs) {
+		this.jobs = jobs;
+	}
+	
+	public ListQueueJobsResponse() {
+	}
+
 	public List<ListQueueJobsDTO> getJobs() {
 		return jobs;
 	}

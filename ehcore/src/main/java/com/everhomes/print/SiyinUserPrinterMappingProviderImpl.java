@@ -87,4 +87,20 @@ public class SiyinUserPrinterMappingProviderImpl implements SiyinUserPrinterMapp
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
+
+	@Override
+	public List<SiyinUserPrinterMapping> listSiyinUserPrinterMappingByUserId(Long userId,Integer namespaceId) {
+		return getReadOnlyContext().select().from(Tables.EH_SIYIN_USER_PRINTER_MAPPINGS)
+				.where(Tables.EH_SIYIN_USER_PRINTER_MAPPINGS.USER_ID.eq(userId))
+				.and(Tables.EH_SIYIN_USER_PRINTER_MAPPINGS.NAMESPACE_ID.eq(namespaceId))
+				.fetch().map(r -> ConvertHelper.convert(r, SiyinUserPrinterMapping.class));
+	}
+
+	@Override
+	public SiyinUserPrinterMapping findSiyinUserPrinterMappingByUserAndPrinter(Long userId, String readerName) {
+		return getReadOnlyContext().select().from(Tables.EH_SIYIN_USER_PRINTER_MAPPINGS)
+				.where(Tables.EH_SIYIN_USER_PRINTER_MAPPINGS.USER_ID.eq(userId))
+				.and(Tables.EH_SIYIN_USER_PRINTER_MAPPINGS.READER_NAME.eq(readerName))
+				.fetchAny().map(r -> ConvertHelper.convert(r, SiyinUserPrinterMapping.class));
+	}
 }
