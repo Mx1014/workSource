@@ -122,7 +122,7 @@ public class QualityServiceImpl implements QualityService {
 
 	@Autowired
 	private ConfigurationProvider configProvider;
-	
+
 	@Override
 	public QualityStandardsDTO creatQualityStandard(CreatQualityStandardCommand cmd) {
 		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARD_CREATE, 0L);
@@ -332,7 +332,9 @@ public class QualityServiceImpl implements QualityService {
 	
 	private QualityInspectionStandards verifiedStandardById(Long id) {
 		QualityInspectionStandards standard = qualityProvider.findStandardById(id);
-		if(standard == null || standard.getStatus() == null || standard.getStatus() == QualityStandardStatus.INACTIVE.getCode()) {
+//		if(standard == null || standard.getStatus() == null || standard.getStatus() == QualityStandardStatus.INACTIVE.getCode()) {
+		//fix bug 1123  #15610
+		if(standard == null || standard.getStatus() == null) {
 			LOGGER.error("the standard which id="+id+" don't exist!");
 			throw RuntimeErrorException
 					.errorWith(
@@ -768,6 +770,13 @@ public class QualityServiceImpl implements QualityService {
 			return ConvertHelper.convert(task, QualityInspectionTaskDTO.class);
 
 		return null;
+	}
+
+	@Override
+	public OrganizationMember getCurrentUserInfo() {
+		//fix bug #15603 暂时没有公共API
+		Long currentUserId = UserContext.current().getUser().getId();
+		return organizationProvider.listOrganizationMembers(currentUserId).get(0);
 	}
 
 	@Override
@@ -3072,8 +3081,7 @@ public class QualityServiceImpl implements QualityService {
 		Collections.sort(list, new Comparator<Map.Entry<Long, Timestamp>>() {
 			public int compare(Map.Entry<Long, Timestamp> o1,
 							   Map.Entry<Long, Timestamp> o2) {
-				//change to before fix history tasks order
-				if(o2.getValue().before(o1.getValue()))
+				if(o2.getValue().after(o1.getValue()))
 					return 1;
 				return -1;
 			}
@@ -3668,8 +3676,8 @@ public class QualityServiceImpl implements QualityService {
 			if (total.doubleValue() == sortedScoresByTarget.get(i).getTotalScore().doubleValue() && sortedScoresByTarget.get(i).getTotalScore() != 0) {
 				sortedScoresByTarget.get(i).setOrderId(previousOrder);
 			} else {
-				sortedScoresByTarget.get(i).setOrderId(i + 1);
-				previousOrder++;
+				Integer tempOrder = previousOrder +1;
+				sortedScoresByTarget.get(i).setOrderId(tempOrder);
 				total = sortedScoresByTarget.get(i).getTotalScore();
 			}
 		}
