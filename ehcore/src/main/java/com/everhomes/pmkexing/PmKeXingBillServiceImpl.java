@@ -17,6 +17,8 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contract.ContractService;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.*;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.AddressDTO;
@@ -25,6 +27,7 @@ import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ListEnterpriseCustomerContractsCommand;
 import com.everhomes.rest.contract.ListIndividualCustomerContractsCommand;
 import com.everhomes.rest.contract.NamespaceContractType;
+import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
@@ -83,7 +86,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
     private CacheProvider cacheProvider;
 
     @Autowired
-    private ContractService contractService;
+    private ContractProvider contractProvider;
 
     private static LocaleStringService localeStringService;
 
@@ -265,19 +268,11 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         GetLeaseContractBillOnFiPropertyRes res = new GetLeaseContractBillOnFiPropertyRes();
         List<GetLeaseContractBillOnFiPropertyData> data = new ArrayList<>();
         //获得所有合同
-        List<ContractDTO> contracts = new ArrayList<>();
+        List<Contract> contracts = new ArrayList<>();
         if(targetType.equals(AssetPaymentStrings.EH_USER)){
-            ListIndividualCustomerContractsCommand cmd = new ListIndividualCustomerContractsCommand();
-            cmd.setNamespaceId(namespaceId);
-            cmd.setCommunityId(ownerId);
-            cmd.setIndividualCustomerId(UserContext.currentUserId());
-            contracts = contractService.listIndividualCustomerContracts(cmd);
+            contracts = contractProvider.listContractByCustomerId(ownerId, UserContext.currentUserId(), CustomerType.INDIVIDUAL.getCode());
         }else if(targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
-            ListEnterpriseCustomerContractsCommand cmd = new ListEnterpriseCustomerContractsCommand();
-            cmd.setNamespaceId(namespaceId);
-            cmd.setCommunityId(ownerId);
-            cmd.setEnterpriseCustomerId(targetId);
-            contracts = contractService.listEnterpriseCustomerContracts(cmd);
+            contracts = contractProvider.listContractByCustomerId(ownerId, UserContext.currentUserId(), CustomerType.ENTERPRISE.getCode());
         }
         //从eh_config表中获得api
         String api = getBillAPI(ConfigConstants.ASSET_PAYMENT_ZJH_API_15);
@@ -296,7 +291,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
             params.put("isPay",isPayStr);
         }
         for(int i = 0; i < contracts.size(); i ++){
-            ContractDTO contract = contracts.get(i);
+            Contract contract = contracts.get(i);
             if(!contract.getNamespaceContractType().equals(NamespaceContractType.EBEI.getCode())){
                 continue;
             }
