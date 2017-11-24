@@ -2311,6 +2311,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 		}
 		List<ProjectDTO> projectTrees = new ArrayList<>();
+		// 存在项目分类时的解析
 		if(0 != categoryIds.size()){
 			List<ProjectDTO> temp = communityProvider.listResourceCategory(null, null, categoryIds, ResourceCategoryType.CATEGORY.getCode())
 					.stream().map(r -> {
@@ -2330,6 +2331,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			setResourceDTOs(projectTrees, projectIds, namespaceId);
 		}
 
+		// 不存在项目分类时的解析
 		//添加子项目
 		entityts.stream().filter(r -> EntityType.COMMUNITY == EntityType.fromCode(r.getProjectType())).map(r -> {
 			//获取园区下的子项目
