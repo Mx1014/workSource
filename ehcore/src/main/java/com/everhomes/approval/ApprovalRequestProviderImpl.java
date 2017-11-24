@@ -358,7 +358,7 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 			calendar.add(Calendar.MONTH, 1);
 			Timestamp endDate = new Timestamp(calendar.getTimeInMillis());
 			SelectConditionStep<Record1<BigDecimal>> step = getReadOnlyContext()
-					.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.DURATION.sum()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS)
+					.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.DURATION.sum().round(3)).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS)
 					.where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.CREATOR_UID.eq(userId))
 					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(ownerId))
 					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(beginDate))
