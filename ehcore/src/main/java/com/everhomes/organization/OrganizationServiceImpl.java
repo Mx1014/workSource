@@ -2802,7 +2802,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 continue;
             }
 
-            //Filter out the inactive organization add by lei.lv 20171124
+            //Filter out the child organization add by lei.lv 20171124
             Long parentId = org.getParentId();
             if (parentId != 0L) {
                 LOGGER.error("The member's organization is child-enterprise, userId=" + userId
