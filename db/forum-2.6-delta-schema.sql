@@ -2,7 +2,7 @@
 CREATE TABLE `eh_forum_service_types` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) NOT NULL DEFAULT '0',
-  `module_type` tinyint(4) NOT NULL DEFAULT '1' COMMENT 'module type, 1-forum,3-club......',
+  `module_type` tinyint(4) DEFAULT NULL COMMENT 'module type, 1-forum,2-activity......',
   `category_id` bigint(20) DEFAULT NULL,
   `service_type` varchar(255) NOT NULL,
   `sort_num` int(11) NOT NULL DEFAULT '0',
