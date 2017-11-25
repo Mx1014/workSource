@@ -2,9 +2,10 @@
 CREATE TABLE `eh_forum_service_types` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) NOT NULL DEFAULT '0',
-  `module_type` tinyint(4) DEFAULT NULL COMMENT 'module type, 1-forum,2-activity......',
-  `category_id` bigint(20) DEFAULT NULL,
+  `module_type` tinyint(4) NOT NULL COMMENT 'module type, 1-forum,2-activity......',
+  `category_id` bigint(20) NOT NULL,
   `service_type` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
   `sort_num` int(11) NOT NULL DEFAULT '0',
   `create_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
@@ -12,3 +13,4 @@ CREATE TABLE `eh_forum_service_types` (
 
 -- 热门标签，增加模块类型，1-论坛、2-活动、3-公告...等等  add by yanjun 20171123
 ALTER TABLE `eh_hot_tags` ADD COLUMN `module_type`  tinyint(4) DEFAULT NULL COMMENT 'module type, 1-forum 2-activity...........';
+ALTER TABLE `eh_hot_tags` MODIFY COLUMN `category_id`  bigint(22) NULL DEFAULT 0 AFTER `delete_uid`;
