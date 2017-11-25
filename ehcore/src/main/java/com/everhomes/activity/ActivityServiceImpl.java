@@ -969,11 +969,17 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
 	private ActivityRoster newRoster(ManualSignupCommand cmd, User createUser, Activity activity) {
-		User user = getUserFromPhone(cmd.getPhone());
+		//User user = getUserFromPhone(cmd.getPhone());
 		ActivityRoster roster = new ActivityRoster();
 		roster.setUuid(UUID.randomUUID().toString());
 		roster.setActivityId(activity.getId());
-		roster.setUid(user.getId());
+
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
+		if (userIdentifier != null) {
+			roster.setUid(userIdentifier.getOwnerUid());
+		}
+
         roster.setAdultCount(1);
         roster.setChildCount(0);
         roster.setCheckinFlag(CheckInStatus.UN_CHECKIN.getCode());
@@ -1195,10 +1201,16 @@ public class ActivityServiceImpl implements ActivityService {
 			//成功加一
 			result.setSuccess(result.getSuccess() + 1);
 
-			User user = getUserFromPhone(row.getA().trim());
+			//User user = getUserFromPhone(row.getA().trim());
 			ActivityRoster roster = new ActivityRoster();
 			roster.setUuid(UUID.randomUUID().toString());
-			roster.setUid(user.getId());
+
+			Integer namespaceId = UserContext.getCurrentNamespaceId();
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, row.getA().trim());
+			if (userIdentifier != null) {
+				roster.setUid(userIdentifier.getOwnerUid());
+			}
+			
 	        roster.setAdultCount(1);
 	        roster.setChildCount(0);
 	        roster.setCheckinFlag(CheckInStatus.UN_CHECKIN.getCode());
