@@ -25,6 +25,8 @@ public class ForumServiceTypeDTO {
 
     private String serviceType;
 
+    private String name;
+
     private Timestamp createTime;
 
     public Long getId() {
@@ -65,6 +67,14 @@ public class ForumServiceTypeDTO {
 
     public void setModuleType(Byte moduleType) {
         this.moduleType = moduleType;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
