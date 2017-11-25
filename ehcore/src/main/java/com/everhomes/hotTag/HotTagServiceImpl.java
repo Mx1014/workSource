@@ -45,9 +45,10 @@ public class HotTagServiceImpl implements HotTagService{
 		if(cmd.getNamespaceId() == null){
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
-
-
-		List<TagDTO> tags = hotTagProvider.listHotTag(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId(), cmd.getServiceType(), cmd.getPageSize());
+		List<TagDTO> tags = null;
+		if(cmd.getModuleType() != null && cmd.getCategoryId() != null && cmd.getServiceType() != null){
+			tags = hotTagProvider.listHotTag(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId(), cmd.getServiceType(), cmd.getPageSize());
+		}
 
 		//查询没有标签，则使用0域空间、默认类型，入口为null的数据，即以前默认的数据
 		if(tags == null || tags.size() == 0){

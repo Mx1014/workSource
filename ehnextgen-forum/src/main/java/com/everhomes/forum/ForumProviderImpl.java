@@ -1133,13 +1133,9 @@ public class ForumProviderImpl implements ForumProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhForumServiceTypesRecord> query = context.selectQuery(Tables.EH_FORUM_SERVICE_TYPES);
         query.addConditions(Tables.EH_FORUM_SERVICE_TYPES.NAMESPACE_ID.eq(namespaceId));
-        if(moduleType != null){
-            query.addConditions(Tables.EH_FORUM_SERVICE_TYPES.MODULE_TYPE.eq(moduleType));
-        }
+        query.addConditions(Tables.EH_FORUM_SERVICE_TYPES.MODULE_TYPE.eq(moduleType));
 
-        if(categoryId != null){
-            query.addConditions(Tables.EH_FORUM_SERVICE_TYPES.CATEGORY_ID.eq(categoryId));
-        }
+        query.addConditions(Tables.EH_FORUM_SERVICE_TYPES.CATEGORY_ID.eq(categoryId));
 
         query.addOrderBy(Tables.EH_FORUM_SERVICE_TYPES.SORT_NUM.asc());
 
