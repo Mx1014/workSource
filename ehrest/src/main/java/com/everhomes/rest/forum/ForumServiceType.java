@@ -28,7 +28,7 @@ public enum ForumServiceType {
         }
 
         for(ForumServiceType v : ForumServiceType.values()) {
-            if(v.getCode() == code)
+            if(v.getCode().equals(code))
                 return v;
         }
         return null;
