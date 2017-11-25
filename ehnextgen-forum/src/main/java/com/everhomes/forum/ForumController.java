@@ -478,6 +478,7 @@ public class ForumController extends ControllerBase {
      */
     @RequestMapping("listForumServiceTypes")
     @RestReturn(value=ListForumServiceTypesResponse.class)
+    @RequireAuthentication(false)
     public RestResponse listForumServiceTypes(ListForumServiceTypesCommand cmd) {
 
         ListForumServiceTypesResponse res = forumService.listForumServiceTypes(cmd);

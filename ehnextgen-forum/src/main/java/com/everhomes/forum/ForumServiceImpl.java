@@ -6459,7 +6459,7 @@ public class ForumServiceImpl implements ForumService {
         List<ForumServiceType> types = forumProvider.listForumServiceTypes(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId());
 
         if(types == null || types.size() == 0){
-            types = forumProvider.listForumServiceTypes(0, cmd.getModuleType(), cmd.getCategoryId());
+            types = forumProvider.listForumServiceTypes(0, null, null);
         }
 
         ListForumServiceTypesResponse response = new ListForumServiceTypesResponse();
