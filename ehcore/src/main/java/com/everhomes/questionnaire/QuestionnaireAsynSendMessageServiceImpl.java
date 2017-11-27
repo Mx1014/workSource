@@ -402,14 +402,19 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		cmd.setIsAuth(isAuthor);
 		//这里只需要查询userID，其他的附加查询不需要，所以自己搞了个查询。
 		List<UserOrganizations> userOrganizations = listUserCommunities(cmd);
-		List<String> userids = userOrganizations.stream().map(r->String.valueOf(r.getUserId())).collect(Collectors.toList());
-		if(isAuthor == 0){
+		List<String> userids = new ArrayList<>();
+		if(isAuthor == 0 || isAuthor == 1) {
+			userids = userOrganizations.stream().map(r -> String.valueOf(r.getUserId())).collect(Collectors.toList());
+		}
+		if(isAuthor == 0 || isAuthor == 2){
 			//未认证用户 userprofile表中的用户-已认证或者认证中的用户
 			List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null, null);
 			if(users == null){
 				users = new ArrayList<>();
 			}
-			users.forEach(r->{userids.add(r.getId()+"");});
+			for (User user : users) {
+				userids.add(user.getId()+"");
+			}
 		}
 		return userids;
 	}
