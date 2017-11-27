@@ -230,7 +230,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     }
 
     @Override
-    public ShowBillDetailForClientResponse getBillDetailForClient(String billId,String targetType) {
+    public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId,String targetType) {
         ShowBillDetailForClientResponse result = new ShowBillDetailForClientResponse();
         List<ShowBillDetailForClientDTO> list = new ArrayList<>();
         String postJson = "";

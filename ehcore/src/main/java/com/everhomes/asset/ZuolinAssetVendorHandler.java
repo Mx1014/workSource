@@ -769,7 +769,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
 
     @Override
-    public ShowBillDetailForClientResponse getBillDetailForClient(String billId,String targetType) {
+    public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId,String targetType) {
         ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
         response =  assetProvider.getBillDetailForClient(Long.parseLong(billId));
         return response;

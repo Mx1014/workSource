@@ -1,5 +1,6 @@
 package com.everhomes.asset;
 
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.pmkexing.PmKeXingBillService;
 import com.everhomes.rest.asset.*;
@@ -30,6 +31,9 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
 
     @Autowired
     private AssetProvider assetProvider;
+
+    @Autowired
+    private CommunityProvider communityProvider;
 
     private static ZuolinAssetVendorHandler zuolinAssetVendorHandler = new ZuolinAssetVendorHandler();
 
@@ -247,10 +251,54 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public ShowBillDetailForClientResponse getBillDetailForClient(String billId, String targetType) {
-        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
-        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                "Insufficient privilege");
+    public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId, String targetType) {
+        ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
+        BigDecimal amountReceivable = new BigDecimal("0");
+        BigDecimal amountOwed = new BigDecimal("0");
+        TreeSet<Date> dateSet = new TreeSet<>();
+        SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+        List<ShowBillDetailForClientDTO> list = new ArrayList<>();
+
+        Integer pageOffSet = 1;
+        Integer pageSize = 100;
+        List<GetLeaseContractReceivableData> allData = new ArrayList<>();
+        int count = 0;
+        while(true){
+            count++;
+            GetLeaseContractReceivableRes res = keXingBillService.listFiCategoryBills(billId,ownerId,pageOffSet,pageSize);
+            if(res.getHasNextPag().equals("0") || count > 1000){
+                break;
+            }
+            if(res.getResponseCode().equals("200") && res.getHasNextPag().equals("1")){
+                allData.addAll(res.getData());
+            }
+        }
+        for(int i = 0; i < allData.size(); i++){
+            GetLeaseContractReceivableData source = allData.get(i);
+            ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
+
+            try {
+                dateSet.add(yyyyMMdd.parse(source.getDateStrBegin()));
+                dateSet.add(yyyyMMdd.parse(source.getDateStrEnd()));
+            } catch (ParseException e) {}
+            dto.setDateStrBegin(source.getDateStrBegin());
+            dto.setDateStrEnd(source.getDateStrEnd());
+            dto.setDateStr(source.getChargePeriod());
+            BigDecimal amunt1 = new BigDecimal(source.getShouldMoney());
+            dto.setAmountReceivable(amunt1);
+            amountReceivable = amountReceivable.add(amunt1);
+            BigDecimal amount2 = new BigDecimal(source.getActualMoney());
+            dto.setAmountOwed(amount2);
+            amountOwed = amountOwed.add(amount2);
+            dto.setBillItemName(source.getFiCategory());
+            dto.setAddressName(source.getBuildingRename());
+            list.add(dto);
+        }
+        response.setShowBillDetailForClientDTOList(list);
+        response.setAmountReceivable(amountReceivable);
+        response.setDatestr(dateSet.pollFirst().toString()+"~"+ dateSet.pollLast().toString());
+        response.setAmountOwed(amountOwed);
+        return response;
     }
 
     @Override
@@ -399,7 +447,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
             List<GetLeaseContractBillOnFiPropertyData> values = entry.getValue();
             List<BillForClientV2> bills = new ArrayList<>();
             BigDecimal overallOwedAmount = new BigDecimal("0");
-            StringBuilder addresses = new StringBuilder();
+            Set<String> addresses = new HashSet<>();
             for(int i = 0; i < values.size(); i++){
                 GetLeaseContractBillOnFiPropertyData value = values.get(i);
                 BillForClientV2 bill = new BillForClientV2();
@@ -408,14 +456,18 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
                 overallOwedAmount = overallOwedAmount.add(new BigDecimal(value.getActualMoney()));
                 bill.setAmountReceivable(value.getShouldMoney());
                 bill.setBillDuration(value.getDateStrBegin()+"至"+value.getDateStrEnd());
-                addresses.append(value.getBuildingRename());
-                if(i != values.size()-1) addresses.append(",");
-                bills.add(bill);
+                addresses.add(value.getBuildingRename());
             }
             dto.setBillGroupName(getFiPropertyName(values.get(0).getFiProperty()));
             dto.setBills(bills);
             dto.setOverAllAmountOwed(overallOwedAmount.toString());
-            dto.setAddressStr(addresses.toString());
+            Iterator<String> it = addresses.iterator();
+            StringBuilder sb = new StringBuilder();
+            while(it.hasNext()){
+                sb.append(it.next()+",");
+            }
+            sb.deleteCharAt(sb.length()-1);
+            dto.setAddressStr(sb.toString());
             list.add(dto);
         }
         return list;
