@@ -25,6 +25,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.ActivationFlag;
 import com.everhomes.rest.common.OfficialActionData;
 import com.everhomes.rest.common.Router;
+import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
 import com.everhomes.rest.community.admin.CommunityUserDto;
 import com.everhomes.rest.community.admin.CommunityUserResponse;
@@ -39,6 +40,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivity;
+import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.ConvertHelper;
@@ -99,6 +101,8 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 	private QuestionnaireAnswerProvider questionnaireAnswerProvider;
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	@Autowired
+	private UserActivityProvider userActivityProvider;
 
 	@Override
 	public void sendAllTargetMessageAndSaveTargetScope(Long questionnaireId) {
@@ -398,7 +402,16 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		cmd.setIsAuth(isAuthor);
 		//这里只需要查询userID，其他的附加查询不需要，所以自己搞了个查询。
 		List<UserOrganizations> userOrganizations = listUserCommunities(cmd);
-		return userOrganizations.stream().map(r->String.valueOf(r.getUserId())).collect(Collectors.toList());
+		List<String> userids = userOrganizations.stream().map(r->String.valueOf(r.getUserId())).collect(Collectors.toList());
+		if(isAuthor == 0){
+			//未认证用户 userprofile表中的用户-已认证或者认证中的用户
+			List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null, null);
+			if(users == null){
+				users = new ArrayList<>();
+			}
+			users.forEach(r->{userids.add(r.getId()+"");});
+		}
+		return userids;
 	}
 
 	private  List<String> getNamespaceUsers(String range, Integer isAuthor) {
