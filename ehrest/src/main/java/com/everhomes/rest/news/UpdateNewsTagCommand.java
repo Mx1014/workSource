@@ -16,6 +16,7 @@ import java.util.List;
  * <li>isSearch: 是否支持筛选 0否 1是</li>
  * <li>deleteFlag: 删除标志 0未删除 1删除</li>
  * <li>tags: 标签可选项</li>
+ * <li>categoryId: 分类id</li>
  * </ul>
  */
 public class UpdateNewsTagCommand {
@@ -32,6 +33,16 @@ public class UpdateNewsTagCommand {
     private Byte deleteFlag;
     @ItemType(NewsTagDTO.class)
     private List<NewsTagDTO> tags;
+
+    private Long categoryId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;
