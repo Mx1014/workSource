@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>id: key 的唯一 ID</li>
  * <li>doorGroupId: key 所在的组 ID </li>
  * <li>doorName: 组名字</li>
+ * <li>doorDisplayName: 门禁显示名称</li>
  * <li>doorOwnerId: 门禁对应的父级 ID，园区或者公司</li>
  * <li>doorOwnerType: {@link com.everhomes.rest.aclink.DoorAccessOwnerType}</li>
  * <li>qrCodeKey: 生成二维码相关的密钥 </li>

@@ -2115,6 +2115,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         qr.setCreatorUid(auth.getApproveUserId());
         qr.setDoorGroupId(doorAccess.getId());
         qr.setDoorName(doorAccess.getName());
+        qr.setDoorDisplayName(doorAccess.getDisplayNameNotEmpty());
         
         if(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
         	qr.setExpireTimeMs(System.currentTimeMillis() + this.getQrTimeout());
@@ -2147,6 +2148,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         qr.setCreatorUid(auth.getApproveUserId());
         qr.setDoorGroupId(doorAccess.getId());
         qr.setDoorName(doorAccess.getName());
+        qr.setDoorDisplayName(doorAccess.getDisplayNameNotEmpty());
         qr.setExpireTimeMs(auth.getKeyValidTime());
         qr.setId(auth.getId());
         qr.setQrDriver(DoorAccessDriverType.HUARUN_ANGUAN.getCode());
@@ -2394,6 +2396,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 aclink.setDeviceName(cmd.getName());
                 aclink.setFirwareVer("");
                 aclinkProvider.createAclink(aclink);
+                
+                AesServerKey aesServerKey = new AesServerKey();
+                aesServerKey.setCreateTimeMs(System.currentTimeMillis());
+                aesServerKey.setDoorId(doorAcc.getId());
+                aesServerKey.setSecret(aesKey);
+                aesServerKey.setDeviceVer(AclinkDeviceVer.VER0.getCode());
+                aesServerKeyService.createAesServerKey(aesServerKey);
                
                 return doorAcc;
             }
@@ -4112,16 +4121,31 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         //update count if the count is null
         int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         cmd.setPageSize(count);
-        ListDoorAuthLevelResponse resp = doorAuthLevelProvider.findAuthLevels(cmd);
-        if(resp.getDtos() != null && resp.getDtos().size() > 0) {
-            for(DoorAuthLevelDTO dto : resp.getDtos()) {
-                Organization org = organizationProvider.findOrganizationById(dto.getLevelId());
-                if(org != null) {
-                    dto.setOrgName(org.getName());    
-                } 
-            }      
-        }
         
+        ListDoorAuthLevelResponse resp = null;
+        
+        if(cmd.getLevelType() == null) {
+            return null;
+        }
+        if(cmd.getLevelType().equals(DoorAccessOwnerType.ENTERPRISE.getCode())) {
+            if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
+                resp = doorAuthLevelProvider.findAuthLevels(cmd);
+                if(resp.getDtos() != null && resp.getDtos().size() > 0) {
+                    for(DoorAuthLevelDTO dto : resp.getDtos()) {
+                        Organization org = organizationProvider.findOrganizationById(dto.getLevelId());
+                        if(org != null) {
+                            dto.setOrgName(org.getName());    
+                        } 
+                    }      
+                }
+                
+            } else {
+                resp = doorAuthLevelProvider.findAuthLevelsWithOrg(cmd);
+            }
+        } else {
+            resp = doorAuthLevelProvider.findAuthLevelsWithBuilding(cmd);
+        }
+                
         return resp;
     }
     
