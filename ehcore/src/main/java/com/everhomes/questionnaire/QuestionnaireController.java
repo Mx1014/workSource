@@ -174,4 +174,16 @@ public class QuestionnaireController extends ControllerBase {
 		return new RestResponse();
 	}
 
+	/**
+	 * <b>URL: /questionnaire/reSendQuesionnaireMessages</b>
+	 * <p>15.给未回答问卷，且在一天之内到期的用户发送消息</p>
+	 */
+	@RequestMapping("reSendQuesionnaireMessages")
+	@RestReturn(String.class)
+	@RequireAuthentication(false)
+	public RestResponse reSendQuesionnaireMessages(){
+		questionnaireService.reSendQuesionnaireMessages();
+		return new RestResponse();
+	}
+
 }

@@ -47,4 +47,6 @@ public interface QuestionnaireService {
 	public GetTargetQuestionnaireDetailResponse getAnsweredQuestionnaireDetail(GetTargetQuestionnaireDetailCommand cmd);
 
     void reScopeQuesionnaireRanges(ReScopeQuesionnaireRangesCommand cmd);
+
+	void reSendQuesionnaireMessages();
 }

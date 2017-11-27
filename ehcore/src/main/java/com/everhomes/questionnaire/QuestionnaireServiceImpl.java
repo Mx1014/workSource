@@ -1345,4 +1345,9 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	public void reScopeQuesionnaireRanges(ReScopeQuesionnaireRangesCommand cmd) {
 		questionnaireAsynSendMessageService.sendAllTargetMessageAndSaveTargetScope(cmd.getQuesionnaireId());
 	}
+
+	@Override
+	public void reSendQuesionnaireMessages() {
+		questionnaireAsynSendMessageService.sendUnAnsweredTargetMessage();
+	}
 }
