@@ -1,20 +1,18 @@
 package com.everhomes.equipment;
 
-import java.util.List;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletResponse;
-
+import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.pmNotify.DeletePmNotifyParamsCommand;
 import com.everhomes.rest.pmNotify.ListPmNotifyParamsCommand;
 import com.everhomes.rest.pmNotify.PmNotifyParamDTO;
 import com.everhomes.rest.pmNotify.SetPmNotifyParamsCommand;
+import com.everhomes.rest.user.admin.ImportDataResponse;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.user.admin.ImportDataResponse;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+import java.util.Set;
 
 public interface EquipmentService {
 	
@@ -85,4 +83,10 @@ public interface EquipmentService {
 	void deletePmNotifyParams(DeletePmNotifyParamsCommand cmd);
 
 	Set<Long> getTaskGroupUsers(Long taskId, byte groupType);
+
+    EquipmentInspectionPlanDTO createEquipmentsInspectionPlan(UpdateEquipmentPlanCommand cmd);
+
+	EquipmentInspectionPlanDTO updateEquipmentInspectionPlan(UpdateEquipmentPlanCommand cmd);
+
+	EquipmentInspectionPlanDTO getEquipmmentInspectionPlan(DeleteEquipmentPlanCommand cmd);
 }

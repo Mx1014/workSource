@@ -230,7 +230,7 @@ public class EquipmentController extends ControllerBase {
 
     /**
      * <b>URL: /equipment/searchEquipmentStandardRelations</b>
-     * <p>列出设备列表 新建计划时关联巡检对象</p>
+     * <p>列出设备标准关联列表 新建计划时关联巡检对象</p>
      */
     @RequestMapping("searchEquipmentStandardRelations")
     @RestReturn(value = SearchEquipmentStandardRelationsResponse.class)
@@ -248,7 +248,6 @@ public class EquipmentController extends ControllerBase {
      */
     @RequestMapping("exportEquipments")
     public HttpServletResponse exportEquipments(@Valid SearchEquipmentsCommand cmd, HttpServletResponse response) {
-        //动态excel
         return equipmentService.exportEquipments(cmd, response);
     }
 
@@ -355,27 +354,27 @@ public class EquipmentController extends ControllerBase {
 
     /**
      * <b>URL: /equipment/createEquipmentInspectionPlan</b>
-     * <p>创建巡检计划</p>
+     * <p>创建巡检计划 V3.0.2</p>
      */
     @RequestMapping("createEquipmentInspectionPlan")
     @RestReturn(value = EquipmentInspectionPlanDTO.class)
     public RestResponse createEquipmentInspectionPlan(UpdateEquipmentPlanCommand cmd) {
-        EquipmentInspectionPlanDTO equipmentInspectionPlans = null;
+        EquipmentInspectionPlanDTO equipmentInspectionPlansDTO = equipmentService.createEquipmentsInspectionPlan(cmd);
 
-        return getRestResponse(equipmentInspectionPlans);
+        return getRestResponse(equipmentInspectionPlansDTO);
     }
 
     /**
      * <b>URL: /equipment/updateEquipmentInspectionPlan</b>
-     * <p>更新巡检计划</p>
+     * <p>更新巡检计划 V3.0.2</p>
      */
     @RequestMapping("updateEquipmentInspectionPlan")
     @RestReturn(value = String.class)
     public RestResponse updateEquipmentInspectionPlan(UpdateEquipmentPlanCommand cmd) {
 
-        EquipmentInspectionPlanDTO equipmentInspectionPlans = null;
+        EquipmentInspectionPlanDTO equipmentInspectionPlansDTO = equipmentService.updateEquipmentInspectionPlan(cmd);
 
-        return getRestResponse(equipmentInspectionPlans);
+        return getRestResponse(equipmentInspectionPlansDTO);
     }
 
     /**
@@ -386,7 +385,7 @@ public class EquipmentController extends ControllerBase {
     @RestReturn(value = EquipmentInspectionPlanDTO.class)
     public RestResponse getEquipmentInspectionPlan(DeleteEquipmentPlanCommand cmd) {
 
-        EquipmentInspectionPlanDTO equipmentInspectionPlans = null;
+        EquipmentInspectionPlanDTO equipmentInspectionPlans = equipmentService.getEquipmmentInspectionPlan(cmd);
 
         return getRestResponse(equipmentInspectionPlans);
     }

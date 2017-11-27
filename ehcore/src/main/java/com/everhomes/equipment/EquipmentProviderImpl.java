@@ -1398,6 +1398,34 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
+    public EquipmentInspectionPlans createEquipmentInspectionPlans(EquipmentInspectionPlans plan) {
+        Long planId = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionPlans.class));
+        plan.setId(planId);
+        plan.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhEquipmentInspectionPlansDao dao = new EhEquipmentInspectionPlansDao(context.configuration());
+        dao.insert(plan);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionPlans.class, null);
+
+        return plan;
+    }
+
+    @Override
+    public EquipmentInspectionPlans getEquipmmentInspectionPlan(Long planId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhEquipmentInspectionPlansDao dao = new EhEquipmentInspectionPlansDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(planId), EquipmentInspectionPlans.class);
+    }
+
+    @Override
+    public void createEquipmentPlanMaps(EquipmentInspectionPlans plan, EhEquipmentInspectionEquipmentPlanMap map) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhEquipmentInspectionEquipmentPlanMapDao dao = new EhEquipmentInspectionEquipmentPlanMapDao(context.configuration());
+        dao.insert(map);
+        DaoHelper.publishDaoAction(DaoAction.CREATE,EhEquipmentInspectionEquipmentPlanMap.class,null);
+    }
+
+    @Override
     public void updateEquipmentStandardMap(EquipmentStandardMap map) {
         assert (map.getId() != null);
 

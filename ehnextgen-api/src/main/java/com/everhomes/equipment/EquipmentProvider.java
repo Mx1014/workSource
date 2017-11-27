@@ -3,6 +3,7 @@ package com.everhomes.equipment;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.equipment.*;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentPlanMap;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -149,4 +150,10 @@ public interface EquipmentProvider {
     void populateEquipments(EquipmentInspectionStandards standard);
 
 	void populateItems(EquipmentInspectionStandards standard);
+
+    EquipmentInspectionPlans createEquipmentInspectionPlans(EquipmentInspectionPlans plan);
+
+    EquipmentInspectionPlans getEquipmmentInspectionPlan(Long planId);
+
+	void createEquipmentPlanMaps(EquipmentInspectionPlans plan, EhEquipmentInspectionEquipmentPlanMap map);
 }

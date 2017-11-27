@@ -55,6 +55,7 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.search.*;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentPlanMap;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.*;
@@ -222,7 +223,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			createEquipmentStandardItems(standard, cmd.getItems());
 			equipmentProvider.updateEquipmentStandard(standard);
 			equipmentStandardSearcher.feedDoc(standard);
-			// 上版的关系表inActive
+			// 修改之前的关系表inActive
 			List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
 			if (maps != null && maps.size() > 0) {
 				for (EquipmentStandardMap map : maps) {
@@ -539,12 +540,18 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		Row row = sheet.createRow(sheet.getLastRowNum());
 		int i =-1 ;
-		row.createCell(++i).setCellValue("标准编号");
+		/*row.createCell(++i).setCellValue("标准编号");
 		row.createCell(++i).setCellValue("标准名称");
 		row.createCell(++i).setCellValue("类别");
 		row.createCell(++i).setCellValue("执行频率");
 		row.createCell(++i).setCellValue("开始执行时间");
 		row.createCell(++i).setCellValue("时间限制");
+		row.createCell(++i).setCellValue("最新更新时间");
+		row.createCell(++i).setCellValue("标准来源");
+		row.createCell(++i).setCellValue("标准状态");*/
+		//V3.0.2
+		row.createCell(++i).setCellValue("标准名称");
+		row.createCell(++i).setCellValue("周期类型");
 		row.createCell(++i).setCellValue("最新更新时间");
 		row.createCell(++i).setCellValue("标准来源");
 		row.createCell(++i).setCellValue("标准状态");
@@ -553,9 +560,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 	private void setNewEquipmentStandardsBookRow(Sheet sheet ,EquipmentStandardsDTO dto){
 		Row row = sheet.createRow(sheet.getLastRowNum()+1);
 		int i = -1;
-		row.createCell(++i).setCellValue(dto.getStandardNumber());
+		//row.createCell(++i).setCellValue(dto.getStandardNumber());
 		row.createCell(++i).setCellValue(dto.getName());
-		row.createCell(++i).setCellValue(StandardType.fromStatus(dto.getStandardType()).getName());
+		/*row.createCell(++i).setCellValue(StandardType.fromStatus(dto.getStandardType()).getName());
 		if(dto.getRepeat() != null) {
 			row.createCell(++i).setCellValue(repeatService.getExecutionFrequency(dto.getRepeat()));
 			row.createCell(++i).setCellValue(repeatService.getExecuteStartTime(dto.getRepeat()));
@@ -564,7 +571,18 @@ public class EquipmentServiceImpl implements EquipmentService {
 			row.createCell(++i).setCellValue("");
 			row.createCell(++i).setCellValue("");
 			row.createCell(++i).setCellValue("");
-		}
+		}*/
+		//v3.0.2中标准导出字段变成如下
+		if(StandardRepeatType.NO_REPEAT.equals(StandardRepeatType.fromStatus(dto.getRepeatType())))
+			row.createCell(++i).setCellValue(StandardRepeatType.NO_REPEAT.getName());
+		if(StandardRepeatType.BY_DAY.equals(StandardRepeatType.fromStatus(dto.getRepeatType())))
+			row.createCell(++i).setCellValue(StandardRepeatType.BY_DAY.getName());
+		if(StandardRepeatType.BY_WEEK.equals(StandardRepeatType.fromStatus(dto.getRepeatType())))
+			row.createCell(++i).setCellValue(StandardRepeatType.BY_WEEK.getName());
+		if(StandardRepeatType.BY_MONTH.equals(StandardRepeatType.fromStatus(dto.getRepeatType())))
+			row.createCell(++i).setCellValue(StandardRepeatType.BY_MONTH.getName());
+		if(StandardRepeatType.BY_YEAR.equals(StandardRepeatType.fromStatus(dto.getRepeatType())))
+			row.createCell(++i).setCellValue(StandardRepeatType.BY_YEAR.getName());
 
 		row.createCell(++i).setCellValue(dto.getUpdateTime().toString());
 		row.createCell(++i).setCellValue(dto.getStandardSource());
@@ -588,7 +606,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 		//processRepeatSetting(standard);
 		
 		//equipmentProvider.populateStandardGroups(standard);
+		//填充标准中的设备列表
 		equipmentProvider.populateEquipments(standard);
+		//填充标准中的巡检项
 		equipmentProvider.populateItems(standard);
 		EquipmentStandardsDTO dto = converStandardToDto(standard);
 		
@@ -2712,10 +2732,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 			dbProvider.execute((TransactionStatus status) -> {
 				EquipmentInspectionAccessories accessory = new EquipmentInspectionAccessories();
 				accessory.setName(s[0]);
-				accessory.setManufacturer(s[1]);;
-				accessory.setModelNumber(s[2]);;
-				accessory.setSpecification(s[3]);;
-				accessory.setLocation(s[4]);;
+				accessory.setManufacturer(s[1]);
+				accessory.setModelNumber(s[2]);
+				accessory.setSpecification(s[3]);
+				accessory.setLocation(s[4]);
 				accessory.setNamespaceId(namespaceId);
 				accessory.setOwnerType(cmd.getOwnerType());
 				accessory.setOwnerId(cmd.getOwnerId());
@@ -4437,5 +4457,64 @@ public class EquipmentServiceImpl implements EquipmentService {
 			return userIds;
 		}
 		return null;
+	}
+
+
+	@Override
+	public EquipmentInspectionPlanDTO createEquipmentsInspectionPlan(UpdateEquipmentPlanCommand cmd) {
+
+		EquipmentInspectionPlans plan = ConvertHelper.convert(cmd, EquipmentInspectionPlans.class);
+		User user = UserContext.current().getUser();
+		plan.setCreatorUid(user.getId());
+		plan.setOperatorUid(user.getId());
+		plan.setNamespaceId(UserContext.getCurrentNamespaceId());
+		plan.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
+		//创建巡检计划的执行周期
+		RepeatSettings repeatSettings = ConvertHelper.convert(cmd.getRepeatSettings(),RepeatSettings.class);
+		repeatService.createRepeatSettings(repeatSettings);
+
+		//创建巡检计划
+		plan.setRepeatsettingId(repeatSettings.getId());
+		EquipmentInspectionPlans createdPlan = equipmentProvider.createEquipmentInspectionPlans(plan);
+		//创建计划巡检对象标准关联
+		List<EquipmentStandardRelationDTO> equipmentStandardRelation=  cmd.getEquipmentStandardRelations();
+
+		for (EquipmentStandardRelationDTO relation : cmd.getEquipmentStandardRelations()) {
+			EhEquipmentInspectionEquipmentPlanMap equipmentPlanMap = new EhEquipmentInspectionEquipmentPlanMap();
+			equipmentPlanMap.setDefaultOrder(relation.getOrder());
+			equipmentPlanMap.setNamespaceId(UserContext.getCurrentNamespaceId());
+			equipmentPlanMap.setOwnerId(cmd.getOwnerId());
+			equipmentPlanMap.setOwnerType(cmd.getOwnerType());
+			equipmentPlanMap.setPlanId(createdPlan.getId());
+			equipmentPlanMap.setTargetId(cmd.getTargetId());
+			equipmentPlanMap.setTargetType(cmd.getTargetType());
+			equipmentPlanMap.setStandardId(relation.getStandardId());
+			equipmentPlanMap.setEquimentId(relation.getTargetId());
+
+			equipmentProvider.createEquipmentPlanMaps(plan, equipmentPlanMap);
+			equipmentStandardRelation.add(relation);
+		}
+
+			createdPlan.setEquipmentStandardRelations(equipmentStandardRelation);
+
+		return ConvertHelper.convert(createdPlan, EquipmentInspectionPlanDTO.class);
+	}
+
+	@Override
+	public EquipmentInspectionPlanDTO updateEquipmentInspectionPlan(UpdateEquipmentPlanCommand cmd) {
+		EquipmentInspectionPlans plan = ConvertHelper.convert(cmd, EquipmentInspectionPlans.class);
+		return null;
+	}
+
+	@Override
+	public EquipmentInspectionPlanDTO getEquipmmentInspectionPlan(DeleteEquipmentPlanCommand cmd) {
+
+		EquipmentInspectionPlans equipmentInspectionPlan = equipmentProvider.getEquipmmentInspectionPlan(cmd.getId());
+		//填充巡检计划相关的巡检对象
+
+		//填充计划的执行周期
+
+
+		return ConvertHelper.convert(equipmentInspectionPlan, EquipmentInspectionPlanDTO.class);
 	}
 }

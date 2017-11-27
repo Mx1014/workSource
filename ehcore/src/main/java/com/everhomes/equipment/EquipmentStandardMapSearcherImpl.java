@@ -159,7 +159,12 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 		if(cmd.getReviewResult() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewResult", cmd.getReviewResult()));
 
-		//add  inspectionCategoryId  过滤
+		//增加  V3.0.2  inspectionCategoryId   repeatType 过滤
+		if(cmd.getReviewResult() != null)
+			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("repeatType", cmd.getRepeatType()));
+
+		if(cmd.getReviewResult() != null)
+			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("inspectionCategoryId", cmd.getInspectionCategoryId()));
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
         if(cmd.getPageAnchor() != null) {
@@ -258,7 +263,8 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
             	b.field("targetType", equipment.getTargetType());
             	b.field("equipmentName", equipment.getName());
             	//add equipment   inspectionCategoryId
-            } else {
+				//b.field("inspectionCategoryId", equipment.getInspectionCategoryId());
+			} else {
             	b.field("ownerId", "");
                 b.field("ownerType", "");
                 b.field("targetId", "");

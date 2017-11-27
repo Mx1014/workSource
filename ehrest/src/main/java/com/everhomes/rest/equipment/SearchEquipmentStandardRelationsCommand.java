@@ -20,16 +20,16 @@ import javax.validation.constraints.NotNull;
 public class SearchEquipmentStandardRelationsCommand {
 	@NotNull
 	private Long ownerId;
-	
+
 	@NotNull
 	private String ownerType;
-	
+
 	private Long targetId;
-	
+
 	private String targetType;
 
 	private  Byte repeatType;
-	
+
 	@Deprecated
 	private Byte reviewStatus;
 
@@ -37,10 +37,13 @@ public class SearchEquipmentStandardRelationsCommand {
 	private Byte reviewResult;
 
 	private String keyword;
-	
+
 	private Long pageAnchor;
-	
+
 	private Integer pageSize;
+
+	//V3.0.2 增加 用于创建计划时候选择设备标准关联
+    private Long inspectionCategoryId;
 
 	public Long getOwnerId() {
 		return ownerId;
@@ -122,7 +125,15 @@ public class SearchEquipmentStandardRelationsCommand {
 		this.repeatType = repeatType;
 	}
 
-	@Override
+    public Long getInspectionCategoryId() {
+        return inspectionCategoryId;
+    }
+
+    public void setInspectionCategoryId(Long inspectionCategoryId) {
+        this.inspectionCategoryId = inspectionCategoryId;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
