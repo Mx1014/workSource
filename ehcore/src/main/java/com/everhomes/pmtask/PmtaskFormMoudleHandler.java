@@ -133,7 +133,7 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
         Long total = Long.valueOf(getTextString(getFormItem(cmd.getValues(),"总计").getFieldValue()));
         content += "总计:"+total+"元\n";
         Long serviceFee = Long.valueOf(getTextString(getFormItem(cmd.getValues(),"服务费").getFieldValue()));
-        content += "服务费:"+total+"元\n";
+        content += "服务费:"+serviceFee+"元\n";
         content += "物品费:"+(total-serviceFee)+"元\n";
         PostApprovalFormItem subForm = getFormItem(cmd.getValues(),"物品");
         if (subForm!=null) {
@@ -147,7 +147,7 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
                     content += getTextString(getFormItem(values,"物品名称").getFieldValue())+":";
                     content += getTextString(getFormItem(values,"小计").getFieldValue())+"元";
                     content += "("+getTextString(getFormItem(values,"单价").getFieldValue())+"元*"+
-                            getTextString(getFormItem(values,"数量").getFieldValue())+")";
+                            getTextString(getFormItem(values,"数量").getFieldValue())+")\n";
                 }
                 content += "如对上述费用有疑义请附言说明";
             }
