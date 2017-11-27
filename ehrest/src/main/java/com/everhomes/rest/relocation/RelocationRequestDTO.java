@@ -13,6 +13,8 @@ public class RelocationRequestDTO {
 
     private Long id;
     private Integer namespaceId;
+    private String ownerType;
+    private Long ownerId;
     private String requestNo;
     private Long requestorEnterpriseId;
     private String requestorEnterpriseName;
@@ -25,11 +27,36 @@ public class RelocationRequestDTO {
     private Long creatorUid;
     private Timestamp createTime;
     private Long flowCaseId;
+    private String flowCaseUrl;
     private Timestamp cancelTime;
     private Long cancelUid;
 
     @ItemType(RelocationRequestItemDTO.class)
     private List<RelocationRequestItemDTO> items;
+
+    public String getFlowCaseUrl() {
+        return flowCaseUrl;
+    }
+
+    public void setFlowCaseUrl(String flowCaseUrl) {
+        this.flowCaseUrl = flowCaseUrl;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
 
     public List<RelocationRequestItemDTO> getItems() {
         return items;

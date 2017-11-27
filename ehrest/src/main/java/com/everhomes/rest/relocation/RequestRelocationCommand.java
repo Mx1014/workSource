@@ -11,6 +11,8 @@ import java.util.List;
 public class RequestRelocationCommand {
 
     private Integer namespaceId;
+    private String ownerType;
+    private Long ownerId;
     private Long requestorEnterpriseId;
     private String requestorEnterpriseName;
     private String requestorEnterpriseAddress;
@@ -20,6 +22,22 @@ public class RequestRelocationCommand {
 
     @ItemType(RelocationRequestItemDTO.class)
     private List<RelocationRequestItemDTO> items;
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
 
     public String getContactPhone() {
         return contactPhone;

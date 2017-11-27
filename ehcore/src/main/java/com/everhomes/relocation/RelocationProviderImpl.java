@@ -77,8 +77,8 @@ public class RelocationProviderImpl implements RelocationProvider {
 	}
 
     @Override
-    public List<RelocationRequest> searchRelocationRequests(Integer namespaceId, String keyword, Long startDate,
-															   Long endDate, Byte status, Long pageAnchor, Integer pageSize) {
+    public List<RelocationRequest> searchRelocationRequests(Integer namespaceId, String ownerType, Long ownerId,
+		String keyword, Long startDate, Long endDate, Byte status, Long pageAnchor, Integer pageSize) {
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
         SelectQuery<EhRelocationRequestsRecord> query = context.selectQuery(Tables.EH_RELOCATION_REQUESTS);
@@ -87,6 +87,12 @@ public class RelocationProviderImpl implements RelocationProvider {
 
         if (null != pageAnchor && pageAnchor != 0) {
 			query.addConditions(Tables.EH_RELOCATION_REQUESTS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
+		}
+		if (null != ownerId) {
+			query.addConditions(Tables.EH_RELOCATION_REQUESTS.OWNER_ID.eq(ownerId));
+		}
+		if (StringUtils.isNotBlank(ownerType)) {
+			query.addConditions(Tables.EH_RELOCATION_REQUESTS.OWNER_TYPE.eq(ownerType));
 		}
         if(StringUtils.isNotBlank(keyword)) {
 			query.addConditions(Tables.EH_RELOCATION_REQUESTS.REQUESTOR_ENTERPRISE_NAME.like("%" + keyword + "%")

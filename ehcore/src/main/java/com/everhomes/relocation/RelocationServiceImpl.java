@@ -2,6 +2,7 @@
 package com.everhomes.relocation;
 
 
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -18,7 +19,6 @@ import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.relocation.*;
 import com.everhomes.rest.relocation.AttachmentDescriptor;
 
-import com.everhomes.rest.techpark.expansion.ExpansionConst;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 
@@ -60,10 +60,6 @@ public class RelocationServiceImpl implements RelocationService {
     private ContentServerService contentServerService;
     @Autowired
 	private FlowService flowService;
-    @Autowired
-	private FlowProvider flowProvider;
-    @Autowired
-    private FlowCaseProvider flowCaseProvider;
 	@Autowired
 	private RelocationProvider relocationProvider;
 
@@ -75,8 +71,9 @@ public class RelocationServiceImpl implements RelocationService {
 		}
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
-		List<RelocationRequest> requests = relocationProvider.searchRelocationRequests(cmd.getNamespaceId(), cmd.getKeyword(),
-				cmd.getStartTime(), cmd.getEndTime(), cmd.getStatus(), cmd.getPageAnchor(), cmd.getPageSize());
+		List<RelocationRequest> requests = relocationProvider.searchRelocationRequests(cmd.getNamespaceId(), cmd.getOwnerType(),
+				cmd.getOwnerId(), cmd.getKeyword(), cmd.getStartTime(), cmd.getEndTime(), cmd.getStatus(), cmd.getPageAnchor(),
+				cmd.getPageSize());
 
 		SearchRelocationRequestsResponse response = new SearchRelocationRequestsResponse();
 
@@ -130,6 +127,10 @@ public class RelocationServiceImpl implements RelocationService {
 
 			return itemDTO;
 		}).collect(Collectors.toList()));
+
+		String flowCaseUrl = configProvider.getValue(ConfigConstants.RELOCATION_FLOWCASE_URL, "");
+
+		dto.setFlowCaseUrl(String.format(flowCaseUrl, request.getFlowCaseId()));
 	}
 
 	@Override

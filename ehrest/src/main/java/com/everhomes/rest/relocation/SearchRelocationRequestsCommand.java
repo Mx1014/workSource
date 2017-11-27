@@ -8,12 +8,30 @@ import com.everhomes.util.StringHelper;
 public class SearchRelocationRequestsCommand {
 
     private Integer namespaceId;
+    private String ownerType;
+    private Long ownerId;
     private String keyword;
     private Byte status;
     private Long startTime;
     private Long endTime;
     private Long pageAnchor;
     private Integer pageSize;
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
 
     public Long getPageAnchor() {
         return pageAnchor;
