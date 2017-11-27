@@ -269,7 +269,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         if(targetType.equals(AssetPaymentStrings.EH_USER)){
             contracts = contractProvider.listContractByCustomerId(ownerId, UserContext.currentUserId(), CustomerType.INDIVIDUAL.getCode());
         }else if(targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
-            contracts = contractProvider.listContractByCustomerId(ownerId, UserContext.currentUserId(), CustomerType.ENTERPRISE.getCode());
+            contracts = contractProvider.listContractByCustomerId(ownerId, targetId, CustomerType.ENTERPRISE.getCode());
         }
 //        Contract experimentSample = new Contract();
 //        experimentSample.setNamespaceContractType("ebei");

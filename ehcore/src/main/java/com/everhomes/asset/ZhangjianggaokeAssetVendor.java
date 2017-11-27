@@ -849,12 +849,17 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dto.setNoticeTel(phones.toString());
                     dto.setBillId(sourceDto.getBillID());
                     dto.setBillGroupName(sourceDto.getFeeName()==null?"租金":sourceDto.getFeeName());
-                    dto.setDateStr(sourceDto.getBillDate());
+//                    dto.setDateStr(sourceDto.getBillDate());
+                    dto.setDateStr(sourceDto.getDateStrBegin()+"~"+sourceDto.getDateStreEnd());
                     dto.setTargetType(RelTargetType);
                     dto.setTargetName(sourceDto.getCustomerName());
                     dto.setAmountOwed(new BigDecimal(sourceDto.getAmountOwed()));
                     dto.setAmountReceivable(new BigDecimal(sourceDto.getAmountReceivable()));
                     dto.setAmountReceived(new BigDecimal(sourceDto.getAmountReceived()));
+                    String szsm_status = sourceDto.getStatus();
+                    if(szsm_status.equals(PaymentStatus.SUSPEND.getCode())){
+                        dto.setPayStatus(PaymentStatus.IN_PROCESS.getCode());
+                    }
                     list.add(dto);
                 }
             }else{
