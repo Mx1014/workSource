@@ -82,7 +82,14 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
         response.setValues(items);
 
         FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(pmTask.getId(), EntityType.PM_TASK.getCode(), moduleId);
-        if (vals==null || vals.size()==0){ //第一次提交表单 执行下一步
+        FlowNodeDetailDTO detail = flowService.getFlowNodeDetail(flowCase.getCurrentNodeId());
+        String params = detail.getParams();
+        String nodeType = "";
+        if (!StringUtils.isBlank(params)) {
+            JSONObject paramJson = JSONObject.parseObject(params);
+            nodeType = paramJson.getString("nodeType");
+        }
+        if ("CONFIRM".equals(nodeType)){ //费用确认节点
             FlowAutoStepDTO dto = new FlowAutoStepDTO();
             dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
             dto.setFlowCaseId(flowCase.getId());

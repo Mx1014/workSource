@@ -303,6 +303,7 @@ class PmTaskCommonServiceImpl {
             case "HANDOVER": return PmTaskFlowStatus.PROCESSING.getCode();
             case "FLOWCOMPLETED": return PmTaskFlowStatus.COMPLETED.getCode();
             case "CONFIRMFEE": return  PmTaskFlowStatus.CONFIRM.getCode();
+            case "MOTIFYFEE":return PmTaskFlowStatus.MOTIFY.getCode();
             default: return null;
         }
     }
