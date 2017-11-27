@@ -102,6 +102,9 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	@Autowired
 	private ScheduleProvider scheduleProvider;
 
+	@Autowired
+	private QuestionnaireAsynSendMessageService questionnaireAsynSendMessageService;
+
 	@PostConstruct
 	public void setup(){
 		//启动定时任务
@@ -1336,5 +1339,10 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		}
 		return new GetTargetQuestionnaireDetailResponse(convertToQuestionnaireDTO(questionnaireOptions,null,cmd.getTargetId()));
 
+	}
+
+	@Override
+	public void reScopeQuesionnaireRanges(ReScopeQuesionnaireRangesCommand cmd) {
+		questionnaireAsynSendMessageService.sendAllTargetMessageAndSaveTargetScope(cmd.getQuesionnaireId());
 	}
 }

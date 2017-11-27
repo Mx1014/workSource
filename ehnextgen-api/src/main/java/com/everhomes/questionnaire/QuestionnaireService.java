@@ -45,4 +45,6 @@ public interface QuestionnaireService {
 	public ListUsersbyIdentifiersResponse listUsersbyIdentifiers(ListUsersbyIdentifiersCommand cmd);
 
 	public GetTargetQuestionnaireDetailResponse getAnsweredQuestionnaireDetail(GetTargetQuestionnaireDetailCommand cmd);
+
+    void reScopeQuesionnaireRanges(ReScopeQuesionnaireRangesCommand cmd);
 }

@@ -2,6 +2,7 @@
 package com.everhomes.questionnaire;
 
 import com.everhomes.rest.questionnaire.*;
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -159,6 +160,18 @@ public class QuestionnaireController extends ControllerBase {
 	@RestReturn(ListUsersbyIdentifiersResponse.class)
 	public RestResponse listUsersbyIdentifiers(ListUsersbyIdentifiersCommand cmd){
 		return new RestResponse(questionnaireService.listUsersbyIdentifiers(cmd));
+	}
+
+	/**
+	 * <b>URL: /questionnaire/reScopeQuesionnaireRanges</b>
+	 * <p>14.重新计算问卷的范围</p>
+	 */
+	@RequestMapping("reScopeQuesionnaireRanges")
+	@RestReturn(String.class)
+	@RequireAuthentication(false)
+	public RestResponse reScopeQuesionnaireRanges(ReScopeQuesionnaireRangesCommand cmd){
+		questionnaireService.reScopeQuesionnaireRanges(cmd);
+		return new RestResponse();
 	}
 
 }
