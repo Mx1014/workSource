@@ -1,13 +1,18 @@
 package com.everhomes.equipment;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.repeat.RepeatService;
+import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.equipment.*;
+import com.everhomes.search.AbstractElasticSearch;
+import com.everhomes.search.EquipmentStandardSearcher;
+import com.everhomes.search.SearchUtils;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.util.ConvertHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -24,16 +29,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.repeat.RepeatService;
-import com.everhomes.repeat.RepeatSettings;
-import com.everhomes.rest.repeat.RepeatSettingsDTO;
-import com.everhomes.search.AbstractElasticSearch;
-import com.everhomes.search.EquipmentStandardSearcher;
-import com.everhomes.search.SearchUtils;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.util.ConvertHelper;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class EquipmentStandardSearcherImpl extends AbstractElasticSearch implements EquipmentStandardSearcher{
@@ -123,12 +121,13 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
             qb = QueryBuilders.matchAllQuery();
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-            		.field("standardName", 1.2f)
-                    .field("standardNumber", 1.0f);
+            		.field("standardName", 1.2f);
+                    //.field("standardNumber", 1.0f);
             
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("standardName").addHighlightedField("standardNumber");
+            builder.addHighlightedField("standardName");
+                    //.addHighlightedField("standardNumber");
         }
 
         FilterBuilder fb = null;
@@ -147,15 +146,18 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
             fb = FilterBuilders.andFilter(fb, tfb);
         }
 
-        if(cmd.getStandardType() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("standardType", cmd.getStandardType()));
+       /* if(cmd.getStandardType() != null)
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("standardType", cmd.getStandardType()));*/
         
         if(cmd.getStatus() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
         
         if(cmd.getInspectionCategoryId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("inspectionCategoryId", cmd.getInspectionCategoryId()));
-        	
+
+        if(cmd.getInspectionCategoryId() != null)
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("repeatType", cmd.getRepeatType()));
+
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
         if(cmd.getPageAnchor() != null) {
@@ -187,13 +189,14 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         for(Long id : ids) {
         	EquipmentInspectionStandards standard = equipmentProvider.findStandardById(id);
         	if(standard != null) {
-        		processRepeatSetting(standard);
+        		//processRepeatSetting(standard);
+                processEquipmentCount(standard);
         		EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
                 dto.setDescription("");
-        		if(null != standard.getRepeat()) {
+        		/*if(null != standard.getRepeat()) {
     	    		RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
     	    		dto.setRepeat(rs);
-        		}
+        		}*/
         		eqStandards.add(dto);
         	}
 
@@ -202,7 +205,21 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         return new SearchEquipmentStandardsResponse(nextPageAnchor, eqStandards);
 	}
 
-	private void processRepeatSetting(EquipmentInspectionStandards standard) {
+    private void processEquipmentCount(EquipmentInspectionStandards standard) {
+        List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
+        int count = 0;
+        if(maps != null) {
+            for(EquipmentStandardMap map : maps) {
+                if(EquipmentReviewStatus.REVIEWED.equals(EquipmentReviewStatus.fromStatus(map.getReviewStatus())) &&
+                        ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(map.getReviewResult()))) {
+                    count++;
+                }
+            }
+        }
+        standard.setEquipmentsCount(count);
+    }
+
+    private void processRepeatSetting(EquipmentInspectionStandards standard) {
 		if(null != standard.getRepeatSettingId() && standard.getRepeatSettingId() != 0) {
 			RepeatSettings repeat = repeatService.findRepeatSettingById(standard.getRepeatSettingId());
 			standard.setRepeat(repeat);

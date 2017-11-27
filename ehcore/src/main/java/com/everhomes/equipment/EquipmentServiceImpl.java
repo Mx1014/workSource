@@ -436,6 +436,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 				inActiveEquipmentStandardRelations(map);
 			}
 		}
+		/**
+		 * TODO:删除相关巡检计划
+		 */
 		
 		inactiveTasksByStandardId(standard.getId());
 	}
@@ -582,9 +585,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 		//填充关联设备数equipmentsCount
 		processEquipmentsCount(standard);
 		//填充执行周期repeat
-		processRepeatSetting(standard);
+		//processRepeatSetting(standard);
 		
-		equipmentProvider.populateStandardGroups(standard);
+		//equipmentProvider.populateStandardGroups(standard);
+		equipmentProvider.populateEquipments(standard);
+		equipmentProvider.populateItems(standard);
 		EquipmentStandardsDTO dto = converStandardToDto(standard);
 		
 		return dto;

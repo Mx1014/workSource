@@ -145,4 +145,8 @@ public interface EquipmentProvider {
 
 	//add inactiveEquipmentStandardMap
     void inActiveEquipmentStandardMap(EquipmentStandardMap equipmentStandardMap);
+
+    void populateEquipments(EquipmentInspectionStandards standard);
+
+	void populateItems(EquipmentInspectionStandards standard);
 }

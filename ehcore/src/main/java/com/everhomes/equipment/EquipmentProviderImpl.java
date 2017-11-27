@@ -1376,6 +1376,28 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
+    public void populateEquipments(EquipmentInspectionStandards standard) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<EhEquipmentInspectionEquipmentStandardMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP);
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STANDARD_ID.eq(standard.getId()));
+        query.fetch().map((r)->{
+            standard.getEquipments().add(findEquipmentById(r.getTargetId()));
+            return null;
+        });
+    }
+
+    @Override
+    public void populateItems(EquipmentInspectionStandards standard) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<EhEquipmentInspectionTemplateItemMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATE_ITEM_MAP);
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATE_ITEM_MAP.ID.eq(standard.getTemplateId()));
+        query.fetch().map((r)->{
+            standard.getItems().add(findEquipmentInspectionItem(r.getItemId()));
+            return null;
+        });
+    }
+
+    @Override
     public void updateEquipmentStandardMap(EquipmentStandardMap map) {
         assert (map.getId() != null);
 
