@@ -296,7 +296,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         }
         response.setShowBillDetailForClientDTOList(list);
         response.setAmountReceivable(amountReceivable);
-        response.setDatestr(dateSet.pollFirst().toString()+"~"+ dateSet.pollLast().toString());
+        response.setDatestr(yyyyMMdd.format(dateSet.pollFirst())+"~"+ yyyyMMdd.format(dateSet.pollLast()));
         response.setAmountOwed(amountOwed);
         return response;
     }
