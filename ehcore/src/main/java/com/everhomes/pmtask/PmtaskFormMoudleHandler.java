@@ -89,7 +89,7 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
             JSONObject paramJson = JSONObject.parseObject(params);
             nodeType = paramJson.getString("nodeType");
         }
-        if ("CONFIRM".equals(nodeType)){ //费用确认节点
+        if ("CONFIRMFEE".equals(nodeType)){ //费用确认节点
             FlowAutoStepDTO dto = new FlowAutoStepDTO();
             dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
             dto.setFlowCaseId(flowCase.getId());
