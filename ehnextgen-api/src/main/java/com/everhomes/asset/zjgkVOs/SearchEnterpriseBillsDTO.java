@@ -26,7 +26,7 @@ public class SearchEnterpriseBillsDTO {
     private String amountReceived;
     private String contractNum;
     private String dateStrBegin;
-    private String dateStreEnd;
+    private String dateStrEnd;
     private String status;
 
     public String getStatus() {
@@ -45,12 +45,12 @@ public class SearchEnterpriseBillsDTO {
         this.dateStrBegin = dateStrBegin;
     }
 
-    public String getDateStreEnd() {
-        return dateStreEnd;
+    public String getDateStrEnd() {
+        return dateStrEnd;
     }
 
-    public void setDateStreEnd(String dateStreEnd) {
-        this.dateStreEnd = dateStreEnd;
+    public void setDateStrEnd(String dateStrEnd) {
+        this.dateStrEnd = dateStrEnd;
     }
 
     @Override

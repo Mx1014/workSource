@@ -457,6 +457,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
                 bill.setAmountReceivable(value.getShouldMoney());
                 bill.setBillDuration(value.getDateStrBegin()+"至"+value.getDateStrEnd());
                 addresses.add(value.getBuildingRename());
+                bills.add(bill);
             }
             dto.setBillGroupName(getFiPropertyName(values.get(0).getFiProperty()));
             dto.setBills(bills);
