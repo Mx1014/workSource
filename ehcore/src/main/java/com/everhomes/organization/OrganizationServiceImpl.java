@@ -7231,6 +7231,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                             LOGGER.info("User join the enterprise automatically, userId=" + identifier.getOwnerUid()
                                     + ", contactId=" + member.getId() + ", enterpriseId=" + member.getOrganizationId());
                         }
+                        //自动加入公司的门禁 add by lei.lv
+                        this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), member.getOrganizationId(), member.getTargetId());
                     } else {
                         if (LOGGER.isInfoEnabled()) {
                             LOGGER.debug("organization group type not enterprise, organizationId={}, groupType={}, memberId={}", member.getOrganizationId(), member.getStatus(), member.getId());
