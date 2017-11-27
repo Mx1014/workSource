@@ -266,11 +266,11 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         while(true){
             count++;
             GetLeaseContractReceivableRes res = keXingBillService.listFiCategoryBills(billId,ownerId,pageOffSet,pageSize);
+            if(res.getResponseCode().equals("200")){
+                allData.addAll(res.getData());
+            }
             if(res.getHasNextPag().equals("0") || count > 1000){
                 break;
-            }
-            if(res.getResponseCode().equals("200") && res.getHasNextPag().equals("1")){
-                allData.addAll(res.getData());
             }
         }
         for(int i = 0; i < allData.size(); i++){

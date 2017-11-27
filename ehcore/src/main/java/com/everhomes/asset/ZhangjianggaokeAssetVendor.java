@@ -951,15 +951,16 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dto.setAmountReceived(sourceDto.getAmountReceived()!=null?new BigDecimal(sourceDto.getAmountReceived()):null);
                     dto.setBillItemName(sourceDto.getFeeName());
                     dto.setBillStatus(sourceDto.getPayFlag());
-                    dto.setDateStr(sourceDto.getBillDate());
+//                    dto.setDateStr(sourceDto.getBillDate());
+                    dto.setDateStr(sourceDto.getDateStrBegin()+"~"+sourceDto.getDateStrEnd());
 //                    dto.setDefaultOrder();
                     dto.setTargetId(sourceDto.getCustomerIdentifier());
                     dto.setTargetName(sourceDto.getCustomerName());
                     dto.setTargetType(targetType);
                     dto.setPayStatus(sourceDto.getStatus()!=null?sourceDto.getStatus().equals(PaymentStatus.SUSPEND.getCode())?PaymentStatus.IN_PROCESS.getCode():null:null);
                     //增加计费周期
-                    dto.setDateStrBegin(sourceDto.getDateStrBegin());
-                    dto.setDateStrEnd(sourceDto.getDateStrEnd());
+//                    dto.setDateStrBegin();
+//                    dto.setDateStrEnd();
                     list.add(dto);
                 }
             }

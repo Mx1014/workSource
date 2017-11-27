@@ -280,7 +280,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         String projectId = communityProvider.getCommunityToken("ebei", ownerId);
         Integer currentPage = 1;
         String isPayStr = null;
-        if(StringUtils.isNotBlank(String.valueOf(isPay))){
+        if(isPay!=null && StringUtils.isNotBlank(isPay.toString())){
             isPayStr = String.valueOf(isPay);
         }
         //组装参数，判断非空
