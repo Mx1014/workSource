@@ -1776,11 +1776,22 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		List<LaunchPadLayoutDTO> results = getLaunchPadLayoutByVersionCode(cmd, scopeType,scopeId);
 		if(results != null && !results.isEmpty()){
 			LaunchPadLayoutDTO dto =  results.get(0);
+			populateLaunchPadLayoutDTO(dto);
 			return dto;
 		}
 		return null;
 	}
-	
+
+	private void populateLaunchPadLayoutDTO(LaunchPadLayoutDTO dto){
+		if(dto == null || StringUtils.isEmpty(dto.getBgImageUri()) || dto.getId() == null){
+			return;
+		}
+
+		String url = contentServerService.parserUri(dto.getBgImageUri(), LaunchPadLayoutDTO.class.getSimpleName(), dto.getId());
+
+		dto.setBgImageUrl(url);
+	}
+
 	@Override
     public LaunchPadLayoutDTO getLastLaunchPadLayoutByScene(@Valid GetLaunchPadLayoutBySceneCommand cmd) {
 	    User user = UserContext.current().getUser();
