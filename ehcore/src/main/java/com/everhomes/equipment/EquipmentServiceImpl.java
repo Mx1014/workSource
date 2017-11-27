@@ -2672,7 +2672,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 		//记录excel中的field顺序
 		List<String> fieldOrders = new ArrayList<>();
 		for (FieldDTO field : fieldsDTO) {
-			fieldOrders.add(field.getFieldName());
+			//去除附件
+			if (!field.getFieldName().equals("attachments")){
+				fieldOrders.add(field.getFieldName());
+			}
 		}
 		int flag = 0;
 		//因为有注意事项  一行 从第二行开始
@@ -2791,14 +2794,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 
 		return objList;
-	}
-
-	private void convertValueToCode(String field) {
-		//将excel文案转成code
-		if (field.equals("categoryId")){
-
-		}
-
 	}
 
 	private void setToObj(String fieldName, Object dto,Object value) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
