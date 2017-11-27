@@ -71,6 +71,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         ShowBillForClientDTO finalDto = new ShowBillForClientDTO();
         List<BillDetailDTO> dtos = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+        SimpleDateFormat yyyy_MM_dd = new SimpleDateFormat("yyyy-MM-dd");
         //用时间区分待缴
         String dateStrEnd = "";
         if(isOwedBill==1 || isOwedBill==0){
@@ -168,28 +169,47 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dto.setDateStrEnd(sourceDto.getDateStrEnd());
                     Byte billStatus = sourceDto.getPayFlag();
                     try{
-                        String billDate = sourceDto.getBillDate();
-                        Date returnedDate = sdf.parse(billDate);
-                        Calendar c4 = Calendar.getInstance();
-                        c4.setTime(returnedDate);
-
                         Calendar local = Calendar.getInstance();
-                        Calendar local15 = Calendar.getInstance();
-                        local15.add(Calendar.DAY_OF_MONTH,15);
 
-                        //0:待缴；payflag为0，本地时间加15天大于等于 账期所在月,本地时间小于账期
-                        if(billStatus == 0 && (local.compareTo(c4)==-1 && local15.compareTo(c4)!=-1)){
-                            billStatus = 0;
-                        }else if(billStatus == 1){
-                            // 1：已缴；payflag为1
-                            billStatus = 1;
-                        }else if(billStatus == 0 && c4.compareTo(local)!=1){
-                            // 2：欠费；payfalg为0，账期小于本地时间
-                            billStatus = 2;
-                        }else if(billStatus == 0 && c4.compareTo(local15)==1){
-                            // 3：未缴，payflag为0，日期大于本地时间15天
-                            billStatus = 3;
+                        String dateStrBegin = sourceDto.getDateStrBegin();
+                        Calendar dateBegin = Calendar.getInstance();
+                        dateBegin.setTime(yyyy_MM_dd.parse(dateStrBegin));
+
+                        if(ownerType.equals(AssetPaymentStrings.EH_USER)){
+                            Calendar localPlus15 = Calendar.getInstance();
+                            localPlus15.add(Calendar.DAY_OF_MONTH,15);
+                            //0:待缴；payflag为0，本地时间加15天大于等于 账期所在月,本地时间小于账期
+                            if(billStatus == 0 && (local.compareTo(dateBegin)==-1 && localPlus15.compareTo(dateBegin)!=-1)){
+                                billStatus = 0;
+                            }else if(billStatus == 1){
+                                // 1：已缴；payflag为1
+                                billStatus = 1;
+                            }else if(billStatus == 0 && dateBegin.compareTo(local)==-1){
+                                // 2：欠费；payfalg为0，计费开始时间小于本地时间
+                                billStatus = 2;
+                            }else if(billStatus == 0 && dateBegin.compareTo(localPlus15)==1){
+                                // 3：未缴，payflag为0，日期大于本地时间15天以上
+                                billStatus = 3;
+                            }
+                        }else if(ownerType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+                            Calendar beginPlus10 = Calendar.getInstance();
+                            beginPlus10.setTime(dateBegin.getTime());
+                            beginPlus10.add(Calendar.DAY_OF_MONTH,10);
+                            //0:待缴；payflag为0，本地时间处于账期开始和10天的区间之内
+                            if(billStatus == 0 && (local.compareTo(dateBegin)!=-1 && local.compareTo(beginPlus10)!=1)){
+                                billStatus = 0;
+                            }else if(billStatus == 1){
+                                // 1：已缴；payflag为1
+                                billStatus = 1;
+                            }else if(billStatus == 0 && local.compareTo(beginPlus10)==1){
+                                // 2：欠费；payfalg为0，计费开始时间小于本地时间
+                                billStatus = 2;
+                            }else if(billStatus == 0 && local.compareTo(dateBegin)==-1){
+                                // 3：未缴，payflag为0，日期大于本地时间15天以上
+                                billStatus = 3;
+                            }
                         }
+
 
                     }catch (Exception e){
                         LOGGER.error("billStatus parse failed");

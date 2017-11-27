@@ -412,6 +412,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
                 if(i != values.size()-1) addresses.append(",");
                 bills.add(bill);
             }
+            dto.setBillGroupName(getFiPropertyName(values.get(0).getFiProperty()));
             dto.setBills(bills);
             dto.setOverAllAmountOwed(overallOwedAmount.toString());
             dto.setAddressStr(addresses.toString());
