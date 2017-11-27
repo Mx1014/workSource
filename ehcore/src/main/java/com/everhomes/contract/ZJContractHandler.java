@@ -431,6 +431,13 @@ public class ZJContractHandler implements ContractService{
     }
 
     @Override
+    public List<ContractDTO> listApartmentContracts(ListApartmentContractsCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler entryContract");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
     public void entryContract(EntryContractCommand cmd) {
         LOGGER.error("Insufficient privilege, zjgkhandler entryContract");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,

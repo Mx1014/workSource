@@ -22,6 +22,7 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +37,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhContractsDao;
 import com.everhomes.server.schema.tables.pojos.EhContracts;
 import com.everhomes.util.ConvertHelper;
+import org.springframework.util.StringUtils;
 
 @Component
 public class ContractProviderImpl implements ContractProvider {
@@ -356,6 +358,21 @@ public class ContractProviderImpl implements ContractProvider {
 			result.put(r.getId(), ConvertHelper.convert(r, Contract.class));
 			return null;
 		});
+
+		return result;
+	}
+
+	@Override
+	public List<Contract> listContractsByAddressId(Long addressId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<Contract> result  = new ArrayList<Contract>();
+		SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
+		query.addJoin(Tables.EH_CONTRACT_BUILDING_MAPPINGS, Tables.EH_CONTRACTS.ID.eq(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID));
+		query.addConditions(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.eq(addressId));
+
+		query.addOrderBy(Tables.EH_CONTRACTS.ID.desc());
+		result = query.fetch().map(new DefaultRecordMapper(Tables.EH_CONTRACTS.recordType(), Contract.class));
 
 		return result;
 	}

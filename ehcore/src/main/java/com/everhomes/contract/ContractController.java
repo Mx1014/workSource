@@ -194,6 +194,18 @@ public class ContractController extends ControllerBase {
 	}
 
 	/**
+	 * <p>查看门牌的合同</p>
+	 * <b>URL: /contract/listApartmentContracts</b>
+	 */
+	@RequestMapping("listApartmentContracts")
+	@RestReturn(value = ContractDTO.class, collection = true)
+	public RestResponse listApartmentContracts(ListApartmentContractsCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		return new RestResponse(contractService.listApartmentContracts(cmd));
+	}
+
+	/**
 	 * <p>设置合同参数</p>
 	 * <b>URL: /contract/setContractParam</b>
 	 */

@@ -52,4 +52,5 @@ public interface ContractProvider {
 	String findLastContractVersionByCommunity(Integer namespaceId, Long communityId);
 
 	List<Contract> listContractByNamespaceType(Integer namespaceId, String namespaceType, Long communityId);
+	List<Contract> listContractsByAddressId(Long addressId);
 }

@@ -1393,6 +1393,15 @@ public class ContractServiceImpl implements ContractService {
 		return null;
 	}
 
+	@Override
+	public List<ContractDTO> listApartmentContracts(ListApartmentContractsCommand cmd) {
+		List<Contract> contracts = contractProvider.listContractsByAddressId(cmd.getAddressId());
+		if(contracts != null && contracts.size() > 0) {
+			return contracts.stream().map(contract -> ConvertHelper.convert(contract, ContractDTO.class)).collect(Collectors.toList());
+		}
+		return null;
+	}
+
 	private Contract checkContract(Long id) {
 		Contract contract = contractProvider.findContractById(id);
 		if(contract == null) {
