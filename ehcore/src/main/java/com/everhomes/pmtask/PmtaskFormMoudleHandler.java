@@ -93,6 +93,7 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
             flowService.processAutoStep(dto);
         }
         //修改任务跟踪
+        flowCase = flowCaseProvider.findFlowCaseByReferId(pmTask.getId(), EntityType.PM_TASK.getCode(), moduleId);
         FlowAutoStepDTO dto = new FlowAutoStepDTO();
         dto.setAutoStepType(FlowStepType.NO_STEP.getCode());
         dto.setFlowCaseId(flowCase.getId());
