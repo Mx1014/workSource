@@ -25,3 +25,5 @@ ALTER TABLE `eh_aclink_logs` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT 
 ALTER TABLE `eh_aclinks` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT 0 AFTER `id`;
 ALTER TABLE `eh_aclink_undo_key` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT 0 AFTER `id`;
 
+-- layout 增加广场的背景图片 add by yanjun 201711271158
+ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `bg_image_uri`  varchar(255) NULL;
