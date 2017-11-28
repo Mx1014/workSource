@@ -2077,7 +2077,7 @@ public class PortalServiceImpl implements PortalService {
 			}
 
 			// 同步reflectionServiceModule表
-			this.serviceModuleService.getOrCreateReflectionServiceModuleApp(namespaceId, actionData, instanceConfig, serviceModule,itemLabel);
+			this.serviceModuleService.getOrCreateReflectionServiceModuleApp(namespaceId, actionData, moduleApp.getInstanceConfig(), itemLabel, serviceModule);
 		}
 		serviceModuleAppProvider.createServiceModuleApp(moduleApp);
 		return moduleApp;
