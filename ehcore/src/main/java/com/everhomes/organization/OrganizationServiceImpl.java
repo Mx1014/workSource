@@ -7047,7 +7047,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public OrganizationMemberDTO processUserForMember(UserIdentifier identifier) {
+    public OrganizationMemberDTO  processUserForMember(UserIdentifier identifier) {
         return processUserForMember(identifier, true);
     }
 

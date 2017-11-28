@@ -78,5 +78,5 @@ public interface AuthorizationProvider {
 
     void delteAuthorizationControlConfigsWithCondition(Integer namespaceId, Long userId);
 
-    List listAuthorizationControlConfigs(Integer namespaceId, Long userId, Long controlId);
+    List listAuthorizationControlConfigs(Long userId, Long controlId);
 }
