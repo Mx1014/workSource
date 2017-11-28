@@ -74,4 +74,7 @@ public interface ServiceModuleProvider {
 
     List<ServiceModule> listServiceModule(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 
+    void createReflectionServiceModuleApp();
+
+
 }

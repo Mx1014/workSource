@@ -555,4 +555,9 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         dao.deleteById(id);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhServiceModules.class, id);
     }
+
+    @Override
+    public void createReflectionServiceModuleApp() {
+
+    }
 }
