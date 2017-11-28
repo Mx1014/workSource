@@ -132,7 +132,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	public static final String REDIS_PRINT_JOB_CHECK_TIME = "redis_print_job_check_time";
 	private static final String PRINT_SUBJECT = "print";
 	//用户登录司印使用的用户id-园区id的分割字符串。
-	public static final String PRINT_LOGON_ACCOUNT_SPLIT = "-";
+//	public static final String PRINT_LOGON_ACCOUNT_SPLIT = "-";
+	public static final String PRINT_LOGON_ACCOUNT_SPLIT = "_";
 	public static final String PRINT_COMPANY_SPLIT = ",";
 	
 	@Autowired
