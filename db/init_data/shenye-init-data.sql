@@ -4229,8 +4229,9 @@ SELECT max(id) FROM eh_namespace_resources INTO @max_name_res_id;
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`)
 VALUES((@max_name_res_id := @max_name_res_id + 1), 999992, 'COMMUNITY', @max_community_id, UTC_TIMESTAMP());
 
-
-
+-- add by sw 20171115
+SET @scope_id = (SELECT MAX(id) FROM eh_web_menu_scopes);
+ INSERT INTO `eh_web_menu_scopes` VALUES(@scope_id := @scope_id + 1,50400,'','EhNamespaces',999992,2);
 
 
 

@@ -457,11 +457,13 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 	}
 
 	@Override
-	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
 		List<FlowServiceTypeDTO> result = new ArrayList<>();
 		FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
 		dto.setNamespaceId(namespaceId);
 		dto.setServiceName("停车月卡申请");
+		result.add(dto);
+
 		return result;
 	}
 }

@@ -41,4 +41,7 @@ public interface GroupServiceErrorCode {
     static final int ERROR_BROADCAST_TITLE_LENGTH = 10033; // 标题不能超过10个字
     static final int ERROR_BROADCAST_CONTENT_LENGTH = 10034; // 内容不能超过200个字
     static final int ERROR_GROUP_DESCRIPTION_LENGTH = 10035; // 不可小于10个字
+
+    static final int ERROR_GROUP_CREATOR_REVOKED_NOT_ALLOW_FOR_CLUB = 10036; // 俱乐部创建者无法被删除
+    static final int ERROR_GROUP_CREATOR_REVOKED_NOT_ALLOW_FOR_GUILD = 10037; // 行业协会创建者无法被删除
 }

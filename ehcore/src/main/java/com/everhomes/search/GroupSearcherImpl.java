@@ -150,14 +150,14 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
             if(groups.size() >= pageSize) {
                 this.bulkUpdate(groups);
                 groups.clear();
-                LOGGER.info("Sync group(iterate), process count: " + groups.size());
+                LOGGER.info("Sync group(iterate), processStat count: " + groups.size());
             }
         });
         
         if(groups.size() > 0) {
             this.bulkUpdate(groups);
             groups.clear();
-            LOGGER.info("Sync group(syncupdate), process count: " + groups.size());
+            LOGGER.info("Sync group(syncupdate), processStat count: " + groups.size());
         }
         
         //TODO merge ?

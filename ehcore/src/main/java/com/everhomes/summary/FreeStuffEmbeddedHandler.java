@@ -54,7 +54,7 @@ public class FreeStuffEmbeddedHandler implements ForumEmbeddedHandler {
                 });
             }
         } catch(Exception e) {
-            LOGGER.error("Failed to process free stuff embedded json info, postId=" + post.getId() + ", json=" + embeddedJson, e);
+            LOGGER.error("Failed to processStat free stuff embedded json info, postId=" + post.getId() + ", json=" + embeddedJson, e);
         }
         return post;
     }

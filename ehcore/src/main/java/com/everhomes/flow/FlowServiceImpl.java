@@ -944,9 +944,8 @@ public class FlowServiceImpl implements FlowService {
             if (actionInfo.getTemplateId() != null) {
                 action.setTemplateId(actionInfo.getTemplateId());
             }
-            if (actionInfo.getRenderText() != null) {
-                action.setRenderText(actionInfo.getRenderText());
-            }
+            action.setRenderText(actionInfo.getRenderText());
+
             flowActionProvider.updateFlowAction(action);
 
             flowUserSelectionProvider.deleteSelectionByBelong(action.getId(), FlowEntityType.FLOW_ACTION.getCode(), FlowUserType.PROCESSOR.getCode());
@@ -1083,16 +1082,12 @@ public class FlowServiceImpl implements FlowService {
             }
         }
 
-        List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(
-                cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType());
+        ListFlowUserSelectionCommand cmd1 = new ListFlowUserSelectionCommand();
+        cmd1.setBelongTo(cmd.getBelongTo());
+        cmd1.setFlowEntityType(cmd.getFlowEntityType());
+        cmd1.setFlowUserType(cmd.getFlowUserType());
 
-        ListFlowUserSelectionResponse resp = new ListFlowUserSelectionResponse();
-        resp.setSelections(
-                selections.stream()
-                        .map(r -> ConvertHelper.convert(r, FlowUserSelectionDTO.class))
-                .collect(Collectors.toList())
-        );
-        return resp;
+        return listFlowUserSelection(cmd1);
     }
 
     @Override
@@ -1102,7 +1097,7 @@ public class FlowServiceImpl implements FlowService {
         List<FlowUserSelectionDTO> selections = new ArrayList<>();
         resp.setSelections(selections);
         List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(
-                cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType(), 0);
+                cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType(), FlowConstants.FLOW_CONFIG_VER);
         if (seles != null && seles.size() > 0) {
             seles.forEach((sel) -> {
                 selections.add(ConvertHelper.convert(sel, FlowUserSelectionDTO.class));
@@ -1372,8 +1367,8 @@ public class FlowServiceImpl implements FlowService {
 
         Tuple<Boolean, Boolean> tuple = coordinationProvider.getNamedLock(lockKey).enter(() -> {
             // 查询看是否有原来已经开启的工作流
-            Flow enabledFlow = flowProvider.getEnabledConfigFlow(flow.getNamespaceId(), flow.getProjectType(), flow.getProjectId(),
-                    flow.getModuleId(), flow.getModuleType(), flow.getOwnerId(), flow.getOwnerType());
+            Flow enabledFlow = flowProvider.getEnabledConfigFlow(flow.getNamespaceId(), flow.getProjectType(),
+                    flow.getProjectId(), flow.getModuleId(), flow.getModuleType(), flow.getOwnerId(), flow.getOwnerType());
 
             if (enabledFlow != null && !enabledFlow.getId().equals(flowId)) {
                 dbProvider.execute(status -> {
@@ -2505,6 +2500,8 @@ public class FlowServiceImpl implements FlowService {
             flowCase.setApplyUserId(UserContext.current().getUser().getId());
         }
         UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(flowCase.getApplyUserId());
+        fixupUserInfo(snapshotFlow.getOrganizationId(), userInfo);
+
         flowCase.setApplierName(userInfo.getNickName());
         if (userInfo.getPhones() != null && userInfo.getPhones().size() > 0) {
             flowCase.setApplierPhone(userInfo.getPhones().get(0));
@@ -3128,11 +3125,11 @@ public class FlowServiceImpl implements FlowService {
                 nodeLogDTO.setNodeId(currNode.getId());
                 nodeLogDTO.setNodeLevel(currNode.getNodeLevel());
                 nodeLogDTO.setNodeName(currNode.getNodeName());
-                nodeLogDTO.setParams(currNode.getParams());
+                nodeLogDTO.setParams(currNode.getGroupByParams());
 
                 if (flowCase.getStepCount().equals(eventLog.getStepCount())) {
                     nodeLogDTO.setIsCurrentNode((byte) 1);
-                    dto.setCurrNodeParams(currNode.getParams());
+                    dto.setCurrNodeParams(currNode.getGroupByParams());
 
                     // 附言按钮
                     FlowButton commentBtn = flowButtonProvider.findFlowButtonByStepType(currNode.getId()
@@ -5031,7 +5028,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public FlowConditionVariable getFormFieldValueByVariable(FlowCaseState ctx, String variable, String extra) {
         String fieldName = formFieldProcessorManager.parseFormFieldName(ctx, variable, extra);
-        FlowCase flowCase = ctx.getFlowCase();
+        FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
         GeneralFormFieldDTO fieldDTO = generalFormService.getGeneralFormValueByOwner(
                 flowCase.getModuleType(),
                 flowCase.getModuleId(),
@@ -5343,25 +5340,25 @@ public class FlowServiceImpl implements FlowService {
             }
 
             // 创建link
-            // Map<Integer, Long> linkLevelToLinkIdMap = new HashMap<>();
+            Map<Integer, Long> linkLevelToLinkIdMap = new HashMap<>();
             flowLinkProvider.deleteFlowLink(flow.getId(), FlowConstants.FLOW_CONFIG_VER);
             for (FlowLinkCommand flowLinkCmd : cmd.getLinks()) {
                 flowLinkCmd.setFromNodeId(nodeLevelToNodeIdMap.get(flowLinkCmd.getFromNodeLevel()));
                 flowLinkCmd.setToNodeId(nodeLevelToNodeIdMap.get(flowLinkCmd.getToNodeLevel()));
                 FlowLinkDTO flowLink = createFlowLink(flow, flowLinkCmd);
-                // linkLevelToLinkIdMap.put(flowLink.getLinkLevel(), flowLink.getId());
+                linkLevelToLinkIdMap.put(flowLink.getLinkLevel(), flowLink.getId());
             }
 
-            /*// 创建condition
+            // 创建condition
             if (cmd.getConditions() != null) {
-                flowConditionProvider.deleteFlowCondition(flow.getId(), FlowConstants.FLOW_CONFIG_VER);
+                flowConditionProvider.deleteFlowCondition(flow.getId(), null, FlowConstants.FLOW_CONFIG_VER);
                 for (FlowConditionCommand conditionCmd : cmd.getConditions()) {
                     conditionCmd.setFlowNodeId(nodeLevelToNodeIdMap.get(conditionCmd.getFlowNodeLevel()));
                     conditionCmd.setNextNodeId(nodeLevelToNodeIdMap.get(conditionCmd.getNextNodeLevel()));
                     conditionCmd.setFlowLinkId(linkLevelToLinkIdMap.get(conditionCmd.getFlowLinkLevel()));
                     createFlowCondition(flow, conditionCmd);
                 }
-            }*/
+            }
             return true;
         });
 
@@ -5742,13 +5739,15 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public ListFlowServiceTypeResponse listFlowServiceTypes(ListFlowServiceTypesCommand cmd) {
         List<FlowServiceTypeDTO> serviceTypes = new ArrayList<>();
-        serviceTypes.addAll(flowListenerManager.listFlowServiceTypes(UserContext.getCurrentNamespaceId(), cmd.getModuleId()));
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        serviceTypes.addAll(flowListenerManager.listFlowServiceTypes(namespaceId, cmd.getModuleId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId()));
 
         List<FlowServiceTypeDTO> nsServiceTypes = flowServiceTypeProvider.listFlowServiceType(
-                UserContext.getCurrentNamespaceId(), cmd.getModuleId(), FlowServiceTypeDTO.class);
+                namespaceId, cmd.getModuleId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), FlowServiceTypeDTO.class);
         if (nsServiceTypes.size() == 0) {
             nsServiceTypes = flowServiceTypeProvider.listFlowServiceType(
-                    Namespace.DEFAULT_NAMESPACE, cmd.getModuleId(), FlowServiceTypeDTO.class);
+                    Namespace.DEFAULT_NAMESPACE, cmd.getModuleId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), FlowServiceTypeDTO.class);
         }
         serviceTypes.addAll(nsServiceTypes);
 
@@ -5815,7 +5814,7 @@ public class FlowServiceImpl implements FlowService {
         if (flowUserTypes.size() > 0) {
             return flowListenerManager.onFlowCaseDetailRender(flowCase, flowUserTypes.get(0));
         }
-        return flowListenerManager.onFlowCaseDetailRender(flowCase, null);
+        return flowListenerManager.onFlowCaseDetailRender(flowCase, FlowUserType.NO_USER);
     }
 
     private List<FlowButtonDTO> getFlowButtonDTOList(FlowGraph flowGraph, Long userId, List<FlowUserType> flowUserTypes, boolean checkProcessor, FlowCase flowCase, List<FlowNode> nodes, List<FlowLane> laneList) {
@@ -5993,7 +5992,7 @@ public class FlowServiceImpl implements FlowService {
                 for (FlowCase aCase : allFlowCase) {
                     if (eventLog.getFlowCaseId().equals(aCase.getId()) && aCase.getStepCount().equals(eventLog.getStepCount())) {
                         nodeLogDTO.setIsCurrentNode((byte) 1);
-                        // dto.setCurrNodeParams(currNode.getParams());
+                        // dto.setCurrNodeParams(currNode.getGroupByParams());
 
                         // 下一步需要处理人选择下一步节点
                         // List<FlowLink> linksOut = flowLinkProvider.listFlowLinkByFromNodeId(currNode.getId(), aCase.getFlowVersion());
@@ -6272,6 +6271,7 @@ public class FlowServiceImpl implements FlowService {
             flowLane.setFlowMainId(flow.getId());
             flowLane.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
             flowLane.setLaneLevel(flowLaneCmd.getLaneLevel());
+            flowLane.setFlowNodeLevel(flowLaneCmd.getFlowNodeLevel());
             flowLane.setNamespaceId(flow.getNamespaceId());
             flowLane.setStatus(FlowCommonStatus.ACTIVE.getCode());
             flowLane.setIdentifierNodeLevel(flowLaneCmd.getIdentifierNodeLevel());

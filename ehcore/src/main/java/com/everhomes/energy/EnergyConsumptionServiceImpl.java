@@ -3162,6 +3162,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 List<EnergyMeterTaskDTO> taskDTOs = tasks.stream().map(task -> {
                     EnergyMeterTaskDTO dto = ConvertHelper.convert(task, EnergyMeterTaskDTO.class);
                     EnergyMeter meter = meterProvider.findById(task.getNamespaceId(), task.getMeterId());
+                    dto.setBillCategoryId(meter.getBillCategoryId());
+                    // 项目
+                    EnergyMeterCategory billCategory = meterCategoryProvider.findById(UserContext.getCurrentNamespaceId(task.getNamespaceId()), meter.getBillCategoryId());
+                    dto.setBillCategory(billCategory != null ? billCategory.getName() : null);
+
                     dto.setMeterName(meter.getName());
                     dto.setMeterNumber(meter.getMeterNumber());
                     dto.setMeterType(meter.getMeterType());

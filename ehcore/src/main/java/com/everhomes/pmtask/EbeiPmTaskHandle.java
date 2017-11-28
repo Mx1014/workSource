@@ -442,17 +442,21 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
             task.setOrganizationId(cmd.getOrganizationId());
             task.setRequestorName(requestorName);
             task.setRequestorPhone(requestorPhone);
+            task.setOrganizationName(cmd.getOrganizationName());
             Long time  = System.currentTimeMillis();
+            pmTaskProvider.createTask(task);
+            createFlowCase(task);
+
             EbeiTaskResult createTaskResultDTO = createTask(task, cmd.getAttachments(),cmd.getFlowOrganizationId());
             LOGGER.info("--------------------------------------timecost:"+(System.currentTimeMillis()-time));
             if(null != createTaskResultDTO) {
                 task.setStringTag1(createTaskResultDTO.getOrderId());
             }
-            pmTaskProvider.createTask(task);
+
             //附件
             pmTaskCommonService.addAttachments(cmd.getAttachments(), user.getId(), task.getId(), PmTaskAttachmentType.TASK.getCode());
 
-            createFlowCase(task);
+           pmTaskProvider.updateTask(task);
             return null;
         });
 

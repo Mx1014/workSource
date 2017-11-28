@@ -21,23 +21,23 @@ import java.util.concurrent.Executor;
  * Note
  *     We support a mixed-mode of bean configuration. You can both configure beans here
  *  or in applicationContext.xml.
- *  
+ *
  *  In general, use annotation based configuration if you can, but if you do need 
  *  more expressive way in the configuration, put them in applicationContext.xml 
- *  
+ *
  * @author Kelven Yang
  */
 @Configuration
-@ImportResource(value="classpath*:**/applicationContext.xml")
+@ImportResource(value = "classpath*:**/applicationContext.xml")
 @EnableWebSocket
 @EnableCaching
 @EnableAsync
 @EnableScheduling
 public class AppConfig implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
-    
+
     public static int DEFAULT_PAGINATION_PAGE_SIZE = 20;
-    
+
     @Value("${upload.max.size}")
     long maxUploadSize;
     
@@ -56,11 +56,11 @@ public class AppConfig implements AsyncConfigurer {
         return resolver;
     }
     */
-    
+
     @Bean
     CharacterEncodingFilter encodingFilter() {
         CharacterEncodingFilter filter = new CharacterEncodingFilter();
-        
+
         filter.setEncoding("UTF-8");
         filter.setForceEncoding(true);
         return filter;
@@ -69,13 +69,13 @@ public class AppConfig implements AsyncConfigurer {
     @Override
     public Executor getAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(7);
-        executor.setMaxPoolSize(12);
-        executor.setQueueCapacity(11);
+        executor.setCorePoolSize(6);
+        executor.setMaxPoolSize(128);
         executor.setThreadNamePrefix("AsyncMethodInvocation-");
         executor.initialize();
         return executor;
     }
+
 //    @Bean
 //    public SchedulerFactoryBean quartz() {
 //        SchedulerFactoryBean factoryBean = new SchedulerFactoryBean();
@@ -83,5 +83,5 @@ public class AppConfig implements AsyncConfigurer {
 //        factoryBean.setApplicationContextSchedulerContextKey("applicationContext");
 //        return factoryBean;
 //    }
-    
+
 }

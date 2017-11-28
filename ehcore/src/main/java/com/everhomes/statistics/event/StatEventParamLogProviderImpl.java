@@ -221,6 +221,17 @@ public class StatEventParamLogProviderImpl implements StatEventParamLogProvider 
         return result;
     }
 
+    @Override
+    public void createStatEventParamLogs(List<StatEventParamLog> paramLogs) {
+        for (StatEventParamLog paramLog : paramLogs) {
+            Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhStatEventParamLogs.class));
+            paramLog.setId(id);
+            paramLog.setCreateTime(DateUtils.currentTimestamp());
+        }
+        rwDao().insert(paramLogs.toArray(new EhStatEventParamLogs[paramLogs.size()]));
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhStatEventParamLogs.class, null);
+    }
+
     /*@Override
     public Map<Map<String, String>, Integer> countDistinctSession(Integer namespaceId, String eventName, String eventVersion, List<String> paramKeys, Timestamp minTime, Timestamp maxTime) {
         DSLContext context = context();

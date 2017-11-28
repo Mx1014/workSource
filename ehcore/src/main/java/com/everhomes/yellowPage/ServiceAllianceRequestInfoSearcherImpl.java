@@ -94,6 +94,7 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
 
 @Component
 public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearch
@@ -558,14 +559,20 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 			//如('审批',[['序号':1,'用户姓名':'邓爽'],['附加属性1':'值1','附加属性2':'值2']])
 			Map<String,List[]> requestsInfoMap = new HashMap<String, List[]>();
 			GetRequestInfoCommand command = new GetRequestInfoCommand();
+			forLoop:
 			for (RequestInfoDTO requestInfo : response.getDtos()) {
 				command.setId(requestInfo.getId());
 				command.setTemplateType(requestInfo.getTemplateType());
 				Object extrasInfo = null;
 				//审批另外调用接口，返回的object，通过类型判断在生成sheet时做对应处理，参考createXSSFWorkbook(XSSFWorkbook wb, String templateName,List[] requestInfos)
 				if("flowCase".equals(command.getTemplateType())){
-					extrasInfo=flowService.getFlowCaseDetail(requestInfo.getFlowCaseId(), UserContext.current().getUser().getId(),
+					try{
+						extrasInfo=flowService.getFlowCaseDetail(requestInfo.getFlowCaseId(), UserContext.current().getUser().getId(),
 							FlowUserType.PROCESSOR, true);
+					}catch (RuntimeErrorException e) {
+						LOGGER.error("{}",e);
+						continue forLoop;
+					}
 					if(null==templateMap.get("flowCase"+requestInfo.getFlowCaseId())){
 						GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(requestInfo.getFlowCaseId(),
 								GeneralFormDataSourceType.USER_NAME.getCode());

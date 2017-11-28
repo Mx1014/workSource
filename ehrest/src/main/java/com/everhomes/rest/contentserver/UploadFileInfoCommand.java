@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul> 上传文件控件的文件详细信息
  * <li>uploadId: 上传会话 ID </li>
+ * <li>title: 标题</li>
  * <li>limitCount: 文件数限制 </li>
  * <li>limitPerSize: 每个文件大小的限制 </li>
  * <li>fileExtension: 文件拓展名 </li>
@@ -27,7 +28,7 @@ public class UploadFileInfoCommand {
     private Integer limitCount;
     private Integer limitPerSize;
     private String fileExtension;
-    
+    private String title;
     private String userToken;
     private String contentServer;
     
@@ -88,6 +89,14 @@ public class UploadFileInfoCommand {
 
     public void setInfos(List<UploadFileInfo> infos) {
         this.infos = infos;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     @Override

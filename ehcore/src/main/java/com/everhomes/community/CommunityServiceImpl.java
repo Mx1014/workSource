@@ -1113,6 +1113,9 @@ public class CommunityServiceImpl implements CommunityService {
 					String[] temp = data.getLongitudeLatitude().replace("，", ",").replace("、", ",").split(",");
 					building.setLongitude(Double.parseDouble(temp[0]));
 					building.setLatitude(Double.parseDouble(temp[1]));
+				} else {
+					building.setLongitude(null);
+					building.setLatitude(null);
 				}
 
 				building.setNamespaceBuildingType(data.getNamespaceBuildingType());
@@ -2794,9 +2797,9 @@ public class CommunityServiceImpl implements CommunityService {
 		try {
 			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
 		} catch (IOException e) {
-			LOGGER.error("process Excel error, operatorId=" + userId + ", cmd=" + cmd);
+			LOGGER.error("processStat Excel error, operatorId=" + userId + ", cmd=" + cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_GENERAL_EXCEPTION, "process Excel error");
+					ErrorCodes.ERROR_GENERAL_EXCEPTION, "processStat Excel error");
 		}
 
 		if (resultList != null && resultList.size() > 0) {
@@ -3671,7 +3674,8 @@ public class CommunityServiceImpl implements CommunityService {
 			ProjectDTO dto = new ProjectDTO();
 			dto.setProjectName(category.getName());
 			dto.setProjectId(category.getId());
-			dto.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
+			dto.setProjectType(EntityType.CHILD_PROJECT.getCode());
+			dto.setParentId(cmd.getProjectId());
 			List<ResourceCategoryAssignment> buildingCategorys = communityProvider.listResourceCategoryAssignment(category.getId(), namespaceId);
 			List<ProjectDTO> buildingProjects = new ArrayList<>();
 			for (ResourceCategoryAssignment buildingCategory: buildingCategorys) {
@@ -3679,6 +3683,7 @@ public class CommunityServiceImpl implements CommunityService {
 					Building building = communityProvider.findBuildingById(buildingCategory.getResourceId());
 					if(null != building){
 						ProjectDTO buildingProject = new ProjectDTO();
+						buildingProject.setParentId(category.getId());
 						buildingProject.setProjectId(building.getId());
 						buildingProject.setProjectName(building.getName());
 						buildingProject.setProjectType(EntityType.BUILDING.getCode());

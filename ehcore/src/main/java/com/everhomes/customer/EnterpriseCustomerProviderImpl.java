@@ -10,13 +10,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.rest.customer.*;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectOffsetStep;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,60 +34,11 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.customer.CustomerErrorCode;
-import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
-import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
-import com.everhomes.rest.customer.CustomerType;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
-import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
-import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
-import com.everhomes.rest.customer.TrackingPlanReadStatus;
 import com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhCustomerApplyProjectsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerCertificatesDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerCommercialsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerEconomicIndicatorsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerEventsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerInvestmentsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerPatentsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerTalentsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerTrackingPlansDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerTrackingsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerTrademarksDao;
-import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomersDao;
-import com.everhomes.server.schema.tables.daos.EhPmNotifyLogsDao;
-import com.everhomes.server.schema.tables.daos.EhTrackingNotifyLogsDao;
-import com.everhomes.server.schema.tables.pojos.EhCustomerApplyProjects;
-import com.everhomes.server.schema.tables.pojos.EhCustomerCertificates;
-import com.everhomes.server.schema.tables.pojos.EhCustomerCommercials;
-import com.everhomes.server.schema.tables.pojos.EhCustomerEconomicIndicators;
-import com.everhomes.server.schema.tables.pojos.EhCustomerEvents;
-import com.everhomes.server.schema.tables.pojos.EhCustomerInvestments;
-import com.everhomes.server.schema.tables.pojos.EhCustomerPatents;
-import com.everhomes.server.schema.tables.pojos.EhCustomerTalents;
-import com.everhomes.server.schema.tables.pojos.EhCustomerTrackingPlans;
-import com.everhomes.server.schema.tables.pojos.EhCustomerTrackings;
-import com.everhomes.server.schema.tables.pojos.EhCustomerTrademarks;
-import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomers;
-import com.everhomes.server.schema.tables.pojos.EhPmNotifyLogs;
-import com.everhomes.server.schema.tables.pojos.EhTrackingNotifyLogs;
-import com.everhomes.server.schema.tables.records.EhCustomerApplyProjectsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerCertificatesRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerCommercialsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerEconomicIndicatorsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerEventsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerInvestmentsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerPatentsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerTalentsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerTrackingPlansRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerTrackingsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerTrademarksRecord;
-import com.everhomes.server.schema.tables.records.EhEnterpriseCustomersRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.user.UserContext;
@@ -484,12 +435,62 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         economicIndicator.setCreateUid(UserContext.current().getUser().getId());
         economicIndicator.setStatus(CommonStatus.ACTIVE.getCode());
 
-        LOGGER.info("createCustomerEconomicIndicator: " + economicIndicator);
 
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEconomicIndicators.class, id));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEconomicIndicators.class));
         EhCustomerEconomicIndicatorsDao dao = new EhCustomerEconomicIndicatorsDao(context.configuration());
         dao.insert(economicIndicator);
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerEconomicIndicators.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerEconomicIndicators.class, id);
+    }
+
+    @Override
+    public void createCustomerEconomicIndicatorStatistic(CustomerEconomicIndicatorStatistic statistic) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerEconomicIndicatorStatistics.class));
+        statistic.setId(id);
+        statistic.setStatus(CommonStatus.ACTIVE.getCode());
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEconomicIndicatorStatistics.class));
+        EhCustomerEconomicIndicatorStatisticsDao dao = new EhCustomerEconomicIndicatorStatisticsDao(context.configuration());
+        dao.insert(statistic);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerEconomicIndicatorStatistics.class, id);
+    }
+
+    @Override
+    public void updateCustomerEconomicIndicatorStatistic(CustomerEconomicIndicatorStatistic statistic) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEconomicIndicatorStatistics.class));
+        EhCustomerEconomicIndicatorStatisticsDao dao = new EhCustomerEconomicIndicatorStatisticsDao(context.configuration());
+
+        dao.update(statistic);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerEconomicIndicatorStatistics.class, statistic.getId());
+    }
+
+    @Override
+    public void deleteCustomerEconomicIndicatorStatistic(CustomerEconomicIndicatorStatistic statistic) {
+        assert(statistic.getId() != null);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEconomicIndicatorStatistics.class, statistic.getId()));
+        EhCustomerEconomicIndicatorStatisticsDao dao = new EhCustomerEconomicIndicatorStatisticsDao(context.configuration());
+        dao.delete(statistic);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerEconomicIndicatorStatistics.class, statistic.getId());
+
+    }
+
+    @Override
+    public CustomerEconomicIndicatorStatistic listCustomerEconomicIndicatorStatisticsByCustomerIdAndMonth(Long customerId, Timestamp time) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerEconomicIndicatorStatisticsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS);
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.START_TIME.le(time));
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.END_TIME.ge(time));
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerEconomicIndicatorStatistic> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerEconomicIndicatorStatistic.class));
+            return null;
+        });
+        if(result.size() == 0) {
+            return null;
+        }
+        return result.get(0);
     }
 
     @Override
@@ -734,6 +735,24 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
+    public List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerId(Long customerId, Timestamp startTime, Timestamp endTime) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerEconomicIndicatorsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS);
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.MONTH.ge(startTime));
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.MONTH.le(endTime));
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerEconomicIndicator> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerEconomicIndicator.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
     public List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerIds(List<Long> customerIds) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhCustomerEconomicIndicatorsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS);
@@ -745,6 +764,66 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
             result.add(ConvertHelper.convert(r, CustomerEconomicIndicator.class));
             return null;
         });
+
+        return result;
+    }
+
+    @Override
+    public List<CustomerAnnualStatisticDTO> listCustomerAnnualStatistics(Long communityId, Timestamp now, CrossShardListingLocator locator, Integer pageSize,
+               BigDecimal turnoverMinimum, BigDecimal turnoverMaximum, BigDecimal taxPaymentMinimum, BigDecimal taxPaymentMaximum) {
+        Integer size = pageSize + 1;
+        List<CustomerAnnualStatisticDTO> result = new ArrayList<>();
+        dbProvider.mapReduce(AccessSpec.readOnly(), null,
+                (DSLContext context, Object reducingContext) -> {
+                    SelectQuery<Record> query = context.selectQuery();
+                    query.addSelect(Tables.EH_ENTERPRISE_CUSTOMERS.ID,Tables.EH_ENTERPRISE_CUSTOMERS.NAME,
+                            Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.TURNOVER,
+                            Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.TAX_PAYMENT);
+                    query.addFrom(Tables.EH_ENTERPRISE_CUSTOMERS);
+                    query.addJoin(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS, JoinType.LEFT_OUTER_JOIN,
+                            Tables.EH_ENTERPRISE_CUSTOMERS.ID.eq(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.CUSTOMER_ID));
+
+                    query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(communityId));
+                    query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+                    query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.START_TIME.le(now));
+                    query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.END_TIME.ge(now));
+
+                    if(turnoverMinimum != null) {
+                        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.TURNOVER.ge(turnoverMinimum));
+                    }
+                    if(turnoverMaximum != null) {
+                        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.TURNOVER.le(turnoverMaximum));
+                    }
+                    if(taxPaymentMinimum != null) {
+                        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.TAX_PAYMENT.ge(taxPaymentMinimum));
+                    }
+                    if(taxPaymentMaximum != null) {
+                        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.TAX_PAYMENT.le(taxPaymentMaximum));
+                    }
+                    if (null != locator && null != locator.getAnchor())
+                        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.ID.lt(locator.getAnchor()));
+
+                    query.addOrderBy(Tables.EH_ENTERPRISE_CUSTOMERS.ID.desc());
+                    query.addLimit(size);
+                    LOGGER.debug("query sql:{}", query.getSQL());
+                    LOGGER.debug("query param:{}", query.getBindValues());
+                    query.fetch().map((r) -> {
+                        CustomerAnnualStatisticDTO statisticDTO = new CustomerAnnualStatisticDTO();
+                        statisticDTO.setEnterpriseCustomerId(r.getValue(Tables.EH_ENTERPRISE_CUSTOMERS.ID));
+                        statisticDTO.setEnterpriseCustomerName(r.getValue(Tables.EH_ENTERPRISE_CUSTOMERS.NAME));
+                        statisticDTO.setTurnover(r.getValue(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.TURNOVER));
+                        statisticDTO.setTaxPayment(r.getValue(Tables.EH_CUSTOMER_ECONOMIC_INDICATOR_STATISTICS.TAX_PAYMENT));
+                        result.add(statisticDTO);
+                        return null;
+                    });
+                    return true;
+                });
+
+        locator.setAnchor(null);
+        if (result.size() > pageSize) {
+            result.remove(result.size() - 1);
+            locator.setAnchor(result.get(result.size() - 1).getEnterpriseCustomerId());
+        }
 
         return result;
     }
@@ -858,7 +937,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
     @Override
     public void updateCustomerEconomicIndicator(CustomerEconomicIndicator economicIndicator) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEconomicIndicators.class, economicIndicator.getId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEconomicIndicators.class));
         EhCustomerEconomicIndicatorsDao dao = new EhCustomerEconomicIndicatorsDao(context.configuration());
 
         economicIndicator.setOperatorUid(UserContext.current().getUser().getId());

@@ -74,7 +74,9 @@ public interface ConfigConstants {
 	public static final String OAUTH_SERVER = "oauth.server";
 	public static final String PAY_SERVER = "pay.server";
 	
-	public static final String ACTIVITY_CONTENT_URL = "activity.content.url"; 
+	public static final String ACTIVITY_CONTENT_URL = "activity.content.url";
+
+    public static final String CLUB_DESCRIPTION_URL = "club.description.url";
 	
 	public static final String CLUB_PLACEHOLDER_NAME = "club.placeholder.name"; 
 	
@@ -128,5 +130,6 @@ public interface ConfigConstants {
     public static final String QUESTIONNAIRE_REMIND_TIME_INTERVAL = "questionnaire.remind.time.interval";
 
     String PARKING_CAR_VERIFICATION_FLOWCASE_URL = "parking.car.verification.flowCase.url";
-
+    String ARCHIVES_FORM_ORIGIN_ID = "archives.form.origin.id";
+    String APP_SYSTEM_UPLOAD_URL_IN_BROWSER = "app.system.upload_url_in_browser";
 }

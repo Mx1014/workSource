@@ -3,6 +3,7 @@ package com.everhomes.techpark.punch;
 import javax.validation.Valid;
 
 import com.everhomes.rest.techpark.punch.*;
+import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
 
 import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
 import org.slf4j.Logger;
@@ -111,6 +112,24 @@ public class PunchController extends ControllerBase {
 
 
 	/**
+	 * <b>URL: /techpark/punch/checkAbnormalStatus</b>
+	 * <p>
+	 * 查询企业是否开启了异常审批
+	 * </p>
+	 */
+	@RequestMapping("checkAbnormalStatus")
+	@RestReturn(value = CheckAbnormalStatusResponse.class)
+	public RestResponse checkAbnormalStatus(@Valid CheckPunchAdminCommand cmd) {
+		// 打卡返回打卡时间
+		CheckAbnormalStatusResponse res = punchService.checkAbnormalStatus(cmd);
+		RestResponse response = new RestResponse(res); 
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
 	 * <b>URL: /techpark/punch/checkPunchAdmin</b>
 	 * <p>
 	 * 查询当前用户是否为该公司考勤的管理员(目前是企业管理员)
@@ -126,8 +145,7 @@ public class PunchController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
-
+	
 	/**
 	 * <b>URL: /techpark/punch/getPunchNewException</b>
 	 * <p>
@@ -292,7 +310,7 @@ public class PunchController extends ControllerBase {
 //	}
 	
 	/**
-	 * <b>URL: /techpark/punch/listPunchExceptionRequest</b>
+	 * <b>URL: /techpark/punch/listPunchExceptionRequestBetweenBeginAndEndTime</b>
 	 * <p>
 	 * 查询公司打卡异常申请列表
 	 * </p>

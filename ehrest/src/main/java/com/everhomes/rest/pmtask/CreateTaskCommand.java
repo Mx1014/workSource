@@ -20,6 +20,9 @@ import com.everhomes.util.StringHelper;
  * <li>sourceType: 报事来源</li>
  * <li>requestorName: 联系人名称</li>
  * <li>requestorPhone: 联系方式</li>
+ * <li>requestorPhone: 联系方式</li>
+ * <li>attachments: 附件，参考{@link com.everhomes.rest.pmtask.AttachmentDescriptor}</li>
+ * <li>organizationName: 公司名称</li>
  * <li>addressType: 地址类型   1:小区家庭门牌地址 2: 园区公司地址 {@link com.everhomes.rest.pmtask.PmTaskAddressType }</li>
  * </ul>
  */
@@ -45,6 +48,7 @@ public class CreateTaskCommand {
 	private String buildingName;
 	private Long flowOrganizationId;
 	private Integer namespaceId;
+	private String organizationName;
 	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachments;
 
@@ -166,6 +170,14 @@ public class CreateTaskCommand {
 
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public String getOrganizationName() {
+		return organizationName;
+	}
+
+	public void setOrganizationName(String organizationName) {
+		this.organizationName = organizationName;
 	}
 
 	@Override

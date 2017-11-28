@@ -461,3 +461,8 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), 41600+@entry_id*100+60, '', 'EhNamespaces', '999972', '2');
 
 update eh_launch_pad_items set action_type = '33' , action_data = CONCAT('{"type":',@category_id,',"parentId":',@category_id,',"displayType": "list"}') where namespace_id=999972 and item_label='投融资';
+
+-- add by sw 20171116
+set @id = (select MAX(id) FROM eh_web_menu_scopes);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@id := @id + 1),10200,NULL,'EhNamespaces',999972,2);

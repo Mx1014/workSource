@@ -2148,3 +2148,7 @@ SET @asset_vendor_id = (SELECT MAX(id) FROM `eh_asset_vendor`);
 INSERT INTO `eh_asset_vendor` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `status`, `namespace_id`)
     VALUES ((@asset_vendor_id := @asset_vendor_id + 1), 'community', '240111044331050367', '互联网产业园物业缴费', 'ZUOLIN', '2', '999970');
 
+-- 添加物业巡检下，增加“消息提醒设置”的菜单 add by sw 20171117
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20860,'', 'EhNamespaces', 999970,2);

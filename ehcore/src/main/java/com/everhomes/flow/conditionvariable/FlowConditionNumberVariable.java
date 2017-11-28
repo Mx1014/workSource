@@ -20,17 +20,17 @@ public class FlowConditionNumberVariable implements FlowConditionVariable<Number
 
     @Override
     public boolean isEqual(FlowConditionVariable variable) {
-        return doCompare(this, variable, (number1, number2) -> Math.abs(number1.floatValue() - number2.floatValue()) < 0.0001);
+        return doCompare(this, variable, (number1, number2) -> Math.abs(number1.floatValue() - number2.floatValue()) < 0.00001);
     }
 
     @Override
     public boolean isGreaterThen(FlowConditionVariable variable) {
-        return doCompare(this, variable, (number1, number2) -> Math.abs(number1.floatValue() - number2.floatValue()) > 0);
+        return doCompare(this, variable, (number1, number2) -> number1.floatValue() - number2.floatValue() > 0);
     }
 
     @Override
     public boolean isLessThen(FlowConditionVariable variable) {
-        return doCompare(this, variable, (number1, number2) -> Math.abs(number1.floatValue() - number2.floatValue()) < 0);
+        return doCompare(this, variable, (number1, number2) -> number1.floatValue() - number2.floatValue() < 0);
     }
 
     interface CompareCallback {

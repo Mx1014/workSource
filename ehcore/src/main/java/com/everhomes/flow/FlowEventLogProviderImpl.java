@@ -204,7 +204,8 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
         }
     	if(cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
     		cond = cond.and(
-    				Tables.EH_FLOW_CASES.MODULE_NAME.like(cmd.getKeyword() + "%")
+                    Tables.EH_FLOW_CASES.TITLE.like(cmd.getKeyword() + "%")
+                            .or(Tables.EH_FLOW_CASES.CONTENT.like("%" + cmd.getKeyword() + "%"))
     				.or(Tables.EH_FLOW_CASES.APPLIER_NAME.like(cmd.getKeyword() + "%"))
     				.or(Tables.EH_FLOW_CASES.APPLIER_PHONE.like(cmd.getKeyword() + "%"))
             );
@@ -630,11 +631,8 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
         com.everhomes.server.schema.tables.EhFlowEventLogs log = Tables.EH_FLOW_EVENT_LOGS;
         com.everhomes.server.schema.tables.EhFlowCases flowCase = Tables.EH_FLOW_CASES;
 
-
-
-        SelectQuery<Record9<Long, Long, String, String, String, Long, String, String, Timestamp>> query = context
-                .select(log.ID, flowCase.ID, flowCase.TITLE, flowCase.ROUTE_URI, flowCase.MODULE_NAME, flowCase.MODULE_ID,
-                        flowCase.CONTENT, log.LOG_CONTENT, log.CREATE_TIME)
+        SelectQuery<Record9<Long, Long, String, String, Long, String, String, String, Timestamp>> query = context
+                .select(log.ID, flowCase.ID, flowCase.TITLE, flowCase.MODULE_NAME, flowCase.MODULE_ID, flowCase.CONTENT, log.LOG_CONTENT, log.FLOW_USER_NAME, log.CREATE_TIME)
                 .from(log)
                 .join(flowCase).on(log.FLOW_CASE_ID.eq(flowCase.ID))
                 .getQuery();
@@ -681,6 +679,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
             dto.setFlowCaseContent(r.getValue(flowCase.CONTENT));
             dto.setLogContent(r.getValue(log.LOG_CONTENT));
             dto.setCreateTime(r.getValue(log.CREATE_TIME));
+            dto.setFlowUserName(r.getValue(log.FLOW_USER_NAME));
             return dto;
         });
         if (dtoList.size() > pageSize) {
