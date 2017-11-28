@@ -149,6 +149,17 @@ ALTER TABLE eh_flow_condition_expressions MODIFY variable2 VARCHAR(64) NOT NULL 
 ALTER TABLE eh_flow_condition_expressions MODIFY variable_type1 VARCHAR(64) NOT NULL DEFAULT '';
 ALTER TABLE eh_flow_condition_expressions MODIFY variable_type2 VARCHAR(64) NOT NULL DEFAULT '';
 
+
+-- by dengs, 20171120 已在线网执行的sql，放这里只是产生对应的persist包  (4.11.1已有)
+-- ALTER TABLE eh_news_tag ADD COLUMN `category_id` BIGINT default 0;
+
+-- 工作流条件字段 add by xq.tian 2017/22/24
+ALTER TABLE eh_flow_conditions MODIFY next_node_id BIGINT;
+ALTER TABLE eh_flow_conditions MODIFY next_node_level INTEGER;
+
+-- add column by lqs 20171124
+ALTER TABLE `eh_payment_users` ADD COLUMN `settlement_type` INTEGER NOT NULL DEFAULT 7 COMMENT '0-DAILY, 7-WEEKLY';
+
 -- 表增加索引 add by xiongying20171128
 ALTER TABLE eh_equipment_inspection_tasks UNIQUE INDEX `equipment_id_uniqueIndex` (`equipment_id`) ;
 ALTER TABLE eh_energy_date_statistics UNIQUE INDEX `unionmeter_stat_uniqueIndex` (`meter_id`,`stat_date`) ;

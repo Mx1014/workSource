@@ -477,6 +477,8 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         paymentUser.setOwnerId(ownerId);
         paymentUser.setPaymentUserType(businessUserType);
         paymentUser.setPaymentUserId(paymentUserId);
+        // 买方会员默认就是正常状态，不需要审核 by lqs 20171124
+        paymentUser.setStatus(PaymentUserStatus.ACTIVE.getCode());
         payProvider.createPaymentUser(paymentUser);
         return paymentUser;
     }
@@ -607,7 +609,19 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         createOrderCmd.setPaymentType(cmd.getPaymentType());
         createOrderCmd.setValidationType(ValidationType.NO_VERIFY.getCode());
         createOrderCmd.setPaymentParams(flattenMap);
-        createOrderCmd.setSettlementType(null);
+        
+        // 在eh_payment_users中加上结算类型，结算类型以收款方为准，收款方没有配置时则使用默认值 by lqs 20171124
+        //createOrderCmd.setSettlementType(null);
+        PaymentUser payeetUser = payProvider.findPaymentUserByOwner(serviceConfig.getOwnerType(), serviceConfig.getOwnerId());
+        SettlementType settlementType = null;
+        if(payeetUser != null) {
+            settlementType = SettlementType.fromCode(payeetUser.getSettlementType());
+        }
+        if(settlementType == null) {
+            settlementType = SettlementType.WEEKLY;
+        }
+        createOrderCmd.setSettlementType(settlementType.getCode());
+        
         createOrderCmd.setSplitRuleId(serviceConfig.getPaymentSplitRuleId());
         if(cmd.getExpiration() != null) {
             createOrderCmd.setExpirationMillis(cmd.getExpiration());

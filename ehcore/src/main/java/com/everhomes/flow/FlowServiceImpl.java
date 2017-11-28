@@ -2500,6 +2500,8 @@ public class FlowServiceImpl implements FlowService {
             flowCase.setApplyUserId(UserContext.current().getUser().getId());
         }
         UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(flowCase.getApplyUserId());
+        fixupUserInfo(snapshotFlow.getOrganizationId(), userInfo);
+
         flowCase.setApplierName(userInfo.getNickName());
         if (userInfo.getPhones() != null && userInfo.getPhones().size() > 0) {
             flowCase.setApplierPhone(userInfo.getPhones().get(0));
@@ -5035,7 +5037,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public FlowConditionVariable getFormFieldValueByVariable(FlowCaseState ctx, String variable, String extra) {
         String fieldName = formFieldProcessorManager.parseFormFieldName(ctx, variable, extra);
-        FlowCase flowCase = ctx.getFlowCase();
+        FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
         GeneralFormFieldDTO fieldDTO = generalFormService.getGeneralFormValueByOwner(
                 flowCase.getModuleType(),
                 flowCase.getModuleId(),
@@ -5347,25 +5349,25 @@ public class FlowServiceImpl implements FlowService {
             }
 
             // 创建link
-            // Map<Integer, Long> linkLevelToLinkIdMap = new HashMap<>();
+            Map<Integer, Long> linkLevelToLinkIdMap = new HashMap<>();
             flowLinkProvider.deleteFlowLink(flow.getId(), FlowConstants.FLOW_CONFIG_VER);
             for (FlowLinkCommand flowLinkCmd : cmd.getLinks()) {
                 flowLinkCmd.setFromNodeId(nodeLevelToNodeIdMap.get(flowLinkCmd.getFromNodeLevel()));
                 flowLinkCmd.setToNodeId(nodeLevelToNodeIdMap.get(flowLinkCmd.getToNodeLevel()));
                 FlowLinkDTO flowLink = createFlowLink(flow, flowLinkCmd);
-                // linkLevelToLinkIdMap.put(flowLink.getLinkLevel(), flowLink.getId());
+                linkLevelToLinkIdMap.put(flowLink.getLinkLevel(), flowLink.getId());
             }
 
-            /*// 创建condition
+            // 创建condition
             if (cmd.getConditions() != null) {
-                flowConditionProvider.deleteFlowCondition(flow.getId(), FlowConstants.FLOW_CONFIG_VER);
+                flowConditionProvider.deleteFlowCondition(flow.getId(), null, FlowConstants.FLOW_CONFIG_VER);
                 for (FlowConditionCommand conditionCmd : cmd.getConditions()) {
                     conditionCmd.setFlowNodeId(nodeLevelToNodeIdMap.get(conditionCmd.getFlowNodeLevel()));
                     conditionCmd.setNextNodeId(nodeLevelToNodeIdMap.get(conditionCmd.getNextNodeLevel()));
                     conditionCmd.setFlowLinkId(linkLevelToLinkIdMap.get(conditionCmd.getFlowLinkLevel()));
                     createFlowCondition(flow, conditionCmd);
                 }
-            }*/
+            }
             return true;
         });
 

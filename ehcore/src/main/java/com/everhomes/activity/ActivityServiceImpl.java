@@ -969,6 +969,10 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
 	private ActivityRoster newRoster(ManualSignupCommand cmd, User createUser, Activity activity) {
+
+		// 这里是的getUserFromPhone有点小问题的，id为0的用户在我们系统中是存在的，可能会有某些地方显示异常。
+		// 尝试过将uid设置成null，导致了app查询报名用户和后台导出报名出现了nullpointexception，还有报名、确认、取消、签到、支付、退款、活动详情及报名统计多个接口等没测试。
+		// 素我无能为力，暂时保持原样。
 		User user = getUserFromPhone(cmd.getPhone());
 		ActivityRoster roster = new ActivityRoster();
 		roster.setUuid(UUID.randomUUID().toString());
@@ -991,7 +995,7 @@ public class ActivityServiceImpl implements ActivityService {
         roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
         roster.setEmail(cmd.getEmail());
         roster.setStatus(ActivityRosterStatus.NORMAL.getCode());
-        
+
         return roster;
 	}
 
@@ -1074,7 +1078,7 @@ public class ActivityServiceImpl implements ActivityService {
 			User user = UserContext.current().getUser();
 			Activity activity = checkActivityExist(cmd.getActivityId());
 			List<ActivityRoster> rosters = getRostersFromExcel(files[0], result, activity.getId());
-			
+
 //			List<ActivityRoster> rosters = filterExistRoster(cmd.getActivityId(), rostersTemp);
 
 			//检查是否超过报名人数限制, add by tt, 20161012
@@ -1101,7 +1105,7 @@ public class ActivityServiceImpl implements ActivityService {
 				activity.setSignupAttendeeCount(activity.getSignupAttendeeCount() + rosters.size() - result.getUpdate());
 	            activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + rosters.size() - result.getUpdate());
 	            activityProvider.updateActivity(activity);
-	            
+
 				return null;
 			});
 
@@ -1195,6 +1199,9 @@ public class ActivityServiceImpl implements ActivityService {
 			//成功加一
 			result.setSuccess(result.getSuccess() + 1);
 
+			// 这里是的getUserFromPhone有点小问题的，id为0的用户在我们系统中是存在的，可能会有某些地方显示异常。
+			// 尝试过将uid设置成null，导致了app查询报名用户和后台导出报名出现了nullpointexception，还有报名、确认、取消、签到、支付、退款、活动详情及报名统计多个接口等没测试。
+			// 素我无能为力，暂时保持原样。
 			User user = getUserFromPhone(row.getA().trim());
 			ActivityRoster roster = new ActivityRoster();
 			roster.setUuid(UUID.randomUUID().toString());
@@ -2212,7 +2219,8 @@ public class ActivityServiceImpl implements ActivityService {
             
             User currentUser = userProvider.findUserById(r.getUid());
             d.setId(r.getId());
-            if (currentUser != null) {
+            //导入和手动添加的用户uid为0
+            if (currentUser != null && currentUser.getId() != 0) {
                 d.setUserAvatar(contentServerService.parserUri(currentUser.getAvatar(), EntityType.ACTIVITY.getCode(), activity.getId()));
                 d.setUserName(populateUserName(currentUser, activity.getPostId()));
                 

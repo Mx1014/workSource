@@ -142,11 +142,11 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 		if(QuestionnaireTargetType.ORGANIZATION == QuestionnaireTargetType.fromCode(targetType)){
 			joinCondition = joinCondition.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE.eq(QuestionnaireTargetType.ORGANIZATION.getCode()).and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID.eq(organizationID)));
 			condition = condition.and((Tables.EH_QUESTIONNAIRES.TARGET_TYPE.eq(QuestionnaireTargetType.ORGANIZATION.getCode())
-							.and(Tables.EH_QUESTIONNAIRES.ORGANIZATION_SCOPE.like("%"+organizationID+"%"))));
+							.and(Tables.EH_QUESTIONNAIRES.ORGANIZATION_SCOPE.like("%\""+organizationID+"\"%"))));
 		}else if(QuestionnaireTargetType.USER == QuestionnaireTargetType.fromCode(targetType)){
 			joinCondition = joinCondition.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE.eq(QuestionnaireTargetType.USER.getCode()).and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID.eq(UserId)));
 			condition = condition.and(Tables.EH_QUESTIONNAIRES.TARGET_TYPE.eq(QuestionnaireTargetType.USER.getCode())
-					.and(Tables.EH_QUESTIONNAIRES.USER_SCOPE.like("%"+UserId+"%")
+					.and(Tables.EH_QUESTIONNAIRES.USER_SCOPE.like("%\""+UserId+"\"%")
 							.and(Tables.EH_QUESTIONNAIRES.ORGANIZATION_SCOPE.isNull())));
 		}else{
 			joinCondition = joinCondition.and(

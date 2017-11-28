@@ -1674,10 +1674,17 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 
 		ParkingCarLockInfoDTO temp = getParkingCarLockInfoDTO(cmd, parkingLot, user);
-		temp.setCarVerificationFlag(dto.getCarVerificationFlag());
-		temp.setFlowCaseUrl(dto.getFlowCaseUrl());
-		//兼容老版本app, 不论认证是什么状态，都返回锁车数据, 注意：前提是客户端根据carVerificationFlag标志来跳转
-		BeanUtils.copyProperties(temp, dto);
+		if (null != temp) {
+			temp.setCarVerificationFlag(dto.getCarVerificationFlag());
+			temp.setFlowCaseUrl(dto.getFlowCaseUrl());
+			//兼容老版本app, 不论认证是什么状态，都返回锁车数据, 注意：前提是客户端根据carVerificationFlag标志来跳转
+			BeanUtils.copyProperties(temp, dto);
+		}else {
+			if (dto.getCarVerificationFlag() == ParkingCarVerificationStatus.SUCCEED.getCode()) {
+				dto = null;
+			}
+		}
+
 		return dto;
 	}
 
