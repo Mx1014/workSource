@@ -92,6 +92,11 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     }
 
     @Override
+    public Long getNextId() {
+        return this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowCases.class));
+    }
+
+    @Override
     public void updateFlowCase(FlowCase obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowCases.class));
         EhFlowCasesDao dao = new EhFlowCasesDao(context.configuration());
@@ -209,7 +214,8 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
             }
             if(cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
         		cond = cond.and(
-        				Tables.EH_FLOW_CASES.MODULE_NAME.like(cmd.getKeyword() + "%")
+        				Tables.EH_FLOW_CASES.TITLE.like(cmd.getKeyword() + "%")
+        				.or(Tables.EH_FLOW_CASES.CONTENT.like("%" + cmd.getKeyword() + "%"))
         				.or(Tables.EH_FLOW_CASES.APPLIER_NAME.like(cmd.getKeyword() + "%"))
         				.or(Tables.EH_FLOW_CASES.APPLIER_PHONE.like(cmd.getKeyword() + "%"))
                 );
@@ -337,7 +343,8 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
         	}
         	if(cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
         		cond = cond.and(
-        				Tables.EH_FLOW_CASES.MODULE_NAME.like(cmd.getKeyword() + "%")
+                        Tables.EH_FLOW_CASES.TITLE.like(cmd.getKeyword() + "%")
+                                .or(Tables.EH_FLOW_CASES.CONTENT.like("%" + cmd.getKeyword() + "%"))
         				.or(Tables.EH_FLOW_CASES.APPLIER_NAME.like(cmd.getKeyword() + "%"))
         				.or(Tables.EH_FLOW_CASES.APPLIER_PHONE.like(cmd.getKeyword() + "%"))
         				);

@@ -1026,7 +1026,7 @@ public class ContractServiceImpl implements ContractService {
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 			addToFlowCase(contract);
 		}
-
+		contractSearcher.feedDoc(contract);
 		ExecutorUtil.submit(new Runnable() {
 			@Override
 			public void run() {

@@ -152,6 +152,10 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
                 UserContext.current().setNamespaceId(flowCase.getNamespaceId());
             }
 
+            if (stepDTO.getEventLogs() != null) {
+                ctx.getLogs().addAll(stepDTO.getEventLogs());
+            }
+
             ctx.setFlowCase(flowCase);
             ctx.setModule(flowListenerManager.getModule(flowCase.getModuleId()));
 
@@ -204,6 +208,10 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
     public FlowCaseState prepareNoStep(FlowAutoStepDTO stepDTO) {
         FlowCaseState ctx = new FlowCaseState();
         FlowCase flowCase = flowCaseProvider.getFlowCaseById(stepDTO.getFlowCaseId());
+
+        if (stepDTO.getEventLogs() != null) {
+            ctx.getLogs().addAll(stepDTO.getEventLogs());
+        }
 
         User user;
         if (stepDTO.getOperatorId() != null) {

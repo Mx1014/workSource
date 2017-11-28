@@ -2,12 +2,14 @@ package com.everhomes.techpark.punch;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.techpark.punch.DateStatus;
+import com.everhomes.rest.techpark.punch.ExtDTO;
 import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
 import com.everhomes.rest.techpark.punch.UserPunchStatusCount;
  
@@ -269,7 +271,7 @@ public interface PunchProvider {
 	public PunchExceptionRequest findPunchExceptionRequest(Long userId, Long ownerId, Long punchDate,
 														   Integer intervalTimeNo);
 
-	public PunchExceptionRequest findPunchExceptionRequestByRequestId(Long ownerId, Long creatorUid, Long id);
+	public PunchExceptionRequest findPunchExceptionRequestByRequestId(Long enterpriseId, Long userId, Long requestId);
 
 	public void deletePunchExceptionRequest(PunchExceptionRequest punchExceptionRequest);
 
@@ -331,7 +333,23 @@ public interface PunchProvider {
 
 	void deletePunchTimeRuleByRuleId(Long id);
 
+	Integer approveAbnormalPunch(Long userId, Date punchDate, Integer punchIntervalNo, Byte punchType);
+
+	List<PunchExceptionRequest> listPunchExceptionRequestBetweenBeginAndEndTime(Long userId, Long enterpriseId, Timestamp dayStart, Timestamp dayEnd);
+
+	List<PunchExceptionRequest> listpunchexceptionRequestByDate(Long userId, Long enterpriseId, Date punchDate);
+
+	Integer countExceptionRequests(Long userId, String ownerType, Long ownerId, String punchMonth);
+
+	List<ExtDTO> listAskForLeaveExtDTOs(Long userId, String ownerType, Long ownerId, String punchMonth);
+	
 	List<PunchRule> listPunchRulesByStatus(List<Byte> statusList);
 
 	List<PunchRule> listPunchRulesByOwnerAndRuleType(String ownerType, Long ownerId, byte code);
+
+	PunchExceptionRequest findPunchExceptionRequest(Long userId, Long enterpriseId, Date punchDate, Integer punchIntervalNo, Byte punchType);
+
+	PunchLog findPunchLog(Long organizationId, Long applyUserId, Date punchDate, Byte punchType, Integer punchIntervalNo);
+
+	void updatePunchLog(PunchLog onDutyLog);
 }

@@ -1407,7 +1407,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		// 按id排序 可以去掉 by sfyan
 //		Collections.sort(result, new Comparator<LaunchPadItemDTO>(){
 //			@Override
-//			public int compare(LaunchPadItemDTO o1, LaunchPadItemDTO o2){
+//			public int compareTo(LaunchPadItemDTO o1, LaunchPadItemDTO o2){
 //				return o1.getId().intValue() - o2.getId().intValue();
 //			}
 //		});

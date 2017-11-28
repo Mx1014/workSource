@@ -1,23 +1,34 @@
 // @formatter:off
 package com.everhomes.junit;
 
+import com.everhomes.atomikos.AtomikosHelper;
+import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.mock.env.MockPropertySource;
+import org.springframework.core.env.PropertySource;
+import org.springframework.core.io.Resource;
 
-import com.everhomes.atomikos.AtomikosHelper;
+import java.io.IOException;
 
 /**
- * 
+ *
  * Provides mocked property environment for integration tests
- * 
+ *
  * @author Kelven Yang
  *
  */
 public class PropertyInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     public void initialize(ConfigurableApplicationContext applicationContext) {
-         AtomikosHelper.fixup();
-         applicationContext.getEnvironment().getPropertySources().addFirst(
+        AtomikosHelper.fixup();
+        try {
+            Resource resource = applicationContext.getResource("classpath:ehcore_custom.yml");
+            YamlPropertySourceLoader sourceLoader = new YamlPropertySourceLoader();
+            PropertySource<?> yamlTestProperties = sourceLoader.load("yamlTestProperties", resource, null);
+            applicationContext.getEnvironment().getPropertySources().addFirst(yamlTestProperties);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+         /*applicationContext.getEnvironment().getPropertySources().addFirst(
            new MockPropertySource()
             .withProperty("redis.bus.host", "redis-server")
             .withProperty("redis.bus.port", "6379")
@@ -64,6 +75,6 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("schedule.running.flag", "0")
             .withProperty("src.path", "/home/janson/ssd2/everhomes/ehnextgen")
             .withProperty("schedule.running.flag", "1")
-            );
+            );*/
     }
 }

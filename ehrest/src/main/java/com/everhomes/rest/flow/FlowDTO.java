@@ -52,6 +52,8 @@ public class FlowDTO {
     private String projectType;
     private Byte validationStatus;
 
+    private Byte needFormFlag;
+
     private String stringTag1;
 
     public String getFlowName() {
@@ -228,6 +230,14 @@ public class FlowDTO {
 
     public void setValidationStatus(Byte validationStatus) {
         this.validationStatus = validationStatus;
+    }
+
+    public Byte getNeedFormFlag() {
+        return needFormFlag;
+    }
+
+    public void setNeedFormFlag(Byte needFormFlag) {
+        this.needFormFlag = needFormFlag;
     }
 
     @Override

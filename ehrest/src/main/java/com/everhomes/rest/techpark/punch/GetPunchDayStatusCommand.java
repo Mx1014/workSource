@@ -6,14 +6,17 @@ import com.everhomes.util.StringHelper;
 /**
 * <ul>  
 * <li>enterpriseId：long 企业Id</li> 
-* <li>queryTime：long 查询时间戳-查询当下的状态不用传这个参数</li> 
+ * <li>queryTime：long 查询时间戳-查询当下的状态不用传这个参数</li>
+ * <li>userId：long 查询某人的打卡记录,不传就是查自己的</li>
 * </ul>
 */
 public class GetPunchDayStatusCommand {
  
-    private Long enterpriseId; 
-    private Long queryTime;
-     @Override
+    private Long enterpriseId;
+	private Long queryTime;
+	private Long userId;
+
+	@Override
      public String toString() {
          return StringHelper.toJsonString(this);
      }
@@ -33,6 +36,13 @@ public class GetPunchDayStatusCommand {
 	public void setQueryTime(Long queryTime) {
 		this.queryTime = queryTime;
 	}
- 
 
- }
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+}

@@ -1,7 +1,9 @@
 package com.everhomes.general_approval;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.general_approval.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,14 +13,11 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+
+import java.util.List;
 //import com.everhomes.rest.general_approval.GetActiveGeneralFormByOriginIdCommand;
 //import com.everhomes.rest.general_approval.GetActiveGeneralFormByOriginIdResponse;
-import com.everhomes.rest.general_approval.GetTemplateByApprovalIdCommand;
-import com.everhomes.rest.general_approval.GetTemplateByApprovalIdResponse;
-import com.everhomes.rest.general_approval.ListActiveGeneralApprovalCommand;
-import com.everhomes.rest.general_approval.ListGeneralApprovalCommand;
-import com.everhomes.rest.general_approval.ListGeneralApprovalResponse;
-import com.everhomes.rest.general_approval.PostApprovalFormCommand;
+
 //import com.everhomes.rest.general_approval.PostFormCommand;
 //import com.everhomes.rest.general_approval.PostFormResponse;
 
@@ -106,5 +105,65 @@ public class GeneralApprovalController extends ControllerBase {
 //    	response.setErrorDescription("OK");
 //    	
 //    	return response;
-//    } 
+//    }
+	/**
+	 * <b>URL: /general_approval/verifyApprovalTemplates</b>
+	 * <p> 判断是否需要创建审批模板 </p>
+	 */
+	@RequestMapping("verifyApprovalTemplates")
+	@RestReturn(value=VerifyApprovalTemplatesResponse.class)
+	public RestResponse verifyApprovalTemplates(@Valid VerifyApprovalTemplatesCommand cmd) {
+        VerifyApprovalTemplatesResponse res = generalApprovalService.verifyApprovalTemplates(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
+
+
+	/**
+	 * <b>URL: /general_approval/createApprovalTemplates</b>
+	 * <p> 创建审批模板 </p>
+	 */
+	@RequestMapping("createApprovalTemplates")
+	@RestReturn(value=String.class)
+	public RestResponse createApprovalTemplates(@Valid CreateApprovalTemplatesCommand cmd) {
+		generalApprovalService.createApprovalTemplates(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
+
+	/**
+	 * <b>URL: /general_approval/listGeneralApprovalRecords</b>
+	 * <p> 根据模块 id 获取对应的审批记录 </p>
+	 */
+	@RequestMapping("listGeneralApprovalRecords")
+	@RestReturn(value=ListGeneralApprovalRecordsResponse.class)
+	public RestResponse listGeneralApprovalRecords(@Valid ListGeneralApprovalRecordsCommand cmd) {
+		ListGeneralApprovalRecordsResponse results =  generalApprovalService.listGeneralApprovalRecords(cmd);
+		RestResponse response = new RestResponse(results);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
+
+	/**
+	 * <b>URL: /general_approval/exportGeneralApprovalRecords</b>
+	 * <p> 根据模块 id 与审判类型导出对应的审批记录 </p>
+	 */
+	@RequestMapping("exportGeneralApprovalRecords")
+	@RestReturn(value=String.class)
+	public RestResponse exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd, HttpServletResponse httpResponse) {
+		generalApprovalService.exportGeneralApprovalRecords(cmd, httpResponse);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
 }

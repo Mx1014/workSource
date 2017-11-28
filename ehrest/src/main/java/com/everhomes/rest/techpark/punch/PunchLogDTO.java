@@ -13,6 +13,10 @@ import com.everhomes.util.StringHelper;
  * <li>latitude： 维度</li>
  * <li>longitude： 经度</li>
  * <li>clockStatus：打卡状态 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
+ * <li>requestToken： 异常申请的token </li>
+ * <li>approvalStatus： 审批的状态 参考{@link com.everhomes.rest.approval.ApprovalStatus}  </li>
+ * <li>smartAlignment： 智能校准 1-是智能校准 0-不是智能校准 </li>
+ * <li>identification： 打卡设备的唯一标识 </li>
  * </ul>
  */
 public class PunchLogDTO {
@@ -21,14 +25,15 @@ public class PunchLogDTO {
 	private Long punchNormalTime;
 	private Integer punchIntervalNo;
 	private Byte punchType;
-	private long ruleTime;
-    private long punchTime; 
+	private Long ruleTime;
+    private Long punchTime;
     private Byte clockStatus;
 	private Double longitude;
 	private Double latitude;
 	private String identification;
-
-      
+    private String requestToken;
+    private Byte approvalStatus;
+    private Byte smartAlignment;
 
     @Override
     public String toString() {
@@ -75,12 +80,6 @@ public class PunchLogDTO {
 		this.punchNormalTime = punchNormalTime;
 	}
 
-	public long getPunchTime() {
-		return punchTime;
-	}
-	public void setPunchTime(long punchTime) {
-		this.punchTime = punchTime;
-	}
 
 	public Byte getClockStatus() {
 		return clockStatus;
@@ -99,13 +98,6 @@ public class PunchLogDTO {
 		this.punchType = punchType;
 	}
 
-	public long getRuleTime() {
-		return ruleTime;
-	}
-
-	public void setRuleTime(long ruleTime) {
-		this.ruleTime = ruleTime;
-	}
 
 	public Integer getPunchIntervalNo() {
 		return punchIntervalNo;
@@ -114,6 +106,45 @@ public class PunchLogDTO {
 	public void setPunchIntervalNo(Integer punchIntervalNo) {
 		this.punchIntervalNo = punchIntervalNo;
 	}
- 
-    
+
+	public String getRequestToken() {
+		return requestToken;
+	}
+
+	public void setRequestToken(String requestToken) {
+		this.requestToken = requestToken;
+	}
+
+	public Byte getApprovalStatus() {
+		return approvalStatus;
+	}
+
+	public void setApprovalStatus(Byte approvalStatus) {
+		this.approvalStatus = approvalStatus;
+	}
+
+	public Byte getSmartAlignment() {
+		return smartAlignment;
+	}
+
+	public void setSmartAlignment(Byte smartAlignment) {
+		this.smartAlignment = smartAlignment;
+	}
+
+
+	public Long getRuleTime() {
+		return ruleTime;
+	}
+
+	public void setRuleTime(Long ruleTime) {
+		this.ruleTime = ruleTime;
+	}
+
+	public Long getPunchTime() {
+		return punchTime;
+	}
+
+	public void setPunchTime(Long punchTime) {
+		this.punchTime = punchTime;
+	}
 }
