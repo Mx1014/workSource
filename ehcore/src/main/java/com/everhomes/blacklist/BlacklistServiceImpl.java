@@ -12,6 +12,7 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.blacklist.*;
+import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -26,6 +27,7 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -147,19 +149,47 @@ public class BlacklistServiceImpl implements BlacklistService{
 		}
 		return userBlacklistDTO;
 	}
+	
+	private UserBlacklistDTO addUserBlacklistByPhone(AddUserBlacklistCommand cmd) {
+	    Integer namespaceId = UserContext.getCurrentNamespaceId();
+	    UserBlacklist userBlack = blacklistProvider.findUserBlacklistByContactToken(namespaceId, null, 0L, cmd.getPhone());
+	    if(userBlack != null) {
+	        throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_USERBLACKLIST_EXISTS, "user black already exists");
+	    }
+	    
+	    cmd.setOwnerId(0L);
+	    UserBlacklist userBlacklist = new UserBlacklist();
+	    userBlacklist.setNamespaceId(UserContext.getCurrentNamespaceId());
+	    userBlacklist.setScopeId(0L);
+	    userBlacklist.setStatus(UserBlacklistStatus.ACTIVE.getCode());
+	    userBlacklist.setOwnerUid(0L);
+	    userBlacklist.setContactToken(cmd.getPhone());
+	    
+	    blacklistProvider.createUserBlacklist(userBlacklist);
+	    UserBlacklistDTO dto = ConvertHelper.convert(userBlacklist, UserBlacklistDTO.class);
+	    dto.setCreateTime(userBlacklist.getCreateTime().getTime());
+	    dto.setUserId(userBlacklist.getOwnerUid());
+	    return dto;
+	}
 
 	@Override
 	public UserBlacklistDTO addUserBlacklist(AddUserBlacklistCommand cmd) {
 
-		User user = userProvider.findUserById(cmd.getUserId());
+		User user = null;
+		
+		if(cmd.getUserId() != null && !cmd.getUserId().equals(0L)) {
+		    user = userProvider.findUserById(cmd.getUserId());   
+		}
 
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-
 		if(null == user){
-			LOGGER.error("user does not exist, userId ={},", cmd.getUserId());
-			throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_USER_NOT_EXISTS,
-					"user does not exist");
+//			LOGGER.error("user does not exist, userId ={},", cmd.getUserId());
+//			throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_USER_NOT_EXISTS,
+//					"user does not exist");
+		    //Added by Janson
+		    return addUserBlacklistByPhone(cmd);
 		}
+		
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 
 		if(null == userIdentifier){
@@ -260,7 +290,11 @@ public class BlacklistServiceImpl implements BlacklistService{
 					if(null != userBlacklist){
 						userBlacklist.setStatus(UserBlacklistStatus.INACTIVE.getCode());
 						blacklistProvider.updateUserBlacklist(userBlacklist);
-						rolePrivilegeService.deleteAcls(cmd.getOwnerType(),cmd.getOwnerId(),EntityType.USER.getCode(),userBlacklist.getOwnerUid(), privilegeIds);
+						if(!userBlacklist.getOwnerUid().equals(0l)) {
+						    //Added by Janson
+						    rolePrivilegeService.deleteAcls(cmd.getOwnerType(),cmd.getOwnerId(),EntityType.USER.getCode(),userBlacklist.getOwnerUid(), privilegeIds);    
+						}
+						
 					}
 				}
 				return null;
@@ -303,6 +337,12 @@ public class BlacklistServiceImpl implements BlacklistService{
 		if(null == cmd.getOwnerId()){
 			cmd.setOwnerId(0L);
 		}
+		
+		//added by Janson
+		if(cmd.getUserId() == null || cmd.getUserId().equals(0l)) {
+		    return listBlacklistPrivileges();
+		}
+		
 		List<BlacklistPrivilegeDTO> dtos = new ArrayList<>();
 
 		List<Privilege> privileges = rolePrivilegeService.listPrivilegesByTarget(cmd.getOwnerType(),cmd.getOwnerId(), EntityType.USER.getCode(), cmd.getUserId(), BlacklistErrorCode.SCOPE);

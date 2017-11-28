@@ -1492,6 +1492,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         
     	AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAccess.getId());
+    	if(aesServerKey == null) {
+    	    return null;
+    	}
     	AesUserKey aesUserKey = new AesUserKey();
 		aesUserKey.setId(aesUserKeyProvider.prepareForAesUserKeyId());
 		aesUserKey.setKeyId(new Integer((int) (aesUserKey.getId().intValue() % MAX_KEY_ID)));
