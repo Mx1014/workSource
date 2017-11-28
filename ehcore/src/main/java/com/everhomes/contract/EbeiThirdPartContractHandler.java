@@ -301,6 +301,8 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         contract.setNamespaceContractType(NamespaceContractType.EBEI.getCode());
         contract.setNamespaceContractToken(ebeiContract.getContractId());
         contract.setContractNumber(ebeiContract.getSerialNumber());
+        contract.setName(ebeiContract.getSerialNumber());
+        contract.setBuildingRename(ebeiContract.getBuildingRename());
         if(StringUtils.isNotBlank(ebeiContract.getStartDate())) {
             contract.setContractStartDate(dateStrToTimestamp(ebeiContract.getStartDate()));
         }
@@ -407,6 +409,8 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         contract.setNamespaceContractType(NamespaceContractType.EBEI.getCode());
         contract.setNamespaceContractToken(ebeiContract.getContractId());
         contract.setContractNumber(ebeiContract.getSerialNumber());
+        contract.setName(ebeiContract.getSerialNumber());
+        contract.setBuildingRename(ebeiContract.getBuildingRename());
         if(StringUtils.isNotBlank(ebeiContract.getStartDate())) {
             contract.setContractStartDate(dateStrToTimestamp(ebeiContract.getStartDate()));
         }
