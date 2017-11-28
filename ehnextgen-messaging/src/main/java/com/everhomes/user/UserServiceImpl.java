@@ -4492,6 +4492,8 @@ public class UserServiceImpl implements UserService {
 					dto.setContactEnglishName(detail.getEnName());
 				dto.setGender(detail.getGender());
 				dto.setContactToken(detail.getContactToken());
+				if (!StringUtils.isEmpty(detail.getContactShortToken()))
+					dto.setContactShortToken(detail.getContactShortToken());
 				if (!StringUtils.isEmpty(detail.getEmail()))
 					dto.setEmail(detail.getEmail());
 				dto.setRegionCode(detail.getRegionCode());
