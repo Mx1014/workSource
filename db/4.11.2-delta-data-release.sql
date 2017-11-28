@@ -36,7 +36,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 
 -- from club 3.2 end
 
--- added by R for approval-1.6
+-- added by nan.rong for approval-1.6
 -- menu
 UPDATE `eh_web_menus` SET `id`='52000', `name`='审批管理', `parent_id`='50000', `icon_url`=NULL, `data_type`='react:/approval-management/approval-list/52000/EhOrganizations', `leaf_flag`='0', `status`='2', `path`='/50000/52000', `type`='park', `sort_num`='591', `module_id`='52000', `level`='2', `condition_type`=NULL, `category`='module' WHERE (`id`='52000');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('52010', '审批记录', '52000', NULL, 'react:/approval-management/approval-records?approvalModuleId=52000', '0', '2', '/50000/52000/52010', 'park', '591', '52000', '3', NULL, 'module');
@@ -79,7 +79,7 @@ VALUES ('520200', '审批设置', '520000', NULL, 'react:/approval-management/ap
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
 VALUES ('520300', '表单管理', '520000', NULL, 'react:/form-management/form-list?moduleId=52000&moduleType=any-module', '0', '2', '/500000/520000/520300', 'organization', '594', '52000', '3', NULL, 'module');
 
--- ended by R
+-- ended by nan.rong
 
 -- 运营后台菜单配置的菜单  add by yanjun 201711211550
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`) VALUES ('70300', '菜单配置', '70000', '/70000/70300', '1', '2', '2', '0', NOW(), NULL, null, NOW(), '0', '0', '0', '0');
@@ -103,3 +103,18 @@ UPDATE eh_flow_condition_expressions SET variable1='', variable2='' WHERE variab
 
 -- 行业协会的actiontype改为38  add by yanjun 201711241009
 UPDATE eh_launch_pad_items set action_type = 38 where namespace_id = 999971 and item_label = '行业协会';
+
+-- 深业物业 volgo 上线审批 add by nan.rong 2017/11/27
+SET @scope_id = (SELECT MAX(id) from `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id := @scope_id +1, 52010, '审批记录', 'EhNamespaces', 999992, 2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id := @scope_id +1, 52020, '规则设置', 'EhNamespaces', 999992, 2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id := @scope_id +1, 52030, '表单管理', 'EhNamespaces', 999992, 2);
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id := @scope_id +1, 52010, '审批记录', 'EhNamespaces', 1, 2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id := @scope_id +1, 52020, '规则设置', 'EhNamespaces', 1, 2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id := @scope_id +1, 52030, '表单管理', 'EhNamespaces', 1, 2);
+
+delete from eh_web_menu_scopes where owner_id in (1,999992) and menu_id = 50900;
+-- 迁移表单
+update eh_general_forms set module_id = 52000, module_type= "any-module" where module_id is null and namespace_id in (1,999992);
+-- end by nan.rong
