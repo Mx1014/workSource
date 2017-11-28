@@ -373,7 +373,15 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		Integer payMoney = (order.getPrice().multiply(new BigDecimal(100))).intValue() - Integer.parseInt(ketuoCardRate.getRuleMoney())
 				* (order.getMonthCount().intValue() - 1);
 
-		if(addMonthCard(order, payMoney)) {
+		ParkingCardRequest request;
+		if (null != order.getCardRequestId()) {
+			request = parkingProvider.findParkingCardRequestById(order.getCardRequestId());
+
+		}else {
+			request = getParkingCardRequestByOrder(order);
+		}
+
+		if(addMonthCard(order, payMoney, request)) {
 			Integer count = order.getMonthCount().intValue();
 
 			LOGGER.debug("Parking addMonthCard,count={}", count);
@@ -384,11 +392,11 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 				tempOrder.setPrice(new BigDecimal(((tempOrder.getPrice().multiply(new BigDecimal(100))).intValue() - payMoney))
 						.divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
 				if(rechargeMonthlyCard(order, tempOrder)) {
-					updateFlowStatus(order);
+					updateFlowStatus(request);
 					return true;
 				}
 			}else {
-				updateFlowStatus(order);
+				updateFlowStatus(request);
 			}
 			return true;
 		}
@@ -508,7 +516,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		return false;
 	}
 
-	private boolean addMonthCard(ParkingRechargeOrder order, Integer money){
+	private boolean addMonthCard(ParkingRechargeOrder order, Integer money, ParkingCardRequest request){
 
 		JSONObject param = new JSONObject();
 		String plateNo = order.getPlateNumber();
@@ -517,32 +525,6 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		param.put("plateNo", plateNo);
 		param.put("money", money);
 		param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType()) ? 4 : 5);
-
-		ParkingCardRequest request = null;
-		if (null != order.getCardRequestId()) {
-			request = parkingProvider.findParkingCardRequestById(order.getCardRequestId());
-
-		}else {
-			List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(order.getCreatorUid(), order.getOwnerType(),
-					order.getOwnerId(), order.getParkingLotId(), order.getPlateNumber(), ParkingCardRequestStatus.SUCCEED.getCode(),
-					null, null, null, null);
-
-			for(ParkingCardRequest p: list) {
-				FlowCase flowCase = flowCaseProvider.getFlowCaseById(p.getFlowCaseId());
-
-				Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
-				String tag1 = flow.getStringTag1();
-				if(null == tag1) {
-					LOGGER.error("Flow tag is null, flow={}", flow);
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-							"Flow tag is null.");
-				}
-				if(ParkingRequestFlowType.INTELLIGENT.getCode().equals(Integer.valueOf(tag1))) {
-					request = p;
-					break;
-				}
-			}
-		}
 
 		if (null != request) {
 			param.put("userName", request.getPlateOwnerName());

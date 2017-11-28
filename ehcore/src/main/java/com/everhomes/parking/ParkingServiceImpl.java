@@ -1801,7 +1801,7 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 		Long amount = payService.changePayAmount(price);
 
-		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.PARKING.getPycode(), order.getOrderNo(), refoundOrderNo, amount);
+		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.PARKING.getPycode(), order.getId(), refoundOrderNo, amount);
 
 		if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
 
