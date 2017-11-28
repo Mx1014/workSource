@@ -36,7 +36,7 @@ public class ApartmentAttachmentDTO {
 
     private String contentUrl;
 
-    private int downloadCount;
+    private Integer downloadCount;
 
     private Long creatorUid;
 
@@ -100,11 +100,11 @@ public class ApartmentAttachmentDTO {
         this.contentUrl = contentUrl;
     }
 
-    public int getDownloadCount() {
+    public Integer getDownloadCount() {
         return downloadCount;
     }
 
-    public void setDownloadCount(int downloadCount) {
+    public void setDownloadCount(Integer downloadCount) {
         this.downloadCount = downloadCount;
     }
 
