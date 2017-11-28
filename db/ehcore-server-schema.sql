@@ -5210,14 +5210,16 @@ CREATE TABLE `eh_flow_condition_expressions` (
   `logic_operator` VARCHAR(24) NOT NULL COMMENT '&&, ||, !',
   `relational_operator` VARCHAR(24) NOT NULL COMMENT '>, <, ==, !=',
   `variable_type1` VARCHAR(32) NOT NULL DEFAULT 1 COMMENT 'const, variable',
-  `variable1` VARCHAR(64) NOT NULL DEFAULT 1 COMMENT '${varName} or 2',
+  `variable1` VARCHAR(64) NOT NULL DEFAULT '',
   `variable_type2` VARCHAR(32) NOT NULL DEFAULT 1 COMMENT 'const, variable',
-  `variable2` VARCHAR(64) NOT NULL DEFAULT 1 COMMENT '${varName} or 2',
+  `variable2` VARCHAR(64) NOT NULL DEFAULT '',
   `status` TINYINT NOT NULL COMMENT '0: invalid, 1: valid',
   `creator_uid` BIGINT,
   `create_time` datetime(3),
   `update_uid` BIGINT,
   `update_time` datetime(3),
+  `variable_extra1` VARCHAR(256) COMMENT 'variable 1 extra',
+  `variable_extra2` VARCHAR(256) COMMENT 'variable 2 extra',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -5233,8 +5235,8 @@ CREATE TABLE `eh_flow_conditions` (
   `flow_node_level` INTEGER,
   `flow_link_id` BIGINT,
   `flow_link_level` INTEGER,
-  `next_node_id` BIGINT NOT NULL DEFAULT 0,
-  `next_node_level` INTEGER NOT NULL DEFAULT 0,
+  `next_node_id` BIGINT,
+  `next_node_level` INTEGER,
   `status` TINYINT NOT NULL COMMENT '0: invalid, 1: valid',
   `creator_uid` BIGINT,
   `create_time` datetime(3),
@@ -5317,6 +5319,7 @@ CREATE TABLE `eh_flow_event_logs` (
   `integral_tag3` BIGINT NOT NULL DEFAULT 0,
   `integral_tag4` BIGINT NOT NULL DEFAULT 0,
   `integral_tag5` BIGINT NOT NULL DEFAULT 0,
+  `extra` TEXT COMMENT 'extra data, json format',
   PRIMARY KEY (`id`),
   KEY `i_eh_namespace_id` (`namespace_id`),
   KEY `i_eh_flow_main_id` (`flow_main_id`),
@@ -5478,6 +5481,8 @@ CREATE TABLE `eh_flow_service_types` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `service_name` VARCHAR(64),
   `module_id` BIGINT NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(64) COMMENT 'ownerType, e.g: EhOrganizations',
+  `owner_id` BIGINT COMMENT 'ownerId, e.g: eh_organizations id',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -5626,6 +5631,9 @@ CREATE TABLE `eh_flows` (
   `description` VARCHAR(128) COMMENT 'flow description',
   `allow_flow_case_end_evaluate` TINYINT NOT NULL DEFAULT 0 COMMENT 'allow_flow_case_end_evaluate',
   `validation_status` TINYINT NOT NULL DEFAULT 2 COMMENT 'flow validation status',
+  `form_origin_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'flow ref form id',
+  `form_version` BIGINT NOT NULL DEFAULT 0 COMMENT 'flow ref form version',
+  `form_update_time` DATETIME COMMENT 'form update time',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -5825,8 +5833,31 @@ CREATE TABLE `eh_forums` (
   KEY `i_eh_frm_create_time` (`create_time`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_general_approval_templates`;
 
--- the values of form from request
+
+CREATE TABLE `eh_general_approval_templates` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_id` BIGINT,
+  `owner_type` VARCHAR(64),
+  `organization_id` BIGINT NOT NULL DEFAULT 0,
+  `module_id` BIGINT DEFAULT 0 COMMENT 'the module id',
+  `module_type` VARCHAR(64),
+  `project_id` BIGINT NOT NULL DEFAULT 0,
+  `project_type` VARCHAR(64),
+  `form_template_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'The id of the template form',
+  `support_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'APP:0, WEB:1, APP_WEB: 2',
+  `approval_name` VARCHAR(128) NOT NULL,
+  `approval_attribute` VARCHAR(128) DEFAULT 'CUSTOMIZE' COMMENT 'DEFAULT,CUSTOMIZE',
+  `modify_flag` TINYINT DEFAULT 1 COMMENT 'whether the approval can be modified from desk, 0: no, 1: yes',
+  `delete_flag` TINYINT DEFAULT 1 COMMENT 'whether the approval can be deleted from desk, 0: no, 1: yes',
+  `icon_uri` VARCHAR(1024) COMMENT 'the avatar of the approval',
+  `update_time` DATETIME COMMENT 'last update time',
+  `create_time` DATETIME COMMENT 'record create time',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 DROP TABLE IF EXISTS `eh_general_approval_vals`;
 
 
@@ -5879,6 +5910,12 @@ CREATE TABLE `eh_general_approvals` (
   `status` TINYINT NOT NULL COMMENT 'invalid, config, running',
   `update_time` DATETIME COMMENT 'last update time',
   `create_time` DATETIME COMMENT 'record create time',
+  `approval_template_id` BIGINT COMMENT 'the id in eh_general_approval_templates',
+  `approval_template_version` BIGINT COMMENT 'the version in eh_general_approval_templates',
+  `approval_attribute` VARCHAR(128) DEFAULT 'CUSTOMIZE' COMMENT 'DEFAULT,CUSTOMIZE',
+  `modify_flag` TINYINT DEFAULT 1 COMMENT 'whether the approval can be modified from desk, 0: no, 1: yes',
+  `delete_flag` TINYINT DEFAULT 1 COMMENT 'whether the approval can be deleted from desk, 0: no, 1: yes',
+  `icon_uri` VARCHAR(1024) COMMENT 'the avatar of the approval',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -5898,6 +5935,27 @@ CREATE TABLE `eh_general_form_groups` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_general_form_templates`;
+
+
+CREATE TABLE `eh_general_form_templates` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `organization_id` BIGINT NOT NULL DEFAULT 0,
+  `owner_id` BIGINT NOT NULL,
+  `owner_type` VARCHAR(64) NOT NULL,
+  `module_id` BIGINT DEFAULT 0 COMMENT 'the module id',
+  `module_type` VARCHAR(64),
+  `form_name` VARCHAR(64) NOT NULL,
+  `version` BIGINT NOT NULL DEFAULT 0 COMMENT 'the version of the form template',
+  `template_type` VARCHAR(128) NOT NULL COMMENT 'the type of template text',
+  `template_text` TEXT COMMENT 'json 存放表单字段',
+  `modify_flag` TINYINT DEFAULT 1 COMMENT 'whether the form can be modified from desk, 0: no, 1: yes',
+  `delete_flag` TINYINT DEFAULT 1 COMMENT 'whether the form can be deleted from desk, 0: no, 1: yes',
+  `update_time` DATETIME COMMENT 'last update time',
+  `create_time` DATETIME COMMENT 'record create time',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_general_form_vals`;
 
@@ -5967,7 +6025,11 @@ CREATE TABLE `eh_general_forms` (
   `integral_tag3` BIGINT DEFAULT 0,
   `integral_tag4` BIGINT DEFAULT 0,
   `integral_tag5` BIGINT DEFAULT 0,
-
+  `form_template_id` BIGINT COMMENT 'the id in eh_general_form_templates',
+  `form_template_version` BIGINT COMMENT 'the version in eh_general_form_templates',
+  `form_attribute` VARCHAR(128) DEFAULT 'CUSTOMIZE' COMMENT 'DEFAULT,CUSTOMIZE',
+  `modify_flag` TINYINT DEFAULT 1 COMMENT 'whether the form can be modified from desk, 0: no, 1: yes',
+  `delete_flag` TINYINT DEFAULT 1 COMMENT 'whether the form can be deleted from desk, 0: no, 1: yes',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -6010,6 +6072,7 @@ CREATE TABLE `eh_group_member_logs` (
   `string_tag3` VARCHAR(128),
   `string_tag4` VARCHAR(128),
   `string_tag5` VARCHAR(128),
+  `reject_text` VARCHAR(255),
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -6148,7 +6211,7 @@ CREATE TABLE `eh_group_settings` (
   `create_time` DATETIME COMMENT 'create time',
   `operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'operator uid',
   `update_time` DATETIME COMMENT 'update time',
-  
+  `club_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0-normal club, 1-guild club',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -6224,7 +6287,10 @@ CREATE TABLE `eh_groups` (
   `visible_region_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of region where the group belong to',
   `approval_status` TINYINT COMMENT 'approval status',
   `operator_uid` BIGINT,
-  
+  `tourist_post_policy` TINYINT DEFAULT 2 COMMENT '0-hide, 1-see only, 2-interact',
+  `club_type` TINYINT DEFAULT 0 COMMENT '0-normal club, 1-guild club',
+  `phone_number` VARCHAR(18),
+  `description_type` TINYINT DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_uuid` (`uuid`),
   KEY `i_eh_group_creator` (`creator_uid`),
@@ -6236,10 +6302,29 @@ CREATE TABLE `eh_groups` (
   KEY `i_eh_group_stag2` (`string_tag2`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_guild_applies`;
 
---
--- member of global sharding group
---
+
+CREATE TABLE `eh_guild_applies` (
+  `id` BIGINT NOT NULL,
+  `uuid` VARCHAR(128) NOT NULL,
+  `namespace_id` INTEGER NOT NULL,
+  `group_id` BIGINT NOT NULL,
+  `applicant_uid` BIGINT NOT NULL,
+  `group_member_id` BIGINT NOT NULL,
+  `avatar` VARCHAR(255),
+  `name` VARCHAR(255),
+  `phone` VARCHAR(18),
+  `email` VARCHAR(255),
+  `organization_name` VARCHAR(255),
+  `registered_capital` VARCHAR(255),
+  `industry_type` VARCHAR(255),
+  `create_time` DATETIME ON UPDATE CURRENT_TIMESTAMP,
+  `update_time` DATETIME ON UPDATE CURRENT_TIMESTAMP,
+  `update_uid` BIGINT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 DROP TABLE IF EXISTS `eh_hot_tags`;
 
 
@@ -6332,7 +6417,18 @@ CREATE TABLE `eh_incubator_project_types` (
   `uuid` VARCHAR(128) NOT NULL DEFAULT '',
   `name` VARCHAR(255) NOT NULL,
   `create_time` DATETIME ON UPDATE CURRENT_TIMESTAMP,
-  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_industry_types`;
+
+
+CREATE TABLE `eh_industry_types` (
+  `id` BIGINT NOT NULL,
+  `uuid` VARCHAR(128) NOT NULL,
+  `namespace_id` INTEGER NOT NULL,
+  `name` VARCHAR(32) NOT NULL,
+  `create_time` DATETIME ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -7925,6 +8021,7 @@ CREATE TABLE `eh_organization_members` (
   KEY `i_eh_corg_group` (`member_group`),
   KEY `i_target_id` (`target_id`),
   KEY `i_contact_token` (`contact_token`),
+  KEY `group_type_index` (`group_type`),
   CONSTRAINT `eh_organization_members_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `eh_organizations` (`id`) ON DELETE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -9331,6 +9428,7 @@ CREATE TABLE `eh_payment_users` (
   `creator_uid` BIGINT,
   `operator_uid` BIGINT,
   `update_time` DATETIME,
+  `settlement_type` INTEGER NOT NULL DEFAULT 7 COMMENT '0-DAILY, 7-WEEKLY',
   PRIMARY KEY (`id`),
   UNIQUE KEY `i_owner` (`owner_type`,`owner_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -9987,9 +10085,10 @@ CREATE TABLE `eh_punch_day_logs` (
   `time_rule_name` VARCHAR(64) COMMENT '排班规则名称',
   `time_rule_id` BIGINT COMMENT '排班规则id',
   `approval_status_list` VARCHAR(120) COMMENT '1-未审批 0-审批正常 例如:0/1;1/1/0/1',
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
+  `smart_alignment` VARCHAR(128) COMMENT '智能校准状态:1-未智能校准 0-未校准 例如:0;1/0;1/1/0/1',
+  PRIMARY KEY (`id`),
+  KEY `i_eh_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_punch_exception_approvals`;
 
@@ -10009,6 +10108,7 @@ CREATE TABLE `eh_punch_exception_approvals` (
   `view_flag` TINYINT NOT NULL DEFAULT 1 COMMENT 'is view(0) not view(1)',
   `punch_times_per_day` TINYINT NOT NULL DEFAULT 2 COMMENT '2 or 4 times',
   `approval_status_list` VARCHAR(120) COMMENT '1-未审批 0-审批正常 例如:0/1;1/1/0/1',
+  `punch_type` TINYINT DEFAULT 2 COMMENT ' 0- 上班打卡 ; 1- 下班打卡',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -10032,9 +10132,15 @@ CREATE TABLE `eh_punch_exception_requests` (
   `create_time` DATETIME,
   `operator_uid` BIGINT,
   `operate_time` DATETIME,
-  `view_flag` TINYINT NOT NULL DEFAULT 1 COMMENT 'is view(0) not view(1)',
+  `view_flag` TINYINT DEFAULT 1 COMMENT 'is view(0) not view(1)',
   `request_id` BIGINT COMMENT 'approval request id',
   `punch_interval_no` INTEGER DEFAULT 1 COMMENT '第几次排班的打卡',
+  `punch_type` TINYINT DEFAULT 2 COMMENT ' 0- 上班打卡 ; 1- 下班打卡',
+  `begin_time` DATETIME COMMENT ' 请假/加班 生效开始时间',
+  `end_time` DATETIME COMMENT ' 请假/加班 生效结束时间',
+  `duration` DOUBLE COMMENT ' 请假/加班 时长-可供计算',
+  `category_id` BIGINT COMMENT ' 请假类型',
+  `approval_attribute` VARCHAR(128) COMMENT 'DEFAULT,CUSTOMIZE',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -10116,8 +10222,11 @@ CREATE TABLE `eh_punch_logs` (
   `punch_interval_no` INTEGER DEFAULT 1 COMMENT '第几次排班的打卡',
   `rule_time` BIGINT COMMENT '规则设置的该次打卡时间',
   `status` TINYINT COMMENT '打卡状态 0-正常 1-迟到 2-早退 3-缺勤 14-缺卡',
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+  `approval_status` TINYINT COMMENT '校正后的打卡状态 0-正常 null-没有异常校准',
+  `smart_alignment` TINYINT DEFAULT 0 COMMENT '只能校准状态 0-非校准 1-校准',
+  PRIMARY KEY (`id`),
+  KEY `i_eh_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 --
