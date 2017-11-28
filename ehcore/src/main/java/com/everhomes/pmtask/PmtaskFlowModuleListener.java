@@ -446,9 +446,24 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				pmTaskProvider.updateTask(task);
 				pmTaskSearch.feedDoc(task);
 			}
+		}else if(FlowStepType.NO_STEP.getCode().equals(stepType)) {
+			if ("MOTIFYFEE".equals(nodeType)) {
+				FlowGraphEvent evt = ctx.getCurrentEvent();
+				if (FlowUserType.APPLIER.equals(evt.getUserType())){
+					FlowAutoStepDTO dto = new FlowAutoStepDTO();
+					dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+					dto.setFlowCaseId(flowCase.getId());
+					dto.setFlowMainId(flowCase.getFlowMainId());
+					dto.setFlowNodeId(flowCase.getCurrentNodeId());
+					dto.setFlowVersion(flowCase.getFlowVersion());
+					dto.setStepCount(flowCase.getStepCount());
+					flowService.processAutoStep(dto);
+				}
+			}
 		}
 
 	}
+
 
 	//同步数据到科技园
 	private void synchronizedTaskToTechpark(PmTask task, Long targetId, Long organizationId) {
