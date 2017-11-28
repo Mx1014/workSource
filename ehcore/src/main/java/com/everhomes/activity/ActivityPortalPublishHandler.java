@@ -304,4 +304,16 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		}
 		return StringHelper.toJsonString(config);
 	}
+
+	@Override
+	public String getCustomTag(Integer namespaceId, Long moudleId, String actionData) {
+
+		ActivityActionData actionDataObj = (ActivityActionData)StringHelper.fromJsonString(actionData, ActivityActionData.class);
+
+		if(actionDataObj != null && actionDataObj.getCategoryId() != null){
+			return String.valueOf(actionDataObj.getCategoryId());
+		}
+
+		return null;
+	}
 }
