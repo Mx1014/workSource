@@ -3,12 +3,15 @@ package com.everhomes.approval;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record1;
@@ -344,21 +347,24 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 	}
 
 	@Override
-	public Double countHourLengthByUserAndMonth(Long userId, String ownerType, Long ownerId,
-			String punchMonth) {
+	public Double countOvertimeDurationByUserAndMonth(Long userId, String ownerType, Long ownerId,
+													  String punchMonth) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-		Date beginDate;
+		Timestamp beginDate;
 		try {
-			beginDate = new Date(dateFormat.parse(punchMonth+"01").getTime());
-		
-			Date endDate = new Date(dateFormat.parse((Integer.valueOf(punchMonth)+1)+"01").getTime());
-			SelectConditionStep<Record1<BigDecimal>> step = getReadOnlyContext().select(Tables.EH_APPROVAL_REQUESTS.HOUR_LENGTH.sum()).from(Tables.EH_APPROVAL_REQUESTS)
-					.where(Tables.EH_APPROVAL_REQUESTS.CREATOR_UID.eq(userId))
-					.and(Tables.EH_APPROVAL_REQUESTS.OWNER_TYPE.eq(ownerType))
-					.and(Tables.EH_APPROVAL_REQUESTS.OWNER_ID.eq(ownerId))
-					.and(Tables.EH_APPROVAL_REQUESTS.EFFECTIVE_DATE.greaterOrEqual(beginDate))
-					.and(Tables.EH_APPROVAL_REQUESTS.EFFECTIVE_DATE.lt(endDate))
-					.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.eq(ApprovalStatus.AGREEMENT.getCode()));
+			beginDate = new Timestamp(dateFormat.parse(punchMonth+"01").getTime());
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(beginDate);
+			calendar.add(Calendar.MONTH, 1);
+			Timestamp endDate = new Timestamp(calendar.getTimeInMillis());
+			SelectConditionStep<Record1<BigDecimal>> step = getReadOnlyContext()
+					.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.DURATION.sum().round(3)).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS)
+					.where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.CREATOR_UID.eq(userId))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(ownerId))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(beginDate))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lt(endDate))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.OVERTIME.getCode()))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(ApprovalStatus.AGREEMENT.getCode()));
 //			LOGGER.debug(step.toString());
 			return step.fetchOneInto(Double.class);
 		} catch (ParseException e) {

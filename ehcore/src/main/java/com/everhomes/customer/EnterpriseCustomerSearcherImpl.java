@@ -303,7 +303,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 }
             });
         }
-        Collections.sort(dtos);
+//        Collections.sort(dtos);
         response.setDtos(dtos);
         return response;
     }

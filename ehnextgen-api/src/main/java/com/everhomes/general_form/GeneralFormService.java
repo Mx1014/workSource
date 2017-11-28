@@ -49,6 +49,8 @@ public interface GeneralFormService {
 
 //	GeneralFormDTO getGeneralFormTemplate(GeneralFormTemplateCommand cmd);
 
+	GeneralFormDTO verifyApprovalFormName(VerifyApprovalFormNameCommand cmd);
+
 	GeneralFormGroup createGeneralFormGroup(GeneralForm form, List<GeneralFormGroupDTO> groupDTOS);
 
 	void updateGeneralFormGroupByFormId(GeneralFormGroup group, GeneralForm form, List<GeneralFormGroupDTO> groupDTOS);

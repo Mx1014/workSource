@@ -18,4 +18,11 @@ public interface GeneralApprovalProvider {
 	List<GeneralApproval> queryGeneralApprovals(ListingLocator locator,
 			int count, ListingQueryBuilderCallback queryBuilderCallback);
 
-}
+	List<GeneralApprovalTemplate> listGeneralApprovalTemplateByModuleId(Long moduleId);
+
+    GeneralApproval getGeneralApprovalByName(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, String approvalName);
+
+    GeneralApproval getGeneralApprovalByTemplateId(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long templateId);
+
+	GeneralApproval getGeneralApprovalByAttribute(Integer namespaceId, Long ownerId, String attribute);
+        }

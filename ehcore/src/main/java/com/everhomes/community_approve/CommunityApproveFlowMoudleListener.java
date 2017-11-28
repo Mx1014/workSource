@@ -325,7 +325,7 @@ public class CommunityApproveFlowMoudleListener implements FlowModuleListener {
     }
 
     @Override
-    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
         List<CommunityApprove> list = communityApproveProvider.queryCommunityApprovesByNamespaceId(namespaceId);
         List<FlowServiceTypeDTO> dtos = list.stream().map(r->{
             FlowServiceTypeDTO dto = new FlowServiceTypeDTO();

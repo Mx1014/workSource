@@ -8,22 +8,28 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.pay.order.PaymentDTO;
 import com.everhomes.pay.order.PaymentType;
+import com.everhomes.print.SiyinPrintOrder;
 import com.everhomes.rest.order.PayMethodDTO;
 import com.everhomes.rest.order.PaymentParamsDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPaymentOrderRecordsDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentUsersDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentWithdrawOrdersDao;
 import com.everhomes.server.schema.tables.pojos.EhPaymentOrderRecords;
 import com.everhomes.server.schema.tables.pojos.EhPaymentUsers;
+import com.everhomes.server.schema.tables.pojos.EhPaymentWithdrawOrders;
 import com.everhomes.server.schema.tables.records.EhPaymentAccountsRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentOrderRecordsRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentTypesRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentUsersRecord;
+import com.everhomes.server.schema.tables.records.EhPaymentWithdrawOrdersRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -176,5 +182,72 @@ public class PayProviderImpl implements PayProvider {
         SelectQuery<EhPaymentOrderRecordsRecord>  query = context.selectQuery(Tables.EH_PAYMENT_ORDER_RECORDS);
         query.addConditions(Tables.EH_PAYMENT_ORDER_RECORDS.ORDER_NUM.eq(bizOrderNum));
         return query.fetchOneInto(PaymentOrderRecord.class);
+    }
+    
+    @Override
+    public void createPaymentWithdrawOrder(PaymentWithdrawOrder order) {
+        if(order.getId() == null){
+            long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentWithdrawOrders.class));
+            order.setId(id);
+        }
+
+        if(order.getCreateTime() == null){
+            order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        }
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentWithdrawOrdersDao dao = new EhPaymentWithdrawOrdersDao(context.configuration());
+        dao.insert(order);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPaymentWithdrawOrders.class, order.getId());
+    }
+    
+    @Override
+    public List<PaymentWithdrawOrder> listPaymentWithdrawOrders(String ownerType, Long ownerId, 
+            Long pageAnchor, int pageSize) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhPaymentWithdrawOrdersRecord>  query = context.selectQuery(Tables.EH_PAYMENT_WITHDRAW_ORDERS);
+        query.addConditions(Tables.EH_PAYMENT_WITHDRAW_ORDERS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_PAYMENT_WITHDRAW_ORDERS.OWNER_ID.eq(ownerId));
+        
+        if(pageAnchor != null) {
+            query.addConditions(Tables.EH_PAYMENT_WITHDRAW_ORDERS.ID.lt(pageAnchor));
+        }
+        query.addOrderBy(Tables.EH_PAYMENT_WITHDRAW_ORDERS.ID.desc());
+        query.addLimit(pageSize);
+        
+        List<PaymentWithdrawOrder> orderList = new ArrayList<>();
+
+        query.fetch().map(r -> {
+            PaymentWithdrawOrder order = ConvertHelper.convert(r, PaymentWithdrawOrder.class);
+            orderList.add(order);
+            return null;
+        });
+
+        return orderList;
+    }
+    
+    @Override
+    public PaymentWithdrawOrder findPaymentWithdrawOrderByOrderNo(Long orderNo) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectConditionStep<Record> query = context.select().from(Tables.EH_PAYMENT_WITHDRAW_ORDERS)
+                .where(Tables.EH_PAYMENT_WITHDRAW_ORDERS.ID.eq(orderNo));
+        List<PaymentWithdrawOrder> list  = query.fetch().map((r)->{
+            return ConvertHelper.convert(r, PaymentWithdrawOrder.class);
+        });
+        
+        if(list !=null && list.size()>0) {
+            return list.get(0);
+        } else {
+            return null;
+        }
+    }
+    
+    @Override
+    public void updatePaymentWithdrawOrder(PaymentWithdrawOrder order) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentWithdrawOrdersDao dao = new EhPaymentWithdrawOrdersDao(context.configuration());
+        dao.update(order);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPaymentWithdrawOrders.class, order.getId());
     }
 }

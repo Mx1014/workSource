@@ -4,6 +4,7 @@ import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowConditionVariable;
 import com.everhomes.flow.FormFieldProcessor;
 import com.everhomes.flow.conditionvariable.FlowConditionDateVariable;
+import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.rest.flow.FlowConditionRelationalOperatorType;
 import com.everhomes.rest.flow.FlowConditionVariableDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
@@ -12,10 +13,10 @@ import com.everhomes.util.StringHelper;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,17 +32,6 @@ public class FormFieldDateProcessor implements FormFieldProcessor {
         return GeneralFormFieldType.DATE;
     }
 
-    protected List<FlowConditionRelationalOperatorType> getSupportOperatorList() {
-        List<FlowConditionRelationalOperatorType> operatorTypes = new ArrayList<>();
-        operatorTypes.add(FlowConditionRelationalOperatorType.EQUAL);
-        operatorTypes.add(FlowConditionRelationalOperatorType.NOT_EQUAL);
-        operatorTypes.add(FlowConditionRelationalOperatorType.GREATER_THEN);
-        operatorTypes.add(FlowConditionRelationalOperatorType.GREATER_OR_EQUAL);
-        operatorTypes.add(FlowConditionRelationalOperatorType.LESS_THEN);
-        operatorTypes.add(FlowConditionRelationalOperatorType.LESS_OR_EQUAL);
-        return operatorTypes;
-    }
-
     @Override
     public List<FlowConditionVariableDTO> convertFieldDtoToFlowConditionVariableDto(Flow flow, GeneralFormFieldDTO fieldDTO) {
         List<FlowConditionVariableDTO> dtoList = new ArrayList<>();
@@ -51,7 +41,7 @@ public class FormFieldDateProcessor implements FormFieldProcessor {
         dto.setDisplayName(fieldDTO.getFieldDisplayName());
         dto.setName(fieldDTO.getFieldName());
 
-        dto.setOperators(getSupportOperatorList().stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
+        dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.DATE).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
 
         dtoList.add(dto);
         return dtoList;
@@ -61,10 +51,27 @@ public class FormFieldDateProcessor implements FormFieldProcessor {
     public FlowConditionVariable getFlowConditionVariable(GeneralFormFieldDTO fieldDTO, String fieldName, String extra) {
         try {
             Map<String, String> map = (Map<String, String>) StringHelper.fromJsonString(fieldDTO.getFieldValue(), Map.class);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
-            TemporalAccessor accessor = formatter.parse(map.get("text"));
-            LocalDateTime dateTime = LocalDateTime.from(accessor);
-            return new FlowConditionDateVariable(java.sql.Date.from(dateTime.toInstant(ZoneOffset.UTC)));
+
+            String temp = map.get("text");
+            String pattern;
+            if (temp.matches(FlowConditionStringVariable.DATE_TIME_REGEX_SLASH)) {
+                pattern = "yyyy/MM/dd HH:mm:ss";
+                temp += ":00";
+            } else if (temp.matches(FlowConditionStringVariable.DATE_TIME_REGEX_CENTER)) {
+                pattern = "yyyy-MM-dd HH:mm:ss";
+                temp += ":00";
+            } else if (temp.matches(FlowConditionStringVariable.DATE_REGEX_SLASH)) {
+                pattern = "yyyy/MM/dd HH:mm:ss";
+                temp += " 00:00:00";
+            } else if (temp.matches(FlowConditionStringVariable.DATE_REGEX_CENTER)) {
+                pattern = "yyyy-MM-dd HH:mm:ss";
+                temp += " 00:00:00";
+            } else {
+                pattern = "yyyy/MM/dd HH:mm:ss";
+            }
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+            LocalDateTime dateTime = LocalDateTime.parse(temp, formatter);
+            return new FlowConditionDateVariable(Date.from(dateTime.toInstant(OffsetDateTime.now().getOffset())));
         } catch (Exception ignored) {
             return null;
             // throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CONDITION_VARIABLE,

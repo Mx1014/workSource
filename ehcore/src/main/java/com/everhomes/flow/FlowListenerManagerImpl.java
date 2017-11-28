@@ -231,7 +231,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         return null;
     }
 
-    @Override
+    /*@Override
     public List<FlowPredefinedParamDTO> listFlowPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
         FlowModuleInst inst = moduleMap.get(flow.getModuleId());
         if (inst != null) {
@@ -247,17 +247,17 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
             }
         }
         return new ArrayList<>();
-    }
+    }*/
 
     @Override
-    public List<FlowServiceTypeDTO> listFlowServiceTypes(Integer namespaceId, Long moduleId) {
+    public List<FlowServiceTypeDTO> listFlowServiceTypes(Integer namespaceId, Long moduleId, String ownerType, Long ownerId) {
         List<FlowServiceTypeDTO> serviceTypes = new ArrayList<>();
         if (moduleId != null) {
             FlowModuleInst moduleInst = moduleMap.get(moduleId);
             if (moduleInst != null) {
                 FlowModuleListener listener = moduleInst.getListener();
                 try {
-                    List<FlowServiceTypeDTO> types = listener.listServiceTypes(namespaceId);
+                    List<FlowServiceTypeDTO> types = listener.listServiceTypes(namespaceId, ownerType, ownerId);
                     if (types != null) {
                         serviceTypes.addAll(types);
                     }
@@ -269,7 +269,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
             moduleMap.forEach((k, v) -> {
                 FlowModuleListener listener = v.getListener();
                 try {
-                    List<FlowServiceTypeDTO> types = listener.listServiceTypes(namespaceId);
+                    List<FlowServiceTypeDTO> types = listener.listServiceTypes(namespaceId, ownerType, ownerId);
                     if (types != null) {
                         serviceTypes.addAll(types);
                     }
@@ -374,6 +374,9 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     }
 
     private void wrapError(Exception e, FlowModuleListener listener) {
+        if (e instanceof RuntimeErrorException) {
+            throw ((RuntimeErrorException) e);
+        }
         throw RuntimeErrorException.errorWith(e, ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                 "Flow module listener error, listener=%s, cause=%s", listener.getClass().getSimpleName(), e);
     }

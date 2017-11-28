@@ -30,7 +30,6 @@ import javax.servlet.http.HttpServletResponse;
 import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.configuration.ConfigConstants;
-import com.everhomes.flow.*;
 import com.everhomes.flow.action.FlowTimeoutJob;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PayService;
@@ -75,6 +74,10 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
+import com.everhomes.flow.FlowService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -88,6 +91,13 @@ import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.flow.FlowAutoStepDTO;
+import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowReferType;
+import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -1952,6 +1962,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	 * 每半小时的50秒钟时候开始执行
 	 * */
 	@Scheduled(cron = "50 0/30 * * * ?")
+	@Override
 	public void rentalSchedule(){
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
 			//把所有状态为success-已预约的捞出来 
@@ -3336,7 +3347,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			//增加审批后线上支付模式的判断 审批模式，订单状态设置成待审批 add by sw 20170506
 			//现在审批线上模式，线下订单模式都跟踪状态，金额为0时，直接预约成功，否则设置成待付款
 			//线上模式只有成功之后才走工作流
-//			if (bill.getPayMode().equals(PayMode.ONLINE_PAY.getCode())&&compare == 0) {
+//			if (bill.getPayMode().equals(PayMode.ONLINE_PAY.getCode())&&compareTo == 0) {
 			//线下模式和审批线上模式 都走工作流
 			if (PayMode.ONLINE_PAY.getCode().equals(bill.getPayMode())) {
 				int compare = bill.getPayTotalMoney().compareTo(BigDecimal.ZERO);

@@ -260,3 +260,21 @@ delete from `eh_var_fields` WHERE `module_name` = 'contract' AND `display_name` 
 
 -- 删除用户行为统计错误数据 add by xq.tian  2017/11/17
 DELETE FROM eh_stat_event_statistics WHERE event_name='launchpad_on_launch_pad_item_click';
+
+-- 删除不需要的菜单 delete by R 2017/11/20
+-- 菜单
+-- 1.修改原先组织架构菜单的react
+UPDATE `eh_web_menus` SET `data_type`='react:/address-book/address-list' WHERE id = 50100;
+UPDATE `eh_web_menus` SET `data_type`='react:/address-book/address-list' WHERE id = 501000;
+-- 2.删除原有的菜单id
+DELETE FROM `eh_web_menus` where `id` IN (501100,502000,502100,502200);
+DELETE FROM `eh_web_menus` where `id` IN (50110,50200,50210,50220);
+
+-- merge from payv2-withdraw-delta-data-release.sql by lqs 20171121
+-- 增加提现文案 by lqs 20171119
+set @eh_locale_strings_id = (select max(id) from eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'pay', '10008', 'zh_CN', '可提现金额不足');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'pay', '10009', 'zh_CN', '提现的金额不合法');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'pay', '10010', 'zh_CN', '提现帐号不存在');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'pay', '10011', 'zh_CN', '提现失败');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'pay', '10012', 'zh_CN', '提现订单不存在');

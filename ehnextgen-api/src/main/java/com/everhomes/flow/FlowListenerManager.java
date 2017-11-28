@@ -78,11 +78,11 @@ public interface FlowListenerManager {
 
     String onFlowVariableRender(FlowCaseState ctx, String variable);
 
-    List<FlowPredefinedParamDTO> listFlowPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId);
+    // List<FlowPredefinedParamDTO> listFlowPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId);
 
     List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId);
 
-    List<FlowServiceTypeDTO> listFlowServiceTypes(Integer namespaceId, Long moduleId);
+    List<FlowServiceTypeDTO> listFlowServiceTypes(Integer namespaceId, Long moduleId, String ownerType, Long ownerId);
 
     FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra);
 

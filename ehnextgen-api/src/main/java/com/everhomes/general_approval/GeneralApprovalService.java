@@ -1,6 +1,9 @@
 package com.everhomes.general_approval;
 
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseDetail;
 import com.everhomes.rest.general_approval.*;
+
 import java.util.Map;
 
 import com.everhomes.rest.general_approval.CreateGeneralApprovalCommand;
@@ -15,38 +18,54 @@ import com.everhomes.rest.general_approval.ListGeneralApprovalResponse;
 import com.everhomes.rest.general_approval.PostApprovalFormCommand;
 import com.everhomes.rest.general_approval.UpdateGeneralApprovalCommand;
 
+import javax.servlet.http.HttpServletResponse;
+
 public interface GeneralApprovalService {
 
-	GetTemplateByApprovalIdResponse getTemplateByApprovalId(GetTemplateByApprovalIdCommand cmd);
+    GetTemplateByApprovalIdResponse getTemplateByApprovalId(GetTemplateByApprovalIdCommand cmd);
 
-	GetTemplateByApprovalIdResponse postApprovalForm(PostApprovalFormCommand cmd);
+    GetTemplateByApprovalIdResponse postApprovalForm(PostApprovalFormCommand cmd);
 
-	GeneralFormDTO createApprovalForm(CreateApprovalFormCommand cmd);
+    GeneralFormDTO createApprovalForm(CreateApprovalFormCommand cmd);
 
-	ListGeneralFormResponse listApprovalForms(ListApprovalFormsCommand cmd);
+    ListGeneralFormResponse listApprovalForms(ListApprovalFormsCommand cmd);
 
-	void deleteApprovalFormById(ApprovalFormIdCommand cmd);
+    void deleteApprovalFormById(ApprovalFormIdCommand cmd);
 
-	GeneralApprovalDTO createGeneralApproval(CreateGeneralApprovalCommand cmd);
+    GeneralApprovalDTO createGeneralApproval(CreateGeneralApprovalCommand cmd);
 
-	ListGeneralApprovalResponse listGeneralApproval(ListGeneralApprovalCommand cmd);
+    ListGeneralApprovalResponse listGeneralApproval(ListGeneralApprovalCommand cmd);
 
-	GeneralApprovalDTO updateGeneralApproval(UpdateGeneralApprovalCommand cmd);
+    GeneralApprovalDTO updateGeneralApproval(UpdateGeneralApprovalCommand cmd);
 
-	void deleteGeneralApproval(GeneralApprovalIdCommand cmd);
+    void deleteGeneralApproval(GeneralApprovalIdCommand cmd);
 
-	GeneralFormDTO updateApprovalForm(UpdateApprovalFormCommand cmd);
+    GeneralFormDTO updateApprovalForm(UpdateApprovalFormCommand cmd);
 
-	GeneralFormDTO getApprovalForm(ApprovalFormIdCommand cmd);
+    GeneralFormDTO getApprovalForm(ApprovalFormIdCommand cmd);
 
 
-	void enableGeneralApproval(GeneralApprovalIdCommand cmd);
+    void enableGeneralApproval(GeneralApprovalIdCommand cmd);
 
-	void disableGeneralApproval(GeneralApprovalIdCommand cmd);
+    void disableGeneralApproval(GeneralApprovalIdCommand cmd);
 
-	Boolean checkNumberDefaultValue(String defaultValue, Map<String, Integer> map);
+    Boolean checkNumberDefaultValue(String defaultValue, Map<String, Integer> map);
 
-	ListGeneralApprovalResponse listActiveGeneralApproval(ListActiveGeneralApprovalCommand cmd);
+    VerifyApprovalTemplatesResponse verifyApprovalTemplates(VerifyApprovalTemplatesCommand cmd);
+
+    void createApprovalTemplates(CreateApprovalTemplatesCommand cmd);
+
+    GeneralApproval getGeneralApprovalByAttribute(Long ownerId, String attribute);
+
+    ListGeneralApprovalResponse listActiveGeneralApproval(ListActiveGeneralApprovalCommand cmd);
+
+    ListGeneralApprovalRecordsResponse listGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd);
+
+    GeneralApprovalRecordDTO convertGeneralApprovalRecordDTO(FlowCase r);
+
+    void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd, HttpServletResponse httpResponse);
+
+    GeneralApprovalDTO verifyApprovalName(VerifyApprovalNameCommand cmd);
 
 //	/**
 //	 * 直接通过表单id获取表单
@@ -57,6 +76,5 @@ public interface GeneralApprovalService {
 //	 * 没关联工作流的表单提交数据
 //	 */
 //	GetTemplateByApprovalIdResponse postForm(PostFormCommand cmd);
-
 
 }
