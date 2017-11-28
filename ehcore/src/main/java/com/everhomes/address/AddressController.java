@@ -376,4 +376,46 @@ public class AddressController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /address/uploadApartmentAttachment</b>
+     * <p>上传门牌附件</p>
+     */
+    @RequestMapping("uploadApartmentAttachment")
+    @RestReturn(value=ApartmentAttachmentDTO.class)
+    public RestResponse uploadApartmentAttachment(@Valid UploadApartmentAttachmentCommand cmd) {
+        ApartmentAttachmentDTO dto = addressService.uploadApartmentAttachment(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /address/deleteApartmentAttachment</b>
+     * <p>删除附件</p>
+     */
+    @RequestMapping("deleteApartmentAttachment")
+    @RestReturn(value= java.lang.String.class)
+    public RestResponse deleteApartmentAttachment(@Valid DeleteApartmentAttachmentCommand cmd) {
+        addressService.deleteApartmentAttachment(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /address/listApartmentAttachments</b>
+     * <p>查询门牌的所有附件列表</p>
+     */
+    @RequestMapping("listApartmentAttachments")
+    @RestReturn(value=ApartmentAttachmentDTO.class, collection = true)
+    public RestResponse listApartmentAttachments(@Valid ListApartmentAttachmentsCommand cmd) {
+        List<ApartmentAttachmentDTO> dtos = addressService.listApartmentAttachments(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

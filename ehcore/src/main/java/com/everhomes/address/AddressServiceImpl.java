@@ -2341,4 +2341,19 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         }
         return null;
     }
+
+    @Override
+    public void deleteApartmentAttachment(DeleteApartmentAttachmentCommand cmd) {
+
+    }
+
+    @Override
+    public List<ApartmentAttachmentDTO> listApartmentAttachments(ListApartmentAttachmentsCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public ApartmentAttachmentDTO uploadApartmentAttachment(UploadApartmentAttachmentCommand cmd) {
+        return null;
+    }
 }
