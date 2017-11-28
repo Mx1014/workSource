@@ -786,6 +786,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 			if(cmd.getRepairTime() != null)
 				equipment.setRepairTime(new Timestamp(cmd.getRepairTime()));
+			//V3.0.1中增加
+			if(cmd.getBuyTime() != null)
+				equipment.setBuyTime(new Timestamp(cmd.getBuyTime()));
+
+			if(cmd.getDiscardTime() != null)
+				equipment.setDiscardTime(new Timestamp(cmd.getDiscardTime()));
+
+			if(cmd.getFactoryTime() != null)
+				equipment.setFactoryTime(new Timestamp(cmd.getFactoryTime()));
 
 			equipment.setGeohash(geohash);
 			equipment.setCreatorUid(user.getId());
@@ -898,6 +907,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if(cmd.getRepairTime() != null)
 				equipment.setRepairTime(new Timestamp(cmd.getRepairTime()));
 
+			if(cmd.getBuyTime() != null)
+				equipment.setBuyTime(new Timestamp(cmd.getBuyTime()));
+
+			if(cmd.getDiscardTime() != null)
+				equipment.setDiscardTime(new Timestamp(cmd.getDiscardTime()));
+
+			if(cmd.getFactoryTime() != null)
+				equipment.setFactoryTime(new Timestamp(cmd.getFactoryTime()));
+
 
 			if(exist.getLatitude() != null && equipment.getLongitude() != null) {
 				if(!exist.getLatitude().equals(equipment.getLatitude()) || !equipment.getLongitude().equals(exist.getLongitude()) ) {
@@ -991,7 +1009,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 
 			List<EquipmentStandardMap> maps = equipmentProvider.findByTarget(equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
-			if (maps.size() > 0 && maps != null) {
+			if (maps != null) {
 				for(EquipmentStandardMap map : maps) {
                     if(!updateStandardIds.contains(map.getStandardId())) {
                         map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
@@ -1295,7 +1313,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if (equipmentsDTO.getStatus() != null) {
 			data.setStatus(EquipmentStatus.fromStatus(equipmentsDTO.getStatus()).getName());
 		}
-		if(equipmentsDTO.getCategoryId()!=null){
+		if (equipmentsDTO.getCategoryId() != null && equipmentsDTO.getCategoryId() != 0) {
 				data.setCategoryId(EquipmentCategories.fromStatus(equipmentsDTO.getCategoryId().byteValue()).getName());
 		}
 
