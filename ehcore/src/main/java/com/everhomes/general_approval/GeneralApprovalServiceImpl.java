@@ -244,6 +244,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 fieldDTO.setDepartment(department.getName());
                 fieldDTO.setDepartmentId(department.getId());
             }
+
             //  设置审批编号 added by approval1.6
             String countKey = "general_approval_no" + user.getNamespaceId() + cmd.getOrganizationId();
             String count;

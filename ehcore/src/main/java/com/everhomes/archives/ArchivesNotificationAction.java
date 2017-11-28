@@ -26,6 +26,7 @@ public class ArchivesNotificationAction implements Runnable {
 
     private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
+    private List<ArchivesNotifications> notifyLists;
 
     private Integer hour;
 

@@ -2391,11 +2391,12 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     //    @Scheduled(cron = "0 0 * * * ?")
     public void executeArchivesNotification() {
+        //  1.读取当天 week
         Calendar c = Calendar.getInstance();
         int weekDay = c.get(Calendar.DAY_OF_WEEK);
         List<ArchivesNotifications> results = archivesProvider.listArchivesNotificationsByWeek(weekDay);
         if (results != null && results.size() > 0) {
-            //  按照时间归类，来启动对应时间点的定时器
+        //  2.按照时间归类，来启动对应时间点的定时器
             Map<Integer, List<ArchivesNotifications>> notifyMap = results.stream().collect(Collectors.groupingBy
                     (ArchivesNotifications::getNotifyHour));
             for (Integer key : notifyMap.keySet()) {
