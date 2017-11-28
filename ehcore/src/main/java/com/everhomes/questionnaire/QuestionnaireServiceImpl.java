@@ -102,6 +102,9 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	@Autowired
 	private ScheduleProvider scheduleProvider;
 
+	@Autowired
+	private QuestionnaireAsynSendMessageService questionnaireAsynSendMessageService;
+
 	@PostConstruct
 	public void setup(){
 		//启动定时任务
@@ -1110,9 +1113,9 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	private void updateQuestionnaireCollectionCount(Long questionnaireId) {
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_QUESTIONNAIRE.getCode() + questionnaireId).enter(()->{
 			Questionnaire questionnaire = questionnaireProvider.findQuestionnaireById(questionnaireId);
-			Integer count = questionnaireAnswerProvider.countQuestionnaireAnswerByQuestionnaireId(questionnaireId);
-			questionnaire.setCollectionCount(count);
-//			questionnaire.setCollectionCount((questionnaire.getCollectionCount()==null?0:questionnaire.getCollectionCount())+1);
+//			Integer count = questionnaireAnswerProvider.countQuestionnaireAnswerByQuestionnaireId(questionnaireId);
+//			questionnaire.setCollectionCount(count);
+			questionnaire.setCollectionCount((questionnaire.getCollectionCount()==null?0:questionnaire.getCollectionCount())+1);
 			questionnaireProvider.updateQuestionnaire(questionnaire);
 			return null;
 		});
@@ -1121,9 +1124,9 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	private void updateOptionCheckedCount(Long optionId) {
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_QUESTIONNAIRE_OPTION.getCode() + optionId).enter(()->{
 			QuestionnaireOption option = questionnaireOptionProvider.findQuestionnaireOptionById(optionId);
-			Integer count = questionnaireAnswerProvider.countQuestionnaireAnswerByOptionId(optionId);
-			option.setCheckedCount(count);
-//			option.setCheckedCount((option.getCheckedCount()==null?0:option.getCheckedCount())+1);
+//			Integer count = questionnaireAnswerProvider.countQuestionnaireAnswerByOptionId(optionId);
+//			option.setCheckedCount(count);
+			option.setCheckedCount((option.getCheckedCount()==null?0:option.getCheckedCount())+1);
 			questionnaireOptionProvider.updateQuestionnaireOption(option);
 			return null;
 		});
@@ -1336,5 +1339,15 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		}
 		return new GetTargetQuestionnaireDetailResponse(convertToQuestionnaireDTO(questionnaireOptions,null,cmd.getTargetId()));
 
+	}
+
+	@Override
+	public void reScopeQuesionnaireRanges(ReScopeQuesionnaireRangesCommand cmd) {
+		questionnaireAsynSendMessageService.sendAllTargetMessageAndSaveTargetScope(cmd.getQuesionnaireId());
+	}
+
+	@Override
+	public void reSendQuesionnaireMessages() {
+		questionnaireAsynSendMessageService.sendUnAnsweredTargetMessage();
 	}
 }

@@ -1093,5 +1093,18 @@ public class AssetController extends ControllerBase {
         restResponse.setErrorDescription("OK");
         return restResponse;
     }
+    /**
+     * <b>URL: /asset/checkEnterpriseHasArrearage</b>
+     * <p>检查企业是否有欠费的账单</p>
+     */
+    @RequestMapping("checkEnterpriseHasArrearage")
+    @RestReturn(value = CheckEnterpriseHasArrearageResponse.class)
+    public RestResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd){
+        CheckEnterpriseHasArrearageResponse res = assetService.checkEnterpriseHasArrearage(cmd);
+        RestResponse restResponse = new RestResponse(res);
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return restResponse;
+    }
 
 }

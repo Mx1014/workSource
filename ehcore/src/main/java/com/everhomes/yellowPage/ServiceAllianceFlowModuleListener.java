@@ -10,9 +10,6 @@ import java.util.stream.Collectors;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.messaging.admin.MessagingAdminController;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
@@ -20,7 +17,6 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.common.FlowCaseDetailActionData;
 import com.everhomes.rest.common.Router;
-import com.everhomes.rest.common.ThirdPartActionData;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.messaging.*;
@@ -31,8 +27,6 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
-import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayDestination;
-import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.user.*;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.StringHelper;
@@ -53,7 +47,6 @@ import com.everhomes.general_approval.GeneralApprovalFlowModuleListener;
 import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.module.ServiceModule;
-import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.util.DateHelper;
@@ -502,7 +495,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 	}
 
 	@Override
-	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
 		List<ServiceAllianceCategories> serviceAllianceCategories = yellowPageProvider.listChildCategories(null, null, namespaceId, 0L, null, null);
 		if(serviceAllianceCategories == null || serviceAllianceCategories.size() == 0 ){
 			return new ArrayList<>();

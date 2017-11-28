@@ -34,7 +34,7 @@ public interface ApprovalRequestProvider {
 
 	void deleteApprovalRequest(ApprovalRequest aprpovalRequest);
 
-	Double countHourLengthByUserAndMonth(Long userId, String ownerType, Long ownerId,
-			String punchMonth);
+	Double countOvertimeDurationByUserAndMonth(Long userId, String ownerType, Long ownerId,
+											   String punchMonth);
 
 }

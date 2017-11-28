@@ -1,11 +1,10 @@
 package com.everhomes.quality;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletResponse;
-
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.quality.*;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 public interface QualityService {
 
@@ -71,4 +70,6 @@ public interface QualityService {
 
 	void updateSampleScoreStat();
 	QualityInspectionTaskDTO findQualityInspectionTask(FindQualityInspectionTaskCommand cmd);
+
+	CurrentUserInfoDTO getCurrentUserInfo();
 }

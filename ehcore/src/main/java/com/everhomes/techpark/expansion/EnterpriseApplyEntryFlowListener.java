@@ -4,8 +4,6 @@ package com.everhomes.techpark.expansion;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
-import com.everhomes.building.BuildingProvider;
-import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.entity.EntityType;
@@ -384,7 +382,7 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     }
 
     @Override
-    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
         List<FlowServiceTypeDTO> result = new ArrayList<>();
         FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
         dto.setNamespaceId(namespaceId);
