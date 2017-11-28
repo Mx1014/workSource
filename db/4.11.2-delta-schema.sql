@@ -161,6 +161,6 @@ ALTER TABLE eh_flow_conditions MODIFY next_node_level INTEGER;
 ALTER TABLE `eh_payment_users` ADD COLUMN `settlement_type` INTEGER NOT NULL DEFAULT 7 COMMENT '0-DAILY, 7-WEEKLY';
 
 -- 表增加索引 add by xiongying20171128
-ALTER TABLE eh_equipment_inspection_tasks UNIQUE INDEX `equipment_id_uniqueIndex` (`equipment_id`) ;
-ALTER TABLE eh_energy_date_statistics UNIQUE INDEX `unionmeter_stat_uniqueIndex` (`meter_id`,`stat_date`) ;
-ALTER TABLE eh_equipment_inspection_item_results UNIQUE INDEX `task_log_uniqueIndex` (`task_log_id`) ;
+ALTER TABLE eh_equipment_inspection_tasks INDEX `equipment_id_uniqueIndex` (`equipment_id`) ;
+ALTER TABLE eh_energy_date_statistics INDEX `unionmeter_stat_uniqueIndex` (`meter_id`,`stat_date`) ;
+ALTER TABLE eh_equipment_inspection_item_results INDEX `task_log_uniqueIndex` (`task_log_id`) ;
