@@ -120,6 +120,8 @@ public class UpdateEquipmentsCommand {
 
 	private  Integer depreciationYears;
 
+	private  String  provenance;
+
 
 	@ItemType(EquipmentAttachmentDTO.class)
     private List<EquipmentAttachmentDTO> attachments;
@@ -447,6 +449,14 @@ public class UpdateEquipmentsCommand {
 
 	public void setDepreciationYears(Integer depreciationYears) {
 		this.depreciationYears = depreciationYears;
+	}
+
+	public String getProvenance() {
+		return provenance;
+	}
+
+	public void setProvenance(String provenance) {
+		this.provenance = provenance;
 	}
 
 	@Override
