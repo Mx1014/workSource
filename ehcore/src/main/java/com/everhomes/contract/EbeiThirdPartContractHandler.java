@@ -27,6 +27,7 @@ import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.openapi.shenzhou.SyncFlag;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.search.ContractSearcher;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -323,6 +324,8 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         if(customer != null) {
             contract.setCustomerId(customer.getId());
         }
+        contract.setCreateUid(UserContext.currentUserId());
+        contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         contractProvider.createContract(contract);
         dealContractApartments(contract, ebeiContract.getHouseInfoList());
         contractSearcher.feedDoc(contract);

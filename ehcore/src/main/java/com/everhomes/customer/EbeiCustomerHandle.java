@@ -429,7 +429,7 @@ public class EbeiCustomerHandle implements CustomerHandle {
                 StringHelper.toJsonString(customer), StringHelper.toJsonString(ebeiCustomer));
         this.dbProvider.execute((TransactionStatus status) -> {
             customer.setCommunityId(communityId);
-            customer.setNamespaceCustomerType(NamespaceCustomerType.SHENZHOU.getCode());
+            customer.setNamespaceCustomerType(NamespaceCustomerType.EBEI.getCode());
             customer.setNamespaceCustomerToken(ebeiCustomer.getOwnerId());
             customer.setName(ebeiCustomer.getCompanyName());
             customer.setNickName(ebeiCustomer.getCompanyName());
