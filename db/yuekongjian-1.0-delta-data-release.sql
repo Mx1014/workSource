@@ -5,5 +5,5 @@ INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `defa
 ((@eh_categories_id:=@eh_categories_id+1), '6', '0', '物业报修', '任务/物业报修', '-1', '2', now(), NULL, NULL, NULL, @namespace_id);
 
 SET @namespace_id = 999957;
-DELETE  FROM  eh_configurations WHERE namespace_id = @namespace_id AND `name`=CONCAT('pmtask.handler-',@namespace_id);
-INSERT INTO `eh_configurations` (`name`, `value`, `namespace_id`,`description`) VALUES (CONCAT('pmtask.handler-',@namespace_id), 'yue_kong_jian',@namespace_id,'越空间物业报修的handler');
+DELETE  FROM  eh_configurations WHERE namespace_id = 0 AND `name`=CONCAT('pmtask.handler-',@namespace_id);
+INSERT INTO `eh_configurations` (`name`, `value`,`description`) VALUES (CONCAT('pmtask.handler-',@namespace_id), 'yue_kong_jian','越空间物业报修的handler');
