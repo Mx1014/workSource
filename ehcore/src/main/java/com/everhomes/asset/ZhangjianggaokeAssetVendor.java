@@ -261,6 +261,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 List<com.everhomes.asset.zjgkVOs.BillDetailDTO> dtos = response.getResponse();
                 BigDecimal amountOwed = new BigDecimal("0");
                 BigDecimal amountReceivable = new BigDecimal("0");
+                TreeSet<Date> dates = new TreeSet<>();
+                SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
                 for(int i = 0 ; i < dtos.size(); i++){
                     com.everhomes.asset.zjgkVOs.BillDetailDTO sourceDto = dtos.get(i);
                     ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
@@ -281,8 +283,16 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dto.setDateStr(sourceDto.getBillDate());
                     dto.setDateStrBegin(sourceDto.getDateStrBegin());
                     dto.setDateStrEnd(sourceDto.getDateStrEnd());
-                    result.setDatestr(sourceDto.getBillDate());
+                    try{
+                        dates.add(yyyyMMdd.parse(sourceDto.getDateStrBegin()));
+                        dates.add((yyyyMMdd.parse(sourceDto.getDateStrEnd())));
+                    }catch (Exception e){
+                    }
+//                    result.setDatestr(sourceDto.getBillDate());
                     list.add(dto);
+                }
+                if(dates.first()!=null && dates.last()!=null){
+                    result.setDatestr(dates.first().toString()+"~"+dates.last().toString());
                 }
                 result.setAmountOwed(amountOwed);
                 result.setAmountReceivable(amountReceivable);
