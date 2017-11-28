@@ -2876,6 +2876,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (communityId != null) {
             Community community = communityProvider.findCommunityById(communityId);
             if (community != null) {
+                organizationDto.setCityId(community.getCityId());
+                organizationDto.setCityName(community.getCityName());
+                organizationDto.setAreaId(community.getAreaId());
+                organizationDto.setAreaName(community.getAreaName());
                 organizationDto.setCommunityId(communityId);
                 organizationDto.setCommunityName(community.getName());
                 organizationDto.setCommunityAliasName(community.getAliasName());
