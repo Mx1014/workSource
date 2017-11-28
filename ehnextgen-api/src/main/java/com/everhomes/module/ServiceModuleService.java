@@ -42,4 +42,6 @@ public interface ServiceModuleService {
 
 	ListServiceModulesResponse listAllServiceModules(ListServiceModulesCommand cmd);
 	List<ServiceModuleDTO> filterByScopes(int namespaceId, String ownerType, Long ownerId);
+
+	ReflectionServiceModuleApp getOrCreateReflectionServiceModuleApp(Integer namespaceId, String actionData, String instanceConfig, String itemLabel, ServiceModule serviceModule);
 }

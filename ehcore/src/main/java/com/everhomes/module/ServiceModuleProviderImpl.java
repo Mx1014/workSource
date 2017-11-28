@@ -6,11 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.everhomes.acl.AuthorizationRelation;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
@@ -28,13 +29,10 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.module.ServiceModuleStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.records.EhServiceModuleAssignmentRelationsRecord;
-import com.everhomes.server.schema.tables.records.EhServiceModuleAssignmentsRecord;
-import com.everhomes.server.schema.tables.records.EhServiceModulePrivilegesRecord;
-import com.everhomes.server.schema.tables.records.EhServiceModuleScopesRecord;
-import com.everhomes.server.schema.tables.records.EhServiceModulesRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+
+import static com.everhomes.server.schema.tables.EhReflectionServiceModuleApps.EH_REFLECTION_SERVICE_MODULE_APPS;
 
 @Component
 public class ServiceModuleProviderImpl implements ServiceModuleProvider {
@@ -557,7 +555,50 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
     }
 
     @Override
-    public void createReflectionServiceModuleApp() {
+    public void createReflectionServiceModuleApp(ReflectionServiceModuleApp reflectionServiceModuleApp) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhReflectionServiceModuleApps.class));
+        reflectionServiceModuleApp.setId(id);
+        EhReflectionServiceModuleAppsDao dao = new EhReflectionServiceModuleAppsDao(context.configuration());
+        dao.insert(reflectionServiceModuleApp);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhReflectionServiceModuleAppsDao.class, id);
+    }
 
+    @Override
+    public ReflectionServiceModuleApp findReflectionServiceModuleAppById(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhReflectionServiceModuleAppsDao dao = new EhReflectionServiceModuleAppsDao(context.configuration());
+        EhReflectionServiceModuleApps app = dao.findById(id);
+        if(app != null){
+            return ConvertHelper.convert(app, ReflectionServiceModuleApp.class);
+        }
+        return null;
+    }
+
+    @Override
+    public ReflectionServiceModuleApp findReflectionServiceModuleAppByParam(Integer namespaceId, Long moduleId, String custom_tag) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<EhReflectionServiceModuleAppsRecord> query = context.selectQuery(Tables.EH_REFLECTION_SERVICE_MODULE_APPS);
+        Condition condition = Tables.EH_REFLECTION_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId);
+        condition = condition.and(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.MODULE_ID.eq(moduleId));
+        condition = condition.and(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.CUSTOM_TAG.eq(custom_tag));
+        EhReflectionServiceModuleAppsRecord record =  query.fetchAny();
+        if(record != null){
+            return ConvertHelper.convert(record, ReflectionServiceModuleApp.class);
+        }
+        return null;
+    }
+
+    @Override
+    public Long getMaxActiveAppId() {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ACTIVE_APP_ID.max()).fetchOne().value1();
+    }
+
+    @Override
+    public void lapseReflectionServiceModuleAppByNamespaceId(Integer namespaceId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        context.update(Tables.EH_REFLECTION_SERVICE_MODULE_APPS).set(EH_REFLECTION_SERVICE_MODULE_APPS.STATUS, ServiceModuleAppStatus.INACTIVE.getCode())
+                .where(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId));
     }
 }

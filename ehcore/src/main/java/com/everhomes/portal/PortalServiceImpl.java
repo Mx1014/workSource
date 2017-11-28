@@ -19,11 +19,10 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.activity.ActivityActionData;
-import com.everhomes.rest.activity.ActivityEntryConfigulation;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.MoreActionData;
 import com.everhomes.rest.common.NavigationActionData;
@@ -49,7 +48,6 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
-import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -128,6 +126,9 @@ public class PortalServiceImpl implements PortalService {
 
 	@Autowired
 	private OrganizationSearcher organizationSearcher;
+
+	@Autowired
+	private ServiceModuleService serviceModuleService;
 
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
@@ -1785,6 +1786,9 @@ public class PortalServiceImpl implements PortalService {
 	private PortalLayout syncLayout(Integer namespaceId, String location, String name){
 		User user = UserContext.current().getUser();
 		List<LaunchPadLayout> padLayouts = launchPadProvider.getLaunchPadLayouts(name, namespaceId);
+		// 每次同步开始的时候，先把reflectionServiceModuleApp中对应的数据状态置为无效
+		this.serviceModuleProvider.lapseReflectionServiceModuleAppByNamespaceId(namespaceId);
+
 		PortalLayout layout = null;
 		if(padLayouts.size() == 0){
 			LOGGER.error("Unable to find the lunch pad layout. namespaceId = {}, location = {}, layoutName = {}", namespaceId, location, name);
@@ -2071,6 +2075,9 @@ public class PortalServiceImpl implements PortalService {
 					moduleApp.setInstanceConfig(instanceConfig);
 				}
 			}
+
+			// 同步reflectionServiceModule表
+			this.serviceModuleService.getOrCreateReflectionServiceModuleApp(namespaceId, actionData, instanceConfig, serviceModule,itemLabel);
 		}
 		serviceModuleAppProvider.createServiceModuleApp(moduleApp);
 		return moduleApp;
@@ -2126,7 +2133,7 @@ public class PortalServiceImpl implements PortalService {
 		return scope;
 	}
 
-	private PortalPublishHandler getPortalPublishHandler(Long moduleId) {
+	public PortalPublishHandler getPortalPublishHandler(Long moduleId) {
 		PortalPublishHandler handler = null;
 
 		if(moduleId != null && moduleId.longValue() > 0) {

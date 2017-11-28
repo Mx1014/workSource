@@ -32,4 +32,6 @@ public interface PortalPublishHandler {
     String getAppInstanceConfig(Integer namespaceId, String actionData);
 
     String processInstanceConfig(String instanceConfig);
+
+    String getCustomTag(Integer namespaceId, Long moudleId, String actionData);
 }

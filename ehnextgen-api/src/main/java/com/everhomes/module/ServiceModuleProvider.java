@@ -74,7 +74,13 @@ public interface ServiceModuleProvider {
 
     List<ServiceModule> listServiceModule(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 
-    void createReflectionServiceModuleApp();
+    void createReflectionServiceModuleApp(ReflectionServiceModuleApp reflectionServiceModuleApp);
 
+    ReflectionServiceModuleApp findReflectionServiceModuleAppById(Long id);
 
+    ReflectionServiceModuleApp findReflectionServiceModuleAppByParam(Integer namespaceId, Long moduleId, String custom_tag);
+
+    Long getMaxActiveAppId();
+
+    void lapseReflectionServiceModuleAppByNamespaceId(Integer namespaceId);
 }

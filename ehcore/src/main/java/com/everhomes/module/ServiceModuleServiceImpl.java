@@ -18,6 +18,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.portal.ServiceModuleAppProvider;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.address.CommunityDTO;
@@ -25,8 +26,11 @@ import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.module.*;
 import com.everhomes.rest.oauth2.ModuleManagementType;
+import com.everhomes.rest.portal.MultipleFlag;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
+import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -86,6 +90,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Autowired
     private ServiceModuleAppProvider serviceModuleAppProvider;
+
+    @Autowired
+    private SequenceProvider sequenceProvider;
 
 
     @Override
@@ -817,6 +824,50 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             return dto;
         }).collect(Collectors.toList());
         return temp;
+    }
+
+    @Override
+    public ReflectionServiceModuleApp getOrCreateReflectionServiceModuleApp(Integer namespaceId, String actionData, String instanceConfig, String itemLabel, ServiceModule serviceModule) {
+        ReflectionServiceModuleApp reflectionApp = null;
+        String customTag = "";
+        switch (MultipleFlag.fromCode(serviceModule.getMultipleFlag())){
+            case NO:
+                reflectionApp = this.serviceModuleProvider.findReflectionServiceModuleAppByParam(namespaceId, serviceModule.getId(), null);
+                break;
+            case YES:
+                reflectionApp = this.serviceModuleProvider.findReflectionServiceModuleAppByParam(namespaceId, serviceModule.getId(), instanceConfig);
+                String handlerPrefix = PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX;
+                PortalPublishHandler handler = PlatformContext.getComponent(handlerPrefix + serviceModule.getId());
+                if(null != handler){
+                    customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), actionData);
+                }
+                break;
+        }
+        if (reflectionApp != null){//更新为有效
+            reflectionApp.setName(itemLabel);
+            reflectionApp.setStatus(ServiceModuleAppStatus.ACTIVE.getCode());
+            reflectionApp.setInstanceConfig(instanceConfig);
+            reflectionApp.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            reflectionApp.setActionData(actionData);
+            reflectionApp.setInstanceConfig(instanceConfig);
+        }else{//创建
+            ReflectionServiceModuleApp reflectionApp_new = new ReflectionServiceModuleApp();
+            Long activeAppId = this.sequenceProvider.getNextSequence("activeAppId");
+            reflectionApp_new.setActiveAppId(activeAppId);
+            reflectionApp_new.setNamespaceId(namespaceId);
+            reflectionApp_new.setActionData(actionData);
+            reflectionApp_new.setModuleControlType(serviceModule.getModuleControlType());
+            reflectionApp_new.setActionType(serviceModule.getActionType());
+            reflectionApp_new.setMultipleFlag(serviceModule.getMultipleFlag());
+            reflectionApp_new.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            reflectionApp_new.setInstanceConfig(instanceConfig);
+            reflectionApp_new.setStatus(ServiceModuleAppStatus.ACTIVE.getCode());
+            reflectionApp_new.setCustomTag(customTag);
+            reflectionApp_new.setName(itemLabel);
+            this.serviceModuleProvider.createReflectionServiceModuleApp(reflectionApp_new);
+        }
+
+        return null;
     }
 
     /**

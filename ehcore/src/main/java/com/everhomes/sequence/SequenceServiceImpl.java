@@ -4,6 +4,7 @@ package com.everhomes.sequence;
 import java.util.List;
 
 import com.everhomes.acl.AuthorizationProvider;
+import com.everhomes.module.ServiceModuleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -539,6 +540,9 @@ public class SequenceServiceImpl implements SequenceService {
 
     @Autowired
     private AuthorizationProvider authorizationProvider;
+
+    @Autowired
+    private ServiceModuleProvider serviceModuleProvider;
 
     @Override
     public void syncSequence() {
@@ -2575,6 +2579,22 @@ public class SequenceServiceImpl implements SequenceService {
             long nextSequenceAfterReset = sequenceProvider.getNextSequence(key);
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("maxAuthorizationControlId sequence, key=" + key + ", newSequence=" + (maxAuthorizationControlId + 1)
+                        + ", nextSequenceBeforeReset=" + nextSequenceBeforeReset + ", nextSequenceAfterReset=" + nextSequenceAfterReset);
+            }
+        }
+    }
+
+    private void syncActiveAppId() {
+        long maxSyncActiveAppId = 0;
+        maxSyncActiveAppId = this.serviceModuleProvider.getMaxActiveAppId();
+
+        if (maxSyncActiveAppId > 0) {
+            String key = "activeAppId";
+            long nextSequenceBeforeReset = sequenceProvider.getNextSequence(key);
+            sequenceProvider.resetSequence(key, maxSyncActiveAppId + 1);
+            long nextSequenceAfterReset = sequenceProvider.getNextSequence(key);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("maxSyncActiveAppId sequence, key=" + key + ", newSequence=" + (maxSyncActiveAppId + 1)
                         + ", nextSequenceBeforeReset=" + nextSequenceBeforeReset + ", nextSequenceAfterReset=" + nextSequenceAfterReset);
             }
         }
