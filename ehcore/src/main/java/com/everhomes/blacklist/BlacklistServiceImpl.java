@@ -1,7 +1,12 @@
 package com.everhomes.blacklist;
 
 import com.everhomes.acl.*;
+import com.everhomes.bus.LocalBus;
+import com.everhomes.bus.LocalBusSubscriber;
+import com.everhomes.bus.LocalBusSubscriber.Action;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -20,13 +25,17 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhGroupMembers;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -44,9 +53,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 
 @Service
-public class BlacklistServiceImpl implements BlacklistService{
+public class BlacklistServiceImpl implements BlacklistService, LocalBusSubscriber{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BlacklistServiceImpl.class);
 
@@ -73,7 +84,15 @@ public class BlacklistServiceImpl implements BlacklistService{
 
 	@Autowired
 	private LocaleTemplateService localeTemplateService;
+	
+    @Autowired
+    private LocalBus localBus;
 
+    @PostConstruct
+    void setup() {
+        localBus.subscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhUsers.class, null), this);   
+    }
+	
 	@Override
 	public ListUserBlacklistsResponse listUserBlacklists(ListUserBlacklistsCommand cmd) {
 		ListUserBlacklistsResponse res = new ListUserBlacklistsResponse();
@@ -123,7 +142,12 @@ public class BlacklistServiceImpl implements BlacklistService{
 	@Override
 	public UserBlacklistDTO checkUserBlacklist(CheckUserBlacklistCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		UserBlacklist userBlacklist = blacklistProvider.findUserBlacklistByContactToken(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getContactToken());
+		UserBlacklist userBlacklist = blacklistProvider.findUserBlacklistByContactToken(namespaceId, null, 0L, cmd.getContactToken());
+		
+		if(userBlacklist == null) {
+		    userBlacklist = blacklistProvider.findUserBlacklistByContactToken(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getContactToken());    
+		}
+		
 
 		if(null != userBlacklist){
 			LOGGER.error("User blacklist already exists, contactToken ={},", cmd.getContactToken());
@@ -154,10 +178,11 @@ public class BlacklistServiceImpl implements BlacklistService{
 	    Integer namespaceId = UserContext.getCurrentNamespaceId();
 	    UserBlacklist userBlack = blacklistProvider.findUserBlacklistByContactToken(namespaceId, null, 0L, cmd.getPhone());
 	    if(userBlack != null) {
-	        throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_USERBLACKLIST_EXISTS, "user black already exists");
+	        throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_USERBLACKLIST_EXISTS, "User blacklist already exists");
 	    }
 	    
 	    cmd.setOwnerId(0L);
+	    cmd.setOwnerType("");
 	    UserBlacklist userBlacklist = new UserBlacklist();
 	    userBlacklist.setNamespaceId(UserContext.getCurrentNamespaceId());
 	    userBlacklist.setScopeId(0L);
@@ -232,7 +257,10 @@ public class BlacklistServiceImpl implements BlacklistService{
 
 	@Override
 	public void editUserBlacklist(AddUserBlacklistCommand cmd) {
-		User user = userProvider.findUserById(cmd.getUserId());
+	   User user = null;
+	   if(cmd.getUserId() != null && !cmd.getUserId().equals(0l)) {
+	       user = userProvider.findUserById(cmd.getUserId());
+	   }
 
 		if(null == user){
 			LOGGER.error("user does not exist, userId ={},", cmd.getUserId());
@@ -357,6 +385,28 @@ public class BlacklistServiceImpl implements BlacklistService{
 
 		return dtos;
 	}
+	
+	@Override
+	public boolean checkUserPrivilege(Integer namespaceId, String phone, Long privilegeId) {
+	    UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+	    ListUserBlacklistPrivilegesCommand cmd = new ListUserBlacklistPrivilegesCommand();
+	    if(userIdentifier == null) {
+	        cmd.setUserId(0L);
+	        cmd.setOwnerId(0L);
+	    } else {
+	        cmd.setUserId(userIdentifier.getOwnerUid());
+	        cmd.setOwnerId(userIdentifier.getOwnerUid());
+	    }
+	    List<BlacklistPrivilegeDTO> dtos = listUserBlacklistPrivileges(cmd);
+	    if(dtos != null) {
+	        for(BlacklistPrivilegeDTO dto : dtos) {
+	            if(dto.getPrivilegeId().equals(privilegeId)) {
+	                return true;
+	            }
+	        }
+	    }
+	    return false;
+	}
 
 	private void sendMessageToUser(User user, int templateCode, Map<String,Object> map, String scope, String defaultValue) {
 		String message = this.localeTemplateService.getLocaleTemplateString(scope,
@@ -375,4 +425,70 @@ public class BlacklistServiceImpl implements BlacklistService{
 					channelToken, messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 		}
 	}
+	
+	@Override
+	public void updateUserBlackWhenUserSignup(User user, UserIdentifier userIdentifier) {
+	    UserBlacklist userBlack = blacklistProvider.findUserBlacklistByContactToken(user.getNamespaceId(), null, 0L, userIdentifier.getIdentifierToken());
+	    if(userBlack == null) {
+	        return;
+	    }
+	    
+	    userBlack.setStatus(UserBlacklistStatus.INACTIVE.getCode());
+	    blacklistProvider.updateUserBlacklist(userBlack);
+	    
+	    UserContext.setCurrentNamespaceId(user.getNamespaceId());
+	    UserContext.setCurrentUser(user);
+	    
+	    AddUserBlacklistCommand cmd = new AddUserBlacklistCommand();
+	    cmd.setOwnerId(0l);
+	    cmd.setUserId(user.getId());
+	    cmd.setOwnerType("");
+	    
+	    List<Privilege> privileges = rolePrivilegeService.listPrivilegesByTarget("system", null, EntityType.ROLE.getCode(), RoleConstants.BLACKLIST, null);
+	    List<Long> privilegeIds = privileges.stream().map(p -> {
+	        return p.getId();
+	    }).collect(Collectors.toList());
+	    
+	    cmd.setPrivilegeIds(privilegeIds);
+	    
+	    addUserBlacklist(cmd);
+	    
+	    UserContext.setCurrentNamespaceId(null);
+       UserContext.setCurrentUser(null);
+	}
+
+    @Override
+    public Action onLocalBusMessage(Object arg0, String arg1, Object arg2,
+            String arg3) {
+        BlacklistService srv = this;
+        if(arg1.indexOf(EntityType.USER.getCode()) >= 0) {
+            Long userId = (Long)arg2;
+            
+            User user = userProvider.findUserById(userId);
+            if(user == null) {
+                return Action.none;
+            }
+            
+            UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+            if(userIdentifier == null) {
+                return Action.none;
+            }
+            
+            ExecutorUtil.submit(new Runnable() {
+
+                @Override
+                public void run() {
+                    try{
+                        srv.updateUserBlackWhenUserSignup(user, userIdentifier);    
+                    }catch(Exception ex) {
+                        LOGGER.error("updateUserBlackWhenUserSignup failed ex=", ex);
+                    }
+                    
+                }
+                
+            });   
+        }
+        
+        return Action.none;
+    }
 }

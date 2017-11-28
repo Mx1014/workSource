@@ -1,5 +1,7 @@
 package com.everhomes.aclink;
 
+import static com.everhomes.util.RuntimeErrorException.errorWith;
+
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
@@ -18,6 +20,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.blacklist.BlacklistService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.border.Border;
 import com.everhomes.border.BorderConnectionProvider;
@@ -62,6 +65,7 @@ import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.OSType;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
@@ -222,6 +226,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     @Autowired
     private NamespaceProvider namespaceProvider;
+    
+    @Autowired
+    private BlacklistService blacklistService;
     
     AlipayClient alipayClient;
     
@@ -2821,15 +2828,21 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     @Override
     public DoorAuthDTO createDoorVisitorAuth(CreateDoorVisitorCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         
         //first check is the phone is in black list
 //        this.userService.checkSmsBlackList("doorVisitor", cmd.getPhone());
         
+        if(blacklistService.checkUserPrivilege(namespaceId, cmd.getPhone(), PrivilegeConstants.MODULE_ACLINK_VISITOR_DENY)) {
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_BLACK_LIST,
+                    "Hi guys, you are black list user.");    
+        }
+        
 //        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 //        resolver.checkUserBlacklistAuthority(userId, ownerType, ownerId, PrivilegeConstants.BLACKLIST_NEWS);
         
-        DoorAccessDriverType qrDriver = getQrDriverType(cmd.getNamespaceId());
-        DoorAccessDriverType qrDriverExt = getQrDriverExt(cmd.getNamespaceId());
+        DoorAccessDriverType qrDriver = getQrDriverType(namespaceId);
+        DoorAccessDriverType qrDriverExt = getQrDriverExt(namespaceId);
         if(qrDriver.equals(DoorAccessDriverType.LINGLING)) {
             return createLinglingVisitorAuth(cmd);
         } else if(qrDriver.equals(DoorAccessDriverType.HUARUN_ANGUAN)) {
