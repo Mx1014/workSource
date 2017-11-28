@@ -239,19 +239,8 @@ public class AssetServiceImpl implements AssetService {
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListBillsResponse response = new ListBillsResponse();
-        if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
-            if(UserContext.getCurrentNamespaceId()!=999971){
-                cmd.setPageAnchor(0l);
-//                cmd.setPageAnchor(1l);
-            }else{
-                cmd.setPageAnchor(1l);
-            }
-        }
-        if(cmd.getPageSize() == null || cmd.getPageSize() < 1 || cmd.getPageSize() > Integer.MAX_VALUE/10){
-            cmd.setPageSize(20);
-        }
-        int pageOffSet = cmd.getPageAnchor().intValue();
-        List<ListBillsDTO> list = handler.listBills(cmd.getContractNum(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus(),cmd.getTargetType(), response);
+
+        List<ListBillsDTO> list = handler.listBills(cmd.getContractNum(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),cmd.getPageAnchor(),cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus(),cmd.getTargetType(), response);
         response.setListBillsDTOS(list);
         return response;
     }
@@ -262,7 +251,7 @@ public class AssetServiceImpl implements AssetService {
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListBillItemsResponse response = new ListBillItemsResponse();
-        Integer pageOffSet = cmd.getPageAnchor().intValue();
+        Integer pageOffSet = cmd.getPageAnchor()==null?null:cmd.getPageAnchor().intValue();
         List<BillDTO> billDTOS = handler.listBillItems(cmd.getTargetType(),cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize(),cmd.getOwnerId(),response);
         response.setBillDTOS(billDTOS);
         return response;
@@ -463,7 +452,7 @@ public class AssetServiceImpl implements AssetService {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
-        return handler.getBillDetailForClient(cmd.getBillId(),cmd.getTargetType());
+        return handler.getBillDetailForClient(cmd.getOwnerId(),cmd.getBillId(),cmd.getTargetType());
     }
 
     @Override
@@ -2549,6 +2538,34 @@ public class AssetServiceImpl implements AssetService {
         AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId());
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
         return handler.listAllBillsForClient(cmd);
+    }
+
+    /**
+     * 暂时性方案，通过域空间来定义功能是否可用
+     */
+    @Override
+    public FunctionDisableListDto functionDisableList(FunctionDisableListCommand cmd) {
+        FunctionDisableListDto dto = new FunctionDisableListDto();
+        Integer namespaceId = cmd.getNamespaceId();
+        Byte hasContractView = 1;
+        Byte hasPay = 1;
+        if(namespaceId==null){
+            namespaceId = UserContext.getCurrentNamespaceId();
+        }
+        switch (namespaceId){
+            case 999971:
+                if(cmd.getOwnerType()!=null && cmd.getOwnerType().equals(AssetPaymentStrings.EH_USER)) hasPay = 0;
+                break;
+            case 999983:
+                hasContractView = 0;
+                hasPay = 0;
+                break;
+            default:
+                break;
+        }
+        dto.setHasPay(hasPay);
+        dto.setHasContractView(hasContractView);
+        return dto;
     }
 
 

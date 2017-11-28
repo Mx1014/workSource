@@ -1130,4 +1130,18 @@ public class AssetController extends ControllerBase {
         return restResponse;
     }
 
+    /**
+     * <b>URL: /asset/functionDisableList</b>
+     * <p></p>
+     */
+    @RequestMapping("functionDisableList")
+    @RestReturn(value = FunctionDisableListDto.class)
+    public RestResponse functionDisableList(FunctionDisableListCommand cmd){
+        FunctionDisableListDto dto = assetService.functionDisableList(cmd);
+        RestResponse restResponse = new RestResponse(dto);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
 }

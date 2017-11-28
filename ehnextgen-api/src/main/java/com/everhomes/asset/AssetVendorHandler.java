@@ -20,7 +20,7 @@ public interface AssetVendorHandler {
 
     AssetBillStatDTO getAssetBillStat(String tenantType, Long tenantId, Long addressId);
 
-    List<ListBillsDTO> listBills(String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType,String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Integer pageOffSet, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse response);
+    List<ListBillsDTO> listBills(String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType,String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Long pageAnchor, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse response);
 
     List<BillDTO> listBillItems(String targetType,String billId, String targetName, Integer pageOffSet, Integer pageSize, Long ownerId, ListBillItemsResponse response);
 
@@ -28,7 +28,7 @@ public interface AssetVendorHandler {
 
     ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOnlyOwedBill,String contractId);
 
-    ShowBillDetailForClientResponse getBillDetailForClient(String billId,String targetType);
+    ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId,String targetType);
 
     ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus,Long ownerId, String ownerType, String targetType, Long targetId, String dateStr,String contractId);
 
