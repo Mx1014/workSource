@@ -8,6 +8,7 @@ import javax.validation.Valid;
 
 import com.everhomes.rest.address.*;
 
+import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -398,6 +399,22 @@ public class AddressController extends ControllerBase {
     @RestReturn(value= java.lang.String.class)
     public RestResponse deleteApartmentAttachment(@Valid DeleteApartmentAttachmentCommand cmd) {
         addressService.deleteApartmentAttachment(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/downloadApartmentAttachment</b>
+     * <p> 下载门牌附件 </p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("downloadApartmentAttachment")
+    @RestReturn(value = String.class)
+    public RestResponse downloadApartmentAttachment(DownloadApartmentAttachmentCommand cmd) {
+        addressService.downloadApartmentAttachment(cmd);
+
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

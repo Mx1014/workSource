@@ -80,5 +80,6 @@ public interface AddressService {
     ApartmentAttachmentDTO uploadApartmentAttachment(UploadApartmentAttachmentCommand cmd);
     void deleteApartmentAttachment(DeleteApartmentAttachmentCommand cmd);
     List<ApartmentAttachmentDTO> listApartmentAttachments(ListApartmentAttachmentsCommand cmd);
+    void downloadApartmentAttachment(DownloadApartmentAttachmentCommand cmd);
 
 }

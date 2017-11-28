@@ -9,7 +9,11 @@ import java.util.Map;
 import java.util.UUID;
 
 
+import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.address.ApartmentAbstractDTO;
+import com.everhomes.server.schema.tables.daos.EhActivityAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhAddressAttachmentsDao;
+import com.everhomes.server.schema.tables.pojos.EhAddressAttachments;
 import com.everhomes.util.RecordHelper;
 import org.apache.commons.lang.StringUtils;
 
@@ -57,7 +61,7 @@ public class AddressProviderImpl implements AddressProvider {
     private DbProvider dbProvider;
     
     @Autowired
-    private SequenceProvider sequnceProvider;
+    private SequenceProvider sequenceProvider;
     
     @Autowired
     private ShardingProvider shardingProvider;
@@ -587,4 +591,57 @@ public class AddressProviderImpl implements AddressProvider {
         return list;
     }
 
+    @Override
+    public void createAddressAttachment(AddressAttachment attachment) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAddressAttachments.class));
+
+        attachment.setId(id);
+        attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        LOGGER.info("createAddressAttachment: " + attachment);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAddressAttachments.class, id));
+        EhAddressAttachmentsDao dao = new EhAddressAttachmentsDao(context.configuration());
+        dao.insert(attachment);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhAddressAttachments.class, id);
+
+    }
+
+    @Override
+    public void deleteApartmentAttachment(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhAddressAttachmentsDao dao = new EhAddressAttachmentsDao(context.configuration());
+        dao.deleteById(id);
+    }
+
+    @Override
+    public AddressAttachment findByAddressAttachmentId(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhAddressAttachments.class, id));
+        EhAddressAttachmentsDao dao = new EhAddressAttachmentsDao(context.configuration());
+        EhAddressAttachments result = dao.findById(id);
+        if (result == null) {
+            return null;
+        }
+        return ConvertHelper.convert(result, AddressAttachment.class);
+    }
+
+    @Override
+    public List<AddressAttachment> listAddressAttachments(Long addressId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ADDRESS_ATTACHMENTS)
+                .where(Tables.EH_ADDRESS_ATTACHMENTS.ADDRESS_ID.eq(addressId))
+                .fetchInto(AddressAttachment.class);
+    }
+
+    @Override
+    public void updateAddressAttachment(AddressAttachment attachment) {
+        assert(attachment.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAddressAttachments.class, attachment.getId()));
+        EhAddressAttachmentsDao dao = new EhAddressAttachmentsDao(context.configuration());
+        dao.update(attachment);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAddressAttachments.class, attachment.getId());
+    }
 }
