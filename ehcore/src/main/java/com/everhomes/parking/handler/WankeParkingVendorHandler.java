@@ -14,12 +14,10 @@ import com.everhomes.rest.parking.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.parking.wanke.WankeCardInfo;
 import com.everhomes.parking.wanke.WankeCardType;
@@ -268,7 +266,7 @@ public class WankeParkingVendorHandler extends DefaultParkingVendorHandler {
 		dto.setEntryTime(Utils.strToLong(tempFee.getEntryTime(), Utils.DateStyle.DATE_TIME));
 		dto.setParkingTime(Integer.valueOf(tempFee.getParkingTime()));
 		dto.setDelayTime(Integer.valueOf(tempFee.getDelayTime()));
-		dto.setPrice(new BigDecimal(tempFee.getAmount()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
+		dto.setPrice(new BigDecimal(tempFee.getAmount()).divide(new BigDecimal(100), TEMP_FEE_RETAIN_DECIMAL, RoundingMode.HALF_UP));
 		dto.setOrderToken(tempFee.getOrderNo());
 		dto.setPayTime(System.currentTimeMillis());
 		return dto;
