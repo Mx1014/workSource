@@ -875,14 +875,23 @@ public class OrganizationServiceImpl implements OrganizationService {
                 dto.setAvatarUrl(contentServerService.parserUri(dto.getAvatarUri(), EntityType.ORGANIZATIONS.getCode(), organization.getId()));
 
             List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organization.getId());
-            List<AddressDTO> addresses = organizationAddresses.stream().map(r -> {
-                OrganizationAddressDTO address = ConvertHelper.convert(r, OrganizationAddressDTO.class);
-                Address addr = addressProvider.findAddressById(address.getAddressId());
-                AddressDTO addressDTO = ConvertHelper.convert(addr, AddressDTO.class);
-                return addressDTO;
-            }).collect(Collectors.toList());
 
-            dto.setAddresses(addresses);
+            if(organizationAddresses != null && organizationAddresses.size() > 0) {
+                if(StringUtils.isEmpty(cmd.getBuildingName())) {
+                    Address addr = addressProvider.findAddressById(organizationAddresses.get(0).getAddressId());
+                    if(addr != null)
+                        dto.setAddress(addr.getAddress());
+                } else {
+                    for (OrganizationAddress organizationAddress : organizationAddresses) {
+                        Address addr = addressProvider.findAddressById(organizationAddress.getAddressId());
+                        if(addr != null && cmd.getBuildingName().equals(addr.getBuildingName())) {
+                            dto.setAddress(addr.getAddress());
+                            break ;
+                        }
+                    }
+                }
+
+            }
             dtos.add(dto);
         }
 

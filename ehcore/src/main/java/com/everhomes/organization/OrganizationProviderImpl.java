@@ -2862,7 +2862,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
-    public List<OrganizationAddress> findOrganizationAddressByOrganizationId(
+    public List<OrganizationAddress>    findOrganizationAddressByOrganizationId(
             Long organizationId) {
 
         List<OrganizationAddress> ea = new ArrayList<OrganizationAddress>();
