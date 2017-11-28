@@ -447,7 +447,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				pmTaskSearch.feedDoc(task);
 			}
 		}else if(FlowStepType.NO_STEP.getCode().equals(stepType)) {
-			if ("".equals(nodeType)) { //TODO
+			if ("MOTIFYFEE".equals(nodeType)) {
 				FlowGraphEvent evt = ctx.getCurrentEvent();
 				if (FlowUserType.APPLIER.equals(evt.getUserType())){
 					FlowAutoStepDTO dto = new FlowAutoStepDTO();
