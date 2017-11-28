@@ -4041,7 +4041,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         List<ImportTasksByEnergyPlanDataDTO> result = new ArrayList<>();
         int row = 1;
         for (Object o : list) {
-            if(row < 2){
+            if(row < 1){
                 row ++;
                 continue;
             }
