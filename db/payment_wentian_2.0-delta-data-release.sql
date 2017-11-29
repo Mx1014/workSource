@@ -28,3 +28,12 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 -- 张江高科支持新支付 by wentian
 SET @config_id = (SELECT MAX(`id`) from `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@config_id:=@config_id+1, 'pay.platform', '1', '张江高科物业缴费新支付', '999971', NULL);
+
+SET @field_id = (SELECT MAX(id) from `eh_var_fields`);
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
+VALUES (@field_id:=@field_id+1, 'contract', 'denunciationTime', '退约日期', 'Long', '15', '/13/15', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"datetime\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
+VALUES (@field_id:=@field_id+1, 'contract', 'denunciationUid', '退约经办人', 'Long', '15', '/13/15', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
+VALUES (@field_id:=@field_id+1, 'contract', 'buildingRename', '房间别名', 'Long', '15', '/13/15', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+
