@@ -3967,9 +3967,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         row.createCell(++i).setCellValue(timeToStr(dto.getExecutiveStartTime()));
         row.createCell(++i).setCellValue(timeToStr(dto.getExecutiveExpireTime()));
         if(EnergyTaskStatus.NON_READ.equals(EnergyTaskStatus.fromCode(dto.getStatus())))
-            row.createCell(++i).setCellValue("未抄");
+            row.createCell(++i).setCellValue("未完成");
         if(EnergyTaskStatus.READ.equals(EnergyTaskStatus.fromCode(dto.getStatus())))
-            row.createCell(++i).setCellValue("已抄");
+            row.createCell(++i).setCellValue("已完成");
         if(EnergyTaskStatus.INACTIVE.equals(EnergyTaskStatus.fromCode(dto.getStatus())))
             row.createCell(++i).setCellValue("无效");
 
