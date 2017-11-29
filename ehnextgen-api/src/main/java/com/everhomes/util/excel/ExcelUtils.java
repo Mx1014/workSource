@@ -422,6 +422,7 @@ public class ExcelUtils {
         workbook.setSheetName(sheetNum, sheetTitle);
         // 设置表格默认列宽度为20个字节
         sheet.setDefaultColumnWidth((short) 30);
+        //sheet.autoSizeColumn(1, true);
         // 生成一个样式
         CellStyle style_non_m = workbook.createCellStyle();
         // 设置这些样式
@@ -480,7 +481,8 @@ public class ExcelUtils {
         CellRangeAddress cra = new CellRangeAddress(0,0,0,11);
         sheet.addMergedRegion(cra);
         Row introRow = sheet.createRow(0);
-        introRow.setHeightInPoints(130);
+        //这里改成170 原：130
+        introRow.setHeightInPoints(170);
         Cell introCell = introRow.createCell(0);
         introCell.setCellStyle(introStyle);
         //这里可以根据sheet决定怎么显示枚举，晚上搞这个
@@ -529,7 +531,8 @@ public class ExcelUtils {
                 instruction =
                         "二维码状态： 停用 、启用 \n"+
                         "当前状态：不完整 、使用中 、维修中 、报废 、停用  、备用 \n"+
-                        "设备类型：消防 、强电 、弱电 、电梯 、空调 、给排水、空置房、装修、安保、日常工作检查、公共设施检查、周末值班、安全检查、其他 \n";
+                        "设备类型：消防 、强电 、弱电 、电梯 、空调 、给排水、空置房、装修、安保、日常工作检查、公共设施检查、周末值班、安全检查、其他 \n"+
+                        "日期格式:  yyyy-MM-dd \n";
         }
         introCell.setCellValue("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
                 "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +

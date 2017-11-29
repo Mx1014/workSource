@@ -1,4 +1,4 @@
--- 增加设备字段
+-- 增加设备字段  by jiarui
 ALTER TABLE `eh_equipment_inspection_equipments`
 ADD COLUMN `brand_name` varchar(1024) COMMENT 'brand_name',
 ADD COLUMN `construction_party` varchar(1024) COMMENT 'construction party',
