@@ -1,5 +1,6 @@
 package com.everhomes.portal;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.pmtask.PmTaskProvider;
 import com.everhomes.rentalv2.RentalResourceType;
 import com.everhomes.rentalv2.Rentalv2Provider;
@@ -80,4 +81,25 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
     public String processInstanceConfig(String instanceConfig) {
         return instanceConfig;
     }
+
+    @Override
+    public String getCustomTag(Integer namespaceId, Long moudleId, String actionData){
+
+        //{"url":"zl://propertyrepair/create?type=user&taskCategoryId=203531&displayName=物业报修"}
+
+        JSONObject json = JSONObject.parseObject(actionData);
+        String url = json.getString("url");
+        String[] arrs = url.split("&");
+        for (String s: arrs) {
+            int spe = s.indexOf("=");
+            String key = s.substring(0, spe);
+            String value = s.substring(spe + 1);
+            if ("taskCategoryId".equals(key)) {
+                return value;
+            }
+        }
+
+        return actionData;
+    }
+
 }
