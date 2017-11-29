@@ -15,6 +15,7 @@ import com.everhomes.server.schema.tables.records.*;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
+import org.jooq.UpdateQuery;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -565,6 +566,20 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
     }
 
     @Override
+    public void updateReflectionServiceModuleApp(ReflectionServiceModuleApp reflectionServiceModuleApp) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        UpdateQuery<EhReflectionServiceModuleAppsRecord> item = context.updateQuery(Tables.EH_REFLECTION_SERVICE_MODULE_APPS);
+        item.addValue(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.NAME, reflectionServiceModuleApp.getName());
+        item.addValue(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.STATUS, reflectionServiceModuleApp.getStatus());
+        item.addValue(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.INSTANCE_CONFIG, reflectionServiceModuleApp.getInstanceConfig());
+        item.addValue(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.UPDATE_TIME, reflectionServiceModuleApp.getUpdateTime());
+        item.addValue(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ACTION_DATA, reflectionServiceModuleApp.getActionData());
+        item.addConditions(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ID.eq(reflectionServiceModuleApp.getId()));
+        item.setReturning(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ID);
+        item.execute();
+    }
+
+    @Override
     public ReflectionServiceModuleApp findReflectionServiceModuleAppById(Long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhReflectionServiceModuleAppsDao dao = new EhReflectionServiceModuleAppsDao(context.configuration());
@@ -581,8 +596,10 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         SelectQuery<EhReflectionServiceModuleAppsRecord> query = context.selectQuery(Tables.EH_REFLECTION_SERVICE_MODULE_APPS);
         Condition condition = Tables.EH_REFLECTION_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId);
         condition = condition.and(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.MODULE_ID.eq(moduleId));
-        condition = condition.and(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.CUSTOM_TAG.eq(custom_tag));
-        EhReflectionServiceModuleAppsRecord record =  query.fetchAny();
+        if(custom_tag != null)
+            condition = condition.and(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.CUSTOM_TAG.eq(custom_tag));
+        query.addConditions(condition);
+        EhReflectionServiceModuleAppsRecord record = query.fetchOne();
         if(record != null){
             return ConvertHelper.convert(record, ReflectionServiceModuleApp.class);
         }

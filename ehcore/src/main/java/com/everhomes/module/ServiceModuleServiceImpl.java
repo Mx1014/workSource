@@ -849,7 +849,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             reflectionApp.setInstanceConfig(instanceConfig);
             reflectionApp.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             reflectionApp.setActionData(actionData);
-            reflectionApp.setInstanceConfig(instanceConfig);
+            this.serviceModuleProvider.updateReflectionServiceModuleApp(reflectionApp);
         }else{//创建
             ReflectionServiceModuleApp reflectionApp_new = new ReflectionServiceModuleApp();
             Long activeAppId = this.sequenceProvider.getNextSequence("activeAppId");
@@ -864,6 +864,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             reflectionApp_new.setStatus(ServiceModuleAppStatus.ACTIVE.getCode());
             reflectionApp_new.setCustomTag(customTag);
             reflectionApp_new.setName(itemLabel);
+            reflectionApp_new.setModuleId(serviceModule.getId());
             this.serviceModuleProvider.createReflectionServiceModuleApp(reflectionApp_new);
         }
 

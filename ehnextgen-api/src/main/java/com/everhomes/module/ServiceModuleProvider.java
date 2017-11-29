@@ -76,6 +76,8 @@ public interface ServiceModuleProvider {
 
     void createReflectionServiceModuleApp(ReflectionServiceModuleApp reflectionServiceModuleApp);
 
+    void updateReflectionServiceModuleApp(ReflectionServiceModuleApp reflectionServiceModuleApp);
+
     ReflectionServiceModuleApp findReflectionServiceModuleAppById(Long id);
 
     ReflectionServiceModuleApp findReflectionServiceModuleAppByParam(Integer namespaceId, Long moduleId, String custom_tag);
