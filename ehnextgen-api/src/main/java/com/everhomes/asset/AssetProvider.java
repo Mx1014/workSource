@@ -2,6 +2,7 @@ package com.everhomes.asset;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.order.PaymentAccount;
+import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
 import com.everhomes.rest.asset.*;
 import com.everhomes.server.schema.tables.pojos.*;
@@ -258,4 +259,6 @@ public interface AssetProvider {
     BigDecimal getBillExpectanciesAmountOnContract(String contractNum, Long contractId);
 
     List<ListAllBillsForClientDTO> listAllBillsForClient(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId);
+
+    PaymentServiceConfig findServiceConfig(Integer namespaceId);
 }
