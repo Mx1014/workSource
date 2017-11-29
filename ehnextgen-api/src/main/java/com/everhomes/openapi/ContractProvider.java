@@ -49,5 +49,8 @@ public interface ContractProvider {
 	void updateContractParam(ContractParam param);
 	ContractParam findContractParamByCommunityId(Long communityId);
 	Map<Long, List<Contract>> listContractGroupByCommunity();
+	String findLastContractVersionByCommunity(Integer namespaceId, Long communityId);
 
+	List<Contract> listContractByNamespaceType(Integer namespaceId, String namespaceType, Long communityId);
+	List<Contract> listContractsByAddressId(Long addressId);
 }

@@ -26,6 +26,7 @@ import com.everhomes.asset.AssetVendorHandler;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.customer.CustomerHandle;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.customer.IndividualCustomerProvider;
@@ -187,7 +188,7 @@ public class ContractServiceImpl implements ContractService {
 		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 
 //		if(namespaceId == 999971) {
-//			ContractHandler handler = PlatformContext.getComponent(ContractHandler.CONTRACT_PREFIX + namespaceId);
+//			ThirdPartContractHandler handler = PlatformContext.getComponent(ThirdPartContractHandler.CONTRACT_PREFIX + namespaceId);
 //			ListContractsResponse response = handler.listContracts(cmd);
 //			return response;
 //		}
@@ -1230,8 +1231,10 @@ public class ContractServiceImpl implements ContractService {
 			if(contractApartments != null && contractApartments.size() > 0) {
 				contractApartments.forEach(contractApartment -> {
 					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(contractApartment.getAddressId());
-					addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
-					propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+					if(addressMapping != null) {
+						addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+						propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+					}
 				});
 			}
 		}
@@ -1241,7 +1244,7 @@ public class ContractServiceImpl implements ContractService {
 	public ContractDetailDTO findContract(FindContractCommand cmd) {
 //		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 //		if(namespaceId == 999971) {
-//			ContractHandler handler = PlatformContext.getComponent(ContractHandler.CONTRACT_PREFIX + namespaceId);
+//			ThirdPartContractHandler handler = PlatformContext.getComponent(ThirdPartContractHandler.CONTRACT_PREFIX + namespaceId);
 //			ContractDetailDTO response = handler.findContract(cmd);
 //			return response;
 //		}
@@ -1318,7 +1321,7 @@ public class ContractServiceImpl implements ContractService {
 			if(userIdentifier != null) {
 //				Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 //				if(namespaceId == 999971) {
-//					ContractHandler handler = PlatformContext.getComponent(ContractHandler.CONTRACT_PREFIX + namespaceId);
+//					ThirdPartContractHandler handler = PlatformContext.getComponent(ThirdPartContractHandler.CONTRACT_PREFIX + namespaceId);
 //					ListIndividualCustomerContractsCommand command = new ListIndividualCustomerContractsCommand();
 //					command.setNamespaceId(cmd.getNamespaceId());
 //					command.setCommunityId(cmd.getCommunityId());
@@ -1351,7 +1354,7 @@ public class ContractServiceImpl implements ContractService {
 	public List<ContractDTO> listEnterpriseCustomerContracts(ListEnterpriseCustomerContractsCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 //		if(namespaceId == 999971) {
-//			ContractHandler handler = PlatformContext.getComponent(ContractHandler.CONTRACT_PREFIX + namespaceId);
+//			ThirdPartContractHandler handler = PlatformContext.getComponent(ThirdPartContractHandler.CONTRACT_PREFIX + namespaceId);
 //			List<ContractDTO> response = handler.listEnterpriseCustomerContracts(cmd);
 //			return response;
 //		}
@@ -1372,7 +1375,7 @@ public class ContractServiceImpl implements ContractService {
 	public List<ContractDTO> listIndividualCustomerContracts(ListIndividualCustomerContractsCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 //		if(namespaceId == 999971) {
-//			ContractHandler handler = PlatformContext.getComponent(ContractHandler.CONTRACT_PREFIX + namespaceId);
+//			ThirdPartContractHandler handler = PlatformContext.getComponent(ThirdPartContractHandler.CONTRACT_PREFIX + namespaceId);
 //			if(cmd.getIndividualCustomerId() != null) {
 //				OrganizationOwner owner = individualCustomerProvider.findOrganizationOwnerById(cmd.getIndividualCustomerId());
 //				if(owner != null) {
@@ -1384,6 +1387,15 @@ public class ContractServiceImpl implements ContractService {
 //		}
 
 		List<Contract> contracts = contractProvider.listContractByCustomerId(cmd.getCommunityId(), cmd.getIndividualCustomerId(), CustomerType.INDIVIDUAL.getCode());
+		if(contracts != null && contracts.size() > 0) {
+			return contracts.stream().map(contract -> ConvertHelper.convert(contract, ContractDTO.class)).collect(Collectors.toList());
+		}
+		return null;
+	}
+
+	@Override
+	public List<ContractDTO> listApartmentContracts(ListApartmentContractsCommand cmd) {
+		List<Contract> contracts = contractProvider.listContractsByAddressId(cmd.getAddressId());
 		if(contracts != null && contracts.size() > 0) {
 			return contracts.stream().map(contract -> ConvertHelper.convert(contract, ContractDTO.class)).collect(Collectors.toList());
 		}
@@ -1545,5 +1557,30 @@ public class ContractServiceImpl implements ContractService {
 			}).collect(Collectors.toList());
 			dto.setAttachments(dtos);
 		}
+	}
+
+	@Override
+	public void syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd) {
+		this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_CONTRACT.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
+			ExecutorUtil.submit(new Runnable() {
+				@Override
+				public void run() {
+					try{
+						Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+						if(community == null) {
+							return;
+						}
+						String version = contractProvider.findLastContractVersionByCommunity(cmd.getNamespaceId(), community.getId());
+						ThirdPartContractHandler contractHandler = PlatformContext.getComponent(ThirdPartContractHandler.CONTRACT_PREFIX + cmd.getNamespaceId());
+						if(contractHandler != null) {
+							contractHandler.syncContractsFromThirdPart("1", version, community.getNamespaceCommunityToken());
+						}
+
+					}catch (Exception e){
+						LOGGER.error("syncEnterpriseCustomers error.", e);
+					}
+				}
+			});
+		});
 	}
 }
