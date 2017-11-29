@@ -73,6 +73,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	private PmTaskService pmTaskService;
 	@Autowired
 	private GeneralFormValProvider generalFormValProvider;
+	@Autowired
+	FlowEventLogProvider flowEventLogProvider;
 
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
 
@@ -177,6 +179,40 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				//要求传的是转发项目经理填写的内容和图片 add by xiongying20170922
 				FlowSubjectDTO subjectDTO = flowService.getSubectById(ctx.getCurrentEvent().getSubject().getId());
 				pmTaskCommonService.handoverTaskToTrd(task, subjectDTO.getContent(), subjectDTO.getImages());
+			}else if("MOTIFYFEE".equals(nodeType)){
+				List<GeneralFormVal> vals = generalFormValProvider.queryGeneralFormVals(EntityType.PM_TASK.getCode(),flowCase.getReferId());
+				//没产生费用
+				if (vals==null || vals.size()==0){
+					FlowAutoStepDTO dto = new FlowAutoStepDTO();
+					dto.setAutoStepType(FlowStepType.NO_STEP.getCode());
+					dto.setFlowCaseId(flowCase.getId());
+					dto.setFlowMainId(flowCase.getFlowMainId());
+					dto.setFlowNodeId(flowCase.getCurrentNodeId());
+					dto.setFlowVersion(flowCase.getFlowVersion());
+					dto.setStepCount(flowCase.getStepCount());
+					dto.setEventType(FlowEventType.STEP_MODULE.getCode());
+
+					List<FlowEventLog> eventLogs = new ArrayList<>();
+					FlowEventLog log = new FlowEventLog();
+					log.setId(flowEventLogProvider.getNextId());
+					log.setFlowMainId(flowCase.getFlowMainId());
+					log.setFlowVersion(flowCase.getFlowVersion());
+					log.setNamespaceId(flowCase.getNamespaceId());
+					log.setFlowNodeId(flowCase.getCurrentNodeId());
+					log.setFlowCaseId(flowCase.getId());
+					log.setStepCount(flowCase.getStepCount());
+					log.setSubjectId(0L);
+					log.setParentId(0L);
+					log.setLogType(FlowLogType.NODE_TRACKER.getCode());
+					log.setButtonFiredStep(FlowStepType.NO_STEP.getCode());
+					log.setTrackerApplier(1L);
+					log.setTrackerProcessor(1L);
+					String content = "本次服务没有产生维修费";
+					log.setLogContent(content);
+					eventLogs.add(log);
+					dto.setEventLogs(eventLogs);
+					flowService.processAutoStep(dto);
+				}
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
 
