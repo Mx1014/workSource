@@ -432,6 +432,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(maps != null && maps.size() > 0) {
 			for(EquipmentStandardMap map : maps) {
 				inActiveEquipmentStandardRelations(map);
+				//设备状态修改为不完整
+				EquipmentInspectionEquipments equipmet = equipmentProvider.findEquipmentById(map.getTargetId());
+				equipmet.setStatus(EquipmentStatus.INCOMPLETE.getCode());
+				equipmentProvider.updateEquipmentInspectionEquipment(equipmet);
 			}
 		}
 		
