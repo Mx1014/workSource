@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
  *  <li>status: 计划状态 参考{@link com.everhomes.rest.equipment.EquipmentPlanStatus}</li>
  *  <li>reviewResult: 计划审核状态 参考{@link com.everhomes.rest.equipment.EquipmentInspectionPlanResult}</li>
  *  <li>planType: 类型 参考{@link com.everhomes.rest.equipment.StandardType}</li>
+ *  <li>repeatType: 执行周期类型 repeatType: 0:no repeat 1: by day 2:by week 3: by month 4:year</li>
  *  <li>keyword: 查询关键字</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
@@ -42,6 +43,8 @@ public class searchEquipmentInspectionPlansCommand {
     private Integer pageSize;
 
     private Long inspectionCategoryId;
+
+    private Byte repeatType;
 
     public Long getOwnerId() {
         return ownerId;
@@ -129,6 +132,14 @@ public class searchEquipmentInspectionPlansCommand {
 
     public void setInspectionCategoryId(Long inspectionCategoryId) {
         this.inspectionCategoryId = inspectionCategoryId;
+    }
+
+    public Byte getRepeatType() {
+        return repeatType;
+    }
+
+    public void setRepeatType(Byte repeatType) {
+        this.repeatType = repeatType;
     }
 
     @Override

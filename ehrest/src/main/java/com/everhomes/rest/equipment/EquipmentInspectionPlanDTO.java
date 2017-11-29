@@ -51,6 +51,13 @@ public class EquipmentInspectionPlanDTO {
 
     private RepeatSettingsDTO repeatSettings;
 
+    private String executeStartTime;
+
+    private String  executionFrequency;
+
+    private String limitTime;
+
+
     @ItemType(EquipmentStandardRelationDTO.class)
     private List<EquipmentStandardRelationDTO> equipmentStandardRelations;
 
@@ -156,6 +163,30 @@ public class EquipmentInspectionPlanDTO {
 
     public void setEquipmentStandardRelations(List<EquipmentStandardRelationDTO> equipmentStandardRelations) {
         this.equipmentStandardRelations = equipmentStandardRelations;
+    }
+
+    public String getExecuteStartTime() {
+        return executeStartTime;
+    }
+
+    public void setExecuteStartTime(String executeStartTime) {
+        this.executeStartTime = executeStartTime;
+    }
+
+    public String getExecutionFrequency() {
+        return executionFrequency;
+    }
+
+    public void setExecutionFrequency(String executionFrequency) {
+        this.executionFrequency = executionFrequency;
+    }
+
+    public String getLimitTime() {
+        return limitTime;
+    }
+
+    public void setLimitTime(String limitTime) {
+        this.limitTime = limitTime;
     }
 
     @Override

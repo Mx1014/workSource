@@ -15,16 +15,16 @@ import java.util.List;
 public class searchEquipmentInspectionPlansResponse {
 
     @ItemType(EquipmentInspectionPlanDTO.class)
-    private List<EquipmentInspectionPlanDTO> equipmentInspectionPlanDTO;
+    private List<EquipmentInspectionPlanDTO> equipmentInspectionPlans;
 
     private Long nextPageAnchor;
 
-    public List<EquipmentInspectionPlanDTO> getEquipmentInspectionPlanDTO() {
-        return equipmentInspectionPlanDTO;
+    public List<EquipmentInspectionPlanDTO> getEquipmentInspectionPlans() {
+        return equipmentInspectionPlans;
     }
 
-    public void setEquipmentInspectionPlanDTO(List<EquipmentInspectionPlanDTO> equipmentInspectionPlanDTO) {
-        this.equipmentInspectionPlanDTO = equipmentInspectionPlanDTO;
+    public void setEquipmentInspectionPlans(List<EquipmentInspectionPlanDTO> equipmentInspectionPlans) {
+        this.equipmentInspectionPlans = equipmentInspectionPlans;
     }
 
     public Long getNextPageAnchor() {

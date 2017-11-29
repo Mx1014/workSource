@@ -15,6 +15,13 @@ public class EquipmentInspectionPlans  extends EhEquipmentInspectionPlans{
 
     private RepeatSettings repeatSettings;
 
+    //增加执行频率 等
+    private String executeStartTime;
+
+    private String  executionFrequency;
+
+    private String limitTime;
+
     private List<EquipmentStandardRelationDTO> equipmentStandardRelations;
 
     public RepeatSettings getRepeatSettings() {
@@ -31,6 +38,30 @@ public class EquipmentInspectionPlans  extends EhEquipmentInspectionPlans{
 
     public void setEquipmentStandardRelations(List<EquipmentStandardRelationDTO> equipmentStandardRelations) {
         this.equipmentStandardRelations = equipmentStandardRelations;
+    }
+
+    public String getExecuteStartTime() {
+        return executeStartTime;
+    }
+
+    public void setExecuteStartTime(String executeStartTime) {
+        this.executeStartTime = executeStartTime;
+    }
+
+    public String getExecutionFrequency() {
+        return executionFrequency;
+    }
+
+    public void setExecutionFrequency(String executionFrequency) {
+        this.executionFrequency = executionFrequency;
+    }
+
+    public String getLimitTime() {
+        return limitTime;
+    }
+
+    public void setLimitTime(String limitTime) {
+        this.limitTime = limitTime;
     }
 
     @Override

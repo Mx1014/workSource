@@ -1,21 +1,38 @@
 package com.everhomes.equipment;
 
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.repeat.RepeatService;
+import com.everhomes.rest.equipment.EquipmentInspectionPlanDTO;
 import com.everhomes.rest.equipment.searchEquipmentInspectionPlansCommand;
 import com.everhomes.rest.equipment.searchEquipmentInspectionPlansResponse;
+import com.everhomes.rest.quality.OwnerType;
+import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EquipmentPlanSearcher;
 import com.everhomes.search.SearchUtils;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.mysql.jdbc.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements EquipmentPlanSearcher {
@@ -24,6 +41,12 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
 
     @Autowired
     private  EquipmentProvider equipmentProvider;
+
+    @Autowired
+    private ConfigurationProvider configProvider;
+
+    @Autowired
+    private RepeatService repeatService;
 
 
     @Override
@@ -86,7 +109,82 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
 
     @Override
     public searchEquipmentInspectionPlansResponse query(searchEquipmentInspectionPlansCommand cmd) {
-        return null;
+        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+        QueryBuilder qb = null;
+        if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
+            qb = QueryBuilders.matchAllQuery();
+        } else {
+            qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+                    .field("name", 5.0f)
+                    .field("planNumber", 5.0f);
+
+            builder.addHighlightedField("name")
+                    .addHighlightedField("planNumber");
+
+        }
+
+        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
+        if(cmd.getTargetId() != null)
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
+
+        if(!StringUtils.isNullOrEmpty(cmd.getTargetType()))
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
+
+        if(cmd.getInspectionCategoryId()!=null)
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("inspectionCategoryId", cmd.getInspectionCategoryId()));
+
+        if (cmd.getStatus()!=null){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
+        }
+        if (cmd.getPlanType()!=null){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("planType", cmd.getPlanType()));
+        }
+        //增加频次  repeatType
+        if(cmd.getRepeatType()!=null)
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("repeatType", cmd.getRepeatType()));
+
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = 0L;
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
+
+        qb = QueryBuilders.filteredQuery(qb, fb);
+        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
+        builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
+        builder.setQuery(qb);
+
+        SearchResponse rsp = builder.execute().actionGet();
+
+        List<Long> ids = getIds(rsp);
+
+        searchEquipmentInspectionPlansResponse response = new searchEquipmentInspectionPlansResponse();
+        if(ids.size() > pageSize) {
+            response.setNextPageAnchor(anchor + 1);
+            ids.remove(ids.size() - 1);
+        } else {
+            response.setNextPageAnchor(null);
+        }
+
+        List<EquipmentInspectionPlanDTO> plans = new ArrayList<EquipmentInspectionPlanDTO>();
+        for(Long id : ids) {
+            //RP上只展示计划基本信息和执行周期
+            EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlan(id);
+
+            //填充执行开始时间  执行频率  执行时长
+            plan.setExecuteStartTime(repeatService.getExecuteStartTime(ConvertHelper.
+                    convert(repeatService.findRepeatSettingById(plan.getRepeatsettingId()), RepeatSettingsDTO.class)));
+            plan.setExecutionFrequency(repeatService.getExecutionFrequency(ConvertHelper.
+                    convert(repeatService.findRepeatSettingById(plan.getRepeatsettingId()), RepeatSettingsDTO.class)));
+            plan.setLimitTime(repeatService.getlimitTime(ConvertHelper.
+                    convert(repeatService.findRepeatSettingById(plan.getRepeatsettingId()), RepeatSettingsDTO.class)));
+
+            plans.add(ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class));
+
+        }
+        response.setEquipmentInspectionPlans(plans);
+
+        return response;
     }
 
     @Override
@@ -105,13 +203,15 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
             b.field("name", plan.getName());
             b.field("planNumber", plan.getPlanNumber());
             b.field("planType", plan.getPlanType());
+            b.field("status", plan.getStatus());
+
             //关联计划的周期类型
-            b.field("repeatType", plan.getRepeatSettings().getRepeatType());
+            b.field("repeatType", repeatService.findRepeatSettingById(plan.getRepeatsettingId()).getRepeatType());
 
             b.endObject();
             return b;
         } catch (IOException ex) {
-            LOGGER.error("Create accessory " + plan.getId() + " error");
+            LOGGER.error("Create EquipmentInspectionPlan " + plan.getId() + " error");
             return null;
         }
     }
