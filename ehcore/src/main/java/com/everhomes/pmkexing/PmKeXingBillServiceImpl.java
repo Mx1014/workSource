@@ -5,6 +5,7 @@ import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.*;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
 import com.everhomes.community.Community;
@@ -264,12 +265,21 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
     public GetLeaseContractBillOnFiPropertyRes getAllFiPropertyBills(Integer namespaceId, Long ownerId, Long targetId, String targetType, Byte isPay) {
         GetLeaseContractBillOnFiPropertyRes res = new GetLeaseContractBillOnFiPropertyRes();
         List<GetLeaseContractBillOnFiPropertyData> data = new ArrayList<>();
+        ContractService contractService = getContractService(0);
         //获得所有合同
-        List<Contract> contracts = new ArrayList<>();
+        List<ContractDTO> contracts = new ArrayList<>();
         if(targetType.equals(AssetPaymentStrings.EH_USER)){
-            contracts = contractProvider.listContractByCustomerId(ownerId, UserContext.currentUserId(), CustomerType.INDIVIDUAL.getCode());
+            ListIndividualCustomerContractsCommand cmd = new ListIndividualCustomerContractsCommand();
+            cmd.setIndividualCustomerId(UserContext.currentUserId());
+            cmd.setCommunityId(ownerId);
+            cmd.setNamespaceId(namespaceId);
+            contracts = contractService.listIndividualCustomerContracts(cmd);
         }else if(targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
-            contracts = contractProvider.listContractByCustomerId(ownerId, targetId, CustomerType.ENTERPRISE.getCode());
+            ListEnterpriseCustomerContractsCommand cmd = new ListEnterpriseCustomerContractsCommand();
+            cmd.setEnterpriseCustomerId(targetId);
+            cmd.setCommunityId(ownerId);
+            cmd.setNamespaceId(namespaceId);
+            contracts = contractService.listEnterpriseCustomerContracts(cmd);
         }
 //        Contract experimentSample = new Contract();
 //        experimentSample.setNamespaceContractType("ebei");
@@ -292,7 +302,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
             params.put("isPay",isPayStr);
         }
         for(int i = 0; i < contracts.size(); i ++){
-            Contract contract = contracts.get(i);
+            ContractDTO contract = contracts.get(i);
             if(!contract.getNamespaceContractType().equals(NamespaceContractType.EBEI.getCode())){
                 continue;
             }
@@ -580,6 +590,11 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
     @Autowired
     public void setLocaleStringService(LocaleStringService localeStringService) {
         PmKeXingBillServiceImpl.localeStringService = localeStringService;
+    }
+
+    private ContractService getContractService(Integer namespaceId) {
+        String handler = configurationProvider.getValue(namespaceId, "contractService", "");
+        return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
     }
 
     /*public static void main(String[] args) {
