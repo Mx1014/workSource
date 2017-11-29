@@ -17,6 +17,7 @@ import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1149,7 +1150,7 @@ public class AssetController extends ControllerBase {
      * <p></p>
      */
     @RequestMapping("sc")
-    @RestReturn(value = String.class)
+    @RequireAuthentication(value = false)
     public RestResponse syncCustomer(Integer namespaceId){
         RestResponse restResponse = new RestResponse();
         assetService.syncCustomer(namespaceId);
