@@ -220,8 +220,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			pmTaskProvider.updateTask(task);
 		}
 		//elasticsearch更新
-		pmTaskSearch.deleteById(task.getId());
-		pmTaskSearch.feedDoc(task);
+		//pmTaskSearch.deleteById(task.getId());
+		//pmTaskSearch.feedDoc(task);
 
 	}
 
@@ -479,8 +479,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 //				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
-				pmTaskProvider.updateTask(task);
-				pmTaskSearch.feedDoc(task);
+			//	pmTaskProvider.updateTask(task);
+			//	pmTaskSearch.feedDoc(task);
 			}
 		}else if(FlowStepType.NO_STEP.getCode().equals(stepType)) {
 			if ("MOTIFYFEE".equals(nodeType)) {
@@ -613,6 +613,10 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		ListTaskCategoriesCommand cmd = new ListTaskCategoriesCommand();
 		cmd.setNamespaceId(namespaceId);
+		//if (flow.getModuleType().equals(FlowModuleType.REPAIR_MODULE.getCode()))
+			cmd.setTaskCategoryId(PmTaskAppType.REPAIR_ID);
+//		else
+//			cmd.setTaskCategoryId(PmTaskAppType.SUGGESTION_ID);
 		ListTaskCategoriesResponse response = pmTaskService.listTaskCategories(cmd);
 		dto.setOptions(new ArrayList<>());
 		response.getRequests().forEach(p->{
