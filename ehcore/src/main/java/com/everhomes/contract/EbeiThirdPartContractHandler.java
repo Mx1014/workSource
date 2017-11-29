@@ -403,8 +403,15 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
                 contractBuildingMappingProvider.deleteContractBuildingMapping(apartment);
 
                 CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(apartment.getAddressId());
-                addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
-                propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+                if(addressMapping != null) {
+                    addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+                    propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+                } else {
+                    Address address = addressProvider.findAddressById(apartment.getAddressId());
+                    address.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
+                    addressProvider.updateAddress(address);
+                }
+
             });
         }
 
