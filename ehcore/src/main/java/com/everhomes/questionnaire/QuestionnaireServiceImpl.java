@@ -1072,9 +1072,11 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			homeUrl = homeUrl.endsWith("/")?homeUrl.substring(0,homeUrl.length()-1):homeUrl;
 			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question/%s#sign_suffix");
 			String srcUrl = String.format(homeUrl+contextUrl, dto.getId());
-			String shareContext = String.format("/evh/wxauth/authReq?ns=%s&src_url=%s",dto.getNamespaceId(), URLEncoder.encode(srcUrl,"utf-8"));
-			dto.setShareUrl(homeUrl+shareContext);
-		} catch (UnsupportedEncodingException e) {
+//			String shareContext = String.format("/evh/wxauth/authReq?ns=%s&src_url=%s",dto.getNamespaceId(), URLEncoder.encode(srcUrl,"utf-8"));
+//			dto.setShareUrl(homeUrl+shareContext);
+			String shareUrl = srcUrl.replace("index.html","index.html?ns="+dto.getNamespaceId());
+			dto.setShareUrl(shareUrl);
+		} catch (Exception e) {
 			LOGGER.warn("generate share url = "+dto);
 		}
 
