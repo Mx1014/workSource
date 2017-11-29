@@ -2015,6 +2015,7 @@ public class SequenceServiceImpl implements SequenceService {
         });
         syncTableSequence(null, EhRelocationRequestAttachments.class, Tables.EH_RELOCATION_REQUEST_ATTACHMENTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_RELOCATION_REQUEST_ATTACHMENTS.ID.max()).from(Tables.EH_RELOCATION_REQUEST_ATTACHMENTS).fetchOne().value1();
+        });
         syncTableSequence(null, EhBanners.class, Tables.EH_BANNERS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_BANNERS.ID.max()).from(Tables.EH_BANNERS).fetchOne().value1();
         });
