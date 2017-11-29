@@ -8,6 +8,10 @@ import com.everhomes.rest.portal.NewsInstanceConfig;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.StringHelper;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,5 +82,25 @@ public class NewsPortalPublishHandler implements PortalPublishHandler{
     @Override
     public String processInstanceConfig(String instanceConfig) {
         return instanceConfig;
+    }
+    
+    final Pattern pattern = Pattern.compile("^.*\"categoryId\":[\\s]*([\\d]*),");
+    @Override
+    public String getCustomTag(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
+    	
+    	if(actionData!=null && actionData.length()!=0){
+	    	Matcher m = pattern.matcher(actionData);
+	    	if(m.find()){
+	    		return m.group(1);
+	    	}
+    	}
+    	if(instanceConfig!=null && instanceConfig.length()!=0){
+    		Matcher m = pattern.matcher(actionData);
+	    	if(m.find()){
+	    		return m.group(1);
+	    	}
+    	}
+    	LOGGER.info("ServiceAlliancePortalPublishHandler actionData = {}, instanceConfig = {}",actionData,instanceConfig);
+    	return null;
     }
 }
