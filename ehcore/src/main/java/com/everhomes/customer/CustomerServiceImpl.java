@@ -813,6 +813,9 @@ public class CustomerServiceImpl implements CustomerService {
         if(cmd.getLiquidationCommitteeRecoredDate() != null) {
             commercial.setLiquidationCommitteeRecoredDate(new Timestamp(cmd.getLiquidationCommitteeRecoredDate()));
         }
+        if(cmd.getBranchRegisteredDate() != null) {
+            commercial.setBranchRegisteredDate(new Timestamp(cmd.getBranchRegisteredDate()));
+        }
 
         enterpriseCustomerProvider.createCustomerCommercial(commercial);
     }
@@ -1100,6 +1103,9 @@ public class CustomerServiceImpl implements CustomerService {
         }
         if(cmd.getLiquidationCommitteeRecoredDate() != null) {
             commercial.setLiquidationCommitteeRecoredDate(new Timestamp(cmd.getLiquidationCommitteeRecoredDate()));
+        }
+        if(cmd.getBranchRegisteredDate() != null) {
+            commercial.setBranchRegisteredDate(new Timestamp(cmd.getBranchRegisteredDate()));
         }
         commercial.setCreateTime(exist.getCreateTime());
         commercial.setCreateUid(exist.getCreateUid());
