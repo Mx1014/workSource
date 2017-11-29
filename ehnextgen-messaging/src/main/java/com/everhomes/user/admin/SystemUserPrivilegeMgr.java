@@ -209,7 +209,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
             }
         }
         // 查询app关联的moduleId
-        ServiceModuleApp app = this.serviceModuleAppProvider.findServiceModuleAppById(appId);
+        ServiceModuleApp app = this.serviceModuleProvider.findReflectionServiceModuleAppByActiveAppId(appId);
         if(app != null && p_moduleId != 0L && p_moduleId.longValue() == app.getModuleId().longValue()){//如果权限对应的moduleId和appId对应的模块Id相等，再校验是否对应用有权
           return checkModuleAppAdmin(namespaceId, ownerType, ownerId, userId, p_moduleId, appId, communityId, organizationId);
         }

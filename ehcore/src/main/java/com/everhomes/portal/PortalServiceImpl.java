@@ -2066,8 +2066,10 @@ public class PortalServiceImpl implements PortalService {
 		moduleApp.setCreatorUid(user.getId());
 		moduleApp.setOperatorUid(user.getId());
 		List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModule(actionType);
-		if(serviceModules.size() == 0 || ActionType.OFFLINE_WEBAPP  == ActionType.fromCode(actionType)
-				|| ActionType.ROUTER  == ActionType.fromCode(actionType)){
+//		if(serviceModules.size() == 0 || ActionType.OFFLINE_WEBAPP  == ActionType.fromCode(actionType)
+//				|| ActionType.ROUTER  == ActionType.fromCode(actionType)){
+
+		if(serviceModules.size() == 0 || ActionType.OFFLINE_WEBAPP  == ActionType.fromCode(actionType)){
 
 		}else{
 			ServiceModule serviceModule = serviceModules.get(0);

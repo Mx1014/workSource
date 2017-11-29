@@ -35,6 +35,7 @@ import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.pmtask.ebei.EbeiPmTaskDTO;
 import com.everhomes.pmtask.ebei.EbeiPmtaskLogDTO;
 import com.everhomes.portal.PortalService;
+import com.everhomes.rest.blacklist.BlacklistErrorCode;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.ListBuildingCommand;
@@ -586,13 +587,23 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+
+		//检查多入口应用权限
+		if(checkAppPrivilege(namespaceId, cmd.getTaskCategoryId(), cmd.getOrganizationId(), EntityType.COMMUNITY.getCode(), cmd.getOwnerId())){
+
+		}else{
+			LOGGER.error("Permission is prohibited, userId={}, privilegeId = {}", cmd.getOwnerId(), 0L);
+			throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_FORBIDDEN_PERMISSIONS,
+					"Permission is prohibited");
+		}
+
 		//黑名单权限校验 by sfyan20161213
 		checkBlacklist(null, null);
 
 		cmd.setSourceType(PmTaskSourceType.APP.getCode());
 
 		User user = UserContext.current().getUser();
-		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		if (null == namespaceId) {
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
@@ -656,7 +667,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return response;
 	}
 
-	private void checkAppPrivilege(Integer namespaceId, Long taskCategoryId, Long orgId, String ownerType, Long ownerId) {
+	private boolean checkAppPrivilege(Integer namespaceId, Long taskCategoryId, Long orgId, String ownerType, Long ownerId) {
 		if (null != taskCategoryId) {
 			ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
 			listServiceModuleAppsCommand.setNamespaceId(namespaceId);
@@ -664,10 +675,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 			listServiceModuleAppsCommand.setCustomTag(String.valueOf(taskCategoryId));
 			ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
 			if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
-				userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), ownerType, ownerId,
+				return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
 						orgId, PrivilegeConstants.PMTASK_LIST, apps.getServiceModuleApps().get(0).getId(), null, ownerId);
 			}
 		}
+		return false;
 	}
 
 	@Override
@@ -1807,39 +1819,44 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		ListAuthorizationCommunityByUserResponse response = new ListAuthorizationCommunityByUserResponse();
 
-		ListUserRelatedProjectByModuleCommand listUserRelatedProjectByModuleCommand = new ListUserRelatedProjectByModuleCommand();
-		listUserRelatedProjectByModuleCommand.setOrganizationId(cmd.getOrganizationId());
-		listUserRelatedProjectByModuleCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
+//		ListUserRelatedProjectByModuleCommand listUserRelatedProjectByModuleCommand = new ListUserRelatedProjectByModuleCommand();
+//		listUserRelatedProjectByModuleCommand.setOrganizationId(cmd.getOrganizationId());
+//		listUserRelatedProjectByModuleCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
+//
+//		List<CommunityDTO> dtos = serviceModuleService.listUserRelatedCommunityByModuleId(listUserRelatedProjectByModuleCommand);
+//
+//		if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
+//
+//			if(0 == dtos.size()) {
+//				LOGGER.error("Not privilege", cmd);
+//				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CREATE_TASK_PRIVILEGE,
+//						"Not privilege");
+//			}
+//
+//			SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//			User user = UserContext.current().getUser();
+//			List<CommunityDTO> result = new ArrayList<>();
+//			dtos.forEach(r -> {
+//				if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), r.getId(), cmd.getOrganizationId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE)) {
+////				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), r.getId(), cmd.getOrganizationId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE);
+//					result.add(r);
+//				}
+//			});
+//			if(0 == result.size()) {
+//				LOGGER.error("Not privilege", cmd);
+//				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CREATE_TASK_PRIVILEGE,
+//						"Not privilege");
+//			}
+//			response.setCommunities(result);
+//
+//		}else{
+//			response.setCommunities(dtos);
+//		}
 
-		List<CommunityDTO> dtos = serviceModuleService.listUserRelatedCommunityByModuleId(listUserRelatedProjectByModuleCommand);
-
-		if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
-
-			if(0 == dtos.size()) {
-				LOGGER.error("Not privilege", cmd);
-				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CREATE_TASK_PRIVILEGE,
-						"Not privilege");
-			}
-
-			SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-			User user = UserContext.current().getUser();
-			List<CommunityDTO> result = new ArrayList<>();
-			dtos.forEach(r -> {
-				if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), r.getId(), cmd.getOrganizationId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE)) {
-//				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), r.getId(), cmd.getOrganizationId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE);
-					result.add(r);
-				}
-			});
-			if(0 == result.size()) {
-				LOGGER.error("Not privilege", cmd);
-				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CREATE_TASK_PRIVILEGE,
-						"Not privilege");
-			}
-			response.setCommunities(result);
-
-		}else{
-			response.setCommunities(dtos);
-		}
+		List<CommunityDTO> dtos = this.communityProvider.listCommunitiesByNamespaceId(UserContext.getCurrentNamespaceId()).stream().map(r->{
+			return ConvertHelper.convert(r, CommunityDTO.class);
+		}).collect(Collectors.toList());
+		response.setCommunities(dtos);
 		return response;
 	}
 

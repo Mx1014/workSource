@@ -125,10 +125,13 @@ public class WebMenuServiceImpl implements WebMenuService {
 			//获取人员和人员所有机构所赋予的应用模块权限(应用管理员)
 			List<Long> moduleIds_app = authorizationProvider.getAuthorizationAppModuleIdsByTarget(targets);
 
+			moduleIds.addAll(moduleIds_app);
+
 			if(null != moduleIds && moduleIds.size() > 0){
 				if (moduleIds_app != null && moduleIds_app.size() > 0){
 					moduleIds.addAll(moduleIds_app);
 				}
+
 				//获取这些模块对应的菜单
 				if(moduleIds.contains(0L)){
 					moduleIds = serviceModuleService.filterByScopes(UserContext.getCurrentNamespaceId(), null, null).stream().map(r ->{
