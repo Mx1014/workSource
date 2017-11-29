@@ -4520,6 +4520,16 @@ public class EquipmentServiceImpl implements EquipmentService {
 		return ConvertHelper.convert(equipmentInspectionPlan, EquipmentInspectionPlanDTO.class);
 	}
 
+	@Override
+	public void deleteEquipmentInspectionPlan(DeleteEquipmentPlanCommand cmd) {
+		//根据id删除巡检计划
+		equipmentProvider.deleteEquipmentInspectionPlanById(cmd.getId());
+		//刪除巡检计划巡检对象关联
+		equipmentProvider.deleteEquipmentInspectionPlanMap(cmd.getId());
+
+		//删除repeatSetting  不删也可
+	}
+
 	private void processEquipmentInspectionObjectsByPlanId(Long planId, EquipmentInspectionPlans equipmentInspectionPlan) {
 
 		List<EhEquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.getEquipmentInspectionPlanMap(planId);

@@ -158,4 +158,10 @@ public interface EquipmentProvider {
 	void createEquipmentPlanMaps(EquipmentInspectionPlans plan, EhEquipmentInspectionEquipmentPlanMap map);
 
 	List<EhEquipmentInspectionEquipmentPlanMap> getEquipmentInspectionPlanMap(Long planId);
+
+    void deleteEquipmentInspectionPlanById(Long planId);
+
+	void deleteEquipmentInspectionPlanMap(Long id);
+
+	List<EquipmentInspectionPlans> ListEquipmentInspectionPlans(ListingLocator locator, int pageSize);
 }

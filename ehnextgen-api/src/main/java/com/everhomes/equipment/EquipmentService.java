@@ -89,4 +89,6 @@ public interface EquipmentService {
 	EquipmentInspectionPlanDTO updateEquipmentInspectionPlan(UpdateEquipmentPlanCommand cmd);
 
 	EquipmentInspectionPlanDTO getEquipmmentInspectionPlan(DeleteEquipmentPlanCommand cmd);
+
+    void deleteEquipmentInspectionPlan(DeleteEquipmentPlanCommand cmd);
 }

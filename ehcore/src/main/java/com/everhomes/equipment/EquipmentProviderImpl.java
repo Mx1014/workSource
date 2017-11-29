@@ -1434,6 +1434,46 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
+    public void deleteEquipmentInspectionPlanById(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhEquipmentInspectionPlansDao dao = new EhEquipmentInspectionPlansDao(context.configuration());
+        dao.deleteById(id);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEquipmentInspectionPlans.class, id);
+    }
+
+    @Override
+    public void deleteEquipmentInspectionPlanMap(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhEquipmentInspectionPlansDao dao = new EhEquipmentInspectionPlansDao(context.configuration());
+        dao.deleteById(id);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEquipmentInspectionPlans.class, id);
+    }
+
+    @Override
+    public List<EquipmentInspectionPlans> ListEquipmentInspectionPlans(ListingLocator locator, int pageSize) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<EquipmentInspectionPlans> plans = new ArrayList<>();
+        SelectQuery<EhEquipmentInspectionPlansRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_PLANS);
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_PLANS.STATUS.ne(EquipmentPlanStatus.INACTIVE.getCode()));
+        if (locator.getAnchor() != null && locator.getAnchor() != 0) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_PLANS.ID.lt(locator.getAnchor()));
+        }
+        query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_PLANS.ID.desc());
+        query.addLimit(pageSize);
+        query.fetch().map((r) -> {
+            plans.add(ConvertHelper.convert(r, EquipmentInspectionPlans.class));
+            return null;
+        });
+        if (pageSize >= plans.size()) {
+            locator.setAnchor(plans.get(plans.size() - 1).getId());
+        } else {
+            locator.setAnchor(null);
+        }
+
+        return plans;
+    }
+
+    @Override
     public void updateEquipmentStandardMap(EquipmentStandardMap map) {
         assert (map.getId() != null);
 

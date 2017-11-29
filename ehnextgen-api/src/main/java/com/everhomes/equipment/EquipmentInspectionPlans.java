@@ -7,11 +7,7 @@ import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
-/**
- * Date: 2017/11/13 10 :00
- *
- * @author rui.jia
- */
+
 
 public class EquipmentInspectionPlans  extends EhEquipmentInspectionPlans{
 
