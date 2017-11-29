@@ -426,7 +426,10 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     @Override
     public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
         List<ShowBillForClientV2DTO> list = new ArrayList<>();
-        GetLeaseContractBillOnFiPropertyRes res = keXingBillService.getAllFiPropertyBills(cmd.getNamespaceId(),cmd.getOwnerId(),cmd.getTargetId(),cmd.getTargetType(),(byte)0);
+        SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
+        String beginMonth = yyyyMM.format(new Date());
+        String endMonth = beginMonth;
+        GetLeaseContractBillOnFiPropertyRes res = keXingBillService.getAllFiPropertyBills(cmd.getNamespaceId(),cmd.getOwnerId(),cmd.getTargetId(),cmd.getTargetType(),(byte)0,beginMonth,endMonth);
         //处理数据
         List<GetLeaseContractBillOnFiPropertyData> data = res.getData();
         Map<String,List<GetLeaseContractBillOnFiPropertyData>> tabs = new HashMap<>();
@@ -477,7 +480,9 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     @Override
     public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
         List<ListAllBillsForClientDTO> list = new ArrayList<>();
-        GetLeaseContractBillOnFiPropertyRes res = keXingBillService.getAllFiPropertyBills(cmd.getNamespaceId(),cmd.getOwnerId(),cmd.getTargetId(),cmd.getTargetType(),null);
+        SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
+        String endMonth = yyyyMM.format(new Date());
+        GetLeaseContractBillOnFiPropertyRes res = keXingBillService.getAllFiPropertyBills(cmd.getNamespaceId(),cmd.getOwnerId(),cmd.getTargetId(),cmd.getTargetType(),null,null,endMonth);
         List<GetLeaseContractBillOnFiPropertyData> data = res.getData();
         for(int i = 0; i < data.size(); i ++){
             GetLeaseContractBillOnFiPropertyData source = data.get(i);
