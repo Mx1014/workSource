@@ -3,6 +3,7 @@ package com.everhomes.contract;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.contract.*;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.UserContext;
@@ -16,6 +17,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/contract")
@@ -192,6 +194,18 @@ public class ContractController extends ControllerBase {
 	}
 
 	/**
+	 * <p>查看门牌的合同</p>
+	 * <b>URL: /contract/listApartmentContracts</b>
+	 */
+	@RequestMapping("listApartmentContracts")
+	@RestReturn(value = ContractDTO.class, collection = true)
+	public RestResponse listApartmentContracts(ListApartmentContractsCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		return new RestResponse(contractService.listApartmentContracts(cmd));
+	}
+
+	/**
 	 * <p>设置合同参数</p>
 	 * <b>URL: /contract/setContractParam</b>
 	 */
@@ -240,6 +254,21 @@ public class ContractController extends ControllerBase {
 		ContractService contractService = getContractService(namespaceId);
 		contractService.entryContract(cmd);
 		return new RestResponse();
+	}
+
+	/**
+	 * <b>URL: /contract/syncContractsFromThirdPart</b>
+	 * <p>从第三方同步合同</p>
+	 */
+	@RequestMapping("syncContractsFromThirdPart")
+	@RestReturn(value = String.class)
+	public RestResponse syncContractsFromThirdPart(@Valid SyncContractsFromThirdPartCommand cmd) {
+		ContractService contractService = getContractService(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
+		contractService.syncContractsFromThirdPart(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	private ContractService getContractService(Integer namespaceId) {

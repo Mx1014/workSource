@@ -205,7 +205,7 @@ public class ZJContractHandler implements ContractService{
 
     @Override
     public ContractDetailDTO updateContract(UpdateContractCommand cmd) {
-        LOGGER.error("Insufficient privilege, zjgkhandler createContract");
+        LOGGER.error("Insufficient privilege, zjgkhandler updateContract");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
@@ -259,7 +259,7 @@ public class ZJContractHandler implements ContractService{
 
     @Override
     public void deleteContract(DeleteContractCommand cmd) {
-        LOGGER.error("Insufficient privilege, zjgkhandler createContract");
+        LOGGER.error("Insufficient privilege, zjgkhandler deleteContract");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
@@ -456,29 +456,43 @@ public class ZJContractHandler implements ContractService{
     }
 
     @Override
+    public List<ContractDTO> listApartmentContracts(ListApartmentContractsCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler entryContract");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
     public void entryContract(EntryContractCommand cmd) {
-        LOGGER.error("Insufficient privilege, zjgkhandler createContract");
+        LOGGER.error("Insufficient privilege, zjgkhandler entryContract");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
 
     @Override
     public void reviewContract(ReviewContractCommand cmd) {
-        LOGGER.error("Insufficient privilege, zjgkhandler createContract");
+        LOGGER.error("Insufficient privilege, zjgkhandler reviewContract");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
 
     @Override
     public void setContractParam(SetContractParamCommand cmd) {
-        LOGGER.error("Insufficient privilege, zjgkhandler createContract");
+        LOGGER.error("Insufficient privilege, zjgkhandler setContractParam");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
 
     @Override
     public ContractParamDTO getContractParam(GetContractParamCommand cmd) {
-        LOGGER.error("Insufficient privilege, zjgkhandler createContract");
+        LOGGER.error("Insufficient privilege, zjgkhandler getContractParam");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public void syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler syncContractsFromThirdPart");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }

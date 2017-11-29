@@ -1517,7 +1517,16 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
                 .fetchInto(OrganizationOwnerBehavior.class);
     }
 
-    @Override
+	@Override
+	public List<OrganizationOwnerBehavior> listApartmentOrganizationOwnerBehaviors(Long addressId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select().from(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS)
+				.where(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS.ADDRESS_ID.eq(addressId))
+				.and(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS.STATUS.eq(OrganizationOwnerBehaviorStatus.NORMAL.getCode()))
+				.fetchInto(OrganizationOwnerBehavior.class);
+	}
+
+	@Override
     public long createOrganizationOwnerAddress(OrganizationOwnerAddress ownerAddress) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationOwnerAddress.class));
