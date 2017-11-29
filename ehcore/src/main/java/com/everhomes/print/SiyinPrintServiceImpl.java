@@ -478,7 +478,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	@Override
 	public GetPrintUnpaidOrderResponse getPrintUnpaidOrder(GetPrintUnpaidOrderCommand cmd) {
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-		return new GetPrintUnpaidOrderResponse(checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId()).getCode());
+		GetPrintUnpaidOrderResponse r = new GetPrintUnpaidOrderResponse();
+		r.setExistFlag(checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId(),r).getCode());
+		return r;
 	}
 
 	@Override
@@ -1105,6 +1107,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	 * @param ownerType 
 	 */
 	private PrintLogonStatusType checkUnpaidOrder(String ownerType, Long ownerId) {
+		return checkUnpaidOrder(ownerType, ownerId, null);
+	}
+	
+	private PrintLogonStatusType checkUnpaidOrder(String ownerType, Long ownerId, GetPrintUnpaidOrderResponse r) {
 		User user = UserContext.current().getUser();
 		
 		List<SiyinPrintOrder> list = siyinPrintOrderProvider.listSiyinPrintUnpaidOrderByUserId(user.getId(),ownerType,ownerId);
@@ -1112,6 +1118,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		if(list == null || list.size() == 0){
 			return PrintLogonStatusType.LOGON_SUCCESS;
 		}
+		if(r != null)
+			r.setOrderId(list.get(0).getId());
 		return PrintLogonStatusType.HAVE_UNPAID_ORDER;
 	}
 	
