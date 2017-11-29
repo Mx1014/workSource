@@ -613,10 +613,10 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		ListTaskCategoriesCommand cmd = new ListTaskCategoriesCommand();
 		cmd.setNamespaceId(namespaceId);
-		if (flow.getModuleType().equals(FlowModuleType.REPAIR_MODULE.getCode()))
+		//if (flow.getModuleType().equals(FlowModuleType.REPAIR_MODULE.getCode()))
 			cmd.setTaskCategoryId(PmTaskAppType.REPAIR_ID);
-		else
-			cmd.setTaskCategoryId(PmTaskAppType.SUGGESTION_ID);
+//		else
+//			cmd.setTaskCategoryId(PmTaskAppType.SUGGESTION_ID);
 		ListTaskCategoriesResponse response = pmTaskService.listTaskCategories(cmd);
 		dto.setOptions(new ArrayList<>());
 		response.getRequests().forEach(p->{
