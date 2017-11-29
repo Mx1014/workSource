@@ -10,6 +10,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.namespace.NamespaceResourceService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.order.PaymentAccount;
+import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.launchpad.ItemScope;
@@ -3607,6 +3608,15 @@ public class AssetProviderImpl implements AssetProvider {
             list.get(i).setBillGroupName(groupNames.get(groupIds.get(i)));
         }
         return list;
+    }
+
+    @Override
+    public PaymentServiceConfig findServiceConfig(Integer namespaceId) {
+        List<PaymentServiceConfig> configs = getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_SERVICE_CONFIGS)
+                .where(Tables.EH_PAYMENT_SERVICE_CONFIGS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_PAYMENT_SERVICE_CONFIGS.NAME.eq("物业缴费"))
+                .fetchInto(PaymentServiceConfig.class);
+        return configs.get(0);
     }
 
     private Map<Long,String> getGroupNames(ArrayList<Long> groupIds) {

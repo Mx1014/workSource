@@ -262,7 +262,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
     }
 
     @Override
-    public GetLeaseContractBillOnFiPropertyRes getAllFiPropertyBills(Integer namespaceId, Long ownerId, Long targetId, String targetType, Byte isPay) {
+    public GetLeaseContractBillOnFiPropertyRes getAllFiPropertyBills(Integer namespaceId, Long ownerId, Long targetId, String targetType, Byte isPay,String beginMonth,String endMonth) {
         GetLeaseContractBillOnFiPropertyRes res = new GetLeaseContractBillOnFiPropertyRes();
         List<GetLeaseContractBillOnFiPropertyData> data = new ArrayList<>();
         ContractService contractService = getContractService(0);
@@ -298,6 +298,8 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         params.put("projectId",projectId);
         params.put("pageSize","100");
         params.put("currentPage",String.valueOf(currentPage));
+        if(beginMonth!=null) params.put("beginMonth",beginMonth);
+        if(endMonth != null) params.put("endMonth",endMonth);
         if(isPayStr!=null){
             params.put("isPay",isPayStr);
         }

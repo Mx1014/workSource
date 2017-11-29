@@ -58,7 +58,7 @@ public interface PmKeXingBillService {
     /**
      * 根据用户获得所有fiProperty维度的账单 by Vladimir Putin
      */
-    GetLeaseContractBillOnFiPropertyRes getAllFiPropertyBills(Integer namespaceId, Long ownerId, Long targetId, String targetType,Byte isPay);
+    GetLeaseContractBillOnFiPropertyRes getAllFiPropertyBills(Integer namespaceId, Long ownerId, Long targetId, String targetType,Byte isPay,String beginMonth,String endMonth);
 
     /**
      *
