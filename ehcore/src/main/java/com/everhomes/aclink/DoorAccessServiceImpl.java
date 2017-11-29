@@ -350,7 +350,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(cmd.getOwnerType()));
                 if(cmd.getSearch() != null) {
                     Condition c = Tables.EH_DOOR_ACCESS.NAME.like(cmd.getSearch() + "%").
-                            or(Tables.EH_DOOR_ACCESS.HARDWARE_ID.like(cmd.getSearch() + "%"));
+                            or(Tables.EH_DOOR_ACCESS.HARDWARE_ID.like(cmd.getSearch() + "%")).
+                            or(Tables.EH_DOOR_ACCESS.DISPLAY_NAME.like((cmd.getSearch() + "%"))
+                                    );
                     query.addConditions(c);
                 }
                 
@@ -395,6 +397,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 if(user.getPhones() != null && user.getPhones().size() > 0) {
                     phone = user.getPhones().get(0);
                     }
+
                 dto.setCreatorPhone(phone);
                 }
             
@@ -406,8 +409,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 }
             }
             
-            if(da.getDisplayName() == null) {
-                da.setDisplayName(da.getName());
+            if(dto.getDisplayName() == null) {
+                dto.setDisplayName(dto.getName());
             }
             
             dtos.add(dto);
@@ -782,6 +785,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
         // 记录操作日志
         this.createDoorAuthLog(doorAuth);
+        
+        if(cmd.getRightOpen().equals((byte)0) && cmd.getRightRemote().equals((byte)0) && cmd.getRightVisitor().equals((byte)0)) {
+            //如果所有的权限都没有，则不发消息
+            return rlt;
+        }
 
         User tmpUser = new User();
         tmpUser.setNickName("admin");
@@ -2197,6 +2205,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         ListDoorAccessQRKeyResponse resp = new ListDoorAccessQRKeyResponse();
         List<DoorAccessQRKeyDTO> qrKeys = new ArrayList<DoorAccessQRKeyDTO>();
         resp.setKeys(qrKeys);
+        resp.setQrIntro(this.configProvider.getValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_INTRO, "http://www.zuolin.com"));
         
         for(DoorAuth auth : auths) {
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
@@ -2242,6 +2251,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             		}
             	}
             	resp.setQrTimeout(this.getQrTimeout()/1000l);
+            	resp.setQrIntro("http://xxxx.com");
                 doZuolinQRKey(generate, user, doorAccess, auth, qrKeys);
                 }
            
@@ -3527,7 +3537,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 
                 DoorAccess door = doorAccessProvider.getDoorAccessById(doorAuth.getDoorId());
                 
-                aclinkLog.setDoorName(door.getName());
+                if(door.getDisplayName() != null) {
+                    aclinkLog.setDoorName(door.getDisplayName());
+                } else {
+                    aclinkLog.setDoorName(door.getName());    
+                }
+                
                 
                 aclinkLog.setHardwareId(door.getHardwareId());
                 aclinkLog.setOwnerId(door.getOwnerId());
