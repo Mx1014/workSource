@@ -95,7 +95,7 @@ public class NewsPortalPublishHandler implements PortalPublishHandler{
 	    	}
     	}
     	if(instanceConfig!=null && instanceConfig.length()!=0){
-    		Matcher m = pattern.matcher(actionData);
+    		Matcher m = pattern.matcher(instanceConfig);
 	    	if(m.find()){
 	    		return m.group(1);
 	    	}
