@@ -3576,7 +3576,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
                 .and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
-                .fetchOne();
+                .fetchAny();
         if (r != null)
             return ConvertHelper.convert(r, Organization.class);
         return null;
