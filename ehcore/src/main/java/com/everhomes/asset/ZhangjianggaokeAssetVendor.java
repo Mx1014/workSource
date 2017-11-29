@@ -292,7 +292,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     list.add(dto);
                 }
                 if(dates.first()!=null && dates.last()!=null){
-                    result.setDatestr(dates.first().toString()+"~"+dates.last().toString());
+                    result.setDatestr(yyyyMMdd.format(dates.first())+"~"+yyyyMMdd.format(dates.last()));
                 }
                 result.setAmountOwed(amountOwed);
                 result.setAmountReceivable(amountReceivable);
