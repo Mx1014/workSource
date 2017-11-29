@@ -48,9 +48,6 @@ import java.util.List;
  *     <li>invalidUserName: 作废人</li>
  *     <li>invalidTime: 作废时间</li>
  *     <li>invalidReason: 作废原因</li>
- *     <li>denunciationUid: 退约经办人id</li>
- *     <li>denunciationUserName: 退约经办人</li>
- *     <li>denunciationTime: 退约时间</li>
  *     <li>denunciationReason: 退约原因</li>
  *     <li>apartments: 合同资产列表 参考{@link com.everhomes.rest.contract.BuildingApartmentDTO}</li>
  *     <li>chargingItems: 合同计价条款 参考{@link com.everhomes.rest.contract.ContractChargingItemDTO}</li>
@@ -61,6 +58,10 @@ import java.util.List;
  *     <li>layoutName: 房型名</li>
  *     <li>adjusts: 调租计划列表 参考{@link com.everhomes.rest.contract.ContractChargingChangeDTO}</li>
  *     <li>frees: 免租计划列表 参考{@link com.everhomes.rest.contract.ContractChargingChangeDTO}</li>
+ *     <li>denunciationUid: 退约人id</li>
+ *     <li>denunciationName: 退约人姓名</li>
+ *     <li>denunciationTime: 退约时间</li>
+ *     <li>buildingRename: 房间别名</li>
  * </ul>
  * Created by ying.xiong on 2017/8/3.
  */
@@ -107,10 +108,11 @@ public class ContractDetailDTO {
     private Timestamp decorateBeginDate;
     private Timestamp decorateEndDate;
     private String signedPurpose;
-    private Long denunciationUid;
-    private String denunciationUserName;
-    private Timestamp denunciationTime;
     private String denunciationReason;
+    private Long denunciationUid;
+    private String denunciationName;
+    private Timestamp denunciationTime;
+    private String buildingRename;
     private String remark;
     private Long createUid;
     private String creatorName;
@@ -389,12 +391,20 @@ public class ContractDetailDTO {
         this.denunciationUid = denunciationUid;
     }
 
-    public String getDenunciationUserName() {
-        return denunciationUserName;
+    public String getBuildingRename() {
+        return buildingRename;
     }
 
-    public void setDenunciationUserName(String denunciationUserName) {
-        this.denunciationUserName = denunciationUserName;
+    public void setBuildingRename(String buildingRename) {
+        this.buildingRename = buildingRename;
+    }
+
+    public String getDenunciationName() {
+        return denunciationName;
+    }
+
+    public void setDenunciationName(String denunciationName) {
+        this.denunciationName = denunciationName;
     }
 
     public BigDecimal getDeposit() {
