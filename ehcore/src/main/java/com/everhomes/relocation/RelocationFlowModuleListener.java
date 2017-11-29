@@ -7,9 +7,11 @@ import com.everhomes.flow.*;
 import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.rest.asset.CheckEnterpriseHasArrearageCommand;
 import com.everhomes.rest.asset.CheckEnterpriseHasArrearageResponse;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.qrcode.NewQRCodeCommand;
 import com.everhomes.rest.relocation.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.StringHelper;
@@ -29,7 +31,7 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
     @Autowired
     private RelocationProvider relocationProvider;
     @Autowired
-    private LocaleTemplateService localeTemplateService;
+    private QRCodeService qRCodeService;
     @Autowired
     private LocaleStringService localeStringService;
     @Autowired
@@ -107,6 +109,9 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
         RelocationRequestDTO dto = relocationService.getRelocationRequestDetail(cmd);
         if (null != dto) {
 
+//            NewQRCodeCommand qrCmd = new NewQRCodeCommand();
+//            qrCmd.set
+//            qRCodeService
             flowCase.setCustomObject(JSONObject.toJSONString(dto));
 
         } else {

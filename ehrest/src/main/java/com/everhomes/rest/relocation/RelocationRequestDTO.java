@@ -28,11 +28,20 @@ public class RelocationRequestDTO {
     private Timestamp createTime;
     private Long flowCaseId;
     private String flowCaseUrl;
+    private String qrCodeUrl;
     private Timestamp cancelTime;
     private Long cancelUid;
 
     @ItemType(RelocationRequestItemDTO.class)
     private List<RelocationRequestItemDTO> items;
+
+    public String getQrCodeUrl() {
+        return qrCodeUrl;
+    }
+
+    public void setQrCodeUrl(String qrCodeUrl) {
+        this.qrCodeUrl = qrCodeUrl;
+    }
 
     public String getFlowCaseUrl() {
         return flowCaseUrl;
