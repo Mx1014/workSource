@@ -148,10 +148,10 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private FieldService fieldService;
 
-    private void checkPrivilege() {
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        if(namespaceId == 999971) {
-            LOGGER.error("Insufficient privilege, zjgk modify data");
+    private void checkPrivilege(Integer ns) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId(ns);
+        if(namespaceId == 999971 || namespaceId == 999983) {
+            LOGGER.error("Insufficient privilege");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                     "Insufficient privilege");
         }
@@ -193,7 +193,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public EnterpriseCustomerDTO createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd) {
-        checkPrivilege();
+        checkPrivilege(cmd.getNamespaceId());
         checkEnterpriseCustomerNumberUnique(null, cmd.getNamespaceId(), cmd.getCustomerNumber(), cmd.getName());
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         customer.setNamespaceId((null != cmd.getNamespaceId() ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId()));
@@ -310,8 +310,8 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public EnterpriseCustomerDTO updateEnterpriseCustomer(UpdateEnterpriseCustomerCommand cmd) {
-        checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
+        checkPrivilege(customer.getNamespaceId());
         checkEnterpriseCustomerNumberUnique(customer.getId(), customer.getNamespaceId(), cmd.getCustomerNumber(), cmd.getName());
         EnterpriseCustomer updateCustomer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         updateCustomer.setNamespaceId(customer.getNamespaceId());
@@ -380,8 +380,8 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd) {
-        checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
+        checkPrivilege(customer.getNamespaceId());
         List<Contract> contracts = contractProvider.listContractByCustomerId(customer.getCommunityId(),customer.getId(),CustomerType.ENTERPRISE.getCode());
         for(Contract contract : contracts) {
             if(contract.getStatus() == ContractStatus.ACTIVE.getCode() || contract.getStatus() == ContractStatus.WAITING_FOR_LAUNCH.getCode()
@@ -414,7 +414,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public ImportFileTaskDTO importEnterpriseCustomer(ImportEnterpriseCustomerDataCommand cmd, MultipartFile mfile, Long userId) {
-        checkPrivilege();
+        checkPrivilege(cmd.getNamespaceId());
         ImportFileTask task = new ImportFileTask();
         try {
             //解析excel

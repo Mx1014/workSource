@@ -1134,7 +1134,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         User user = UserContext.current().getUser();
 
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-        if(namespaceId == 999971) {
+        if(namespaceId == 999971 || namespaceId == 999983) {
             LOGGER.error("Insufficient privilege, createEnterprise");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                     "Insufficient privilege");
@@ -1246,7 +1246,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     private void createEnterpriseCustomer(Organization organization, String logo, OrganizationDetail enterprise, Long communityId) {
-        if(organization.getNamespaceId() == 999971) {
+        if(organization.getNamespaceId() == 999971 || organization.getNamespaceId() == 999983) {
             LOGGER.error("Insufficient privilege, createEnterpriseCustomer");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                     "Insufficient privilege");
@@ -1355,7 +1355,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public void updateEnterprise(UpdateEnterpriseCommand cmd, boolean updateAttachmentAndAddress) {
-        if(cmd.getNamespaceId() == 999971) {
+        if(cmd.getNamespaceId() == 999971 || cmd.getNamespaceId() == 999983) {
             LOGGER.error("Insufficient privilege, createEnterprise");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                     "Insufficient privilege");
@@ -1470,7 +1470,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public void deleteEnterpriseById(DeleteOrganizationIdCommand cmd) {
         Organization organization = checkOrganization(cmd.getId());
-        if(organization.getNamespaceId() == 999971) {
+        if(organization.getNamespaceId() == 999971 || organization.getNamespaceId() == 999983) {
             LOGGER.error("Insufficient privilege, createEnterprise");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                     "Insufficient privilege");
@@ -7484,7 +7484,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<ImportFileResultLog<ImportEnterpriseDataDTO>> errorDataLogs = new ArrayList<>();
 
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-        if(namespaceId == 999971) {
+        if(namespaceId == 999971 || namespaceId == 999983) {
             LOGGER.error("Insufficient privilege, createEnterprise");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                     "Insufficient privilege");
