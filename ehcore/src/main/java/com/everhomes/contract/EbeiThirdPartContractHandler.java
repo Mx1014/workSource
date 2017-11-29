@@ -282,6 +282,14 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         DeleteContractCommand command = new DeleteContractCommand();
         command.setId(contract.getId());
         getContractService(contract.getNamespaceId()).deleteContract(command);
+        if(contract.getCustomerId() != null) {
+            EnterpriseCustomer customer = customerProvider.findById(contract.getCustomerId());
+            if(customer != null) {
+                customer.setContactAddress("");
+                customerProvider.updateEnterpriseCustomer(customer);
+            }
+        }
+
     }
     private ContractService getContractService(Integer namespaceId) {
         String handler = configurationProvider.getValue(namespaceId, "contractService", "");
@@ -324,6 +332,8 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         contract.setCustomerType(CustomerType.ENTERPRISE.getCode());
         EnterpriseCustomer customer = customerProvider.findByNamespaceToken(NamespaceCustomerType.EBEI.getCode(), ebeiContract.getOwnerId());
         if(customer != null) {
+            customer.setContactAddress(ebeiContract.getBuildingRename());
+            customerProvider.updateEnterpriseCustomer(customer);
             contract.setCustomerId(customer.getId());
         }
         contract.setCreateUid(UserContext.currentUserId());
@@ -331,6 +341,10 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         contractProvider.createContract(contract);
         dealContractApartments(contract, ebeiContract.getHouseInfoList());
         contractSearcher.feedDoc(contract);
+
+
+
+
     }
 
     private void dealContractApartments(Contract contract, List<EbeiContractRoomInfo> ebeiContractRoomInfos) {
@@ -432,6 +446,8 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         contract.setCustomerType(CustomerType.ENTERPRISE.getCode());
         EnterpriseCustomer customer = customerProvider.findByNamespaceToken(NamespaceCustomerType.EBEI.getCode(), ebeiContract.getOwnerId());
         if(customer != null) {
+            customer.setContactAddress(ebeiContract.getBuildingRename());
+            customerProvider.updateEnterpriseCustomer(customer);
             contract.setCustomerId(customer.getId());
         }
         contractProvider.updateContract(contract);
