@@ -79,7 +79,7 @@ public class HotTagController extends ControllerBase {
      */
     @RequestMapping("resetHotTag")
     @RestReturn(value=String.class)
-    public RestResponse resetHotTag(resetHotTagCommand cmd) {
+    public RestResponse resetHotTag(ResetHotTagCommand cmd) {
 
         hotTagService.resetHotTag(cmd);
 

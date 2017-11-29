@@ -9,13 +9,32 @@ CREATE TABLE `eh_community_organization_detail_display` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE `eh_communities` ADD COLUMN `community_number` VARCHAR(64) COMMENT 'ÏîÄ¿±àºÅ';
-ALTER TABLE `eh_buildings` ADD COLUMN `building_number` VARCHAR(64) COMMENT 'Â¥¶°±àºÅ';
+ALTER TABLE `eh_communities` ADD COLUMN `community_number` VARCHAR(64) COMMENT 'ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½';
+ALTER TABLE `eh_buildings` ADD COLUMN `building_number` VARCHAR(64) COMMENT 'Â¥ï¿½ï¿½ï¿½ï¿½ï¿½';
 
 
-ALTER TABLE `eh_enterprise_customers` ADD COLUMN `version` VARCHAR(32) COMMENT '°æ±¾ºÅ';
-ALTER TABLE `eh_contracts` ADD COLUMN `version` VARCHAR(32) COMMENT '°æ±¾ºÅ';
-ALTER TABLE `eh_contracts` ADD COLUMN `building_rename` VARCHAR(64) COMMENT '·¿¼ä±ğÃû';
+ALTER TABLE `eh_enterprise_customers` ADD COLUMN `version` VARCHAR(32) COMMENT 'ï¿½æ±¾ï¿½ï¿½';
+ALTER TABLE `eh_contracts` ADD COLUMN `version` VARCHAR(32) COMMENT 'ï¿½æ±¾ï¿½ï¿½';
+ALTER TABLE `eh_contracts` ADD COLUMN `building_rename` VARCHAR(64) COMMENT 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½';
 
 ALTER TABLE `eh_contracts` ADD COLUMN `namespace_contract_type` VARCHAR(128);
 ALTER TABLE `eh_contracts` ADD COLUMN `namespace_contract_token` VARCHAR(128);
+
+
+-- merge from forum-2.6 start 201711291416
+-- è®ºå›å‘å¸ƒç±»å‹  add by yanjun 20171122
+CREATE TABLE `eh_forum_service_types` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `module_type` tinyint(4) DEFAULT NULL COMMENT 'module type, 1-forum,2-activity......',
+  `category_id` bigint(20) DEFAULT NULL,
+  `service_type` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `sort_num` int(11) NOT NULL DEFAULT '0',
+  `create_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- çƒ­é—¨æ ‡ç­¾ï¼Œå¢åŠ æ¨¡å—ç±»å‹ï¼Œ1-è®ºå›ã€2-æ´»åŠ¨ã€3-å…¬å‘Š...ç­‰ç­‰  add by yanjun 20171123
+ALTER TABLE `eh_hot_tags` ADD COLUMN `module_type`  tinyint(4) DEFAULT NULL COMMENT 'module type, 1-forum 2-activity...........';
+-- merge from forum-2.6 end 201711291416
