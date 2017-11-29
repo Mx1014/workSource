@@ -73,6 +73,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	private PmTaskService pmTaskService;
 	@Autowired
 	private GeneralFormValProvider generalFormValProvider;
+	@Autowired
+	FlowEventLogProvider flowEventLogProvider;
 
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
 
@@ -177,6 +179,28 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				//要求传的是转发项目经理填写的内容和图片 add by xiongying20170922
 				FlowSubjectDTO subjectDTO = flowService.getSubectById(ctx.getCurrentEvent().getSubject().getId());
 				pmTaskCommonService.handoverTaskToTrd(task, subjectDTO.getContent(), subjectDTO.getImages());
+			}else if("MOTIFYFEE".equals(nodeType)){
+				List<GeneralFormVal> vals = generalFormValProvider.queryGeneralFormVals(EntityType.PM_TASK.getCode(),flowCase.getReferId());
+				//没产生费用
+				if (vals==null || vals.size()==0){
+					FlowEventLog log = new FlowEventLog();
+					log.setId(flowEventLogProvider.getNextId());
+					log.setFlowMainId(flowCase.getFlowMainId());
+					log.setFlowVersion(flowCase.getFlowVersion());
+					log.setNamespaceId(flowCase.getNamespaceId());
+					log.setFlowNodeId(flowCase.getCurrentNodeId());
+					log.setFlowCaseId(flowCase.getId());
+					log.setStepCount(flowCase.getStepCount());
+					log.setSubjectId(0L);
+					log.setParentId(0L);
+					log.setLogType(FlowLogType.NODE_TRACKER.getCode());
+					log.setButtonFiredStep(FlowStepType.NO_STEP.getCode());
+					log.setTrackerApplier(1L);
+					log.setTrackerProcessor(1L);
+					String content = "本次服务没有产生维修费";
+					log.setLogContent(content);
+					ctx.getLogs().add(log);
+				}
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
 
@@ -184,8 +208,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			pmTaskProvider.updateTask(task);
 		}
 		//elasticsearch更新
-		pmTaskSearch.deleteById(task.getId());
-		pmTaskSearch.feedDoc(task);
+		//pmTaskSearch.deleteById(task.getId());
+		//pmTaskSearch.feedDoc(task);
 
 	}
 
@@ -443,8 +467,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 //				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
-				pmTaskProvider.updateTask(task);
-				pmTaskSearch.feedDoc(task);
+			//	pmTaskProvider.updateTask(task);
+			//	pmTaskSearch.feedDoc(task);
 			}
 		}else if(FlowStepType.NO_STEP.getCode().equals(stepType)) {
 			if ("MOTIFYFEE".equals(nodeType)) {
@@ -577,6 +601,10 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		ListTaskCategoriesCommand cmd = new ListTaskCategoriesCommand();
 		cmd.setNamespaceId(namespaceId);
+		//if (flow.getModuleType().equals(FlowModuleType.REPAIR_MODULE.getCode()))
+			cmd.setTaskCategoryId(PmTaskAppType.REPAIR_ID);
+//		else
+//			cmd.setTaskCategoryId(PmTaskAppType.SUGGESTION_ID);
 		ListTaskCategoriesResponse response = pmTaskService.listTaskCategories(cmd);
 		dto.setOptions(new ArrayList<>());
 		response.getRequests().forEach(p->{
