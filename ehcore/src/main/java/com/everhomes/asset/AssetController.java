@@ -1144,4 +1144,18 @@ public class AssetController extends ControllerBase {
         return restResponse;
     }
 
+    /**
+     * <b>URL: /asset/sc</b>
+     * <p></p>
+     */
+    @RequestMapping("sc")
+    @RestReturn(value = String.class)
+    public RestResponse syncCustomer(Integer namespaceId){
+        RestResponse restResponse = new RestResponse();
+        assetService.syncCustomer(namespaceId);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
 }

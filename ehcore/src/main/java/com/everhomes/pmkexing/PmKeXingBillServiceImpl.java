@@ -21,10 +21,7 @@ import com.everhomes.organization.*;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.contract.ContractDTO;
-import com.everhomes.rest.contract.ListEnterpriseCustomerContractsCommand;
-import com.everhomes.rest.contract.ListIndividualCustomerContractsCommand;
-import com.everhomes.rest.contract.NamespaceContractType;
+import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -268,19 +265,18 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         ContractService contractService = getContractService(0);
         //获得所有合同
         List<ContractDTO> contracts = new ArrayList<>();
+        ListCustomerContractsCommand cmd = new ListCustomerContractsCommand();
         if(targetType.equals(AssetPaymentStrings.EH_USER)){
-            ListIndividualCustomerContractsCommand cmd = new ListIndividualCustomerContractsCommand();
-            cmd.setIndividualCustomerId(UserContext.currentUserId());
-            cmd.setCommunityId(ownerId);
-            cmd.setNamespaceId(namespaceId);
-            contracts = contractService.listIndividualCustomerContracts(cmd);
+            cmd.setTargetId(UserContext.currentUserId());
+            cmd.setTargetType(CustomerType.INDIVIDUAL.getCode());
         }else if(targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
-            ListEnterpriseCustomerContractsCommand cmd = new ListEnterpriseCustomerContractsCommand();
-            cmd.setEnterpriseCustomerId(targetId);
-            cmd.setCommunityId(ownerId);
-            cmd.setNamespaceId(namespaceId);
-            contracts = contractService.listEnterpriseCustomerContracts(cmd);
+            cmd.setTargetId(targetId);
+            cmd.setTargetType(CustomerType.ENTERPRISE.getCode());
         }
+        cmd.setNamespaceId(namespaceId);
+        cmd.setCommunityId(ownerId);
+
+        contracts = contractService.listCustomerContracts(cmd);
 //        Contract experimentSample = new Contract();
 //        experimentSample.setNamespaceContractType("ebei");
 //        experimentSample.setNamespaceContractToken("002285da-4796-495d-aaa3-742bb2ae5b39");

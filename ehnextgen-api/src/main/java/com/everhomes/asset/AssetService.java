@@ -158,4 +158,6 @@ public interface AssetService {
     List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd);
 
     FunctionDisableListDto functionDisableList(FunctionDisableListCommand cmd);
+
+    void syncCustomer(Integer namespaceId);
 }
