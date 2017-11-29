@@ -93,4 +93,12 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
     public String processInstanceConfig(String instanceConfig) {
         return instanceConfig;
     }
+
+    @Override
+    public String getCustomTag(Integer namespaceId, Long moudleId, String actionData) {
+        RentalActionData actionDataObject = (RentalActionData)StringHelper.fromJsonString(actionData,RentalActionData.class);
+        if (actionDataObject!=null && actionDataObject.getResourceTypeId()!=null)
+            return String.valueOf(actionDataObject.getResourceTypeId());
+        return null;
+    }
 }
