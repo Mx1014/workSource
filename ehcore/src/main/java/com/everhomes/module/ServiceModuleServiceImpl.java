@@ -835,12 +835,12 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 reflectionApp = this.serviceModuleProvider.findReflectionServiceModuleAppByParam(namespaceId, serviceModule.getId(), null);
                 break;
             case YES:
-                reflectionApp = this.serviceModuleProvider.findReflectionServiceModuleAppByParam(namespaceId, serviceModule.getId(), instanceConfig);
                 String handlerPrefix = PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX;
                 PortalPublishHandler handler = PlatformContext.getComponent(handlerPrefix + serviceModule.getId());
                 if(null != handler){
-                    customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), actionData);
+                    customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), actionData, instanceConfig);
                 }
+                reflectionApp = this.serviceModuleProvider.findReflectionServiceModuleAppByParam(namespaceId, serviceModule.getId(), customTag);
                 break;
         }
         if (reflectionApp != null){//更新为有效

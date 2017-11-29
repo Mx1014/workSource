@@ -2,12 +2,8 @@ package com.everhomes.portal;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.pmtask.PmTaskProvider;
-import com.everhomes.rentalv2.RentalResourceType;
-import com.everhomes.rentalv2.Rentalv2Provider;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.portal.PmTaskInstanceConfig;
-import com.everhomes.rest.portal.RentalInstanceConfig;
-import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
 import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +79,7 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
     }
 
     @Override
-    public String getCustomTag(Integer namespaceId, Long moudleId, String actionData){
+    public String getCustomTag(Integer namespaceId, Long moudleId, String actionData, String instanceConfig){
 
         //{"url":"zl://propertyrepair/create?type=user&taskCategoryId=203531&displayName=物业报修"}
 

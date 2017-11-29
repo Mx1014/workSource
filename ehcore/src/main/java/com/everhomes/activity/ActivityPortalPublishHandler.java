@@ -306,7 +306,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	}
 
 	@Override
-	public String getCustomTag(Integer namespaceId, Long moudleId, String actionData) {
+	public String getCustomTag(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
 
 		ActivityActionData actionDataObj = (ActivityActionData)StringHelper.fromJsonString(actionData, ActivityActionData.class);
 
