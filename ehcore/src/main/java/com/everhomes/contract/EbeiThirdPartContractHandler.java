@@ -383,8 +383,14 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
 
                     if(address != null) {
                         CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(address.getId());
-                        addressMapping.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
-                        propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+                        if(addressMapping != null) {
+                            addressMapping.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
+                            propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+                        } else {
+                            address.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
+                            addressProvider.updateAddress(address);
+                        }
+
                     }
 
                 } else {
