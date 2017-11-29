@@ -4,15 +4,13 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationJobPosition;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.energy.EnergyMeterTaskDTO;
-import com.everhomes.rest.energy.EnergyPlanGroupDTO;
-import com.everhomes.rest.energy.SearchTasksByEnergyPlanCommand;
-import com.everhomes.rest.energy.SearchTasksByEnergyPlanResponse;
+import com.everhomes.rest.energy.*;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EnergyMeterTaskSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -163,7 +161,16 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
         }
 
         if(cmd.getStatus() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
+            //已抄未完成
+            if(cmd.getStatus() == 3) {
+                fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", EnergyTaskStatus.NON_READ.getCode()));
+                RangeFilterBuilder rf = new RangeFilterBuilder("endTime");
+                rf.lt(DateHelper.currentGMTTime().getTime());
+                fb = FilterBuilders.andFilter(fb, rf);
+            } else {
+                fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
+            }
+
         }
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
