@@ -6888,8 +6888,12 @@ public class PunchServiceImpl implements PunchService {
 
 		if (punchGroupDTO.getRuleType().equals(PunchRuleType.PAIBAN.getCode()) && punchGroupDTO.getSchedulings() != null) {
 			List<PunchScheduling> schedulings = new ArrayList<>();
+            Long monthLong = 0L;
 			for (PunchSchedulingDTO monthScheduling : punchGroupDTO.getSchedulings()) {
-				List<PunchScheduling> psList = saveMonthSchedulings(monthScheduling, pr, ptrs);
+                if(monthLong.compareTo(monthScheduling.getMonth()) <0 ) {
+                    monthLong = monthScheduling.getMonth();
+                }
+                List<PunchScheduling> psList = saveMonthSchedulings(monthScheduling, pr, ptrs);
 				if (null != psList && psList.size() > 0) {
 					schedulings.addAll(psList);
 				}
@@ -6911,6 +6915,8 @@ public class PunchServiceImpl implements PunchService {
 //				LOGGER.debug("for schedulings time "+  t2 + "cost: " +(t2-t1));
 
 				punchSchedulingProvider.batchCreatePunchSchedulings(ehPsList);
+                //把设置的最大月份之后的排班都置为pr的status
+                punchSchedulingProvider.updatePunchSchedulingsStatusByDate(pr.getStatus(), pr.getId(), new java.sql.Date(monthLong));
 //				Long t3 = System.currentTimeMillis();
 
 //				LOGGER.debug("batch save schedulings time "+  t3 + "cost: " +(t3-t2));
