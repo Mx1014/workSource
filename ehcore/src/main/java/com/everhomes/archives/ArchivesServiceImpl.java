@@ -20,7 +20,6 @@ import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.sms.DateUtil;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -2392,15 +2391,16 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     //    @Scheduled(cron = "0 0 * * * ?")
     public void executeArchivesNotification() {
+        //  1.读取当天 week
         Calendar c = Calendar.getInstance();
         int weekDay = c.get(Calendar.DAY_OF_WEEK);
         List<ArchivesNotifications> results = archivesProvider.listArchivesNotificationsByWeek(weekDay);
         if (results != null && results.size() > 0) {
-            //  按照时间归类，来启动对应时间点的定时器
+        //  2.按照时间归类，来启动对应时间点的定时器
             Map<Integer, List<ArchivesNotifications>> notifyMap = results.stream().collect(Collectors.groupingBy
                     (ArchivesNotifications::getNotifyHour));
             for (Integer key : notifyMap.keySet()) {
-                archivesConfigurationService.sendingMail(key, notifyMap.get(key));
+                archivesConfigurationService.sendingMailJob(key, notifyMap.get(key));
             }
         }
     }

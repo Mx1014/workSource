@@ -6,6 +6,9 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.base.RestClient;
 import com.everhomes.pay.order.*;
@@ -13,14 +16,25 @@ import com.everhomes.pay.rest.ApiConstants;
 import com.everhomes.pay.user.BindPhoneCommand;
 import com.everhomes.pay.user.BusinessUserType;
 import com.everhomes.pay.user.RegisterBusinessUserCommand;
+import com.everhomes.query.QueryBuilder;
+import com.everhomes.query.QueryCondition;
+import com.everhomes.rest.MapListRestResponse;
 import com.everhomes.rest.StringRestResponse;
+import com.everhomes.rest.group.GroupServiceErrorCode;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.order.OrderPaymentStatus;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
+import com.everhomes.rest.pay.controller.QueryBalanceRestResponse;
 import com.everhomes.rest.pay.controller.RegisterBusinessUserRestResponse;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
@@ -37,6 +51,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +81,15 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
     private ContentServerService contentServerService;
 
     private RestClient restClient = null;
+    
+    @Autowired
+    private UserProvider userProvider;
+    
+    @Autowired
+    private OrganizationProvider organizationProvider;
+    
+    @Autowired
+    private ConfigurationProvider configProvider;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -453,6 +477,8 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         paymentUser.setOwnerId(ownerId);
         paymentUser.setPaymentUserType(businessUserType);
         paymentUser.setPaymentUserId(paymentUserId);
+        // 买方会员默认就是正常状态，不需要审核 by lqs 20171124
+        paymentUser.setStatus(PaymentUserStatus.ACTIVE.getCode());
         payProvider.createPaymentUser(paymentUser);
         return paymentUser;
     }
@@ -583,7 +609,19 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         createOrderCmd.setPaymentType(cmd.getPaymentType());
         createOrderCmd.setValidationType(ValidationType.NO_VERIFY.getCode());
         createOrderCmd.setPaymentParams(flattenMap);
-        createOrderCmd.setSettlementType(null);
+        
+        // 在eh_payment_users中加上结算类型，结算类型以收款方为准，收款方没有配置时则使用默认值 by lqs 20171124
+        //createOrderCmd.setSettlementType(null);
+        PaymentUser payeetUser = payProvider.findPaymentUserByOwner(serviceConfig.getOwnerType(), serviceConfig.getOwnerId());
+        SettlementType settlementType = null;
+        if(payeetUser != null) {
+            settlementType = SettlementType.fromCode(payeetUser.getSettlementType());
+        }
+        if(settlementType == null) {
+            settlementType = SettlementType.WEEKLY;
+        }
+        createOrderCmd.setSettlementType(settlementType.getCode());
+        
         createOrderCmd.setSplitRuleId(serviceConfig.getPaymentSplitRuleId());
         if(cmd.getExpiration() != null) {
             createOrderCmd.setExpirationMillis(cmd.getExpiration());
@@ -833,5 +871,339 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         cmd.setBizOrderNum(String.valueOf(orderRecordId));
 
         return cmd;
+    }
+    
+    @Override
+//    public PaymentBalanceDTO getPaymentSettlementAmounts(String ownerType, Long ownerId)  {
+//        PaymentUser paymentUser = payProvider.findPaymentUserByOwner(ownerType, ownerId);
+//        if(paymentUser == null) {
+//            LOGGER.error("Payment user not found, ownerType=%s, ownerId=%s", ownerType, ownerId);
+//            return null;
+//        }
+//
+//        Long notSettledAmount = getPaymentAmountBySettlement(paymentUser.getPaymentUserId(), SettlementStatus.NOT_SETTLED.getCode());
+//        Long settledAmount = getPaymentAmountBySettlement(paymentUser.getPaymentUserId(), SettlementStatus.SETTLED.getCode());
+//        Long withdrawAmount = getPaymentAmountByWithdraw(paymentUser.getPaymentUserId());
+//        Long refundAmount = getPaymentAmountByRefund(paymentUser.getPaymentUserId());
+//        if(LOGGER.isDebugEnabled()) {
+//            LOGGER.debug("Payment amounts info, notSettledAmount=%s, settledAmount=%s, withdrawAmount=%s, refundAmount=%s",
+//                    notSettledAmount, settledAmount, withdrawAmount, refundAmount);
+//        }
+//
+//        PaymentBalanceDTO result = new PaymentBalanceDTO();
+//        result.setSettlementAmount(notSettledAmount);
+//        result.setWithdrawableAmount(settledAmount - withdrawAmount - refundAmount);
+//                
+//        return result;
+//    }
+    public PaymentBalanceDTO getPaymentBalance(String ownerType, Long ownerId)  {
+        PaymentUser paymentUser = payProvider.findPaymentUserByOwner(ownerType, ownerId);
+        if(paymentUser == null) {
+            LOGGER.error("Payment user not found, ownerType=%s, ownerId=%s", ownerType, ownerId);
+            return null;
+        }
+        
+        QueryBalanceCommand cmd = new QueryBalanceCommand();
+        cmd.setUserId(paymentUser.getPaymentUserId());
+        QueryBalanceRestResponse queryBalanceResp = restClient.restCall("POST", ApiConstants.ORDER_QUERYBALANCE_URL, cmd, QueryBalanceRestResponse.class);
+
+        PaymentBalanceDTO result = new PaymentBalanceDTO();
+        if(queryBalanceResp.getResponse() != null) {
+            result.setAllAmount(queryBalanceResp.getResponse().getAllAmount());
+            result.setFrozenAmount(queryBalanceResp.getResponse().getFrozenAmount());
+            result.setUnsettledPaymentAmount(queryBalanceResp.getResponse().getUnsettledPaymentAmount());
+            result.setUnsettledRechargeAmount(queryBalanceResp.getResponse().getUnsettledRechargeAmount());
+            result.setUnsettledWithdrawAmount(queryBalanceResp.getResponse().getUnsettledWithdrawAmount());
+            if(result.getAllAmount() != null && result.getFrozenAmount() != null && result.getUnsettledPaymentAmount() != null) {
+                result.setWithdrawableAmount(result.getAllAmount() - result.getFrozenAmount() - result.getUnsettledPaymentAmount());
+            }
+        }
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Payment balance info, ownerType={}, paymentUserId={}, balance={}", ownerType, ownerId, paymentUser.getPaymentUserId(), result);
+        }
+        
+        return result;
+    }
+    
+    @Override
+    public Long getPaymentAmountBySettlement(Long paymentUserId, Integer settlementStatus) {
+        QueryOrderPaymentsCommand payCmd = new QueryOrderPaymentsCommand();
+        QueryBuilder queryBuilder = payCmd.builder();
+        queryBuilder.select(PaymentAttributes.AMOUNT.sum("amount"));
+
+        // ORDERPAYMENT: 通过订单收到的款
+        // FEECHARGE: 交易手续费（可正可负）
+        // REFUND: 退款（可正可负，即含别人退给自己的，也含退给别人的）
+        // REFUND_FEECHARGE: 退款费用（可正可负）
+        QueryCondition condition = PaymentAttributes.TRASACTION_TYPE.eq(TransactionType.ORDERPAYMENT.getCode())
+                .or(PaymentAttributes.TRASACTION_TYPE.eq(TransactionType.FEECHARGE.getCode()))
+                .or(PaymentAttributes.TRASACTION_TYPE.eq(TransactionType.REFUND.getCode()))
+                .or(PaymentAttributes.TRASACTION_TYPE.eq(TransactionType.REFUND_FEECHARGE.getCode()));
+
+        condition = condition.and(PaymentAttributes.USER_ID.eq(paymentUserId))
+                .and(PaymentAttributes.SETTLEMENT_STATUS.eq(settlementStatus))
+                .and(PaymentAttributes.PAYMENT_STATUS.eq(com.everhomes.pay.order.OrderPaymentStatus.SUCCESS.getCode()));
+
+        queryBuilder.where(condition);
+
+        MapListRestResponse response = (MapListRestResponse) restClient.restCall(
+                "POST",
+                ApiConstants.ORDER_QUERYORDERPAYMENTS_URL,
+                payCmd.done(),
+                MapListRestResponse.class);
+
+        if(response.getResponse() == null || response.getResponse().isEmpty()  || response.getResponse().get(0).get("amount") == null) {
+            return 0L;
+        } else {
+            return Long.valueOf(response.getResponse().get(0).get("amount"));
+        }
+    }
+    
+    @Override
+    public Long getPaymentAmountByWithdraw(Long paymentUserId) {
+        QueryOrderPaymentsCommand payCmd = new QueryOrderPaymentsCommand();
+        QueryBuilder queryBuilder = payCmd.builder();
+        queryBuilder.select(PaymentAttributes.AMOUNT.sum("amount"));
+
+        // WITHDRAW: 已提现
+        QueryCondition condition = PaymentAttributes.TRASACTION_TYPE.eq(TransactionType.WITHDRAW.getCode())
+                .and(PaymentAttributes.USER_ID.eq(paymentUserId))
+                .and(PaymentAttributes.PAYMENT_STATUS.eq(com.everhomes.pay.order.OrderPaymentStatus.SUCCESS.getCode())
+                        .or(PaymentAttributes.PAYMENT_STATUS.eq(com.everhomes.pay.order.OrderPaymentStatus.PENDING.getCode())));
+        queryBuilder.where(condition);
+
+        MapListRestResponse response = (MapListRestResponse) restClient.restCall(
+                "POST",
+                ApiConstants.ORDER_QUERYORDERPAYMENTS_URL,
+                payCmd.done(),
+                MapListRestResponse.class);
+
+        if(response.getResponse() == null || response.getResponse().isEmpty() || response.getResponse().get(0).get("amount") == null) {
+            return 0L;
+        } else {
+            return -Long.valueOf(response.getResponse().get(0).get("amount"));
+        }
+    }
+    
+    @Override
+    public Long getPaymentAmountByRefund(Long paymentUserId) {
+        QueryOrderPaymentsCommand payCmd = new QueryOrderPaymentsCommand();
+        QueryBuilder queryBuilder = payCmd.builder();
+        queryBuilder.select(PaymentAttributes.AMOUNT.sum("amount"));
+
+        // REFUND: 已退款
+        // REFUND_FEECHARGE: 退款手续费
+        QueryCondition trasactionTypeCondition = PaymentAttributes.TRASACTION_TYPE.eq(TransactionType.REFUND.getCode())
+                .or(PaymentAttributes.TRASACTION_TYPE.eq(TransactionType.REFUND_FEECHARGE.getCode()));
+        
+        QueryCondition condition = PaymentAttributes.USER_ID.eq(paymentUserId)
+                .and(trasactionTypeCondition)
+                .and(PaymentAttributes.PAYMENT_STATUS.eq(com.everhomes.pay.order.OrderPaymentStatus.SUCCESS.getCode()));
+        queryBuilder.where(condition);
+
+        MapListRestResponse response = (MapListRestResponse) restClient.restCall(
+                "POST",
+                ApiConstants.ORDER_QUERYORDERPAYMENTS_URL,
+                payCmd.done(),
+                MapListRestResponse.class);
+
+        if(response.getResponse() == null || response.getResponse().isEmpty() || response.getResponse().get(0).get("amount") == null) {
+            return 0L;
+        } else {
+            return -Long.valueOf(response.getResponse().get(0).get("amount"));
+        }
+    }
+    
+    public void withdraw(PaymentWithdrawCommand cmd) {
+        String ownerType = cmd.getOwnerType();
+        Long ownerId = cmd.getOwnerId();
+        Long amount = cmd.getAmount();
+        User operator = UserContext.current().getUser();
+        
+        withdraw(ownerType, ownerId, operator, amount);
+    }
+    
+    public CreateOrderRestResponse withdraw(String ownerType, Long ownerId, User operator, Long amount) {
+        if(amount == null || amount.longValue() <= 0L) {
+            LOGGER.error("Invalid amount to withdraw, ownerType={}, ownerId={}, operatorUid={}, amount={}", 
+                    ownerType, ownerId, operator.getId(), amount);
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_INVALID_WITHDRAW_AMOUNT,
+                    "Invalid amount to withdraw");
+        }
+        
+        PaymentAccount paymentAccount = findPaymentAccount(SYSTEMID);
+        if (paymentAccount == null) {
+            LOGGER.error("Payment account no found, ownerType={}, ownerId={}, operatorUid={}, amount={}, systemId={}", 
+                    ownerType, ownerId, operator.getId(), amount, SYSTEMID);
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_ACCOUNT_NO_FIND,
+                    "Payment account no found");
+        }
+        
+        PaymentUser paymentUser = payProvider.findPaymentUserByOwner(ownerType, ownerId);
+        if(paymentUser == null) {
+            LOGGER.error("Withdraw account not found, ownerType={}, ownerId={}, operatorUid={}, amount={}, realAmount={}", 
+                    ownerType, ownerId, operator.getId(), amount);
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_WITHDRAW_ACCOUNT_NOT_FOUND,
+                    "Withdraw account not found");
+        }
+        
+        PaymentBalanceDTO paymentBalance = getPaymentBalance(ownerType, ownerId);
+        Long withdrawableAmount = paymentBalance.getWithdrawableAmount();
+        if(withdrawableAmount == null || withdrawableAmount.longValue() <= 0)  {
+            LOGGER.error("Withdrawable amount insufficient, ownerType={}, ownerId={}, operatorUid={}, amount={}, realAmount={}", 
+                    ownerType, ownerId, operator.getId(), amount, paymentBalance);
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_WITHDRAWABLE_AMOUNT_INSUFFICIENT,
+                    "Withdrawable amount insufficient");
+        }
+        
+        Long orderNumber = createOrderNumberByTime();
+        String orderType = OrderType.OrderTypeEnum.PRINT_ORDER.getPycode();
+        Timestamp time = new Timestamp(DateHelper.currentGMTTime().getTime());
+        PaymentWithdrawOrder order = new PaymentWithdrawOrder();
+        order.setOwnerType(ownerType);
+        order.setOwnerId(ownerId);
+        order.setNamespaceId(operator.getNamespaceId());
+        order.setOrderNo(orderNumber);
+        order.setAmount(changePayAmount(amount));
+        order.setPaymentUserType(paymentUser.getPaymentUserType());
+        order.setPaymentUserId(paymentUser.getPaymentUserId());
+        order.setOperatorUid(operator.getId());
+        order.setOperateTime(time);
+        order.setStatus(PaymentWithdrawOrderStatus.WAITING_FOR_CONFIRM.getCode());
+        order.setCreatorUid(operator.getId());
+        order.setCreateTime(time);
+        payProvider.createPaymentWithdrawOrder(order);
+        
+        
+        String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.callback.url", "");
+        String backUrl = homeUrl + contextPath + backUri;
+        String withdrawOrderNo = getOrderNum(order.getId(), OrderType.OrderTypeEnum.WITHDRAW_CODE.getPycode());
+        CreateOrderCommand orderCmd = new CreateOrderCommand();
+        orderCmd.setBizSystemId(paymentAccount.getSystemId());
+        orderCmd.setAmount(amount);
+        orderCmd.setBizOrderNum(withdrawOrderNo);
+        orderCmd.setPayeeUserId(paymentUser.getPaymentUserId());
+        orderCmd.setSourceType(SourceType.MOBILE.getCode());
+        orderCmd.setOrderType(com.everhomes.pay.order.OrderType.WITHDRAW.getCode());
+        orderCmd.setValidationType(ValidationType.NO_VERIFY.getCode());
+        orderCmd.setBackUrl(backUrl);
+        orderCmd.setCommitFlag(PaymentCommitFlag.YES.getCode());
+        orderCmd.setPaymentType(PaymentType.WITHDRAW_AUTO.getCode());
+
+        // 银行卡号和属性
+        Map<String, String> paymentParams = new HashMap<>();
+        paymentParams.put("bankCardNum", paymentUser.getBankCardNumber());
+        paymentParams.put("bankCardPro", String.valueOf(getBankCardProperty(paymentUser.getPaymentUserType())));
+        orderCmd.setPaymentParams(paymentParams);
+        
+        CreateOrderRestResponse createOrderResp = restClient.restCall(
+                "POST", 
+                ApiConstants.ORDER_CREATEORDER_URL, 
+                orderCmd, 
+                CreateOrderRestResponse.class);     
+        
+        if(CreateOrderRestResponse.isSuccess(createOrderResp)){
+            Long serviceConfigId = 0L; // 提现时不分具体业务，故没有此ID信息
+            OrderCommandResponse  orderCommandResponse = createOrderResp.getResponse();
+            saveOrderRecord(orderCommandResponse, orderNumber, orderType,  serviceConfigId, com.everhomes.pay.order.OrderType.PURCHACE.getCode());
+        } else {
+            LOGGER.error("Failed to withdraw mony, ownerType={}, ownerId={}, operatorUid={}, amount={}, createOrderResp={}", 
+                    ownerType, ownerId, operator.getId(), amount, StringHelper.toJsonString(createOrderResp));
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_WITHDRAWABLE_AMOUNT_INSUFFICIENT,
+                    "Failed to withdraw mony");
+        }
+        
+        return createOrderResp;
+    }
+    
+    private int getBankCardProperty(Integer paymentUserType) {
+        BusinessUserType userType = BusinessUserType.fromCode(paymentUserType);
+        int bankCardPro = PaymentBankCardType.PERSONAL.getCode();
+        if(userType == BusinessUserType.BUSINESS) {
+            bankCardPro = PaymentBankCardType.BUSINESS.getCode();
+        }
+        
+        return bankCardPro;
+    }
+    
+    public Long createOrderNumberByTime() {
+        String suffix = String.valueOf(generateRandomNumber(3));
+
+        return Long.valueOf(String.valueOf(System.currentTimeMillis()) + suffix);
+    }
+
+    /**
+     *
+     * @param n 创建n位随机数
+     * @return
+     */
+    private long generateRandomNumber(int n){
+        return (long)((Math.random() * 9 + 1) * Math.pow(10, n-1)); 
+    }
+    
+    @Override
+    public ListPaymentWithdrawOrderResponse listPaymentWithdrawOrders(ListPaymentWithdrawOrderCommand cmd) {
+        String ownerType = cmd.getOwnerType();
+        Long ownerId = cmd.getOwnerId();
+        
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        List<PaymentWithdrawOrder> orders = payProvider.listPaymentWithdrawOrders(ownerType, ownerId, cmd.getPageAnchor(), pageSize+1);
+        
+        ListPaymentWithdrawOrderResponse response = new ListPaymentWithdrawOrderResponse();
+        if(orders.size() > pageSize) {
+            orders.remove(orders.size() - 1);
+            response.setNextPageAnchor(orders.get(orders.size() - 1).getId());
+        }
+        response.setOrders(toPaymentWithdrawOrderDTO(orders));
+        
+        return response;
+    }
+    
+    private List<PaymentWithdrawOrderDTO> toPaymentWithdrawOrderDTO(List<PaymentWithdrawOrder> orders) {
+        List<PaymentWithdrawOrderDTO> dtos = new ArrayList<PaymentWithdrawOrderDTO>();
+        for(PaymentWithdrawOrder order : orders) {
+            dtos.add(toPaymentWithdrawOrderDTO(order));
+        }
+        
+        return dtos;
+    }
+    
+    private PaymentWithdrawOrderDTO toPaymentWithdrawOrderDTO(PaymentWithdrawOrder order) {
+        PaymentWithdrawOrderDTO orderDto = ConvertHelper.convert(order, PaymentWithdrawOrderDTO.class);
+        
+        // 在数据库取出来时amount是BigDecimal类型，给客户端时则是Long型，故需要特殊转一下
+        Long amount = changePayAmount(order.getAmount());
+        orderDto.setAmount(amount);
+        
+        UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(order.getOperatorUid(), order.getNamespaceId());
+        if(userIdentifier != null) {
+            orderDto.setOperatorPhone(userIdentifier.getIdentifierToken());
+        } else {
+            LOGGER.error("User identifier not found, ownerType={}, ownerId={}, withdrawOrderId={}, operatorUid={}", 
+                        order.getOwnerType(), order.getOwnerId(), order.getId(), order.getOperatorUid());
+        }
+        
+        User user = userProvider.findUserById(order.getOperatorUid());
+        if(user != null) {
+            orderDto.setOperatorName(user.getNickName());
+        } else {
+            LOGGER.error("User not found, ownerType={}, ownerId={}, withdrawOrderId={}, operatorUid={}", 
+                    order.getOwnerType(), order.getOwnerId(), order.getId(), order.getOperatorUid());
+        }
+        
+        OwnerType  ownerType = OwnerType.fromCode(order.getOwnerType());
+        if(ownerType == OwnerType.ORGANIZATION) {
+            OrganizationMemberDetails orgMember = organizationProvider.findOrganizationMemberDetailsByTargetId(order.getOperatorUid());
+            if(orgMember != null && orgMember.getContactName() != null && orgMember.getContactName().length() > 0) {
+                orderDto.setEnterpriseName(orgMember.getContactName());
+            } else {
+                LOGGER.error("Organization not found, ownerType={}, ownerId={}, withdrawOrderId={}", 
+                        order.getOwnerType(), order.getOwnerId(), order.getId());
+            }
+        }
+        
+        return orderDto;
     }
 }

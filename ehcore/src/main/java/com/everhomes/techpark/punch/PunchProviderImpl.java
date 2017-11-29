@@ -2818,7 +2818,7 @@ long id = sequenceProvider.getNextSequence(key);
 			calendar.add(Calendar.MONTH, 1);
 			Timestamp endDate = new Timestamp(calendar.getTimeInMillis());
 			SelectHavingStep<Record2<String, BigDecimal>> step = getReadOnlyContext()
-					.select(Tables.EH_APPROVAL_CATEGORIES.CATEGORY_NAME,Tables.EH_PUNCH_EXCEPTION_REQUESTS.DURATION.sum())
+					.select(Tables.EH_APPROVAL_CATEGORIES.CATEGORY_NAME,Tables.EH_PUNCH_EXCEPTION_REQUESTS.DURATION.sum().round(3))
 					.from(Tables.EH_APPROVAL_CATEGORIES).leftOuterJoin(Tables.EH_PUNCH_EXCEPTION_REQUESTS)
 					.on(Tables.EH_APPROVAL_CATEGORIES.ID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.CATEGORY_ID))
 					.where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.CREATOR_UID.eq(userId))

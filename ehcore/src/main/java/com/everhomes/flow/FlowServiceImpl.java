@@ -944,9 +944,8 @@ public class FlowServiceImpl implements FlowService {
             if (actionInfo.getTemplateId() != null) {
                 action.setTemplateId(actionInfo.getTemplateId());
             }
-            if (actionInfo.getRenderText() != null) {
-                action.setRenderText(actionInfo.getRenderText());
-            }
+            action.setRenderText(actionInfo.getRenderText());
+
             flowActionProvider.updateFlowAction(action);
 
             flowUserSelectionProvider.deleteSelectionByBelong(action.getId(), FlowEntityType.FLOW_ACTION.getCode(), FlowUserType.PROCESSOR.getCode());
@@ -2501,6 +2500,8 @@ public class FlowServiceImpl implements FlowService {
             flowCase.setApplyUserId(UserContext.current().getUser().getId());
         }
         UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(flowCase.getApplyUserId());
+        fixupUserInfo(snapshotFlow.getOrganizationId(), userInfo);
+
         flowCase.setApplierName(userInfo.getNickName());
         if (userInfo.getPhones() != null && userInfo.getPhones().size() > 0) {
             flowCase.setApplierPhone(userInfo.getPhones().get(0));
@@ -2944,10 +2945,10 @@ public class FlowServiceImpl implements FlowService {
             details = flowEventLogProvider.findProcessorFlowCases(locator, count, cmd, callback);
         }
 
-        List<FlowCaseDTO> dtos = new ArrayList<FlowCaseDTO>();
+        List<FlowCaseDTO> dtos = new ArrayList<>();
         if (details != null) {
             for (FlowCaseDetail detail : details) {
-                detail.setContent(onFlowCaseBriefRender(flowUserType, detail));
+                onFlowCaseBriefRender(flowUserType, detail);
 
                 FlowCaseDTO dto = ConvertHelper.convert(detail, FlowCaseDTO.class);
                 FlowNode flowNode = flowNodeProvider.getFlowNodeById(dto.getCurrentNodeId());
@@ -2972,17 +2973,8 @@ public class FlowServiceImpl implements FlowService {
         return resp;
     }
 
-    private String onFlowCaseBriefRender(FlowUserType flowUserType, FlowCase flowCase) {
-        String flowCaseContent = flowCase.getContent();
-        try {
-            String content = flowListenerManager.onFlowCaseBriefRender(flowCase, flowUserType);
-            if (content != null) {
-                flowCaseContent = content;
-            }
-        } catch (Exception e) {
-            LOGGER.error("Flow listener onFlowCaseBriefRender error, flowCaseId = "+flowCase.getId(), e);
-        }
-        return flowCaseContent;
+    private void onFlowCaseBriefRender(FlowUserType flowUserType, FlowCase flowCase) {
+        flowListenerManager.onFlowCaseBriefRender(flowCase, flowUserType);
     }
 
     @Override
@@ -5036,7 +5028,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public FlowConditionVariable getFormFieldValueByVariable(FlowCaseState ctx, String variable, String extra) {
         String fieldName = formFieldProcessorManager.parseFormFieldName(ctx, variable, extra);
-        FlowCase flowCase = ctx.getFlowCase();
+        FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
         GeneralFormFieldDTO fieldDTO = generalFormService.getGeneralFormValueByOwner(
                 flowCase.getModuleType(),
                 flowCase.getModuleId(),
@@ -5348,25 +5340,25 @@ public class FlowServiceImpl implements FlowService {
             }
 
             // 创建link
-            // Map<Integer, Long> linkLevelToLinkIdMap = new HashMap<>();
+            Map<Integer, Long> linkLevelToLinkIdMap = new HashMap<>();
             flowLinkProvider.deleteFlowLink(flow.getId(), FlowConstants.FLOW_CONFIG_VER);
             for (FlowLinkCommand flowLinkCmd : cmd.getLinks()) {
                 flowLinkCmd.setFromNodeId(nodeLevelToNodeIdMap.get(flowLinkCmd.getFromNodeLevel()));
                 flowLinkCmd.setToNodeId(nodeLevelToNodeIdMap.get(flowLinkCmd.getToNodeLevel()));
                 FlowLinkDTO flowLink = createFlowLink(flow, flowLinkCmd);
-                // linkLevelToLinkIdMap.put(flowLink.getLinkLevel(), flowLink.getId());
+                linkLevelToLinkIdMap.put(flowLink.getLinkLevel(), flowLink.getId());
             }
 
-            /*// 创建condition
+            // 创建condition
             if (cmd.getConditions() != null) {
-                flowConditionProvider.deleteFlowCondition(flow.getId(), FlowConstants.FLOW_CONFIG_VER);
+                flowConditionProvider.deleteFlowCondition(flow.getId(), null, FlowConstants.FLOW_CONFIG_VER);
                 for (FlowConditionCommand conditionCmd : cmd.getConditions()) {
                     conditionCmd.setFlowNodeId(nodeLevelToNodeIdMap.get(conditionCmd.getFlowNodeLevel()));
                     conditionCmd.setNextNodeId(nodeLevelToNodeIdMap.get(conditionCmd.getNextNodeLevel()));
                     conditionCmd.setFlowLinkId(linkLevelToLinkIdMap.get(conditionCmd.getFlowLinkLevel()));
                     createFlowCondition(flow, conditionCmd);
                 }
-            }*/
+            }
             return true;
         });
 
@@ -5658,7 +5650,7 @@ public class FlowServiceImpl implements FlowService {
 
         // 督办按钮处理
         for (FlowCase aCase : allFlowCase) {
-            FlowEventLog enterLog = flowEventLogProvider.isSupervisors(userId, aCase);
+            FlowEventLog enterLog = flowEventLogProvider.isSupervisor(userId, aCase);
             if (enterLog != null) {
                 if (!flowUserTypes.contains(FlowUserType.SUPERVISOR)) {
                     flowUserTypes.add(FlowUserType.SUPERVISOR);
@@ -5798,6 +5790,7 @@ public class FlowServiceImpl implements FlowService {
 
         List<FlowOperateLogDTO> operateLogs = flowEventLogProvider.searchOperateLogs(
                 cmd.getModuleId(), cmd.getFlowCaseId(), userId, cmd.getServiceType(), cmd.getKeyword(), pageSize, locator);
+
         SearchFlowOperateLogResponse response = new SearchFlowOperateLogResponse();
         response.setLogs(operateLogs);
         response.setNextPageAnchor(locator.getAnchor());
@@ -5821,7 +5814,7 @@ public class FlowServiceImpl implements FlowService {
         if (flowUserTypes.size() > 0) {
             return flowListenerManager.onFlowCaseDetailRender(flowCase, flowUserTypes.get(0));
         }
-        return flowListenerManager.onFlowCaseDetailRender(flowCase, null);
+        return flowListenerManager.onFlowCaseDetailRender(flowCase, FlowUserType.NO_USER);
     }
 
     private List<FlowButtonDTO> getFlowButtonDTOList(FlowGraph flowGraph, Long userId, List<FlowUserType> flowUserTypes, boolean checkProcessor, FlowCase flowCase, List<FlowNode> nodes, List<FlowLane> laneList) {
@@ -6447,5 +6440,13 @@ public class FlowServiceImpl implements FlowService {
             flowCases.addAll(getAllChildFlowCase(flowCase));
         }
         return flowCases;
+    }
+
+    @Override
+    public String getFlowCaseRouteURI(Long flowCaseId, Long moduleId) {
+        FlowCaseDetailActionData actionData = new FlowCaseDetailActionData();
+        actionData.setFlowCaseId(flowCaseId);
+        actionData.setModuleId(moduleId);
+        return RouterBuilder.build(Router.WORKFLOW_DETAIL, actionData);
     }
 }

@@ -474,6 +474,8 @@ public interface FlowService {
 
     void updateFlowValidationStatus(UpdateFlowValidationStatusCommand cmd);
 
+    String getFlowCaseRouteURI(Long flowCaseId, Long moduleId);
+
     FlowConditionVariable getFormFieldValueByVariable(FlowCaseState ctx, String variable, String extra);
 
     ListFlowConditionVariablesResponse listFlowConditionVariables(ListFlowConditionVariablesCommand cmd);

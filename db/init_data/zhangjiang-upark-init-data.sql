@@ -2377,3 +2377,14 @@ VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 9999
 update eh_service_alliance_categories SET entry_id = 14 WHERE namespace_id = 999971 AND `name` = '服务联盟' AND entry_id = 10;
 -- end  by dengs.
 
+-- added by R "行业协会" 菜单及模块
+set @scope_id = (select MAX(id) from eh_service_module_scopes);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES (@scope_id := @scope_id + 1, '999971', '10760', '', 'EhOrganizations', '999971', NULL, '2');
+
+set @menu_id = (select MAX(id) from eh_web_menu_scopes);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@menu_id := @menu_id + 1, '10760', '', 'EhNamespaces', '999971', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@menu_id := @menu_id + 1, '10761', '', 'EhNamespaces', '999971', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@menu_id := @menu_id + 1, '10762', '', 'EhNamespaces', '999971', '2');
+-- 问卷调查
+update eh_launch_pad_items set action_type = 13, action_data = '{\"url\":\"http://core.zuolin.com/questionnaire-survey/build/index.html#/home#sign_suffix\"}' where item_label like "%问卷%" and namespace_id = 999971;
+-- end by R.

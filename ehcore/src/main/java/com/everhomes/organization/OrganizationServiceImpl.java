@@ -2824,6 +2824,15 @@ public class OrganizationServiceImpl implements OrganizationService {
                         + ", namespaceId=" + namespaceId + ", groupType=" + groupType + ", orgStatus" + orgStatus);
                 continue;
             }
+
+            //Filter out the child organization add by lei.lv 20171124
+            Long parentId = org.getParentId();
+            if (parentId != 0L) {
+                LOGGER.error("The member's organization is child-enterprise, userId=" + userId
+                        + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId()
+                        + ", namespaceId=" + namespaceId + ", groupType=" + groupType + ", orgStatus" + orgStatus);
+                continue;
+            }
             dtos.add(org);
         }
 
@@ -7236,6 +7245,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                             LOGGER.info("User join the enterprise automatically, userId=" + identifier.getOwnerUid()
                                     + ", contactId=" + member.getId() + ", enterpriseId=" + member.getOrganizationId());
                         }
+                        //自动加入公司的门禁 add by lei.lv
+                        this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), member.getOrganizationId(), member.getTargetId());
                     } else {
                         if (LOGGER.isInfoEnabled()) {
                             LOGGER.debug("organization group type not enterprise, organizationId={}, groupType={}, memberId={}", member.getOrganizationId(), member.getStatus(), member.getId());

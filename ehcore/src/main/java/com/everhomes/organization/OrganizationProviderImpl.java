@@ -3654,7 +3654,22 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	}
 
-    /**
+	@Override
+	public List<OrganizationCommunityRequest> listOrganizationCommunityRequestsByOrganizationId(Long organizationId) {
+		List<OrganizationCommunityRequest> results = new ArrayList<OrganizationCommunityRequest>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationCommunityRequestsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS);
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.eq(OrganizationCommunityRequestStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID.eq(organizationId));
+		query.fetch().map(r -> {
+			results.add(ConvertHelper.convert(r, OrganizationCommunityRequest.class));
+			return null;
+		});
+		return results;
+	}
+
+	/**
      * modify cause member_detail by lei lv
      **/
     @Override

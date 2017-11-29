@@ -204,7 +204,8 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
         }
     	if(cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
     		cond = cond.and(
-    				Tables.EH_FLOW_CASES.MODULE_NAME.like(cmd.getKeyword() + "%")
+                    Tables.EH_FLOW_CASES.TITLE.like(cmd.getKeyword() + "%")
+                            .or(Tables.EH_FLOW_CASES.CONTENT.like("%" + cmd.getKeyword() + "%"))
     				.or(Tables.EH_FLOW_CASES.APPLIER_NAME.like(cmd.getKeyword() + "%"))
     				.or(Tables.EH_FLOW_CASES.APPLIER_PHONE.like(cmd.getKeyword() + "%"))
             );
@@ -669,6 +670,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
             dto.setId(r.getValue(log.ID));
             dto.setFlowCaseId(r.getValue(flowCase.ID));
             dto.setModuleId(r.getValue(flowCase.MODULE_ID));
+            dto.setRouteUri(r.getValue(flowCase.ROUTE_URI));
             String title = r.getValue(flowCase.TITLE);
             if (title == null || title.isEmpty()) {
                 title = r.getValue(flowCase.MODULE_NAME);
@@ -690,7 +692,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     }
 
     @Override
-    public FlowEventLog isSupervisors(Long userId, FlowCase flowCase) {
+    public FlowEventLog isSupervisor(Long userId, FlowCase flowCase) {
         List<FlowEventLog> objs = this.queryFlowEventLogs(new ListingLocator(), 1, (locator, query) -> {
             query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(flowCase.getId()));
             query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.FLOW_SUPERVISOR.getCode()));
@@ -713,5 +715,19 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
             query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.eq(stepCount));
             return query;
         });
+    }
+
+    @Override
+    public FlowEventLog isHistoryProcessors(Long userId, FlowCase flowCase) {
+        List<FlowEventLog> flowEventLogs = this.queryFlowEventLogs(new ListingLocator(), 1, (locator, query) -> {
+            query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.in(flowCase.getId()));
+            query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(userId));
+            query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.BUTTON_FIRED.getCode()));
+            return query;
+        });
+        if (flowEventLogs != null && flowEventLogs.size() > 0) {
+            return flowEventLogs.get(0);
+        }
+        return null;
     }
 }

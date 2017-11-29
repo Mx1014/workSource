@@ -10,10 +10,12 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhFlowConditionsDao;
 import com.everhomes.server.schema.tables.pojos.EhFlowConditions;
+import com.everhomes.server.schema.tables.records.EhFlowConditionsRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -55,11 +57,15 @@ public class FlowConditionProviderImpl implements FlowConditionProvider {
     public void deleteFlowCondition(Long flowMainId, Long flowNodeId, Integer flowVersion) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         com.everhomes.server.schema.tables.EhFlowConditions t = Tables.EH_FLOW_CONDITIONS;
-        context.delete(t)
-                .where(t.FLOW_MAIN_ID.eq(flowMainId))
-                .and(t.FLOW_VERSION.eq(flowVersion))
-                .and(t.FLOW_NODE_ID.eq(flowNodeId))
-                .execute();
+
+        DeleteQuery<EhFlowConditionsRecord> query = context.deleteQuery(t);
+        query.addConditions(t.FLOW_MAIN_ID.eq(flowMainId));
+        query.addConditions(t.FLOW_VERSION.eq(flowVersion));
+
+        if (flowNodeId != null) {
+            query.addConditions(t.FLOW_NODE_ID.eq(flowNodeId));
+        }
+        query.execute();
     }
 
     @Override

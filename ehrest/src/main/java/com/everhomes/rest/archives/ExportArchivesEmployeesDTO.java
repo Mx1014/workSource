@@ -1,9 +1,7 @@
 package com.everhomes.rest.archives;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.util.StringHelper;
-import com.sun.javafx.image.impl.General;
 
 import java.util.List;
 
