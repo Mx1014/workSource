@@ -183,16 +183,6 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				List<GeneralFormVal> vals = generalFormValProvider.queryGeneralFormVals(EntityType.PM_TASK.getCode(),flowCase.getReferId());
 				//没产生费用
 				if (vals==null || vals.size()==0){
-					FlowAutoStepDTO dto = new FlowAutoStepDTO();
-					dto.setAutoStepType(FlowStepType.NO_STEP.getCode());
-					dto.setFlowCaseId(flowCase.getId());
-					dto.setFlowMainId(flowCase.getFlowMainId());
-					dto.setFlowNodeId(flowCase.getCurrentNodeId());
-					dto.setFlowVersion(flowCase.getFlowVersion());
-					dto.setStepCount(flowCase.getStepCount());
-					dto.setEventType(FlowEventType.STEP_MODULE.getCode());
-
-					List<FlowEventLog> eventLogs = new ArrayList<>();
 					FlowEventLog log = new FlowEventLog();
 					log.setId(flowEventLogProvider.getNextId());
 					log.setFlowMainId(flowCase.getFlowMainId());
@@ -209,9 +199,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 					log.setTrackerProcessor(1L);
 					String content = "本次服务没有产生维修费";
 					log.setLogContent(content);
-					eventLogs.add(log);
-					dto.setEventLogs(eventLogs);
-					flowService.processAutoStep(dto);
+					ctx.getLogs().add(log);
 				}
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
