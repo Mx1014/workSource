@@ -3945,7 +3945,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         row.createCell(++i).setCellValue("工单号");
         row.createCell(++i).setCellValue("表计号码");
         row.createCell(++i).setCellValue("表计名称");
-        row.createCell(++i).setCellValue("表计类型");
+        row.createCell(++i).setCellValue("表计分类");
         row.createCell(++i).setCellValue("开始日期");
         row.createCell(++i).setCellValue("结束日期");
         row.createCell(++i).setCellValue("工单状态");
