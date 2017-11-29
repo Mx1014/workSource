@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.portal.ServiceModuleApp;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import org.jooq.Condition;
 
 public interface ServiceModuleProvider {
@@ -85,4 +87,10 @@ public interface ServiceModuleProvider {
     Long getMaxActiveAppId();
 
     void lapseReflectionServiceModuleAppByNamespaceId(Integer namespaceId);
+
+    List<ServiceModuleAppDTO> listReflectionServiceModuleAppsByModuleIds(Integer namespaceId, List<Long> moduleIds);
+
+    List<ServiceModuleAppDTO> listReflectionServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String customPath);
+
+    ServiceModuleApp findReflectionServiceModuleAppByActiveAppId(Long id);
 }

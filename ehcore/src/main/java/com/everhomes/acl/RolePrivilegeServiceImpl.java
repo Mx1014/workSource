@@ -3359,7 +3359,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				return authorizationsAppControl;
 			}
 
-			ServiceModuleApp serviceModuleApp = serviceModuleAppProvider.findServiceModuleAppById(authorization.getModuleAppId());
+			ServiceModuleApp serviceModuleApp = serviceModuleProvider.findReflectionServiceModuleAppByActiveAppId(authorization.getModuleAppId());
 			if(null != serviceModuleApp){
 				serviceModuleApps.add(serviceModuleApp);
 			}

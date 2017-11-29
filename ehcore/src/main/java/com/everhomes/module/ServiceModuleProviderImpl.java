@@ -1,37 +1,38 @@
 // @formatter:off
 package com.everhomes.module;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.portal.ServiceModuleApp;
+import com.everhomes.rest.module.ServiceModuleStatus;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
-import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhReflectionServiceModuleAppsDao;
+import com.everhomes.server.schema.tables.daos.EhServiceModuleAssignmentRelationsDao;
+import com.everhomes.server.schema.tables.daos.EhServiceModuleAssignmentsDao;
+import com.everhomes.server.schema.tables.daos.EhServiceModulesDao;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.SelectQuery;
-import org.jooq.UpdateQuery;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import org.jooq.*;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DaoAction;
-import com.everhomes.db.DaoHelper;
-import com.everhomes.db.DbProvider;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.module.ServiceModuleStatus;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.everhomes.server.schema.tables.EhReflectionServiceModuleApps.EH_REFLECTION_SERVICE_MODULE_APPS;
 
@@ -574,6 +575,8 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         item.addValue(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.INSTANCE_CONFIG, reflectionServiceModuleApp.getInstanceConfig());
         item.addValue(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.UPDATE_TIME, reflectionServiceModuleApp.getUpdateTime());
         item.addValue(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ACTION_DATA, reflectionServiceModuleApp.getActionData());
+        item.addValue(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.CUSTOM_TAG, reflectionServiceModuleApp.getCustomTag());
+        item.addValue(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.CUSTOM_PATH, reflectionServiceModuleApp.getCustomPath());
         item.addConditions(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ID.eq(reflectionServiceModuleApp.getId()));
         item.setReturning(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ID);
         item.execute();
@@ -617,5 +620,46 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         context.update(Tables.EH_REFLECTION_SERVICE_MODULE_APPS).set(EH_REFLECTION_SERVICE_MODULE_APPS.STATUS, ServiceModuleAppStatus.INACTIVE.getCode())
                 .where(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId));
+    }
+
+    @Override
+    public List<ServiceModuleAppDTO> listReflectionServiceModuleAppsByModuleIds(Integer namespaceId, List<Long> moduleIds) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Condition cond = Tables.EH_REFLECTION_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId);
+        if (null != moduleIds && moduleIds.size() > 0)
+            cond = cond.and(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.MODULE_ID.in(moduleIds));
+        return context.select().from(Tables.EH_REFLECTION_SERVICE_MODULE_APPS)
+                .where(cond)
+                .and(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()))
+                .orderBy(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.MODULE_ID.asc())
+                .fetch().map(r -> ConvertHelper.convert(r, ServiceModuleAppDTO.class));
+    }
+
+    @Override
+    public List<ServiceModuleAppDTO> listReflectionServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String customPath) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Condition cond = Tables.EH_REFLECTION_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId);
+        if(null != moduleId)
+            cond = cond.and(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.MODULE_ID.eq(moduleId));
+        if(null != actionType)
+            cond = cond.and(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ACTION_TYPE.eq(actionType));
+        if(null != customTag)
+            cond = cond.and(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.CUSTOM_TAG.eq(customTag));
+        if(null != customPath)
+            cond = cond.and(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.CUSTOM_PATH.eq(customPath));
+        return context.select().from(Tables.EH_REFLECTION_SERVICE_MODULE_APPS)
+                .where(cond)
+                .and(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()))
+                .orderBy(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ID.asc())
+                .fetch().map(r -> ConvertHelper.convert(r, ServiceModuleAppDTO.class));
+    }
+
+    @Override
+    public ServiceModuleApp findReflectionServiceModuleAppByActiveAppId(Long id) {
+        assert (id != null);
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Record r = context.select().from(Tables.EH_REFLECTION_SERVICE_MODULE_APPS).where(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ACTIVE_APP_ID.eq(id))
+                .fetchAny();
+        return ConvertHelper.convert(r, ServiceModuleApp.class);
     }
 }

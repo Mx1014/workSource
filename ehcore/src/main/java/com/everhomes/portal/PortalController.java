@@ -28,7 +28,7 @@ public class PortalController extends ControllerBase {
 	}
 
 	/**
-	 * <p>1.模块应用列表</p>
+	 * <p>1.根据条件查询模块应用</p>
 	 * <b>URL: /portal/listServiceModuleAppsWithConditon</b>
 	 */
 	@RequestMapping("listServiceModuleAppsWithConditon")

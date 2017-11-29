@@ -849,6 +849,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             reflectionApp.setInstanceConfig(instanceConfig);
             reflectionApp.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             reflectionApp.setActionData(actionData);
+            reflectionApp.setCustomTag(customTag);
             this.serviceModuleProvider.updateReflectionServiceModuleApp(reflectionApp);
         }else{//创建
             ReflectionServiceModuleApp reflectionApp_new = new ReflectionServiceModuleApp();
@@ -912,7 +913,8 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                     List<Long> moduleIds = c_node.stream().map(ServiceModuleDTO::getId).collect(Collectors.toList());
                     if(moduleIds.size() != 0){
                         //给一级模块设置APPS
-                        List<ServiceModuleAppDTO> apps = serviceModuleAppProvider.listServiceModuleAppsByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
+                        // 这里因为运营后台的不完善，暂时使用reflectionServiceModuleApps代替真正的serviceModuleApps。原来的代码为serviceModuleAppProvider.listServiceModuleAppsByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
+                        List<ServiceModuleAppDTO> apps = serviceModuleProvider.listReflectionServiceModuleAppsByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
                         current.setServiceModuleApps(apps);
                         LOGGER.debug(current.getName()+ "分类下一共有"+moduleIds.toString() +"的模块和"+ apps.size() + "个应用");
                     }
