@@ -150,13 +150,13 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
 
         if(cmd.getStartTime() != null) {
             RangeFilterBuilder rf = new RangeFilterBuilder("startTime");
-            rf.gt(cmd.getStartTime());
+            rf.gte(cmd.getStartTime());
             fb = FilterBuilders.andFilter(fb, rf);
         }
 
         if(cmd.getEndTime() != null) {
             RangeFilterBuilder rf = new RangeFilterBuilder("endTime");
-            rf.lt(cmd.getEndTime());
+            rf.lte(cmd.getEndTime());
             fb = FilterBuilders.andFilter(fb, rf);
         }
 
@@ -165,7 +165,7 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
             if(cmd.getStatus() == 3) {
                 fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", EnergyTaskStatus.NON_READ.getCode()));
                 RangeFilterBuilder rf = new RangeFilterBuilder("endTime");
-                rf.lt(DateHelper.currentGMTTime().getTime());
+                rf.lte(DateHelper.currentGMTTime().getTime());
                 fb = FilterBuilders.andFilter(fb, rf);
             } else {
                 fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
