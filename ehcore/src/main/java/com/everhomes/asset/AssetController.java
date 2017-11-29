@@ -1151,9 +1151,9 @@ public class AssetController extends ControllerBase {
      */
     @RequestMapping("sc")
     @RequireAuthentication(value = false)
-    public RestResponse syncCustomer(Integer namespaceId){
+    public RestResponse syncCustomer(SyncCustomerCommand cmd){
         RestResponse restResponse = new RestResponse();
-        assetService.syncCustomer(namespaceId);
+        assetService.syncCustomer(cmd.getNamespaceId());
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         restResponse.setErrorDescription("OK");
         return restResponse;
