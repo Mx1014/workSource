@@ -1426,6 +1426,14 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
+    public List<EhEquipmentInspectionEquipmentPlanMap> getEquipmentInspectionPlanMap(Long planId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP)
+                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.ID.eq(planId))
+                .fetchInto(EhEquipmentInspectionEquipmentPlanMap.class);
+    }
+
+    @Override
     public void updateEquipmentStandardMap(EquipmentStandardMap map) {
         assert (map.getId() != null);
 

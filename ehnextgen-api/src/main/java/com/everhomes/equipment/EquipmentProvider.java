@@ -156,4 +156,6 @@ public interface EquipmentProvider {
     EquipmentInspectionPlans getEquipmmentInspectionPlan(Long planId);
 
 	void createEquipmentPlanMaps(EquipmentInspectionPlans plan, EhEquipmentInspectionEquipmentPlanMap map);
+
+	List<EhEquipmentInspectionEquipmentPlanMap> getEquipmentInspectionPlanMap(Long planId);
 }

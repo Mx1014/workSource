@@ -4,7 +4,6 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.repeat.RepeatService;
-import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.equipment.*;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EquipmentStandardSearcher;
@@ -136,17 +135,17 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 
         // 改用namespaceId by xiongying20170328
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId()));
-//    	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
-//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
-        if(cmd.getTargetId() != null) {
+    	/*fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));*/
+        //V3.0.2 不需要项目id过滤标准
+        /*if(cmd.getTargetId() != null) {
             FilterBuilder tfb = FilterBuilders.termFilter("targetId", cmd.getTargetId());
             if(TargetIdFlag.YES.equals(TargetIdFlag.fromStatus(cmd.getTargetIdFlag()))) {
                 tfb = FilterBuilders.orFilter(tfb, FilterBuilders.termFilter("targetId", 0));
             }
             fb = FilterBuilders.andFilter(fb, tfb);
         }
-
-       /* if(cmd.getStandardType() != null)
+         if(cmd.getStandardType() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("standardType", cmd.getStandardType()));*/
         
         if(cmd.getStatus() != null)
@@ -155,11 +154,16 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         if(cmd.getInspectionCategoryId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("inspectionCategoryId", cmd.getInspectionCategoryId()));
 
-        if(cmd.getInspectionCategoryId() != null)
+        if(cmd.getRepeatType() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("repeatType", cmd.getRepeatType()));
 
+        //增加设备tab页面根据设备类型查找标准选项 V3.0.2
+        if (cmd.getCategoryId() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
+        }
+
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        Long anchor = 0l;
+        Long anchor = 0L;
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
@@ -219,12 +223,12 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         standard.setEquipmentsCount(count);
     }
 
-    private void processRepeatSetting(EquipmentInspectionStandards standard) {
+   /* private void processRepeatSetting(EquipmentInspectionStandards standard) {
 		if(null != standard.getRepeatSettingId() && standard.getRepeatSettingId() != 0) {
 			RepeatSettings repeat = repeatService.findRepeatSettingById(standard.getRepeatSettingId());
 			standard.setRepeat(repeat);
 		}
-	}
+	}*/
 	
 	@Override
 	public String getIndexType() {
@@ -243,11 +247,16 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
             b.field("status", standard.getStatus());
             b.field("namespaceId", standard.getNamespaceId());
 
-            if(standard.getTargetId() != null) {
+            //根据标准关联的设备类型筛选标准
+            equipmentProvider.populateEquipments(standard);
+            if(standard.getEquipments()!= null) {
+                b.field("categoryId", standard.getEquipments().get(0).getCategoryId());
+            }
+            /*if(standard.getTargetId() != null) {
                 b.field("targetId", standard.getTargetId());
             } else {
                 b.field("targetId", 0);
-            }
+            }*/
 
             b.endObject();
             return b;

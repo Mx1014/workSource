@@ -262,8 +262,9 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
             	b.field("targetId", equipment.getTargetId());
             	b.field("targetType", equipment.getTargetType());
             	b.field("equipmentName", equipment.getName());
-            	//add equipment   inspectionCategoryId
-				//b.field("inspectionCategoryId", equipment.getInspectionCategoryId());
+            	//add equipment   inspectionCategoryId and categoryId  V3.0.2
+				b.field("inspectionCategoryId", equipment.getInspectionCategoryId());
+				b.field("categoryId", equipment.getCategoryId());
 			} else {
             	b.field("ownerId", "");
                 b.field("ownerType", "");

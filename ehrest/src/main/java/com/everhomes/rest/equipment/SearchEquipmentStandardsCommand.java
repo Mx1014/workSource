@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
  *  <li>targetType: 标准所属项目类型</li>
  *  <li>status: 标准状态 参考{@link com.everhomes.rest.equipment.EquipmentStandardStatus}</li>
  *  <li>repeatType:标准周期  0:no repeat 1: by day 2:by week 3: by month 4:year</li>
+ *  <li>categoryId:设备具体类型 </li>
  *  <li>keyword: 查询关键字</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
@@ -37,6 +38,9 @@ public class SearchEquipmentStandardsCommand {
 	private  Byte repeatType;
 
 	private Byte status;
+
+	//巡检V3.0.2增加
+	private  Long categoryId;
 	
 	private String keyword;
 	
@@ -110,6 +114,14 @@ public class SearchEquipmentStandardsCommand {
 
 	public void setStatus(Byte status) {
 		this.status = status;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
 	}
 
 	public String getKeyword() {

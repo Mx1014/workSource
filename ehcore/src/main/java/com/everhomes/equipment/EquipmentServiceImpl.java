@@ -56,6 +56,7 @@ import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.search.*;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentPlanMap;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandards;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.*;
@@ -437,10 +438,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 				inActiveEquipmentStandardRelations(map);
 			}
 		}
+		//删除itemMap表和template表  暂时可以不做
 		/**
 		 * TODO:删除相关巡检计划
 		 */
-		
+		//inActive与删除标准相关的所有任务
 		inactiveTasksByStandardId(standard.getId());
 	}
 
@@ -4511,10 +4513,33 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		EquipmentInspectionPlans equipmentInspectionPlan = equipmentProvider.getEquipmmentInspectionPlan(cmd.getId());
 		//填充巡检计划相关的巡检对象
-
+		processEquipmentInspectionObjectsByPlanId(cmd.getId(),equipmentInspectionPlan);
 		//填充计划的执行周期
-
+		equipmentInspectionPlan.setRepeatSettings(repeatService.findRepeatSettingById(cmd.getId()));
 
 		return ConvertHelper.convert(equipmentInspectionPlan, EquipmentInspectionPlanDTO.class);
+	}
+
+	private void processEquipmentInspectionObjectsByPlanId(Long planId, EquipmentInspectionPlans equipmentInspectionPlan) {
+
+		List<EhEquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.getEquipmentInspectionPlanMap(planId);
+		List<EquipmentStandardRelationDTO> relationDTOS = new ArrayList<>();
+
+		for (EhEquipmentInspectionEquipmentPlanMap map : planMaps) {
+			EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getEquimentId());
+			EhEquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
+
+			EquipmentStandardRelationDTO relations = new EquipmentStandardRelationDTO();
+			//根据id查询计划的详情巡检对象栏  只需要如下几个字段
+			relations.setEquipmentName(equipment.getName());
+			relations.setStandardName(standard.getName());
+			relations.setRepeatType(standard.getRepeatType());
+
+			relationDTOS.add(relations);
+
+		}
+		//process plan
+		equipmentInspectionPlan.setEquipmentStandardRelations(relationDTOS);
+
 	}
 }
