@@ -56,7 +56,7 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 
 	@Override
 	public List<EnterpriseOpRequest> listApplyEntrys(EnterpriseOpRequest request,
-			ListingLocator locator, int pageSize) {
+			ListingLocator locator, Integer pageSize) {
 		return listApplyEntrys(request, locator, pageSize, null);
 	}
 
@@ -329,15 +329,12 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 
 	@Override
 	public List<EnterpriseOpRequest> listApplyEntrys(EnterpriseOpRequest request,
-													 ListingLocator locator, int pageSize, List<Long> idList) {
+													 ListingLocator locator, Integer pageSize, List<Long> idList) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		pageSize = pageSize + 1;
-		Condition cond =  Tables.EH_ENTERPRISE_OP_REQUESTS.ID.gt(0L);
+
+		Condition cond =  Tables.EH_ENTERPRISE_OP_REQUESTS.NAMESPACE_ID.eq(request.getNamespaceId());
 		SelectQuery<EhEnterpriseOpRequestsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_OP_REQUESTS);
 
-		if(!StringUtils.isEmpty(request.getNamespaceId())){
-			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.NAMESPACE_ID.eq(request.getNamespaceId()));
-		}
 		if(!StringUtils.isEmpty(request.getCommunityId())){
 			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.COMMUNITY_ID.eq(request.getCommunityId()));
 		}
@@ -375,12 +372,17 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 
 		query.addConditions(cond);
 		query.addOrderBy(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.desc());
-		query.addLimit(pageSize);
-		List<EnterpriseOpRequest> enterpriseOpRequests = query.fetch().map(new DefaultRecordMapper(Tables.EH_ENTERPRISE_OP_REQUESTS.recordType(), EnterpriseOpRequest.class));
 
-		if (enterpriseOpRequests.size() >= pageSize) {
-			locator.setAnchor(enterpriseOpRequests.get(enterpriseOpRequests.size() - 1).getId());
-			enterpriseOpRequests.remove(enterpriseOpRequests.size() - 1);
+		if (null != pageSize) {
+			pageSize = pageSize + 1;
+			query.addLimit(pageSize);
+		}
+
+		List<EnterpriseOpRequest> enterpriseOpRequests = query.fetch().map(new DefaultRecordMapper(Tables.EH_ENTERPRISE_OP_REQUESTS.recordType(), EnterpriseOpRequest.class));
+		int listSize = enterpriseOpRequests.size();
+		if (null != pageSize && listSize >= pageSize) {
+			locator.setAnchor(enterpriseOpRequests.get(listSize - 1).getId());
+			enterpriseOpRequests.remove(listSize - 1);
 		} else {
 			locator.setAnchor(null);
 		}

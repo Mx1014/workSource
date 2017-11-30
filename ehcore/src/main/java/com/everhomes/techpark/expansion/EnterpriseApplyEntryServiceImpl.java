@@ -37,9 +37,11 @@ import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.*;
+import com.everhomes.parking.ParkingRechargeOrder;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
@@ -49,6 +51,8 @@ import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.organization.VendorType;
+import com.everhomes.rest.parking.ParkingRechargeType;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -62,23 +66,26 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.Tuple;
+import com.everhomes.util.*;
 import com.everhomes.yellowPage.YellowPage;
 import com.everhomes.yellowPage.YellowPageProvider;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.*;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -197,13 +204,15 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		
 		EnterpriseOpRequest request = ConvertHelper.convert(cmd, EnterpriseOpRequest.class);
 
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		if(cmd.getPageSize() == null) {
+			cmd.setPageSize(configurationProvider.getIntValue("pagination.default.size", AppConstants.PAGINATION_DEFAULT_SIZE));
+		}
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 	    locator.setAnchor(cmd.getPageAnchor());
 		List<EnterpriseOpRequest> enterpriseOpRequests = null;
 		//增加了判断buildingId
 		if(null == cmd.getBuildingId()) {
-			enterpriseOpRequests = enterpriseApplyEntryProvider.listApplyEntrys(request, locator, pageSize);
+			enterpriseOpRequests = enterpriseApplyEntryProvider.listApplyEntrys(request, locator, cmd.getPageSize());
 		} else {
 			List<EnterpriseOpRequestBuilding> opRequestBuildings = this.enterpriseOpRequestBuildingProvider.queryEnterpriseOpRequestBuildings(
 					new ListingQueryBuilderCallback() {
@@ -220,7 +229,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				idList.add(opBuilding.getEnterpriseOpRequestsId());
 			}
 			if(idList.size() > 0) {
-				enterpriseOpRequests = enterpriseApplyEntryProvider.listApplyEntrys(request, locator, pageSize, idList);
+				enterpriseOpRequests = enterpriseApplyEntryProvider.listApplyEntrys(request, locator, cmd.getPageSize(), idList);
 			}
 		}
 		if(null == enterpriseOpRequests) {
@@ -236,6 +245,69 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		response.setEntrys(dtos);
 		return response;
+	}
+
+	@Override
+	public void exportApplyEntrys(ListEnterpriseApplyEntryCommand cmd, HttpServletResponse resp) {
+		cmd.setPageSize(Integer.MAX_VALUE - 1);
+		ListEnterpriseApplyEntryResponse response = listApplyEntrys(cmd);
+
+		Workbook wb = new XSSFWorkbook();
+
+		Font font = wb.createFont();
+		font.setFontName("黑体");
+		font.setFontHeightInPoints((short) 16);
+		CellStyle style = wb.createCellStyle();
+		style.setFont(font);
+
+		Sheet sheet = wb.createSheet("ApplyEntrys");
+		sheet.setDefaultColumnWidth(20);
+		sheet.setDefaultRowHeightInPoints(20);
+		Row row = sheet.createRow(0);
+		row.createCell(0).setCellValue("申请时间");
+		row.createCell(1).setCellValue("项目");
+		row.createCell(2).setCellValue("楼栋");
+		row.createCell(3).setCellValue("门牌");
+		row.createCell(4).setCellValue("申请来源");
+		row.createCell(5).setCellValue("申请人");
+		row.createCell(6).setCellValue("电话");
+		row.createCell(7).setCellValue("企业");
+		row.createCell(8).setCellValue("状态");
+
+		SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		if (null != response) {
+			List<EnterpriseApplyEntryDTO> list = response.getEntrys();
+			for(int i=0;i<list.size();i++){
+				Row tempRow = sheet.createRow(i + 1);
+				EnterpriseApplyEntryDTO entry = list.get(i);
+				tempRow.createCell(0).setCellValue(datetimeSF.format(entry.getCreateTime()));
+				tempRow.createCell(1).setCellValue(checkStr(entry.getCommunityName()));
+				tempRow.createCell(2).setCellValue(checkStr(entry.getBuildingName()));
+				tempRow.createCell(3).setCellValue(checkStr(entry.getApartmentName()));
+				tempRow.createCell(4).setCellValue(ApplyEntrySourceType.fromType(entry.getSourceType()).getDescription());
+				tempRow.createCell(5).setCellValue(checkStr(entry.getApplyUserName()));
+				tempRow.createCell(6).setCellValue(checkStr(entry.getApplyContact()));
+				tempRow.createCell(7).setCellValue(checkStr(entry.getEnterpriseName()));
+				tempRow.createCell(8).setCellValue(ApplyEntryStatus.fromType(entry.getStatus()).getDescription());
+
+			}
+		}
+
+		ByteArrayOutputStream out = null;
+		try {
+			out = new ByteArrayOutputStream();
+			wb.write(out);
+			DownloadUtils.download(out, resp);
+		} catch (IOException e) {
+			LOGGER.error("exportApplyEntrys is fail. {}",e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"exportApplyEntrys is fail.");
+		}
+
+	}
+
+	private String checkStr(String str) {
+		return null == str ? "无" : str;
 	}
 
 	private EnterpriseApplyEntryDTO populateEnterpriseApplyEntryDTO(EnterpriseOpRequest enterpriseOpRequest, String defaultValue) {

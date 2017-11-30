@@ -26,6 +26,7 @@ import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
 import com.everhomes.util.ConvertHelper;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 @RestDoc(value = "entry controller", site = "ehcore")
@@ -214,6 +215,16 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/entry/exportApplyEntrys
+	 * <p>入住信息列表
+	 */
+	@RequestMapping("exportApplyEntrys")
+	public void exportApplyEntrys(ListEnterpriseApplyEntryCommand cmd, HttpServletResponse resp){
+		enterpriseApplyEntryService.exportApplyEntrys(cmd, resp);
+
 	}
 
 	/**
