@@ -169,15 +169,15 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
         List<EquipmentInspectionPlanDTO> plans = new ArrayList<EquipmentInspectionPlanDTO>();
         for(Long id : ids) {
             //RP上只展示计划基本信息和执行周期
-            EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlan(id);
+            EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(id);
 
             //填充执行开始时间  执行频率  执行时长
-            plan.setExecuteStartTime(repeatService.getExecuteStartTime(ConvertHelper.
-                    convert(repeatService.findRepeatSettingById(plan.getRepeatsettingId()), RepeatSettingsDTO.class)));
-            plan.setExecutionFrequency(repeatService.getExecutionFrequency(ConvertHelper.
-                    convert(repeatService.findRepeatSettingById(plan.getRepeatsettingId()), RepeatSettingsDTO.class)));
-            plan.setLimitTime(repeatService.getlimitTime(ConvertHelper.
-                    convert(repeatService.findRepeatSettingById(plan.getRepeatsettingId()), RepeatSettingsDTO.class)));
+            RepeatSettingsDTO repeatSetting =ConvertHelper.
+                    convert(repeatService.findRepeatSettingById(plan.getRepeatsettingId()), RepeatSettingsDTO.class);
+
+            plan.setExecuteStartTime(repeatService.getExecuteStartTime(repeatSetting));
+            plan.setExecutionFrequency(repeatService.getExecutionFrequency(repeatSetting));
+            plan.setLimitTime(repeatService.getlimitTime(repeatSetting));
 
             plans.add(ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class));
 

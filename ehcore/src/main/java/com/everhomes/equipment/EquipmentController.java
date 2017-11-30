@@ -58,6 +58,9 @@ public class EquipmentController extends ControllerBase {
     @Autowired
     private EquipmentStandardMapSearcher equipmentStandardMapSearcher;
 
+    @Autowired
+    private EquipmentPlanSearcher equipmentPlanSearcher;
+
     /**
      * <b>URL: /equipment/updateEquipmentStandard</b>
      * <p>创建或修改设备巡检标准</p>
@@ -359,6 +362,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("createEquipmentInspectionPlan")
     @RestReturn(value = EquipmentInspectionPlanDTO.class)
     public RestResponse createEquipmentInspectionPlan(UpdateEquipmentPlanCommand cmd) {
+
         EquipmentInspectionPlanDTO equipmentInspectionPlansDTO = equipmentService.createEquipmentsInspectionPlan(cmd);
 
         return getRestResponse(equipmentInspectionPlansDTO);
@@ -385,7 +389,7 @@ public class EquipmentController extends ControllerBase {
     @RestReturn(value = EquipmentInspectionPlanDTO.class)
     public RestResponse getEquipmentInspectionPlan(DeleteEquipmentPlanCommand cmd) {
 
-        EquipmentInspectionPlanDTO equipmentInspectionPlans = equipmentService.getEquipmmentInspectionPlan(cmd);
+        EquipmentInspectionPlanDTO equipmentInspectionPlans = equipmentService.getEquipmmentInspectionPlanById(cmd);
 
         return getRestResponse(equipmentInspectionPlans);
     }
@@ -409,7 +413,8 @@ public class EquipmentController extends ControllerBase {
     @RestReturn(value = searchEquipmentInspectionPlansResponse.class)
     public RestResponse searchEquipmentInspectionPlans(searchEquipmentInspectionPlansCommand cmd) {
 
-        searchEquipmentInspectionPlansResponse equipmentInspectionPlansResponse = null;
+        searchEquipmentInspectionPlansResponse equipmentInspectionPlansResponse = equipmentPlanSearcher.query(cmd);
+
         return getRestResponse(equipmentInspectionPlansResponse);
     }
 

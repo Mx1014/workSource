@@ -7,8 +7,9 @@ import com.everhomes.util.StringHelper;
 public enum EquipmentPlanStatus {
     WAITTING_FOR_STARTING((byte) 0, "待发起"),
     WATTING_FOR_APPOVING((byte) 1, "待审批"),
-    ACTIVE((byte) 2, "有效"),
-    INACTIVE((byte) 3, "无效");
+    QUALIFIED((byte) 2, "审批通过"),
+    UN_QUALIFIED((byte) 3, "审批不通过"),
+    INACTIVE((byte) 4, "无效");
 
     private byte code;
     private String name;

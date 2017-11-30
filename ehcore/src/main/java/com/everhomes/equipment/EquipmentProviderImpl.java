@@ -122,7 +122,6 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
         standard.setId(id);
         standard.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        standard.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
         LOGGER.info("creatEquipmentStandard: " + standard);
 
@@ -1411,7 +1410,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public EquipmentInspectionPlans getEquipmmentInspectionPlan(Long planId) {
+    public EquipmentInspectionPlans getEquipmmentInspectionPlanById(Long planId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhEquipmentInspectionPlansDao dao = new EhEquipmentInspectionPlansDao(context.configuration());
         return ConvertHelper.convert(dao.findById(planId), EquipmentInspectionPlans.class);
@@ -1430,6 +1429,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP)
                 .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.ID.eq(planId))
+                .orderBy(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.DEFAULT_ORDER)
                 .fetchInto(EhEquipmentInspectionEquipmentPlanMap.class);
     }
 
@@ -1464,7 +1464,53 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             plans.add(ConvertHelper.convert(r, EquipmentInspectionPlans.class));
             return null;
         });
-        if (pageSize >= plans.size()) {
+        if (pageSize <= plans.size()) {
+            locator.setAnchor(plans.get(plans.size() - 1).getId());
+        } else {
+            locator.setAnchor(null);
+        }
+
+        return plans;
+    }
+
+    @Override
+    public void updateEquipmentInspectionPlan(EquipmentInspectionPlans plan) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhEquipmentInspectionPlansDao dao = new EhEquipmentInspectionPlansDao(context.configuration());
+        dao.update(plan);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEquipmentInspectionPlans.class, plan.getId());
+    }
+
+    @Override
+    public void deleteEquipmentInspectionStandardMap(Long deleteId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhEquipmentInspectionStandardGroupMapDao dao = new EhEquipmentInspectionStandardGroupMapDao(context.configuration());
+        dao.deleteById(deleteId);
+    }
+
+    @Override
+    public void inActiveEquipmentPlansMapByStandardId(Long standardId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhEquipmentInspectionPlansDao dao = new EhEquipmentInspectionPlansDao(context.configuration());
+        dao.deleteById(standardId);
+    }
+
+    @Override
+    public List<EquipmentInspectionPlans> ListQualifiedEquipmentInspectionPlans(ListingLocator locator, int pageSize) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<EquipmentInspectionPlans> plans = new ArrayList<>();
+        SelectQuery<EhEquipmentInspectionPlansRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_PLANS);
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_PLANS.STATUS.eq(EquipmentPlanStatus.QUALIFIED.getCode()));
+        if (locator.getAnchor() != null && locator.getAnchor() != 0) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_PLANS.ID.lt(locator.getAnchor()));
+        }
+        query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_PLANS.ID.desc());
+        query.addLimit(pageSize);
+        query.fetch().map((r) -> {
+            plans.add(ConvertHelper.convert(r, EquipmentInspectionPlans.class));
+            return null;
+        });
+        if (pageSize <= plans.size()) {
             locator.setAnchor(plans.get(plans.size() - 1).getId());
         } else {
             locator.setAnchor(null);

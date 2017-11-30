@@ -1,14 +1,12 @@
 package com.everhomes.scheduler;
 
-import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.equipment.*;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.rest.equipment.EquipmentStandardStatus;
 import com.everhomes.rest.equipment.EquipmentStatus;
-import com.everhomes.rest.quality.QualityGroupType;
-import com.everhomes.util.CronDateUtils;
 import com.everhomes.util.DateHelper;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -62,17 +60,38 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
 			//为防止时间长了的话可能会有内存溢出的可能，把每天过期的定时任务清理一下
 			//scheduleProvider.unscheduleJob("EquipmentInspectionNotify ");
-
 			closeDelayTasks();
-			createTask();
-	//		Boolean notifyFlag = configurationProvider.getBooleanValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_FLAG, false);
-	//		if (notifyFlag) {
-	//			sendTaskMsg();
-	//		}
+			//createTask();
+			createTaskByPlan();
 		}
 
 	}
-	
+
+	private void createTaskByPlan() {
+		if (LOGGER.isInfoEnabled()){
+			LOGGER.info("EquipmentInspectionScheduleJob:createTask.....");
+		}
+		int pageSize=200;
+		ListingLocator locator =new ListingLocator();
+		while (locator.getAnchor()!=null){
+			List<EquipmentInspectionPlans> plans = equipmentProvider.ListQualifiedEquipmentInspectionPlans(locator, pageSize);
+			for (EquipmentInspectionPlans plan: plans){
+				if(checkPlanRepeat(plan)){
+
+				}
+
+			}
+		}
+	}
+
+	private boolean checkPlanRepeat(EquipmentInspectionPlans plan) {
+		boolean isRepeat = repeatService.isRepeatSettingActive(plan.getRepeatsettingId());
+		LOGGER.info("checkPlanRepeat: plans  id = " + plan.getId()
+				+ "repeat setting id = "+ plan.getRepeatsettingId() + "is repeat setting active: " + isRepeat);
+
+		return isRepeat;
+	}
+
 	private void createTask() {
 		if(LOGGER.isInfoEnabled()) {
 			LOGGER.info("EquipmentInspectionScheduleJob: createTask");
@@ -81,7 +100,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 
 
 		Map<Long, Set<EquipmentStandardMap>> standardEquipmentMap = new HashMap<>();
-//		maps.stream().map(map -> {
+
 		if(maps != null && maps.size() > 0) {
 			for(EquipmentStandardMap map : maps) {
 				Set<EquipmentStandardMap> equipmentStandardMaps = standardEquipmentMap.get(map.getStandardId());
@@ -94,7 +113,6 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 			}
 		}
 
-//		});
 
 		for (Map.Entry<Long, Set<EquipmentStandardMap>> entry : standardEquipmentMap.entrySet()) {
 			EquipmentInspectionStandards standard = equipmentProvider.findStandardById(entry.getKey());
@@ -125,30 +143,6 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 			}
 
 		}
-//		if(maps != null && maps.size() > 0) {
-//			for(EquipmentStandardMap map : maps) {
-//				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
-//				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getTargetId());
-//				if(standard == null || standard.getStatus() == null
-//						|| !EquipmentStandardStatus.ACTIVE.equals(EquipmentStandardStatus.fromStatus(standard.getStatus()))) {
-//					LOGGER.info("EquipmentInspectionScheduleJob standard is not exist or active! standardId = " + map.getStandardId());
-//					continue;
-//				} else if(equipment == null || !EquipmentStatus.IN_USE.equals(EquipmentStatus.fromStatus(equipment.getStatus()))) {
-//						LOGGER.info("EquipmentInspectionScheduleJob equipment is not exist or active! equipmentId = " + map.getTargetId());
-//						continue;
-//
-//				} else {
-//					boolean isRepeat = repeatService.isRepeatSettingActive(standard.getRepeatSettingId());
-//					LOGGER.info("EquipmentInspectionScheduleJob: standard id = " + standard.getId()
-//							+ "repeat setting id = "+ standard.getRepeatSettingId() + "is repeat setting active: " + isRepeat);
-//					if(isRepeat) {
-//
-//							equipmentService.creatTaskByStandard(equipment, standard);
-//
-//					}
-//				}
-//			}
-//		}
 	}
 
 
@@ -198,29 +192,5 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		equipmentProvider.closeExpiredReviewTasks();
 	}
 
-	private void sendTaskMsg() {
-		long current = System.currentTimeMillis();//当前时间毫秒数
-		long zero = current / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
-
-		long endTime = current + (configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 10) * 60000);
-		//通知当天零点到11分的所有任务
-		equipmentService.sendTaskMsg(zero, endTime+60000, QualityGroupType.EXECUTIVE_GROUP.getCode());
-		equipmentService.sendTaskMsg(zero, endTime+60000, QualityGroupType.REVIEW_GROUP.getCode());
-		EquipmentInspectionTasks task = equipmentProvider.findLastestEquipmentInspectionTask(endTime+60000);
-
-		if(task != null) {
-			Timestamp taskStartTime = task.getExecutiveStartTime();
-			//默认提前十分钟
-			long nextNotifyTime = taskStartTime.getTime() - (configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 10) * 60000);
-
-			String cronExpression = CronDateUtils.getCron(new Timestamp(nextNotifyTime));
-
-			String equipmentInspectionNotifyTriggerName = "EquipmentInspectionNotify ";
-			String equipmentInspectionNotifyJobName = "EquipmentInspectionNotify " + System.currentTimeMillis();
-			scheduleProvider.scheduleCronJob(equipmentInspectionNotifyTriggerName, equipmentInspectionNotifyJobName,
-					cronExpression, EquipmentInspectionTaskNotifyScheduleJob.class, null);
-		}
-
-	}
 
 }

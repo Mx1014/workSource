@@ -141,8 +141,9 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
         }
 
         FilterBuilder fb = null;
-        FilterBuilder nfb = FilterBuilders.termFilter("reviewStatus", EquipmentReviewStatus.DELETE.getCode());
-    	fb = FilterBuilders.notFilter(nfb);
+        //V3.0.2去掉设备和标准关联审批
+        /*FilterBuilder nfb = FilterBuilders.termFilter("reviewStatus", EquipmentReviewStatus.DELETE.getCode());
+    	fb = FilterBuilders.notFilter(nfb);*/
 		//总公司分公司的原因改用namespaceId by xiongying20170328
 		fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId()));
 //    	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
@@ -153,12 +154,12 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
         if(!StringUtils.isNullOrEmpty(cmd.getTargetType()))
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
         
-        if(cmd.getReviewStatus() != null)
+  /*      if(cmd.getReviewStatus() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewStatus", cmd.getReviewStatus()));
 
 		if(cmd.getReviewResult() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewResult", cmd.getReviewResult()));
-
+*/
 		//增加  V3.0.2  inspectionCategoryId   repeatType 过滤
 		if(cmd.getReviewResult() != null)
 			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("repeatType", cmd.getRepeatType()));
@@ -239,10 +240,6 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 	private XContentBuilder createDoc(EquipmentStandardMap map){
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
-           
-            b.field("reviewStatus", map.getReviewStatus());
-			b.field("reviewResult", map.getReviewResult());
-            b.field("status", map.getStatus());
             
             EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
             if(standard != null) {

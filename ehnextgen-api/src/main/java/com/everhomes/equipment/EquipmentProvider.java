@@ -153,7 +153,7 @@ public interface EquipmentProvider {
 
     EquipmentInspectionPlans createEquipmentInspectionPlans(EquipmentInspectionPlans plan);
 
-    EquipmentInspectionPlans getEquipmmentInspectionPlan(Long planId);
+    EquipmentInspectionPlans getEquipmmentInspectionPlanById(Long planId);
 
 	void createEquipmentPlanMaps(EquipmentInspectionPlans plan, EhEquipmentInspectionEquipmentPlanMap map);
 
@@ -164,4 +164,12 @@ public interface EquipmentProvider {
 	void deleteEquipmentInspectionPlanMap(Long id);
 
 	List<EquipmentInspectionPlans> ListEquipmentInspectionPlans(ListingLocator locator, int pageSize);
+
+    void updateEquipmentInspectionPlan(EquipmentInspectionPlans plan);
+
+    void deleteEquipmentInspectionStandardMap(Long  deleteId);
+
+	void inActiveEquipmentPlansMapByStandardId(Long id);
+
+    List<EquipmentInspectionPlans> ListQualifiedEquipmentInspectionPlans(ListingLocator locator, int pageSize);
 }

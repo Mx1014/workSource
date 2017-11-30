@@ -1,29 +1,13 @@
 // @formatter:off
 package com.everhomes.sequence;
 
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.admin.GetSequenceCommand;
 import com.everhomes.rest.admin.GetSequenceDTO;
-import com.everhomes.schema.tables.pojos.EhAclPrivileges;
-import com.everhomes.schema.tables.pojos.EhAclRoleAssignments;
-import com.everhomes.schema.tables.pojos.EhAclRoles;
-import com.everhomes.schema.tables.pojos.EhAcls;
-import com.everhomes.schema.tables.pojos.EhConfigurations;
-import com.everhomes.schema.tables.pojos.EhContentShardMap;
-import com.everhomes.schema.tables.pojos.EhMessageBoxs;
-import com.everhomes.schema.tables.pojos.EhMessages;
-import com.everhomes.schema.tables.pojos.EhNamespaces;
-import com.everhomes.schema.tables.pojos.EhServerShardMap;
+import com.everhomes.schema.tables.pojos.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
 import com.everhomes.server.schema.tables.EhPaymentWithdrawOrders;
@@ -31,6 +15,12 @@ import com.everhomes.server.schema.tables.EhQuestionnaireRanges;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class SequenceServiceImpl implements SequenceService {
@@ -777,6 +767,12 @@ public class SequenceServiceImpl implements SequenceService {
         });
         syncTableSequence(null, EhCategories.class, Tables.EH_CATEGORIES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_CATEGORIES.ID.max()).from(Tables.EH_CATEGORIES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEquipmentInspectionPlans.class, Tables.EH_EQUIPMENT_INSPECTION_PLANS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_PLANS.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_PLANS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEquipmentInspectionEquipmentPlanMap.class, Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP).fetchOne().value1();
         });
         syncTableSequence(null, EhEquipmentInspectionTasks.class, Tables.EH_EQUIPMENT_INSPECTION_TASKS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_TASKS).fetchOne().value1();
