@@ -4798,7 +4798,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	@Override
-	public  ScopeFieldItem findScopeFieldItemByFieldItemId(findScopeFieldItemCommand cmd) {
-		 return  fieldProvider.findScopeFieldItemByBusinessValue(cmd.getNamespaceId(),cmd.getCommunityId(),cmd.getModuleName(),cmd.getFieldId(),cmd.getBusinessValue());
+	public  FindScopeFieldItemByBusinessValueRestResponse findScopeFieldItemByFieldItemId(findScopeFieldItemCommand cmd) {
+		 return  (FindScopeFieldItemByBusinessValueRestResponse)ConvertHelper.convert(fieldProvider.findScopeFieldItemByBusinessValue(cmd.getNamespaceId(),cmd.getCommunityId(),cmd.getModuleName(),cmd.getFieldId(),cmd.getBusinessValue()),FindScopeFieldItemByBusinessValueRestResponse.class);
 	}
 }

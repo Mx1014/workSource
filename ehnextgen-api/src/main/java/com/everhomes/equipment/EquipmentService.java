@@ -85,5 +85,5 @@ public interface EquipmentService {
 
 	Set<Long> getTaskGroupUsers(Long taskId, byte groupType);
 
-	ScopeFieldItem findScopeFieldItemByFieldItemId(findScopeFieldItemCommand cmd);
+	FindScopeFieldItemByBusinessValueRestResponse findScopeFieldItemByFieldItemId(findScopeFieldItemCommand cmd);
 }

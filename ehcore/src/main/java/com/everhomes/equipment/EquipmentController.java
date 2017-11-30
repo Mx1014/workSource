@@ -1136,7 +1136,7 @@ public class EquipmentController extends ControllerBase {
 	 * <p>根据业务值获取item信息</p>
 	 */
 	@RequestMapping("findScopeFieldItemByBusinessValue")
-	@RestReturn(value = ScopeFieldItem.class)
+	@RestReturn(value = FindScopeFieldItemByBusinessValueRestResponse.class)
 	public RestResponse findScopeFieldItemByBusinessValue (findScopeFieldItemCommand cmd) {
 		RestResponse response = new RestResponse(equipmentService.findScopeFieldItemByFieldItemId(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
