@@ -20,6 +20,7 @@ import com.everhomes.rest.relocation.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,7 +100,7 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
     public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
 
         String content = flowCase.getContent();
-        if (flowUserType == FlowUserType.APPLIER) {
+        if (StringUtils.isNotBlank(content) && flowUserType == FlowUserType.APPLIER) {
             int lineBreak = content.indexOf("\\r\\n");
             content = content.substring(lineBreak + 4);
         }
