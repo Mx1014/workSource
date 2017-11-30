@@ -1185,7 +1185,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 				result = HttpUtils.post(siyinUrl + "/console/cardListener", params, 30);
 				String siyinCode = getSiyinCode(result);
 				if(siyinCode!=null && siyinCode.startsWith("INF")){
-					if(siyinCode.equals("INF0008") || siyinCode.equals("INF0009")){
+					if(siyinCode.equals("INF0008") || siyinCode.equals("INF0009") || siyinCode.equals("INF0001")){
 						continue readerLoop;
 					}else{
 						LOGGER.error("siyin api:/console/cardListener request failed, result = {} ",result);
