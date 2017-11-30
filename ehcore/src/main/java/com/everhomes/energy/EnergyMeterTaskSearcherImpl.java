@@ -161,15 +161,17 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
         }
 
         if(cmd.getStatus() != null) {
-            //已抄未完成
-            if(cmd.getStatus() == 3) {
-                fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", EnergyTaskStatus.NON_READ.getCode()));
-                RangeFilterBuilder rf = new RangeFilterBuilder("endTime");
-                rf.lte(DateHelper.currentGMTTime().getTime());
-                fb = FilterBuilders.andFilter(fb, rf);
-            } else {
+//            //已抄未完成
+//            if(cmd.getStatus() == 3) {
+//                FilterBuilder statusfb = FilterBuilders.termFilter("status", EnergyTaskStatus.NON_READ.getCode());
+//                RangeFilterBuilder rf = new RangeFilterBuilder("endTime");
+//                rf.lte(DateHelper.currentGMTTime().getTime());
+//                statusfb = FilterBuilders.andFilter(statusfb, rf);
+//                statusfb = FilterBuilders.orFilter(statusfb, FilterBuilders.termFilter("status", EnergyTaskStatus.NON_READ_DELAY.getCode()));
+//                fb = FilterBuilders.andFilter(fb, statusfb);
+//            } else {
                 fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
-            }
+//            }
 
         }
 

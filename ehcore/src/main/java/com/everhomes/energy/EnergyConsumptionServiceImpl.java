@@ -3972,6 +3972,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             row.createCell(++i).setCellValue("已完成");
         if(EnergyTaskStatus.INACTIVE.equals(EnergyTaskStatus.fromCode(dto.getStatus())))
             row.createCell(++i).setCellValue("无效");
+        if(EnergyTaskStatus.NON_READ_DELAY.equals(EnergyTaskStatus.fromCode(dto.getStatus())))
+            row.createCell(++i).setCellValue("到期未完成");
 
         if(dto.getLastTaskReading() == null) {
             row.createCell(++i).setCellValue("");
