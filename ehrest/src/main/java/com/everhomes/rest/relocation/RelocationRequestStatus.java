@@ -4,8 +4,8 @@ package com.everhomes.rest.relocation;
 /**
  * <ul>物品搬迁申请状态
  * <li>CANCELED(0): 已取消</li>
- * <li>COMPLETED(1): 处理中</li>
- * <li>PROCESSING(2): 已完成</li>
+ * <li>COMPLETED(1): 已完成</li>
+ * <li>PROCESSING(2): 处理中</li>
  * </ul>
  */
 public enum RelocationRequestStatus {
