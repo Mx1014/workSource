@@ -224,7 +224,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 			String body = "";
 			ServiceAllianceCategories category = yellowPageProvider.findCategoryById(serviceOrg.getParentId());
-			body += "收到一条"+serviceOrg.getName()+"的申请";
+			body += "收到一条"+category.getName()+"的申请";
 
 			FlowCaseDetailActionData actionData = new FlowCaseDetailActionData();
 			actionData.setFlowCaseId(flowCase.getId());
