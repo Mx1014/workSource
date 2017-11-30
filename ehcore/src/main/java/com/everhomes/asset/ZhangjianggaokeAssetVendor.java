@@ -68,7 +68,9 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
 
     @Override
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum) {
+        PaymentBillGroup group = assetProvider.getBillGroupById(billGroupId);
         ShowBillForClientDTO finalDto = new ShowBillForClientDTO();
+        if(!group.getName().equals("租金")) return finalDto;
         List<BillDetailDTO> dtos = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
         SimpleDateFormat yyyy_MM_dd = new SimpleDateFormat("yyyy-MM-dd");
@@ -158,6 +160,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             ContractBillResponse response = (ContractBillResponse)StringHelper.fromJsonString(postJson, ContractBillResponse.class);
             if(response.getErrorCode()==200){
                 List<ContractBillsDTO> res = response.getResponse();
+                fakeData(res,targetType);
                 for(int i = 0; i < res.size(); i++){
                     ContractBillsDTO sourceDto = res.get(i);
                     BillDetailDTO dto = new BillDetailDTO();
@@ -227,6 +230,96 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         }
         finalDto.setBillDetailDTOList(dtos);
         return finalDto;
+    }
+
+    private void fakeData(List<ContractBillsDTO> res,String targetType) {
+        res = new ArrayList<>();
+
+
+
+        if(targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+
+            ContractBillsDTO dtos[] = new ContractBillsDTO[4];
+            for(int i = 0; i < dtos.length; i++) {
+                ContractBillsDTO dto = new ContractBillsDTO();
+                dto.setCustomerName("账单"+i);
+                dto.setFeeName("租金");
+            }
+            // local 待缴 10天
+            ContractBillsDTO dto = dtos[0];
+            dto.setAmountOwed("1000");
+            dto.setDateStrBegin("2017-11-25");
+            dto.setDateStrEnd("2017-12-25");
+            dto.setPayFlag((byte)0);
+            dto.setStatus("未缴");
+            res.add(dto);
+            // local  10天 欠费
+            ContractBillsDTO dto1 = dtos[1];
+            dto1.setAmountOwed("1000");
+            dto1.setDateStrBegin("2017-11-10");
+            dto1.setDateStrBegin("2017-12-10");
+            dto1.setPayFlag((byte)0);
+            dto1.setStatus("未缴");
+            res.add(dto1);
+            //   local  10天  未缴
+            ContractBillsDTO dto2 = dtos[2];
+            dto2.setAmountOwed("1000");
+            dto2.setDateStrBegin("2017-12-05");
+            dto2.setDateStrBegin("2018-01-05");
+            dto2.setPayFlag((byte)0);
+            dto2.setStatus("未缴");
+            res.add(dto2);
+            // 已缴
+            ContractBillsDTO dto3 = dtos[3];
+            dto3.setAmountOwed("1000");
+            dto3.setDateStrBegin("2017-10-05");
+            dto3.setDateStrBegin("2017-11-05");
+            dto3.setPayFlag((byte)1);
+            dto3.setStatus("已缴纳");
+            res.add(dto3);
+        }else if(targetType.equals(AssetPaymentStrings.EH_USER)){
+
+            ContractBillsDTO dtos[] = new ContractBillsDTO[4];
+            for(int i = 0; i < dtos.length; i++) {
+                ContractBillsDTO dto = new ContractBillsDTO();
+                dto.setCustomerName("账单"+i);
+                dto.setFeeName("租金");
+            }
+            // local 待缴 10天
+            ContractBillsDTO dto = dtos[0];
+            dto.setAmountOwed("1000");
+            dto.setDateStrBegin("2017-12-05");
+            dto.setDateStrEnd("2018-01-25");
+            dto.setPayFlag((byte)0);
+            dto.setStatus("未缴");
+            res.add(dto);
+            // local  10天 欠费
+            ContractBillsDTO dto1 = dtos[1];
+            dto1.setAmountOwed("1000");
+            dto1.setDateStrBegin("2017-11-10");
+            dto1.setDateStrBegin("2017-12-10");
+            dto1.setPayFlag((byte)0);
+            dto1.setStatus("未缴");
+            res.add(dto1);
+            //   local  10天  未缴
+            ContractBillsDTO dto2 = dtos[2];
+            dto2.setAmountOwed("1000");
+            dto2.setDateStrBegin("2018-01-05");
+            dto2.setDateStrBegin("2018-02-05");
+            dto2.setPayFlag((byte)0);
+            dto2.setStatus("未缴");
+            res.add(dto2);
+            // 已缴
+            ContractBillsDTO dto3 = dtos[3];
+            dto3.setAmountOwed("1000");
+            dto3.setDateStrBegin("2017-10-05");
+            dto3.setDateStrBegin("2017-11-05");
+            dto3.setPayFlag((byte)1);
+            dto3.setStatus("已缴纳");
+            res.add(dto3);
+
+
+        }
     }
 
     @Override
