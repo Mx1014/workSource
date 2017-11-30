@@ -17,6 +17,7 @@ import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1139,6 +1140,20 @@ public class AssetController extends ControllerBase {
     public RestResponse functionDisableList(FunctionDisableListCommand cmd){
         FunctionDisableListDto dto = assetService.functionDisableList(cmd);
         RestResponse restResponse = new RestResponse(dto);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /asset/sc</b>
+     * <p></p>
+     */
+    @RequestMapping("sc")
+    @RequireAuthentication(value = false)
+    public RestResponse syncCustomer(SyncCustomerCommand cmd){
+        RestResponse restResponse = new RestResponse();
+        assetService.syncCustomer(cmd.getNamespaceId());
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         restResponse.setErrorDescription("OK");
         return restResponse;

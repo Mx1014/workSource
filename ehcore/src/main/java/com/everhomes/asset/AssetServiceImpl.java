@@ -14,6 +14,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contract.ContractScheduleJob;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.customer.CustomerService;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
@@ -46,6 +47,7 @@ import com.everhomes.rest.contract.ListCustomerContractsCommand;
 import com.everhomes.rest.contract.*;
 
 import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.customer.SyncCustomersCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -79,6 +81,7 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.sun.org.apache.regexp.internal.RE;
+import org.apache.catalina.core.ApplicationContext;
 import org.apache.commons.collections.list.AbstractLinkedList;
 
 import org.apache.commons.collections.map.HashedMap;
@@ -189,6 +192,9 @@ public class AssetServiceImpl implements AssetService {
 
 //    @Autowired
 //    private ZhangjianggaokeAssetVendor handler;
+
+    @Autowired
+    private CustomerService customerService;
 
     @Autowired
     private NamespaceResourceService namespaceResourceService;
@@ -2566,6 +2572,22 @@ public class AssetServiceImpl implements AssetService {
         dto.setHasPay(hasPay);
         dto.setHasContractView(hasContractView);
         return dto;
+    }
+
+    @Override
+    public void syncCustomer(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Community> communities = context.selectFrom(Tables.EH_COMMUNITIES)
+                .where(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(999971))
+                .fetchInto(Community.class);
+        for(int i = 0; i < communities.size(); i++){
+            Community c = communities.get(i);
+            SyncCustomersCommand cmd = new SyncCustomersCommand();
+            cmd.setCommunityId(c.getId());
+            cmd.setNamespaceId(999971);
+            customerService.syncIndividualCustomers(cmd);
+            customerService.syncEnterpriseCustomers(cmd);
+        }
     }
 
 
