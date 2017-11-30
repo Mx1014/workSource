@@ -47,6 +47,7 @@ import com.everhomes.rest.aclink.AclinkMessageTestCommand;
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
 import com.everhomes.rest.aclink.AclinkRemoteOpenByHardwareIdCommand;
 import com.everhomes.rest.aclink.AclinkRemoteOpenCommand;
+import com.everhomes.rest.aclink.AclinkServiceErrorCode;
 import com.everhomes.rest.aclink.AclinkSyncTimerCommand;
 import com.everhomes.rest.aclink.AclinkUpdateLinglingStoreyCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeCommand;
@@ -78,6 +79,7 @@ import com.everhomes.rest.aclink.QueryDoorMessageResponse;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
+import com.everhomes.util.RuntimeErrorException;
 
 @RestDoc(value="Aclink controller", site="core")
 @RestController
@@ -488,7 +490,10 @@ public class AclinkController extends ControllerBase {
             //https://core.zuolin.com/mobile/static/qr_access/qrCode.html?id=10ae5-15016
             //getVisitor
             DoorAuth auth = doorAccessService.getLinglingDoorAuthByUuid(cmd.getId());
-            if(auth.getDriver().equals(DoorAccessDriverType.PHONE_VISIT.getCode())) {
+//            if(auth == null) {
+//                throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "DoorAuth error");
+//            }
+            if(auth != null && auth.getDriver().equals(DoorAccessDriverType.PHONE_VISIT.getCode())) {
                 httpHeaders.setLocation(new URI("/mobile/static/qr_access/qrPhoneCode.html?id=" + cmd.getId()));
                 
             } else {
