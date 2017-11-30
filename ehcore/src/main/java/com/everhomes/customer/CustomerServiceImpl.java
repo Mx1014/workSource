@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contract.ContractService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.contract.ContractStatus;
@@ -1738,7 +1739,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void syncEnterpriseCustomers(SyncCustomersCommand cmd) {
         if(cmd.getNamespaceId() == 999971) {
-            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode()).tryEnter(()-> {
+            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
                 ExecutorUtil.submit(new Runnable() {
                     @Override
                     public void run() {
@@ -1758,8 +1759,28 @@ public class CustomerServiceImpl implements CustomerService {
                     }
                 });
             });
+        } else {
+            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
+                ExecutorUtil.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try{
+                            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+                            if(community == null) {
+                                return;
+                            }
+                            String version = enterpriseCustomerProvider.findLastEnterpriseCustomerVersionByCommunity(cmd.getNamespaceId(), community.getId());
+                            CustomerHandle customerHandle = PlatformContext.getComponent(CustomerHandle.CUSTOMER_PREFIX + cmd.getNamespaceId());
+                            if(customerHandle != null) {
+                                customerHandle.syncEnterprises("1", version, community.getNamespaceCommunityToken());
+                            }
 
-
+                        }catch (Exception e){
+                            LOGGER.error("syncEnterpriseCustomers error.", e);
+                        }
+                    }
+                });
+            });
         }
 
     }

@@ -536,4 +536,8 @@ public interface OrganizationProvider {
 	Integer updateOrganizationMembersToInactiveByPath(String path,Timestamp now);
 
 	OrganizationMember findDepartmentMemberByTargetIdAndOrgId(Long userId, Long organizationId);
+
+	CommunityOrganizationDetailDisplay findOrganizationDetailFlag(Integer namespaceId, Long communityId);
+	void createCommunityOrganizationDetailDisplay(CommunityOrganizationDetailDisplay detailDisplay);
+	void updateCommunityOrganizationDetailDisplay(CommunityOrganizationDetailDisplay detailDisplay);
 }

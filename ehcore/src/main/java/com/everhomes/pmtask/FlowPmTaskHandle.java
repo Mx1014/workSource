@@ -93,16 +93,16 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 
 			String params = flowNode.getParams();
 
-			if(StringUtils.isBlank(params)) {
-				LOGGER.error("Invalid flowNode param.");
-				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
-						"Invalid flowNode param.");
-			}
+//			if(StringUtils.isBlank(params)) {
+//				LOGGER.error("Invalid flowNode param.");
+//				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+//						"Invalid flowNode param.");
+//			}
 
-			JSONObject paramJson = JSONObject.parseObject(params);
-			String nodeType = paramJson.getString("nodeType");
+//			JSONObject paramJson = JSONObject.parseObject(params);
+//			String nodeType = paramJson.getString("nodeType");
 
-			task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
+			task.setStatus(PmTaskFlowStatus.ACCEPTING.getCode());
 			task.setFlowCaseId(flowCase.getId());
 			pmTaskProvider.updateTask(task);
 			return task;

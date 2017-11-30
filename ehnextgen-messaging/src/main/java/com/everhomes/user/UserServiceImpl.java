@@ -2975,6 +2975,16 @@ public class UserServiceImpl implements UserService {
 			communityName = organizationDto.getCommunityName();
 		}
 
+		//加上province
+		Region city = regionProvider.findRegionById(organizationDto.getCityId());
+		if(city != null) {
+			Region province = regionProvider.findRegionById(city.getParentId());
+			if(province != null) {
+				organizationDto.setProvinceId(province.getId());
+				organizationDto.setProvinceName(province.getName());
+			}
+		}
+
 		String organizaitonName = "";
 		if(organizationDto.getDisplayName() != null && !organizationDto.getDisplayName().equals("")){
 			organizaitonName = organizationDto.getDisplayName();

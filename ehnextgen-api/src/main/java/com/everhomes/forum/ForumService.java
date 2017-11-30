@@ -123,4 +123,10 @@ public interface ForumService {
     ListForumCategoryResponse listForumCategory(ListForumCategoryCommand cmd);
 
     ForumCategoryDTO findForumCategory(FindForumCategoryCommand cmd);
+
+    GetForumSettingResponse getForumSetting(GetForumSettingCommand cmd);
+
+    void updateForumSetting(UpdateForumSettingCommand cmd);
+
+    ListForumServiceTypesResponse listForumServiceTypes(ListForumServiceTypesCommand cmd);
 }
