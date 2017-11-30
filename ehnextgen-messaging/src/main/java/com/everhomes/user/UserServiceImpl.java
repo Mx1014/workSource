@@ -4524,7 +4524,7 @@ public class UserServiceImpl implements UserService {
 
     private void getRelevantContactMoreInfo(SceneContactV2DTO dto, Long organizationId) {
 
-        List<String> groupTypes = new ArrayList<>();
+/*        List<String> groupTypes = new ArrayList<>();
         groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
 //        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
@@ -4543,17 +4543,27 @@ public class UserServiceImpl implements UserService {
 			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
 			departments = this.organizationService.getOrganizationMemberGroups(groupTypes, dto.getContactToken(), directlyEnterprise.getPath());
 		}
-        //  设置父部门名称
-        if (departments != null && departments.size() > 0) {
-            for (int i = 0; i < departments.size(); i++) {
-                if (departments.get(i).getParentId().equals(0))
-                    continue;
-                departments.get(i).setParentName(this.organizationProvider.findOrganizationById(departments.get(i).getParentId()).getName());
-            }
-        }
-        dto.setDepartments(departments);
 
-        //  设置岗位
+        dto.setDepartments(departments);*/
+		//	设置查询条件
+		Organization directlyEnterprise = this.organizationProvider.findOrganizationById(organizationId);
+		List<String> groupTypes = new ArrayList<>();
+		groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+
+		//	查询部门
+		List<OrganizationDTO> departments = getContactDepartments(directlyEnterprise.getPath(), groupTypes, dto.getContactToken());
+
+		//	对于 belongTo 的数据再做处理, add by lei.lv 2017/11/30
+		if(departments == null || departments.size() < 1){
+			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+			departments = getContactDepartments(directlyEnterprise.getPath(), groupTypes, dto.getContactToken());
+		}
+
+		//	设置部门
+		dto.setDepartments(departments);
+
+		//  设置岗位
         dto.setJobPosition(this.organizationService.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, dto.getContactToken(), directlyEnterprise.getPath()));
 
 
@@ -4568,7 +4578,33 @@ public class UserServiceImpl implements UserService {
         //	设置隐私保护值
         OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(dto.getContactToken(),dto.getOrganizationId());
         dto.setVisibleFlag(member.getVisibleFlag());
-    }
+	}
+
+
+	/*
+	查询部门的方法
+	 */
+	private List<OrganizationDTO> getContactDepartments(String path, List<String> groupTypes, String contactToken) {
+		List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(path, groupTypes, contactToken);
+		List<OrganizationDTO> departments = new ArrayList<OrganizationDTO>();
+		if (members != null && members.size() > 0) {
+			for (OrganizationMember member : members) {
+				Organization group = organizationProvider.findOrganizationById(member.getOrganizationId());
+				if (null != group && OrganizationStatus.fromCode(group.getStatus()) == OrganizationStatus.ACTIVE) {
+					departments.add(ConvertHelper.convert(group, OrganizationDTO.class));
+				}
+			}
+			//  设置父部门名称
+			if (departments != null && departments.size() > 0) {
+				for (int i = 0; i < departments.size(); i++) {
+					if (departments.get(i).getParentId().equals(0))
+						continue;
+					departments.get(i).setParentName(this.organizationProvider.findOrganizationById(departments.get(i).getParentId()).getName());
+				}
+			}
+		}
+		return departments;
+	}
 
     @Override
     public SceneContactV2DTO getContactInfoByUserId(GetContactInfoByUserIdCommand cmd) {
