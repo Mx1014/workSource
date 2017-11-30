@@ -1255,6 +1255,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		contract.setContractEndDate(getTimestampDate(customerContract.getContractEndDate()));
 		contract.setStatus(CommonStatus.ACTIVE.getCode());
 		contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		contract.setCreateUid(UserContext.currentUserId());
 		contractProvider.createContract(contract);
 		return contract;
 	}
