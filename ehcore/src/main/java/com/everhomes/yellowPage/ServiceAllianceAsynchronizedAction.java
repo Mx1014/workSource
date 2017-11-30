@@ -38,11 +38,9 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
-import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -149,17 +147,7 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 		
 		//如果没有设置邮箱不发邮件，直接结束。
 		CrossShardListingLocator locator = new CrossShardListingLocator();
-		String ownerType =category.getOwnerType();
-		Long ownerId = category.getOwnerId();
-	    if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(category.getOwnerType())){
-		     List <Organization> organizations = organizationProvider.findOrganizationByCommunityId(category.getOwnerId());
-		     if(organizations!=null && organizations.size()>0) {
-		    	 ownerType = ServiceAllianceBelongType.ORGANAIZATION.getCode();
-		    	 ownerId = organizations.get(0).getId(); 
-		     }
-	    }
-	    LOGGER.info("ownerType = {}, ownerId = {}",ownerType,ownerId);
-		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(ownerType, ownerId,  ContactType.EMAIL.getCode(), 
+		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(category.getOwnerType(), category.getOwnerId(), ContactType.EMAIL.getCode(), 
 						category.getId(), locator, Integer.MAX_VALUE);
 		if((serviceOrg == null ||serviceOrg.getEmail() == null ||"".equals(serviceOrg.getEmail().trim()))
 				&& (emails == null || emails.size() == 0)){

@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
@@ -110,17 +109,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		userCompanyItem = getFormFieldDTO(GeneralFormDataSourceType.USER_COMPANY.getCode(),values);
 
 		CrossShardListingLocator locator = new CrossShardListingLocator();
-		String ownerType = category.getOwnerType();
-		Long ownerId = category.getOwnerId();
-	    if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(category.getOwnerType())){
-		     List <Organization> organizations = organizationProvider.findOrganizationByCommunityId(category.getOwnerId());
-		     if(organizations!=null && organizations.size()>0) {
-		    	 ownerType = ServiceAllianceBelongType.ORGANAIZATION.getCode();
-		    	 ownerId = organizations.get(0).getId(); 
-		     }
-	    }
-	    LOGGER.info("ownerType = {}, ownerId = {}",ownerType,ownerId);
-		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(ownerType, ownerId, ContactType.EMAIL.getCode(),
+		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(category.getOwnerType(), category.getOwnerId(), ContactType.EMAIL.getCode(),
 				category.getId(), locator, Integer.MAX_VALUE);
 	}
 
@@ -260,17 +249,9 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			//发消息给服务联盟机构管理员
 			CrossShardListingLocator locator = new CrossShardListingLocator();
 
-			String ownerType = category.getOwnerType();
-			Long ownerId = category.getOwnerId();
-		    if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(category.getOwnerType())){
-			     List <Organization> organizations = organizationProvider.findOrganizationByCommunityId(category.getOwnerId());
-			     if(organizations!=null && organizations.size()>0) {
-			    	 ownerType = ServiceAllianceBelongType.ORGANAIZATION.getCode();
-			    	 ownerId = organizations.get(0).getId(); 
-			     }
-		    }
-		    LOGGER.info("ownerType = {}, ownerId = {}",ownerType,ownerId);
-			List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(ownerType, ownerId, ContactType.MOBILE.getCode(), serviceOrg.getParentId(),locator, Integer.MAX_VALUE);
+
+			List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(category.getOwnerType(),
+					category.getOwnerId(), ContactType.MOBILE.getCode(), serviceOrg.getParentId(),locator, Integer.MAX_VALUE);
 			if(targets != null && targets.size() > 0) {
 				for(ServiceAllianceNotifyTargets target : targets) {
 					if(target.getStatus().byteValue() == 1) {

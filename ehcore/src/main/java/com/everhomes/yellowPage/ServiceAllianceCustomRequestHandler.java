@@ -42,7 +42,6 @@ import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.rest.yellowPage.JumpType;
-import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceRequests;
@@ -195,17 +194,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ADMIN;
 		String notifyTextForAdmin = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
 		CrossShardListingLocator locator = new CrossShardListingLocator();
-		String ownerType = request.getOwnerType();
-		Long ownerId = request.getOwnerId();
-	    if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(request.getOwnerType())){
-		     List <Organization> organizations = organizationProvider.findOrganizationByCommunityId(request.getOwnerId());
-		     if(organizations!=null && organizations.size()>0) {
-		    	 ownerType = ServiceAllianceBelongType.ORGANAIZATION.getCode();
-		    	 ownerId = organizations.get(0).getId(); 
-		     }
-	    }
-	    LOGGER.info("ownerType = {}, ownerId = {}",ownerType,ownerId);
-		List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(ownerType, ownerId,  ContactType.MOBILE.getCode(), 
+		List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(request.getOwnerType(), request.getOwnerId(), ContactType.MOBILE.getCode(), 
 				request.getType(), locator, Integer.MAX_VALUE);
 		if(targets != null && targets.size() > 0) {
 			for(ServiceAllianceNotifyTargets target : targets) {
@@ -219,7 +208,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		}
 		
 		//发邮件给服务联盟机构管理员
-		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(ownerType, ownerId,  ContactType.EMAIL.getCode(), 
+		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(request.getOwnerType(), request.getOwnerId(), ContactType.EMAIL.getCode(), 
 				request.getType(), locator, Integer.MAX_VALUE);
 		if(emails != null && emails.size() > 0) {
 			for(ServiceAllianceNotifyTargets email : emails) {
