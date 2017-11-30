@@ -17,4 +17,6 @@ public interface AclinkConstant {
     public static final String ACLINK_JOIN_COMPANY_AUTO_AUTH = "aclink.join_company_auto_auth";//加入公司自动授权，目前暂时是基于域空间配置，未来应该有更好的管理界面
     public static final String ACLINK_QR_IMAGE_TIMEOUTS = "aclink.qr_image_timeout";
     public static final String ACLINK_QR_IMAGE_INTRO = "aclink.qr_image_intro";
+    
+    public static final String QR_INTRO_URL = "http://aclinktest.lab.everhomes.com/entrance-guard/build/index.html?hideNavigationBar=1#/instructions";
 }

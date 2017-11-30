@@ -2205,7 +2205,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         ListDoorAccessQRKeyResponse resp = new ListDoorAccessQRKeyResponse();
         List<DoorAccessQRKeyDTO> qrKeys = new ArrayList<DoorAccessQRKeyDTO>();
         resp.setKeys(qrKeys);
-        resp.setQrIntro(this.configProvider.getValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_INTRO, "http://aclinktest.lab.everhomes.com/entrance-guard/build/index.html?hideNavigationBar=1#/instructions"));
+        resp.setQrIntro(this.configProvider.getValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_INTRO, AclinkConstant.QR_INTRO_URL));
         
         for(DoorAuth auth : auths) {
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
@@ -3039,6 +3039,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setOrganization(auth.getOrganization());
         resp.setUserName(auth.getNickname());
         resp.setValidEndMs(auth.getValidEndMs());
+        resp.setQrIntro(this.configProvider.getValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_INTRO, AclinkConstant.QR_INTRO_URL));
         
         User user = userProvider.findUserById(auth.getApproveUserId());
         if(user != null) {
