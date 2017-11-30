@@ -206,16 +206,6 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         return result.get(0);
     }
 
-    @Override
-    public EnterpriseCustomer findByNamespaceToken(String namespaceType, String namespaceCustomerToken) {
-        List<EnterpriseCustomer> list = this.dbProvider.getDslContext(AccessSpec.readOnly())
-                .selectFrom(Tables.EH_ENTERPRISE_CUSTOMERS)
-                .where(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_CUSTOMER_TYPE.eq(namespaceType))
-                .and(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_CUSTOMER_TOKEN.eq(namespaceCustomerToken))
-                .fetchInto(EnterpriseCustomer.class);
-        if(list.size()<1) return null;
-        return list.get(0);
-    }
 
     @Override
     public List<EnterpriseCustomer> listEnterpriseCustomers(CrossShardListingLocator locator, Integer pageSize) {

@@ -97,7 +97,7 @@ ALTER TABLE `eh_aclink_undo_key` ADD COLUMN `namespace_id` int(11) NOT NULL DEFA
 
 -- merge from yuekongjian 1.0  by yanjun 201711301748  start
 
-
+-- by wentian
 ALTER TABLE `eh_payment_bill_groups_rules` ADD `brother_rule_id` BIGINT DEFAULT NULL COMMENT '兄弟账单组收费项id';
 
 -- from asset-org by xiongying
