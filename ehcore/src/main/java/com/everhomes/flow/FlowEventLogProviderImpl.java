@@ -631,8 +631,9 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
         com.everhomes.server.schema.tables.EhFlowEventLogs log = Tables.EH_FLOW_EVENT_LOGS;
         com.everhomes.server.schema.tables.EhFlowCases flowCase = Tables.EH_FLOW_CASES;
 
-        SelectQuery<Record9<Long, Long, String, String, Long, String, String, String, Timestamp>> query = context
-                .select(log.ID, flowCase.ID, flowCase.TITLE, flowCase.MODULE_NAME, flowCase.MODULE_ID, flowCase.CONTENT, log.LOG_CONTENT, log.FLOW_USER_NAME, log.CREATE_TIME)
+        SelectQuery<Record10<Long, Long, String, String, String, Long, String, String, String, Timestamp>> query = context
+                .select(log.ID, flowCase.ID, flowCase.TITLE, flowCase.ROUTE_URI, flowCase.MODULE_NAME, flowCase.MODULE_ID,
+                        flowCase.CONTENT, log.LOG_CONTENT, log.FLOW_USER_NAME, log.CREATE_TIME)
                 .from(log)
                 .join(flowCase).on(log.FLOW_CASE_ID.eq(flowCase.ID))
                 .getQuery();
