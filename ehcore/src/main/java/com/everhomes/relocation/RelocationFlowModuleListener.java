@@ -12,6 +12,8 @@ import com.everhomes.rest.asset.CheckEnterpriseHasArrearageCommand;
 import com.everhomes.rest.asset.CheckEnterpriseHasArrearageResponse;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.qrcode.NewQRCodeCommand;
+import com.everhomes.rest.qrcode.QRCodeDTO;
+import com.everhomes.rest.qrcode.QRCodeHandler;
 import com.everhomes.rest.relocation.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.StringHelper;
@@ -109,9 +111,11 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
         RelocationRequestDTO dto = relocationService.getRelocationRequestDetail(cmd);
         if (null != dto) {
 
-//            NewQRCodeCommand qrCmd = new NewQRCodeCommand();
-//            qrCmd.set
-//            qRCodeService
+            NewQRCodeCommand qrCmd = new NewQRCodeCommand();
+            qrCmd.setRouteUri("");
+            qrCmd.setHandler(QRCodeHandler.FLOW.getCode());
+            QRCodeDTO qRCodeDTO = qRCodeService.createQRCode(qrCmd);
+            dto.setQrCodeUrl(qRCodeDTO.getUrl());
             flowCase.setCustomObject(JSONObject.toJSONString(dto));
 
         } else {
