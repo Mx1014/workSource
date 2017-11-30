@@ -83,7 +83,9 @@ public interface FlowEventLogProvider {
 
     List<FlowOperateLogDTO> searchOperateLogs(Long moduleId, Long flowCaseId, Long userId, String serviceType, String keyword, Integer pageSize, ListingLocator locator);
 
-    FlowEventLog isSupervisors(Long userId, FlowCase flowCase);
+    FlowEventLog isSupervisor(Long userId, FlowCase flowCase);
 
     List<FlowEventLog> findRejectEventLogsByNodeId(Long nodeId, Long flowCaseId, Long stepCount);
+
+    FlowEventLog isHistoryProcessors(Long userId, FlowCase flowCase);
 }
