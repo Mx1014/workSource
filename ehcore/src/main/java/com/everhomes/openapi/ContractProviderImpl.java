@@ -18,11 +18,17 @@ import com.everhomes.server.schema.tables.records.EhContractParamsRecord;
 import com.everhomes.server.schema.tables.records.EhContractsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.util.IterationMapReduceCallback;
+
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
 import org.jooq.impl.DefaultRecordMapper;
+
+import org.jooq.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,6 +47,7 @@ import org.springframework.util.StringUtils;
 
 @Component
 public class ContractProviderImpl implements ContractProvider {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ContractProviderImpl.class);
 
 	@Autowired
 	private DbProvider dbProvider;
@@ -136,6 +143,54 @@ public class ContractProviderImpl implements ContractProvider {
 			return ConvertHelper.convert(result, Contract.class);
 		}
 		return null;
+	}
+
+	@Override
+	public List<Contract> listContractByBuildingName(String buildingName, Long communityId) {
+		List<Contract> result = new ArrayList<>();
+		SelectQuery<Record> query = getReadOnlyContext().selectQuery();
+		query.addSelect(Tables.EH_CONTRACTS.ID,Tables.EH_CONTRACTS.STATUS);
+		query.addFrom(Tables.EH_CONTRACTS);
+		query.addJoin(Tables.EH_CONTRACT_BUILDING_MAPPINGS, JoinType.LEFT_OUTER_JOIN, Tables.EH_CONTRACTS.ID.eq(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID));
+
+		query.addConditions(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME.eq(buildingName));
+		query.addConditions(Tables.EH_CONTRACT_BUILDING_MAPPINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId));
+
+		LOGGER.debug("query sql:{}", query.getSQL());
+		LOGGER.debug("query param:{}", query.getBindValues());
+		query.fetch().map((r) -> {
+			Contract contract = new Contract();
+			contract.setId(r.getValue(Tables.EH_CONTRACTS.ID));
+			contract.setStatus(r.getValue(Tables.EH_CONTRACTS.STATUS));
+			result.add(contract);
+			return null;
+		});
+		return result;
+	}
+
+	@Override
+	public List<Contract> listContractByAddressId(Long addressId) {
+
+		List<Contract> result = new ArrayList<>();
+		SelectQuery<Record> query = getReadOnlyContext().selectQuery();
+		query.addSelect(Tables.EH_CONTRACTS.ID,Tables.EH_CONTRACTS.STATUS);
+		query.addFrom(Tables.EH_CONTRACTS);
+		query.addJoin(Tables.EH_CONTRACT_BUILDING_MAPPINGS, JoinType.LEFT_OUTER_JOIN, Tables.EH_CONTRACTS.ID.eq(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID));
+
+		query.addConditions(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.eq(addressId));
+		query.addConditions(Tables.EH_CONTRACT_BUILDING_MAPPINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+		LOGGER.debug("query sql:{}", query.getSQL());
+		LOGGER.debug("query param:{}", query.getBindValues());
+		query.fetch().map((r) -> {
+			Contract contract = new Contract();
+			contract.setId(r.getValue(Tables.EH_CONTRACTS.ID));
+			contract.setStatus(r.getValue(Tables.EH_CONTRACTS.STATUS));
+			result.add(contract);
+			return null;
+		});
+		return result;
 	}
 
 	@Override

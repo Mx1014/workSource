@@ -42,6 +42,8 @@ public interface ContractProvider {
 
 	Contract findActiveContractByContractNumber(Integer namespaceId, String contractNumber);
 
+	List<Contract> listContractByAddressId(Long addressId);
+	List<Contract> listContractByBuildingName(String buildingName, Long communityId);
 
     List<Object> findCustomerByContractNum(String contractNum);
 

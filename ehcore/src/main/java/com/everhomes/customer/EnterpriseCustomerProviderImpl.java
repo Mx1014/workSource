@@ -23,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
-import com.everhomes.activity.Activity;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -40,7 +39,6 @@ import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sharding.ShardIterator;
-import com.everhomes.sms.DateUtil;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -206,6 +204,17 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
             return null;
         }
         return result.get(0);
+    }
+
+    @Override
+    public EnterpriseCustomer findByNamespaceToken(String namespaceType, String namespaceCustomerToken) {
+        List<EnterpriseCustomer> list = this.dbProvider.getDslContext(AccessSpec.readOnly())
+                .selectFrom(Tables.EH_ENTERPRISE_CUSTOMERS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_CUSTOMER_TYPE.eq(namespaceType))
+                .and(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_CUSTOMER_TOKEN.eq(namespaceCustomerToken))
+                .fetchInto(EnterpriseCustomer.class);
+        if(list.size()<1) return null;
+        return list.get(0);
     }
 
     @Override
