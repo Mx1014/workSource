@@ -3401,13 +3401,19 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public List<PaymentBills> findAssetArrearage(Integer namespaceId, Long communityId, Long organizationId) {
-        return getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
-                .where(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq("community"))
-                .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(communityId))
-                .and(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq("eh_organization"))
-                .and(Tables.EH_PAYMENT_BILLS.TARGET_ID.eq(organizationId))
-                .fetchInto(PaymentBills.class);
+        SelectQuery<EhPaymentBillsRecord> query = getReadOnlyContext().selectQuery(Tables.EH_PAYMENT_BILLS);
+        if(namespaceId!=null) query.addConditions(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(namespaceId));
+        if(communityId!=null) {
+            query.addConditions(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq("community"));
+            query.addConditions(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(communityId));
+        }
+
+        if(organizationId!=null) {
+            query.addConditions(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq("eh_organization"));
+            query.addConditions(Tables.EH_PAYMENT_BILLS.TARGET_ID.eq(organizationId));
+        }
+        query.addConditions(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte)1));
+        return query.fetchInto(PaymentBills.class);
     }
 
     @Override

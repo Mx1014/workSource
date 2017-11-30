@@ -3945,7 +3945,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         row.createCell(++i).setCellValue("工单号");
         row.createCell(++i).setCellValue("表计号码");
         row.createCell(++i).setCellValue("表计名称");
-        row.createCell(++i).setCellValue("表计类型");
+        row.createCell(++i).setCellValue("表计分类");
         row.createCell(++i).setCellValue("开始日期");
         row.createCell(++i).setCellValue("结束日期");
         row.createCell(++i).setCellValue("工单状态");
@@ -3967,11 +3967,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         row.createCell(++i).setCellValue(timeToStr(dto.getExecutiveStartTime()));
         row.createCell(++i).setCellValue(timeToStr(dto.getExecutiveExpireTime()));
         if(EnergyTaskStatus.NON_READ.equals(EnergyTaskStatus.fromCode(dto.getStatus())))
-            row.createCell(++i).setCellValue("未抄");
+            row.createCell(++i).setCellValue("未完成");
         if(EnergyTaskStatus.READ.equals(EnergyTaskStatus.fromCode(dto.getStatus())))
-            row.createCell(++i).setCellValue("已抄");
+            row.createCell(++i).setCellValue("已完成");
         if(EnergyTaskStatus.INACTIVE.equals(EnergyTaskStatus.fromCode(dto.getStatus())))
             row.createCell(++i).setCellValue("无效");
+        if(EnergyTaskStatus.NON_READ_DELAY.equals(EnergyTaskStatus.fromCode(dto.getStatus())))
+            row.createCell(++i).setCellValue("到期未完成");
 
         if(dto.getLastTaskReading() == null) {
             row.createCell(++i).setCellValue("");
