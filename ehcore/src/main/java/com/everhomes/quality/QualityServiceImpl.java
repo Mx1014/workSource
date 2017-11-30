@@ -3619,6 +3619,8 @@ public class QualityServiceImpl implements QualityService {
 				Community community = communityProvider.findCommunityById(target);
 				if(community != null) {
 					scoreGroupDto.setTargetName(community.getName());
+					//add for order
+					scoreGroupDto.setBuildArea(community.getBuildArea());
 				}
 
 				if(specificationTree != null && specificationTree.size() > 0) {
@@ -3675,7 +3677,12 @@ public class QualityServiceImpl implements QualityService {
 		Double total = 0D;
 		for (int i = 0; i < sortedScoresByTarget.size(); i++) {
 			if (total.doubleValue() == sortedScoresByTarget.get(i).getTotalScore().doubleValue() && sortedScoresByTarget.get(i).getTotalScore() != 0) {
-				sortedScoresByTarget.get(i).setOrderId(previousOrder);
+				if (sortedScoresByTarget.get(i - 1).getBuildArea() < sortedScoresByTarget.get(i).getBuildArea()) {
+					sortedScoresByTarget.get(i).setOrderId(++previousOrder);
+				} else {
+					sortedScoresByTarget.get(i).setOrderId(previousOrder);
+					sortedScoresByTarget.get(i - 1).setOrderId(++previousOrder);
+				}
 			} else {
 				previousOrder++;
 				sortedScoresByTarget.get(i).setOrderId(previousOrder);

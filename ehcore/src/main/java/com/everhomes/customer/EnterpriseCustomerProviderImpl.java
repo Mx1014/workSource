@@ -111,6 +111,25 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
+    public EnterpriseCustomer findByNamespaceToken(String namespaceType, String namespaceCustomerToken) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_CUSTOMER_TYPE.eq(namespaceType));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_CUSTOMER_TOKEN.eq(namespaceCustomerToken));
+
+        List<EnterpriseCustomer> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, EnterpriseCustomer.class));
+            return null;
+        });
+
+        if(result.size() == 0) {
+            return null;
+        }
+        return result.get(0);
+    }
+
+    @Override
     public List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceType(Integer namespaceId, String namespaceType, Long communityId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
@@ -1471,5 +1490,25 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         	   .execute();
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
 	}
-	
+
+    @Override
+    public String findLastEnterpriseCustomerVersionByCommunity(Integer namespaceId, Long communityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+        query.addOrderBy(Tables.EH_ENTERPRISE_CUSTOMERS.VERSION.desc());
+        query.addLimit(1);
+        List<EnterpriseCustomer> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, EnterpriseCustomer.class));
+            return null;
+        });
+        if(result == null || result.size() == 0) {
+            return null;
+        }
+
+        return result.get(0).getVersion();
+    }
 }

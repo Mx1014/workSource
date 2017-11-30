@@ -61,7 +61,7 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
         cmd3.setSourceId(cmd.getSourceId());
         cmd3.setSourceType(cmd.getSourceType());
         cmd3.setValues(cmd.getValues());
-        List<GeneralFormVal> vals = generalFormValProvider.queryGeneralFormVals(EntityType.PM_TASK.getCode(),pmTask.getId());
+
         //将旧的清单删除
         generalFormValProvider.deleteGeneralFormVals(EntityType.PM_TASK.getCode(),pmTask.getId());
         generalFormService.addGeneralFormValues(cmd3);

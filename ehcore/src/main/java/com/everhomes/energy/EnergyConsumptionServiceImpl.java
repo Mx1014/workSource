@@ -57,6 +57,7 @@ import com.everhomes.search.EnergyMeterReadingLogSearcher;
 import com.everhomes.search.EnergyMeterSearcher;
 import com.everhomes.search.EnergyMeterTaskSearcher;
 import com.everhomes.search.EnergyPlanSearcher;
+import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
@@ -74,6 +75,10 @@ import com.google.zxing.WriterException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.math.NumberUtils;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -3884,5 +3889,320 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
 
         return ts;
+    }
+
+    @Override
+    public HttpServletResponse exportTasksByEnergyPlan(SearchTasksByEnergyPlanCommand cmd, HttpServletResponse response) {
+        Integer pageSize = Integer.MAX_VALUE;
+        cmd.setPageSize(pageSize);
+
+        SearchTasksByEnergyPlanResponse resp = energyMeterTaskSearcher.searchTasksByEnergyPlan(cmd);
+        List<EnergyMeterTaskDTO> dtos = resp.getTaskDTOs();
+
+
+        URL rootPath = RentalServiceImpl.class.getResource("/");
+        String filePath =rootPath.getPath() + this.downloadDir ;
+        File file = new File(filePath);
+        if(!file.exists())
+            file.mkdirs();
+        filePath = filePath + "EnergyPlanTask"+System.currentTimeMillis()+".xlsx";
+        //新建了一个文件
+        this.createEnergyPlanTasksBook(filePath, dtos);
+        LOGGER.info("filePath:{}", filePath);
+
+        return download(filePath,response);
+    }
+
+    public void createEnergyPlanTasksBook(String path,List<EnergyMeterTaskDTO> dtos) {
+        Workbook wb = new XSSFWorkbook();
+        Sheet sheet = wb.createSheet("EnergyPlanTasks");
+
+        this.createEnergyPlanTasksBookSheetHead(sheet);
+        for (EnergyMeterTaskDTO dto : dtos ) {
+            this.setNewEnergyPlanTasksBookRow(sheet, dto);
+        }
+
+        try {
+            FileOutputStream out = new FileOutputStream(path);
+
+            wb.write(out);
+            wb.close();
+            out.close();
+
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            throw RuntimeErrorException.errorWith(EnergyConsumptionServiceErrorCode.SCOPE,
+                    EnergyConsumptionServiceErrorCode.ERROR_DOWNLOAD_FILE,
+                    e.getLocalizedMessage());
+        }
+
+    }
+
+    private void createEnergyPlanTasksBookSheetHead(Sheet sheet){
+
+        Row row = sheet.createRow(sheet.getLastRowNum());
+        int i =-1 ;
+        row.createCell(++i).setCellValue("工单号");
+        row.createCell(++i).setCellValue("表计号码");
+        row.createCell(++i).setCellValue("表计名称");
+        row.createCell(++i).setCellValue("表计分类");
+        row.createCell(++i).setCellValue("开始日期");
+        row.createCell(++i).setCellValue("结束日期");
+        row.createCell(++i).setCellValue("工单状态");
+        row.createCell(++i).setCellValue("上周期抄表读数");
+        row.createCell(++i).setCellValue("上次抄表读数");
+    }
+
+    private void setNewEnergyPlanTasksBookRow(Sheet sheet ,EnergyMeterTaskDTO dto){
+        Row row = sheet.createRow(sheet.getLastRowNum()+1);
+        int i = -1;
+        row.createCell(++i).setCellValue(dto.getId());
+        row.createCell(++i).setCellValue(dto.getMeterNumber());
+        row.createCell(++i).setCellValue(dto.getMeterName());
+        if(EnergyMeterType.ELECTRIC.equals(EnergyMeterType.fromCode(dto.getMeterType())))
+            row.createCell(++i).setCellValue("电表");
+        if(EnergyMeterType.WATER.equals(EnergyMeterType.fromCode(dto.getMeterType())))
+            row.createCell(++i).setCellValue("水表");
+
+        row.createCell(++i).setCellValue(timeToStr(dto.getExecutiveStartTime()));
+        row.createCell(++i).setCellValue(timeToStr(dto.getExecutiveExpireTime()));
+        if(EnergyTaskStatus.NON_READ.equals(EnergyTaskStatus.fromCode(dto.getStatus())))
+            row.createCell(++i).setCellValue("未完成");
+        if(EnergyTaskStatus.READ.equals(EnergyTaskStatus.fromCode(dto.getStatus())))
+            row.createCell(++i).setCellValue("已完成");
+        if(EnergyTaskStatus.INACTIVE.equals(EnergyTaskStatus.fromCode(dto.getStatus())))
+            row.createCell(++i).setCellValue("无效");
+        if(EnergyTaskStatus.NON_READ_DELAY.equals(EnergyTaskStatus.fromCode(dto.getStatus())))
+            row.createCell(++i).setCellValue("到期未完成");
+
+        if(dto.getLastTaskReading() == null) {
+            row.createCell(++i).setCellValue("");
+        } else {
+            row.createCell(++i).setCellValue(dto.getLastTaskReading().toString());
+        }
+
+        if(dto.getReading() == null) {
+            row.createCell(++i).setCellValue("");
+        } else {
+            row.createCell(++i).setCellValue(dto.getReading().toString());
+        }
+
+    }
+
+
+    private String timeToStr(Timestamp time) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(time);
+    }
+
+    @Override
+    public ImportFileTaskDTO importTasksByEnergyPlan(ImportTasksByEnergyPlanCommand cmd, MultipartFile mfile, Long userId) {
+        ImportFileTask task = new ImportFileTask();
+        try {
+            //解析excel
+            List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
+
+            if(null == resultList || resultList.isEmpty()){
+                LOGGER.error("File content is empty。userId="+userId);
+                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL,
+                        localeStringService.getLocalizedString(String.valueOf(UserServiceErrorCode.SCOPE),
+                                String.valueOf(UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL),
+                                UserContext.current().getUser().getLocale(),"File content is empty"));
+            }
+            task.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+            task.setOwnerId(cmd.getOwnerId());
+            task.setType(ImportFileTaskType.ENERGY_PLAN_TASK.getCode());
+            task.setCreatorUid(userId);
+            task = importFileService.executeTask(new ExecuteImportTaskCallback() {
+                @Override
+                public ImportFileResponse importFile() {
+                    ImportFileResponse response = new ImportFileResponse();
+                    List<ImportTasksByEnergyPlanDataDTO> datas = handleImportTasksByEnergyPlanData(resultList);
+                    if(datas.size() > 0){
+                        //设置导出报错的结果excel的标题
+                        response.setTitle(datas.get(0));
+                        datas.remove(0);
+                    }
+                    List<ImportFileResultLog<ImportTasksByEnergyPlanDataDTO>> results = importTasksByEnergyPlanData(cmd, datas, userId);
+                    response.setTotalCount((long)datas.size());
+                    response.setFailCount((long)results.size());
+                    response.setLogs(results);
+                    return response;
+                }
+            }, task);
+
+        } catch (IOException e) {
+            LOGGER.error("File can not be resolved...");
+            e.printStackTrace();
+        }
+        LOGGER.info("task: {}",  task);
+        return ConvertHelper.convert(task, ImportFileTaskDTO.class);
+    }
+
+    private List<ImportTasksByEnergyPlanDataDTO> handleImportTasksByEnergyPlanData(List list) {
+        List<ImportTasksByEnergyPlanDataDTO> result = new ArrayList<>();
+        int row = 1;
+        for (Object o : list) {
+            if(row < 1){
+                row ++;
+                continue;
+            }
+
+            RowResult r = (RowResult)o;
+            ImportTasksByEnergyPlanDataDTO data = null;
+            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getA())) {
+                if(data == null) {
+                    data = new ImportTasksByEnergyPlanDataDTO();
+                }
+                data.setId(r.getA().trim());
+            }
+
+            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getB())) {
+                if(data == null) {
+                    data = new ImportTasksByEnergyPlanDataDTO();
+                }
+                data.setMeterNumber(r.getB().trim());
+            }
+
+            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getC())) {
+                if(data == null) {
+                    data = new ImportTasksByEnergyPlanDataDTO();
+                }
+                data.setMeterName(r.getC().trim());
+            }
+
+            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getD())) {
+                if(data == null) {
+                    data = new ImportTasksByEnergyPlanDataDTO();
+                }
+                data.setMeterType(r.getD().trim());
+            }
+
+            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getE())) {
+                if(data == null) {
+                    data = new ImportTasksByEnergyPlanDataDTO();
+                }
+                data.setExecutiveStartTime(r.getE().trim());
+            }
+
+            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getF())) {
+                if(data == null) {
+                    data = new ImportTasksByEnergyPlanDataDTO();
+                }
+                data.setExecutiveExpireTime(r.getF().trim());
+            }
+
+            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getG())) {
+                if(data == null) {
+                    data = new ImportTasksByEnergyPlanDataDTO();
+                }
+                data.setStatus(r.getG().trim());
+            }
+
+            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getH())) {
+                if(data == null) {
+                    data = new ImportTasksByEnergyPlanDataDTO();
+                }
+                data.setLastTaskReading(r.getH().trim());
+            }
+
+            if(org.apache.commons.lang.StringUtils.isNotBlank(r.getI())) {
+                if(data == null) {
+                    data = new ImportTasksByEnergyPlanDataDTO();
+                }
+                data.setReading(r.getI().trim());
+            }
+
+            if(data != null) {
+                result.add(data);
+            }
+        }
+        LOGGER.info("result size : " + result.size());
+        return result;
+    }
+
+    private List<ImportFileResultLog<ImportTasksByEnergyPlanDataDTO>> importTasksByEnergyPlanData(ImportTasksByEnergyPlanCommand cmd, List<ImportTasksByEnergyPlanDataDTO> list, Long userId){
+        List<ImportFileResultLog<ImportTasksByEnergyPlanDataDTO>> errorDataLogs = new ArrayList<>();
+        Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+        list.forEach(str -> {
+            ImportFileResultLog<ImportTasksByEnergyPlanDataDTO> log = new ImportFileResultLog<>(EnergyConsumptionServiceErrorCode.SCOPE);
+            if(org.apache.commons.lang.StringUtils.isNotBlank(str.getId())) {
+                EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskById(Long.valueOf(str.getId()));
+                if(task == null || task.getPlanId().equals(cmd.getPlanId())
+                        || task.getExecutiveExpireTime().before(now)) {
+                    LOGGER.error("EnergyTask not exist or already close, data = {}", str);
+                    log.setData(str);
+                    log.setErrorLog("EnergyTask not exist or already close");
+                    log.setCode(EnergyConsumptionServiceErrorCode.ERR_METER_TASK_NOT_EXIST);
+                    errorDataLogs.add(log);
+                    return;
+                }
+
+                EnergyMeter meter = meterProvider.findById(task.getNamespaceId(), task.getMeterId());
+                if(!EnergyMeterStatus.ACTIVE.equals(EnergyMeterStatus.fromCode(meter.getStatus()))) {
+                    LOGGER.error("EnergyTask meter status is not active, data = {}", str);
+                    log.setData(str);
+                    log.setErrorLog("EnergyTask meter status is not active");
+                    log.setCode(EnergyConsumptionServiceErrorCode.ERR_METER_NOT_EXIST);
+                    errorDataLogs.add(log);
+                    return;
+                }
+                if(StringUtils.isEmpty(str.getReading())) {
+                    LOGGER.error("EnergyTask reading is null, data = {}", str);
+                    log.setData(str);
+                    log.setErrorLog("EnergyTask reading is null");
+                    log.setCode(EnergyConsumptionServiceErrorCode.ERROR_READING_IS_NULL);
+                    errorDataLogs.add(log);
+                    return;
+                }
+
+                if(!str.getReading().matches("^[0.0-9.0]+$")) {
+                    LOGGER.error("EnergyTask reading is not number, data = {}", str);
+                    log.setData(str);
+                    log.setErrorLog("EnergyTask reading is not number");
+                    log.setCode(EnergyConsumptionServiceErrorCode.ERROR_READING_IS_NOT_NUMBER);
+                    errorDataLogs.add(log);
+                    return;
+                }
+
+                BigDecimal reading = new BigDecimal(str.getReading());
+                // 读数大于最大量程
+                if (reading.doubleValue() > meter.getMaxReading().doubleValue()) {
+                    LOGGER.error("EnergyTask reading greater than meter max reading, data = {}", str);
+                    log.setData(str);
+                    log.setErrorLog("EnergyTask reading greater than meter max reading");
+                    log.setCode(EnergyConsumptionServiceErrorCode.ERR_CURR_READING_GREATER_THEN_MAX_READING);
+                    errorDataLogs.add(log);
+                    return;
+                }
+
+                task.setReading(reading);
+                task.setStatus(EnergyTaskStatus.READ.getCode());
+                task.setOperatorUid(userId);
+                task.setUpdateTime(now);
+                energyMeterTaskProvider.updateEnergyMeterTask(task);
+                energyMeterTaskSearcher.feedDoc(task);
+
+
+                EnergyMeterReadingLog readingLog = new EnergyMeterReadingLog();
+                readingLog.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+                readingLog.setReading(reading);
+                readingLog.setCommunityId(meter.getCommunityId());
+                readingLog.setMeterId(meter.getId());
+                readingLog.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
+                readingLog.setOperateTime(now);
+                readingLog.setOperatorId(userId);
+                readingLog.setResetMeterFlag(TrueOrFalseFlag.FALSE.getCode());
+                dbProvider.execute(r -> {
+                    meterReadingLogProvider.createEnergyMeterReadingLog(readingLog);
+                    meter.setLastReading(readingLog.getReading());
+                    meter.setLastReadTime(now);
+                    meterProvider.updateEnergyMeter(meter);
+                    return true;
+                });
+                readingLogSearcher.feedDoc(readingLog);
+            }
+        });
+        return errorDataLogs;
     }
 }

@@ -22,6 +22,7 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +37,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhContractsDao;
 import com.everhomes.server.schema.tables.pojos.EhContracts;
 import com.everhomes.util.ConvertHelper;
+import org.springframework.util.StringUtils;
 
 @Component
 public class ContractProviderImpl implements ContractProvider {
@@ -361,6 +363,21 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
+	public List<Contract> listContractsByAddressId(Long addressId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<Contract> result  = new ArrayList<Contract>();
+		SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
+		query.addJoin(Tables.EH_CONTRACT_BUILDING_MAPPINGS, Tables.EH_CONTRACTS.ID.eq(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID));
+		query.addConditions(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.eq(addressId));
+
+		query.addOrderBy(Tables.EH_CONTRACTS.ID.desc());
+		result = query.fetch().map(new DefaultRecordMapper(Tables.EH_CONTRACTS.recordType(), Contract.class));
+
+		return result;
+	}
+
+	@Override
 	public void createContractParam(ContractParam param) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractParams.class));
 		param.setId(id);
@@ -398,6 +415,37 @@ public class ContractProviderImpl implements ContractProvider {
 		dao.update(param);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractParams.class, param.getId());
 
+	}
+
+	@Override
+	public String findLastContractVersionByCommunity(Integer namespaceId, Long communityId) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId))
+				.orderBy(Tables.EH_CONTRACTS.VERSION.desc())
+				.limit(1)
+				.fetchOne();
+		if (record != null) {
+			return record.getValue(Tables.EH_CONTRACTS.VERSION);
+		}
+		return null;
+	}
+
+	@Override
+	public List<Contract> listContractByNamespaceType(Integer namespaceId, String namespaceType, Long communityId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
+		query.addConditions(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TYPE.eq(namespaceType));
+		query.addConditions(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId));
+
+		List<Contract> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, Contract.class));
+			return null;
+		});
+
+		return result;
 	}
 
 	private EhContractsDao getReadWriteDao() {

@@ -5048,7 +5048,30 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         return dtoList;
     }
 
-    @Override
+	@Override
+	public List<OrganizationOwnerBehaviorDTO> listApartmentOrganizationOwnerBehaviors(ListApartmentOrganizationOwnerBehaviorsCommand cmd) {
+		User user = UserContext.current().getUser();
+		List<OrganizationOwnerBehavior> behaviorList = propertyMgrProvider.listApartmentOrganizationOwnerBehaviors(cmd.getAddressId());
+
+		List<OrganizationOwnerBehaviorDTO> dtoList = new ArrayList<>();
+		if (behaviorList != null && behaviorList.size() > 0) {
+			for (OrganizationOwnerBehavior behavior : behaviorList) {
+				Address address = addressProvider.findAddressById(behavior.getAddressId());
+				OrganizationOwnerBehaviorDTO dto = new OrganizationOwnerBehaviorDTO();
+				dto.setApartment(address.getApartmentName());
+				dto.setBehaviorTime(behavior.getBehaviorTime());
+				dto.setBuilding(address.getBuildingName());
+				dto.setId(behavior.getId());
+				LocaleString behaviorLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.BEHAVIOR_SCOPE,
+						behavior.getBehaviorType(), user.getLocale());
+				dto.setBehaviorType(behaviorLocale != null ? behaviorLocale.getText() : null);
+				dtoList.add(dto);
+			}
+		}
+		return dtoList;
+	}
+
+	@Override
     public void deleteOrganizationOwnerBehavior(DeleteOrganizationOwnerBehaviorCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());

@@ -1315,7 +1315,7 @@ public class YellowPageServiceImpl implements YellowPageService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         
-		List<ServiceAllianceNotifyTargets> targets = this.yellowPageProvider.listNotifyTargets(cmd.getOwnerType(), cmd.getOwnerId(), 
+		List<ServiceAllianceNotifyTargets> targets = this.yellowPageProvider.listNotifyTargets(UserContext.getCurrentNamespaceId(), 
 				cmd.getContactType(), cmd.getCategoryId(), locator, pageSize+1);
 		
 		if(targets != null && targets.size() > 0) {
