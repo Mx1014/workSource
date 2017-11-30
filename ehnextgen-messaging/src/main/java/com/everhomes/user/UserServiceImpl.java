@@ -4597,8 +4597,10 @@ public class UserServiceImpl implements UserService {
 			//  设置父部门名称
 			if (departments != null && departments.size() > 0) {
 				for (int i = 0; i < departments.size(); i++) {
-					if (departments.get(i).getParentId().equals(0L))
+					if (departments.get(i).getParentId().equals(0L)) {
+						departments.get(i).setParentName(departments.get(i).getName());
 						continue;
+					}
 					departments.get(i).setParentName(this.organizationProvider.findOrganizationById(departments.get(i).getParentId()).getName());
 				}
 			}
