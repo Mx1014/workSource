@@ -1,5 +1,6 @@
 package com.everhomes.module;
 
+import com.everhomes.acl.Authorization;
 import com.everhomes.acl.AuthorizationProvider;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.bootstrap.PlatformContext;
@@ -25,6 +26,7 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.module.*;
+import com.everhomes.rest.oauth2.ControlTargetOption;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.rest.portal.MultipleFlag;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
@@ -56,6 +58,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.everhomes.rest.oauth2.ControlTargetOption.ALL_COMMUNITY;
+import static com.everhomes.rest.oauth2.ModuleManagementType.COMMUNITY_CONTROL;
 
 @Service
 public class ServiceModuleServiceImpl implements ServiceModuleService {
@@ -728,7 +733,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 targets.add(new Target(com.everhomes.entity.EntityType.ORGANIZATIONS.getCode(), orgId));
             }
 
-            //获取人员和人员所有机构所赋予模块的所属项目范围
+            //获取人员和人员所有机构所赋予模块的所属项目范围(模块管理员+权限细化的)
             List<Project> projects = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(EntityType.SERVICE_MODULE.getCode(), moduleId, targets);
             for (Project project: projects) {
                 //在模块下拥有全部项目权限
@@ -740,6 +745,27 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                     dtos.add(ConvertHelper.convert(project, ProjectDTO.class));
                 }
             }
+
+            //获取人员和人员所有机构所赋予模块的所属项目范围(应用管理员) -- add by lei.lv
+            List<Authorization> authorizations_apps =  authorizationProvider.listAuthorizations(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), userId, com.everhomes.entity.EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(), true, null, null);
+            if(authorizations_apps != null && authorizations_apps.size() > 0){
+                authorizations_apps = authorizations_apps.stream().filter(r->ModuleManagementType.fromCode(r.getModuleControlType()) == COMMUNITY_CONTROL).limit(1).collect(Collectors.toList());
+                if(authorizations_apps !=null && authorizations_apps.size() > 0) {
+                    Authorization authorization = authorizations_apps.get(0);//每一个userId+organizationId在同一个type下只有一个control_id
+                    if (ControlTargetOption.fromCode(authorization.getControlOption()) == ALL_COMMUNITY){
+                        allProjectFlag = true;
+                    }else{
+                        List<ControlTarget> configs = authorizationProvider.listAuthorizationControlConfigs(userId,authorization.getControlId());
+                        List<Project> projectList = configs.stream().map(r->new Project(Tables.EH_AUTHORIZATIONS.OWNER_TYPE.toString(), r.getId())).collect(Collectors.toList());
+                        for (Project project : projectList) {
+                            processProject(project);
+                            dtos.add(ConvertHelper.convert(projectList, ProjectDTO.class));
+                        }
+                    }
+
+                }
+            }
+
         }
 
         if(allProjectFlag){
