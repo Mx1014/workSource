@@ -160,9 +160,9 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 //			contentBuffer.append(" : ");
 //			contentBuffer.append(JSON.parseObject(entpriseVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
 //		}
-		contentBuffer.append("申请类型");
-		contentBuffer.append(" : ");
-		contentBuffer.append(ga.getApprovalName());
+//		contentBuffer.append("申请类型");
+//		contentBuffer.append(" : ");
+//		contentBuffer.append(ga.getApprovalName());
 		PostApprovalFormItem sourceVal = getFormFieldDTO(GeneralFormDataSourceType.SOURCE_ID.getCode(),values);
 		Long yellowPageId = 0l;
 		if(null != sourceVal){
@@ -172,9 +172,8 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			ServiceAlliances  yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null); 
 			ServiceAllianceCategories  parentPage = yellowPageProvider.findCategoryById(yellowPage.getParentId());
 
-			contentBuffer.append("申请来源");
-			contentBuffer.append(" : ");
-			contentBuffer.append(parentPage.getName());
+			contentBuffer.append("服务名称 : ");
+			contentBuffer.append(yellowPage.getName());
 			flowCase.setTitle(parentPage.getName());
 			request.setServiceAllianceId(yellowPageId);
 			request.setType(yellowPage.getParentId());
@@ -424,14 +423,18 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		Long yellowPageId = Long.valueOf(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
 		ServiceAlliances  yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null);
 		ServiceAllianceCategories  parentPage = null;
-		if(null != yellowPage)
+		////申请来源
+		if(null != yellowPage){
 			parentPage = yellowPageProvider.findCategoryById(yellowPage.getParentId());
+		}
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+		e.setKey("申请来源");
+		e.setValue(parentPage==null?"未知":parentPage.getName());
+		e = new FlowCaseEntity();
+//		GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(val.getApprovalId());
 
-		//申请类型
-		e = new FlowCaseEntity(); 
-		GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(val.getApprovalId());
-
-		e.setKey("申请类型");
+		e.setKey("服务名称");
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
 		e.setValue(yellowPage.getName());
 		entities.add(e);
