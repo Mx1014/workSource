@@ -59,6 +59,10 @@ public class MeWebMenuServiceImpl implements MeWebMenuService {
 	public ListMeWebMenusResponse listMeWebMenus(ListMeWebMenusCommand cmd){
 		ListMeWebMenusResponse response = new ListMeWebMenusResponse();
 		List<MeWebMenu> meWebMenus = meWebMenuProvider.listMeWebMenus(cmd.getNamespaceId());
+		//找不到就找默认0空间的
+		if(meWebMenus == null || meWebMenus.size() == 0){
+			meWebMenus = meWebMenuProvider.listMeWebMenus(0);
+		}
 		List<MeWebMenuDTO> dtos = new ArrayList<>();
 		if(meWebMenus != null){
 			dtos = meWebMenus.stream()
