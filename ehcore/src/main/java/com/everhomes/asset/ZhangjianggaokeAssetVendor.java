@@ -175,7 +175,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                         Calendar dateBegin = Calendar.getInstance();
                         dateBegin.setTime(yyyy_MM_dd.parse(dateStrBegin));
 
-                        if(ownerType.equals(AssetPaymentStrings.EH_USER)){
+                        if(targetType.equals(AssetPaymentStrings.EH_USER)){
                             Calendar localPlus15 = Calendar.getInstance();
                             localPlus15.add(Calendar.DAY_OF_MONTH,15);
                             //0:待缴；payflag为0，本地时间加15天大于等于 账期所在月,本地时间小于账期
@@ -191,7 +191,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                                 // 3：未缴，payflag为0，日期大于本地时间15天以上
                                 billStatus = 3;
                             }
-                        }else if(ownerType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+                        }else if(targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
                             Calendar beginPlus10 = Calendar.getInstance();
                             beginPlus10.setTime(dateBegin.getTime());
                             beginPlus10.add(Calendar.DAY_OF_MONTH,10);
