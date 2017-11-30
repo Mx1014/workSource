@@ -24,7 +24,7 @@ public class ShowBillForClientV2DTO {
     private Long billGroupId;
     private String addressStr;
     private String contractId;
-
+    @ItemType(BillForClientV2.class)
     List<BillForClientV2> bills;
 
     public ShowBillForClientV2DTO(Long billGroupId, String contractId) {
