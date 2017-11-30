@@ -362,7 +362,7 @@ public interface RolePrivilegeService {
 
 	List<Long> listUserRelatedPrivilegeByModuleId(ListUserRelatedPrivilegeByModuleIdCommand cmd);
 
-	List<Long> listUserPrivilegeByModuleId(String ownerType, Long ownerId, Long organizationId, Long userId, Long moduleId);
+	List<Long> listUserPrivilegeByModuleId(Integer namespaceId, String ownerType, Long ownerId, Long organizationId, Long userId, Long moduleId);
 
 	List<Long> getPrivilegeIdsByRoleId(ListPrivilegesByRoleIdCommand cmd);
 

@@ -11,6 +11,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
@@ -28,11 +29,6 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.module.ServiceModuleStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.records.EhServiceModuleAssignmentRelationsRecord;
-import com.everhomes.server.schema.tables.records.EhServiceModuleAssignmentsRecord;
-import com.everhomes.server.schema.tables.records.EhServiceModulePrivilegesRecord;
-import com.everhomes.server.schema.tables.records.EhServiceModuleScopesRecord;
-import com.everhomes.server.schema.tables.records.EhServiceModulesRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
@@ -554,5 +550,25 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         EhServiceModulesDao dao = new EhServiceModulesDao(context.configuration());
         dao.deleteById(id);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhServiceModules.class, id);
+    }
+
+    @Override
+    public List<ServiceModuleExcludePrivilege> listExcludePrivileges(Integer namespaceId, Long comunityId, Long moduleId) {
+        List<ServiceModuleExcludePrivilege> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModuleExcludePrivileges.class));
+        SelectQuery<EhServiceModuleExcludePrivilegesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_EXCLUDE_PRIVILEGES);
+
+        Condition cond = Tables.EH_SERVICE_MODULE_EXCLUDE_PRIVILEGES.NAMESPACE_ID.eq(namespaceId);
+        if (comunityId != null)
+            cond = cond.and(Tables.EH_SERVICE_MODULE_EXCLUDE_PRIVILEGES.COMMUNITY_ID.eq(comunityId));
+        if (moduleId != null)
+            cond = cond.and(Tables.EH_SERVICE_MODULE_EXCLUDE_PRIVILEGES.MODULE_ID.eq(moduleId));
+
+        query.addConditions(cond);
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, ServiceModuleExcludePrivilege.class));
+            return null;
+        });
+        return results;
     }
 }

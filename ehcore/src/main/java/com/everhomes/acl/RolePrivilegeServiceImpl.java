@@ -679,12 +679,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public List<Long> listUserRelatedPrivilegeByModuleId(ListUserRelatedPrivilegeByModuleIdCommand cmd){
-		return listUserPrivilegeByModuleId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOrganizationId(), UserContext.current().getUser().getId(), cmd.getModuleId());
+		return listUserPrivilegeByModuleId(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOrganizationId(), UserContext.current().getUser().getId(), cmd.getModuleId());
 	}
 
 
 	@Override
-	public List<Long> listUserPrivilegeByModuleId(String ownerType, Long ownerId, Long organizationId, Long userId, Long moduleId){
+	public List<Long> listUserPrivilegeByModuleId(Integer namespaceId, String ownerType, Long ownerId, Long organizationId, Long userId, Long moduleId){
 		List<Long> privilegeIds = new ArrayList<>();
 		if(null != organizationId){
 			privilegeIds.addAll(getUserPrivileges(null ,organizationId, userId));
@@ -751,7 +751,21 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 
 		//看域空间&项目是否排除掉了模块下的某个权限 add by xiongying20171130
-		
+		List<ServiceModuleExcludePrivilege> moduleExcludePrivileges = new ArrayList<>();
+		if(EntityType.COMMUNITY.equals(ownerType)) {
+			moduleExcludePrivileges = serviceModuleProvider.listExcludePrivileges(namespaceId, ownerId, moduleId);
+		}
+		//项目下没有的话 查域下有没有排除
+		if(moduleExcludePrivileges == null || moduleExcludePrivileges.size() == 0) {
+			moduleExcludePrivileges = serviceModuleProvider.listExcludePrivileges(namespaceId, null, moduleId);
+		}
+
+		//去掉排除的权限
+		if(moduleExcludePrivileges != null && moduleExcludePrivileges.size() > 0) {
+			moduleExcludePrivileges.forEach(excludePrivilege -> {
+				pIds.remove(excludePrivilege.getPrivilegeId());
+			});
+		}
 
 		return pIds;
 	}
