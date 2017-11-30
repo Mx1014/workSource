@@ -750,6 +750,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 		}
 
+		//看域空间&项目是否排除掉了模块下的某个权限 add by xiongying20171130
+		
+
 		return pIds;
 	}
 
