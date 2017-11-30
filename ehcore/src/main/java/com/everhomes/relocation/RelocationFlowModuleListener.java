@@ -3,6 +3,8 @@ package com.everhomes.relocation;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.asset.AssetService;
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.flow.*;
 import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.locale.LocaleStringService;
@@ -42,6 +44,8 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
     private RelocationService relocationService;
     @Autowired
     private AssetService assetService;
+    @Autowired
+    private ConfigurationProvider configProvider;
 
     @Override
     public void onFlowCaseStart(FlowCaseState ctx) {
@@ -111,8 +115,10 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
         RelocationRequestDTO dto = relocationService.getRelocationRequestDetail(cmd);
         if (null != dto) {
 
+            String flowCaseUrl = configProvider.getValue(ConfigConstants.RELOCATION_FLOWCASE_URL, "");
+
             NewQRCodeCommand qrCmd = new NewQRCodeCommand();
-            qrCmd.setRouteUri("");
+            qrCmd.setRouteUri(String.format(flowCaseUrl, flowCase.getId(), FlowUserType.PROCESSOR.getCode()));
             qrCmd.setHandler(QRCodeHandler.FLOW.getCode());
             QRCodeDTO qRCodeDTO = qRCodeService.createQRCode(qrCmd);
             dto.setQrCodeUrl(qRCodeDTO.getUrl());

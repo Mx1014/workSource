@@ -130,7 +130,7 @@ public class RelocationServiceImpl implements RelocationService {
 
 		String flowCaseUrl = configProvider.getValue(ConfigConstants.RELOCATION_FLOWCASE_URL, "");
 
-		dto.setFlowCaseUrl(String.format(flowCaseUrl, request.getFlowCaseId()));
+		dto.setFlowCaseUrl(String.format(flowCaseUrl, request.getFlowCaseId(), FlowUserType.APPLIER.getCode()));
 	}
 
 	@Override
