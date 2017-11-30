@@ -101,9 +101,10 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
 
         String content = flowCase.getContent();
         if (StringUtils.isNotBlank(content) && flowUserType == FlowUserType.APPLIER) {
-            int lineBreak = content.indexOf("\\r\\n");
+            int lineBreak = content.indexOf("\r\n");
             content = content.substring(lineBreak + 4);
         }
+        flowCase.setContent(content);
         return content;
     }
 
