@@ -3,29 +3,36 @@ package com.everhomes.rest.group;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.rest.comment.ContentType;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>name：group名称</li>
- * <li>description：group描述</li>
- * <li>avatar：group头像ID，图片上传到ContentServer得到的ID</li>
- * <li>visibilityScope：group可见性类型，参考{@link com.everhomes.rest.visibility.VisibilityScope}</li>
- * <li>visibilityScopeId：根据group可见性类型对应的ID（如小区ID、城市ID等）</li>
- * <li>privateFlag：公私有标志，兴趣圈为公有、私有邻居圈为私有，参考{@link com.everhomes.rest.group.GroupPrivacy}</li>
- * <li>categoryId：group类型ID</li>
- * <li>tag：标签，用于搜索</li>
- * <li>postFlag：是否只有管理员可以发帖，参考{@link com.everhomes.rest.group.GroupPostFlag}</li>
- * <li>explicitRegionDescriptorsJson：暂不使用</li>
- * <li>visibleRegionType：用户创建圈时所在的范围类型，{@link com.everhomes.rest.visibility.VisibleRegionType}，添加于3.1.0版本 20151104</li>
- * <li>visibleRegionId：用户创建圈时所在的范围ID，如园区/小区ID、片区ID（即机构ID），添加于3.1.0版本 20151104</li>
- * <li>joinPolicy: 加入策略，参考{@link com.everhomes.rest.group.GroupJoinPolicy}</li>
+ *     <li>name: group名称</li>
+ *     <li>description: group描述</li>
+ *     <li>descriptionType: group描述的载体类型  参考{@link com.everhomes.rest.group.DescriptionType}</li>
+ *     <li>avatar: group头像ID，图片上传到ContentServer得到的ID</li>
+ *     <li>visibilityScope: group可见性类型，参考{@link com.everhomes.rest.visibility.VisibilityScope}</li>
+ *     <li>visibilityScopeId: 根据group可见性类型对应的ID（如小区ID、城市ID等）</li>
+ *     <li>privateFlag: 公私有标志，兴趣圈为公有、私有邻居圈为私有，参考{@link com.everhomes.rest.group.GroupPrivacy}</li>
+ *     <li>categoryId: group类型ID</li>
+ *     <li>tag: 标签，用于搜索</li>
+ *     <li>postFlag: 是否只有管理员可以发帖，参考{@link com.everhomes.rest.group.GroupPostFlag}</li>
+ *     <li>visibleRegionType: 用户创建圈时所在的范围类型，{@link com.everhomes.rest.visibility.VisibleRegionType}，添加于3.1.0版本 20151104</li>
+ *     <li>visibleRegionId: 用户创建圈时所在的范围ID，如园区/小区ID、片区ID（即机构ID），添加于3.1.0版本 20151104</li>
+ *     <li>explicitRegionDescriptorsJson: 暂不使用</li>
+ *     <li>namespaceId: namespaceId</li>
+ *     <li>joinPolicy: 加入策略，参考{@link com.everhomes.rest.group.GroupJoinPolicy}</li>
+ *     <li>touristPostPolicy: touristPostPolicy 参考{@link TouristPostPolicyFlag}</li>
+ *     <li>clubType: clubType 参考{@link ClubType}</li>
+ *     <li>phoneNumber: 联系电话</li>
  * </ul>
  */
 public class CreateGroupCommand {
     @NotNull
     private String name;
     private String description;
+    private Byte descriptionType;
     private String avatar;
     private Byte visibilityScope;
     private Long visibilityScopeId;
@@ -40,19 +47,22 @@ public class CreateGroupCommand {
     private String explicitRegionDescriptorsJson;
     private Integer namespaceId;
     private Integer joinPolicy;
-    
+    private Byte touristPostPolicy;
+    private Byte clubType;
+    private String phoneNumber;
+
     public CreateGroupCommand() {
     }
 
     public Integer getJoinPolicy() {
-		return joinPolicy;
-	}
+        return joinPolicy;
+    }
 
-	public void setJoinPolicy(Integer joinPolicy) {
-		this.joinPolicy = joinPolicy;
-	}
+    public void setJoinPolicy(Integer joinPolicy) {
+        this.joinPolicy = joinPolicy;
+    }
 
-	public String getName() {
+    public String getName() {
         return name;
     }
 
@@ -66,6 +76,14 @@ public class CreateGroupCommand {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Byte getDescriptionType() {
+        return descriptionType;
+    }
+
+    public void setDescriptionType(Byte descriptionType) {
+        this.descriptionType = descriptionType;
     }
 
     public String getAvatar() {
@@ -91,7 +109,7 @@ public class CreateGroupCommand {
     public void setTag(String tag) {
         this.tag = tag;
     }
-    
+
     public Long getCategoryId() {
         return categoryId;
     }
@@ -99,7 +117,7 @@ public class CreateGroupCommand {
     public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
     }
-    
+
     public Byte getVisibilityScope() {
         return visibilityScope;
     }
@@ -154,6 +172,30 @@ public class CreateGroupCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public Byte getTouristPostPolicy() {
+        return touristPostPolicy;
+    }
+
+    public void setTouristPostPolicy(Byte touristPostPolicy) {
+        this.touristPostPolicy = touristPostPolicy;
+    }
+
+    public Byte getClubType() {
+        return clubType;
+    }
+
+    public void setClubType(Byte clubType) {
+        this.clubType = clubType;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     @Override

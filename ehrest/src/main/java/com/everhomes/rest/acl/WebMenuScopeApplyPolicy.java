@@ -22,11 +22,13 @@ public enum WebMenuScopeApplyPolicy {
     }
     
     public static WebMenuScopeApplyPolicy fromCode(Byte code) {
-    	WebMenuScopeApplyPolicy[] values = WebMenuScopeApplyPolicy.values();
-        for(WebMenuScopeApplyPolicy value : values) {
-        	  if(value.code == code.byteValue()) {
-                  return value;
-              }
+        if(null == code){
+            return null;
+        }
+        for (WebMenuScopeApplyPolicy flag : WebMenuScopeApplyPolicy.values()) {
+            if (flag.code == code.byteValue()) {
+                return flag;
+            }
         }
         return null;
     }

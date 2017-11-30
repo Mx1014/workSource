@@ -34,10 +34,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * <ul>
- * <li>在客户端组件化的过程中，有一些与界面有关的逻辑会放到服务器端</li>
- * <li>专门提供客户端逻辑的API都放到该Controller中，这类API属于比较高层的API，专门服务于界面</li>
- * </ul>
+ * 在客户端组件化的过程中，有一些与界面有关的逻辑会放到服务器端
+ * 专门提供客户端逻辑的API都放到该Controller中，这类API属于比较高层的API，专门服务于界面
  */
 @RestDoc(value="UserUi controller", site="userui")
 @RestController
@@ -65,8 +63,7 @@ public class UserUiController extends ControllerBase {
     
     /**
      * <b>URL: /ui/user/listUserRelatedScenes</b>
-     * <p>列出用户当前域空间下的相关场景。</p>
-     * <p>必须在请求的Header中提供域空间。</p>
+     * <p>列出用户当前域空间下的相关场景。必须在请求的Header中提供域空间。</p>
      */
     @RequestMapping("listUserRelatedScenes")
     @RestReturn(value=SceneDTO.class, collection=true)

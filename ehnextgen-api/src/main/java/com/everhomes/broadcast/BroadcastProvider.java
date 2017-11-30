@@ -15,7 +15,9 @@ public interface BroadcastProvider {
 
 	List<Broadcast> listBroadcastByOwner(String ownerType, Long ownerId, Long pageAnchor, int pageSize);
 
-	Integer selectBroadcastCountToday(Integer namespaceId, String ownerType, Long ownerId);
+    Integer countBroadcastByOwner(String ownerType, Long ownerId);
+
+    Integer selectBroadcastCountToday(Integer namespaceId, String ownerType, Long ownerId);
 
     void deleteBroadcast(Broadcast broadcast);
 }

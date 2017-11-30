@@ -672,6 +672,7 @@ public class ContentServerServiceImpl implements ContentServerService {
         dto.setLimitPerSize(cmd.getLimitPerSize());
         dto.setUserId(userId);
         dto.setUserToken(cmd.getUserToken());
+        dto.setTitle(cmd.getTitle());
         
         obj = redisTemplate.opsForValue().getAndSet(key, StringHelper.toJsonString(dto));
         if(obj != null) {
@@ -833,6 +834,7 @@ public class ContentServerServiceImpl implements ContentServerService {
         dto.setInfos(cmd.getInfos());
         dto.setLimitCount(cmd.getLimitCount());
         dto.setLimitPerSize(cmd.getLimitPerSize());
+        dto.setTitle(cmd.getTitle());
 //        dto.setUserId(userId);
 //        dto.setUserToken(cmd.getUserToken());
         
