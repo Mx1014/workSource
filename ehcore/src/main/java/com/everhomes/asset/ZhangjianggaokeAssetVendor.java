@@ -68,9 +68,9 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
 
     @Override
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum) {
-        PaymentBillGroup group = assetProvider.getBillGroupById(billGroupId);
         ShowBillForClientDTO finalDto = new ShowBillForClientDTO();
-        if(!group.getName().equals("租金")) return finalDto;
+//        PaymentBillGroup group = assetProvider.getBillGroupById(billGroupId);
+//        if(!group.getName().equals("租金")) return finalDto;
         List<BillDetailDTO> dtos = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
         SimpleDateFormat yyyy_MM_dd = new SimpleDateFormat("yyyy-MM-dd");
@@ -244,6 +244,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 ContractBillsDTO dto = new ContractBillsDTO();
                 dto.setCustomerName("账单"+i);
                 dto.setFeeName("租金");
+                dtos[i] = dto;
             }
             // local 待缴 10天
             ContractBillsDTO dto = dtos[0];
@@ -284,6 +285,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 ContractBillsDTO dto = new ContractBillsDTO();
                 dto.setCustomerName("账单"+i);
                 dto.setFeeName("租金");
+                dtos[i] = dto;
             }
             // local 待缴 10天
             ContractBillsDTO dto = dtos[0];
