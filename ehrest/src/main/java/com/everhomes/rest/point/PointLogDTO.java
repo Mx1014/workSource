@@ -9,8 +9,8 @@ import java.sql.Timestamp;
  *     <li>id: id</li>
  *     <li>namespaceId: namespaceId</li>
  *     <li>systemId: systemId</li>
- *     <li>moduleId: moduleId</li>
- *     <li>moduleName: moduleName</li>
+ *     <li>categoryId: categoryId</li>
+ *     <li>categoryName: categoryName</li>
  *     <li>ruleId: ruleId</li>
  *     <li>ruleName: ruleName</li>
  *     <li>operateType: operateType</li>
@@ -30,8 +30,8 @@ public class PointLogDTO {
     private Long id;
     private Integer namespaceId;
     private Long systemId;
-    private Long moduleId;
-    private String moduleName;
+    private Long categoryId;
+    private String categoryName;
     private Long ruleId;
     private String ruleName;
     private Byte operateType;
@@ -70,20 +70,20 @@ public class PointLogDTO {
         this.systemId = systemId;
     }
 
-    public Long getModuleId() {
-        return moduleId;
+    public Long getCategoryId() {
+        return categoryId;
     }
 
-    public void setModuleId(Long moduleId) {
-        this.moduleId = moduleId;
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
     }
 
-    public String getModuleName() {
-        return moduleName;
+    public String getCategoryName() {
+        return categoryName;
     }
 
-    public void setModuleName(String moduleName) {
-        this.moduleName = moduleName;
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 
     public Long getRuleId() {

@@ -6,9 +6,11 @@ import java.sql.Timestamp;
 
 /**
  * <ul>
+ *     <li>id: id</li>
  *     <li>flowCaseId: flowCaseId</li>
  *     <li>moduleId: moduleId</li>
  *     <li>flowCaseTitle: 标题</li>
+ *     <li>flowUserName: 操作人</li>
  *     <li>flowCaseContent: 任务信息</li>
  *     <li>logContent: 日志内容</li>
  *     <li>createTime: 创建时间</li>
@@ -20,6 +22,7 @@ public class FlowOperateLogDTO {
     private Long flowCaseId;
     private Long moduleId;
     private String flowCaseTitle;
+    private String flowUserName;
     private String flowCaseContent;
     private String logContent;
     private Timestamp createTime;
@@ -78,6 +81,14 @@ public class FlowOperateLogDTO {
 
     public void setModuleId(Long moduleId) {
         this.moduleId = moduleId;
+    }
+
+    public String getFlowUserName() {
+        return flowUserName;
+    }
+
+    public void setFlowUserName(String flowUserName) {
+        this.flowUserName = flowUserName;
     }
 
     @Override

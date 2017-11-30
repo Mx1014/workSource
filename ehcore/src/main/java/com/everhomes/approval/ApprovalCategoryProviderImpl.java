@@ -56,6 +56,7 @@ public class ApprovalCategoryProviderImpl implements ApprovalCategoryProvider {
 			return ConvertHelper.convert( ApprovalServiceImpl.defaultCategory, ApprovalCategory.class);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), ApprovalCategory.class);
 	}
+
 	
 	@Override
 	public List<ApprovalCategory> listApprovalCategory() {
@@ -65,6 +66,8 @@ public class ApprovalCategoryProviderImpl implements ApprovalCategoryProvider {
 				.orderBy(Tables.EH_APPROVAL_CATEGORIES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, ApprovalCategory.class));
 	}
+	
+	
 	
 	@Override
 	public List<ApprovalCategory> listApprovalCategoryForStatistics(Integer namespaceId, String ownerType, Long ownerId,

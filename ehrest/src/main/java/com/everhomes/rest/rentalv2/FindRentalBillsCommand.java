@@ -14,7 +14,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class FindRentalBillsCommand {
-	
+
+	private Long id;
 	private Long resourceTypeId;
 	private Long pageAnchor;
 		
@@ -85,10 +86,11 @@ public class FindRentalBillsCommand {
 	}
 
 
- 
+	public Long getId() {
+		return id;
+	}
 
- 
-
-
-
+	public void setId(Long id) {
+		this.id = id;
+	}
 }

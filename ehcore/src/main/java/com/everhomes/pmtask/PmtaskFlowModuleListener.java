@@ -439,7 +439,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	}
 
 	@Override
-	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
 		Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
 		List<Category> categories = categoryProvider.listTaskCategories(namespaceId, defaultId, null,
 				null, null);

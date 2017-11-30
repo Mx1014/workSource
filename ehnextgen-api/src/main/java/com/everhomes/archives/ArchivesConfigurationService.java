@@ -4,5 +4,5 @@ import java.util.List;
 
 public interface ArchivesConfigurationService {
 
-    void sendingMail(List<ArchivesNotifications> notifyLists);
+    void sendingMailJob(Integer hour, List<ArchivesNotifications> notifyLists);
 }

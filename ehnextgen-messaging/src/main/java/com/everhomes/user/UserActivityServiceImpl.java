@@ -874,7 +874,6 @@ public class UserActivityServiceImpl implements UserActivityService {
         PointSystemDTO system = pointSystemResponse.getSystems().get(0);
 
         GetUserPointCommand pointCommand = new GetUserPointCommand();
-        pointCommand.setNamespaceId(namespaceId);
         pointCommand.setUid(UserContext.currentUserId());
         pointCommand.setSystemId(system.getId());
         PointScoreDTO userPoint = pointService.getUserPoint(pointCommand);

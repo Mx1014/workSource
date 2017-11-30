@@ -57,6 +57,9 @@ public class PointServiceImpl implements PointService {
     @Autowired
     private PointGoodProvider pointGoodProvider;
 
+    @Autowired
+    private PointRuleProvider pointRuleProvider;
+
     @Override
     public GetEnabledPointSystemResponse getEnabledPointSystem(GetEnabledPointSystemCommand cmd) {
         ValidatorUtil.validate(cmd);
@@ -83,7 +86,7 @@ public class PointServiceImpl implements PointService {
     public PointSystemDTO getPointSystem(GetPointSystemCommand cmd) {
         ValidatorUtil.validate(cmd);
         PointSystem pointSystem = pointSystemProvider.findById(cmd.getSystemId());
-        return ConvertHelper.convert(pointSystem, PointSystemDTO.class);
+        return toPointSystemDTO(pointSystem);
     }
 
     @Override
@@ -98,16 +101,22 @@ public class PointServiceImpl implements PointService {
 
         // --------
         cmd.setUserId(null);
-        cmd.setOperateType(null);
         // -------
 
-        List<PointLogDTO> logs = pointLogProvider.listPointLogs(cmd, locator);
+        List<PointLog> logs = pointLogProvider.listPointLogs(cmd, locator);
 
         ListPointLogsResponse response = new ListPointLogsResponse();
-        response.setLogs(logs);
+
+        List<PointLogDTO> logDTOS = logs.stream().map(this::toPointLogDTO).collect(Collectors.toList());
+
+        response.setLogs(logDTOS);
         response.setNextPageAnchor(locator.getAnchor());
 
         return response;
+    }
+
+    private PointLogDTO toPointLogDTO(PointLog pointLog) {
+        return ConvertHelper.convert(pointLog, PointLogDTO.class);
     }
 
     @Override
@@ -181,7 +190,11 @@ public class PointServiceImpl implements PointService {
     }
 
     private PointTutorialDetailDTO toPointTutorialDetailDTO(PointTutorialToPointRuleMapping mapping) {
-        return ConvertHelper.convert(mapping, PointTutorialDetailDTO.class);
+        PointTutorialDetailDTO detailDTO = ConvertHelper.convert(mapping, PointTutorialDetailDTO.class);
+        PointRule pointRule = pointRuleProvider.findById(mapping.getRuleId());
+        detailDTO.setRuleName(pointRule.getDisplayName());
+        detailDTO.setPoints(pointRule.getPoints());
+        return detailDTO;
     }
 
     @Override
@@ -221,9 +234,9 @@ public class PointServiceImpl implements PointService {
 
         ListPointLogsCommand logsCmd = ConvertHelper.convert(cmd, ListPointLogsCommand.class);
 
-        List<PointLogDTO> logs = pointLogProvider.listPointLogs(logsCmd, locator);
+        List<PointLog> logs = pointLogProvider.listPointLogs(logsCmd, locator);
         ListPointLogsResponse response = new ListPointLogsResponse();
-        response.setLogs(logs);
+        response.setLogs(logs.stream().map(this::toPointLogDTO).collect(Collectors.toList()));
         response.setNextPageAnchor(locator.getAnchor());
         return response;
     }

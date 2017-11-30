@@ -28,9 +28,9 @@ CREATE TABLE `eh_point_scores` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
--- 模块
--- DROP TABLE IF EXISTS `eh_point_modules`;
-CREATE TABLE `eh_point_modules` (
+-- 积分分类
+-- DROP TABLE IF EXISTS `eh_point_categories`;
+CREATE TABLE `eh_point_categories` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `display_name` VARCHAR(32) NOT NULL,
@@ -46,6 +46,7 @@ CREATE TABLE `eh_point_rules` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `system_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_systems id',
+  `category_id` BIGINT NOT NULL DEFAULT 0,
   `module_id` BIGINT NOT NULL DEFAULT 0,
   `display_name` VARCHAR(64) NOT NULL,
   `operate_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: plus, 2: minus',
@@ -65,8 +66,8 @@ CREATE TABLE `eh_point_logs` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `system_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_systems id',
-  `module_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_modules id',
-  `module_name` VARCHAR(32) NOT NULL DEFAULT '',
+  `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_modules id',
+  `category_name` VARCHAR(32) NOT NULL DEFAULT '',
   `rule_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rules id',
   `rule_name` VARCHAR(32) NOT NULL DEFAULT '',
   `operate_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: plus, 2: minus',

@@ -4,8 +4,6 @@ package com.everhomes.techpark.expansion;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
-import com.everhomes.building.BuildingProvider;
-import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.entity.EntityType;
@@ -21,6 +19,7 @@ import com.everhomes.openapi.ContractProvider;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowModuleDTO;
+import com.everhomes.rest.flow.FlowServiceTypeDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -380,5 +379,15 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
         }
 
+    }
+
+    @Override
+    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
+        List<FlowServiceTypeDTO> result = new ArrayList<>();
+        FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+        dto.setNamespaceId(namespaceId);
+        dto.setServiceName("园区入驻");
+        result.add(dto);
+        return result;
     }
 }

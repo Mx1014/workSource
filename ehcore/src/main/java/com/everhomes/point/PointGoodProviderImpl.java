@@ -86,6 +86,7 @@ public class PointGoodProviderImpl implements PointGoodProvider {
         com.everhomes.server.schema.tables.EhPointGoods t = Tables.EH_POINT_GOODS;
         return this.query(locator, pageSize, (locator1, query) -> {
             query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+            query.addOrderBy(t.TOP_TIME.desc());
             return query;
         });
     }

@@ -66,4 +66,16 @@ public interface GroupNotificationTemplateCode {
     static final int GROUP_BE_REMOVE = 56;  //你被${userName}移出了群聊
     static final int GROUP_DELETE = 57;  //你加入的群聊“${groupName}”已解散
 
+    static final int GROUP_MEMBER_TO_ADMIN_WHEN_REQUEST_TO_JOIN_FOR_GUILD = 60;  //${申请人昵称}申请${企业名}加入${协会名}，是否同意？
+    static final int GROUP_MEMBER_APPROVE_REQUEST_TO_JOIN_FOR_GUILD = 61;  //您提交的申请：{企业名}加入{行业协会名}，已被管理员通过。
+    static final int GROUP_MEMBER_REJECT_REQUEST_TO_JOIN_FOR_GUILD = 62;  //您提交的申请：{企业名}加入{行业协会名}，已被管理员拒绝，理由：{拒绝理由}。
+    static final int GROUP_DELETE_FOR_GUILD = 63;  //您加入的行业协会“${groupName}”已解散
+    static final int GROUP_DELETE_FOR_CLUB = 64;  //您加入的俱乐部“${groupName}”已解散
+    static final int GROUP_MEMBER_DELETE_MEMBER_FOR_CLUB = 65;   //您已退出俱乐部“${groupName}”
+    static final int GROUP_MEMBER_DELETE_MEMBER_FOR_GUILD = 66;   //您已退出行业协会“${groupName}”
+    static final int GROUP_MEMBER_LEAVE_FOR_CLUB = 67;  //${userName}已退出俱乐部“${groupName}”
+    static final int GROUP_MEMBER_LEAVE_FOR_GUILD = 68;  //${userName}已退出行业协会“${groupName}”
+    static final int GROUP_MEMBER_JOIN_FREE_FOR_CLUB = 69;  //${userName}已退出俱乐部“${groupName}”
+    static final int GROUP_MEMBER_JOIN_FREE_FOR_GUILD = 70;  //${userName}已退出行业协会“${groupName}”
+
 }

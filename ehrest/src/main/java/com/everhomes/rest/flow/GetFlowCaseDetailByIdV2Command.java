@@ -4,8 +4,8 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>flowCaseId: flowCaseId</li>
- *     <li>flowUserType: {@link com.everhomes.rest.flow.FlowUserType} processor: 处理者， node_applier: 申请者</li>
+ *     <li>flowCaseId: 任务id</li>
+ *     <li>flowUserType: 用户类型{@link com.everhomes.rest.flow.FlowUserType} processor: 处理者， node_applier: 申请者</li>
  * </ul>
  */
 public class GetFlowCaseDetailByIdV2Command {

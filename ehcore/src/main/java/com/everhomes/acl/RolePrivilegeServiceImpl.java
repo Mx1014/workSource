@@ -1,9 +1,6 @@
 package com.everhomes.acl;
 
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.community.ResourceCategory;
-import com.everhomes.community.ResourceCategoryAssignment;
+import com.everhomes.community.*;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -23,6 +20,7 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.ActivationFlag;
 import com.everhomes.rest.common.AllFlagType;
+import com.everhomes.rest.community.ListChildProjectCommand;
 import com.everhomes.rest.community.ResourceCategoryType;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.module.AssignmentTarget;
@@ -108,6 +106,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
     @Autowired
     private LocaleTemplateService localeTemplateService;
+
+    @Autowired
+    private CommunityService communityService;
 
 	@Override
 	public ListWebMenuResponse listWebMenu(ListWebMenuCommand cmd) {
@@ -2310,6 +2311,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 		}
 		List<ProjectDTO> projectTrees = new ArrayList<>();
+		// 存在项目分类时的解析
 		if(0 != categoryIds.size()){
 			List<ProjectDTO> temp = communityProvider.listResourceCategory(null, null, categoryIds, ResourceCategoryType.CATEGORY.getCode())
 					.stream().map(r -> {
@@ -2328,6 +2330,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 			setResourceDTOs(projectTrees, projectIds, namespaceId);
 		}
+
+		// 不存在项目分类时的解析
+		//添加子项目
+		entityts.stream().filter(r -> EntityType.COMMUNITY == EntityType.fromCode(r.getProjectType())).map(r -> {
+			//获取园区下的子项目
+			ListChildProjectCommand cmd = new ListChildProjectCommand();
+			cmd.setProjectType(EntityType.COMMUNITY.getCode());
+			cmd.setProjectId(r.getProjectId());
+			List<ProjectDTO> childDto = this.communityService.listChildProjects(cmd);
+			if (childDto != null && childDto.size() > 0)
+				r.setProjects(childDto);
+			return r;
+		}).collect(Collectors.toList());
 		projectTrees.addAll(entityts);
 
 		Long endTime = System.currentTimeMillis();
@@ -2363,6 +2378,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 						Community community = communityProvider.findCommunityById(r.getResourceId());
 						if(community != null){
 							dto.setProjectName(community.getName());
+							//获取园区下的子项目
+							ListChildProjectCommand cmd = new ListChildProjectCommand();
+							cmd.setProjectType(EntityType.COMMUNITY.getCode());
+							cmd.setProjectId(community.getId());
+							List<ProjectDTO> childDto = this.communityService.listChildProjects(cmd);
+							if(childDto != null && childDto.size() > 0)
+								dto.setProjects(childDto);
 						}
 					}
 					dto.setProjectType(r.getResourceType());
@@ -2748,8 +2770,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		if(null == modules){
 			LOGGER.error("This user has not been added to the administrator list.");
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_ADMINISTRATORS_LIST_NONEXISTS,
-					"This user has not been added to the administrator list.");
+//			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_ADMINISTRATORS_LIST_NONEXISTS,
+//					"This user has not been added to the administrator list.");
+			return;
 		}
 
 		List<Authorization> authorizations = authorizationProvider.listManageAuthorizationsByTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId(), EntityType.SERVICE_MODULE.getCode(), null);

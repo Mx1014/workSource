@@ -831,7 +831,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         //Now, the contact only has a parent group 
 //        Collections.sort(members, new Comparator<EnterpriseContactGroupMember>() {
 //            @Override
-//            public int compare(EnterpriseContactGroupMember o1, EnterpriseContactGroupMember o2) {
+//            public int compareTo(EnterpriseContactGroupMember o1, EnterpriseContactGroupMember o2) {
 //            }
 //            
 //        });

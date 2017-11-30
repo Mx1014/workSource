@@ -1,6 +1,5 @@
 package com.everhomes.quality;
 
-import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -11,11 +10,8 @@ import com.everhomes.rest.quality.*;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.QualityInspectionSampleSearcher;
 import com.everhomes.search.SearchUtils;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSampleCommunityMap;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.mysql.jdbc.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -32,9 +28,6 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/6/9.
@@ -143,14 +136,17 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
         }
 
         List<SampleTaskScoreDTO> dtos = new ArrayList<>();
-        for(Long id : ids) {
-            QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(id, cmd.getOwnerType(), cmd.getOwnerId());
-            SampleTaskScoreDTO dto = ConvertHelper.convert(sample, SampleTaskScoreDTO.class);
-            List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(dto.getCreatorUid());
-            if(members != null && members.size() > 0) {
-                dto.setCreatorName(members.get(0).getContactName());
+        //可能是这里导致Alpha环境空指针
+        if (ids.size() > 0) {
+            for(Long id : ids) {
+                QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(id, cmd.getOwnerType(), cmd.getOwnerId());
+                SampleTaskScoreDTO dto = ConvertHelper.convert(sample, SampleTaskScoreDTO.class);
+                List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(dto.getCreatorUid());
+                if(members != null && members.size() > 0) {
+                    dto.setCreatorName(members.get(0).getContactName());
+                }
+                dtos.add(dto);
             }
-            dtos.add(dto);
         }
         response.setSampleTasks(dtos);
         return response;

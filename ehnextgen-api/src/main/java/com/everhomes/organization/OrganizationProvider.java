@@ -259,6 +259,7 @@ public interface OrganizationProvider {
 	List<OrganizationMember> listOrganizationMembers(Long orgId,List<Long> memberUids);
 
 	List<OrganizationCommunityRequest> listOrganizationCommunityRequests(Long communityId);
+	List<OrganizationCommunityRequest> listOrganizationCommunityRequestsByOrganizationId(Long organizationId);
 
 	void createOrganizationMemberLog(OrganizationMemberLog orgLog);
 	List<OrganizationMemberLog> listOrganizationMemberLogs(Long id);
@@ -284,6 +285,8 @@ public interface OrganizationProvider {
 															   Long pageAnchor, Integer pageSize);
 
 	List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes, String keyword, Long pageAnchor, Integer pageSize);
+
+	List<Organization> listOrganizationByGroupTypesAndPath(String path, List<String> groupTypes, String keyword, Long pageAnchor, Integer pageSize);
 
 	List<OrganizationCommunityRequest> listOrganizationCommunityRequests(List<Long> communityIds);
 

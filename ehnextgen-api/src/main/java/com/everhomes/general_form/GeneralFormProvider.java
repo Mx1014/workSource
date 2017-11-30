@@ -34,4 +34,11 @@ public interface GeneralFormProvider {
 
     void updateGeneralFormGroup(GeneralFormGroup group);
 
+	List<GeneralFormTemplate> listGeneralFormTemplate(Long moduleId);
+
+    GeneralFormTemplate findGeneralFormTemplateByIdAndModuleId(Long id, Long moduleId);
+
+	GeneralForm getActiveGeneralFormByName(Long moduleId, Long ownerId, String ownerType, String formName);
+
+	GeneralForm getGeneralFormByTemplateId(Long moduleId, Long ownerId, String ownerType, Long templateId);
 }

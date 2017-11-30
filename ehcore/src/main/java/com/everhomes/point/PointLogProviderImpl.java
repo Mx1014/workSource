@@ -8,7 +8,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.point.ListPointLogsCommand;
-import com.everhomes.rest.point.PointLogDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPointLogsDao;
@@ -58,23 +57,23 @@ public class PointLogProviderImpl implements PointLogProvider {
 	}
 
     @Override
-    public List<PointLogDTO> listPointLogs(ListPointLogsCommand cmd, ListingLocator locator) {
+    public List<PointLog> listPointLogs(ListPointLogsCommand cmd, ListingLocator locator) {
         com.everhomes.server.schema.tables.EhPointLogs t = Tables.EH_POINT_LOGS;
         SelectQuery<EhPointLogsRecord> query = context().selectFrom(t).getQuery();
         if (cmd.getSystemId() != null) {
             query.addConditions(t.SYSTEM_ID.eq(cmd.getSystemId()));
         }
 
-        Optional.of(cmd.getUserId()).ifPresent(targetUid -> query.addConditions(t.TARGET_UID.eq(targetUid)));
-        Optional.of(cmd.getOperateType()).ifPresent(operateType -> query.addConditions(t.OPERATE_TYPE.eq(operateType)));
-        Optional.of(cmd.getPhone()).ifPresent(phone -> query.addConditions(t.TARGET_PHONE.eq(phone)));
-        Optional.of(cmd.getStartTime()).ifPresent(startTime -> query.addConditions(t.CREATE_TIME.gt(new Timestamp(startTime))));
-        Optional.of(cmd.getEndTime()).ifPresent(endTime -> query.addConditions(t.CREATE_TIME.le(new Timestamp(endTime))));
+        Optional.ofNullable(cmd.getUserId()).ifPresent(targetUid -> query.addConditions(t.TARGET_UID.eq(targetUid)));
+        Optional.ofNullable(cmd.getOperateType()).ifPresent(operateType -> query.addConditions(t.OPERATE_TYPE.eq(operateType)));
+        Optional.ofNullable(cmd.getPhone()).ifPresent(phone -> query.addConditions(t.TARGET_PHONE.eq(phone)));
+        Optional.ofNullable(cmd.getStartTime()).ifPresent(startTime -> query.addConditions(t.CREATE_TIME.gt(new Timestamp(startTime))));
+        Optional.ofNullable(cmd.getEndTime()).ifPresent(endTime -> query.addConditions(t.CREATE_TIME.le(new Timestamp(endTime))));
 
-        Optional.of(locator.getAnchor()).ifPresent(pageAnchor -> query.addConditions(t.ID.le(pageAnchor)));
-        Optional.of(cmd.getPageSize()).ifPresent(query::addLimit);
+        Optional.ofNullable(locator.getAnchor()).ifPresent(pageAnchor -> query.addConditions(t.ID.le(pageAnchor)));
+        Optional.ofNullable(cmd.getPageSize()).ifPresent(query::addLimit);
 
-        List<PointLogDTO> list = query.fetchInto(PointLogDTO.class);
+        List<PointLog> list = query.fetchInto(PointLog.class);
         if (list.size() > cmd.getPageSize()) {
             locator.setAnchor(list.get(list.size() - 1).getId());
             list.remove(list.size() - 1);

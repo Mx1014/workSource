@@ -14,7 +14,7 @@ import org.springframework.context.annotation.ComponentScan;
 import com.everhomes.atomikos.AtomikosHelper;
 
 /**
- * Spring boot main class. Its class name need to be packaged to let Spring boot bootstrap process
+ * Spring boot main class. Its class name need to be packaged to let Spring boot bootstrap processStat
  * be aware of.
  * 
  * Maven spring boot plugin can take its name from maven property(start-class)

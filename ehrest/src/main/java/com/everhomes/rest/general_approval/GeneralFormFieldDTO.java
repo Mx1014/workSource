@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>fieldType: 字段类型 {@link GeneralFormFieldType}</li>
+ * <li>fieldType: 字段类型 {@link com.everhomes.rest.general_approval.GeneralFormFieldType}</li>
  * <li>fieldName: 字段名字，对应的 form 表单里面的名字</li>
  * <li>fieldDisplayName: 显示的字段名字</li>
  * <li>fieldDesc: 提示文案</li>
@@ -16,13 +16,14 @@ import com.everhomes.util.StringHelper;
  * 日期类型：{@link com.everhomes.rest.general_approval.GeneralFormDateDTO}
  * 下拉框类型：{@link com.everhomes.rest.general_approval.GeneralFormDropBoxDTO}
  * 子表单类型：{@link com.everhomes.rest.general_approval.GeneralFormSubformDTO}
- * 企业联系人类型：{@link com.everhomes.rest.general_approval.GeneralFormContactDTO}</li>
+ * 企业联系人类型：{@link com.everhomes.rest.general_approval.GeneralFormContactDTO}
+ * </li>
  * <li>requiredFlag: 是否必填 </li>
  * <li>dynamicFlag: 是否动态获取数据</li>
- * <li>visibleType: 显示风格，比如：隐藏，只读，可以修改 {@link GeneralFormDataVisibleType}</li>
- * <li>validatorType: 校验方式 {@link GeneralFormValidatorType}</li>
- * <li>dataSourceType: 数据源类型 {@link GeneralFormDataSourceType}</li>
- * <li>renderType: 渲染类型，{@link GeneralFormRenderType}</li>
+ * <li>visibleType: 显示风格，比如：隐藏，只读，可以修改 {@link com.everhomes.rest.general_approval.GeneralFormDataVisibleType}</li>
+ * <li>validatorType: 校验方式 {@link com.everhomes.rest.general_approval.GeneralFormValidatorType}</li>
+ * <li>dataSourceType: 数据源类型 {@link com.everhomes.rest.general_approval.GeneralFormDataSourceType}</li>
+ * <li>renderType: 渲染类型，{@link com.everhomes.rest.general_approval.GeneralFormRenderType}</li>
  * <li>fieldValue: 字段值</li>
  * <li>fieldGroupName: 字段组名称</li>
  * <li>fieldAttribute: 字段属性 比如：DEFAULT-系统字段 {@link GeneralFormFieldAttribute}</li>
@@ -52,6 +53,7 @@ public class GeneralFormFieldDTO {
 	private String fieldAttribute;
 	private Byte modifyFlag;
 	private Byte deleteFlag;
+
 
 	public String getFieldName() {
 		return fieldName;

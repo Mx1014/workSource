@@ -12,7 +12,9 @@ public interface RentalNotificationTemplateCode {
     int RENTAL_CANCEL_CODE = 7; // 取消短信：【正中会】您申请预约的{使用时间}的{资源名称}由于超时未支付或被其他客户抢先预约，已自动取消，由此给您造成的不便，敬请谅解，感谢您的使用。
     int RENTAL_REMIND_CODE = 8; // 资催办-正中会:【正中发】客户（{申请人姓名}{申请人联系电话}）提交资源预约的线下支付申请，预约{资源名称}，使用时间：{使用时间}，订单金额{订单金额}，请尽快联系客户完成支付
 
-    int RENTAL_PROCESSOR_SUCCESS_CODE = 9; // 正中会-预成功:【正在会】客户{客户姓名}（{客户联系方式}）完成支付，成功预约{使用时间}的{资源名称}，请提前做好相关准备工作。
+	public static final int RENTAL_PROCESSOR_SUCCESS_CODE = 9; // 正中会-预成功:【正在会】客户{客户姓名}（{客户联系方式}）完成支付，成功预约{使用时间}的{资源名称}，请提前做好相关准备工作。
+	public static final int RENTAL_END_NOTIFY_HOUR = 10;//预定快结束的推送(小时/半天):温馨提醒：{资源名称}资源的使用将在15分钟后结束，使用客户{客户姓名}（{客户联系方式}），请进行确认
+	public static final int RENTAL_END_NOTIFY_DAY = 11;//预定快结束的推送(天/月):温馨提醒：{资源名称}资源的使用将在今日结束，使用客户{客户姓名}（{客户联系方式}），请进行确认
 
     int RENTAL_TEXT_REMARK = 10; // 资源提交信息   请输入备注
     int RENTAL_SHOW_CONTENT = 11; // 资源提交信息  请输入显示内容

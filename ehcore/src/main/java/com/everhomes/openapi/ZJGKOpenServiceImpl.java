@@ -2,6 +2,7 @@ package com.everhomes.openapi;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.app.App;
@@ -26,6 +27,7 @@ import com.everhomes.pmtask.ebei.EbeiJsonEntity;
 import com.everhomes.pmtask.ebei.EbeiResult;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.community.BuildingDTO;
@@ -50,6 +52,7 @@ import com.everhomes.search.PMOwnerSearcher;
 import com.everhomes.server.schema.tables.pojos.EhZjSyncdataBackup;
 import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
 import com.everhomes.techpark.expansion.LeasePromotion;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
 import com.everhomes.varField.FieldProvider;
@@ -99,7 +102,7 @@ public class ZJGKOpenServiceImpl {
 
     private static ThreadLocal<SimpleDateFormat> simpleDateSF = new ThreadLocal<SimpleDateFormat>(){
         protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("yyyy-MM-dd");
+            return new SimpleDateFormat("yyyyMMdd");
         }
     };
 
@@ -182,6 +185,9 @@ public class ZJGKOpenServiceImpl {
 
     @Autowired
     private FieldService fieldService;
+
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
 
     public void syncData() {
 //        Map<String, String> params = generateParams();
@@ -1339,11 +1345,33 @@ public class ZJGKOpenServiceImpl {
 
             insertOrUpdateOrganizationDetail(organization, customer);
             insertOrUpdateOrganizationCommunityRequest(zjEnterprise.getCommunityId(), organization);
-            insertOrUpdateOrganizationAddresses(zjEnterprise.getApartmentIdentifierList(), customer);
+            insertOrUpdateOrganizationAddresses(zjEnterprise.getAddressList(), customer);
+            insertOrUpdateOrganizationMembers(namespaceId, organization, customer.getContactName(), customer.getContactMobile());
             organizationSearcher.feedDoc(organization);
             return null;
         });
 
+    }
+
+    // 需要把同步过来的业务人员添加为我司系统对应组织的管理员
+    private void insertOrUpdateOrganizationMembers(Integer namespaceId, Organization organization, String contact, String contactPhone) {
+        if (StringUtils.isBlank(contact) || StringUtils.isBlank(contactPhone) || organization == null) {
+            return ;
+        }
+        try {
+            User user = new User();
+            user.setId(1L);
+            UserContext.setCurrentUser(user);
+            UserContext.setCurrentNamespaceId(namespaceId);
+
+            CreateOrganizationAdminCommand cmd = new CreateOrganizationAdminCommand();
+            cmd.setContactName(contact);
+            cmd.setContactToken(contactPhone);
+            cmd.setOrganizationId(organization.getId());
+            rolePrivilegeService.createOrganizationAdmin(cmd, namespaceId);
+        } catch (Exception e) {
+            LOGGER.error("sync organization members error: organizationId="+organization.getId()+", contact="+contact+", contactPhone="+contactPhone, e);
+        }
     }
 
     private void insertOrUpdateOrganizationAddresses(List<CommunityAddressDTO> apartmentIdentifier, EnterpriseCustomer customer){
@@ -1411,6 +1439,13 @@ public class ZJGKOpenServiceImpl {
     }
 
     private Organization insertOrganization(EnterpriseCustomer customer) {
+        Organization org = organizationProvider.findOrganizationByNameAndNamespaceId(customer.getName(), customer.getNamespaceId());
+        if(org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
+            //已存在则更新 地址、官网地址、企业logo
+            org.setWebsite(customer.getCorpWebsite());
+            organizationProvider.updateOrganization(org);
+            return org;
+        }
         Organization organization = new Organization();
         organization.setParentId(0L);
         organization.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
@@ -1437,18 +1472,17 @@ public class ZJGKOpenServiceImpl {
             organizationDetail = new OrganizationDetail();
             organizationDetail.setOrganizationId(organization.getId());
             organizationDetail.setDescription(organization.getDescription());
-            organizationDetail.setContact(customer.getContactPhone());
             organizationDetail.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organizationDetail.setDisplayName(organization.getName());
-            organizationDetail.setContactor(customer.getContactName());
+            organizationDetail.setAddress(customer.getContactAddress());
             organizationProvider.createOrganizationDetail(organizationDetail);
         }else {
             organizationDetail.setOrganizationId(organization.getId());
             organizationDetail.setDescription(organization.getDescription());
-            organizationDetail.setContact(customer.getContactPhone());
             organizationDetail.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organizationDetail.setDisplayName(organization.getName());
-            organizationDetail.setContactor(customer.getContactName());
+            organizationDetail.setAddress(customer.getContactAddress());
+            organizationDetail.setContact("");
             organizationProvider.updateOrganizationDetail(organizationDetail);
         }
         organizationSearcher.feedDoc(organization);
@@ -1456,6 +1490,20 @@ public class ZJGKOpenServiceImpl {
 
     private void insertOrUpdateOrganizationCommunityRequest(Long communityId, Organization organization) {
         if(communityId != null) {
+            Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+            //删除不在本园区的
+            List<OrganizationCommunityRequest> requests = organizationProvider.listOrganizationCommunityRequestsByOrganizationId(organization.getId());
+            if(requests != null && requests.size() > 0) {
+                for(OrganizationCommunityRequest request : requests) {
+                    if(!request.getCommunityId().equals(communityId)) {
+                        request.setMemberStatus(OrganizationCommunityRequestStatus.INACTIVE.getCode());
+                        request.setOperatorUid(1L);
+                        request.setUpdateTime(now);
+                        organizationProvider.updateOrganizationCommunityRequest(request);
+                    }
+                }
+            }
+
             OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.findOrganizationCommunityRequestByOrganizationId(communityId, organization.getId());
             if (organizationCommunityRequest == null) {
                 organizationCommunityRequest = new OrganizationCommunityRequest();
@@ -1464,7 +1512,7 @@ public class ZJGKOpenServiceImpl {
                 organizationCommunityRequest.setMemberId(organization.getId());
                 organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
                 organizationCommunityRequest.setCreatorUid(1L);
-                organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                organizationCommunityRequest.setCreateTime(now);
                 organizationCommunityRequest.setOperatorUid(1L);
                 organizationCommunityRequest.setApproveTime(organizationCommunityRequest.getCreateTime());
                 organizationCommunityRequest.setUpdateTime(organizationCommunityRequest.getCreateTime());
@@ -1472,7 +1520,7 @@ public class ZJGKOpenServiceImpl {
             }else {
                 organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
                 organizationCommunityRequest.setOperatorUid(1L);
-                organizationCommunityRequest.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                organizationCommunityRequest.setUpdateTime(now);
                 organizationProvider.updateOrganizationCommunityRequest(organizationCommunityRequest);
             }
         }
@@ -1498,12 +1546,12 @@ public class ZJGKOpenServiceImpl {
         DeleteOrganizationIdCommand deleteOrganizationIdCommand = new DeleteOrganizationIdCommand();
         deleteOrganizationIdCommand.setId(customer.getOrganizationId());
         organizationService.deleteEnterpriseById(deleteOrganizationIdCommand);
-        List<OrganizationAddress> myOrganizationAddressList = organizationProvider.listOrganizationAddressByOrganizationId(customer.getOrganizationId());
-        if(myOrganizationAddressList != null && myOrganizationAddressList.size() > 0) {
-            myOrganizationAddressList.forEach(organizationAddress -> {
-                deleteOrganizationAddress(organizationAddress);
-            });
-        }
+//        List<OrganizationAddress> myOrganizationAddressList = organizationProvider.listOrganizationAddressByOrganizationId(customer.getOrganizationId());
+//        if(myOrganizationAddressList != null && myOrganizationAddressList.size() > 0) {
+//            myOrganizationAddressList.forEach(organizationAddress -> {
+//                deleteOrganizationAddress(organizationAddress);
+//            });
+//        }
 
     }
 
@@ -1585,7 +1633,8 @@ public class ZJGKOpenServiceImpl {
 
             insertOrUpdateOrganizationDetail(organization, customer);
             insertOrUpdateOrganizationCommunityRequest(zjEnterprise.getCommunityId(), organization);
-            insertOrUpdateOrganizationAddresses(zjEnterprise.getApartmentIdentifierList(), customer);
+            insertOrUpdateOrganizationAddresses(zjEnterprise.getAddressList(), customer);
+            insertOrUpdateOrganizationMembers(customer.getNamespaceId(), organization, customer.getContactName(), customer.getContactMobile());
             organizationSearcher.feedDoc(organization);
             return null;
         });
@@ -1749,7 +1798,7 @@ public class ZJGKOpenServiceImpl {
         try {
             ts = new Timestamp(simpleDateSF.get().parse(str).getTime());
         } catch (ParseException e) {
-            LOGGER.error("validityPeriod data format is not yyyymmdd.");
+            LOGGER.error("validityPeriod data format is not yyyymmdd. data = {}", str);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "validityPeriod data format is not yyyymmdd.");
         }

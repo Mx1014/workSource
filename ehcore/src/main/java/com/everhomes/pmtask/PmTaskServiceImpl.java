@@ -1,8 +1,6 @@
 package com.everhomes.pmtask;
 
 import java.io.*;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
@@ -22,19 +20,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
-import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.CommunityService;
-import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.flow.*;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.namespace.*;
 import com.everhomes.organization.*;
 import com.everhomes.pmtask.ebei.EbeiBuildingType;
-import com.everhomes.pmtask.ebei.EbeiPmTaskDTO;
-import com.everhomes.pmtask.ebei.EbeiPmtaskLogDTO;
-import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
@@ -68,13 +61,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 
-
-
-
-
-
-
-import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -88,22 +74,18 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.family.FamilyService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.family.FamilyDTO;
-import com.everhomes.rest.namespace.NamespaceCommunityType;
-import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.Tuple;
 
 @Component
 public class PmTaskServiceImpl implements PmTaskService {
@@ -111,7 +93,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	private static final String CATEGORY_SEPARATOR = "/";
 
-	private static final String HANDLER = "pmtask.handler-";
+	public static final String HANDLER = "pmtask.handler-";
 	
     private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
@@ -192,25 +174,19 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 
 	
-//	@Override
-//	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
-//
+	@Override
+	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
+
 //		Integer namespaceId = cmd.getNamespaceId();
 //		if (null == namespaceId) {
 //			namespaceId = UserContext.getCurrentNamespaceId();
 //		}
 //		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
-//
-//		//TODO:为科兴与一碑对接
-//		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() &&
-//				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
-//			handle = PmTaskHandle.EBEI;
-//		}
-//
-//		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
-//
-//		return handler.listUserTasks(cmd);
-//	}
+
+		YueKongJianPmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.YUE_KONG_JIAN);
+
+		return handler.listUserTasks(cmd);
+	}
 
 //	@Override
 //	public void evaluateTask(EvaluateTaskCommand cmd) {
@@ -551,19 +527,19 @@ public class PmTaskServiceImpl implements PmTaskService {
 				"non-privileged.");
     }
 	
-//	@Override
-//	public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
-//
+	@Override
+	public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
+
 //		Integer namespaceId = cmd.getNamespaceId();
 //		if (null == namespaceId) {
 //			namespaceId = UserContext.getCurrentNamespaceId();
 //		}
 //		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
-//
-//		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
-//
-//		return handler.getTaskDetail(cmd);
-//	}
+
+		YueKongJianPmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.YUE_KONG_JIAN);
+
+		return handler.getTaskDetail(cmd);
+	}
 
 	private void checkBlacklist(String ownerType, Long ownerId){
 		ownerType = org.springframework.util.StringUtils.isEmpty(ownerType) ? "" : ownerType;
@@ -599,13 +575,16 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if (null == cmd.getOrganizationId()) {
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 			OrganizationMember member = null;
-			if (cmd.getFlowOrganizationId()!=null)
-				member = organizationProvider.findOrganizationMemberByOrgIdAndToken(userIdentifier.getIdentifierToken(),cmd.getFlowOrganizationId());
+			if (cmd.getFlowOrganizationId()!=null) {
+				member = organizationProvider.findOrganizationMemberByOrgIdAndToken(userIdentifier.getIdentifierToken(), cmd.getFlowOrganizationId());
+			}
 			//真实姓名
-			if (member==null )
-				return handler.createTask(cmd, user.getId(), user.getNickName(), userIdentifier.getIdentifierToken());
-			else
-				return handler.createTask(cmd, user.getId(), member.getContactName(), userIdentifier.getIdentifierToken());
+			if (member==null ) {
+				return handler.createTask(cmd, user.getId(), user.getNickName(), userIdentifier==null?"":userIdentifier.getIdentifierToken());
+			}
+			else {
+				return handler.createTask(cmd, user.getId(), member.getContactName(), userIdentifier==null?"":userIdentifier.getIdentifierToken());
+			}
 		}else {
 			String requestorPhone = cmd.getRequestorPhone();
 			String requestorName = cmd.getRequestorName();
@@ -2106,7 +2085,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 //
 //				}
 //				FlowNode flowNode = flowNodeProvider.getFlowNodeById(flowCase.getCurrentNodeId());
-//				task.setStatus(pmTaskCommonService.convertFlowStatus(flowNode.getParams()));
+//				task.setStatus(pmTaskCommonService.convertFlowStatus(flowNode.getGroupByParams()));
 //				task.setFlowCaseId(flowCase.getId());
 //				pmTaskProvider.updateTask(task);
 //
