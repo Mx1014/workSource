@@ -4525,8 +4525,8 @@ public class UserServiceImpl implements UserService {
     private void getRelevantContactMoreInfo(SceneContactV2DTO dto, Long organizationId) {
 
         List<String> groupTypes = new ArrayList<>();
-        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
-        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCodeg());
+//        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
 
         //  设置公司
