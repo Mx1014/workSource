@@ -147,7 +147,7 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 		
 		//如果没有设置邮箱不发邮件，直接结束。
 		CrossShardListingLocator locator = new CrossShardListingLocator();
-		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(category.getOwnerType(), category.getOwnerId(), ContactType.EMAIL.getCode(), 
+		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(category.getNamespaceId(), ContactType.EMAIL.getCode(), 
 						category.getId(), locator, Integer.MAX_VALUE);
 		if((serviceOrg == null ||serviceOrg.getEmail() == null ||"".equals(serviceOrg.getEmail().trim()))
 				&& (emails == null || emails.size() == 0)){
