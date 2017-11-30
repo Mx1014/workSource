@@ -393,9 +393,14 @@ public class BlacklistServiceImpl implements BlacklistService, LocalBusSubscribe
 	    if(userIdentifier == null) {
 	        cmd.setUserId(0L);
 	        cmd.setOwnerId(0L);
+	        UserBlacklist userBlack = blacklistProvider.findUserBlacklistByContactToken(namespaceId, null, 0L, phone);
+	        if(userBlack == null) {
+	            return false;
+	        }
+	        
 	    } else {
 	        cmd.setUserId(userIdentifier.getOwnerUid());
-	        cmd.setOwnerId(userIdentifier.getOwnerUid());
+	        cmd.setOwnerId(0L);
 	    }
 	    List<BlacklistPrivilegeDTO> dtos = listUserBlacklistPrivileges(cmd);
 	    if(dtos != null) {
