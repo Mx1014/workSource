@@ -4467,7 +4467,7 @@ public class UserServiceImpl implements UserService {
             }
         }
     }
-		//added by R 20170713, 通讯录2.4增加
+		//added by nan.rong 20170713, 通讯录2.4增加
 	@Override
 	public SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd) {
 		if (org.springframework.util.StringUtils.isEmpty(cmd.getDetailId())) {
@@ -4525,7 +4525,7 @@ public class UserServiceImpl implements UserService {
     private void getRelevantContactMoreInfo(SceneContactV2DTO dto, Long organizationId) {
 
         List<String> groupTypes = new ArrayList<>();
-        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCodeg());
+        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
 //        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
 
