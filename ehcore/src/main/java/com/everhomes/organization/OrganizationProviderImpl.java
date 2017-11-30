@@ -698,7 +698,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(organizationId));
 		}
 		query.addOrderBy(Tables.EH_ORGANIZATION_COMMUNITIES.ID.desc());
-		query.fetch().map((r) -> {\
+		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, OrganizationCommunity.class));
 			return null;
 		});
