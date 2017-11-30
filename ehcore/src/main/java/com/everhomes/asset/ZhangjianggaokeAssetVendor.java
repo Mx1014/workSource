@@ -69,8 +69,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     @Override
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum) {
         ShowBillForClientDTO finalDto = new ShowBillForClientDTO();
-//        PaymentBillGroup group = assetProvider.getBillGroupById(billGroupId);
-//        if(!group.getName().equals("租金")) return finalDto;
+        PaymentBillGroup group = assetProvider.getBillGroupById(billGroupId);
+        if(!group.getName().equals("租金")) return finalDto;
         List<BillDetailDTO> dtos = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
         SimpleDateFormat yyyy_MM_dd = new SimpleDateFormat("yyyy-MM-dd");
@@ -160,7 +160,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             ContractBillResponse response = (ContractBillResponse)StringHelper.fromJsonString(postJson, ContractBillResponse.class);
             if(response.getErrorCode()==200){
                 List<ContractBillsDTO> res = response.getResponse();
-                fakeData(res,targetType);
+//                fakeData(res,targetType);
                 for(int i = 0; i < res.size(); i++){
                     ContractBillsDTO sourceDto = res.get(i);
                     BillDetailDTO dto = new BillDetailDTO();
