@@ -1401,5 +1401,16 @@ INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 
 
 -- 新增新左邻运营后台配置 add by xujuan 20171103
-set @domain_id = IFNULL((SELECT MAX(id) FROM `eh_domains`), 1);
-insert into `eh_domains` (`id`, `namespace_id`, `portal_type`, `portal_id`, `domain`, `create_uid`, `create_time`) values((@domain_id := @domain_id + 1),'0','EhZuolinAdmins',0, 'opv2.szbay.com', 0, now());
+SET @domain_id = IFNULL((SELECT MAX(id) FROM `eh_domains`), 1);
+INSERT INTO `eh_domains` (`id`, `namespace_id`, `portal_type`, `portal_id`, `domain`, `create_uid`, `create_time`) VALUES((@domain_id := @domain_id + 1),'0','EhZuolinAdmins',0, 'opv2.szbay.com', 0, NOW());
+
+-- 深圳湾普通企业管理员后台菜单配置：【内部管理】-【组织架构】【职级管理】【员工认证】【考勤管理】【视频会议】【审批管理】
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),52000,'', 'EhNamespaces', 999966,2); 
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),52010,'', 'EhNamespaces', 999966,2); 
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),52020,'', 'EhNamespaces', 999966,2); 
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),52030,'', 'EhNamespaces', 999966,2); 
+
+-- 【深圳湾mybay】【大堂门禁】【IOS&安卓】删掉蓝牙门禁的tab，不在APP端显示
+
+UPDATE `eh_launch_pad_items` SET `action_data` = '{"isSupportQR":1,"isSupportSmart":0}' WHERE `namespace_id` = 999966 AND `item_label` ='闸机门禁' ;
