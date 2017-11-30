@@ -63,7 +63,6 @@ ALTER TABLE `eh_var_field_items` ADD COLUMN `business_value` TINYINT COMMENT 'th
 ALTER TABLE `eh_var_field_item_scopes` ADD COLUMN `business_value` TINYINT COMMENT 'the value defined in special business like status';
 -- merge from  fixPm-1.0   by jiarui  20171130
 
-
 -- merge from yuekongjian 1.0  by yanjun 201711301748  start
 
 -- web页面“我的”里面的菜单表
@@ -99,6 +98,7 @@ ALTER TABLE `eh_aclink_undo_key` ADD COLUMN `namespace_id` int(11) NOT NULL DEFA
 
 -- merge from yuekongjian 1.0  by yanjun 201711301748  start
 
+
 ALTER TABLE `eh_payment_bill_groups_rules` ADD `brother_rule_id` BIGINT DEFAULT NULL COMMENT '兄弟账单组收费项id';
 
 -- from asset-org by xiongying
@@ -121,3 +121,11 @@ ALTER TABLE `eh_contracts` ADD COLUMN `building_rename` VARCHAR(64) COMMENT '房
 
 ALTER TABLE `eh_contracts` ADD COLUMN `namespace_contract_type` VARCHAR(128);
 ALTER TABLE `eh_contracts` ADD COLUMN `namespace_contract_token` VARCHAR(128);
+
+-- 二维码加路由   add by xq.tian  2017/11/15
+ALTER TABLE eh_qrcodes ADD COLUMN `route_uri` VARCHAR(256) COMMENT 'route uri, like zl://xxx/xxx';
+ALTER TABLE eh_qrcodes ADD COLUMN `handler` VARCHAR(32) COMMENT 'module handler';
+ALTER TABLE eh_qrcodes ADD COLUMN `extra` TEXT COMMENT 'module handler';
+
+ALTER TABLE eh_flow_cases ADD COLUMN `route_uri` VARCHAR(128) COMMENT 'route uri';
+
