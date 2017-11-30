@@ -1,14 +1,21 @@
 package com.everhomes.portal;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.acl.WebMenu;
+import com.everhomes.acl.WebMenuPrivilegeProvider;
 import com.everhomes.pmtask.PmTaskProvider;
+import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.portal.PmTaskInstanceConfig;
 import com.everhomes.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by sfyan on 2017/8/30.
@@ -21,7 +28,8 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
 
     @Autowired
     private PmTaskProvider pmTaskProvider;
-
+    @Autowired
+    private WebMenuPrivilegeProvider webMenuProvider;
 
     @Override
     public String publish(Integer namespaceId, String instanceConfig, String itemLabel) {
@@ -98,4 +106,18 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
         return actionData;
     }
 
+    public Long getWebMenuId(Integer namespaceId, Long moudleId, String actionData, String instanceConfig){
+
+        String taskCategoryId = getCustomTag(namespaceId, moudleId, actionData, instanceConfig);
+
+        List<WebMenu> menus = webMenuProvider.listWebMenuByType(WebMenuType.PARK.getCode(), null, "/20000%", Collections.singletonList(20100L));
+
+        for (WebMenu menu: menus) {
+            if (StringUtils.isNotBlank(menu.getDataType()) && menu.getDataType().contains(taskCategoryId)) {
+                return menu.getId();
+            }
+        }
+
+        return null;
+    }
 }
