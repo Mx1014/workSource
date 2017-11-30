@@ -91,7 +91,6 @@ ALTER TABLE `eh_door_auth` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT 0 
 ALTER TABLE `eh_door_auth_logs` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT 0 AFTER `id`;
 ALTER TABLE `eh_door_command` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT 0 AFTER `id`;
 ALTER TABLE `eh_aclink_firmware` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT 0 AFTER `id`;
-ALTER TABLE `eh_aclink_logs` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT 0 AFTER `id`;
 ALTER TABLE `eh_aclinks` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT 0 AFTER `id`;
 ALTER TABLE `eh_aclink_undo_key` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT 0 AFTER `id`;
 
