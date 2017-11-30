@@ -26,8 +26,8 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 SET @config_id = (SELECT MAX(id) from `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@config_id:=@config_id+1, 'ebei.url', 'http://183.62.222.87:5902/sf', '一碑url', '0', NULL);
 -- 张江高科支持新支付 by wentian
-SET @config_id = (SELECT MAX(`id`) from `eh_configurations`);
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@config_id:=@config_id+1, 'pay.platform', '1', '张江高科物业缴费新支付', '999971', NULL);
+-- SET @config_id = (SELECT MAX(`id`) from `eh_configurations`);
+-- INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@config_id:=@config_id+1, 'pay.platform', '1', '张江高科物业缴费新支付', '999971', NULL);
 
 SET @field_id = (SELECT MAX(id) from `eh_var_fields`);
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
