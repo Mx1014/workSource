@@ -605,3 +605,8 @@ INSERT INTO `eh_web_menus`  VALUES ('2080000', '物业巡检', '2000000', '', 'e
 INSERT INTO `eh_web_menus`  VALUES ('2081000', '物业巡检', '2080000', '', 'equipment-management', '1', '2', '/2000000/2080000/2081000', 'zuolin', '2', '20800', '3', 'system', 'page');
 
 -- merge from fixPm-1.0  by jiarui   20171130
+
+-- 二维码加路由   add by xq.tian  2017/11/15
+SET @locale_strings_id = IFNULL((SELECT MAX(id) FROM `eh_locale_strings`), 1);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+VALUES ((@locale_strings_id := @locale_strings_id + 1), 'flow', '100019', 'zh_CN', '对不起，您无权查看此任务');
