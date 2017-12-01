@@ -2,6 +2,7 @@
 package com.everhomes.asset;
 
 import com.everhomes.order.PaymentAccount;
+import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
 import com.everhomes.pay.order.TransactionType;
 import com.everhomes.rest.asset.ListPaymentBillCmd;
@@ -9,6 +10,7 @@ import com.everhomes.rest.asset.ListPaymentBillResp;
 import com.everhomes.rest.asset.PaymentAccountResp;
 import com.everhomes.rest.asset.ReSortCmd;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +32,11 @@ public class PaymentServiceImpl implements PaymentService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentServiceImpl.class);
     @Override
     public ListPaymentBillResp listPaymentBill(ListPaymentBillCmd cmd) throws Exception {
+        if(cmd.getNamespaceId() == null){
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        }
+        cmd.setOrderType(getRealOrderType(cmd.getNamespaceId()));
+
         if (cmd.getPageSize() == null) {
             cmd.setPageSize(21l);
         }else{
@@ -60,6 +67,11 @@ public class PaymentServiceImpl implements PaymentService {
         cmd.setUserId(paymentUser.getPaymentUserId());
         LOGGER.info("payee user payer id is = {}",paymentUser.getPaymentUserId());
         return remoteAccessService.listOrderPayment(cmd);
+    }
+
+    private String getRealOrderType(Integer namespaceId) {
+        PaymentServiceConfig config = assetProvider.findServiceConfig(namespaceId);
+        return config.getOrderType();
     }
 
     @Override

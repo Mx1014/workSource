@@ -129,7 +129,7 @@ public interface AssetService {
 
     ListChargingItemsForBillGroupResponse listChargingItemsForBillGroup(BillGroupIdCommand cmd);
 
-    AddOrModifyRuleForBillGroupResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
+    void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
 
     DeleteChargingItemForBillGroupResponse deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd);
 
@@ -153,5 +153,15 @@ public interface AssetService {
 
     void activeAutoBillNotice();
 
+
     CheckEnterpriseHasArrearageResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd);
+
+    List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd);
+
+    List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd);
+
+    FunctionDisableListDto functionDisableList(FunctionDisableListCommand cmd);
+
+    void syncCustomer(Integer namespaceId);
+
 }

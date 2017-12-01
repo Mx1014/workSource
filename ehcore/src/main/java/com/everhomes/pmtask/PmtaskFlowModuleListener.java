@@ -183,16 +183,6 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				List<GeneralFormVal> vals = generalFormValProvider.queryGeneralFormVals(EntityType.PM_TASK.getCode(),flowCase.getReferId());
 				//没产生费用
 				if (vals==null || vals.size()==0){
-					FlowAutoStepDTO dto = new FlowAutoStepDTO();
-					dto.setAutoStepType(FlowStepType.NO_STEP.getCode());
-					dto.setFlowCaseId(flowCase.getId());
-					dto.setFlowMainId(flowCase.getFlowMainId());
-					dto.setFlowNodeId(flowCase.getCurrentNodeId());
-					dto.setFlowVersion(flowCase.getFlowVersion());
-					dto.setStepCount(flowCase.getStepCount());
-					dto.setEventType(FlowEventType.STEP_MODULE.getCode());
-
-					List<FlowEventLog> eventLogs = new ArrayList<>();
 					FlowEventLog log = new FlowEventLog();
 					log.setId(flowEventLogProvider.getNextId());
 					log.setFlowMainId(flowCase.getFlowMainId());
@@ -209,9 +199,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 					log.setTrackerProcessor(1L);
 					String content = "本次服务没有产生维修费";
 					log.setLogContent(content);
-					eventLogs.add(log);
-					dto.setEventLogs(eventLogs);
-					flowService.processAutoStep(dto);
+					ctx.getLogs().add(log);
 				}
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
@@ -581,9 +569,12 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
-		Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
-		List<Category> categories = categoryProvider.listTaskCategories(namespaceId, defaultId, null,
-				null, null);
+
+		List<Category> categories = new ArrayList<>();
+		for (Long id: PmTaskAppType.TYPES) {
+			categories.addAll(categoryProvider.listTaskCategories(namespaceId, id, null,
+					null, null));
+		}
 
 		if(namespaceId == 999983) {
 			EbeiPmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
@@ -613,6 +604,10 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		ListTaskCategoriesCommand cmd = new ListTaskCategoriesCommand();
 		cmd.setNamespaceId(namespaceId);
+		if (flow.getModuleType().equals(FlowModuleType.NO_MODULE.getCode()))
+			cmd.setTaskCategoryId(PmTaskAppType.REPAIR_ID);
+		else
+			cmd.setTaskCategoryId(PmTaskAppType.SUGGESTION_ID);
 		ListTaskCategoriesResponse response = pmTaskService.listTaskCategories(cmd);
 		dto.setOptions(new ArrayList<>());
 		response.getRequests().forEach(p->{

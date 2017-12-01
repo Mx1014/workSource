@@ -10,6 +10,7 @@ import com.everhomes.discover.ItemType;
 /**
  * <ul>
  * <li>name: 门禁名字</li>
+ * <li>displayName: 用户端显示的门禁名字</li>
  * <li>hardwareId: 门禁硬件地址</li>
  * <li>status: 门禁状态， 0 激活中，1 已激活，2 无效</li>
  * <li>description: 门禁描述</li>
@@ -36,6 +37,7 @@ public class DoorAccessDTO {
     private Byte     role;
     private Long     id;
     private String     name;
+    private String displayName;
     private String hardwareId;
     private String creatorName;
     private String creatorPhone;
@@ -310,6 +312,16 @@ public class DoorAccessDTO {
 
     public void setGroupId(Long groupId) {
         this.groupId = groupId;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
 

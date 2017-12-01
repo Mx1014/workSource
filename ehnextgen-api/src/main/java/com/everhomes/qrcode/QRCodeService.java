@@ -6,7 +6,11 @@ import com.everhomes.rest.qrcode.NewQRCodeCommand;
 import com.everhomes.rest.qrcode.QRCodeDTO;
 
 public interface QRCodeService {
+
     QRCodeDTO createQRCode(NewQRCodeCommand cmd);
+
     QRCodeDTO getQRCodeInfo(GetQRCodeInfoCommand cmd);
-    QRCodeDTO getQRCodeInfoById(String qrid);
+
+    QRCodeDTO getQRCodeInfoById(String qrid, String extraInfo);
+
 }

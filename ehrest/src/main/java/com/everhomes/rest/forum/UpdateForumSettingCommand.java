@@ -13,9 +13,9 @@ import java.util.List;
  *     <li>moduleType: 模块类型  参考 {@link com.everhomes.rest.forum.ForumModuleType}</li>
  *     <li>categoryId: 模块入口id，活动、论坛等多入口的模块需要传</li>
  *     <li>serviceTypes: 服务类型 {@link com.everhomes.rest.forum.ForumServiceType}</li>
- *     <li>topicTags: 话题热门标签 </li>
- *     <li>activityTags: 活动热门标签</li>
- *     <li>pollTags: 投票热门标签</li>
+ *     <li>topicTags: 话题热门标签 {@link com.everhomes.rest.hotTag.TagDTO}</li>
+ *     <li>activityTags: 活动热门标签 {@link com.everhomes.rest.hotTag.TagDTO}</li>
+ *     <li>pollTags: 投票热门标签 {@link com.everhomes.rest.hotTag.TagDTO}</li>
  *     <li>interactFlag: 是否支持交互 {@link com.everhomes.rest.forum.InteractFlag}</li>
  * </ul>
  */

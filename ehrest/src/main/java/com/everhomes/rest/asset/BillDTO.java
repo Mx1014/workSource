@@ -39,6 +39,24 @@ public class BillDTO {
     private Byte billStatus;
     private String payStatus;
     private Long billGroupRuleId;
+    private String dateStrBegin;
+    private String dateStrEnd;
+
+    public String getDateStrBegin() {
+        return dateStrBegin;
+    }
+
+    public void setDateStrBegin(String dateStrBegin) {
+        this.dateStrBegin = dateStrBegin;
+    }
+
+    public String getDateStrEnd() {
+        return dateStrEnd;
+    }
+
+    public void setDateStrEnd(String dateStrEnd) {
+        this.dateStrEnd = dateStrEnd;
+    }
 
     @Override
     public String toString() {
