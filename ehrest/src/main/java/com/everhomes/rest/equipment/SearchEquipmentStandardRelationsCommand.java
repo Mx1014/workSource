@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
  *  <li>targetId: 设备-标准关联所属管理处</li>
  *  <li>repeatType: 巡检对象对应标准周期类型</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
+ *  <li>categoryId: 巡检对象类型id</li>
  *  <li>keyword: 查询关键字</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
@@ -44,6 +45,8 @@ public class SearchEquipmentStandardRelationsCommand {
 
 	//V3.0.2 增加 用于创建计划时候选择设备标准关联
     private Long inspectionCategoryId;
+
+    private Long categoryId;
 
 	public Long getOwnerId() {
 		return ownerId;
@@ -133,7 +136,15 @@ public class SearchEquipmentStandardRelationsCommand {
         this.inspectionCategoryId = inspectionCategoryId;
     }
 
-    @Override
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

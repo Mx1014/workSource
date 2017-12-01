@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 	<li>INACTIVE : 0 无效</li>
- *	<li>NOT_COMPLETED : 1 未完成</li>
+ *	<li>NOT_COMPLETED : 1 未完成  上一版根据是否有执行周期来判断是否完成 V3.0.2取消</li>
  *	<li>ACTIVE : 2 正常</li>
  * </ul>
  *

@@ -1417,7 +1417,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public void createEquipmentPlanMaps(EquipmentInspectionPlans plan, EhEquipmentInspectionEquipmentPlanMap map) {
+    public void createEquipmentPlanMaps(EhEquipmentInspectionEquipmentPlanMap map) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhEquipmentInspectionEquipmentPlanMapDao dao = new EhEquipmentInspectionEquipmentPlanMapDao(context.configuration());
         dao.insert(map);
@@ -1442,11 +1442,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public void deleteEquipmentInspectionPlanMap(Long id) {
+    public void deleteEquipmentInspectionPlanMap(Long planId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        EhEquipmentInspectionPlansDao dao = new EhEquipmentInspectionPlansDao(context.configuration());
-        dao.deleteById(id);
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEquipmentInspectionPlans.class, id);
+        context.delete(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP)
+                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.PLAN_ID.eq(planId))
+                .execute();
     }
 
     @Override
@@ -1476,23 +1476,27 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     @Override
     public void updateEquipmentInspectionPlan(EquipmentInspectionPlans plan) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        plan.setOperatorUid(UserContext.currentUserId());
+        plan.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhEquipmentInspectionPlansDao dao = new EhEquipmentInspectionPlansDao(context.configuration());
         dao.update(plan);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEquipmentInspectionPlans.class, plan.getId());
     }
 
     @Override
-    public void deleteEquipmentInspectionStandardMap(Long deleteId) {
+    public void deleteEquipmentInspectionStandardMap(Long standardId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        EhEquipmentInspectionStandardGroupMapDao dao = new EhEquipmentInspectionStandardGroupMapDao(context.configuration());
-        dao.deleteById(deleteId);
+        context.delete(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP)
+                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.STANDARD_ID.eq(standardId))
+                .execute();
     }
 
     @Override
     public void inActiveEquipmentPlansMapByStandardId(Long standardId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        EhEquipmentInspectionPlansDao dao = new EhEquipmentInspectionPlansDao(context.configuration());
-        dao.deleteById(standardId);
+        context.delete(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP)
+                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.STANDARD_ID.eq(standardId))
+                .execute();
     }
 
     @Override

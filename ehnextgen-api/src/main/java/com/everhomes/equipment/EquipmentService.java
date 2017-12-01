@@ -91,4 +91,6 @@ public interface EquipmentService {
 	EquipmentInspectionPlanDTO getEquipmmentInspectionPlanById(DeleteEquipmentPlanCommand cmd);
 
     void deleteEquipmentInspectionPlan(DeleteEquipmentPlanCommand cmd);
+
+    void createEquipmentTaskByPlan(EquipmentInspectionPlans plan);
 }

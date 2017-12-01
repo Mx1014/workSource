@@ -1,13 +1,14 @@
 package com.everhomes.equipment;
 
-import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.equipment.EquipmentStandardRelationDTO;
+import com.everhomes.rest.equipment.InspectionStandardMapTargetType;
+import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsCommand;
+import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsResponse;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EquipmentStandardMapSearcher;
@@ -145,7 +146,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
         /*FilterBuilder nfb = FilterBuilders.termFilter("reviewStatus", EquipmentReviewStatus.DELETE.getCode());
     	fb = FilterBuilders.notFilter(nfb);*/
 		//总公司分公司的原因改用namespaceId by xiongying20170328
-		fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId()));
+		fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
 //    	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
 //        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
         if(cmd.getTargetId() != null)
@@ -153,21 +154,19 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
         
         if(!StringUtils.isNullOrEmpty(cmd.getTargetType()))
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
-        
-  /*      if(cmd.getReviewStatus() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewStatus", cmd.getReviewStatus()));
 
-		if(cmd.getReviewResult() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewResult", cmd.getReviewResult()));
-*/
 		//增加  V3.0.2  inspectionCategoryId   repeatType 过滤
-		if(cmd.getReviewResult() != null)
+		if (cmd.getRepeatType() != null)
 			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("repeatType", cmd.getRepeatType()));
 
-		if(cmd.getReviewResult() != null)
+		if (cmd.getInspectionCategoryId() != null)
 			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("inspectionCategoryId", cmd.getInspectionCategoryId()));
-        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        Long anchor = 0l;
+		//只有巡检对象为设备的时候才根据categoryId过滤
+		if (cmd.getCategoryId() != null)
+			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
+
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = 0L;
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
@@ -201,9 +200,9 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 	        	dto.setEquipmentId(equipment.getId());
 	        	dto.setTargetId(equipment.getTargetId());
 //	        	Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
-				Community community = communityProvider.findCommunityById(dto.getTargetId());
+				/*Community community = communityProvider.findCommunityById(dto.getTargetId());
 	    		if(community != null)
-	    			dto.setTargetName(community.getName());
+	    			dto.setTargetName(community.getName());*/
 	    		
 	    		dto.setEquipmentName(equipment.getName());
 	    		dto.setEquipmentModel(equipment.getEquipmentModel());
@@ -218,12 +217,12 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 	            dto.setReviewStatus(map.getReviewStatus());
 				dto.setReviewTime(map.getReviewTime());
 
-				if(map.getReviewerUid() != null && map.getReviewerUid() != 0L) {
+				/*if(map.getReviewerUid() != null && map.getReviewerUid() != 0L) {
 					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(map.getReviewerUid(), equipment.getOwnerId());
 					if(member != null) {
 						dto.setReviewer(member.getContactName());
 					}
-				}
+				}*/
 	    		dtos.add(dto);
         	}
         }

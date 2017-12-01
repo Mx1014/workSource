@@ -27,7 +27,7 @@ public enum EquipmentPlanStatus {
         return code;
     }
 
-    public static EquipmentPlanStatus FromCode(byte code) {
+    public static EquipmentPlanStatus fromStatus(byte code) {
         for (EquipmentPlanStatus v : EquipmentPlanStatus.values()) {
             if (v.getCode() == code) {
                 return v;

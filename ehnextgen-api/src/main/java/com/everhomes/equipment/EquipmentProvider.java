@@ -155,7 +155,7 @@ public interface EquipmentProvider {
 
     EquipmentInspectionPlans getEquipmmentInspectionPlanById(Long planId);
 
-	void createEquipmentPlanMaps(EquipmentInspectionPlans plan, EhEquipmentInspectionEquipmentPlanMap map);
+	void createEquipmentPlanMaps(EhEquipmentInspectionEquipmentPlanMap map);
 
 	List<EhEquipmentInspectionEquipmentPlanMap> getEquipmentInspectionPlanMap(Long planId);
 
@@ -172,4 +172,5 @@ public interface EquipmentProvider {
 	void inActiveEquipmentPlansMapByStandardId(Long id);
 
     List<EquipmentInspectionPlans> ListQualifiedEquipmentInspectionPlans(ListingLocator locator, int pageSize);
+
 }

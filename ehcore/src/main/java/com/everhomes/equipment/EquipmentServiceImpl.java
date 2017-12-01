@@ -225,15 +225,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 			createEquipmentStandardsEquipmentsMap(standard, cmd.getEquipments());
 
 			/**
-			 * TODO:需要inactive所有的 equipment plans  and equipment tasks
+			 * TODO:需要inactive所有的 equipment plans  task是根据planId来获取任务设备的所以不需要inactive
 			 */
-			 //删除与当前删除标准相关的所有计划 只需要删除标准对应的巡检对象列表中对应条目
-			 equipmentProvider.inActiveEquipmentPlansMapByStandardId(standard.getId());
+			//删除与当前删除标准相关的所有计划 只需要删除标准对应的巡检对象列表中对应条目
+			equipmentProvider.inActiveEquipmentPlansMapByStandardId(standard.getId());
 
 		}
 
-		EquipmentStandardsDTO dto = converStandardToDto(standard);
-		return dto;
+		return converStandardToDto(standard);
 	}
 
 	private void createEquipmentStandardsEquipmentsMap(EquipmentInspectionStandards standard, List<EquipmentsDTO> equipments) {
@@ -250,7 +249,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	private void createEquipmentStandardItems(EquipmentInspectionStandards standards, UpdateEquipmentStandardCommand cmd) {
-
+		//这里按照上一版的模式  后台还是新建模板 和模板巡检项关联表
 		EquipmentInspectionTemplates templates = new EquipmentInspectionTemplates();
 		templates.setName(standards.getName());
 		templates.setOwnerId(cmd.getOwnerId());
@@ -264,10 +263,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 		List<InspectionItemDTO> itemDTOS = cmd.getItems();
 		for (InspectionItemDTO itemDTO : itemDTOS) {
 			EquipmentInspectionItems item = ConvertHelper.convert(itemDTO, EquipmentInspectionItems.class);
-			equipmentProvider.createEquipmentInspectionItems(item);
+			Long itemId = equipmentProvider.createEquipmentInspectionItems(item);
 			items.add(item);
 
-			templateItemMap.setItemId(item.getId());
+			templateItemMap.setItemId(itemId);
 			templateItemMap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			equipmentProvider.createEquipmentInspectionTemplateItemMap(templateItemMap);
 		}
@@ -618,10 +617,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 		int count = 0;
 		if(maps != null) {
 			for(EquipmentStandardMap map : maps) {
-				if(EquipmentReviewStatus.REVIEWED.equals(EquipmentReviewStatus.fromStatus(map.getReviewStatus())) &&
+				/*if(EquipmentReviewStatus.REVIEWED.equals(EquipmentReviewStatus.fromStatus(map.getReviewStatus())) &&
 						ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(map.getReviewResult()))) {
 					count++;
-				}
+				}*/
+				count++;
 			}
 		}
 		
@@ -4464,11 +4464,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 			plan.setStatus(EquipmentPlanStatus.WATTING_FOR_APPOVING.getCode());
 		}
 		//创建巡检计划的执行周期
-		RepeatSettings repeatSettings = ConvertHelper.convert(cmd.getRepeatSettings(),RepeatSettings.class);
+		RepeatSettings repeatSettings = plan.getRepeatSettings();
 		repeatService.createRepeatSettings(repeatSettings);
 
 		//创建巡检计划
-		plan.setRepeatsettingId(repeatSettings.getId());
+		plan.setRepeatSettingId(repeatSettings.getId());
+		plan.setPlanVersion(1L);
 		EquipmentInspectionPlans createdPlan = equipmentProvider.createEquipmentInspectionPlans(plan);
 		//创建计划巡检对象标准关联
 		List<EquipmentStandardRelationDTO> equipmentStandardRelation = new ArrayList<>();
@@ -4485,7 +4486,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			equipmentPlanMap.setStandardId(relation.getStandardId());
 			equipmentPlanMap.setEquimentId(relation.getTargetId());
 
-			equipmentProvider.createEquipmentPlanMaps(plan, equipmentPlanMap);
+			equipmentProvider.createEquipmentPlanMaps(equipmentPlanMap);
 			equipmentStandardRelation.add(relation);
 		}
 
@@ -4496,22 +4497,72 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public EquipmentInspectionPlanDTO updateEquipmentInspectionPlan(UpdateEquipmentPlanCommand cmd) {
+
+		EquipmentInspectionPlans exist = verifyEquipmentInspectionPlan(cmd.getId());
+		EquipmentInspectionPlans updatePlan =null;
+
 		EquipmentInspectionPlans plan = ConvertHelper.convert(cmd, EquipmentInspectionPlans.class);
-		EquipmentInspectionPlans updatePlan = verifyEquipmentInspectionPlan(cmd.getId());
-		if(cmd.getEquipmentStandardRelations()==null || cmd.getEquipmentStandardRelations().size()==0){
+		if (cmd.getEquipmentStandardRelations() == null || cmd.getEquipmentStandardRelations().size() != 0) {
 			plan.setStatus(EquipmentPlanStatus.WAITTING_FOR_STARTING.getCode());
-		}else {
+		} else {
 			plan.setStatus(EquipmentPlanStatus.WATTING_FOR_APPOVING.getCode());
 		}
-		plan.setNamespaceId(UserContext.getCurrentNamespaceId());
+		plan.setCreateTime(exist.getCreateTime());
 
-		equipmentProvider.updateEquipmentInspectionPlan(plan);
-		return null;
+		//创建巡检计划的执行周期
+		RepeatSettings repeatSettings = plan.getRepeatSettings();
+		repeatService.createRepeatSettings(repeatSettings);
+		plan.setRepeatSettingId(repeatSettings.getId());
+
+		//需要记录update的plan的 mainId 在新的plans审批通过后删除mainId的plan
+		if (exist.getPlanMainId() == null) {
+			//mainId为空则创建副本
+			plan.setPlanMainId(cmd.getId());
+			plan.setCreatorUid(UserContext.currentUserId());
+			updatePlan = equipmentProvider.createEquipmentInspectionPlans(plan);
+		} else {
+			plan.setOperatorUid(UserContext.currentUserId());
+			plan.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			equipmentProvider.updateEquipmentInspectionPlan(plan);
+			updatePlan = plan;
+			equipmentProvider.deleteEquipmentInspectionPlanMap(plan.getId());
+			repeatService.deleteRepeatSettingsById(cmd.getRepeatSettings().getId());
+		}
+
+		//创建计划巡检对象标准关联
+		List<EquipmentStandardRelationDTO> equipmentStandardRelation = new ArrayList<>();
+
+		for (EquipmentStandardRelationDTO relation : cmd.getEquipmentStandardRelations()) {
+			EhEquipmentInspectionEquipmentPlanMap equipmentPlanMap = new EhEquipmentInspectionEquipmentPlanMap();
+			equipmentPlanMap.setDefaultOrder(relation.getOrder());
+			equipmentPlanMap.setNamespaceId(UserContext.getCurrentNamespaceId());
+			equipmentPlanMap.setOwnerId(cmd.getOwnerId());
+			equipmentPlanMap.setOwnerType(cmd.getOwnerType());
+			equipmentPlanMap.setPlanId(updatePlan.getId());
+			equipmentPlanMap.setTargetId(cmd.getTargetId());
+			equipmentPlanMap.setTargetType(cmd.getTargetType());
+			equipmentPlanMap.setStandardId(relation.getStandardId());
+			equipmentPlanMap.setEquimentId(relation.getTargetId());
+
+			equipmentProvider.createEquipmentPlanMaps(equipmentPlanMap);
+			equipmentStandardRelation.add(relation);
+		}
+
+		updatePlan.setEquipmentStandardRelations(equipmentStandardRelation);
+
+		return ConvertHelper.convert(updatePlan,EquipmentInspectionPlanDTO.class);
 	}
 
 	private EquipmentInspectionPlans verifyEquipmentInspectionPlan(Long id) {
 
-		return equipmentProvider.getEquipmmentInspectionPlanById(id);
+		EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(id);
+
+		if (EquipmentPlanStatus.INACTIVE.equals(EquipmentPlanStatus.fromStatus(plan.getStatus()))) {
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_PLAN_ALREADY_DELETED,
+					"巡检计划已经删除");
+		}
+		return plan;
 	}
 
 	@Override
@@ -4533,6 +4584,112 @@ public class EquipmentServiceImpl implements EquipmentService {
 		//刪除巡检计划巡检对象关联
 		equipmentProvider.deleteEquipmentInspectionPlanMap(cmd.getId());
 		//删除repeatSetting  不删也可
+	}
+
+	@Override
+	public void createEquipmentTaskByPlan(EquipmentInspectionPlans plan) {
+		//根据巡检计划创建巡检任务
+		EquipmentInspectionTasks task = new EquipmentInspectionTasks();
+		task.setOwnerType(plan.getOwnerType());
+		task.setOwnerId(plan.getOwnerId());
+		task.setNamespaceId(plan.getNamespaceId());
+		task.setTargetId(plan.getTargetId());
+		task.setTargetType(plan.getTargetType());
+		task.setInspectionCategoryId(plan.getInspectionCategoryId());
+		task.setTaskNumber(plan.getPlanNumber());
+		task.setStatus(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
+		task.setResult(EquipmentTaskResult.NONE.getCode());
+		task.setReviewResult(ReviewResult.NONE.getCode());
+		List<TimeRangeDTO> timeRanges = repeatService.analyzeTimeRange(plan.getRepeatSettings().getTimeRanges());
+
+		if(timeRanges != null && timeRanges.size() > 0) {
+			if (LOGGER.isInfoEnabled()) {
+				LOGGER.info("creatTaskByPlan, timeRanges = " + timeRanges);
+			}
+			long current = System.currentTimeMillis();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+			String day = sdf.format(current);
+			int i = 0;
+			for (TimeRangeDTO timeRange : timeRanges) {
+				i++;
+
+				String duration = timeRange.getDuration();
+				String start = timeRange.getStartTime();
+				String str = day + " " + start;
+				Timestamp startTime = strToTimestamp(str);
+				Timestamp expiredTime = repeatService.getEndTimeByAnalyzeDuration(startTime, duration);
+				task.setExecutiveStartTime(startTime);
+				task.setExecutiveExpireTime(expiredTime);
+				long now = System.currentTimeMillis();
+				//改为：计划名称+巡检/保养+当日日期6位(年的后两位+月份+天)+两位序号（系统从01开始生成）by xiongying20170927
+				if (i < 10) {
+
+					String taskName = plan.getName() +plan.getPlanType()+
+							timestampToStr(new Timestamp(now)).substring(2) + "0" + i;
+					task.setTaskName(taskName);
+				} else {
+					String taskName = plan.getName() +plan.getPlanType()+
+							timestampToStr(new Timestamp(now)).substring(2) + i;
+					task.setTaskName(taskName);
+				}
+				equipmentProvider.creatEquipmentTask(task);
+				equipmentTasksSearcher.feedDoc(task);
+
+ 				// 启动提醒 此处需要集成工作流 从执行节点拿到执行人员
+				ListPmNotifyParamsCommand command = new ListPmNotifyParamsCommand();
+				command.setCommunityId(task.getTargetId());
+				command.setNamespaceId(task.getNamespaceId());
+				//此处为拿到自定义通知参数的接收人ids
+				List<PmNotifyParamDTO> paramDTOs = listPmNotifyParams(command);
+				if(paramDTOs != null && paramDTOs.size() > 0) {
+					for (PmNotifyParamDTO notifyParamDTO : paramDTOs) {
+						List<PmNotifyReceiverDTO> receivers = notifyParamDTO.getReceivers();
+						if(receivers != null && receivers.size() > 0) {
+							PmNotifyRecord record = ConvertHelper.convert(notifyParamDTO, PmNotifyRecord.class);
+							PmNotifyReceiverList receiverList = new PmNotifyReceiverList();
+							List<PmNotifyReceiver> pmNotifyReceivers = new ArrayList<>();
+							receivers.forEach(receiver -> {
+								PmNotifyReceiver pmNotifyReceiver = new PmNotifyReceiver();
+								if(receiver != null) {
+									pmNotifyReceiver.setReceiverType(receiver.getReceiverType());
+									if(receiver.getReceivers() != null) {
+										List<Long> ids = receiver.getReceivers().stream().map(receiverName -> {
+											return receiverName.getId();
+										}).collect(Collectors.toList());
+										pmNotifyReceiver.setReceiverIds(ids);
+									}
+									pmNotifyReceivers.add(pmNotifyReceiver);
+								}
+							});
+							receiverList.setReceivers(pmNotifyReceivers);
+							record.setReceiverJson(receiverList.toString());
+							record.setOwnerType(EntityType.EQUIPMENT_TASK.getCode());
+							record.setOwnerId(task.getId());
+
+							//notify_time
+							PmNotifyType notify = PmNotifyType.fromCode(record.getNotifyType());
+							switch (notify) {
+								case BEFORE_START:
+									Timestamp starttime = minusMinutes(task.getExecutiveStartTime(), notifyParamDTO.getNotifyTickMinutes());
+									record.setNotifyTime(starttime);
+									break;
+								case BEFORE_DELAY:
+									Timestamp delaytime = minusMinutes(task.getExecutiveExpireTime(), notifyParamDTO.getNotifyTickMinutes());
+									record.setNotifyTime(delaytime);
+									break;
+								case AFTER_DELAY:
+									record.setNotifyTime(task.getExecutiveExpireTime());
+									break;
+								default:
+									break;
+							}
+							pmNotifyService.pushPmNotifyRecord(record);
+						}
+
+					}
+				}
+			}
+		}
 	}
 
 	private void processEquipmentInspectionObjectsByPlanId(Long planId, EquipmentInspectionPlans equipmentInspectionPlan) {

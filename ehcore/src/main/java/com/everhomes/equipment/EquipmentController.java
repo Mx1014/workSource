@@ -406,7 +406,7 @@ public class EquipmentController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /equipment/searchEquipmentAccessories</b>
+     * <b>URL: /equipment/searchEquipmentInspectionPlans</b>
      * <p>巡检计划列表</p>
      */
     @RequestMapping("searchEquipmentInspectionPlans")

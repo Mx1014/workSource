@@ -71,23 +71,30 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		if (LOGGER.isInfoEnabled()){
 			LOGGER.info("EquipmentInspectionScheduleJob:createTask.....");
 		}
-		int pageSize=200;
-		ListingLocator locator =new ListingLocator();
-		while (locator.getAnchor()!=null){
+		int pageSize = 200;
+		ListingLocator locator = new ListingLocator();
+		while (locator.getAnchor() != null) {
 			List<EquipmentInspectionPlans> plans = equipmentProvider.ListQualifiedEquipmentInspectionPlans(locator, pageSize);
-			for (EquipmentInspectionPlans plan: plans){
-				if(checkPlanRepeat(plan)){
-
-				}
+			for (EquipmentInspectionPlans plan : plans) {
+				//判断repeatSettings是否Active
+				dbProvider.execute((TransactionStatus status) -> {
+					if (checkPlanRepeat(plan)) {
+						//不需要校验 展示的时候过滤即可
+						equipmentService.createEquipmentTaskByPlan(plan);
+						plan.setLastCreateTasktime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						equipmentProvider.updateEquipmentInspectionPlan(plan);
+					}
+					return null;
+				});
 
 			}
 		}
 	}
 
 	private boolean checkPlanRepeat(EquipmentInspectionPlans plan) {
-		boolean isRepeat = repeatService.isRepeatSettingActive(plan.getRepeatsettingId());
+		boolean isRepeat = repeatService.isRepeatSettingActive(plan.getRepeatSettingId());
 		LOGGER.info("checkPlanRepeat: plans  id = " + plan.getId()
-				+ "repeat setting id = "+ plan.getRepeatsettingId() + "is repeat setting active: " + isRepeat);
+				+ "repeat setting id = "+ plan.getRepeatSettingId() + "is repeat setting active: " + isRepeat);
 
 		return isRepeat;
 	}
