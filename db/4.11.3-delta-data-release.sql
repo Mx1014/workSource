@@ -1600,3 +1600,9 @@ INSERT  INTO  `eh_var_fields` VALUES (10825, 'equipment_inspection', 'quantity',
 -- update `eh_launch_pad_items` set action_data = '{"url":"http://beta.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix"}', action_type = 13 where namespace_id = 999983 and item_label = '物业查费';
 -- release
 update `eh_launch_pad_items` set action_data = '{"url":"http://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix"}', action_type = 13 where namespace_id = 999983 and item_label = '物业查费';
+
+-- add by janson 201712011625
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 0, 'system', NULL, 1, 1009, 2000, 'EhAclRoles', 0, 1, UTC_TIMESTAMP());
+
