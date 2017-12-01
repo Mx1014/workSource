@@ -248,8 +248,8 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		cond = cond.and(targetCond);
 		query.addConditions(cond);
 		query.fetch().map((r) -> {
-			if(!result.contains(r.getAuthId()))
-				result.add(r.getAuthId());
+			if(!result.contains(r.getModuleAppId()))
+				result.add(r.getModuleAppId());
 			return null;
 		});
 		return result;

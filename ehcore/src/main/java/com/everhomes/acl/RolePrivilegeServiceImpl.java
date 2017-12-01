@@ -2983,6 +2983,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					"params targets is null.");
 		}
 
+		if(null == cmd.getAppId()){
+			LOGGER.error("params appId is null");
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"appId targets is null.");
+		}
+
 		if(null == AllFlagType.fromCode(cmd.getAllProjectFlag())){
 			LOGGER.error("params allProjectFlag is null");
 			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
@@ -3014,6 +3020,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			authorizationRelation.setCreatorUid(user.getId());
 			authorizationRelation.setOperatorUid(user.getId());
 			authorizationRelation.setNamespaceId(namespaceId);
+			authorizationRelation.setAppId(cmd.getAppId());
 			if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllProjectFlag())){
 				authorizationRelation.setProjectJson(StringHelper.toJsonString(cmd.getProjects()));
 			}
@@ -3042,6 +3049,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			LOGGER.error("params id is null");
 			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
 					"params id is null.");
+		}
+
+		if(null == cmd.getAppId()){
+			LOGGER.error("params appId is null");
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"appId targets is null.");
 		}
 
 		if(null == cmd.getTargets() || cmd.getTargets().size() == 0){
@@ -3085,6 +3098,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			authorizationRelation.setOperatorUid(user.getId());
 			authorizationRelation.setAllFlag(cmd.getAllFlag());
 			authorizationRelation.setAllProjectFlag(cmd.getAllProjectFlag());
+			authorizationRelation.setAppId(cmd.getAppId());
 			if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllProjectFlag())){
 				authorizationRelation.setProjectJson(StringHelper.toJsonString(cmd.getProjects()));
 			}
@@ -3145,13 +3159,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					authorization.setTargetType(target.getTargetType());
 					authorization.setTargetId(target.getTargetId());
 					authorization.setAllFlag(authorizationRelation.getAllFlag());
-					authorization.setAuthType(EntityType.SERVICE_MODULE.getCode());
+					authorization.setAuthType(EntityType.SERVICE_MODULE_APP.getCode());
 					authorization.setIdentityType(IdentityType.ORDINARY.getCode());
 					authorization.setNamespaceId(authorizationRelation.getNamespaceId());
 					authorization.setCreatorUid(user.getId());
 					authorization.setOperatorUid(user.getId());
 					authorization.setAuthId(authorizationRelation.getModuleId());
 					authorization.setScope(tag);
+					authorization.setModuleAppId(authorizationRelation.getAppId());
 					authorizations.add(authorization);
 
 				}
@@ -3165,13 +3180,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				authorization.setTargetType(target.getTargetType());
 				authorization.setTargetId(target.getTargetId());
 				authorization.setAllFlag(authorizationRelation.getAllFlag());
-				authorization.setAuthType(EntityType.SERVICE_MODULE.getCode());
+				authorization.setAuthType(EntityType.SERVICE_MODULE_APP.getCode());
 				authorization.setAuthId(authorizationRelation.getModuleId());
 				authorization.setIdentityType(IdentityType.ORDINARY.getCode());
 				authorization.setNamespaceId(authorizationRelation.getNamespaceId());
 				authorization.setCreatorUid(user.getId());
 				authorization.setOperatorUid(user.getId());
 				authorization.setScope(tag);
+				authorization.setModuleAppId(authorizationRelation.getAppId());
 				authorizations.add(authorization);
 			}
 		}
