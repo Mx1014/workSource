@@ -19,4 +19,6 @@ public interface WorkReportService {
     void postWorkReport(PostWorkReportCommand cmd);
 
     void updatePostWorkReport(PostWorkReportCommand cmd);
+
+    void listPostWorkReports(ListPostWorkReportsCommand cmd);
 }

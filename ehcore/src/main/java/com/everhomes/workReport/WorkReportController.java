@@ -108,7 +108,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/postWorkReport</b>
-     * <p>3-1.提交工作汇报模板 </p>
+     * <p>3-1.提交工作汇报 </p>
      */
     @RequestMapping("postWorkReport")
     @RestReturn(value=String.class)
@@ -122,12 +122,26 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/updatePostWorkReport</b>
-     * <p>3-2.提交工作汇报模板 </p>
+     * <p>3-2.工作汇报申请列表 </p>
      */
     @RequestMapping("updatePostWorkReport")
     @RestReturn(value=String.class)
     public RestResponse updatePostWorkReport(PostWorkReportCommand cmd) {
         workReportService.updatePostWorkReport(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /workReport/listPostWorkReports</b>
+     * <p>3-3.编辑工作汇报 </p>
+     */
+    @RequestMapping("listPostWorkReports")
+    @RestReturn(value=String.class)
+    public RestResponse listPostWorkReports(ListPostWorkReportsCommand cmd) {
+        workReportService.listPostWorkReports(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
