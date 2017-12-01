@@ -27,6 +27,16 @@ public class PaymentExpectancyDTO {
     private BigDecimal amountReceivable;
     private String dueDateStr;
 
+    private Long billItemId;
+
+
+
+
+    @Override
+    public int hashCode() {
+        return getBillItemId() != null ? getBillItemId().hashCode() : 0;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -37,12 +47,8 @@ public class PaymentExpectancyDTO {
         return getBillItemId() != null ? getBillItemId().equals(that.getBillItemId()) : that.getBillItemId() == null;
     }
 
-    @Override
-    public int hashCode() {
-        return getBillItemId() != null ? getBillItemId().hashCode() : 0;
-    }
 
-    private Long billItemId;
+
 
     public Long getBillItemId() {
         return billItemId;

@@ -73,6 +73,25 @@ public class ContractDTO {
     private List<BuildingApartmentDTO> buildings;
 	private BigDecimal rent;
 
+	private String namespaceContractType;
+	private String namespaceContractToken;
+
+	public String getNamespaceContractType() {
+		return namespaceContractType;
+	}
+
+	public void setNamespaceContractType(String namespaceContractType) {
+		this.namespaceContractType = namespaceContractType;
+	}
+
+	public String getNamespaceContractToken() {
+		return namespaceContractToken;
+	}
+
+	public void setNamespaceContractToken(String namespaceContractToken) {
+		this.namespaceContractToken = namespaceContractToken;
+	}
+
 	public String getSettled() {
 		return settled;
 	}

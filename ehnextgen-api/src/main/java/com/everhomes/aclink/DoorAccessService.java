@@ -143,4 +143,8 @@ public interface DoorAccessService {
     void deleteDoorAuthLevel(Long id);
     
     String faceTest();
+
+    //要不要生成门禁二维码信息，如果是 web 端，则需要直接生成给 web
+    ListDoorAccessQRKeyResponse listDoorAccessQRKeyAndGenerateQR(
+            boolean generate);
 }
