@@ -426,6 +426,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		////申请来源
 		if(null != yellowPage){
 			parentPage = yellowPageProvider.findCategoryById(yellowPage.getParentId());
+			flowCase.setModuleName(parentPage.getName());
 		}
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
@@ -433,6 +434,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		e.setValue(parentPage==null?"未知":parentPage.getName());
 		e = new FlowCaseEntity();
 		entities.add(e);
+		
 //		GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(val.getApprovalId());
 
 		e.setKey("服务名称");
