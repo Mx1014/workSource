@@ -671,6 +671,56 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public void createCustomerAccount(CreateCustomerAccountCommand cmd) {
+        
+    }
+
+    @Override
+    public void createCustomerTax(CreateCustomerTaxCommand cmd) {
+
+    }
+
+    @Override
+    public void deleteCustomerAccount(DeleteCustomerAccountCommand cmd) {
+
+    }
+
+    @Override
+    public void deleteCustomerTax(DeleteCustomerTaxCommand cmd) {
+
+    }
+
+    @Override
+    public CustomerAccountDTO getCustomerAccount(GetCustomerAccountCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public CustomerTaxDTO getCustomerTax(GetCustomerTaxCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public List<CustomerAccountDTO> listCustomerAccounts(ListCustomerAccountsCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public List<CustomerTaxDTO> listCustomerTaxes(ListCustomerTaxesCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public void updateCustomerAccount(UpdateCustomerAccountCommand cmd) {
+
+    }
+
+    @Override
+    public void updateCustomerTax(UpdateCustomerTaxCommand cmd) {
+
+    }
+
+    @Override
     public void createCustomerTalent(CreateCustomerTalentCommand cmd) {
         CustomerTalent talent = ConvertHelper.convert(cmd, CustomerTalent.class);
         enterpriseCustomerProvider.createCustomerTalent(talent);
