@@ -145,11 +145,17 @@ public class ZJContractHandler implements ContractService{
                 if(community != null && CommunityType.COMMERCIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
                     if(cmd.getCustomerType() == null || CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(cmd.getCustomerType()))) {
                         String contract = postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null);
+                        if(StringUtils.isBlank(enterprises)) {
+                            return response;
+                        }
                         entity = JSONObject.parseObject(contract, new TypeReference<ShenzhouJsonEntity<List<ZJContract>>>(){});
                     }
                 } else if(community != null && CommunityType.RESIDENTIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
                     if(cmd.getCustomerType() == null || CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(cmd.getCustomerType()))) {
                         String contract = postToShenzhou(params, LIST_USER_CONTRACTS, null);
+                        if(StringUtils.isBlank(enterprises)) {
+                            return response;
+                        }
                         entity = JSONObject.parseObject(contract, new TypeReference<ShenzhouJsonEntity<List<ZJContract>>>(){});
                     }
                 }
