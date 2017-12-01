@@ -1590,3 +1590,6 @@ SET @locale_strings_id = IFNULL((SELECT MAX(id) FROM `eh_locale_strings`), 1);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 VALUES ((@locale_strings_id := @locale_strings_id + 1), 'flow', '100019', 'zh_CN', '对不起，您无权查看此任务');
 
+
+-- 添加设备数量  by jiarui 20171201
+INSERT  INTO  `eh_var_fields` VALUES (10825, 'equipment_inspection', 'quantity', '数量', 'Long', 10000, CONCAT('/',10000), 0, null, 2, 1, now(),null ,null,'{\"fieldParamType\": \"text\", \"length\": 32}');

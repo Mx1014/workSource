@@ -5,6 +5,7 @@ import com.everhomes.acl.WebMenu;
 import com.everhomes.acl.WebMenuPrivilegeProvider;
 import com.everhomes.acl.WebMenuScope;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.domain.Domain;
@@ -55,6 +56,9 @@ public class MeWebMenuServiceImpl implements MeWebMenuService {
 	@Autowired
 	private MeWebMenuProvider meWebMenuProvider;
 
+	@Autowired
+	private ContentServerService contentServerService;
+
 	@Override
 	public ListMeWebMenusResponse listMeWebMenus(ListMeWebMenusCommand cmd){
 		ListMeWebMenusResponse response = new ListMeWebMenusResponse();
@@ -71,12 +75,26 @@ public class MeWebMenuServiceImpl implements MeWebMenuService {
 		List<MeWebMenuDTO> dtos = new ArrayList<>();
 		if(meWebMenus != null){
 			dtos = meWebMenus.stream()
-					.map(r -> ConvertHelper.convert(r, MeWebMenuDTO.class))
-					.collect(Collectors.toList());
+					.map(r -> {
+						MeWebMenuDTO dto = ConvertHelper.convert(r, MeWebMenuDTO.class);
+						populateMeWebMenuDTO(dto);
+						return dto;
+					}).collect(Collectors.toList());
 		}
 
 		response.setDtos(dtos);
 		return  response;
+	}
+
+
+	private void populateMeWebMenuDTO(MeWebMenuDTO dto){
+		if(dto == null || StringUtils.isEmpty(dto.getIconUri()) || dto.getId() == null){
+			return;
+		}
+
+		String url = contentServerService.parserUri(dto.getIconUri(), MeWebMenuDTO.class.getSimpleName(), dto.getId());
+
+		dto.setIconUrl(url);
 	}
 
 }
