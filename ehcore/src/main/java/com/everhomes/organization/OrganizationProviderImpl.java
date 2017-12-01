@@ -5557,7 +5557,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				.where(Tables.EH_USER_ORGANIZATIONS.USER_ID.eq(userId)
 						.and(Tables.EH_USER_ORGANIZATIONS.STATUS.in(UserOrganizationStatus.ACTIVE.getCode(), UserOrganizationStatus.WAITING_FOR_APPROVAL.getCode()))
 						.and(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(orgId)))
-				.fetchOne();
+				.fetchAny();
 		if (record != null)
 			return ConvertHelper.convert(record, UserOrganizations.class);
 		return null;
