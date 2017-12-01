@@ -1593,3 +1593,10 @@ VALUES ((@locale_strings_id := @locale_strings_id + 1), 'flow', '100019', 'zh_CN
 
 -- 添加设备数量  by jiarui 20171201
 INSERT  INTO  `eh_var_fields` VALUES (10825, 'equipment_inspection', 'quantity', '数量', 'Long', 10000, CONCAT('/',10000), 0, null, 2, 1, now(),null ,null,'{\"fieldParamType\": \"text\", \"length\": 32}');
+
+
+-- 添加正中会物业缴费入口 by wentian
+-- beta
+-- update `eh_launch_pad_items` set action_data = '{"url":"http://beta.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix"}', action_type = 13 where namespace_id = 999983 and item_label = '物业查费';
+-- release
+update `eh_launch_pad_items` set action_data = '{"url":"http://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix"}', action_type = 13 where namespace_id = 999983 and item_label = '物业查费';

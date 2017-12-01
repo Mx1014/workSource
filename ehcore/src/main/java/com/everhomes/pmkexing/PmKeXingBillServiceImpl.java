@@ -277,6 +277,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         cmd.setCommunityId(ownerId);
 
         contracts = contractService.listCustomerContracts(cmd);
+        if(contracts == null) return res;
 //        Contract experimentSample = new Contract();
 //        experimentSample.setNamespaceContractType("ebei");
 //        experimentSample.setNamespaceContractToken("002285da-4796-495d-aaa3-742bb2ae5b39");

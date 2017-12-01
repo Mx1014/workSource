@@ -405,7 +405,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public void exportRentalExcelTemplate(HttpServletResponse response) {
+    public void exportfRentalExcelTemplate(HttpServletResponse response) {
         LOGGER.error("Insufficient privilege, EBeiAssetHandler");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
