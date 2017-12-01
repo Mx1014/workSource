@@ -677,7 +677,7 @@ VALUES (@field_id:=@field_id+1, 'contract', 'denunciationUid', '退约经办人'
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
 VALUES (@field_id:=@field_id+1, 'contract', 'buildingRename', '房间别名', 'Long', '15', '/13/15', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
 
--- 科兴基础数据
+-- 科兴基础数据 by xiongying
 update eh_communities set namespace_community_type = 'ebei' where namespace_id = 999983;
 update eh_communities set namespace_community_token = '6255265c-80bc-11e7-8e8b-020b31d69c8a' where namespace_id = 999983;
 

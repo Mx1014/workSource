@@ -208,8 +208,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			pmTaskProvider.updateTask(task);
 		}
 		//elasticsearch更新
-		//pmTaskSearch.deleteById(task.getId());
-		//pmTaskSearch.feedDoc(task);
+		pmTaskSearch.deleteById(task.getId());
+		pmTaskSearch.feedDoc(task);
 
 	}
 
@@ -467,8 +467,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 //				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
-			//	pmTaskProvider.updateTask(task);
-			//	pmTaskSearch.feedDoc(task);
+				pmTaskProvider.updateTask(task);
+				pmTaskSearch.feedDoc(task);
 			}
 		}else if(FlowStepType.NO_STEP.getCode().equals(stepType)) {
 			if ("MOTIFYFEE".equals(nodeType)) {

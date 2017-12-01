@@ -9,13 +9,13 @@ CREATE TABLE `eh_community_organization_detail_display` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE `eh_communities` ADD COLUMN `community_number` VARCHAR(64) COMMENT '��Ŀ���';
-ALTER TABLE `eh_buildings` ADD COLUMN `building_number` VARCHAR(64) COMMENT '¥�����';
+ALTER TABLE `eh_communities` ADD COLUMN `community_number` VARCHAR(64) COMMENT '项目编号';
+ALTER TABLE `eh_buildings` ADD COLUMN `building_number` VARCHAR(64) COMMENT '楼栋编号';
 
 
-ALTER TABLE `eh_enterprise_customers` ADD COLUMN `version` VARCHAR(32) COMMENT '�汾��';
-ALTER TABLE `eh_contracts` ADD COLUMN `version` VARCHAR(32) COMMENT '�汾��';
-ALTER TABLE `eh_contracts` ADD COLUMN `building_rename` VARCHAR(64) COMMENT '�������';
+ALTER TABLE `eh_enterprise_customers` ADD COLUMN `version` VARCHAR(32) COMMENT '版本号';
+ALTER TABLE `eh_contracts` ADD COLUMN `version` VARCHAR(32) COMMENT '版本号';
+ALTER TABLE `eh_contracts` ADD COLUMN `building_rename` VARCHAR(64) COMMENT '房间别名';
 
 ALTER TABLE `eh_contracts` ADD COLUMN `namespace_contract_type` VARCHAR(128);
 ALTER TABLE `eh_contracts` ADD COLUMN `namespace_contract_token` VARCHAR(128);
