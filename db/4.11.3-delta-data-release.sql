@@ -368,6 +368,8 @@ INSERT  INTO  `eh_var_fields` VALUES (10821, 'equipment_inspection', 'depreciati
 INSERT  INTO  `eh_var_fields` VALUES (10822, 'equipment_inspection', 'qrCodeFlag', '二维码状态', 'Long', 10000, CONCAT('/',10000), 0, null, 2, 1, now(),null ,null,'{\"fieldParamType\": \"select\", \"length\": 32}');
 INSERT  INTO  `eh_var_fields` VALUES (10823, 'equipment_inspection', 'remarks', '备注', 'String', 10000, CONCAT('/',10000), 0, null, 2, 1, now(),null ,null,'{\"fieldParamType\": \"multiText\", \"length\": 2048}');
 INSERT  INTO  `eh_var_fields` VALUES (10824, 'equipment_inspection', 'attachments', '附件', 'String', 10000, CONCAT('/',10000), 0, null, 2, 1, now(),null ,null,'{\"fieldParamType\": \"file\", \"length\": 32}');
+-- 添加设备数量  by jiarui 20171201
+INSERT  INTO  `eh_var_fields` VALUES (10925, 'equipment_inspection', 'quantity', '数量', 'Long', 10000, CONCAT('/',10000), 0, null, 2, 1, now(),null ,null,'{\"fieldParamType\": \"text\", \"length\": 32}');
 
 
 
@@ -1590,9 +1592,6 @@ SET @locale_strings_id = IFNULL((SELECT MAX(id) FROM `eh_locale_strings`), 1);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 VALUES ((@locale_strings_id := @locale_strings_id + 1), 'flow', '100019', 'zh_CN', '对不起，您无权查看此任务');
 
-
--- 添加设备数量  by jiarui 20171201
-INSERT  INTO  `eh_var_fields` VALUES (10825, 'equipment_inspection', 'quantity', '数量', 'Long', 10000, CONCAT('/',10000), 0, null, 2, 1, now(),null ,null,'{\"fieldParamType\": \"text\", \"length\": 32}');
 
 
 -- 添加正中会物业缴费入口 by wentian
