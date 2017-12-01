@@ -672,32 +672,66 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void createCustomerAccount(CreateCustomerAccountCommand cmd) {
-        
+        CustomerAccount account = ConvertHelper.convert(cmd, CustomerAccount.class);
+        enterpriseCustomerProvider.createCustomerAccount(account);
     }
 
     @Override
     public void createCustomerTax(CreateCustomerTaxCommand cmd) {
-
+        CustomerTax tax = ConvertHelper.convert(cmd, CustomerTax.class);
+        enterpriseCustomerProvider.createCustomerTax(tax);
     }
 
     @Override
     public void deleteCustomerAccount(DeleteCustomerAccountCommand cmd) {
-
+        CustomerAccount account = checkCustomerAccount(cmd.getId(), cmd.getCustomerId());
+        enterpriseCustomerProvider.deleteCustomerAccount(account);
     }
 
     @Override
     public void deleteCustomerTax(DeleteCustomerTaxCommand cmd) {
-
+        CustomerTax tax = checkCustomerTax(cmd.getId(), cmd.getCustomerId());
+        enterpriseCustomerProvider.deleteCustomerTax(tax);
     }
 
     @Override
     public CustomerAccountDTO getCustomerAccount(GetCustomerAccountCommand cmd) {
-        return null;
+        CustomerAccount account = checkCustomerAccount(cmd.getId(), cmd.getCustomerId());
+        return convertCustomerAccountDTO(account, cmd.getCommunityId());
     }
 
     @Override
     public CustomerTaxDTO getCustomerTax(GetCustomerTaxCommand cmd) {
-        return null;
+        CustomerTax tax = checkCustomerTax(cmd.getId(), cmd.getCustomerId());
+        return convertCustomerTaxDTO(tax, cmd.getCommunityId());
+    }
+
+    private CustomerAccountDTO convertCustomerAccountDTO(CustomerAccount account, Long communityId) {
+        CustomerAccountDTO dto = ConvertHelper.convert(account, CustomerAccountDTO.class);
+
+        if(dto.getAbroadItemId() != null) {
+//            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getAbroadItemId());
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(account.getNamespaceId(), communityId, dto.getAbroadItemId());
+            if(scopeFieldItem != null) {
+                dto.setAbroadItemName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+
+        return dto;
+    }
+
+    private CustomerTaxDTO convertCustomerTaxDTO(CustomerTax tax, Long communityId) {
+        CustomerTaxDTO dto = ConvertHelper.convert(tax, CustomerTaxDTO.class);
+
+        if(dto.getAbroadItemId() != null) {
+//            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getAbroadItemId());
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(account.getNamespaceId(), communityId, dto.getAbroadItemId());
+            if(scopeFieldItem != null) {
+                dto.setAbroadItemName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+
+        return dto;
     }
 
     @Override
