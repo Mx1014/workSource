@@ -2005,7 +2005,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 					Long chargeUid = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId()).getChargeUid();
 					String notifyTextForOther = null;
-					if (orderReminderEndTimeLong % 3600 != 0)//检测是否在15分或45分结束
+					if (orderReminderEndTimeLong % 3600000 != 0)//检测是否在15分或45分结束
 						notifyTextForOther = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
 								RentalNotificationTemplateCode.RENTAL_END_NOTIFY_HOUR, RentalNotificationTemplateCode.locale, map, "");
 					else

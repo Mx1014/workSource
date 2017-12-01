@@ -1255,6 +1255,13 @@ public class ContractServiceImpl implements ContractService {
 			dto.setCreatorName(creator.getNickName());
 		}
 
+		if(dto.getDenunciationUid() != null) {
+			User denunciactionName = userProvider.findUserById(dto.getDenunciationUid());
+			if(denunciactionName != null) {
+				dto.setDenunciationName(denunciactionName.getNickName());
+			}
+		}
+
 		if(contract.getPartyAId() != null && contract.getPartyAType() != null) {
 			if(0 == contract.getPartyAType()) {
 				Organization organization = organizationProvider.findOrganizationById(contract.getPartyAId());
