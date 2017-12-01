@@ -1,8 +1,6 @@
 package com.everhomes.module;
 
-import com.everhomes.acl.Authorization;
-import com.everhomes.acl.AuthorizationProvider;
-import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.acl.*;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -55,6 +53,7 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -98,6 +97,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Autowired
     private SequenceProvider sequenceProvider;
+
+    @Autowired
+    private WebMenuPrivilegeProvider webMenuPrivilegeProvider;
 
 
     @Override
@@ -856,15 +858,23 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     public ReflectionServiceModuleApp getOrCreateReflectionServiceModuleApp(Integer namespaceId, String actionData, String instanceConfig, String itemLabel, ServiceModule serviceModule) {
         ReflectionServiceModuleApp reflectionApp = null;
         String customTag = "";
+        Long webMenuId = 0L;
         switch (MultipleFlag.fromCode(serviceModule.getMultipleFlag())){
             case NO:
                 reflectionApp = this.serviceModuleProvider.findReflectionServiceModuleAppByParam(namespaceId, serviceModule.getId(), null);
+                // 取非多入口的模块的菜单id
+                List<WebMenu>  webMenus = this.webMenuPrivilegeProvider.listWebMenuByMenuIds(Collections.singletonList(serviceModule.getId()));
+                if(webMenus != null && webMenus.size() > 0){
+                    webMenuId = webMenus.get(0).getId();
+                }
                 break;
             case YES:
                 String handlerPrefix = PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX;
                 PortalPublishHandler handler = PlatformContext.getComponent(handlerPrefix + serviceModule.getId());
                 if(null != handler){
                     customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), actionData, instanceConfig);
+                    // 取多入口的模块的菜单id
+                    webMenuId = handler.getWebMenuId(namespaceId, serviceModule.getId(), actionData, instanceConfig);
                 }
                 reflectionApp = this.serviceModuleProvider.findReflectionServiceModuleAppByParam(namespaceId, serviceModule.getId(), customTag);
                 break;
@@ -876,6 +886,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             reflectionApp.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             reflectionApp.setActionData(actionData);
             reflectionApp.setCustomTag(customTag);
+            reflectionApp.setMenuId(webMenuId);
             this.serviceModuleProvider.updateReflectionServiceModuleApp(reflectionApp);
         }else{//创建
             ReflectionServiceModuleApp reflectionApp_new = new ReflectionServiceModuleApp();
@@ -892,6 +903,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             reflectionApp_new.setCustomTag(customTag);
             reflectionApp_new.setName(itemLabel);
             reflectionApp_new.setModuleId(serviceModule.getId());
+            reflectionApp_new.setMenuId(webMenuId);
             this.serviceModuleProvider.createReflectionServiceModuleApp(reflectionApp_new);
         }
 

@@ -44,6 +44,10 @@ CREATE TABLE `eh_reflection_service_module_apps` (
   `multiple_flag` tinyint(4) DEFAULT NULL,
   `custom_tag` varchar(64) DEFAULT '',
   `custom_path` varchar(128) DEFAULT '',
-  `menu_id` bigint(20) NOT NULL,
+  `menu_id` bigint(20) DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5007 DEFAULT CHARSET=utf8mb4;
+
+
+-- 权限细化改造 by lei.lv
+ALTER TABLE `eh_authorization_relations` ADD COLUMN `app_id` bigint(20);

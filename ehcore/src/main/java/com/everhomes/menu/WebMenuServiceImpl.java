@@ -120,12 +120,11 @@ public class WebMenuServiceImpl implements WebMenuService {
 			for (Long orgId: orgIds) {
 				targets.add(new Target(EntityType.ORGANIZATIONS.getCode(), orgId));
 			}
-			//获取人员和人员所有机构所赋予的权限模块(模块管理员)
+			//获取人员和人员所有机构所赋予的权限模块(模块管理员) 模块管理员拥有所有模块下的菜单
 			List<Long> moduleIds = authorizationProvider.getAuthorizationModuleIdsByTarget(targets);
-			//获取人员和人员所有机构所赋予的应用模块权限(应用管理员)
+			//获取人员和人员所有机构所赋予的应用模块权限(应用管理员) 应用管理员拥有应用对应的菜单
 			List<Long> moduleIds_app = authorizationProvider.getAuthorizationAppModuleIdsByTarget(targets);
 
-			moduleIds.addAll(moduleIds_app);
 
 			if(null != moduleIds && moduleIds.size() > 0){
 				if (moduleIds_app != null && moduleIds_app.size() > 0){
@@ -139,7 +138,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 					}).collect(Collectors.toList());
 				}
 
-				menus = webMenuProvider.listWebMenuByType(WebMenuType.PARK.getCode(), categories, null, moduleIds);
+				menus = webMenuProvider. listWebMenuByType(WebMenuType.PARK.getCode(), categories, null, moduleIds);
 			}
 
 			//拼上菜单的所有父级菜单

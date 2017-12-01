@@ -577,6 +577,7 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         item.addValue(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ACTION_DATA, reflectionServiceModuleApp.getActionData());
         item.addValue(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.CUSTOM_TAG, reflectionServiceModuleApp.getCustomTag());
         item.addValue(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.CUSTOM_PATH, reflectionServiceModuleApp.getCustomPath());
+        item.addValue(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.MENU_ID, reflectionServiceModuleApp.getMenuId());
         item.addConditions(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ID.eq(reflectionServiceModuleApp.getId()));
         item.setReturning(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ID);
         item.execute();
