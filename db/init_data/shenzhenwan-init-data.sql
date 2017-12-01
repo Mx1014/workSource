@@ -1413,4 +1413,9 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 
 -- 【深圳湾mybay】【大堂门禁】【IOS&安卓】删掉蓝牙门禁的tab，不在APP端显示
 
-UPDATE `eh_launch_pad_items` SET `action_data` = '{"isSupportQR":1,"isSupportSmart":0}' WHERE `namespace_id` = 999966 AND `item_label` ='闸机门禁' ;
+UPDATE `eh_launch_pad_items` SET `action_data` = '{"isSupportQR":1,"isSupportSmart":0, "isSupportKeyShowing":1}' WHERE `namespace_id` = 999966 AND `item_label` ='闸机门禁' ;
+
+
+-- 【深圳湾mybay】切换到创投项目中，把首页默认显示的闸机门禁替换成通讯录
+UPDATE eh_launch_pad_items  SET display_flag = 0 WHERE  scope_id = 240111044331050371  AND  namespace_id =  999966 AND action_type =40;
+UPDATE eh_launch_pad_items  SET display_flag = 0 WHERE  scope_id = 240111044331050371  AND  namespace_id =  999966 AND item_label = '通讯录';
