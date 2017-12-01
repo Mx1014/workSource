@@ -2484,7 +2484,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //			rs.setApprovingUserWeekendPrice(approvingUserWeekendPrice);
 //			rs.setApprovingUserWorkdayPrice(approvingUserWorkdayPrice);
 
-			if (cmd.getNeedPay() == NormalFlag.NEED.getCode()) {
+			//if (cmd.getNeedPay() == NormalFlag.NEED.getCode()) {
 				for (PriceRuleDTO priceRuleDTO : cmd.getPriceRules()) {
 					currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)) );
 					seqNum.set(0L);
@@ -2556,7 +2556,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					priceRuleDTO.setCellBeginId(cellBeginId);
 					priceRuleDTO.setCellEndId(cellBeginId + seqNum.get()-1);
 				}
-			}
+			//}
 
 //			if(LOGGER.isDebugEnabled()) {
 //	            LOGGER.debug("eh rental cells get next sequence block, id=" + cellBeginId+",block count = "+ seqNum.get()); 
