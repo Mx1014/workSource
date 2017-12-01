@@ -1,7 +1,10 @@
 package com.everhomes.portal;
 
+import com.everhomes.acl.WebMenu;
+import com.everhomes.acl.WebMenuPrivilegeProvider;
 import com.everhomes.rentalv2.RentalResourceType;
 import com.everhomes.rentalv2.Rentalv2Provider;
+import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.common.RentalActionData;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.portal.RentalInstanceConfig;
@@ -11,6 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by sfyan on 2017/8/30.
@@ -23,6 +29,8 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
 
     @Autowired
     private Rentalv2Provider rentalv2Provider;
+    @Autowired
+    private WebMenuPrivilegeProvider webMenuProvider;
 
 
     @Override
@@ -85,6 +93,15 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
         RentalActionData actionDataObject = (RentalActionData)StringHelper.fromJsonString(actionData,RentalActionData.class);
         if (actionDataObject!=null && actionDataObject.getResourceTypeId()!=null)
             return String.valueOf(actionDataObject.getResourceTypeId());
+        return null;
+    }
+
+    @Override
+    public Long getWebMenuId(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
+        List<WebMenu> menus = webMenuProvider.listWebMenuByType(WebMenuType.PARK.getCode(), null, "/40000%", Collections.singletonList(40400L));
+        if (menus!=null && menus.size()>0)
+            return menus.get(0).getId();
+
         return null;
     }
 }
