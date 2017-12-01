@@ -2014,6 +2014,10 @@ public class SequenceServiceImpl implements SequenceService {
 		syncTableSequence(null, EhPaymentWithdrawOrders.class, Tables.EH_PAYMENT_WITHDRAW_ORDERS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PAYMENT_WITHDRAW_ORDERS.ID.max()).from(Tables.EH_PAYMENT_WITHDRAW_ORDERS).fetchOne().value1();
         });
+
+        syncTableSequence(null, EhMeWebMenus.class, Tables.EH_ME_WEB_MENUS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ME_WEB_MENUS.ID.max()).from(Tables.EH_ME_WEB_MENUS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
