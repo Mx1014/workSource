@@ -56,6 +56,15 @@ ALTER TABLE eh_qrcodes ADD COLUMN `extra` TEXT COMMENT 'module handler';
 ALTER TABLE eh_flow_cases ADD COLUMN `route_uri` VARCHAR(128) COMMENT 'route uri';
 
 
+ALTER TABLE eh_enterprise_op_requests ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
+ALTER TABLE eh_lease_promotions ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
+ALTER TABLE eh_lease_projects ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
+ALTER TABLE eh_lease_project_communities ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
+ALTER TABLE eh_lease_issuers ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
+ALTER TABLE eh_lease_form_requests ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
+ALTER TABLE eh_lease_configs ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
+ALTER TABLE eh_lease_buildings ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
+
 -- from club 3.2 start
 -- 行业协会类型
 CREATE TABLE `eh_industry_types` (
