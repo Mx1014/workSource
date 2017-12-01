@@ -1631,6 +1631,9 @@ UPDATE eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create
 
 UPDATE eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=9&displayName=投诉与需求"}' where namespace_id = 999983 and item_label = '投诉与需求';
 
+UPDATE eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=6&displayName=家政服务"}' where namespace_id = 999993 and item_label = '家政服务';
+UPDATE eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=6&displayName=综合维修"}' where namespace_id = 999993 and item_label = '综合维修';
+
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`)
 	VALUES ('9', '0', '0', '投诉建议', '投诉建议', '0', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '0');
 
@@ -1639,6 +1642,25 @@ UPDATE eh_categories set `name` = '物业报修', path = '物业报修' where id
 UPDATE eh_categories set path = replace(path, '任务', '物业报修') where path like '任务%' and id not in (203665, 203532, 202564);
 
 UPDATE eh_categories set path = replace(path, '任务', '投诉建议'), parent_id = 9 where id in (203665, 203532, 202564) and parent_id = 6;
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20230,'', 'EhNamespaces', 999967,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20240,'', 'EhNamespaces', 999967,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20250,'', 'EhNamespaces', 999967,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20255,'', 'EhNamespaces', 999967,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20258,'', 'EhNamespaces', 999967,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20280,'', 'EhNamespaces', 999967,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20290,'', 'EhNamespaces', 999967,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20291,'', 'EhNamespaces', 999967,2);
+
 
 -- add by janson 201712011625
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
