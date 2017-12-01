@@ -130,6 +130,7 @@ public class HotTagServiceImpl implements HotTagService{
 				cmd.getNames().forEach(r -> {
 					SetHotTagCommand setCmd = new SetHotTagCommand();
 					setCmd.setNamespaceId(cmd.getNamespaceId());
+					setCmd.setModuleType(cmd.getModuleType());
 					setCmd.setServiceType(cmd.getServiceType());
 					setCmd.setCategoryId(cmd.getCategoryId());
 					setCmd.setName(r);
