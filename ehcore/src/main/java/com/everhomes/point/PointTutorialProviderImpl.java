@@ -74,6 +74,12 @@ public class PointTutorialProviderImpl implements PointTutorialProvider {
         return tutorials;
     }
 
+    @Override
+    public void deleteTutorial(PointTutorial tutorial) {
+        rwDao().delete(tutorial);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointTutorials.class, tutorial.getId());
+    }
+
     private EhPointTutorialsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhPointTutorialsDao(context.configuration());

@@ -39,7 +39,7 @@ public class PointController extends ControllerBase {
     @RequestMapping("getUserPoint")
     public RestResponse getUserPoint(GetUserPointCommand cmd) {
         PointScoreDTO dto = pointService.getUserPoint(cmd);
-        return response(dto);
+        return success(dto);
     }
 
     /**
@@ -50,7 +50,7 @@ public class PointController extends ControllerBase {
     @RequestMapping("getPointSystem")
     public RestResponse getPointSystem(GetPointSystemCommand cmd) {
         PointSystemDTO dto = pointService.getPointSystem(cmd);
-        return response(dto);
+        return success(dto);
     }
 
     /**
@@ -64,7 +64,7 @@ public class PointController extends ControllerBase {
             cmd.setUserId(UserContext.currentUserId());
         }
         ListPointLogsResponse response = pointService.listPointLogs(cmd);
-        return response(response);
+        return success(response);
     }
 
     /**
@@ -75,7 +75,7 @@ public class PointController extends ControllerBase {
     @RequestMapping("listPointLogsForMall")
     public RestResponse listPointLogsForMall(ListPointLogsForMallCommand cmd) {
         ListPointLogsResponse response = pointService.listPointLogsForMall(cmd);
-        return response(response);
+        return success(response);
     }
 
     /**
@@ -85,8 +85,9 @@ public class PointController extends ControllerBase {
     @RestReturn(ListPointGoodsResponse.class)
     @RequestMapping("listPointGoods")
     public RestResponse listPointGoods(ListPointGoodsCommand cmd) {
+        cmd.setStatus(PointCommonStatus.ENABLED.getCode());
         ListPointGoodsResponse response = pointService.listPointGoods(cmd);
-        return response(response);
+        return success(response);
     }
 
     /**
@@ -97,7 +98,7 @@ public class PointController extends ControllerBase {
     @RequestMapping("listPointTutorials")
     public RestResponse listPointTutorials(ListPointTutorialsCommand cmd) {
         ListPointTutorialResponse response = pointService.listPointTutorials(cmd);
-        return response(response);
+        return success(response);
     }
 
     /**
@@ -108,7 +109,7 @@ public class PointController extends ControllerBase {
     @RequestMapping("listPointTutorialDetail")
     public RestResponse listPointTutorialDetail(ListPointTutorialDetailCommand cmd) {
         ListPointTutorialDetailResponse response = pointService.listPointTutorialDetail(cmd);
-        return response(response);
+        return success(response);
     }
 
     /**
@@ -119,10 +120,10 @@ public class PointController extends ControllerBase {
     @RequestMapping("listPointMallBanners")
     public RestResponse listPointMallBanners(ListPointMallBannersCommand cmd) {
         ListPointMallBannersResponse response = pointService.listPointMallBanners(cmd);
-        return response(response);
+        return success(response);
     }
 
-    private RestResponse response(Object o) {
+    private RestResponse success(Object o) {
         RestResponse response = new RestResponse(o);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);

@@ -1,21 +1,20 @@
 // @formatter:off
 package com.everhomes.point;
 
-import com.everhomes.server.schema.Tables;
-import org.jooq.DSLContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPointScoresDao;
 import com.everhomes.server.schema.tables.pojos.EhPointScores;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
+import org.jooq.DSLContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public class PointScoreProviderImpl implements PointScoreProvider {
@@ -38,7 +37,7 @@ public class PointScoreProviderImpl implements PointScoreProvider {
 
 	@Override
 	public void updatePointScore(PointScore pointScore) {
-		// pointScore.setUpdateTime(DateUtils.currentTimestamp());
+		pointScore.setUpdateTime(DateUtils.currentTimestamp());
 		// pointScore.setUpdateUid(UserContext.currentUserId());
         rwDao().update(pointScore);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointScores.class, pointScore.getId());

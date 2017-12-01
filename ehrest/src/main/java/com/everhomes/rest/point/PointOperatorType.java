@@ -2,18 +2,18 @@ package com.everhomes.rest.point;
 
 /**
  * <ul>
- *     <li>PLUS((byte) 1): 增加</li>
- *     <li>MINUS((byte) 2): 减少</li>
+ *     <li>SYSTEM((byte) 1): SYSTEM</li>
+ *     <li>MANUALLY((byte) 2): MANUALLY</li>
  * </ul>
  */
-public enum PointOperateType {
+public enum PointOperatorType {
 
-    PLUS((byte) 1),
-    MINUS((byte) 2);
+    SYSTEM((byte) 1),
+    MANUALLY((byte) 2);
 
     private Byte code;
 
-    PointOperateType(Byte code) {
+    PointOperatorType(Byte code) {
         this.code = code;
     }
 
@@ -21,9 +21,9 @@ public enum PointOperateType {
         return code;
     }
 
-    public static PointOperateType fromCode(Byte code) {
+    public static PointOperatorType fromCode(Byte code) {
         if (code != null) {
-            for (PointOperateType type : PointOperateType.values()) {
+            for (PointOperatorType type : PointOperatorType.values()) {
                 if (type.getCode().equals(code)) {
                     return type;
                 }

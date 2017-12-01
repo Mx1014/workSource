@@ -8,16 +8,16 @@ import java.sql.Timestamp;
  * <ul>
  *     <li>id: id</li>
  *     <li>namespaceId: namespaceId</li>
- *     <li>number: number</li>
- *     <li>displayName: displayName</li>
- *     <li>posterUri: posterUri</li>
- *     <li>posterUrl: posterUrl</li>
- *     <li>detailUrl: detailUrl</li>
- *     <li>points: points</li>
- *     <li>soldAmount: soldAmount</li>
- *     <li>originalPrice: originalPrice</li>
- *     <li>discountPrice: discountPrice</li>
- *     <li>pointRule: pointRule</li>
+ *     <li>number: 商品编号</li>
+ *     <li>displayName: 名称</li>
+ *     <li>posterUri: 封面uri</li>
+ *     <li>posterUrl: 封面url</li>
+ *     <li>detailUrl: 商品url</li>
+ *     <li>points: 可使用积分数量</li>
+ *     <li>soldAmount: 销量</li>
+ *     <li>originalPrice: 原始价格</li>
+ *     <li>discountPrice: 折扣价格</li>
+ *     <li>pointRuleDescription: 积分使用规则描述</li>
  *     <li>status: status</li>
  *     <li>topTime: topTime</li>
  *     <li>createTime: createTime</li>
@@ -36,7 +36,7 @@ public class PointGoodDTO {
     private Long soldAmount;
     private Long originalPrice;
     private Long discountPrice;
-    private String pointRule;
+    private String pointRuleDescription;
     private Byte status;
     private Timestamp topTime;
     private Timestamp createTime;
@@ -130,14 +130,6 @@ public class PointGoodDTO {
         this.discountPrice = discountPrice;
     }
 
-    public String getPointRule() {
-        return pointRule;
-    }
-
-    public void setPointRule(String pointRule) {
-        this.pointRule = pointRule;
-    }
-
     public Byte getStatus() {
         return status;
     }
@@ -168,6 +160,14 @@ public class PointGoodDTO {
 
     public void setUpdateTime(Timestamp updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getPointRuleDescription() {
+        return pointRuleDescription;
+    }
+
+    public void setPointRuleDescription(String pointRuleDescription) {
+        this.pointRuleDescription = pointRuleDescription;
     }
 
     @Override

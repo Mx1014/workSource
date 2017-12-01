@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 
 public class PointRule extends EhPointRules {
 	
-	private static final long serialVersionUID = -1505120444134352970L;
+	private static final long serialVersionUID = 8645241153995535815L;
 	
 	@Override
 	public String toString() {

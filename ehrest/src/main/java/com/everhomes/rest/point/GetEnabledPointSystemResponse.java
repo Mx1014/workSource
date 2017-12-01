@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>systems: systems</li>
+ *     <li>systems: 开启的积分系统</li>
  * </ul>
  */
 public class GetEnabledPointSystemResponse {

@@ -8,25 +8,27 @@ import java.sql.Timestamp;
  * <ul>
  *     <li>id: id</li>
  *     <li>namespaceId: namespaceId</li>
- *     <li>systemId: systemId</li>
- *     <li>categoryId: categoryId</li>
- *     <li>categoryName: categoryName</li>
- *     <li>ruleId: ruleId</li>
- *     <li>ruleName: ruleName</li>
- *     <li>operateType: operateType</li>
- *     <li>points: points</li>
- *     <li>targetUid: targetUid</li>
- *     <li>targetName: targetName</li>
- *     <li>targetPhone: targetPhone</li>
- *     <li>operatorUid: operatorUid</li>
- *     <li>operatorName: operatorName</li>
- *     <li>operatorPhone: operatorPhone</li>
- *     <li>description: description</li>
+ *     <li>systemId: 积分系统id</li>
+ *     <li>categoryId: 积分模块id</li>
+ *     <li>categoryName: 积分模块名称</li>
+ *     <li>ruleId: 积分规则id</li>
+ *     <li>ruleName: 积分规则名称</li>
+ *     <li>arithmeticType: arithmeticType {@link com.everhomes.rest.point.PointArithmeticType}</li>
+ *     <li>points: 积分数量</li>
+ *     <li>targetUid: 用户id</li>
+ *     <li>targetName: 用户昵称</li>
+ *     <li>targetPhone: 用户phone</li>
+ *     <li>operatorType: 系统操作还是手动操作 {@link com.everhomes.rest.point.PointOperatorType}</li>
+ *     <li>operatorUid: 操作用户id</li>
+ *     <li>operatorName: 操作用户昵称</li>
+ *     <li>operatorPhone: 操作用户电话</li>
+ *     <li>description: 描述</li>
  *     <li>status: status</li>
  *     <li>createTime: createTime</li>
  * </ul>
  */
 public class PointLogDTO {
+
     private Long id;
     private Integer namespaceId;
     private Long systemId;
@@ -34,11 +36,12 @@ public class PointLogDTO {
     private String categoryName;
     private Long ruleId;
     private String ruleName;
-    private Byte operateType;
+    private Byte arithmeticType;
     private Integer points;
     private Long targetUid;
     private String targetName;
     private String targetPhone;
+    private Byte operatorType;
     private Long operatorUid;
     private String operatorName;
     private String operatorPhone;
@@ -102,12 +105,20 @@ public class PointLogDTO {
         this.ruleName = ruleName;
     }
 
-    public Byte getOperateType() {
-        return operateType;
+    public Byte getArithmeticType() {
+        return arithmeticType;
     }
 
-    public void setOperateType(Byte operateType) {
-        this.operateType = operateType;
+    public void setArithmeticType(Byte arithmeticType) {
+        this.arithmeticType = arithmeticType;
+    }
+
+    public Byte getOperatorType() {
+        return operatorType;
+    }
+
+    public void setOperatorType(Byte operatorType) {
+        this.operatorType = operatorType;
     }
 
     public Integer getPoints() {

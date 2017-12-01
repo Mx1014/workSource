@@ -6,6 +6,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.point.ListPointLogsCommand;
 import com.everhomes.sequence.SequenceProvider;
@@ -22,7 +23,6 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public class PointLogProviderImpl implements PointLogProvider {
@@ -51,36 +51,100 @@ public class PointLogProviderImpl implements PointLogProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointLogs.class, pointLog.getId());
 	}
 
-	@Override
-	public PointLog findById(Long id) {
-		return ConvertHelper.convert(dao().findById(id), PointLog.class);
-	}
-
     @Override
-    public List<PointLog> listPointLogs(ListPointLogsCommand cmd, ListingLocator locator) {
+    public List<PointLog> query(ListingLocator locator, int count, ListingQueryBuilderCallback callback) {
         com.everhomes.server.schema.tables.EhPointLogs t = Tables.EH_POINT_LOGS;
-        SelectQuery<EhPointLogsRecord> query = context().selectFrom(t).getQuery();
-        if (cmd.getSystemId() != null) {
-            query.addConditions(t.SYSTEM_ID.eq(cmd.getSystemId()));
+
+        SelectQuery<EhPointLogsRecord> query = context().selectQuery(t);
+        if (callback != null) {
+            callback.buildCondition(locator, query);
+        }
+        if (locator.getAnchor() != null) {
+            query.addConditions(t.ID.lt(locator.getAnchor()));
         }
 
-        Optional.ofNullable(cmd.getUserId()).ifPresent(targetUid -> query.addConditions(t.TARGET_UID.eq(targetUid)));
-        Optional.ofNullable(cmd.getOperateType()).ifPresent(operateType -> query.addConditions(t.OPERATE_TYPE.eq(operateType)));
-        Optional.ofNullable(cmd.getPhone()).ifPresent(phone -> query.addConditions(t.TARGET_PHONE.eq(phone)));
-        Optional.ofNullable(cmd.getStartTime()).ifPresent(startTime -> query.addConditions(t.CREATE_TIME.gt(new Timestamp(startTime))));
-        Optional.ofNullable(cmd.getEndTime()).ifPresent(endTime -> query.addConditions(t.CREATE_TIME.le(new Timestamp(endTime))));
-
-        Optional.ofNullable(locator.getAnchor()).ifPresent(pageAnchor -> query.addConditions(t.ID.le(pageAnchor)));
-        Optional.ofNullable(cmd.getPageSize()).ifPresent(query::addLimit);
+        if (count > 0) {
+            query.addLimit(count + 1);
+        }
+        query.addOrderBy(t.ID.desc());
 
         List<PointLog> list = query.fetchInto(PointLog.class);
-        if (list.size() > cmd.getPageSize()) {
+        if (list.size() > count && count > 0) {
             locator.setAnchor(list.get(list.size() - 1).getId());
             list.remove(list.size() - 1);
         } else {
             locator.setAnchor(null);
         }
         return list;
+    }
+
+    @Override
+    public List<PointLog> listPointLogs(ListPointLogsCommand cmd, ListingLocator locator) {
+        com.everhomes.server.schema.tables.EhPointLogs t = Tables.EH_POINT_LOGS;
+        return this.query(locator, cmd.getPageSize(), (locator1, query) -> {
+            if (cmd.getSystemId() != null) {
+                query.addConditions(t.SYSTEM_ID.eq(cmd.getSystemId()));
+            }
+            if (cmd.getUserId() != null) {
+                query.addConditions(t.TARGET_UID.eq(cmd.getUserId()));
+            }
+            if (cmd.getArithmeticType() != null) {
+                query.addConditions(t.ARITHMETIC_TYPE.eq(cmd.getArithmeticType()));
+            }
+            if (cmd.getPhone() != null) {
+                query.addConditions(t.TARGET_PHONE.eq(cmd.getPhone()));
+            }
+            if (cmd.getStartTime() != null) {
+                query.addConditions(t.CREATE_TIME.gt(new Timestamp(cmd.getStartTime())));
+            }
+            if (cmd.getEndTime() != null) {
+                query.addConditions(t.CREATE_TIME.le(new Timestamp(cmd.getEndTime())));
+            }
+            return query;
+        });
+    }
+
+	@Override
+	public PointLog findById(Long id) {
+		return ConvertHelper.convert(dao().findById(id), PointLog.class);
+	}
+
+    @Override
+    public PointLog findByUidAndEntity(Integer namespaceId, Long uid, String eventName, String entityType, Long entityId) {
+        com.everhomes.server.schema.tables.EhPointLogs t = Tables.EH_POINT_LOGS;
+        List<PointLog> logList = this.query(new ListingLocator(), 1, (locator1, query) -> {
+            if (namespaceId != null) {
+                query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+            }
+            if (uid != null) {
+                query.addConditions(t.TARGET_UID.eq(uid));
+            }
+            if (eventName != null) {
+                query.addConditions(t.EVENT_NAME.eq(eventName));
+            }
+            if (entityType != null && entityId != null) {
+                query.addConditions(t.ENTITY_TYPE.eq(entityType));
+                query.addConditions(t.ENTITY_ID.eq(entityId));
+            }
+            return query;
+        });
+        if (logList.size() > 0) {
+            return logList.get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public Integer countPointLog(Integer namespaceId, Long systemId, Long uid, String eventName, Long createTime) {
+        com.everhomes.server.schema.tables.EhPointLogs t = Tables.EH_POINT_LOGS;
+        SelectQuery<EhPointLogsRecord> query = context().selectFrom(t).getQuery();
+        query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(t.TARGET_UID.eq(uid));
+        query.addConditions(t.EVENT_NAME.eq(eventName));
+        if (createTime != null) {
+            query.addConditions(t.CREATE_TIME.gt(new Timestamp(createTime)));
+        }
+        return query.fetchCount();
     }
 
     private EhPointLogsDao rwDao() {

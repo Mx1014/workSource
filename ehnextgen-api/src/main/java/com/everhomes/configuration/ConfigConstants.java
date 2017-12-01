@@ -134,5 +134,5 @@ public interface ConfigConstants {
     String ARCHIVES_FORM_ORIGIN_ID = "archives.form.origin.id";
     String APP_SYSTEM_UPLOAD_URL_IN_BROWSER = "app.system.upload_url_in_browser";
 
-    String POINT_MALL_PATH = "point.path";
+    String POINT_DETAIL_PATH = "point.detail.path";
 }

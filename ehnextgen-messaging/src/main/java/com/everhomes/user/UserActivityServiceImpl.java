@@ -857,16 +857,10 @@ public class UserActivityServiceImpl implements UserActivityService {
         if (pointSystemResponse == null || pointSystemResponse.getSystems() == null || pointSystemResponse.getSystems().size() == 0) {
             point.setStatus(TrueOrFalseFlag.FALSE.getCode());
 
-
-
-
-            point.setUrl(String.format("http://10.1.10.79/integral-management/build/index.html?systemId=%s&ehnavigatorstyle=2#/home#sign_suffix", 1));
-            point.setStatus(TrueOrFalseFlag.TRUE.getCode());
-            point.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
-            point.setCount(UserContext.currentUserId());
-
-
-
+            // point.setUrl(String.format("http://10.1.10.79/integral-management/build/index.html?systemId=%s&ehnavigatorstyle=2#/home#sign_suffix", 1));
+            // point.setStatus(TrueOrFalseFlag.TRUE.getCode());
+            // point.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
+            // point.setCount(UserContext.currentUserId());
 
             return;
         }
@@ -881,10 +875,10 @@ public class UserActivityServiceImpl implements UserActivityService {
             point.setCount(userPoint.getScore());
         }
         String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
-        String pointUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.POINT_MALL_PATH, "");
-        point.setUrl(homeUrl + pointUrl + String.format("?systemId=%s", system.getId()));
+        String pointUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.POINT_DETAIL_PATH, "");
+        point.setUrl(homeUrl + String.format(pointUrl, system.getId()));
 
-        point.setUrl(String.format("http://10.1.10.79/integral-management/build/index.html?systemId=%s&ehnavigatorstyle=2#/home#sign_suffix", 1));
+        // point.setUrl(String.format("http://10.1.10.79/integral-management/build/index.html?systemId=%s&ehnavigatorstyle=2#/home#sign_suffix", 1));
 
         TrueOrFalseFlag flag = TrueOrFalseFlag.fromCode(system.getPointExchangeFlag());
         if (flag != null) {

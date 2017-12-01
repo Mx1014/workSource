@@ -24,7 +24,7 @@ public class PointTutorialDetailDTO {
     private Long ruleId;
     private String ruleName;
     private Byte operateType;
-    private Integer points;
+    private Long points;
     private String description;
 
     @Override
@@ -88,11 +88,11 @@ public class PointTutorialDetailDTO {
         this.operateType = operateType;
     }
 
-    public Integer getPoints() {
+    public Long getPoints() {
         return points;
     }
 
-    public void setPoints(Integer points) {
+    public void setPoints(Long points) {
         this.points = points;
     }
 

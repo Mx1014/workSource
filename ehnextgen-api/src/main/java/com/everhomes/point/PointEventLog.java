@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 
 public class PointEventLog extends EhPointEventLogs {
 	
-	private static final long serialVersionUID = -7817340926692322559L;
+	private static final long serialVersionUID = 1612038090341917312L;
 	
 	@Override
 	public String toString() {

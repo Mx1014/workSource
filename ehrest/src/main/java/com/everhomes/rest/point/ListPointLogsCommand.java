@@ -6,17 +6,20 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
+ *     <li>systemId: 配置id</li>
  *     <li>startTime: startTime</li>
  *     <li>endTime: endTime</li>
  *     <li>phone: phone</li>
  *     <li>userId: 用户id, 不传就是不区分用户</li>
- *     <li>systemId: 配置id</li>
- *     <li>operateType: 日志类型 {@link com.everhomes.rest.point.PointOperateType}</li>
+ *     <li>arithmeticType: 计算类型</li>
  *     <li>pageAnchor: 锚点</li>
  *     <li>pageSize: pageSize</li>
  * </ul>
  */
 public class ListPointLogsCommand {
+
+    @NotNull
+    private Long systemId;
 
     private Long startTime;
     private Long endTime;
@@ -24,9 +27,7 @@ public class ListPointLogsCommand {
     private String phone;
 
     private Long userId;
-    @NotNull
-    private Long systemId;
-    private Byte operateType;
+    private Byte arithmeticType;
     private Long pageAnchor;
     private Integer pageSize;
 
@@ -70,12 +71,12 @@ public class ListPointLogsCommand {
         this.systemId = systemId;
     }
 
-    public Byte getOperateType() {
-        return operateType;
+    public Byte getArithmeticType() {
+        return arithmeticType;
     }
 
-    public void setOperateType(Byte operateType) {
-        this.operateType = operateType;
+    public void setArithmeticType(Byte arithmeticType) {
+        this.arithmeticType = arithmeticType;
     }
 
     public Long getPageAnchor() {

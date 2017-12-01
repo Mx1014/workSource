@@ -8,11 +8,13 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.point.ListPointGoodsCommand;
+import com.everhomes.rest.point.PointCommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.records.EhPointGoodsRecord;
 import com.everhomes.server.schema.tables.daos.EhPointGoodsDao;
 import com.everhomes.server.schema.tables.pojos.EhPointGoods;
+import com.everhomes.server.schema.tables.records.EhPointGoodsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
 import org.jooq.DSLContext;
@@ -60,14 +62,15 @@ public class PointGoodProviderImpl implements PointGoodProvider {
         if (locator.getAnchor() != null) {
             query.addConditions(t.ID.lt(locator.getAnchor()));
         }
+        query.addConditions(t.STATUS.ne(PointCommonStatus.INACTIVE.getCode()));
 
         if (count > 0) {
-            query.addLimit(count);
+            query.addLimit(count + 1);
         }
         query.addOrderBy(t.ID.desc());
 
         List<PointGood> list = query.fetchInto(PointGood.class);
-        if (list.size() > count) {
+        if (list.size() > count && count > 0) {
             locator.setAnchor(list.get(list.size() - 1).getId());
             list.remove(list.size() - 1);
         } else {
@@ -82,10 +85,13 @@ public class PointGoodProviderImpl implements PointGoodProvider {
 	}
 
     @Override
-    public List<PointGood> listPointGood(Integer namespaceId, Long systemId, int pageSize, ListingLocator locator) {
+    public List<PointGood> listPointGood(Integer namespaceId, ListPointGoodsCommand cmd, int pageSize, ListingLocator locator) {
         com.everhomes.server.schema.tables.EhPointGoods t = Tables.EH_POINT_GOODS;
         return this.query(locator, pageSize, (locator1, query) -> {
             query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+            if (cmd.getStatus() != null) {
+                query.addConditions(t.STATUS.eq(cmd.getStatus()));
+            }
             query.addOrderBy(t.TOP_TIME.desc());
             return query;
         });

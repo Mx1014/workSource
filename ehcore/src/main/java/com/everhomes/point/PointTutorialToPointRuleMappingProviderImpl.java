@@ -10,9 +10,9 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.records.EhPointTutorialToPointRuleMappingsRecord;
 import com.everhomes.server.schema.tables.daos.EhPointTutorialToPointRuleMappingsDao;
 import com.everhomes.server.schema.tables.pojos.EhPointTutorialToPointRuleMappings;
+import com.everhomes.server.schema.tables.records.EhPointTutorialToPointRuleMappingsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
 import org.jooq.DSLContext;
@@ -60,12 +60,13 @@ public class PointTutorialToPointRuleMappingProviderImpl implements PointTutoria
         if (locator.getAnchor() != null) {
             query.addConditions(t.ID.lt(locator.getAnchor()));
         }
-
-        query.addLimit(count);
+        if (count > 0) {
+            query.addLimit(count + 1);
+        }
         query.addOrderBy(t.ID.desc());
 
         List<PointTutorialToPointRuleMapping> list = query.fetchInto(PointTutorialToPointRuleMapping.class);
-        if (list.size() > count) {
+        if (list.size() > count && count > 0) {
             locator.setAnchor(list.get(list.size() - 1).getId());
             list.remove(list.size() - 1);
         } else {
@@ -86,6 +87,16 @@ public class PointTutorialToPointRuleMappingProviderImpl implements PointTutoria
             query.addConditions(t.TUTORIAL_ID.eq(tutorialId));
             return query;
         });
+    }
+
+    @Override
+    public void deleteByTutorialId(Long tutorialId) {
+        com.everhomes.server.schema.tables.EhPointTutorialToPointRuleMappings t = Tables.EH_POINT_TUTORIAL_TO_POINT_RULE_MAPPINGS;
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        context.delete(t)
+                .where(t.TUTORIAL_ID.eq(tutorialId))
+                .execute();
     }
 
     private EhPointTutorialToPointRuleMappingsDao rwDao() {

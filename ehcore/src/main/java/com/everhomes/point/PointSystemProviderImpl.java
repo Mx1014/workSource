@@ -14,6 +14,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPointSystemsDao;
 import com.everhomes.server.schema.tables.pojos.EhPointSystems;
 import com.everhomes.server.schema.tables.records.EhPointSystemsRecord;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
 import org.jooq.DSLContext;
@@ -37,15 +38,15 @@ public class PointSystemProviderImpl implements PointSystemProvider {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointSystems.class));
 		pointSystem.setId(id);
 		pointSystem.setCreateTime(DateUtils.currentTimestamp());
-		// pointSystem.setCreatorUid(UserContext.currentUserId());
+		pointSystem.setCreatorUid(UserContext.currentUserId());
 		rwDao().insert(pointSystem);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointSystems.class, id);
 	}
 
 	@Override
 	public void updatePointSystem(PointSystem pointSystem) {
-		// pointSystem.setUpdateTime(DateUtils.currentTimestamp());
-		// pointSystem.setUpdateUid(UserContext.currentUserId());
+		pointSystem.setUpdateTime(DateUtils.currentTimestamp());
+		pointSystem.setUpdateUid(UserContext.currentUserId());
         rwDao().update(pointSystem);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointSystems.class, pointSystem.getId());
 	}
@@ -61,14 +62,15 @@ public class PointSystemProviderImpl implements PointSystemProvider {
         if (locator.getAnchor() != null) {
             query.addConditions(t.ID.lt(locator.getAnchor()));
         }
+        query.addConditions(t.STATUS.ne(PointCommonStatus.INACTIVE.getCode()));
 
         if (count > 0) {
-            query.addLimit(count);
+            query.addLimit(count + 1);
         }
         query.addOrderBy(t.ID.desc());
 
         List<PointSystem> list = query.fetchInto(PointSystem.class);
-        if (list.size() > count) {
+        if (list.size() > count && count > 0) {
             locator.setAnchor(list.get(list.size() - 1).getId());
             list.remove(list.size() - 1);
         } else {
@@ -86,8 +88,19 @@ public class PointSystemProviderImpl implements PointSystemProvider {
     public List<PointSystem> getEnabledPointSystems(Integer namespaceId) {
         com.everhomes.server.schema.tables.EhPointSystems t = Tables.EH_POINT_SYSTEMS;
         return query(new ListingLocator(), -1, (locator, query) -> {
-            query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+            if (namespaceId != null) {
+                query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+            }
             query.addConditions(t.STATUS.eq(PointCommonStatus.ENABLED.getCode()));
+            return query;
+        });
+    }
+
+    @Override
+    public List<PointSystem> listPointSystems(Integer namespaceId, int pageSize, ListingLocator locator) {
+        com.everhomes.server.schema.tables.EhPointSystems t = Tables.EH_POINT_SYSTEMS;
+        return this.query(locator, pageSize, (locator1, query) -> {
+            query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
             return query;
         });
     }

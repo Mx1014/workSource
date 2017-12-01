@@ -389,6 +389,7 @@ public class VersionServiceImpl implements VersionService {
 	}
 
 	@Override
+
 	public GetUpgradeContentResponse getUpgradeContent(GetUpgradeContentCommand cmd) {
 		if (cmd.getId() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,

@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * 积分
  * Created by xq.tian on 2017/11/23.
@@ -32,13 +34,68 @@ public class PointAdminController extends ControllerBase {
     };
 
     /**
+     * <b>URL: /admin/point/getPointSystem</b>
+     * <p>获取积分系统信息</p>
+     */
+    @RestReturn(PointSystemDTO.class)
+    @RequestMapping("getPointSystem")
+    public RestResponse getPointSystem(GetPointSystemCommand cmd) {
+        PointSystemDTO dto = pointService.getPointSystem(cmd);
+        return success(dto);
+    }
+
+    /**
+     * <b>URL: /admin/point/listPointSystems</b>
+     * <p>积分系统列表</p>
+     */
+    @RestReturn(ListPointSystemsResponse.class)
+    @RequestMapping("listPointSystems")
+    public RestResponse listPointSystems(ListPointSystemsCommand cmd) {
+        ListPointSystemsResponse response = pointService.listPointSystems(cmd);
+        return success(response);
+    }
+
+    /**
      * <b>URL: /admin/point/createPointSystem</b>
      * <p>创建积分系统配置信息</p>
      */
     @RestReturn(PointSystemDTO.class)
     @RequestMapping("createPointSystem")
-    public RestResponse createPointConfig(CreatePointSystemCommand cmd) {
+    public RestResponse createPointSystem(CreatePointSystemCommand cmd) {
+        PointSystemDTO dto = pointService.createPointSystem(cmd);
+        return success(dto);
+    }
 
+    /**
+     * <b>URL: /admin/point/enablePointSystem</b>
+     * <p>开启积分系统</p>
+     */
+    @RestReturn(PointSystemDTO.class)
+    @RequestMapping("enablePointSystem")
+    public RestResponse enablePointSystem(PointSystemIdCommand cmd) {
+        PointSystemDTO dto = pointService.enablePointSystem(cmd);
+        return success(dto);
+    }
+
+    /**
+     * <b>URL: /admin/point/disablePointSystem</b>
+     * <p>关闭积分系统</p>
+     */
+    @RestReturn(PointSystemDTO.class)
+    @RequestMapping("disablePointSystem")
+    public RestResponse disablePointSystem(PointSystemIdCommand cmd) {
+        PointSystemDTO dto = pointService.disablePointSystem(cmd);
+        return success(dto);
+    }
+
+    /**
+     * <b>URL: /admin/point/deletePointSystem</b>
+     * <p>删除积分系统</p>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("deletePointSystem")
+    public RestResponse deletePointSystem(PointSystemIdCommand cmd) {
+        pointService.deletePointSystem(cmd);
         return SUCCESS;
     }
 
@@ -48,31 +105,31 @@ public class PointAdminController extends ControllerBase {
      */
     @RestReturn(PointSystemDTO.class)
     @RequestMapping("updatePointSystem")
-    public RestResponse updatePointConfig(UpdatePointSystemCommand cmd) {
-
-        return SUCCESS;
+    public RestResponse updatePointSystem(UpdatePointSystemCommand cmd) {
+        PointSystemDTO dto = pointService.updatePointSystem(cmd);
+        return success(dto);
     }
 
     /**
-     * <b>URL: /admin/point/listPointModules</b>
-     * <p>获取模块列表</p>
+     * <b>URL: /admin/point/listPointRuleCategories</b>
+     * <p>获取积分规则分类列表</p>
      */
-    @RestReturn(ListPointModulesResponse.class)
-    @RequestMapping("listPointModules")
-    public RestResponse listPointModules() {
-
-        return SUCCESS;
+    @RestReturn(ListPointRuleCategoriesResponse.class)
+    @RequestMapping("listPointRuleCategories")
+    public RestResponse listPointRuleCategories() {
+        ListPointRuleCategoriesResponse response = pointService.listPointRuleCategories();
+        return success(response);
     }
 
     /**
      * <b>URL: /admin/point/createPointLog</b>
      * <p>新增积分记录</p>
      */
-    @RestReturn(ListPointModulesResponse.class)
+    @RestReturn(PointLogDTO.class)
     @RequestMapping("createPointLog")
     public RestResponse createPointLog(CreatePointLogCommand cmd) {
-
-        return SUCCESS;
+        PointLogDTO dto = pointService.createPointLog(cmd);
+        return success(dto);
     }
 
     /**
@@ -82,8 +139,8 @@ public class PointAdminController extends ControllerBase {
     @RestReturn(ListPointRulesResponse.class)
     @RequestMapping("listPointRules")
     public RestResponse listPointRules(ListPointRulesCommand cmd) {
-
-        return SUCCESS;
+        ListPointRulesResponse response = pointService.listPointRules(cmd);
+        return success(response);
     }
 
     /**
@@ -93,8 +150,8 @@ public class PointAdminController extends ControllerBase {
     @RestReturn(ListPointLogsResponse.class)
     @RequestMapping("listPointLogs")
     public RestResponse listPointLogs(ListPointLogsCommand cmd) {
-
-        return SUCCESS;
+        ListPointLogsResponse response = pointService.listPointLogs(cmd);
+        return success(response);
     }
 
     /**
@@ -103,8 +160,8 @@ public class PointAdminController extends ControllerBase {
      */
     @RestReturn(String.class)
     @RequestMapping("exportPointLogs")
-    public RestResponse exportPointLogs(ExportPointLogsCommand cmd) {
-
+    public RestResponse exportPointLogs(ExportPointLogsCommand cmd, HttpServletResponse response) {
+        pointService.exportPointLog(cmd, response);
         return SUCCESS;
     }
 
@@ -115,19 +172,19 @@ public class PointAdminController extends ControllerBase {
     @RestReturn(ListPointGoodsResponse.class)
     @RequestMapping("listPointGoods")
     public RestResponse listPointGoods(ListPointGoodsCommand cmd) {
-
-        return SUCCESS;
+        ListPointGoodsResponse response = pointService.listPointGoods(cmd);
+        return success(response);
     }
 
     /**
-     * <b>URL: /admin/point/updatePointGoods</b>
+     * <b>URL: /admin/point/updatePointGood</b>
      * <p>修改积分商城的商品</p>
      */
     @RestReturn(PointGoodDTO.class)
-    @RequestMapping("updatePointGoods")
-    public RestResponse updatePointGoods(UpdatePointGoodCommand cmd) {
-
-        return SUCCESS;
+    @RequestMapping("updatePointGood")
+    public RestResponse updatePointGood(UpdatePointGoodCommand cmd) {
+        PointGoodDTO dto = pointService.updatePointGood(cmd);
+        return success(dto);
     }
 
     /**
@@ -137,19 +194,8 @@ public class PointAdminController extends ControllerBase {
     @RestReturn(ListPointTutorialResponse.class)
     @RequestMapping("listPointTutorials")
     public RestResponse listPointTutorials(ListPointTutorialsCommand cmd) {
-
-        return SUCCESS;
-    }
-
-    /**
-     * <b>URL: /admin/point/listPointTutorialDetail</b>
-     * <p>获取积分指南详情</p>
-     */
-    @RestReturn(ListPointTutorialDetailResponse.class)
-    @RequestMapping("listPointTutorialDetail")
-    public RestResponse listPointTutorialDetail(ListPointTutorialDetailCommand cmd) {
-
-        return SUCCESS;
+        ListPointTutorialResponse response = pointService.listPointTutorialsWithMapping(cmd);
+        return success(response);
     }
 
     /**
@@ -159,8 +205,8 @@ public class PointAdminController extends ControllerBase {
     @RestReturn(PointTutorialDTO.class)
     @RequestMapping("deletePointTutorial")
     public RestResponse deletePointTutorial(DeletePointTutorialCommand cmd) {
-
-        return SUCCESS;
+        PointTutorialDTO dto = pointService.deletePointTutorial(cmd);
+        return success(dto);
     }
 
     /**
@@ -170,7 +216,18 @@ public class PointAdminController extends ControllerBase {
     @RestReturn(PointTutorialDTO.class)
     @RequestMapping("createOrUpdatePointTutorial")
     public RestResponse createOrUpdatePointTutorial(CreateOrUpdatePointTutorialCommand cmd) {
+        PointTutorialDTO dto = pointService.createOrUpdatePointTutorial(cmd);
+        return success(dto);
+    }
 
+    /**
+     * <b>URL: /admin/point/restartEventLogScheduler</b>
+     * <p>因为事件处理调度一旦遇到异常就会停止，所以需要手动重启</p>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("restartEventLogScheduler")
+    public RestResponse restartEventLogScheduler() {
+        pointService.restartEventLogScheduler();
         return SUCCESS;
     }
 
@@ -191,7 +248,7 @@ public class PointAdminController extends ControllerBase {
      * <b>URL: /admin/point/publishEvent</b>
      * <p>发布事件</p>
      */
-    @RestReturn(String.class)
+    @RestReturn(PublishEventResultDTO.class)
     @RequestMapping("publishEvent")
     public RestResponse publishEvent(PublishEventCommand cmd) {
 
@@ -206,7 +263,7 @@ public class PointAdminController extends ControllerBase {
     @RequestMapping("getUserPoint")
     public RestResponse getUserPoint(GetUserPointCommand cmd) {
         PointScoreDTO dto = pointService.getUserPoint(cmd);
-        return response(dto);
+        return success(dto);
     }
 
     /**
@@ -216,22 +273,22 @@ public class PointAdminController extends ControllerBase {
     @RestReturn(PointRuleDTO.class)
     @RequestMapping("getPointRule")
     public RestResponse getPointRule(GetPointRuleCommand cmd) {
-
-        return SUCCESS;
+        PointRuleDTO dto = pointService.getPointRule(cmd);
+        return success(dto);
     }
 
     /**
      * <b>URL: /admin/point/getEnabledPointSystem</b>
-     * <p>获取启用的积分系统配置</p>
+     * <p>获取启用的积分系统</p>
      */
     @RestReturn(GetEnabledPointSystemResponse.class)
     @RequestMapping("getEnabledPointSystem")
     public RestResponse getEnabledPointSystem(GetEnabledPointSystemCommand cmd) {
         GetEnabledPointSystemResponse response = pointService.getEnabledPointSystem(cmd);
-        return response(response);
+        return success(response);
     }
 
-    private RestResponse response(Object o) {
+    private RestResponse success(Object o) {
         RestResponse response = new RestResponse(o);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);

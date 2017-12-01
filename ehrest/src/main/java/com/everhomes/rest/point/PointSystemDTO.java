@@ -8,12 +8,13 @@ import java.sql.Timestamp;
  * <ul>
  *     <li>id: id</li>
  *     <li>namespaceId: namespaceId</li>
- *     <li>displayName: displayName</li>
- *     <li>pointName: pointName</li>
- *     <li>pointExchangeFlag: pointExchangeFlag</li>
- *     <li>exchangeRate: exchangeRate</li>
- *     <li>userAgreement: userAgreement</li>
- *     <li>status: status</li>
+ *     <li>displayName: 积分系统名称</li>
+ *     <li>pointName: 积分名称</li>
+ *     <li>pointExchangeFlag: 积分兑换flag{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ *     <li>exchangePoint: 兑换积分数</li>
+ *     <li>exchangeCash: 兑换现金数</li>
+ *     <li>userAgreement: 用户须知</li>
+ *     <li>status: status {@link com.everhomes.rest.point.PointCommonStatus}</li>
  *     <li>createTime: createTime</li>
  * </ul>
  */
@@ -23,7 +24,8 @@ public class PointSystemDTO {
     private String displayName;
     private String pointName;
     private Byte pointExchangeFlag;
-    private Integer exchangeRate;
+    private Integer exchangePoint;
+    private Integer exchangeCash;
     private String userAgreement;
     private Byte status;
     private Timestamp createTime;
@@ -68,12 +70,20 @@ public class PointSystemDTO {
         this.pointExchangeFlag = pointExchangeFlag;
     }
 
-    public Integer getExchangeRate() {
-        return exchangeRate;
+    public Integer getExchangePoint() {
+        return exchangePoint;
     }
 
-    public void setExchangeRate(Integer exchangeRate) {
-        this.exchangeRate = exchangeRate;
+    public void setExchangePoint(Integer exchangePoint) {
+        this.exchangePoint = exchangePoint;
+    }
+
+    public Integer getExchangeCash() {
+        return exchangeCash;
+    }
+
+    public void setExchangeCash(Integer exchangeCash) {
+        this.exchangeCash = exchangeCash;
     }
 
     public String getUserAgreement() {

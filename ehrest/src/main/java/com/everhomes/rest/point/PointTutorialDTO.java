@@ -3,6 +3,8 @@ package com.everhomes.rest.point;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <ul>
@@ -16,9 +18,11 @@ import java.sql.Timestamp;
  *     <li>status: status</li>
  *     <li>createTime: createTime</li>
  *     <li>updateTime: updateTime</li>
+ *     <li>mappings: mappings</li>
  * </ul>
  */
 public class PointTutorialDTO {
+
     private Long id;
     private Integer namespaceId;
     private Long systemId;
@@ -29,6 +33,8 @@ public class PointTutorialDTO {
     private Byte status;
     private Timestamp createTime;
     private Timestamp updateTime;
+
+    private List<PointTutorialToPointRuleMappingDTO> mappings = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -108,6 +114,14 @@ public class PointTutorialDTO {
 
     public void setUpdateTime(Timestamp updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public List<PointTutorialToPointRuleMappingDTO> getMappings() {
+        return mappings;
+    }
+
+    public void setMappings(List<PointTutorialToPointRuleMappingDTO> mappings) {
+        this.mappings = mappings;
     }
 
     @Override

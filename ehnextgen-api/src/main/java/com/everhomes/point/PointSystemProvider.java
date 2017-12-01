@@ -17,4 +17,6 @@ public interface PointSystemProvider {
 	PointSystem findById(Long id);
 
     List<PointSystem> getEnabledPointSystems(Integer namespaceId);
+
+    List<PointSystem> listPointSystems(Integer namespaceId, int pageSize, ListingLocator locator);
 }
