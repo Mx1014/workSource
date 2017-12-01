@@ -102,43 +102,36 @@ public class ZJContractHandler implements ContractService{
         if(community != null && CommunityType.COMMERCIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
             if(cmd.getCustomerType() == null || CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(cmd.getCustomerType()))) {
                 sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
-                if(StringUtils.isNotBlank(cmd.getKeywords())) {
-                    params = generateParams(params, cmd.getKeywords());
-                    sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
-                }
             }
         } else if(community != null && CommunityType.RESIDENTIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
             if(cmd.getCustomerType() == null || CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(cmd.getCustomerType()))) {
                 sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
-                if(StringUtils.isNotBlank(cmd.getKeywords())) {
-                    params = generateParams(params, cmd.getKeywords());
-                    sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
-                }
             }
-        } else {
-            if(cmd.getCustomerType() == null) {
-                sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
-                sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
-                if(StringUtils.isNotBlank(cmd.getKeywords())) {
-                    params = generateParams(params, cmd.getKeywords());
-                    sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
-                    sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
-                }
-            } else if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(cmd.getCustomerType()))){
-                sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
-                if(StringUtils.isNotBlank(cmd.getKeywords())) {
-                    params = generateParams(params, cmd.getKeywords());
-                    sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
-                }
-            } else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(cmd.getCustomerType()))){
-                sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
-                if(StringUtils.isNotBlank(cmd.getKeywords())) {
-                    params = generateParams(params, cmd.getKeywords());
-                    sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
-                }
-            }
-
         }
+//        else {
+//            if(cmd.getCustomerType() == null) {
+//                sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
+//                sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
+//                if(StringUtils.isNotBlank(cmd.getKeywords())) {
+//                    params = generateParams(params, cmd.getKeywords());
+//                    sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
+//                    sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
+//                }
+//            } else if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(cmd.getCustomerType()))){
+//                sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
+//                if(StringUtils.isNotBlank(cmd.getKeywords())) {
+//                    params = generateParams(params, cmd.getKeywords());
+//                    sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
+//                }
+//            } else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(cmd.getCustomerType()))){
+//                sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
+//                if(StringUtils.isNotBlank(cmd.getKeywords())) {
+//                    params = generateParams(params, cmd.getKeywords());
+//                    sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
+//                }
+//            }
+//
+//        }
         ListContractsResponse response = new ListContractsResponse();
         String enterprises = sb.toString();
         LOGGER.debug("zjgk listContracts enterprise: {}",enterprises);
@@ -146,6 +139,30 @@ public class ZJContractHandler implements ContractService{
             return response;
         }
         ShenzhouJsonEntity<List<ZJContract>> entity = JSONObject.parseObject(enterprises, new TypeReference<ShenzhouJsonEntity<List<ZJContract>>>(){});
+        if(entity.getResponse() == null || entity.getResponse().size() == 0) {
+            if(StringUtils.isNotBlank(cmd.getKeywords())) {
+                params = generateParams(params, cmd.getKeywords());
+                if(community != null && CommunityType.COMMERCIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
+                    if(cmd.getCustomerType() == null || CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(cmd.getCustomerType()))) {
+                        String contract = postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null);
+                        if(StringUtils.isBlank(enterprises)) {
+                            return response;
+                        }
+                        entity = JSONObject.parseObject(contract, new TypeReference<ShenzhouJsonEntity<List<ZJContract>>>(){});
+                    }
+                } else if(community != null && CommunityType.RESIDENTIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
+                    if(cmd.getCustomerType() == null || CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(cmd.getCustomerType()))) {
+                        String contract = postToShenzhou(params, LIST_USER_CONTRACTS, null);
+                        if(StringUtils.isBlank(enterprises)) {
+                            return response;
+                        }
+                        entity = JSONObject.parseObject(contract, new TypeReference<ShenzhouJsonEntity<List<ZJContract>>>(){});
+                    }
+                }
+
+            }
+        }
+
         if(entity.getNextPageOffset() != null && !"".equals(entity.getNextPageOffset())) {
             response.setNextPageAnchor(entity.getNextPageOffset().longValue());
         }
