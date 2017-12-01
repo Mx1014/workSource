@@ -13,7 +13,7 @@ CREATE TABLE `eh_equipment_inspection_plans` (
 `review_result` tinyint(4) NOT NULL  COMMENT'0:none, 1:qualified 2:unqualified 3:review_delay',
 `repeat_setting_id` bigint(20) NOT NULL COMMENT 'refers to eh_repeatsetting ',
 `remarks` text NULL,
-`plan_version` varchar(255) NULL COMMENT 'the version of plan for modifying plan',
+`plan_version` bigint(20) NULL COMMENT 'the version of plan for modifying plan',
 `plan_main_id` bigint(20) NULL COMMENT 'refer to old version plan for modifying plan',
 `creator_uid` bigint(20) NULL,
 `create_time` datetime NOT NULL,
