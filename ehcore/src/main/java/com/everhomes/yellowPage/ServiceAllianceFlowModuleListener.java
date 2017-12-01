@@ -436,7 +436,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		entities.add(e);
 		
 //		GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(val.getApprovalId());
-
+		e = new FlowCaseEntity();
 		e.setKey("服务名称");
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
 		e.setValue(yellowPage.getName());
