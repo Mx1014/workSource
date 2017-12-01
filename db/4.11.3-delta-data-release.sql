@@ -1660,6 +1660,13 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
   VALUES((@menu_scope_id := @menu_scope_id + 1),20291,'', 'EhNamespaces', 999967,2);
 
+UPDATE eh_flows set module_type = 'suggestion' where module_type = 'any-module' and id = 94;
+UPDATE eh_flows set module_type = 'suggestion' where module_type = 'any-module' and flow_main_id = 94;
+UPDATE eh_flow_cases set module_type = 'suggestion' where module_type = 'any-module' and flow_main_id = 94;
+UPDATE eh_flow_evaluates set module_type = 'suggestion' where module_type = 'any-module' and flow_main_id = 94;
+
+UPDATE eh_flow_predefined_params set module_type = 'suggestion' where module_type = 'any-module' and module_id = 20100;
+
 
 -- add by janson 201712011625
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
