@@ -97,6 +97,8 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
 public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseApplyEntryServiceImpl.class);
 
+    public static final Long DEFAULT_CATEGORY_ID = 1L;
+
 	private SmsProvider smsProvider;
 	private ContractProvider contractProvider;
 	private BuildingProvider buildingProvider;
@@ -195,6 +197,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 	@Override
 	public ListEnterpriseApplyEntryResponse listApplyEntrys(ListEnterpriseApplyEntryCommand cmd) {
+
+		if (null == cmd.getCategoryId()) {
+			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
+		}
 
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -405,6 +411,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public ApplyEntryResponse applyEntry(EnterpriseApplyEntryCommand cmd) {
 		ApplyEntryResponse resp = new ApplyEntryResponse();
+
+		if (null == cmd.getCategoryId()) {
+			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
+		}
 
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -834,6 +844,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
 
+		if (null == cmd.getCategoryId()) {
+			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
+		}
+
 		ListBuildingForRentResponse res = new ListBuildingForRentResponse();
 		if (null==cmd.getRentType()) {
 			cmd.setRentType(LeasePromotionType.ORDINARY.getCode());
@@ -979,6 +993,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 	@Override
 	public BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd, Byte adminFlag){
+
+		if (null == cmd.getCategoryId()) {
+			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
+		}
 
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -1239,6 +1257,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
 
+		if (null == cmd.getCategoryId()) {
+			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
+		}
+
 		ListLeaseIssuersResponse resp = new ListLeaseIssuersResponse();
 
 		List<LeaseIssuer> issuers = enterpriseLeaseIssuerProvider.listLeaseIssers(cmd.getNamespaceId(), null,
@@ -1356,6 +1378,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
 
+		if (null == cmd.getCategoryId()) {
+			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
+		}
+
         dbProvider.execute((TransactionStatus status) -> {
 
             if (null != cmd.getEnterpriseIds()) {
@@ -1418,6 +1444,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
 
+		if (null == cmd.getCategoryId()) {
+			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
+		}
+
 		LeasePromotionConfigDTO dto = new LeasePromotionConfigDTO();
 
 		dto.setNamespaceId(cmd.getNamespaceId());
@@ -1433,7 +1463,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		dto.setDisplayNames(Arrays.stream(defaultNames).collect(Collectors.toList()));
 		dto.setDisplayOrders(Arrays.stream(defaultOrders).map(Integer::valueOf).collect(Collectors.toList()));
 
-		List<LeasePromotionConfig> configs = enterpriseLeaseIssuerProvider.listLeasePromotionConfigByNamespaceId(cmd.getNamespaceId());
+		List<LeasePromotionConfig> configs = enterpriseLeaseIssuerProvider.listLeasePromotionConfigs(cmd.getNamespaceId(), cmd.getCategoryId());
         if (null != configs) {
 			configs.forEach(c -> {
 				String name = c.getConfigName();
@@ -1473,11 +1503,15 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
 
+		if (null == cmd.getCategoryId()) {
+			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
+		}
+
 		//如果开启就添加到数据库中，否则默认关闭
 		if (LeasePromotionFlag.ENABLED.getCode() == cmd.getBuildingIntroduceFlag()) {
 
 			LeasePromotionConfig config = enterpriseLeaseIssuerProvider.findLeasePromotionConfig(cmd.getNamespaceId(),
-					"buildingIntroduceFlag");
+					"buildingIntroduceFlag", cmd.getCategoryId());
 
 			if (null != config) {
 				config.setConfigValue(String.valueOf(cmd.getBuildingIntroduceFlag()));
@@ -1487,12 +1521,13 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				config.setNamespaceId(cmd.getNamespaceId());
 				config.setConfigName("buildingIntroduceFlag");
 				config.setConfigValue(String.valueOf(cmd.getBuildingIntroduceFlag()));
+				config.setCategoryId(cmd.getCategoryId());
 				enterpriseLeaseIssuerProvider.createLeasePromotionConfig(config);
 			}
 
 		}else {
 			enterpriseLeaseIssuerProvider.deleteLeasePromotionConfig(cmd.getNamespaceId(),
-					"buildingIntroduceFlag");
+					"buildingIntroduceFlag", cmd.getCategoryId());
 		}
 
 	}
@@ -1502,6 +1537,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         CheckIsLeaseIssuerDTO dto = new CheckIsLeaseIssuerDTO();
 		Long organizationId = cmd.getOrganizationId();
 		User user = UserContext.current().getUser();
+
+		if (null == cmd.getCategoryId()) {
+			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
+		}
 
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -1634,8 +1673,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
 
+		if (null == cmd.getCategoryId()) {
+			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
+		}
+
 		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-				null, null, cmd.getSourceType());
+				null, null, cmd.getSourceType(), cmd.getCategoryId());
 
 		if (null == request) {
 			if (null != cmd.getSourceId()) {
@@ -1662,8 +1705,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
 
+		if (null == cmd.getCategoryId()) {
+			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
+		}
+
 		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-				null, null, cmd.getSourceType());
+				null, null, cmd.getSourceType(), cmd.getCategoryId());
 
 		LeaseFormRequestDTO dto = ConvertHelper.convert(request, LeaseFormRequestDTO.class);
 

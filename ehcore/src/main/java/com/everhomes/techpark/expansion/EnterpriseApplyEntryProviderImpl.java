@@ -107,6 +107,7 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 				.eq(Tables.EH_LEASE_PROMOTIONS.ID));
 
 		Condition cond = Tables.EH_LEASE_PROMOTIONS.NAMESPACE_ID.eq(leasePromotion.getNamespaceId());
+		cond = cond.and(Tables.EH_LEASE_PROMOTIONS.CATEGORY_ID.eq(leasePromotion.getCategoryId()));
 		cond = cond.and(Tables.EH_LEASE_PROMOTIONS.STATUS.ne(LeasePromotionStatus.INACTIVE.getCode()));
 
 		if(!StringUtils.isEmpty(leasePromotion.getCommunityId())){
@@ -332,7 +333,9 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 													 ListingLocator locator, Integer pageSize, List<Long> idList) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
-		Condition cond =  Tables.EH_ENTERPRISE_OP_REQUESTS.NAMESPACE_ID.eq(request.getNamespaceId());
+		Condition cond = Tables.EH_ENTERPRISE_OP_REQUESTS.NAMESPACE_ID.eq(request.getNamespaceId());
+		cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.CATEGORY_ID.eq(request.getCategoryId()));
+
 		SelectQuery<EhEnterpriseOpRequestsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_OP_REQUESTS);
 
 		if(!StringUtils.isEmpty(request.getCommunityId())){
@@ -446,12 +449,14 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 	}
 
 	@Override
-	public LeaseFormRequest findLeaseRequestForm(Integer namespaceId, Long ownerId, String ownerType, String sourceType) {
+	public LeaseFormRequest findLeaseRequestForm(Integer namespaceId, Long ownerId, String ownerType, String sourceType,
+												 Long categoryId) {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseFormRequests.class));
 
 		SelectQuery query = context.selectQuery(Tables.EH_LEASE_FORM_REQUESTS);
 		query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.CATEGORY_ID.eq(categoryId));
 
 		if (null != ownerId) {
 			query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.OWNER_ID.eq(ownerId));

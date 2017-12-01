@@ -31,13 +31,13 @@ public interface EnterpriseLeaseIssuerProvider {
 
     LeaseIssuer findLeaseIssersByContact(Integer namespaceId, String contact);
 
-    List<LeasePromotionConfig> listLeasePromotionConfigByNamespaceId(Integer namespaceId);
+    List<LeasePromotionConfig> listLeasePromotionConfigs(Integer namespaceId, Long categoryId);
 
     void createLeasePromotionConfig(LeasePromotionConfig config);
 
-    LeasePromotionConfig findLeasePromotionConfig(Integer namespaceId, String configName);
+    LeasePromotionConfig findLeasePromotionConfig(Integer namespaceId, String configName, Long categoryId);
 
-    void deleteLeasePromotionConfig(Integer namespaceId, String configName);
+    void deleteLeasePromotionConfig(Integer namespaceId, String configName, Long categoryId);
 
     void updateLeasePromotionConfig(LeasePromotionConfig config);
 }

@@ -156,11 +156,12 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 	}
 
 	@Override
-	public List<LeasePromotionConfig> listLeasePromotionConfigByNamespaceId(Integer namespaceId) {
+	public List<LeasePromotionConfig> listLeasePromotionConfigs(Integer namespaceId, Long categoryId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseConfigs.class));
 
 		SelectQuery<EhLeaseConfigsRecord> query = context.selectQuery(Tables.EH_LEASE_CONFIGS);
 		query.addConditions(Tables.EH_LEASE_CONFIGS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_LEASE_CONFIGS.CATEGORY_ID.eq(categoryId));
 
 		return query.fetch().map(r -> ConvertHelper.convert(r, LeasePromotionConfig.class));
 	}
@@ -193,23 +194,25 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 	}
 
 	@Override
-	public LeasePromotionConfig findLeasePromotionConfig(Integer namespaceId, String configName) {
+	public LeasePromotionConfig findLeasePromotionConfig(Integer namespaceId, String configName, Long categoryId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseConfigs.class));
 
 		SelectQuery<EhLeaseConfigsRecord> query = context.selectQuery(Tables.EH_LEASE_CONFIGS);
 		query.addConditions(Tables.EH_LEASE_CONFIGS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_LEASE_CONFIGS.CONFIG_NAME.eq(configName));
+		query.addConditions(Tables.EH_LEASE_CONFIGS.CATEGORY_ID.eq(categoryId));
 
 		return ConvertHelper.convert(query.fetchOne(), LeasePromotionConfig.class);
 	}
 
 	@Override
-	public void deleteLeasePromotionConfig(Integer namespaceId, String configName) {
+	public void deleteLeasePromotionConfig(Integer namespaceId, String configName, Long categoryId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
 		DeleteQuery<EhLeaseConfigsRecord> query = context.deleteQuery(Tables.EH_LEASE_CONFIGS);
 		query.addConditions(Tables.EH_LEASE_CONFIGS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_LEASE_CONFIGS.CONFIG_NAME.eq(configName));
+		query.addConditions(Tables.EH_LEASE_CONFIGS.CATEGORY_ID.eq(categoryId));
 
 		query.execute();
 	}
