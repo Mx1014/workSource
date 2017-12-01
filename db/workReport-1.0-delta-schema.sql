@@ -1,3 +1,5 @@
+-- 工作汇报1.0 add by nan.rong
+-- 工作汇报模板表
 CREATE TABLE `eh_work_report_templates` (
   `id` BIGINT NOT NULL COMMENT 'id of the report template',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -20,6 +22,7 @@ CREATE TABLE `eh_work_report_templates` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 工作汇报表
 CREATE TABLE `eh_work_reports` (
   `id` BIGINT NOT NULL COMMENT 'id of the report',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -46,6 +49,7 @@ CREATE TABLE `eh_work_reports` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 工作汇报值表
 CREATE TABLE `eh_work_report_vals` (
   `id` BIGINT NOT NULL COMMENT 'id of the report val',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -57,6 +61,7 @@ CREATE TABLE `eh_work_report_vals` (
   `module_type` VARCHAR(64) COMMENT 'the module type',
   `module_name` VARCHAR(64),
   `title` VARCHAR(128) COMMENT 'the title of the report',
+  `report_id` BIGINT NOT NULL COMMENT 'the id of the report',
   `report_time` DATETIME COMMENT 'the target time of the report',
   `applier_name` VARCHAR(64) COMMENT 'the name of the applier',
   `applier_user_id` BIGINT COMMENT 'the userId of the applier',
@@ -69,4 +74,4 @@ CREATE TABLE `eh_work_report_vals` (
   `create_time` DATETIME COMMENT 'record create time',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+-- end by nan.rong
