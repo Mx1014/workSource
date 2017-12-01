@@ -569,9 +569,12 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
-		Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
-		List<Category> categories = categoryProvider.listTaskCategories(namespaceId, defaultId, null,
-				null, null);
+
+		List<Category> categories = new ArrayList<>();
+		for (Long id: PmTaskAppType.TYPES) {
+			categories.addAll(categoryProvider.listTaskCategories(namespaceId, id, null,
+					null, null));
+		}
 
 		if(namespaceId == 999983) {
 			EbeiPmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
