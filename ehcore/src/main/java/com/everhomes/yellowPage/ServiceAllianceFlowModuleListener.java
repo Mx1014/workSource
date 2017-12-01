@@ -219,54 +219,47 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		//给服务公司留的手机号推消息
 		if (yellowPageId!=0) {
 			ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(yellowPageId, null, null);
-			if (serviceOrg.getContactMemid()==null || serviceOrg.getContactMemid()==0)
-				return;
-
-			String body = "";
 			ServiceAllianceCategories category = yellowPageProvider.findCategoryById(serviceOrg.getParentId());
-			body += "收到一条"+category.getName()+"的申请";
-
-			FlowCaseDetailActionData actionData = new FlowCaseDetailActionData();
-			actionData.setFlowCaseId(flowCase.getId());
-			actionData.setFlowUserType(FlowUserType.PROCESSOR.getCode());
-			actionData.setModuleId(flowCase.getModuleId());
-			String url = RouterBuilder.build(Router.WORKFLOW_DETAIL, actionData);
-			RouterMetaObject metaObject = new RouterMetaObject();
-            metaObject.setUrl(url);
-			Map<String, String> meta = new HashMap<>();
-			meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
-			meta.put(MessageMetaConstant.MESSAGE_SUBJECT, category.getName());
-      	    meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
-
-			OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
-
-
-			MessageDTO messageDto = createMessageDto(body,meta,member.getTargetId().toString());
-			messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-                    member.getTargetId().toString(),messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-
 			//发消息给服务联盟机构管理员
 			CrossShardListingLocator locator = new CrossShardListingLocator();
-
-
 			List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(category.getOwnerType(),
 					category.getOwnerId(), ContactType.MOBILE.getCode(), serviceOrg.getParentId(),locator, Integer.MAX_VALUE);
-			if(targets != null && targets.size() > 0) {
-				for(ServiceAllianceNotifyTargets target : targets) {
-					if(target.getStatus().byteValue() == 1) {
-						UserIdentifier contact = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), target.getContactToken());
-						if(contact != null) {
-							MessageDTO message = createMessageDto(body,meta,contact.getOwnerUid().toString());
-							messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-									contact.getOwnerUid().toString(), message, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-						}
-					}
+			if ((serviceOrg.getContactMemid()!=null && serviceOrg.getContactMemid()!=0) || (targets != null && targets.size() > 0)) {
+				String body = "收到一条" + category.getName() + "的申请";
+				FlowCaseDetailActionData actionData = new FlowCaseDetailActionData();
+				actionData.setFlowCaseId(flowCase.getId());
+				actionData.setFlowUserType(FlowUserType.PROCESSOR.getCode());
+				actionData.setModuleId(flowCase.getModuleId());
+				String url = RouterBuilder.build(Router.WORKFLOW_DETAIL, actionData);
+				RouterMetaObject metaObject = new RouterMetaObject();
+				metaObject.setUrl(url);
+				Map<String, String> meta = new HashMap<>();
+				meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+				meta.put(MessageMetaConstant.MESSAGE_SUBJECT, category.getName());
+				meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
 
+				if(serviceOrg.getContactMemid()!=null && serviceOrg.getContactMemid()!=0) {
+					OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
+
+					MessageDTO messageDto = createMessageDto(body, meta, member.getTargetId().toString());
+					messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+							member.getTargetId().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+				}
+
+				if (targets != null && targets.size() > 0) {
+					for (ServiceAllianceNotifyTargets target : targets) {
+						if (target.getStatus().byteValue() == 1) {
+							UserIdentifier contact = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), target.getContactToken());
+							if (contact != null) {
+								MessageDTO message = createMessageDto(body, meta, contact.getOwnerUid().toString());
+								messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+										contact.getOwnerUid().toString(), message, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+							}
+						}
+
+					}
 				}
 			}
-
-
-
 
 		}
 	}
