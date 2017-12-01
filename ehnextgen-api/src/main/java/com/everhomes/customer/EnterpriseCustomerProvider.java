@@ -26,6 +26,18 @@ public interface EnterpriseCustomerProvider {
     Map<Long, Long> listEnterpriseCustomerSourceByCommunityId(Long communityId);
     Map<Long, Long> listEnterpriseCustomerIndustryByCommunityId(Long communityId);
 
+    void createCustomerAccount(CustomerAccount account);
+    void updateCustomerAccount(CustomerAccount account);
+    void deleteCustomerAccount(CustomerAccount account);
+    CustomerAccount findCustomerAccountById(Long id);
+    List<CustomerAccount> listCustomerAccountsByCustomerId(Long customerId);
+
+    void createCustomerTax(CustomerTax tax);
+    void updateCustomerTax(CustomerTax tax);
+    void deleteCustomerTax(CustomerTax tax);
+    CustomerTax findCustomerTaxById(Long id);
+    List<CustomerTax> listCustomerTaxesByCustomerId(Long customerId);
+
     void createCustomerTalent(CustomerTalent talent);
     void updateCustomerTalent(CustomerTalent talent);
     void deleteCustomerTalent(CustomerTalent talent);
