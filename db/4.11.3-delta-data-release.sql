@@ -1593,3 +1593,76 @@ VALUES ((@locale_strings_id := @locale_strings_id + 1), 'flow', '100019', 'zh_CN
 
 -- 添加设备数量  by jiarui 20171201
 INSERT  INTO  `eh_var_fields` VALUES (10925, 'equipment_inspection', 'quantity', '数量', 'Long', 10000, CONCAT('/',10000), 0, null, 2, 1, now(),null ,null,'{\"fieldParamType\": \"text\", \"length\": 32}');
+
+
+-- 添加正中会物业缴费入口 by wentian
+-- beta
+-- update `eh_launch_pad_items` set action_data = '{"url":"http://beta.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix"}', action_type = 13 where namespace_id = 999983 and item_label = '物业查费';
+-- release
+update `eh_launch_pad_items` set action_data = '{"url":"http://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix"}', action_type = 13 where namespace_id = 999983 and item_label = '物业查费';
+
+
+-- 物业报修多入口数据整理
+DELETE from eh_categories where status = 0 and path like '任务%';
+DELETE from eh_categories where status = 0 and parent_id = 6;
+UPDATE eh_launch_pad_items set action_data = replace(action_data, 'taskCategoryId=0', 'taskCategoryId=6') where action_data like '%zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=%';
+
+UPDATE eh_web_menus set data_type = 'react:/repair-management/task-list/6' where id = 20140;
+UPDATE eh_web_menus set data_type = 'task_management_service_entry/6' where id = 20150;
+UPDATE eh_web_menus set data_type = 'service_type_setting/6' where id = 20170;
+UPDATE eh_web_menus set data_type = 'classify_setting/6' where id = 20180;
+UPDATE eh_web_menus set data_type = 'task_statistics/6' where id = 20191;
+
+UPDATE eh_web_menus set data_type = 'react:/repair-management/task-list/9' where id = 20240;
+UPDATE eh_web_menus set data_type = 'task_management_service_entry/9' where id = 20250;
+UPDATE eh_web_menus set data_type = 'classify_setting/9' where id = 20280;
+UPDATE eh_web_menus set data_type = 'task_statistics/9' where id = 20291;
+UPDATE eh_web_menus set data_type = 'react:/working-flow/flow-list/property-service/20100?moduleType=suggestion' where id = 20258;
+
+UPDATE eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=9&displayName=投诉与建议"}' where namespace_id = 999961 and item_label = '投诉与建议';
+UPDATE eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=6&displayName=物业报修"}' where namespace_id = 999961 and item_label = '物业报修';
+
+UPDATE eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=6&displayName=投诉保修"}' where namespace_id = 999962 and item_label = '投诉保修';
+
+UPDATE eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=6&displayName=物业报修"}' where namespace_id = 999958 and item_label = '物业报修';
+
+UPDATE eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=9&displayName=投诉建议"}' where namespace_id = 999967 and item_label = '投诉建议';
+UPDATE eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=6&displayName=物业报修"}' where namespace_id = 999967 and item_label = '物业报修';
+
+UPDATE eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=9&displayName=投诉与需求"}' where namespace_id = 999983 and item_label = '投诉与需求';
+
+UPDATE eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=6&displayName=家政服务"}' where namespace_id = 999993 and item_label = '家政服务';
+UPDATE eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=6&displayName=综合维修"}' where namespace_id = 999993 and item_label = '综合维修';
+
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`)
+	VALUES ('9', '0', '0', '投诉建议', '投诉建议', '0', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '0');
+
+UPDATE eh_categories set `name` = '物业报修', path = '物业报修' where id = 6;
+
+UPDATE eh_categories set path = replace(path, '任务', '物业报修') where path like '任务%' and id not in (203665, 203532, 202564);
+
+UPDATE eh_categories set path = replace(path, '任务', '投诉建议'), parent_id = 9 where id in (203665, 203532, 202564) and parent_id = 6;
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20230,'', 'EhNamespaces', 999967,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20240,'', 'EhNamespaces', 999967,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20250,'', 'EhNamespaces', 999967,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20255,'', 'EhNamespaces', 999967,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20258,'', 'EhNamespaces', 999967,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20280,'', 'EhNamespaces', 999967,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20290,'', 'EhNamespaces', 999967,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20291,'', 'EhNamespaces', 999967,2);
+
+
+-- add by janson 201712011625
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 0, 'system', NULL, 1, 1009, 2000, 'EhAclRoles', 0, 1, UTC_TIMESTAMP());

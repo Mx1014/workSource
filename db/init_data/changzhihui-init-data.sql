@@ -1164,3 +1164,9 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 
 -- 【昌智汇】APP端上线云打印功能（icon在“全部”中）-(display改变)
 UPDATE `eh_launch_pad_items` SET `display_flag` =1 WHERE  `item_label` = '云打印' AND  `namespace_id` = 999990; 
+
+-- 【昌发展】会议室预约配置为审批后线上支付的形式
+UPDATE eh_rentalv2_resource_types SET pay_mode =2 WHERE NAME ='会议室预订' AND  `namespace_id` = 999990; 
+SET @max_ren_t_id = (SELECT id FROM eh_rentalv2_resource_types  WHERE NAME ='会议室预订' AND  `namespace_id` = 999990);
+UPDATE eh_launch_pad_items SET action_data = CONCAT('{"resourceTypeId":', @max_ren_t_id, ',"pageType":0,"payMode":2}') WHERE item_label = '会议室预订'  AND  `namespace_id` = 999990;
+ 

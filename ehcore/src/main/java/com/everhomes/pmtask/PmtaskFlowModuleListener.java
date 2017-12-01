@@ -569,9 +569,12 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
-		Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
-		List<Category> categories = categoryProvider.listTaskCategories(namespaceId, defaultId, null,
-				null, null);
+
+		List<Category> categories = new ArrayList<>();
+		for (Long id: PmTaskAppType.TYPES) {
+			categories.addAll(categoryProvider.listTaskCategories(namespaceId, id, null,
+					null, null));
+		}
 
 		if(namespaceId == 999983) {
 			EbeiPmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
@@ -601,10 +604,10 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		ListTaskCategoriesCommand cmd = new ListTaskCategoriesCommand();
 		cmd.setNamespaceId(namespaceId);
-		//if (flow.getModuleType().equals(FlowModuleType.REPAIR_MODULE.getCode()))
+		if (flow.getModuleType().equals(FlowModuleType.NO_MODULE.getCode()))
 			cmd.setTaskCategoryId(PmTaskAppType.REPAIR_ID);
-//		else
-//			cmd.setTaskCategoryId(PmTaskAppType.SUGGESTION_ID);
+		else
+			cmd.setTaskCategoryId(PmTaskAppType.SUGGESTION_ID);
 		ListTaskCategoriesResponse response = pmTaskService.listTaskCategories(cmd);
 		dto.setOptions(new ArrayList<>());
 		response.getRequests().forEach(p->{
