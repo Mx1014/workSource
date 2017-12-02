@@ -1,47 +1,47 @@
 -- 物业巡检V3.1
 -- 设备巡检计划表
 CREATE TABLE `eh_equipment_inspection_plans` (
-`id` bigint(20) NOT NULL,
-`owner_id` bigint(20) NOT NULL COMMENT 'organization_id',
-`owner_type` varchar(32) NOT NULL COMMENT 'organization',
-`target_type` varchar(32) NOT NULL COMMENT 'zone resource_type ',
-`target_id` bigint NOT NULL COMMENT 'zone  resource_id',
-`plan_number` varchar(128) NOT NULL COMMENT 'the plans number ',
-`plan_type` tinyint(4) NOT NULL COMMENT 'the type of plan 0: 巡检  1: 保养',
-`name` varchar(1024) NULL COMMENT 'the name of plan_number',
-`status` tinyint(4) NOT NULL COMMENT 'status of plans  0:waitting for starting 1: waitting for approving  2: Active 3:inActive',
-`review_result` tinyint(4) NOT NULL  COMMENT'0:none, 1:qualified 2:unqualified 3:review_delay',
-`repeat_setting_id` bigint(20) NOT NULL COMMENT 'refers to eh_repeatsetting ',
-`remarks` text NULL,
-`plan_version` bigint(20) NULL COMMENT 'the version of plan for modifying plan',
-`plan_main_id` bigint(20) NULL COMMENT 'refer to old version plan for modifying plan',
-`creator_uid` bigint(20) NULL,
-`create_time` datetime NOT NULL,
-`operator_uid` bigint(20) NULL,
-`update_time` datetime NULL,
-`deleter_uid` bigint NULL,
-`delete_time` datetime NULL,
-`last_create_taskTime`  datetime NULL COMMENT 'the last time when gen task' ,
-`inspection_category_id` bigint(20),
-`namespace_id` int(11) NULL,
-PRIMARY KEY (`id`)
-)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+  `id` bigint(20) NOT NULL,
+  `owner_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'organization_id',
+  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'organization',
+  `target_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'zone resource_type ',
+  `target_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'zone  resource_id',
+  `plan_number` varchar(128) NOT NULL DEFAULT '0' COMMENT 'the plans number ',
+  `plan_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'the type of plan 0: 巡检  1: 保养',
+  `name` varchar(1024) DEFAULT NULL COMMENT 'the name of plan_number',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'status of plans  0:waitting for starting 1: waitting for approving  2: Active 3:inActive',
+  `review_result` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0:none, 1:qualified 2:unqualified 3:review_delay',
+  `repeat_setting_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'refers to eh_repeatsetting ',
+  `remarks` text,
+  `plan_version` bigint(20) DEFAULT NULL COMMENT 'the version of plan for modifying plan',
+  `plan_main_id` bigint(20) DEFAULT NULL COMMENT 'refer to old version plan for modifying plan',
+  `creator_uid` bigint(20) NOT NULL DEFAULT '0',
+  `create_time` datetime DEFAULT NULL,
+  `operator_uid` bigint(20) DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  `deleter_uid` bigint(20) DEFAULT NULL,
+  `delete_time` datetime DEFAULT NULL,
+  `last_create_taskTime` datetime DEFAULT NULL COMMENT 'the last time when gen task',
+  `inspection_category_id` bigint(20) DEFAULT NULL,
+  `namespace_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 -- 设备巡检计划--设备 关联表
 CREATE TABLE `eh_equipment_inspection_equipment_plan_map` (
-`id` bigint(20) NOT NULL,
-`equiment_id` bigint(20) NULL,
-`owner_id` bigint(20) NULL,
-`owner_type` varchar(32) NULL,
-`target_id` bigint(20) NULL,
-`target_type` varchar(32) NULL,
-`plan_id` bigint(20) NULL,
-`standard_id` bigint(20) NOT NULL,
-`namespace_id` int(11) NULL,
-`default_order` bigint(20) NULL COMMENT 'show order of equipment_maps',
-PRIMARY KEY (`id`)
-)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+  `id` bigint(20) NOT NULL,
+  `equiment_id` bigint(20) NOT NULL DEFAULT '0',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0',
+  `owner_type` varchar(32) NOT NULL DEFAULT '',
+  `target_id` bigint(20) NOT NULL DEFAULT '0',
+  `target_type` varchar(32) NOT NULL DEFAULT '',
+  `plan_id` bigint(20) NOT NULL DEFAULT '0',
+  `standard_id` bigint(20) NOT NULL DEFAULT '0',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `default_order` bigint(20) NOT NULL DEFAULT '0' COMMENT 'show order of equipment_maps',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
