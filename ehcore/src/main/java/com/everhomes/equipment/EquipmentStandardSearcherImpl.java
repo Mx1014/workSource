@@ -186,7 +186,9 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         if(ids.size() > pageSize) {
         	nextPageAnchor = anchor + 1;
             ids.remove(ids.size() - 1);
-         } 
+         } else {
+            nextPageAnchor = null;
+        }
         
         List<EquipmentStandardsDTO> eqStandards = new ArrayList<EquipmentStandardsDTO>();
         for(Long id : ids) {
@@ -210,16 +212,9 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 
     private void processEquipmentCount(EquipmentInspectionStandards standard) {
         List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
-        int count = 0;
-        if(maps != null) {
-            for(EquipmentStandardMap map : maps) {
-                if(EquipmentReviewStatus.REVIEWED.equals(EquipmentReviewStatus.fromStatus(map.getReviewStatus())) &&
-                        ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(map.getReviewResult()))) {
-                    count++;
-                }
-            }
+        if (maps != null) {
+            standard.setEquipmentsCount(maps.size());
         }
-        standard.setEquipmentsCount(count);
     }
 
    /* private void processRepeatSetting(EquipmentInspectionStandards standard) {
@@ -238,7 +233,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("standardName", standard.getName());
-            b.field("standardNumber", standard.getStandardNumber());
+           // b.field("standardNumber", standard.getStandardNumber());
             b.field("ownerId", standard.getOwnerId());
             b.field("ownerType", standard.getOwnerType());
             b.field("standardType", standard.getStandardType());

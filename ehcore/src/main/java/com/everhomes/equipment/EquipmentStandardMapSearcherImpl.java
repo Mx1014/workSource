@@ -188,7 +188,9 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
         if(ids.size() > pageSize) {
         	response.setNextPageAnchor(anchor + 1);
             ids.remove(ids.size() - 1);
-         } 
+         } else {
+        	response.setNextPageAnchor(null);
+		}
         
         List<EquipmentStandardRelationDTO> dtos = new ArrayList<EquipmentStandardRelationDTO>();
         for(Long id : ids) {
@@ -213,9 +215,9 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 	            	dto.setStandardName(standard.getName());
 	            }
 	            
-	            dto.setReviewResult(map.getReviewResult());
+	            /*dto.setReviewResult(map.getReviewResult());
 	            dto.setReviewStatus(map.getReviewStatus());
-				dto.setReviewTime(map.getReviewTime());
+				dto.setReviewTime(map.getReviewTime());*/
 
 				/*if(map.getReviewerUid() != null && map.getReviewerUid() != 0L) {
 					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(map.getReviewerUid(), equipment.getOwnerId());

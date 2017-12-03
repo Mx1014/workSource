@@ -1376,7 +1376,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     @Override
     public void populateEquipments(EquipmentInspectionStandards standard) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionEquipmentStandardMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP);
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STANDARD_ID.eq(standard.getId()));
         query.fetch().map((r)->{
@@ -1387,7 +1387,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     @Override
     public void populateItems(EquipmentInspectionStandards standard) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionTemplateItemMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATE_ITEM_MAP);
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATE_ITEM_MAP.ID.eq(standard.getTemplateId()));
         query.fetch().map((r)->{
@@ -1417,7 +1417,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public void createEquipmentPlanMaps(EhEquipmentInspectionEquipmentPlanMap map) {
+    public void createEquipmentPlanMaps(EquipmentInspectionEquipmentPlanMap map) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhEquipmentInspectionEquipmentPlanMapDao dao = new EhEquipmentInspectionEquipmentPlanMapDao(context.configuration());
         dao.insert(map);
@@ -1425,20 +1425,22 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public List<EhEquipmentInspectionEquipmentPlanMap> getEquipmentInspectionPlanMap(Long planId) {
+    public List<EquipmentInspectionEquipmentPlanMap> getEquipmentInspectionPlanMap(Long planId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP)
                 .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.ID.eq(planId))
                 .orderBy(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.DEFAULT_ORDER)
-                .fetchInto(EhEquipmentInspectionEquipmentPlanMap.class);
+                .fetchInto(EquipmentInspectionEquipmentPlanMap.class);
     }
 
     @Override
-    public void deleteEquipmentInspectionPlanById(Long id) {
+    public void deleteEquipmentInspectionPlanById(EquipmentInspectionPlans plan) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhEquipmentInspectionPlansDao dao = new EhEquipmentInspectionPlansDao(context.configuration());
-        dao.deleteById(id);
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEquipmentInspectionPlans.class, id);
+        //dao.deleteById(id);
+        dao.update(plan);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEquipmentInspectionPlans.class, plan.getId());
     }
 
     @Override
@@ -1582,7 +1584,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.ID.eq(id));
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STATUS.eq(Status.ACTIVE.getCode()));
 
-        List<EquipmentStandardMap> result = new ArrayList<EquipmentStandardMap>();
+        List<EquipmentStandardMap> result = new ArrayList<>();
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, EquipmentStandardMap.class));
             return null;

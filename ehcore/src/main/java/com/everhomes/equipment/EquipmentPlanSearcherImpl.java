@@ -34,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements EquipmentPlanSearcher {
 
@@ -171,9 +170,9 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
         for(Long id : ids) {
             //RP上只展示计划基本信息和执行周期
             EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(id);
-            if(plan.getPlanMainId()!=null){
+            /*if(plan.getPlanMainId()!=null){
                 removeMainPlan(plans,plan.getPlanMainId());
-            }
+            }*/
             //填充执行开始时间  执行频率  执行时长
             RepeatSettingsDTO repeatSetting =ConvertHelper.
                     convert(repeatService.findRepeatSettingById(plan.getRepeatSettingId()), RepeatSettingsDTO.class);
@@ -181,8 +180,10 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
             plan.setExecuteStartTime(repeatService.getExecuteStartTime(repeatSetting));
             plan.setExecutionFrequency(repeatService.getExecutionFrequency(repeatSetting));
             plan.setLimitTime(repeatService.getlimitTime(repeatSetting));
-
-            plans.add(ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class));
+            //过滤掉planVersion ==2 的表示已经有副本
+            if(plan.getPlanVersion()!=2L) {
+                plans.add(ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class));
+            }
 
         }
         response.setEquipmentInspectionPlans(plans);
@@ -190,10 +191,10 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
         return response;
     }
 
-    private void removeMainPlan(List<EquipmentInspectionPlanDTO> plans,Long mainId) {
-        //删除MainId不为空的  删除mainId的记录
-        plans.removeIf(equipmentInspectionPlanDTO -> Objects.equals(mainId, equipmentInspectionPlanDTO.getId()));
-    }
+//    private void removeMainPlan(List<EquipmentInspectionPlanDTO> plans,Long mainId) {
+//        //MainId不为空的记录  取出mainID 删除mainId的记录
+//        plans.removeIf(equipmentInspectionPlanDTO -> Objects.equals(mainId, equipmentInspectionPlanDTO.getId()));
+//    }
 
     @Override
     public String getIndexType() {

@@ -614,18 +614,16 @@ public class EquipmentServiceImpl implements EquipmentService {
 	
 	private void processEquipmentsCount(EquipmentInspectionStandards standard) {
 		List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
-		int count = 0;
+		//int count = 0;
 		if(maps != null) {
-			for(EquipmentStandardMap map : maps) {
 				/*if(EquipmentReviewStatus.REVIEWED.equals(EquipmentReviewStatus.fromStatus(map.getReviewStatus())) &&
 						ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(map.getReviewResult()))) {
 					count++;
 				}*/
-				count++;
-			}
+				//count++;
+				standard.setEquipmentsCount(maps.size());
 		}
-		
-		standard.setEquipmentsCount(count);
+
 	}
 	
 	private EquipmentInspectionStandards verifyEquipmentStandard(Long standardId) {
@@ -3483,8 +3481,17 @@ public class EquipmentServiceImpl implements EquipmentService {
 					EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_NOT_EXIST,
 					"任务不存在");
 		}
+		List<EquipmentsDTO> equipments = new ArrayList<>();
+		equipments = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId())
+				.getEquipmentStandardRelations()
+				.stream().map((r) ->
+						ConvertHelper.convert(r, EquipmentsDTO.class))
+				.collect(Collectors.toList());
+
+
 		EquipmentTaskDTO dto = convertEquipmentTaskToDTO(task);
-		
+		dto.setEquipments(equipments);
+
 		return dto;
 	}
 
@@ -4456,9 +4463,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 		EquipmentInspectionPlans plan = ConvertHelper.convert(cmd, EquipmentInspectionPlans.class);
 		User user = UserContext.current().getUser();
 		plan.setCreatorUid(user.getId());
-		plan.setOperatorUid(user.getId());
 		plan.setNamespaceId(UserContext.getCurrentNamespaceId());
-		if (cmd.getEquipmentStandardRelations() == null || cmd.getEquipmentStandardRelations().size() != 0) {
+		if (cmd.getEquipmentStandardRelations() == null || cmd.getEquipmentStandardRelations().size() != 0
+				|| cmd.getRepeatSettings() ==null) {
 			plan.setStatus(EquipmentPlanStatus.WAITTING_FOR_STARTING.getCode());
 		} else {
 			plan.setStatus(EquipmentPlanStatus.WATTING_FOR_APPOVING.getCode());
@@ -4475,7 +4482,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		List<EquipmentStandardRelationDTO> equipmentStandardRelation = new ArrayList<>();
 
 		for (EquipmentStandardRelationDTO relation : cmd.getEquipmentStandardRelations()) {
-			EhEquipmentInspectionEquipmentPlanMap equipmentPlanMap = new EhEquipmentInspectionEquipmentPlanMap();
+			EquipmentInspectionEquipmentPlanMap equipmentPlanMap = new EquipmentInspectionEquipmentPlanMap();
 			equipmentPlanMap.setDefaultOrder(relation.getOrder());
 			equipmentPlanMap.setNamespaceId(UserContext.getCurrentNamespaceId());
 			equipmentPlanMap.setOwnerId(cmd.getOwnerId());
@@ -4488,6 +4495,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 			equipmentProvider.createEquipmentPlanMaps(equipmentPlanMap);
 			equipmentStandardRelation.add(relation);
+		}
+		//创建flowcase
+		if(plan.getStatus()==EquipmentPlanStatus.WATTING_FOR_APPOVING.getCode()){
+			//TODO: workFlow
 		}
 
 			createdPlan.setEquipmentStandardRelations(equipmentStandardRelation);
@@ -4502,12 +4513,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 		EquipmentInspectionPlans updatePlan =null;
 
 		EquipmentInspectionPlans plan = ConvertHelper.convert(cmd, EquipmentInspectionPlans.class);
-		if (cmd.getEquipmentStandardRelations() == null || cmd.getEquipmentStandardRelations().size() != 0) {
+		if (cmd.getEquipmentStandardRelations() == null || cmd.getEquipmentStandardRelations().size() != 0
+				|| cmd.getRepeatSettings() ==null) {
 			plan.setStatus(EquipmentPlanStatus.WAITTING_FOR_STARTING.getCode());
 		} else {
 			plan.setStatus(EquipmentPlanStatus.WATTING_FOR_APPOVING.getCode());
 		}
 		plan.setCreateTime(exist.getCreateTime());
+		plan.setCreatorUid(exist.getCreatorUid());
+		plan.setNamespaceId(exist.getNamespaceId());
 
 		//创建巡检计划的执行周期
 		RepeatSettings repeatSettings = plan.getRepeatSettings();
@@ -4516,24 +4530,30 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		//需要记录update的plan的 mainId 在新的plans审批通过后删除mainId的plan
 		if (exist.getPlanMainId() == null) {
-			//mainId为空则创建副本
+			//mainId为空则创建副本 副本最多只有一份
 			plan.setPlanMainId(cmd.getId());
 			plan.setCreatorUid(UserContext.currentUserId());
-			updatePlan = equipmentProvider.createEquipmentInspectionPlans(plan);
+			exist.setPlanVersion(2L);//version为2表示已经有副本
+			dbProvider.execute((TransactionStatus status)->{
+				equipmentProvider.updateEquipmentInspectionPlan(exist);
+				equipmentProvider.createEquipmentInspectionPlans(plan);
+				return  null;
+			});
+
 		} else {
 			plan.setOperatorUid(UserContext.currentUserId());
 			plan.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			equipmentProvider.updateEquipmentInspectionPlan(plan);
-			updatePlan = plan;
 			equipmentProvider.deleteEquipmentInspectionPlanMap(plan.getId());
 			repeatService.deleteRepeatSettingsById(cmd.getRepeatSettings().getId());
 		}
+		updatePlan = plan;
 
 		//创建计划巡检对象标准关联
 		List<EquipmentStandardRelationDTO> equipmentStandardRelation = new ArrayList<>();
 
 		for (EquipmentStandardRelationDTO relation : cmd.getEquipmentStandardRelations()) {
-			EhEquipmentInspectionEquipmentPlanMap equipmentPlanMap = new EhEquipmentInspectionEquipmentPlanMap();
+			EquipmentInspectionEquipmentPlanMap equipmentPlanMap = new EquipmentInspectionEquipmentPlanMap();
 			equipmentPlanMap.setDefaultOrder(relation.getOrder());
 			equipmentPlanMap.setNamespaceId(UserContext.getCurrentNamespaceId());
 			equipmentPlanMap.setOwnerId(cmd.getOwnerId());
@@ -4547,8 +4567,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 			equipmentProvider.createEquipmentPlanMaps(equipmentPlanMap);
 			equipmentStandardRelation.add(relation);
 		}
-
 		updatePlan.setEquipmentStandardRelations(equipmentStandardRelation);
+
+		//创建flowcase
+		if(plan.getStatus()==EquipmentPlanStatus.WATTING_FOR_APPOVING.getCode()){
+			//TODO: workFlow
+		}
 
 		return ConvertHelper.convert(updatePlan,EquipmentInspectionPlanDTO.class);
 	}
@@ -4579,8 +4603,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public void deleteEquipmentInspectionPlan(DeleteEquipmentPlanCommand cmd) {
-		//根据id删除巡检计划
-		equipmentProvider.deleteEquipmentInspectionPlanById(cmd.getId());
+		EquipmentInspectionPlans exist = equipmentProvider.getEquipmmentInspectionPlanById(cmd.getId());
+		exist.setStatus(EquipmentPlanStatus.INACTIVE.getCode());
+		exist.setDeleterUid(UserContext.currentUserId());
+		exist.setDeleterUid(UserContext.currentUserId());
+		//根据id删除巡检计划 置状态
+		equipmentProvider.deleteEquipmentInspectionPlanById(exist);
 		//刪除巡检计划巡检对象关联
 		equipmentProvider.deleteEquipmentInspectionPlanMap(cmd.getId());
 		//删除repeatSetting  不删也可
@@ -4694,7 +4722,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	private void processEquipmentInspectionObjectsByPlanId(Long planId, EquipmentInspectionPlans equipmentInspectionPlan) {
 
-		List<EhEquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.getEquipmentInspectionPlanMap(planId);
+		List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.getEquipmentInspectionPlanMap(planId);
 		List<EquipmentStandardRelationDTO> relationDTOS = new ArrayList<>();
 
 		for (EhEquipmentInspectionEquipmentPlanMap map : planMaps) {

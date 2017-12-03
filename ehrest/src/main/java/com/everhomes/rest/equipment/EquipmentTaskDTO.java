@@ -430,6 +430,14 @@ public class EquipmentTaskDTO {
 		this.pictureFlag = pictureFlag;
 	}
 
+	public List<EquipmentsDTO> getEquipments() {
+		return equipments;
+	}
+
+	public void setEquipments(List<EquipmentsDTO> equipments) {
+		this.equipments = equipments;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
