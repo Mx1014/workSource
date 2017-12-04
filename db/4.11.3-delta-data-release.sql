@@ -1683,3 +1683,9 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '21210', '', 'EhNamespaces', '999983', '2');
 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('20422', '计价条款设置', '20400', NULL, 'react:/payment-management/bills-price', '0', '2', '/20000/20400/20422', 'park', '491', '20400', '3', NULL, 'module');
+
+-- 各个入口加入发帖类型  add by yanjun 20171204
+set @id = IFNULL((SELECT MAX(id) from eh_forum_service_types), 1);
+INSERT INTO eh_forum_service_types SELECT (@id := @id + 1), namespace_id, 1, entry_id, 'topic', '话题', 0, NOW() FROM eh_forum_categories;
+INSERT INTO eh_forum_service_types SELECT (@id := @id + 1), namespace_id, 1, entry_id, 'activity', '活动', 1, NOW() FROM eh_forum_categories;
+INSERT INTO eh_forum_service_types SELECT (@id := @id + 1), namespace_id, 1, entry_id, 'poll', '投票', 2, NOW() FROM eh_forum_categories;
