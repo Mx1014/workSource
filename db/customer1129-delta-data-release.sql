@@ -37,3 +37,44 @@ INSERT INTO `eh_service_module_functions` (`id`, `module_id`, `privilege_id`, `e
 INSERT INTO `eh_service_module_functions` (`id`, `module_id`, `privilege_id`, `explain`) VALUES ('98', '21200', '0', '同步合同');
 INSERT INTO `eh_service_module_functions` (`id`, `module_id`, `privilege_id`, `explain`) VALUES ('97', '37000', '0', '同步客户资料');
 INSERT INTO `eh_service_module_functions` (`id`, `module_id`, `privilege_id`, `explain`) VALUES ('96', '20400', '0', '缴费未出账单tab');
+
+
+INSERT INTO eh_service_module_exclude_functions (id, namespace_id, module_id, function_id)
+    VALUES(1, 999983, 20400, 96);
+INSERT INTO eh_service_module_exclude_functions (id, namespace_id, module_id, function_id)
+    VALUES(2, 999971, 20400, 96);
+    
+DROP PROCEDURE if exists create_exclude_function;
+delimiter //
+CREATE PROCEDURE `create_exclude_function` ()
+BEGIN  
+  DECLARE ns INTEGER;
+  DECLARE done INT DEFAULT FALSE;
+  DECLARE cur CURSOR FOR select id from eh_namespaces; 
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+  OPEN cur;
+  read_loop: LOOP
+                FETCH cur INTO ns;
+                IF done THEN
+                    LEAVE read_loop;
+                END IF;
+
+        SET @exclude_function_id = (SELECT MAX(id) FROM `eh_service_module_exclude_functions`);
+        INSERT INTO eh_service_module_exclude_functions (id, namespace_id, module_id, function_id)
+            VALUES((@exclude_function_id := @exclude_function_id + 1), ns, 21100, 99);
+        INSERT INTO eh_service_module_exclude_functions (id, namespace_id, module_id, function_id)
+            VALUES((@exclude_function_id := @exclude_function_id + 1), ns, 21200, 98);
+        INSERT INTO eh_service_module_exclude_functions (id, namespace_id, module_id, function_id)
+            VALUES((@exclude_function_id := @exclude_function_id + 1), ns, 37000, 97);
+  END LOOP;
+  CLOSE cur;
+END
+//
+delimiter ;
+CALL create_exclude_function;
+DROP PROCEDURE if exists create_exclude_function;
+
+delete from eh_service_module_exclude_functions where namespace_id = 999983 and function_id = 99;
+delete from eh_service_module_exclude_functions where namespace_id = 999971 and function_id = 99;
+delete from eh_service_module_exclude_functions where namespace_id = 999983 and function_id = 98;
+delete from eh_service_module_exclude_functions where namespace_id = 999971 and function_id = 97;
