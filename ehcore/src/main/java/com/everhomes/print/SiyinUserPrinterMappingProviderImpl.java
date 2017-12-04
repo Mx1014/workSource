@@ -98,9 +98,13 @@ public class SiyinUserPrinterMappingProviderImpl implements SiyinUserPrinterMapp
 
 	@Override
 	public SiyinUserPrinterMapping findSiyinUserPrinterMappingByUserAndPrinter(Long userId, String readerName) {
-		return getReadOnlyContext().select().from(Tables.EH_SIYIN_USER_PRINTER_MAPPINGS)
+		List<SiyinUserPrinterMapping> list = getReadOnlyContext().select().from(Tables.EH_SIYIN_USER_PRINTER_MAPPINGS)
 				.where(Tables.EH_SIYIN_USER_PRINTER_MAPPINGS.USER_ID.eq(userId))
 				.and(Tables.EH_SIYIN_USER_PRINTER_MAPPINGS.READER_NAME.eq(readerName))
-				.fetchAny().map(r -> ConvertHelper.convert(r, SiyinUserPrinterMapping.class));
+				.fetch().map(r -> ConvertHelper.convert(r, SiyinUserPrinterMapping.class));
+		if(list == null || list.size() == 0){
+			return null;
+		}
+		return list.get(0);
 	}
 }
