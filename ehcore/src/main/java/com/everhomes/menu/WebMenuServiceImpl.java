@@ -1,9 +1,8 @@
 package com.everhomes.menu;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.everhomes.acl.AuthorizationProvider;
+import com.everhomes.acl.WebMenu;
+import com.everhomes.acl.WebMenuPrivilegeProvider;
 import com.everhomes.acl.WebMenuScope;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.DbProvider;
@@ -15,16 +14,17 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.portal.ServiceModuleApp;
-import com.everhomes.rest.acl.*;
+import com.everhomes.rest.acl.WebMenuDTO;
+import com.everhomes.rest.acl.WebMenuScopeApplyPolicy;
+import com.everhomes.rest.acl.WebMenuSelectedFlag;
 import com.everhomes.rest.acl.WebMenuType;
+import com.everhomes.rest.acl.admin.ListWebMenuResponse;
 import com.everhomes.rest.menu.*;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
-import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
+import com.everhomes.util.ConvertHelper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -32,12 +32,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.everhomes.acl.WebMenu;
-import com.everhomes.acl.WebMenuPrivilegeProvider;
-import com.everhomes.rest.acl.admin.ListWebMenuResponse;
-import com.everhomes.util.ConvertHelper;
 import org.springframework.util.StringUtils;
+import scala.collection.parallel.ParIterableLike;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class WebMenuServiceImpl implements WebMenuService {
@@ -155,9 +154,17 @@ public class WebMenuServiceImpl implements WebMenuService {
 			List<Long> appIds = authorizationProvider.getAuthorizationAppModuleIdsByTarget(targets);
 			//根据应用拿菜单
 			List<ServiceModuleAppDTO> dtos = serviceModuleProvider.listReflectionServiceModuleAppByActiveAppIds(UserContext.getCurrentNamespaceId(), appIds);
-			if(dtos != null){
-				List<Long> menuIds_app = dtos.stream().map(r->r.getMenuId()).collect(Collectors.toList());
-				menus_apps = webMenuPrivilegeProvider.listWebMenuByMenuIds(menuIds_app);
+			if (dtos != null) {
+				for (ServiceModuleAppDTO r : dtos) {
+					Long menuId = r.getMenuId();
+					if(menuId != null && menuId != 0L){
+						List<Long> menuIdSignle = new ArrayList<>();
+						menuIdSignle.add(menuId);
+						List<WebMenu> menuSignle = webMenuPrivilegeProvider.listWebMenuByMenuIds(menuIdSignle);
+						if(menuSignle != null)
+							menus_apps = webMenuProvider.listWebMenusByPath(menuSignle.get(0).getPath(), categories);
+					}
+				}
 			}
 
 			if(menus_module != null)

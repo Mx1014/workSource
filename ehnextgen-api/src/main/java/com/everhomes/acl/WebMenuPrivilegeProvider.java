@@ -53,6 +53,8 @@ public interface WebMenuPrivilegeProvider {
 
 	List<WebMenu> listWebMenus(Long parentId, String type);
 
+	List<WebMenu> listWebMenusByPath(String path, List<String> types);
+
 	void deleteWebMenuScopes(List<Long> ids);
 
 	void createWebMenuScopes(List<WebMenuScope> scopes);
