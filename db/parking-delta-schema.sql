@@ -18,6 +18,7 @@ CREATE TABLE `eh_relocation_requests` (
   `flow_case_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'flow case id',
   `cancel_time` datetime DEFAULT NULL,
   `cancel_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'cancel user id',
+  `qr_id` bigint(20) NOT NULL COMMENT 'id of the qr record',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
