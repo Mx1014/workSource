@@ -322,4 +322,12 @@ public class PunchSchedulingProviderImpl implements PunchSchedulingProvider {
 		step.where(condition);
 		step.execute();
 	}
+
+	@Override
+	public void updatePunchSchedulingsStatusByDate(Byte status, Long ruleId, java.sql.Date date) {
+		DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.update(Tables.EH_PUNCH_SCHEDULINGS).set(Tables.EH_PUNCH_SCHEDULINGS.STATUS, status)
+				.where(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.eq(ruleId))
+				.and(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.greaterOrEqual(date));
+	}
 }
