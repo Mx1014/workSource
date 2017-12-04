@@ -1683,3 +1683,27 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '21210', '', 'EhNamespaces', '999983', '2');
 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('20422', '计价条款设置', '20400', NULL, 'react:/payment-management/bills-price', '0', '2', '/20000/20400/20422', 'park', '491', '20400', '3', NULL, 'module');
+
+-- redmine xiongying20171204
+update eh_var_field_group_scopes set default_order = 5 where namespace_id = 999974 and community_id = 240111044332059749 and group_display_name = '知识产权';
+set @item_id = (SELECT MAX(id) from `eh_var_field_items`);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'enterprise_customer', '149', '德国', '4', '2', '1', NOW(), NULL, NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'enterprise_customer', '149', '英国', '5', '2', '1', NOW(), NULL, NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'enterprise_customer', '149', '法国', '6', '2', '1', NOW(), NULL, NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'enterprise_customer', '149', '澳大利亚', '7', '2', '1', NOW(), NULL, NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'enterprise_customer', '149', '加拿大', '8', '2', '1', NOW(), NULL, NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'enterprise_customer', '149', '新加坡', '9', '2', '1', NOW(), NULL, NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'enterprise_customer', '149', '西班牙', '10', '2', '1', NOW(), NULL, NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'enterprise_customer', '149', '韩国', '11', '2', '1', NOW(), NULL, NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'enterprise_customer', '149', '新西兰', '12', '2', '1', NOW(), NULL, NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'enterprise_customer', '149', '香港', '13', '2', '1', NOW(), NULL, NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'enterprise_customer', '149', '台湾', '14', '2', '1', NOW(), NULL, NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'enterprise_customer', '149', '其他', '15', '2', '1', NOW(), NULL, NULL, NULL);
+
+
+-- 各个入口加入发帖类型  add by yanjun 20171204
+set @id = IFNULL((SELECT MAX(id) from eh_forum_service_types), 1);
+INSERT INTO eh_forum_service_types SELECT (@id := @id + 1), namespace_id, 1, entry_id, 'topic', '话题', 0, NOW() FROM eh_forum_categories;
+INSERT INTO eh_forum_service_types SELECT (@id := @id + 1), namespace_id, 1, entry_id, 'activity', '活动', 1, NOW() FROM eh_forum_categories;
+INSERT INTO eh_forum_service_types SELECT (@id := @id + 1), namespace_id, 1, entry_id, 'poll', '投票', 2, NOW() FROM eh_forum_categories;
+
