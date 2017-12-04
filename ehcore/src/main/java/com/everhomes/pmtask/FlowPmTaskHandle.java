@@ -53,8 +53,17 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 			PmTask task = pmTaskCommonService.createTask(cmd, requestorUid, requestorName, requestorPhone);
 			//新建flowcase
 			Integer namespaceId = UserContext.getCurrentNamespaceId();
-			Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
-					FlowModuleType.NO_MODULE.getCode(), cmd.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+			Flow flow = null;
+
+            Long parentTaskId = categoryProvider.findCategoryById(cmd.getTaskCategoryId()).getParentId();
+            if (parentTaskId == PmTaskAppType.SUGGESTION_ID)
+                flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+                        FlowModuleType.SUGGESTION_MODULE.getCode(), cmd.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+            else
+               // if (cmd.getTaskCategoryId()==PmTaskAppType.REPAIR_ID)
+                    flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+                        FlowModuleType.NO_MODULE.getCode(), cmd.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+
 			if(null == flow) {
 				LOGGER.error("Enable pmtask flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
 				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,

@@ -407,6 +407,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
 				query.addConditions(Tables.EH_FLOW_CASES.REFER_ID.eq(referId));
 				query.addConditions(Tables.EH_FLOW_CASES.REFER_TYPE.eq(referType));
 				query.addConditions(Tables.EH_FLOW_CASES.MODULE_ID.eq(moduleId));
+				query.addConditions(Tables.EH_FLOW_CASES.PARENT_ID.eq(0L));
 				return query;
 			}
     		
