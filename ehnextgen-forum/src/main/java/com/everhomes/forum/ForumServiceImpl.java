@@ -6394,10 +6394,6 @@ public class ForumServiceImpl implements ForumService {
     @Override
     public void updateForumSetting(UpdateForumSettingCommand cmd) {
 
-        List<ForumServiceType> oldTypes = forumProvider.listForumServiceTypes(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId());
-
-        List<Long> oldTypeIds = oldTypes.stream().map(r -> r.getId()).collect(Collectors.toList());
-
         List<ForumServiceType> newTypes = new ArrayList<>();
 
         if(cmd.getServiceTypes() != null){
@@ -6413,10 +6409,14 @@ public class ForumServiceImpl implements ForumService {
             }
         }
 
+
         dbProvider.execute(status -> {
 
-            //更新服务类型
-            forumProvider.deleteForumServiceTypes(oldTypeIds);
+            List<ForumServiceType> oldTypes = forumProvider.listForumServiceTypes(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId());
+            if(oldTypes != null && oldTypes.size() > 0){
+                List<Long> oldTypeIds = oldTypes.stream().map(r -> r.getId()).collect(Collectors.toList());
+                forumProvider.deleteForumServiceTypes(oldTypeIds);
+            }
             forumProvider.createForumServiceTypes(newTypes);
 
             ResetHotTagCommand resetHotTagCommand = new ResetHotTagCommand();
@@ -6461,9 +6461,9 @@ public class ForumServiceImpl implements ForumService {
 
         List<ForumServiceType> types = forumProvider.listForumServiceTypes(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId());
 
-        if(types == null || types.size() == 0){
-            types = forumProvider.listForumServiceTypes(0, null, null);
-        }
+//        if(types == null || types.size() == 0){
+//            types = forumProvider.listForumServiceTypes(0, null, null);
+//        }
 
         ListForumServiceTypesResponse response = new ListForumServiceTypesResponse();
 
