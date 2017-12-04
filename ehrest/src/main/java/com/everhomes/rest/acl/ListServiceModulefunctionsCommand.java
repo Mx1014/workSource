@@ -1,5 +1,7 @@
 package com.everhomes.rest.acl;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <ul>
  *     <li>namespaceId: 域空间id</li>
@@ -15,7 +17,7 @@ public class ListServiceModulefunctionsCommand {
     private Long communityId;
 
     private Long organizationId;
-
+    @NotNull
     private Long moduleId;
 
     public Long getCommunityId() {

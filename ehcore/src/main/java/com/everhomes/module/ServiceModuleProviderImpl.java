@@ -559,13 +559,16 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
     }
 
     @Override
-    public List<ServiceModuleFunction> listFunctions(Long moduleId) {
+    public List<ServiceModuleFunction> listFunctions(Long moduleId, List<Long> privilegeIds) {
         List<ServiceModuleFunction> results = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModuleFunctions.class));
         SelectQuery<EhServiceModuleFunctionsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_FUNCTIONS);
 
         if (moduleId != null)
             query.addConditions(Tables.EH_SERVICE_MODULE_FUNCTIONS.MODULE_ID.eq(moduleId));
+
+        if(privilegeIds != null && privilegeIds.size() > 0)
+            query.addConditions(Tables.EH_SERVICE_MODULE_FUNCTIONS.PRIVILEGE_ID.in(privilegeIds));
 
         query.fetch().map((r) -> {
             results.add(ConvertHelper.convert(r, ServiceModuleFunction.class));

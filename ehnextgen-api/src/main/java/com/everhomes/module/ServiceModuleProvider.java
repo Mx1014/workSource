@@ -74,6 +74,6 @@ public interface ServiceModuleProvider {
 
     List<ServiceModule> listServiceModule(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 
-    List<ServiceModuleFunction> listFunctions(Long moduleId);
+    List<ServiceModuleFunction> listFunctions(Long moduleId, List<Long> privilegeIds);
     List<ServiceModuleExcludeFunction> listExcludeFunctions(Integer namespaceId, Long comunityId, Long moduleId);
 }

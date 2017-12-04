@@ -818,7 +818,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     @Override
     public List<Long> listServiceModulefunctions(ListServiceModulefunctionsCommand cmd) {
         List<Long> functionIds = new ArrayList<>();
-        List<ServiceModuleFunction> moduleFunctions = serviceModuleProvider.listFunctions(cmd.getModuleId());
+        List<Long> privilegeIds = rolePrivilegeService.listUserPrivilegeByModuleId(cmd.getNamespaceId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), UserContext.current().getUser().getId(), cmd.getModuleId());
+
+        List<ServiceModuleFunction> moduleFunctions = serviceModuleProvider.listFunctions(cmd.getModuleId(), privilegeIds);
         if(moduleFunctions != null && moduleFunctions.size() > 0) {
             moduleFunctions.forEach(moduleFunction -> {
                 functionIds.add(moduleFunction.getId());
@@ -830,6 +832,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 functionIds.remove(excludeFunction.getFunctionId());
             });
         }
+
         return functionIds;
     }
 }
