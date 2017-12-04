@@ -3683,7 +3683,9 @@ public class QualityServiceImpl implements QualityService {
 			Double total = 0D;
 			for (int i = 0; i < sortedScoresByTarget.size(); i++) {
                 if (total.doubleValue() == sortedScoresByTarget.get(i).getTotalScore().doubleValue() && sortedScoresByTarget.get(i).getTotalScore() != 0) {
-                    if (sortedScoresByTarget.get(i - 1).getBuildArea() < sortedScoresByTarget.get(i).getBuildArea()) {
+					Double preBuildArea = (sortedScoresByTarget.get(i - 1).getBuildArea() == null) ? 0D : sortedScoresByTarget.get(i - 1).getBuildArea();
+					Double currBuildArea = (sortedScoresByTarget.get(i).getBuildArea() == null) ? 0D : sortedScoresByTarget.get(i).getBuildArea();
+					if (preBuildArea < currBuildArea) {
                         sortedScoresByTarget.get(i).setOrderId(++previousOrder);
                     } else {
                         sortedScoresByTarget.get(i).setOrderId(previousOrder);

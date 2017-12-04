@@ -615,8 +615,24 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
             cmd.setPageSize(5000);
         }
+        List<ListBillsDTO> dtos = new ArrayList<>();
         //has already distributed
-        ListBillsResponse bills = listBills(cmd);
+        if(UserContext.getCurrentNamespaceId()==999983){
+            Integer pageSize = cmd.getPageSize();
+            if(pageSize <= 100){
+                dtos.addAll(listBills(cmd).getListBillsDTOS());
+            }
+            Integer pageAnchor = 100;
+            while(pageSize > pageAnchor){
+                cmd.setPageSize(pageAnchor);
+                dtos.addAll(listBills(cmd).getListBillsDTOS());
+                pageSize = pageSize - 100;
+                pageAnchor = pageSize;
+                cmd.setPageAnchor(cmd.getPageAnchor()+1l);
+            }
+        }else{
+            dtos.addAll(listBills(cmd).getListBillsDTOS());
+        }
         Calendar c = Calendar.getInstance();
         int year = c.get(Calendar.YEAR);
         int month = c.get(Calendar.MONTH);
@@ -625,7 +641,6 @@ public class AssetServiceImpl implements AssetService {
         int minute = c.get(Calendar.MINUTE);
         int second = c.get(Calendar.SECOND);
         String fileName = "bill"+"/"+year + "/" + month + "/" + date + " " +hour + ":" +minute + ":" + second;
-        List<ListBillsDTO> dtos = bills.getListBillsDTOS();
 
         List<exportPaymentBillsDetail> dataList = new ArrayList<>();
         //组装datalist来确定propertyNames的值
