@@ -54,7 +54,7 @@
             eh_version_realm | eh_version_upgrade_rules | eh_versioned_content | eh_version_urls |
             eh_cooperation_requests | eh_thirdpart_users | eh_push_messages | eh_push_message_results |
             eh_enterprise_addresses | eh_enterprise_contacts | eh_enterprise_contact_entries | eh_enterprise_contact_groups |
-            eh_enterprise_contact_group_members | eh_enterprise_community_members |
+            eh_enterprise_community_members |
             eh_punch_logs | eh_punch_rules | eh_punch_geopoints | eh_punch_exception_requests | eh_punch_workday | eh_punch_statistics |
             eh_punch_exception_approvals | eh_punch_day_logs |  eh_punch_time_rules | eh_punch_location_rules | eh_punch_wifis | eh_punch_wifi_rules | eh_punch_holidays | eh_punch_workday_rules | eh_punch_rule_owner_map |
             eh_rental_rules | eh_rental_sites | eh_rental_site_items | eh_rental_site_rules | eh_rental_bills | eh_rental_sites_bills | eh_rental_bill_attachments | eh_rental_items_bills | eh_rental_bill_paybill_map |
@@ -70,46 +70,36 @@
             eh_quality_inspection_tasks | eh_quality_inspection_task_attachments | eh_quality_inspection_evaluation_factors | eh_quality_inspection_evaluations |
             eh_quality_inspection_task_records | eh_quality_inspection_categories |
             eh_organization_details  | eh_preferential_rules | eh_scene_types | eh_op_promotion_policies | eh_op_promotion_settings |
-            eh_op_promotions | eh_web_menus | eh_web_menu_privileges |
             eh_parking_vendors | eh_parking_lots | eh_parking_recharge_rates | eh_parking_recharge_orders | eh_parking_card_requests |
             eh_parking_activities |
-            eh_organization_role_map | eh_organization_addresses | eh_organization_attachments | eh_organization_community_requests |
-            eh_organization_details  | eh_preferential_rules | eh_scene_types | eh_op_promotion_policies | eh_op_promotion_settings |
             eh_op_promotions | eh_web_menus | eh_web_menu_privileges | eh_web_menu_scopes |
             eh_aclinks | eh_door_access | eh_aes_server_key | eh_aes_user_key | eh_aclink_undo_key | eh_door_auth | eh_owner_doors | eh_door_command |
             eh_aclink_firmware |
             eh_organization_task_targets | eh_business_assigned_namespaces |
             eh_op_promotion_activities | eh_schedule_tasks | eh_schedule_task_logs | eh_op_promotion_messages | eh_op_promotion_assigned_scopes |
             eh_pmsy_orders | eh_pmsy_order_items | eh_pmsy_payers | eh_pmsy_communities |
-            eh_namespace_details |
-            eh_wifi_settings |
             eh_payment_card_issuers | eh_payment_card_issuer_communities | eh_payment_cards | eh_payment_card_recharge_orders | eh_payment_card_transactions |
             eh_quality_inspection_logs |
             eh_namespace_details | eh_wifi_settings | eh_user_launch_pad_items | eh_hot_tags | eh_app_urls |
-            eh_wifi_settings |
             eh_news | eh_news_attachments | eh_news_comment |
             eh_stat_orders | eh_stat_transactions | eh_stat_refunds | eh_stat_settlements | eh_stat_service_settlement_results | eh_stat_task_logs | eh_stat_service |
-            eh_wifi_settings | eh_news | eh_news_attachments | eh_news_comment | eh_equipment_inspection_standards | eh_equipment_inspection_equipments | eh_equipment_inspection_accessories |
+            eh_wifi_settings | eh_equipment_inspection_standards | eh_equipment_inspection_equipments | eh_equipment_inspection_accessories |
             eh_equipment_inspection_accessory_map | eh_equipment_inspection_equipment_parameters | eh_equipment_inspection_equipment_attachments |
             eh_equipment_inspection_tasks | eh_equipment_inspection_task_attachments | eh_equipment_inspection_task_logs |
             eh_rentalv2_default_rules | eh_rentalv2_time_interval | eh_rentalv2_close_dates | eh_rentalv2_resources | eh_rentalv2_resource_ranges | eh_rentalv2_resource_pics |
             eh_rentalv2_cells | eh_rentalv2_config_attachments | eh_rentalv2_items | eh_rentalv2_orders |eh_rentalv2_resource_orders |
             eh_rentalv2_items_orders | eh_rentalv2_order_attachments | eh_rentalv2_order_payorder_map | eh_rentalv2_refund_orders | eh_rentalv2_resource_types | eh_rentalv2_resource_numbers |
-            eh_office_cubicle_spaces | eh_office_cubicle_attachments | eh_office_cubicle_categories | eh_office_cubicle_orders |
             eh_journals | eh_journal_configs |
-            eh_community_services |
             eh_organization_owner_cars | eh_organization_owner_address | eh_organization_owner_owner_car | eh_organization_owner_attachments | eh_organization_owner_car_attachments | eh_organization_owner_behaviors | eh_organization_owner_type |
             eh_pm_tasks | eh_pm_task_logs | eh_pm_task_attachments | eh_pm_task_statistics |
             eh_rich_texts |
             eh_office_cubicle_spaces | eh_office_cubicle_attachments | eh_office_cubicle_categories | eh_office_cubicle_orders | eh_rich_texts | eh_user_impersonations |
-            eh_journals | eh_journal_configs |
             eh_search_types |
             eh_service_alliance_categories | eh_service_alliances | eh_service_alliance_attachments |
             eh_community_services | eh_aclink_logs | eh_activity_video | eh_yzb_devices |
             eh_approval_flows | eh_approval_flow_levels | eh_approval_rules | eh_approval_rule_flow_map | eh_approval_categories | eh_approval_requests | eh_approval_attachments | eh_approval_time_ranges | eh_approval_day_actual_time | eh_approval_op_requests |
             eh_news_categories |
             eh_request_templates | eh_request_templates_namespace_mapping | eh_request_attachments | eh_service_alliance_requests | eh_service_alliance_notify_targets | eh_settle_requests |
-            eh_region_codes | eh_stat_active_users | eh_warning_settings | eh_service_alliance_reservation_requests |
             eh_quality_inspection_standard_specification_map | eh_quality_inspection_specifications | eh_quality_inspection_specification_item_results |
             eh_region_codes | eh_stat_active_users | eh_item_service_categries |
             eh_pm_task_targets | eh_parking_card_categories |
@@ -138,7 +128,6 @@
             eh_general_forms | eh_general_approvals | eh_general_approval_vals  |
             eh_door_auth_logs |
             eh_asset_bills | eh_asset_bill_template_fields | eh_asset_bill_notify_records |
-            eh_door_auth_logs |
             eh_enterprise_op_request_buildings |
             eh_equipment_inspection_categories | eh_equipment_inspection_standard_group_map |
             eh_questionnaires | eh_questionnaire_questions | eh_questionnaire_options | eh_questionnaire_answers |
@@ -153,44 +142,32 @@
             eh_energy_meter_price_config | eh_asset_vendor |
             eh_import_file_tasks |
             eh_pm_task_history_addresses |
-            eh_authorizations | eh_service_module_assignment_relations | eh_authorization_relations |
-            eh_energy_meter_price_config |
-            eh_user_notification_settings | eh_group_member_logs | eh_domains |
+            eh_user_notification_settings | eh_group_member_logs |
             eh_express_service_addresses | eh_express_companies | eh_express_users | eh_express_addresses |
             eh_express_orders | eh_express_query_histories | eh_express_order_logs |
             eh_roster_order_settings |
-            eh_energy_meter_price_config |
             eh_general_form_vals | eh_lease_form_requests | eh_general_form_mappings |
             eh_warehouses | eh_warehouse_materials | eh_warehouse_material_categories | eh_warehouse_stocks | eh_warehouse_stock_logs | eh_warehouse_requests | eh_warehouse_request_materials | eh_warehouse_units |
             eh_service_module_apps | eh_portal_navigation_bars | eh_portal_layouts | eh_portal_item_groups | eh_portal_items | eh_portal_layout_templates | eh_portal_item_categories | eh_portal_content_scopes | eh_portal_publish_logs | eh_portal_launch_pad_mappings |
             eh_talents | eh_talent_categories | eh_talent_query_histories | eh_talent_requests | eh_talent_message_senders |
             eh_authorizations | eh_authorization_relations | eh_service_module_assignment_relations | eh_domains |
-            eh_user_notification_settings | eh_group_member_logs |
             eh_quality_inspection_samples | eh_quality_inspection_sample_group_map | eh_quality_inspection_sample_community_map | eh_quality_inspection_sample_score_stat | eh_quality_inspection_sample_community_specification_stat |
             eh_news_communities | eh_news_comment_rule |
             eh_rentalv2_price_rules |
             eh_organization_member_details | eh_organization_member_educations | eh_organization_member_work_experiences | eh_organization_member_insurances |
             eh_organization_member_contracts | eh_organization_member_profile_logs | eh_user_organizations |
-            eh_sms_black_lists |
-            eh_siyin_print_settings | eh_siyin_print_printers | eh_siyin_print_orders | eh_siyin_print_records | eh_siyin_print_emails |
             eh_sms_black_lists | eh_yzx_sms_logs |
             eh_user_identifier_logs | eh_user_appeal_logs | eh_organization_members_test |
             eh_salary_default_entities | eh_salary_entity_categories | eh_salary_group_entities | eh_salary_employee_origin_vals | eh_salary_groups | eh_salary_employees | eh_salary_employee_period_vals |
             eh_uniongroup_configures | eh_uniongroup_member_details |
             eh_authorization_third_party_forms | eh_authorization_third_party_records | eh_authorization_third_party_buttons |
-            eh_user_identifier_logs | eh_user_appeal_logs |
             eh_var_field_groups | eh_var_fields | eh_var_field_items | eh_var_field_group_scopes | eh_var_field_scopes | eh_var_field_item_scopes |
             eh_enterprise_customers | eh_contract_attachments | eh_contract_charging_items | eh_contract_charging_item_addresses | eh_contract_params |
             eh_customer_talents | eh_customer_trademarks | eh_customer_patents | eh_customer_apply_projects | eh_customer_commercials | eh_customer_economic_indicators | eh_customer_investments | eh_customer_certificates |
             eh_zj_syncdata_backup | eh_thirdpart_configurations |
             eh_payment_bills | eh_payment_bill_groups | eh_payment_bill_groups_rules | eh_payment_bill_items | eh_payment_bill_notice_records | eh_payment_charging_items | eh_payment_charging_standards | eh_payment_exemption_items | eh_payment_variables | eh_payment_charging_standards_scopes | eh_payment_charging_item_scopes | eh_payment_contract_receiver |
-            eh_siyin_print_settings | eh_siyin_print_printers | eh_siyin_print_orders | eh_siyin_print_records | eh_siyin_print_emails |
-            eh_community_approve|
             eh_pm_notify_configurations | eh_pm_notify_records | eh_pm_notify_logs |
             eh_community_approve_requests | eh_community_map_search_types | eh_community_map_infos|  eh_community_building_geos |
-            eh_community_map_shops |
-            eh_pm_notify_configurations | eh_pm_notify_records | eh_pm_notify_logs |
-            eh_lease_buildings | eh_lease_promotion_communities |
             eh_express_company_businesses | eh_express_hotlines | eh_express_param_settings |
             eh_stat_event_device_logs | eh_stat_event_upload_strategies | eh_stat_events | eh_stat_event_params | eh_stat_event_content_logs |
             eh_stat_event_logs | eh_stat_event_param_logs | eh_stat_event_app_attachment_logs | eh_stat_event_portal_configs | eh_stat_event_portal_statistics |
@@ -200,50 +177,26 @@
             eh_service_alliance_comment_attachments | eh_service_alliance_comments |
             eh_incubator_applies | eh_incubator_project_types | eh_incubator_apply_attachments |
             eh_payment_users | eh_payment_accounts | eh_payment_service_configs | eh_payment_order_records | eh_payment_types | eh_asset_payment_order | eh_asset_payment_order_bills |
-            eh_news_tag | eh_news_tag_vals |
-	    eh_forum_categories | eh_interact_settings |
+            eh_forum_categories | eh_interact_settings |
             eh_archives_sticky_contacts | eh_archives_dismiss_employees | eh_general_form_groups | eh_archives_forms | eh_archives_configurations | eh_archives_logs | eh_archives_notifications |
             eh_lease_projects | eh_lease_project_communities |
-            eh_customer_events  | eh_customer_tracking_plans  | eh_customer_trackings  |   eh_tracking_notify_logs  | 
+            eh_customer_events  | eh_customer_tracking_plans  | eh_customer_trackings  |   eh_tracking_notify_logs  |
             eh_address_attachments | eh_contract_charging_changes | eh_contract_charging_change_addresses |
             eh_parking_car_verifications |
-        eh_siyin_print_settings | eh_siyin_print_printers | eh_siyin_print_orders | eh_siyin_print_records | eh_siyin_print_emails |eh_community_approve |
-        eh_community_approve_requests |
-        eh_lease_buildings | eh_lease_promotion_communities |
-            eh_siyin_print_settings | eh_siyin_print_printers | eh_siyin_print_orders | eh_siyin_print_records | eh_siyin_print_emails |eh_community_approve|
-        eh_community_approve_requests | 
-	    eh_express_company_businesses | eh_express_hotlines | eh_express_param_settings |
-
-        eh_lease_buildings | eh_lease_promotion_communities |
-		eh_express_company_businesses | eh_express_hotlines | eh_express_param_settings |
-
-        eh_stat_event_device_logs | eh_stat_event_upload_strategies | eh_stat_events | eh_stat_event_params | eh_stat_event_content_logs |
-        eh_stat_event_logs | eh_stat_event_param_logs | eh_stat_event_app_attachment_logs | eh_stat_event_portal_configs | eh_stat_event_portal_statistics |
-        eh_stat_event_statistics | eh_stat_event_task_logs | eh_community_default | eh_namespace_masks | eh_door_auth_level |
-        eh_punch_special_days | eh_punch_time_intervals |
-        eh_service_alliance_comment_attachments | eh_service_alliance_comments |
-	eh_incubator_applies | eh_incubator_project_types | eh_incubator_apply_attachments |
-            eh_payment_users | eh_payment_accounts | eh_payment_service_configs | eh_payment_order_records | eh_payment_types | eh_asset_payment_order | eh_asset_payment_order_bills |
-            eh_payment_formula |
-            eh_community_map_shops |      
-            eh_energy_meter_addresses | eh_energy_plans | eh_energy_plan_group_map | eh_energy_plan_meter_map | eh_energy_meter_tasks | eh_energy_meter_logs |     
-            eh_parking_invoice_types | eh_parking_card_types | eh_parking_user_invoices |
-            eh_news_tag | eh_news_tag_vals |
-            eh_lease_projects | eh_lease_project_communities |
-            eh_customer_events  | eh_customer_tracking_plans  | eh_customer_trackings  |   eh_tracking_notify_logs  | 
-            eh_address_attachments | eh_contract_charging_changes | eh_contract_charging_change_addresses | 
-            eh_parking_invoice_types | eh_parking_card_types | eh_parking_user_invoices |
-            eh_service_alliance_comment_attachments | eh_service_alliance_comments |
-
-            eh_incubator_applies | eh_incubator_project_types | eh_incubator_apply_attachments |
-            eh_uniongroup_version | 
-            eh_news_tag | eh_news_tag_vals|
+            eh_siyin_print_settings | eh_siyin_print_printers | eh_siyin_print_orders | eh_siyin_print_records | eh_siyin_print_emails |eh_community_approve |
+            eh_lease_buildings | eh_lease_promotion_communities | eh_community_map_shops |
+            eh_energy_meter_addresses | eh_energy_plans | eh_energy_plan_group_map | eh_energy_plan_meter_map | eh_energy_meter_tasks | eh_energy_meter_logs |
+            eh_news_tag | eh_news_tag_vals | eh_uniongroup_version |
             eh_flow_conditions|eh_flow_condition_expressions|eh_flow_lanes|eh_flow_links|eh_flow_predefined_params|eh_flow_branches|eh_flow_service_types|
-            eh_questionnaire_ranges | eh_payment_formula | eh_servers |
-
-            eh_flow_conditions|eh_flow_condition_expressions|eh_flow_lanes|eh_flow_links|eh_flow_predefined_params|eh_flow_branches|eh_flow_service_types|
-            eh_default_charging_items | eh_default_charging_item_properties | eh_payment_notice_config | eh_authorization_control_configs | eh_reflection_service_module_apps |
-	        eh_authorization_control_configs | eh_reflection_service_module_apps | eh_guild_applies |
+            eh_servers | eh_general_approval_templates | eh_general_form_templates |
+            eh_default_charging_items | eh_default_charging_item_properties | eh_payment_notice_config |
+            eh_questionnaire_ranges | eh_payment_formula | eh_customer_economic_indicator_statistics |
+            eh_industry_types | eh_guild_applies |
+            eh_rentalv2_price_packages |
+            eh_payment_withdraw_orders |eh_community_organization_detail_display |
+            eh_forum_service_types |
+            eh_me_web_menus |
+	        eh_authorization_control_configs | eh_reflection_service_module_apps |
         </includes>
 
             <!-- All elements that are excluded from your schema
