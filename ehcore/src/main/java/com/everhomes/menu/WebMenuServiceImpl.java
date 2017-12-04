@@ -135,7 +135,8 @@ public class WebMenuServiceImpl implements WebMenuService {
 					return r.getId();
 				}).collect(Collectors.toList());
 			}
-			menus_module = webMenuProvider. listWebMenuByType(WebMenuType.PARK.getCode(), categories, null, moduleIds);
+			if(moduleIds != null && moduleIds.size() > 0)
+				menus_module = webMenuProvider. listWebMenuByType(WebMenuType.PARK.getCode(), categories, null, moduleIds);
 
 
 			//todo: 2--根据应用拿菜单
