@@ -6409,49 +6409,52 @@ public class ForumServiceImpl implements ForumService {
             }
         }
 
+        //页面同时点击报错导致了delete报错。这都被测试测出来了。加个锁吧。
+        this.coordinationProvider.getNamedLock(CoordinationLocks.FORUM_SETTING.getCode()).enter(()-> {
+            dbProvider.execute(status -> {
 
-        dbProvider.execute(status -> {
+                List<ForumServiceType> oldTypes = forumProvider.listForumServiceTypes(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId());
+                if (oldTypes != null && oldTypes.size() > 0) {
+                    List<Long> oldTypeIds = oldTypes.stream().map(r -> r.getId()).collect(Collectors.toList());
+                    forumProvider.deleteForumServiceTypes(oldTypeIds);
+                }
+                forumProvider.createForumServiceTypes(newTypes);
 
-            List<ForumServiceType> oldTypes = forumProvider.listForumServiceTypes(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId());
-            if(oldTypes != null && oldTypes.size() > 0){
-                List<Long> oldTypeIds = oldTypes.stream().map(r -> r.getId()).collect(Collectors.toList());
-                forumProvider.deleteForumServiceTypes(oldTypeIds);
-            }
-            forumProvider.createForumServiceTypes(newTypes);
+                ResetHotTagCommand resetHotTagCommand = new ResetHotTagCommand();
+                resetHotTagCommand.setNamespaceId(cmd.getNamespaceId());
+                resetHotTagCommand.setModuleType(cmd.getModuleType());
+                resetHotTagCommand.setCategoryId(cmd.getCategoryId());
 
-            ResetHotTagCommand resetHotTagCommand = new ResetHotTagCommand();
-            resetHotTagCommand.setNamespaceId(cmd.getNamespaceId());
-            resetHotTagCommand.setModuleType(cmd.getModuleType());
-            resetHotTagCommand.setCategoryId(cmd.getCategoryId());
+                //话题的热门标签
+                if (cmd.getTopicTags() == null) {
+                    cmd.setTopicTags(new ArrayList<>());
+                }
+                resetHotTagCommand.setServiceType(HotTagServiceType.TOPIC.getCode());
+                resetHotTagCommand.setNames(cmd.getTopicTags().stream().map(r -> r.getName()).collect(Collectors.toList()));
+                hotTagService.resetHotTag(resetHotTagCommand);
 
-            //话题的热门标签
-            if(cmd.getTopicTags() == null){
-                cmd.setTopicTags(new ArrayList<>());
-            }
-            resetHotTagCommand.setServiceType(HotTagServiceType.TOPIC.getCode());
-            resetHotTagCommand.setNames(cmd.getTopicTags().stream().map(r -> r.getName()).collect(Collectors.toList()));
-            hotTagService.resetHotTag(resetHotTagCommand);
+                //活动的热门标签
+                if (cmd.getActivityTags() == null) {
+                    cmd.setActivityTags(new ArrayList<>());
+                }
+                resetHotTagCommand.setServiceType(HotTagServiceType.ACTIVITY.getCode());
+                resetHotTagCommand.setNames(cmd.getActivityTags().stream().map(r -> r.getName()).collect(Collectors.toList()));
+                hotTagService.resetHotTag(resetHotTagCommand);
 
-            //活动的热门标签
-            if(cmd.getActivityTags() == null){
-                cmd.setActivityTags(new ArrayList<>());
-            }
-            resetHotTagCommand.setServiceType(HotTagServiceType.ACTIVITY.getCode());
-            resetHotTagCommand.setNames(cmd.getActivityTags().stream().map(r -> r.getName()).collect(Collectors.toList()));
-            hotTagService.resetHotTag(resetHotTagCommand);
+                //投票的热门标签
+                if (cmd.getPollTags() == null) {
+                    cmd.setPollTags(new ArrayList<>());
+                }
+                resetHotTagCommand.setServiceType(HotTagServiceType.POLL.getCode());
+                resetHotTagCommand.setNames(cmd.getPollTags().stream().map(r -> r.getName()).collect(Collectors.toList()));
+                hotTagService.resetHotTag(resetHotTagCommand);
 
-            //投票的热门标签
-            if(cmd.getPollTags() == null){
-                cmd.setPollTags(new ArrayList<>());
-            }
-            resetHotTagCommand.setServiceType(HotTagServiceType.POLL.getCode());
-            resetHotTagCommand.setNames(cmd.getPollTags().stream().map(r -> r.getName()).collect(Collectors.toList()));
-            hotTagService.resetHotTag(resetHotTagCommand);
+                //暂时不对评论做处理。
 
-            //暂时不对评论做处理。
+                return null;
 
+            });
             return null;
-
         });
 
     }
