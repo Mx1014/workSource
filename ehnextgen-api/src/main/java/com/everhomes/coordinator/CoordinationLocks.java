@@ -108,7 +108,8 @@ public enum CoordinationLocks {
     CREATE_ENERGY_TASK("energy.task.create"),
     SCHEDULE_ENERGY_TASK("energy.task.schedule"),
 	ADD_ORGANIZATION_PERSONEL("add.organization.personel"),
-    SYNC_CONTRACT("sync.contract")
+    SYNC_CONTRACT("sync.contract"),
+    FORUM_SETTING("forum.setting")
     ;
     private String code;
     private CoordinationLocks(String code) {
