@@ -78,6 +78,14 @@ public class OrganizationDTO {
     private Byte communityType;
     private Long defaultForumId;
     private Long feedbackForumId;
+
+	//fix 14844 电商需要企业的provinceName，cityName,areaName
+	private Long provinceId;
+	private String provinceName;
+	private Long cityId;
+	private String cityName;
+	private Long areaId;
+	private String areaName;
 	
 	private Long groupId;
 	
@@ -103,7 +111,55 @@ public class OrganizationDTO {
     private Integer order;
 
     private Integer errorCode;
-	
+
+	public Long getAreaId() {
+		return areaId;
+	}
+
+	public void setAreaId(Long areaId) {
+		this.areaId = areaId;
+	}
+
+	public String getAreaName() {
+		return areaName;
+	}
+
+	public void setAreaName(String areaName) {
+		this.areaName = areaName;
+	}
+
+	public Long getCityId() {
+		return cityId;
+	}
+
+	public void setCityId(Long cityId) {
+		this.cityId = cityId;
+	}
+
+	public String getCityName() {
+		return cityName;
+	}
+
+	public void setCityName(String cityName) {
+		this.cityName = cityName;
+	}
+
+	public Long getProvinceId() {
+		return provinceId;
+	}
+
+	public void setProvinceId(Long provinceId) {
+		this.provinceId = provinceId;
+	}
+
+	public String getProvinceName() {
+		return provinceName;
+	}
+
+	public void setProvinceName(String provinceName) {
+		this.provinceName = provinceName;
+	}
+
 	public String getEnterpriseContactor() {
 		return enterpriseContactor;
 	}

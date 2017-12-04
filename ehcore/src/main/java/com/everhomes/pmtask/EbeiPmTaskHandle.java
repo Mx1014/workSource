@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.category.Category;
@@ -22,6 +24,7 @@ import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.flow.*;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pmtask.ebei.*;
+import com.everhomes.rest.address.NamespaceAddressType;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -97,6 +100,8 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
     private FlowService flowService;
     @Autowired
     private OrganizationProvider organizationProvider;
+    @Autowired
+    private AddressProvider addressProvider;
 
     @PostConstruct
     public void init() {
@@ -295,6 +300,11 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
         if (companyId!=null)
             param.put("companyName",organizationProvider.getOrganizationNameById(companyId));
 
+        if (task.getAddressId()!=null) {
+            Address address = addressProvider.findAddressById(task.getAddressId());
+            if (address != null && NamespaceAddressType.EBEI.getCode().equals(address.getNamespaceAddressType()))
+                param.put("buildingId", address.getNamespaceAddressToken());
+        }
 
         param.put("submitter","正中会");
         param.put("serviceId", getMappingIdByCategoryId(task.getCategoryId()));
@@ -442,17 +452,21 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
             task.setOrganizationId(cmd.getOrganizationId());
             task.setRequestorName(requestorName);
             task.setRequestorPhone(requestorPhone);
+            task.setOrganizationName(cmd.getOrganizationName());
             Long time  = System.currentTimeMillis();
+            pmTaskProvider.createTask(task);
+            createFlowCase(task);
+
             EbeiTaskResult createTaskResultDTO = createTask(task, cmd.getAttachments(),cmd.getFlowOrganizationId());
             LOGGER.info("--------------------------------------timecost:"+(System.currentTimeMillis()-time));
             if(null != createTaskResultDTO) {
                 task.setStringTag1(createTaskResultDTO.getOrderId());
             }
-            pmTaskProvider.createTask(task);
+
             //附件
             pmTaskCommonService.addAttachments(cmd.getAttachments(), user.getId(), task.getId(), PmTaskAttachmentType.TASK.getCode());
 
-            createFlowCase(task);
+           pmTaskProvider.updateTask(task);
             return null;
         });
 

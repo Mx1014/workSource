@@ -2330,6 +2330,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 		}
 		List<ProjectDTO> projectTrees = new ArrayList<>();
+		// 存在项目分类时的解析
 		if(0 != categoryIds.size()){
 			//把分类下的每一个项目树形化，并加入到resource
 			List<ProjectDTO> temp = communityProvider.listResourceCategory(null, null, categoryIds, ResourceCategoryType.CATEGORY.getCode())
@@ -2350,6 +2351,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 			setResourceDTOs(projectTrees, projectIds, namespaceId);
 		}
+
+		// 不存在项目分类时的解析
+		//添加子项目
+		entityts.stream().filter(r -> EntityType.COMMUNITY == EntityType.fromCode(r.getProjectType())).map(r -> {
+			//获取园区下的子项目
+			ListChildProjectCommand cmd = new ListChildProjectCommand();
+			cmd.setProjectType(EntityType.COMMUNITY.getCode());
+			cmd.setProjectId(r.getProjectId());
+			List<ProjectDTO> childDto = this.communityService.listChildProjects(cmd);
+			if (childDto != null && childDto.size() > 0)
+				r.setProjects(childDto);
+			return r;
+		}).collect(Collectors.toList());
 		projectTrees.addAll(entityts);
 
 		Long endTime = System.currentTimeMillis();
@@ -2836,6 +2850,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			LOGGER.error("This user has not been added to the administrator list.");
 //			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_ADMINISTRATORS_LIST_NONEXISTS,
 //					"This user has not been added to the administrator list.");
+			return;
 		}
 
 		List<Authorization> authorizations = authorizationProvider.listManageAuthorizationsByTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId(), EntityType.SERVICE_MODULE.getCode(), null);

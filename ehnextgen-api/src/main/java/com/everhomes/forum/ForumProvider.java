@@ -294,6 +294,12 @@ public interface ForumProvider {
 
     InteractSetting findInteractSetting(Integer namespaceId, Long forumId, String type, Long entryId);
 
+    void createForumServiceTypes(List<ForumServiceType> list);
+
+    List<ForumServiceType> listForumServiceTypes(Integer namespaceId, Byte moduleType, Long categoryId);
+
+    void deleteForumServiceTypes(List<Long> ids);
+
     //ForumCategory findForumCategory(Long forumId, Long entryId);
 
 }

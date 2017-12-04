@@ -28,7 +28,8 @@ import com.everhomes.group.Group;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
-import com.everhomes.hotTag.HotTags;
+import com.everhomes.hotTag.HotTagService;
+import com.everhomes.hotTag.HotTag;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -62,8 +63,7 @@ import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
 import com.everhomes.rest.forum.StickPostCommand;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.common.Router;
-import com.everhomes.rest.hotTag.HotFlag;
-import com.everhomes.rest.hotTag.HotTagServiceType;
+import com.everhomes.rest.hotTag.*;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.*;
@@ -87,7 +87,6 @@ import com.everhomes.user.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import net.greghaines.jesque.Job;
-import org.apache.xmlbeans.impl.xb.xsdschema.Public;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.elasticsearch.common.text.Text;
@@ -203,6 +202,9 @@ public class ForumServiceImpl implements ForumService {
 
     @Autowired
     private HotTagSearcher hotTagSearcher;
+
+    @Autowired
+    private HotTagService hotTagService;
     
     @Override
     public boolean isSystemForum(long forumId, Long communityId) {
@@ -406,14 +408,17 @@ public class ForumServiceImpl implements ForumService {
     private void feedDocTopicTag(Post post){
         if(post.getEmbeddedAppId()!=null && post.getEmbeddedAppId() == 0L && !StringUtils.isEmpty(post.getTag())){
             try{
-                HotTags tag = new HotTags();
+                HotTag tag = new HotTag();
 
                 Integer namespaceId = UserContext.getCurrentNamespaceId(post.getNamespaceId());
                 tag.setNamespaceId(namespaceId);
 
+                //TODO 业务类型、入口ID
+                tag.setServiceType(HotTagServiceType.TOPIC.getCode());
+
                 tag.setName(post.getTag());
                 tag.setHotFlag(HotFlag.NORMAL.getCode());
-                tag.setServiceType(HotTagServiceType.TOPIC.getCode());
+
                 hotTagSearcher.feedDoc(tag);
             }catch (Exception e){
                 LOGGER.error("feedDoc topic tag error",e);
@@ -6346,6 +6351,128 @@ public class ForumServiceImpl implements ForumService {
     public ForumCategoryDTO findForumCategory(FindForumCategoryCommand cmd) {
          ForumCategory category = forumProvider.findForumCategoryById(cmd.getId());
         return ConvertHelper.convert(category, ForumCategoryDTO.class);
+    }
+
+    @Override
+    public GetForumSettingResponse getForumSetting(GetForumSettingCommand cmd) {
+        GetForumSettingResponse response = new GetForumSettingResponse();
+
+        //获取服务类型
+        ListForumServiceTypesCommand serviceTypesCommand = new ListForumServiceTypesCommand();
+        serviceTypesCommand.setNamespaceId(cmd.getNamespaceId());
+        serviceTypesCommand.setModuleType(cmd.getModuleType());
+        serviceTypesCommand.setCategoryId(cmd.getCategoryId());
+        ListForumServiceTypesResponse serviceTypesDtos = listForumServiceTypes(serviceTypesCommand);
+        response.setServiceTypes(serviceTypesDtos.getDtos());
+
+        //话题的热门标签
+        ListHotTagCommand tagCommand = new ListHotTagCommand();
+        tagCommand.setNamespaceId(cmd.getNamespaceId());
+        tagCommand.setModuleType(cmd.getModuleType());
+        tagCommand.setCategoryId(cmd.getCategoryId());
+        tagCommand.setServiceType(HotTagServiceType.TOPIC.getCode());
+        List<TagDTO> tagDTOS = hotTagService.listHotTag(tagCommand);
+        response.setTopicTags(tagDTOS);
+
+
+        //活动的热门标签
+        tagCommand.setServiceType(HotTagServiceType.ACTIVITY.getCode());
+        tagDTOS = hotTagService.listHotTag(tagCommand);
+        response.setActivityTags(tagDTOS);
+
+        //投票的热门标签
+        tagCommand.setServiceType(HotTagServiceType.POLL.getCode());
+        tagDTOS = hotTagService.listHotTag(tagCommand);
+        response.setPollTags(tagDTOS);
+
+        //暂时不对评论做处理。
+        response.setInteractFlag(InteractFlag.SUPPORT.getCode());
+
+        return response;
+    }
+
+    @Override
+    public void updateForumSetting(UpdateForumSettingCommand cmd) {
+
+        List<ForumServiceType> oldTypes = forumProvider.listForumServiceTypes(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId());
+
+        List<Long> oldTypeIds = oldTypes.stream().map(r -> r.getId()).collect(Collectors.toList());
+
+        List<ForumServiceType> newTypes = new ArrayList<>();
+
+        if(cmd.getServiceTypes() != null){
+            for (int i= 0; i<cmd.getServiceTypes().size(); i++){
+                ForumServiceType type = ConvertHelper.convert(cmd.getServiceTypes().get(i), ForumServiceType.class);
+                type.setId(null);
+                type.setSortNum(i);
+                type.setCreateTime(new Timestamp(System.currentTimeMillis()));
+                type.setNamespaceId(cmd.getNamespaceId());
+                type.setModuleType(cmd.getModuleType());
+                type.setCategoryId(cmd.getCategoryId());
+                newTypes.add(type);
+            }
+        }
+
+        dbProvider.execute(status -> {
+
+            //更新服务类型
+            forumProvider.deleteForumServiceTypes(oldTypeIds);
+            forumProvider.createForumServiceTypes(newTypes);
+
+            ResetHotTagCommand resetHotTagCommand = new ResetHotTagCommand();
+            resetHotTagCommand.setNamespaceId(cmd.getNamespaceId());
+            resetHotTagCommand.setModuleType(cmd.getModuleType());
+            resetHotTagCommand.setCategoryId(cmd.getCategoryId());
+
+            //话题的热门标签
+            if(cmd.getTopicTags() == null){
+                cmd.setTopicTags(new ArrayList<>());
+            }
+            resetHotTagCommand.setServiceType(HotTagServiceType.TOPIC.getCode());
+            resetHotTagCommand.setNames(cmd.getTopicTags().stream().map(r -> r.getName()).collect(Collectors.toList()));
+            hotTagService.resetHotTag(resetHotTagCommand);
+
+            //活动的热门标签
+            if(cmd.getActivityTags() == null){
+                cmd.setActivityTags(new ArrayList<>());
+            }
+            resetHotTagCommand.setServiceType(HotTagServiceType.ACTIVITY.getCode());
+            resetHotTagCommand.setNames(cmd.getActivityTags().stream().map(r -> r.getName()).collect(Collectors.toList()));
+            hotTagService.resetHotTag(resetHotTagCommand);
+
+            //投票的热门标签
+            if(cmd.getPollTags() == null){
+                cmd.setPollTags(new ArrayList<>());
+            }
+            resetHotTagCommand.setServiceType(HotTagServiceType.POLL.getCode());
+            resetHotTagCommand.setNames(cmd.getPollTags().stream().map(r -> r.getName()).collect(Collectors.toList()));
+            hotTagService.resetHotTag(resetHotTagCommand);
+
+            //暂时不对评论做处理。
+
+            return null;
+
+        });
+
+    }
+
+    @Override
+    public ListForumServiceTypesResponse listForumServiceTypes(ListForumServiceTypesCommand cmd) {
+
+        List<ForumServiceType> types = forumProvider.listForumServiceTypes(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId());
+
+        if(types == null || types.size() == 0){
+            types = forumProvider.listForumServiceTypes(0, null, null);
+        }
+
+        ListForumServiceTypesResponse response = new ListForumServiceTypesResponse();
+
+        if(types != null){
+            List<ForumServiceTypeDTO> dtos = types.stream().map(r -> ConvertHelper.convert(r, ForumServiceTypeDTO.class)).collect(Collectors.toList());
+            response.setDtos(dtos);
+        }
+        return response;
+
     }
     
 }

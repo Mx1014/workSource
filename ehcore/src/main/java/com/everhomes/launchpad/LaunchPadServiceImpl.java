@@ -1407,7 +1407,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		// 按id排序 可以去掉 by sfyan
 //		Collections.sort(result, new Comparator<LaunchPadItemDTO>(){
 //			@Override
-//			public int compare(LaunchPadItemDTO o1, LaunchPadItemDTO o2){
+//			public int compareTo(LaunchPadItemDTO o1, LaunchPadItemDTO o2){
 //				return o1.getId().intValue() - o2.getId().intValue();
 //			}
 //		});
@@ -1776,11 +1776,22 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		List<LaunchPadLayoutDTO> results = getLaunchPadLayoutByVersionCode(cmd, scopeType,scopeId);
 		if(results != null && !results.isEmpty()){
 			LaunchPadLayoutDTO dto =  results.get(0);
+			populateLaunchPadLayoutDTO(dto);
 			return dto;
 		}
 		return null;
 	}
-	
+
+	private void populateLaunchPadLayoutDTO(LaunchPadLayoutDTO dto){
+		if(dto == null || StringUtils.isEmpty(dto.getBgImageUri()) || dto.getId() == null){
+			return;
+		}
+
+		String url = contentServerService.parserUri(dto.getBgImageUri(), LaunchPadLayoutDTO.class.getSimpleName(), dto.getId());
+
+		dto.setBgImageUrl(url);
+	}
+
 	@Override
     public LaunchPadLayoutDTO getLastLaunchPadLayoutByScene(@Valid GetLaunchPadLayoutBySceneCommand cmd) {
 	    User user = UserContext.current().getUser();

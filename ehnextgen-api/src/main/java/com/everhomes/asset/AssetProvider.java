@@ -2,12 +2,14 @@ package com.everhomes.asset;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.order.PaymentAccount;
+import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
 import com.everhomes.rest.asset.*;
 import com.everhomes.server.schema.tables.pojos.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -191,13 +193,13 @@ public interface AssetProvider {
 
     List<ListChargingItemsForBillGroupDTO> listChargingItemsForBillGroup(Long billGroupId,Long pageAnchor,Integer pageSize);
 
-    AddOrModifyRuleForBillGroupResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
+    Long addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd,Long brotherRuleId,byte deCouplingFlag);
 
     EhPaymentBillGroupsRules findBillGroupRuleById(Long billGroupRuleId);
 
     boolean isInWorkGroupRule(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule);
 
-    void deleteBillGroupRuleById(Long billGroupRuleId);
+    DeleteChargingItemForBillGroupResponse deleteBillGroupRuleById(Long billGroupRuleId,byte deCouplingFlag);
 
     EhPaymentChargingStandards findChargingStandardById(Long chargingStandardId);
 
@@ -205,7 +207,7 @@ public interface AssetProvider {
 
     boolean checkBillsByBillGroupId(Long billGroupId);
 
-    void deleteBillGroupAndRules(Long billGroupId,byte deCouplingFlag,String ownerType,Long ownerId);
+    DeleteBillGroupReponse deleteBillGroupAndRules(Long billGroupId,byte deCouplingFlag,String ownerType,Long ownerId);
 
     ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(Long billGroupRuleId);
 
@@ -242,4 +244,27 @@ public interface AssetProvider {
     List<PaymentNoticeConfig> listAllNoticeConfigs();
 
     List<PaymentBills> getAllBillsByCommunity(Long key);
+
+
+    List<PaymentBills> findAssetArrearage(Integer namespaceId, Long communityId, Long organizationId);
+
+
+
+
+    List<EhPaymentBillGroupsRules> getBillGroupRuleByCommunityWithBro(Long ownerId, String ownerType, boolean b);
+
+    List<PaymentBills> findSettledBillsByContractIds(List<Long> contractIds);
+
+    String getbillGroupNameById(Long billGroupId);
+
+    Collection<? extends Long> getAddressIdByBillId(Long id);
+
+    String getAddressStrByIds(List<Long> collect);
+
+    BigDecimal getBillExpectanciesAmountOnContract(String contractNum, Long contractId);
+
+    List<ListAllBillsForClientDTO> listAllBillsForClient(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId);
+
+    PaymentServiceConfig findServiceConfig(Integer namespaceId);
+
 }

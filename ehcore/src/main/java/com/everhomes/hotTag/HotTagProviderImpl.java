@@ -12,29 +12,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.activity.Activity;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.quality.QualityInspectionStandards;
-import com.everhomes.quality.QualityInspectionTasks;
 import com.everhomes.rest.hotTag.HotTagStatus;
 import com.everhomes.rest.hotTag.TagDTO;
-import com.everhomes.rest.quality.QualityStandardStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhActivitiesDao;
 import com.everhomes.server.schema.tables.daos.EhHotTagsDao;
-import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.server.schema.tables.pojos.EhHotTags;
 import com.everhomes.server.schema.tables.records.EhHotTagsRecord;
-import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRecord;
-import com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import scala.Int;
 
 @Component
 public class HotTagProviderImpl implements HotTagProvider {
@@ -47,14 +38,17 @@ public class HotTagProviderImpl implements HotTagProvider {
 	private DbProvider dbProvider;
 
 	@Override
-	public List<TagDTO> listHotTag(Integer nameSpaceId, Long categoryId, String serviceType, Integer pageSize) {
+	public List<TagDTO> listHotTag(Integer nameSpaceId, Byte moduleType, Long categoryId, String serviceType, Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhHotTagsRecord> query = context.selectQuery(Tables.EH_HOT_TAGS);
-		query.addConditions(Tables.EH_HOT_TAGS.SERVICE_TYPE.eq(serviceType));
 		query.addConditions(Tables.EH_HOT_TAGS.NAMESPACE_ID.eq(nameSpaceId));
+		if(moduleType != null){
+			query.addConditions(Tables.EH_HOT_TAGS.MODULE_TYPE.eq(moduleType));
+		}
 		if(categoryId != null){
 			query.addConditions(Tables.EH_HOT_TAGS.CATEGORY_ID.eq(categoryId));
 		}
+		query.addConditions(Tables.EH_HOT_TAGS.SERVICE_TYPE.eq(serviceType));
 		query.addConditions(Tables.EH_HOT_TAGS.STATUS.eq(HotTagStatus.ACTIVE.getCode()));
 		query.addOrderBy(Tables.EH_HOT_TAGS.DEFAULT_ORDER.desc());
 
@@ -95,7 +89,7 @@ public class HotTagProviderImpl implements HotTagProvider {
 	}
 
 	@Override
-	public void updateHotTag(HotTags tag) {
+	public void updateHotTag(HotTag tag) {
 		assert(tag.getId() != null);
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhHotTags.class, tag.getId()));
@@ -106,7 +100,18 @@ public class HotTagProviderImpl implements HotTagProvider {
 	}
 
 	@Override
-	public void createHotTag(HotTags tag) {
+	public void deleteHotTag(HotTag tag) {
+		assert(tag.getId() != null);
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhHotTags.class, tag.getId()));
+		EhHotTagsDao dao = new EhHotTagsDao(context.configuration());
+		dao.delete(tag);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhHotTags.class, tag.getId());
+	}
+
+	@Override
+	public void createHotTag(HotTag tag) {
 		
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhHotTags.class));
 		
@@ -124,31 +129,35 @@ public class HotTagProviderImpl implements HotTagProvider {
 	}
 
 	@Override
-	public HotTags findById(Long id) {
+	public HotTag findById(Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhHotTags.class, id));
 		EhHotTagsDao dao = new EhHotTagsDao(context.configuration());
 		EhHotTags result = dao.findById(id);
         if (result == null) {
             return null;
         }
-        return ConvertHelper.convert(result, HotTags.class);
+        return ConvertHelper.convert(result, HotTag.class);
 	}
 
 	@Override
-	public HotTags findByName(Integer namespaceId, Long categoryId, String serviceType, String name) {
+	public HotTag findByName(Integer namespaceId, Byte moduleType, Long categoryId, String serviceType, String name) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhHotTagsRecord> query = context.selectQuery(Tables.EH_HOT_TAGS);
-		query.addConditions(Tables.EH_HOT_TAGS.NAME.eq(name));
-		query.addConditions(Tables.EH_HOT_TAGS.SERVICE_TYPE.eq(serviceType));
+
 		query.addConditions(Tables.EH_HOT_TAGS.NAMESPACE_ID.eq(namespaceId));
 
+		if(moduleType != null){
+			query.addConditions(Tables.EH_HOT_TAGS.MODULE_TYPE.eq(moduleType));
+		}
 		if(categoryId != null){
 			query.addConditions(Tables.EH_HOT_TAGS.CATEGORY_ID.eq(categoryId));
 		}
 
-		List<HotTags> result = new ArrayList<HotTags>();
+		query.addConditions(Tables.EH_HOT_TAGS.SERVICE_TYPE.eq(serviceType));
+		query.addConditions(Tables.EH_HOT_TAGS.NAME.eq(name));
+		List<HotTag> result = new ArrayList<HotTag>();
 		query.fetch().map((r) -> {
-			result.add(ConvertHelper.convert(r, HotTags.class));
+			result.add(ConvertHelper.convert(r, HotTag.class));
 			return null;
 		});
 		if(result.size()==0)

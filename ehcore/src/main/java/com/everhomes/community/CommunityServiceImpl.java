@@ -27,19 +27,23 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.namespace.*;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.*;
+import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserLevel;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.ProjectDTO;
-import com.everhomes.rest.address.AddressDTO;
-import com.everhomes.rest.address.CommunityAdminStatus;
-import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.*;
+import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.admin.*;
+import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.messaging.*;
@@ -166,6 +170,12 @@ public class CommunityServiceImpl implements CommunityService {
     @Autowired
     private ServiceConfigurationsProvider serviceConfigurationsProvider;
 
+	@Autowired
+	private ContractProvider contractProvider;
+
+	@Autowired
+	private PropertyMgrService propertyMgrService;
+
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
 
@@ -245,6 +255,10 @@ public class CommunityServiceImpl implements CommunityService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid areaId parameter,area is not found.");
 		}
+		if(StringUtils.isNotBlank(cmd.getCommunityNumber())) {
+			checkCommunityNumberUnique(community.getId(), cmd.getCommunityNumber(), community.getNamespaceId());
+		}
+		community.setCommunityNumber(cmd.getCommunityNumber());
 		community.setAreaId(cmd.getAreaId());
 		community.setCityId(cmd.getCityId());
 		community.setOperatorUid(userId);
@@ -299,6 +313,25 @@ public class CommunityServiceImpl implements CommunityService {
 			return null;
 		});
 	}
+
+	private void checkCommunityNumberUnique(Long id, String communityNumber, Integer namespaceId) {
+		Community community = communityProvider.findCommunityByCommunityNumber(communityNumber, namespaceId);
+		if(community != null && !community.getId().equals(id)) {
+			LOGGER.error("Community number is already exsit.communityNumber=" + communityNumber);
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NUMBER_EXIST,
+					"Community number is already exsit.");
+		}
+	}
+
+	private void checkBuildingNumberUnique(Long id, String buildingNumber, Long communityId) {
+		Building building = communityProvider.findBuildingByCommunityIdAndNumber(communityId, buildingNumber);
+		if(building != null && !building.getId().equals(id)) {
+			LOGGER.error("building number is already exsit.buildingNumber=" + buildingNumber);
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_BUILDING_NUMBER_EXIST,
+					"building number is already exsit.");
+		}
+	}
+
 	@Override
 	public void approveCommuniy(ApproveCommunityAdminCommand cmd){
 		if(cmd.getCommunityId() == null){
@@ -793,7 +826,12 @@ public class CommunityServiceImpl implements CommunityService {
 		if(cmd.getEntryDate() != null) {
 			building.setEntryDate(new Timestamp(cmd.getEntryDate()));
 		}
-		
+
+		if(StringUtils.isNotBlank(cmd.getBuildingNumber())){
+			checkBuildingNumberUnique(building.getId(), cmd.getBuildingNumber(), building.getCommunityId());
+		}
+		building.setBuildingNumber(cmd.getBuildingNumber());
+
 		Long userId = UserContext.currentUserId();
 
 		dbProvider.execute((TransactionStatus status) -> {
@@ -827,8 +865,37 @@ public class CommunityServiceImpl implements CommunityService {
 	public void deleteBuilding(DeleteBuildingAdminCommand cmd) {
 		
 		Building building = this.communityProvider.findBuildingById(cmd.getBuildingId());
-		
-		this.communityProvider.deleteBuilding(building);
+//		1.若楼栋或楼栋下的门牌关联了合同或其他业务（如车辆、服务等），则
+//		不允许删除；
+//		2.若楼栋或楼栋下的门牌没有做任何关联，则删除楼栋时，连同楼栋下的
+//		子节点一同删除；
+		dbProvider.execute((TransactionStatus status) -> {
+			if(building != null) {
+				List<Contract> contracts = contractProvider.listContractByBuildingName(building.getName(), building.getCommunityId());
+				if(contracts != null && contracts.size() > 0) {
+					contracts.forEach(contract -> {
+						if(contract.getStatus() == ContractStatus.ACTIVE.getCode() || contract.getStatus() == ContractStatus.WAITING_FOR_LAUNCH.getCode()
+								|| contract.getStatus() == ContractStatus.WAITING_FOR_APPROVAL.getCode() || contract.getStatus() == ContractStatus.APPROVE_QUALITIED.getCode()
+								|| contract.getStatus() == ContractStatus.EXPIRING.getCode() || contract.getStatus() == ContractStatus.DRAFT.getCode()) {
+							LOGGER.error("the building has attach to contract. address id: {}", cmd.getBuildingId());
+							throw RuntimeErrorException.errorWith(BuildingServiceErrorCode.SCOPE, BuildingServiceErrorCode.ERROR_BUILDING_HAS_CONTRACT,
+									"the building has attach to contract");
+						}
+					});
+				}
+				List<ApartmentDTO> apartments = addressProvider.listApartmentsByBuildingName(building.getCommunityId(), building.getName() , 0 , Integer.MAX_VALUE-1);
+				if(apartments != null && apartments.size() > 0) {
+					apartments.forEach(apartmentDTO -> {
+						DeleteApartmentCommand command = new DeleteApartmentCommand();
+						command.setId(apartmentDTO.getAddressId());
+						propertyMgrService.deleteApartment(command);
+					});
+				}
+				this.communityProvider.deleteBuilding(building);
+			}
+			return null;
+		});
+
 	}
 
 
@@ -1113,6 +1180,9 @@ public class CommunityServiceImpl implements CommunityService {
 					String[] temp = data.getLongitudeLatitude().replace("，", ",").replace("、", ",").split(",");
 					building.setLongitude(Double.parseDouble(temp[0]));
 					building.setLatitude(Double.parseDouble(temp[1]));
+				} else {
+					building.setLongitude(null);
+					building.setLatitude(null);
 				}
 
 				building.setNamespaceBuildingType(data.getNamespaceBuildingType());
@@ -2133,6 +2203,7 @@ public class CommunityServiceImpl implements CommunityService {
 				CommunityUserDto dto = new CommunityUserDto();
 				//dto.setUserName(u.getNickName());
 				dto.setNickName(u.getNickName());
+				dto.setUserId(u.getId());
 				// dto.setPhone(r.getPhoneNumber());
 				dto.setApplyTime(u.getCreateTime());
 				dto.setIdentityNumber(u.getIdentityNumberTag());
@@ -2793,9 +2864,9 @@ public class CommunityServiceImpl implements CommunityService {
 		try {
 			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
 		} catch (IOException e) {
-			LOGGER.error("process Excel error, operatorId=" + userId + ", cmd=" + cmd);
+			LOGGER.error("processStat Excel error, operatorId=" + userId + ", cmd=" + cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_GENERAL_EXCEPTION, "process Excel error");
+					ErrorCodes.ERROR_GENERAL_EXCEPTION, "processStat Excel error");
 		}
 
 		if (resultList != null && resultList.size() > 0) {
@@ -3670,7 +3741,8 @@ public class CommunityServiceImpl implements CommunityService {
 			ProjectDTO dto = new ProjectDTO();
 			dto.setProjectName(category.getName());
 			dto.setProjectId(category.getId());
-			dto.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
+			dto.setProjectType(EntityType.CHILD_PROJECT.getCode());
+			dto.setParentId(cmd.getProjectId());
 			List<ResourceCategoryAssignment> buildingCategorys = communityProvider.listResourceCategoryAssignment(category.getId(), namespaceId);
 			List<ProjectDTO> buildingProjects = new ArrayList<>();
 			for (ResourceCategoryAssignment buildingCategory: buildingCategorys) {
@@ -3678,6 +3750,7 @@ public class CommunityServiceImpl implements CommunityService {
 					Building building = communityProvider.findBuildingById(buildingCategory.getResourceId());
 					if(null != building){
 						ProjectDTO buildingProject = new ProjectDTO();
+						buildingProject.setParentId(category.getId());
 						buildingProject.setProjectId(building.getId());
 						buildingProject.setProjectName(building.getName());
 						buildingProject.setProjectType(EntityType.BUILDING.getCode());

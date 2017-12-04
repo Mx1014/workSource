@@ -2,10 +2,10 @@ package com.everhomes.flow;
 
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.util.Tuple;
 
 import java.util.List;
-import java.util.Map;
 
 public interface FlowListenerManager {
 
@@ -77,11 +77,17 @@ public interface FlowListenerManager {
 
     void onFlowMessageSend(FlowCaseState ctx, MessageDTO messageDto);
 
-    Map<String,String> onFlowVariableRender(FlowCaseState ctx, List<String> vars);
+    String onFlowVariableRender(FlowCaseState ctx, String variable);
 
-    List<FlowPredefinedParamDTO> listPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId);
+    // List<FlowPredefinedParamDTO> listFlowPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId);
 
-    List<FlowServiceTypeDTO> listFlowServiceTypes(Integer namespaceId, Long moduleId);
+    List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId);
 
-    boolean evaluateFlowConditionVariableRelational(FlowCaseState ctx, FlowConditionRelationalOperatorType relationalOperatorType, FlowConditionExpression exp);
+    List<FlowServiceTypeDTO> listFlowServiceTypes(Integer namespaceId, Long moduleId, String ownerType, Long ownerId);
+
+    void onScanQRCode(FlowCase flowCase, QRCodeDTO qrCode, Long currentUserId);
+
+    FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra);
+
+    List<FlowFormDTO> listFlowForms(Flow flow);
 }

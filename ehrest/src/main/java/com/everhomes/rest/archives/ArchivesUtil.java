@@ -13,6 +13,12 @@ public class ArchivesUtil {
                 pattern = "yyyy-MM-dd";
             } else if (strDate.matches("\\d{2}/\\d{2}/\\d{2}")) {
                 pattern = "MM/dd/yy";
+            }else if (strDate.matches("\\d{2}/\\d/\\d{2}")) {
+                pattern = "MM/d/yy";
+            }else if (strDate.matches("\\d/\\d/\\d{2}")) {
+                pattern = "M/d/yy";
+            }else if (strDate.matches("\\d/\\d{2}/\\d{2}")) {
+                pattern = "M/dd/yy";
             }
         }
         if (pattern == null)

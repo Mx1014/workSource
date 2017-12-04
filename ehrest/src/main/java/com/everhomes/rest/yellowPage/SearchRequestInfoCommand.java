@@ -13,6 +13,10 @@ import com.everhomes.util.StringHelper;
  *  <li>endDay：结束时间</li>
  *  <li>keyword：关键字（创建请求的用户姓名和机构名称）</li>
  *  <li>templateType：申请类型 ServiceAlliance/Settle</li>
+ *  <li>approvalType: 审批类型</li>
+ *  <li>approvalStatus: 审批状态</li>
+ *  <li>approvalNumber: 审批编号</li>
+ *  <li>proposer: 申请人</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
  * </ul>

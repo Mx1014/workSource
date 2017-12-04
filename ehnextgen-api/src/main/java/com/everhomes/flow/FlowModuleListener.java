@@ -2,10 +2,10 @@ package com.everhomes.flow;
 
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.util.Tuple;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 业务模块必须实现的接口
@@ -21,7 +21,10 @@ public interface FlowModuleListener {
 
 	default void onFlowCreating(Flow flow) { }
 
-    default List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+    /**
+     * 获取业务类型列表，用于搜索时的业务类型选择
+     */
+    default List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
 	    return null;
 	}
 
@@ -61,7 +64,7 @@ public interface FlowModuleListener {
 	List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType);
 
     /**
-     * 当事件触发的时候
+     * 当按钮事件触发的时候
      */
     void onFlowButtonFired(FlowCaseState ctx);
 
@@ -80,31 +83,46 @@ public interface FlowModuleListener {
     default void onFlowMessageSend(FlowCaseState ctx, MessageDTO messageDto) { }
 
     /**
-     * 预定义参数、自定义参数渲染
-     * @param vars  变量名称，比如：${amount}
-     * @return  参数名称对应的参数的值，比如：key=${amount}, value=100
+     * 任务跟踪里的自定义变量渲染
      */
-    default Map<String, String> onFlowVariableRender(FlowCaseState ctx, List<String> vars) {
-        return null;
-    }
-
-    /**
-     * FlowCase 的变量渲染, 见 onFlowVariableRender(FlowCaseState ctx, List<String> vars)
-     */
-    @Deprecated
     default String onFlowVariableRender(FlowCaseState ctx, String variable) {
         return null;
     }
 
     /**
-     * 获取预定义的参数
-     * @param flow  工作流
-     * @param flowEntityType 不同地方的参数，比如条件，节点，按钮等
-     * @param ownerType 归属类型
-     * @param ownerId   归属id
-     * @return  返回参数列表
+     * 获取条件节点的变量列表
+     * @param flowEntityType FlowEntityType.FLOW_CONDITION
+     * @param ownerId 目前为 null
+     * @param ownerType 目前为 null
      */
-    default List<FlowPredefinedParamDTO> listPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+    default List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
         return null;
     }
+
+    /*default List<FlowPredefinedParamDTO> listFlowPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+
+     }
+     */
+
+    /**
+     * 从工作流界面扫描二维码
+     */
+    default void onScanQRCode(FlowCase flowCase, QRCodeDTO qrCode, Long currentUserId) { }
+
+    /**
+     * 这个和上面的是不一样的
+     */
+    default List<FlowPredefinedParamDTO> listFlowPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+        return null;
+    }
+
+    /**
+     * 条件节点的变量渲染
+     */
+    default FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) { return null;}
+
+    /**
+     * 需要在工作流里使用表单功能，需要实现此方法
+     */
+    default List<FlowFormDTO> listFlowForms(Flow flow) {return null;}
 }

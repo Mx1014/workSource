@@ -4,6 +4,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <li>isSearch: 传1只显示筛选项 为空都显示</li>
+ * <li>categoryId: 分类id</li>
  */
 public class GetNewsTagCommand {
     @NotNull
@@ -13,6 +14,16 @@ public class GetNewsTagCommand {
     private Byte isSearch;
     private Long pageAnchor;
     private Integer pageSize;
+
+    private Long categoryId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     public String getOwnerType() {
         return ownerType;

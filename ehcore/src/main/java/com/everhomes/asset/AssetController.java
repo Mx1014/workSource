@@ -17,6 +17,7 @@ import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -571,8 +572,10 @@ public class AssetController extends ControllerBase {
     @RequestMapping("addOrModifyRuleForBillGroup")
     @RestReturn(value = AddOrModifyRuleForBillGroupResponse.class)
     public RestResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
-        AddOrModifyRuleForBillGroupResponse res = assetService.addOrModifyRuleForBillGroup(cmd);
-        RestResponse response = new RestResponse(res);
+//        AddOrModifyRuleForBillGroupResponse res = assetService.addOrModifyRuleForBillGroup(cmd);
+//        RestResponse response = new RestResponse(res);
+        assetService.addOrModifyRuleForBillGroup(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
@@ -875,6 +878,39 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
+    // this is for 显示一个用户的物业账单          4
+    /**
+     * <p>显示一个用户的物业账单</p>
+     * <b>URL: /asset/showBillForClientV2</b>
+     */
+    @RequestMapping("showBillForClientV2")
+    @RestReturn(value = ShowBillForClientV2DTO.class,collection = true)
+    public RestResponse showBillForClientV2(ShowBillForClientV2Command cmd) {
+        if(cmd.getNamespaceId()!=UserContext.getCurrentNamespaceId()){
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        }
+        List<ShowBillForClientV2DTO> dtos = assetService.showBillForClientV2(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 显示一个用户的物业账单          4
+    /**
+     * <p>显示一个用户的物业账单</p>
+     * <b>URL: /asset/listAllBillsForClient</b>
+     */
+    @RequestMapping("listAllBillsForClient")
+    @RestReturn(value = ListAllBillsForClientDTO.class,collection = true)
+    public RestResponse listAllBillsForClient(ListAllBillsForClientCommand cmd) {
+        List<ListAllBillsForClientDTO> dtos = assetService.listAllBillsForClient(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
     //this is for 查看缴费详情
     /**
      * <p>查看缴费详情</p>
@@ -896,6 +932,7 @@ public class AssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
+
 
     //this is for app选择切换月份查看账单      4
     /**
@@ -1089,6 +1126,47 @@ public class AssetController extends ControllerBase {
     public RestResponse listAutoNoticeConfig(){
         assetService.activeAutoBillNotice();
         RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+    /**
+     * <b>URL: /asset/checkEnterpriseHasArrearage</b>
+     * <p>检查企业是否有欠费的账单</p>
+     */
+    @RequestMapping("checkEnterpriseHasArrearage")
+    @RestReturn(value = CheckEnterpriseHasArrearageResponse.class)
+    public RestResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd){
+        CheckEnterpriseHasArrearageResponse res = assetService.checkEnterpriseHasArrearage(cmd);
+        RestResponse restResponse = new RestResponse(res);
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /asset/functionDisableList</b>
+     * <p></p>
+     */
+    @RequestMapping("functionDisableList")
+    @RestReturn(value = FunctionDisableListDto.class)
+    public RestResponse functionDisableList(FunctionDisableListCommand cmd){
+        FunctionDisableListDto dto = assetService.functionDisableList(cmd);
+        RestResponse restResponse = new RestResponse(dto);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /asset/sc</b>
+     * <p></p>
+     */
+    @RequestMapping("sc")
+    @RequireAuthentication(value = false)
+    public RestResponse syncCustomer(SyncCustomerCommand cmd){
+        RestResponse restResponse = new RestResponse();
+        assetService.syncCustomer(cmd.getNamespaceId());
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         restResponse.setErrorDescription("OK");
         return restResponse;

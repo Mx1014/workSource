@@ -50,6 +50,8 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.customer.CustomerErrorCode;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
 import com.everhomes.rest.family.*;
@@ -1902,13 +1904,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Organization org = this.checkOrganizationByCommIdAndOrgType(communityId, OrganizationType.PM.getCode());
 		long organizationId = org.getId();
 
+		int sum = addressProvider.countApartment(communityId);
 		int defaultCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, AddressMappingStatus.DEFAULT.getCode());
-		int liveCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, AddressMappingStatus.LIVING.getCode());
+		int liveCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, AddressMappingStatus.LIVING.getCode()) + sum - propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, null);
 		int rentCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, AddressMappingStatus.RENT.getCode());
 		int freeCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, AddressMappingStatus.FREE.getCode());
 		int saledCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, AddressMappingStatus.SALED.getCode());
 		int unsaleCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, AddressMappingStatus.UNSALE.getCode());
-		int sum = defaultCount + liveCount + rentCount + freeCount + saledCount + unsaleCount;
+
 		dto.setAptCount(sum);
 		dto.setFamilyCount(familyCount);
 		dto.setUserCount(userCount);
@@ -1930,6 +1933,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		this.checkCommunityIdIsNull(communityId);
 		Community community = this.checkCommunity(communityId);
 
+		// 科技园的从address表里统计，其它域空间还是按以前的方式统计
+		if (community.getNamespaceId() != 1000000) {
+			return getApartmentStatistics(cmd);
+		}
 		int familyCount = familyProvider.countFamiliesByCommunityId(communityId);
 		int userCount = familyProvider.countUserByCommunityId(communityId);
 //		Organization org = this.checkOrganizationByCommIdAndOrgType(communityId, OrganizationType.PM.getCode());
@@ -1964,11 +1971,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		int occupiedCount = (temp = result.get(AddressMappingStatus.OCCUPIED.getCode())) == null ? 0 : temp;
 		dto.setOccupiedCount(occupiedCount);
 		sum = defaultCount + livingCount + rentCount + freeCount + saledCount + unsaleCount + occupiedCount;
-		
-		// 科技园的从address表里统计，其它域空间还是按以前的方式统计
-		if (sum == 0) {
-			return getApartmentStatistics(cmd);
-		}
+
 		dto.setAptCount(sum);
 		dto.setHasOwnerCount(livingCount + rentCount + saledCount);
 		dto.setNoOwnerCount(freeCount + unsaleCount);
@@ -2336,6 +2339,19 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters");
 		}
+		List<Contract> contracts = contractProvider.listContractByAddressId(address.getId());
+		if(contracts != null && contracts.size() > 0) {
+			contracts.forEach(contract -> {
+				if(contract.getStatus() == ContractStatus.ACTIVE.getCode() || contract.getStatus() == ContractStatus.WAITING_FOR_LAUNCH.getCode()
+						|| contract.getStatus() == ContractStatus.WAITING_FOR_APPROVAL.getCode() || contract.getStatus() == ContractStatus.APPROVE_QUALITIED.getCode()
+						|| contract.getStatus() == ContractStatus.EXPIRING.getCode() || contract.getStatus() == ContractStatus.DRAFT.getCode()) {
+					LOGGER.error("the address has attach to contract. address id: {}", cmd.getId());
+					throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_ADDRESS_HAS_CONTRACT,
+							"the address has attach to contract");
+				}
+			});
+		}
+
     	address.setStatus(AddressAdminStatus.INACTIVE.getCode());
     	addressProvider.updateAddress(address);
     	addressProvider.updateOrganizationAddressMapping(address.getId());
@@ -4622,6 +4638,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     public OrganizationOwnerDTO updateOrganizationOwner(UpdateOrganizationOwnerCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
+		User currentUser = UserContext.current().getUser();
+		if(currentUser.getNamespaceId() == 999971) {
+			LOGGER.error("Insufficient privilege, updateOrganizationOwner");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+					"Insufficient privilege");
+		}
         Tuple<CommunityPmOwner, Boolean> tuple =
                 coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ORGANIZATION_OWNER.getCode() + cmd.getId()).enter(() -> {
             CommunityPmOwner owner = propertyMgrProvider.findPropOwnerById(cmd.getId());
@@ -4707,14 +4729,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	public OrganizationOwnerDTO createOrganizationOwner(CreateOrganizationOwnerCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-
+		User currentUser = UserContext.current().getUser();
+		if(currentUser.getNamespaceId() == 999971) {
+			LOGGER.error("Insufficient privilege, createOrganizationOwner");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+					"Insufficient privilege");
+		}
         OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeById(cmd.getOrgOwnerTypeId());
         if (ownerType == null) {
             invalidParameterException("orgOwnerTypeId", cmd.getOrgOwnerTypeId());
         }
         checkContactTokenUnique(cmd.getCommunityId(), cmd.getContactToken());
 
-        User currentUser = UserContext.current().getUser();
         CommunityPmOwner owner = ConvertHelper.convert(cmd, CommunityPmOwner.class);
         if (cmd.getBirthday() != null) {
             owner.setBirthday(new java.sql.Date(cmd.getBirthday()));
@@ -5037,7 +5063,30 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         return dtoList;
     }
 
-    @Override
+	@Override
+	public List<OrganizationOwnerBehaviorDTO> listApartmentOrganizationOwnerBehaviors(ListApartmentOrganizationOwnerBehaviorsCommand cmd) {
+		User user = UserContext.current().getUser();
+		List<OrganizationOwnerBehavior> behaviorList = propertyMgrProvider.listApartmentOrganizationOwnerBehaviors(cmd.getAddressId());
+
+		List<OrganizationOwnerBehaviorDTO> dtoList = new ArrayList<>();
+		if (behaviorList != null && behaviorList.size() > 0) {
+			for (OrganizationOwnerBehavior behavior : behaviorList) {
+				Address address = addressProvider.findAddressById(behavior.getAddressId());
+				OrganizationOwnerBehaviorDTO dto = new OrganizationOwnerBehaviorDTO();
+				dto.setApartment(address.getApartmentName());
+				dto.setBehaviorTime(behavior.getBehaviorTime());
+				dto.setBuilding(address.getBuildingName());
+				dto.setId(behavior.getId());
+				LocaleString behaviorLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.BEHAVIOR_SCOPE,
+						behavior.getBehaviorType(), user.getLocale());
+				dto.setBehaviorType(behaviorLocale != null ? behaviorLocale.getText() : null);
+				dtoList.add(dto);
+			}
+		}
+		return dtoList;
+	}
+
+	@Override
     public void deleteOrganizationOwnerBehavior(DeleteOrganizationOwnerBehaviorCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
@@ -5090,7 +5139,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	public void deleteOrganizationOwner(DeleteOrganizationOwnerCommand cmd) {
         validate(cmd);
 		checkCurrentUserNotInOrg(cmd.getOrganizationId());
-
+		User currentUser = UserContext.current().getUser();
+		if(currentUser.getNamespaceId() == 999971) {
+			LOGGER.error("Insufficient privilege, deleteOrganizationOwner");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+					"Insufficient privilege");
+		}
 		CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(cmd.getId());
 		if (pmOwner == null) {
 			LOGGER.error("OrganizationOwner is not exist. ownerId = {}", cmd.getId());
@@ -6058,6 +6112,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     @Override
     public void importOrganizationOwners(@Valid ImportOrganizationsOwnersCommand cmd, MultipartFile[] file) {
         User user = UserContext.current().getUser();
+		if(user.getNamespaceId() == 999971) {
+			LOGGER.error("Insufficient privilege, importOrganizationOwners");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+					"Insufficient privilege");
+		}
         Long communityId = cmd.getCommunityId();
         this.checkCommunityIdIsNull(communityId);
         this.checkCommunity(communityId);
@@ -6326,7 +6385,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             if (LOGGER.isDebugEnabled())
                 LOGGER.debug("getRequestInfo groupMemberLog {}", groupMemberLog);
 			if (groupMemberLog != null) {
-				return new GetRequestInfoResponse(groupMemberLog.getMemberStatus());
+				return new GetRequestInfoResponse(groupMemberLog.getMemberStatus(), groupMemberLog.getRejectText());
 			}
 		}
         if (LOGGER.isDebugEnabled())
@@ -6372,6 +6431,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			defaultChargingItem.setCreateUid(exist.getCreateUid());
 			defaultChargingItem.setCreateTime(exist.getCreateTime());
 			defaultChargingItemProvider.updateDefaultChargingItem(defaultChargingItem);
+			dealDefaultChargingItemProperty(defaultChargingItem, cmd.getApartments());
 		}
 		return toDefaultChargingItemDTO(defaultChargingItem);
 	}

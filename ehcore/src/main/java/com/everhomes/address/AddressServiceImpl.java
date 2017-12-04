@@ -7,6 +7,8 @@ import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.community.*;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerResource;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.core.AppConfig;
@@ -56,10 +58,7 @@ import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.region.RegionServiceErrorCode;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhAddresses;
-import com.everhomes.server.schema.tables.pojos.EhBuildings;
-import com.everhomes.server.schema.tables.pojos.EhCommunities;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
@@ -153,6 +152,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ContentServerService contentServerService;
 
     @PostConstruct
     public void setup() {
@@ -1739,7 +1741,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Override
     public List<GetApartmentNameByBuildingNameDTO> getApartmentNameByBuildingName(GetApartmentNameByBuildingNameCommand cmd) {
-        return addressProvider.getApartmentNameByBuildingName(cmd.getBuildingName(), cmd.getCommunityId(), UserContext.getCurrentNamespaceId());
+        return addressProvider.getApartmentNameByBuildingName(cmd.getBuildingName(), cmd.getCommunityId(), cmd.getNamespaceId() == null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId());
     }
     @Override
     public ListNearbyMixCommunitiesCommandV2Response listNearbyMixCommunitiesV2(ListNearbyMixCommunitiesCommand cmd) {
@@ -2340,5 +2342,55 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             }
         }
         return null;
+    }
+
+    @Override
+    public void deleteApartmentAttachment(DeleteApartmentAttachmentCommand cmd) {
+        addressProvider.deleteApartmentAttachment(cmd.getId());
+    }
+
+    @Override
+    public List<ApartmentAttachmentDTO> listApartmentAttachments(ListApartmentAttachmentsCommand cmd) {
+        List<AddressAttachment> attachmentList = addressProvider.listAddressAttachments(cmd.getAddressId());
+
+        return attachmentList.stream().map(r -> {
+            ApartmentAttachmentDTO dto = ConvertHelper.convert(r, ApartmentAttachmentDTO.class);
+            dto.setContentUrl(contentServerService.parserUri(r.getContentUri(), EhActivities.class.getSimpleName(), r.getAddressId()));
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public ApartmentAttachmentDTO uploadApartmentAttachment(UploadApartmentAttachmentCommand cmd) {
+        AddressAttachment attachment = new AddressAttachment();
+        attachment.setAddressId(cmd.getAddressId());
+        attachment.setContentUri(cmd.getContentUri());
+        attachment.setName(cmd.getAttachmentName());
+        ContentServerResource resource = contentServerService.findResourceByUri(cmd.getContentUri());
+        Integer size = resource.getResourceSize();
+        attachment.setFileSize(size);
+        attachment.setCreatorUid(UserContext.currentUserId());
+        addressProvider.createAddressAttachment(attachment);
+
+        ApartmentAttachmentDTO dto = ConvertHelper.convert(attachment, ApartmentAttachmentDTO.class);
+        dto.setContentUrl(contentServerService.parserUri(attachment.getContentUri(), EhActivities.class.getSimpleName(), attachment.getAddressId()));
+        return dto;
+    }
+
+    @Override
+    public void downloadApartmentAttachment(DownloadApartmentAttachmentCommand cmd) {
+        if(cmd.getAttachmentId() == null || cmd.getAddressId() == null) {
+            return ;
+        }
+
+        AddressAttachment attachment = addressProvider.findByAddressAttachmentId(cmd.getAttachmentId());
+        if(attachment == null) {
+            LOGGER.error("handle address attachment error ,the address attachment does not exsit.cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE,
+                    AddressServiceErrorCode.ERROR_INVALID_ADDRESS_ATTACHMENT_ID, "invalid address attachment id " + cmd.getAttachmentId());
+        }
+
+        attachment.setDownloadCount(attachment.getDownloadCount() + 1);
+        addressProvider.updateAddressAttachment(attachment);
     }
 }

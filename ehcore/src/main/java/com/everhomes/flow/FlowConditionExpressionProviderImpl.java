@@ -17,6 +17,7 @@ import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Repository
@@ -65,6 +66,28 @@ public class FlowConditionExpressionProviderImpl implements FlowConditionExpress
     public List<FlowConditionExpression> listFlowConditionExpression(Long conditionId) {
         com.everhomes.server.schema.tables.EhFlowConditionExpressions t = Tables.EH_FLOW_CONDITION_EXPRESSIONS;
         return context().selectFrom(t).where(t.FLOW_CONDITION_ID.eq(conditionId)).fetchInto(FlowConditionExpression.class);
+    }
+
+    @Override
+    public void updateFlowConditionExpressions(List<FlowConditionExpression> expressions) {
+        Long updateUid = UserContext.currentUserId();
+        Timestamp updateTime = DateUtils.currentTimestamp();
+        for (FlowConditionExpression expression : expressions) {
+            expression.setUpdateTime(updateTime);
+            expression.setUpdateUid(updateUid);
+        }
+        rwDao().update(expressions.toArray(new EhFlowConditionExpressions[expressions.size()]));
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhFlowConditionExpressions.class, null);
+    }
+
+    @Override
+    public List<FlowConditionExpression> listFlowConditionExpressionByFlow(Long flowId, Integer flowVersion) {
+        com.everhomes.server.schema.tables.EhFlowConditionExpressions t = Tables.EH_FLOW_CONDITION_EXPRESSIONS;
+        return context()
+                .selectFrom(t)
+                .where(t.FLOW_MAIN_ID.eq(flowId))
+                .and(t.FLOW_VERSION.eq(flowVersion))
+                .fetchInto(FlowConditionExpression.class);
     }
 
     private EhFlowConditionExpressionsDao rwDao() {

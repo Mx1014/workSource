@@ -1834,13 +1834,13 @@ public class PortalServiceImpl implements PortalService {
 						itemGroup.setName(instanceConfig.getItemGroup());
 						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
 						if(Style.fromCode(padLayoutGroup.getStyle()) == Style.GALLERY){
-							if(!StringUtils.isEmpty(padLayoutGroup.getTitle()) || !StringUtils.isEmpty(padLayoutGroup.getIconUrl())){
-								config.setTitleFlag(TitleFlag.TRUE.getCode());
-								config.setTitle(padLayoutGroup.getTitle());
-								config.setTitleUri(padLayoutGroup.getIconUrl());
-							}
 							config.setPadding(instanceConfig.getPaddingTop());
 							config.setMargin(instanceConfig.getLineSpacing());
+						}
+						if(!StringUtils.isEmpty(padLayoutGroup.getTitle()) || !StringUtils.isEmpty(padLayoutGroup.getIconUrl())){
+							config.setTitleFlag(TitleFlag.TRUE.getCode());
+							config.setTitle(padLayoutGroup.getTitle());
+							config.setTitleUri(padLayoutGroup.getIconUrl());
 						}
 						config.setColumnCount(padLayoutGroup.getColumnCount());
 						itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
@@ -2132,6 +2132,14 @@ public class PortalServiceImpl implements PortalService {
 				}
 			}
 			scope.setScopeId(scopeId);
+		}else if(ScopeType.RESIDENTIAL == ScopeType.fromCode(scopeType)){
+			scope.setScopeType(PortalScopeType.RESIDENTIAL.getCode());
+			scope.setScopeId(scopeId);
+
+		}else if(ScopeType.PM == ScopeType.fromCode(scopeType)){
+			scope.setScopeType(PortalScopeType.PM.getCode());
+			scope.setScopeId(scopeId);
+
 		}else{
 			LOGGER.debug("data error. scopeType = " + scopeType);
 			return null;

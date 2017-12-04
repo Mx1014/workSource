@@ -555,7 +555,7 @@ public class BusinessServiceImpl implements BusinessService {
 		}
 		
 		Community community = communityProvider.findCommunityById(communityId);
-		LOGGER.debug("process communityId is :" + communityId);
+		LOGGER.debug("processStat communityId is :" + communityId);
 		
 		if(community == null){
 			LOGGER.error("Invalid paramter communityId,community is not exists.,communityId=" + communityId);
@@ -859,7 +859,7 @@ public class BusinessServiceImpl implements BusinessService {
 		//recommand business first
 		/*dtos.sort(new Comparator<BusinessDTO>() {
 			@Override
-			public int compare(BusinessDTO o1, BusinessDTO o2) {
+			public int compareTo(BusinessDTO o1, BusinessDTO o2) {
 				return o2.getRecommendStatus() - o1.getRecommendStatus();
 			}
 		});*/

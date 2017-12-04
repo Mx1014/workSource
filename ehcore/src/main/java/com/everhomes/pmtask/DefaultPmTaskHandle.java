@@ -190,32 +190,46 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 
 		ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
 
-		List<Category> list;
+		//多入口时，app始终会传taskCategoryId，根据时候传parentId来查询服务类型
 		if(null != cmd.getTaskCategoryId() && cmd.getTaskCategoryId() != 0L && cmd.getParentId() == null) {
-			Category category = categoryProvider.findCategoryById(cmd.getTaskCategoryId());
-			list = new ArrayList<>();
-			list.add(category);
+			//app服务广场 物业报修配固定id  PmTaskAppType.REPAIR_ID
+			//投诉建议 配固定id PmTaskAppType.SUGGESTION_ID, 如果配置错误，则需要修改
+			parentId = cmd.getTaskCategoryId();
+//			if (PmTaskAppType.REPAIR_ID == cmd.getTaskCategoryId()) {
+//
+//			}else if (PmTaskAppType.REPAIR_ID == cmd.getTaskCategoryId())
+
+//			Category category = categoryProvider.findCategoryById(cmd.getTaskCategoryId());
+//			list = new ArrayList<>();
+//			list.add(category);
 		}else{
-			if(null == parentId){
-				Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
-				Category ancestor = categoryProvider.findCategoryById(defaultId);
-				parentId = ancestor.getId();
-			}else {
-				Category parent = categoryProvider.findCategoryById(parentId);
-				if (null == parent) {
-					LOGGER.error("Category not found, cmd={}", cmd);
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-							"Category not found.");
-				}
-				if (CategoryAdminStatus.INACTIVE.getCode() == parent.getStatus()) {
-					return response;
-				}
+//			if(null == parentId){
+//				Category ancestor = categoryProvider.findCategoryById(defaultId);
+//				parentId = ancestor.getId();
+//			}else {
+//				Category parent = categoryProvider.findCategoryById(parentId);
+//				if (null == parent) {
+//					LOGGER.error("Category not found, cmd={}", cmd);
+//					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//							"Category not found.");
+//				}
+//				if (CategoryAdminStatus.INACTIVE.getCode() == parent.getStatus()) {
+//					return response;
+//				}
+//			}
+			Category parent = categoryProvider.findCategoryById(parentId);
+			if (null == parent) {
+				LOGGER.error("Category not found, cmd={}", cmd);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Category not found.");
+			}
+			if (CategoryAdminStatus.INACTIVE.getCode() == parent.getStatus()) {
+				return response;
 			}
 
-			list = categoryProvider.listTaskCategories(namespaceId, parentId, cmd.getKeyword(),
-					cmd.getPageAnchor(), cmd.getPageSize());
 		}
-				
+		List<Category> list = categoryProvider.listTaskCategories(namespaceId, parentId, cmd.getKeyword(),
+				cmd.getPageAnchor(), cmd.getPageSize());
 		int size = list.size();
 		if(size > 0){
     		response.setRequests(list.stream().map(r -> {
@@ -242,7 +256,7 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 	public List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId();
 		checkNamespaceId(namespaceId);
-		Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
+		Long defaultId = PmTaskAppType.REPAIR_ID;
 
 		List<Category> categories = categoryProvider.listTaskCategories(namespaceId, null, null, null, null);
 		
@@ -319,7 +333,7 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 		
 		return response;
 	}
-	
+
 //	@Override
 //	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
 //		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());

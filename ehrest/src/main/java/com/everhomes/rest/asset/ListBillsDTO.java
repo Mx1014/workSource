@@ -27,6 +27,9 @@ import java.math.BigDecimal;
  * <li>noticeTimes:已催缴次数</li>
  * <li>ownerId:所属者id</li>
  * <li>ownerType:所属者类型</li>
+ * <li>dateStrBegin:所属者类型</li>
+ * <li>dateStrEnd:所属者类型</li>
+ * <li>payStatus:清账信息</li>
  *</ul>
  */
 public class ListBillsDTO {
@@ -49,6 +52,15 @@ public class ListBillsDTO {
     private Integer noticeTimes;
     private String ownerId;
     private String ownerType;
+    private String payStatus;
+
+    public String getPayStatus() {
+        return payStatus;
+    }
+
+    public void setPayStatus(String payStatus) {
+        this.payStatus = payStatus;
+    }
 
     @Override
     public String toString() {

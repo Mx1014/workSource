@@ -152,6 +152,10 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
                 UserContext.current().setNamespaceId(flowCase.getNamespaceId());
             }
 
+            if (stepDTO.getEventLogs() != null) {
+                ctx.getLogs().addAll(stepDTO.getEventLogs());
+            }
+
             ctx.setFlowCase(flowCase);
             ctx.setModule(flowListenerManager.getModule(flowCase.getModuleId()));
 
@@ -204,6 +208,10 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
     public FlowCaseState prepareNoStep(FlowAutoStepDTO stepDTO) {
         FlowCaseState ctx = new FlowCaseState();
         FlowCase flowCase = flowCaseProvider.getFlowCaseById(stepDTO.getFlowCaseId());
+
+        if (stepDTO.getEventLogs() != null) {
+            ctx.getLogs().addAll(stepDTO.getEventLogs());
+        }
 
         User user;
         if (stepDTO.getOperatorId() != null) {
@@ -291,7 +299,8 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
                             allFlowCases.stream()
                                     .filter(r -> r.getStartNodeId().equals(tmpCurrent.getFlowNode().getId()))
                                     .filter(r -> r.getStartLinkId().equals(graphLink.getFlowLink().getId()))
-                                    .findFirst().ifPresent(r -> r.setStepCount(r.getStepCount() + 1));
+                                    .findFirst()
+                                    .ifPresent(r -> r.setStepCount(r.getStepCount() + 1));
                         }
                     }
                 }
@@ -542,13 +551,19 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
             case APPROVE_STEP:
                 logStep = true;
                 if (currentNode.getTrackApproveEnter() != null) {
-                    currentNode.getTrackApproveEnter().fireAction(ctx, null);
+                    FlowActionStatus status = FlowActionStatus.fromCode(currentNode.getTrackApproveEnter().getFlowAction().getStatus());
+                    if (status == FlowActionStatus.ENABLED) {
+                        currentNode.getTrackApproveEnter().fireAction(ctx, null);
+                    }
                 }
                 break;
             case REJECT_STEP:
                 logStep = true;
                 if (currentNode.getTrackRejectEnter() != null) {
-                    currentNode.getTrackRejectEnter().fireAction(ctx, null);
+                    FlowActionStatus status = FlowActionStatus.fromCode(currentNode.getTrackRejectEnter().getFlowAction().getStatus());
+                    if (status == FlowActionStatus.ENABLED) {
+                        currentNode.getTrackApproveEnter().fireAction(ctx, null);
+                    }
                 }
                 break;
             case TRANSFER_STEP:

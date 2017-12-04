@@ -588,7 +588,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 .where(cond).orderBy(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.desc())
                 .limit(pageSize + 1);
 
-        System.out.println("Query sql ====== " + step.getSQL());
+//        System.out.println("Query sql ====== " + step.getSQL());
 
         step.fetch().map(r ->{
             User user = new User();
@@ -659,7 +659,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                     .where(cond).orderBy(Tables.EH_USERS.ID.desc())
                     .limit(pageSize + 1);
 
-            System.out.println("query sql:" + step.getSQL());
+//            System.out.println("query sql:" + step.getSQL());
 
             step.fetch().map(r ->{
                 User user = new User();
@@ -681,6 +681,79 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         }
         return users;
     }
+    
+    /*@Override
+    public List<User> listDoorAuthByBuildingId(Byte isAuth, Byte isOpenAuth, Long doorId, CrossShardListingLocator locator, int pageSize, Integer namespaceId){
+        List<User> users = new ArrayList<>();
+
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context, obj)->{
+            Condition cond = Tables.EH_USERS.ID.isNotNull();
+            cond = getIsAuthCond(cond, isAuth);
+            cond = getIsOpenAuthCond(cond, isOpenAuth);
+            if(locator.getAnchor() != null ) {
+                cond = cond.and(Tables.EH_USERS.ID.lt(locator.getAnchor()));
+            }
+
+            SelectOffsetStep<Record> step = context.select().from(
+                    context.select().from(Tables.EH_USERS)
+                            .where(
+                                    Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId)
+                            ).asTable(Tables.EH_USERS.getName()))
+                    .leftOuterJoin(
+                            context.select().from(Tables.EH_DOOR_AUTH)
+                                    .where(
+                                            Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()))
+                                    .and(
+                                            Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode())
+                                    .and(
+                                            Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId)))
+                                    .asTable(Tables.EH_DOOR_AUTH.getName()))
+                    .on(Tables.EH_USERS.ID.eq(Tables.EH_DOOR_AUTH.USER_ID))
+                    .leftOuterJoin(
+                            context.select(
+                                    Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID,
+                                    Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE,
+                                    Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN,
+                                    Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME,
+                                    Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID)
+                                    .from(Tables.EH_ORGANIZATION_MEMBERS)
+                                    .leftOuterJoin(Tables.EH_ORGANIZATIONS)
+                                    .on(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID))
+                                    .where(
+                                            Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+                                    .and(
+                                            Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
+                                    .and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
+                                    .and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0L))
+                                    .and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()))
+                                    .groupBy(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID)
+                                    .asTable(Tables.EH_ORGANIZATION_MEMBERS.getName()))
+                    .on(Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID))
+                    .where(cond).orderBy(Tables.EH_USERS.ID.desc())
+                    .limit(pageSize + 1);
+
+//            System.out.println("query sql:" + step.getSQL());
+
+            step.fetch().map(r ->{
+                User user = new User();
+                user.setId(r.getValue(Tables.EH_USERS.ID));
+                user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
+                user.setIdentifierToken(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN));
+                user.setGender(r.getValue(Tables.EH_USERS.GENDER));
+                user.setCreateTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
+                users.add(user);
+                return null;
+            });
+            return true;
+        });
+
+        locator.setAnchor(null);
+        if(users.size() > pageSize){
+            users.remove(users.size() - 1);
+            locator.setAnchor(users.get(users.size() - 1).getId());
+        }
+        return users;
+    }*/
 
 
     @Override

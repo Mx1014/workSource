@@ -694,4 +694,32 @@ public class EnergyConsumptionController extends ControllerBase {
         return success();
     }
 
+    /**
+     * <p>导出计划的任务</p>
+     * <b>URL: /energy/exportTasksByEnergyPlan</b>
+     */
+    @RequestMapping("exportTasksByEnergyPlan")
+    public HttpServletResponse exportTasksByEnergyPlan(SearchTasksByEnergyPlanCommand cmd, HttpServletResponse response) {
+        HttpServletResponse resp = energyConsumptionService.exportTasksByEnergyPlan(cmd, response);
+
+        return resp;
+    }
+
+    /**
+     * <p>导入计划工单的抄表读数(Excel)</p>
+     * <b>URL: /energy/importTasksByEnergyPlan</b>
+     */
+    @RestReturn(ImportFileTaskDTO.class)
+    @RequestMapping("importTasksByEnergyPlan")
+    public RestResponse importTasksByEnergyPlan(ImportTasksByEnergyPlanCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
+        User manaUser = UserContext.current().getUser();
+        Long userId = manaUser.getId();
+        if (null == files || null == files[0]) {
+            LOGGER.error("files is null。userId=" + userId);
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+                    "files is null");
+        }
+        return response(energyConsumptionService.importTasksByEnergyPlan(cmd, files[0], userId));
+    }
+
 }

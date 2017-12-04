@@ -21,6 +21,7 @@ import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.PayService;
+import com.everhomes.parking.handler.DefaultParkingVendorHandler;
 import com.everhomes.rentalv2.RentalUtils;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
@@ -84,43 +85,43 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 @Component
 public class ParkingServiceImpl implements ParkingService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ParkingServiceImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ParkingServiceImpl.class);
 
-    private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    @Autowired
-    private ParkingProvider parkingProvider;
-    @Autowired
-    private UserProvider userProvider;
-    @Autowired
-    private ConfigurationProvider configProvider;
-    @Autowired
+	@Autowired
+	private ParkingProvider parkingProvider;
+	@Autowired
+	private UserProvider userProvider;
+	@Autowired
+	private ConfigurationProvider configProvider;
+	@Autowired
 	private OrderUtil commonOrderUtil;
-    @Autowired
+	@Autowired
 	private MessagingService messagingService;
-    @Autowired
+	@Autowired
 	private LocaleTemplateService localeTemplateService;
-    @Autowired
-    private DbProvider dbProvider;
-    @Autowired
-    private ContentServerService contentServerService;
-    @Autowired
+	@Autowired
+	private DbProvider dbProvider;
+	@Autowired
+	private ContentServerService contentServerService;
+	@Autowired
 	private FlowService flowService;
-    @Autowired
+	@Autowired
 	private FlowProvider flowProvider;
-    @Autowired
-    private FlowCaseProvider flowCaseProvider;
-    @Autowired
-    private OrganizationProvider organizationProvider;
-    @Autowired
-    private AppProvider appProvider;
+	@Autowired
+	private FlowCaseProvider flowCaseProvider;
+	@Autowired
+	private OrganizationProvider organizationProvider;
+	@Autowired
+	private AppProvider appProvider;
 	@Autowired
 	private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
-    @Autowired
-    private PayService payService;
+	@Autowired
+	private PayService payService;
 
-    @Override
-    public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
+	@Override
+	public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
 
 		return getParkingCardsByGeneral(cmd, (byte)1);
 	}
@@ -171,42 +172,42 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
-    	
-    	Long parkingLotId = cmd.getParkingLotId();
-        ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
 
-        String vendorName = parkingLot.getVendorName();
-        ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
-        
-        ListCardTypeResponse response = handler.listCardType(cmd);
-        
-    	return response;
-    }
-    
-    @Override
-    public List<ParkingRechargeRateDTO> listParkingRechargeRates(ListParkingRechargeRatesCommand cmd){
-    	
-    	Long parkingLotId = cmd.getParkingLotId();
-        ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
-        
-        String vendorName = parkingLot.getVendorName();
-        ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
-        
-        List<ParkingRechargeRateDTO> parkingRechargeRateList = handler.getParkingRechargeRates(parkingLot,
+		Long parkingLotId = cmd.getParkingLotId();
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
+
+		String vendorName = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+
+		ListCardTypeResponse response = handler.listCardType(cmd);
+
+		return response;
+	}
+
+	@Override
+	public List<ParkingRechargeRateDTO> listParkingRechargeRates(ListParkingRechargeRatesCommand cmd){
+
+		Long parkingLotId = cmd.getParkingLotId();
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
+
+		String vendorName = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+
+		List<ParkingRechargeRateDTO> parkingRechargeRateList = handler.getParkingRechargeRates(parkingLot,
 				cmd.getPlateNumber(), cmd.getCardNo());
 
-        if (null != parkingLot.getMonthlyDiscountFlag()) {
+		if (null != parkingLot.getMonthlyDiscountFlag()) {
 			if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getMonthlyDiscountFlag()) {
 				parkingRechargeRateList.forEach(r -> {
 					r.setOriginalPrice(r.getPrice());
 					BigDecimal newPrice = r.getPrice().multiply(new BigDecimal(parkingLot.getMonthlyDiscount()))
-							.divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
+							.divide(new BigDecimal(10), DefaultParkingVendorHandler.CARD_RATE_RETAIN_DECIMAL, RoundingMode.HALF_UP);
 					r.setPrice(newPrice);
 				});
 			}
 		}
 
-        return parkingRechargeRateList;
+		return parkingRechargeRateList.stream().filter(r -> r.getPrice().compareTo(new BigDecimal(0)) == 1).collect(Collectors.toList());
     }
     
     private ParkingVendorHandler getParkingVendorHandler(String vendorName) {
@@ -216,29 +217,29 @@ public class ParkingServiceImpl implements ParkingService {
 			String handlerPrefix = ParkingVendorHandler.PARKING_VENDOR_PREFIX;
 			handler = PlatformContext.getComponent(handlerPrefix + vendorName);
 		}
-        
-        return handler;
-    }
-    
 
-    @Override
-    public List<ParkingLotDTO> listParkingLots(ListParkingLotsCommand cmd){
-    	
-    	if(cmd.getOwnerId() == null || StringUtils.isBlank(cmd.getOwnerType())){
-    		LOGGER.error("OwnerId or ownerType cannot be null.");
+		return handler;
+	}
+
+
+	@Override
+	public List<ParkingLotDTO> listParkingLots(ListParkingLotsCommand cmd){
+
+		if(cmd.getOwnerId() == null || StringUtils.isBlank(cmd.getOwnerType())){
+			LOGGER.error("OwnerId or ownerType cannot be null.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"OwnerId or ownerType cannot be null.");
-    	}
-    	User user = UserContext.current().getUser();
-    	List<ParkingLot> list = parkingProvider.listParkingLots(cmd.getOwnerType(), cmd.getOwnerId());
-    	
-    	List<ParkingLotDTO> parkingLotList = list.stream().map(r -> {
-    		ParkingLotDTO dto = ConvertHelper.convert(r, ParkingLotDTO.class);
-    		
-        	Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE, 
-        			FlowModuleType.NO_MODULE.getCode(), r.getId(), FlowOwnerType.PARKING.getCode());
-        	//当没有设置工作流的时候，表示是禁用模式
-        	if(null == flow) {
+		}
+		User user = UserContext.current().getUser();
+		List<ParkingLot> list = parkingProvider.listParkingLots(cmd.getOwnerType(), cmd.getOwnerId());
+
+		List<ParkingLotDTO> parkingLotList = list.stream().map(r -> {
+			ParkingLotDTO dto = ConvertHelper.convert(r, ParkingLotDTO.class);
+
+			Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
+					FlowModuleType.NO_MODULE.getCode(), r.getId(), FlowOwnerType.PARKING.getCode());
+			//当没有设置工作流的时候，表示是禁用模式
+			if(null == flow) {
 				dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
 
 			}else {
@@ -247,7 +248,7 @@ public class ParkingServiceImpl implements ParkingService {
 				Integer flowMode = Integer.valueOf(tag1);
 				dto.setFlowMode(flowMode);
 
-        		LOGGER.info("parking enabled flow, flow={}", flow);
+				LOGGER.info("parking enabled flow, flow={}", flow);
 				Flow mainFlow = flowProvider.getFlowById(flow.getFlowMainId());
 				LOGGER.info("parking main flow, flow={}", mainFlow);
 				//当获取到的工作流与 main工作流中的版本不一致时，表示获取到的工作流不是编辑后最新的工作流（工作流没有启用），是禁用模式
@@ -256,26 +257,26 @@ public class ParkingServiceImpl implements ParkingService {
 						dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
 					}
 				}
-        	}
-        	
-    		return dto;
-    	}).collect(Collectors.toList());
-    	
-    	return parkingLotList;
-    }
-    
-    @Override
+			}
+
+			return dto;
+		}).collect(Collectors.toList());
+
+		return parkingLotList;
+	}
+
+	@Override
 	public ParkingCardRequestDTO requestParkingCard(RequestParkingCardCommand cmd) {
-		
-    	checkPlateNumber(cmd.getPlateNumber());
-    	ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-		
-    	String vendor = parkingLot.getVendorName();
-    	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
+
+		checkPlateNumber(cmd.getPlateNumber());
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
+		String vendor = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(vendor);
 
 		List<ParkingCardDTO> cards = handler.listParkingCardsByPlate(parkingLot, cmd.getPlateNumber());
-        User user = UserContext.current().getUser();
-        int cardListSize = cards.size();
+		User user = UserContext.current().getUser();
+		int cardListSize = cards.size();
 		if(cardListSize > 0){
 			LOGGER.error("PlateNumber card is existed, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_EXIST,
@@ -283,41 +284,41 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 
 		String ownerType = FlowOwnerType.PARKING.getCode();
-    	Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE, 
-    			FlowModuleType.NO_MODULE.getCode(), parkingLot.getId(), ownerType);
+		Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
+				FlowModuleType.NO_MODULE.getCode(), parkingLot.getId(), ownerType);
 		Long flowId = flow.getFlowMainId();
 		String requestFlowType = flow.getStringTag1();
-		
-        if(cardListSize == 0){
-        	//当查询的月卡信息不存在时，检查申请条件
+
+		if(cardListSize == 0){
+			//当查询的月卡信息不存在时，检查申请条件
 			checkRequestCondition(cmd, flowId);
-        }
-        ParkingCardRequest parkingCardRequest = buildParkingCardRequest(cmd, Integer.valueOf(requestFlowType));
+		}
+		ParkingCardRequest parkingCardRequest = buildParkingCardRequest(cmd, Integer.valueOf(requestFlowType));
 
-        dbProvider.execute((TransactionStatus status) -> {
+		dbProvider.execute((TransactionStatus status) -> {
 
-    		parkingProvider.requestParkingCard(parkingCardRequest);
-    		
-    		addAttachments(cmd.getAttachments(), user.getId(), parkingCardRequest.getId(), ParkingAttachmentType.PARKING_CARD_REQUEST.getCode());
+			parkingProvider.requestParkingCard(parkingCardRequest);
 
-        	FlowCase flowCase = createFlowCase(parkingCardRequest, flow, user.getId());
+			addAttachments(cmd.getAttachments(), user.getId(), parkingCardRequest.getId(), ParkingAttachmentType.PARKING_CARD_REQUEST.getCode());
+
+			FlowCase flowCase = createFlowCase(parkingCardRequest, flow, user.getId());
 
 			parkingCardRequest.setFlowId(flowId);
-    		parkingCardRequest.setFlowCaseId(flowCase.getId());
-    		parkingProvider.updateParkingCardRequest(parkingCardRequest);
+			parkingCardRequest.setFlowCaseId(flowCase.getId());
+			parkingProvider.updateParkingCardRequest(parkingCardRequest);
 
 			createParkingUserInvoice(cmd.getInvoiceType(), parkingLot, user);
 
 			return null;
 		});
 		ParkingCardRequestDTO parkingCardRequestDTO = ConvertHelper.convert(parkingCardRequest, ParkingCardRequestDTO.class);
-		
+
 		Integer count = parkingProvider.waitingCardCount(cmd.getOwnerType(), cmd.getOwnerId(),
-					cmd.getParkingLotId(), parkingCardRequest.getCreateTime());
+				cmd.getParkingLotId(), parkingCardRequest.getCreateTime());
 		parkingCardRequestDTO.setRanking(count);
-		
+
 		return parkingCardRequestDTO;
-    	
+
 	}
 
 	private FlowCase createFlowCase(ParkingCardRequest parkingCardRequest, Flow flow, Long userId) {
@@ -343,7 +344,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 	private ParkingCardRequest buildParkingCardRequest(RequestParkingCardCommand cmd, Integer requestFlowType) {
 
-    	Long userId = UserContext.currentUserId();
+		Long userId = UserContext.currentUserId();
 
 		ParkingCardRequest parkingCardRequest = ConvertHelper.convert(cmd, ParkingCardRequest.class);
 
@@ -377,7 +378,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 	private void checkRequestCondition(RequestParkingCardCommand cmd, Long flowId) {
 
-    	Long userId = UserContext.currentUserId();
+		Long userId = UserContext.currentUserId();
 
 		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), flowId);
@@ -406,47 +407,47 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 	}
 
-    public ParkingCardRequestDTO getRequestParkingCardDetail(GetRequestParkingCardDetailCommand cmd) {
-    	
-    	ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(cmd.getId());
-    	
-    	ParkingCardRequestDTO dto = ConvertHelper.convert(parkingCardRequest, ParkingCardRequestDTO.class);
-    	
-    	List<ParkingAttachment> attachments = parkingProvider.listParkingAttachments(parkingCardRequest.getId(), 
-    			ParkingAttachmentType.PARKING_CARD_REQUEST.getCode());
-    	
+	public ParkingCardRequestDTO getRequestParkingCardDetail(GetRequestParkingCardDetailCommand cmd) {
+
+		ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(cmd.getId());
+
+		ParkingCardRequestDTO dto = ConvertHelper.convert(parkingCardRequest, ParkingCardRequestDTO.class);
+
+		List<ParkingAttachment> attachments = parkingProvider.listParkingAttachments(parkingCardRequest.getId(),
+				ParkingAttachmentType.PARKING_CARD_REQUEST.getCode());
+
 		List<ParkingAttachmentDTO> attachmentDTOs =  attachments.stream().map(r -> {
 			ParkingAttachmentDTO attachmentDto = ConvertHelper.convert(r, ParkingAttachmentDTO.class);
-			
-			String contentUrl = getResourceUrlByUir(r.getContentUri(), 
-	                EntityType.USER.getCode(), r.getCreatorUid());
+
+			String contentUrl = getResourceUrlByUir(r.getContentUri(),
+					EntityType.USER.getCode(), r.getCreatorUid());
 			attachmentDto.setContentUrl(contentUrl);
 			attachmentDto.setInformationType(r.getDataType());
 			return attachmentDto;
 		}).collect(Collectors.toList());
-    	
+
 		dto.setAttachments(attachmentDTOs);
-		
+
 		Integer count = parkingProvider.waitingCardCount(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getParkingLotId(), parkingCardRequest.getCreateTime());
 		dto.setRanking(count + 1);
-    	return dto;
-    }
-    
-    private String getResourceUrlByUir(String uri, String ownerType, Long ownerId) {
-        String url = null;
-        if(null != uri && uri.length() > 0) {
-            try{
-                url = contentServerService.parserUri(uri, ownerType, ownerId);
-            }catch(Exception e){
-                LOGGER.error("Failed to parse uri, uri=, ownerType=, ownerId=", uri, ownerType, ownerId, e);
-            }
-        }
-        
-        return url;
-    }
-    
-    private void addAttachments(List<AttachmentDescriptor> list, Long userId, Long ownerId, String ownerType){
+		return dto;
+	}
+
+	private String getResourceUrlByUir(String uri, String ownerType, Long ownerId) {
+		String url = null;
+		if(null != uri && uri.length() > 0) {
+			try{
+				url = contentServerService.parserUri(uri, ownerType, ownerId);
+			}catch(Exception e){
+				LOGGER.error("Failed to parse uri, uri=, ownerType=, ownerId=", uri, ownerType, ownerId, e);
+			}
+		}
+
+		return url;
+	}
+
+	private void addAttachments(List<AttachmentDescriptor> list, Long userId, Long ownerId, String ownerType){
 		if(!CollectionUtils.isEmpty(list)){
 			for(AttachmentDescriptor ad: list){
 				if(null != ad){
@@ -463,72 +464,72 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 		}
 	}
-    
-	@Override
-    public ListParkingCardRequestResponse listParkingCardRequests(ListParkingCardRequestsCommand cmd){
-		
-        checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-		
-    	ListParkingCardRequestResponse response = new ListParkingCardRequestResponse();
-    	cmd.setPageSize(PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
-    	User user = UserContext.current().getUser();
-    	
-    	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(user.getId(), cmd.getOwnerType(), 
-    			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), null, cmd.getPageAnchor(),
-    			cmd.getPageSize());
-    					
-    	if(list.size() > 0){
-    		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, ParkingCardRequestDTO.class))
-    				.collect(Collectors.toList()));
-    		if(list.size() != cmd.getPageSize()){
-        		response.setNextPageAnchor(null);
-        	}else{
-        		response.setNextPageAnchor(list.get(list.size()-1).getCreateTime().getTime());
-        	}
-    	}
-    	
-    	return response;
-    }
-
-    @Override
-    public PreOrderDTO createParkingRechargeOrderV2(CreateParkingRechargeOrderCommand cmd){
-
-        if(null == cmd.getMonthCount() || cmd.getMonthCount() ==0) {
-            LOGGER.error("Invalid MonthCount, cmd={}", cmd);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "Invalid MonthCount.");
-        }
-
-        return (PreOrderDTO) createGeneralOrder(cmd, ParkingRechargeType.MONTHLY.getCode(), ActivityRosterPayVersionFlag.V2);
-    }
-
-    @Override
-    public PreOrderDTO createParkingTempOrderV2(CreateParkingTempOrderCommand cmd) {
-        checkOrderToken(cmd.getOrderToken());
-        CreateParkingRechargeOrderCommand param = new CreateParkingRechargeOrderCommand();
-        param.setOwnerType(cmd.getOwnerType());
-        param.setOwnerId(cmd.getOwnerId());
-        param.setParkingLotId(cmd.getParkingLotId());
-        param.setPlateNumber(cmd.getPlateNumber());
-        param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
-        param.setPrice(cmd.getPrice());
-
-        return (PreOrderDTO) createGeneralOrder(param, ParkingRechargeType.TEMPORARY.getCode(), ActivityRosterPayVersionFlag.V2);
-
-    }
 
 	@Override
-	public CommonOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd){
-		
+	public ListParkingCardRequestResponse listParkingCardRequests(ListParkingCardRequestsCommand cmd){
+
+		checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
+		ListParkingCardRequestResponse response = new ListParkingCardRequestResponse();
+		cmd.setPageSize(PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
+		User user = UserContext.current().getUser();
+
+		List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(user.getId(), cmd.getOwnerType(),
+				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), null, cmd.getPageAnchor(),
+				cmd.getPageSize());
+
+		if(list.size() > 0){
+			response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, ParkingCardRequestDTO.class))
+					.collect(Collectors.toList()));
+			if(list.size() != cmd.getPageSize()){
+				response.setNextPageAnchor(null);
+			}else{
+				response.setNextPageAnchor(list.get(list.size()-1).getCreateTime().getTime());
+			}
+		}
+
+		return response;
+	}
+
+	@Override
+	public PreOrderDTO createParkingRechargeOrderV2(CreateParkingRechargeOrderCommand cmd){
+
 		if(null == cmd.getMonthCount() || cmd.getMonthCount() ==0) {
 			LOGGER.error("Invalid MonthCount, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"Invalid MonthCount.");
 		}
-		
+
+		return (PreOrderDTO) createGeneralOrder(cmd, ParkingRechargeType.MONTHLY.getCode(), ActivityRosterPayVersionFlag.V2);
+	}
+
+	@Override
+	public PreOrderDTO createParkingTempOrderV2(CreateParkingTempOrderCommand cmd) {
+		checkOrderToken(cmd.getOrderToken());
+		CreateParkingRechargeOrderCommand param = new CreateParkingRechargeOrderCommand();
+		param.setOwnerType(cmd.getOwnerType());
+		param.setOwnerId(cmd.getOwnerId());
+		param.setParkingLotId(cmd.getParkingLotId());
+		param.setPlateNumber(cmd.getPlateNumber());
+		param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
+		param.setPrice(cmd.getPrice());
+
+		return (PreOrderDTO) createGeneralOrder(param, ParkingRechargeType.TEMPORARY.getCode(), ActivityRosterPayVersionFlag.V2);
+
+	}
+
+	@Override
+	public CommonOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd){
+
+		if(null == cmd.getMonthCount() || cmd.getMonthCount() ==0) {
+			LOGGER.error("Invalid MonthCount, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Invalid MonthCount.");
+		}
+
 		return (CommonOrderDTO) createGeneralOrder(cmd, ParkingRechargeType.MONTHLY.getCode(), ActivityRosterPayVersionFlag.V1);
 	}
-	
+
 	@Override
 	public CommonOrderDTO createParkingTempOrder(CreateParkingTempOrderCommand cmd) {
 		checkOrderToken(cmd.getOrderToken());
@@ -539,23 +540,24 @@ public class ParkingServiceImpl implements ParkingService {
 		param.setPlateNumber(cmd.getPlateNumber());
 		param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
 		param.setPrice(cmd.getPrice());
-		
+		param.setClientAppName(cmd.getClientAppName());
+
 		return (CommonOrderDTO) createGeneralOrder(param, ParkingRechargeType.TEMPORARY.getCode(), ActivityRosterPayVersionFlag.V1);
 
 	}
-	
+
 	private Object createGeneralOrder(CreateParkingRechargeOrderCommand cmd, Byte rechargeType, ActivityRosterPayVersionFlag version) {
 		checkPlateNumber(cmd.getPlateNumber());
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		String vendor = parkingLot.getVendorName();
-    	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
+		ParkingVendorHandler handler = getParkingVendorHandler(vendor);
 
-    	ParkingRechargeOrder parkingRechargeOrder = new ParkingRechargeOrder();
+		ParkingRechargeOrder parkingRechargeOrder = new ParkingRechargeOrder();
 
 		User user = UserContext.current().getUser();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-		
+
 		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), cmd.getPayerEnterpriseId());
 		if(null != organizationMember) {
 			if(null == cmd.getPlateOwnerName())
@@ -570,26 +572,26 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingRechargeOrder.setPlateNumber(cmd.getPlateNumber());
 		parkingRechargeOrder.setPlateOwnerName(null != cmd.getPlateOwnerName()?cmd.getPlateOwnerName():user.getNickName());
 		parkingRechargeOrder.setPlateOwnerPhone(cmd.getPlateOwnerPhone());
-		
+
 		parkingRechargeOrder.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
 		parkingRechargeOrder.setPayerUid(user.getId());
 		parkingRechargeOrder.setPayerPhone(userIdentifier.getIdentifierToken());
 		parkingRechargeOrder.setCreatorUid(user.getId());
 		Long now = System.currentTimeMillis();
 		parkingRechargeOrder.setCreateTime(new Timestamp(now));
-		
+
 		parkingRechargeOrder.setVendorName(parkingLot.getVendorName());
 		parkingRechargeOrder.setCardNumber(cmd.getCardNumber());
-		
+
 		parkingRechargeOrder.setStatus(ParkingRechargeOrderStatus.UNPAID.getCode());
 
 		parkingRechargeOrder.setOrderNo(createOrderNo(System.currentTimeMillis()));
 		parkingRechargeOrder.setPaidVersion(version.getCode());
 		parkingRechargeOrder.setInvoiceType(cmd.getInvoiceType());
 		if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {
-    		ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, cmd.getPlateNumber());
+			ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, cmd.getPlateNumber());
 
-    		if (null == dto || null == dto.getPrice()) {
+			if (null == dto || null == dto.getPrice()) {
 				LOGGER.error("Parking request temp fee failed, cmd={}", cmd);
 				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REQUEST_SERVER,
 						"Parking request temp fee failed");
@@ -599,7 +601,7 @@ public class ParkingServiceImpl implements ParkingService {
 			if (null != parkingLot.getTempFeeDiscountFlag()) {
 				if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getTempFeeDiscountFlag()) {
 					tempFee = dto.getPrice().multiply(new BigDecimal(parkingLot.getTempFeeDiscount()))
-							.divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
+							.divide(new BigDecimal(10), DefaultParkingVendorHandler.TEMP_FEE_RETAIN_DECIMAL, RoundingMode.HALF_UP);
 				}
 			}
 			if(0 != tempFee.compareTo(cmd.getPrice())) {
@@ -618,8 +620,8 @@ public class ParkingServiceImpl implements ParkingService {
 		}else if(rechargeType.equals(ParkingRechargeType.MONTHLY.getCode())) {
 			//查询rate
 			parkingRechargeOrder.setRateToken(cmd.getRateToken());
-    		parkingRechargeOrder.setMonthCount(new BigDecimal(cmd.getMonthCount()));
-    		//先设置客户端传进来的价格，在updateParkingRechargeOrderRate方法中校验价格,根据费率设置originalPrice
+			parkingRechargeOrder.setMonthCount(new BigDecimal(cmd.getMonthCount()));
+			//先设置客户端传进来的价格，在updateParkingRechargeOrderRate方法中校验价格,根据费率设置originalPrice
 			parkingRechargeOrder.setPrice(cmd.getPrice());
 
 			if (parkingRechargeOrder.getOrderType() == ParkingOrderType.RECHARGE.getCode()) {
@@ -628,9 +630,9 @@ public class ParkingServiceImpl implements ParkingService {
 				//TODO:开卡校验
 				parkingRechargeOrder.setOriginalPrice(cmd.getPrice());
 			}
-    	}
+		}
 
-    	dbProvider.execute(status -> {
+		dbProvider.execute(status -> {
 			parkingProvider.createParkingRechargeOrder(parkingRechargeOrder);
 
 			createParkingUserInvoice(cmd.getInvoiceType(), parkingLot, user);
@@ -639,18 +641,18 @@ public class ParkingServiceImpl implements ParkingService {
 		});
 
 		if (ActivityRosterPayVersionFlag.V1 == version) {
-		    return convertOrderDTOForV1(parkingRechargeOrder, rechargeType);
-        }else {
-		    return convertOrderDTOForV2(parkingRechargeOrder, cmd.getClientAppName());
-        }
+			return convertOrderDTOForV1(parkingRechargeOrder, rechargeType);
+		}else {
+			return convertOrderDTOForV2(parkingRechargeOrder, cmd.getClientAppName());
+		}
 	}
 
-    private PreOrderDTO convertOrderDTOForV2(ParkingRechargeOrder parkingRechargeOrder, String clientAppName) {
+	private PreOrderDTO convertOrderDTOForV2(ParkingRechargeOrder parkingRechargeOrder, String clientAppName) {
 //        PreOrderCommand preOrderCommand = new PreOrderCommand();
 //
 //        preOrderCommand.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
 //        preOrderCommand.setOrderId(parkingRechargeOrder.getOrderNo());
-        Long amount = payService.changePayAmount(parkingRechargeOrder.getPrice());
+		Long amount = payService.changePayAmount(parkingRechargeOrder.getPrice());
 //        preOrderCommand.setAmount(amount);
 //
 //        preOrderCommand.setPayerId(parkingRechargeOrder.getPayerUid());
@@ -661,44 +663,45 @@ public class ParkingServiceImpl implements ParkingService {
 //        preOrderCommand.setClientAppName(clientAppName);
 //
 //        PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+		LOGGER.info("createAppPreOrder clientAppName={}", clientAppName);
 		PreOrderDTO callBack = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(), clientAppName, OrderType.OrderTypeEnum.PARKING.getPycode(),
 				parkingRechargeOrder.getId(), parkingRechargeOrder.getPayerUid(), amount);
 
 
 		return callBack;
-    }
+	}
 
-    private CommonOrderDTO convertOrderDTOForV1(ParkingRechargeOrder parkingRechargeOrder, Byte rechargeType) {
-        //调用统一处理订单接口，返回统一订单格式
-        CommonOrderCommand orderCmd = new CommonOrderCommand();
-        orderCmd.setBody(ParkingRechargeType.fromCode(parkingRechargeOrder.getRechargeType()).toString());
-        orderCmd.setOrderNo(parkingRechargeOrder.getId().toString());
-        orderCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
-        if(rechargeType.equals(ParkingRechargeType.MONTHLY.getCode())) {
-            orderCmd.setSubject("停车缴费（月卡车：" + parkingRechargeOrder.getPlateNumber() + "）");
-        }else {
-            orderCmd.setSubject("停车缴费（临时车：" + parkingRechargeOrder.getPlateNumber() + "）");
-        }
+	private CommonOrderDTO convertOrderDTOForV1(ParkingRechargeOrder parkingRechargeOrder, Byte rechargeType) {
+		//调用统一处理订单接口，返回统一订单格式
+		CommonOrderCommand orderCmd = new CommonOrderCommand();
+		orderCmd.setBody(ParkingRechargeType.fromCode(parkingRechargeOrder.getRechargeType()).toString());
+		orderCmd.setOrderNo(parkingRechargeOrder.getId().toString());
+		orderCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
+		if(rechargeType.equals(ParkingRechargeType.MONTHLY.getCode())) {
+			orderCmd.setSubject("停车缴费（月卡车：" + parkingRechargeOrder.getPlateNumber() + "）");
+		}else {
+			orderCmd.setSubject("停车缴费（临时车：" + parkingRechargeOrder.getPlateNumber() + "）");
+		}
 
-        boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
-        if(flag) {
-            orderCmd.setTotalFee(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
-        } else {
-            orderCmd.setTotalFee(parkingRechargeOrder.getPrice());
-        }
+		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+		if(flag) {
+			orderCmd.setTotalFee(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+		} else {
+			orderCmd.setTotalFee(parkingRechargeOrder.getPrice());
+		}
 
-        CommonOrderDTO dto = null;
-        try {
-            dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
-        } catch (Exception e) {
-            LOGGER.error("convertToCommonOrder is fail.",e);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "convertToCommonOrder is fail.");
-        }
+		CommonOrderDTO dto = null;
+		try {
+			dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
+		} catch (Exception e) {
+			LOGGER.error("convertToCommonOrder is fail.",e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"convertToCommonOrder is fail.");
+		}
 
-        return dto;
+		return dto;
 
-    }
+	}
 
 	private void createParkingUserInvoice(Long invoiceType, ParkingLot parkingLot, User user) {
 		if (null != invoiceType) {
@@ -722,9 +725,9 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public ListParkingRechargeOrdersResponse listParkingRechargeOrders(ListParkingRechargeOrdersCommand cmd){
-		
-        ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-		
+
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
 		ListParkingRechargeOrdersResponse response = new ListParkingRechargeOrdersResponse();
 		//设置分页
 		cmd.setPageSize(PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
@@ -734,47 +737,47 @@ public class ParkingServiceImpl implements ParkingService {
 				cmd.getParkingLotId(), cmd.getPlateNumber(), user.getId(), cmd.getPageAnchor(), cmd.getPageSize());
 
 		int size = list.size();
-    	if(size > 0){
-    		response.setOrders(list.stream().map(r -> {
+		if(size > 0){
+			response.setOrders(list.stream().map(r -> {
 				ParkingRechargeOrderDTO d = ConvertHelper.convert(r, ParkingRechargeOrderDTO.class);
 
 				d.setParkingLotName(parkingLot.getName());
 				d.setContact(parkingLot.getContact());
 				return d;
 			}).collect(Collectors.toList()));
-    		if(size != cmd.getPageSize()){
-        		response.setNextPageAnchor(null);
-        	}else{
-        		response.setNextPageAnchor(list.get(size-1).getCreateTime().getTime());
-        	}
-    	}
-    	
+			if(size != cmd.getPageSize()){
+				response.setNextPageAnchor(null);
+			}else{
+				response.setNextPageAnchor(list.get(size-1).getCreateTime().getTime());
+			}
+		}
+
 		return response;
 	}
-	
+
 	@Override
-    public ParkingRechargeRateDTO createParkingRechargeRate(CreateParkingRechargeRateCommand cmd){
+	public ParkingRechargeRateDTO createParkingRechargeRate(CreateParkingRechargeRateCommand cmd){
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
- 
-        String vendorName = parkingLot.getVendorName();
-        ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
-        
-        return handler.createParkingRechargeRate(cmd);
-    }
-	
+
+		String vendorName = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+
+		return handler.createParkingRechargeRate(cmd);
+	}
+
 	@Override
 	public boolean deleteParkingRechargeRate(DeleteParkingRechargeRateCommand cmd){
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
- 
-        String vendorName = parkingLot.getVendorName();
-        ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
-        handler.deleteParkingRechargeRate(cmd);
+
+		String vendorName = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+		handler.deleteParkingRechargeRate(cmd);
 		return true;
 	}
-	
+
 	@Override
 	public ListParkingRechargeOrdersResponse searchParkingRechargeOrders(SearchParkingRechargeOrdersCommand cmd){
-		
+
 		ListParkingRechargeOrdersResponse response = new ListParkingRechargeOrdersResponse();
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 		Timestamp startDate = null;
@@ -789,11 +792,11 @@ public class ParkingServiceImpl implements ParkingService {
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(), cmd.getCardNumber(),
 				cmd.getStatus(), cmd.getPageAnchor(), pageSize);
-    	int size = list.size(); 				
-    	if(size > 0){
-    		response.setOrders(list.stream().map(r -> {
+		int size = list.size();
+		if(size > 0){
+			response.setOrders(list.stream().map(r -> {
 				ParkingRechargeOrderDTO d = ConvertHelper.convert(r, ParkingRechargeOrderDTO.class);
-    			d.setVendorName(parkingLot.getName());
+				d.setVendorName(parkingLot.getName());
 
 				if (null != r.getInvoiceType()) {
 					ParkingInvoiceType parkingInvoiceType = parkingProvider.findParkingInvoiceTypeById(r.getInvoiceType());
@@ -801,20 +804,20 @@ public class ParkingServiceImpl implements ParkingService {
 						d.setInvoiceName(parkingInvoiceType.getName());
 					}
 				}
-    			return d;
+				return d;
 			}).collect(Collectors.toList()));
-    		if(size != pageSize){
-        		response.setNextPageAnchor(null);
-        	}else{
-        		response.setNextPageAnchor(list.get(size - 1).getCreateTime().getTime());
-        	}
-    	}
-    	
-    	BigDecimal totalAmount = parkingProvider.countParkingRechargeOrders(cmd.getOwnerType(),
+			if(size != pageSize){
+				response.setNextPageAnchor(null);
+			}else{
+				response.setNextPageAnchor(list.get(size - 1).getCreateTime().getTime());
+			}
+		}
+
+		BigDecimal totalAmount = parkingProvider.countParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType());
-    	response.setTotalAmount(totalAmount);
-    	
+		response.setTotalAmount(totalAmount);
+
 		return response;
 	}
 
@@ -854,33 +857,33 @@ public class ParkingServiceImpl implements ParkingService {
 
 		}
 
-    	List<ParkingCardRequest> list = parkingProvider.searchParkingCardRequests(cmd.getOwnerType(), 
-    			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(), 
-    			cmd.getPlateOwnerPhone(), startDate, endDate, cmd.getStatus(), cmd.getCarBrand(), 
-    			cmd.getCarSerieName(), cmd.getPlateOwnerEntperiseName(), cmd.getFlowId(), order, cmd.getCardTypeId(),
+		List<ParkingCardRequest> list = parkingProvider.searchParkingCardRequests(cmd.getOwnerType(),
+				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
+				cmd.getPlateOwnerPhone(), startDate, endDate, cmd.getStatus(), cmd.getCarBrand(),
+				cmd.getCarSerieName(), cmd.getPlateOwnerEntperiseName(), cmd.getFlowId(), order, cmd.getCardTypeId(),
 				cmd.getPageAnchor(), pageSize);
-    	
-    	Long userId = UserContext.current().getUser().getId();
-    	int size = list.size();
-    	if(size > 0){
-    		response.setRequests(list.stream().map(r -> {
-    			ParkingCardRequestDTO dto = ConvertHelper.convert(r, ParkingCardRequestDTO.class);
+
+		Long userId = UserContext.current().getUser().getId();
+		int size = list.size();
+		if(size > 0){
+			response.setRequests(list.stream().map(r -> {
+				ParkingCardRequestDTO dto = ConvertHelper.convert(r, ParkingCardRequestDTO.class);
 
 				ParkingCardType cardType =getParkingCardType(cmd.getOwnerType(), cmd.getOwnerId(),
 						cmd.getParkingLotId(), r.getCardTypeId());
 				if (null != cardType) {
 					dto.setCardTypeName(cardType.getTypeName());
 				}
-    			return dto;
-    		}).collect(Collectors.toList()));
-    		
-    		if(size != pageSize){
-        		response.setNextPageAnchor(null);
-        	}else{
-        		response.setNextPageAnchor(list.get(size-1).getCreateTime().getTime());
-        	}
-    	}
-    	return response;
+				return dto;
+			}).collect(Collectors.toList()));
+
+			if(size != pageSize){
+				response.setNextPageAnchor(null);
+			}else{
+				response.setNextPageAnchor(list.get(size-1).getCreateTime().getTime());
+			}
+		}
+		return response;
 	}
 
 	@Override
@@ -907,12 +910,12 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public void setParkingLotConfig(SetParkingLotConfigCommand cmd){
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-		
+
 		if(null == cmd.getExpiredRechargeFlag()){
-        	LOGGER.error("ExpiredRechargeFlag cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"ExpiredRechargeFlag cannot be null.");
-        }
+			LOGGER.error("ExpiredRechargeFlag cannot be null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"ExpiredRechargeFlag cannot be null.");
+		}
 
 		ParkingRechargeConfig config = ConvertHelper.convert(cmd, ParkingRechargeConfig.class);
 //		config.setExpiredRechargeFlag(cmd.getIsSupportRecharge());
@@ -930,120 +933,120 @@ public class ParkingServiceImpl implements ParkingService {
 
 		parkingLot.setRechargeJson(JSONObject.toJSONString(config));
 
-        parkingProvider.updateParkingLot(parkingLot);
+		parkingProvider.updateParkingLot(parkingLot);
 	}
 
 	@Override
 	public void issueParkingCards(IssueParkingCardsCommand cmd) {
-		
+
 		Byte status = cmd.getStatus();
 		Integer count = cmd.getCount();
 		Long flowId = cmd.getFlowId();
 		if(null == count) {
-        	LOGGER.error("Count cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"Count cannot be null.");
-        }
+			LOGGER.error("Count cannot be null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Count cannot be null.");
+		}
 		if(null == status) {
-        	LOGGER.error("Status cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"Status cannot be null.");
-        }
-		
+			LOGGER.error("Status cannot be null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Status cannot be null.");
+		}
+
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-		
-		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), 
+
+		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(),
 				parkingLot.getId(), flowId);
-		
-		Integer issuedCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
+
+		Integer issuedCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(),
 				parkingLot.getId(), flowId, ParkingCardRequestStatus.SUCCEED.getCode(), null);
-		
+
 		Integer totalCount = 0;
 		if(null != parkingFlow)
 			totalCount = parkingFlow.getMaxIssueNum();
 		Integer surplusCount = totalCount - issuedCount;
-		
+
 		if(null != parkingFlow && parkingFlow.getMaxIssueNumFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
 			if(status == ParkingCardRequestStatus.QUEUEING.getCode()) {
 				if(count > surplusCount) {
 					LOGGER.error("Count is rather than surplusCount.");
-		    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD_SURPLUS_NUM,
-		    				"Count is rather than surplusCount.");
+					throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD_SURPLUS_NUM,
+							"Count is rather than surplusCount.");
 				}
 			}else {
 				if(count > surplusCount) {
 					LOGGER.error("Count is rather than surplusCount.");
-		    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PROCESS_CARD_SURPLUS_NUM,
-		    				"Count is rather than surplusCount.");
+					throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PROCESS_CARD_SURPLUS_NUM,
+							"Count is rather than surplusCount.");
 				}
 			}
 		}
-		
+
 		if(status == ParkingCardRequestStatus.QUEUEING.getCode()) {
-			Integer quequeCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
+			Integer quequeCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(),
 					parkingLot.getId(), flowId, null, ParkingCardRequestStatus.QUEUEING.getCode());
 
 			if(count > quequeCount) {
 				LOGGER.error("Count is rather than quequeCount.");
-	    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD_QUEQUE_NUM,
-	    				"Count is rather than quequeCount.");
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD_QUEQUE_NUM,
+						"Count is rather than quequeCount.");
 			}
 		}else {
-			Integer processingCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
+			Integer processingCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(),
 					parkingLot.getId(), flowId, null, ParkingCardRequestStatus.PROCESSING.getCode());
 			if(count > processingCount) {
 				LOGGER.error("Count is rather than processingCount.");
-	    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PROCESS_CARD_QUEQUE_NUM,
-	    				"Count is rather than processingCount.");
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PROCESS_CARD_QUEQUE_NUM,
+						"Count is rather than processingCount.");
 			}
 		}
-		
-		
+
+
 		dbProvider.execute((TransactionStatus transactionStatus) -> {
 			Flow flow = flowProvider.findSnapshotFlow(flowId, FlowConstants.FLOW_CONFIG_START);
-	        String tag1 = flow.getStringTag1();
+			String tag1 = flow.getStringTag1();
 			StringBuilder strBuilder = new StringBuilder();
 			List<ParkingCardRequest> list = null;
 			if(status == ParkingCardRequestStatus.QUEUEING.getCode()) {
-				list = parkingProvider.listParkingCardRequests(null, cmd.getOwnerType(), 
-		    			cmd.getOwnerId(), cmd.getParkingLotId(), null, ParkingCardRequestStatus.QUEUEING.getCode(),
-		    			null, flowId, null, cmd.getCount());
-		    	
+				list = parkingProvider.listParkingCardRequests(null, cmd.getOwnerType(),
+						cmd.getOwnerId(), cmd.getParkingLotId(), null, ParkingCardRequestStatus.QUEUEING.getCode(),
+						null, flowId, null, cmd.getCount());
+
 				if(ParkingRequestFlowType.QUEQUE.getCode() == Integer.valueOf(tag1)) {
 
 					setParkingCardRequestsStatus(list, strBuilder, ParkingCardRequestStatus.PROCESSING.getCode());
 				}else {
-					
+
 					setParkingCardRequestsStatus(list, strBuilder, ParkingCardRequestStatus.SUCCEED.getCode());
 				}
 			}else {
-				list = parkingProvider.listParkingCardRequests(null, cmd.getOwnerType(), 
-		    			cmd.getOwnerId(), cmd.getParkingLotId(), null, ParkingCardRequestStatus.PROCESSING.getCode(),
-		    			null, flowId, null, cmd.getCount());
+				list = parkingProvider.listParkingCardRequests(null, cmd.getOwnerType(),
+						cmd.getOwnerId(), cmd.getParkingLotId(), null, ParkingCardRequestStatus.PROCESSING.getCode(),
+						null, flowId, null, cmd.getCount());
 				setParkingCardRequestsStatus(list, strBuilder, ParkingCardRequestStatus.SUCCEED.getCode());
 			}
-	    	
-	    	parkingProvider.updateParkingCardRequest(list);
-	    	
-	    	list.forEach(q -> {
-	    		FlowCase flowCase = flowCaseProvider.getFlowCaseById(q.getFlowCaseId());
-	    		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
-	    		stepDTO.setFlowCaseId(q.getFlowCaseId());
-	    		stepDTO.setFlowMainId(flowCase.getFlowMainId());
-	    		stepDTO.setFlowVersion(flowCase.getFlowVersion());
-	    		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
-	    		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-	    		stepDTO.setStepCount(flowCase.getStepCount());
-	    		flowService.processAutoStep(stepDTO);
-	    	});
-	    	
-	    	if(LOGGER.isDebugEnabled()) {
-	    	    LOGGER.debug("Issue parking cards, requestIds=[{}]", strBuilder.toString());
-	    	}
-	    	Integer namespaceId = UserContext.getCurrentNamespaceId();
-	    	Map<String, Object> map = new HashMap<String, Object>();
+
+			parkingProvider.updateParkingCardRequest(list);
+
+			list.forEach(q -> {
+				FlowCase flowCase = flowCaseProvider.getFlowCaseById(q.getFlowCaseId());
+				FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+				stepDTO.setFlowCaseId(q.getFlowCaseId());
+				stepDTO.setFlowMainId(flowCase.getFlowMainId());
+				stepDTO.setFlowVersion(flowCase.getFlowVersion());
+				stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+				stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+				stepDTO.setStepCount(flowCase.getStepCount());
+				flowService.processAutoStep(stepDTO);
+			});
+
+			if(LOGGER.isDebugEnabled()) {
+				LOGGER.debug("Issue parking cards, requestIds=[{}]", strBuilder.toString());
+			}
+			Integer namespaceId = UserContext.getCurrentNamespaceId();
+			Map<String, Object> map = new HashMap<String, Object>();
 			String deadline = deadline(parkingLot.getMaxExpiredDay());
-		    map.put("deadline", deadline);
+			map.put("deadline", deadline);
 			String scope = ParkingNotificationTemplateCode.SCOPE;
 			int code = ParkingNotificationTemplateCode.USER_APPLY_CARD;
 			String locale = "zh_CN";
@@ -1053,7 +1056,7 @@ public class ParkingServiceImpl implements ParkingService {
 			});
 			return null;
 		});
-    	
+
 	}
 
 	private void setParkingCardRequestsStatus(List<ParkingCardRequest> list, StringBuilder strBuilder, Byte status) {
@@ -1062,7 +1065,7 @@ public class ParkingServiceImpl implements ParkingService {
 				r.setIssueTime(new Timestamp(System.currentTimeMillis()));
 				r.setStatus(status);
 				if(strBuilder.length() > 0) {
-				    strBuilder.append(", ");
+					strBuilder.append(", ");
 				}
 				strBuilder.append(r.getId());
 			});
@@ -1071,14 +1074,14 @@ public class ParkingServiceImpl implements ParkingService {
 				r.setProcessSucceedTime(new Timestamp(System.currentTimeMillis()));
 				r.setStatus(status);
 				if(strBuilder.length() > 0) {
-				    strBuilder.append(", ");
+					strBuilder.append(", ");
 				}
 				strBuilder.append(r.getId());
 			});
 		}
-		
+
 	}
-	
+
 	private String deadline(Integer day) {
 		long time = System.currentTimeMillis();
 
@@ -1089,91 +1092,91 @@ public class ParkingServiceImpl implements ParkingService {
 		calendar.add(Calendar.DATE, day);
 		return sdf.format(calendar.getTime());
 	}
-	
+
 	private void sendMessageToUser(Long userId, String content) {
 
 		MessageDTO messageDto = new MessageDTO();
-        messageDto.setAppId(AppConstants.APPID_MESSAGING);
-        messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
-        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-        messageDto.setBody(content);
-        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-        
-        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
-                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+		messageDto.setAppId(AppConstants.APPID_MESSAGING);
+		messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
+		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
+		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+		messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+		messageDto.setBody(content);
+		messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+
+		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+				userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 	}
-	
+
 	@Override
 	public void notifyParkingRechargeOrderPayment(PayCallbackCommand cmd) {
-		
+
 		OrderEmbeddedHandler orderEmbeddedHandler = this.getOrderHandler(cmd.getOrderType());
-		
+
 		LOGGER.debug("OrderEmbeddedHandler={}", orderEmbeddedHandler.getClass().getName());
-		
+
 		if(cmd.getPayStatus().equalsIgnoreCase("success"))
 			orderEmbeddedHandler.paySuccess(cmd);
 		if(cmd.getPayStatus().equalsIgnoreCase("fail"))
 			orderEmbeddedHandler.payFail(cmd);
-		
+
 	}
-	
+
     private ParkingLot checkParkingLot(String ownerType, Long ownerId, Long parkingLotId){
-    	if(null == ownerId) {
-        	LOGGER.error("OwnerId cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"OwnerId cannot be null.");
-        }
-    	
-    	if(StringUtils.isBlank(ownerType)) {
-        	LOGGER.error("OwnerType cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"OwnerType cannot be null.");
-        }
-    	
-    	if(null == parkingLotId) {
-        	LOGGER.error("ParkingLotId cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"ParkingLotId cannot be null.");
-        }
-    	
-    	ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
-        if(null == parkingLot) {
-        	LOGGER.error("ParkingLot not found, parkingLotId={}", parkingLotId);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    			"ParkingLot not found");
-        }
-        // 检查参数里的ownerType和ownerId是否与查出来停车场里的匹配
-        if(ownerId.longValue() != parkingLot.getOwnerId().longValue()) {
-        	LOGGER.error("OwnerId is not match with parkingLot ownerId, ownerId={}", ownerId);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-    				"OwnerId is not match with parkingLot ownerId.");
-        }
-        if(ParkingOwnerType.fromCode(parkingLot.getOwnerType()) != ParkingOwnerType.fromCode(ownerType)){
-            LOGGER.error("OwnerType is not match with parkingLot OwnerType, ownerType={}", ownerType);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-    				"OwnerType is not match with parkingLot OwnerType.");
-        }
-        return parkingLot;
-    }
-    
-    private void checkPlateNumber(String plateNumber){
-    	if(StringUtils.isBlank(plateNumber)) {
-        	LOGGER.error("PlateNumber cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"PlateNumber cannot be null.");
-        }
-    }
-    
-    private void checkOrderToken(String orderToken){
-    	if(StringUtils.isBlank(orderToken)) {
-        	LOGGER.error("OrderToken cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"OrderToken cannot be null.");
-        }
-    }
-    
+		if(null == ownerId) {
+			LOGGER.error("OwnerId cannot be null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"OwnerId cannot be null.");
+		}
+
+		if(StringUtils.isBlank(ownerType)) {
+			LOGGER.error("OwnerType cannot be null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"OwnerType cannot be null.");
+		}
+
+		if(null == parkingLotId) {
+			LOGGER.error("ParkingLotId cannot be null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"ParkingLotId cannot be null.");
+		}
+
+		ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
+		if(null == parkingLot) {
+			LOGGER.error("ParkingLot not found, parkingLotId={}", parkingLotId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"ParkingLot not found");
+		}
+		// 检查参数里的ownerType和ownerId是否与查出来停车场里的匹配
+		if(ownerId.longValue() != parkingLot.getOwnerId().longValue()) {
+			LOGGER.error("OwnerId is not match with parkingLot ownerId, ownerId={}", ownerId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+					"OwnerId is not match with parkingLot ownerId.");
+		}
+		if(ParkingOwnerType.fromCode(parkingLot.getOwnerType()) != ParkingOwnerType.fromCode(ownerType)){
+			LOGGER.error("OwnerType is not match with parkingLot OwnerType, ownerType={}", ownerType);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+					"OwnerType is not match with parkingLot OwnerType.");
+		}
+		return parkingLot;
+	}
+
+	private void checkPlateNumber(String plateNumber){
+		if(StringUtils.isBlank(plateNumber)) {
+			LOGGER.error("PlateNumber cannot be null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"PlateNumber cannot be null.");
+		}
+	}
+
+	private void checkOrderToken(String orderToken){
+		if(StringUtils.isBlank(orderToken)) {
+			LOGGER.error("OrderToken cannot be null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"OrderToken cannot be null.");
+		}
+	}
+
 //    @Scheduled(cron="0 0 2 * * ? ")
 //   	@Override
 //   	public void invalidApplier() {
@@ -1184,13 +1187,13 @@ public class ParkingServiceImpl implements ParkingService {
 //   			long time = System.currentTimeMillis() - days * 24 * 60 * 60 * 1000;
 //   			parkingProvider.updateInvalidAppliers(new Timestamp(time),parkingLot.getId());
 //   		}
-//   		
+//
 //   	}
-    
+
 	private OrderEmbeddedHandler getOrderHandler(String orderType) {
 		return PlatformContext.getComponent(OrderEmbeddedHandler.ORDER_EMBEDED_OBJ_RESOLVER_PREFIX+this.getOrderTypeCode(orderType));
 	}
-	
+
 	private String getOrderTypeCode(String orderType) {
 		Integer code = OrderType.OrderTypeEnum.getCodeByPyCode(orderType);
 		if(null == code){
@@ -1214,16 +1217,16 @@ public class ParkingServiceImpl implements ParkingService {
 				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(), cmd.getCardNumber(),
 				cmd.getStatus(), cmd.getPageAnchor(), cmd.getPageSize());
 		Workbook wb = new XSSFWorkbook();
-		
-		Font font = wb.createFont();   
-		font.setFontName("黑体");   
+
+		Font font = wb.createFont();
+		font.setFontName("黑体");
 		font.setFontHeightInPoints((short) 16);
 		CellStyle style = wb.createCellStyle();
 		style.setFont(font);
-		
+
 		Sheet sheet = wb.createSheet("parkingRechargeOrders");
-		sheet.setDefaultColumnWidth(20);  
-		sheet.setDefaultRowHeightInPoints(20); 
+		sheet.setDefaultColumnWidth(20);
+		sheet.setDefaultRowHeightInPoints(20);
 		Row row = sheet.createRow(0);
 		row.createCell(0).setCellValue("订单号");
 		row.createCell(1).setCellValue("车牌号");
@@ -1233,7 +1236,7 @@ public class ParkingServiceImpl implements ParkingService {
 		row.createCell(5).setCellValue("缴费月数");
 		row.createCell(6).setCellValue("金额");
 		row.createCell(7).setCellValue("支付方式");
-		row.createCell(8).setCellValue("缴费类型"); 
+		row.createCell(8).setCellValue("缴费类型");
 		for(int i=0;i<list.size();i++){
 			Row tempRow = sheet.createRow(i + 1);
 			ParkingRechargeOrder order = list.get(i);
@@ -1247,7 +1250,7 @@ public class ParkingServiceImpl implements ParkingService {
 			VendorType type = VendorType.fromCode(order.getPaidType());
 			tempRow.createCell(7).setCellValue(null==type?"":type.getDescribe());
 			tempRow.createCell(8).setCellValue(ParkingRechargeType.fromCode(order.getRechargeType()).getDescribe());
-			
+
 		}
 		ByteArrayOutputStream out = null;
 		try {
@@ -1259,23 +1262,23 @@ public class ParkingServiceImpl implements ParkingService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"exportParkingRechageOrders is fail.");
 		}
-		
+
 		return response;
 	}
-	
+
 	@Override
 	public void deleteParkingRechargeOrder(DeleteParkingRechargeOrderCommand cmd) {
 		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getId());
 		if(null == order){
 			LOGGER.error("Order not found, cmd={}", cmd);
- 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
- 					ErrorCodes.ERROR_GENERAL_EXCEPTION,
- 					"Order not found");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Order not found");
 		}
 		order.setIsDelete(ParkingOrderDeleteFlag.DELETED.getCode());
 		parkingProvider.updateParkingRechargeOrder(order);
 	}
-	
+
 	private Long createOrderNo(Long time) {
 //		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 //		String prefix = sdf.format(new Date());
@@ -1296,19 +1299,19 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public ParkingTempFeeDTO getParkingTempFee(GetParkingTempFeeCommand cmd) {
 		checkPlateNumber(cmd.getPlateNumber());
-    	ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-		
-    	String vendor = parkingLot.getVendorName();
-    	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
-    	
-    	ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, cmd.getPlateNumber());
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
-    	if (null != parkingLot.getTempFeeDiscountFlag()) {
+		String vendor = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(vendor);
+
+		ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, cmd.getPlateNumber());
+
+		if (null != parkingLot.getTempFeeDiscountFlag()) {
 			if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getTempFeeDiscountFlag()) {
 				if (null != dto.getPrice()) {
 					dto.setOriginalPrice(dto.getPrice());
 					BigDecimal newPrice = dto.getPrice().multiply(new BigDecimal(parkingLot.getTempFeeDiscount()))
-							.divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
+							.divide(new BigDecimal(10), DefaultParkingVendorHandler.TEMP_FEE_RETAIN_DECIMAL, RoundingMode.HALF_UP);
 					dto.setPrice(newPrice);
 				}
 			}
@@ -1348,26 +1351,26 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public ListParkingCarSeriesResponse listParkingCarSeries(ListParkingCarSeriesCommand cmd) {
-		
+
 		ListParkingCarSeriesResponse response = new ListParkingCarSeriesResponse();
 //		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
 		Integer pageSize = cmd.getPageSize();
 
 		List<ParkingCarSerie> list = parkingProvider.listParkingCarSeries(cmd.getParentId(), cmd.getPageAnchor(), pageSize);
-    	int size = list.size(); 				
-    	if(size > 0){
-    		response.setCarSeries(list.stream().map(r -> ConvertHelper.convert(r, ParkingCarSerieDTO.class))
-    				.collect(Collectors.toList()));
-    		if(null != pageSize) {
-    			if(size != pageSize){
-            		response.setNextPageAnchor(null);
-            	}else{
-            		response.setNextPageAnchor(list.get(size-1).getId());
-            	}	
-    		}
-    	}
-    	
+		int size = list.size();
+		if(size > 0){
+			response.setCarSeries(list.stream().map(r -> ConvertHelper.convert(r, ParkingCarSerieDTO.class))
+					.collect(Collectors.toList()));
+			if(null != pageSize) {
+				if(size != pageSize){
+					response.setNextPageAnchor(null);
+				}else{
+					response.setNextPageAnchor(list.get(size-1).getId());
+				}
+			}
+		}
+
 		return response;
 	}
 
@@ -1377,27 +1380,27 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingRequestCardConfigDTO dto = null;
 
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-    	
+
 		User user = UserContext.current().getUser();
 		Long flowId = cmd.getFlowId();
-    	if(null == flowId) {
-        	Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE, 
-        			FlowModuleType.NO_MODULE.getCode(), cmd.getParkingLotId(), FlowOwnerType.PARKING.getCode());
+		if(null == flowId) {
+			Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
+					FlowModuleType.NO_MODULE.getCode(), cmd.getParkingLotId(), FlowOwnerType.PARKING.getCode());
 
-        	if (null == flow) {
-        		return null;
+			if (null == flow) {
+				return null;
 			}
-        	flowId = flow.getFlowMainId();
+			flowId = flow.getFlowMainId();
 //        	LOGGER.error("FlowId cannot be null.");
 //    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 //    				"FlowId cannot be null.");
-        }
-		
+		}
+
 		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), parkingLot.getId(), flowId);
 
 		if(null != parkingFlow) {
 			dto = ConvertHelper.convert(parkingFlow, ParkingRequestCardConfigDTO.class);
-		
+
 			String host =  configProvider.getValue(UserContext.getCurrentNamespaceId(), "home.url", "");
 
 			if (parkingFlow.getCardAgreementFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
@@ -1421,15 +1424,15 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public void setParkingRequestCardConfig(SetParkingRequestCardConfigCommand cmd) {
-		
-    	ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-    	Long flowId = cmd.getFlowId();
-    	if(null == flowId) {
-        	LOGGER.error("FlowId cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"FlowId cannot be null.");
-        }
-    	
+
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+		Long flowId = cmd.getFlowId();
+		if(null == flowId) {
+			LOGGER.error("FlowId cannot be null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"FlowId cannot be null.");
+		}
+
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
 		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), flowId);
 		if(null == parkingFlow) {
@@ -1471,15 +1474,15 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
-		
+
 		checkPlateNumber(cmd.getPlateNumber());
-    	ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-		
-    	String vendor = parkingLot.getVendorName();
-    	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
-    	
-    	OpenCardInfoDTO dto = handler.getOpenCardInfo(cmd);		
-		
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
+		String vendor = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(vendor);
+
+		OpenCardInfoDTO dto = handler.getOpenCardInfo(cmd);
+
 		return dto;
 	}
 
@@ -1499,29 +1502,29 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public SurplusCardCountDTO getSurplusCardCount(GetParkingRequestCardConfigCommand cmd) {
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-    	
+
 		Long flowId = cmd.getFlowId();
-    	if(null == flowId) {
-        	LOGGER.error("FlowId cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"FlowId cannot be null.");
-        }
-		
-		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), 
+		if(null == flowId) {
+			LOGGER.error("FlowId cannot be null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"FlowId cannot be null.");
+		}
+
+		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(),
 				parkingLot.getId(), flowId);
-		
-		Integer count = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
+
+		Integer count = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(),
 				parkingLot.getId(), flowId, ParkingCardRequestStatus.SUCCEED.getCode(), null);
-		
+
 		Integer totalCount = 0;
 		Byte maxIssueNumFlag = 0;
 		if(null != parkingFlow) {
 			maxIssueNumFlag = parkingFlow.getMaxIssueNumFlag();
 			totalCount = parkingFlow.getMaxIssueNum();
 		}
-			
+
 		SurplusCardCountDTO dto = new SurplusCardCountDTO();
-		
+
 		dto.setTotalCount(totalCount);
 		dto.setSurplusCount(totalCount - count);
 		dto.setMaxIssueNumFlag(maxIssueNumFlag);
@@ -1533,7 +1536,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		ParkingRequestCardAgreementDTO dto = new ParkingRequestCardAgreementDTO();
 		ParkingFlow parkingFlow = parkingProvider.findParkingRequestCardConfig(cmd.getConfigId());
-		
+
 		if(null != parkingFlow)
 			dto.setAgreement(parkingFlow.getCardAgreement());
 		return dto;
@@ -1599,25 +1602,25 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public void synchronizedData(ListParkingCardRequestsCommand cmd) {
-		
+
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		User user = UserContext.current().getUser();
-		
+
 		String ownerType = FlowOwnerType.PARKING.getCode();
-    	Flow flow = flowService.getEnabledFlow(namespaceId, ParkingFlowConstant.PARKING_RECHARGE_MODULE,
-    			FlowModuleType.NO_MODULE.getCode(), cmd.getParkingLotId(), ownerType);
-    	
-    	if(null == flow) {
-    		LOGGER.error("Enabled flow not found, cmd={}", cmd);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"Enabled flow not found.");
-    	}
-    	
+		Flow flow = flowService.getEnabledFlow(namespaceId, ParkingFlowConstant.PARKING_RECHARGE_MODULE,
+				FlowModuleType.NO_MODULE.getCode(), cmd.getParkingLotId(), ownerType);
+
+		if(null == flow) {
+			LOGGER.error("Enabled flow not found, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Enabled flow not found.");
+		}
+
 		Long flowId = flow.getFlowMainId();
-		
-		List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(null, cmd.getOwnerType(), 
-    			cmd.getOwnerId(), cmd.getParkingLotId(), null, (byte)1, null, null, null, null);
-		
+
+		List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(null, cmd.getOwnerType(),
+				cmd.getOwnerId(), cmd.getParkingLotId(), null, (byte)1, null, null, null, null);
+
 		for(ParkingCardRequest request: list) {
 
 			CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
@@ -1628,16 +1631,16 @@ public class ParkingServiceImpl implements ParkingService {
 			createFlowCaseCommand.setReferType(EntityType.PARKING_CARD_REQUEST.getCode());
 			createFlowCaseCommand.setContent("车牌号码：" + request.getPlateNumber() + "\n"
 					+ "车主电话：" + request.getPlateOwnerPhone());
-	    	
-	    	FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
-			
-	    	request.setFlowId(flowCase.getFlowMainId());
-	    	request.setFlowCaseId(flowCase.getId());
-	    	request.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
+
+			FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
+
+			request.setFlowId(flowCase.getFlowMainId());
+			request.setFlowCaseId(flowCase.getId());
+			request.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
 			parkingProvider.updateParkingCardRequest(request);
 		}
-		
-		
+
+
 	}
 
 	@Override
@@ -1653,52 +1656,67 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingCarVerification verification = parkingProvider.findParkingCarVerificationByUserId(cmd.getOwnerType(), cmd.getOwnerId(),
 				parkingLotId, cmd.getPlateNumber(), userId);
 
+		ParkingCarLockInfoDTO dto = new ParkingCarLockInfoDTO();
+
 		if (null == verification || verification.getStatus() == ParkingCarVerificationStatus.INACTIVE.getCode()
 				|| verification.getStatus() == ParkingCarVerificationStatus.FAILED.getCode()
 				|| verification.getStatus() == ParkingCarVerificationStatus.UN_AUTHORIZED.getCode()) {
-			ParkingCarLockInfoDTO dto = new ParkingCarLockInfoDTO();
 			dto.setCarVerificationFlag(ParkingCarVerificationStatus.UN_AUTHORIZED.getCode());
-			return dto;
 		}else if (verification.getStatus() == ParkingCarVerificationStatus.AUDITING.getCode()) {
-			ParkingCarLockInfoDTO dto = new ParkingCarLockInfoDTO();
 			dto.setCarVerificationFlag(ParkingCarVerificationStatus.AUDITING.getCode());
 
 			String flowCaseUrl = configProvider.getValue(ConfigConstants.PARKING_CAR_VERIFICATION_FLOWCASE_URL, "");
 
 			dto.setFlowCaseUrl(String.format(flowCaseUrl, verification.getFlowCaseId()));
-			return dto;
 		}else if (verification.getStatus() == ParkingCarVerificationStatus.SUCCEED.getCode()) {
-			String vendorName = parkingLot.getVendorName();
-			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
 
-			ParkingCarLockInfoDTO dto = handler.getParkingCarLockInfo(cmd);
+			dto.setCarVerificationFlag(ParkingCarVerificationStatus.SUCCEED.getCode());
 
-			if (null != dto) {
-				dto.setOwnerId(cmd.getOwnerId());
-				dto.setOwnerType(cmd.getOwnerType());
-				dto.setParkingLotId(cmd.getParkingLotId());
-				dto.setPlateNumber(cmd.getPlateNumber());
-				dto.setParkingLotName(parkingLot.getName());
-
-				Long organizationId = cmd.getOrganizationId();
-
-				String plateOwnerName = user.getNickName();
-
-				if(null != organizationId) {
-					OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
-					if(null != organizationMember) {
-						plateOwnerName = organizationMember.getContactName();
-					}
-				}
-				if(StringUtils.isBlank(dto.getPlateOwnerName())) {
-					dto.setPlateOwnerName(plateOwnerName);
-				}
-				dto.setCarVerificationFlag(ParkingCarVerificationStatus.SUCCEED.getCode());
-
-			}
-			return dto;
 		}
-		return null;
+
+		ParkingCarLockInfoDTO temp = getParkingCarLockInfoDTO(cmd, parkingLot, user);
+		if (null != temp) {
+			temp.setCarVerificationFlag(dto.getCarVerificationFlag());
+			temp.setFlowCaseUrl(dto.getFlowCaseUrl());
+			//兼容老版本app, 不论认证是什么状态，都返回锁车数据, 注意：前提是客户端根据carVerificationFlag标志来跳转
+			BeanUtils.copyProperties(temp, dto);
+		}else {
+			if (dto.getCarVerificationFlag() == ParkingCarVerificationStatus.SUCCEED.getCode()) {
+				dto = null;
+			}
+		}
+
+		return dto;
+	}
+
+	private ParkingCarLockInfoDTO getParkingCarLockInfoDTO(GetParkingCarLockInfoCommand cmd, ParkingLot parkingLot, User user) {
+		String vendorName = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+
+		ParkingCarLockInfoDTO dto = handler.getParkingCarLockInfo(cmd);
+
+		if (null != dto) {
+			dto.setOwnerId(cmd.getOwnerId());
+			dto.setOwnerType(cmd.getOwnerType());
+			dto.setParkingLotId(cmd.getParkingLotId());
+			dto.setPlateNumber(cmd.getPlateNumber());
+			dto.setParkingLotName(parkingLot.getName());
+
+			Long organizationId = cmd.getOrganizationId();
+
+			String plateOwnerName = user.getNickName();
+
+			if(null != organizationId) {
+				OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organizationId);
+				if(null != organizationMember) {
+					plateOwnerName = organizationMember.getContactName();
+				}
+			}
+			if(StringUtils.isBlank(dto.getPlateOwnerName())) {
+				dto.setPlateOwnerName(plateOwnerName);
+			}
+		}
+		return dto;
 	}
 
 	@Override
@@ -1716,12 +1734,12 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-		
+
 		String vendor = parkingLot.getVendorName();
-    	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
-    	
-    	GetParkingCarNumsResponse response = handler.getParkingCarNums(cmd);
-    	
+		ParkingVendorHandler handler = getParkingVendorHandler(vendor);
+
+		GetParkingCarNumsResponse response = handler.getParkingCarNums(cmd);
+
 		return response;
 	}
 
@@ -1768,68 +1786,71 @@ public class ParkingServiceImpl implements ParkingService {
 			refundParkingOrderV2(cmd, order);
 		}
 
-        order.setStatus(ParkingRechargeOrderStatus.REFUNDED.getCode());
-        order.setRefundTime(new Timestamp(System.currentTimeMillis()));
-        parkingProvider.updateParkingRechargeOrder(order);
+		order.setStatus(ParkingRechargeOrderStatus.REFUNDED.getCode());
+		order.setRefundTime(new Timestamp(System.currentTimeMillis()));
+		parkingProvider.updateParkingRechargeOrder(order);
 	}
 
-    private void refundParkingOrderV2 (UpdateParkingOrderCommand cmd, ParkingRechargeOrder order) {
+	private void refundParkingOrderV2 (UpdateParkingOrderCommand cmd, ParkingRechargeOrder order) {
 
-        Long refoundOrderNo = createOrderNo(System.currentTimeMillis());
+		Long refoundOrderNo = createOrderNo(System.currentTimeMillis());
 
-        Long amount = payService.changePayAmount(order.getPrice());
-        CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.PARKING.getPycode(), order.getOrderNo(), refoundOrderNo, amount);
+		BigDecimal price = order.getPrice();
 
-        if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+		Long amount = payService.changePayAmount(price);
 
-        } else{
-            LOGGER.error("Refund failed from vendor, cmd={}, response={}",
-                    cmd, refundResponse);
-            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-                    RentalServiceErrorCode.ERROR_REFUND_ERROR,
-                    "bill refund error");
-        }
-    }
+		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.PARKING.getPycode(), order.getId(), refoundOrderNo, amount);
+
+		if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+
+		} else{
+			LOGGER.error("Refund failed from vendor, cmd={}, response={}",
+					cmd, refundResponse);
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_REFUND_ERROR,
+					"bill refund error");
+		}
+	}
 
 	private void refundParkingOrderV1 (UpdateParkingOrderCommand cmd, ParkingRechargeOrder order) {
-        PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
-        String refundApi =  configProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
-        String appKey = configProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.appKey", "");
-        refundCmd.setAppKey(appKey);
-        Long timestamp = System.currentTimeMillis();
-        refundCmd.setTimestamp(timestamp);
-        Integer randomNum = (int) (Math.random()*1000);
-        refundCmd.setNonce(randomNum);
+		PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
+		String refundApi =  configProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
+		String appKey = configProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.appKey", "");
+		refundCmd.setAppKey(appKey);
+		Long timestamp = System.currentTimeMillis();
+		refundCmd.setTimestamp(timestamp);
+		Integer randomNum = (int) (Math.random()*1000);
+		refundCmd.setNonce(randomNum);
 
-        refundCmd.setRefundOrderNo(String.valueOf(order.getOrderNo()));
-        refundCmd.setOrderNo(String.valueOf(order.getId()));
+		refundCmd.setRefundOrderNo(String.valueOf(order.getOrderNo()));
+		refundCmd.setOrderNo(String.valueOf(order.getId()));
 
-        refundCmd.setOnlinePayStyleNo(VendorType.fromCode(order.getPaidType()).getStyleNo());
+		refundCmd.setOnlinePayStyleNo(VendorType.fromCode(order.getPaidType()).getStyleNo());
 
-        refundCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
-        boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
-        if (flag) {
-            refundCmd.setRefundAmount(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
-        }else {
-            refundCmd.setRefundAmount(order.getPrice());
-        }
+		refundCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
+		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+		if (flag) {
+			refundCmd.setRefundAmount(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+		}else {
+			refundCmd.setRefundAmount(order.getPrice());
+		}
 
-        refundCmd.setRefundMsg("停车缴费退款");
-        this.setSignatureParam(refundCmd);
+		refundCmd.setRefundMsg("停车缴费退款");
+		this.setSignatureParam(refundCmd);
 
-        PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refundApi, refundCmd, PayZuolinRefundResponse.class);
-        if(refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
-            order.setStatus(ParkingRechargeOrderStatus.REFUNDED.getCode());
-            order.setRefundTime(new Timestamp(System.currentTimeMillis()));
-            parkingProvider.updateParkingRechargeOrder(order);
-        } else{
-            LOGGER.error("Refund failed from vendor, cmd={}, refundCmd={}, response={}",
-                    cmd, refundCmd, refundResponse);
-            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-                    RentalServiceErrorCode.ERROR_REFUND_ERROR,
-                    "bill refund error");
-        }
-    }
+		PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refundApi, refundCmd, PayZuolinRefundResponse.class);
+		if(refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+			order.setStatus(ParkingRechargeOrderStatus.REFUNDED.getCode());
+			order.setRefundTime(new Timestamp(System.currentTimeMillis()));
+			parkingProvider.updateParkingRechargeOrder(order);
+		} else{
+			LOGGER.error("Refund failed from vendor, cmd={}, refundCmd={}, response={}",
+					cmd, refundCmd, refundResponse);
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_REFUND_ERROR,
+					"bill refund error");
+		}
+	}
 
 	/***给支付相关的参数签名*/
 	private void setSignatureParam(PayZuolinRefundCommand cmd) {

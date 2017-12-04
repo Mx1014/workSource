@@ -203,6 +203,14 @@ public class FlowCaseState {
         return processStack.firstElement();
     }
 
+    private void addNodeTrackLog(String content) {
+        FlowEventLog log = new FlowEventLog();
+
+
+
+        this.logs.add(log);
+    }
+
     private List<FlowCase> getChildFlowCases(FlowCaseState parentState) {
         List<FlowCase> childStates = new ArrayList<>();
         childStates.add(parentState.getFlowCase());

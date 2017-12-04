@@ -62,4 +62,5 @@ public class GetResourceTypeListCommand {
 	public void setStatus(Byte status) {
 		this.status = status;
 	}
+
 }

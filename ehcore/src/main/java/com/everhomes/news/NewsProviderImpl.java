@@ -162,11 +162,12 @@ public class NewsProviderImpl implements NewsProvider {
 	}
 
 	@Override
-	public List<NewsTag> listNewsTag(String ownerType, Long ownerId, Byte isSearch,Long parentId,Long pageAnchor, Integer pageSize) {
+	public List<NewsTag> listNewsTag(Integer namespaceId, Byte isSearch,Long parentId,Long pageAnchor, Integer pageSize,Long categoryId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhNewsTag.class));
 		SelectQuery<EhNewsTagRecord> query = context.selectQuery(Tables.EH_NEWS_TAG);
-		query.addConditions(Tables.EH_NEWS_TAG.OWNER_TYPE.eq(ownerType));
-		query.addConditions(Tables.EH_NEWS_TAG.OWNER_ID.eq(ownerId));
+//		query.addConditions(Tables.EH_NEWS_TAG.OWNER_TYPE.eq(ownerType));
+//		query.addConditions(Tables.EH_NEWS_TAG.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_NEWS_TAG.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_NEWS_TAG.DELETE_FLAG.eq((byte)0));
 		if (isSearch != null)
 			query.addConditions(Tables.EH_NEWS_TAG.IS_SEARCH.eq(isSearch));
@@ -174,6 +175,9 @@ public class NewsProviderImpl implements NewsProvider {
 			query.addConditions(Tables.EH_NEWS_TAG.PARENT_ID.eq(parentId));
 		if(null != pageAnchor && pageAnchor != 0)
 			query.addConditions(Tables.EH_NEWS_TAG.DEFAULT_ORDER.gt(pageAnchor));
+		if(categoryId !=null){
+			query.addConditions(Tables.EH_NEWS_TAG.CATEGORY_ID.eq(categoryId));
+		}
 		if(null != pageSize)
 			query.addLimit(pageSize);
 		query.addOrderBy(Tables.EH_NEWS_TAG.DEFAULT_ORDER.asc());

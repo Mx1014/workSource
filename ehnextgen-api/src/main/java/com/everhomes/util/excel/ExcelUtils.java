@@ -1,18 +1,18 @@
 package com.everhomes.util.excel;
 
-import com.everhomes.user.UserContact;
-import com.everhomes.user.UserContext;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.usermodel.HSSFRichTextString;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.boot.test.IntegrationTest;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -321,6 +321,9 @@ public class ExcelUtils {
         font.setBold(true);
         style.setAlignment(CellStyle.ALIGN_CENTER);
         style.setFont(font);
+        //  日期格式
+        XSSFDataFormat format = workbook.createDataFormat();
+        style.setDataFormat(format.getFormat("yyyy-MM-dd"));
     }
 
     /**
@@ -334,6 +337,9 @@ public class ExcelUtils {
         font.setBold(true);
         style.setAlignment(CellStyle.ALIGN_CENTER);
         style.setFont(font);
+        //  日期格式
+        XSSFDataFormat format = workbook.createDataFormat();
+        style.setDataFormat(format.getFormat("yyyy-MM-dd"));
     }
 
     /**
@@ -346,6 +352,9 @@ public class ExcelUtils {
         font.setBold(true);
         style.setFont(font);
         style.setWrapText(true);
+        //  日期格式
+        XSSFDataFormat format = workbook.createDataFormat();
+        style.setDataFormat(format.getFormat("yyyy-MM-dd"));
     }
 
     /*public static void main(String[] args) {
@@ -406,72 +415,75 @@ public class ExcelUtils {
      * @param result   （表格的数据）
      * @throws Exception
      */
-    public void exportExcel(HSSFWorkbook workbook, int sheetNum,
+    public void exportExcel(org.apache.poi.ss.usermodel.Workbook workbook, int sheetNum,
                             String sheetTitle, String[] headers, List<List<String>> result,String[] mandatory) throws Exception {
         // 生成一个表格
-        HSSFSheet sheet = workbook.createSheet();
+        Sheet sheet = workbook.createSheet();
         workbook.setSheetName(sheetNum, sheetTitle);
         // 设置表格默认列宽度为20个字节
-        sheet.setDefaultColumnWidth((short) 20);
+        sheet.setDefaultColumnWidth((short) 30);
+        //sheet.autoSizeColumn(1, true);
         // 生成一个样式
-        HSSFCellStyle style_non_m = workbook.createCellStyle();
+        CellStyle style_non_m = workbook.createCellStyle();
         // 设置这些样式
 //        style.setFillForegroundColor(HSSFColor.GREEN.index);
 //        style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
-        style_non_m.setBorderBottom(HSSFCellStyle.BORDER_THIN);
-        style_non_m.setBorderLeft(HSSFCellStyle.BORDER_THIN);
-        style_non_m.setBorderRight(HSSFCellStyle.BORDER_THIN);
-        style_non_m.setBorderTop(HSSFCellStyle.BORDER_THIN);
-        style_non_m.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+        style_non_m.setBorderBottom(CellStyle.BORDER_THIN);
+        style_non_m.setBorderLeft(CellStyle.BORDER_THIN);
+        style_non_m.setBorderRight(CellStyle.BORDER_THIN);
+        style_non_m.setBorderTop(CellStyle.BORDER_THIN);
+        style_non_m.setAlignment(CellStyle.ALIGN_CENTER);
         // 生成一个内容字体
-        HSSFCellStyle style_content = workbook.createCellStyle();
-        HSSFFont font = workbook.createFont();
+        CellStyle style_content = workbook.createCellStyle();
+        Font font = workbook.createFont();
         font.setColor(HSSFColor.BLACK.index);
         font.setFontHeightInPoints((short) 12);
         style_content.setFont(font);
         //非必填的标题的样式
-        HSSFFont font2 = workbook.createFont();
+        Font font2 = workbook.createFont();
         font2.setColor(HSSFColor.BLACK.index);
         font2.setFontHeightInPoints((short) 16);
         font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
         style_non_m.setFont(font2);
         //必填的字体和样式
 
-        HSSFCellStyle style_m = workbook.createCellStyle();
+        CellStyle style_m = workbook.createCellStyle();
         // 设置这些样式
 //        style.setFillForegroundColor(HSSFColor.GREEN.index);
 //        style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
-        style_m.setBorderBottom(HSSFCellStyle.BORDER_THIN);
-        style_m.setBorderLeft(HSSFCellStyle.BORDER_THIN);
-        style_m.setBorderRight(HSSFCellStyle.BORDER_THIN);
-        style_m.setBorderTop(HSSFCellStyle.BORDER_THIN);
-        style_m.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+        style_m.setBorderBottom(CellStyle.BORDER_THIN);
+        style_m.setBorderLeft(CellStyle.BORDER_THIN);
+        style_m.setBorderRight(CellStyle.BORDER_THIN);
+        style_m.setBorderTop(CellStyle.BORDER_THIN);
+        style_m.setAlignment(CellStyle.ALIGN_CENTER);
 
-        HSSFFont font4 = workbook.createFont();
+        Font font4 = workbook.createFont();
         font4.setColor(HSSFColor.RED.index);
         font4.setFontHeightInPoints((short) 16);
-        font4.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+        font4.setBoldweight(Font.BOLDWEIGHT_BOLD);
 
         style_m.setFont(font4);
         // 指定当单元格内容显示不下时自动换行
         style_non_m.setWrapText(true);
         style_content.setWrapText(true);
+        style_m.setWrapText(true);
         //产生说明
-        HSSFFont font3 = workbook.createFont();
+        Font font3 = workbook.createFont();
         font3.setColor(HSSFColor.BLACK.index);
         font3.setFontHeightInPoints((short) 12);
         font3.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
 
-        HSSFCellStyle introStyle = workbook.createCellStyle();
+        CellStyle introStyle = workbook.createCellStyle();
         introStyle.setWrapText(true);
         introStyle.setAlignment(HorizontalAlignment.LEFT);
         introStyle.setFillBackgroundColor(HSSFColor.YELLOW.index);
         introStyle.setFont(font3);
         CellRangeAddress cra = new CellRangeAddress(0,0,0,11);
         sheet.addMergedRegion(cra);
-        HSSFRow introRow = sheet.createRow(0);
-        introRow.setHeightInPoints(130);
-        HSSFCell introCell = introRow.createCell(0);
+        Row introRow = sheet.createRow(0);
+        //这里改成170 原：130
+        introRow.setHeightInPoints(170);
+        Cell introCell = introRow.createCell(0);
         introCell.setCellStyle(introStyle);
         //这里可以根据sheet决定怎么显示枚举，晚上搞这个
         String instruction = "";
@@ -514,6 +526,13 @@ public class ExcelUtils {
                 break;
             case "计划信息":
                 break;
+            //物业巡检中添加 备注信息 暂时在注意事项中协商select的byte值  列出
+            default:
+                instruction =
+                        "二维码状态： 停用 、启用 \n"+
+                        "当前状态：不完整 、使用中 、维修中 、报废 、停用  、备用 \n"+
+                        "设备类型：消防 、强电 、弱电 、电梯 、空调 、给排水、空置房、装修、安保、日常工作检查、公共设施检查、周末值班、安全检查、其他 \n"+
+                        "日期格式:  yyyy-MM-dd \n";
         }
         introCell.setCellValue("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
                 "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +
@@ -538,11 +557,11 @@ public class ExcelUtils {
 //                "表计类型: 应收部分、应付部分、自用部分、公共计量部分、其他 \n"
 
         // 产生表格标题行
-        HSSFRow row = sheet.createRow(1);
+        Row row = sheet.createRow(1);
         // 把字体应用到当前的样式,标题为加粗的
 
         for (int i = 0; i < headers.length; i++) {
-            HSSFCell cell = row.createCell((short) i);
+            Cell cell = row.createCell((short) i);
             if(mandatory[i].equals("1")){
                 cell.setCellStyle(style_m);
             }else{
@@ -559,7 +578,7 @@ public class ExcelUtils {
                 row = sheet.createRow(index+1);
                 int cellIndex = 0;
                 for (String str : m) {
-                    HSSFCell cell = row.createCell((short) cellIndex);
+                    Cell cell = row.createCell((short) cellIndex);
                     cell.setCellStyle(style_content);
                     cell.setCellValue(str.toString());
                     cellIndex++;

@@ -8,7 +8,7 @@ import com.everhomes.flow.FlowService;
 import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.pay.order.PaymentType;
-import com.everhomes.rest.flow.FlowAutoStepDTO;
+import com.everhomes.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.order.OrderType;
@@ -166,7 +166,10 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 
 	@Override
 	public void refundSuccess(SrvOrderPaymentNotificationCommand cmd) {
-
+		RentalOrderPayorderMap orderMap= rentalProvider.findRentalBillPaybillMapByOrderNo(String.valueOf(cmd.getOrderId()));
+		RentalOrder order = rentalProvider.findRentalBillById(orderMap.getOrderId());
+		order.setStatus(SiteBillStatus.REFUNDED.getCode());
+		rentalProvider.updateRentalBill(order);
 	}
 
 	@Override
