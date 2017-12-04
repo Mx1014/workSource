@@ -1142,6 +1142,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return siyinPrintEmail;
 	}
 	private String getSiyinCode(String result){
+		LOGGER.info("result = "+result);
         return result.substring(0, result.indexOf(":"));
     }
 
