@@ -3672,7 +3672,7 @@ public class QualityServiceImpl implements QualityService {
 				//scoresByTarget.add(scoreGroupDto);
 			}
 		}
-		List<ScoreGroupByTargetDTO> sortedScoresByTarget = null;
+		List<ScoreGroupByTargetDTO> sortedScoresByTarget = new ArrayList<>();
 		if (scoresByTarget.size() > 0) {
 			//sort  scoreByTarget
 			sortedScoresByTarget = scoresByTarget.stream()
