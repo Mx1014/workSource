@@ -215,8 +215,10 @@ public class WebMenuServiceImpl implements WebMenuService {
 		Set<Long> appMapKeus = appMap.keySet();
 		for (WebMenu webMenu : menus) {
 			pathToArray = Arrays.stream(webMenu.getPath().split("/")).map(r->{
-				return Long.valueOf(r);
-			}).collect(Collectors.toList());
+				if(!StringUtils.isEmpty(r))
+					return Long.valueOf(r);
+				return null;
+			}).filter(r-> r != null).collect(Collectors.toList());
 			pathToArray.retainAll(appMapKeus);
 			//存在对应的appId
 			if(!pathToArray.isEmpty()){

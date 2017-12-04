@@ -710,7 +710,7 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
                 .and(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()))
                 .orderBy(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ID.asc())
                 .fetch().map(r -> {
-                    appMap.put(r.getValue(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ACTIVE_APP_ID), ReflectionServiceModuleApp.getServiceModuleApp(ConvertHelper.convert(r, ReflectionServiceModuleApp.class)));
+                    appMap.put(r.getValue(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.MENU_ID), ReflectionServiceModuleApp.getServiceModuleApp(ConvertHelper.convert(r, ReflectionServiceModuleApp.class)));
                     return null;
                 });
         return appMap;
