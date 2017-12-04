@@ -155,14 +155,20 @@ public class WebMenuServiceImpl implements WebMenuService {
 			//根据应用拿菜单
 			List<ServiceModuleAppDTO> dtos = serviceModuleProvider.listReflectionServiceModuleAppByActiveAppIds(UserContext.getCurrentNamespaceId(), appIds);
 			if (dtos != null) {
-				for (ServiceModuleAppDTO r : dtos) {
-					Long menuId = r.getMenuId();
+				for (ServiceModuleAppDTO dto : dtos) {
+					Long menuId = dto.getMenuId();
 					if(menuId != null && menuId != 0L){
 						List<Long> menuIdSignle = new ArrayList<>();
 						menuIdSignle.add(menuId);
 						List<WebMenu> menuSignle = webMenuPrivilegeProvider.listWebMenuByMenuIds(menuIdSignle);
-						if(menuSignle != null)
-							menus_apps = webMenuProvider.listWebMenusByPath(menuSignle.get(0).getPath(), categories);
+						if(menuSignle != null){
+							List<WebMenu> menuList = webMenuProvider.listWebMenusByPath(menuSignle.get(0).getPath(), categories);
+							menuList = menuList.stream().map(r->{
+								r.setAppId(dto.getId());
+								return r;
+							}).collect(Collectors.toList());
+							menus_apps.addAll(menuList);
+						}
 					}
 				}
 			}
@@ -201,14 +207,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 				return new ArrayList<>();
 		}
 		menus = filterMenus(menus, organizationId);
- 		return processWebMenus(menus.stream().map(r->{
-			 WebMenuDTO dto = ConvertHelper.convert(r, WebMenuDTO.class);
-			ServiceModuleApp app =serviceModuleProvider.findReflectionServiceModuleAppByMenuId(r.getId());
-			if(app != null){
-				dto.setAppId(app.getId());
-			}
-			return dto;
-		}).collect(Collectors.toList()), ConvertHelper.convert(menu, WebMenuDTO.class)).getDtos();
+ 		return processWebMenus(menus.stream().map(r->{ return  ConvertHelper.convert(r, WebMenuDTO.class); }).collect(Collectors.toList()), ConvertHelper.convert(menu, WebMenuDTO.class)).getDtos();
 	}
 
 	private List<WebMenuDTO> listEnterpriseWebMenu(Long userId, WebMenu menu, List<String> categories, Long organizationId){
