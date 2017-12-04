@@ -35,6 +35,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
@@ -100,6 +101,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Autowired
     private WebMenuPrivilegeProvider webMenuPrivilegeProvider;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 
 
     @Override
@@ -658,6 +662,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             userId = user.getId();
         }
         if(checkModuleManage(userId, cmd.getOrganizationId(), cmd.getModuleId())){
+            return 1;
+        }
+        if(userPrivilegeMgr.checkModuleAppAdmin(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), cmd.getUserId(), cmd.getAppId())){
             return 1;
         }
         return 0;

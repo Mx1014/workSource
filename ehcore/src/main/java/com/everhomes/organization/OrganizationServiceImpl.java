@@ -3017,7 +3017,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         //检查应用管理员+权限细化 add by lei.lv
-        List<Project> projects_app = authorizationProvider.getManageAuthorizationProjectsByAuthAndTargets(EntityType.SERVICE_MODULE_APP.getCode(), null, targets);
+        List<Project> projects_app = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(EntityType.SERVICE_MODULE_APP.getCode(), null, targets);
         for (Project project : projects_app) {
             if (EntityType.fromCode(project.getProjectType()) == EntityType.ORGANIZATIONS) {
                 organizationIds.add(project.getProjectId());

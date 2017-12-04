@@ -279,6 +279,23 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
     }
 
     @Override
+    public boolean checkModuleAppAdmin(Integer namespaceId, Long organizationId, Long userId, Long appId) {
+        ServiceModuleApp app = this.serviceModuleProvider.findReflectionServiceModuleAppByActiveAppId(appId);
+        ServiceModule serviceModule = this.serviceModuleProvider.findServiceModuleById(app.getModuleId());
+        if(serviceModule != null){
+            List<Authorization> authorizations_Total =  this.authorizationProvider.listAuthorizations(EntityType.ORGANIZATIONS.getCode(), organizationId, OwnerType.USER.getCode(), userId, EntityType.SERVICE_MODULE_APP.getCode(), 0L, IdentityType.MANAGE.getCode(), 0L, serviceModule.getModuleControlType(), AllFlagType.YES.getCode(), false);
+            if(authorizations_Total.size() > 0){
+                return true;
+            }
+            List<Authorization> authorizations = this.authorizationProvider.listAuthorizations(EntityType.ORGANIZATIONS.getCode(), organizationId, OwnerType.USER.getCode(), userId, EntityType.SERVICE_MODULE_APP.getCode(), serviceModule.getId(), IdentityType.MANAGE.getCode(), appId, null, null, false);
+            if(authorizations.size() > 0){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public boolean checkSuperAdmin(Long userId, Long currentOrgId){
         if(null == currentOrgId){
             return false;

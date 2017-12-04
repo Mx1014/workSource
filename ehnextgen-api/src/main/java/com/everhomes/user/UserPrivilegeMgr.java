@@ -192,4 +192,14 @@ public interface UserPrivilegeMgr {
      * @param organizationId
      */
     boolean checkModuleAppAdmin(Integer namespaceId, String ownerType, Long ownerId, Long userId, Long moduleId, Long appId, Long communityId, Long organizationId);
+
+
+    /**
+     * 简单检查用户是否对某个应用是管理员
+     * @param namespaceId
+     * @param userId
+     * @param appId
+     * @return
+     */
+    boolean checkModuleAppAdmin(Integer namespaceId, Long organizationId, Long userId, Long appId);
 }
