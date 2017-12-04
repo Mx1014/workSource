@@ -219,7 +219,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 
 	/**
 	 * <b>URL: /techpark/entry/exportApplyEntrys
-	 * <p>入住信息列表
+	 * <p>导出入住信息列表
 	 */
 	@RequestMapping("exportApplyEntrys")
 	public void exportApplyEntrys(ListEnterpriseApplyEntryCommand cmd, HttpServletResponse resp){

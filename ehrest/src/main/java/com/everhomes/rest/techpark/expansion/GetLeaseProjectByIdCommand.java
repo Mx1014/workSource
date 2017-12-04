@@ -5,6 +5,15 @@ package com.everhomes.rest.techpark.expansion;
  */
 public class GetLeaseProjectByIdCommand {
     private Long projectId;
+    private Long categoryId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     public Long getProjectId() {
         return projectId;

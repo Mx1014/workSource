@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class RelocationFlowModuleListener implements FlowModuleListener {
@@ -36,8 +37,6 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
     @Autowired
     private RelocationProvider relocationProvider;
     @Autowired
-    private QRCodeService qRCodeService;
-    @Autowired
     private LocaleStringService localeStringService;
     @Autowired
     private FlowService flowService;
@@ -45,8 +44,6 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
     private RelocationService relocationService;
     @Autowired
     private AssetService assetService;
-    @Autowired
-    private ConfigurationProvider configProvider;
 
     @Override
     public void onFlowCaseStart(FlowCaseState ctx) {
@@ -117,13 +114,6 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
         RelocationRequestDTO dto = relocationService.getRelocationRequestDetail(cmd);
         if (null != dto) {
 
-            String flowCaseUrl = configProvider.getValue(ConfigConstants.RELOCATION_FLOWCASE_URL, "");
-
-            NewQRCodeCommand qrCmd = new NewQRCodeCommand();
-            qrCmd.setRouteUri(String.format(flowCaseUrl, flowCase.getId(), FlowUserType.PROCESSOR.getCode()));
-            qrCmd.setHandler(QRCodeHandler.FLOW.getCode());
-            QRCodeDTO qRCodeDTO = qRCodeService.createQRCode(qrCmd);
-            dto.setQrCodeUrl(qRCodeDTO.getUrl());
             flowCase.setCustomObject(JSONObject.toJSONString(dto));
 
         } else {
@@ -201,6 +191,7 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
         FlowConditionVariableDTO dto = new FlowConditionVariableDTO();
         dto.setName("relocationMode");
         dto.setDisplayName("relocationMode");
+        dto.setOptions(Arrays.stream(RelocationFlowMode.values()).map(RelocationFlowMode::getCode).collect(Collectors.toList()));
 //        dto.setOperators(Collections.singletonList("="));
         return Collections.singletonList(dto);
     }

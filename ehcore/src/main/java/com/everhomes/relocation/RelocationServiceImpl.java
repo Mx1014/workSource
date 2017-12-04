@@ -12,10 +12,14 @@ import com.everhomes.flow.*;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.*;
+import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.organization.OrganizationGroupType;
 
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.rest.qrcode.NewQRCodeCommand;
+import com.everhomes.rest.qrcode.QRCodeDTO;
+import com.everhomes.rest.qrcode.QRCodeHandler;
 import com.everhomes.rest.relocation.*;
 import com.everhomes.rest.relocation.AttachmentDescriptor;
 
@@ -62,6 +66,8 @@ public class RelocationServiceImpl implements RelocationService {
 	private FlowService flowService;
 	@Autowired
 	private RelocationProvider relocationProvider;
+	@Autowired
+	private QRCodeService qRCodeService;
 
 	@Override
 	public SearchRelocationRequestsResponse searchRelocationRequests(SearchRelocationRequestsCommand cmd) {
@@ -228,9 +234,18 @@ public class RelocationServiceImpl implements RelocationService {
 					}
 				});
 			}
-
+			//创建工作流case
 			FlowCase flowCase = createFlowCase(request, cmd.getItems());
 			request.setFlowCaseId(flowCase.getId());
+
+			//创建二维码
+			String flowCaseUrl = configProvider.getValue(ConfigConstants.RELOCATION_FLOWCASE_URL, "");
+			NewQRCodeCommand qrCmd = new NewQRCodeCommand();
+			qrCmd.setRouteUri(String.format(flowCaseUrl, flowCase.getId(), FlowUserType.PROCESSOR.getCode()));
+			qrCmd.setHandler(QRCodeHandler.FLOW.getCode());
+			QRCodeDTO qRCodeDTO = qRCodeService.createQRCode(qrCmd);
+			request.setQrCodeUrl(qRCodeDTO.getUrl());
+
 			relocationProvider.updateRelocationRequest(request);
 			return null;
 		});
