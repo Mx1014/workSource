@@ -3022,7 +3022,7 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue("应打卡天数");
 		row.createCell(++i).setCellValue("正常天数");
 		row.createCell(++i).setCellValue("异常天数");
-		row.createCell(++i).setCellValue("缺勤天数");
+		row.createCell(++i).setCellValue("缺勤小时数");
 		row.createCell(++i).setCellValue("迟到次数");
 		row.createCell(++i).setCellValue("早退次数");
 		row.createCell(++i).setCellValue("迟到且早退次数");
@@ -5388,6 +5388,7 @@ public class PunchServiceImpl implements PunchService {
 								//找到用户的rule
 								PunchRule punchRule = getPunchRule(scheduling.getOwnerType(), scheduling.getOwnerId(), memberDTO.getTargetId());
 								//保证用户的rule 和schedule一致(也就是他使用的确实是这个排班而不是用别部门或者单独设置的排班)
+
 								if(null != punchRule && punchRule.getId().equals(scheduling.getPunchRuleId()) &&
 										//如果没有打卡 添加到推送列表
 										!checkUserPunch(scheduling.getRuleDate(),memberDTO.getTargetId(),scheduling.getOwnerId()))
