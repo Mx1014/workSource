@@ -615,6 +615,7 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
             cmd.setPageSize(5000);
         }
+        cmd.setPageSize(130);
         List<ListBillsDTO> dtos = new ArrayList<>();
         //has already distributed
         if(UserContext.getCurrentNamespaceId()==999983){
@@ -622,13 +623,25 @@ public class AssetServiceImpl implements AssetService {
             if(pageSize <= 100){
                 dtos.addAll(listBills(cmd).getListBillsDTOS());
             }
+            Integer hundred = 100;
             Integer pageAnchor = 100;
-            while(pageSize > pageAnchor){
-                cmd.setPageSize(pageAnchor);
-                dtos.addAll(listBills(cmd).getListBillsDTOS());
-                pageSize = pageSize - 100;
-                pageAnchor = pageSize;
-                cmd.setPageAnchor(cmd.getPageAnchor()+1l);
+            if(pageSize > 100){
+                while(pageSize > 0){
+                    cmd.setPageSize(hundred);
+                    List<ListBillsDTO> back = listBills(cmd).getListBillsDTOS();
+                    if(back.size() > pageAnchor) {
+                        for(int i = 0; i < pageAnchor; i++){
+                            dtos.add(back.get(i));
+                        }
+                        break;
+                    }else{
+                        dtos.addAll(back);
+                    }
+
+                    pageSize = pageSize - 100;
+                    pageAnchor = pageSize;
+                    cmd.setPageAnchor(cmd.getPageAnchor()==null?2l:cmd.getPageAnchor()+1l);
+                }
             }
         }else{
             dtos.addAll(listBills(cmd).getListBillsDTOS());
