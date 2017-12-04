@@ -3652,42 +3652,49 @@ public class QualityServiceImpl implements QualityService {
 								Double mark = (score.getSpecificationScore() - score.getScore()) * score.getSpecificationWeight();
 								score.setScore(mark);
 							}
-
+							scores.add(score);
 						}
-						scores.add(score);
+						//move this to if condition
+						//scores.add(score);
 					}
 
 					scoreGroupDto.setScores(scores);
 					//fix order
 					Double totalScore = 0D;
-					for (ScoreDTO score : scores) {
-						totalScore = totalScore + score.getScore();
+					if (scores.size() > 0) {
+						for (ScoreDTO score : scores) {
+							totalScore = totalScore + score.getScore();
+						}
+						scoreGroupDto.setTotalScore(totalScore);
 					}
-					scoreGroupDto.setTotalScore(totalScore);
+					scoresByTarget.add(scoreGroupDto);
 				}
-				scoresByTarget.add(scoreGroupDto);
+				//scoresByTarget.add(scoreGroupDto);
 			}
 		}
-		//sort  scoreByTarget
-		List<ScoreGroupByTargetDTO> sortedScoresByTarget = scoresByTarget.stream()
-				.sorted(Comparator.comparing(ScoreGroupByTargetDTO::getTotalScore).reversed())
-				.collect(Collectors.toList());
-		//add orderId for  ScoresByTarget
-		Integer previousOrder = 0;
-		Double total = 0D;
-		for (int i = 0; i < sortedScoresByTarget.size(); i++) {
-			if (total.doubleValue() == sortedScoresByTarget.get(i).getTotalScore().doubleValue() && sortedScoresByTarget.get(i).getTotalScore() != 0) {
-				if (sortedScoresByTarget.get(i - 1).getBuildArea() < sortedScoresByTarget.get(i).getBuildArea()) {
-					sortedScoresByTarget.get(i).setOrderId(++previousOrder);
-				} else {
-					sortedScoresByTarget.get(i).setOrderId(previousOrder);
-					sortedScoresByTarget.get(i - 1).setOrderId(++previousOrder);
-				}
-			} else {
-				previousOrder++;
-				sortedScoresByTarget.get(i).setOrderId(previousOrder);
-				total = sortedScoresByTarget.get(i).getTotalScore();
-			}
+		List<ScoreGroupByTargetDTO> sortedScoresByTarget = null;
+		if (scoresByTarget.size() > 0) {
+			//sort  scoreByTarget
+			sortedScoresByTarget = scoresByTarget.stream()
+                    .sorted(Comparator.comparing(ScoreGroupByTargetDTO::getTotalScore).reversed())
+                    .collect(Collectors.toList());
+			//add orderId for  ScoresByTarget
+			Integer previousOrder = 0;
+			Double total = 0D;
+			for (int i = 0; i < sortedScoresByTarget.size(); i++) {
+                if (total.doubleValue() == sortedScoresByTarget.get(i).getTotalScore().doubleValue() && sortedScoresByTarget.get(i).getTotalScore() != 0) {
+                    if (sortedScoresByTarget.get(i - 1).getBuildArea() < sortedScoresByTarget.get(i).getBuildArea()) {
+                        sortedScoresByTarget.get(i).setOrderId(++previousOrder);
+                    } else {
+                        sortedScoresByTarget.get(i).setOrderId(previousOrder);
+                        sortedScoresByTarget.get(i - 1).setOrderId(++previousOrder);
+                    }
+                } else {
+                    previousOrder++;
+                    sortedScoresByTarget.get(i).setOrderId(previousOrder);
+                    total = sortedScoresByTarget.get(i).getTotalScore();
+                }
+            }
 		}
 
 		response.setScores(sortedScoresByTarget);
