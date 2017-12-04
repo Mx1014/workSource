@@ -31,7 +31,9 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.everhomes.server.schema.tables.EhReflectionServiceModuleApps.EH_REFLECTION_SERVICE_MODULE_APPS;
@@ -669,7 +671,7 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         Record r = context.select().from(Tables.EH_REFLECTION_SERVICE_MODULE_APPS).where(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ACTIVE_APP_ID.eq(id))
                 .fetchAny();
-        return ConvertHelper.convert(r, ServiceModuleApp.class);
+        return ReflectionServiceModuleApp.getServiceModuleApp(ConvertHelper.convert(r, ReflectionServiceModuleApp.class));
     }
 
     @Override
@@ -678,7 +680,7 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         Record r = context.select().from(Tables.EH_REFLECTION_SERVICE_MODULE_APPS).where(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.MENU_ID.eq(id))
                 .fetchAny();
-        return ConvertHelper.convert(r, ServiceModuleApp.class);
+        return ReflectionServiceModuleApp.getServiceModuleApp(ConvertHelper.convert(r, ReflectionServiceModuleApp.class));
     }
 
     @Override
@@ -696,5 +698,21 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
             return apps.stream().map(r -> ReflectionServiceModuleApp.getServiceModuleAppDTO(r)).collect(Collectors.toList());
         }
         return null;
+    }
+
+    @Override
+    public Map<Long, ServiceModuleApp> listReflectionAcitveAppIdByNamespaceId(Integer namespaceId) {
+        Map<Long, ServiceModuleApp> appMap = new HashMap<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Condition cond = Tables.EH_REFLECTION_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId);
+        context.select().from(Tables.EH_REFLECTION_SERVICE_MODULE_APPS)
+                .where(cond)
+                .and(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()))
+                .orderBy(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ID.asc())
+                .fetch().map(r -> {
+                    appMap.put(r.getValue(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ACTIVE_APP_ID), ReflectionServiceModuleApp.getServiceModuleApp(ConvertHelper.convert(r, ReflectionServiceModuleApp.class)));
+                    return null;
+                });
+        return appMap;
     }
 }

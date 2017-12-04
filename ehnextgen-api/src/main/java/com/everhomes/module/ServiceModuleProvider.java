@@ -2,6 +2,7 @@
 package com.everhomes.module;
 
 import java.util.List;
+import java.util.Map;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -97,4 +98,6 @@ public interface ServiceModuleProvider {
     ServiceModuleApp findReflectionServiceModuleAppByMenuId(Long id);
 
     List<ServiceModuleAppDTO> listReflectionServiceModuleAppByActiveAppIds(Integer namespaceId, List<Long> appIds);
+
+    Map<Long, ServiceModuleApp> listReflectionAcitveAppIdByNamespaceId(Integer namespaceId);
 }

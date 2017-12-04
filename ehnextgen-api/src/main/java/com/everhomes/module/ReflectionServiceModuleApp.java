@@ -1,8 +1,10 @@
 package com.everhomes.module;
 
+import com.everhomes.portal.ServiceModuleApp;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.server.schema.tables.pojos.EhReflectionServiceModuleApps;
 import com.everhomes.techpark.punch.PunchDayLog;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 
 public class ReflectionServiceModuleApp extends EhReflectionServiceModuleApps{
@@ -23,6 +25,12 @@ public class ReflectionServiceModuleApp extends EhReflectionServiceModuleApps{
         dto.setModuleId(app.getModuleId());
         dto.setInstanceConfig(app.getInstanceConfig());
         dto.setMenuId(app.getMenuId());
+        return dto;
+    }
+
+    protected static ServiceModuleApp getServiceModuleApp(ReflectionServiceModuleApp app){
+        ServiceModuleApp dto = ConvertHelper.convert(app, ServiceModuleApp.class);
+        dto.setId(app.getActiveAppId());
         return dto;
     }
 }

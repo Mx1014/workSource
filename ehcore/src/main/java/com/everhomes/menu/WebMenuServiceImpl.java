@@ -28,6 +28,7 @@ import com.everhomes.util.ConvertHelper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.sun.javafx.scene.control.skin.VirtualFlow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -207,7 +208,24 @@ public class WebMenuServiceImpl implements WebMenuService {
 				return new ArrayList<>();
 		}
 		menus = filterMenus(menus, organizationId);
- 		return processWebMenus(menus.stream().map(r->{ return  ConvertHelper.convert(r, WebMenuDTO.class); }).collect(Collectors.toList()), ConvertHelper.convert(menu, WebMenuDTO.class)).getDtos();
+		List<Long> pathToArray = null;
+		//获取本域空间的所有appId
+		Map<Long, ServiceModuleApp> appMap = serviceModuleProvider.listReflectionAcitveAppIdByNamespaceId(UserContext.getCurrentNamespaceId());
+		List<WebMenuDTO> dtos = new ArrayList<>();
+		Set<Long> appMapKeus = appMap.keySet();
+		for (WebMenu webMenu : menus) {
+			pathToArray = Arrays.stream(webMenu.getPath().split("/")).map(r->{
+				return Long.valueOf(r);
+			}).collect(Collectors.toList());
+			pathToArray.retainAll(appMapKeus);
+			//存在对应的appId
+			if(!pathToArray.isEmpty()){
+				webMenu.setAppId(appMap.get(pathToArray.get(0)).getId());
+			}
+			dtos.add(ConvertHelper.convert(webMenu, WebMenuDTO.class));
+		}
+
+ 		return processWebMenus(dtos, ConvertHelper.convert(menu, WebMenuDTO.class)).getDtos();
 	}
 
 	private List<WebMenuDTO> listEnterpriseWebMenu(Long userId, WebMenu menu, List<String> categories, Long organizationId){
