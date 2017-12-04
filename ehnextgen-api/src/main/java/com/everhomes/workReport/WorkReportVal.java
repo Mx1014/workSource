@@ -1,9 +1,9 @@
 package com.everhomes.workReport;
 
-import com.everhomes.server.schema.tables.pojos.EhWorkReports;
+import com.everhomes.server.schema.tables.pojos.EhWorkReportVals;
 import com.everhomes.util.StringHelper;
 
-public class WorkReports extends EhWorkReports{
+public class WorkReportVal extends EhWorkReportVals{
 
     @Override
     public String toString() {

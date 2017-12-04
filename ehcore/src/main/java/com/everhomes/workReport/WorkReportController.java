@@ -107,13 +107,13 @@ public class WorkReportController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /workReport/postWorkReport</b>
+     * <b>URL: /workReport/postWorkReportVal</b>
      * <p>3-1.提交工作汇报 </p>
      */
-    @RequestMapping("postWorkReport")
+    @RequestMapping("postWorkReportVal")
     @RestReturn(value=String.class)
-    public RestResponse postWorkReport(PostWorkReportCommand cmd) {
-        workReportService.postWorkReport(cmd);
+    public RestResponse postWorkReportVal(PostWorkReportValCommand cmd) {
+        workReportService.postWorkReportVal(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -121,13 +121,13 @@ public class WorkReportController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /workReport/updatePostWorkReport</b>
-     * <p>3-2.工作汇报申请列表 </p>
+     * <b>URL: /workReport/updateWorkReportVal</b>
+     * <p>3-2.编辑工作汇报 </p>
      */
-    @RequestMapping("updatePostWorkReport")
+    @RequestMapping("updateWorkReportVal")
     @RestReturn(value=String.class)
-    public RestResponse updatePostWorkReport(PostWorkReportCommand cmd) {
-        workReportService.updatePostWorkReport(cmd);
+    public RestResponse updateWorkReportVal(PostWorkReportValCommand cmd) {
+        workReportService.updateWorkReportVal(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -135,13 +135,27 @@ public class WorkReportController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /workReport/listPostWorkReports</b>
-     * <p>3-3.编辑工作汇报 </p>
+     * <b>URL: /workReport/listWorkReportsVal</b>
+     * <p>3-3.工作汇报申请列表 </p>
      */
-    @RequestMapping("listPostWorkReports")
+    @RequestMapping("listWorkReportsVal")
     @RestReturn(value=String.class)
-    public RestResponse listPostWorkReports(ListPostWorkReportsCommand cmd) {
-        workReportService.listPostWorkReports(cmd);
+    public RestResponse listWorkReportsVal(ListWorkReportsValCommand cmd) {
+        workReportService.listWorkReportsVal(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /workReport/getWorkReportVal</b>
+     * <p>3-3.工作汇报申请列表 </p>
+     */
+    @RequestMapping("getWorkReportVal")
+    @RestReturn(value=String.class)
+    public RestResponse getWorkReportVal(WorkReportValIdCommand cmd) {
+        workReportService.getWorkReportVal(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

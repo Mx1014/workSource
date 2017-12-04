@@ -16,9 +16,9 @@ public interface WorkReportService {
 
     void createWorkReportTemplates(CreateWorkReportTemplatesCommand cmd);
 
-    void postWorkReport(PostWorkReportCommand cmd);
+    void postWorkReportVal(PostWorkReportValCommand cmd);
 
-    void updatePostWorkReport(PostWorkReportCommand cmd);
+    void updateWorkReportVal(PostWorkReportValCommand cmd);
 
-    void listPostWorkReports(ListPostWorkReportsCommand cmd);
+    void listWorkReportsVal(ListWorkReportsValCommand cmd);
 }

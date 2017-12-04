@@ -9,14 +9,17 @@ import java.util.List;
 
 /**
  * <ul>
+ * <li>reportId: 汇报id</li>
  * <li>reportValId: 汇报单id</li>
- * <li>reportType: 汇报类型</li>
+ * <li>reportType: 汇报类型, 0-日报 1-周报 2-月报 参考{@link com.everhomes.rest.workReport.WorkReportType}</li>
  * <li>reportTime: 汇报时间</li>
  * <li>values: 汇报项中，每项对应的值 参考{@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
  * <li>receiverIds: <List>接收人ids</li>
  * </ul>
  */
-public class PostWorkReportCommand {
+public class PostWorkReportValCommand {
+
+    private Long reportId;
 
     private Long reportValId;
 
@@ -30,7 +33,15 @@ public class PostWorkReportCommand {
     @ItemType(Long.class)
     private List<Long> receiverIds;
 
-    public PostWorkReportCommand() {
+    public PostWorkReportValCommand() {
+    }
+
+    public Long getReportId() {
+        return reportId;
+    }
+
+    public void setReportId(Long reportId) {
+        this.reportId = reportId;
     }
 
     public Long getReportValId() {

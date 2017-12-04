@@ -2,6 +2,12 @@ package com.everhomes.rest.workReport;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>ownerId: 属于的对象 ID，如果所属类型是 EhOrganizations，则 ownerId 等于 organizationId</li>
+ * <li>ownerType: 对象类型，默认为 EhOrganizations</li>
+ * </ul>
+ */
 public class ListWorkReportsCommand {
 
     private Long ownerId;

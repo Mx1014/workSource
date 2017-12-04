@@ -36,12 +36,12 @@ public class WorkReportServiceImpl implements WorkReportService{
     }
 
     @Override
-    public void postWorkReport(PostWorkReportCommand cmd) {
+    public void postWorkReportVal(PostWorkReportValCommand cmd) {
 
     }
 
     @Override
-    public void updatePostWorkReport(PostWorkReportCommand cmd) {
+    public void updateWorkReportVal(PostWorkReportValCommand cmd) {
 
     }
 }

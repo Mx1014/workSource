@@ -3,7 +3,7 @@ package com.everhomes.workReport;
 import com.everhomes.server.schema.tables.pojos.EhWorkReportTemplates;
 import com.everhomes.util.StringHelper;
 
-public class WorkReportTemplates extends EhWorkReportTemplates{
+public class WorkReportTemplate extends EhWorkReportTemplates{
 
     @Override
     public String toString() {

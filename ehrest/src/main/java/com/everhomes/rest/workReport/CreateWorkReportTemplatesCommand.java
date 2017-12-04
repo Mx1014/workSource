@@ -6,9 +6,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>ownerId: 属于的对象 ID，如果所属类型是 EhOrganizations，则 ownerId 等于 organizationId</li>
  * <li>ownerType: 对象类型，默认为 EhOrganizations</li>
- * <li>moduleId: moduleId</li>
- * <li>moduleType: moduleType</li>
- * <li>organizationId: organizationId</li>
+ * <li>moduleId: 模块id - 每一个功能模块有自己的id</li>
+ * <li>organizationId: 公司id</li>
  * </ul>
  */
 public class CreateWorkReportTemplatesCommand {
