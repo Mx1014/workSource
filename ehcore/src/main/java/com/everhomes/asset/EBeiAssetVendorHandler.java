@@ -433,6 +433,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         //处理数据
         List<GetLeaseContractBillOnFiPropertyData> data = res.getData();
         Map<String,List<GetLeaseContractBillOnFiPropertyData>> tabs = new HashMap<>();
+        if(data == null) return list;
         for(int i = 0; i < data.size(); i++){
             GetLeaseContractBillOnFiPropertyData source = data.get(i);
             String key = source.getContractId()+"-"+source.getFiProperty();
