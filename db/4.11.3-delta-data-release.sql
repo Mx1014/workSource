@@ -1601,7 +1601,7 @@ VALUES ((@locale_strings_id := @locale_strings_id + 1), 'flow', '100019', 'zh_CN
 update `eh_launch_pad_items` set action_data = '{"url":"http://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix"}', action_type = 13 where namespace_id = 999983 and item_label = '物业查费';
 
 
--- 物业报修多入口数据整理
+-- 物业报修多入口数据整理 add by sw 20171204
 DELETE from eh_categories where status = 0 and path like '任务%';
 DELETE from eh_categories where status = 0 and parent_id = 6;
 UPDATE eh_launch_pad_items set action_data = replace(action_data, 'taskCategoryId=0', 'taskCategoryId=6') where action_data like '%zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=%';
@@ -1617,6 +1617,7 @@ UPDATE eh_web_menus set data_type = 'task_management_service_entry/9' where id =
 UPDATE eh_web_menus set data_type = 'classify_setting/9' where id = 20280;
 UPDATE eh_web_menus set data_type = 'task_statistics/9' where id = 20291;
 UPDATE eh_web_menus set data_type = 'react:/working-flow/flow-list/property-service/20100?moduleType=suggestion' where id = 20258;
+UPDATE eh_web_menus set data_type = 'task_management_service_entry/1' where id = 20225;
 
 UPDATE eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=9&displayName=投诉与建议"}' where namespace_id = 999961 and item_label = '投诉与建议';
 UPDATE eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=6&displayName=物业报修"}' where namespace_id = 999961 and item_label = '物业报修';
