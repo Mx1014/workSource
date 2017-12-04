@@ -31,6 +31,16 @@ public class WorkReportServiceImpl implements WorkReportService{
     }
 
     @Override
+    public void enableWorkReportName(WorkReportIdCommand cmd) {
+
+    }
+
+    @Override
+    public void disableWorkReportName(WorkReportIdCommand cmd) {
+
+    }
+
+    @Override
     public void createWorkReportTemplates(CreateWorkReportTemplatesCommand cmd) {
 
     }
