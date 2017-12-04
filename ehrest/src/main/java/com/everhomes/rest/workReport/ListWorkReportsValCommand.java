@@ -3,6 +3,7 @@ package com.everhomes.rest.workReport;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -11,6 +12,9 @@ import java.util.List;
  * <li>ownerType: 对象类型，默认为 EhOrganizations</li>
  * <li>applierIds: 申请人ids</li>
  * <li>receiverIds: 接收人ids</li>
+ * <li>reportId: 工作汇报id</li>
+ * <li>startTime: 开始时间</li>
+ * <li>endTime: 结束时间</li>
  * <li>pageAnchor: 分页锚点</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
@@ -26,6 +30,12 @@ public class ListWorkReportsValCommand {
 
     @ItemType(Long.class)
     private List<Long> receiverIds;
+
+    private Long reportId;
+
+    private Timestamp startTime;
+
+    private Timestamp endTime;
 
     private Long pageAnchor;
 
@@ -64,6 +74,30 @@ public class ListWorkReportsValCommand {
 
     public void setReceiverIds(List<Long> receiverIds) {
         this.receiverIds = receiverIds;
+    }
+
+    public Long getReportId() {
+        return reportId;
+    }
+
+    public void setReportId(Long reportId) {
+        this.reportId = reportId;
+    }
+
+    public Timestamp getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Timestamp startTime) {
+        this.startTime = startTime;
+    }
+
+    public Timestamp getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Timestamp endTime) {
+        this.endTime = endTime;
     }
 
     public Long getPageAnchor() {
