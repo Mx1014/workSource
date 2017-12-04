@@ -10802,7 +10802,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public List<OrganizationDTO> listAllPmOrganizations() {
-        List<Organization> organizations = organizationProvider.listOrganizations(OrganizationType.PM.getCode(), ,
+        List<Organization> organizations = organizationProvider.listOrganizations(OrganizationType.PM.getCode(), null,
                 0L, null, null);
         return organizations.stream().map(r -> ConvertHelper.convert(r, OrganizationDTO.class)).collect(Collectors.toList());
     }

@@ -287,6 +287,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			query.addConditions(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(organizationType));
 		}
 
+		if(namespaceId != null) {
+			query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		}
+
 		if (null != parentId) {
 			query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(parentId));
 		}
