@@ -139,9 +139,9 @@ public class WorkReportController extends ControllerBase{
      * <p>3-3.工作汇报申请列表 </p>
      */
     @RequestMapping("listWorkReportsVal")
-    @RestReturn(value=String.class)
+    @RestReturn(value=ListWorkReportsValResponse.class)
     public RestResponse listWorkReportsVal(ListWorkReportsValCommand cmd) {
-        workReportService.listWorkReportsVal(cmd);
+        ListWorkReportsValResponse res = workReportService.listWorkReportsVal(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -153,10 +153,10 @@ public class WorkReportController extends ControllerBase{
      * <p>3-3.工作汇报申请列表 </p>
      */
     @RequestMapping("getWorkReportVal")
-    @RestReturn(value=String.class)
+    @RestReturn(value=WorkReportValDTO.class)
     public RestResponse getWorkReportVal(WorkReportValIdCommand cmd) {
-        workReportService.getWorkReportVal(cmd);
-        RestResponse response = new RestResponse();
+        WorkReportValDTO res = workReportService.getWorkReportVal(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

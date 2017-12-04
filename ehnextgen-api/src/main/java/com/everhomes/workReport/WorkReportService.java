@@ -20,5 +20,7 @@ public interface WorkReportService {
 
     void updateWorkReportVal(PostWorkReportValCommand cmd);
 
-    void listWorkReportsVal(ListWorkReportsValCommand cmd);
+    ListWorkReportsValResponse listWorkReportsVal(ListWorkReportsValCommand cmd);
+
+    WorkReportValDTO getWorkReportVal(WorkReportValIdCommand cmd);
 }

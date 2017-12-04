@@ -44,4 +44,14 @@ public class WorkReportServiceImpl implements WorkReportService{
     public void updateWorkReportVal(PostWorkReportValCommand cmd) {
 
     }
+
+    @Override
+    public ListWorkReportsValResponse listWorkReportsVal(ListWorkReportsValCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public WorkReportValDTO getWorkReportVal(WorkReportValIdCommand cmd) {
+        return null;
+    }
 }
