@@ -426,6 +426,9 @@ public class EquipmentController extends ControllerBase {
     public HttpServletResponse exportEquipmentInspectionPlans(searchEquipmentInspectionPlansCommand cmd, HttpServletResponse response) {
 
         HttpServletResponse commandResponse = null;
+        /**
+         * TODO:
+         */
 
         return commandResponse;
     }

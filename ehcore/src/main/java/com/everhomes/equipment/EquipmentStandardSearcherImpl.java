@@ -156,7 +156,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         if(cmd.getRepeatType() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("repeatType", cmd.getRepeatType()));
 
-        //增加设备tab页面根据设备类型查找标准选项 V3.0.2   产品设计有问题  不要了。。
+        //增加设备tab页面根据设备类型查找标准选项 V3.0.2
         /*if (cmd.getCategoryId() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
         }*/

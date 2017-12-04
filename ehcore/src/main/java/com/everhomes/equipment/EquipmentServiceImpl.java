@@ -17,6 +17,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
@@ -200,7 +201,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 			standard = ConvertHelper.convert(cmd, EquipmentInspectionStandards.class);
 			standard.setCreatorUid(user.getId());
 			standard.setNamespaceId(UserContext.getCurrentNamespaceId());
-			standard.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
+			if (cmd.getEquipments() == null || cmd.getEquipments().size() == 0) {
+				standard.setStatus(EquipmentStandardStatus.NOT_COMPLETED.getCode());
+			} else {
+				standard.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
+			}
 
 			//创建标准的模板表和item关系表
 			createEquipmentStandardItems(standard, cmd);
@@ -213,7 +218,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 			standard = ConvertHelper.convert(cmd, EquipmentInspectionStandards.class);
 			standard.setOperatorUid(user.getId());
 			standard.setNamespaceId(UserContext.getCurrentNamespaceId());
-			standard.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
+			if (cmd.getEquipments() == null || cmd.getEquipments().size() == 0) {
+				standard.setStatus(EquipmentStandardStatus.NOT_COMPLETED.getCode());
+			} else {
+				standard.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
+			}
 
 			//创建标准的模板表和item关系表
 			createEquipmentStandardItems(standard,cmd);
@@ -242,6 +251,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		List<EquipmentInspectionEquipments> createdEquipments = new ArrayList<>();
 		for (EquipmentsDTO equipment : equipments) {
 			equipmentStandardMap.setTargetId(equipment.getId());
+			equipmentStandardMap.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
 			equipmentProvider.createEquipmentStandardMap(equipmentStandardMap);
 			createdEquipments.add(ConvertHelper.convert(equipment,EquipmentInspectionEquipments.class));
 		}
@@ -599,9 +609,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		equipmentProvider.populateEquipments(standard);
 		//填充标准中的巡检项
 		equipmentProvider.populateItems(standard);
-		EquipmentStandardsDTO dto = converStandardToDto(standard);
-		
-		return dto;
+
+		return converStandardToDto(standard);
 	}
 	
 	
@@ -2360,7 +2369,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		int i =-1 ;
 		row.createCell(++i).setCellValue("任务名称");
 		row.createCell(++i).setCellValue("类型");
-		row.createCell(++i).setCellValue("巡检设备");
+		//row.createCell(++i).setCellValue("巡检设备");
 		row.createCell(++i).setCellValue("开始时间");
 		row.createCell(++i).setCellValue("截止时间");
 		row.createCell(++i).setCellValue("设备位置");
@@ -2377,7 +2386,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		row.createCell(++i).setCellValue(dto.getTaskName());
 		if(null != dto.getTaskType()  && null != StandardType.fromStatus(dto.getTaskType()))
 			row.createCell(++i).setCellValue(StandardType.fromStatus(dto.getTaskType()).getName());
-		row.createCell(++i).setCellValue(dto.getEquipmentName());
+		//row.createCell(++i).setCellValue(dto.getEquipmentName());
 		if(null != dto.getExecutiveStartTime())
 			row.createCell(++i).setCellValue(dto.getExecutiveStartTime().toString());
 		if(dto.getProcessExpireTime() != null) {
@@ -3419,39 +3428,43 @@ public class EquipmentServiceImpl implements EquipmentService {
 	public ListEquipmentTasksResponse listTasksByEquipmentId(
 			ListTasksByEquipmentIdCommand cmd) {
 		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
-		
+
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        CrossShardListingLocator locator = new CrossShardListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
-        
-        List<Long> standardIds = null;
-        if(cmd.getTaskType() != null) {
-        	standardIds = equipmentProvider.listStandardIdsByType(cmd.getTaskType());
-        }
-        
-        Timestamp startTime = null;
-        Timestamp endTime = null;
-        if(cmd.getStartTime() != null) {
-        	startTime = new Timestamp(cmd.getStartTime());
-        }
-        if(cmd.getExpireTime() != null) {
-        	endTime = new Timestamp(cmd.getExpireTime());
-        }
-        
-		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(cmd.getEquipmentId(), standardIds, startTime, endTime, locator, pageSize+1, null);
-		
-		if(tasks.size() > pageSize) {
-        	tasks.remove(tasks.size() - 1);
-        	response.setNextPageAnchor(tasks.get(tasks.size() - 1).getId());
-        }
-        
-    	List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
-        	EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
-        	return dto;
-        }).filter(r->r!=null).collect(Collectors.toList());
-        
+		ListingLocator locator = new ListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+
+		/*List<Long> standardIds = null;
+		if (cmd.getTaskType() != null) {
+			standardIds = equipmentProvider.listStandardIdsByType(cmd.getTaskType());
+		}*/
+
+		Timestamp startTime = null;
+		Timestamp endTime = null;
+		if (cmd.getStartTime() != null) {
+			startTime = new Timestamp(cmd.getStartTime());
+		}
+		if (cmd.getExpireTime() != null) {
+			endTime = new Timestamp(cmd.getExpireTime());
+		}
+
+		//List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(cmd.getEquipmentId(), standardIds, startTime, endTime, locator, pageSize+1, null);
+		//之前任务表中有设备id  V3.0.2中改为根据planId关联任务的巡检对象
+		List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.listPlanMapByEquipmentId(cmd.getEquipmentId());
+		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTaskByPlanMaps(planMaps, startTime, endTime, locator, pageSize + 1);
+		if (tasks.size() > pageSize) {
+			tasks.remove(tasks.size() - 1);
+			response.setNextPageAnchor(tasks.get(tasks.size() - 1).getId());
+		} else {
+			response.setNextPageAnchor(null);
+		}
+
+		List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
+			EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
+			return dto;
+		}).filter(r -> r != null).collect(Collectors.toList());
+
 		response.setTasks(dtos);
-				
+
 		return response;
 	}
 

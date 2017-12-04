@@ -1511,18 +1511,61 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_PLANS.ID.lt(locator.getAnchor()));
         }
         query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_PLANS.ID.desc());
-        query.addLimit(pageSize);
+        query.addLimit(pageSize+1);
         query.fetch().map((r) -> {
             plans.add(ConvertHelper.convert(r, EquipmentInspectionPlans.class));
             return null;
         });
-        if (pageSize <= plans.size()) {
+        if (pageSize < plans.size()) {
+            plans.remove(pageSize + 1);
             locator.setAnchor(plans.get(plans.size() - 1).getId());
         } else {
             locator.setAnchor(null);
         }
 
         return plans;
+    }
+
+    @Override
+    public List<EquipmentInspectionEquipmentPlanMap> listPlanMapByEquipmentId(Long equipmentId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<EquipmentInspectionEquipmentPlanMap> planMap =
+                context.selectFrom(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP)
+                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.EQUIMENT_ID.eq(equipmentId))
+                .fetchInto(EquipmentInspectionEquipmentPlanMap.class);
+        return planMap;
+    }
+
+    @Override
+    public List<EquipmentInspectionTasks> listTaskByPlanMaps(List<EquipmentInspectionEquipmentPlanMap> planMaps, Timestamp startTime, Timestamp endTime, ListingLocator locator, int pageSize) {
+
+        List<EquipmentInspectionTasks> tasks = new ArrayList<EquipmentInspectionTasks>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
+        if (startTime != null && !"".equals(startTime)) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_START_TIME.ge(startTime));
+        }
+
+        if (endTime != null && !"".equals(endTime)) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.le(endTime));
+        }
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
+        query.addLimit(pageSize);
+        query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.desc());
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listTaskByPlanMaps, sql=" + query.getSQL());
+            LOGGER.debug("listTaskByPlanMaps, bindValues=" + query.getBindValues());
+        }
+
+        query.fetch().map((r) -> {
+
+            tasks.add(ConvertHelper.convert(r, EquipmentInspectionTasks.class));
+            return null;
+        });
+
+        return tasks;
+
     }
 
     @Override
