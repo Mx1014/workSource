@@ -293,9 +293,6 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Autowired
     private CustomerService customerService;
 
-    @Autowired
-    private OrganizationProvider organizationProvider;
-
 
     private int getPageCount(int totalCount, int pageSize) {
         int pageCount = totalCount / pageSize;
