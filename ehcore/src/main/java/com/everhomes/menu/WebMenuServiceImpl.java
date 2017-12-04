@@ -155,6 +155,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 			List<Long> appIds = authorizationProvider.getAuthorizationAppModuleIdsByTarget(targets);
 			//根据应用拿菜单
 			List<ServiceModuleAppDTO> dtos = serviceModuleProvider.listReflectionServiceModuleAppByActiveAppIds(UserContext.getCurrentNamespaceId(), appIds);
+			List<WebMenu> menus_app_iter = new ArrayList<>();
 			if (dtos != null) {
 				for (ServiceModuleAppDTO dto : dtos) {
 					Long menuId = dto.getMenuId();
@@ -168,10 +169,11 @@ public class WebMenuServiceImpl implements WebMenuService {
 								r.setAppId(dto.getId());
 								return r;
 							}).collect(Collectors.toList());
-							menus_apps.addAll(menuList);
+							menus_app_iter.addAll(menuList);
 						}
 					}
 				}
+				menus_apps = menus_app_iter;
 			}
 
 			if(menus_module != null)

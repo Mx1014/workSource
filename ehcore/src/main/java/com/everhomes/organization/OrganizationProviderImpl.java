@@ -278,7 +278,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
-	public List<Organization> listOrganizations(String organizationType, Long parentId, Long pageAnchor, Integer pageSize) {
+	public List<Organization> listOrganizations(String organizationType, Integer namespaceId, Long parentId, Long pageAnchor, Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		List<Organization> result  = new ArrayList<Organization>();

@@ -8,7 +8,6 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.archives.ArchivesProvider;
 import com.everhomes.archives.ArchivesService;
-import com.everhomes.archives.ArchivesStickyContacts;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -68,7 +67,6 @@ import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
@@ -294,6 +292,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Autowired
     private CustomerService customerService;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
 
     private int getPageCount(int totalCount, int pageSize) {
@@ -3019,8 +3020,16 @@ public class OrganizationServiceImpl implements OrganizationService {
         //检查应用管理员+权限细化 add by lei.lv
         List<Project> projects_app = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(EntityType.SERVICE_MODULE_APP.getCode(), null, targets);
         for (Project project : projects_app) {
+            // 应用管理员
             if (EntityType.fromCode(project.getProjectType()) == EntityType.ORGANIZATIONS) {
                 organizationIds.add(project.getProjectId());
+            }
+            // 权限细化 (敢哥说先这么改)
+            if(EntityType.fromCode(project.getProjectType()) == EntityType.COMMUNITY){
+                List<Organization> organizations = organizationProvider.listOrganizations(OrganizationType.PM.getCode(), UserContext.getCurrentNamespaceId(), 0L, null, null);
+                if(organizations != null && organizations.size() > 0){
+                    organizationIds.add(organizations.get(0).getId());
+                }
             }
         }
 
@@ -10793,8 +10802,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public List<OrganizationDTO> listAllPmOrganizations() {
-        List<Organization> organizations = organizationProvider.listOrganizations(OrganizationType.PM.getCode(), 0L,
-                null, null);
+        List<Organization> organizations = organizationProvider.listOrganizations(OrganizationType.PM.getCode(), ,
+                0L, null, null);
         return organizations.stream().map(r -> ConvertHelper.convert(r, OrganizationDTO.class)).collect(Collectors.toList());
     }
 
