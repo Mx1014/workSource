@@ -2610,29 +2610,57 @@ public class PunchServiceImpl implements PunchService {
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid queryDate parameter in the command");
 		}
-		PunchLogsDay pdl = makePunchLogsDayListInfo(userId,
-				cmd.getEnterpirseId(), logDay);
-		pdl.setPunchStatusNew(pdl.getPunchStatus());
-		pdl.setMorningPunchStatusNew(pdl.getMorningPunchStatus());
-		pdl.setAfternoonPunchStatusNew(pdl.getAfternoonPunchStatus());
-		if(pdl.getPunchStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getPunchStatus())))
-			pdl.setPunchStatus(ApprovalStatus.UNPUNCH.getCode());
-		if(pdl.getMorningPunchStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getMorningPunchStatus())))
-			pdl.setMorningPunchStatus(ApprovalStatus.UNPUNCH.getCode());
-		if(pdl.getAfternoonPunchStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getAfternoonPunchStatus())))
-			pdl.setAfternoonPunchStatus(ApprovalStatus.UNPUNCH.getCode());
-		pdl.setApprovalStatusNew(pdl.getApprovalStatus());
-		pdl.setMorningApprovalStatusNew(pdl.getMorningApprovalStatus());
-		pdl.setAfternoonApprovalStatusNew(pdl.getAfternoonApprovalStatus());
-		if(pdl.getApprovalStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getApprovalStatus())))
-			pdl.setApprovalStatus(ApprovalStatus.UNPUNCH.getCode());
-		if(pdl.getMorningApprovalStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getMorningApprovalStatus())))
-			pdl.setMorningApprovalStatus(ApprovalStatus.UNPUNCH.getCode());
-		if(pdl.getAfternoonApprovalStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getAfternoonApprovalStatus())))
-			pdl.setAfternoonApprovalStatus(ApprovalStatus.UNPUNCH.getCode());
-		punchProvider.viewDateFlags(userId, cmd.getEnterpirseId(),
-				dateSF.get().format(logDay.getTime()));
+        Version version = new Version(1, 0, 0);
+        Version anchorVerison = new Version(4, 9, 1);
+        if (null != UserContext.current() && null != UserContext.current().getVersion()) {
+            version = Version.fromVersionString(UserContext.current().getVersion());
+        }
+        PunchLogsDay pdl = null;
+        if (version.getEncodedValue() < anchorVerison.getEncodedValue()) {
 
+            pdl = makePunchLogsDayListInfo(userId,
+                    cmd.getEnterpirseId(), logDay);
+            pdl.setPunchStatusNew(pdl.getPunchStatus());
+            pdl.setMorningPunchStatusNew(pdl.getMorningPunchStatus());
+            pdl.setAfternoonPunchStatusNew(pdl.getAfternoonPunchStatus());
+            if(pdl.getPunchStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getPunchStatus()))) {
+                pdl.setPunchStatus(ApprovalStatus.UNPUNCH.getCode());
+            }
+            if(pdl.getMorningPunchStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getMorningPunchStatus()))) {
+                pdl.setMorningPunchStatus(ApprovalStatus.UNPUNCH.getCode());
+            }
+            if(pdl.getAfternoonPunchStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getAfternoonPunchStatus()))) {
+                pdl.setAfternoonPunchStatus(ApprovalStatus.UNPUNCH.getCode());
+            }
+            pdl.setApprovalStatusNew(pdl.getApprovalStatus());
+            pdl.setMorningApprovalStatusNew(pdl.getMorningApprovalStatus());
+            pdl.setAfternoonApprovalStatusNew(pdl.getAfternoonApprovalStatus());
+            if(pdl.getApprovalStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getApprovalStatus()))) {
+                pdl.setApprovalStatus(ApprovalStatus.UNPUNCH.getCode());
+            }
+            if(pdl.getMorningApprovalStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getMorningApprovalStatus()))) {
+                pdl.setMorningApprovalStatus(ApprovalStatus.UNPUNCH.getCode());
+            }
+            if(pdl.getAfternoonApprovalStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getAfternoonApprovalStatus()))) {
+
+            }
+            pdl.setAfternoonApprovalStatus(ApprovalStatus.UNPUNCH.getCode());
+            punchProvider.viewDateFlags(userId, cmd.getEnterpirseId(),
+                    dateSF.get().format(logDay.getTime()));
+
+        }else{
+            pdl = new PunchLogsDay();
+            List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,
+                    cmd.getEnterpirseId(), dateSF.get().format(logDay.getTime()),
+                    ClockCode.SUCESS.getCode());
+            pdl.setPunchLogs(new ArrayList<>());
+            for (PunchLog log : punchLogs){
+                PunchLogDTO dto = ConvertHelper.convert(log, PunchLogDTO.class);
+                dto.setPunchTime(log.getPunchTime().getTime());
+                pdl.getPunchLogs().add(dto);
+            }
+
+        }
 		return pdl;
 	}
 	@Override
