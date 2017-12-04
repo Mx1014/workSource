@@ -235,8 +235,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	@RestReturn(value=ApplyEntryResponse.class)
 	public RestResponse applyEntry(EnterpriseApplyEntryCommand cmd){
         ApplyEntryResponse applyEntryResponse = enterpriseApplyEntryService.applyEntry(cmd);
-        ApplyEntryResponse b = applyEntryResponse;
-		RestResponse response = new RestResponse(b);
+		RestResponse response = new RestResponse(applyEntryResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

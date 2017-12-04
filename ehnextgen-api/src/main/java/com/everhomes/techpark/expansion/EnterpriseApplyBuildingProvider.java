@@ -39,5 +39,5 @@ public interface EnterpriseApplyBuildingProvider {
 
     void deleteLeaseProjectCommunity(Long leaseProjectId);
 
-    List<Long> listLeaseProjectCommunities(Long leaseProjectId);
+    List<Long> listLeaseProjectCommunities(Long leaseProjectId, Long categoryId);
 }

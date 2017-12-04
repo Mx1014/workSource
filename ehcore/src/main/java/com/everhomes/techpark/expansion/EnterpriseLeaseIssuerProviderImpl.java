@@ -88,12 +88,14 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 	}
 
 	@Override
-	public List<LeaseIssuer> listLeaseIssers(Integer namespaceId, Long organizationId, String keyword, Long pageAnchor, Integer pageSize) {
+	public List<LeaseIssuer> listLeaseIssuers(Integer namespaceId, Long organizationId, String keyword, Long categoryId,
+											  Long pageAnchor, Integer pageSize) {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseIssuers.class));
 		SelectQuery<EhLeaseIssuersRecord> query = context.selectQuery(Tables.EH_LEASE_ISSUERS);
 		query.addConditions(Tables.EH_LEASE_ISSUERS.STATUS.eq(LeaseIssuerStatus.ACTIVE.getCode()));
 		query.addConditions(Tables.EH_LEASE_ISSUERS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_LEASE_ISSUERS.CATEGORY_ID.eq(categoryId));
 		if (StringUtils.isNotBlank(keyword)) {
 			keyword = "%" + keyword + "%";
 			query.addJoin(Tables.EH_ORGANIZATIONS, JoinType.LEFT_OUTER_JOIN, Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_LEASE_ISSUERS.ENTERPRISE_ID));
@@ -120,7 +122,7 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 	}
 
 	@Override
-	public LeaseIssuer fingLeaseIssersByOrganizationId(Integer namespaceId, Long organizationId) {
+	public LeaseIssuer fingLeaseIssuersByOrganizationId(Integer namespaceId, Long organizationId, Long categoryId) {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseIssuers.class));
 		SelectQuery<EhLeaseIssuersRecord> query = context.selectQuery(Tables.EH_LEASE_ISSUERS);
@@ -133,13 +135,14 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 	}
 
 	@Override
-	public LeaseIssuer findLeaseIssersByContact(Integer namespaceId, String contact) {
+	public LeaseIssuer findLeaseIssuersByContact(Integer namespaceId, String contact, Long categoryId) {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseIssuers.class));
 		SelectQuery<EhLeaseIssuersRecord> query = context.selectQuery(Tables.EH_LEASE_ISSUERS);
 		query.addConditions(Tables.EH_LEASE_ISSUERS.STATUS.eq(LeaseIssuerStatus.ACTIVE.getCode()));
 		query.addConditions(Tables.EH_LEASE_ISSUERS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_LEASE_ISSUERS.ISSUER_CONTACT.eq(contact));
+		query.addConditions(Tables.EH_LEASE_ISSUERS.CATEGORY_ID.eq(categoryId));
 
 		return 	ConvertHelper.convert(query.fetchAny(), LeaseIssuer.class);
 
@@ -243,7 +246,7 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 	}
 
 	@Override
-	public List<LeaseIssuerAddress> listLeaseIsserAddresses(Long leaseIssuerId, Long buildingId) {
+	public List<LeaseIssuerAddress> listLeaseIssuerAddresses(Long leaseIssuerId, Long buildingId) {
 		List<LeaseIssuerAddress> result = new ArrayList<>();
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseIssuers.class));
@@ -262,7 +265,7 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 	}
 
 	@Override
-	public List<LeaseIssuerAddress> listLeaseIsserBuildings(Long leaseIssuerId) {
+	public List<LeaseIssuerAddress> listLeaseIssuerBuildings(Long leaseIssuerId) {
 		List<LeaseIssuerAddress> result = new ArrayList<>();
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseIssuers.class));

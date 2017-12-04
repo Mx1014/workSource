@@ -252,13 +252,14 @@ public class EnterpriseApplyBuildingProviderImpl implements EnterpriseApplyBuild
     }
 
     @Override
-    public List<Long> listLeaseProjectCommunities(Long leaseProjectId) {
+    public List<Long> listLeaseProjectCommunities(Long leaseProjectId, Long categoryId) {
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseProjectCommunities.class));
 
         SelectQuery<EhLeaseProjectCommunitiesRecord> query = context.selectQuery(Tables.EH_LEASE_PROJECT_COMMUNITIES);
 
         query.addConditions(Tables.EH_LEASE_PROJECT_COMMUNITIES.LEASE_PROJECT_ID.eq(leaseProjectId));
+        query.addConditions(Tables.EH_LEASE_PROJECT_COMMUNITIES.CATEGORY_ID.eq(categoryId));
 
         return query.fetch(Tables.EH_LEASE_PROJECT_COMMUNITIES.COMMUNITY_ID);
     }

@@ -426,14 +426,14 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		}
 	}
 
-	private void populateProjectDetailInfo (LeaseProjectDTO dto, Community r, LeaseProject leaseProject) {
+	private void populateProjectDetailInfo(LeaseProjectDTO dto, Community r, LeaseProject leaseProject, Long categoryId) {
 //		populateProjectBasicInfo(dto, r);
 		dto.setName(r.getName());
 		String json = leaseProject.getExtraInfoJson();
 		LeaseProjectExtraInfo extraInfo = JSONObject.parseObject(json, LeaseProjectExtraInfo.class);
 		BeanUtils.copyProperties(extraInfo, dto);
 
-		List<Long> communityIds = enterpriseApplyBuildingProvider.listLeaseProjectCommunities(leaseProject.getId());
+		List<Long> communityIds = enterpriseApplyBuildingProvider.listLeaseProjectCommunities(leaseProject.getId(), categoryId);
 		dto.setProjectDTOS(communityIds.stream().map(c -> {
 			ProjectDTO d = new ProjectDTO();
 			d.setProjectId(c);
@@ -545,7 +545,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		}else {
 			dto = ConvertHelper.convert(leaseProject, LeaseProjectDTO.class);
 
-			populateProjectDetailInfo(dto, community, leaseProject);
+			populateProjectDetailInfo(dto, community, leaseProject, cmd.getCategoryId());
 		}
 
 		//当配置 APP端显示楼栋介绍信息时，才返回楼栋列表，园区入驻3.6
@@ -576,6 +576,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 				LeaseProjectCommunity leaseProjectCommunity = new LeaseProjectCommunity();
 				leaseProjectCommunity.setLeaseProjectId(leaseProject.getId());
 				leaseProjectCommunity.setCommunityId(m);
+				leaseProjectCommunity.setCategoryId(leaseProject.getCategoryId());
 				enterpriseApplyBuildingProvider.createLeaseProjectCommunity(leaseProjectCommunity);
 			});
 		}
