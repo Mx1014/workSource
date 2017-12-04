@@ -615,7 +615,7 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
             cmd.setPageSize(5000);
         }
-        cmd.setPageSize(130);
+//        cmd.setPageSize(130);
         List<ListBillsDTO> dtos = new ArrayList<>();
         //has already distributed
         if(UserContext.getCurrentNamespaceId()==999983){
