@@ -1,22 +1,3 @@
-CREATE TABLE `eh_guild_applies` (
-  `id` BIGINT(20) NOT NULL,
-  `uuid` VARCHAR(128) NOT NULL,
-  `namespace_id` INT(11) NOT NULL,
-  `group_id` BIGINT(22) NOT NULL,
-  `applicant_uid` BIGINT(22) NOT NULL,
-  `group_member_id` BIGINT(22) NOT NULL,
-  `avatar` VARCHAR(255) DEFAULT NULL,
-  `name` VARCHAR(255) DEFAULT NULL,
-  `phone` VARCHAR(18) DEFAULT NULL,
-  `email` VARCHAR(255) DEFAULT NULL,
-  `organization_name` VARCHAR(255) DEFAULT NULL,
-  `registered_capital` VARCHAR(255) DEFAULT NULL,
-  `industry_type` VARCHAR(255) DEFAULT NULL,
-  `create_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `update_uid` BIGINT(22) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 俱乐部类型，普通俱乐部、行业协会
 ALTER TABLE `eh_group_settings` ADD COLUMN `club_type`  TINYINT(4) NOT NULL DEFAULT 0 COMMENT '0-normal club, 1-guild club' ;
