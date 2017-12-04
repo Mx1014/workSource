@@ -730,22 +730,22 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		List<Long> pIds = new ArrayList<>();
 
-		//看域空间&项目是否排除掉了模块下的某个权限 add by xiongying20171130
-		List<ServiceModuleExcludePrivilege> moduleExcludePrivileges = new ArrayList<>();
-		if(EntityType.COMMUNITY.equals(ownerType)) {
-			moduleExcludePrivileges = serviceModuleProvider.listExcludePrivileges(namespaceId, ownerId, moduleId);
-		}
-		//项目下没有的话 查域下有没有排除
-		if(moduleExcludePrivileges == null || moduleExcludePrivileges.size() == 0) {
-			moduleExcludePrivileges = serviceModuleProvider.listExcludePrivileges(namespaceId, null, moduleId);
-		}
-
-		//去掉排除的权限
-		if(moduleExcludePrivileges != null && moduleExcludePrivileges.size() > 0) {
-			moduleExcludePrivileges.forEach(excludePrivilege -> {
-				privilegeIds.remove(excludePrivilege.getPrivilegeId());
-			});
-		}
+//		//看域空间&项目是否排除掉了模块下的某个权限 add by xiongying20171130
+//		List<ServiceModuleExcludeFunction> moduleExcludePrivileges = new ArrayList<>();
+//		if(EntityType.COMMUNITY.equals(ownerType)) {
+//			moduleExcludePrivileges = serviceModuleProvider.listExcludePrivileges(namespaceId, ownerId, moduleId);
+//		}
+//		//项目下没有的话 查域下有没有排除
+//		if(moduleExcludePrivileges == null || moduleExcludePrivileges.size() == 0) {
+//			moduleExcludePrivileges = serviceModuleProvider.listExcludePrivileges(namespaceId, null, moduleId);
+//		}
+//
+//		//去掉排除的权限
+//		if(moduleExcludePrivileges != null && moduleExcludePrivileges.size() > 0) {
+//			moduleExcludePrivileges.forEach(excludePrivilege -> {
+//				privilegeIds.remove(excludePrivilege.getPrivilegeId());
+//			});
+//		}
 
 		//获取的权限当中有模块的超管权限，就把模块下面所有的权限都返回 add by sfyan 20170329
 		List<ServiceModulePrivilege> moduleSuperPrivileges = serviceModuleProvider.listServiceModulePrivileges(moduleId, ServiceModulePrivilegeType.SUPER);

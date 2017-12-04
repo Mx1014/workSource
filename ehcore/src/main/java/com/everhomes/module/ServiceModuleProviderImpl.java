@@ -6,11 +6,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.everhomes.acl.AuthorizationRelation;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignmentRelations;
+import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignments;
+import com.everhomes.server.schema.tables.pojos.EhServiceModuleExcludeFunctions;
+import com.everhomes.server.schema.tables.pojos.EhServiceModuleFunctions;
+import com.everhomes.server.schema.tables.pojos.EhServiceModuleScopes;
+import com.everhomes.server.schema.tables.pojos.EhServiceModules;
 import com.everhomes.server.schema.tables.records.*;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -553,20 +559,36 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
     }
 
     @Override
-    public List<ServiceModuleExcludePrivilege> listExcludePrivileges(Integer namespaceId, Long comunityId, Long moduleId) {
-        List<ServiceModuleExcludePrivilege> results = new ArrayList<>();
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModuleExcludePrivileges.class));
-        SelectQuery<EhServiceModuleExcludePrivilegesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_EXCLUDE_PRIVILEGES);
+    public List<ServiceModuleFunction> listFunctions(Long moduleId) {
+        List<ServiceModuleFunction> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModuleFunctions.class));
+        SelectQuery<EhServiceModuleFunctionsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_FUNCTIONS);
 
-        Condition cond = Tables.EH_SERVICE_MODULE_EXCLUDE_PRIVILEGES.NAMESPACE_ID.eq(namespaceId);
-        if (comunityId != null)
-            cond = cond.and(Tables.EH_SERVICE_MODULE_EXCLUDE_PRIVILEGES.COMMUNITY_ID.eq(comunityId));
         if (moduleId != null)
-            cond = cond.and(Tables.EH_SERVICE_MODULE_EXCLUDE_PRIVILEGES.MODULE_ID.eq(moduleId));
+            query.addConditions(Tables.EH_SERVICE_MODULE_FUNCTIONS.MODULE_ID.eq(moduleId));
+
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, ServiceModuleFunction.class));
+            return null;
+        });
+        return results;
+    }
+
+    @Override
+    public List<ServiceModuleExcludeFunction> listExcludeFunctions(Integer namespaceId, Long comunityId, Long moduleId) {
+        List<ServiceModuleExcludeFunction> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModuleExcludeFunctions.class));
+        SelectQuery<EhServiceModuleExcludeFunctionsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS);
+
+        Condition cond = Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.NAMESPACE_ID.eq(namespaceId);
+        if (comunityId != null)
+            cond = cond.and(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.COMMUNITY_ID.eq(comunityId));
+        if (moduleId != null)
+            cond = cond.and(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.MODULE_ID.eq(moduleId));
 
         query.addConditions(cond);
         query.fetch().map((r) -> {
-            results.add(ConvertHelper.convert(r, ServiceModuleExcludePrivilege.class));
+            results.add(ConvertHelper.convert(r, ServiceModuleExcludeFunction.class));
             return null;
         });
         return results;
