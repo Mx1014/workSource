@@ -189,7 +189,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 				return new ArrayList<>();
 		}
 		menus = filterMenus(menus, organizationId);
-		return processWebMenus(menus.stream().map(r->{
+ 		return processWebMenus(menus.stream().map(r->{
 			 WebMenuDTO dto = ConvertHelper.convert(r, WebMenuDTO.class);
 			ServiceModuleApp app =serviceModuleProvider.findReflectionServiceModuleAppByMenuId(r.getId());
 			if(app != null){
