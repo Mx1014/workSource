@@ -4,25 +4,17 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>reportValId: 工作汇报单id</li>
  * <li>reportId: 工作汇报id</li>
+ * <li>reportStatus: 汇报状态 0-无效 1-未启用 2-启用 参考{@link com.everhomes.rest.workReport.WorkReportStatus}</li>
  * </ul>
  */
-public class WorkReportValIdCommand {
-
-    private Long reportValId;
+public class TurnWorkReportNameCommand {
 
     private Long reportId;
 
-    public WorkReportValIdCommand() {
-    }
+    private Byte reportStatus;
 
-    public Long getReportValId() {
-        return reportValId;
-    }
-
-    public void setReportValId(Long reportValId) {
-        this.reportValId = reportValId;
+    public TurnWorkReportNameCommand() {
     }
 
     public Long getReportId() {
@@ -33,9 +25,16 @@ public class WorkReportValIdCommand {
         this.reportId = reportId;
     }
 
+    public Byte getReportStatus() {
+        return reportStatus;
+    }
+
+    public void setReportStatus(Byte reportStatus) {
+        this.reportStatus = reportStatus;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-
 }

@@ -14,6 +14,8 @@ public interface WorkReportService {
 
     WorkReportDTO updateWorkReportName(UpdateWorkReportNameCommand cmd);
 
+    void turnWorkReportName(TurnWorkReportNameCommand cmd);
+
     void createWorkReportTemplates(CreateWorkReportTemplatesCommand cmd);
 
     void postWorkReportVal(PostWorkReportValCommand cmd);

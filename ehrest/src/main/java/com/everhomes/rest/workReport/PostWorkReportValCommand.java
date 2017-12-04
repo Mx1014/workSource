@@ -2,6 +2,7 @@ package com.everhomes.rest.workReport;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.ui.user.SceneContactV2DTO;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
@@ -9,12 +10,12 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>reportId: 汇报id</li>
- * <li>reportValId: 汇报单id</li>
+ * <li>reportId: 工作汇报id</li>
+ * <li>reportValId: 工作汇报单id</li>
  * <li>reportType: 汇报类型, 0-日报 1-周报 2-月报 参考{@link com.everhomes.rest.workReport.WorkReportType}</li>
  * <li>reportTime: 汇报时间</li>
- * <li>values: 汇报项中，每项对应的值 参考{@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
- * <li>receiverIds: <List>接收人ids</li>
+ * <li>values: 汇报键值对 参考{@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
+ * <li>receivers: 接收人 {@link com.everhomes.rest.ui.user.SceneContactV2DTO}</li>
  * </ul>
  */
 public class PostWorkReportValCommand {
@@ -30,8 +31,8 @@ public class PostWorkReportValCommand {
     @ItemType(PostApprovalFormItem.class)
     private List<PostApprovalFormItem> values;
 
-    @ItemType(Long.class)
-    private List<Long> receiverIds;
+    @ItemType(SceneContactV2DTO.class)
+    private List<SceneContactV2DTO> receivers;
 
     public PostWorkReportValCommand() {
     }
@@ -76,12 +77,12 @@ public class PostWorkReportValCommand {
         this.values = values;
     }
 
-    public List<Long> getReceiverIds() {
-        return receiverIds;
+    public List<SceneContactV2DTO> getReceivers() {
+        return receivers;
     }
 
-    public void setReceiverIds(List<Long> receiverIds) {
-        this.receiverIds = receiverIds;
+    public void setReceivers(List<SceneContactV2DTO> receivers) {
+        this.receivers = receivers;
     }
 
     @Override

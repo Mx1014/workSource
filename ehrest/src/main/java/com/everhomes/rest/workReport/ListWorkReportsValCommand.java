@@ -1,13 +1,18 @@
 package com.everhomes.rest.workReport;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
  * <li>ownerId: 属于的对象 ID，如果所属类型是 EhOrganizations，则 ownerId 等于 organizationId</li>
  * <li>ownerType: 对象类型，默认为 EhOrganizations</li>
- * <li>applierId: 申请人id</li>
- * <li>receiverId: 接收者id</li>
+ * <li>applierIds: 申请人ids</li>
+ * <li>receiverIds: 接收人ids</li>
+ * <li>pageAnchor: 分页锚点</li>
+ * <li>pageSize: 每页大小</li>
  * </ul>
  */
 public class ListWorkReportsValCommand {
@@ -16,9 +21,15 @@ public class ListWorkReportsValCommand {
 
     private String ownerType;
 
-    private Long applierId;
+    @ItemType(Long.class)
+    private List<Long> applierIds;
 
-    private Long receiverId;
+    @ItemType(Long.class)
+    private List<Long> receiverIds;
+
+    private Long pageAnchor;
+
+    private Integer pageSize;
 
     public ListWorkReportsValCommand() {
     }
@@ -39,20 +50,36 @@ public class ListWorkReportsValCommand {
         this.ownerType = ownerType;
     }
 
-    public Long getApplierId() {
-        return applierId;
+    public List<Long> getApplierIds() {
+        return applierIds;
     }
 
-    public void setApplierId(Long applierId) {
-        this.applierId = applierId;
+    public void setApplierIds(List<Long> applierIds) {
+        this.applierIds = applierIds;
     }
 
-    public Long getReceiverId() {
-        return receiverId;
+    public List<Long> getReceiverIds() {
+        return receiverIds;
     }
 
-    public void setReceiverId(Long receiverId) {
-        this.receiverId = receiverId;
+    public void setReceiverIds(List<Long> receiverIds) {
+        this.receiverIds = receiverIds;
+    }
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
     }
 
     @Override

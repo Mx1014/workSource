@@ -1,7 +1,10 @@
 package com.everhomes.rest.workReport;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.ui.user.SceneContactV2DTO;
 import com.everhomes.rest.user.UserDTO;
 import com.everhomes.util.StringHelper;
 
@@ -10,19 +13,22 @@ import java.util.List;
 
 /**
  * <ul>
+ * <li>reportId: 工作汇报单id</li>
  * <li>title: 标题</li>
  * <li>applierName: 申请人姓名</li>
  * <li>applierUserId: 申请人id</li>
  * <li>receiverNames: 接收人姓名(外部快速显示)</li>
- * <li>receivers: 接收人信息 参考{@link com.everhomes.rest.user.UserDTO}</li>
+ * <li>receivers: 接收人 {@link com.everhomes.rest.ui.user.SceneContactV2DTO}</li>
  * <li>reportTime: 汇报时间</li>
  * <li>reportType: 汇报类型</li>
- * <li>values: 表单各项值 参考{@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
+ * <li>values: 表单各项值 参考{@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
  * <li>updateTime: 修改时间</li>
  * <li>createTime: 创建时间</li>
  * </ul>
  */
 public class WorkReportValDTO {
+
+    private String reportId;
 
     private String title;
 
@@ -32,21 +38,29 @@ public class WorkReportValDTO {
 
     private String receiverNames;
 
-    @ItemType(UserDTO.class)
-    private List<UserDTO> receivers;
+    @ItemType(SceneContactV2DTO.class)
+    private List<SceneContactV2DTO> receivers;
 
     private Timestamp reportTime;
 
     private Byte reportType;
 
-    @ItemType(PostApprovalFormItem.class)
-    private List<PostApprovalFormItem> values;
+    @ItemType(GeneralFormFieldDTO.class)
+    private List<GeneralFormFieldDTO> values;
 
     private Timestamp updateTime;
 
     private Timestamp createTime;
 
     public WorkReportValDTO() {
+    }
+
+    public String getReportId() {
+        return reportId;
+    }
+
+    public void setReportId(String reportId) {
+        this.reportId = reportId;
     }
 
     public String getTitle() {
@@ -81,11 +95,11 @@ public class WorkReportValDTO {
         this.receiverNames = receiverNames;
     }
 
-    public List<UserDTO> getReceivers() {
+    public List<SceneContactV2DTO> getReceivers() {
         return receivers;
     }
 
-    public void setReceivers(List<UserDTO> receivers) {
+    public void setReceivers(List<SceneContactV2DTO> receivers) {
         this.receivers = receivers;
     }
 
@@ -105,11 +119,11 @@ public class WorkReportValDTO {
         this.reportType = reportType;
     }
 
-    public List<PostApprovalFormItem> getValues() {
+    public List<GeneralFormFieldDTO> getValues() {
         return values;
     }
 
-    public void setValues(List<PostApprovalFormItem> values) {
+    public void setValues(List<GeneralFormFieldDTO> values) {
         this.values = values;
     }
 

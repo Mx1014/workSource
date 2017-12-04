@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>reportId: 汇报id</li>
+ * <li>reportId: 工作汇报id</li>
  * </ul>
  */
 public class WorkReportIdCommand {

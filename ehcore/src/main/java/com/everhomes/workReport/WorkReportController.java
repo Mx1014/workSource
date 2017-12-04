@@ -93,6 +93,20 @@ public class WorkReportController extends ControllerBase{
     }
 
     /**
+     * <b>URL: /workReport/turnWorkReportName</b>
+     * <p>1-6.启用/关闭工作汇报</p>
+     */
+    @RequestMapping("turnWorkReportName")
+    @RestReturn(value = String.class)
+    public RestResponse turnWorkReportName(TurnWorkReportNameCommand cmd){
+        workReportService.turnWorkReportName(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /workReport/createWorkReportTemplates</b>
      * <p>2.创建工作汇报模板 </p>
      */
@@ -108,7 +122,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/postWorkReportVal</b>
-     * <p>3-1.提交工作汇报 </p>
+     * <p>3-1.提交、编辑工作汇报 </p>
      */
     @RequestMapping("postWorkReportVal")
     @RestReturn(value=String.class)
@@ -150,7 +164,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/getWorkReportVal</b>
-     * <p>3-3.工作汇报申请列表 </p>
+     * <p>3-4.获取工作汇报详情 </p>
      */
     @RequestMapping("getWorkReportVal")
     @RestReturn(value=WorkReportValDTO.class)

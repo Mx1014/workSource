@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>reportId: 汇报id</li>
+ * <li>reportId: 工作汇报id</li>
  * <li>visibleRangeId: 可见范围id</li>
  * <li>reportType: 汇报类型 0-每日 1-每周 2-每月 参考{@link com.everhomes.rest.workReport.WorkReportType}</li>
  * <li>formOriginId: 表单id</li>

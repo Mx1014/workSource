@@ -5,9 +5,9 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>reportId: 汇报id</li>
- * <li>reportName: 汇报名称</li>
- * <li>reportStatus: 汇报状态</li>
+ * <li>reportId: 工作汇报id</li>
+ * <li>reportName: 工作汇报名称</li>
+ * <li>reportStatus: 汇报状态 0-无效 1-未启用 2-启用 参考{@link com.everhomes.rest.workReport.WorkReportStatus}</li>
  * <li>modifyFlag: 修改属性</li>
  * <li>deleteFlag: 删除属性</li>
  * <li>visibleRange: 可见范围 参考{@link com.everhomes.rest.organization.OrganizationDTO}</li>
