@@ -1707,3 +1707,4 @@ INSERT INTO eh_forum_service_types SELECT (@id := @id + 1), namespace_id, 1, ent
 INSERT INTO eh_forum_service_types SELECT (@id := @id + 1), namespace_id, 1, entry_id, 'activity', '活动', 1, NOW() FROM eh_forum_categories;
 INSERT INTO eh_forum_service_types SELECT (@id := @id + 1), namespace_id, 1, entry_id, 'poll', '投票', 2, NOW() FROM eh_forum_categories;
 
+update eh_var_fields set display_name = '经办人' where display_name = '签约经办人';
