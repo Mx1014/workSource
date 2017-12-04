@@ -485,6 +485,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         String endMonth = yyyyMM.format(new Date());
         GetLeaseContractBillOnFiPropertyRes res = keXingBillService.getAllFiPropertyBills(cmd.getNamespaceId(),cmd.getOwnerId(),cmd.getTargetId(),cmd.getTargetType(),null,null,endMonth);
         List<GetLeaseContractBillOnFiPropertyData> data = res.getData();
+        if(data == null) return list;
         for(int i = 0; i < data.size(); i ++){
             GetLeaseContractBillOnFiPropertyData source = data.get(i);
             ListAllBillsForClientDTO dto = new ListAllBillsForClientDTO();

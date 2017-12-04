@@ -6936,7 +6936,7 @@ public class PunchServiceImpl implements PunchService {
 
 //				Long t1 = System.currentTimeMillis();
 				List<EhPunchSchedulings> ehPsList = new ArrayList<>();
-				Long beginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), schedulings.size());
+				Long beginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPunchSchedulings.class), schedulings.size());
 
 				for (PunchScheduling ps : schedulings) {
 					ps.setId(beginId++);
