@@ -106,3 +106,5 @@ ALTER TABLE eh_qrcodes ADD COLUMN `extra` TEXT COMMENT 'module handler';
 
 ALTER TABLE eh_flow_cases ADD COLUMN `route_uri` VARCHAR(128) COMMENT 'route uri';
 
+-- fix 20472 by xiongying20171204 
+ALTER TABLE eh_enterprise_customers MODIFY COLUMN `tracking_uid` BIGINT NOT NULL DEFAULT '-1' COMMENT '跟进人uid';
