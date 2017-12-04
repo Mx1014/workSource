@@ -506,6 +506,7 @@ public class ZJContractHandler implements ContractService{
         params.put("contractNum", contractNum);
         params.put("customerName", "");
         String secretKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.secret.key", "");
+        params.remove("signature");
         String signature = SignatureHelper.computeSignature(params, secretKey);
         params.put("signature", signature);
         return params;

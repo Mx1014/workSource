@@ -204,7 +204,6 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 //			list.add(category);
 		}else{
 //			if(null == parentId){
-//				Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
 //				Category ancestor = categoryProvider.findCategoryById(defaultId);
 //				parentId = ancestor.getId();
 //			}else {
@@ -257,7 +256,7 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 	public List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId();
 		checkNamespaceId(namespaceId);
-		Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
+		Long defaultId = PmTaskAppType.REPAIR_ID;
 
 		List<Category> categories = categoryProvider.listTaskCategories(namespaceId, null, null, null, null);
 		

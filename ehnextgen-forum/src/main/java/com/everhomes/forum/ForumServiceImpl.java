@@ -6406,6 +6406,9 @@ public class ForumServiceImpl implements ForumService {
                 type.setId(null);
                 type.setSortNum(i);
                 type.setCreateTime(new Timestamp(System.currentTimeMillis()));
+                type.setNamespaceId(cmd.getNamespaceId());
+                type.setModuleType(cmd.getModuleType());
+                type.setCategoryId(cmd.getCategoryId());
                 newTypes.add(type);
             }
         }

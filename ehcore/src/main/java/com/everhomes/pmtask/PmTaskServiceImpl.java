@@ -670,7 +670,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	@Override
 	public void deleteTaskCategory(DeleteTaskCategoryCommand cmd) {
-//		Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
 //		if(cmd.getParentId() == null || defaultId.equals(cmd.getParentId())) {
 //			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_SERVICE_CATEGORY_DELETE);
 //		} else {
@@ -715,7 +714,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 //		if(null == parentId){
 //
-//			Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
 //			Category ancestor = categoryProvider.findCategoryById(defaultId);
 //			parentId = ancestor.getId();
 //			path = ancestor.getPath() + CATEGORY_SEPARATOR + cmd.getName();
@@ -1187,19 +1185,20 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	private void createTaskStatistics(List<Namespace> namespaces, Timestamp startDate, Timestamp endDate, long now) {
 		for (Namespace n : namespaces) {
-			Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
-			Category ancestor = categoryProvider.findCategoryById(defaultId);
+			for (Long id: PmTaskAppType.TYPES) {
+				Category ancestor = categoryProvider.findCategoryById(id);
 
-			if (null != ancestor) {
-				List<Category> categories = categoryProvider.listTaskCategories(n.getId(), ancestor.getId(), null, null, null);
-				if (null != categories && !categories.isEmpty()) {
-					List<Community> communities = communityProvider.listCommunitiesByNamespaceId(n.getId());
-					for (Community community : communities) {
-						for (Category taskCategory : categories) {
-							createTaskStatistics(community.getId(), taskCategory.getId(), 0L, startDate, endDate, now, n.getId());
-							List<Category> tempCategories = categoryProvider.listTaskCategories(n.getId(), taskCategory.getId(), null, null, null);
-							for (Category category : tempCategories) {
-								createTaskStatistics(community.getId(), taskCategory.getId(), category.getId(), startDate, endDate, now, n.getId());
+				if (null != ancestor) {
+					List<Category> categories = categoryProvider.listTaskCategories(n.getId(), ancestor.getId(), null, null, null);
+					if (null != categories && !categories.isEmpty()) {
+						List<Community> communities = communityProvider.listCommunitiesByNamespaceId(n.getId());
+						for (Community community : communities) {
+							for (Category taskCategory : categories) {
+								createTaskStatistics(community.getId(), taskCategory.getId(), 0L, startDate, endDate, now, n.getId());
+								List<Category> tempCategories = categoryProvider.listTaskCategories(n.getId(), taskCategory.getId(), null, null, null);
+								for (Category category : tempCategories) {
+									createTaskStatistics(community.getId(), taskCategory.getId(), category.getId(), startDate, endDate, now, n.getId());
+								}
 							}
 						}
 					}

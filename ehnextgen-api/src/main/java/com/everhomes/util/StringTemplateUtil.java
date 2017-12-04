@@ -29,6 +29,7 @@ public class StringTemplateUtil {
                open = false;
                if(sb.length() > 0){
                    result.add(sb.toString());
+                   sb = new StringBuffer();
                }
                continue;
             }

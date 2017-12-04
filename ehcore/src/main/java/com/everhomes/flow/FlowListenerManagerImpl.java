@@ -3,6 +3,7 @@ package com.everhomes.flow;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import org.slf4j.Logger;
@@ -330,6 +331,15 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
             return flowForms;
         }
         return null;
+    }
+
+    @Override
+    public void onScanQRCode(FlowCase flowCase, QRCodeDTO qrCode, Long currentUserId) {
+        FlowModuleInst inst = moduleMap.get(flowCase.getModuleId());
+        if (inst != null) {
+            FlowModuleListener listener = inst.getListener();
+            listener.onScanQRCode(flowCase, qrCode, currentUserId);
+        }
     }
 
     @Override
