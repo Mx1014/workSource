@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.forum.ForumModuleType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -48,6 +49,9 @@ import com.everhomes.util.StringHelper;
  * <li>maxQuantity: 限制人数</li>
  * <li>tag: 帖子标签</li>
  * <li>forumEntryId: 论坛应用入口Id</li>
+ * <li>moduleType: 模块类型，现在所有的帖子都要往帖子表里写，通过判断条件已经很难区分是哪里来的帖子了，现在由创建帖子的时候带来。 参考{@link ForumModuleType}</li>
+ * <li>moduleCategoryId: 业务模块的入口id</li>
+ *
  * </ul>
  */
 public class NewTopicBySceneCommand {
@@ -100,6 +104,10 @@ public class NewTopicBySceneCommand {
     private String tag;
 
     private Long forumEntryId;
+
+    private Byte moduleType;
+
+    private Long moduleCategoryId;
 
 	public Integer getMaxQuantity() {
 		return maxQuantity;
@@ -280,6 +288,22 @@ public class NewTopicBySceneCommand {
 
     public void setForumEntryId(Long forumEntryId) {
         this.forumEntryId = forumEntryId;
+    }
+
+    public Byte getModuleType() {
+        return moduleType;
+    }
+
+    public void setModuleType(Byte moduleType) {
+        this.moduleType = moduleType;
+    }
+
+    public Long getModuleCategoryId() {
+        return moduleCategoryId;
+    }
+
+    public void setModuleCategoryId(Long moduleCategoryId) {
+        this.moduleCategoryId = moduleCategoryId;
     }
 
     @Override

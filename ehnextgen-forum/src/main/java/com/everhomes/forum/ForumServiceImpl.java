@@ -3328,6 +3328,9 @@ public class ForumServiceImpl implements ForumService {
         post.setInteractFlag(InteractFlag.SUPPORT.getCode());
         post.setStickFlag(StickFlag.DEFAULT.getCode());
 
+        post.setModuleType(cmd.getModuleType());
+        post.setModuleCategoryId(cmd.getModuleCategoryId());
+
         return post;
     }
     
@@ -4153,24 +4156,32 @@ public class ForumServiceImpl implements ForumService {
 
     @Override
     public InteractSetting findInteractSettingByPost(Post post){
-        InteractSetting setting = null;
+//        InteractSetting setting = null;
+
+        if(post.getModuleType() == null){
+            return null;
+        }
 
         Integer namespaceId = post.getNamespaceId();
         if(namespaceId == null){
             namespaceId = UserContext.getCurrentNamespaceId();
         }
 
-        //非常不靠谱的判断，可是真的没有其他办法，急需在创建帖子的时候从来源处传来是哪个应用的  add by yanjun 20171109
-        if(post.getActivityCategoryId() != null && post.getActivityCategoryId().longValue() != 0){
-            //活动应用的帖子
-            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.ACTIVITY.getCode(), post.getActivityCategoryId());
-        }else if(post.getForumEntryId() != null && (post.getCategoryId() == null || post.getCategoryId() != 1003)){
-            //论坛应用的帖子
-            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.FORUM.getCode(), post.getForumEntryId());
-        }else if(post.getCategoryId() != null && post.getCategoryId() == 1003){
-            //公告应用的帖子
-            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.ANNOUNCEMENT.getCode(), null);
-        }
+
+        InteractSetting setting = forumProvider.findInteractSetting(namespaceId, post.getModuleType(), post.getModuleCategoryId());
+
+
+//        //非常不靠谱的判断，可是真的没有其他办法，急需在创建帖子的时候从来源处传来是哪个应用的  add by yanjun 20171109
+//        if(post.getActivityCategoryId() != null && post.getActivityCategoryId().longValue() != 0){
+//            //活动应用的帖子
+//            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.ACTIVITY.getCode(), post.getActivityCategoryId());
+//        }else if(post.getForumEntryId() != null && (post.getCategoryId() == null || post.getCategoryId() != 1003)){
+//            //论坛应用的帖子
+//            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.FORUM.getCode(), post.getForumEntryId());
+//        }else if(post.getCategoryId() != null && post.getCategoryId() == 1003){
+//            //公告应用的帖子
+//            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.ANNOUNCEMENT.getCode(), null);
+//        }
 
         return setting;
     }

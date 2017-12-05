@@ -1100,17 +1100,16 @@ public class ForumProviderImpl implements ForumProvider {
                 .fetchOneInto(ForumCategory.class);
     }
 
-    @Cacheable(value="findInteractSetting", key="{#namespaceId, #forumId, #type, #entryId}", unless="#result == null")
+    @Cacheable(value="findInteractSetting", key="{#namespaceId, #moduleType, #categoryId}", unless="#result == null")
     @Override
-    public InteractSetting findInteractSetting(Integer namespaceId, Long forumId, String type, Long entryId) {
+    public InteractSetting findInteractSetting(Integer namespaceId, Byte moduleType, Long categoryId) {
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhInteractSettingsRecord> query = context.selectQuery(Tables.EH_INTERACT_SETTINGS);
         query.addConditions(Tables.EH_INTERACT_SETTINGS.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_INTERACT_SETTINGS.FORUM_ID.eq(forumId));
-        query.addConditions(Tables.EH_INTERACT_SETTINGS.TYPE.eq(type));
-        if(entryId != null){
-            query.addConditions(Tables.EH_INTERACT_SETTINGS.ENTRY_ID.eq(entryId));
+        query.addConditions(Tables.EH_INTERACT_SETTINGS.MODULE_TYPE.eq(moduleType));
+        if(categoryId != null){
+            query.addConditions(Tables.EH_INTERACT_SETTINGS.CATEGORY_ID.eq(categoryId));
         }
         return query.fetchAnyInto(InteractSetting.class);
     }
