@@ -67,8 +67,21 @@ CREATE TABLE `eh_work_report_vals` (
   `applier_user_id` BIGINT COMMENT 'the userId of the applier',
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0-invalid, 1-valid',
   `report_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0-Day, 1-Week, 2-Month',
-  `receiver_user_ids` VARCHAR(256) COMMENT 'the id list of receivers',
-  `receiver_names` VARCHAR(256) COMMENT 'the name list of receivers',
+
+  `update_time` DATETIME COMMENT 'last update time',
+  `create_time` DATETIME COMMENT 'record create time',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 工作汇报值映射表
+CREATE TABLE `eh_work_report_val_mappings` (
+  `id` BIGINT NOT NULL COMMENT 'the id of the report val mapping',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+
+  `report_val_id` BIGINT COMMENT 'the id of the report val',
+  `receiver_user_id` BIGINT COMMENT 'the id of the receiver',
+  `receiver_name` VARCHAR(256) COMMENT 'the name of the receiver',
+  `read_status` TINYINT DEFAULT 0 COMMENT '0-unread 1-read',
 
   `update_time` DATETIME COMMENT 'last update time',
   `create_time` DATETIME COMMENT 'record create time',
