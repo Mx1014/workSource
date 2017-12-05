@@ -2,8 +2,10 @@
 package com.everhomes.print;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -730,7 +732,12 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			return null;
 		}
 		
-		return new UnlockPrinterResponse(url, StringHelper.toJsonString(params));
+		try {
+			return new UnlockPrinterResponse(url, URLEncoder.encode(StringHelper.toJsonString(params),"UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.info("{}",e);
+			throw new RuntimeErrorException(e);
+		}
 		
 	}
 
