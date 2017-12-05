@@ -7,4 +7,4 @@ CREATE TABLE `eh_equipment_module_community_map` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_equipment_inspection_standards`
-ADD COLUMN `refer_id`  bigint(20) NULL AFTER `repeat_type`;
+ADD COLUMN `refer_id`  bigint(20) NULL;
