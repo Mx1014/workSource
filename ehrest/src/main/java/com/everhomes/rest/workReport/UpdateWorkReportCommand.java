@@ -20,6 +20,8 @@ public class UpdateWorkReportCommand {
 
     private Long formOriginId;
 
+    private Long formVersion;
+
     public UpdateWorkReportCommand() {
     }
 
@@ -53,6 +55,14 @@ public class UpdateWorkReportCommand {
 
     public void setFormOriginId(Long formOriginId) {
         this.formOriginId = formOriginId;
+    }
+
+    public Long getFormVersion() {
+        return formVersion;
+    }
+
+    public void setFormVersion(Long formVersion) {
+        this.formVersion = formVersion;
     }
 
     @Override

@@ -255,9 +255,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         ListArchivesContactsResponse response = new ListArchivesContactsResponse();
         final Integer stickCount = 20;  //  置顶数为20,表示一页最多显示20个置顶人员 at 11/06/2017
-        if (cmd.getPageSize() != null)
-            cmd.setPageSize(cmd.getPageSize());
-        else
+        if (cmd.getPageSize() == null)
             cmd.setPageSize(20);
 
         List<Long> detailIds = archivesProvider.listArchivesStickyContactsIds(namespaceId, cmd.getOrganizationId(), stickCount);    //  保存置顶人员

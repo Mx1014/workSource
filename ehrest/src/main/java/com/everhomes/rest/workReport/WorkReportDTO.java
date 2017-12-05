@@ -18,9 +18,8 @@ import java.sql.Timestamp;
  * <li>reportType: 工作汇报类型 0-每日 1-每周 2-每月 参考{@link com.everhomes.rest.workReport.WorkReportType}</li>
  * <li>reportAttribute: 工作汇报属性 例如：比如: DEFAULT-系统默认 参考{@link com.everhomes.rest.workReport.WorkReportAttribute}</li>
  * <li>formOriginId: 关联表单id</li>
- * <li>formVersion: formVersion</li>
- * <li>visibleRangeId: visibleRangeId</li>
- * <li>createTime: createTime</li>
+ * <li>formVersion: 关联表单版本</li>
+ * <li>updateTime: 编辑时间</li>
  * </ul>
  */
 public class WorkReportDTO {
@@ -51,9 +50,8 @@ public class WorkReportDTO {
 
     private Long formVersion;
 
-    private Long visibleRangeId;
+    private Timestamp updateTime;
 
-    private Timestamp createTime;
 
     public WorkReportDTO() {
     }
@@ -162,20 +160,12 @@ public class WorkReportDTO {
         this.formVersion = formVersion;
     }
 
-    public Long getVisibleRangeId() {
-        return visibleRangeId;
+    public Timestamp getUpdateTime() {
+        return updateTime;
     }
 
-    public void setVisibleRangeId(Long visibleRangeId) {
-        this.visibleRangeId = visibleRangeId;
-    }
-
-    public Timestamp getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Timestamp createTime) {
-        this.createTime = createTime;
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
     }
 
     @Override

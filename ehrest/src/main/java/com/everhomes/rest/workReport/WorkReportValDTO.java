@@ -13,7 +13,8 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>reportId: 工作汇报单id</li>
+ * <li>reportValId: 工作汇报单id</li>
+ * <li>reportId: 工作汇报id</li>
  * <li>title: 标题</li>
  * <li>applierName: 申请人姓名</li>
  * <li>applierUserId: 申请人id</li>
@@ -29,7 +30,9 @@ import java.util.List;
  */
 public class WorkReportValDTO {
 
-    private String reportId;
+    private Long reportValId;
+
+    private Long reportId;
 
     private String title;
 
@@ -58,11 +61,19 @@ public class WorkReportValDTO {
     public WorkReportValDTO() {
     }
 
-    public String getReportId() {
+    public Long getReportValId() {
+        return reportValId;
+    }
+
+    public void setReportValId(Long reportValId) {
+        this.reportValId = reportValId;
+    }
+
+    public Long getReportId() {
         return reportId;
     }
 
-    public void setReportId(String reportId) {
+    public void setReportId(Long reportId) {
         this.reportId = reportId;
     }
 
