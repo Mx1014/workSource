@@ -97,7 +97,8 @@ public class RelocationProviderImpl implements RelocationProvider {
         if(StringUtils.isNotBlank(keyword)) {
 			query.addConditions(Tables.EH_RELOCATION_REQUESTS.REQUESTOR_ENTERPRISE_NAME.like("%" + keyword + "%")
 					.or(Tables.EH_RELOCATION_REQUESTS.REQUESTOR_NAME.like("%" + keyword + "%"))
-					.or(Tables.EH_RELOCATION_REQUESTS.CONTACT_PHONE.like("%" + keyword + "%")));
+					.or(Tables.EH_RELOCATION_REQUESTS.CONTACT_PHONE.like("%" + keyword + "%"))
+					.or(Tables.EH_RELOCATION_REQUESTS.REQUEST_NO.like("%" + keyword + "%")));
 		}
         if(null != startDate) {
 			query.addConditions(Tables.EH_RELOCATION_REQUESTS.CREATE_TIME.gt(new Timestamp(startDate)));
