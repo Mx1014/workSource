@@ -167,10 +167,17 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 
 		//检查多入口应用权限
-		checkAppPrivilege(namespaceId, cmd.getTaskCategoryId(), cmd.getCurrentOrgId(), EntityType.COMMUNITY.getCode(), cmd.getOwnerId());
+		if(!checkAppPrivilege(namespaceId, cmd.getTaskCategoryId(), cmd.getCurrentOrgId(), EntityType.COMMUNITY.getCode(),
+				cmd.getOwnerId(), PrivilegeConstants.PMTASK_LIST)){
+			LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
+							" privilege={}", namespaceId, cmd.getTaskCategoryId(), cmd.getCurrentOrgId(), EntityType.COMMUNITY.getCode(),
+					cmd.getOwnerId(), PrivilegeConstants.PMTASK_LIST);
+			throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_FORBIDDEN_PERMISSIONS,
+					"Permission is prohibited");
+		}
 
 		//检查权限细化
-		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST);
+//		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST);
 
 
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
@@ -566,15 +573,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public PmTaskDTO createTask(CreateTaskCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 
-		//检查多入口应用权限
-		if(checkAppPrivilege(namespaceId, cmd.getTaskCategoryId(), cmd.getOrganizationId(), EntityType.COMMUNITY.getCode(), cmd.getOwnerId())){
-
-		}else{
-			LOGGER.error("Permission is prohibited, userId={}, privilegeId = {}", cmd.getOwnerId(), 0L);
-			throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_FORBIDDEN_PERMISSIONS,
-					"Permission is prohibited");
-		}
-
 		//黑名单权限校验 by sfyan20161213
 		checkBlacklist(null, null);
 
@@ -609,6 +607,17 @@ public class PmTaskServiceImpl implements PmTaskService {
 				return handler.createTask(cmd, user.getId(), member.getContactName(), userIdentifier==null?"":userIdentifier.getIdentifierToken());
 			}
 		}else {
+
+			//检查多入口应用权限
+			if(!checkAppPrivilege(namespaceId, cmd.getTaskCategoryId(), cmd.getOrganizationId(), EntityType.COMMUNITY.getCode(),
+					cmd.getOwnerId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE)){
+				LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
+								" privilege={}", namespaceId, cmd.getTaskCategoryId(), cmd.getOrganizationId(), EntityType.COMMUNITY.getCode(),
+						cmd.getOwnerId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE);
+				throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_FORBIDDEN_PERMISSIONS,
+						"Permission is prohibited");
+			}
+
 			String requestorPhone = cmd.getRequestorPhone();
 			String requestorName = cmd.getRequestorName();
 			if(StringUtils.isBlank(requestorPhone)){
@@ -647,8 +656,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return response;
 	}
 
-	private boolean checkAppPrivilege(Integer namespaceId, Long taskCategoryId, Long orgId, String ownerType, Long ownerId) {
-		if (null != taskCategoryId) {
+	private boolean checkAppPrivilege(Integer namespaceId, Long taskCategoryId, Long orgId, String ownerType, Long ownerId, Long privilege) {
+		if (null != taskCategoryId && Arrays.asList(PmTaskAppType.TYPES).contains(taskCategoryId)) {
 			ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
 			listServiceModuleAppsCommand.setNamespaceId(namespaceId);
 			listServiceModuleAppsCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
@@ -656,7 +665,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
 			if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
 				return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
-						orgId, PrivilegeConstants.PMTASK_LIST, apps.getServiceModuleApps().get(0).getId(), null, ownerId);
+						orgId, privilege, apps.getServiceModuleApps().get(0).getId(), null, ownerId);
 			}
 		}
 		return false;
@@ -670,15 +679,22 @@ public class PmTaskServiceImpl implements PmTaskService {
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
 		//检查多入口应用权限
-		checkAppPrivilege(namespaceId, cmd.getTaskCategoryId(), cmd.getOrganizationId(), EntityType.COMMUNITY.getCode(), cmd.getOwnerId());
-
-		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-		User user = UserContext.current().getUser();
-		if(!resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE)) {
-			LOGGER.error("Not privilege", cmd);
-			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CREATE_TASK_PRIVILEGE,
-					"Not privilege");
+		//检查多入口应用权限
+		if(!checkAppPrivilege(namespaceId, cmd.getTaskCategoryId(), cmd.getOrganizationId(), EntityType.COMMUNITY.getCode(),
+				cmd.getOwnerId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE)){
+			LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
+							" privilege={}", namespaceId, cmd.getTaskCategoryId(), cmd.getOrganizationId(), EntityType.COMMUNITY.getCode(),
+					cmd.getOwnerId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE);
+			throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_FORBIDDEN_PERMISSIONS,
+					"Permission is prohibited");
 		}
+//		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//		User user = UserContext.current().getUser();
+//		if(!resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE)) {
+//			LOGGER.error("Not privilege", cmd);
+//			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CREATE_TASK_PRIVILEGE,
+//					"Not privilege");
+//		}
 //		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE);
 		//黑名单权限校验 by sfyan20161213
 		checkBlacklist(null, null);
@@ -963,9 +979,21 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public SearchTaskStatisticsResponse searchTaskStatistics(SearchTaskStatisticsCommand cmd) {
-		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_TASK_STATISTICS_LIST);
+
+//		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_TASK_STATISTICS_LIST);
 		Integer namespaceId = cmd.getNamespaceId();
 		checkNamespaceId(namespaceId);
+
+		//检查多入口应用权限
+		if(!checkAppPrivilege(namespaceId, cmd.getTaskCategoryId(), cmd.getCurrentOrgId(), EntityType.COMMUNITY.getCode(),
+				cmd.getCommunityId(), PrivilegeConstants.PMTASK_TASK_STATISTICS_LIST)){
+			LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
+					" privilege={}", namespaceId, cmd.getTaskCategoryId(), cmd.getCurrentOrgId(), EntityType.COMMUNITY.getCode(),
+					cmd.getCommunityId(), PrivilegeConstants.PMTASK_TASK_STATISTICS_LIST);
+			throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_FORBIDDEN_PERMISSIONS,
+					"Permission is prohibited");
+		}
+
 		SearchTaskStatisticsResponse response = new SearchTaskStatisticsResponse();
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
@@ -1090,11 +1118,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	@Override
 	public GetStatisticsResponse getStatistics(GetStatisticsCommand cmd) {
-		if(cmd.getOwnerId() == null) {
-			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_ALL_TASK_STATISTICS_LIST);
-		} else {
-			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_TASK_STATISTICS_LIST);
-		}
+//		if(cmd.getOwnerId() == null) {
+//			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_ALL_TASK_STATISTICS_LIST);
+//		} else {
+//			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_TASK_STATISTICS_LIST);
+//		}
 		Integer namespaceId = cmd.getNamespaceId();
 		checkNamespaceId(namespaceId);
 		GetStatisticsResponse response = new GetStatisticsResponse();
