@@ -122,14 +122,14 @@ public class WorkReportServiceImpl implements WorkReportService {
     }
 
     @Override
-    public void enableWorkReportName(WorkReportIdCommand cmd) {
+    public void enableWorkReport(WorkReportIdCommand cmd) {
         WorkReport report = workReportProvider.findWorkReport(cmd.getReportId());
         report.setReportType(WorkReportStatus.RUNNING.getCode());
         workReportProvider.updateWorkReport(report);
     }
 
     @Override
-    public void disableWorkReportName(WorkReportIdCommand cmd) {
+    public void disableWorkReport(WorkReportIdCommand cmd) {
         WorkReport report = workReportProvider.findWorkReport(cmd.getReportId());
         report.setReportType(WorkReportStatus.VALID.getCode());
         workReportProvider.updateWorkReport(report);

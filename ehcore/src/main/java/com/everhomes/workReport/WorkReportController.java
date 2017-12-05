@@ -93,14 +93,14 @@ public class WorkReportController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /workReport/enableWorkReportName</b>
+     * <b>URL: /workReport/enableWorkReport</b>
      * <p>1-6.启用工作汇报</p>
      * <p>(若 formOriginId 为 0 时则不能执行此方法，具体流程类似于审批设置的启用)</p>
      */
-    @RequestMapping("enableWorkReportName")
+    @RequestMapping("enableWorkReport")
     @RestReturn(value = String.class)
-    public RestResponse enableWorkReportName(WorkReportIdCommand cmd){
-        workReportService.enableWorkReportName(cmd);
+    public RestResponse enableWorkReport(WorkReportIdCommand cmd){
+        workReportService.enableWorkReport(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -108,13 +108,13 @@ public class WorkReportController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /workReport/disableWorkReportName</b>
+     * <b>URL: /workReport/disableWorkReport</b>
      * <p>1-7.关闭工作汇报</p>
      */
-    @RequestMapping("disableWorkReportName")
+    @RequestMapping("disableWorkReport")
     @RestReturn(value = String.class)
-    public RestResponse disableWorkReportName(WorkReportIdCommand cmd){
-        workReportService.disableWorkReportName(cmd);
+    public RestResponse disableWorkReport(WorkReportIdCommand cmd){
+        workReportService.disableWorkReport(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
