@@ -2016,7 +2016,6 @@ public class PortalServiceImpl implements PortalService {
 						UrlActionData actionData = (UrlActionData)StringHelper.fromJsonString(padItem.getActionData(), UrlActionData.class);
 						item.setActionData(StringHelper.toJsonString(actionData));
 					}
-
 				}else if(ActionType.THIRDPART_URL == ActionType.fromCode(padItem.getActionType())){
 					item.setActionType(PortalItemActionType.THIRDURL.getCode());
 					if(!StringUtils.isEmpty(padItem.getActionData())){
@@ -2066,30 +2065,45 @@ public class PortalServiceImpl implements PortalService {
 		moduleApp.setStatus(ServiceModuleAppStatus.ACTIVE.getCode());
 		moduleApp.setCreatorUid(user.getId());
 		moduleApp.setOperatorUid(user.getId());
-		List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModule(actionType);
 
-//		if(serviceModules.size() == 0 || ActionType.OFFLINE_WEBAPP  == ActionType.fromCode(actionType)
-//				|| ActionType.ROUTER  == ActionType.fromCode(actionType)){
-
-		if(serviceModules.size() == 0 || ActionType.OFFLINE_WEBAPP  == ActionType.fromCode(actionType) || ActionType.OFFICIAL_URL  == ActionType.fromCode(actionType) || ActionType.THIRDPART_URL  == ActionType.fromCode(actionType)){
-
-		}else{
-			ServiceModule serviceModule = serviceModules.get(0);
-			moduleApp.setModuleId(serviceModule.getId());
-			if(StringUtils.isEmpty(itemLabel)){
-				moduleApp.setName(serviceModule.getName());
-			}
-			if(MultipleFlag.fromCode(serviceModule.getMultipleFlag()) == MultipleFlag.YES){
-				PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
-				if(null != handler){
-					String instanceConfig = handler.getAppInstanceConfig(namespaceId, actionData);
-					moduleApp.setInstanceConfig(instanceConfig);
+		ServiceModule serviceModule = null;
+		if(ActionType.fromCode(actionType) == ActionType.OFFICIAL_URL){
+			List<String> beans = PortalUrlParserBeanUtil.getkeys();
+			Long moduleId = 0L;
+			for (String bean : beans) {
+				PortalUrlParser parser = PlatformContext.getComponent(bean);
+				if(parser != null){
+					moduleId = parser.getModuleId(namespaceId, actionData, actionType, itemLabel);
+					if(moduleId != null && moduleId != 0L){
+						serviceModule = serviceModuleProvider.findServiceModuleById(moduleId);
+						break;
+					}
 				}
 			}
-
-			// 同步reflectionServiceModule表
-			this.serviceModuleService.getOrCreateReflectionServiceModuleApp(namespaceId, actionData, moduleApp.getInstanceConfig(), itemLabel, serviceModule);
+		}else if(ActionType.OFFLINE_WEBAPP  == ActionType.fromCode(actionType) || ActionType.THIRDPART_URL  == ActionType.fromCode(actionType)){
+			return moduleApp;
+		}else{
+			List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModule(actionType);
+			if(serviceModules.size() != 0){
+				serviceModule = serviceModules.get(0);
+			}
 		}
+
+		moduleApp.setModuleId(serviceModule.getId());
+		if(StringUtils.isEmpty(itemLabel)){
+			moduleApp.setName(serviceModule.getName());
+		}
+		if(MultipleFlag.fromCode(serviceModule.getMultipleFlag()) == MultipleFlag.YES){
+			PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
+			if(null != handler){
+				String instanceConfig = handler.getAppInstanceConfig(namespaceId, actionData);
+				moduleApp.setInstanceConfig(instanceConfig);
+			}
+		}
+
+		// 同步reflectionServiceModule表
+		this.serviceModuleService.getOrCreateReflectionServiceModuleApp(namespaceId, actionData, moduleApp.getInstanceConfig(), itemLabel, serviceModule);
+
 		serviceModuleAppProvider.createServiceModuleApp(moduleApp);
 		return moduleApp;
 	}
