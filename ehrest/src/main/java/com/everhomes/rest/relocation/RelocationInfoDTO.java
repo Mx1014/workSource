@@ -12,6 +12,7 @@ public class RelocationInfoDTO {
 
     private String userName;
     private String contactPhone;
+    private Long currOrgId;
 
     @ItemType(OrganizationBriefInfoDTO.class)
     private List<OrganizationBriefInfoDTO> organizations;
@@ -19,6 +20,14 @@ public class RelocationInfoDTO {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Long getCurrOrgId() {
+        return currOrgId;
+    }
+
+    public void setCurrOrgId(Long currOrgId) {
+        this.currOrgId = currOrgId;
     }
 
     public String getUserName() {

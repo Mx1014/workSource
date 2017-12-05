@@ -168,6 +168,7 @@ public class RelocationServiceImpl implements RelocationService {
 			case ENTERPRISE:
 			case ENTERPRISE_NOAUTH:
 				Long organizationId = sceneToken.getEntityId();
+				dto.setCurrOrgId(organizationId);
 				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
 				if (null != member) {
 					dto.setUserName(member.getContactName());
