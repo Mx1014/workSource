@@ -300,11 +300,11 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
         if (companyId!=null)
             param.put("companyName",organizationProvider.getOrganizationNameById(companyId));
 
-//        if (task.getAddressId()!=null) {
-//            Address address = addressProvider.findAddressById(task.getAddressId());
-//            if (address != null && NamespaceAddressType.EBEI.getCode().equals(address.getNamespaceAddressType()))
-//                param.put("buildingId", address.getNamespaceAddressToken());
-//        }
+        if (task.getAddressId()!=null) {
+            Address address = addressProvider.findAddressById(task.getAddressId());
+            if (address != null && NamespaceAddressType.EBEI.getCode().equals(address.getNamespaceAddressType()))
+                param.put("buildingId", address.getNamespaceAddressToken());
+        }
 
         param.put("submitter","正中会");
         param.put("serviceId", getMappingIdByCategoryId(task.getCategoryId()));
