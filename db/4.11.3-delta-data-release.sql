@@ -1669,6 +1669,23 @@ UPDATE eh_flow_evaluates set module_type = 'suggestion' where module_type = 'any
 UPDATE eh_flow_predefined_params set module_type = 'suggestion' where module_type = 'any-module' and module_id = 20100;
 
 
+SET @ns_id = 0;
+SET @flow_predefined_params_id = IFNULL((SELECT MAX(id) FROM `eh_flow_predefined_params`), 1);
+
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 20100, 'any-module', 'flow_node', '待受理', '待受理', '{"nodeType":"ACCEPTING"}', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 20100, 'any-module', 'flow_node', '待分配', '待分配', '{"nodeType":"ASSIGNING"}', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 20100, 'any-module', 'flow_node', '待处理', '待处理', '{"nodeType":"PROCESSING"}', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 20100, 'any-module', 'flow_node', '已完成', '已完成', '{"nodeType":"COMPLETED"}', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 20100, 'any-module', 'flow_node', '待确认费用', '待确认费用', '{"nodeType":"CONFIRMFEE"}', '2', NULL, NULL, NULL, NULL);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 20100, 'any-module', 'flow_node', '调整费用', '调整费用', '{"nodeType":"MOTIFYFEE"}', '2', NULL, NULL, NULL, NULL);
+
+
 -- add by janson 201712011625
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
