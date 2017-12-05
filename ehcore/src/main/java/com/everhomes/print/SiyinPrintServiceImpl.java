@@ -16,7 +16,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
@@ -105,6 +104,7 @@ import com.everhomes.rest.print.PrintSettingType;
 import com.everhomes.rest.print.PrintStatDTO;
 import com.everhomes.rest.print.ReleaseQueueJobsCommand;
 import com.everhomes.rest.print.UnlockPrinterCommand;
+import com.everhomes.rest.print.UnlockPrinterResponse;
 import com.everhomes.rest.print.UpdatePrintSettingCommand;
 import com.everhomes.rest.print.UpdatePrintUserEmailCommand;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -113,10 +113,9 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.xml.XMLToJSON;
-
-import sun.misc.BASE64Decoder;
 /**
  * 
  *  @author:dengs 2017年6月22日
@@ -558,14 +557,14 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	}
 	
 	@Override
-	public void unlockPrinter(UnlockPrinterCommand cmd) {
+	public UnlockPrinterResponse unlockPrinter(UnlockPrinterCommand cmd) {
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		//解锁打印机之前检查是否存在未支付订单。
 		//前端必须先调用接口 /siyinprint/getPrintUnpaidOrder,如此处存在未支付订单，那么抛出异常
 		if(PrintLogonStatusType.HAVE_UNPAID_ORDER == checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId())){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "Have unpaid order");
 		}
-		unlockPrinter(cmd,false);
+		return unlockPrinter(cmd,false);
 	}
 	
 	/**
@@ -659,7 +658,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return tuple.first();
 	}
 
-	private void unlockPrinter(UnlockPrinterCommand cmd, boolean isDirectPrint) {
+	private UnlockPrinterResponse unlockPrinter(UnlockPrinterCommand cmd, boolean isDirectPrint) {
         String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
         String moduleIp = getSiyinModuleIp(siyinUrl, cmd.getReaderName());
         String loginData = getLoginData(siyinUrl,cmd);
@@ -683,8 +682,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         	LOGGER.error("Unknown readerName = {}, register on table eh_siyin_print_printers",cmd.getReaderName());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unknown readerName = "+cmd.getReaderName());
         }
-        directLogin(moduleIp,printer,loginData);
         mappingReaderToUser(cmd.getReaderName());
+        return directLogin(moduleIp,printer,loginData);
 	}
 	
 	private void mappingReaderToUser(String readerName) {
@@ -708,24 +707,30 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	/**
 	 * 解锁打印机
 	 */
-	private void directLogin(String moduleIp, SiyinPrintPrinter printer, String loginData) {
+	private UnlockPrinterResponse directLogin(String moduleIp, SiyinPrintPrinter printer, String loginData) {
 		Map<String, String> params = new HashMap<>();
 		params.put("reader_name", printer.getReaderName());
 		params.put("action", "QueryModule");
 		params.put("login_data", loginData);
 		String url = "http://" + moduleIp  + ":" + printer.getModulePort() + printer.getLoginContext();
-		String result;
-		try {
-			result = HttpUtils.post(url, params, 30);
-			String siyinCode = getSiyinCode(result);
-			if(!siyinCode.equals("OK")){
-				LOGGER.error("siyin api:"+url+"request failed : "+result);
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, printer.getLoginContext()+" request failed, message = "+result);
+		boolean isunlockbg = configurationProvider.getBooleanValue("print.isunlockbg", false);
+		if(isunlockbg){
+			String result;
+			try {
+				result = HttpUtils.post(url, params, 30);
+				String siyinCode = getSiyinCode(result);
+				if(!siyinCode.equals("OK")){
+					LOGGER.error("siyin api:"+url+"request failed : "+result);
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, printer.getLoginContext()+" request failed, message = "+result);
+				}
+			} catch (IOException e) {
+				LOGGER.error("siyin api:"+url+" request exception : "+e.getMessage());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, printer.getLoginContext()+" return exception, message = "+e.getMessage());
 			}
-		} catch (IOException e) {
-			LOGGER.error("siyin api:"+url+" request exception : "+e.getMessage());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, printer.getLoginContext()+" return exception, message = "+e.getMessage());
+			return null;
 		}
+		
+		return new UnlockPrinterResponse(url, StringHelper.toJsonString(params));
 		
 	}
 

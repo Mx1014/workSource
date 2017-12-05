@@ -300,10 +300,10 @@ public class SiYinPrintController extends ControllerBase {
 	  * <p>19.直接解锁打印机,请先调用 /siyinprint/getPrintUnpaidOrder 接口检查未支付订单</p>
 	  */
 	 @RequestMapping("unlockPrinter")
-	 @RestReturn(value=String.class)
+	 @RestReturn(value=UnlockPrinterResponse.class)
 	 public RestResponse unlockPrinter(UnlockPrinterCommand cmd) {
-		 siyinPrintService.unlockPrinter(cmd);
-	     RestResponse response = new RestResponse();
+		 UnlockPrinterResponse r = siyinPrintService.unlockPrinter(cmd);
+	     RestResponse response = new RestResponse(r);
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
 	     return response;
