@@ -585,7 +585,7 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 
         Condition cond = Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.NAMESPACE_ID.eq(namespaceId);
         if (comunityId != null)
-            cond = cond.and(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.COMMUNITY_ID.eq(comunityId));
+            cond = cond.and(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.COMMUNITY_ID.eq(comunityId).or(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.COMMUNITY_ID.eq(0L)));
         if (moduleId != null)
             cond = cond.and(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.MODULE_ID.eq(moduleId));
 

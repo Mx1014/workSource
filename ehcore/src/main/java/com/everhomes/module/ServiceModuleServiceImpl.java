@@ -818,7 +818,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     @Override
     public List<Long> listServiceModulefunctions(ListServiceModulefunctionsCommand cmd) {
         List<Long> functionIds = new ArrayList<>();
-        List<Long> privilegeIds = rolePrivilegeService.listUserPrivilegeByModuleId(cmd.getNamespaceId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), UserContext.current().getUser().getId(), cmd.getModuleId());
+        List<Long> privilegeIds = rolePrivilegeService.listUserPrivilegeByModuleId(cmd.getNamespaceId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), UserContext.currentUserId(), cmd.getModuleId());
         privilegeIds.add(0L);
         List<ServiceModuleFunction> moduleFunctions = serviceModuleProvider.listFunctions(cmd.getModuleId(), privilegeIds);
         if(moduleFunctions != null && moduleFunctions.size() > 0) {
