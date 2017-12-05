@@ -18,6 +18,8 @@ public interface WorkReportService {
 
     void disableWorkReport(WorkReportIdCommand cmd);
 
+    VerifyWorkReportResponse verifyWorkReportTemplates(CreateWorkReportTemplatesCommand cmd);
+
     void createWorkReportTemplates(CreateWorkReportTemplatesCommand cmd);
 
     void postWorkReportVal(PostWorkReportValCommand cmd);

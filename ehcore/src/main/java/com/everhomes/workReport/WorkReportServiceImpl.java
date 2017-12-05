@@ -136,6 +136,11 @@ public class WorkReportServiceImpl implements WorkReportService {
     }
 
     @Override
+    public VerifyWorkReportResponse verifyWorkReportTemplates(CreateWorkReportTemplatesCommand cmd) {
+return null;
+    }
+
+    @Override
     public void createWorkReportTemplates(CreateWorkReportTemplatesCommand cmd) {
 
     }

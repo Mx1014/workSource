@@ -122,8 +122,22 @@ public class WorkReportController extends ControllerBase{
     }
 
     /**
+     * <b>URL: /workReport/verifyWorkReportTemplates</b>
+     * <p>2-1.判断是否需要创建工作汇报模板 </p>
+     */
+    @RequestMapping("verifyWorkReportTemplates")
+    @RestReturn(value=VerifyWorkReportResponse.class)
+    public RestResponse verifyWorkReportTemplates(CreateWorkReportTemplatesCommand cmd) {
+        VerifyWorkReportResponse res = workReportService.verifyWorkReportTemplates(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /workReport/createWorkReportTemplates</b>
-     * <p>2.创建工作汇报模板 </p>
+     * <p>2-2.创建工作汇报模板 </p>
      */
     @RequestMapping("createWorkReportTemplates")
     @RestReturn(value=String.class)
