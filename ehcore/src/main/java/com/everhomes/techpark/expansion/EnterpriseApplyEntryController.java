@@ -7,7 +7,9 @@ import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GetTemplateByFormIdCommand;
+import com.everhomes.rest.organization.GetOrganizationDetailByIdCommand;
 import com.everhomes.rest.techpark.expansion.*;
+import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RequireAuthentication;
 import com.mysql.jdbc.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,38 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 
 	@Autowired
 	private GeneralFormService generalFormService;
+
+	/**
+	 * <b>URL: /techpark/entry/listEnterprisesAbstract
+	 * <p>企业概要列表
+	 */
+	@RequestMapping("listEnterprisesAbstract")
+	@RestReturn(value=ListEnterpriseDetailResponse.class)
+	public RestResponse listEnterprisesAbstract(ListEnterpriseDetailCommand cmd){
+		ListEnterprisesCommand command = ConvertHelper.convert(cmd, ListEnterprisesCommand.class);
+		command.setPageSize(100000);
+		RestResponse response = new RestResponse(organizationService.listEnterprisesAbstract(command));
+
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/entry/getOrganizationDetailWithDefaultAttachmentById</b>
+	 * <p>根据Id查询对应的企业详情信息</p>
+	 */
+	@RequestMapping("getOrganizationDetailWithDefaultAttachmentById")
+	@RestReturn(OrganizationDetailDTO.class)
+	public RestResponse getOrganizationDetailWithDefaultAttachmentById(GetOrganizationDetailByIdCommand cmd){
+
+		OrganizationDetailDTO org = organizationService.getOrganizationDetailWithDefaultAttachmentById(cmd);
+		RestResponse response = new RestResponse(org);
+
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 	/**
 	 * <b>URL: /techpark/entry/listEnterpriseDetails
@@ -52,6 +86,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	@RestReturn(value=ListEnterpriseDetailResponse.class)
 	public RestResponse listEnterpriseDetails(ListEnterpriseDetailCommand cmd){
 		ListEnterprisesCommand command = ConvertHelper.convert(cmd, ListEnterprisesCommand.class);
+//		command.setPageSize(100000);
 		ListEnterprisesCommandResponse r = organizationService.listEnterprises(command);
 		List<OrganizationDetailDTO> dtos = r.getDtos();
 		
@@ -69,6 +104,13 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 			if(dto.getEnterpriseName() == null || StringUtils.isNullOrEmpty(dto.getEnterpriseName()))
 				dto.setEnterpriseName(c.getDisplayName());
 			dto.setContactPhone(c.getAccountPhone());
+
+
+			String pinyin = PinYinHelper.getPinYin(dto.getEnterpriseName());
+			dto.setFullInitial(PinYinHelper.getFullCapitalInitial(pinyin));
+			dto.setFullPinyin(pinyin.replaceAll(" ", ""));
+			dto.setInitial(PinYinHelper.getCapitalInitial(dto.getFullPinyin()));
+
 			return dto;
 		}).collect(Collectors.toList()));
 		res.setNextPageAnchor(r.getNextPageAnchor());

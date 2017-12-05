@@ -32,6 +32,8 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+
+import org.elasticsearch.common.lang3.StringUtils;
 import org.jooq.*;
 import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -166,6 +168,23 @@ public class UserAdminProviderImpl implements UserAdminProvider {
             ListingQueryBuilderCallback callback) {
         return listUserIdentifiersByOrder(locator, count, callback,
                 Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TYPE.eq(IdentifierType.MOBILE.getCode()));
+    }
+    
+    /**
+     * Added by Janson
+     */
+    @Override
+    public List<UserIdentifier> listAllVerifyCodeByPhone(CrossShardListingLocator locator, String phone, int count,
+            ListingQueryBuilderCallback callback) {
+        if(phone != null && !phone.isEmpty()) {
+            return listUserIdentifiersByOrder(locator, count, callback,
+                    Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TYPE.eq(IdentifierType.MOBILE.getCode()),
+                    Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(phone + "%"));    
+        } else {
+            return listUserIdentifiersByOrder(locator, count, callback,
+                    Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TYPE.eq(IdentifierType.MOBILE.getCode()));
+        }
+        
     }
 
 	@Override

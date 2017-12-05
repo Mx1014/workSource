@@ -42,6 +42,8 @@ public interface ContractProvider {
 
 	Contract findActiveContractByContractNumber(Integer namespaceId, String contractNumber);
 
+	List<Contract> listContractByAddressId(Long addressId);
+	List<Contract> listContractByBuildingName(String buildingName, Long communityId);
 
     List<Object> findCustomerByContractNum(String contractNum);
 
@@ -49,5 +51,8 @@ public interface ContractProvider {
 	void updateContractParam(ContractParam param);
 	ContractParam findContractParamByCommunityId(Long communityId);
 	Map<Long, List<Contract>> listContractGroupByCommunity();
+	String findLastContractVersionByCommunity(Integer namespaceId, Long communityId);
 
+	List<Contract> listContractByNamespaceType(Integer namespaceId, String namespaceType, Long communityId);
+	List<Contract> listContractsByAddressId(Long addressId);
 }

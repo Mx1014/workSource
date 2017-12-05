@@ -439,4 +439,53 @@ public class ForumController extends ControllerBase {
         return response;
     }
 
+
+    /**
+     * <b>URL: /forum/getForumSetting</b>
+     * <p>获取论坛基本配置</p>
+     * @return
+     */
+    @RequestMapping("getForumSetting")
+    @RestReturn(value=GetForumSettingResponse.class)
+    public RestResponse getForumSetting(GetForumSettingCommand cmd) {
+
+        GetForumSettingResponse res = forumService.getForumSetting(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /forum/updateForumSetting</b>
+     * <p>更新论坛基本配置</p>
+     * @return
+     */
+    @RequestMapping("updateForumSetting")
+    @RestReturn(value=String.class)
+    public RestResponse updateForumSetting(UpdateForumSettingCommand cmd) {
+        forumService.updateForumSetting(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /forum/listForumServiceTypes</b>
+     * <p>获取论坛服务类型</p></p>
+     * @return
+     */
+    @RequestMapping("listForumServiceTypes")
+    @RestReturn(value=ListForumServiceTypesResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse listForumServiceTypes(ListForumServiceTypesCommand cmd) {
+
+        ListForumServiceTypesResponse res = forumService.listForumServiceTypes(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

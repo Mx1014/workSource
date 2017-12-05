@@ -1464,7 +1464,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     @Override
     public Organization findOrganizationByName(String name) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        Record r = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.NAME.eq(name)).fetchOne();
+        Record r = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.NAME.eq(name)).fetchAny();
         if (r != null)
             return ConvertHelper.convert(r, Organization.class);
         return null;
@@ -2899,7 +2899,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
-    public List<OrganizationAddress> findOrganizationAddressByOrganizationId(
+    public List<OrganizationAddress>    findOrganizationAddressByOrganizationId(
             Long organizationId) {
 
         List<OrganizationAddress> ea = new ArrayList<OrganizationAddress>();
@@ -3483,7 +3483,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                                                              Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         Record r = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
-                .and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId)).fetchOne();
+                .and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode())).fetchAny();
         if (r != null)
             return ConvertHelper.convert(r, Organization.class);
         return null;
@@ -3497,7 +3498,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType))
                 .and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(parentId))
                 .and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
-                .fetchOne();
+                .fetchAny();
         if (r != null)
             return ConvertHelper.convert(r, Organization.class);
         return null;
@@ -3576,7 +3577,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
                 .and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
-                .fetchOne();
+                .fetchAny();
         if (r != null)
             return ConvertHelper.convert(r, Organization.class);
         return null;
@@ -5556,7 +5557,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				.where(Tables.EH_USER_ORGANIZATIONS.USER_ID.eq(userId)
 						.and(Tables.EH_USER_ORGANIZATIONS.STATUS.in(UserOrganizationStatus.ACTIVE.getCode(), UserOrganizationStatus.WAITING_FOR_APPROVAL.getCode()))
 						.and(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(orgId)))
-				.fetchOne();
+				.fetchAny();
 		if (record != null)
 			return ConvertHelper.convert(record, UserOrganizations.class);
 		return null;
@@ -5838,5 +5839,42 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if (r != null)
 			return ConvertHelper.convert(r, OrganizationMember.class);
 		return null;
+	}
+
+	@Override
+	public void createCommunityOrganizationDetailDisplay(CommunityOrganizationDetailDisplay detailDisplay) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCommunityOrganizationDetailDisplay.class));
+
+		detailDisplay.setId(id);
+		detailDisplay.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		detailDisplay.setOperatorUid(UserContext.currentUserId());
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunityOrganizationDetailDisplay.class));
+		EhCommunityOrganizationDetailDisplayDao dao = new EhCommunityOrganizationDetailDisplayDao(context.configuration());
+		dao.insert(detailDisplay);
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhCommunityOrganizationDetailDisplay.class, id);
+	}
+
+	@Override
+	public CommunityOrganizationDetailDisplay findOrganizationDetailFlag(Integer namespaceId, Long communityId) {
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.selectFrom(Tables.EH_COMMUNITY_ORGANIZATION_DETAIL_DISPLAY)
+				.where(Tables.EH_COMMUNITY_ORGANIZATION_DETAIL_DISPLAY.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_COMMUNITY_ORGANIZATION_DETAIL_DISPLAY.COMMUNITY_ID.eq(communityId))
+				.fetchAnyInto(CommunityOrganizationDetailDisplay.class);
+	}
+
+	@Override
+	public void updateCommunityOrganizationDetailDisplay(CommunityOrganizationDetailDisplay detailDisplay) {
+		assert(detailDisplay.getId() != null);
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunityOrganizationDetailDisplay.class));
+		EhCommunityOrganizationDetailDisplayDao dao = new EhCommunityOrganizationDetailDisplayDao(context.configuration());
+		detailDisplay.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		detailDisplay.setOperatorUid(UserContext.currentUserId());
+		dao.update(detailDisplay);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityOrganizationDetailDisplay.class, detailDisplay.getId());
 	}
 }

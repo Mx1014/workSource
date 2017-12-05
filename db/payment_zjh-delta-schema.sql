@@ -1,3 +1,4 @@
+-- 严军的club 3.2
 -- 行业协会类型
 CREATE TABLE `eh_industry_types` (
   `id` bigint(20) NOT NULL,

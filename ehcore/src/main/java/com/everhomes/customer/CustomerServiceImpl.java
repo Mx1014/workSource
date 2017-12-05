@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contract.ContractService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.contract.ContractStatus;
@@ -147,10 +148,10 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private FieldService fieldService;
 
-    private void checkPrivilege() {
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        if(namespaceId == 999971) {
-            LOGGER.error("Insufficient privilege, zjgk modify data");
+    private void checkPrivilege(Integer ns) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId(ns);
+        if(namespaceId == 999971 || namespaceId == 999983) {
+            LOGGER.error("Insufficient privilege");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                     "Insufficient privilege");
         }
@@ -192,7 +193,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public EnterpriseCustomerDTO createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd) {
-        checkPrivilege();
+        checkPrivilege(cmd.getNamespaceId());
         checkEnterpriseCustomerNumberUnique(null, cmd.getNamespaceId(), cmd.getCustomerNumber(), cmd.getName());
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         customer.setNamespaceId((null != cmd.getNamespaceId() ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId()));
@@ -309,8 +310,8 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public EnterpriseCustomerDTO updateEnterpriseCustomer(UpdateEnterpriseCustomerCommand cmd) {
-        checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
+        checkPrivilege(customer.getNamespaceId());
         checkEnterpriseCustomerNumberUnique(customer.getId(), customer.getNamespaceId(), cmd.getCustomerNumber(), cmd.getName());
         EnterpriseCustomer updateCustomer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         updateCustomer.setNamespaceId(customer.getNamespaceId());
@@ -379,8 +380,8 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd) {
-        checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
+        checkPrivilege(customer.getNamespaceId());
         List<Contract> contracts = contractProvider.listContractByCustomerId(customer.getCommunityId(),customer.getId(),CustomerType.ENTERPRISE.getCode());
         for(Contract contract : contracts) {
             if(contract.getStatus() == ContractStatus.ACTIVE.getCode() || contract.getStatus() == ContractStatus.WAITING_FOR_LAUNCH.getCode()
@@ -413,7 +414,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public ImportFileTaskDTO importEnterpriseCustomer(ImportEnterpriseCustomerDataCommand cmd, MultipartFile mfile, Long userId) {
-        checkPrivilege();
+        checkPrivilege(cmd.getNamespaceId());
         ImportFileTask task = new ImportFileTask();
         try {
             //解析excel
@@ -1738,7 +1739,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void syncEnterpriseCustomers(SyncCustomersCommand cmd) {
         if(cmd.getNamespaceId() == 999971) {
-            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode()).tryEnter(()-> {
+            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
                 ExecutorUtil.submit(new Runnable() {
                     @Override
                     public void run() {
@@ -1758,8 +1759,28 @@ public class CustomerServiceImpl implements CustomerService {
                     }
                 });
             });
+        } else {
+            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
+                ExecutorUtil.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try{
+                            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+                            if(community == null) {
+                                return;
+                            }
+                            String version = enterpriseCustomerProvider.findLastEnterpriseCustomerVersionByCommunity(cmd.getNamespaceId(), community.getId());
+                            CustomerHandle customerHandle = PlatformContext.getComponent(CustomerHandle.CUSTOMER_PREFIX + cmd.getNamespaceId());
+                            if(customerHandle != null) {
+                                customerHandle.syncEnterprises("1", version, community.getNamespaceCommunityToken());
+                            }
 
-
+                        }catch (Exception e){
+                            LOGGER.error("syncEnterpriseCustomers error.", e);
+                        }
+                    }
+                });
+            });
         }
 
     }

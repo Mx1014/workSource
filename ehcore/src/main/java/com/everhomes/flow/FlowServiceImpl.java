@@ -3776,8 +3776,10 @@ public class FlowServiceImpl implements FlowService {
                     flowEventLogProvider.updateFlowEventLogs(flowCaseState.getUpdateLogs());
 
                     flowEvaluateProvider.createFlowEvaluate(ctx.getFlowEvas());
-                } else {
+                } else if (ctx.getStepType() != FlowStepType.NO_STEP) {
                     throw new FlowStepBusyException("already step by others, flowCaseId = " + flowCase.getId());
+                } else {
+                    LOGGER.warn("already step by others, flowCaseId = {}, but it is FlowStepType.NO_STEP", flowCase.getId());
                 }
             }
             return true;

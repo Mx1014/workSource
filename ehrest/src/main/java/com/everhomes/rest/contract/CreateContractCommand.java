@@ -53,6 +53,10 @@ import java.util.List;
  *     <li>layout: 房型</li>
  *     <li>adjusts: 调租计划列表 参考{@link com.everhomes.rest.contract.ContractChargingChangeDTO}</li>
  *     <li>frees: 免租计划列表 参考{@link com.everhomes.rest.contract.ContractChargingChangeDTO}</li>
+ *     <li>denunciationUid: 退约人id</li>
+ *     <li>denunciationName: 退约人姓名</li>
+ *     <li>denunciationTime: 退约时间</li>
+ *     <li>buildingRename: 房间别名</li>
  * </ul>
  * Created by ying.xiong on 2017/8/2.
  */
@@ -94,6 +98,10 @@ public class CreateContractCommand {
     private Long decorateEndDate;
     private String signedPurpose;
     private String denunciationReason;
+    private Long denunciationUid;
+    private String denunciationName;
+    private Long denunciationTime;
+    private String buildingRename;
     private String remark;
     private String layout;
     private String settled;
@@ -129,6 +137,38 @@ public class CreateContractCommand {
     }
 
     private Byte status;
+
+    public String getBuildingRename() {
+        return buildingRename;
+    }
+
+    public void setBuildingRename(String buildingRename) {
+        this.buildingRename = buildingRename;
+    }
+
+    public String getDenunciationName() {
+        return denunciationName;
+    }
+
+    public void setDenunciationName(String denunciationName) {
+        this.denunciationName = denunciationName;
+    }
+
+    public Long getDenunciationTime() {
+        return denunciationTime;
+    }
+
+    public void setDenunciationTime(Long denunciationTime) {
+        this.denunciationTime = denunciationTime;
+    }
+
+    public Long getDenunciationUid() {
+        return denunciationUid;
+    }
+
+    public void setDenunciationUid(Long denunciationUid) {
+        this.denunciationUid = denunciationUid;
+    }
 
     public String getLayout() {
         return layout;

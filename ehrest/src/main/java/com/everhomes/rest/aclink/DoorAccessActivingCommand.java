@@ -11,7 +11,8 @@ import com.everhomes.util.StringHelper;
  * <li>rsaAclinkPub: 门禁激活的公钥 </li>
  * <li>ownerType: 门禁属于的小区或者企业， 0 : 小区， 1: 企业</li>
  * <li>ownerId: 门禁属于的对象ID</li>
- * <li>name: 门禁名字， 16字节以内英文</li>
+ * <li>name: 门禁名字， 16字节以内英文。如果必填，则从 displayName 取拼音 6 个字符</li>
+ * <li>displayName: 门禁显示名字</li>
  * <li>description: 描述</li>
  * <li>address: 地址信息</li>
  * <li>groupId: 分组信息</li>
@@ -34,8 +35,9 @@ public class DoorAccessActivingCommand {
     @NotNull
     Long ownerId;
     
-    @NotNull
     String name;
+    
+    String displayName;
     
     Long groupId;
     
@@ -97,6 +99,12 @@ public class DoorAccessActivingCommand {
     }
     public void setGroupId(Long groupId) {
         this.groupId = groupId;
+    }
+    public String getDisplayName() {
+        return displayName;
+    }
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
     @Override
     public String toString() {

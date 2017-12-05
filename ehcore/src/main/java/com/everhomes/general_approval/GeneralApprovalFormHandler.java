@@ -28,27 +28,6 @@ public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
     @Override
     public PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd) {
 
-//        String json = null;
-//
-//
-//        for (PostApprovalFormItem item: cmd.getValues()) {
-//            GeneralFormDataSourceType sourceType = GeneralFormDataSourceType.fromCode(item.getFieldName());
-//            boolean flag = false;
-//            if (null != sourceType) {
-//                switch (sourceType) {
-//                    case CUSTOM_DATA:
-//                        json = JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText();
-//                        flag = true;
-//                        break;
-//                }
-//            }
-//
-//            if (flag) {
-//                break;
-//            }
-//        }
-//
-//        PostApprovalFormCommand cmd2 = JSONObject.parseObject(json, PostApprovalFormCommand.class);
         PostApprovalFormCommand cmd2 = new PostApprovalFormCommand();
         cmd2.setApprovalId(cmd.getSourceId());
         cmd2.setValues(cmd.getValues());
@@ -72,7 +51,6 @@ public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
 
     @Override
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
-        //
         GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(cmd
                 .getSourceId());
 
@@ -118,7 +96,6 @@ public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
 
         GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
         dto.setFormFields(fieldDTOs);
-//        dto.setCustomObject(JSONObject.toJSONString(ga));
         return dto;
     }
 }

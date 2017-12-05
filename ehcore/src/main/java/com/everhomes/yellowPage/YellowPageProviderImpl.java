@@ -666,19 +666,20 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 	@Override
 	public List<ServiceAllianceNotifyTargets> listNotifyTargets(
-			String ownerType, Long ownerId, Byte contactType, Long categoryId,
+			Integer namespaceId, Byte contactType, Long categoryId,
 			CrossShardListingLocator locator, int pageSize) {
 		List<ServiceAllianceNotifyTargets> targets = new ArrayList<ServiceAllianceNotifyTargets>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         SelectQuery<EhServiceAllianceNotifyTargetsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS);
  
-        if (!StringUtils.isEmpty(ownerType) )
-    		query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.OWNER_TYPE.eq(ownerType));
-        
-        if(ownerId != null)
-        	query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.OWNER_ID.eq(ownerId));
-        
+//        if (!StringUtils.isEmpty(ownerType) )
+//    		query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.OWNER_TYPE.eq(ownerType));
+//        
+//        if(ownerId != null)
+//        	query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.OWNER_ID.eq(ownerId));
+//        
+        query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.NAMESPACE_ID.eq(namespaceId));
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.ID.gt(locator.getAnchor()));
             
