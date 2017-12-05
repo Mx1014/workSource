@@ -18,10 +18,11 @@ import java.util.List;
  * <li>applierName: 申请人姓名</li>
  * <li>applierUserId: 申请人id</li>
  * <li>receiverNames: 接收人姓名(外部快速显示)</li>
- * <li>receivers: 接收人 {@link com.everhomes.rest.ui.user.SceneContactV2DTO}</li>
+ * <li>receivers: 接收人 参考{@link com.everhomes.rest.ui.user.SceneContactV2DTO}</li>
  * <li>reportTime: 汇报时间</li>
  * <li>reportType: 汇报类型</li>
  * <li>values: 表单各项值 参考{@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
+ * <li>readStatus: 0-未读 1-已读 参考{@link com.everhomes.rest.workReport.WorkReportReadStatus}</li>
  * <li>updateTime: 修改时间</li>
  * <li>createTime: 创建时间</li>
  * </ul>
@@ -47,6 +48,8 @@ public class WorkReportValDTO {
 
     @ItemType(GeneralFormFieldDTO.class)
     private List<GeneralFormFieldDTO> values;
+
+    private Byte readStatus;
 
     private Timestamp updateTime;
 
@@ -125,6 +128,14 @@ public class WorkReportValDTO {
 
     public void setValues(List<GeneralFormFieldDTO> values) {
         this.values = values;
+    }
+
+    public Byte getReadStatus() {
+        return readStatus;
+    }
+
+    public void setReadStatus(Byte readStatus) {
+        this.readStatus = readStatus;
     }
 
     public Timestamp getUpdateTime() {
