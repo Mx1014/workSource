@@ -1424,8 +1424,9 @@ public class ZJGKOpenServiceImpl {
             organizationAddress.setBuildingId(0L);
         }else {
             organizationAddress.setBuildingId(building.getId());
+            organizationAddress.setBuildingName(building.getName());
         }
-        organizationAddress.setBuildingName(building.getName());
+
         organizationProvider.createOrganizationAddress(organizationAddress);
     }
 

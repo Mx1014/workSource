@@ -34,6 +34,13 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
     //开卡按30天计算
     static final int DAY_COUNT = 30;
 
+    //开卡费用计算保留小数
+    public static final int OPEN_CARD_RETAIN_DECIMAL = 0;
+    //临时车费用计算保留小数
+    public static final int TEMP_FEE_RETAIN_DECIMAL = 2;
+    //月卡充值费率计算保留小数
+    public static final int CARD_RATE_RETAIN_DECIMAL = 2;
+
     @Autowired
     ParkingProvider parkingProvider;
     @Autowired
@@ -99,7 +106,7 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
         if (null != parkingLot.getMonthlyDiscountFlag()) {
             if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getMonthlyDiscountFlag()) {
                 ratePrice = ratePrice.multiply(new BigDecimal(parkingLot.getMonthlyDiscount()))
-                        .divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
+                        .divide(new BigDecimal(10), CARD_RATE_RETAIN_DECIMAL, RoundingMode.HALF_UP);
             }
         }
         if (order.getPrice().compareTo(ratePrice) != 0) {
@@ -160,32 +167,40 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
         parkingProvider.deleteParkingRechargeRate(rate);
     }
 
-    void updateFlowStatus(ParkingRechargeOrder order) {
-        User user = UserContext.current().getUser();
-        LOGGER.debug("ParkingCardRequest pay callback user={}", user);
-
+    ParkingCardRequest getParkingCardRequestByOrder(ParkingRechargeOrder order) {
         List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(order.getCreatorUid(), order.getOwnerType(),
                 order.getOwnerId(), order.getParkingLotId(), order.getPlateNumber(), ParkingCardRequestStatus.SUCCEED.getCode(),
                 null, null, null, null);
 
         LOGGER.debug("ParkingCardRequest list size={}", list.size());
-        dbProvider.execute((TransactionStatus transactionStatus) -> {
-            ParkingCardRequest parkingCardRequest = null;
-            for(ParkingCardRequest p: list) {
-                FlowCase flowCase = flowCaseProvider.getFlowCaseById(p.getFlowCaseId());
 
-                Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
-                String tag1 = flow.getStringTag1();
-                if(null == tag1) {
-                    LOGGER.error("Flow tag is null, flow={}", flow);
-                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                            "Flow tag is null.");
-                }
-                if(ParkingRequestFlowType.INTELLIGENT.getCode().equals(Integer.valueOf(tag1))) {
-                    parkingCardRequest = p;
-                    break;
-                }
+        ParkingCardRequest parkingCardRequest = null;
+
+        for(ParkingCardRequest p: list) {
+            FlowCase flowCase = flowCaseProvider.getFlowCaseById(p.getFlowCaseId());
+
+            Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+            String tag1 = flow.getStringTag1();
+            if(null == tag1) {
+                LOGGER.error("Flow tag is null, flow={}", flow);
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "Flow tag is null.");
             }
+            if(ParkingRequestFlowType.INTELLIGENT.getCode().equals(Integer.valueOf(tag1))) {
+                parkingCardRequest = p;
+                break;
+            }
+        }
+
+        return parkingCardRequest;
+    }
+
+    void updateFlowStatus(ParkingCardRequest parkingCardRequest) {
+        User user = UserContext.current().getUser();
+        LOGGER.debug("ParkingCardRequest pay callback user={}", user);
+
+        dbProvider.execute((TransactionStatus transactionStatus) -> {
+
             if(null != parkingCardRequest) {
                 FlowCase flowCase = flowCaseProvider.getFlowCaseById(parkingCardRequest.getFlowCaseId());
 
@@ -272,7 +287,7 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
 
                 BigDecimal price = dto.getPrice().multiply(new BigDecimal(requestMonthCount - 1))
                         .add(dto.getPrice().multiply(new BigDecimal(maxDay-today + 1))
-                                .divide(new BigDecimal(DAY_COUNT), 2, RoundingMode.HALF_UP));
+                                .divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
                 dto.setPayMoney(price);
             }
 

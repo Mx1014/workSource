@@ -4,28 +4,47 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>name: 标签名</li>
- *     <li>serviceType: 标签服务类型 参考{@link com.everhomes.rest.hotTag.HotTagServiceType}</li>
  *     <li>namespaceId: 域空间Id，不传则取当前域空间的</li>
+ *     <li>moduleType: 模块类型  参考 {@link com.everhomes.rest.forum.ForumModuleType}</li>
  *     <li>categoryId: categoryId</li>
+ *     <li>serviceType: 标签服务类型 参考{@link com.everhomes.rest.hotTag.HotTagServiceType}</li>
+ *     <li>name: 标签名</li>
  * </ul>
  */
 public class DeleteHotTagByNameCommand {
 
-	private String name;
-
-	private String serviceType;
-
 	private Integer namespaceId;
+
+	private Byte moduleType;
 
 	private Long categoryId;
 
-	public String getName() {
-		return name;
+	private String serviceType;
+
+	private String name;
+
+	public Integer getNamespaceId() {
+		return namespaceId;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Byte getModuleType() {
+		return moduleType;
+	}
+
+	public void setModuleType(Byte moduleType) {
+		this.moduleType = moduleType;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
 	}
 
 	public String getServiceType() {
@@ -36,20 +55,12 @@ public class DeleteHotTagByNameCommand {
 		this.serviceType = serviceType;
 	}
 
-	public Integer getNamespaceId() {
-		return namespaceId;
+	public String getName() {
+		return name;
 	}
 
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
-
-	public Long getCategoryId() {
-		return categoryId;
-	}
-
-	public void setCategoryId(Long categoryId) {
-		this.categoryId = categoryId;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	@Override

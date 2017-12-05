@@ -1,16 +1,27 @@
 package com.everhomes.equipment;
 
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.pmNotify.DeletePmNotifyParamsCommand;
 import com.everhomes.rest.pmNotify.ListPmNotifyParamsCommand;
 import com.everhomes.rest.pmNotify.PmNotifyParamDTO;
 import com.everhomes.rest.pmNotify.SetPmNotifyParamsCommand;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.rest.varField.FieldItemDTO;
+import com.everhomes.search.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,25 +30,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.controller.ControllerBase;
-import com.everhomes.discover.RestDoc;
-import com.everhomes.discover.RestReturn;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.user.admin.ImportDataResponse;
-import com.everhomes.search.EquipmentAccessoriesSearcher;
-import com.everhomes.search.EquipmentSearcher;
-import com.everhomes.search.EquipmentStandardMapSearcher;
-import com.everhomes.search.EquipmentStandardSearcher;
-import com.everhomes.search.EquipmentTasksSearcher;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import com.everhomes.util.RuntimeErrorException;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.util.List;
 
 @RestDoc(value = "Equipment Controller", site = "core")
 @RestController
@@ -327,11 +322,15 @@ public class EquipmentController extends ControllerBase {
 	 * <p>导出设备列表</p>
 	 */
 	@RequestMapping("exportEquipments")
-	public HttpServletResponse exportEquipments(@Valid SearchEquipmentsCommand cmd,HttpServletResponse response) {
+	@RestReturn(String.class)
+	public RestResponse exportEquipments(@Valid SearchEquipmentsCommand cmd,HttpServletResponse httpResponse) {
 		
-		HttpServletResponse commandResponse = equipmentService.exportEquipments(cmd, response);
-		
-		return commandResponse;
+		equipmentService.exportEquipments(cmd, httpResponse);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+
 	}
 	
 	/**
@@ -348,8 +347,8 @@ public class EquipmentController extends ControllerBase {
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
 					"files is null");
 		}
-		ImportDataResponse importDataResponse = this.equipmentService.importEquipments(cmd, files[0], userId);
-        RestResponse response = new RestResponse(importDataResponse);
+		ImportDataResponse importResponse = this.equipmentService.importEquipments(cmd, files[0], userId);
+        RestResponse response = new RestResponse(importResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1131,6 +1130,20 @@ public class EquipmentController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /equipment/findScopeFieldItemByBusinessValue</b>
+	 * <p>根据业务值获取item信息</p>
+	 */
+	@RequestMapping("findScopeFieldItemByBusinessValue")
+	@RestReturn(value = FieldItemDTO.class)
+	public RestResponse findScopeFieldItemByBusinessValue (findScopeFieldItemCommand cmd) {
+		RestResponse response = new RestResponse(equipmentService.findScopeFieldItemByFieldItemId(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 
 
 }

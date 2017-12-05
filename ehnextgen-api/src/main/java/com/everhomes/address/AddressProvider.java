@@ -69,4 +69,10 @@ public interface AddressProvider {
 
 
     List<GetApartmentNameByBuildingNameDTO> getApartmentNameByBuildingName(String buildingName, Long communityId, Integer currentNamespaceId);
+
+    void createAddressAttachment(AddressAttachment attachment);
+    void updateAddressAttachment(AddressAttachment attachment);
+    void deleteApartmentAttachment(Long id);
+    AddressAttachment findByAddressAttachmentId(Long id);
+    List<AddressAttachment> listAddressAttachments(Long addressId);
 }
