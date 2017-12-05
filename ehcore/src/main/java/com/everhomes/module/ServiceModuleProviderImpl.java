@@ -671,7 +671,10 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         Record r = context.select().from(Tables.EH_REFLECTION_SERVICE_MODULE_APPS).where(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ACTIVE_APP_ID.eq(id))
                 .fetchAny();
-        return ReflectionServiceModuleApp.getServiceModuleApp(ConvertHelper.convert(r, ReflectionServiceModuleApp.class));
+        if(r != null){
+            return ReflectionServiceModuleApp.getServiceModuleApp(ConvertHelper.convert(r, ReflectionServiceModuleApp.class));
+        }
+        return null;
     }
 
     @Override

@@ -51,6 +51,7 @@ import com.everhomes.util.*;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.util.postgres.pg_catalog.routines.Count1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2066,10 +2067,11 @@ public class PortalServiceImpl implements PortalService {
 		moduleApp.setCreatorUid(user.getId());
 		moduleApp.setOperatorUid(user.getId());
 		List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModule(actionType);
+		
 //		if(serviceModules.size() == 0 || ActionType.OFFLINE_WEBAPP  == ActionType.fromCode(actionType)
 //				|| ActionType.ROUTER  == ActionType.fromCode(actionType)){
 
-		if(serviceModules.size() == 0 || ActionType.OFFLINE_WEBAPP  == ActionType.fromCode(actionType)){
+		if(serviceModules.size() == 0 || ActionType.OFFLINE_WEBAPP  == ActionType.fromCode(actionType) || ActionType.OFFICIAL_URL  == ActionType.fromCode(actionType) || ActionType.THIRDPART_URL  == ActionType.fromCode(actionType)){
 
 		}else{
 			ServiceModule serviceModule = serviceModules.get(0);
