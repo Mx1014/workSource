@@ -2010,12 +2010,12 @@ public class PortalServiceImpl implements PortalService {
 					AllOrMoreActionData actionData = new AllOrMoreActionData();
 					actionData.setType(AllOrMoreType.ALL.getCode());
 					item.setActionData(StringHelper.toJsonString(actionData));
-				}else if(ActionType.OFFICIAL_URL == ActionType.fromCode(padItem.getActionType())){
-					item.setActionType(PortalItemActionType.ZUOLINURL.getCode());
-					if(!StringUtils.isEmpty(padItem.getActionData())){
-						UrlActionData actionData = (UrlActionData)StringHelper.fromJsonString(padItem.getActionData(), UrlActionData.class);
-						item.setActionData(StringHelper.toJsonString(actionData));
-					}
+//				}else if(ActionType.OFFICIAL_URL == ActionType.fromCode(padItem.getActionType())){
+//					item.setActionType(PortalItemActionType.ZUOLINURL.getCode());
+//					if(!StringUtils.isEmpty(padItem.getActionData())){
+//						UrlActionData actionData = (UrlActionData)StringHelper.fromJsonString(padItem.getActionData(), UrlActionData.class);
+//						item.setActionData(StringHelper.toJsonString(actionData));
+//					}
 				}else if(ActionType.THIRDPART_URL == ActionType.fromCode(padItem.getActionType())){
 					item.setActionType(PortalItemActionType.THIRDURL.getCode());
 					if(!StringUtils.isEmpty(padItem.getActionData())){
@@ -2068,7 +2068,7 @@ public class PortalServiceImpl implements PortalService {
 
 		ServiceModule serviceModule = null;
 		if(ActionType.fromCode(actionType) == ActionType.OFFICIAL_URL){
-			List<String> beans = PortalUrlParserBeanUtil.getkeys();
+			Set<String> beans = PortalUrlParserBeanUtil.getkeys();
 			Long moduleId = 0L;
 			for (String bean : beans) {
 				PortalUrlParser parser = PlatformContext.getComponent(bean);
@@ -2089,22 +2089,23 @@ public class PortalServiceImpl implements PortalService {
 			}
 		}
 
-		moduleApp.setModuleId(serviceModule.getId());
-		if(StringUtils.isEmpty(itemLabel)){
-			moduleApp.setName(serviceModule.getName());
-		}
-		if(MultipleFlag.fromCode(serviceModule.getMultipleFlag()) == MultipleFlag.YES){
-			PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
-			if(null != handler){
-				String instanceConfig = handler.getAppInstanceConfig(namespaceId, actionData);
-				moduleApp.setInstanceConfig(instanceConfig);
+		if(serviceModule != null){
+			moduleApp.setModuleId(serviceModule.getId());
+			if(StringUtils.isEmpty(itemLabel)){
+				moduleApp.setName(serviceModule.getName());
 			}
+			if(MultipleFlag.fromCode(serviceModule.getMultipleFlag()) == MultipleFlag.YES){
+				PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
+				if(null != handler){
+					String instanceConfig = handler.getAppInstanceConfig(namespaceId, actionData);
+					moduleApp.setInstanceConfig(instanceConfig);
+				}
+			}
+
+			// 同步reflectionServiceModule表
+			this.serviceModuleService.getOrCreateReflectionServiceModuleApp(namespaceId, actionData, moduleApp.getInstanceConfig(), itemLabel, serviceModule);
+			serviceModuleAppProvider.createServiceModuleApp(moduleApp);
 		}
-
-		// 同步reflectionServiceModule表
-		this.serviceModuleService.getOrCreateReflectionServiceModuleApp(namespaceId, actionData, moduleApp.getInstanceConfig(), itemLabel, serviceModule);
-
-		serviceModuleAppProvider.createServiceModuleApp(moduleApp);
 		return moduleApp;
 	}
 

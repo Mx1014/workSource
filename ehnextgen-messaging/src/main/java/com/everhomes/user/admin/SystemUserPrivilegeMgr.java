@@ -298,6 +298,19 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
     }
 
     @Override
+    public boolean checkModuleAppRelation(Integer namespaceId, Long communityId, Long userId, Long appId) {
+        List<Project> projects_app = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(EntityType.SERVICE_MODULE_APP.getCode(), null, targets);
+        for (Project project : projects_app) {
+            if(EntityType.fromCode(project.getProjectType()) == EntityType.COMMUNITY){
+                List<Organization> organizations = organizationProvider.listOrganizations(OrganizationType.PM.getCode(), UserContext.getCurrentNamespaceId(), 0L, null, null);
+                if(organizations != null && organizations.size() > 0){
+                    organizationIds.add(organizations.get(0).getId());
+                }
+            }
+        }
+    }
+
+    @Override
     public boolean checkSuperAdmin(Long userId, Long currentOrgId){
         if(null == currentOrgId){
             return false;
@@ -398,8 +411,11 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
                                 LOGGER.debug("check moduleApp admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, checkCommunityId={}, checkOrgId={}, privilegeId={}, appId={}" , userId, ownerType, ownerId, currentOrgId, checkCommunityId, checkOrgId, privilegeId, appId);
                                 return true;
                             }
+                            // 校验权限细化
+                            if(checkAccess(userId, EntityType.COMMUNITY.getCode(), checkCommunityId, currentOrgId, privilegeId)){
+                                return true;
+                            }
                         }
-
                     }else{
                         if(checkOrganizationAdmin(userId, currentOrgId)){
                             LOGGER.debug("check organization admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);

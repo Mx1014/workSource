@@ -202,4 +202,15 @@ public interface UserPrivilegeMgr {
      * @return
      */
     boolean checkModuleAppAdmin(Integer namespaceId, Long organizationId, Long userId, Long appId);
+
+
+    /**
+     * 校验权限细化
+     * @param namespaceId
+     * @param communityId
+     * @param userId
+     * @param appId
+     * @return
+     */
+    boolean checkModuleAppRelation(Integer namespaceId, Long communityId, Long userId, Long appId);
 }
