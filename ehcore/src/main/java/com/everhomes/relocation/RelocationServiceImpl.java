@@ -77,8 +77,15 @@ public class RelocationServiceImpl implements RelocationService {
 		}
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
+		Long orgId = null;
+		if (RelocationOwnerType.fromCode(cmd.getOwnerType()) == RelocationOwnerType.ORGANIZATION) {
+			orgId = cmd.getOwnerId();
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
+
 		List<RelocationRequest> requests = relocationProvider.searchRelocationRequests(cmd.getNamespaceId(), cmd.getOwnerType(),
-				cmd.getOwnerId(), cmd.getKeyword(), cmd.getStartTime(), cmd.getEndTime(), cmd.getStatus(), cmd.getPageAnchor(),
+				cmd.getOwnerId(), cmd.getKeyword(), cmd.getStartTime(), cmd.getEndTime(), cmd.getStatus(), orgId, cmd.getPageAnchor(),
 				cmd.getPageSize());
 
 		SearchRelocationRequestsResponse response = new SearchRelocationRequestsResponse();

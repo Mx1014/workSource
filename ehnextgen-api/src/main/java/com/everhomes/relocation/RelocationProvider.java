@@ -14,7 +14,7 @@ public interface RelocationProvider {
     void updateRelocationRequest(RelocationRequest request);
 
     List<RelocationRequest> searchRelocationRequests(Integer namespaceId, String ownerType, Long ownerId, String keyword,
-                                                     Long startDate, Long endDate, Byte status, Long pageAnchor, Integer pageSize);
+                                                     Long startDate, Long endDate, Byte status, Long orgId, Long pageAnchor, Integer pageSize);
 
     void createRelocationRequestItem(RelocationRequestItem item);
 

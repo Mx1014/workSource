@@ -8,7 +8,7 @@ package com.everhomes.rest.relocation;
  * </ul>
  */
 public enum RelocationOwnerType {
-    COMMUNITY("community");
+    COMMUNITY("community"), ORGANIZATION("organization");
 
     private String code;
     private RelocationOwnerType(String code) {
