@@ -141,4 +141,6 @@ public interface ConfigConstants {
     public static final String ASSET_PAYMENT_ZJH_API_10 = "asset.payment.zjh.api.2.2.4.10";
     public static final String ASSET_PAYMENT_ZJH_API_15 = "asset.payment.zjh.api.2.2.4.15";
 
+    public static final String MY_PUBLISH_FLAG = "my.publish.flag";
+
 }

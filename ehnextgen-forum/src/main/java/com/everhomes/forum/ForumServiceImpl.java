@@ -4806,7 +4806,11 @@ public class ForumServiceImpl implements ForumService {
                 visibleRegionType = VisibleRegionType.fromCode(cmd.getVisibleRegionType());
                 visibleRegionType = (visibleRegionType == null) ? VisibleRegionType.REGION : visibleRegionType;
                 visibleRegionId = cmd.getVisibleRegionId();
-                visibleRegionId = (visibleRegionId == null) ? org.getId() : visibleRegionId;
+
+                if(cmd.getVisibleRegionIds() == null || cmd.getVisibleRegionIds().size() == 0){
+                    visibleRegionId = (visibleRegionId == null) ? org.getId() : visibleRegionId;
+                }
+
                 if(OrganizationType.isGovAgencyOrganization(orgType)) {
 //                    if(VisibleRegionType.fromCode(cmd.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
 //                    	creatorTag = PostEntityTag.fromCode(orgType);
