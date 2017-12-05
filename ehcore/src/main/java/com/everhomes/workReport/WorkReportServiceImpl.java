@@ -46,10 +46,8 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Override
     public void deleteWorkReport(WorkReportIdCommand cmd) {
-        //  find the report by id.
         WorkReport report = workReportProvider.findWorkReport(cmd.getReportId());
         if (report != null) {
-            //  change the status.
             report.setStatus(WorkReportStatus.INVALID.getCode());
             workReportProvider.updateWorkReport(report);
         }
@@ -112,17 +110,29 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Override
     public WorkReportDTO updateWorkReportName(UpdateWorkReportNameCommand cmd) {
-        return null;
+        WorkReport report = workReportProvider.findWorkReport(cmd.getReportId());
+        report.setReportName(cmd.getReportName());
+        workReportProvider.updateWorkReport(report);
+
+        WorkReportDTO dto = new WorkReportDTO();
+        dto.setReportName(report.getReportName());
+        dto.setReportType(report.getReportType());
+        dto.setReportAttribute(report.getReportAttribute());
+        return dto;
     }
 
     @Override
     public void enableWorkReportName(WorkReportIdCommand cmd) {
-
+        WorkReport report = workReportProvider.findWorkReport(cmd.getReportId());
+        report.setReportType(WorkReportStatus.RUNNING.getCode());
+        workReportProvider.updateWorkReport(report);
     }
 
     @Override
     public void disableWorkReportName(WorkReportIdCommand cmd) {
-
+        WorkReport report = workReportProvider.findWorkReport(cmd.getReportId());
+        report.setReportType(WorkReportStatus.VALID.getCode());
+        workReportProvider.updateWorkReport(report);
     }
 
     @Override
