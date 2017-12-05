@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>reportName: 汇报名称</li>
  * <li>ownerId: 属于的对象 ID，如果所属类型是 EhOrganizations，则 ownerId 等于 organizationId</li>
  * <li>ownerType: 对象类型，默认为 EhOrganizations</li>
+ * <li>moduleId: 模块id - 每一个功能模块有自己的id</li>
  * </ul>
  */
 public class AddWorkReportCommand {
@@ -19,6 +20,10 @@ public class AddWorkReportCommand {
     private Long ownerId;
 
     private String ownerType;
+
+    private Long moduleId;
+
+    private String moduleType;
 
     public AddWorkReportCommand() {
     }
@@ -53,6 +58,22 @@ public class AddWorkReportCommand {
 
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
+    }
+
+    public Long getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
+    }
+
+    public String getModuleType() {
+        return moduleType;
+    }
+
+    public void setModuleType(String moduleType) {
+        this.moduleType = moduleType;
     }
 
     @Override
