@@ -714,7 +714,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		params.put("reader_name", printer.getReaderName());
 		params.put("action", "QueryModule");
 		params.put("login_data", loginData);
-		String url = "http://" + moduleIp  + ":" + printer.getModulePort() + printer.getLoginContext();
+		StringBuffer buffer = new StringBuffer();
+		String url = buffer.append("http://").append(moduleIp).append(":").append(printer.getModulePort()).append(printer.getLoginContext()).toString();
 		boolean isunlockbg = configurationProvider.getBooleanValue("print.isunlockbg", false);
 		if(isunlockbg){
 			String result;
@@ -732,7 +733,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			return null;
 		}
 		
+		
 		try {
+			url = buffer.append("?").append("reader_name=").append(printer.getReaderName())
+					.append("&action=QueryModule&login_data=").append(URLEncoder.encode(StringHelper.toJsonString(loginData),"UTF-8")).toString();
 			return new UnlockPrinterResponse(url, URLEncoder.encode(StringHelper.toJsonString(params),"UTF-8"));
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.info("{}",e);
