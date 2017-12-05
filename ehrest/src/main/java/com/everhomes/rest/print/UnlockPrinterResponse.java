@@ -1,18 +1,20 @@
 // @formatter:off
 package com.everhomes.rest.print;
 
+import java.util.Map;
+
 import com.everhomes.util.StringHelper;
 
 public class UnlockPrinterResponse {
 	private String url;
-	private String params;
+	private Map<String,String> params;
 	
-	public UnlockPrinterResponse() {
-	}
-	public UnlockPrinterResponse(String url, String params) {
+	public UnlockPrinterResponse(String url, Map<String, String> params) {
 		super();
 		this.url = url;
 		this.params = params;
+	}
+	public UnlockPrinterResponse() {
 	}
 	public String getUrl() {
 		return url;
@@ -20,13 +22,13 @@ public class UnlockPrinterResponse {
 	public void setUrl(String url) {
 		this.url = url;
 	}
-	public String getParams() {
+	
+	public Map<String, String> getParams() {
 		return params;
 	}
-	public void setParams(String params) {
+	public void setParams(Map<String, String> params) {
 		this.params = params;
 	}
-	
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

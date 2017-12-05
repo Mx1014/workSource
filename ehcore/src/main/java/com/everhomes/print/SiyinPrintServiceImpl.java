@@ -734,15 +734,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}
 		
 		
-		try {
-			url = buffer.append("?").append("reader_name=").append(printer.getReaderName())
-					.append("&action=QueryModule&login_data=").append(URLEncoder.encode(StringHelper.toJsonString(loginData),"UTF-8")).toString();
-			return new UnlockPrinterResponse(url, URLEncoder.encode(StringHelper.toJsonString(params),"UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.info("{}",e);
-			throw new RuntimeErrorException(e);
-		}
-		
+//			url = buffer.append("?").append("reader_name=").append(printer.getReaderName())
+//					.append("&action=QueryModule&login_data=").append(URLEncoder.encode(StringHelper.toJsonString(loginData),"UTF-8")).toString();
+			
+			return new UnlockPrinterResponse(url, params);
 	}
 
 
