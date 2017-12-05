@@ -1,11 +1,9 @@
 package com.everhomes.rest.workReport;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.ui.user.SceneContactDTO;
 import com.everhomes.rest.ui.user.SceneContactV2DTO;
-import com.everhomes.rest.user.UserDTO;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
@@ -19,7 +17,7 @@ import java.util.List;
  * <li>applierName: 申请人姓名</li>
  * <li>applierUserId: 申请人id</li>
  * <li>receiverNames: 接收人姓名(外部快速显示)</li>
- * <li>receivers: 接收人 参考{@link com.everhomes.rest.ui.user.SceneContactV2DTO}</li>
+ * <li>receivers: 接收人 参考{@link com.everhomes.rest.ui.user.SceneContactDTO}</li>
  * <li>reportTime: 汇报时间</li>
  * <li>reportType: 汇报类型</li>
  * <li>values: 表单各项值 参考{@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
@@ -42,8 +40,8 @@ public class WorkReportValDTO {
 
     private String receiverNames;
 
-    @ItemType(SceneContactV2DTO.class)
-    private List<SceneContactV2DTO> receivers;
+    @ItemType(SceneContactDTO.class)
+    private List<SceneContactDTO> receivers;
 
     private Timestamp reportTime;
 
@@ -109,11 +107,11 @@ public class WorkReportValDTO {
         this.receiverNames = receiverNames;
     }
 
-    public List<SceneContactV2DTO> getReceivers() {
+    public List<SceneContactDTO> getReceivers() {
         return receivers;
     }
 
-    public void setReceivers(List<SceneContactV2DTO> receivers) {
+    public void setReceivers(List<SceneContactDTO> receivers) {
         this.receivers = receivers;
     }
 

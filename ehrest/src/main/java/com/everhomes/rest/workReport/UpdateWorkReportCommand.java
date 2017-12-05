@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>visibleRangeId: 可见范围id</li>
  * <li>reportType: 汇报类型 0-每日 1-每周 2-每月 参考{@link com.everhomes.rest.workReport.WorkReportType}</li>
  * <li>formOriginId: 表单id</li>
+ * <li>formVersion: 表单版本</li>
  * </ul>
  */
 public class UpdateWorkReportCommand {
