@@ -615,10 +615,21 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
-        String vender = assetVendor.getVendorName();
-        AssetVendorHandler handler = getAssetVendorHandler(vender);
-        return handler.listBillStatics(cmd);
+        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
+        cmd1.setActionType((byte)13);
+        cmd1.setModuleId(20400l);
+        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
+        Long appId = res.getServiceModuleApps().get(0).getId();
+        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), 1000001L, 1000001L, 40077L, appId, null, cmd.getOwnerId())){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"checkUserPrivilege false");
+        }else{
+            return new ArrayList<BillStaticsDTO>();
+        }
+//        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+//        String vender = assetVendor.getVendorName();
+//        AssetVendorHandler handler = getAssetVendorHandler(vender);
+//        return handler.listBillStatics(cmd);
     }
 
     @Override
