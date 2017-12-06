@@ -2779,7 +2779,65 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		List<Long> closeDates = cmd.getCloseDates();
 
 		// 月的需要单独计算
-		if (!cmd.getRentalType().equals(RentalType.MONTH.getCode())) {
+		if (cmd.getRentalType().equals(RentalType.MONTH.getCode())) {
+			// 这里计算月的
+			// TODO
+			// 初始化开始时间，按每月的第一天算
+			Calendar temp = Calendar.getInstance();
+			temp.setTime(new Date(cmd.getBeginDate()));
+			initToMonthFirstDay(temp);
+			if (start.after(temp)) {
+				temp.add(Calendar.MONTH, 1);
+				start = temp;
+			}
+
+			RentalCell rsr =ConvertHelper.convert(cmd, RentalCell.class);
+			rsr.setRentalResourceId(cmd.getRentalSiteId());
+			rsr.setAutoAssign(cmd.getAutoAssign());
+			rsr.setRentalType(cmd.getRentalType());
+			rsr.setCounts(cmd.getSiteCounts());
+			rsr.setRentalStep(1);
+			rsr.setUnit(cmd.getUnit());
+			rsr.setPrice(cmd.getWorkdayPrice());
+			rsr.setApprovingUserPrice(cmd.getApprovingUserWorkdayPrice());
+			rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
+			rsr.setStatus(RentalSiteStatus.NORMAL.getCode());
+			rsr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			rsr.setCreatorUid(userId);
+			while(start.before(end)) {
+				rsr.setResourceRentalDate(Date.valueOf(dateSF.get().format(start.getTime())));
+				createRSR(rsr, cmd );
+				start.add(Calendar.MONTH, 1);
+			}
+		} else if (cmd.getRentalType().equals(RentalType.WEEK.getCode())) {
+			Calendar temp = Calendar.getInstance();
+			temp.setTime(new Date(cmd.getBeginDate()));
+			initToWeekFirstDay(temp);
+			if (start.after(temp)) {
+				temp.add(Calendar.DATE, 7);
+				start = temp;
+			}
+
+			RentalCell rsr =ConvertHelper.convert(cmd, RentalCell.class);
+			rsr.setRentalResourceId(cmd.getRentalSiteId());
+			rsr.setAutoAssign(cmd.getAutoAssign());
+			rsr.setRentalType(cmd.getRentalType());
+			rsr.setCounts(cmd.getSiteCounts());
+			rsr.setRentalStep(1);
+			rsr.setUnit(cmd.getUnit());
+			rsr.setPrice(cmd.getWorkdayPrice());
+			rsr.setApprovingUserPrice(cmd.getApprovingUserWorkdayPrice());
+			rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
+			rsr.setStatus(RentalSiteStatus.NORMAL.getCode());
+			rsr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			rsr.setCreatorUid(userId);
+			while(start.before(end)) {
+				rsr.setResourceRentalDate(Date.valueOf(dateSF.get().format(start.getTime())));
+				createRSR(rsr, cmd );
+				start.add(Calendar.DATE, 7);
+			}
+
+		}else {
 			while (start.before(end)) {
 				Integer weekday = start.get(Calendar.DAY_OF_WEEK);
 				Integer day = start.get(Calendar.DAY_OF_MONTH);
@@ -2889,42 +2947,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}
 				start.add(Calendar.DAY_OF_MONTH, 1);
 			}
-		} else {
-			// 这里计算月的
-			// TODO
-			// 初始化开始时间，按每月的第一天算
-			Calendar temp = Calendar.getInstance();
-			temp.setTime(new Date(cmd.getBeginDate()));
-			initToMonthFirstDay(temp);
-			if (start.after(temp)) {
-				temp.add(Calendar.MONTH, 1);
-				start = temp;
-			}
-			
-			RentalCell rsr =ConvertHelper.convert(cmd, RentalCell.class);
-			rsr.setRentalResourceId(cmd.getRentalSiteId());
-			rsr.setAutoAssign(cmd.getAutoAssign()); 
-			rsr.setRentalType(cmd.getRentalType());
-			rsr.setCounts(cmd.getSiteCounts());
-			rsr.setRentalStep(1);
-			rsr.setUnit(cmd.getUnit());
-			rsr.setPrice(cmd.getWorkdayPrice());
-			rsr.setApprovingUserPrice(cmd.getApprovingUserWorkdayPrice());
-			rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
-			rsr.setStatus(RentalSiteStatus.NORMAL.getCode());
-			rsr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			rsr.setCreatorUid(userId);
-			while(start.before(end)) {
-				rsr.setResourceRentalDate(Date.valueOf(dateSF.get().format(start.getTime())));
-				createRSR(rsr, cmd );
-				start.add(Calendar.MONDAY, 1);
-			}
 		}
 		
 	}
 
 	private void initToMonthFirstDay(Calendar temp) {
 		temp.set(Calendar.DAY_OF_MONTH, 1);
+		temp.set(Calendar.HOUR_OF_DAY, 0);
+		temp.set(Calendar.MINUTE, 0);
+		temp.set(Calendar.SECOND, 0);
+		temp.set(Calendar.MILLISECOND, 0);
+	}
+	private void initToWeekFirstDay(Calendar temp){
+		temp.set(Calendar.DAY_OF_WEEK,1);
 		temp.set(Calendar.HOUR_OF_DAY, 0);
 		temp.set(Calendar.MINUTE, 0);
 		temp.set(Calendar.SECOND, 0);

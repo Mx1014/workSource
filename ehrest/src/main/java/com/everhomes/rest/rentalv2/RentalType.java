@@ -7,11 +7,12 @@ package com.everhomes.rest.rentalv2;
  * <li>DAY(2): 按天</li>
  * <li>THREETIMEADAY(3): 按半天 (支持晚上)</li>
  * <li>MONTH(4): 按月</li>
+ * <li>MONTH(5): 按周</li>
  * </ul>
  */
 public enum RentalType {
    
-    HOUR((byte)0),DAY((byte)2),HALFDAY((byte)1),THREETIMEADAY((byte)3), MONTH((byte)4);
+    HOUR((byte)0),DAY((byte)2),HALFDAY((byte)1),THREETIMEADAY((byte)3), MONTH((byte)4),WEEK((byte)5);
     
     private byte code;
     private RentalType(byte code) {
