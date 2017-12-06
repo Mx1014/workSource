@@ -416,6 +416,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
                             }
                             // 校验权限细化
                             if(checkAccess(userId, EntityType.COMMUNITY.getCode(), checkCommunityId, currentOrgId, privilegeId)){
+                                LOGGER.debug("check moduleApp relation privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, checkCommunityId={}, checkOrgId={}, privilegeId={}, appId={}" , userId, ownerType, ownerId, currentOrgId, checkCommunityId, checkOrgId, privilegeId, appId);
                                 return true;
                             }
                         }
