@@ -245,7 +245,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 
 					dto.setStartPeriod(startPeriod);
 
-					dto.setEndPeriod(Utils.getLongByAddNatureMonth(Utils.getlastDayOfMonth(now), parkingLot.getExpiredRechargeMonthCount() -1));
+					dto.setEndPeriod(Utils.getLongByAddNatureMonth(Utils.getLastDayOfMonth(now), parkingLot.getExpiredRechargeMonthCount() -1));
 
 					//计算优惠
 					if (null != parkingLot.getMonthlyDiscountFlag()) {
