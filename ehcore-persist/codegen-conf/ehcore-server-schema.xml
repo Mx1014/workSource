@@ -195,7 +195,7 @@
             eh_rentalv2_price_packages |
 			eh_payment_withdraw_orders |eh_community_organization_detail_display |
             eh_forum_service_types |
-            eh_me_web_menus |
+            eh_me_web_menus | eh_customer_entry_infos | eh_customer_departure_infos |
         </includes>
 
             <!-- All elements that are excluded from your schema
