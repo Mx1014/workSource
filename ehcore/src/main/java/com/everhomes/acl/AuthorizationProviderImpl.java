@@ -91,7 +91,7 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
     @Override
     public Long getMaxControlIdInAuthorizations() {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		return context.select(Tables.EH_AUTHORIZATIONS.CONTROL_ID.max()).fetchOne().value1();
+		return context.select(Tables.EH_AUTHORIZATIONS.CONTROL_ID.max()).from(Tables.EH_AUTHORIZATIONS).fetchOne().value1();
     }
 
 	@Override
