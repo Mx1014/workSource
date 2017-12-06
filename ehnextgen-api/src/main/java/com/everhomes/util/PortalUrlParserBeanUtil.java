@@ -9,18 +9,19 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class PortalUrlParserBeanUtil implements ApplicationContextAware {
     private ApplicationContext applicationContext;
 
-    private static Map<String, PortalUrlParser> urlParserBeanMap;
+    private static ConcurrentHashMap<String, PortalUrlParser> urlParserBeanMap;
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
         Map<String, PortalUrlParser> map = this.applicationContext.getBeansOfType(PortalUrlParser.class);
-        urlParserBeanMap = new HashMap<>();
+        urlParserBeanMap = new ConcurrentHashMap();
         map.forEach((key, value) -> urlParserBeanMap.put(key, value));
     }
 

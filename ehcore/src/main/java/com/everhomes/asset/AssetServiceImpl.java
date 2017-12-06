@@ -187,6 +187,9 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private SequenceProvider sequenceProvider;
 
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+
 //    @Autowired
 //    private ContractService contractService;
 
@@ -252,7 +255,9 @@ public class AssetServiceImpl implements AssetService {
         cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
         ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
         Long appId = res.getServiceModuleApps().get(0).getId();
-         checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), 100750l, 100750l, 40073l, appId, null, cmd.getOwnerId());
+        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), 1011212L, 1011212L, 40073l, appId, null, cmd.getOwnerId())){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"checkUserPrivilege false");
+        }
 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
