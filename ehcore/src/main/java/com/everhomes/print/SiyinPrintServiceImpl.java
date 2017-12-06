@@ -488,14 +488,22 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	public CommonOrderDTO payPrintOrder(PayPrintOrderCommand cmd) {
 		//检查订单id是否存在，是否已经是  已支付状态
 		SiyinPrintOrder order = checkPrintOrder(cmd.getOrderId());
-		
+
 		//检查订单是否被锁定
 		//没有被锁定的订单，锁定他
 		PrintOrderLockType lockType = PrintOrderLockType.fromCode(order.getLockFlag());
 		if(lockType == PrintOrderLockType.UNLOCKED){
 			order = lockOrder(cmd.getOrderId());
 		}
-		
+
+		//锁定了，金额为0，设置为已支付
+		if(order.getOrderTotalFee() == null || order.getOrderTotalFee().compareTo(new BigDecimal(0)) == 0){
+			order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
+			order.setLockFlag(PrintOrderLockType.LOCKED.getCode());
+			siyinPrintOrderProvider.updateSiyinPrintOrder(order);
+			return null;
+		}
+
 		//调用统一处理订单接口，返回统一订单格式
 		CommonOrderCommand orderCmd = new CommonOrderCommand();
 		orderCmd.setBody(PrintJobTypeType.fromCode(order.getJobType()).getDescribe());
@@ -535,6 +543,14 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		PrintOrderLockType lockType = PrintOrderLockType.fromCode(order.getLockFlag());
 		if(lockType == PrintOrderLockType.UNLOCKED){
 			order = lockOrder(cmd.getOrderId());
+		}
+
+		//锁定了，金额为0，设置为已支付
+		if(order.getOrderTotalFee() == null || order.getOrderTotalFee().compareTo(new BigDecimal(0)) == 0){
+			order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
+			order.setLockFlag(PrintOrderLockType.LOCKED.getCode());
+			siyinPrintOrderProvider.updateSiyinPrintOrder(order);
+			return null;
 		}
 
 		Long paysummay = payService.changePayAmount(order.getOrderTotalFee());
