@@ -128,5 +128,11 @@ public interface ForumService {
 
     void updateForumSetting(UpdateForumSettingCommand cmd);
 
+    InteractSettingDTO getInteractSetting(GetInteractSettingCommand cmd);
+
+    void updateInteractSetting(UpdateInteractSettingCommand cmd);
+
+    void saveInteractSetting(Integer namespaceId, Byte moduleType, Long categoryId, Byte interactFlag);
+
     ListForumServiceTypesResponse listForumServiceTypes(ListForumServiceTypesCommand cmd);
 }

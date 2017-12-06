@@ -6400,8 +6400,14 @@ public class ForumServiceImpl implements ForumService {
         tagDTOS = hotTagService.listHotTag(tagCommand);
         response.setPollTags(tagDTOS);
 
-        //暂时不对评论做处理。
-        response.setInteractFlag(InteractFlag.SUPPORT.getCode());
+        //评论配置
+        InteractSetting interactSetting = forumProvider.findInteractSetting(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId());
+        if(interactSetting == null){
+            response.setInteractFlag(InteractFlag.SUPPORT.getCode());
+        }else {
+            response.setInteractFlag(interactSetting.getInteractFlag());
+        }
+
 
         return response;
     }
@@ -6464,7 +6470,8 @@ public class ForumServiceImpl implements ForumService {
                 resetHotTagCommand.setNames(cmd.getPollTags().stream().map(r -> r.getName()).collect(Collectors.toList()));
                 hotTagService.resetHotTag(resetHotTagCommand);
 
-                //暂时不对评论做处理。
+                //更新评论开关
+                saveInteractSetting(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId(), cmd.getInteractFlag());
 
                 return null;
 
@@ -6472,6 +6479,40 @@ public class ForumServiceImpl implements ForumService {
             return null;
         });
 
+    }
+
+    @Override
+    public InteractSettingDTO getInteractSetting(GetInteractSettingCommand cmd) {
+        InteractSetting interactSetting = forumProvider.findInteractSetting(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId());
+        if(interactSetting != null){
+            return ConvertHelper.convert(interactSetting, InteractSettingDTO.class);
+        }
+        return ConvertHelper.convert(cmd, InteractSettingDTO.class);
+    }
+
+    @Override
+    public void updateInteractSetting(UpdateInteractSettingCommand cmd) {
+        saveInteractSetting(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId(), cmd.getInteractFlag());
+    }
+
+    @Override
+    public void saveInteractSetting(Integer namespaceId, Byte moduleType, Long categoryId, Byte interactFlag){
+
+        //更新评论开关
+        InteractSetting interactSetting = forumProvider.findInteractSetting(namespaceId, moduleType, categoryId);
+        if(interactSetting != null){
+            interactSetting.setInteractFlag(interactFlag);
+            interactSetting.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            forumProvider.updateInteractSetting(interactSetting);
+        }else {
+            interactSetting = new InteractSetting();
+            interactSetting.setNamespaceId(namespaceId);
+            interactSetting.setModuleType(moduleType);
+            interactSetting.setCategoryId(categoryId);
+            interactSetting.setInteractFlag(interactFlag);
+            interactSetting.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            forumProvider.createInteractSetting(interactSetting);
+        }
     }
 
     @Override

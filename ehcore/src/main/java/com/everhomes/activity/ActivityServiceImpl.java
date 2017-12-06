@@ -20,10 +20,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
-import com.everhomes.forum.Attachment;
-import com.everhomes.forum.ForumProvider;
-import com.everhomes.forum.ForumService;
-import com.everhomes.forum.Post;
+import com.everhomes.forum.*;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -5124,7 +5121,10 @@ public class ActivityServiceImpl implements ActivityService {
 		timeResponse.setOrderHours(orderResponse.getHours());
 		timeResponse.setOrderTime(orderResponse.getTime());
 		timeResponse.setWechatSignup(orderResponse.getWechatSignup());
-		
+
+		//更新评论开关
+		forumService.saveInteractSetting(cmd.getNamespaceId(), ForumModuleType.ACTIVITY.getCode(), cmd.getCategoryId(), cmd.getInteractFlag());
+
 		return timeResponse;
 	}
 
@@ -5150,7 +5150,15 @@ public class ActivityServiceImpl implements ActivityService {
 		timeResponse.setOrderHours(orderResponse.getHours());
 		timeResponse.setOrderTime(orderResponse.getTime());
 		timeResponse.setWechatSignup(orderResponse.getWechatSignup());
-		
+
+		//评论设置
+		InteractSetting interactSetting = forumProvider.findInteractSetting(cmd.getNamespaceId(), ForumModuleType.ACTIVITY.getCode(), cmd.getCategoryId());
+		if(interactSetting == null){
+			timeResponse.setInteractFlag(InteractFlag.SUPPORT.getCode());
+		}else {
+			timeResponse.setInteractFlag(interactSetting.getInteractFlag());
+		}
+
 		return timeResponse;
 	}  
 	

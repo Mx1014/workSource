@@ -1115,6 +1115,32 @@ public class ForumProviderImpl implements ForumProvider {
     }
 
     @Override
+    public void createInteractSetting(InteractSetting setting) {
+
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhInteractSettings.class));
+        setting.setId(id);
+        setting.setUuid(UUID.randomUUID().toString());
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhInteractSettingsDao dao = new EhInteractSettingsDao(context.configuration());
+        dao.insert(setting);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhInteractSettings.class, null);
+    }
+
+    @Caching(evict = { @CacheEvict(value="findInteractSetting", key="{#namespaceId, #moduleType, #categoryId}")})
+    @Override
+    public void updateInteractSetting(InteractSetting setting) {
+
+        assert(setting.getId() == null);
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhInteractSettingsDao dao = new EhInteractSettingsDao(context.configuration());
+        dao.update(setting);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY,EhInteractSettings.class, setting.getId());
+    }
+
+    @Override
     public void createForumServiceTypes(List<ForumServiceType> list) {
         for(ForumServiceType s: list){
             if(s.getId() == null){
