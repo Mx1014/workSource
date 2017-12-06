@@ -31,6 +31,15 @@ public class CustomerApplyProjectDTO {
     private Timestamp projectCompleteDate;
     private BigDecimal projectAmount;
     private Byte status;
+    private String description;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public Byte getStatus() {
         return status;
