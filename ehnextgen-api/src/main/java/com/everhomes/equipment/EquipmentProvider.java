@@ -143,9 +143,9 @@ public interface EquipmentProvider {
 
 	List<EquipmentInspectionTasks> listDelayTasks(Long inspectionCategoryId, List<Long> standards, String targetType, Long targetId, Integer offset, Integer pageSize, Byte adminFlag, Timestamp startTime);
 
-  /*  void createEquipmentModleCommunityMap(EquipmentModleCommunityMap map);
+    void createEquipmentModleCommunityMap(EquipmentModleCommunityMap map);
 
     List<EquipmentModleCommunityMap> getModuleCommunityMap(Long targetId);
 
-    void deleteEquipmentModuleCommunityMap(Long standardId);*/
+    void deleteEquipmentModleCommunityMap(Long standardId);
 }
