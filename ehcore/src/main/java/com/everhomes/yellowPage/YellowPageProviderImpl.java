@@ -1213,6 +1213,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         SelectQuery<EhServiceAllianceCategoriesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_CATEGORIES);
         query.addConditions(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.PARENT_ID.eq(0L));
+        query.addConditions(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.ENTRY_ID.isNotNull());
         query.addOrderBy(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.ENTRY_ID.asc());
         
         return query.fetch().map(r->r.getEntryId());

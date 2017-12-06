@@ -182,12 +182,12 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 			return null;
 		}
     	 List<Integer> entryIds = yellowPageProvider.listAscEntryIds(namespaceId);
-    	 int maxEntryId = configProvider.getIntValue("portal.max.entryid", 30);
     	 for (int i = 0; i < entryIds.size(); i++) {
 			if(entryIds.get(i)!=i+1){
 				return i+1;
 			}
 		}
+    	 int maxEntryId = configProvider.getIntValue("portal.max.entryid", 30);
     	 if(entryIds.size() == maxEntryId){
     		 LOGGER.error("service alliance maxEntryId exceed "+maxEntryId);
     		 return null;
