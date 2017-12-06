@@ -1175,7 +1175,7 @@ public class EquipmentController extends ControllerBase {
 
 	/**
 	 * <b>URL: /equipment/syscTemplates</b>
-	 * <p>删除modle和项目的关联表</p>
+	 * <p>不同域空间下巡检模板全部应用到对应域空间下所有项目</p>
 	 */
 	@RequestMapping("distributeTemplates")
 	@RestReturn(value = String.class)
