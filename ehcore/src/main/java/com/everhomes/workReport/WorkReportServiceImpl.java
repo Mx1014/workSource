@@ -1,12 +1,12 @@
 package com.everhomes.workReport;
 
 import com.everhomes.db.DbProvider;
+import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.general_approval.CreateApprovalTemplatesCommand;
 import com.everhomes.rest.workReport.*;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -31,6 +31,9 @@ public class WorkReportServiceImpl implements WorkReportService {
     @Autowired
     private DbProvider dbProvider;
 
+    @Autowired
+    private GeneralFormService generalFormService;
+
     @Override
     public WorkReportDTO addWorkReport(AddWorkReportCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -47,16 +50,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         report.setReportType(WorkReportType.DAY.getCode());
         //  add it with the initial scope.
         dbProvider.execute((TransactionStatus status) -> {
-            workReportProvider.createWorkReport(report);
-            Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
-            if (org != null) {
-                WorkReportScopeMap scopeMap = new WorkReportScopeMap();
-                scopeMap.setNamespaceId(namespaceId);
-                scopeMap.setSourceType(WorkReportScopeType.DEPARTMENT.getCode());
-                scopeMap.setSourceId(org.getId());
-                scopeMap.setSourceDescription(org.getName());
-                workReportProvider.createWorkReportScopeMap(scopeMap);
-            }
+            createWorkReport(report, cmd.getOrganizationId(), namespaceId);
             return null;
         });
 
@@ -66,6 +60,19 @@ public class WorkReportServiceImpl implements WorkReportService {
         dto.setReportType(report.getReportType());
         dto.setReportAttribute(report.getReportAttribute());
         return dto;
+    }
+
+    private void createWorkReport(WorkReport report, Long organizationId, Integer namespaceId) {
+        workReportProvider.createWorkReport(report);
+        Organization org = organizationProvider.findOrganizationById(organizationId);
+        if (org != null) {
+            WorkReportScopeMap scopeMap = new WorkReportScopeMap();
+            scopeMap.setNamespaceId(namespaceId);
+            scopeMap.setSourceType(WorkReportScopeType.DEPARTMENT.getCode());
+            scopeMap.setSourceId(org.getId());
+            scopeMap.setSourceDescription(org.getName());
+            workReportProvider.createWorkReportScopeMap(scopeMap);
+        }
     }
 
     @Override
@@ -215,11 +222,16 @@ public class WorkReportServiceImpl implements WorkReportService {
         //  2.create the work report if the formTemplateId is 0 immediately.
         //  3.Otherwise create the form before creating work reports.
         List<WorkReportTemplate> templates = workReportProvider.listWorkReportTemplates(cmd.getModuleId());
-        if (templates != null && templates.size() > 0){
-            dbProvider.execute((TransactionStatus status) ->{
-                for(WorkReportTemplate template : templates){
-                    if(template.getFormTemplateId().longValue() == 0)
+        if (templates != null && templates.size() > 0) {
+            dbProvider.execute((TransactionStatus status) -> {
+                for (WorkReportTemplate template : templates) {
+                    if (template.getFormTemplateId().longValue() == 0)
                         createWorkReportByTemplate(template, null, cmd);
+                    else {
+                        CreateApprovalTemplatesCommand command = ConvertHelper.convert(cmd, CreateApprovalTemplatesCommand.class);
+                        Long formOriginId = generalFormService.createGeneralFormByTemplate(template.getFormTemplateId(), command);
+                        createWorkReportByTemplate(template, formOriginId, cmd);
+                    }
                 }
                 return null;
             });
@@ -227,12 +239,26 @@ public class WorkReportServiceImpl implements WorkReportService {
     }
 
     private void createWorkReportByTemplate(
-            WorkReportTemplate template, Long formOriginId, CreateWorkReportTemplatesCommand cmd){
+            WorkReportTemplate template, Long formOriginId, CreateWorkReportTemplatesCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         WorkReport report = workReportProvider.findWorkReportByTemplateId(UserContext.getCurrentNamespaceId(),
                 template.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType(), template.getId());
-        if(report !=null){
+        //  update the template if it is already existing.
+        if (report != null) {
             report.setStatus(WorkReportStatus.RUNNING.getCode());
             report.setReportName(template.getReportName());
+            report.setReportType(template.getReportType());
+            workReportProvider.updateWorkReport(report);
+        } else {
+            //
+            report = ConvertHelper.convert(template, WorkReport.class);
+            report.setNamespaceId(namespaceId);
+            report.setOwnerId(cmd.getOwnerId());
+            report.setOwnerType(cmd.getOwnerType());
+            report.setOrganizationId(cmd.getOrganizationId());
+            report.setStatus(WorkReportStatus.RUNNING.getCode());
+            report.setReportTemplateId(template.getId());
+            createWorkReport(report, cmd.getOrganizationId(), namespaceId);
         }
     }
 

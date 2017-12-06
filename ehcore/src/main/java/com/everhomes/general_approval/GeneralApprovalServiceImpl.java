@@ -22,6 +22,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormTemplate;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
@@ -109,6 +110,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Autowired
     private GeneralFormProvider generalFormProvider;
+
+    @Autowired
+    private GeneralFormService generalFormService;
 
     @Autowired
     private GeneralApprovalProvider generalApprovalProvider;
@@ -784,15 +788,15 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         //  3.有则先创建表单拿去表单 id,在创建审批与生成的 id 关联
         if (templates != null || templates.size() > 0) {
             dbProvider.execute((TransactionStatus status) -> {
-                for (GeneralApprovalTemplate approval : templates) {
-                    if (approval.getFormTemplateId().longValue() == 0) {
+                for (GeneralApprovalTemplate template : templates) {
+                    if (template.getFormTemplateId().longValue() == 0) {
                         //  Create Approvals directly.
-                        createGeneralApprovalByTemplate(approval, null, cmd);
+                        createGeneralApprovalByTemplate(template, null, cmd);
                     } else {
                         //  Create Forms before creating approvals.
-                        Long formOriginId = createGeneralFormByTemplate(approval, cmd);
+                        Long formOriginId = generalFormService.createGeneralFormByTemplate(template.getFormTemplateId(), cmd);
                         //  Then, start to create approvals.
-                        createGeneralApprovalByTemplate(approval, formOriginId, cmd);
+                        createGeneralApprovalByTemplate(template, formOriginId, cmd);
                     }
                 }
                 return null;
@@ -813,25 +817,6 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         }
     }
 
-    private Long createGeneralFormByTemplate(GeneralApprovalTemplate approval, CreateApprovalTemplatesCommand cmd) {
-        GeneralFormTemplate form = generalFormProvider.findGeneralFormTemplateByIdAndModuleId(
-                approval.getFormTemplateId(), cmd.getModuleId());
-        GeneralForm gf = generalFormProvider.getGeneralFormByTemplateId(cmd.getModuleId(), cmd.getOwnerId(),
-                cmd.getOwnerType(), form.getId());
-        if (gf != null) {
-            gf = convertFormFromTemplate(gf, form, cmd);
-            generalFormProvider.updateGeneralForm(gf);
-            return gf.getFormOriginId();
-        } else {
-            gf = ConvertHelper.convert(form, GeneralForm.class);
-            gf = convertFormFromTemplate(gf, form, cmd);
-            gf.setStatus(GeneralFormStatus.CONFIG.getCode());
-            gf.setFormVersion(0L);
-            Long formOriginId = generalFormProvider.createGeneralForm(gf);
-            return formOriginId;
-        }
-    }
-
     private GeneralApproval convertApprovalFromTemplate(GeneralApproval ga, GeneralApprovalTemplate approval, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
         ga.setNamespaceId(UserContext.getCurrentNamespaceId());
         ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
@@ -845,18 +830,6 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             ga.setFormOriginId(formOriginId);
         ga.setSupportType(cmd.getSupportType());
         return ga;
-    }
-
-    private GeneralForm convertFormFromTemplate(GeneralForm gf, GeneralFormTemplate form, CreateApprovalTemplatesCommand cmd) {
-        gf.setFormAttribute(GeneralApprovalAttribute.DEFAULT.getCode());
-        gf.setNamespaceId(UserContext.getCurrentNamespaceId());
-        gf.setFormTemplateId(form.getId());
-        gf.setFormTemplateVersion(form.getVersion());
-        gf.setOwnerId(cmd.getOwnerId());
-        gf.setOwnerId(cmd.getOwnerId());
-        gf.setOwnerType(cmd.getOwnerType());
-        gf.setOrganizationId(cmd.getOrganizationId());
-        return gf;
     }
 
     @Override
