@@ -1,12 +1,12 @@
 ALTER TABLE `eh_enterprise_customers` ADD COLUMN `founder_introduce` TEXT COMMENT '创始人介绍';
 ALTER TABLE `eh_enterprise_customers` ADD COLUMN `founding_time` DATETIME COMMENT '企业成立时间';
-ALTER TABLE `eh_enterprise_customers` ADD COLUMN `registration_type` BIGINT COMMENT '企业登记注册类型';
-ALTER TABLE `eh_enterprise_customers` ADD COLUMN `technical_field` BIGINT COMMENT '企业所属技术领域';
-ALTER TABLE `eh_enterprise_customers` ADD COLUMN `taxpayer_type` BIGINT COMMENT '企业纳税人类型';
-ALTER TABLE `eh_enterprise_customers` ADD COLUMN `relation_willing` BIGINT COMMENT '是否愿意与创业导师建立辅导关系';
-ALTER TABLE `eh_enterprise_customers` ADD COLUMN `high_and_new_tech` BIGINT COMMENT '是否高新技术企业';
-ALTER TABLE `eh_enterprise_customers` ADD COLUMN `entrepreneurial_characteristics` BIGINT COMMENT '企业主要负责人创业特征';
-ALTER TABLE `eh_enterprise_customers` ADD COLUMN `serial_entrepreneur` BIGINT COMMENT '企业主要负责人是否为连续创业者';
+ALTER TABLE `eh_enterprise_customers` ADD COLUMN `registration_type_id` BIGINT COMMENT '企业登记注册类型';
+ALTER TABLE `eh_enterprise_customers` ADD COLUMN `technical_field_id` BIGINT COMMENT '企业所属技术领域';
+ALTER TABLE `eh_enterprise_customers` ADD COLUMN `taxpayer_type_id` BIGINT COMMENT '企业纳税人类型';
+ALTER TABLE `eh_enterprise_customers` ADD COLUMN `relation_willing_id` BIGINT COMMENT '是否愿意与创业导师建立辅导关系';
+ALTER TABLE `eh_enterprise_customers` ADD COLUMN `high_and_new_tech_id` BIGINT COMMENT '是否高新技术企业';
+ALTER TABLE `eh_enterprise_customers` ADD COLUMN `entrepreneurial_characteristics_id` BIGINT COMMENT '企业主要负责人创业特征';
+ALTER TABLE `eh_enterprise_customers` ADD COLUMN `serial_entrepreneur_id` BIGINT COMMENT '企业主要负责人是否为连续创业者';
 ALTER TABLE `eh_enterprise_customers` ADD COLUMN `risk_investment_amount` DECIMAL(10,2) COMMENT '获天使或风险投资总金额（万元）';
 
 ALTER TABLE `eh_customer_talents` ADD COLUMN `total_employees` INTEGER COMMENT '从业人员总人数';
@@ -70,8 +70,8 @@ CREATE TABLE `eh_customer_departure_infos` (
   `customer_name` VARCHAR(64),
   `review_time` DATETIME COMMENT '评审时间',
   `hatch_months` INTEGER COMMENT '孵化时间(X月)',
-  `departure_nature` TINYINT COMMENT '离场性质',
-  `departure_direction` TINYINT COMMENT '离场去向',
+  `departure_nature_id` BIGINT COMMENT '离场性质',
+  `departure_direction_id` BIGINT COMMENT '离场去向',
   `remark` VARCHAR(512) COMMENT '备注',
   `status` TINYINT NOT NULL DEFAULT 2,
   `create_uid` BIGINT NOT NULL DEFAULT 0,
