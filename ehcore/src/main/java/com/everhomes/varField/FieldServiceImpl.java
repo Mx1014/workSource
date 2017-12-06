@@ -520,6 +520,24 @@ public class FieldServiceImpl implements FieldService {
                     setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
                 }
                 break;
+            case "跟进信息":
+                ListCustomerTrackingsCommand cmd9  = new ListCustomerTrackingsCommand();
+                cmd9.setCustomerId(customerId);
+                cmd9.setCustomerType(customerType);
+                List<CustomerTrackingDTO> customerTrackingDTOS = customerService.listCustomerTrackings(cmd9);
+                if(customerTrackingDTOS == null) customerTrackingDTOS = new ArrayList<>();
+                for(int j = 0; j < customerTrackingDTOS.size(); j++){
+                    setMutilRowDatas(fields,data,customerTrackingDTOS.get(j),communityId,namespaceId,moduleName);
+                }
+            case "计划信息":
+                ListCustomerTrackingPlansCommand cmd10  = new ListCustomerTrackingPlansCommand();
+                cmd10.setCustomerId(customerId);
+                cmd10.setCustomerType(customerType);
+                List<CustomerTrackingPlanDTO> customerTrackingPlanDTOS = customerService.listCustomerTrackingPlans(cmd10);
+                if(customerTrackingPlanDTOS == null) customerTrackingPlanDTOS = new ArrayList<>();
+                for(int j = 0; j < customerTrackingPlanDTOS.size(); j++){
+                    setMutilRowDatas(fields,data,customerTrackingPlanDTOS.get(j),communityId,namespaceId,moduleName);
+                }
         }
         return data;
     }
