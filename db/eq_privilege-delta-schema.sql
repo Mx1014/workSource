@@ -1,5 +1,6 @@
 CREATE TABLE `eh_equipment_module_community_map` (
   `id` bigint(20) NOT NULL,
+  `standard_id` bigint(20) NOT NULL,
   `target_type` varchar(255) DEFAULT NULL,
   `target_id` bigint(20) DEFAULT NULL COMMENT 'community id ',
   `create_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
