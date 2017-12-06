@@ -984,8 +984,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Integer namespaceId = cmd.getNamespaceId();
 		checkNamespaceId(namespaceId);
 
+		Category category = categoryProvider.findCategoryById(cmd.getTaskCategoryId());
 		//检查多入口应用权限
-		if(!checkAppPrivilege(namespaceId, cmd.getTaskCategoryId(), cmd.getCurrentOrgId(), EntityType.COMMUNITY.getCode(),
+		if(!checkAppPrivilege(namespaceId, category.getParentId(), cmd.getCurrentOrgId(), EntityType.COMMUNITY.getCode(),
 				cmd.getCommunityId(), PrivilegeConstants.PMTASK_TASK_STATISTICS_LIST)){
 			LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
 					" privilege={}", namespaceId, cmd.getTaskCategoryId(), cmd.getCurrentOrgId(), EntityType.COMMUNITY.getCode(),

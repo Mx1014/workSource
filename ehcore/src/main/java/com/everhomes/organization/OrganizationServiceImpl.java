@@ -3022,7 +3022,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 organizationIds.add(project.getProjectId());
             }
             // 权限细化 (敢哥说先这么改)
-            if(EntityType.fromCode(project.getProjectType()) == EntityType.COMMUNITY){
+            if(EntityType.fromCode(project.getProjectType()) == EntityType.COMMUNITY || EntityType.fromCode(project.getProjectType()) == EntityType.ALL){
                 List<Organization> organizations = organizationProvider.listOrganizations(OrganizationType.PM.getCode(), UserContext.getCurrentNamespaceId(), 0L, null, null);
                 if(organizations != null && organizations.size() > 0){
                     organizationIds.add(organizations.get(0).getId());
