@@ -54,9 +54,9 @@ CREATE TABLE `eh_work_report_scope_map` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
 
   `report_id` BIGINT NOT NULL COMMENT 'id of the report',
-  `scope_type` VARCHAR(64) NOT NULL COMMENT 'department, user',
-  `scope_id` BIGINT NOT NULL COMMENT 'id of the scope',
-  `scope_description` VARCHAR(128) NOT NULL COMMENT 'the description of the scope class',
+  `source_type` VARCHAR(64) NOT NULL COMMENT 'department, user',
+  `source_id` BIGINT NOT NULL COMMENT 'id of the scope',
+  `source_description` VARCHAR(128) NOT NULL COMMENT 'the description of the scope class',
 
   `create_time` DATETIME COMMENT 'record create time',
   PRIMARY KEY (`id`)
