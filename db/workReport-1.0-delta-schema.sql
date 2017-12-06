@@ -39,12 +39,25 @@ CREATE TABLE `eh_work_reports` (
   `form_origin_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'The id of the original form',
   `form_version` BIGINT NOT NULL DEFAULT 0 COMMENT 'the current using version',
   `report_template_id` BIGINT DEFAULT 0 COMMENT 'the id in eh_general_approval_templates',
-  `visible_range_id` BIGINT NOT NULL COMMENT 'the visible range of the report',
   `modify_flag` TINYINT DEFAULT 1 COMMENT '0: no, 1: yes',
   `delete_flag` TINYINT DEFAULT 1 COMMENT '0: no, 1: yes',
   `icon_uri` VARCHAR(1024) COMMENT 'the avatar of the approval',
 
   `update_time` DATETIME COMMENT 'last update time',
+  `create_time` DATETIME COMMENT 'record create time',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 工作汇报可见范围映射表
+CREATE TABLE `eh_work_report_scope_map` (
+  `id` BIGINT NOT NULL COMMENT 'id of the report scope id',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+
+  `report_id` BIGINT NOT NULL COMMENT 'id of the report',
+  `scope_type` VARCHAR(64) NOT NULL COMMENT 'department, user',
+  `scope_id` BIGINT NOT NULL COMMENT 'id of the scope',
+  `scope_description` VARCHAR(128) NOT NULL COMMENT 'the description of the scope class',
+
   `create_time` DATETIME COMMENT 'record create time',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -73,9 +86,9 @@ CREATE TABLE `eh_work_report_vals` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 工作汇报值映射表
-CREATE TABLE `eh_work_report_val_mappings` (
-  `id` BIGINT NOT NULL COMMENT 'the id of the report val mapping',
+-- 工作汇报值接收人映射表
+CREATE TABLE `eh_work_report_val_receiver_map` (
+  `id` BIGINT NOT NULL COMMENT 'the id of the report val map',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
 
   `report_val_id` BIGINT COMMENT 'the id of the report val',
@@ -83,7 +96,6 @@ CREATE TABLE `eh_work_report_val_mappings` (
   `receiver_name` VARCHAR(256) COMMENT 'the name of the receiver',
   `read_status` TINYINT DEFAULT 0 COMMENT '0-unread 1-read',
 
-  `update_time` DATETIME COMMENT 'last update time',
   `create_time` DATETIME COMMENT 'record create time',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
