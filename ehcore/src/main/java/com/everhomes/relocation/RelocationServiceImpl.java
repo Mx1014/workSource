@@ -299,6 +299,7 @@ public class RelocationServiceImpl implements RelocationService {
 		map.put("requestorName", request.getRequestorName());
 		map.put("requestorEnterpriseName", request.getRequestorEnterpriseName());
 		map.put("items", getItemName(items));
+		map.put("totalNum", items.stream().mapToInt(RelocationRequestItemDTO::getItemQuantity).summaryStatistics().getSum());
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		map.put("relocationDate", sdf.format(request.getRelocationDate()));
 		String content = localeTemplateService.getLocaleTemplateString(RelocationTemplateCode.SCOPE, RelocationTemplateCode.FLOW_PROCESSOR_CONTENT,
