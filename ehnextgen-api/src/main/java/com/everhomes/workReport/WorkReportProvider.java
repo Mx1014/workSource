@@ -13,4 +13,16 @@ public interface WorkReportProvider {
     WorkReport findWorkReport(Long id);
 
     List<WorkReport> listWorkReports(Long pageAnchor, Integer count, Long organizationId, String ownerType, Long moduleId, Byte status);
+
+    void createWorkReportScopeMap(WorkReportScopeMap scopeMap);
+
+    void deleteWorkReportScopeMapNotInIds(Long reportId, List<Long> sourceIds);
+
+    WorkReportScopeMap findWorkReportScopeMap(Long id);
+
+    WorkReportScopeMap findWorkReportScopeMapBySourceId(Long reportId, Long sourceId);
+
+    void updateWorkReportScopeMap(WorkReportScopeMap scopeMap);
+
+    List<WorkReportScopeMap> listWorkReportScopeMap(Long reportId);
 }

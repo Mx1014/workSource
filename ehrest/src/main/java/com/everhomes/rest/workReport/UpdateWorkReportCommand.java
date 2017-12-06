@@ -1,27 +1,31 @@
 package com.everhomes.rest.workReport;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
  * <li>reportId: 工作汇报id</li>
- * <li>visibleRangeId: 可见范围id</li>
  * <li>reportType: 汇报类型 0-每日 1-每周 2-每月 参考{@link com.everhomes.rest.workReport.WorkReportType}</li>
  * <li>formOriginId: 表单id</li>
  * <li>formVersion: 表单版本</li>
+ * <li>scopes: 可见范围 参考{@link com.everhomes.rest.workReport.WorkReportScopeMapDTO}</li>
  * </ul>
  */
 public class UpdateWorkReportCommand {
 
     private Long reportId;
 
-    private Long visibleRangeId;
-
     private Byte reportType;
 
     private Long formOriginId;
 
     private Long formVersion;
+
+    @ItemType(WorkReportScopeMapDTO.class)
+    private List<WorkReportScopeMapDTO> scopes;
 
     public UpdateWorkReportCommand() {
     }
@@ -32,14 +36,6 @@ public class UpdateWorkReportCommand {
 
     public void setReportId(Long reportId) {
         this.reportId = reportId;
-    }
-
-    public Long getVisibleRangeId() {
-        return visibleRangeId;
-    }
-
-    public void setVisibleRangeId(Long visibleRangeId) {
-        this.visibleRangeId = visibleRangeId;
     }
 
     public Byte getReportType() {
@@ -64,6 +60,14 @@ public class UpdateWorkReportCommand {
 
     public void setFormVersion(Long formVersion) {
         this.formVersion = formVersion;
+    }
+
+    public List<WorkReportScopeMapDTO> getScopes() {
+        return scopes;
+    }
+
+    public void setScopes(List<WorkReportScopeMapDTO> scopes) {
+        this.scopes = scopes;
     }
 
     @Override

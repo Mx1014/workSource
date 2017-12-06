@@ -1,9 +1,11 @@
 package com.everhomes.rest.workReport;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -12,14 +14,14 @@ import java.sql.Timestamp;
  * <li>reportId: 工作汇报id</li>
  * <li>reportName: 工作汇报名称</li>
  * <li>status: 汇报状态 0-无效 1-未启用 2-启用 参考{@link com.everhomes.rest.workReport.WorkReportStatus}</li>
+ * <li>scopes: 可见范围 参考{@link com.everhomes.rest.workReport.WorkReportScopeMapDTO}</li>
  * <li>modifyFlag: 是否可修改 0-不可修改 1-可以修改 {@link com.everhomes.rest.workReport.AttitudeFlag}</li>
  * <li>deleteFlag: 是否可删除 0-不可删除 1-可以删除</li>
- * <li>visibleRange: 可见范围 参考{@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>reportType: 工作汇报类型 0-每日 1-每周 2-每月 参考{@link com.everhomes.rest.workReport.WorkReportType}</li>
  * <li>reportAttribute: 工作汇报属性 例如：比如: DEFAULT-系统默认 参考{@link com.everhomes.rest.workReport.WorkReportAttribute}</li>
  * <li>formOriginId: 关联表单id</li>
  * <li>formVersion: 关联表单版本</li>
- * <li>updateTime: 编辑时间</li>
+ * <li>updateInfo: 最后编辑信息</li>
  * </ul>
  */
 public class WorkReportDTO {
@@ -36,11 +38,12 @@ public class WorkReportDTO {
 
     private Byte status;
 
+    @ItemType(WorkReportScopeMapDTO.class)
+    private List<WorkReportScopeMapDTO> scopes;
+
     private Byte modifyFlag;
 
     private Byte deleteFlag;
-
-    private OrganizationDTO visibleRange;
 
     private Byte reportType;
 
@@ -52,6 +55,7 @@ public class WorkReportDTO {
 
     private Timestamp updateTime;
 
+    private String updateInfo;
 
     public WorkReportDTO() {
     }
@@ -104,6 +108,14 @@ public class WorkReportDTO {
         this.status = status;
     }
 
+    public List<WorkReportScopeMapDTO> getScopes() {
+        return scopes;
+    }
+
+    public void setScopes(List<WorkReportScopeMapDTO> scopes) {
+        this.scopes = scopes;
+    }
+
     public Byte getModifyFlag() {
         return modifyFlag;
     }
@@ -118,14 +130,6 @@ public class WorkReportDTO {
 
     public void setDeleteFlag(Byte deleteFlag) {
         this.deleteFlag = deleteFlag;
-    }
-
-    public OrganizationDTO getVisibleRange() {
-        return visibleRange;
-    }
-
-    public void setVisibleRange(OrganizationDTO visibleRange) {
-        this.visibleRange = visibleRange;
     }
 
     public Byte getReportType() {
@@ -166,6 +170,14 @@ public class WorkReportDTO {
 
     public void setUpdateTime(Timestamp updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getUpdateInfo() {
+        return updateInfo;
+    }
+
+    public void setUpdateInfo(String updateInfo) {
+        this.updateInfo = updateInfo;
     }
 
     @Override

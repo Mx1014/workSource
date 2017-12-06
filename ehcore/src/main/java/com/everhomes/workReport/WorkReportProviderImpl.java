@@ -8,15 +8,23 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.workReport.WorkReportStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhWorkReportScopeMapDao;
 import com.everhomes.server.schema.tables.daos.EhWorkReportsDao;
+import com.everhomes.server.schema.tables.pojos.EhWorkReportScopeMap;
 import com.everhomes.server.schema.tables.pojos.EhWorkReports;
+import com.everhomes.server.schema.tables.records.EhWorkReportScopeMapRecord;
 import com.everhomes.server.schema.tables.records.EhWorkReportsRecord;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
@@ -85,6 +93,74 @@ public class WorkReportProviderImpl implements WorkReportProvider {
         List<WorkReport> results = new ArrayList<>();
         query.fetch().map(r -> {
             results.add(ConvertHelper.convert(r, WorkReport.class));
+            return null;
+        });
+        if (null != results && 0 < results.size()) {
+            return results;
+        }
+        return null;
+    }
+
+    @Caching(evict = {@CacheEvict(value = "listWorkReportScopeMap", key = "#scopeMap.reportId")})
+    @Override
+    public void createWorkReportScopeMap(WorkReportScopeMap scopeMap) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWorkReportScopeMap.class));
+        scopeMap.setId(id);
+        scopeMap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWorkReportScopeMapDao dao = new EhWorkReportScopeMapDao(context.configuration());
+        dao.insert(scopeMap);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhWorkReportScopeMap.class, null);
+    }
+
+    @Caching(evict = {@CacheEvict(value = "listWorkReportScopeMap", key = "#reportId")})
+    @Override
+    public void deleteWorkReportScopeMapNotInIds(Long reportId, List<Long> sourceIds) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        DeleteQuery<EhWorkReportScopeMapRecord> query = context.deleteQuery(Tables.EH_WORK_REPORT_SCOPE_MAP);
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.REPORT_ID.eq(reportId));
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.SOURCE_ID.notIn(sourceIds));
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWorkReportScopeMap.class, null);
+    }
+
+    @Override
+    public WorkReportScopeMap findWorkReportScopeMap(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhWorkReportScopeMapDao dao = new EhWorkReportScopeMapDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), WorkReportScopeMap.class);
+    }
+
+    @Override
+    public WorkReportScopeMap findWorkReportScopeMapBySourceId(Long reportId, Long sourceId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportScopeMapRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_SCOPE_MAP);
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.REPORT_ID.eq(reportId));
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.SOURCE_ID.eq(sourceId));
+        return query.fetchOneInto(WorkReportScopeMap.class);
+    }
+
+    @Caching(evict = {@CacheEvict(value = "listWorkReportScopeMap", key = "#scopeMap.reportId")})
+    @Override
+    public void updateWorkReportScopeMap(WorkReportScopeMap scopeMap) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWorkReportScopeMapDao dao = new EhWorkReportScopeMapDao(context.configuration());
+        dao.update(scopeMap);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhWorkReportScopeMap.class, scopeMap.getId());
+    }
+
+    @Cacheable(value = "listWorkReportScopeMap", key="#reportId", unless="#result.size() == 0")
+    @Override
+    public List<WorkReportScopeMap> listWorkReportScopeMap(Long reportId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportScopeMapRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_SCOPE_MAP);
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.REPORT_ID.eq(reportId));
+        query.addOrderBy(Tables.EH_WORK_REPORT_SCOPE_MAP.CREATE_TIME.asc());
+        List<WorkReportScopeMap> results = new ArrayList<>();
+        query.fetch().map(r ->{
+            results.add(ConvertHelper.convert(r, WorkReportScopeMap.class));
             return null;
         });
         if (null != results && 0 < results.size()) {

@@ -7,7 +7,6 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 属于的对象 ID，如果所属类型是 EhOrganizations，则 ownerId 等于 organizationId</li>
  * <li>ownerType: 对象类型，默认为 EhOrganizations</li>
  * <li>moduleId: 模块id - 每一个功能模块有自己的id</li>
- * <li>reportStatus: 汇报状态 0-无效 1-未启用 2-启用 参考{@link com.everhomes.rest.workReport.WorkReportStatus}</li>
  * <li>pageAnchor: 分页锚点</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
@@ -19,8 +18,6 @@ public class ListWorkReportsCommand {
     private String ownerType;
 
     private Long moduleId;
-
-    private Byte reportStatus;
 
     private Long pageAnchor;
 
@@ -51,14 +48,6 @@ public class ListWorkReportsCommand {
 
     public void setModuleId(Long moduleId) {
         this.moduleId = moduleId;
-    }
-
-    public Byte getReportStatus() {
-        return reportStatus;
-    }
-
-    public void setReportStatus(Byte reportStatus) {
-        this.reportStatus = reportStatus;
     }
 
     public Long getPageAnchor() {
