@@ -485,11 +485,12 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 	@Override
 	public long createAuthorizations(List<Authorization> authorizations) {
 		long id = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhAuthorizations.class), (long)authorizations.size());
+		long nextId =  id - authorizations.size() + 1;
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAuthorizations.class));
 		List<EhAuthorizations> auths = new ArrayList<>();
 		for (Authorization authorization: authorizations) {
-			id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAuthorizationControlConfigs.class));
-			authorization.setId(id);
+			nextId++;
+			authorization.setId(nextId);
 			if(null == authorization.getCreateTime())
 				authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			auths.add(ConvertHelper.convert(authorization, EhAuthorizations.class));
