@@ -6487,7 +6487,7 @@ public class ForumServiceImpl implements ForumService {
         if(interactSetting != null){
             return ConvertHelper.convert(interactSetting, InteractSettingDTO.class);
         }
-        return ConvertHelper.convert(cmd, InteractSettingDTO.class);
+        return null;
     }
 
     @Override

@@ -371,26 +371,27 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
                 sentScopeDto.setName(menuName);
                 sentScopeDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
                 sentScopeList.add(sentScopeDto);
-                
-                //如果大于一个小区，就加上全部
-                if (tmpSentScopeList.size() > 1) {
-                	sentScopeDto = new TopicScopeDTO();
-                    sentScopeDto.setId(allId);
-                    sentScopeDto.setParentId(group2Id);
-                    code = String.valueOf(ForumLocalStringCode.POST_MEMU_ALL);
-                    menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
-                    sentScopeDto.setName(menuName);
-                    sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
-                    sentScopeDto.setForumId(tmpSentScopeList.get(0).getForumId());
-                    sentScopeDto.setSceneToken(sceneToken);
-                    sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());
-                    avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
-                    sentScopeDto.setAvatar(avatarUri);
-                    sentScopeDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
-                    sentScopeDto.setVisibleRegionType(VisibleRegionType.REGION.getCode());
-                    sentScopeDto.setVisibleRegionId(organization.getId());
-                    sentScopeList.add(sentScopeDto);
-				}
+
+                //客户端不需要全部了 add by yanjun 20171206
+//                //如果大于一个小区，就加上全部
+//                if (tmpSentScopeList.size() > 1) {
+//                	sentScopeDto = new TopicScopeDTO();
+//                    sentScopeDto.setId(allId);
+//                    sentScopeDto.setParentId(group2Id);
+//                    code = String.valueOf(ForumLocalStringCode.POST_MEMU_ALL);
+//                    menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+//                    sentScopeDto.setName(menuName);
+//                    sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+//                    sentScopeDto.setForumId(tmpSentScopeList.get(0).getForumId());
+//                    sentScopeDto.setSceneToken(sceneToken);
+//                    sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());
+//                    avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
+//                    sentScopeDto.setAvatar(avatarUri);
+//                    sentScopeDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+//                    sentScopeDto.setVisibleRegionType(VisibleRegionType.REGION.getCode());
+//                    sentScopeDto.setVisibleRegionId(organization.getId());
+//                    sentScopeList.add(sentScopeDto);
+//				}
                 
                 // 公司管理的各个小区
                 sentScopeList.addAll(tmpSentScopeList);
