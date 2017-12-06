@@ -33,6 +33,7 @@ import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.ExcelUtils;
+import com.sun.xml.bind.AnyTypeAdapter;
 import freemarker.core.ArithmeticEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -343,14 +344,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     @Override
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractId) {
         ShowBillForClientDTO response = new ShowBillForClientDTO();
-        if(!targetType.equals(AssetPaymentStrings.EH_USER) || !targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
-            LOGGER.error("target type is neither eh_user nor eh_organization");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"target type is neither eh_user nor eh_organization");
-        }
-        if(targetId == null){
-            LOGGER.error("customer id cannot be null!");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"customer id cannot be null!");
-        }
+        checkCustomerParameter(targetType, targetId);
         //获得必要条件 客户
         if(targetType.equals("eh_user")) {
             targetId = UserContext.current().getUser().getId();
@@ -388,6 +382,17 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         response.setBillPeriodMonths(dateStrFilter.size());
         response.setBillDetailDTOList(billDetailDTOList);
         return response;
+    }
+
+    private void checkCustomerParameter(String targetType, Long targetId) {
+        if(!targetType.equals(AssetPaymentStrings.EH_USER) || !targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+            LOGGER.error("target type is neither eh_user nor eh_organization");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"target type is neither eh_user nor eh_organization");
+        }
+        if(targetId == null){
+            LOGGER.error("customer id cannot be null!");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"customer id cannot be null!");
+        }
     }
 
     @Override
@@ -719,59 +724,105 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
      */
     @Override
     public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
+        checkCustomerParameter(cmd.getTargetType(), cmd.getTargetId());
         List<ShowBillForClientV2DTO> tabBills = new ArrayList<>();
-        //查询合同，用来聚类
-        List<ContractDTO> contracts = listCustomerContracts(cmd.getTargetType(), cmd.getTargetId(), cmd.getNamespaceId(), cmd.getOwnerId());
-        if(contracts == null || contracts.size() < 1){
-            return null;
-        }
-        List<Long> contractIds = new ArrayList<>();
-        Map<Long,ContractDTO> contractMap = new HashMap<>();
-        contracts.stream().forEach(r -> contractMap.put(r.getId(),r));
-        contracts.stream().forEach(r -> contractIds.add(r.getId()));
-        List<PaymentBills> bills = assetProvider.findSettledBillsByContractIds(contractIds);
-        Map<ShowBillForClientV2DTO,List<PaymentBills>> map = new HashMap<>();
-        // extract tab bills from bills
-        long start1 = System.currentTimeMillis();
-        for(int i = 0; i < bills.size(); i++){
-            PaymentBills bill = bills.get(i);
-            ShowBillForClientV2DTO dto = new ShowBillForClientV2DTO(bill.getBillGroupId(),String.valueOf(bill.getContractId()));
-            if(map.containsKey(dto)){
-                map.get(dto).add(bill);
-            }else{
-                map.put(dto,new ArrayList<>());
+//        //查询合同，用来聚类
+//        List<ContractDTO> contracts = listCustomerContracts(cmd.getTargetType(), cmd.getTargetId(), cmd.getNamespaceId(), cmd.getOwnerId());
+//        if(contracts == null || contracts.size() < 1){
+//            return null;
+//        }
+//        List<Long> contractIds = new ArrayList<>();
+//        Map<Long,ContractDTO> contractMap = new HashMap<>();
+//        contracts.stream().forEach(r -> contractMap.put(r.getId(),r));
+//        contracts.stream().forEach(r -> contractIds.add(r.getId()));
+//        List<PaymentBills> bills = assetProvider.findSettledBillsByContractIds(contractIds);
+        //获得此用户的所有账单
+        List<PaymentBills> paymentBills = assetProvider.findSettledBillsByCustomer(cmd.getTargetType(),cmd.getTargetId());
+        //进行分类，冗杂代码，用空间换时间， 字符串操作+类型转换  vs  新建对象; 对象隐式指定最大寿命
+        List<Map<?,?>> maps = new ArrayList<>();
+        tryMakeCategory:{
+            //同样contract和billGroup一样的在一起，没有contract视为同样的contract。 首先，比较contractid+billGroup先拿人得到n个tab，contract+billgroup继续
+            //剩下的按照billGroup再分tab
+            Map<ContractIdBillGroup, List<PaymentBills>> idMap = new HashMap<>();
+            Map<ContractNumBillGroup, List<PaymentBills>> numMap = new HashMap<>();
+            Map<Long, List<PaymentBills>> groupMap = new HashMap<>();
+            for (int i = 0; i < paymentBills.size(); i++) {
+                PaymentBills bill = paymentBills.get(i);
+                if (bill.getContractId() != null) {
+                    ContractIdBillGroup idIden = new ContractIdBillGroup();
+                    idIden.setBillGroupId(bill.getBillGroupId());
+                    idIden.setContractId(bill.getContractId());
+                    if (idMap.containsKey(idIden)) {
+                        idMap.get(idIden).add(bill);
+                    } else {
+                        List<PaymentBills> idList = new ArrayList<>();
+                        idList.add(bill);
+                        idMap.put(idIden, idList);
+                    }
+                    continue;
+                }
+                if (bill.getContractNum() != null) {
+                    ContractNumBillGroup numIden = new ContractNumBillGroup();
+                    numIden.setBillGroupId(bill.getBillGroupId());
+                    numIden.setContractNum(bill.getContractNum());
+                    if (numMap.containsKey(numIden)) {
+                        numMap.get(numIden).add(bill);
+                    } else {
+                        List<PaymentBills> idList = new ArrayList<>();
+                        idList.add(bill);
+                        numMap.put(numIden, idList);
+                    }
+                    continue;
+                }
+                if (groupMap.containsKey(bill.getBillGroupId())) {
+                    groupMap.get(bill.getBillGroupId()).add(bill);
+                } else {
+                    List<PaymentBills> idList = new ArrayList<>();
+                    idList.add(bill);
+                    groupMap.put(bill.getBillGroupId(), idList);
+                }
             }
+            maps.add(idMap);
+            maps.add(numMap);
+            maps.add(groupMap);
         }
-        LOGGER.info("v2火箭组装耗时"+(System.currentTimeMillis() - start1)/1000+"秒");
-        long start2 = System.currentTimeMillis();
-        for(Map.Entry<ShowBillForClientV2DTO,List<PaymentBills>> entry : map.entrySet()){
-            ShowBillForClientV2DTO dto = entry.getKey();
-            dto.setBillGroupName(assetProvider.getbillGroupNameById(dto.getBillGroupId()));
-            List<BillForClientV2> list = new ArrayList<>();
-            List<PaymentBills> enclosedBills = entry.getValue();
-            Set<Long> addressIds = new HashSet<>();
-            BigDecimal owedMoney = new BigDecimal("0");
-            for(int i = 0; i < enclosedBills.size(); i++){
-                BillForClientV2 v2 = new BillForClientV2();
-                owedMoney = owedMoney.add(enclosedBills.get(i).getAmountOwed());
 
-                addressIds.addAll(assetProvider.getAddressIdByBillId(enclosedBills.get(i).getId()));
+        assemble:
+        {
+            for (int j = 0; j < maps.size(); j++) {
+                Map<?, ?> map = maps.get(j);
+                if (map.size() < 1) continue;
+                for (HashMap.Entry<?, ?> entry : map.entrySet()) {
+                    ShowBillForClientV2DTO dto = new ShowBillForClientV2DTO();
+                    List<PaymentBills> enclosedBills = (List<PaymentBills>) entry.getValue();
+                    if (enclosedBills.size() > 0)
+                        dto.setBillGroupName(assetProvider.getbillGroupNameById(enclosedBills.get(0).getBillGroupId()));
+                    //组装
+                    List<BillForClientV2> list = new ArrayList<>();
+                    Set<Long> addressIds = new HashSet<>();
+                    BigDecimal owedMoney = new BigDecimal("0");
+                    for (int i = 0; i < enclosedBills.size(); i++) {
+                        PaymentBills bill = enclosedBills.get(i);
+                        BillForClientV2 v2 = new BillForClientV2();
+                        owedMoney = owedMoney.add(enclosedBills.get(i).getAmountOwed());
+                        addressIds.addAll(assetProvider.getAddressIdByBillId(bill.getId()));
 
-                v2.setAmountOwed(enclosedBills.get(i).getAmountOwed().toString());
-                v2.setAmountReceivable(enclosedBills.get(i).getAmountReceivable().toString());
-                v2.setBillDuration(enclosedBills.get(i).getDateStrBegin()+"至"+enclosedBills.get(i).getDateStrEnd());
-                v2.setBillId(String.valueOf(enclosedBills.get(i).getId()));
-                list.add(v2);
+                        v2.setAmountOwed(bill.getAmountOwed().toString());
+                        v2.setAmountReceivable(bill.getAmountReceivable().toString());
+                        v2.setBillDuration(bill.getDateStrBegin() + "至" + bill.getDateStrEnd());
+                        v2.setBillId(String.valueOf(bill.getId()));
+                        list.add(v2);
+                    }
+                    dto.setAddressStr(assetProvider.getAddressStrByIds(addressIds.stream().collect(Collectors.toList())));
+                    if (dto.getAddressStr().lastIndexOf(",") != -1) {
+                        dto.setAddressStr(dto.getAddressStr().substring(0, dto.getAddressStr().length() - 1));
+                    }
+                    dto.setBills(list);
+                    dto.setOverAllAmountOwed(owedMoney.toString());
+                    tabBills.add(dto);
+                }
             }
-            dto.setAddressStr(assetProvider.getAddressStrByIds(addressIds.stream().collect(Collectors.toList())));
-            if(dto.getAddressStr().lastIndexOf(",")!=-1){
-                dto.setAddressStr(dto.getAddressStr().substring(0,dto.getAddressStr().length()-1));
-            }
-            dto.setBills(list);
-            dto.setOverAllAmountOwed(owedMoney.toString());
-            tabBills.add(dto);
         }
-        LOGGER.info("组装每个tab卡一共耗时"+(System.currentTimeMillis() - start2)/1000+"秒");
         return tabBills;
     }
 

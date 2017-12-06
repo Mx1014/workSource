@@ -3636,6 +3636,14 @@ public class AssetProviderImpl implements AssetProvider {
         return configs.get(0);
     }
 
+    @Override
+    public List<PaymentBills> findSettledBillsByCustomer(String targetType, Long targetId) {
+        return getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.TARGET_ID.eq(targetId))
+                .and(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq(targetType))
+                .fetchInto(PaymentBills.class);
+    }
+
     private Map<Long,String> getGroupNames(ArrayList<Long> groupIds) {
         Map<Long,String> map = new HashMap<>();
         EhPaymentBillGroups group = Tables.EH_PAYMENT_BILL_GROUPS.as("group");
