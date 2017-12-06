@@ -488,7 +488,7 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAuthorizations.class));
 		List<EhAuthorizations> auths = new ArrayList<>();
 		for (Authorization authorization: authorizations) {
-			id ++;
+			id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAuthorizationControlConfigs.class));
 			authorization.setId(id);
 			if(null == authorization.getCreateTime())
 				authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
