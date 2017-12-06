@@ -1,4 +1,4 @@
-package com.everhomes.filedownload.banner;
+package com.everhomes.filedownload;
 
 /**
  * Created by Administrator on 2017/12/4.

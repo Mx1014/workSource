@@ -1,10 +1,5 @@
-package com.everhomes.filedownload.banner;
+package com.everhomes.filedownload;
 
-import com.everhomes.rest.banner.*;
-import com.everhomes.rest.banner.admin.*;
-import com.everhomes.rest.ui.banner.GetBannersBySceneCommand;
-
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface FileDownloadService {
@@ -19,7 +14,7 @@ public interface FileDownloadService {
      */
     Long createJob(String fileName, Integer rowCount, List<Object> rows, List<CellMapper> cellMappers);
 
-    List<FileDownloadJobDTO> listJob();
+    //List<FileDownloadJobDTO> listJob();
 
     void cancelJob(Long jobId);
     

@@ -1,4 +1,4 @@
-package com.everhomes.filedownload.banner;
+package com.everhomes.filedownload;
 
 import com.everhomes.rest.banner.BannerDTO;
 import com.everhomes.rest.banner.BannerScope;
