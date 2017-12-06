@@ -388,6 +388,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
 
     @Override
     public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId, Long appId, Long checkOrgId, Long checkCommunityId){
+        LOGGER.debug("checkUserPrivilege start.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}, appId={}, checkOrgId={}, checkCommunityId= {}" , userId, ownerType, ownerId, currentOrgId, privilegeId, appId, checkOrgId, checkCommunityId);
 
         Domain domain = UserContext.current().getDomain();
 

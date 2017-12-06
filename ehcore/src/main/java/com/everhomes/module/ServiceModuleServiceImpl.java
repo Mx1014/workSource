@@ -881,6 +881,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 PortalPublishHandler handler = PlatformContext.getComponent(handlerPrefix + serviceModule.getId());
                 if(null != handler){
                     customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), actionData, instanceConfig);
+                    LOGGER.debug("get customTag from handler = {}, customTag =s {}",handler,customTag);
                     // 取多入口的模块的菜单id
                     webMenuId = handler.getWebMenuId(namespaceId, serviceModule.getId(), actionData, instanceConfig);
                 }
