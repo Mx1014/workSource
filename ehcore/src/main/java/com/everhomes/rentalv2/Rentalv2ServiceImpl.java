@@ -417,10 +417,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			Rentalv2PriceRule priceRule = priceRules.get(0);
 			response.setRentalType(priceRule.getRentalType());
 			response.setWorkdayPrice(priceRule.getWorkdayPrice());
-			response.setWeekendPrice(priceRule.getWeekendPrice());
-			response.setOrgMemberWeekendPrice(priceRule.getOrgMemberWeekendPrice());
 			response.setOrgMemberWorkdayPrice(priceRule.getOrgMemberWorkdayPrice());
-			response.setApprovingUserWeekendPrice(priceRule.getApprovingUserWeekendPrice());
 			response.setApprovingUserWorkdayPrice(priceRule.getApprovingUserWorkdayPrice());
 			response.setDiscountType(priceRule.getDiscountType());
 			response.setDiscountRatio(priceRule.getDiscountRatio());
@@ -442,10 +439,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			Rentalv2PriceRule priceRule = priceRules.get(0);
 			response.setRentalType(priceRule.getRentalType());
 			response.setWorkdayPrice(priceRule.getWorkdayPrice());
-			response.setWeekendPrice(priceRule.getWeekendPrice());
-			response.setOrgMemberWeekendPrice(priceRule.getOrgMemberWeekendPrice());
 			response.setOrgMemberWorkdayPrice(priceRule.getOrgMemberWorkdayPrice());
-			response.setApprovingUserWeekendPrice(priceRule.getApprovingUserWeekendPrice());
 			response.setApprovingUserWorkdayPrice(priceRule.getApprovingUserWorkdayPrice());
 			response.setDiscountType(priceRule.getDiscountType());
 			response.setDiscountRatio(priceRule.getDiscountRatio());
@@ -501,10 +495,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		PriceRuleDTO priceRuleDTO = new PriceRuleDTO();
 		priceRuleDTO.setRentalType(RentalType.DAY.getCode());
 		priceRuleDTO.setWorkdayPrice(new BigDecimal(0));
-		priceRuleDTO.setWeekendPrice(new BigDecimal(0));
-		priceRuleDTO.setApprovingUserWeekendPrice(new BigDecimal(0));
 		priceRuleDTO.setApprovingUserWorkdayPrice(new BigDecimal(0));
-		priceRuleDTO.setOrgMemberWeekendPrice(new BigDecimal(0));
 		priceRuleDTO.setOrgMemberWorkdayPrice(new BigDecimal(0));
 		addCmd.setPriceRules(Arrays.asList(priceRuleDTO));
 		addCmd.setRentalTypes(Arrays.asList(RentalType.DAY.getCode()));
@@ -1175,20 +1166,20 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if (sceneTokenDTO != null) {
 			String scene = sceneTokenDTO.getScene();
 			if (SceneType.PM_ADMIN.getCode().equals(scene)) {
-				maxPrice = max(maxMinPrice.getMaxOrgMemberPrice(), priceRule.getOrgMemberWorkdayPrice(), priceRule.getOrgMemberWeekendPrice());
-				minPrice = min(maxMinPrice.getMinOrgMemberPrice(), priceRule.getOrgMemberWorkdayPrice(), priceRule.getOrgMemberWeekendPrice());
+				maxPrice = max(maxMinPrice.getMaxOrgMemberPrice(), priceRule.getOrgMemberWorkdayPrice());
+				minPrice = min(maxMinPrice.getMinOrgMemberPrice(), priceRule.getOrgMemberWorkdayPrice());
 				sitePriceRuleDTO.setMaxPrice(maxPrice);
 				sitePriceRuleDTO.setMinPrice(minPrice);
 				sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, priceRule.getRentalType(), rentalSite.getTimeStep()));
 			}else if (SceneType.ENTERPRISE.getCode().equals(scene)) {
-				maxPrice = max(maxMinPrice.getMaxPrice(), priceRule.getWorkdayPrice(), priceRule.getWeekendPrice());
-				minPrice = min(maxMinPrice.getMinPrice(), priceRule.getWorkdayPrice(), priceRule.getWeekendPrice());
+				maxPrice = max(maxMinPrice.getMaxPrice(), priceRule.getWorkdayPrice());
+				minPrice = min(maxMinPrice.getMinPrice(), priceRule.getWorkdayPrice());
 				sitePriceRuleDTO.setMaxPrice(maxPrice);
 				sitePriceRuleDTO.setMinPrice(minPrice);
 				sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, priceRule.getRentalType(), rentalSite.getTimeStep()));
 			}else if (TrueOrFalseFlag.fromCode(resourceType.getUnauthVisible()) == TrueOrFalseFlag.TRUE) {
-				maxPrice = max(maxMinPrice.getMaxApprovingUserPrice(), priceRule.getApprovingUserWorkdayPrice(), priceRule.getApprovingUserWeekendPrice());
-				minPrice = min(maxMinPrice.getMinApprovingUserPrice(), priceRule.getApprovingUserWorkdayPrice(), priceRule.getApprovingUserWeekendPrice());
+				maxPrice = max(maxMinPrice.getMaxApprovingUserPrice(), priceRule.getApprovingUserWorkdayPrice());
+				minPrice = min(maxMinPrice.getMinApprovingUserPrice(), priceRule.getApprovingUserWorkdayPrice());
 				sitePriceRuleDTO.setMaxPrice(maxPrice);
 				sitePriceRuleDTO.setMinPrice(minPrice);
 				sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, priceRule.getRentalType(), rentalSite.getTimeStep()));
@@ -1196,8 +1187,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				sitePriceRuleDTO.setPriceStr("");
 			}
 		}else {
-			maxPrice = max(maxMinPrice.getMaxPrice(), priceRule.getWorkdayPrice(), priceRule.getWeekendPrice());
-			minPrice = min(maxMinPrice.getMinPrice(), priceRule.getWorkdayPrice(), priceRule.getWeekendPrice());
+			maxPrice = max(maxMinPrice.getMaxPrice(), priceRule.getWorkdayPrice());
+			minPrice = min(maxMinPrice.getMinPrice(), priceRule.getWorkdayPrice());
 			sitePriceRuleDTO.setMaxPrice(maxPrice);
 			sitePriceRuleDTO.setMinPrice(minPrice);
 			sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, priceRule.getRentalType(), rentalSite.getTimeStep()));
@@ -2517,11 +2508,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 								singleCmd.setEndTime(timeInterval.getEndTime());
 								singleCmd.setTimeStep(timeInterval.getTimeStep());
 								singleCmd.setRentalType(priceRuleDTO.getRentalType());
-								singleCmd.setWeekendPrice(priceRuleDTO.getWeekendPrice());
 								singleCmd.setWorkdayPrice(priceRuleDTO.getWorkdayPrice());
-								singleCmd.setOrgMemberWeekendPrice(priceRuleDTO.getOrgMemberWeekendPrice());
 								singleCmd.setOrgMemberWorkdayPrice(priceRuleDTO.getOrgMemberWorkdayPrice());
-								singleCmd.setApprovingUserWeekendPrice(priceRuleDTO.getApprovingUserWeekendPrice());
 								singleCmd.setApprovingUserWorkdayPrice(priceRuleDTO.getApprovingUserWorkdayPrice());
 								addRentalSiteSingleSimpleRule(singleCmd);
 							}
@@ -2543,11 +2531,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						}
 						AddRentalSiteSingleSimpleRule singleCmd=ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class);
 						singleCmd.setRentalType(priceRuleDTO.getRentalType());
-						singleCmd.setWeekendPrice(priceRuleDTO.getWeekendPrice());
 						singleCmd.setWorkdayPrice(priceRuleDTO.getWorkdayPrice());
-						singleCmd.setOrgMemberWeekendPrice(priceRuleDTO.getOrgMemberWeekendPrice());
 						singleCmd.setOrgMemberWorkdayPrice(priceRuleDTO.getOrgMemberWorkdayPrice());
-						singleCmd.setApprovingUserWeekendPrice(priceRuleDTO.getApprovingUserWeekendPrice());
 						singleCmd.setApprovingUserWorkdayPrice(priceRuleDTO.getApprovingUserWorkdayPrice());
 						addRentalSiteSingleSimpleRule(singleCmd);
 					}
@@ -2589,10 +2574,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			PriceRuleDTO rule = new PriceRuleDTO();
 			rule.setRentalType(r);
 			rule.setWorkdayPrice(new BigDecimal(0));
-			rule.setWeekendPrice(new BigDecimal(0));
-			rule.setApprovingUserWeekendPrice(new BigDecimal(0));
 			rule.setApprovingUserWorkdayPrice(new BigDecimal(0));
-			rule.setOrgMemberWeekendPrice(new BigDecimal(0));
 			rule.setOrgMemberWorkdayPrice(new BigDecimal(0));
 			priceRules.add(rule);
 		});
@@ -2728,11 +2710,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		cellList.set(new ArrayList<>());
 		currentId.set(priceRule.getCellBeginId());
 		seqNum.set(0L);
-		BigDecimal weekendPrice = priceRule.getWeekendPrice() == null ? new BigDecimal(0) : priceRule.getWeekendPrice();
 		BigDecimal workdayPrice = priceRule.getWorkdayPrice() == null ? new BigDecimal(0) : priceRule.getWorkdayPrice();
-		BigDecimal orgMemberWeekendPrice = priceRule.getOrgMemberWeekendPrice() == null ? new BigDecimal(0) : priceRule.getOrgMemberWeekendPrice();
 		BigDecimal orgMemberWorkdayPrice = priceRule.getOrgMemberWorkdayPrice() == null ? new BigDecimal(0) : priceRule.getOrgMemberWorkdayPrice();
-		BigDecimal approvingUserWeekendPrice = priceRule.getApprovingUserWeekendPrice() == null ? new BigDecimal(0) : priceRule.getApprovingUserWeekendPrice();
 		BigDecimal approvingUserWorkdayPrice = priceRule.getApprovingUserWorkdayPrice() == null ? new BigDecimal(0) : priceRule.getApprovingUserWorkdayPrice();
 
 //		List<AddRentalSiteSingleSimpleRule> addSingleRules =new ArrayList<>();
@@ -2753,11 +2732,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(null != rs.getBeginDate() && null != rs.getEndDate()){
 			singleCmd.setBeginDate(rs.getBeginDate().getTime());
 			singleCmd.setEndDate(rs.getEndDate().getTime());
-			singleCmd.setWeekendPrice(weekendPrice);
 			singleCmd.setWorkdayPrice(workdayPrice);
-			singleCmd.setOrgMemberWeekendPrice(orgMemberWeekendPrice);
 			singleCmd.setOrgMemberWorkdayPrice(orgMemberWorkdayPrice);
-			singleCmd.setApprovingUserWeekendPrice(approvingUserWeekendPrice);
 			singleCmd.setApprovingUserWorkdayPrice(approvingUserWorkdayPrice);
 			if (rentalType == RentalType.HOUR.getCode())  {
 				if(singleCmd.getTimeIntervals() != null){
@@ -2838,15 +2814,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 								rsr.setRentalType(cmd.getRentalType());
 								rsr.setCounts(cmd.getSiteCounts());
 								rsr.setUnit(cmd.getUnit());
-								if (weekday == 1 || weekday == 7) {
-									rsr.setPrice(cmd.getWeekendPrice());
-									rsr.setOrgMemberPrice(cmd.getOrgMemberWeekendPrice());
-									rsr.setApprovingUserPrice(cmd.getApprovingUserWeekendPrice());
-								} else {
-									rsr.setPrice(cmd.getWorkdayPrice());
-									rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
-									rsr.setApprovingUserPrice(cmd.getApprovingUserWorkdayPrice());
-								}
+
+								rsr.setPrice(cmd.getWorkdayPrice());
+								rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
+								rsr.setApprovingUserPrice(cmd.getApprovingUserWorkdayPrice());
+
 								if(rsr.getUnit()<1){
 									rsr.setHalfresourcePrice(rsr.getPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
 									rsr.setHalfApprovingUserPrice(rsr.getApprovingUserPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP));
@@ -2873,46 +2845,25 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						rsr.setCreatorUid(userId);
 						rsr.setRentalStep(1);
 
-						if (weekday == 1 || weekday == 7) {
-							rsr.setPrice(cmd.getWeekendPrice());
-							rsr.setOrgMemberPrice(cmd.getOrgMemberWeekendPrice());
-							rsr.setApprovingUserPrice(cmd.getApprovingUserWeekendPrice());
+						rsr.setPrice(cmd.getWorkdayPrice());
+						rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
+						rsr.setApprovingUserPrice(cmd.getApprovingUserWorkdayPrice());
 
-							rsr.setAmorpm(AmorpmFlag.AM.getCode());
-							if(rsr.getUnit()<1){
-								rsr.setHalfresourcePrice(rsr.getPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
-								rsr.setHalfApprovingUserPrice(rsr.getApprovingUserPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP));
-								rsr.setHalfOrgMemberPrice(rsr.getOrgMemberPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
+						rsr.setAmorpm(AmorpmFlag.AM.getCode());
+						if (rsr.getUnit() < 1) {
+							rsr.setHalfresourcePrice(rsr.getPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP));
+							rsr.setHalfApprovingUserPrice(rsr.getApprovingUserPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP));
+							rsr.setHalfOrgMemberPrice(rsr.getOrgMemberPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP));
 
-							}
-							createRSR(rsr, cmd);
-							rsr.setAmorpm(AmorpmFlag.PM.getCode());
-							createRSR(rsr, cmd);
-							if(cmd.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
-								rsr.setAmorpm(AmorpmFlag.NIGHT.getCode());
-								createRSR(rsr, cmd);
-							}
-								
-						} else {
-							rsr.setPrice(cmd.getWorkdayPrice());
-							rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
-							rsr.setApprovingUserPrice(cmd.getApprovingUserWorkdayPrice());
-
-							rsr.setAmorpm(AmorpmFlag.AM.getCode());
-							if(rsr.getUnit()<1){
-								rsr.setHalfresourcePrice(rsr.getPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
-								rsr.setHalfApprovingUserPrice(rsr.getApprovingUserPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP));
-								rsr.setHalfOrgMemberPrice(rsr.getOrgMemberPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
-
-							}
-							createRSR(rsr, cmd);
-							rsr.setAmorpm(AmorpmFlag.PM.getCode());
-							createRSR(rsr, cmd);
-							if(cmd.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
-								rsr.setAmorpm(AmorpmFlag.NIGHT.getCode());
-								createRSR(rsr, cmd);
-							}
 						}
+						createRSR(rsr, cmd);
+						rsr.setAmorpm(AmorpmFlag.PM.getCode());
+						createRSR(rsr, cmd);
+						if (cmd.getRentalType().equals(RentalType.THREETIMEADAY.getCode())) {
+							rsr.setAmorpm(AmorpmFlag.NIGHT.getCode());
+							createRSR(rsr, cmd);
+						}
+
 					}else if (cmd.getRentalType().equals(RentalType.DAY.getCode())) {
 						// 按日预定
 						//TODO:产品说按天预定没有场所编号，所以默认只为noneed，以后可能会改就注释掉下面这一句
@@ -2922,15 +2873,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						rsr.setCounts(cmd.getSiteCounts());
 						rsr.setRentalStep(1);
 						rsr.setUnit(cmd.getUnit());
-						if (weekday == 1 || weekday == 7) {
-							rsr.setPrice(cmd.getWeekendPrice());
-							rsr.setApprovingUserPrice(cmd.getApprovingUserWeekendPrice());
-							rsr.setOrgMemberPrice(cmd.getOrgMemberWeekendPrice());
-						}else {
-							rsr.setPrice(cmd.getWorkdayPrice());
-							rsr.setApprovingUserPrice(cmd.getApprovingUserWorkdayPrice());
-							rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
-						}
+
+						rsr.setPrice(cmd.getWorkdayPrice());
+						rsr.setApprovingUserPrice(cmd.getApprovingUserWorkdayPrice());
+						rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
+
 						rsr.setResourceRentalDate(Date.valueOf(dateSF.get().format(start.getTime())));
 						rsr.setStatus(RentalSiteStatus.NORMAL.getCode());
 						rsr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -5283,7 +5230,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			resource.setOpenWeekday(convertOpenWeekday(defaultRule.getOpenWeekday()));
 
-			BigDecimal weekendPrice = defaultRule.getWeekendPrice() == null ? new BigDecimal(0) : defaultRule.getWeekendPrice(); 
 			BigDecimal workdayPrice = defaultRule.getWorkdayPrice() == null ? new BigDecimal(0) : defaultRule.getWorkdayPrice();
 
 			LOGGER.debug("test enter cerate cell, defaultRule={}", defaultRule);
@@ -5308,7 +5254,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							signleCmd.setEndTime(timeInterval.getEndTime()); 
 							if(null!=timeInterval.getTimeStep())
 								signleCmd.setTimeStep(timeInterval.getTimeStep());
-							signleCmd.setWeekendPrice(weekendPrice); 
 							signleCmd.setWorkdayPrice(workdayPrice);
 							addSingleRules.add(signleCmd);
 						}
@@ -5322,7 +5267,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}else {
 					AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(defaultRule, AddRentalSiteSingleSimpleRule.class ); 
 					signleCmd.setRentalType(priceRuleDTO.getRentalType());
-					signleCmd.setWeekendPrice(weekendPrice); 
 					signleCmd.setWorkdayPrice(workdayPrice);
 					addSingleRules.add(signleCmd);
 				}
