@@ -12,11 +12,14 @@ import java.util.Set;
 
 @Component
 public class PortalUrlParserBeanUtil implements ApplicationContextAware {
+    private ApplicationContext applicationContext;
+
     private static Map<String, PortalUrlParser> urlParserBeanMap;
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        Map<String, PortalUrlParser> map = applicationContext.getBeansOfType(PortalUrlParser.class);
+        this.applicationContext = applicationContext;
+        Map<String, PortalUrlParser> map = this.applicationContext.getBeansOfType(PortalUrlParser.class);
         urlParserBeanMap = new HashMap<>();
         map.forEach((key, value) -> urlParserBeanMap.put(key, value));
     }
