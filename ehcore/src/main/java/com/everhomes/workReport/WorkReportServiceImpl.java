@@ -3,6 +3,7 @@ package com.everhomes.workReport;
 import com.everhomes.db.DbProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.workReport.*;
 import com.everhomes.user.User;
@@ -103,19 +104,19 @@ public class WorkReportServiceImpl implements WorkReportService {
         return null;
     }
 
-    private void updateWorkReportScopeMap(Long reportId, List<WorkReportScopeMapDTO> scopes){
-        if(scopes == null)
+    private void updateWorkReportScopeMap(Long reportId, List<WorkReportScopeMapDTO> scopes) {
+        if (scopes == null)
             return;
         List<Long> sourceIds = new ArrayList<>();
-        for(WorkReportScopeMapDTO dto : scopes){
+        for (WorkReportScopeMapDTO dto : scopes) {
             //  in order to record those ids.
             sourceIds.add(dto.getSourceId());
             WorkReportScopeMap scopeMap = workReportProvider.findWorkReportScopeMapBySourceId(reportId, dto.getSourceId());
-            if(scopeMap !=null) {
+            if (scopeMap != null) {
                 scopeMap.setSourceDescription(dto.getSourceDescription());
                 scopeMap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                 workReportProvider.updateWorkReportScopeMap(scopeMap);
-            }else {
+            } else {
                 workReportProvider.createWorkReportScopeMap(scopeMap);
             }
         }
@@ -181,10 +182,10 @@ public class WorkReportServiceImpl implements WorkReportService {
         workReportProvider.updateWorkReport(report);
     }
 
-    public List<WorkReportScopeMapDTO> listWorkReportScopeMap(Long reportId){
+    public List<WorkReportScopeMapDTO> listWorkReportScopeMap(Long reportId) {
         List<WorkReportScopeMap> results = workReportProvider.listWorkReportScopeMap(reportId);
-        if(results !=null && results.size()>0){
-            return results.stream().map(r ->{
+        if (results != null && results.size() > 0) {
+            return results.stream().map(r -> {
                 WorkReportScopeMapDTO dto = ConvertHelper.convert(r, WorkReportScopeMapDTO.class);
                 return dto;
             }).collect(Collectors.toList());
@@ -194,12 +195,45 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Override
     public VerifyWorkReportResponse verifyWorkReportTemplates(CreateWorkReportTemplatesCommand cmd) {
-        return null;
+        VerifyWorkReportResponse response = new VerifyWorkReportResponse();
+        response.setResult(TrueOrFalseFlag.TRUE.getCode());
+        List<WorkReportTemplate> templates = workReportProvider.listWorkReportTemplates(cmd.getModuleId());
+        for (WorkReportTemplate template : templates) {
+            WorkReport report = workReportProvider.findWorkReportByTemplateId(UserContext.getCurrentNamespaceId(),
+                    template.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType(), template.getId());
+            if (report == null) {
+                response.setResult(TrueOrFalseFlag.FALSE.getCode());
+                break;
+            }
+        }
+        return response;
     }
 
     @Override
     public void createWorkReportTemplates(CreateWorkReportTemplatesCommand cmd) {
+        //  1.get templates by moduleId and then check the formTemplateId.
+        //  2.create the work report if the formTemplateId is 0 immediately.
+        //  3.Otherwise create the form before creating work reports.
+        List<WorkReportTemplate> templates = workReportProvider.listWorkReportTemplates(cmd.getModuleId());
+        if (templates != null && templates.size() > 0){
+            dbProvider.execute((TransactionStatus status) ->{
+                for(WorkReportTemplate template : templates){
+                    if(template.getFormTemplateId().longValue() == 0)
+                        createWorkReportByTemplate(template, null, cmd);
+                }
+                return null;
+            });
+        }
+    }
 
+    private void createWorkReportByTemplate(
+            WorkReportTemplate template, Long formOriginId, CreateWorkReportTemplatesCommand cmd){
+        WorkReport report = workReportProvider.findWorkReportByTemplateId(UserContext.getCurrentNamespaceId(),
+                template.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType(), template.getId());
+        if(report !=null){
+            report.setStatus(WorkReportStatus.RUNNING.getCode());
+            report.setReportName(template.getReportName());
+        }
     }
 
     @Override

@@ -13,6 +13,7 @@ import com.everhomes.server.schema.tables.daos.EhWorkReportsDao;
 import com.everhomes.server.schema.tables.pojos.EhWorkReportScopeMap;
 import com.everhomes.server.schema.tables.pojos.EhWorkReports;
 import com.everhomes.server.schema.tables.records.EhWorkReportScopeMapRecord;
+import com.everhomes.server.schema.tables.records.EhWorkReportTemplatesRecord;
 import com.everhomes.server.schema.tables.records.EhWorkReportsRecord;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -66,6 +67,20 @@ public class WorkReportProviderImpl implements WorkReportProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         EhWorkReportsDao dao = new EhWorkReportsDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), WorkReport.class);
+    }
+
+    @Override
+    public WorkReport findWorkReportByTemplateId(
+            Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long templateId){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportsRecord> query = context.selectQuery(Tables.EH_WORK_REPORTS);
+        query.addConditions(Tables.EH_WORK_REPORTS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_WORK_REPORTS.MODULE_ID.eq(moduleId));
+        query.addConditions(Tables.EH_WORK_REPORTS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_WORK_REPORTS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_WORK_REPORTS.REPORT_TEMPLATE_ID.eq(templateId));
+        query.addConditions(Tables.EH_WORK_REPORTS.STATUS.ne(WorkReportStatus.INVALID.getCode()));
+        return query.fetchOneInto(WorkReport.class);
     }
 
     @Override
@@ -150,22 +165,37 @@ public class WorkReportProviderImpl implements WorkReportProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhWorkReportScopeMap.class, scopeMap.getId());
     }
 
-    @Cacheable(value = "listWorkReportScopeMap", key="#reportId", unless="#result.size() == 0")
+    @Cacheable(value = "listWorkReportScopeMap", key = "#reportId", unless = "#result.size() == 0")
     @Override
-    public List<WorkReportScopeMap> listWorkReportScopeMap(Long reportId){
+    public List<WorkReportScopeMap> listWorkReportScopeMap(Long reportId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWorkReportScopeMapRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_SCOPE_MAP);
         query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
         query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.REPORT_ID.eq(reportId));
         query.addOrderBy(Tables.EH_WORK_REPORT_SCOPE_MAP.CREATE_TIME.asc());
         List<WorkReportScopeMap> results = new ArrayList<>();
-        query.fetch().map(r ->{
+        query.fetch().map(r -> {
             results.add(ConvertHelper.convert(r, WorkReportScopeMap.class));
             return null;
         });
         if (null != results && 0 < results.size()) {
             return results;
         }
+        return null;
+    }
+
+    @Override
+    public List<WorkReportTemplate> listWorkReportTemplates(Long moduleId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportTemplatesRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_TEMPLATES);
+        query.addConditions(Tables.EH_WORK_REPORT_TEMPLATES.MODULE_ID.eq(moduleId));
+        List<WorkReportTemplate> results = new ArrayList<>();
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, WorkReportTemplate.class));
+            return null;
+        });
+        if (null != results && results.size() > 0)
+            return results;
         return null;
     }
 }

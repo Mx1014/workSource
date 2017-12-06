@@ -762,13 +762,13 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Override
     public VerifyApprovalTemplatesResponse verifyApprovalTemplates(VerifyApprovalTemplatesCommand cmd) {
         VerifyApprovalTemplatesResponse response = new VerifyApprovalTemplatesResponse();
-        response.setResult(1L);
+        response.setResult(TrueOrFalseFlag.TRUE.getCode());
         List<GeneralApprovalTemplate> templates = generalApprovalProvider.listGeneralApprovalTemplateByModuleId(cmd.getModuleId());
         for (GeneralApprovalTemplate template : templates) {
             GeneralApproval ga = generalApprovalProvider.getGeneralApprovalByTemplateId(UserContext.getCurrentNamespaceId(), cmd.getModuleId(), cmd.getOwnerId(),
                     cmd.getOwnerType(), template.getId());
             if (ga == null) {
-                response.setResult(0L);
+                response.setResult(TrueOrFalseFlag.FALSE.getCode());
                 break;
             }
         }

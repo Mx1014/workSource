@@ -9,16 +9,16 @@ import com.everhomes.util.StringHelper;
  */
 public class VerifyWorkReportResponse {
 
-    private Long result;
+    private Byte result;
 
     public VerifyWorkReportResponse() {
     }
 
-    public Long getResult() {
+    public Byte getResult() {
         return result;
     }
 
-    public void setResult(Long result) {
+    public void setResult(Byte result) {
         this.result = result;
     }
 
