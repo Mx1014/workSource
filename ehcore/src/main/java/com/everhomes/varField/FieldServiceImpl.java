@@ -1140,6 +1140,25 @@ public class FieldServiceImpl implements FieldService {
         }
     }
 
+    /**
+     * 新增域空间模块字段选择项：
+     * 1、在系统表加一条 status置为customization
+     * 2、在相应域下增加一条 itemId为系统item表中的id
+     */
+    private void insertFieldItems(ScopeFieldItem scopeFieldItem) {
+        FieldItem item = ConvertHelper.convert(scopeFieldItem, FieldItem.class);
+        item.setDisplayName(scopeFieldItem.getItemDisplayName());
+        item.setCreatorUid(UserContext.currentUserId());
+        item.setStatus(VarFieldStatus.CUSTOMIZATION.getCode());
+        fieldProvider.createFieldItem(item);
+
+
+        scopeFieldItem.setItemId(item.getId());
+        scopeFieldItem.setStatus(VarFieldStatus.ACTIVE.getCode());
+        scopeFieldItem.setCreatorUid(UserContext.currentUserId());
+        fieldProvider.createScopeFieldItem(scopeFieldItem);
+    }
+
     @Override
     public void updateFieldItems(UpdateFieldItemsCommand cmd) {
         List<ScopeFieldItemInfo> items = cmd.getItems();
@@ -1147,24 +1166,31 @@ public class FieldServiceImpl implements FieldService {
             Long userId = UserContext.currentUserId();
             Map<Long, ScopeFieldItem> existItems = fieldProvider.listScopeFieldsItems(cmd.getFieldIds(), cmd.getNamespaceId(), cmd.getCommunityId());
             items.forEach(item -> {
-                ScopeFieldItem scopeFieldItem = ConvertHelper.convert(item, ScopeFieldItem.class);
-                scopeFieldItem.setNamespaceId(cmd.getNamespaceId());
-                scopeFieldItem.setCommunityId(cmd.getCommunityId());
-                if(scopeFieldItem.getId() == null) {
-                    scopeFieldItem.setCreatorUid(userId);
-                    fieldProvider.createScopeFieldItem(scopeFieldItem);
+                if(item.getItemId() == null) {
+                    ScopeFieldItem scopeFieldItem = ConvertHelper.convert(item, ScopeFieldItem.class);
+                    scopeFieldItem.setNamespaceId(cmd.getNamespaceId());
+                    scopeFieldItem.setCommunityId(cmd.getCommunityId());
+                    insertFieldItems(scopeFieldItem);
                 } else {
-                    ScopeFieldItem exist = fieldProvider.findScopeFieldItem(scopeFieldItem.getId(), cmd.getNamespaceId(), cmd.getCommunityId());
-                    if(exist != null) {
-                        scopeFieldItem.setCreatorUid(exist.getCreatorUid());
-                        scopeFieldItem.setCreateTime(exist.getCreateTime());
-                        scopeFieldItem.setOperatorUid(userId);
-                        scopeFieldItem.setStatus(VarFieldStatus.ACTIVE.getCode());
-                        fieldProvider.updateScopeFieldItem(scopeFieldItem);
-                        existItems.remove(exist.getId());
-                    } else {
+                    ScopeFieldItem scopeFieldItem = ConvertHelper.convert(item, ScopeFieldItem.class);
+                    scopeFieldItem.setNamespaceId(cmd.getNamespaceId());
+                    scopeFieldItem.setCommunityId(cmd.getCommunityId());
+                    if(scopeFieldItem.getId() == null) {
                         scopeFieldItem.setCreatorUid(userId);
                         fieldProvider.createScopeFieldItem(scopeFieldItem);
+                    } else {
+                        ScopeFieldItem exist = fieldProvider.findScopeFieldItem(scopeFieldItem.getId(), cmd.getNamespaceId(), cmd.getCommunityId());
+                        if(exist != null) {
+                            scopeFieldItem.setCreatorUid(exist.getCreatorUid());
+                            scopeFieldItem.setCreateTime(exist.getCreateTime());
+                            scopeFieldItem.setOperatorUid(userId);
+                            scopeFieldItem.setStatus(VarFieldStatus.ACTIVE.getCode());
+                            fieldProvider.updateScopeFieldItem(scopeFieldItem);
+                            existItems.remove(exist.getId());
+                        } else {
+                            scopeFieldItem.setCreatorUid(userId);
+                            fieldProvider.createScopeFieldItem(scopeFieldItem);
+                        }
                     }
                 }
             });

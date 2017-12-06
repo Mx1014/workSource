@@ -13,6 +13,7 @@ import java.sql.Timestamp;
  *     <li>customerId：所属客户id</li>
  *     <li>area：区域</li>
  *     <li>address：地址</li>
+ *     <li>addressName：楼栋门牌名</li>
  *     <li>addressId：楼栋门牌id</li>
  *     <li>areaSize：面积</li>
  *     <li>contractStartDate：合同开始日期</li>
@@ -30,12 +31,21 @@ public class CustomerEntryInfoDTO {
     private Long customerId;
     private String area;
     private String address;
+    private String addressName;
     private Long addressId;
     private BigDecimal areaSize;
     private Timestamp contractStartDate;
     private Timestamp contractEndDate;
     private Integer contractEndMonth;
     private String remark;
+
+    public String getAddressName() {
+        return addressName;
+    }
+
+    public void setAddressName(String addressName) {
+        this.addressName = addressName;
+    }
 
     public String getAddress() {
         return address;

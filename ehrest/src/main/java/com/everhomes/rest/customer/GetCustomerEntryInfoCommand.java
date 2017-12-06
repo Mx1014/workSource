@@ -5,6 +5,7 @@ package com.everhomes.rest.customer;
  *     <li>id: id</li>
  *     <li>customerType: 客户类型 0: enterprise; 1: individual</li>
  *     <li>customerId: 客户id</li>
+ *     <li>communityId：所属项目id</li>
  * </ul>
  * Created by ying.xiong on 2017/12/6.
  */
@@ -15,6 +16,16 @@ public class GetCustomerEntryInfoCommand {
     private Byte customerType;
 
     private Long customerId;
+
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Long getId() {
         return id;

@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contract.ContractService;
 import com.everhomes.organization.*;
@@ -138,6 +140,9 @@ public class CustomerServiceImpl implements CustomerService {
 	
 	@Autowired
 	private ScheduleProvider scheduleProvider;
+
+    @Autowired
+    private AddressProvider addressProvider;
 	
     private static final  String queueDelay = "trackingPlanTaskDelays";
     private static final  String  queueNoDelay = "trackingPlanTaskNoDelays";
@@ -1545,7 +1550,10 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerEntryInfoDTO getCustomerEntryInfo(GetCustomerEntryInfoCommand cmd) {
         CustomerEntryInfo entryInfo = checkCustomerEntryInfo(cmd.getId(), cmd.getCustomerId());
-        return ConvertHelper.convert(entryInfo, CustomerEntryInfoDTO.class);
+        if(entryInfo.getAddressId() != null) {
+
+        }
+        return convertCustomerEntryInfoDTO(entryInfo);
     }
 
     @Override
@@ -1577,12 +1585,25 @@ public class CustomerServiceImpl implements CustomerService {
         return dto;
     }
 
+    private CustomerEntryInfoDTO convertCustomerEntryInfoDTO(CustomerEntryInfo entryInfo) {
+        CustomerEntryInfoDTO dto = ConvertHelper.convert(entryInfo, CustomerEntryInfoDTO.class);
+
+        if(dto.getAddressId() != null) {
+            Address address = addressProvider.findAddressById(dto.getAddressId());
+            if(address != null) {
+                dto.setAddressName(address.getAddress());
+            }
+        }
+
+        return dto;
+    }
+
     @Override
     public List<CustomerEntryInfoDTO> listCustomerEntryInfos(ListCustomerEntryInfosCommand cmd) {
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
         if(entryInfos != null && entryInfos.size() > 0) {
             return entryInfos.stream().map(entryInfo -> {
-                return ConvertHelper.convert(entryInfo, CustomerEntryInfoDTO.class);
+                return convertCustomerEntryInfoDTO(entryInfo);
             }).collect(Collectors.toList());
         }
         return null;

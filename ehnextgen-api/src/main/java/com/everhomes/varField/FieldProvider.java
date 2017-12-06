@@ -43,4 +43,6 @@ public interface FieldProvider {
     void updateScopeFieldItem(ScopeFieldItem scopeFieldItem);
     ScopeFieldItem findScopeFieldItem(Long id, Integer namespaceId, Long communityId);
 
+    void createFieldItem(FieldItem item);
+
 }
