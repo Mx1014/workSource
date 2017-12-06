@@ -6,6 +6,7 @@ import com.everhomes.acl.WebMenuPrivilegeProvider;
 import com.everhomes.pmtask.PmTaskProvider;
 import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.pmtask.PmTaskAppType;
 import com.everhomes.rest.portal.PmTaskInstanceConfig;
 import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
@@ -110,12 +111,10 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
 
         String taskCategoryId = getCustomTag(namespaceId, moudleId, actionData, instanceConfig);
 
-        List<WebMenu> menus = webMenuProvider.listWebMenuByType(WebMenuType.PARK.getCode(), null, "/20000%", Collections.singletonList(20100L));
-
-        for (WebMenu menu: menus) {
-            if (StringUtils.isNotBlank(menu.getDataType()) && menu.getDataType().contains(taskCategoryId)) {
-                return menu.getId();
-            }
+        if (Long.valueOf(taskCategoryId) == PmTaskAppType.REPAIR_ID) {
+            return 20100L;
+        }else if (Long.valueOf(taskCategoryId) == PmTaskAppType.SUGGESTION_ID) {
+            return 20230L;
         }
 
         return null;
