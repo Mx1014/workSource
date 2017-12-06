@@ -146,4 +146,6 @@ public interface EquipmentProvider {
     void createEquipmentModuleCommunityMap(EquipmentModuleCommunityMap map);
 
     List<EquipmentModuleCommunityMap> getModuleCommunityMap(Long targetId);
+
+    void deleteEquipmentModuleCommunityMap(Long standardId);
 }

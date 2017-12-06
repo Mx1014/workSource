@@ -1144,6 +1144,21 @@ public class EquipmentController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <b>URL: /equipment/disableModule</b>
+	 * <p>删除module和项目的关联表</p>
+	 */
+	@RequestMapping("disableModule")
+	@RestReturn(value = String.class)
+	public RestResponse disableModule (DeleteEquipmentStandardCommand cmd) {
+
+		equipmentService.disableModule(cmd.getStandardId());
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 
 
 }

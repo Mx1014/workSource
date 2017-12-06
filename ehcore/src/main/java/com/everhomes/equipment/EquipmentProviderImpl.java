@@ -909,6 +909,14 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 				.fetchInto(EquipmentModuleCommunityMap.class);
 	}
 
+	@Override
+	public void deleteEquipmentModuleCommunityMap(Long standardId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_EQUIPMENT_MODULE_COMMUNITY_MAP)
+				.where(Tables.EH_EQUIPMENT_MODULE_COMMUNITY_MAP.STANDARD_ID.eq(standardId))
+				.execute();
+	}
+
 	@Cacheable(value="listQualifiedEquipmentStandardEquipments", key="'AllEquipments'", unless="#result.size() == 0")
 	@Override
 	public List<EquipmentInspectionEquipments> listQualifiedEquipmentStandardEquipments() {

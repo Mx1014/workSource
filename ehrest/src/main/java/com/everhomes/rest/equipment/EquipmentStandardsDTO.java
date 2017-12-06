@@ -1,17 +1,18 @@
 package com.everhomes.rest.equipment;
 
-import java.sql.Timestamp;
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.util.StringHelper;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
  *  <li>id: 标准id</li>
  *  <li>ownerId: 标准所属的主体id</li>
  *  <li>ownerType: 标准所属的主体，参考{@link com.everhomes.rest.quality.OwnerType}</li>
+ *  <li>targetId: 标准所属项目id  为0则是在全部里</li>
  *  <li>name: 标准名称</li>
  *  <li>standardNumber: 标准编号</li>
  *  <li>standardSource: 标准来源</li>
@@ -42,6 +43,8 @@ public class EquipmentStandardsDTO {
 	private String ownerType;
 	
 	private Long ownerId;
+
+	private Long  targetId;
 	
 	private String standardNumber;
 	
@@ -276,6 +279,14 @@ public class EquipmentStandardsDTO {
 
 	public void setReviewGroup(List<StandardGroupDTO> reviewGroup) {
 		this.reviewGroup = reviewGroup;
+	}
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
 	}
 
 	@Override

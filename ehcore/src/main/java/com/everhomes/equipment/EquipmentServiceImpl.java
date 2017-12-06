@@ -4820,4 +4820,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 	public  FieldItemDTO findScopeFieldItemByFieldItemId(findScopeFieldItemCommand cmd) {
 		 return  ConvertHelper.convert(fieldProvider.findScopeFieldItemByBusinessValue(cmd.getNamespaceId(),cmd.getCommunityId(),cmd.getModuleName(),cmd.getFieldId(),cmd.getBusinessValue()),FieldItemDTO.class);
 	}
+
+	@Override
+	public void disableModule(Long standardId) {
+		equipmentProvider.deleteEquipmentModuleCommunityMap(standardId);
+	}
 }
