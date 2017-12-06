@@ -90,7 +90,7 @@ public class EquipmentController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>URL: /equipment/findEquipmentStandard</b>
 	 * <p>根据id查询巡检标准</p>

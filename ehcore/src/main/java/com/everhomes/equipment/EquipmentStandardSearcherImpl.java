@@ -1,13 +1,19 @@
 package com.everhomes.equipment;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.repeat.RepeatService;
+import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.repeat.RepeatSettingsDTO;
+import com.everhomes.search.AbstractElasticSearch;
+import com.everhomes.search.EquipmentStandardSearcher;
+import com.everhomes.search.SearchUtils;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.util.ConvertHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -24,16 +30,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.repeat.RepeatService;
-import com.everhomes.repeat.RepeatSettings;
-import com.everhomes.rest.repeat.RepeatSettingsDTO;
-import com.everhomes.search.AbstractElasticSearch;
-import com.everhomes.search.EquipmentStandardSearcher;
-import com.everhomes.search.SearchUtils;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.util.ConvertHelper;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Component
 public class EquipmentStandardSearcherImpl extends AbstractElasticSearch implements EquipmentStandardSearcher{
@@ -184,9 +184,17 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
          } 
         
         List<EquipmentStandardsDTO> eqStandards = new ArrayList<EquipmentStandardsDTO>();
+        List <EquipmentModuleCommunityMap> maps = equipmentProvider.getModuleCommunityMap(cmd.getTargetId());
         for(Long id : ids) {
         	EquipmentInspectionStandards standard = equipmentProvider.findStandardById(id);
-        	if(standard != null) {
+            if (cmd.getTargetId() != null) {
+                //权限细化增加   项目的增加上公共标准  过滤已经修改过的模板
+                if (standard.getReferId() != null) {
+                    if (maps!=null && maps.size()>0)
+                    maps.removeIf((s) -> Objects.equals(s.getId(), standard.getReferId()));
+                }
+            }
+            if(standard != null) {
         		processRepeatSetting(standard);
         		EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
                 dto.setDescription("");
@@ -197,6 +205,23 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         		eqStandards.add(dto);
         	}
 
+        }
+        //过滤剩下的maps 增加到项目中
+        if (maps != null && maps.size() > 0) {
+            for (EquipmentModuleCommunityMap map : maps) {
+                EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
+                if (standard != null) {
+                    processRepeatSetting(standard);
+                    EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
+                    dto.setDescription("");
+                    if (null != standard.getRepeat()) {
+                        RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
+                        dto.setRepeat(rs);
+                    }
+                    eqStandards.add(dto);
+
+                }
+            }
         }
         
         return new SearchEquipmentStandardsResponse(nextPageAnchor, eqStandards);

@@ -243,6 +243,17 @@ public class EquipmentServiceImpl implements EquipmentService {
 				standard.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
 			}
 			equipmentProvider.creatEquipmentStandard(standard);
+			//按照现在的模式  在公共中创建的标准targetId为null
+			if(cmd.getCommunities() != null && cmd.getCommunities().size()>0){
+				//此处创建公共标准关联表 targetId为null为公共标准
+				for (Long communityId: cmd.getCommunities()) {
+					EquipmentModuleCommunityMap map = new EquipmentModuleCommunityMap();
+					map.setStandardId(cmd.getId());
+					map.setTargetType(cmd.getTargetType());
+					map.setTargetId(communityId);
+					equipmentProvider.createEquipmentModuleCommunityMap(map);
+				}
+			}
 
 		} else {
 			EquipmentInspectionStandards exist = verifyEquipmentStandard(cmd.getId());
@@ -252,17 +263,17 @@ public class EquipmentServiceImpl implements EquipmentService {
 			standard.setOperatorUid(user.getId());
 			standard.setNamespaceId(UserContext.getCurrentNamespaceId());
 
-			if(EquipmentStandardStatus.NOT_COMPLETED.equals(EquipmentStandardStatus.fromStatus(standard.getStatus()))) {
-				if(cmd.getRepeat() == null) {
+			if (EquipmentStandardStatus.NOT_COMPLETED.equals(EquipmentStandardStatus.fromStatus(standard.getStatus()))) {
+				if (cmd.getRepeat() == null) {
 					throw RuntimeErrorException.errorWith(RepeatServiceErrorCode.SCOPE,
 							RepeatServiceErrorCode.ERROR_REPEAT_SETTING_NOT_EXIST,
-		 				"执行周期为空");
+							"执行周期为空");
 				}
-				if(cmd.getRepeat() !=null) {
+				if (cmd.getRepeat() != null) {
 					repeat = ConvertHelper.convert(cmd.getRepeat(), RepeatSettings.class);
-					if(cmd.getRepeat().getStartDate() != null)
+					if (cmd.getRepeat().getStartDate() != null)
 						repeat.setStartDate(new Date(cmd.getRepeat().getStartDate()));
-					if(cmd.getRepeat().getEndDate() != null)
+					if (cmd.getRepeat().getEndDate() != null)
 						repeat.setEndDate(new Date(cmd.getRepeat().getEndDate()));
 
 					repeat.setCreatorUid(user.getId());
@@ -272,7 +283,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 					standard.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
 				}
 			}
-			equipmentProvider.updateEquipmentStandard(standard);
+			if (exist.getTargetId() == 0L && cmd.getTargetId()!=null) {
+				//如果是项目上修改判断下是否为公共标准 创建副本将标准的referId设置成公共标准id
+				standard.setReferId(cmd.getId());
+				standard.setTargetId(cmd.getTargetId());
+				equipmentProvider.creatEquipmentStandard(standard);
+
+			}else {
+				equipmentProvider.updateEquipmentStandard(standard);
+			}
 
 			/*List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
 			if(maps != null && maps.size() > 0) {

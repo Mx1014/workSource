@@ -892,6 +892,23 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		return result;
 	}
 
+	@Override
+	public void createEquipmentModuleCommunityMap(EquipmentModuleCommunityMap  map) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentModuleCommunityMap.class));
+		EhEquipmentModuleCommunityMapDao dao = new EhEquipmentModuleCommunityMapDao(context.configuration());
+		map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		dao.insert(map);
+	}
+
+	@Override
+	public List<EquipmentModuleCommunityMap> getModuleCommunityMap(Long targetId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.selectFrom(Tables.EH_EQUIPMENT_MODULE_COMMUNITY_MAP)
+				.where(Tables.EH_EQUIPMENT_MODULE_COMMUNITY_MAP.TARGET_ID.eq(targetId))
+				.fetchInto(EquipmentModuleCommunityMap.class);
+	}
+
 	@Cacheable(value="listQualifiedEquipmentStandardEquipments", key="'AllEquipments'", unless="#result.size() == 0")
 	@Override
 	public List<EquipmentInspectionEquipments> listQualifiedEquipmentStandardEquipments() {
