@@ -303,7 +303,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
         if (task.getAddressId()!=null) {
             Address address = addressProvider.findAddressById(task.getAddressId());
             if (address != null && NamespaceAddressType.EBEI.getCode().equals(address.getNamespaceAddressType()))
-                param.put("buildingId", address.getNamespaceAddressToken());
+                param.put("infoId", address.getNamespaceAddressToken());
         }
 
         param.put("submitter","正中会");
