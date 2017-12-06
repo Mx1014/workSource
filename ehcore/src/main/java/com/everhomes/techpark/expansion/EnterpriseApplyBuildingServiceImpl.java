@@ -405,6 +405,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 			dto.setAreaId(r.getAreaId());
 			dto.setAreaName(r.getAreaName());
 			dto.setAddress(r.getAddress());
+			dto.setCategoryId(categoryId);
 //			dto.setContactPhone(r.get);
 		}else {
 			dto.setProjectId(leaseProject.getProjectId());
@@ -423,6 +424,8 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 				dto.setPosterUrl(contentServerService.parserUri(dto.getPosterUri(), EntityType.USER.getCode(), userId));
 			}
 			dto.setDescription(leaseProject.getDescription());
+			dto.setCategoryId(categoryId);
+
 		}
 	}
 
