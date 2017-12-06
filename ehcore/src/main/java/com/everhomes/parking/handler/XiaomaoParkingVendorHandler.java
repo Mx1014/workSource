@@ -223,7 +223,8 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
-        long tempTime = calendar.getTimeInMillis();
+        //获取到当前时间减一秒，计算有效期 开始时间在这个时间上加一秒，结束时间一般是在某一天的23:59:59
+        long tempTime = calendar.getTimeInMillis() - 1000L;
 
         Timestamp timestampStart = Utils.addSecond(tempTime, 1);
         Timestamp timestampEnd = Utils.getTimestampByAddNatureMonth(tempTime, order.getMonthCount().intValue());
