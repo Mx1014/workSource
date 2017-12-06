@@ -244,16 +244,16 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 			equipmentProvider.creatEquipmentStandard(standard);
 			//按照现在的模式  在公共中创建的标准targetId为null
-			if(cmd.getCommunities() != null && cmd.getCommunities().size()>0){
+			/*if(cmd.getCommunities() != null && cmd.getCommunities().size()>0){
 				//此处创建公共标准关联表 targetId为null为公共标准
 				for (Long communityId: cmd.getCommunities()) {
-					EquipmentModuleCommunityMap map = new EquipmentModuleCommunityMap();
-					map.setStandardId(cmd.getId());
-					map.setTargetType(cmd.getTargetType());
+					EquipmentModleCommunityMap map = new EquipmentModleCommunityMap();
+					map.setStandardId(standard.getId());
+					map.setTargetType(standard.getTargetType());
 					map.setTargetId(communityId);
-					equipmentProvider.createEquipmentModuleCommunityMap(map);
+					equipmentProvider.createEquipmentModleCommunityMap(map);
 				}
-			}
+			}*/
 
 		} else {
 			EquipmentInspectionStandards exist = verifyEquipmentStandard(cmd.getId());
@@ -3952,6 +3952,16 @@ public class EquipmentServiceImpl implements EquipmentService {
 				map.setItemId(itemId);
 				equipmentProvider.createEquipmentInspectionTemplateItemMap(map);
 			}
+			/*if(cmd.getCommunities() != null && cmd.getCommunities().size()>0){
+				//此处创建公共标准关联表 targetId为null为公共标准
+				for (Long communityId: cmd.getCommunities()) {
+					EquipmentModleCommunityMap  = new EquipmentModleCommunityMap();
+					map.setStandardId(template.getId());
+					map.setTargetType(template.getTargetType());
+					map.setTargetId(communityId);
+					equipmentProvider.createEquipmentModuleCommunityMap(map);
+				}
+			}*/
 		}
 
 

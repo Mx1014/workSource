@@ -1,11 +1,10 @@
 package com.everhomes.rest.equipment;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 
 /**
@@ -14,6 +13,7 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerType: 模板所属组织类型，参考{@link com.everhomes.rest.quality.OwnerType}</li>
  *  <li>name: 模板名称</li>
  *  <li>items: 巡检项信息 参考{@link com.everhomes.rest.equipment.InspectionItemDTO}</li>
+ *  <li>communities: 巡检项信息 </li>
  * </ul>
  */
 public class CreateInspectionTemplateCommand {
@@ -25,6 +25,9 @@ public class CreateInspectionTemplateCommand {
 	private String ownerType;
 	
 	private String name;
+
+	@ItemType(Long.class)
+	private  List<Long> communities;
 	
 	@ItemType(InspectionItemDTO.class)
 	private List<InspectionItemDTO> items;
@@ -59,6 +62,14 @@ public class CreateInspectionTemplateCommand {
 
 	public void setItems(List<InspectionItemDTO> items) {
 		this.items = items;
+	}
+
+	public List<Long> getCommunities() {
+		return communities;
+	}
+
+	public void setCommunities(List<Long> communities) {
+		this.communities = communities;
 	}
 
 	@Override

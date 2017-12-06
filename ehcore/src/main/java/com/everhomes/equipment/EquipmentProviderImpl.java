@@ -892,11 +892,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		return result;
 	}
 
-	@Override
-	public void createEquipmentModuleCommunityMap(EquipmentModuleCommunityMap  map) {
+	/*@Override
+	public void createEquipmentModuleCommunityMap(EquipmentModleCommunityMap  map) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentModuleCommunityMap.class));
-		EhEquipmentModuleCommunityMapDao dao = new EhEquipmentModuleCommunityMapDao(context.configuration());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentModleCommunityMap.class));
+		EhEquipmentModleCommunityMapDao dao = new EhEquipmentModleCommunityMapDao(context.configuration());
 		map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		dao.insert(map);
 	}
@@ -904,8 +904,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	@Override
 	public List<EquipmentModuleCommunityMap> getModuleCommunityMap(Long targetId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		return context.selectFrom(Tables.EH_EQUIPMENT_MODULE_COMMUNITY_MAP)
-				.where(Tables.EH_EQUIPMENT_MODULE_COMMUNITY_MAP.TARGET_ID.eq(targetId))
+		return context.selectFrom(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
+				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TARGET_ID.eq(targetId))
 				.fetchInto(EquipmentModuleCommunityMap.class);
 	}
 
@@ -915,7 +915,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		context.delete(Tables.EH_EQUIPMENT_MODULE_COMMUNITY_MAP)
 				.where(Tables.EH_EQUIPMENT_MODULE_COMMUNITY_MAP.STANDARD_ID.eq(standardId))
 				.execute();
-	}
+	}*/
 
 	@Cacheable(value="listQualifiedEquipmentStandardEquipments", key="'AllEquipments'", unless="#result.size() == 0")
 	@Override

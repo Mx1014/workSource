@@ -1,6 +1,6 @@
 package com.everhomes.equipment;
 
-import com.everhomes.server.schema.tables.pojos.EhEquipmentModuleCommunityMap;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentModleCommunityMap;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * @author jerry.R
  */
 
-public class EquipmentModuleCommunityMap  extends EhEquipmentModuleCommunityMap {
+public class EquipmentModleCommunityMap  extends EhEquipmentModleCommunityMap {
     private static final long serialVersionUID = -3393181671186124334L;
 
     @Override
