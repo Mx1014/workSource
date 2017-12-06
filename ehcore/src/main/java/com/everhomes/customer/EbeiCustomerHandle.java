@@ -294,6 +294,7 @@ public class EbeiCustomerHandle implements CustomerHandle {
             customer.setContactPhone(ebeiCustomer.getContactPhone());
             customer.setStatus(CommonStatus.ACTIVE.getCode());
             customer.setCreatorUid(1L);
+            customer.setTrackingUid(0L);
             customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             customer.setOperatorUid(1L);
             customer.setUpdateTime(customer.getCreateTime());
