@@ -1145,14 +1145,43 @@ public class EquipmentController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /equipment/disableModule</b>
-	 * <p>删除module和项目的关联表</p>
+	 * <b>URL: /equipment/disableModle</b>
+	 * <p>删除标准modle和项目的关联表</p>
+	 */
+	@RequestMapping("disableModle")
+	@RestReturn(value = String.class)
+	public RestResponse disableModleStandard (DeleteEquipmentStandardCommand cmd) {
+
+		equipmentService.disableModle(cmd.getStandardId());
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * <b>URL: /equipment/disableModle</b>
+	 * <p>删除模板modle和项目的关联表</p>
 	 */
 	@RequestMapping("disableModule")
 	@RestReturn(value = String.class)
-	public RestResponse disableModule (DeleteEquipmentStandardCommand cmd) {
+	public RestResponse disableModleTemplate (DeleteEquipmentStandardCommand cmd) {
 
-		equipmentService.disableModule(cmd.getStandardId());
+		equipmentService.disableModleTemplate(cmd.getStandardId());
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/syscTemplates</b>
+	 * <p>删除modle和项目的关联表</p>
+	 */
+	@RequestMapping("distributeTemplates")
+	@RestReturn(value = String.class)
+	public RestResponse distribute () {
+
+		equipmentService.distributeTemplates();
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

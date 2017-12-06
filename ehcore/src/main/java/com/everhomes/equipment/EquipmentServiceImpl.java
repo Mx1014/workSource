@@ -3952,16 +3952,16 @@ public class EquipmentServiceImpl implements EquipmentService {
 				map.setItemId(itemId);
 				equipmentProvider.createEquipmentInspectionTemplateItemMap(map);
 			}
-			/*if(cmd.getCommunities() != null && cmd.getCommunities().size()>0){
+			if(cmd.getCommunities() != null && cmd.getCommunities().size()>0){
 				//此处创建公共标准关联表 targetId为null为公共标准
 				for (Long communityId: cmd.getCommunities()) {
-					EquipmentModleCommunityMap  = new EquipmentModleCommunityMap();
-					map.setStandardId(template.getId());
-					map.setTargetType(template.getTargetType());
-					map.setTargetId(communityId);
-					equipmentProvider.createEquipmentModuleCommunityMap(map);
+					EquipmentModleCommunityMap communityMap = new EquipmentModleCommunityMap();
+					communityMap.setTemplateId(template.getId());
+					communityMap.setTargetType(template.getTargetType());
+					communityMap.setTargetId(communityId);
+					equipmentProvider.createEquipmentModleCommunityMap(communityMap);
 				}
-			}*/
+			}
 		}
 
 
@@ -3977,46 +3977,61 @@ public class EquipmentServiceImpl implements EquipmentService {
 					EquipmentServiceErrorCode.ERROR_TEMPLATE_NOT_EXIST,
  				"模板不存在");
 		}
-		if(!template.getName().equals(cmd.getName())) {
-			template.setName(cmd.getName());
-			equipmentProvider.updateEquipmentInspectionTemplates(template);
-		}
 
-		List<InspectionItemDTO> updateItems = cmd.getItems();
-		List<EquipmentInspectionTemplateItemMap> maps = equipmentProvider.listEquipmentInspectionTemplateItemMap(template.getId());
-		if(updateItems == null || updateItems.size() == 0) {
-			if(maps != null && maps.size() > 0) {
-				for(EquipmentInspectionTemplateItemMap map : maps) {
-					equipmentProvider.deleteEquipmentInspectionTemplateItemMap(map.getId());
-				}
+		//cmd.getTargetId表示当前操作是在项目还是全部 如果在项目上修改公共的则创建副本
+		if (template.getTargetId() == 0L && cmd.getTargetId() != null) {
+			EquipmentInspectionTemplates templatesNew = ConvertHelper.convert(cmd, EquipmentInspectionTemplates.class);
+			equipmentProvider.createEquipmentInspectionTemplates(templatesNew);
+			//创建map表关系
+			for (InspectionItemDTO item : cmd.getItems()) {
+				EquipmentInspectionTemplateItemMap map = new EquipmentInspectionTemplateItemMap();
+				map.setTemplateId(template.getId());
+				map.setItemId(item.getId());
+				equipmentProvider.createEquipmentInspectionTemplateItemMap(map);
 			}
 		} else {
-			List<Long> updateItemIds = new ArrayList<Long>();
 
-			//cmd item 不带id的create，其他的看map表中的itemId在不在cmd里面 不在的删掉
-			for(InspectionItemDTO dto : updateItems) {
-				if(dto.getId() == null) {
+			if (!template.getName().equals(cmd.getName())) {
+				template.setName(cmd.getName());
+				equipmentProvider.updateEquipmentInspectionTemplates(template);
+			}
 
-					EquipmentInspectionItems item = ConvertHelper.convert(dto, EquipmentInspectionItems.class);
-					Long itemId = equipmentProvider.createEquipmentInspectionItems(item);
-					EquipmentInspectionTemplateItemMap map = new EquipmentInspectionTemplateItemMap();
-					map.setTemplateId(template.getId());
-					map.setItemId(itemId);
-					equipmentProvider.createEquipmentInspectionTemplateItemMap(map);
-				} else {
+			List<InspectionItemDTO> updateItems = cmd.getItems();
+			List<EquipmentInspectionTemplateItemMap> maps = equipmentProvider.listEquipmentInspectionTemplateItemMap(template.getId());
+			if (updateItems == null || updateItems.size() == 0) {
+				if (maps != null && maps.size() > 0) {
+					for (EquipmentInspectionTemplateItemMap map : maps) {
+						equipmentProvider.deleteEquipmentInspectionTemplateItemMap(map.getId());
+					}
+				}
+			} else {
+				List<Long> updateItemIds = new ArrayList<Long>();
+
+				//cmd item 不带id的create，其他的看map表中的itemId在不在cmd里面 不在的删掉
+				for (InspectionItemDTO dto : updateItems) {
+					if (dto.getId() == null) {
+
+						EquipmentInspectionItems item = ConvertHelper.convert(dto, EquipmentInspectionItems.class);
+						Long itemId = equipmentProvider.createEquipmentInspectionItems(item);
+						EquipmentInspectionTemplateItemMap map = new EquipmentInspectionTemplateItemMap();
+						map.setTemplateId(template.getId());
+						map.setItemId(itemId);
+						equipmentProvider.createEquipmentInspectionTemplateItemMap(map);
+					} else {
 						EquipmentInspectionItems item = ConvertHelper.convert(dto, EquipmentInspectionItems.class);
 						equipmentProvider.updateEquipmentInspectionItems(item);
 
 						updateItemIds.add(dto.getId());
+					}
 				}
-			}
-			// check maps is null for nullPointException
-			if (maps != null && maps.size() > 0) {
-				for(EquipmentInspectionTemplateItemMap map : maps) {
-                    if(!updateItemIds.contains(map.getItemId())) {
-                        equipmentProvider.deleteEquipmentInspectionTemplateItemMap(map.getId());
-                    }
-                }
+				// check maps is null for nullPointException
+				if (maps != null && maps.size() > 0) {
+					for (EquipmentInspectionTemplateItemMap map : maps) {
+						if (!updateItemIds.contains(map.getItemId())) {
+							equipmentProvider.deleteEquipmentInspectionTemplateItemMap(map.getId());
+						}
+					}
+				}
 			}
 		}
 
@@ -4832,7 +4847,35 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	@Override
-	public void disableModule(Long standardId) {
+	public void disableModle(Long standardId) {
 		equipmentProvider.deleteEquipmentModleCommunityMap(standardId);
+	}
+
+	@Override
+	public void disableModleTemplate(Long templateId) {
+		equipmentProvider.deleteTemplateModleCommunityMap(templateId);
+	}
+
+	@Override
+	public void distributeTemplates() {
+		//对于模板新增项目类型  需要把之前不同域空间模板默认分发到所有的项目
+		List<Integer> allNameSpaces = equipmentProvider.getDistinctNameSpace();
+		for (Integer namespaceId : allNameSpaces) {
+			//获取当前域空间所有的项目
+			List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
+			//获取当前域空间所有的巡检模板
+			List<EquipmentInspectionTemplates> templates = equipmentProvider.listInspectionTemplates(namespaceId, null);
+			for (EquipmentInspectionTemplates template : templates) {
+				for (Community community : communities) {
+					EquipmentModleCommunityMap map = new EquipmentModleCommunityMap();
+					map.setTemplateId(template.getId());
+					map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					map.setTargetId(community.getId());
+					map.setTargetType("community");
+					equipmentProvider.createEquipmentModleCommunityMap(map);
+				}
+			}
+		}
+
 	}
 }

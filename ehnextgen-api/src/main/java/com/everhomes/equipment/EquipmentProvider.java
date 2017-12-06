@@ -148,4 +148,8 @@ public interface EquipmentProvider {
     List<EquipmentModleCommunityMap> getModuleCommunityMap(Long targetId);
 
     void deleteEquipmentModleCommunityMap(Long standardId);
+
+    void deleteTemplateModleCommunityMap(Long templateId);
+
+	List<Integer> getDistinctNameSpace();
 }

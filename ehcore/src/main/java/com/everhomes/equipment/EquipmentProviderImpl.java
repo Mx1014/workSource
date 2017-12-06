@@ -917,6 +917,21 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 				.execute();
 	}
 
+	@Override
+	public void deleteTemplateModleCommunityMap(Long templateId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
+				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TEMPLATE_ID.eq(templateId))
+				.execute();
+	}
+
+	@Override
+	public List<Integer> getDistinctNameSpace() {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.selectDistinct(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.NAMESPACE_ID)
+				.fetchInto(Integer.class);
+	}
+
 	@Cacheable(value="listQualifiedEquipmentStandardEquipments", key="'AllEquipments'", unless="#result.size() == 0")
 	@Override
 	public List<EquipmentInspectionEquipments> listQualifiedEquipmentStandardEquipments() {
