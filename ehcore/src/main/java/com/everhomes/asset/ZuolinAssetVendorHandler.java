@@ -339,13 +339,23 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         }
         return assetProvider.listNoticeInfoByBillId(billIds);
     }
-
+    //这个UI页面希望有合同筛选
     @Override
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractId) {
         ShowBillForClientDTO response = new ShowBillForClientDTO();
+        if(!targetType.equals(AssetPaymentStrings.EH_USER) || !targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+            LOGGER.error("target type is neither eh_user nor eh_organization");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"target type is neither eh_user nor eh_organization");
+        }
+        if(targetId == null){
+            LOGGER.error("customer id cannot be null!");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"customer id cannot be null!");
+        }
+        //获得必要条件 客户
         if(targetType.equals("eh_user")) {
             targetId = UserContext.current().getUser().getId();
         }
+        //获得筛选条件 contractId和contractNum
         String contractNum = null;
         Long cid = null;
         try{
@@ -430,6 +440,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
             GetAreaAndAddressByContractDTO areaAndAddressByContract = assetService.getAreaAndAddressByContract(cmd3);
             res.setAddressNames(areaAndAddressByContract.getAddressNames());
             res.setAreaSizesSum(areaAndAddressByContract.getAreaSizesSum());
+            res.setCustomerName(contractDTO.getCustomerName());
         }
         return res;
     }
@@ -699,14 +710,17 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
 
     /**
-     * method implementation:
+     * @deprecated method implementation:
      * in this method, contracts will be found for the customer. And divided into groups by contractId and billGroupId
      * being the key , while having the bills to be values.
+     *
+     * @active mehtod implementation:
+     * 寻找用户，这里不关心合同
      */
     @Override
     public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
         List<ShowBillForClientV2DTO> tabBills = new ArrayList<>();
-        //find contracts
+        //查询合同，用来聚类
         List<ContractDTO> contracts = listCustomerContracts(cmd.getTargetType(), cmd.getTargetId(), cmd.getNamespaceId(), cmd.getOwnerId());
         if(contracts == null || contracts.size() < 1){
             return null;

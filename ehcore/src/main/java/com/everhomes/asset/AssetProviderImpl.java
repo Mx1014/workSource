@@ -632,26 +632,19 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         SelectQuery<Record> query = dslContext.selectQuery();
         query.addFrom(t);
-        if(ownerType!=null){
-            query.addConditions(t.OWNER_TYPE.eq(ownerType));
-        }
-        if(ownerId!=null){
-            query.addConditions(t.OWNER_ID.eq(ownerId));
-        }
+        //必要用户参数
+        query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        query.addConditions(t.OWNER_ID.eq(ownerId));
+        query.addConditions(t.TARGET_TYPE.eq(targetType));
+        query.addConditions(t.TARGET_ID.eq(targetId));
+        //已出账单，排除了未来账单
+        query.addConditions(t.SWITCH.eq((byte)1));
 
         if(billGroupId!=null){
             query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
         }
-        query.addConditions(t.SWITCH.eq((byte)1));
         if(contractId!=null){
             query.addConditions(t.CONTRACT_ID.eq(contractId));
-        }else{
-            if(targetType!=null){
-                query.addConditions(t.TARGET_TYPE.eq(targetType));
-            }
-            if(targetId!=null){
-                query.addConditions(t.TARGET_ID.eq(targetId));
-            }
         }
         if(contractNum!=null){
             query.addConditions(t.CONTRACT_NUM.eq(contractNum));
@@ -659,7 +652,7 @@ public class AssetProviderImpl implements AssetProvider {
         if(isOwedBill==1){
             query.addConditions(t.STATUS.eq((byte)0));
         }
-        List<Object> list  = new ArrayList<>();
+        List<Byte> list  = new ArrayList<>();
         query.fetch()
                 .map(r -> {
                     BillDetailDTO dto = new BillDetailDTO();
@@ -668,41 +661,50 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBillId(String.valueOf(r.getValue(t.ID)));
                     dto.setDateStr(r.getValue(t.DATE_STR));
 
-                    list.add(r.getValue(t.DATE_STR_DUE));
-                    list.add(r.getValue(t.DUE_DAY_DEADLINE));
-                    list.add(r.getValue(t.STATUS));
+//                    list.add(r.getValue(t.DATE_STR_DUE));
+//                    list.add(r.getValue(t.DUE_DAY_DEADLINE));
+//                    list.add(r.getValue(t.STATUS));
+                    list. add(r.getValue(t.CHARGE_STATUS));
 
+                    dto.setStatus(r.getValue(t.STATUS));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
                     dto.setDeadline(r.getValue(t.DUE_DAY_DEADLINE));
                     dtos.add(dto);
                     return null;});
-        Date today = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//        Date today = new Date();
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         for(int i = 0; i < dtos.size(); i ++){
+            //根据t.status 缴纳情况和 t.chargetStatus正常或者欠费来判定三个状态，注意，这里没有未缴状态，因为所有都是已出账单
             BillDetailDTO dto = dtos.get(i);
-            String due = (String)list.get(3*i);
-            String deadline = (String)list.get(3*i+1);
-            Byte status = (Byte)list.get(3*i+2);
-            if(status != null && status.byteValue() == (byte)1){
-                dto.setStatus((byte)1);
-                continue;
-            }
-            try{
-                if(due!=null && sdf.parse(due).compareTo(today) != 1){
-                    dto.setStatus((byte)0);
-                    //状态进阶为待缴
-                }else if(due!=null && sdf.parse(due).compareTo(today) == 1){
-                    dto.setStatus((byte)3);
-                    //未缴
-                }
-                if(deadline!=null && sdf.parse(deadline).compareTo(today)== -1){
-                    //状态进阶为欠费
-                    dto.setStatus((byte)2);
-                }
-            }catch (Exception e){
+            if(dto.getStatus().byteValue() == (byte)0 && list.get(i).byteValue() == (byte)1){
+                dto.setStatus((byte)2);
+            }else if(dto.getStatus().byteValue() == (byte)0 && list.get(i).byteValue() == (byte)0){
                 dto.setStatus((byte)0);
             }
+            //这是按照时间来划分状态
+//            String due = (String)list.get(3*i);
+//            String deadline = (String)list.get(3*i+1);
+//            Byte status = (Byte)list.get(3*i+2);
+//            if(status != null && status.byteValue() == (byte)1){
+//                dto.setStatus((byte)1);
+//                continue;
+//            }
+//            try{
+//                if(due!=null && sdf.parse(due).compareTo(today) != 1){
+//                    dto.setStatus((byte)0);
+//                    //状态进阶为待缴
+//                }else if(due!=null && sdf.parse(due).compareTo(today) == 1){
+//                    dto.setStatus((byte)3);
+//                    //未缴
+//                }
+//                if(deadline!=null && sdf.parse(deadline).compareTo(today)== -1){
+//                    //状态进阶为欠费
+//                    dto.setStatus((byte)2);
+//                }
+//            }catch (Exception e){
+//                dto.setStatus((byte)0);
+//            }
         }
         for(int i = 0; i < dtos.size(); i++){
             BillDetailDTO dto = dtos.get(i);
