@@ -1,9 +1,9 @@
 package com.everhomes.workReport;
 
-import com.everhomes.server.schema.tables.pojos.EhWorkReportScopeMap;
+import com.everhomes.server.schema.tables.pojos.EhWorkReportValReceiverMap;
 import com.everhomes.util.StringHelper;
 
-public class WorkReportScopeMap extends EhWorkReportScopeMap {
+public class WorkReportValReceiverMap extends EhWorkReportValReceiverMap {
 
     @Override
     public String toString() {

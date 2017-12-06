@@ -2022,6 +2022,26 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhForumServiceTypes.class, Tables.EH_FORUM_SERVICE_TYPES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_FORUM_SERVICE_TYPES.ID.max()).from(Tables.EH_FORUM_SERVICE_TYPES).fetchOne().value1();
         });
+
+        syncTableSequence(null, EhWorkReportTemplates.class, Tables.EH_WORK_REPORT_TEMPLATES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_WORK_REPORT_TEMPLATES.ID.max()).from(Tables.EH_WORK_REPORT_TEMPLATES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhWorkReports.class, Tables.EH_WORK_REPORTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_WORK_REPORTS.ID.max()).from(Tables.EH_WORK_REPORTS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhWorkReportScopeMap.class, Tables.EH_WORK_REPORT_SCOPE_MAP.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_WORK_REPORT_SCOPE_MAP.ID.max()).from(Tables.EH_WORK_REPORT_SCOPE_MAP).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhWorkReportVals.class, Tables.EH_WORK_REPORT_VALS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_WORK_REPORT_VALS.ID.max()).from(Tables.EH_WORK_REPORT_VALS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhWorkReportValReceiverMap.class, Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.ID.max()).from(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
