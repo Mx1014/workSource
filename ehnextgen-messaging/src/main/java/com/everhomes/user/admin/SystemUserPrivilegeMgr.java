@@ -414,10 +414,10 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
                                 LOGGER.debug("check moduleApp admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, checkCommunityId={}, checkOrgId={}, privilegeId={}, appId={}" , userId, ownerType, ownerId, currentOrgId, checkCommunityId, checkOrgId, privilegeId, appId);
                                 return true;
                             }
-//                            // 校验权限细化
-//                            if(checkAccess(userId, EntityType.COMMUNITY.getCode(), checkCommunityId, currentOrgId, privilegeId)){
-//                                return true;
-//                            }
+                            // 校验权限细化
+                            if(checkAccess(userId, EntityType.COMMUNITY.getCode(), checkCommunityId, currentOrgId, privilegeId)){
+                                return true;
+                            }
                         }
                     }else{
                         if(checkOrganizationAdmin(userId, currentOrgId)){
