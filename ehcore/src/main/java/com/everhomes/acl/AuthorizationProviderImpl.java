@@ -489,7 +489,6 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAuthorizations.class));
 		List<EhAuthorizations> auths = new ArrayList<>();
 		for (Authorization authorization: authorizations) {
-			nextId++;
 			authorization.setId(nextId);
 			if(null == authorization.getCreateTime())
 				authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -497,7 +496,8 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		}
 		EhAuthorizationsDao dao = new EhAuthorizationsDao(context.configuration());
 		dao.insert(auths);
-		return id;
+		nextId++;
+		return nextId;
 	}
 
 	@Override
