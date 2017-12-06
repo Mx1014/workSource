@@ -243,20 +243,24 @@ public class WorkReportServiceImpl implements WorkReportService {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         WorkReport report = workReportProvider.findWorkReportByTemplateId(UserContext.getCurrentNamespaceId(),
                 template.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType(), template.getId());
-        //  update the template if it is already existing.
+        //  update the report if it is already existing.
         if (report != null) {
             report.setStatus(WorkReportStatus.RUNNING.getCode());
             report.setReportName(template.getReportName());
             report.setReportType(template.getReportType());
+            if(formOriginId != null)
+                report.setFormOriginId(formOriginId);
             workReportProvider.updateWorkReport(report);
         } else {
-            //
+            //  otherwise, create the report
             report = ConvertHelper.convert(template, WorkReport.class);
             report.setNamespaceId(namespaceId);
             report.setOwnerId(cmd.getOwnerId());
             report.setOwnerType(cmd.getOwnerType());
             report.setOrganizationId(cmd.getOrganizationId());
             report.setStatus(WorkReportStatus.RUNNING.getCode());
+            if(formOriginId != null)
+                report.setFormOriginId(formOriginId);
             report.setReportTemplateId(template.getId());
             createWorkReport(report, cmd.getOrganizationId(), namespaceId);
         }
