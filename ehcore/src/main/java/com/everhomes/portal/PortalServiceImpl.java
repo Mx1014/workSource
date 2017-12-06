@@ -2076,7 +2076,9 @@ public class PortalServiceImpl implements PortalService {
 					moduleId = parser.getModuleId(namespaceId, actionData, actionType, itemLabel);
 					if(moduleId != null && moduleId != 0L){
 						serviceModule = serviceModuleProvider.findServiceModuleById(moduleId);
-						break;
+						if(serviceModule != null){
+							break;
+						}
 					}
 				}
 			}
