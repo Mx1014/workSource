@@ -2,6 +2,8 @@ package com.everhomes.rest.customer;
 
 import com.everhomes.util.StringHelper;
 
+import java.sql.Timestamp;
+
 /**
  * <ul>
  *     <li>id: id</li>
@@ -23,7 +25,7 @@ public class CustomerDepartureInfoDTO {
     private Integer namespaceId;
     private Byte customerType;
     private Long customerId;
-    private Long reviewTime;
+    private Timestamp reviewTime;
     private Integer hatchMonths;
     private Long departureNatureId;
     private String departureNatureName;
@@ -111,11 +113,11 @@ public class CustomerDepartureInfoDTO {
         this.remark = remark;
     }
 
-    public Long getReviewTime() {
+    public Timestamp getReviewTime() {
         return reviewTime;
     }
 
-    public void setReviewTime(Long reviewTime) {
+    public void setReviewTime(Timestamp reviewTime) {
         this.reviewTime = reviewTime;
     }
 
