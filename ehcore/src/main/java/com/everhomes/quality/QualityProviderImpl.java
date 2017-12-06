@@ -1652,10 +1652,10 @@ public class QualityProviderImpl implements QualityProvider {
 //		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId));
 		//改成用namespaceId by xiongying20170329
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
-		//全部中显示scopeId =0 和项目的所有
-		if(scopeCode != null && scopeCode != 0)
+
+		if(scopeCode != null)
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_CODE.eq(scopeCode));
-		if(scopeId != null && scopeId != 0)
+		if(scopeId != null)
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_ID.eq(scopeId));
 		if(inspectionType != null)
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.INSPECTION_TYPE.eq(inspectionType));
