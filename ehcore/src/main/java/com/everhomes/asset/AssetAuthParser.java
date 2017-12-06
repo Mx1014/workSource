@@ -20,8 +20,9 @@ public class AssetAuthParser implements PortalUrlParser {
             Map<String,String> data= new Gson().fromJson(actionData,new TypeToken<HashMap<String,String>>(){}.getType());
             if(data!=null && data.size() > 0 && data.get("url")!=null){
                 String wd = data.get("url").split("/")[3];
-                if( wd.equals("property-payment") || wd.equals("property-management")) return 20400l;
+                if( wd.equals("property-payment") || wd.equals("property-management")) res = 20400l;
             }
         }
+        return res;
     }
 }
