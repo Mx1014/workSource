@@ -164,7 +164,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 						menuIdSignle.add(menuId);
 						List<WebMenu> menuSignle = webMenuPrivilegeProvider.listWebMenuByMenuIds(menuIdSignle);
 						if(menuSignle != null){
-							List<WebMenu> menuList = webMenuProvider.listWebMenusByPath(menuSignle.get(0).getPath(), categories);
+							List<WebMenu> menuList = webMenuProvider.listWebMenusByPath(menuSignle.get(0).getPath(), null);
 							menuList = menuList.stream().map(r->{
 								r.setAppId(dto.getId());
 								return r;
