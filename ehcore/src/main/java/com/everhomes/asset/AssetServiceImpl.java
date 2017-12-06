@@ -31,6 +31,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
@@ -57,6 +58,8 @@ import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
@@ -199,6 +202,9 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private NamespaceResourceService namespaceResourceService;
 
+    @Autowired
+    private PortalService portalService;
+
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
         List<ListOrganizationsByPmAdminDTO> dtoList = new ArrayList<>();
@@ -240,12 +246,19 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public ListBillsResponse listBills(ListBillsCommand cmd) {
 //        Integer namespaceId = 999983;
+        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
+        cmd1.setActionType((byte)13);
+        cmd1.setModuleId(20400l);
+        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
+        Long appId = res.getServiceModuleApps().get(0).getId();
+         checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), 100750l, 100750l, 40073l, appId, null, cmd.getOwnerId());
+
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListBillsResponse response = new ListBillsResponse();
-
         List<ListBillsDTO> list = handler.listBills(cmd.getContractNum(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),cmd.getPageAnchor(),cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus(),cmd.getTargetType(), response);
         response.setListBillsDTOS(list);
         return response;
