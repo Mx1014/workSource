@@ -949,6 +949,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	public List<Long> getModuleCommunityMapByTemplateId(Long templateId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		return context.select(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TARGET_ID)
+				.from(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
 				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TEMPLATE_ID.eq(templateId))
 				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(EquipmentModelType.TEMPLATE.getCode()))
 				.fetchInto(Long.class);
