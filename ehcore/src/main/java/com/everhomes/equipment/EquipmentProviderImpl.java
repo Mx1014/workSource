@@ -933,6 +933,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	public List<Integer> getDistinctNameSpace() {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		return context.selectDistinct(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.NAMESPACE_ID)
+				.from(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES)
 				.fetchInto(Integer.class);
 	}
 
@@ -940,6 +941,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	public List<Long> getModuleCommunityMapByStandardId(Long standardId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		return context.select(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TARGET_ID)
+				.from(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
 				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.STANDARD_ID.eq(standardId))
 				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(EquipmentModelType.STANDARD.getCode()))
 				.fetchInto(Long.class);
