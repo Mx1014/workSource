@@ -27,6 +27,7 @@ import com.everhomes.rest.family.NeighborUserDTO;
 import com.everhomes.rest.family.RejectMemberCommand;
 import com.everhomes.rest.family.RevokeMemberCommand;
 import com.everhomes.rest.family.SetCurrentFamilyCommand;
+import com.everhomes.rest.family.TestLockAquiringCommand;
 import com.everhomes.rest.family.UpdateFamilyInfoCommand;
 import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
 import com.everhomes.rest.family.admin.ListWaitApproveFamilyAdminCommand;
@@ -95,5 +96,5 @@ public interface FamilyService {
      *                                    时间以毫秒为单位，不填是默认为5秒；锁的编号用于在日志中识别是第几个锁，不填则默认为时间戳；
      *                                    这几项信息使用逗号分隔
      */
-	public void testLockAquiring(String expression);
+	public void testLockAquiring(TestLockAquiringCommand cmd);
 }

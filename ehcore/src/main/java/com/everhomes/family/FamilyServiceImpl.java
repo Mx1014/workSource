@@ -2297,26 +2297,10 @@ public class FamilyServiceImpl implements FamilyService {
 	 *                                    时间以毫秒为单位，不填是默认为5秒；锁的编号用于在日志中识别是第几个锁，不填则默认为时间戳；
 	 *                                    这几项信息使用逗号分隔
 	 */
-	public void testLockAquiring(String expression) {
-	    String lockCode = null; // 锁对应的key，如 CoordinationLocks.CREATE_RESOURCE.getCode()
-	    long millis = -1;  // 获取锁的时间
-	    long number = System.currentTimeMillis(); // 锁的编号
-	    
-	    if(expression != null) {
-	        String[] segments = expression.split(",");
-	        if(segments.length > 0 && segments[0].trim().length() > 0) {
-	            lockCode =  segments[0].trim();
-	        }
-	        if(segments.length > 1 && segments[1].trim().length() > 0) {
-	            millis =  Integer.parseInt(segments[1].trim());
-            }
-	        if(millis <=0 ) {
-	            millis = 5000;  // 默认5秒
-	        }
-            if(segments.length > 2 && segments[2].trim().length() > 0) {
-                number =  Long.parseLong(segments[2].trim());
-            }
-	    }
+	public void testLockAquiring(TestLockAquiringCommand cmd) {
+	    String lockCode = cmd.getLockCode(); // 锁对应的key，如 CoordinationLocks.CREATE_RESOURCE.getCode()
+	    long millis = (cmd.getLockTimeout() == null) ? 5000L : cmd.getLockTimeout();  // 持有锁的时间
+	    long number = (cmd.getNumber() == null) ? System.currentTimeMillis() : cmd.getNumber(); // 锁的编号
 	    
 	    if(lockCode != null) {
 	        long startTime = System.currentTimeMillis();
@@ -2327,8 +2311,8 @@ public class FamilyServiceImpl implements FamilyService {
             });
     	    long endTime = System.currentTimeMillis();
     	    if(LOGGER.isDebugEnabled()) {
-    	        LOGGER.debug("Test aquiring lock(release), expression={}, lockCode={}, millis={}, number={}, elapse={}", 
-    	                expression, lockCode, millis, number, (endTime - startTime));
+    	        LOGGER.debug("Test aquiring lock(release), lockCode={}, millis={}, number={}, elapse={}", 
+    	                lockCode, millis, number, (endTime - startTime));
     	    }
 	    }
 	}

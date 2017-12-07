@@ -436,11 +436,11 @@ public class FamilyController extends ControllerBase {
 //        response.setErrorDescription("OK");
 //        return response;
 //    }
+    @RequireAuthentication(false)
     @RequestMapping("testLockAquiring")
     @RestReturn(value=String.class)
-    @RequireAuthentication(false)
-    public RestResponse testLockAquiring(String expression) {
-        this.familyService.testLockAquiring(expression);
+    public RestResponse testLockAquiring(TestLockAquiringCommand cmd) {
+        this.familyService.testLockAquiring(cmd);
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
