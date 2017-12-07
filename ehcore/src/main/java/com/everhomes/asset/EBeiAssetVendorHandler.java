@@ -131,13 +131,14 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public List<ListBillsDTO> listBills(String contractNum, Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName, String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Long pageAnchor, Integer pageSize, String targetName, Byte status, String targetType, ListBillsResponse response) {
+        List<ListBillsDTO> list = new ArrayList<>();
+        if(targetType.equals(AssetPaymentStrings.EH_USER)) return list;
         if(pageAnchor==null || pageAnchor == 0l){
             pageAnchor = 1l;
         }
         if(pageSize == null){
             pageSize = 20;
         }
-        List<ListBillsDTO> list = new ArrayList<>();
         String fiProperty = null;
         if(billGroupId != null){
             PaymentBillGroup group = assetProvider.getBillGroupById(billGroupId);

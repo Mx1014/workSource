@@ -241,8 +241,8 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public ListBillsResponse listBills(ListBillsCommand cmd) {
 //        Integer namespaceId = 999983;
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+//        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        AssetVendor assetVendor = checkAssetVendor(cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId());
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListBillsResponse response = new ListBillsResponse();
