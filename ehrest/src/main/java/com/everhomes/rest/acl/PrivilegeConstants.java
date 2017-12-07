@@ -192,4 +192,24 @@ public interface PrivilegeConstants {
     long ENERGY_PLAN_LIST = 21015L;
     long ENERGY_PLAN_DELETE = 21016L;
 
+    // ---------------- 组织架构权限 -----------------------
+
+    //部门
+    long CREATE_DEPARTMENT = 41001L;
+    long MODIFY_DEPARTMENT = 41002L;
+    long DELETE_DEPARTMENT = 41003L;
+    long CHANGE_DEPARTMENT_ORDER = 41004L;
+
+    //岗位
+    long CREATE_JOB_POSITION = 41005L;
+    long MODIFY_JOB_POSITION = 41006L;
+    long DELETE_JOB_POSITION = 41007L;
+    long MODIFY_DEPARTMENT_JOB_POSITION = 41008L;
+
+    //人员
+    long CREATE_OR_MODIFY_PERSON = 41009L;
+    long DELETE_PERSON = 41010L;
+    long BATCH_IMPORT_PERSON = 41011L;
+    long BATCH_EXPORT_PERSON = 41012L;
+
 }
