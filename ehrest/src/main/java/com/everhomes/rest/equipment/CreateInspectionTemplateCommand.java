@@ -15,7 +15,7 @@ import java.util.List;
  *  <li>targetType: 标准所属项目类型</li>
  *  <li>name: 模板名称</li>
  *  <li>items: 巡检项信息 参考{@link com.everhomes.rest.equipment.InspectionItemDTO}</li>
- *  <li>communities: 巡检项信息 </li>
+ *  <li>communities: 巡检项应用的项目列表 </li>
  * </ul>
  */
 public class CreateInspectionTemplateCommand {

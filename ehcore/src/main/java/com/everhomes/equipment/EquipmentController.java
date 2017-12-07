@@ -1144,25 +1144,19 @@ public class EquipmentController extends ControllerBase {
 		return response;
 	}
 
-	/**
-	 * <b>URL: /equipment/disableModle</b>
-	 * <p>删除标准modle和项目的关联表</p>
-	 */
-	@RequestMapping("disableModle")
+/*
+	@RequestMapping("disableStandardModle")
 	@RestReturn(value = String.class)
 	public RestResponse disableModleStandard (DeleteEquipmentStandardCommand cmd) {
 
-		equipmentService.disableModle(cmd.getStandardId());
+		equipmentService.disableModleStandard(cmd.getStandardId());
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
-	/**
-	 * <b>URL: /equipment/disableModle</b>
-	 * <p>删除模板modle和项目的关联表</p>
-	 */
-	@RequestMapping("disableModule")
+
+	@RequestMapping("disableTemplateModle")
 	@RestReturn(value = String.class)
 	public RestResponse disableModleTemplate (DeleteEquipmentStandardCommand cmd) {
 
@@ -1171,7 +1165,7 @@ public class EquipmentController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
-	}
+	}*/
 
 	/**
 	 * <b>URL: /equipment/syscTemplates</b>

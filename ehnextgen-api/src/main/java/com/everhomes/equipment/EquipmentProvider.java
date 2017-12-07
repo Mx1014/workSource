@@ -85,7 +85,7 @@ public interface EquipmentProvider {
 	EquipmentInspectionTemplateItemMap findEquipmentInspectionTemplateItemMap(Long id);
 	List<EquipmentInspectionTemplateItemMap> listEquipmentInspectionTemplateItemMap(Long templateId);
 	List<EquipmentInspectionTemplates> listInspectionTemplates(Long ownerId, String ownerType, String name);
-	List<EquipmentInspectionTemplates> listInspectionTemplates(Integer namespaceId, String name);
+	List<EquipmentInspectionTemplates> listInspectionTemplates(Integer namespaceId, String name ,Long  targetId);
 	List<EquipmentInspectionStandards> listEquipmentInspectionStandardsByTemplateId(Long templateId);
 	
 	void createEquipmentStandardMap(EquipmentStandardMap map);
@@ -147,7 +147,7 @@ public interface EquipmentProvider {
 
     List<EquipmentModleCommunityMap> getModuleCommunityMap(Long targetId);
 
-    void deleteEquipmentModleCommunityMap(Long standardId);
+    void deleteStandardModleCommunityMap(Long standardId);
 
     void deleteTemplateModleCommunityMap(Long templateId);
 

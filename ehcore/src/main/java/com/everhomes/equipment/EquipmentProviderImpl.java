@@ -910,7 +910,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
-	public void deleteEquipmentModleCommunityMap(Long standardId) {
+	public void deleteStandardModleCommunityMap(Long standardId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		context.delete(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
 				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.STANDARD_ID.eq(standardId))
@@ -1326,7 +1326,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
-	public List<EquipmentInspectionTemplates> listInspectionTemplates(Integer namespaceId, String name) {
+	public List<EquipmentInspectionTemplates> listInspectionTemplates(Integer namespaceId, String name,Long targetId) {
 		List<EquipmentInspectionTemplates> templates = new ArrayList<EquipmentInspectionTemplates>();
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1336,6 +1336,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 		if(!StringUtils.isNullOrEmpty(name)) {
 			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.NAME.like("%"+name+"%"));
+		}
+		//如果为项目查看自定义 增加项目id过滤
+		if(targetId!=null && targetId!=0L) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.TARGET_ID.eq(targetId));
 		}
 
 		query.fetch().map((r) -> {
@@ -1786,6 +1790,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhEquipmentInspectionStandardGroupMap.class), null, 
 				(DSLContext context, Object reducingContext) -> {
 					SelectQuery<EhEquipmentInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP);
+					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.STANDARD_ID.eq(standardId));
 		            query.fetch().map((EhEquipmentInspectionStandardGroupMapRecord record) -> {
 		            	deleteEquipmentInspectionStandardGroupMap(record.getId());
 		            	return null;

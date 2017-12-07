@@ -461,26 +461,32 @@ public class EquipmentServiceImpl implements EquipmentService {
 					EquipmentServiceErrorCode.ERROR_STANDARD_ALREADY_DELETED,
  				"设备标准已删除");
 		}
+		//判断删除情况
+		if(cmd.getTargetId()!=null && standard.getTargetId()==0L){
+			//在项目上删除公共标准的情况  其余情况按照原来模式
+			equipmentProvider.deleteStandardModleCommunityMap(standard.getId());
+		}else {
 
-		standard.setDeleterUid(user.getId());
-		standard.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		standard.setOperatorUid(user.getId());
-		standard.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
-		equipmentProvider.updateEquipmentStandard(standard);
-		equipmentStandardSearcher.feedDoc(standard);
+			standard.setDeleterUid(user.getId());
+			standard.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			standard.setOperatorUid(user.getId());
+			standard.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
+			equipmentProvider.updateEquipmentStandard(standard);
+			equipmentStandardSearcher.feedDoc(standard);
 
-		List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
-		if(maps != null && maps.size() > 0) {
-			for(EquipmentStandardMap map : maps) {
-				inActiveEquipmentStandardRelations(map);
-				//设备状态修改为不完整
-				EquipmentInspectionEquipments equipmet = equipmentProvider.findEquipmentById(map.getTargetId());
-				equipmet.setStatus(EquipmentStatus.INCOMPLETE.getCode());
-				equipmentProvider.updateEquipmentInspectionEquipment(equipmet);
+			List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
+			if (maps != null && maps.size() > 0) {
+				for (EquipmentStandardMap map : maps) {
+					inActiveEquipmentStandardRelations(map);
+					//设备状态修改为不完整
+					EquipmentInspectionEquipments equipmet = equipmentProvider.findEquipmentById(map.getTargetId());
+					equipmet.setStatus(EquipmentStatus.INCOMPLETE.getCode());
+					equipmentProvider.updateEquipmentInspectionEquipment(equipmet);
+				}
 			}
-		}
 
-		inactiveTasksByStandardId(standard.getId());
+			inactiveTasksByStandardId(standard.getId());
+		}
 	}
 
 	@Override
@@ -3978,7 +3984,7 @@ public class EquipmentServiceImpl implements EquipmentService {
  				"模板不存在");
 		}
 
-		//cmd.getTargetId表示当前操作是在项目还是全部 如果在项目上修改公共的则创建副本
+		//cmd.getTargetId表示当前操作是在项目还是全部，template.getTargetId是用来判断是否为公共标准如果在项目上修改公共的则创建副本
 		if (template.getTargetId() == 0L && cmd.getTargetId() != null) {
 			EquipmentInspectionTemplates templatesNew = ConvertHelper.convert(cmd, EquipmentInspectionTemplates.class);
 			equipmentProvider.createEquipmentInspectionTemplates(templatesNew);
@@ -4108,7 +4114,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 //		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_ITEM_LIST, 0L);
 //		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		List<InspectionTemplateDTO> dtos = new ArrayList<InspectionTemplateDTO>();
-		List<EquipmentInspectionTemplates> templates = equipmentProvider.listInspectionTemplates(UserContext.getCurrentNamespaceId(), cmd.getName());
+		//增加判断为全部里面查看还是项目中查看
+		List<EquipmentInspectionTemplates> templates = new ArrayList<>();
+		if (cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
+			templates = equipmentProvider.listInspectionTemplates(UserContext.getCurrentNamespaceId(), cmd.getName(), null);
+		} else {
+			templates = equipmentProvider.listInspectionTemplates(UserContext.getCurrentNamespaceId(), cmd.getName(), cmd.getTargetId());
+			List<EquipmentModleCommunityMap> templatesMap = equipmentProvider.getModuleCommunityMap(cmd.getTargetId());
+		}
+
 		if(templates != null && templates.size() > 0) {
 			for(EquipmentInspectionTemplates template : templates) {
 				InspectionTemplateDTO dto = ConvertHelper.convert(template, InspectionTemplateDTO.class);
@@ -4846,15 +4860,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 		 return  ConvertHelper.convert(fieldProvider.findScopeFieldItemByBusinessValue(cmd.getNamespaceId(),cmd.getCommunityId(),cmd.getModuleName(),cmd.getFieldId(),cmd.getBusinessValue()),FieldItemDTO.class);
 	}
 
-	@Override
-	public void disableModle(Long standardId) {
-		equipmentProvider.deleteEquipmentModleCommunityMap(standardId);
-	}
-
-	@Override
-	public void disableModleTemplate(Long templateId) {
-		equipmentProvider.deleteTemplateModleCommunityMap(templateId);
-	}
 
 	@Override
 	public void distributeTemplates() {
@@ -4864,7 +4869,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			//获取当前域空间所有的项目
 			List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
 			//获取当前域空间所有的巡检模板
-			List<EquipmentInspectionTemplates> templates = equipmentProvider.listInspectionTemplates(namespaceId, null);
+			List<EquipmentInspectionTemplates> templates = equipmentProvider.listInspectionTemplates(namespaceId,null,null);
 			for (EquipmentInspectionTemplates template : templates) {
 				for (Community community : communities) {
 					EquipmentModleCommunityMap map = new EquipmentModleCommunityMap();

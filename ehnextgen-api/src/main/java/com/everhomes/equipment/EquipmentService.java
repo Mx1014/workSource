@@ -87,9 +87,5 @@ public interface EquipmentService {
 
 	FieldItemDTO findScopeFieldItemByFieldItemId(findScopeFieldItemCommand cmd);
 
-    void disableModle(Long standardId);
-
-    void disableModleTemplate(Long standardId);
-
 	void distributeTemplates();
 }
