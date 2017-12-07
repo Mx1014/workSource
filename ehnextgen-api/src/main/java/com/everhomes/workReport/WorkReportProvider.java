@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface WorkReportProvider {
 
-    void createWorkReport(WorkReport report);
+    Long createWorkReport(WorkReport report);
 
     void updateWorkReport(WorkReport report);
 

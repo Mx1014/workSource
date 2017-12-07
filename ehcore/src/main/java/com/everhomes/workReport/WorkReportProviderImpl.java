@@ -44,7 +44,7 @@ public class WorkReportProviderImpl implements WorkReportProvider {
     private SequenceProvider sequenceProvider;
 
     @Override
-    public void createWorkReport(WorkReport report) {
+    public Long createWorkReport(WorkReport report) {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWorkReports.class));
         report.setId(id);
         report.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -53,6 +53,7 @@ public class WorkReportProviderImpl implements WorkReportProvider {
         EhWorkReportsDao dao = new EhWorkReportsDao(context.configuration());
         dao.insert(report);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhWorkReports.class, null);
+        return report.getId();
     }
 
     @Override

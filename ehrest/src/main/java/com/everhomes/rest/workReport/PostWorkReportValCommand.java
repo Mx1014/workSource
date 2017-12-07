@@ -9,6 +9,7 @@ import java.util.List;
 
 /**
  * <ul>
+ * <li>organizationId: 公司id</li>
  * <li>reportId: 工作汇报id</li>
  * <li>reportValId: 工作汇报单id</li>
  * <li>reportType: 汇报类型, 0-日报 1-周报 2-月报 参考{@link com.everhomes.rest.workReport.WorkReportType}</li>

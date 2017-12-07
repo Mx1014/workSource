@@ -64,10 +64,11 @@ public class WorkReportServiceImpl implements WorkReportService {
     }
 
     private void createWorkReport(WorkReport report, Long organizationId, Integer namespaceId) {
-        workReportProvider.createWorkReport(report);
+        Long reportId = workReportProvider.createWorkReport(report);
         Organization org = organizationProvider.findOrganizationById(organizationId);
         if (org != null) {
             WorkReportScopeMap scopeMap = new WorkReportScopeMap();
+            scopeMap.setReportId(reportId);
             scopeMap.setNamespaceId(namespaceId);
             scopeMap.setSourceType(UniongroupTargetType.ORGANIZATION.getCode());
             scopeMap.setSourceId(org.getId());
@@ -275,9 +276,14 @@ public class WorkReportServiceImpl implements WorkReportService {
         val.setNamespaceId(namespaceId);
         val.setOwnerId(report.getOwnerId());
         val.setOwnerType(report.getOwnerType());
-        //todo: organizationId needs to be defined
-//        val.setOrganizationId(cmd.);
+        val.setOrganizationId(cmd.getOrganizationId());
+        val.setModuleId(report.getModuleId());
+        val.setModuleType(report.getModuleType());
+        //  set the content.
+        switch (WorkReportType.fromCode(cmd.getReportType())){
+            case DAY:
 
+        }
     }
 
     @Override
