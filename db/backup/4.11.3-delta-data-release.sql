@@ -1751,3 +1751,6 @@ INSERT INTO `eh_punch_holidays` (`id`, `owner_type`, `owner_id`, `workday_rule_i
 INSERT INTO `eh_punch_holidays` (`id`, `owner_type`, `owner_id`, `workday_rule_id`, `status`, `rule_date`, `creator_uid`, `create_time`, `exchange_from_date`) VALUES((@id:=@id+1),NULL,NULL,NULL,'1','2018-10-05','1','2017-12-06 14:20:10',NULL);
 INSERT INTO `eh_punch_holidays` (`id`, `owner_type`, `owner_id`, `workday_rule_id`, `status`, `rule_date`, `creator_uid`, `create_time`, `exchange_from_date`) VALUES((@id:=@id+1),NULL,NULL,NULL,'0','2018-09-29','1','2017-12-06 14:20:10','2018-10-04');
 INSERT INTO `eh_punch_holidays` (`id`, `owner_type`, `owner_id`, `workday_rule_id`, `status`, `rule_date`, `creator_uid`, `create_time`, `exchange_from_date`) VALUES((@id:=@id+1),NULL,NULL,NULL,'0','2018-09-30','1','2017-12-06 14:20:10','2018-10-05');
+
+-- 科技园的客户类型直接为organization表 add by xiongying20171207
+update eh_contracts set customer_type = 2 where namespace_id = 1000000;
