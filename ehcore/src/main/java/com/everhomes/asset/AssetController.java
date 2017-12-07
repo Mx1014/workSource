@@ -6,17 +6,23 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.entity.EntityType;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.RestResponseBase;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
@@ -43,6 +49,10 @@ public class AssetController extends ControllerBase {
     private ConfigurationProvider configurationProvider;
     @Autowired
     private PaymentService paymentService;
+    @Autowired
+    private PortalService portalService;
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 
 //    根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
     /**
@@ -1061,6 +1071,7 @@ public class AssetController extends ControllerBase {
     @RequestMapping(value = "listPaymentBill")
     @RestReturn(ListPaymentBillResp.class)
     public RestResponse listPaymentBill(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.ASSET_DEAL_VIEW);
 //        UserInfo user = (UserInfo) request.getSession().getAttribute(SessionConstants.MC_LOGIN_USER);
         ListPaymentBillResp result = paymentService.listPaymentBill(cmd);
         RestResponse response = new RestResponse(result);
@@ -1105,7 +1116,7 @@ public class AssetController extends ControllerBase {
 
     /**
      * <b>URL: /asset/listAutoNoticeConfig</b>
-     * <p></p>
+     * <p>设置自动催缴</p>
      */
     @RequestMapping("listAutoNoticeConfig")
     @RestReturn(ListAutoNoticeConfigResponse.class)
@@ -1119,7 +1130,7 @@ public class AssetController extends ControllerBase {
 
     /**
      * <b>URL: /asset/activeAutoBillNotice</b>
-     * <p></p>
+     * <p>主动调用定期催缴的功能</p>
      */
     @RequestMapping("activeAutoBillNotice")
     @RestReturn(String.class)
@@ -1146,7 +1157,7 @@ public class AssetController extends ControllerBase {
 
     /**
      * <b>URL: /asset/functionDisableList</b>
-     * <p></p>
+     * <p>功能失效列表</p>
      */
     @RequestMapping("functionDisableList")
     @RestReturn(value = FunctionDisableListDto.class)
@@ -1170,6 +1181,19 @@ public class AssetController extends ControllerBase {
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         restResponse.setErrorDescription("OK");
         return restResponse;
+    }
+
+    private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId) {
+        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
+        cmd1.setActionType((byte)13);
+        cmd1.setModuleId(20400l);
+        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
+        Long appId = res.getServiceModuleApps().get(0).getId();
+        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), 1000001L, 1000001L,priviledgeId , appId, null,communityId )){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
     }
 
 }

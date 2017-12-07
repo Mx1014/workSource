@@ -191,13 +191,7 @@ public interface PrivilegeConstants {
     long ENERGY_PLAN_CREATE = 21014L;
     long ENERGY_PLAN_LIST = 21015L;
     long ENERGY_PLAN_DELETE = 21016L;
-    //物业缴费权限
-    long ASSET_DEAL_VIEW = 40078L;
-    long ASSET_MANAGEMENT_VIEW = 40073L;
-    long ASSET_MANAGEMENT_CREATE = 40074L;
-    long ASSET_MANAGEMENT_NOTICE = 40075L;
-    long ASSET_MANAGEMENT_CHANGE_STATUS = 40076L;
-    long ASSET_STATISTICS_VIEW = 40077L;
+<<<<<<< HEAD
 
     // ---------------- 组织架构权限 -----------------------
 
@@ -219,4 +213,13 @@ public interface PrivilegeConstants {
     long BATCH_IMPORT_PERSON = 41011L;
     long BATCH_EXPORT_PERSON = 41012L;
 
+=======
+    //物业缴费权限
+    long ASSET_DEAL_VIEW = 40078L;
+    long ASSET_MANAGEMENT_VIEW = 40073L;
+    long ASSET_MANAGEMENT_CREATE = 40074L;
+    long ASSET_MANAGEMENT_NOTICE = 40075L;
+    long ASSET_MANAGEMENT_CHANGE_STATUS = 40076L;
+    long ASSET_STATISTICS_VIEW = 40077L;
+>>>>>>> 72f241c06c03415f5c10636941b3bd829ae0e30a
 }
