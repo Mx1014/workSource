@@ -9,8 +9,10 @@ import com.everhomes.rest.workReport.WorkReportStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhWorkReportScopeMapDao;
+import com.everhomes.server.schema.tables.daos.EhWorkReportValsDao;
 import com.everhomes.server.schema.tables.daos.EhWorkReportsDao;
 import com.everhomes.server.schema.tables.pojos.EhWorkReportScopeMap;
+import com.everhomes.server.schema.tables.pojos.EhWorkReportVals;
 import com.everhomes.server.schema.tables.pojos.EhWorkReports;
 import com.everhomes.server.schema.tables.records.EhWorkReportScopeMapRecord;
 import com.everhomes.server.schema.tables.records.EhWorkReportTemplatesRecord;
@@ -63,15 +65,15 @@ public class WorkReportProviderImpl implements WorkReportProvider {
     }
 
     @Override
-    public WorkReport findWorkReport(Long id) {
+    public WorkReport getWorkReportById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         EhWorkReportsDao dao = new EhWorkReportsDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), WorkReport.class);
     }
 
     @Override
-    public WorkReport findWorkReportByTemplateId(
-            Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long templateId){
+    public WorkReport getWorkReportByTemplateId(
+            Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long templateId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWorkReportsRecord> query = context.selectQuery(Tables.EH_WORK_REPORTS);
         query.addConditions(Tables.EH_WORK_REPORTS.NAMESPACE_ID.eq(namespaceId));
@@ -140,14 +142,14 @@ public class WorkReportProviderImpl implements WorkReportProvider {
     }
 
     @Override
-    public WorkReportScopeMap findWorkReportScopeMap(Long id) {
+    public WorkReportScopeMap getWorkReportScopeMapById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         EhWorkReportScopeMapDao dao = new EhWorkReportScopeMapDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), WorkReportScopeMap.class);
     }
 
     @Override
-    public WorkReportScopeMap findWorkReportScopeMapBySourceId(Long reportId, Long sourceId) {
+    public WorkReportScopeMap getWorkReportScopeMapBySourceId(Long reportId, Long sourceId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWorkReportScopeMapRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_SCOPE_MAP);
         query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));

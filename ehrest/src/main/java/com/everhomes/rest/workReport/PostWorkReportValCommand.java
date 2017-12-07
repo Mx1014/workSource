@@ -19,6 +19,8 @@ import java.util.List;
  */
 public class PostWorkReportValCommand {
 
+    private Long organizationId;
+
     private Long reportId;
 
     private Long reportValId;
@@ -34,6 +36,14 @@ public class PostWorkReportValCommand {
     private List<Long> receiverIds;
 
     public PostWorkReportValCommand() {
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     public Long getReportId() {

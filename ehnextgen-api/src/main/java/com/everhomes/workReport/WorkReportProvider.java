@@ -10,9 +10,9 @@ public interface WorkReportProvider {
 
     void updateWorkReport(WorkReport report);
 
-    WorkReport findWorkReport(Long id);
+    WorkReport getWorkReportById(Long id);
 
-    WorkReport findWorkReportByTemplateId(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long templateId);
+    WorkReport getWorkReportByTemplateId(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long templateId);
 
     List<WorkReport> listWorkReports(Long pageAnchor, Integer count, Long organizationId, String ownerType, Long moduleId, Byte status);
 
@@ -20,13 +20,14 @@ public interface WorkReportProvider {
 
     void deleteWorkReportScopeMapNotInIds(Long reportId, List<Long> sourceIds);
 
-    WorkReportScopeMap findWorkReportScopeMap(Long id);
+    WorkReportScopeMap getWorkReportScopeMapById(Long id);
 
-    WorkReportScopeMap findWorkReportScopeMapBySourceId(Long reportId, Long sourceId);
+    WorkReportScopeMap getWorkReportScopeMapBySourceId(Long reportId, Long sourceId);
 
     void updateWorkReportScopeMap(WorkReportScopeMap scopeMap);
 
     List<WorkReportScopeMap> listWorkReportScopeMap(Long reportId);
 
     List<WorkReportTemplate> listWorkReportTemplates(Long moduleId);
+
 }

@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>reportId: 工作汇报id</li>
- * <li>sourceType: 选择对象的类型 例：department, position, user 参考{@link com.everhomes.rest.workReport.WorkReportScopeType}</li>
+ * <li>sourceType: 选择对象的类型 例：ORGANIZATION, MEMBERDETAIL, user 参考{@link com.everhomes.rest.uniongroup.UniongroupTargetType}</li>
  * <li>sourceId: 选择对象的id</li>
  * <li>sourceDescription: 选择对象的名称</li>
  * </ul>

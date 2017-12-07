@@ -73,7 +73,7 @@ CREATE TABLE `eh_work_report_vals` (
   `module_id` BIGINT COMMENT 'the module id',
   `module_type` VARCHAR(64) COMMENT 'the module type',
   `module_name` VARCHAR(64),
-  `title` VARCHAR(128) COMMENT 'the title of the report',
+  `content` VARCHAR(128) COMMENT 'the content of the report',
   `report_id` BIGINT NOT NULL COMMENT 'the id of the report',
   `report_time` DATETIME COMMENT 'the target time of the report',
   `applier_name` VARCHAR(64) COMMENT 'the name of the applier',

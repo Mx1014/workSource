@@ -6,6 +6,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.general_approval.CreateFormTemplatesCommand;
+import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.rest.workReport.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -68,7 +69,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         if (org != null) {
             WorkReportScopeMap scopeMap = new WorkReportScopeMap();
             scopeMap.setNamespaceId(namespaceId);
-            scopeMap.setSourceType(WorkReportScopeType.DEPARTMENT.getCode());
+            scopeMap.setSourceType(UniongroupTargetType.ORGANIZATION.getCode());
             scopeMap.setSourceId(org.getId());
             scopeMap.setSourceDescription(org.getName());
             workReportProvider.createWorkReportScopeMap(scopeMap);
@@ -77,7 +78,7 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Override
     public void deleteWorkReport(WorkReportIdCommand cmd) {
-        WorkReport report = workReportProvider.findWorkReport(cmd.getReportId());
+        WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
         if (report != null) {
             report.setStatus(WorkReportStatus.INVALID.getCode());
             workReportProvider.updateWorkReport(report);
@@ -87,7 +88,7 @@ public class WorkReportServiceImpl implements WorkReportService {
     @Override
     public WorkReportDTO updateWorkReport(UpdateWorkReportCommand cmd) {
         //  find the report by id.
-        WorkReport report = workReportProvider.findWorkReport(cmd.getReportId());
+        WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
         if (report != null) {
             //  update it.
             report.setReportType(cmd.getReportType());
@@ -118,7 +119,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         for (WorkReportScopeMapDTO dto : scopes) {
             //  in order to record those ids.
             sourceIds.add(dto.getSourceId());
-            WorkReportScopeMap scopeMap = workReportProvider.findWorkReportScopeMapBySourceId(reportId, dto.getSourceId());
+            WorkReportScopeMap scopeMap = workReportProvider.getWorkReportScopeMapBySourceId(reportId, dto.getSourceId());
             if (scopeMap != null) {
                 scopeMap.setSourceDescription(dto.getSourceDescription());
                 scopeMap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -164,7 +165,7 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Override
     public WorkReportDTO updateWorkReportName(UpdateWorkReportNameCommand cmd) {
-        WorkReport report = workReportProvider.findWorkReport(cmd.getReportId());
+        WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
         report.setReportName(cmd.getReportName());
         workReportProvider.updateWorkReport(report);
 
@@ -177,14 +178,14 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Override
     public void enableWorkReport(WorkReportIdCommand cmd) {
-        WorkReport report = workReportProvider.findWorkReport(cmd.getReportId());
+        WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
         report.setReportType(WorkReportStatus.RUNNING.getCode());
         workReportProvider.updateWorkReport(report);
     }
 
     @Override
     public void disableWorkReport(WorkReportIdCommand cmd) {
-        WorkReport report = workReportProvider.findWorkReport(cmd.getReportId());
+        WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
         report.setReportType(WorkReportStatus.VALID.getCode());
         workReportProvider.updateWorkReport(report);
     }
@@ -206,7 +207,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         response.setResult(TrueOrFalseFlag.TRUE.getCode());
         List<WorkReportTemplate> templates = workReportProvider.listWorkReportTemplates(cmd.getModuleId());
         for (WorkReportTemplate template : templates) {
-            WorkReport report = workReportProvider.findWorkReportByTemplateId(UserContext.getCurrentNamespaceId(),
+            WorkReport report = workReportProvider.getWorkReportByTemplateId(UserContext.getCurrentNamespaceId(),
                     template.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType(), template.getId());
             if (report == null) {
                 response.setResult(TrueOrFalseFlag.FALSE.getCode());
@@ -238,10 +239,9 @@ public class WorkReportServiceImpl implements WorkReportService {
         }
     }
 
-    private void createWorkReportByTemplate(
-            WorkReportTemplate template, Long formOriginId, CreateWorkReportTemplatesCommand cmd) {
+    private void createWorkReportByTemplate(WorkReportTemplate template, Long formOriginId, CreateWorkReportTemplatesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        WorkReport report = workReportProvider.findWorkReportByTemplateId(UserContext.getCurrentNamespaceId(),
+        WorkReport report = workReportProvider.getWorkReportByTemplateId(UserContext.getCurrentNamespaceId(),
                 template.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType(), template.getId());
         //  update the report if it is already existing.
         if (report != null) {
@@ -268,6 +268,15 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Override
     public void postWorkReportVal(PostWorkReportValCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
+        WorkReportVal val = new WorkReportVal();
+
+        val.setNamespaceId(namespaceId);
+        val.setOwnerId(report.getOwnerId());
+        val.setOwnerType(report.getOwnerType());
+        //todo: organizationId needs to be defined
+//        val.setOrganizationId(cmd.);
 
     }
 
