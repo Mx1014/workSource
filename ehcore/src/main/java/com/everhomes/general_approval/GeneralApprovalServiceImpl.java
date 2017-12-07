@@ -234,7 +234,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             cmd21.setContent(JSON.toJSONString(cmd));
             cmd21.setCurrentOrganizationId(cmd.getOrganizationId());
             cmd21.setTitle(ga.getApprovalName());
-            
+
 
             //  存储更多的信息 added by approval1.6
             GeneralApprovalFlowCaseAdditionalFieldDTO fieldDTO = new GeneralApprovalFlowCaseAdditionalFieldDTO();
@@ -794,7 +794,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                         createGeneralApprovalByTemplate(template, null, cmd);
                     } else {
                         //  Create Forms before creating approvals.
-                        Long formOriginId = generalFormService.createGeneralFormByTemplate(template.getFormTemplateId(), cmd);
+                        Long formOriginId = generalFormService.createGeneralFormByTemplate(template.getFormTemplateId(), ConvertHelper.convert(cmd, CreateFormTemplatesCommand.class));
                         //  Then, start to create approvals.
                         createGeneralApprovalByTemplate(template, formOriginId, cmd);
                     }

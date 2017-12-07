@@ -5,7 +5,7 @@ import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.general_approval.CreateApprovalTemplatesCommand;
+import com.everhomes.rest.general_approval.CreateFormTemplatesCommand;
 import com.everhomes.rest.workReport.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -228,7 +228,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                     if (template.getFormTemplateId().longValue() == 0)
                         createWorkReportByTemplate(template, null, cmd);
                     else {
-                        CreateApprovalTemplatesCommand command = ConvertHelper.convert(cmd, CreateApprovalTemplatesCommand.class);
+                        CreateFormTemplatesCommand command = ConvertHelper.convert(cmd, CreateFormTemplatesCommand.class);
                         Long formOriginId = generalFormService.createGeneralFormByTemplate(template.getFormTemplateId(), command);
                         createWorkReportByTemplate(template, formOriginId, cmd);
                     }
@@ -248,7 +248,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             report.setStatus(WorkReportStatus.RUNNING.getCode());
             report.setReportName(template.getReportName());
             report.setReportType(template.getReportType());
-            if(formOriginId != null)
+            if (formOriginId != null)
                 report.setFormOriginId(formOriginId);
             workReportProvider.updateWorkReport(report);
         } else {
@@ -259,7 +259,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             report.setOwnerType(cmd.getOwnerType());
             report.setOrganizationId(cmd.getOrganizationId());
             report.setStatus(WorkReportStatus.RUNNING.getCode());
-            if(formOriginId != null)
+            if (formOriginId != null)
                 report.setFormOriginId(formOriginId);
             report.setReportTemplateId(template.getId());
             createWorkReport(report, cmd.getOrganizationId(), namespaceId);
