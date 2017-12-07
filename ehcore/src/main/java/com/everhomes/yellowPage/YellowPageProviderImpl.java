@@ -595,8 +595,6 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	@Override
 	public void createServiceAllianceCategory(ServiceAllianceCategories serviceAllianceCategories) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceCategories.class));
-		serviceAllianceCategories.setId(id);
 		serviceAllianceCategories.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		EhServiceAllianceCategoriesDao dao = new EhServiceAllianceCategoriesDao(context.configuration());
 		dao.insert(serviceAllianceCategories);
