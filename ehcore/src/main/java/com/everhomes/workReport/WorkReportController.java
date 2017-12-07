@@ -165,7 +165,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/postWorkReportVal</b>
-     * <p>4-1.提交工作汇报 </p>
+     * <p>4-1.提交工作汇报单 </p>
      */
     @RequestMapping("postWorkReportVal")
     @RestReturn(value=String.class)
@@ -179,7 +179,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/deleteWorkReportVal</b>
-     * <p>4-2.删除工作汇报 </p>
+     * <p>4-2.删除工作汇报单 </p>
      */
     @RequestMapping("deleteWorkReportVal")
     @RestReturn(value=String.class)
@@ -193,7 +193,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/updateWorkReportVal</b>
-     * <p>4-3.编辑工作汇报 </p>
+     * <p>4-3.编辑工作汇报单 </p>
      */
     @RequestMapping("updateWorkReportVal")
     @RestReturn(value=String.class)
@@ -207,7 +207,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/getWorkReportValItem</b>
-     * <p>4-4.获取工作汇报填写项 </p>
+     * <p>4-4.获取工作汇报单填写项 </p>
      * <p>(此方法在写汇报与编辑汇报之前调用)</p>
      */
     @RequestMapping("getWorkReportValItem")
@@ -223,7 +223,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/listWorkReportsVal</b>
-     * <p>4-5.工作汇报申请列表 </p>
+     * <p>4-5.工作汇报单列表 </p>
      */
     @RequestMapping("listWorkReportsVal")
     @RestReturn(value=ListWorkReportsValResponse.class)
@@ -237,7 +237,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/countUnReadWorkReportsVal</b>
-     * <p>4-6.获取未读条目数 </p>
+     * <p>4-6.获取汇报单未读条目数 </p>
      */
     @RequestMapping("countUnReadWorkReportsVal")
     @RestReturn(value=Integer.class)
@@ -251,7 +251,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/getWorkReportValDetail</b>
-     * <p>5.获取工作汇报详情 </p>
+     * <p>5.获取工作汇报单详情 </p>
      */
     @RequestMapping("getWorkReportValDetail")
     @RestReturn(value=WorkReportValDTO.class)
