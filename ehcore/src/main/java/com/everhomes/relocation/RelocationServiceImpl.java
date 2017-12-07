@@ -289,9 +289,9 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 		calendar.setTimeInMillis(request.getRelocationDate().getTime());
 		calendar.add(Calendar.DAY_OF_MONTH, 1);
 
-//		pushToQueque(String.valueOf(request.getId()), calendar.getTimeInMillis());
+		pushToQueque(String.valueOf(request.getId()), calendar.getTimeInMillis());
 		//TODO:方便测试  5分钟后过期
-		pushToQueque(String.valueOf(request.getId()), request.getCreateTime().getTime() + 1000 * 5 * 60);
+//		pushToQueque(String.valueOf(request.getId()), request.getCreateTime().getTime() + 1000 * 5 * 60);
 
 		RelocationRequestDTO dto = ConvertHelper.convert(request, RelocationRequestDTO.class);
 		populateRequestDTO(request, dto);
