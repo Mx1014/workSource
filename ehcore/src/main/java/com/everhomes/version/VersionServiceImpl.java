@@ -185,6 +185,7 @@ public class VersionServiceImpl implements VersionService {
         params.put("homeurl", this.configurationProvider.getValue(ConfigConstants.HOME_URL, ""));
         response.setDownloadUrl(StringHelper.interpolate(versionUrl.getDownloadUrl(), params));
         response.setInfoUrl(StringHelper.interpolate(versionUrl.getInfoUrl(), params));
+        response.setUpgradeDescription(versionUrl.getUpgradeDescription());
         return response;
         	
 	}
