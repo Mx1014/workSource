@@ -897,6 +897,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentModleCommunityMap.class));
 		EhEquipmentModleCommunityMapDao dao = new EhEquipmentModleCommunityMapDao(context.configuration());
+		map.setId(id);
 		map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		dao.insert(map);
 	}
