@@ -39,6 +39,7 @@ public class CustomerTalentDTO {
     private Byte customerType;
     private Long customerId;
     private String name;
+    private String age;
     private Long gender;
     private String genderName;
     private String phone;
@@ -69,6 +70,14 @@ public class CustomerTalentDTO {
     private Integer overseas;
     private Integer thousandTalentsProgram;
     private Integer freshGraduates;
+
+    public String getAge() {
+        return age;
+    }
+
+    public void setAge(String age) {
+        this.age = age;
+    }
 
     public Integer getDoctors() {
         return doctors;

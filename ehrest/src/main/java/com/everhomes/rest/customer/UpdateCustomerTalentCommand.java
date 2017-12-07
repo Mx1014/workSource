@@ -33,6 +33,7 @@ public class UpdateCustomerTalentCommand {
     private Byte customerType;
     private Long customerId;
     private String name;
+    private Integer age;
     private Long gender;
     private String phone;
     private Long nationalityItemId;
@@ -56,6 +57,14 @@ public class UpdateCustomerTalentCommand {
     private Integer overseas;
     private Integer thousandTalentsProgram;
     private Integer freshGraduates;
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
 
     public Integer getDoctors() {
         return doctors;

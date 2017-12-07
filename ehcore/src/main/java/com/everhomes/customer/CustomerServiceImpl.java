@@ -1224,6 +1224,9 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void createCustomerInvestment(CreateCustomerInvestmentCommand cmd) {
         CustomerInvestment investment = ConvertHelper.convert(cmd, CustomerInvestment.class);
+        if(cmd.getInvestmentTime() != null) {
+            investment.setInvestmentTime(new Timestamp(cmd.getInvestmentTime()));
+        }
         enterpriseCustomerProvider.createCustomerInvestment(investment);
     }
 
@@ -1426,6 +1429,9 @@ public class CustomerServiceImpl implements CustomerService {
     public void updateCustomerInvestment(UpdateCustomerInvestmentCommand cmd) {
         CustomerInvestment exist = checkCustomerInvestment(cmd.getId(), cmd.getCustomerId());
         CustomerInvestment investment = ConvertHelper.convert(cmd, CustomerInvestment.class);
+        if(cmd.getInvestmentTime() != null) {
+            investment.setInvestmentTime(new Timestamp(cmd.getInvestmentTime()));
+        }
         investment.setCreateTime(exist.getCreateTime());
         investment.setCreateUid(exist.getCreateUid());
         enterpriseCustomerProvider.updateCustomerInvestment(investment);
