@@ -74,7 +74,7 @@ public class EnterpriseApplyBuildingProviderImpl implements EnterpriseApplyBuild
     }
 
     @Override
-    public Boolean verifyBuildingName(Integer namespaceId, Long communityId, String buildingName) {
+    public Boolean verifyBuildingName(Integer namespaceId, Long communityId, String buildingName, Long categoryId) {
 
         final Integer[] count = new Integer[1];
         this.dbProvider.mapReduce(AccessSpec.readWrite(), null,
@@ -86,6 +86,7 @@ public class EnterpriseApplyBuildingProviderImpl implements EnterpriseApplyBuild
                     Condition condition = Tables.EH_LEASE_BUILDINGS.COMMUNITY_ID.eq(communityId);
                     condition = condition.and(Tables.EH_LEASE_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
                     condition = condition.and(Tables.EH_LEASE_BUILDINGS.NAME.eq(buildingName));
+                    condition = condition.and(Tables.EH_LEASE_BUILDINGS.CATEGORY_ID.eq(categoryId));
 
                     count[0] = query.where(condition).fetchOneInto(Integer.class);
                     return true;

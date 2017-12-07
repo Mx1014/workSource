@@ -25,7 +25,7 @@ public interface EnterpriseApplyBuildingProvider {
 
     void deleteLeasePromotionCommunity(Long id);
 
-    Boolean verifyBuildingName(Integer namespaceId, Long communityId, String buildingName);
+    Boolean verifyBuildingName(Integer namespaceId, Long communityId, String buildingName, Long categoryId);
 
     void createLeaseBuildings(List<LeaseBuilding> leaseBuildings);
 

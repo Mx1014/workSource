@@ -115,7 +115,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		}
 
 		//检查楼栋名
-		if (!enterpriseApplyBuildingProvider.verifyBuildingName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getName())) {
+		if (!enterpriseApplyBuildingProvider.verifyBuildingName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getName(), cmd.getCategoryId())) {
 			throw RuntimeErrorException.errorWith(ApplyEntryErrorCodes.SCOPE, ApplyEntryErrorCodes.ERROR_BUILDING_NAME_EXIST,
 					"Building name exist");
 		}
