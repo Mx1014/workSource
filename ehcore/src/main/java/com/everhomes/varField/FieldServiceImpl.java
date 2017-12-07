@@ -114,6 +114,7 @@ public class FieldServiceImpl implements FieldService {
             List<SystemFieldItemDTO> dtos = items.stream().map(item -> {
                 return ConvertHelper.convert(item, SystemFieldItemDTO.class);
             }).collect(Collectors.toList());
+            return dtos;
         }
         return null;
     }
