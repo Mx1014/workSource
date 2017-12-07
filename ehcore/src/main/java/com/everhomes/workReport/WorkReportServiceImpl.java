@@ -8,7 +8,6 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.general_approval.CreateFormTemplatesCommand;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
-import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.workReport.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -29,6 +28,9 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Autowired
     private WorkReportProvider workReportProvider;
+
+    @Autowired
+    private WorkReportValProvider workReportValProvider;
 
     @Autowired
     private OrganizationProvider organizationProvider;
@@ -305,6 +307,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         val.setApplierName(fixUpUserName(cmd.getOrganizationId(), user.getId()));
         val.setReportType(cmd.getReportType());
         dbProvider.execute((TransactionStatus status) ->{
+            Long reportValId = workReportValProvider.createWorkReportVal(val);
 
             return null;
         });

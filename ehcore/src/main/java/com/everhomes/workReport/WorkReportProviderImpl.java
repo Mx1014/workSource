@@ -181,10 +181,7 @@ public class WorkReportProviderImpl implements WorkReportProvider {
             results.add(ConvertHelper.convert(r, WorkReportScopeMap.class));
             return null;
         });
-        if (null != results && 0 < results.size()) {
-            return results;
-        }
-        return null;
+        return results;
     }
 
     @Override
