@@ -5,12 +5,18 @@ import com.everhomes.acl.WebMenuScope;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.common.ServiceAllianceActionData;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.portal.DetailFlag;
 import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
 import com.everhomes.rest.portal.ServiceAllianceJump;
 import com.everhomes.rest.yellowPage.DisplayFlagType;
+import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
+import com.everhomes.rest.yellowPage.ServiceAllianceOwnerType;
 import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -42,6 +48,9 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 
     @Autowired
     private CommunityProvider communityProvider;
+    
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
     @Autowired
     private YellowPageProvider yellowPageProvider;
@@ -95,11 +104,14 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
         serviceAllianceCategories.setName(name);
         serviceAllianceCategories.setNamespaceId(namespaceId);
         serviceAllianceCategories.setParentId(0L);
-        List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
-        if(null != communities && communities.size() > 0){
-            Community community = communities.get(0);
-            serviceAllianceCategories.setOwnerType("community");
-            serviceAllianceCategories.setOwnerId(community.getId());
+        List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, OrganizationGroupType.ENTERPRISE.getCode(), new CrossShardListingLocator(), 10);
+//        List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
+//        if(null != communities && communities.size() > 0){
+        if(null != organizations && organizations.size() > 0){
+//            Community community = communities.get(0);
+        	Organization organization = organizations.get(0);
+            serviceAllianceCategories.setOwnerType(ServiceAllianceBelongType.ORGANAIZATION.getCode());
+            serviceAllianceCategories.setOwnerId(organization.getId());
             serviceAllianceCategories.setCreatorUid(user.getId());
             serviceAllianceCategories.setDeleteUid(user.getId());
             serviceAllianceCategories.setStatus(YellowPageStatus.ACTIVE.getCode());
@@ -108,8 +120,8 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 
             ServiceAlliances serviceAlliances = new ServiceAlliances();
             serviceAlliances.setParentId(0L);
-            serviceAlliances.setOwnerType("community");
-            serviceAlliances.setOwnerId(community.getId());
+            serviceAlliances.setOwnerType(ServiceAllianceBelongType.ORGANAIZATION.getCode());
+            serviceAlliances.setOwnerId(organization.getId());
             serviceAlliances.setName(name);
             serviceAlliances.setDisplayName(name);
             serviceAlliances.setType(serviceAllianceCategories.getId());
@@ -131,7 +143,7 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
             	createMenuScope(namespaceId,serviceAllianceCategories.getEntryId(),serviceAllianceCategories.getName());
             }
         }else{
-            LOGGER.error("namespace not community. namespaceId = {}", namespaceId);
+            LOGGER.error("namespace not pm. namespaceId = {}", namespaceId);
         }
 
         return serviceAllianceCategories;
