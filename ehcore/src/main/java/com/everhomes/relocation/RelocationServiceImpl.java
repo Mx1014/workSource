@@ -13,6 +13,8 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.*;
 import com.everhomes.qrcode.QRCodeService;
+import com.everhomes.queue.taskqueue.JesqueClientFactory;
+import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.organization.OrganizationGroupType;
 
@@ -31,9 +33,12 @@ import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
+import net.greghaines.jesque.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
@@ -43,8 +48,10 @@ import java.util.stream.Collectors;
 
 
 @Component
-public class RelocationServiceImpl implements RelocationService {
+public class RelocationServiceImpl implements RelocationService, ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RelocationServiceImpl.class);
+
+	private static final String RELOCATION_CANCEL_QUEQUE = "relocationCancelQueque";
 
 	@Autowired
 	private LocaleStringService localeStringService;
@@ -68,6 +75,25 @@ public class RelocationServiceImpl implements RelocationService {
 	private RelocationProvider relocationProvider;
 	@Autowired
 	private QRCodeService qRCodeService;
+	@Autowired
+	private WorkerPoolFactory workerPoolFactory;
+	@Autowired
+	private JesqueClientFactory jesqueClientFactory;
+
+
+	@Override
+	public void onApplicationEvent(ContextRefreshedEvent event) {
+		if(null == event.getApplicationContext().getParent()) {
+			workerPoolFactory.getWorkerPool().addQueue(RELOCATION_CANCEL_QUEQUE);
+		}
+	}
+
+	private void pushToQueque(String relocationId, long delayTime) {
+
+		final Job job = new Job(RelocationCancelAction.class.getName(), relocationId);
+
+		jesqueClientFactory.getClientPool().delayedEnqueue(RELOCATION_CANCEL_QUEQUE, job, delayTime);
+	}
 
 	@Override
 	public SearchRelocationRequestsResponse searchRelocationRequests(SearchRelocationRequestsCommand cmd) {
@@ -257,6 +283,15 @@ public class RelocationServiceImpl implements RelocationService {
 			relocationProvider.updateRelocationRequest(request);
 			return null;
 		});
+
+		//获取搬迁日期后一天,当作过期时间
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(request.getRelocationDate().getTime());
+		calendar.add(Calendar.DAY_OF_MONTH, 1);
+
+//		pushToQueque(String.valueOf(request.getId()), calendar.getTimeInMillis());
+		//TODO:方便测试  5分钟后过期
+		pushToQueque(String.valueOf(request.getId()), request.getCreateTime().getTime() + 1000 * 5 * 60);
 
 		RelocationRequestDTO dto = ConvertHelper.convert(request, RelocationRequestDTO.class);
 		populateRequestDTO(request, dto);
