@@ -15,6 +15,7 @@ import java.sql.Timestamp;
  *     <li>address：地址</li>
  *     <li>addressName：楼栋门牌名</li>
  *     <li>addressId：楼栋门牌id</li>
+ *     <li>buildingId：楼栋id</li>
  *     <li>areaSize：面积</li>
  *     <li>contractStartDate：合同开始日期</li>
  *     <li>contractEndDate：合同结束日期</li>
@@ -33,6 +34,7 @@ public class CustomerEntryInfoDTO {
     private String address;
     private String addressName;
     private Long addressId;
+    private Long buildingId;
     private BigDecimal areaSize;
     private Timestamp contractStartDate;
     private Timestamp contractEndDate;
@@ -61,6 +63,14 @@ public class CustomerEntryInfoDTO {
 
     public void setAddressId(Long addressId) {
         this.addressId = addressId;
+    }
+
+    public Long getBuildingId() {
+        return buildingId;
+    }
+
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
     }
 
     public String getArea() {

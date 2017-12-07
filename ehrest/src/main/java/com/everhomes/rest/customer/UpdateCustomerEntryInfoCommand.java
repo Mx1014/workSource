@@ -12,6 +12,7 @@ import java.math.BigDecimal;
  *     <li>customerId：所属客户id</li>
  *     <li>area：区域</li>
  *     <li>address：地址</li>
+ *     <li>buildingId：楼栋id</li>
  *     <li>addressId：楼栋门牌id</li>
  *     <li>areaSize：面积</li>
  *     <li>contractStartDate：合同开始日期</li>
@@ -29,6 +30,7 @@ public class UpdateCustomerEntryInfoCommand {
     private String area;
     private String address;
     private Long addressId;
+    private Long buildingId;
     private BigDecimal areaSize;
     private Long contractStartDate;
     private Long contractEndDate;
@@ -49,6 +51,14 @@ public class UpdateCustomerEntryInfoCommand {
 
     public void setAddressId(Long addressId) {
         this.addressId = addressId;
+    }
+
+    public Long getBuildingId() {
+        return buildingId;
+    }
+
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
     }
 
     public String getArea() {
