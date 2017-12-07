@@ -98,6 +98,9 @@ public interface Rentalv2Service {
 	FindRentalSiteMonthStatusCommandResponse findRentalSiteMonthStatus(
 			FindRentalSiteMonthStatusCommand cmd);
 
+	FindRentalSiteMonthStatusByWeekCommandResponse findRentalSiteMonthStatusByWeek(
+			FindRentalSiteMonthStatusByWeekCommand cmd);
+
 
 	void deleteResource(DeleteResourceCommand cmd);
 

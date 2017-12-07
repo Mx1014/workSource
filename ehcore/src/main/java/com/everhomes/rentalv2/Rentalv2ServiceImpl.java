@@ -3780,7 +3780,46 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		cellList.get().clear();
 		return response;
 	}
-	
+
+	@Override
+	public FindRentalSiteMonthStatusByWeekCommandResponse findRentalSiteMonthStatusByWeek(FindRentalSiteMonthStatusByWeekCommand cmd) {
+		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
+		proccessCells(rs, cmd.getRentalType());
+		FindRentalSiteMonthStatusByWeekCommandResponse response = ConvertHelper.convert(rs,FindRentalSiteMonthStatusByWeekCommandResponse.class);
+		response.setRentalSiteId(rs.getId());
+		List<RentalResourcePic> pics = this.rentalv2Provider.findRentalSitePicsByOwnerTypeAndId(EhRentalv2Resources.class.getSimpleName(), rs.getId());
+		response.setSitePics(convertRentalSitePicDTOs(pics));
+
+		response.setAnchorTime(0L);
+
+		List<RentalConfigAttachment> attachments=this.rentalv2Provider.queryRentalConfigAttachmentByOwner(EhRentalv2Resources.class.getSimpleName(),rs.getId());
+		response.setAttachments(convertAttachments(attachments));
+
+		// 查rules
+		Calendar start = Calendar.getInstance();
+		Calendar end = Calendar.getInstance();
+		start.setTime(new Date(cmd.getRuleDate()));
+		end.setTime(new Date(cmd.getRuleDate()));
+		//start 这个月第一周第一天
+		start.set(Calendar.DAY_OF_WEEK_IN_MONTH,1);
+		//end 下个月的第一周第一天
+		end.add(Calendar.MONTH, 1);
+		end.set(Calendar.DAY_OF_WEEK_IN_MONTH,1);
+		response.setSiteDays(new ArrayList<>());
+
+		processWeekRuleDTOs(start, end, response.getSiteDays(), cmd.getSiteId(), rs, response.getAnchorTime(), cmd.getSceneToken(), cmd.getRentalType(),cmd.getPackageName());
+
+		//设置优惠信息
+		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(),rs, cmd.getSceneToken(), cmd.getRentalType(),cmd.getPackageName());
+		response.setFullPrice(dto.getFullPrice());
+		response.setCutPrice(dto.getCutPrice());
+		response.setDiscountType(dto.getDiscountType());
+		response.setDiscountRatio(dto.getDiscountRatio());
+
+		cellList.get().clear();
+		return response;
+	}
+
 	@Override
 	public FindRentalSiteWeekStatusCommandResponse findRentalSiteWeekStatus(FindRentalSiteWeekStatusCommand cmd) {
 		
@@ -4073,6 +4112,72 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}).collect(Collectors.toList());
 		}
 		return new ArrayList<>();
+	}
+
+	private void processWeekRuleDTOs(Calendar start ,Calendar end , List<RentalSiteDayRulesDTO> dtos,Long siteId ,
+									 RentalResource rs, Long anchorTime, String sceneToken, byte rentalType,String packageName){
+
+		java.util.Date reserveTime = new java.util.Date();
+		Timestamp beginTime = new Timestamp(reserveTime.getTime()
+				+ rs.getRentalStartTime());
+
+		//解析场景信息
+		SceneTokenDTO sceneTokenDTO = null;
+		if (null != sceneToken) {
+			User user = UserContext.current().getUser();
+			sceneTokenDTO = userService.checkSceneToken(user.getId(), sceneToken);
+		}
+		List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rs.getId());
+		List <Rentalv2PricePackage> pricePackages = rentalv2PricePackageProvider.listPricePackageByOwner(PriceRuleType.RESOURCE.getCode(), rs.getId(), rentalType,packageName);
+		List<RentalSitePackagesDTO> resourcePackageDtos = new ArrayList<>();
+		processPricePackage(resourcePackageDtos,pricePackages);
+
+		for (;start.before(end);start.add(Calendar.DATE,7)){
+			RentalSiteDayRulesDTO dayDto = new RentalSiteDayRulesDTO();
+			dtos.add(dayDto);
+			dayDto.setSiteRules(new ArrayList<>());
+			dayDto.setRentalDate(start.getTimeInMillis());
+			List<RentalCell> rentalSiteRules = findRentalSiteRules(siteId, dateSF.get().format(new java.util.Date(start.getTimeInMillis())),
+					beginTime, rentalType, DateLength.DAY.getCode(),
+					RentalSiteStatus.NORMAL.getCode(), rs.getRentalStartTimeFlag());
+			if (null != rentalSiteRules && rentalSiteRules.size() > 0) {
+				for (RentalCell rsr : rentalSiteRules) {
+					RentalSiteRulesDTO dto =ConvertHelper.convert(rsr, RentalSiteRulesDTO.class);
+					//根据场景来设置价格
+					setRentalsiteRulePrice(sceneTokenDTO, dto);
+					if (rsr.getPricePackageId()==null){ //使用资源本身的套餐
+						setRentalsitePackagePrice(dto,rsr,resourcePackageDtos,sceneTokenDTO,packageName!=null);
+					}else{
+						List <Rentalv2PricePackage> pricePackages2 = rentalv2PricePackageProvider.listPricePackageByOwner(
+								PriceRuleType.CELL.getCode(),rsr.getPricePackageId(),null,packageName);
+						List<RentalSitePackagesDTO> dtos2 = new ArrayList<>();
+						processPricePackage(dtos2,pricePackages2);
+						setRentalsitePackagePrice(dto,rsr,dtos2,sceneTokenDTO,packageName!=null);
+					}
+					dto.setId(rsr.getId());
+
+
+					dto.setRuleDate(rsr.getResourceRentalDate().getTime());
+					dto.setStatus(SiteRuleStatus.OPEN.getCode());
+
+					// 支持复选，要换一种方式计算剩余数量
+					calculateAvailableCount(dto, rs, rsr, priceRules);
+					//根据时间判断来设置status
+					setRentalCellStatus(reserveTime, dto, rsr, rs);
+
+					if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
+						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
+					}
+
+					// 多种模式的情况下，一种模式下关闭的其它模式下对应的时间段也要关闭
+					if (SiteRuleStatus.fromCode(dto.getStatus()) == SiteRuleStatus.OPEN && priceRules.size() > 1) {
+						calculateCurrentStatus(dto, rs, rsr, priceRules);
+					}
+
+					dayDto.getSiteRules().add(dto);
+				}
+			}
+		}
 	}
 
 	private void processDayRuleDTOs(Calendar start ,Calendar end , List<RentalSiteDayRulesDTO> dtos,Long siteId ,

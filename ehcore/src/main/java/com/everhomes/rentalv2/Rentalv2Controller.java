@@ -113,6 +113,26 @@ public class Rentalv2Controller extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /rental/findRentalSiteMonthStatusByWeek</b>
+	 * <p>
+	 * 查询某服务预约某月的状态(粒度为自然周)
+	 * </p>
+	 */
+
+	@RequestMapping("findRentalSiteMonthStatusByWeek")
+	@RestReturn(value = FindRentalSiteMonthStatusByWeekCommandResponse.class)
+	public RestResponse findRentalSiteMonthStatusByWeek(@Valid FindRentalSiteMonthStatusByWeekCommand cmd) {
+		FindRentalSiteMonthStatusByWeekCommandResponse findRentalSiteMonthStatusByWeekCommandResponse = rentalService
+				.findRentalSiteMonthStatusByWeek(cmd);
+		RestResponse response = new RestResponse(
+				findRentalSiteMonthStatusByWeekCommandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	/**
 	 * <b>URL: /rental/findRentalSiteYearStatus</b>
 	 * <p>
