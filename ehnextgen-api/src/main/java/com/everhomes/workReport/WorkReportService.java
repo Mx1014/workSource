@@ -22,11 +22,19 @@ public interface WorkReportService {
 
     void createWorkReportTemplates(CreateWorkReportTemplatesCommand cmd);
 
+    ListWorkReportsResponse listActiveWorkReports(ListWorkReportsCommand cmd);
+
     void postWorkReportVal(PostWorkReportValCommand cmd);
+
+    void deleteWorkReportVal(WorkReportValIdCommand cmd);
 
     void updateWorkReportVal(PostWorkReportValCommand cmd);
 
+    WorkReportValDTO getWorkReportValItem(WorkReportValIdCommand cmd);
+
     ListWorkReportsValResponse listWorkReportsVal(ListWorkReportsValCommand cmd);
 
-    WorkReportValDTO getWorkReportVal(WorkReportValIdCommand cmd);
+    Integer countUnReadWorkReportsVal();
+
+    WorkReportValDTO getWorkReportValDetail(WorkReportValIdCommand cmd);
 }

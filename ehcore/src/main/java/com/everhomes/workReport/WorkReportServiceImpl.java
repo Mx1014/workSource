@@ -7,11 +7,11 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.general_approval.CreateFormTemplatesCommand;
+import com.everhomes.rest.general_approval.PostGeneralFormCommand;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.rest.workReport.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +41,7 @@ public class WorkReportServiceImpl implements WorkReportService {
     @Autowired
     private GeneralFormService generalFormService;
 
-    @Autowired
-    private UserService userService;
+    private static String WORK_REPORT = "WORK_REPORT";
 
     @Override
     public WorkReportDTO addWorkReport(AddWorkReportCommand cmd) {
@@ -122,11 +121,11 @@ public class WorkReportServiceImpl implements WorkReportService {
         return null;
     }
 
-    private void updateWorkReportScopeMap(Long reportId, List<WorkReportScopeMapDTO> scopes) {
+    private void updateWorkReportScopeMap(Long reportId, List<WorkReportValScopeMapDTO> scopes) {
         if (scopes == null)
             return;
         List<Long> sourceIds = new ArrayList<>();
-        for (WorkReportScopeMapDTO dto : scopes) {
+        for (WorkReportValScopeMapDTO dto : scopes) {
             //  in order to record those ids.
             sourceIds.add(dto.getSourceId());
             WorkReportScopeMap scopeMap = workReportProvider.getWorkReportScopeMapBySourceId(reportId, dto.getSourceId());
@@ -200,11 +199,11 @@ public class WorkReportServiceImpl implements WorkReportService {
         workReportProvider.updateWorkReport(report);
     }
 
-    public List<WorkReportScopeMapDTO> listWorkReportScopeMap(Long reportId) {
+    public List<WorkReportValScopeMapDTO> listWorkReportScopeMap(Long reportId) {
         List<WorkReportScopeMap> results = workReportProvider.listWorkReportScopeMap(reportId);
         if (results != null && results.size() > 0) {
             return results.stream().map(r -> {
-                WorkReportScopeMapDTO dto = ConvertHelper.convert(r, WorkReportScopeMapDTO.class);
+                WorkReportValScopeMapDTO dto = ConvertHelper.convert(r, WorkReportValScopeMapDTO.class);
                 return dto;
             }).collect(Collectors.toList());
         }
@@ -249,6 +248,11 @@ public class WorkReportServiceImpl implements WorkReportService {
         }
     }
 
+    @Override
+    public ListWorkReportsResponse listActiveWorkReports(ListWorkReportsCommand cmd) {
+        return null;
+    }
+
     private void createWorkReportByTemplate(WorkReportTemplate template, Long formOriginId, CreateWorkReportTemplatesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         WorkReport report = workReportProvider.getWorkReportByTemplateId(UserContext.getCurrentNamespaceId(),
@@ -285,6 +289,10 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Override
     public void postWorkReportVal(PostWorkReportValCommand cmd) {
+        //  There are three steps to finish this function.
+        //  1.create the report val
+        //  2.create the report form val
+        //  3.create the report receivers
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         User user = UserContext.current().getUser();
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
@@ -306,11 +314,34 @@ public class WorkReportServiceImpl implements WorkReportService {
         val.setApplierUserId(user.getId());
         val.setApplierName(fixUpUserName(cmd.getOrganizationId(), user.getId()));
         val.setReportType(cmd.getReportType());
+
+        PostGeneralFormCommand formCommand = new PostGeneralFormCommand();
+        formCommand.setNamespaceId(namespaceId);
+        formCommand.setOwnerId(val.getOwnerId());
+        formCommand.setOwnerType(val.getOwnerType());
+        formCommand.setSourceType(WORK_REPORT);
+        formCommand.setCurrentOrganizationId(cmd.getOrganizationId());
+        formCommand.setValues(cmd.getValues());
+
         dbProvider.execute((TransactionStatus status) ->{
             Long reportValId = workReportValProvider.createWorkReportVal(val);
-
+            formCommand.setSourceId(reportValId);
+            generalFormService.postGeneralForm(formCommand);
+            for(Long receiverId : cmd.getReceiverIds()){
+                WorkReportValReceiverMap receiver = new WorkReportValReceiverMap();
+                receiver.setNamespaceId(namespaceId);
+                receiver.setReportValId(reportValId);
+                receiver.setReceiverUserId(receiverId);
+                receiver.setReceiverName(fixUpUserName(cmd.getOrganizationId(),receiverId));
+                workReportValProvider.createWorkReportValReceiverMap(receiver);
+            }
             return null;
         });
+    }
+
+    @Override
+    public void deleteWorkReportVal(WorkReportValIdCommand cmd) {
+
     }
 
     @Override
@@ -319,12 +350,22 @@ public class WorkReportServiceImpl implements WorkReportService {
     }
 
     @Override
+    public WorkReportValDTO getWorkReportValItem(WorkReportValIdCommand cmd) {
+        return null;
+    }
+
+    @Override
     public ListWorkReportsValResponse listWorkReportsVal(ListWorkReportsValCommand cmd) {
         return null;
     }
 
     @Override
-    public WorkReportValDTO getWorkReportVal(WorkReportValIdCommand cmd) {
+    public Integer countUnReadWorkReportsVal() {
+        return null;
+    }
+
+    @Override
+    public WorkReportValDTO getWorkReportValDetail(WorkReportValIdCommand cmd) {
         return null;
     }
 }

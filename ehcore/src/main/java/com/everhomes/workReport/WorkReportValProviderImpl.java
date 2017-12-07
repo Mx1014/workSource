@@ -9,9 +9,11 @@ import com.everhomes.rest.workReport.WorkReportStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhWorkReportScopeMapDao;
+import com.everhomes.server.schema.tables.daos.EhWorkReportValReceiverMapDao;
 import com.everhomes.server.schema.tables.daos.EhWorkReportValsDao;
 import com.everhomes.server.schema.tables.daos.EhWorkReportsDao;
 import com.everhomes.server.schema.tables.pojos.EhWorkReportScopeMap;
+import com.everhomes.server.schema.tables.pojos.EhWorkReportValReceiverMap;
 import com.everhomes.server.schema.tables.pojos.EhWorkReportVals;
 import com.everhomes.server.schema.tables.pojos.EhWorkReports;
 import com.everhomes.server.schema.tables.records.EhWorkReportScopeMapRecord;
@@ -70,5 +72,16 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         EhWorkReportValsDao dao = new EhWorkReportValsDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), WorkReportVal.class);
+    }
+
+    @Override
+    public void createWorkReportValReceiverMap(WorkReportValReceiverMap receiver){
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWorkReportValReceiverMap.class));
+        receiver.setId(id);
+        receiver.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWorkReportValReceiverMapDao dao = new EhWorkReportValReceiverMapDao(context.configuration());
+        dao.insert(receiver);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhWorkReportValReceiverMap.class, null);
     }
 }

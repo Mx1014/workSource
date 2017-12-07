@@ -11,7 +11,7 @@ import java.util.List;
  * <li>reportType: 汇报类型 0-每日 1-每周 2-每月 参考{@link com.everhomes.rest.workReport.WorkReportType}</li>
  * <li>formOriginId: 表单id</li>
  * <li>formVersion: 表单版本</li>
- * <li>scopes: 可见范围 参考{@link com.everhomes.rest.workReport.WorkReportScopeMapDTO}</li>
+ * <li>scopes: 可见范围 参考{@link WorkReportValScopeMapDTO}</li>
  * </ul>
  */
 public class UpdateWorkReportCommand {
@@ -24,8 +24,8 @@ public class UpdateWorkReportCommand {
 
     private Long formVersion;
 
-    @ItemType(WorkReportScopeMapDTO.class)
-    private List<WorkReportScopeMapDTO> scopes;
+    @ItemType(WorkReportValScopeMapDTO.class)
+    private List<WorkReportValScopeMapDTO> scopes;
 
     public UpdateWorkReportCommand() {
     }
@@ -62,11 +62,11 @@ public class UpdateWorkReportCommand {
         this.formVersion = formVersion;
     }
 
-    public List<WorkReportScopeMapDTO> getScopes() {
+    public List<WorkReportValScopeMapDTO> getScopes() {
         return scopes;
     }
 
-    public void setScopes(List<WorkReportScopeMapDTO> scopes) {
+    public void setScopes(List<WorkReportValScopeMapDTO> scopes) {
         this.scopes = scopes;
     }
 

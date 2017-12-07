@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>sourceDescription: 选择对象的名称</li>
  * </ul>
  */
-public class WorkReportScopeMapDTO {
+public class WorkReportValScopeMapDTO {
 
     private Long id;
 
@@ -23,7 +23,7 @@ public class WorkReportScopeMapDTO {
 
     private String sourceDescription;
 
-    public WorkReportScopeMapDTO() {
+    public WorkReportValScopeMapDTO() {
     }
 
     public Long getId() {
