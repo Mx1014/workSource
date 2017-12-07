@@ -3,12 +3,16 @@ package com.everhomes.workReport;
 import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.general_approval.CreateFormTemplatesCommand;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.workReport.*;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +38,9 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Autowired
     private GeneralFormService generalFormService;
+
+    @Autowired
+    private UserService userService;
 
     @Override
     public WorkReportDTO addWorkReport(AddWorkReportCommand cmd) {
@@ -267,9 +274,17 @@ public class WorkReportServiceImpl implements WorkReportService {
         }
     }
 
+    public String fixUpUserName(Long organizationId, Long userId) {
+        OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
+        if (om != null && om.getContactName() != null && !om.getContactName().isEmpty())
+            return om.getContactName();
+        return "";
+    }
+
     @Override
     public void postWorkReportVal(PostWorkReportValCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
+        User user = UserContext.current().getUser();
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
         WorkReportVal val = new WorkReportVal();
 
@@ -280,10 +295,19 @@ public class WorkReportServiceImpl implements WorkReportService {
         val.setModuleId(report.getModuleId());
         val.setModuleType(report.getModuleType());
         //  set the content.
-        switch (WorkReportType.fromCode(cmd.getReportType())){
+/*        switch (WorkReportType.fromCode(cmd.getReportType())){
             case DAY:
 
-        }
+        }*/
+        val.setReportId(cmd.getReportId());
+        val.setReportTime(cmd.getReportTime());
+        val.setApplierUserId(user.getId());
+        val.setApplierName(fixUpUserName(cmd.getOrganizationId(), user.getId()));
+        val.setReportType(cmd.getReportType());
+        dbProvider.execute((TransactionStatus status) ->{
+
+            return null;
+        });
     }
 
     @Override
