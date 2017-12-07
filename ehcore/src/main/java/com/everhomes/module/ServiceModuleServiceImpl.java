@@ -213,8 +213,10 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             startLevel = module.getLevel() + 1;
             if(null != module)//查找三级菜单
                 serviceModules = serviceModuleProvider.listServiceModule(module.getPath() + "/%");
-                if(serviceModules == null)//如果三级菜单不存在，则直接使用二级菜单
+                if(serviceModules == null || serviceModules.size() == 0){//如果三级菜单不存在，则直接使用二级菜单
                     serviceModules = Collections.singletonList(module);
+                    startLevel --;
+                }
         }else{
             serviceModules =  serviceModuleProvider.listServiceModule(startLevel, types);
         }
