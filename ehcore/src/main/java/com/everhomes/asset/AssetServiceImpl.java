@@ -3,6 +3,7 @@ package com.everhomes.asset;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.zjgkVOs.PaymentStatus;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
@@ -553,6 +554,14 @@ public class AssetServiceImpl implements AssetService {
             if(UserContext.getCurrentNamespaceId()==999971){
                 List<NoticeInfo> list = new ArrayList<>();
                 List<ListBillsDTO> listBillsDTOS1 = convertedResponse.getListBillsDTOS();
+                //已经处理过的审核中的账单不进行催缴
+                for(int k = 0; k < listBillsDTOS1.size(); k++){
+                    ListBillsDTO dto = listBillsDTOS1.get(k);
+                    if(dto.getPayStatus().equals(PaymentStatus.IN_PROCESS.getCode())){
+                        listBillsDTOS1.remove(k);
+                        k--;
+                    }
+                }
                 for(int i = 0; i < listBillsDTOS1.size(); i++){
                     ListBillsDTO dto = listBillsDTOS1.get(i);
                     NoticeInfo info = new NoticeInfo();

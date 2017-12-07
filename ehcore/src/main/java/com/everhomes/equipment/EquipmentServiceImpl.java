@@ -324,7 +324,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		List<StandardGroupDTO> executiveGroup = new ArrayList<StandardGroupDTO>();
 		List<StandardGroupDTO> reviewGroup = new ArrayList<StandardGroupDTO>();
-		LOGGER.info("converStandardToDto  standard.getExecutiveGroup:"+standard.getExecutiveGroup());
 		if(standard.getExecutiveGroup() != null) {
 			executiveGroup = standard.getExecutiveGroup().stream().map((r) -> {
 
@@ -377,8 +376,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 		standardDto.setRepeat(repeatDto);
 		standardDto.setExecutiveGroup(executiveGroup);
 		standardDto.setReviewGroup(reviewGroup);
-		LOGGER.info("converStandardToDto  executiveGroup:"+executiveGroup);
-		LOGGER.info("converStandardToDto  standardDTO.getExecutiveGroup:"+standardDto.getExecutiveGroup());
 		return standardDto;
 	}
 
@@ -611,8 +608,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 		processRepeatSetting(standard);
 
 		equipmentProvider.populateStandardGroups(standard);
-		LOGGER.info("stamdard executeGroups:" + standard.getExecutiveGroup());
-		LOGGER.info("stamdard reviewGroups:" + standard.getReviewGroup());
 		EquipmentStandardsDTO dto = converStandardToDto(standard);
 
 		return dto;
