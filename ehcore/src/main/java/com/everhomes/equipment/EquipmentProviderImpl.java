@@ -918,10 +918,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
-	public void deleteTemplateModleCommunityMap(Long templateId) {
+	public void deleteTemplateModleCommunityMap(Long templateId,Long targetId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		context.delete(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
 				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TEMPLATE_ID.eq(templateId))
+				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TARGET_ID.eq(targetId))
 				.execute();
 	}
 

@@ -4055,17 +4055,21 @@ public class EquipmentServiceImpl implements EquipmentService {
 					EquipmentServiceErrorCode.ERROR_TEMPLATE_NOT_EXIST,
  				"模板不存在");
 		}
+		//增加判断template删除情况判断   以下为在项目上删除公共模板
+		if(template.getTargetId()==0L && cmd.getTargetId()!=null){
+			equipmentProvider.deleteTemplateModleCommunityMap(cmd.getId(),cmd.getTargetId());
+		}else {
+			template.setStatus(Status.INACTIVE.getCode());
+			template.setDeleteUid(UserContext.current().getUser().getId());
+			template.setDeleteTime(new Timestamp(System.currentTimeMillis()));
+			equipmentProvider.updateEquipmentInspectionTemplates(template);
 
-		template.setStatus(Status.INACTIVE.getCode());
-		template.setDeleteUid(UserContext.current().getUser().getId());
-		template.setDeleteTime(new Timestamp(System.currentTimeMillis()));
-		equipmentProvider.updateEquipmentInspectionTemplates(template);
-
-		List<EquipmentInspectionStandards> standards = equipmentProvider.listEquipmentInspectionStandardsByTemplateId(template.getId());
-		if(standards != null && standards.size() > 0) {
-			for(EquipmentInspectionStandards standard : standards) {
-				standard.setTemplateId(0L);
-				equipmentProvider.updateEquipmentStandard(standard);
+			List<EquipmentInspectionStandards> standards = equipmentProvider.listEquipmentInspectionStandardsByTemplateId(template.getId());
+			if(standards != null && standards.size() > 0) {
+				for(EquipmentInspectionStandards standard : standards) {
+					standard.setTemplateId(0L);
+					equipmentProvider.updateEquipmentStandard(standard);
+				}
 			}
 		}
 	}
