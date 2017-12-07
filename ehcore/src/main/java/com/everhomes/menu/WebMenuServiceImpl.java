@@ -376,11 +376,24 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		//查询已经配置的菜单
 		List<WebMenuScope> oldScopes = webMenuProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(cmd.getNamespaceId()));
-		List<Long> oldIds = oldScopes.stream().map(r -> r.getId()).collect(Collectors.toList());
+		List<Long> oldScopeIds = new ArrayList<>();
+
+		//只删除上面可选菜单中的的scope。因为可能有部分菜单是普通公司的，这些菜单不在可选菜单中。
+		if(oldScopes != null){
+			for(WebMenuScope scope: oldScopes){
+				for (WebMenuDTO menuDTO: webMenuDTOS){
+					if(scope.getMenuId().longValue() == menuDTO.getId()){
+						oldScopeIds.add(scope.getId());
+					}
+				}
+			}
+		}
 
 		//更新菜单
 		dbProvider.execute(status -> {
-			webMenuProvider.deleteWebMenuScopes(oldIds);
+			if(oldScopeIds.size() > 0){
+				webMenuProvider.deleteWebMenuScopes(oldScopeIds);
+			}
 			webMenuProvider.createWebMenuScopes(newScopes);
 			return true;
 		});
