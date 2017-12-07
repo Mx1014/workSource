@@ -112,7 +112,7 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
         serviceAllianceCategories.setName(name);
         serviceAllianceCategories.setNamespaceId(namespaceId);
         serviceAllianceCategories.setParentId(0L);
-        List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, OrganizationGroupType.ENTERPRISE.getCode(), new CrossShardListingLocator(), 10);
+        List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, "PM", new CrossShardListingLocator(), 10);
 //        List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
 //        if(null != communities && communities.size() > 0){
         if(null != organizations && organizations.size() > 0){
@@ -252,7 +252,7 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 	private ServiceAllianceCategories updateServiceAlliance(Integer namespaceId, Long type, Byte detailFlag, String name){
         ServiceAllianceCategories serviceAllianceCategories = yellowPageProvider.findCategoryById(type);
 //        List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
-        List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, OrganizationGroupType.ENTERPRISE.getCode(), new CrossShardListingLocator(), 10);
+        List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, "PM", new CrossShardListingLocator(), 10);
         if(null != organizations && organizations.size() > 0 && null != serviceAllianceCategories){
         	Organization organization = organizations.get(0);
             serviceAllianceCategories.setName(name);
