@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 public class RelocationServiceImpl implements RelocationService, ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RelocationServiceImpl.class);
 
-	private static final String RELOCATION_CANCEL_QUEQUE = "relocationCancelQueque";
+	private static final String RELOCATION_CANCEL_QUE = "relocationCancelQue";
 
 	@Autowired
 	private LocaleStringService localeStringService;
@@ -84,7 +84,7 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		if(null == event.getApplicationContext().getParent()) {
-			workerPoolFactory.getWorkerPool().addQueue(RELOCATION_CANCEL_QUEQUE);
+			workerPoolFactory.getWorkerPool().addQueue(RELOCATION_CANCEL_QUE);
 		}
 	}
 
@@ -92,7 +92,7 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 
 		final Job job = new Job(RelocationCancelAction.class.getName(), relocationId);
 
-		jesqueClientFactory.getClientPool().delayedEnqueue(RELOCATION_CANCEL_QUEQUE, job, delayTime);
+		jesqueClientFactory.getClientPool().delayedEnqueue(RELOCATION_CANCEL_QUE, job, delayTime);
 	}
 
 	@Override

@@ -48,7 +48,6 @@ public class RelocationCancelAction implements Runnable{
 		//处理中的任务过期 自动取消
 		if (null != request && request.getStatus() == RelocationRequestStatus.PROCESSING.getCode()) {
 
-
 			request.setStatus(RelocationRequestStatus.CANCELED.getCode());
 			request.setCancelTime(new Timestamp(System.currentTimeMillis()));
 			request.setCancelUid(User.SYSTEM_UID);
