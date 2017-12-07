@@ -17,6 +17,7 @@ import java.sql.Timestamp;
  *     <li>projectEstablishDate: 立项日期 时间戳</li>
  *     <li>projectCompleteDate: 完成日期 时间戳</li>
  *     <li>status: 状态</li>
+ *     <li>statusName: 状态名称</li>
  * </ul>
  * Created by ying.xiong on 2017/8/19.
  */
@@ -31,6 +32,15 @@ public class CustomerApplyProjectDTO {
     private Timestamp projectCompleteDate;
     private BigDecimal projectAmount;
     private Byte status;
+    private String statusName;
+
+    public String getStatusName() {
+        return statusName;
+    }
+
+    public void setStatusName(String statusName) {
+        this.statusName = statusName;
+    }
 
     public Byte getStatus() {
         return status;

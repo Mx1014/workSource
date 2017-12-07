@@ -912,6 +912,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerApplyProjectDTO convertCustomerApplyProjectDTO(CustomerApplyProject project, Long communityId) {
         CustomerApplyProjectDTO dto = ConvertHelper.convert(project, CustomerApplyProjectDTO.class);
+        if(dto.getStatus() != null) {
+            CustomerApplyProjectStatus status = CustomerApplyProjectStatus.fromStatus(dto.getStatus());
+            if(status != null) {
+                dto.setStatusName(status.getName());
+            }
+        }
         //PROJECTGSOURCE不是必填项目，这里没有判断 为空字符串
         if(dto.getProjectSource() != null) {
             String[] ids = dto.getProjectSource().split(",");
