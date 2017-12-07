@@ -469,10 +469,10 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         List<ServiceAlliances> saList = new ArrayList<ServiceAlliances>();
         
         SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
-        query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId));
-
-    	if (!StringUtils.isEmpty(ownerType) )
-    		query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId));
+//
+//    	if (!StringUtils.isEmpty(ownerType) )
+//    		query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType));
 //        query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId));
         //topic
         query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.eq(0L));
@@ -1206,4 +1206,27 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         return ConvertHelper.convert(query.fetchOne(), ServiceAllianceCategories.class);
 	}
 
+
+	@Override
+	public List<Integer> listAscEntryIds(int namespaceId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceAllianceCategories.class));
+        SelectQuery<EhServiceAllianceCategoriesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_CATEGORIES);
+        query.addConditions(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.PARENT_ID.eq(0L));
+        query.addConditions(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.ENTRY_ID.isNotNull());
+        query.addOrderBy(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.ENTRY_ID.asc());
+        
+        return query.fetch().map(r->r.getEntryId());
+	
+	}
+	
+	@Override
+	public void updateEntryIdNullByNamespaceId(Integer namespaceId) {
+		dbProvider.getDslContext(AccessSpec.readWrite())
+		.update(Tables.EH_SERVICE_ALLIANCE_CATEGORIES)
+		.set(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.ENTRY_ID,(Integer)null)
+		.where(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+		.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.PARENT_ID.eq(0L))
+		.execute();
+	}
 }

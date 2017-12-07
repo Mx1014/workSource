@@ -1,13 +1,25 @@
 package com.everhomes.portal;
 
+import com.everhomes.acl.WebMenuPrivilegeProvider;
+import com.everhomes.acl.WebMenuScope;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.common.ServiceAllianceActionData;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.portal.DetailFlag;
 import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
 import com.everhomes.rest.portal.ServiceAllianceJump;
+import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.yellowPage.DisplayFlagType;
+import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
+import com.everhomes.rest.yellowPage.ServiceAllianceOwnerType;
 import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -16,12 +28,19 @@ import com.everhomes.yellowPage.ServiceAllianceCategories;
 import com.everhomes.yellowPage.ServiceAllianceSkipRule;
 import com.everhomes.yellowPage.ServiceAlliances;
 import com.everhomes.yellowPage.YellowPageProvider;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by sfyan on 2017/8/30.
@@ -34,11 +53,22 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 
     @Autowired
     private CommunityProvider communityProvider;
+    
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
     @Autowired
     private YellowPageProvider yellowPageProvider;
+    
+    @Autowired
+    private ConfigurationProvider configProvider;
 
-
+	@Autowired
+	private WebMenuPrivilegeProvider webMenuProvider;
+	
+	@Autowired
+	private BigCollectionProvider bigCollectionProvider;
+	
     @Override
     public String publish(Integer namespaceId, String instanceConfig, String itemLabel) {
         ServiceAllianceInstanceConfig serviceAllianceInstanceConfig = (ServiceAllianceInstanceConfig)StringHelper.fromJsonString(instanceConfig, ServiceAllianceInstanceConfig.class);
@@ -82,20 +112,24 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
         serviceAllianceCategories.setName(name);
         serviceAllianceCategories.setNamespaceId(namespaceId);
         serviceAllianceCategories.setParentId(0L);
-        List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
-        if(null != communities && communities.size() > 0){
-            Community community = communities.get(0);
-            serviceAllianceCategories.setOwnerType("community");
-            serviceAllianceCategories.setOwnerId(community.getId());
+        List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, OrganizationGroupType.ENTERPRISE.getCode(), new CrossShardListingLocator(), 10);
+//        List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
+//        if(null != communities && communities.size() > 0){
+        if(null != organizations && organizations.size() > 0){
+//            Community community = communities.get(0);
+        	Organization organization = organizations.get(0);
+            serviceAllianceCategories.setOwnerType(ServiceAllianceBelongType.ORGANAIZATION.getCode());
+            serviceAllianceCategories.setOwnerId(organization.getId());
             serviceAllianceCategories.setCreatorUid(user.getId());
             serviceAllianceCategories.setDeleteUid(user.getId());
             serviceAllianceCategories.setStatus(YellowPageStatus.ACTIVE.getCode());
+            serviceAllianceCategories.setEntryId(generateEntryId(namespaceId));
             yellowPageProvider.createServiceAllianceCategory(serviceAllianceCategories);
 
             ServiceAlliances serviceAlliances = new ServiceAlliances();
             serviceAlliances.setParentId(0L);
-            serviceAlliances.setOwnerType("community");
-            serviceAlliances.setOwnerId(community.getId());
+            serviceAlliances.setOwnerType(ServiceAllianceBelongType.ORGANAIZATION.getCode());
+            serviceAlliances.setOwnerId(organization.getId());
             serviceAlliances.setName(name);
             serviceAlliances.setDisplayName(name);
             serviceAlliances.setType(serviceAllianceCategories.getId());
@@ -111,28 +145,133 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
                 serviceAllianceSkipRule.setServiceAllianceCategoryId(serviceAllianceCategories.getId());
                 yellowPageProvider.createServiceAllianceSkipRule(serviceAllianceSkipRule);
             }
+            
+            boolean iscreateMenuScope = configProvider.getBooleanValue("portal.sa.create.scope", true);
+            if(iscreateMenuScope){
+            	createMenuScope(namespaceId,serviceAllianceCategories.getEntryId(),serviceAllianceCategories.getName());
+            }
         }else{
-            LOGGER.error("namespace not community. namespaceId = {}", namespaceId);
+            LOGGER.error("namespace not pm. namespaceId = {}", namespaceId);
         }
 
         return serviceAllianceCategories;
     }
 
-    private ServiceAllianceCategories updateServiceAlliance(Integer namespaceId, Long type, Byte detailFlag, String name){
+    private void createMenuScope(Integer namespaceId, Integer entryId, String name) {
+    	clearMenuScope(namespaceId);
+		if(entryId == null || namespaceId == null){
+			return ;
+		}
+		long parentMenuId = entryId*100+41600;
+		ArrayList<WebMenuScope> newSocpes = new ArrayList<WebMenuScope>();
+		ArrayList<Long> socpeIds = new ArrayList<Long>();
+//		Map<Long, WebMenuScope> map = webMenuProvider.getWebMenuScopeMapByOwnerId("EhNamespaces", Long.valueOf(namespaceId));
+//		boolean insertflag = false;
+		for (int i = 0; i < 7; i++) {
+			Long menuid = parentMenuId+i*10;
+			newSocpes.add(generteObjWebMenuScope(namespaceId,name,menuid));
+//			WebMenuScope scope = map.get(Long.valueOf(menuid));
+//			if(scope == null){
+//				insertflag = true;
+//			}else{
+//				socpeIds.add(scope.getId());
+//			}
+		}
+//		if(insertflag){
+//			webMenuProvider.deleteWebMenuScopes(socpeIds);
+		webMenuProvider.createWebMenuScopes(newSocpes);
+//		}
+	}
+
+	private void clearMenuScope(Integer namespaceId) {
+		String rkey = "sa_menuscope_"+namespaceId+Thread.currentThread().getId();
+		ValueOperations<String, String> valuemap = getValueOperations(rkey);
+		String value = valuemap.get(rkey);
+		if(value == null){
+			value = "true";
+			valuemap.set(rkey, value, 20, TimeUnit.MINUTES);
+			ArrayList<Integer> socpeIds = new ArrayList<>(33*7);
+			for (int i = 0; i < 30; i++) {
+				socpeIds.add(41600+i*100);
+				socpeIds.add(41600+i*100+10);
+				socpeIds.add(41600+i*100+20);
+				socpeIds.add(41600+i*100+30);
+				socpeIds.add(41600+i*100+40);
+				socpeIds.add(41600+i*100+50);
+				socpeIds.add(41600+i*100+60);
+			}
+			webMenuProvider.deleteWebMenuScopesByMenuIdAndNamespace(socpeIds,namespaceId);
+		}
+	}
+
+	private WebMenuScope generteObjWebMenuScope(Integer namespaceId, String name, Long menuid) {
+		WebMenuScope socpe = new WebMenuScope();
+		socpe.setMenuId(menuid);
+		socpe.setMenuName(name);
+		socpe.setOwnerId(Long.valueOf(namespaceId));
+		socpe.setOwnerType("EhNamespaces");
+		if(menuid%100 == 0){
+			socpe.setApplyPolicy((byte)1);
+		}else{
+			socpe.setApplyPolicy((byte)2);
+		}
+		return socpe;
+	}
+
+	private Integer generateEntryId(Integer namespaceId) {
+		if(namespaceId == null){
+			LOGGER.error("service alliance generateEntryId namespaceId "+namespaceId);
+			return null;
+		}
+		clearEntryId(namespaceId);
+    	 List<Integer> entryIds = yellowPageProvider.listAscEntryIds(namespaceId);
+    	 for (int i = 0; i < entryIds.size(); i++) {
+			if(entryIds.get(i)!=i+1){
+				return i+1;
+			}
+		}
+    	 int maxEntryId = configProvider.getIntValue("portal.max.entryid", 30);
+    	 if(entryIds.size() == maxEntryId){
+    		 LOGGER.error("service alliance maxEntryId exceed "+maxEntryId);
+    		 return null;
+    	 }
+    	return entryIds.size()+1;
+	}
+
+	private void clearEntryId(Integer namespaceId) {
+		String rkey = "sa_entryid_"+namespaceId+Thread.currentThread().getId();
+		 ValueOperations<String, String> valuemap = getValueOperations(rkey);
+		 String value = valuemap.get(rkey);
+        if(value == null){
+        	value = "true";
+        	valuemap.set(rkey, value, 10, TimeUnit.MINUTES);
+        	yellowPageProvider.updateEntryIdNullByNamespaceId(namespaceId);
+        }
+	}
+
+	private ServiceAllianceCategories updateServiceAlliance(Integer namespaceId, Long type, Byte detailFlag, String name){
         ServiceAllianceCategories serviceAllianceCategories = yellowPageProvider.findCategoryById(type);
-        List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
-        if(null != communities && communities.size() > 0 && null != serviceAllianceCategories){
-            Community community = communities.get(0);
+//        List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
+        List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, OrganizationGroupType.ENTERPRISE.getCode(), new CrossShardListingLocator(), 10);
+        if(null != organizations && organizations.size() > 0 && null != serviceAllianceCategories){
+        	Organization organization = organizations.get(0);
             serviceAllianceCategories.setName(name);
+            if(serviceAllianceCategories.getEntryId() == null){
+            	serviceAllianceCategories.setEntryId(generateEntryId(namespaceId));
+            	 boolean iscreateMenuScope = configProvider.getBooleanValue("portal.sa.create.scope", true);
+                 if(iscreateMenuScope){
+                	 createMenuScope(namespaceId, serviceAllianceCategories.getEntryId(), name);
+                 }
+            }
             yellowPageProvider.updateServiceAllianceCategory(serviceAllianceCategories);
 
-            ServiceAlliances serviceAlliances = yellowPageProvider.queryServiceAllianceTopic("community", community.getId(), type);
+            ServiceAlliances serviceAlliances = yellowPageProvider.queryServiceAllianceTopic(ServiceAllianceBelongType.ORGANAIZATION.getCode(), organization.getId(), type);
             if(null != serviceAlliances){
                 serviceAlliances.setName(name);
                 serviceAlliances.setDisplayName(name);
                 yellowPageProvider.updateServiceAlliances(serviceAlliances);
             }else{
-                LOGGER.error("serviceAlliances is null. communityId = {}, type = {}", community.getId(), type);
+                LOGGER.error("serviceAlliances is null. pmId = {}, type = {}", organization.getId(), type);
             }
 
             ServiceAllianceSkipRule rule = yellowPageProvider.getCateorySkipRule(type);
@@ -161,4 +300,26 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
     public String processInstanceConfig(String instanceConfig) {
         return instanceConfig;
     }
+    
+    /**
+	 * 获取key在redis操作的valueOperations
+	 */
+	private ValueOperations<String, String> getValueOperations(String key) {
+		final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+		Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+		RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+		return valueOperations;
+	}
+
+
+	/**
+	 * 清除redis中key的缓存
+	 */
+	private void deleteValueOperations(String key) {
+		final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+		Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+		RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+		redisTemplate.delete(key);
+	}
 }
