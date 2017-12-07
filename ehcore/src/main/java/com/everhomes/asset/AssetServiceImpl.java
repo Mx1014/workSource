@@ -1406,6 +1406,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void autoNoticeConfig(AutoNoticeConfigCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_NOTICE);
         checkNullProhibit("所属者类型",cmd.getOwnerType());
         checkNullProhibit("园区id",cmd.getOwnerId());
         checkNullProhibit("域空间",cmd.getNamespaceId());
