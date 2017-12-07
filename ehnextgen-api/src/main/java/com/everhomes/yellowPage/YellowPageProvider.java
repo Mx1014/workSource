@@ -146,4 +146,7 @@ public interface YellowPageProvider {
 
 
 	List<Integer> listAscEntryIds(int namespaceId);
+
+
+	void updateEntryIdNullByNamespaceId(Integer namespaceId);
 }
