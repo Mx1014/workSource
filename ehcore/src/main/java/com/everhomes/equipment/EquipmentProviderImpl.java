@@ -902,10 +902,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
-	public List<EquipmentModleCommunityMap> getModuleCommunityMap(Long targetId) {
+	public List<EquipmentModleCommunityMap> getModuleCommunityMap(Long targetId, byte modelType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		return context.selectFrom(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
 				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TARGET_ID.eq(targetId))
+				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(modelType))
 				.fetchInto(EquipmentModleCommunityMap.class);
 	}
 
@@ -914,6 +915,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		context.delete(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
 				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.STANDARD_ID.eq(standardId))
+				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(EquipmentModelType.STANDARD.getCode()))
 				.execute();
 	}
 
@@ -923,6 +925,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		context.delete(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
 				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TEMPLATE_ID.eq(templateId))
 				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TARGET_ID.eq(targetId))
+				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(EquipmentModelType.TEMPLATE.getCode()))
 				.execute();
 	}
 

@@ -251,6 +251,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 					map.setStandardId(standard.getId());
 					map.setTargetType(standard.getTargetType());
 					map.setTargetId(communityId);
+					map.setModelType(EquipmentModelType.STANDARD.getCode());
 					equipmentProvider.createEquipmentModleCommunityMap(map);
 				}
 			}
@@ -3965,6 +3966,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 					communityMap.setTemplateId(template.getId());
 					communityMap.setTargetType(template.getTargetType());
 					communityMap.setTargetId(communityId);
+					communityMap.setModelType(EquipmentModelType.TEMPLATE.getCode());
 					equipmentProvider.createEquipmentModleCommunityMap(communityMap);
 				}
 			}
@@ -3988,7 +3990,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if (template.getTargetId() == 0L && cmd.getTargetId() != null) {
 			EquipmentInspectionTemplates templatesNew = ConvertHelper.convert(cmd, EquipmentInspectionTemplates.class);
 			equipmentProvider.createEquipmentInspectionTemplates(templatesNew);
-			//创建map表关系
+			//创建item和模板map表关系
 			for (InspectionItemDTO item : cmd.getItems()) {
 				EquipmentInspectionTemplateItemMap map = new EquipmentInspectionTemplateItemMap();
 				map.setTemplateId(template.getId());
@@ -4124,7 +4126,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 			templates = equipmentProvider.listInspectionTemplates(UserContext.getCurrentNamespaceId(), cmd.getName(), null);
 		} else {
 			templates = equipmentProvider.listInspectionTemplates(UserContext.getCurrentNamespaceId(), cmd.getName(), cmd.getTargetId());
-			List<EquipmentModleCommunityMap> templatesMap = equipmentProvider.getModuleCommunityMap(cmd.getTargetId());
+			List<EquipmentModleCommunityMap> templatesMap = equipmentProvider.getModuleCommunityMap(cmd.getTargetId(), EquipmentModelType.TEMPLATE.getCode());
+			for (EquipmentModleCommunityMap map : templatesMap) {
+				templates.add(equipmentProvider.findEquipmentInspectionTemplate(map.getTemplateId(), null, null));
+			}
 		}
 
 		if(templates != null && templates.size() > 0) {

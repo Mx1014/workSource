@@ -14,6 +14,9 @@ CREATE TABLE `eh_equipment_modle_community_map` (
 ALTER TABLE `eh_equipment_inspection_standards`
   ADD COLUMN `refer_id` BIGINT(20) NULL;
 
+ALTER TABLE `eh_equipment_inspection_templates`
+  ADD COLUMN `refer_id`  bigint(20) NULL;
+
 
 ALTER TABLE `eh_equipment_inspection_templates`
   ADD COLUMN `target_type` VARCHAR(32) NOT NULL DEFAULT '',

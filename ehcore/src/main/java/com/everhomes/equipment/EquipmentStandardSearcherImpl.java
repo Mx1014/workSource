@@ -184,7 +184,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
          } 
         
         List<EquipmentStandardsDTO> eqStandards = new ArrayList<EquipmentStandardsDTO>();
-        List <EquipmentModleCommunityMap> maps = equipmentProvider.getModuleCommunityMap(cmd.getTargetId());
+        List <EquipmentModleCommunityMap> maps = equipmentProvider.getModuleCommunityMap(cmd.getTargetId(),EquipmentModelType.STANDARD.getCode());
         for(Long id : ids) {
         	EquipmentInspectionStandards standard = equipmentProvider.findStandardById(id);
             if (cmd.getTargetId() != null) {

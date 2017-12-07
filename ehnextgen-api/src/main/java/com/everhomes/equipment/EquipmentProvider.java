@@ -145,7 +145,7 @@ public interface EquipmentProvider {
 
     void createEquipmentModleCommunityMap(EquipmentModleCommunityMap map);
 
-    List<EquipmentModleCommunityMap> getModuleCommunityMap(Long targetId);
+    List<EquipmentModleCommunityMap> getModuleCommunityMap(Long targetId, byte modelType);
 
     void deleteStandardModleCommunityMap(Long standardId);
 
