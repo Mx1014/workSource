@@ -781,8 +781,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(EquipmentReviewStatus.INACTIVE.equals(EquipmentReviewStatus.fromStatus(map.getReviewStatus()))) {
 			map.setReviewStatus(EquipmentReviewStatus.DELETE.getCode());
 			map.setReviewResult(ReviewResult.NONE.getCode());
-			//fix bug #20247  20171207
-			map.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
 			equipmentProvider.updateEquipmentStandardMap(map);
 			equipmentStandardMapSearcher.feedDoc(map);
 		} else {
