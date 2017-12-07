@@ -880,6 +880,7 @@ public class ForumServiceImpl implements ForumService {
                         //更新前需要在锁内部重新查询，因为当前的parentPost可能已经是过期的数据了   edit by yanjun 20171207
                         Post updateParentPost = forumProvider.findPostById(parentPost.getId());
                         if(updateParentPost != null){
+                            updateParentPost.setChildCount(updateParentPost.getChildCount() - 1);
                             forumProvider.updatePost(updateParentPost);
                         }
                     }
