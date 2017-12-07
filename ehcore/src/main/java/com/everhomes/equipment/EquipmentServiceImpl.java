@@ -274,6 +274,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 			equipmentProvider.updateEquipmentStandard(standard);
 
+			//PS:这里删除是因为荣超需求
 			/*List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
 			if(maps != null && maps.size() > 0) {
 				for(EquipmentStandardMap map : maps) {
@@ -301,6 +302,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	private void unReviewEquipmentStandardRelations(EquipmentStandardMap map) {
 		map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
 		map.setReviewResult(ReviewResult.NONE.getCode());
+		map.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
 		equipmentProvider.updateEquipmentStandardMap(map);
 		equipmentStandardMapSearcher.feedDoc(map);
 
@@ -749,6 +751,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(EquipmentReviewStatus.INACTIVE.equals(EquipmentReviewStatus.fromStatus(map.getReviewStatus()))) {
 			map.setReviewStatus(EquipmentReviewStatus.DELETE.getCode());
 			map.setReviewResult(ReviewResult.NONE.getCode());
+			//fix bug #20247
+			map.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
 			equipmentProvider.updateEquipmentStandardMap(map);
 			equipmentStandardMapSearcher.feedDoc(map);
 		} else {
@@ -1016,6 +1020,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 				for(EquipmentStandardMap map : maps) {
                     if(!updateStandardIds.contains(map.getStandardId())) {
                         map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
+                        //fix bug #20247
+						map.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
                         equipmentProvider.updateEquipmentStandardMap(map);
                         equipmentStandardMapSearcher.feedDoc(map);
 
