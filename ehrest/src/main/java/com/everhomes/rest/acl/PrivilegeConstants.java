@@ -202,21 +202,21 @@ public interface PrivilegeConstants {
     // ---------------- 组织架构权限 -----------------------
 
     //部门
-    long CREATE_DEPARTMENT = 41001L;
-    long MODIFY_DEPARTMENT = 41002L;
-    long DELETE_DEPARTMENT = 41003L;
-    long CHANGE_DEPARTMENT_ORDER = 41004L;
+    long CREATE_DEPARTMENT = 41001L;//新增部门
+    long MODIFY_DEPARTMENT = 41002L;//修改部门
+    long DELETE_DEPARTMENT = 41003L;//删除部门
+    long CHANGE_DEPARTMENT_ORDER = 41004L;//修改部门殊勋
 
     //岗位
-    long CREATE_JOB_POSITION = 41005L;
-    long MODIFY_JOB_POSITION = 41006L;
-    long DELETE_JOB_POSITION = 41007L;
-    long MODIFY_DEPARTMENT_JOB_POSITION = 41008L;
+    long CREATE_JOB_POSITION = 41005L;//创建岗位
+    long MODIFY_JOB_POSITION = 41006L;//修改岗位
+    long DELETE_JOB_POSITION = 41007L;//删除岗位
+    long MODIFY_DEPARTMENT_JOB_POSITION = 41008L;//修改部门岗位
 
     //人员
-    long CREATE_OR_MODIFY_PERSON = 41009L;
-    long DELETE_PERSON = 41010L;
-    long BATCH_IMPORT_PERSON = 41011L;
-    long BATCH_EXPORT_PERSON = 41012L;
+    long CREATE_OR_MODIFY_PERSON = 41009L;//创建或修改人员
+    long DELETE_PERSON = 41010L;//删除人员
+    long BATCH_IMPORT_PERSON = 41011L;//批量导入人员
+    long BATCH_EXPORT_PERSON = 41012L;//批量导出人员
 
 }

@@ -20,4 +20,7 @@ public interface FlowConstants {
 
     //合同模块id
     Long CONTRACT_MODULE = 21200L;
+
+    //组织架构
+    Long ORGANIZATION_MODULE = 50100L;
 }
