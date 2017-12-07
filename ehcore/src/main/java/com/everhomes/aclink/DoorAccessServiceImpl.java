@@ -2251,7 +2251,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             		}
             	}
             	resp.setQrTimeout(this.getQrTimeout()/1000l);
-            	resp.setQrIntro("http://xxxx.com");
+//            	resp.setQrIntro("http://xxxx.com");
                 doZuolinQRKey(generate, user, doorAccess, auth, qrKeys);
                 }
            
