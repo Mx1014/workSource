@@ -1,7 +1,11 @@
 package com.everhomes.filedownload;
 
 /**
- * Created by Administrator on 2017/12/4.
+ * <ul>
+ *     <li>name: Excel表中列名</li>
+ *     <li>key: object对应的属性名，用户反射获取数据</li>
+ *     <li>length: Excel表中列的长度</li>
+ * </ul>
  */
 public class CellMapper {
     String name;
