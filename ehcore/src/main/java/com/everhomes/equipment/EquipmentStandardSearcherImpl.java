@@ -193,6 +193,11 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
                     if (maps!=null && maps.size()>0)
                     maps.removeIf((s) -> Objects.equals(s.getId(), standard.getReferId()));
                 }
+            } else {
+                //全部里面
+                if (standard != null) {
+                    standard.setCommunities(equipmentProvider.getModuleCommunityMapByStandardId(standard.getId()));
+                }
             }
             if(standard != null) {
         		processRepeatSetting(standard);

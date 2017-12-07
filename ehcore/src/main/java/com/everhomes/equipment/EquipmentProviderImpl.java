@@ -936,6 +936,24 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 				.fetchInto(Integer.class);
 	}
 
+	@Override
+	public List<Long> getModuleCommunityMapByStandardId(Long standardId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		return context.select(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TARGET_ID)
+				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.STANDARD_ID.eq(standardId))
+				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(EquipmentModelType.STANDARD.getCode()))
+				.fetchInto(Long.class);
+	}
+
+	@Override
+	public List<Long> getModuleCommunityMapByTemplateId(Long templateId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		return context.select(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TARGET_ID)
+				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TEMPLATE_ID.eq(templateId))
+				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(EquipmentModelType.TEMPLATE.getCode()))
+				.fetchInto(Long.class);
+	}
+
 	@Cacheable(value="listQualifiedEquipmentStandardEquipments", key="'AllEquipments'", unless="#result.size() == 0")
 	@Override
 	public List<EquipmentInspectionEquipments> listQualifiedEquipmentStandardEquipments() {

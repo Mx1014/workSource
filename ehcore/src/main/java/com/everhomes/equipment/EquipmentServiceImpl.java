@@ -635,7 +635,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 		processRepeatSetting(standard);
 
 		equipmentProvider.populateStandardGroups(standard);
+
 		EquipmentStandardsDTO dto = converStandardToDto(standard);
+
+		if(standard.getTargetId()==0L){
+			dto.setCommunities(equipmentProvider.getModuleCommunityMapByStandardId(standard.getId()));
+		}
 
 		return dto;
 	}
@@ -3989,6 +3994,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		//cmd.getTargetId表示当前操作是在项目还是全部，template.getTargetId是用来判断是否为公共标准如果在项目上修改公共的则创建副本
 		if (template.getTargetId() == 0L && cmd.getTargetId() != null) {
 			EquipmentInspectionTemplates templatesNew = ConvertHelper.convert(cmd, EquipmentInspectionTemplates.class);
+			templatesNew.setReferId(cmd.getId());
 			equipmentProvider.createEquipmentInspectionTemplates(templatesNew);
 			//创建item和模板map表关系
 			for (InspectionItemDTO item : cmd.getItems()) {
@@ -4091,6 +4097,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(items != null && items.size() > 0) {
 			dto.setItems(items);
 		}
+		if(template.getTargetId()==0L){
+			dto.setCommunities(equipmentProvider.getModuleCommunityMapByTemplateId(template.getId()));
+		}
 
 		return dto;
 	}
@@ -4135,6 +4144,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(templates != null && templates.size() > 0) {
 			for(EquipmentInspectionTemplates template : templates) {
 				InspectionTemplateDTO dto = ConvertHelper.convert(template, InspectionTemplateDTO.class);
+				if(template.getId()==0L){
+					dto.setCommunities(equipmentProvider.getModuleCommunityMapByTemplateId(template.getId()));
+				}
 				dtos.add(dto);
 			}
 		}

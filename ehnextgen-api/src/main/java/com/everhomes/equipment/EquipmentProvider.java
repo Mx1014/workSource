@@ -152,4 +152,8 @@ public interface EquipmentProvider {
     void deleteTemplateModleCommunityMap(Long templateId , Long targetId);
 
 	List<Integer> getDistinctNameSpace();
+
+	List<Long> getModuleCommunityMapByStandardId(Long standardId);
+
+	List<Long> getModuleCommunityMapByTemplateId(Long id);
 }
