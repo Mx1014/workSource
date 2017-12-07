@@ -17,6 +17,7 @@ ALTER TABLE `eh_customer_talents` ADD COLUMN `doctors` INTEGER COMMENT '博士';
 ALTER TABLE `eh_customer_talents` ADD COLUMN `overseas` INTEGER COMMENT '留学人员';
 ALTER TABLE `eh_customer_talents` ADD COLUMN `thousand_talents_program` INTEGER COMMENT '千人计划人数';
 ALTER TABLE `eh_customer_talents` ADD COLUMN `fresh_graduates` INTEGER COMMENT '吸纳应届大学毕业生';
+ALTER TABLE `eh_customer_talents` ADD COLUMN `age` INTEGER COMMENT '年龄';
 
 ALTER TABLE `eh_customer_trademarks` ADD COLUMN `applications` INTEGER COMMENT '知识产权申请总数';
 ALTER TABLE `eh_customer_trademarks` ADD COLUMN `patent_applications` INTEGER COMMENT '申请发明专利数';
@@ -33,6 +34,9 @@ ALTER TABLE `eh_customer_certificates` ADD COLUMN `technology_contracts` INTEGER
 ALTER TABLE `eh_customer_certificates` ADD COLUMN `technology_contract_amount` INTEGER COMMENT '技术合同交易总金额（万元）';
 ALTER TABLE `eh_customer_certificates` ADD COLUMN `national_projects` INTEGER COMMENT '当年承担国家级科技计划项目数';
 ALTER TABLE `eh_customer_certificates` ADD COLUMN `provincial_awards` INTEGER COMMENT '当年获得省级以上奖励';
+
+ALTER TABLE `eh_customer_investments` ADD COLUMN `investment_time` DATETIME COMMENT '时间';
+ALTER TABLE `eh_customer_investments` ADD COLUMN `investment_round` VARCHAR(64) COMMENT 'xx轮';
 
 ALTER TABLE `eh_customer_apply_projects` ADD COLUMN `description` TEXT COMMENT '主要项目介绍';
 
