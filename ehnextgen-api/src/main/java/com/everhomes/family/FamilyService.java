@@ -88,4 +88,12 @@ public interface FamilyService {
 
 	void batchRejectMember(BatchRejectMemberCommand cmd);
 
+	/**
+     * 用于测试锁的获取
+     * @param expression  格式：锁的key + 逗号 + 时间(毫秒) + 锁获取的编号
+     *                                    其中锁的key必填，参考：{@link com.everhomes.coordinator.CoordinationLocks}
+     *                                    时间以毫秒为单位，不填是默认为5秒；锁的编号用于在日志中识别是第几个锁，不填则默认为时间戳；
+     *                                    这几项信息使用逗号分隔
+     */
+	public void testLockAquiring(String expression);
 }

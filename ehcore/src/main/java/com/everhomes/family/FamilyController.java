@@ -8,6 +8,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.family.*;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.util.EtagHelper;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -435,6 +436,16 @@ public class FamilyController extends ControllerBase {
 //        response.setErrorDescription("OK");
 //        return response;
 //    }
-    
+    @RequestMapping("testLockAquiring")
+    @RestReturn(value=String.class)
+    @RequireAuthentication(false)
+    public RestResponse testLockAquiring(String expression) {
+        this.familyService.testLockAquiring(expression);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
     
 }

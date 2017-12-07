@@ -10,6 +10,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -2287,5 +2288,48 @@ public class FamilyServiceImpl implements FamilyService {
 			this.rejectMember(member);
 		}
         
+	}
+	
+	/**
+	 * 用于测试锁的获取
+	 * @param expression  格式：锁的key + 逗号 + 时间(毫秒) + 锁获取的编号
+	 *                                    其中锁的key必填，参考：{@link com.everhomes.coordinator.CoordinationLocks}
+	 *                                    时间以毫秒为单位，不填是默认为5秒；锁的编号用于在日志中识别是第几个锁，不填则默认为时间戳；
+	 *                                    这几项信息使用逗号分隔
+	 */
+	public void testLockAquiring(String expression) {
+	    String lockCode = null; // 锁对应的key，如 CoordinationLocks.CREATE_RESOURCE.getCode()
+	    long millis = -1;  // 获取锁的时间
+	    long number = System.currentTimeMillis(); // 锁的编号
+	    
+	    if(expression != null) {
+	        String[] segments = expression.split(",");
+	        if(segments.length > 0 && segments[0].trim().length() > 0) {
+	            lockCode =  segments[0].trim();
+	        }
+	        if(segments.length > 1 && segments[1].trim().length() > 0) {
+	            millis =  Integer.parseInt(segments[1].trim());
+            }
+	        if(millis <=0 ) {
+	            millis = 5000;  // 默认5秒
+	        }
+            if(segments.length > 2 && segments[2].trim().length() > 0) {
+                number =  Long.parseLong(segments[2].trim());
+            }
+	    }
+	    
+	    if(lockCode != null) {
+	        long startTime = System.currentTimeMillis();
+	        final long tmpMillis = millis;
+    	    coordinationProvider.getNamedLock(lockCode).enter(() -> {
+                Thread.sleep(tmpMillis);
+                return null;
+            });
+    	    long endTime = System.currentTimeMillis();
+    	    if(LOGGER.isDebugEnabled()) {
+    	        LOGGER.debug("Test aquiring lock(release), expression={}, lockCode={}, millis={}, number={}, elapse={}", 
+    	                expression, lockCode, millis, number, (endTime - startTime));
+    	    }
+	    }
 	}
 }
