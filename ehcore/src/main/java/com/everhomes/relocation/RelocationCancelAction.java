@@ -43,30 +43,35 @@ public class RelocationCancelAction implements Runnable{
 	@Override
 	public void run() {
 
+		LOGGER.info("Prepared cancel timeout relocation, relocationId={}", relocationId);
 		RelocationRequest request = relocationProvider.findRelocationRequestById(relocationId);
+		//处理中的任务过期 自动取消
+		if (null != request && request.getStatus() == RelocationRequestStatus.PROCESSING.getCode()) {
 
-		request.setStatus(RelocationRequestStatus.CANCELED.getCode());
-		request.setCancelTime(new Timestamp(System.currentTimeMillis()));
-		request.setCancelUid(User.SYSTEM_UID);
 
-		FlowCase flowCase = flowCaseProvider.getFlowCaseById(request.getFlowCaseId());
+			request.setStatus(RelocationRequestStatus.CANCELED.getCode());
+			request.setCancelTime(new Timestamp(System.currentTimeMillis()));
+			request.setCancelUid(User.SYSTEM_UID);
 
-		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
-		stepDTO.setFlowCaseId(flowCase.getId());
-		stepDTO.setFlowMainId(flowCase.getFlowMainId());
-		stepDTO.setFlowVersion(flowCase.getFlowVersion());
-		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
-		stepDTO.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
-		stepDTO.setStepCount(flowCase.getStepCount());
+			FlowCase flowCase = flowCaseProvider.getFlowCaseById(request.getFlowCaseId());
 
-		dbProvider.execute(status -> {
+			FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+			stepDTO.setFlowCaseId(flowCase.getId());
+			stepDTO.setFlowMainId(flowCase.getFlowMainId());
+			stepDTO.setFlowVersion(flowCase.getFlowVersion());
+			stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+			stepDTO.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
+			stepDTO.setStepCount(flowCase.getStepCount());
 
-			relocationProvider.updateRelocationRequest(request);
-			flowService.processAutoStep(stepDTO);
+			dbProvider.execute(status -> {
 
-			return null;
-		});
+				relocationProvider.updateRelocationRequest(request);
+				flowService.processAutoStep(stepDTO);
 
+				return null;
+			});
+			LOGGER.info("Cancel timeout relocation success, relocationId={}", relocationId);
+		}
 	}
 
 }
