@@ -874,8 +874,14 @@ public class ForumServiceImpl implements ForumService {
                     this.forumProvider.updatePost(post);
                  // 删除评论时帖子的child count减1 mod by xiongying 20160428
                     if(parentPost != null) {
-                        parentPost.setChildCount(parentPost.getChildCount() - 1);
-                        this.forumProvider.updatePost(parentPost);
+//                        parentPost.setChildCount(parentPost.getChildCount() - 1);
+//                        this.forumProvider.updatePost(parentPost);
+
+                        //更新前需要在锁内部重新查询，因为当前的parentPost可能已经是过期的数据了   edit by yanjun 20171207
+                        Post updateParentPost = forumProvider.findPostById(parentPost.getId());
+                        if(updateParentPost != null){
+                            forumProvider.updatePost(updateParentPost);
+                        }
                     }
                     if(deleteUserPost) {
                         if(userId.equals(post.getCreatorUid())){
