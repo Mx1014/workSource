@@ -23,6 +23,51 @@ public class CustomerCertificateDTO {
     private String name;
     private String certificateNumber;
     private Timestamp registeDate;
+    private Integer buyPatents;
+    private Integer technologyContracts;
+    private Integer technologyContractAmount;
+    private Integer nationalProjects;
+    private Integer provincialAwards;
+
+    public Integer getBuyPatents() {
+        return buyPatents;
+    }
+
+    public void setBuyPatents(Integer buyPatents) {
+        this.buyPatents = buyPatents;
+    }
+
+    public Integer getNationalProjects() {
+        return nationalProjects;
+    }
+
+    public void setNationalProjects(Integer nationalProjects) {
+        this.nationalProjects = nationalProjects;
+    }
+
+    public Integer getProvincialAwards() {
+        return provincialAwards;
+    }
+
+    public void setProvincialAwards(Integer provincialAwards) {
+        this.provincialAwards = provincialAwards;
+    }
+
+    public Integer getTechnologyContractAmount() {
+        return technologyContractAmount;
+    }
+
+    public void setTechnologyContractAmount(Integer technologyContractAmount) {
+        this.technologyContractAmount = technologyContractAmount;
+    }
+
+    public Integer getTechnologyContracts() {
+        return technologyContracts;
+    }
+
+    public void setTechnologyContracts(Integer technologyContracts) {
+        this.technologyContracts = technologyContracts;
+    }
 
     public String getCertificateNumber() {
         return certificateNumber;
