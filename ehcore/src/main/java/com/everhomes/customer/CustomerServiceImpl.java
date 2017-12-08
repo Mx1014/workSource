@@ -155,11 +155,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     private void checkPrivilege(Integer ns) {
         Integer namespaceId = UserContext.getCurrentNamespaceId(ns);
-        if(namespaceId == 999971 || namespaceId == 999983) {
-            LOGGER.error("Insufficient privilege");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                    "Insufficient privilege");
-        }
+        //产品功能 #20796
+//        if(namespaceId == 999971 || namespaceId == 999983) {
+//            LOGGER.error("Insufficient privilege");
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+//                    "Insufficient privilege");
+//        }
     }
 
     private void checkEnterpriseCustomerNumberUnique(Long id, Integer namespaceId, String customerNumber, String customerName) {
@@ -369,6 +370,15 @@ public class CustomerServiceImpl implements CustomerService {
     public EnterpriseCustomerDTO updateEnterpriseCustomer(UpdateEnterpriseCustomerCommand cmd) {
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         checkPrivilege(customer.getNamespaceId());
+        //产品功能 #20796 同步过来的客户名称不可改
+        if(NamespaceCustomerType.EBEI.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))
+                || NamespaceCustomerType.SHENZHOU.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType())) ) {
+            if(!customer.getName().equals(cmd.getName())) {
+                LOGGER.error("Insufficient privilege");
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                        "Insufficient privilege");
+            }
+        }
         checkEnterpriseCustomerNumberUnique(customer.getId(), customer.getNamespaceId(), cmd.getCustomerNumber(), cmd.getName());
         EnterpriseCustomer updateCustomer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         updateCustomer.setNamespaceId(customer.getNamespaceId());
@@ -443,6 +453,13 @@ public class CustomerServiceImpl implements CustomerService {
     public void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd) {
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         checkPrivilege(customer.getNamespaceId());
+        //产品功能 #20796 同步过来的不能删
+        if(NamespaceCustomerType.EBEI.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))
+                || NamespaceCustomerType.SHENZHOU.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType())) ) {
+            LOGGER.error("Insufficient privilege");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
         List<Contract> contracts = contractProvider.listContractByCustomerId(customer.getCommunityId(),customer.getId(),CustomerType.ENTERPRISE.getCode());
         for(Contract contract : contracts) {
             if(contract.getStatus() == ContractStatus.ACTIVE.getCode() || contract.getStatus() == ContractStatus.WAITING_FOR_LAUNCH.getCode()
