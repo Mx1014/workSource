@@ -9,6 +9,7 @@ import com.everhomes.rest.asset.ListPaymentBillCmd;
 import com.everhomes.rest.asset.ListPaymentBillResp;
 import com.everhomes.rest.asset.PaymentAccountResp;
 import com.everhomes.rest.asset.ReSortCmd;
+import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -35,8 +36,14 @@ public class PaymentServiceImpl implements PaymentService {
         if(cmd.getNamespaceId() == null){
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         }
-        cmd.setOrderType(getRealOrderType(cmd.getNamespaceId()));
-
+        //没有拿到orderType，直接返回
+        if(cmd.getOrderType() == null ) return new ListPaymentBillResp(cmd.getPageAnchor(), cmd.getPageSize());
+        //如果是物业缴费这方面，由于是多个orderType，用域空间筛选下，如果该域空间下没有配置新支付，则直接返回
+        if(cmd.getOrderType()!=null && (cmd.getOrderType().equals(OrderType.OrderTypeEnum.WUYE_CODE.getPycode()) || cmd.getOrderType().equals(OrderType.OrderTypeEnum.ZJGK_RENTAL_CODE.getPycode())))
+        {
+            cmd.setOrderType(getRealOrderType(cmd.getNamespaceId()));
+            if(cmd.getOrderType()==null) return new ListPaymentBillResp(cmd.getPageAnchor(), cmd.getPageSize());
+        }
         if (cmd.getPageSize() == null) {
             cmd.setPageSize(21l);
         }else{
