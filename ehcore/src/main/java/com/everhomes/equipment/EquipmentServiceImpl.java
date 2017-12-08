@@ -4065,8 +4065,6 @@ public class EquipmentServiceImpl implements EquipmentService {
  				"模板不存在");
 		}
 		//增加判断template删除情况判断   以下为在项目上删除公共模板
-		boolean test1 = cmd.getTargetId()!=null;
-		boolean test2 = template.getTargetId()==0L;
 		if(template.getTargetId()==0L && cmd.getTargetId()!=null){
 			equipmentProvider.deleteTemplateModleCommunityMap(cmd.getId(),cmd.getTargetId());
 		}else {
@@ -4134,7 +4132,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		List<InspectionTemplateDTO> dtos = new ArrayList<InspectionTemplateDTO>();
 		//增加判断为全部里面查看还是项目中查看
 		List<EquipmentInspectionTemplates> templates = new ArrayList<>();
-		if (cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
+		if (cmd.getTargetId() != null && cmd.getTargetId() == 0L) {
+			//这个是全部里面查看
 			templates = equipmentProvider.listInspectionTemplates(UserContext.getCurrentNamespaceId(), cmd.getName(), null);
 		} else {
 			templates = equipmentProvider.listInspectionTemplates(UserContext.getCurrentNamespaceId(), cmd.getName(), cmd.getTargetId());

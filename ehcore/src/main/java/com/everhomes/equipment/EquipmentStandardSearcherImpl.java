@@ -191,7 +191,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
                 //权限细化增加   项目的增加上公共标准  过滤已经修改过的模板
                 if (standard.getReferId() != null) {
                     if (maps!=null && maps.size()>0)
-                    maps.removeIf((s) -> Objects.equals(s.getId(), standard.getReferId()));
+                    maps.removeIf((s) -> Objects.equals(s.getStandardId(), standard.getReferId()));
                 }
             } else {
                 //全部里面
