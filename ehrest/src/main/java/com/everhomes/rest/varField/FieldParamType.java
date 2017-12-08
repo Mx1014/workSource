@@ -15,7 +15,7 @@ package com.everhomes.rest.varField;
  */
 public enum FieldParamType {
 
-    TEXT("text"), MULTI_TEXT("multiText"), SELECT("select"), RADIO("radio"), CHECKBOX("checkbox"),DATETIME("datetime"),
+    TEXT("text"), RICH_TEXT("richText"), MULTI_TEXT("multiText"), SELECT("select"), CUSTOMIZATION_SELECT("customizationSelect"), RADIO("radio"), CHECKBOX("checkbox"),DATETIME("datetime"),
     FILE("file"), IMAGE("image");
 
     private String name;

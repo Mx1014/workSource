@@ -512,6 +512,120 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
+    public void createCustomerDepartureInfo(CustomerDepartureInfo departureInfo) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerDepartureInfos.class));
+        departureInfo.setId(id);
+        departureInfo.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        departureInfo.setCreateUid(UserContext.current().getUser().getId());
+        departureInfo.setStatus(CommonStatus.ACTIVE.getCode());
+
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerDepartureInfos.class));
+        EhCustomerDepartureInfosDao dao = new EhCustomerDepartureInfosDao(context.configuration());
+        dao.insert(departureInfo);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerDepartureInfos.class, id);
+    }
+
+    @Override
+    public void createCustomerEntryInfo(CustomerEntryInfo entryInfo) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerEntryInfos.class));
+        entryInfo.setId(id);
+        entryInfo.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        entryInfo.setCreateUid(UserContext.current().getUser().getId());
+        entryInfo.setStatus(CommonStatus.ACTIVE.getCode());
+
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEntryInfos.class));
+        EhCustomerEntryInfosDao dao = new EhCustomerEntryInfosDao(context.configuration());
+        dao.insert(entryInfo);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerEntryInfos.class, id);
+    }
+
+    @Override
+    public void deleteCustomerDepartureInfo(CustomerDepartureInfo departureInfo) {
+        assert(departureInfo.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerDepartureInfos.class, departureInfo.getId()));
+        EhCustomerDepartureInfosDao dao = new EhCustomerDepartureInfosDao(context.configuration());
+        dao.delete(departureInfo);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerDepartureInfos.class, departureInfo.getId());
+    }
+
+    @Override
+    public void deleteCustomerEntryInfo(CustomerEntryInfo entryInfo) {
+        assert(entryInfo.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEntryInfos.class, entryInfo.getId()));
+        EhCustomerEntryInfosDao dao = new EhCustomerEntryInfosDao(context.configuration());
+        dao.delete(entryInfo);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerEntryInfos.class, entryInfo.getId());
+    }
+
+    @Override
+    public CustomerDepartureInfo findCustomerDepartureInfoById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerDepartureInfosDao dao = new EhCustomerDepartureInfosDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerDepartureInfo.class);
+    }
+
+    @Override
+    public CustomerEntryInfo findCustomerEntryInfoById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerEntryInfosDao dao = new EhCustomerEntryInfosDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerEntryInfo.class);
+    }
+
+    @Override
+    public List<CustomerDepartureInfo> listCustomerDepartureInfos(Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerDepartureInfosRecord> query = context.selectQuery(Tables.EH_CUSTOMER_DEPARTURE_INFOS);
+        query.addConditions(Tables.EH_CUSTOMER_DEPARTURE_INFOS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_DEPARTURE_INFOS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerDepartureInfo> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerDepartureInfo.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public List<CustomerEntryInfo> listCustomerEntryInfos(Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerEntryInfosRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ENTRY_INFOS);
+        query.addConditions(Tables.EH_CUSTOMER_ENTRY_INFOS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_ENTRY_INFOS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerEntryInfo> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerEntryInfo.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public void updateCustomerDepartureInfo(CustomerDepartureInfo departureInfo) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerDepartureInfos.class));
+        EhCustomerDepartureInfosDao dao = new EhCustomerDepartureInfosDao(context.configuration());
+
+        dao.update(departureInfo);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerDepartureInfos.class, departureInfo.getId());
+    }
+
+    @Override
+    public void updateCustomerEntryInfo(CustomerEntryInfo entryInfo) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEntryInfos.class));
+        EhCustomerEntryInfosDao dao = new EhCustomerEntryInfosDao(context.configuration());
+
+        dao.update(entryInfo);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerEntryInfos.class, entryInfo.getId());
+    }
+
+    @Override
     public void createCustomerInvestment(CustomerInvestment investment) {
 
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerInvestments.class));

@@ -29,6 +29,7 @@ import com.everhomes.server.schema.tables.daos.EhVarFieldItemScopesDao;
 import com.everhomes.server.schema.tables.daos.EhVarFieldScopesDao;
 import com.everhomes.server.schema.tables.pojos.EhVarFieldGroupScopes;
 import com.everhomes.server.schema.tables.pojos.EhVarFieldItemScopes;
+import com.everhomes.server.schema.tables.pojos.EhVarFieldItems;
 import com.everhomes.server.schema.tables.pojos.EhVarFieldScopes;
 import com.everhomes.server.schema.tables.records.EhVarFieldGroupScopesRecord;
 
@@ -89,6 +90,18 @@ public class FieldProviderImpl implements FieldProvider {
         EhVarFieldGroupScopesDao dao = new EhVarFieldGroupScopesDao(context.configuration());
         dao.insert(scopeGroup);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhVarFieldGroupScopes.class, null);
+    }
+
+    @Override
+    public void createFieldItem(FieldItem item) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhVarFieldItems.class));
+        item.setId(id);
+        item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhVarFieldItemsDao dao = new EhVarFieldItemsDao(context.configuration());
+        dao.insert(item);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhVarFieldItems.class, item.getId());
     }
 
     @Override
@@ -460,6 +473,7 @@ public class FieldProviderImpl implements FieldProvider {
 
         List<FieldItem> items = context.select().from(Tables.EH_VAR_FIELD_ITEMS)
                 .where(Tables.EH_VAR_FIELD_ITEMS.FIELD_ID.in(fieldIds))
+                .and(Tables.EH_VAR_FIELD_ITEMS.STATUS.eq(VarFieldStatus.ACTIVE.getCode()))
                 .fetch().map((record)-> {
                     return ConvertHelper.convert(record, FieldItem.class);
                 });
@@ -473,6 +487,7 @@ public class FieldProviderImpl implements FieldProvider {
 
         List<FieldItem> items = context.select().from(Tables.EH_VAR_FIELD_ITEMS)
                 .where(Tables.EH_VAR_FIELD_ITEMS.FIELD_ID.eq(fieldId))
+                .and(Tables.EH_VAR_FIELD_ITEMS.STATUS.eq(VarFieldStatus.ACTIVE.getCode()))
                 .fetch().map((record)-> {
                     return ConvertHelper.convert(record, FieldItem.class);
                 });

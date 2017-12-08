@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contract.ContractService;
 import com.everhomes.organization.*;
@@ -138,6 +140,9 @@ public class CustomerServiceImpl implements CustomerService {
 	
 	@Autowired
 	private ScheduleProvider scheduleProvider;
+
+    @Autowired
+    private AddressProvider addressProvider;
 	
     private static final  String queueDelay = "trackingPlanTaskDelays";
     private static final  String  queueNoDelay = "trackingPlanTaskNoDelays";
@@ -200,6 +205,9 @@ public class CustomerServiceImpl implements CustomerService {
         if(cmd.getCorpEntryDate() != null) {
             customer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }
+        if(cmd.getFoundingTime() != null) {
+            customer.setFoundingTime(new Timestamp(cmd.getFoundingTime()));
+        }
         customer.setCreatorUid(UserContext.currentUserId());
         if(null != customer.getLongitude() && null != customer.getLatitude()){
         	String geohash  = GeoHashUtils.encode(customer.getLatitude(), customer.getLongitude());
@@ -256,6 +264,55 @@ public class CustomerServiceImpl implements CustomerService {
         	if(null != propertyTypeItem){
         		dto.setPropertyTypeName(propertyTypeItem.getItemDisplayName());
         	}
+        }
+
+        if(null != dto.getRegistrationTypeId()){
+            ScopeFieldItem registrationTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getRegistrationTypeId());
+            if(null != registrationTypeItem){
+                dto.setRegistrationTypeName(registrationTypeItem.getItemDisplayName());
+            }
+        }
+
+        if(null != dto.getTechnicalFieldId()){
+            ScopeFieldItem technicalFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getTechnicalFieldId());
+            if(null != technicalFieldItem){
+                dto.setTechnicalFieldName(technicalFieldItem.getItemDisplayName());
+            }
+        }
+
+        if(null != dto.getTaxpayerTypeId()){
+            ScopeFieldItem taxpayerTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getTaxpayerTypeId());
+            if(null != taxpayerTypeItem){
+                dto.setTaxpayerTypeName(taxpayerTypeItem.getItemDisplayName());
+            }
+        }
+
+        if(null != dto.getRelationWillingId()){
+            ScopeFieldItem relationWillingItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getRelationWillingId());
+            if(null != relationWillingItem){
+                dto.setRelationWillingName(relationWillingItem.getItemDisplayName());
+            }
+        }
+
+        if(null != dto.getHighAndNewTechId()){
+            ScopeFieldItem highAndNewTechItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getHighAndNewTechId());
+            if(null != highAndNewTechItem){
+                dto.setHighAndNewTechName(highAndNewTechItem.getItemDisplayName());
+            }
+        }
+
+        if(null != dto.getEntrepreneurialCharacteristicsId()){
+            ScopeFieldItem entrepreneurialCharacteristicsItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getEntrepreneurialCharacteristicsId());
+            if(null != entrepreneurialCharacteristicsItem){
+                dto.setEntrepreneurialCharacteristicsName(entrepreneurialCharacteristicsItem.getItemDisplayName());
+            }
+        }
+
+        if(null != dto.getSerialEntrepreneurId()){
+            ScopeFieldItem serialEntrepreneurItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getSerialEntrepreneurId());
+            if(null != serialEntrepreneurItem){
+                dto.setSerialEntrepreneurName(serialEntrepreneurItem.getItemDisplayName());
+            }
         }
 
         return dto;
@@ -322,19 +379,23 @@ public class CustomerServiceImpl implements CustomerService {
         if(cmd.getCorpEntryDate() != null) {
             updateCustomer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }
+
+        if(cmd.getFoundingTime() != null) {
+            customer.setFoundingTime(new Timestamp(cmd.getFoundingTime()));
+        }
         updateCustomer.setStatus(CommonStatus.ACTIVE.getCode());
         //保存经纬度
         if(null != updateCustomer.getLongitude() && null != updateCustomer.getLatitude()){
         	String geohash  = GeoHashUtils.encode(updateCustomer.getLatitude(), updateCustomer.getLongitude());
         	updateCustomer.setGeohash(geohash);
         }
-        if(null != updateCustomer && updateCustomer.getTrackingUid() != -1){
+        if(null != updateCustomer && updateCustomer.getTrackingUid() != null && updateCustomer.getTrackingUid() != -1){
 	        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(updateCustomer.getTrackingUid());
 	    	if(null != detail && null != detail.getContactName()){
 	    		updateCustomer.setTrackingName(detail.getContactName());
 	    	}
         }
-        if(updateCustomer.getTrackingUid() == -1){
+        if(updateCustomer.getTrackingUid() == -1 || updateCustomer.getTrackingUid() == null){
         	updateCustomer.setTrackingName(null);
         }
         enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
@@ -1169,6 +1230,9 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void createCustomerInvestment(CreateCustomerInvestmentCommand cmd) {
         CustomerInvestment investment = ConvertHelper.convert(cmd, CustomerInvestment.class);
+        if(cmd.getInvestmentTime() != null) {
+            investment.setInvestmentTime(new Timestamp(cmd.getInvestmentTime()));
+        }
         enterpriseCustomerProvider.createCustomerInvestment(investment);
     }
 
@@ -1371,6 +1435,9 @@ public class CustomerServiceImpl implements CustomerService {
     public void updateCustomerInvestment(UpdateCustomerInvestmentCommand cmd) {
         CustomerInvestment exist = checkCustomerInvestment(cmd.getId(), cmd.getCustomerId());
         CustomerInvestment investment = ConvertHelper.convert(cmd, CustomerInvestment.class);
+        if(cmd.getInvestmentTime() != null) {
+            investment.setInvestmentTime(new Timestamp(cmd.getInvestmentTime()));
+        }
         investment.setCreateTime(exist.getCreateTime());
         investment.setCreateUid(exist.getCreateUid());
         enterpriseCustomerProvider.updateCustomerInvestment(investment);
@@ -1429,6 +1496,156 @@ public class CustomerServiceImpl implements CustomerService {
         certificate.setCreateTime(exist.getCreateTime());
         certificate.setCreateUid(exist.getCreateUid());
         enterpriseCustomerProvider.updateCustomerCertificate(certificate);
+    }
+
+    @Override
+    public void createCustomerDepartureInfo(CreateCustomerDepartureInfoCommand cmd) {
+        CustomerDepartureInfo departureInfo = ConvertHelper.convert(cmd, CustomerDepartureInfo.class);
+        if(cmd.getReviewTime() != null) {
+            departureInfo.setReviewTime(new Timestamp(cmd.getReviewTime()));
+        }
+        enterpriseCustomerProvider.createCustomerDepartureInfo(departureInfo);
+    }
+
+    @Override
+    public void createCustomerEntryInfo(CreateCustomerEntryInfoCommand cmd) {
+        CustomerEntryInfo entryInfo = ConvertHelper.convert(cmd, CustomerEntryInfo.class);
+        if(cmd.getContractEndDate() != null) {
+            entryInfo.setContractEndDate(new Timestamp(cmd.getContractEndDate()));
+        }
+        if(cmd.getContractStartDate() != null) {
+            entryInfo.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
+        }
+        enterpriseCustomerProvider.createCustomerEntryInfo(entryInfo);
+    }
+
+    @Override
+    public void deleteCustomerDepartureInfo(DeleteCustomerDepartureInfoCommand cmd) {
+        CustomerDepartureInfo departureInfo = checkCustomerDepartureInfo(cmd.getId(), cmd.getCustomerId());
+        enterpriseCustomerProvider.deleteCustomerDepartureInfo(departureInfo);
+    }
+
+    @Override
+    public void deleteCustomerEntryInfo(DeleteCustomerEntryInfoCommand cmd) {
+        CustomerEntryInfo entryInfo = checkCustomerEntryInfo(cmd.getId(), cmd.getCustomerId());
+        enterpriseCustomerProvider.deleteCustomerEntryInfo(entryInfo);
+    }
+
+    private CustomerEntryInfo checkCustomerEntryInfo(Long id, Long customerId) {
+        CustomerEntryInfo entryInfo = enterpriseCustomerProvider.findCustomerEntryInfoById(id);
+        if(entryInfo == null || !entryInfo.getCustomerId().equals(customerId)
+                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(entryInfo.getStatus()))) {
+            LOGGER.error("enterprise customer entryInfo is not exist or active. id: {}, certificate: {}", id, entryInfo);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_CERTIFICATE_NOT_EXIST,
+                    "customer entryInfo is not exist or active");
+        }
+        return entryInfo;
+    }
+
+    private CustomerDepartureInfo checkCustomerDepartureInfo(Long id, Long customerId) {
+        CustomerDepartureInfo departureInfo = enterpriseCustomerProvider.findCustomerDepartureInfoById(id);
+        if(departureInfo == null || !departureInfo.getCustomerId().equals(customerId)
+                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(departureInfo.getStatus()))) {
+            LOGGER.error("enterprise customer departureInfo is not exist or active. id: {}, departureInfo: {}", id, departureInfo);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_CERTIFICATE_NOT_EXIST,
+                    "customer departureInfo is not exist or active");
+        }
+        return departureInfo;
+    }
+
+    @Override
+    public CustomerDepartureInfoDTO getCustomerDepartureInfo(GetCustomerDepartureInfoCommand cmd) {
+        CustomerDepartureInfo departureInfo = checkCustomerDepartureInfo(cmd.getId(), cmd.getCustomerId());
+        return convertCustomerDepartureInfoDTO(departureInfo, cmd.getCommunityId());
+    }
+
+    @Override
+    public CustomerEntryInfoDTO getCustomerEntryInfo(GetCustomerEntryInfoCommand cmd) {
+        CustomerEntryInfo entryInfo = checkCustomerEntryInfo(cmd.getId(), cmd.getCustomerId());
+        if(entryInfo.getAddressId() != null) {
+
+        }
+        return convertCustomerEntryInfoDTO(entryInfo);
+    }
+
+    @Override
+    public List<CustomerDepartureInfoDTO> listCustomerDepartureInfos(ListCustomerDepartureInfosCommand cmd) {
+        List<CustomerDepartureInfo> departureInfos = enterpriseCustomerProvider.listCustomerDepartureInfos(cmd.getCustomerId());
+        if(departureInfos != null && departureInfos.size() > 0) {
+            return departureInfos.stream().map(departureInfo -> {
+                return convertCustomerDepartureInfoDTO(departureInfo, cmd.getCommunityId());
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    private CustomerDepartureInfoDTO convertCustomerDepartureInfoDTO(CustomerDepartureInfo departureInfo, Long communityId) {
+        CustomerDepartureInfoDTO dto = ConvertHelper.convert(departureInfo, CustomerDepartureInfoDTO.class);
+
+        if(dto.getDepartureDirectionId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(departureInfo.getNamespaceId(), communityId, dto.getDepartureDirectionId());
+            if(scopeFieldItem != null) {
+                dto.setDepartureDirectionName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+        if(dto.getDepartureNatureId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(departureInfo.getNamespaceId(), communityId, dto.getDepartureNatureId());
+            if(scopeFieldItem != null) {
+                dto.setDepartureNatureName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+        return dto;
+    }
+
+    private CustomerEntryInfoDTO convertCustomerEntryInfoDTO(CustomerEntryInfo entryInfo) {
+        CustomerEntryInfoDTO dto = ConvertHelper.convert(entryInfo, CustomerEntryInfoDTO.class);
+
+        if(dto.getAddressId() != null) {
+            Address address = addressProvider.findAddressById(dto.getAddressId());
+            if(address != null) {
+                dto.setAddressName(address.getAddress());
+            }
+        }
+
+        return dto;
+    }
+
+    @Override
+    public List<CustomerEntryInfoDTO> listCustomerEntryInfos(ListCustomerEntryInfosCommand cmd) {
+        List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
+        if(entryInfos != null && entryInfos.size() > 0) {
+            return entryInfos.stream().map(entryInfo -> {
+                return convertCustomerEntryInfoDTO(entryInfo);
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
+    public void updateCustomerDepartureInfo(UpdateCustomerDepartureInfoCommand cmd) {
+        CustomerDepartureInfo exist = checkCustomerDepartureInfo(cmd.getId(), cmd.getCustomerId());
+        CustomerDepartureInfo departureInfo = ConvertHelper.convert(cmd, CustomerDepartureInfo.class);
+        if(cmd.getReviewTime() != null) {
+            departureInfo.setReviewTime(new Timestamp(cmd.getReviewTime()));
+        }
+        departureInfo.setCreateTime(exist.getCreateTime());
+        departureInfo.setCreateUid(exist.getCreateUid());
+        enterpriseCustomerProvider.updateCustomerDepartureInfo(departureInfo);
+    }
+
+    @Override
+    public void updateCustomerEntryInfo(UpdateCustomerEntryInfoCommand cmd) {
+        CustomerEntryInfo exist = checkCustomerEntryInfo(cmd.getId(), cmd.getCustomerId());
+        CustomerEntryInfo entryInfo = ConvertHelper.convert(cmd, CustomerEntryInfo.class);
+        if(cmd.getContractEndDate() != null) {
+            entryInfo.setContractEndDate(new Timestamp(cmd.getContractEndDate()));
+        }
+        if(cmd.getContractStartDate() != null) {
+            entryInfo.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
+        }
+        entryInfo.setCreateTime(exist.getCreateTime());
+        entryInfo.setCreateUid(exist.getCreateUid());
+        enterpriseCustomerProvider.updateCustomerEntryInfo(entryInfo);
     }
 
     @Override
