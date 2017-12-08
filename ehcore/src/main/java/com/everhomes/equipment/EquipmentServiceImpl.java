@@ -4065,6 +4065,8 @@ public class EquipmentServiceImpl implements EquipmentService {
  				"模板不存在");
 		}
 		//增加判断template删除情况判断   以下为在项目上删除公共模板
+		boolean test1 = cmd.getTargetId()!=null;
+		boolean test2 = template.getTargetId()==0L;
 		if(template.getTargetId()==0L && cmd.getTargetId()!=null){
 			equipmentProvider.deleteTemplateModleCommunityMap(cmd.getId(),cmd.getTargetId());
 		}else {
