@@ -1214,7 +1214,7 @@ public class NewsServiceImpl implements NewsService {
 
 		Long communityId = userService.getCommunityIdBySceneToken(sceneTokenDTO);
 
-		return ConvertHelper.convert(listNews(userId, namespaceId, communityId, cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize(), true),
+		return ConvertHelper.convert(listNews(userId, namespaceId, communityId, cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize(), false),
 				ListNewsBySceneResponse.class);
 	}
 
