@@ -89,24 +89,52 @@ VALUES
 
 
 SET @p_id = 42000;
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '全部考勤规则', '全部的考勤规则', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '查看打卡规则', '查看打卡规则', NULL);
 SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES
-(@mp_id:=@mp_id+1, '50600', '0', @p_id, '全部考勤规则', '0', NOW());
+(@mp_id:=@mp_id+1, '50600', '0', @p_id, '查看打卡规则', '0', NOW());
 
 
 SET @p_id = 42001;
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '自创建考勤规则', '自创建考勤规则', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '查看自己创建的打卡规则', '查看自己创建的打卡规则', NULL);
 SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES
-(@mp_id:=@mp_id+1, '50600', '0', @p_id, '自创建考勤规则', '0', NOW());
-
+(@mp_id:=@mp_id+1, '50600', '0', @p_id, '查看自己创建的打卡规则', '0', NOW());
 
 SET @p_id = 42002;
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '打卡记录', '打卡记录', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '新建打卡规则', '新建打卡规则', NULL);
 SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES
-(@mp_id:=@mp_id+1, '50600', '0', @p_id, '打卡记录', '0', NOW());
+(@mp_id:=@mp_id+1, '50600', '0', @p_id, '新建打卡规则', '0', NOW());
+
+SET @p_id = 42003;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '编辑打卡规则', '编辑打卡规则', NULL);
+SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES
+(@mp_id:=@mp_id+1, '50600', '0', @p_id, '编辑打卡规则', '0', NOW());
+
+SET @p_id = 42004;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '删除打卡规则', '删除打卡规则', NULL);
+SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES
+(@mp_id:=@mp_id+1, '50600', '0', @p_id, '删除打卡规则', '0', NOW());
+
+
+SET @p_id = 42005;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '查看打卡记录', '查看打卡记录', NULL);
+SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES
+(@mp_id:=@mp_id+1, '50600', '0', @p_id, '查看打卡记录', '0', NOW());
+
+SET @p_id = 42006;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '导出打卡记录', '导出打卡记录', NULL);
+SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES
+(@mp_id:=@mp_id+1, '50600', '0', @p_id, '导出打卡记录', '0', NOW());
