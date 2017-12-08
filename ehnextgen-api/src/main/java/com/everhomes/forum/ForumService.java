@@ -86,7 +86,7 @@ public interface ForumService {
      */
     SearchTopicAdminCommandResponse searchTopic(SearchTopicAdminCommand cmd);
 
-    Byte getInteractFlag(Post post);
+    Byte getInteractFlagByPost(Post post);
 
     InteractSetting findInteractSettingByPost(Post post);
 

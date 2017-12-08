@@ -4091,7 +4091,7 @@ public class ForumServiceImpl implements ForumService {
                 populateOwnerToken(post);
 
                 //添加是否支持评论字段 add by yanjun 20171025
-                Byte flag = getInteractFlag(post);
+                Byte flag = getInteractFlagByPost(post);
                 post.setInteractFlag(flag);
                 
                 String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
@@ -4138,7 +4138,7 @@ public class ForumServiceImpl implements ForumService {
      * @param post
      */
     @Override
-    public Byte getInteractFlag(Post post){
+    public Byte getInteractFlagByPost(Post post){
         //如果帖子时关闭评论的，直接是关闭
         if(post.getInteractFlag() != null && InteractFlag.fromCode(post.getInteractFlag()) == InteractFlag.UNSUPPORT){
             return InteractFlag.UNSUPPORT.getCode();

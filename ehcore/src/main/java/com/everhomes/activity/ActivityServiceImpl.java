@@ -31,7 +31,6 @@ import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.order.*;
 import com.everhomes.organization.*;
 import com.everhomes.pay.order.*;
-import com.everhomes.pay.rest.ApiConstants;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
@@ -89,7 +88,6 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import com.sun.xml.messaging.saaj.util.ByteOutputStream;
 import net.greghaines.jesque.Job;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -120,8 +118,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.crypto.Data;
-import java.math.BigDecimal;
 import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -4466,7 +4462,7 @@ public class ActivityServiceImpl implements ActivityService {
 			}
 			fixupVideoInfo(dto);
 
-			Byte flag = forumService.getInteractFlag(post);
+			Byte flag = forumService.getInteractFlagByPost(post);
 			dto.setInteractFlag(flag);
 			return dto;
 		}).filter(r -> r != null).collect(Collectors.toList());
