@@ -2,21 +2,15 @@ package com.everhomes.parking.handler;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.*;
 import com.everhomes.parking.xiaomao.XiaomaoCard;
 import com.everhomes.parking.xiaomao.XiaomaoJsonEntity;
 import com.everhomes.rest.parking.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.MD5Utils;
-import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;

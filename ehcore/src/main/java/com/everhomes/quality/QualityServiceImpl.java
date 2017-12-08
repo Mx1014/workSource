@@ -3619,6 +3619,8 @@ public class QualityServiceImpl implements QualityService {
 				Community community = communityProvider.findCommunityById(target);
 				if(community != null) {
 					scoreGroupDto.setTargetName(community.getName());
+					//add for order
+					scoreGroupDto.setBuildArea(community.getBuildArea());
 				}
 
 				if(specificationTree != null && specificationTree.size() > 0) {
@@ -3650,7 +3652,6 @@ public class QualityServiceImpl implements QualityService {
 								Double mark = (score.getSpecificationScore() - score.getScore()) * score.getSpecificationWeight();
 								score.setScore(mark);
 							}
-
 						}
 						scores.add(score);
 					}
@@ -3658,30 +3659,47 @@ public class QualityServiceImpl implements QualityService {
 					scoreGroupDto.setScores(scores);
 					//fix order
 					Double totalScore = 0D;
-					for (ScoreDTO score : scores) {
-						totalScore = totalScore + score.getScore();
+					if (scores.size() > 0) {
+						for (ScoreDTO score : scores) {
+							totalScore = totalScore + score.getScore();
+						}
+						scoreGroupDto.setTotalScore(totalScore);
 					}
-					scoreGroupDto.setTotalScore(totalScore);
 				}
 				scoresByTarget.add(scoreGroupDto);
 			}
 		}
-		//sort  scoreByTarget
-		List<ScoreGroupByTargetDTO> sortedScoresByTarget = scoresByTarget.stream()
-				.sorted(Comparator.comparing(ScoreGroupByTargetDTO::getTotalScore).reversed())
-				.collect(Collectors.toList());
-		//add orderId for  ScoresByTarget
-		Integer previousOrder = 0;
-		Double total = 0D;
-		for (int i = 0; i < sortedScoresByTarget.size(); i++) {
-			if (total.doubleValue() == sortedScoresByTarget.get(i).getTotalScore().doubleValue() && sortedScoresByTarget.get(i).getTotalScore() != 0) {
-				sortedScoresByTarget.get(i).setOrderId(previousOrder);
-			} else {
-				previousOrder++;
-				sortedScoresByTarget.get(i).setOrderId(previousOrder);
-				total = sortedScoresByTarget.get(i).getTotalScore();
+		List<ScoreGroupByTargetDTO> sortedScoresByTarget = new ArrayList<>();
+		if (scoresByTarget.size() > 0) {
+			//sort  scoreByTarget
+			sortedScoresByTarget = scoresByTarget.stream()
+                    .sorted(Comparator.comparing(ScoreGroupByTargetDTO::getTotalScore).reversed())
+                    .collect(Collectors.toList());
+			//add orderId for  ScoresByTarget
+			Integer previousOrder = 0;
+			Double total = 0D;
+			for (int i = 0; i < sortedScoresByTarget.size(); i++) {
+				if (total.doubleValue() == sortedScoresByTarget.get(i).getTotalScore().doubleValue() && sortedScoresByTarget.get(i).getTotalScore() != 0) {
+					Double preBuildArea = (sortedScoresByTarget.get(i - 1).getBuildArea() == null) ? 0D : sortedScoresByTarget.get(i - 1).getBuildArea();
+					Double currBuildArea = (sortedScoresByTarget.get(i).getBuildArea() == null) ? 0D : sortedScoresByTarget.get(i).getBuildArea();
+					if (preBuildArea < currBuildArea) {
+						sortedScoresByTarget.get(i).setOrderId(++previousOrder);
+					} else if (preBuildArea.doubleValue() == currBuildArea.doubleValue()) {
+						sortedScoresByTarget.get(i).setOrderId(previousOrder);
+
+					} else if (preBuildArea > currBuildArea) {
+						sortedScoresByTarget.get(i).setOrderId(previousOrder);
+						sortedScoresByTarget.get(i - 1).setOrderId(++previousOrder);
+					}
+				} else {
+					previousOrder++;
+					sortedScoresByTarget.get(i).setOrderId(previousOrder);
+					total = sortedScoresByTarget.get(i).getTotalScore();
+				}
 			}
 		}
+		//再次按照order排序
+		sortedScoresByTarget.sort(Comparator.comparing(ScoreGroupByTargetDTO::getOrderId));
 
 		response.setScores(sortedScoresByTarget);
 		return response;

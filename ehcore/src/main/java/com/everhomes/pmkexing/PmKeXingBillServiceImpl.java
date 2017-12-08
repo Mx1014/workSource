@@ -4,18 +4,25 @@ package com.everhomes.pmkexing;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.*;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contract.ContractService;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.*;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.contract.*;
+import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
@@ -26,10 +33,12 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sun.security.krb5.Config;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -70,6 +79,9 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
 
     @Autowired
     private CacheProvider cacheProvider;
+
+    @Autowired
+    private ContractProvider contractProvider;
 
     private static LocaleStringService localeStringService;
 
@@ -204,6 +216,133 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         return billStat != null ? billStat.toBillStatDTO() : new PmKeXingBillStatDTO();
     }
 
+    @Override
+    public GetLeaseContractBillOnFiPropertyRes getFiPropertyBills(Long ownerId, String contractNum, String dateStrBegin, String dateStrEnd, String fiProperty, Byte billStatus, String targetName, Long targetId, Integer pageSize, Integer pageOffSet) {
+        //从eh_config表中获得api
+        String api = getBillAPI(ConfigConstants.ASSET_PAYMENT_ZJH_API_15);
+        //组装参数，判断非空
+        Map<String,String> params = new HashMap<>();
+        params.put("projectId",communityProvider.getCommunityToken("ebei",ownerId));
+        params.put("pageSize",String.valueOf(pageSize));
+        params.put("currentPage",String.valueOf(pageOffSet));
+        if(StringUtils.isNotBlank(targetName)){
+            params.put("customerName",targetName);
+        }
+        if(StringUtils.isNotBlank(dateStrBegin)){
+            params.put("beginMonth",dateStrBegin);
+        }
+        if(StringUtils.isNotBlank(dateStrEnd)){
+            params.put("endMonth",dateStrEnd);
+        }
+        if(StringUtils.isNotBlank(fiProperty)){
+            params.put("fiProperty",fiProperty);
+        }
+        if(billStatus!=null){
+            params.put("isPay",String.valueOf(billStatus));
+        }
+        String json = get(api,params);
+        return (GetLeaseContractBillOnFiPropertyRes) StringHelper.fromJsonString(json, GetLeaseContractBillOnFiPropertyRes.class);
+    }
+
+    @Override
+    public GetLeaseContractReceivableRes listFiCategoryBills(String billId, Long ownerId, Integer pageOffSet, Integer pageSize) {
+        String api = getBillAPI(ConfigConstants.ASSET_PAYMENT_ZJH_API_8);
+        Map<String,String> params = new HashMap<>();
+        params.put("billId",billId);
+        params.put("projectId",communityProvider.getCommunityToken("ebei",ownerId));
+        params.put("currentPage",String.valueOf(pageOffSet));
+        params.put("pageSize",String.valueOf(pageSize>100?100:pageSize));
+        String contractId = billId.split(",")[0];
+        params.put("contractId",contractId==null?"1":contractId);
+        String json = get(api,params);
+        return (GetLeaseContractReceivableRes) StringHelper.fromJsonString(json, GetLeaseContractReceivableRes.class);
+    }
+
+    @Override
+    public GetLeaseContractBillOnFiPropertyRes getAllFiPropertyBills(Integer namespaceId, Long ownerId, Long targetId, String targetType, Byte isPay,String beginMonth,String endMonth) {
+        GetLeaseContractBillOnFiPropertyRes res = new GetLeaseContractBillOnFiPropertyRes();
+        List<GetLeaseContractBillOnFiPropertyData> data = new ArrayList<>();
+        ContractService contractService = getContractService(0);
+        //获得所有合同
+        List<ContractDTO> contracts = new ArrayList<>();
+        ListCustomerContractsCommand cmd = new ListCustomerContractsCommand();
+        if(targetType.equals(AssetPaymentStrings.EH_USER)){
+            cmd.setTargetId(UserContext.currentUserId());
+            cmd.setTargetType(CustomerType.INDIVIDUAL.getCode());
+        }else if(targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+            cmd.setTargetId(targetId);
+            cmd.setTargetType(CustomerType.ENTERPRISE.getCode());
+        }
+        cmd.setNamespaceId(namespaceId);
+        cmd.setCommunityId(ownerId);
+
+        contracts = contractService.listCustomerContracts(cmd);
+        if(contracts == null) return res;
+//        Contract experimentSample = new Contract();
+//        experimentSample.setNamespaceContractType("ebei");
+//        experimentSample.setNamespaceContractToken("002285da-4796-495d-aaa3-742bb2ae5b39");
+//        contracts.add(experimentSample);
+        //从eh_config表中获得api
+        String api = getBillAPI(ConfigConstants.ASSET_PAYMENT_ZJH_API_15);
+        String projectId = communityProvider.getCommunityToken("ebei", ownerId);
+        Integer currentPage = 1;
+        String isPayStr = null;
+        if(isPay!=null && StringUtils.isNotBlank(isPay.toString())){
+            isPayStr = String.valueOf(isPay);
+        }
+        //组装参数，判断非空
+        Map<String,String> params = new HashMap<>();
+        params.put("projectId",projectId);
+        params.put("pageSize","100");
+        params.put("currentPage",String.valueOf(currentPage));
+        if(beginMonth!=null) params.put("beginMonth",beginMonth);
+        if(endMonth != null) params.put("endMonth",endMonth);
+        if(isPayStr!=null){
+            params.put("isPay",isPayStr);
+        }
+        for(int i = 0; i < contracts.size(); i ++){
+            ContractDTO contract = contracts.get(i);
+            if(!contract.getNamespaceContractType().equals(NamespaceContractType.EBEI.getCode())){
+                continue;
+            }
+            String contractId = contract.getNamespaceContractToken();
+            int limitCount = 0;
+            params.put("contractId",contractId);
+            while(true){
+                String json = get(api,params);
+                GetLeaseContractBillOnFiPropertyRes temp = (GetLeaseContractBillOnFiPropertyRes) StringHelper.fromJsonString(json, GetLeaseContractBillOnFiPropertyRes.class);
+                data.addAll(temp.getData());
+                if(temp.getHasNextPag().equals("0") || limitCount > 1000){
+                    break;
+                }
+                limitCount++;
+            }
+        }
+        res.setData(data);
+        return res;
+    }
+
+    @Override
+    public GetLeaseContractReceivableGroupForStatisticsRes listBillStatistics(Long communityId, Byte dimension, String beginLimit, String endLimit) {
+        GetLeaseContractReceivableGroupForStatisticsRes res = new GetLeaseContractReceivableGroupForStatisticsRes();
+        String api = getBillAPI(ConfigConstants.ASSET_PAYMENT_ZJH_API_10);
+        Map<String,String> params = new HashMap<>();
+        if(communityId!=null){
+            params.put("projectId",communityProvider.getCommunityToken("ebei",communityId));
+        }
+        if(dimension!=null){
+            params.put("dimension",dimension.toString());
+        }
+        if(beginLimit!=null){
+            params.put("beginMonth",beginLimit);
+        }
+        if(endLimit!=null){
+            params.put("endMonth",endLimit);
+        }
+        String json = get(api, params);
+        return (GetLeaseContractReceivableGroupForStatisticsRes)StringHelper.fromJsonString(json,GetLeaseContractReceivableGroupForStatisticsRes.class);
+    }
+
     private OrganizationDTO currentOrganization(Long organizationId) {
         OrganizationDTO organization = organizationService.getUserCurrentOrganization();
         if (organization == null) {
@@ -259,6 +398,13 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         return host + api;
     }
 
+    private String getBillAPI(String configName){
+        String host = configurationProvider.getValue(999983,ConfigConstants.ASSET_PAYMENT_ZJH_URL,"");
+        String api = configurationProvider.getValue(999983,configName,"");
+        return host + api;
+    }
+
+
     private String post(String api, Map<String, String> params) {
         try {
             if (LOGGER.isDebugEnabled()) {
@@ -269,6 +415,23 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
             LOGGER.error("Http post error for api: {}", api, e);
             throw RuntimeErrorException.errorWith(PmKeXingBillServiceErrorCode.SCOPE, PmKeXingBillServiceErrorCode.ERROR_HTTP_REQUEST,
                     "Http post error");
+        }
+    }
+
+    private String get(String api, Map<String,String> params){
+        try{
+            if(LOGGER.isDebugEnabled()){
+                LOGGER.debug("Http get params for asset kexing 2.2.4.15 is :{}", params.toString());
+            }
+            String response = HttpUtils.get(api,params,100,"utf-8");
+            if(LOGGER.isDebugEnabled()){
+                LOGGER.debug("Http get response for 2.2.4.15 is : {}", response);
+            }
+            return response;
+        }catch(Throwable e){
+            LOGGER.error("Http get error for api: {}",api,e);
+            throw RuntimeErrorException.errorWith(PmKeXingBillServiceErrorCode.SCOPE,PmKeXingBillServiceErrorCode.ERROR_HTTP_REQUEST,
+                    "Http get error");
         }
     }
 
@@ -426,6 +589,11 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
     @Autowired
     public void setLocaleStringService(LocaleStringService localeStringService) {
         PmKeXingBillServiceImpl.localeStringService = localeStringService;
+    }
+
+    private ContractService getContractService(Integer namespaceId) {
+        String handler = configurationProvider.getValue(namespaceId, "contractService", "");
+        return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
     }
 
     /*public static void main(String[] args) {

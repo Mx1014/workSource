@@ -18,6 +18,9 @@ public class ListFieldGroupCommand {
 
     private Long communityId;
 
+    // 暂时增加用于物业巡检使用
+    private String  equipmentCategoryName;
+
     public Long getCommunityId() {
         return communityId;
     }
@@ -40,6 +43,14 @@ public class ListFieldGroupCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public String getEquipmentCategoryName() {
+        return equipmentCategoryName;
+    }
+
+    public void setEquipmentCategoryName(String equipmentCategoryName) {
+        this.equipmentCategoryName = equipmentCategoryName;
     }
 
     @Override

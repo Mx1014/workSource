@@ -24,9 +24,9 @@ public class FlowVariablePrefixNodeProcessorsResolver implements FlowVariableUse
         FlowGraphNode currNode = ctx.getCurrentNode();
         List<FlowGraphLink> linksIn = currNode.getLinksIn();
         if (linksIn.size() > 1) {
-            FlowCaseState parentState = ctx.getParentState();
-            if (parentState != null) {
-                for (FlowCaseState flowCaseState : parentState.getChildStates()) {
+            // FlowCaseState parentState = ctx.getParentState();
+            // if (parentState != null) {
+                for (FlowCaseState flowCaseState : ctx.getChildStates()) {
                     FlowGraphLink flowLink = currNode.getFlowLink(flowCaseState.getFlowCase().getEndLinkId());
                     Long fromNodeId = flowLink.getFlowLink().getFromNodeId();
 
@@ -34,7 +34,7 @@ public class FlowVariablePrefixNodeProcessorsResolver implements FlowVariableUse
                     logs.addAll(flowEventLogProvider.findPrefixNodeEnterLogs(fromNodeId,
                             flowCaseState.getFlowCase().getId(), maxStepCount + 1));
                 }
-            }
+            // }
         } else {
             FlowGraphNode fromNode = linksIn.get(0).getFromNode(ctx, null);
             node = fromNode.getFlowNode();

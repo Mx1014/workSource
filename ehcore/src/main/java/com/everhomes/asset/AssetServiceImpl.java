@@ -14,6 +14,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contract.ContractScheduleJob;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.customer.CustomerService;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
@@ -46,6 +47,7 @@ import com.everhomes.rest.contract.ListCustomerContractsCommand;
 import com.everhomes.rest.contract.*;
 
 import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.customer.SyncCustomersCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -79,6 +81,7 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.sun.org.apache.regexp.internal.RE;
+import org.apache.catalina.core.ApplicationContext;
 import org.apache.commons.collections.list.AbstractLinkedList;
 
 import org.apache.commons.collections.map.HashedMap;
@@ -191,6 +194,9 @@ public class AssetServiceImpl implements AssetService {
 //    private ZhangjianggaokeAssetVendor handler;
 
     @Autowired
+    private CustomerService customerService;
+
+    @Autowired
     private NamespaceResourceService namespaceResourceService;
 
     @Override
@@ -233,31 +239,14 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillsResponse listBills(ListBillsCommand cmd) {
+//        Integer namespaceId = 999983;
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListBillsResponse response = new ListBillsResponse();
-        if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
-            if(UserContext.getCurrentNamespaceId()!=999971){
-                cmd.setPageAnchor(0l);
-//                cmd.setPageAnchor(1l);
-            }else{
-                cmd.setPageAnchor(1l);
-            }
-        }
-        if(cmd.getPageSize() == null || cmd.getPageSize() < 1 || cmd.getPageSize() > Integer.MAX_VALUE/10){
-            cmd.setPageSize(20);
-        }
-        int pageOffSet = cmd.getPageAnchor().intValue();
-        List<ListBillsDTO> list = handler.listBills(cmd.getCommunityIdentifier(),cmd.getContractNum(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus(),cmd.getTargetType(), response);
 
-        if(list.size() <= cmd.getPageSize() && UserContext.getCurrentNamespaceId()!=999971){
-            response.setNextPageAnchor(null);
-
-        }else if(UserContext.getCurrentNamespaceId()!=999971){
-            response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
-            list.remove(list.size()-1);
-        }
+        List<ListBillsDTO> list = handler.listBills(cmd.getContractNum(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),cmd.getPageAnchor(),cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus(),cmd.getTargetType(), response);
         response.setListBillsDTOS(list);
         return response;
     }
@@ -268,25 +257,8 @@ public class AssetServiceImpl implements AssetService {
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListBillItemsResponse response = new ListBillItemsResponse();
-        if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
-            if(UserContext.getCurrentNamespaceId()!=999971){
-                cmd.setPageAnchor(0l);
-//                cmd.setPageAnchor(1l);
-            }else{
-                cmd.setPageAnchor(1l);
-            }
-        }
-        if(cmd.getPageSize() == null){
-            cmd.setPageSize(20);
-        }
-        Integer pageOffSet = cmd.getPageAnchor().intValue();
-        List<BillDTO> billDTOS = handler.listBillItems(cmd.getTargetType(),cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
-        if(billDTOS.size() <= cmd.getPageSize() && UserContext.getCurrentNamespaceId()!=99971) {
-            response.setNextPageAnchor(null);
-        }else if(UserContext.getCurrentNamespaceId()!=99971){
-            response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
-            billDTOS.remove(billDTOS.size()-1);
-        }
+        Integer pageOffSet = cmd.getPageAnchor()==null?null:cmd.getPageAnchor().intValue();
+        List<BillDTO> billDTOS = handler.listBillItems(cmd.getTargetType(),cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize(),cmd.getOwnerId(),response);
         response.setBillDTOS(billDTOS);
         return response;
     }
@@ -324,7 +296,7 @@ public class AssetServiceImpl implements AssetService {
                 String templateLocale = UserContext.current().getUser().getLocale();
                 //phoneNums make it fake during test
                 Integer nameSpaceId = UserContext.getCurrentNamespaceId();
-//                nameSpaceId = 999971;
+                nameSpaceId = 999971;
                 smsProvider.sendSms(nameSpaceId, telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
             }
         } catch(Exception e){
@@ -409,7 +381,7 @@ public class AssetServiceImpl implements AssetService {
                 smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
                 String templateLocale = UserContext.current().getUser().getLocale();
                 Integer nameSpaceId = UserContext.getCurrentNamespaceId();
-//                nameSpaceId = 999971;
+                nameSpaceId = 999971;
                 smsProvider.sendSms(nameSpaceId, telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
             }
         } catch(Exception e){
@@ -486,7 +458,7 @@ public class AssetServiceImpl implements AssetService {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
-        return handler.getBillDetailForClient(cmd.getBillId(),cmd.getTargetType());
+        return handler.getBillDetailForClient(cmd.getOwnerId(),cmd.getBillId(),cmd.getTargetType());
     }
 
     @Override
@@ -643,8 +615,37 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
             cmd.setPageSize(5000);
         }
+//        cmd.setPageSize(130);
+        List<ListBillsDTO> dtos = new ArrayList<>();
         //has already distributed
-        ListBillsResponse bills = listBills(cmd);
+        if(UserContext.getCurrentNamespaceId()==999983){
+            Integer pageSize = cmd.getPageSize();
+            if(pageSize <= 100){
+                dtos.addAll(listBills(cmd).getListBillsDTOS());
+            }
+            Integer hundred = 100;
+            Integer pageAnchor = 100;
+            if(pageSize > 100){
+                while(pageSize > 0){
+                    cmd.setPageSize(hundred);
+                    List<ListBillsDTO> back = listBills(cmd).getListBillsDTOS();
+                    if(back.size() > pageAnchor) {
+                        for(int i = 0; i < pageAnchor; i++){
+                            dtos.add(back.get(i));
+                        }
+                        break;
+                    }else{
+                        dtos.addAll(back);
+                    }
+
+                    pageSize = pageSize - 100;
+                    pageAnchor = pageSize;
+                    cmd.setPageAnchor(cmd.getPageAnchor()==null?2l:cmd.getPageAnchor()+1l);
+                }
+            }
+        }else{
+            dtos.addAll(listBills(cmd).getListBillsDTOS());
+        }
         Calendar c = Calendar.getInstance();
         int year = c.get(Calendar.YEAR);
         int month = c.get(Calendar.MONTH);
@@ -653,7 +654,6 @@ public class AssetServiceImpl implements AssetService {
         int minute = c.get(Calendar.MINUTE);
         int second = c.get(Calendar.SECOND);
         String fileName = "bill"+"/"+year + "/" + month + "/" + date + " " +hour + ":" +minute + ":" + second;
-        List<ListBillsDTO> dtos = bills.getListBillsDTOS();
 
         List<exportPaymentBillsDetail> dataList = new ArrayList<>();
         //组装datalist来确定propertyNames的值
@@ -2532,6 +2532,7 @@ public class AssetServiceImpl implements AssetService {
             //
             List<Long> billIds = new ArrayList<>();
             List<NoticeInfo> noticeInfoList = new ArrayList<>();
+//            for (int k = 0; k < targetBills.size(); k++) {
             for (int k = 0; k < targetBills.size(); k++) {
                 PaymentBills b = targetBills.get(k);
                 billIds.add(b.getId());
@@ -2541,6 +2542,7 @@ public class AssetServiceImpl implements AssetService {
                 info.setTargetName(b.getTargetName());
                 info.setTargetType(b.getTargetType());
                 info.setAmountOwed(b.getAmountOwed());
+                info.setTargetId(b.getTargetId());
                 info.setAmountRecevable(b.getAmountReceivable());
                 info.setAppName(assetProvider.findAppName(b.getNamespaceId()));
                 info.setOwnerId(b.getOwnerId());
@@ -2548,6 +2550,7 @@ public class AssetServiceImpl implements AssetService {
                 noticeInfoList.add(info);
                 NoticeWithTextAndMessage(billIds, noticeInfoList);
             }
+            LOGGER.info("done");
         }
     }
     @Override
@@ -2558,9 +2561,67 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public CheckEnterpriseHasArrearageResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd) {
         CheckEnterpriseHasArrearageResponse response = new CheckEnterpriseHasArrearageResponse();
-        List<PaymentBills> assetArrearage = assetProvider.findAssetArrearage(cmd.getNamespaceId(),cmd.getCommunityId(),cmd.getOrganizationId());
-        response.setHasArrearage(assetArrearage.size()>0?(byte)1:(byte)0);
+        List<PaymentBills> assetArrearage = assetProvider.findAssetArrearage(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getOrganizationId());
+        response.setHasArrearage(assetArrearage.size() > 0 ? (byte) 1 : (byte) 0);
         return response;
+    }
+    public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+//        AssetVendor assetVendor = checkAssetVendor(999983);
+        String vendorName = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vendorName);
+        return handler.showBillForClientV2(cmd);
+    }
+
+    @Override
+    public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
+        AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId());
+        AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
+        return handler.listAllBillsForClient(cmd);
+    }
+
+    /**
+     * 暂时性方案，通过域空间来定义功能是否可用
+     */
+    @Override
+    public FunctionDisableListDto functionDisableList(FunctionDisableListCommand cmd) {
+        FunctionDisableListDto dto = new FunctionDisableListDto();
+        Integer namespaceId = cmd.getNamespaceId();
+        Byte hasContractView = 1;
+        Byte hasPay = 1;
+        if(namespaceId==null){
+            namespaceId = UserContext.getCurrentNamespaceId();
+        }
+        switch (namespaceId){
+            case 999971:
+                if(cmd.getOwnerType()!=null && cmd.getOwnerType().equals(AssetPaymentStrings.EH_USER)) hasPay = 0;
+                break;
+            case 999983:
+                hasContractView = 0;
+                hasPay = 0;
+                break;
+            default:
+                break;
+        }
+        dto.setHasPay(hasPay);
+        dto.setHasContractView(hasContractView);
+        return dto;
+    }
+
+    @Override
+    public void syncCustomer(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Community> communities = context.selectFrom(Tables.EH_COMMUNITIES)
+                .where(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(999971))
+                .fetchInto(Community.class);
+        for(int i = 0; i < communities.size(); i++){
+            Community c = communities.get(i);
+            SyncCustomersCommand cmd = new SyncCustomersCommand();
+            cmd.setCommunityId(c.getId());
+            cmd.setNamespaceId(999971);
+            customerService.syncIndividualCustomers(cmd);
+            customerService.syncEnterpriseCustomers(cmd);
+        }
     }
 
 
@@ -2939,51 +3000,55 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public AddOrModifyRuleForBillGroupResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
-//        byte deCouplingFlag = 1;
-//        Long brotherRuleId = null;
-//        if(cmd.getOwnerId() == null){
-//            deCouplingFlag = 0;
-//            cmd.setOwnerId(cmd.getNamespaceId().longValue());
-//            brotherRuleId = assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
-//            //耦合中
-//            List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), false);
-//            for(int i = 0; i < allCommunity.size(); i ++){
-////是否耦合（必须检查，否则不耦合的会导致新增失败）
-//                boolean coupled = checkCoupledForGroupRule(cmd.getOwnerId(),cmd.getOwnerType());
-//                if(coupled){
-//                    assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
-//                }
-//            }
-//        }else if(cmd.getOwnerId() != null){
-//            //添加+解耦，判断safe+修改+解耦group和rule
-//            assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
-//        }
-
-        return assetProvider.addOrModifyRuleForBillGroup(cmd);
-
+    public void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
+        byte deCouplingFlag = 1;
+        Long brotherRuleId = null;
+        if(cmd.getOwnerId() == null){
+            deCouplingFlag = 0;
+            cmd.setOwnerId(cmd.getNamespaceId().longValue());
+            brotherRuleId = assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
+            List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), false);
+            for(int i = 0; i < allCommunity.size(); i ++){
+                cmd.setOwnerId(allCommunity.get(i));
+                boolean coupled = checkCoupledForGroupRule(cmd.getOwnerId(),cmd.getOwnerType());
+                if(coupled){
+                    assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
+                }
+            }
+        }else if(cmd.getOwnerId() != null){
+            //添加+解耦，判断safe+修改+解耦group和rule
+            assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
+        }
+//        return assetProvider.addOrModifyRuleForBillGroup(cmd);
     }
 
     private boolean checkCoupledForGroupRule(Long ownerId, String ownerType) {
-        List<EhPaymentBillGroupsRules> list = assetProvider.getBillGroupRuleByCommunity(ownerId,ownerType);
+//        List<EhPaymentBillGroupsRules> list = assetProvider.getBillGroupRuleByCommunity(ownerId,ownerType);
+        List<EhPaymentBillGroupsRules> list = assetProvider.getBillGroupRuleByCommunityWithBro(ownerId,ownerType,false);
         if(list.size() > 0){
-            return true;
+            //没有bro，不耦合或者为空
+            List<EhPaymentBillGroupsRules> list2 = assetProvider.getBillGroupRuleByCommunity(ownerId,ownerType);
+            if(list2.size() == 0){
+                return true;
+            }
+            return false;
         }
-        return false;
+        //有bro，肯定耦合
+        return true;
     }
 
     @Override
     public DeleteChargingItemForBillGroupResponse deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd) {
-        DeleteChargingItemForBillGroupResponse response = new DeleteChargingItemForBillGroupResponse();
+        //获得此rule，ownerid = namesapceid，则在全部操作页面, 修改全部的+bro；如果ownerid != namespaceid，则在single，需要改变，并 不需要 解耦所有账单组合rule
         EhPaymentBillGroupsRules rule = assetProvider.findBillGroupRuleById(cmd.getBillGroupRuleId());
-        boolean workFlag = isInWorkGroupRule(rule,false);
-        if(workFlag){
-            response.setFailCause(AssetPaymentStrings.DELETE_GROUP_RULE_UNSAFE);
-            return response;
+        byte deCouplingFlag = 1;
+        if(rule.getOwnerid().intValue() == rule.getNamespaceId().intValue()){
+            //全部
+            deCouplingFlag = 0;
+            return assetProvider.deleteBillGroupRuleById(cmd.getBillGroupRuleId(),deCouplingFlag);
+        }else{
+            return assetProvider.deleteBillGroupRuleById(cmd.getBillGroupRuleId(),deCouplingFlag);
         }
-        assetProvider.deleteBillGroupRuleById(cmd.getBillGroupRuleId());
-//        response.setFailCause(AssetPaymentStrings.DELETE_SUCCCESS);
-        return response;
     }
 
     /**
@@ -2991,19 +3056,12 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public DeleteBillGroupReponse deleteBillGroup(DeleteBillGroupCommand cmd) {
-        DeleteBillGroupReponse response = new DeleteBillGroupReponse();
-        boolean workFlag = isInWorkGroup(cmd.getBillGroupId(),false);
-        if(workFlag){
-            response.setFailCause(AssetPaymentStrings.DELTE_GROUP_UNSAFE);
-        }
         byte deCouplingFlag = 1;
         if(cmd.getOwnerId() == null) {
             deCouplingFlag = 0;
-            assetProvider.deleteBillGroupAndRules(cmd.getBillGroupId(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId());
-            return response;
+            return assetProvider.deleteBillGroupAndRules(cmd.getBillGroupId(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId());
         }
-        assetProvider.deleteBillGroupAndRules(cmd.getBillGroupId(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId());
-        return response;
+        return assetProvider.deleteBillGroupAndRules(cmd.getBillGroupId(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId());
     }
 
     @Override

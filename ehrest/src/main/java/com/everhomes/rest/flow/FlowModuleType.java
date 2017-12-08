@@ -11,7 +11,7 @@ package com.everhomes.rest.flow;
  */
 public enum FlowModuleType {
 
-	NO_MODULE("any-module"),REPAIR_MODULE("repair"),
+	NO_MODULE("any-module"),REPAIR_MODULE("repair"),SUGGESTION_MODULE("suggestion"),
 	SERVICE_ALLIANCE("service_alliance");
 	
 	private String code;

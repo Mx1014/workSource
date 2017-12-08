@@ -18,6 +18,7 @@ public interface EnterpriseCustomerProvider {
     void deleteEnterpriseCustomer(EnterpriseCustomer customer);
     EnterpriseCustomer findById(Long id);
     EnterpriseCustomer findByOrganizationId(Long organizationId);
+    EnterpriseCustomer findByNamespaceToken(String namespaceType, String namespaceCustomerToken);
     List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceType(Integer namespaceId, String namespaceType, Long communityId);
     List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndName(Integer namespaceId, String name);
     List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndNumber(Integer namespaceId, String number);
@@ -119,5 +120,7 @@ public interface EnterpriseCustomerProvider {
 	List<CustomerTrackingPlan> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd, Long todayFirst);
 	
 	void updateCustomerLastTrackingTime(EnterpriseCustomer customer);
+
+    String findLastEnterpriseCustomerVersionByCommunity(Integer namespaceId, Long communityId);
 
 }

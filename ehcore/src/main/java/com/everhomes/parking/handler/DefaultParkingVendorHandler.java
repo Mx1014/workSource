@@ -34,6 +34,13 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
     //开卡按30天计算
     static final int DAY_COUNT = 30;
 
+    //开卡费用计算保留小数
+    public static final int OPEN_CARD_RETAIN_DECIMAL = 0;
+    //临时车费用计算保留小数
+    public static final int TEMP_FEE_RETAIN_DECIMAL = 2;
+    //月卡充值费率计算保留小数
+    public static final int CARD_RATE_RETAIN_DECIMAL = 2;
+
     @Autowired
     ParkingProvider parkingProvider;
     @Autowired
@@ -99,7 +106,7 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
         if (null != parkingLot.getMonthlyDiscountFlag()) {
             if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getMonthlyDiscountFlag()) {
                 ratePrice = ratePrice.multiply(new BigDecimal(parkingLot.getMonthlyDiscount()))
-                        .divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
+                        .divide(new BigDecimal(10), CARD_RATE_RETAIN_DECIMAL, RoundingMode.HALF_UP);
             }
         }
         if (order.getPrice().compareTo(ratePrice) != 0) {
@@ -280,7 +287,7 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
 
                 BigDecimal price = dto.getPrice().multiply(new BigDecimal(requestMonthCount - 1))
                         .add(dto.getPrice().multiply(new BigDecimal(maxDay-today + 1))
-                                .divide(new BigDecimal(DAY_COUNT), 2, RoundingMode.HALF_UP));
+                                .divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
                 dto.setPayMoney(price);
             }
 

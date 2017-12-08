@@ -171,6 +171,7 @@ public interface PrivilegeConstants {
     
     // ---------------- 门禁权限 -----------------------
     long MODULE_ACLINK_MANAGER = 10041L; //公司门禁 管理员
+    long MODULE_ACLINK_VISITOR_DENY = 1009L; //禁止门禁访客访问
 
     // 能耗权限
     long METER_CREATE = 21000L;

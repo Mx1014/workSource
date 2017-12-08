@@ -20,6 +20,7 @@ import javax.validation.constraints.NotNull;
  *     <li>title: 标题</li>
  *     <li>currentOrganizationId: 用户当前场景下的公司id,推荐传这个值，要不然就无法设置工作流的某些功能</li>
  *     <li>serviceType: 业务类型</li>
+ *     <li>routeUri: 路由</li>
  * </ul>
  */
 public class CreateFlowCaseCommand {
@@ -37,6 +38,8 @@ public class CreateFlowCaseCommand {
     @NotNull
     private Long currentOrganizationId;
     private String serviceType;
+
+    private String routeUri;
 
     @ItemType(FlowCaseAdditionalFieldDTO.class)
     private FlowCaseAdditionalFieldDTO additionalFieldDTO;
@@ -135,6 +138,14 @@ public class CreateFlowCaseCommand {
 
     public void setAdditionalFieldDTO(FlowCaseAdditionalFieldDTO additionalFieldDTO) {
         this.additionalFieldDTO = additionalFieldDTO;
+    }
+
+    public String getRouteUri() {
+        return routeUri;
+    }
+
+    public void setRouteUri(String routeUri) {
+        this.routeUri = routeUri;
     }
 
     public Long getFlowCaseId() {

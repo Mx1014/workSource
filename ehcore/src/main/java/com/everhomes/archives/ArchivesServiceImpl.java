@@ -2390,7 +2390,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     //    @Scheduled(cron = "0 0 * * * ?")
-    public void executeArchivesNotification() {
+    private void sendArchivesNotification() {
         //  1.读取当天 week
         Calendar c = Calendar.getInstance();
         int weekDay = c.get(Calendar.DAY_OF_WEEK);
@@ -2399,9 +2399,13 @@ public class ArchivesServiceImpl implements ArchivesService {
         //  2.按照时间归类，来启动对应时间点的定时器
             Map<Integer, List<ArchivesNotifications>> notifyMap = results.stream().collect(Collectors.groupingBy
                     (ArchivesNotifications::getNotifyHour));
-            for (Integer key : notifyMap.keySet()) {
-                archivesConfigurationService.sendingMailJob(key, notifyMap.get(key));
+            for (Integer hour : notifyMap.keySet()) {
+                archivesConfigurationService.sendingMailJob(hour, notifyMap.get(hour));
             }
         }
+    }
+
+    private void sendEmails(List<ArchivesNotifications> notifyLists){
+
     }
 }

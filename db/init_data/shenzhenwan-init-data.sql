@@ -1401,5 +1401,28 @@ INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 
 
 -- 新增新左邻运营后台配置 add by xujuan 20171103
-set @domain_id = IFNULL((SELECT MAX(id) FROM `eh_domains`), 1);
-insert into `eh_domains` (`id`, `namespace_id`, `portal_type`, `portal_id`, `domain`, `create_uid`, `create_time`) values((@domain_id := @domain_id + 1),'0','EhZuolinAdmins',0, 'opv2.szbay.com', 0, now());
+SET @domain_id = IFNULL((SELECT MAX(id) FROM `eh_domains`), 1);
+INSERT INTO `eh_domains` (`id`, `namespace_id`, `portal_type`, `portal_id`, `domain`, `create_uid`, `create_time`) VALUES((@domain_id := @domain_id + 1),'0','EhZuolinAdmins',0, 'opv2.szbay.com', 0, NOW());
+
+-- 深圳湾普通企业管理员后台菜单配置：【内部管理】-【组织架构】【职级管理】【员工认证】【考勤管理】【视频会议】【审批管理】
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),52000,'', 'EhNamespaces', 999966,2); 
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),52010,'', 'EhNamespaces', 999966,2); 
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),52020,'', 'EhNamespaces', 999966,2); 
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),52030,'', 'EhNamespaces', 999966,2); 
+
+-- 【深圳湾mybay】【大堂门禁】【IOS&安卓】删掉蓝牙门禁的tab，不在APP端显示
+
+UPDATE `eh_launch_pad_items` SET `action_data` = '{"isSupportQR":1,"isSupportSmart":0, "isSupportKeyShowing":1}' WHERE `namespace_id` = 999966 AND `item_label` ='闸机门禁' ;
+
+
+-- 【深圳湾mybay】切换到创投项目中，把首页默认显示的闸机门禁替换成通讯录
+UPDATE eh_launch_pad_items  SET display_flag = 0 WHERE  scope_id = 240111044331050371  AND  namespace_id =  999966 AND action_type =40;
+
+SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+
+INSERT INTO eh_launch_pad_items(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,target_type,target_id,delete_flag,scene_type,scale_type,service_categry_id,selected_icon_uri,more_order,alias_icon_uri,categry_name)
+VALUES((@item_id := @item_id + 1),'999966','0','1','240111044331050371 ','/home','Bizs','EhPortalItems184','通讯录','cs://1/image/aW1hZ2UvTVRwak9EZ3hNelUwTnpobU1ETmpOekZsWVRZM05HTmxNVGN6WldVeE5tWmlNQQ','1','1','46',NULL,'0','0','1','1',NULL,'0',NULL,NULL,NULL,'1','park_tourist','1',NULL,NULL,'3',NULL,'个人服务');
+INSERT INTO eh_launch_pad_items(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,target_type,target_id,delete_flag,scene_type,scale_type,service_categry_id,selected_icon_uri,more_order,alias_icon_uri,categry_name)
+VALUES((@item_id := @item_id + 1),'999966','0','1','240111044331050371 ','/home/PersonalService','PersonalService','EhPortalItems287','通讯录','cs://1/image/aW1hZ2UvTVRwak9EZ3hNelUwTnpobU1ETmpOekZsWVRZM05HTmxNVGN6WldVeE5tWmlNQQ','1','1','46',NULL,'0','0','1','1',NULL,'0',NULL,NULL,NULL,'1','park_tourist','1',NULL,NULL,'0',NULL,NULL);
+

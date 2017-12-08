@@ -29,6 +29,27 @@ public class PaymentExpectancyDTO {
 
     private Long billItemId;
 
+
+
+
+    @Override
+    public int hashCode() {
+        return getBillItemId() != null ? getBillItemId().hashCode() : 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PaymentExpectancyDTO)) return false;
+
+        PaymentExpectancyDTO that = (PaymentExpectancyDTO) o;
+
+        return getBillItemId() != null ? getBillItemId().equals(that.getBillItemId()) : that.getBillItemId() == null;
+    }
+
+
+
+
     public Long getBillItemId() {
         return billItemId;
     }

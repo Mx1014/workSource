@@ -5,10 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.parking.*;
@@ -18,7 +15,6 @@ import com.everhomes.rest.parking.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.MD5Utils;
 import com.everhomes.util.RuntimeErrorException;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +26,6 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 科兴 正中会 停车对接
@@ -257,7 +252,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 						if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getMonthlyDiscountFlag()) {
 							dto.setOriginalPrice(dto.getPrice());
 							BigDecimal newPrice = dto.getPrice().multiply(new BigDecimal(parkingLot.getMonthlyDiscount()))
-									.divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
+									.divide(new BigDecimal(10), CARD_RATE_RETAIN_DECIMAL, RoundingMode.HALF_UP);
 							dto.setPrice(newPrice);
 						}
 					}
@@ -335,15 +330,15 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 			}
 			order.setRateName(ketuoCardRate.getRuleName());
 
-			BigDecimal ratePrice = new BigDecimal(ketuoCardRate.getRuleMoney()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
+			BigDecimal ratePrice = new BigDecimal(ketuoCardRate.getRuleMoney()).divide(new BigDecimal(100), CARD_RATE_RETAIN_DECIMAL, RoundingMode.HALF_UP);
 
 			checkAndSetOrderPrice(parkingLot, order, ratePrice);
 
 			//正中会对接停车长支持优惠
 			order.setPrice(new BigDecimal(order.getPrice().intValue() * 100 - (freeMoney * order.getMonthCount().intValue()))
-							.divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
+							.divide(new BigDecimal(100), CARD_RATE_RETAIN_DECIMAL, RoundingMode.HALF_UP));
 			order.setOriginalPrice(new BigDecimal(order.getOriginalPrice().intValue() * 100 - (freeMoney * order.getMonthCount().intValue()))
-					.divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
+					.divide(new BigDecimal(100), CARD_RATE_RETAIN_DECIMAL, RoundingMode.HALF_UP));
 		}
 
 	}

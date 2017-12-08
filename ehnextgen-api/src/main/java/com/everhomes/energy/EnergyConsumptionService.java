@@ -125,7 +125,7 @@ public interface EnergyConsumptionService {
     /**
      * 导入表记
      * @param cmd   cmd
-     * @param file  Excel文件
+     * @param mfile  Excel文件
      */
     ImportFileTaskDTO importEnergyMeter(ImportEnergyMeterCommand cmd, MultipartFile mfile, Long userId);
 
@@ -266,4 +266,7 @@ public interface EnergyConsumptionService {
 
     BigDecimal processMonthPrompt(EnergyMeter meter,Integer namespaceId);
     BigDecimal processDayPrompt(EnergyMeter meter,Integer namespaceId);
+
+    HttpServletResponse exportTasksByEnergyPlan(SearchTasksByEnergyPlanCommand cmd, HttpServletResponse response);
+    ImportFileTaskDTO importTasksByEnergyPlan(ImportTasksByEnergyPlanCommand cmd, MultipartFile mfile, Long userId);
 }

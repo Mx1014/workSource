@@ -165,6 +165,7 @@ public interface PropertyMgrService {
      * @return behavior列表
      */
     List<OrganizationOwnerBehaviorDTO> listOrganizationOwnerBehaviors(ListOrganizationOwnerBehaviorsCommand cmd);
+    List<OrganizationOwnerBehaviorDTO> listApartmentOrganizationOwnerBehaviors(ListApartmentOrganizationOwnerBehaviorsCommand cmd);
 
     /**
      * 修改业主信息
