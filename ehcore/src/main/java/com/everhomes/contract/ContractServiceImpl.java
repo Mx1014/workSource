@@ -248,27 +248,30 @@ public class ContractServiceImpl implements ContractService {
     	if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
 	    	//使用tryEnter()防止分布式部署重复执行
 	    	coordinationProvider.getNamedLock(CoordinationLocks.CONTRACT_SCHEDULE.getCode()).tryEnter(()->{
-	    		sendMessageToBackTwoMonthsOrganizations();
-	        	sendMessageToBackOneMonthOrganizations();
-	        	sendMessageToNewOrganizations();
+				sendMessageToBackTwoMonthsOrganizations(1000000);
+				sendMessageToBackOneMonthOrganizations(1000000);
+				sendMessageToNewOrganizations(1000000);
 	    	});
     	}
     }
 
-	private void sendMessageToBackTwoMonthsOrganizations() {
+	private void sendMessageToBackTwoMonthsOrganizations(Integer namespaceId) {
 		Timestamp now = getCurrentDate();
 		Timestamp lastNow = getNextNow(now);
 		long offset = 60*ONE_DAY_MS;
 		Timestamp minValue = new Timestamp(lastNow.getTime()+offset);
 		Timestamp maxValue = new Timestamp(now.getTime()+offset);
-		List<Contract> contractList = contractProvider.listContractsByEndDateRange(minValue, maxValue);
+		List<Contract> contractList = contractProvider.listContractsByEndDateRange(minValue, maxValue, namespaceId);
 		if (contractList == null || contractList.isEmpty()) {
 			return;
 		}
 		
 		for (Contract contract : contractList) {
-//			Long organizationId = contract.getOrganizationId();
-			Long organizationId = contract.getCustomerId();
+			Long organizationId = 0L;
+			if(CustomerType.ORGANIZATION.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+				organizationId = contract.getCustomerId();
+			}
+
 			OrganizationServiceUser serviceUser = organizationService.getServiceUser(organizationId);
 			Set<String> phoneSet = organizationService.getOrganizationContactPhone(organizationId);
 			String contractEndDate = getChinaDate(contract.getContractEndDate());
@@ -296,20 +299,22 @@ public class ContractServiceImpl implements ContractService {
 		}
 	}
 	
-	private void sendMessageToBackOneMonthOrganizations() {
+	private void sendMessageToBackOneMonthOrganizations(Integer namespaceId) {
 		Timestamp now = getCurrentDate();
 		Timestamp lastNow = getNextNow(now);
 		long offset = 30*ONE_DAY_MS;
 		Timestamp minValue = new Timestamp(lastNow.getTime()+offset);
 		Timestamp maxValue = new Timestamp(now.getTime()+offset);
-		List<Contract> contractList = contractProvider.listContractsByEndDateRange(minValue, maxValue);
+		List<Contract> contractList = contractProvider.listContractsByEndDateRange(minValue, maxValue, namespaceId);
 		if (contractList == null || contractList.isEmpty()) {
 			return;
 		}
 		
 		for (Contract contract : contractList) {
-//			Long organizationId = contract.getOrganizationId();
-			Long organizationId = contract.getCustomerId();
+			Long organizationId = 0L;
+			if(CustomerType.ORGANIZATION.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+				organizationId = contract.getCustomerId();
+			}
 			OrganizationServiceUser serviceUser = organizationService.getServiceUser(organizationId);
 			Set<String> phoneSet = organizationService.getOrganizationContactPhone(organizationId);
 			String contractEndDate = getChinaDate(contract.getContractEndDate());
@@ -337,17 +342,19 @@ public class ContractServiceImpl implements ContractService {
 		}
 	}
 
-	private void sendMessageToNewOrganizations() {
+	private void sendMessageToNewOrganizations(Integer namespaceId) {
 		Timestamp now = getCurrentDate();
 		Timestamp lastNow = getNextNow(now);
-		List<Contract> contractList = contractProvider.listContractsByCreateDateRange(lastNow, now);
+		List<Contract> contractList = contractProvider.listContractsByCreateDateRange(lastNow, now, namespaceId);
 		if (contractList == null || contractList.isEmpty()) {
 			return;
 		}
 		
 		for (Contract contract : contractList) {
-//			Long organizationId = contract.getOrganizationId();
-			Long organizationId = contract.getCustomerId();
+			Long organizationId = 0L;
+			if(CustomerType.ORGANIZATION.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+				organizationId = contract.getCustomerId();
+			}
 			OrganizationServiceUser serviceUser = organizationService.getServiceUser(organizationId);
 			Set<String> phoneSet = organizationService.getOrganizationContactPhone(organizationId);
 			String communityName = getCommunityName(organizationId);
