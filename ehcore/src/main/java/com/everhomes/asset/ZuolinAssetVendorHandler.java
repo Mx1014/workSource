@@ -648,7 +648,6 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
-        //先进行检查是否重复下单,查询此传来bills是否有对应的order，如果有，那么检查订单的状态，如果订单已经完毕，则返回
         List<BillIdAndAmount> bills = cmd.getBills();
         List<String> billIds = new ArrayList<>();
         Long amountsInCents = 0l;
@@ -658,6 +657,8 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
             Float amountOwedInCents = Float.parseFloat(amountOwed)*100f;
             amountsInCents += amountOwedInCents.longValue();
         }
+        //对左邻的用户，直接检查bill的状态即可
+        checkHasPaidBills(billIds);
         //这种检查的逻辑是不对的
 //        Long checkedOrderId = assetProvider.findAssetOrderByBillIds(billIds);
 //        if(checkedOrderId !=null){
@@ -711,6 +712,11 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 //        response.setPayMethod(preOrder.getPayMethod());
 
         return preOrder;
+    }
+
+    private void checkHasPaidBills(List<String> billIds) {
+        List<PaymentBills> paidBills = assetProvider.findPaidBillsByIds(billIds);
+        if( paidBills.size() >0 ) throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.HAS_PAID_BILLS,"this is bills have been paid,please refresh");
     }
 
 

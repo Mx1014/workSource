@@ -75,6 +75,7 @@ import sun.util.resources.cldr.aa.CalendarData_aa_DJ;
 
 import java.io.StringBufferInputStream;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -1531,28 +1532,34 @@ public class AssetProviderImpl implements AssetProvider {
             BigDecimal amountExemption = new BigDecimal("0");
             BigDecimal amountSupplement = new BigDecimal("0");
             BigDecimal amountReceivable = new BigDecimal("0");
+            BigDecimal amountChange = new BigDecimal("0");
             BigDecimal zero = new BigDecimal("0");
-
-            if(list1!=null){
-                for(int i = 0; i < list1.size() ; i++) {
-                    BillItemDTO dto = list1.get(i);
-                    context.update(t1)
-                            .set(t1.AMOUNT_RECEIVABLE,dto.getAmountReceivable()==null?new BigDecimal("0"):dto.getAmountReceivable())
-                            .set(t1.AMOUNT_OWED,dto.getAmountReceivable()==null?new BigDecimal("0"):dto.getAmountReceivable())
-                            .set(t1.UPDATE_TIME,new Timestamp(DateHelper.currentGMTTime().getTime()))
-                            .set(t1.OPERATOR_UID,UserContext.currentUserId())
-                            .where(t1.BILL_ID.in(billId))
-                            .and(t1.ID.eq(dto.getBillItemId()))
-                            .execute();
-                    amountReceivable = amountReceivable.add(dto.getAmountReceivable()==null?new BigDecimal("0"):dto.getAmountReceivable());
-                }
-            }
+//            //list1为billItem的列表
+//            if(list1!=null){
+//                for(int i = 0; i < list1.size() ; i++) {
+//                    BillItemDTO dto = list1.get(i);
+//                    context.update(t1)
+//                            .set(t1.AMOUNT_RECEIVABLE,dto.getAmountReceivable()==null?new BigDecimal("0"):dto.getAmountReceivable())
+//                            .set(t1.AMOUNT_OWED,dto.getAmountReceivable()==null?new BigDecimal("0"):dto.getAmountReceivable())
+//                            .set(t1.UPDATE_TIME,new Timestamp(DateHelper.currentGMTTime().getTime()))
+//                            .set(t1.OPERATOR_UID,UserContext.currentUserId())
+//                            .where(t1.BILL_ID.in(billId))
+//                            .and(t1.ID.eq(dto.getBillItemId()))
+//                            .execute();
+//                    amountReceivable = amountReceivable.add(dto.getAmountReceivable()==null?new BigDecimal("0"):dto.getAmountReceivable());
+//                }
+//            }
             List<com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems> exemptionItems = new ArrayList<>();
+            //减免项列表list2
+            List<Long> includeExemptionIds = new ArrayList();
+            includeExemptionIds.add(-1l);
             if(list2!=null){
                 //bill exemption
                 for(int i = 0; i < list2.size(); i++){
                     ExemptionItemDTO exemptionItemDTO = list2.get(i);
+                    //有id的
                     if(exemptionItemDTO.getExemptionId()!=null){
+                        includeExemptionIds.add(exemptionItemDTO.getExemptionId());
                         context.update(t2)
                                 .set(t2.AMOUNT,exemptionItemDTO.getAmount()==null?new BigDecimal("0"):exemptionItemDTO.getAmount())
                                 .set(t2.REMARKS,exemptionItemDTO.getRemark())
@@ -1562,6 +1569,7 @@ public class AssetProviderImpl implements AssetProvider {
                                 .and(t2.ID.eq(exemptionItemDTO.getExemptionId()))
                                 .execute();
                     }else{
+                        //没有id的，为新增的
                         long nextId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems.class));
                         PaymentExemptionItems exemptionItem = new PaymentExemptionItems();
                         BigDecimal amount = exemptionItemDTO.getAmount();
@@ -1577,29 +1585,24 @@ public class AssetProviderImpl implements AssetProvider {
                         exemptionItem.setTargetname(targetName);
                         exemptionItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                         exemptionItems.add(exemptionItem);
+                        includeExemptionIds.add(nextId);
                     }
-                    if(exemptionItemDTO.getAmount()!=null&&exemptionItemDTO.getAmount().compareTo(zero)==-1){
-                        amountExemption = amountExemption.add(exemptionItemDTO.getAmount());
-                    }else if(exemptionItemDTO.getAmount()!=null&&exemptionItemDTO.getAmount().compareTo(zero)==1){
-                        amountSupplement = amountSupplement.add(exemptionItemDTO.getAmount());
-                    }
+//                    if(exemptionItemDTO.getAmount()!=null&&exemptionItemDTO.getAmount().compareTo(zero)==-1){
+//                        //更新账单的增加项
+//                        amountExemption = amountExemption.add(exemptionItemDTO.getAmount().multiply(new BigDecimal("-1")));
+//                    }else if(exemptionItemDTO.getAmount()!=null&&exemptionItemDTO.getAmount().compareTo(zero)==1){
+//                        //更新账单的减免项
+//                        amountSupplement = amountSupplement.add(exemptionItemDTO.getAmount());
+//                    }
                 }
             }
             EhPaymentExemptionItemsDao exemptionItemsDao = new EhPaymentExemptionItemsDao(context.configuration());
             exemptionItemsDao.insert(exemptionItems);
-
-            //  缺少创造者信息，先保存在其他地方，比如持久化日志
-            amountReceivable = amountReceivable.add(amountExemption);
-            amountReceivable = amountReceivable.add(amountSupplement);
-            context.update(t)
-                    .set(t.AMOUNT_RECEIVABLE,amountReceivable)
-                    .set(t.AMOUNT_OWED,amountReceivable)
-                    .set(t.AMOUNT_SUPPLEMENT,amountSupplement)
-                    .set(t.AMOUNT_EXEMPTION,amountExemption)
-                    .set(t.UPDATE_TIME,new Timestamp(DateHelper.currentGMTTime().getTime()))
-                    .set(t.OPERATOR_UID,UserContext.currentUserId())
-                    .where(t.ID.eq(billId))
+            //删除include进来之外的增收减免
+            context.delete(t2)
+                    .where(t2.ID.notIn(includeExemptionIds))
                     .execute();
+            reCalBillById(billId);
             return null;
         });
     }
@@ -3642,6 +3645,55 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_PAYMENT_BILLS.TARGET_ID.eq(targetId))
                 .and(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq(targetType))
                 .fetchInto(PaymentBills.class);
+    }
+
+    @Override
+    public List<PaymentBills> findPaidBillsByIds(List<String> billIds) {
+        return getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
+                .fetchInto(PaymentBills.class);
+    }
+
+    @Override
+    public void reCalBillById(long billId) {
+//        重新计算账单
+        final BigDecimal[] amountReceivable = {new BigDecimal("0")};
+        final BigDecimal[] amountReceived = {new BigDecimal("0")};
+        final BigDecimal[] amountOwed = {new BigDecimal("0")};
+        final BigDecimal[] amountExempled = {new BigDecimal("0")};
+        final BigDecimal[] amountSupplement = {new BigDecimal("0")};
+        BigDecimal zero = new BigDecimal("0");
+        getReadOnlyContext().select(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED,Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED)
+                .from(Tables.EH_PAYMENT_BILL_ITEMS)
+                .where(Tables.EH_PAYMENT_BILL_ITEMS.ID.eq(billId))
+                .fetch()
+                .forEach(r -> {
+                    amountReceivable[0] = amountReceivable[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE));
+                    amountReceived[0] = amountReceived[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED));
+                    amountOwed[0] = amountOwed[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED));
+                });
+        getReadOnlyContext().select(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT)
+                .where(Tables.EH_PAYMENT_EXEMPTION_ITEMS.BILL_ID.in(billId))
+                .fetch()
+                .forEach(r ->{
+                    amountReceivable[0] = amountReceivable[0].add(r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT));
+                    amountOwed[0] = amountOwed[0].add(r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT));
+                    if(r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT).compareTo(zero) == 1){
+                        amountSupplement[0] = amountSupplement[0].add(r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT));
+                    }else if (r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT).compareTo(zero) == -1){
+                        amountExempled[0] = amountExempled[0].subtract(r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT));
+                    }
+                });
+        getReadWriteContext().update(Tables.EH_PAYMENT_BILLS)
+                    .set(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE, amountReceivable[0])
+                    .set(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED, amountOwed[0])
+                    .set(Tables.EH_PAYMENT_BILLS.AMOUNT_SUPPLEMENT, amountSupplement[0])
+                    .set(Tables.EH_PAYMENT_BILLS.AMOUNT_EXEMPTION, amountExempled[0])
+                    .set(Tables.EH_PAYMENT_BILLS.UPDATE_TIME,new Timestamp(DateHelper.currentGMTTime().getTime()))
+                    .set(Tables.EH_PAYMENT_BILLS.OPERATOR_UID,UserContext.currentUserId())
+                    .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+                    .execute();
+
     }
 
     private Map<Long,String> getGroupNames(ArrayList<Long> groupIds) {

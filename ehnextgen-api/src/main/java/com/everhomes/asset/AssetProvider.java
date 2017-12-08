@@ -268,4 +268,8 @@ public interface AssetProvider {
     PaymentServiceConfig findServiceConfig(Integer namespaceId);
 
     List<PaymentBills> findSettledBillsByCustomer(String targetType, Long targetId);
+
+    List<PaymentBills> findPaidBillsByIds(List<String> billIds);
+
+    void reCalBillById(long billId);
 }
