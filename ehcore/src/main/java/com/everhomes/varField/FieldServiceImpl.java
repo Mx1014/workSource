@@ -545,9 +545,11 @@ public class FieldServiceImpl implements FieldService {
                 ListCustomerEntryInfosCommand cmd11 = new ListCustomerEntryInfosCommand();
                 cmd11.setCustomerId(customerId);
                 cmd11.setCustomerType(customerType);
+                LOGGER.info("入驻信息 command"+cmd11);
                 List<CustomerEntryInfoDTO> customerEntryInfoDTOS = customerService.listCustomerEntryInfos(cmd11);
                 if(customerEntryInfoDTOS == null) customerEntryInfoDTOS = new ArrayList<>();
                 for(int j = 0; j < customerEntryInfoDTOS.size(); j++){
+                    LOGGER.info("入驻信息 "+j+":"+customerEntryInfoDTOS.get(j));
                     setMutilRowDatas(fields,data,customerEntryInfoDTOS.get(j),communityId,namespaceId,moduleName);
                 }
                 break;
@@ -555,9 +557,11 @@ public class FieldServiceImpl implements FieldService {
                 ListCustomerDepartureInfosCommand cmd12 = new ListCustomerDepartureInfosCommand();
                 cmd12.setCommunityId(customerId);
                 cmd12.setCustomerType(customerType);
+                LOGGER.info("入驻信息 command"+cmd12);
                 List<CustomerDepartureInfoDTO> customerDepartureInfoDTOS = customerService.listCustomerDepartureInfos(cmd12);
                 if(customerDepartureInfoDTOS == null) customerDepartureInfoDTOS = new ArrayList<>();
                 for(int j = 0; j < customerDepartureInfoDTOS.size(); j++){
+                    LOGGER.info("离场信息 "+j+":"+customerDepartureInfoDTOS.get(j));
                     setMutilRowDatas(fields,data,customerDepartureInfoDTOS.get(j),communityId,namespaceId,moduleName);
                 }
                 break;
