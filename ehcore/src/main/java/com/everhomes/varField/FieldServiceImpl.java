@@ -530,6 +530,7 @@ public class FieldServiceImpl implements FieldService {
                 for(int j = 0; j < customerTrackingDTOS.size(); j++){
                     setMutilRowDatas(fields,data,customerTrackingDTOS.get(j),communityId,namespaceId,moduleName);
                 }
+                break;
             case "计划信息":
                 ListCustomerTrackingPlansCommand cmd10  = new ListCustomerTrackingPlansCommand();
                 cmd10.setCustomerId(customerId);
@@ -539,6 +540,27 @@ public class FieldServiceImpl implements FieldService {
                 for(int j = 0; j < customerTrackingPlanDTOS.size(); j++){
                     setMutilRowDatas(fields,data,customerTrackingPlanDTOS.get(j),communityId,namespaceId,moduleName);
                 }
+                break;
+            case "入驻信息":
+                ListCustomerEntryInfosCommand cmd11 = new ListCustomerEntryInfosCommand();
+                cmd11.setCustomerId(customerId);
+                cmd11.setCustomerType(customerType);
+                List<CustomerEntryInfoDTO> customerEntryInfoDTOS = customerService.listCustomerEntryInfos(cmd11);
+                if(customerEntryInfoDTOS == null) customerEntryInfoDTOS = new ArrayList<>();
+                for(int j = 0; j < customerEntryInfoDTOS.size(); j++){
+                    setMutilRowDatas(fields,data,customerEntryInfoDTOS.get(j),communityId,namespaceId,moduleName);
+                }
+                break;
+            case "离场信息":
+                ListCustomerDepartureInfosCommand cmd12 = new ListCustomerDepartureInfosCommand();
+                cmd12.setCommunityId(customerId);
+                cmd12.setCustomerType(customerType);
+                List<CustomerDepartureInfoDTO> customerDepartureInfoDTOS = customerService.listCustomerDepartureInfos(cmd12);
+                if(customerDepartureInfoDTOS == null) customerDepartureInfoDTOS = new ArrayList<>();
+                for(int j = 0; j < customerDepartureInfoDTOS.size(); j++){
+                    setMutilRowDatas(fields,data,customerDepartureInfoDTOS.get(j),communityId,namespaceId,moduleName);
+                }
+                break;
         }
         return data;
     }
