@@ -912,10 +912,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
-	public void deleteStandardModleCommunityMap(Long standardId) {
+	public void deleteStandardModleCommunityMap(Long standardId,Long targetId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		context.delete(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
 				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.STANDARD_ID.eq(standardId))
+				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TARGET_ID.eq(targetId))
 				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(EquipmentModelType.STANDARD.getCode()))
 				.execute();
 	}

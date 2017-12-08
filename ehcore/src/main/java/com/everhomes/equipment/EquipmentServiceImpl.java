@@ -465,7 +465,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		//判断删除情况
 		if(cmd.getTargetId()!=null && standard.getTargetId()==0L){
 			//在项目上删除公共标准的情况  其余情况按照原来模式
-			equipmentProvider.deleteStandardModleCommunityMap(standard.getId());
+			equipmentProvider.deleteStandardModleCommunityMap(standard.getId(),cmd.getTargetId());
 		}else {
 
 			standard.setDeleterUid(user.getId());
