@@ -4136,22 +4136,25 @@ public class EquipmentServiceImpl implements EquipmentService {
 			//这个是全部里面查看
 			templates = equipmentProvider.listInspectionTemplates(UserContext.getCurrentNamespaceId(), cmd.getName(), null);
 		} else {
-			//先查出来所有项目下的模板
+			//先查出来属于项目自定义的模板
 			templates = equipmentProvider.listInspectionTemplates(UserContext.getCurrentNamespaceId(), cmd.getName(), cmd.getTargetId());
 			//获取所有有referId的集合
 			List<Long> removeIds = new ArrayList<>();
-			templates.stream().map((r) -> {
-				if (r.getReferId() != null && r.getReferId() != 0) {
-					removeIds.add(r.getReferId());
-				}
-				return null;
-			});
+			if (templates != null && templates.size() > 0) {
+				templates.stream()
+						.filter(t -> t.getReferId() != null && t.getReferId() != 0)
+						.forEach(t -> removeIds.add(t.getReferId()));
+			}
+
 			//referId的公共模板去掉
 			List<EquipmentModleCommunityMap> templatesMap = equipmentProvider.getModuleCommunityMap(cmd.getTargetId(), EquipmentModelType.TEMPLATE.getCode());
 			if (templatesMap.size() > 0) {
 				for (EquipmentModleCommunityMap map : templatesMap) {
 					if (!removeIds.contains(map.getTemplateId())) {
 						EquipmentInspectionTemplates modelTemplates = equipmentProvider.findEquipmentInspectionTemplate(map.getTemplateId(), cmd.getOwnerId(), cmd.getOwnerType());
+						if (templates == null) {
+							templates = new ArrayList<>();
+						}
 						templates.add(modelTemplates);
 					}
 				}
