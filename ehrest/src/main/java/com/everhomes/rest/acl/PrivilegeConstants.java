@@ -220,6 +220,7 @@ public interface PrivilegeConstants {
     long BATCH_EXPORT_PERSON = 41012L;//批量导出人员
 
 //    -------------- 考勤 ------------
-    long PUNCH_SETTING = 10039L;//考勤管理
-    long PUNCH_STATISTIC = 820L;//考勤统计
+    long PUNCH_SETTING_ALL = 42000L;//考勤管理-全部
+    long PUNCH_SETTING_CREATOR = 42000L;//考勤管理-自定义
+    long PUNCH_STATISTIC = 42002L;//考勤统计
 }
