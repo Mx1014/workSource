@@ -320,7 +320,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private OrganizationDTO createOrganization(EnterpriseCustomer customer) {
-        Organization org = organizationProvider.findOrganizationByNameAndNamespaceId(customer.getName(), customer.getNamespaceId());
+        Organization org = organizationProvider.findOrganizationByName(customer.getName(), customer.getNamespaceId());
         if(org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
             //已存在则更新 地址、官网地址、企业logo
             org.setWebsite(customer.getCorpWebsite());

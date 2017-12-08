@@ -339,7 +339,7 @@ public class EbeiCustomerHandle implements CustomerHandle {
     }
 
     private Organization insertOrganization(EnterpriseCustomer customer) {
-        Organization org = organizationProvider.findOrganizationByNameAndNamespaceId(customer.getName(), customer.getNamespaceId());
+        Organization org = organizationProvider.findOrganizationByName(customer.getName(), customer.getNamespaceId());
         if(org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
             return org;
         }
