@@ -592,6 +592,10 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
             cond = cond.and(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.MODULE_ID.eq(moduleId));
 
         query.addConditions(cond);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listExcludeFunctions, sql=" + query.getSQL());
+            LOGGER.debug("listExcludeFunctions, bindValues=" + query.getBindValues());
+        }
         query.fetch().map((r) -> {
             results.add(ConvertHelper.convert(r, ServiceModuleExcludeFunction.class));
             return null;
