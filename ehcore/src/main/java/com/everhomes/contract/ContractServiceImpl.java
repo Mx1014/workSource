@@ -248,6 +248,7 @@ public class ContractServiceImpl implements ContractService {
     	if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
 	    	//使用tryEnter()防止分布式部署重复执行
 	    	coordinationProvider.getNamedLock(CoordinationLocks.CONTRACT_SCHEDULE.getCode()).tryEnter(()->{
+
 	    		sendMessageToBackTwoMonthsOrganizations(1000000);
 	        	sendMessageToBackOneMonthOrganizations(1000000);
 	        	sendMessageToNewOrganizations(1000000);
@@ -267,8 +268,11 @@ public class ContractServiceImpl implements ContractService {
 		}
 		
 		for (Contract contract : contractList) {
-//			Long organizationId = contract.getOrganizationId();
-			Long organizationId = contract.getCustomerId();
+			Long organizationId = 0L;
+			if(CustomerType.ORGANIZATION.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+				organizationId = contract.getCustomerId();
+			}
+
 			OrganizationServiceUser serviceUser = organizationService.getServiceUser(organizationId);
 			Set<String> phoneSet = organizationService.getOrganizationContactPhone(organizationId);
 			String contractEndDate = getChinaDate(contract.getContractEndDate());
@@ -308,8 +312,10 @@ public class ContractServiceImpl implements ContractService {
 		}
 		
 		for (Contract contract : contractList) {
-//			Long organizationId = contract.getOrganizationId();
-			Long organizationId = contract.getCustomerId();
+			Long organizationId = 0L;
+			if(CustomerType.ORGANIZATION.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+				organizationId = contract.getCustomerId();
+			}
 			OrganizationServiceUser serviceUser = organizationService.getServiceUser(organizationId);
 			Set<String> phoneSet = organizationService.getOrganizationContactPhone(organizationId);
 			String contractEndDate = getChinaDate(contract.getContractEndDate());
@@ -346,8 +352,10 @@ public class ContractServiceImpl implements ContractService {
 		}
 		
 		for (Contract contract : contractList) {
-//			Long organizationId = contract.getOrganizationId();
-			Long organizationId = contract.getCustomerId();
+			Long organizationId = 0L;
+			if(CustomerType.ORGANIZATION.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+				organizationId = contract.getCustomerId();
+			}
 			OrganizationServiceUser serviceUser = organizationService.getServiceUser(organizationId);
 			Set<String> phoneSet = organizationService.getOrganizationContactPhone(organizationId);
 			String communityName = getCommunityName(organizationId);

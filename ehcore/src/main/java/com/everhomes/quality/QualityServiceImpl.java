@@ -3698,6 +3698,8 @@ public class QualityServiceImpl implements QualityService {
 				}
 			}
 		}
+		//再次按照order排序
+		sortedScoresByTarget.sort(Comparator.comparing(ScoreGroupByTargetDTO::getOrderId));
 
 		response.setScores(sortedScoresByTarget);
 		return response;
