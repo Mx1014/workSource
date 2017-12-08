@@ -30,8 +30,11 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.approval.*;
 import com.everhomes.rest.general_approval.GeneralApprovalRecordDTO;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.rest.techpark.punch.ApprovalStatus;
@@ -87,6 +90,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.EnterpriseContactProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.general_approval.GeneralApproval;
@@ -103,10 +107,13 @@ import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationMemberLog;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.blacklist.BlacklistErrorCode;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
+import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -173,6 +180,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.excel.RowResult;
@@ -299,6 +307,29 @@ public class PunchServiceImpl implements PunchService {
     private BusBridgeProvider busBridgeProvider;
 
 
+	@Autowired
+	private PortalService portalService;
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
+	@Override
+	public void checkAppPrivilege(Long orgId,Long checkOrgId, Long privilege){
+		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
+		cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		cmd.setModuleId(PunchConstants.PUNCH_MODULE_ID);
+		cmd.setActionType(ActionType.PUNCH.getCode());
+		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd ); 
+		if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+			if(userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
+					orgId, privilege, apps.getServiceModuleApps().get(0).getId(), checkOrgId, null)){
+				return;
+			}
+		}
+		LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
+				" privilege={},check org id = {}", UserContext.getCurrentNamespaceId(), "", orgId, EntityType.COMMUNITY.getCode(),
+				orgId, privilege,checkOrgId);
+		throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_FORBIDDEN_PERMISSIONS,
+			"Permission is prohibited");
+	} 
 	private void checkCompanyIdIsNull(Long companyId) {
 		if (null == companyId || companyId.equals(0L)) {
 			LOGGER.error("Invalid company Id parameter in the command");
@@ -7181,6 +7212,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 	private PunchGroupDTO getPunchGroupDTOByOrg(Organization r) {
 		PunchRule pr = punchProvider.getPunchruleByPunchOrgId(r.getId());
+		checkAppPrivilege(pr.getOwnerId(),pr.getOwnerId(),PrivilegeConstants.PUNCH_SETTING);
 		if(null == pr )
 			return null;
 		PunchGroupDTO dto = ConvertHelper.convert(pr, PunchGroupDTO.class);
@@ -7424,6 +7456,7 @@ public class PunchServiceImpl implements PunchService {
 //			Long t0 = System.currentTimeMillis();
 //			LOGGER.debug("saveUnion Time t0 "+  System.currentTimeMillis());
 			Organization punchOrg = this.organizationProvider.findOrganizationById(cmd.getId());
+			checkAppPrivilege(cmd.getOwnerId(),cmd.getOwnerId(),PrivilegeConstants.PUNCH_SETTING);
 			punchOrg.setName(cmd.getGroupName());
 			organizationProvider.updateOrganization(punchOrg);
 //			Long t1 = System.currentTimeMillis();
