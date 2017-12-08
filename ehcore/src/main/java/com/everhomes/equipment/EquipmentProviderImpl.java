@@ -1224,6 +1224,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	@Override
 	public EquipmentInspectionTemplates findEquipmentInspectionTemplate(
 			Long id, Long ownerId, String ownerType) {
+		assert id!=null;
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhEquipmentInspectionTemplatesRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES);
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.ID.eq(id));
