@@ -850,6 +850,7 @@ public class CustomerServiceImpl implements CustomerService {
         CustomerTalent talent = ConvertHelper.convert(cmd, CustomerTalent.class);
         talent.setCreateTime(exist.getCreateTime());
         talent.setCreatorUid(exist.getCreatorUid());
+        talent.setStatus(exist.getStatus());
         enterpriseCustomerProvider.updateCustomerTalent(talent);
     }
 
@@ -1188,6 +1189,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
         commercial.setCreateTime(exist.getCreateTime());
         commercial.setCreateUid(exist.getCreateUid());
+        commercial.setStatus(exist.getStatus());
         enterpriseCustomerProvider.updateCustomerCommercial(commercial);
     }
 
@@ -1200,6 +1202,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
         patent.setCreateTime(exist.getCreateTime());
         patent.setCreateUid(exist.getCreateUid());
+        patent.setStatus(exist.getStatus());
         enterpriseCustomerProvider.updateCustomerPatent(patent);
     }
 
@@ -1212,6 +1215,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
         trademark.setCreateTime(exist.getCreateTime());
         trademark.setCreateUid(exist.getCreateUid());
+        trademark.setStatus(exist.getStatus());
         enterpriseCustomerProvider.updateCustomerTrademark(trademark);
     }
 
@@ -1358,6 +1362,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
         indicator.setCreateTime(exist.getCreateTime());
         indicator.setCreateUid(exist.getCreateUid());
+        indicator.setStatus(exist.getStatus());
         enterpriseCustomerProvider.updateCustomerEconomicIndicator(indicator);
 
         if(isSameYear(indicator.getMonth(), exist.getMonth())) {
@@ -1457,6 +1462,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
         investment.setCreateTime(exist.getCreateTime());
         investment.setCreateUid(exist.getCreateUid());
+        investment.setStatus(exist.getStatus());
         enterpriseCustomerProvider.updateCustomerInvestment(investment);
     }
 
@@ -1512,6 +1518,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
         certificate.setCreateTime(exist.getCreateTime());
         certificate.setCreateUid(exist.getCreateUid());
+        certificate.setStatus(exist.getStatus());
         enterpriseCustomerProvider.updateCustomerCertificate(certificate);
     }
 
@@ -1647,6 +1654,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
         departureInfo.setCreateTime(exist.getCreateTime());
         departureInfo.setCreateUid(exist.getCreateUid());
+        departureInfo.setStatus(exist.getStatus());
         enterpriseCustomerProvider.updateCustomerDepartureInfo(departureInfo);
     }
 
@@ -1662,6 +1670,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
         entryInfo.setCreateTime(exist.getCreateTime());
         entryInfo.setCreateUid(exist.getCreateUid());
+        entryInfo.setStatus(exist.getStatus());
         enterpriseCustomerProvider.updateCustomerEntryInfo(entryInfo);
     }
 
