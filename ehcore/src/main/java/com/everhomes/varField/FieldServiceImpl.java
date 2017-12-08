@@ -529,6 +529,7 @@ public class FieldServiceImpl implements FieldService {
                 for(int j = 0; j < customerTrackingDTOS.size(); j++){
                     setMutilRowDatas(fields,data,customerTrackingDTOS.get(j),communityId,namespaceId,moduleName);
                 }
+                break;
             case "计划信息":
                 ListCustomerTrackingPlansCommand cmd10  = new ListCustomerTrackingPlansCommand();
                 cmd10.setCustomerId(customerId);
@@ -538,6 +539,7 @@ public class FieldServiceImpl implements FieldService {
                 for(int j = 0; j < customerTrackingPlanDTOS.size(); j++){
                     setMutilRowDatas(fields,data,customerTrackingPlanDTOS.get(j),communityId,namespaceId,moduleName);
                 }
+                break;
         }
         return data;
     }
