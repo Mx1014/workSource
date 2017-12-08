@@ -2,8 +2,11 @@
 
 package com.everhomes.rest.news;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -14,6 +17,8 @@ import com.everhomes.util.StringHelper;
  * <li>categoryId: 新闻类型ID</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页的数量</li>
+ * <li>keyword: 搜索关键字</li>
+ * <li>tagIds: 需要筛选的标签id</li>
  * </ul>
  */
 public class ListNewsCommand {
@@ -24,8 +29,10 @@ public class ListNewsCommand {
 	private Long categoryId;
 	private Long pageAnchor;
 	private Integer pageSize;
+	private String keyword;
+	@ItemType(Long.class)
+	private List<Long> tagIds;
 	
-
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -69,6 +76,22 @@ public class ListNewsCommand {
 
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
+	}
+
+	public String getKeyword() {
+		return keyword;
+	}
+
+	public void setKeyword(String keyword) {
+		this.keyword = keyword;
+	}
+
+	public List<Long> getTagIds() {
+		return tagIds;
+	}
+
+	public void setTagIds(List<Long> tagIds) {
+		this.tagIds = tagIds;
 	}
  
 }

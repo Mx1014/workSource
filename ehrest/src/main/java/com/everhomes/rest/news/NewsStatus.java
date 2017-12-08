@@ -17,7 +17,7 @@ public enum NewsStatus {
 	public byte getCode(){
 		return this.code;
 	}
-	public NewsStatus fromCode(Byte code){
+	public static NewsStatus fromCode(Byte code){
 		if (code != null) {
 			for (NewsStatus status : NewsStatus.values()) {
 				if (code.byteValue() == status.getCode()) {

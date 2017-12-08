@@ -144,11 +144,15 @@ public class NewsProviderImpl implements NewsProvider {
 	}
 
 	@Override
-	public List<News> listNews(Long communityId, Long categoryId, Integer namespaceId, Long from, Integer pageSize) {
+	public List<News> listNews(Long communityId, Long categoryId, Integer namespaceId, Long from, Integer pageSize,boolean isSearchDraft) {
 		SelectJoinStep<Record> step =  getReadOnlyContext().select().from(Tables.EH_NEWS);
 
 		Condition cond = Tables.EH_NEWS.NAMESPACE_ID.eq(namespaceId);
-		cond = cond.and(Tables.EH_NEWS.STATUS.eq(NewsStatus.ACTIVE.getCode()));
+		if(isSearchDraft){
+			cond = cond.and(Tables.EH_NEWS.STATUS.eq(NewsStatus.ACTIVE.getCode()).or(Tables.EH_NEWS.STATUS.eq(NewsStatus.DRAFT.getCode())));
+		}else{
+			cond = cond.and(Tables.EH_NEWS.STATUS.eq(NewsStatus.ACTIVE.getCode()));
+		}
 		if(null != categoryId) {
 			cond = cond.and(Tables.EH_NEWS.CATEGORY_ID.eq(categoryId));
 		}
@@ -157,7 +161,7 @@ public class NewsProviderImpl implements NewsProvider {
 			cond = cond.and(Tables.EH_NEWS_COMMUNITIES.COMMUNITY_ID.eq(communityId));
 		}
 
-		return step.where(cond).orderBy(Tables.EH_NEWS.TOP_INDEX.desc(), Tables.EH_NEWS.PUBLISH_TIME.desc(), Tables.EH_NEWS.ID.desc())
+		return step.where(cond).orderBy(Tables.EH_NEWS.STATUS.asc(),Tables.EH_NEWS.TOP_INDEX.desc(), Tables.EH_NEWS.PUBLISH_TIME.desc(), Tables.EH_NEWS.ID.desc())
 				.limit(from.intValue(), pageSize).fetch().map(new DefaultRecordMapper(Tables.EH_NEWS.recordType(), News.class));
 	}
 
