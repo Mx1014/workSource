@@ -49,6 +49,7 @@ public class WorkReportServiceImpl implements WorkReportService {
     @Override
     public WorkReportDTO addWorkReport(AddWorkReportCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Long userId = UserContext.currentUserId();
         WorkReport report = new WorkReport();
 
         //  initialize the work report.
@@ -60,6 +61,8 @@ public class WorkReportServiceImpl implements WorkReportService {
         report.setModuleId(cmd.getModuleId());
         report.setStatus(WorkReportStatus.VALID.getCode());
         report.setReportType(WorkReportType.DAY.getCode());
+        report.setOperatorUserId(userId);
+        report.setOperatorName(fixUpUserName(report.getOrganizationId(), userId));
         //  add it with the initial scope.
         dbProvider.execute((TransactionStatus status) -> {
             createWorkReport(report, cmd.getOrganizationId(), namespaceId);
@@ -99,6 +102,7 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Override
     public WorkReportDTO updateWorkReport(UpdateWorkReportCommand cmd) {
+        Long userId = UserContext.currentUserId();
         //  find the report by id.
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
         if (report != null) {
@@ -106,6 +110,8 @@ public class WorkReportServiceImpl implements WorkReportService {
             report.setReportType(cmd.getReportType());
             report.setFormOriginId(cmd.getFormOriginId());
             report.setFormVersion(cmd.getFormVersion());
+            report.setOperatorUserId(userId);
+            report.setOperatorName(fixUpUserName(report.getOrganizationId(), userId));
             dbProvider.execute((TransactionStatus status) -> {
                 workReportProvider.updateWorkReport(report);
                 updateWorkReportScopeMap(report.getId(), cmd.getScopes());
@@ -168,8 +174,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 dto.setReportId(r.getId());
                 dto.setScopes(listWorkReportScopeMap(r.getId()));
                 String updateTime = reportFormat.format(r.getUpdateTime());
-                //todo:修改人
-                dto.setUpdateInfo(updateTime + " " );
+                dto.setUpdateInfo(updateTime + " " + r.getOperatorName());
                 reports.add(dto);
             });
         }
