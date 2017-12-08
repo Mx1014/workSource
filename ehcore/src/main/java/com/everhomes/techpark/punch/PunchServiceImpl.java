@@ -313,6 +313,17 @@ public class PunchServiceImpl implements PunchService {
 	private UserPrivilegeMgr userPrivilegeMgr;
 	@Override
 	public void checkAppPrivilege(Long orgId,Long checkOrgId, Long privilege){
+		if(checkBooleanAppPrivilege(orgId,checkOrgId,privilege)){
+			return;
+		}
+		LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
+				" privilege={},check org id = {}", UserContext.getCurrentNamespaceId(), "", orgId, EntityType.COMMUNITY.getCode(),
+				orgId, privilege,checkOrgId);
+		throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_FORBIDDEN_PERMISSIONS,
+			"Permission is prohibited");
+	} 
+	
+	private boolean checkBooleanAppPrivilege(Long orgId,Long checkOrgId, Long privilege){
 		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
 		cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		cmd.setModuleId(PunchConstants.PUNCH_MODULE_ID);
@@ -321,15 +332,11 @@ public class PunchServiceImpl implements PunchService {
 		if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
 			if(userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
 					orgId, privilege, apps.getServiceModuleApps().get(0).getId(), checkOrgId, null)){
-				return;
+				return ture;
 			}
 		}
-		LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
-				" privilege={},check org id = {}", UserContext.getCurrentNamespaceId(), "", orgId, EntityType.COMMUNITY.getCode(),
-				orgId, privilege,checkOrgId);
-		throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_FORBIDDEN_PERMISSIONS,
-			"Permission is prohibited");
-	} 
+		return false;
+	}
 	private void checkCompanyIdIsNull(Long companyId) {
 		if (null == companyId || companyId.equals(0L)) {
 			LOGGER.error("Invalid company Id parameter in the command");
