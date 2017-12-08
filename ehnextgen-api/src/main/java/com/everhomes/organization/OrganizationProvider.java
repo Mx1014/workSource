@@ -472,7 +472,7 @@ public interface OrganizationProvider {
 	 */
 	List<Long> listOrganizationMemberDetailIdsInActiveStatus(Long organizationId); 
 	List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId,
-													List<Long> orgIds, String groupName, CrossShardListingLocator locator, Integer pageSize);
+													List<Long> orgIds, String groupName, Long creatorUid, CrossShardListingLocator locator, Integer pageSize);
 
 
 	List listOrganizationMembersGroupByToken();

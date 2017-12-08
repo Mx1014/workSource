@@ -332,7 +332,7 @@ public class PunchServiceImpl implements PunchService {
 		if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
 			if(userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
 					orgId, privilege, apps.getServiceModuleApps().get(0).getId(), checkOrgId, null)){
-				return ture;
+				return true;
 			}
 		}
 		return false;
@@ -6769,8 +6769,9 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public void deletePunchGroup(DeleteCommonCommand cmd) {
 		this.dbProvider.execute((TransactionStatus status) -> {
-			 Organization organization = this.organizationProvider.findOrganizationById(cmd.getId());
-			 this.organizationProvider.deleteOrganization(organization);
+            Organization organization = this.organizationProvider.findOrganizationById(cmd.getId());
+            checkAppPrivilege(organization.getDirectlyEnterpriseId(),organization.getDirectlyEnterpriseId(),PrivilegeConstants.PUNCH_RULE_DELETE);
+            this.organizationProvider.deleteOrganization(organization);
 			 //  组织架构删除薪酬组人员关联及配置
 			 this.uniongroupService.deleteUniongroupConfigresByGroupId(cmd.getId(),cmd.getOwnerId());
 			 this.uniongroupService.deleteUniongroupMemberDetailByGroupId(cmd.getId(),cmd.getOwnerId());
@@ -6796,8 +6797,10 @@ public class PunchServiceImpl implements PunchService {
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                         ErrorCodes.ERROR_INVALID_PARAMETER,
                         "Invalid rule type parameter in the command");
+            Long originOwnerId = cmd.getOwnerId();
             cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
-			Integer currentVersion = getPunchGroupCurrentVersion(cmd.getOwnerId());
+            checkAppPrivilege(cmd.getOwnerId(),originOwnerId,PrivilegeConstants.PUNCH_RULE_CREATE);
+            Integer currentVersion = getPunchGroupCurrentVersion(cmd.getOwnerId());
 
 			Long t7 = System.currentTimeMillis();
 			//建立考勤组
@@ -7146,6 +7149,16 @@ public class PunchServiceImpl implements PunchService {
 		ListPunchGroupsResponse response = new ListPunchGroupsResponse();
 //<<<<<<< HEAD
 		Integer currentVersion = getPunchGroupCurrentVersion(cmd.getOwnerId());
+        Long creatorUid= null;
+        if (!checkBooleanAppPrivilege(cmd.getOwnerId(), cmd.getDeptId() == null ? cmd.getOwnerId() : cmd.getDeptId(), PrivilegeConstants.PUNCH_RULE_QUERY_ALL)) {
+            //没通过全部校验的就要进行creator校验
+            if ((!checkBooleanAppPrivilege(cmd.getOwnerId(), cmd.getDeptId() == null ? cmd.getOwnerId() : cmd.getDeptId(), PrivilegeConstants.PUNCH_RULE_QUERY_CREATOR))) {
+                creatorUid = UserContext.current().getUser().getId();
+            }else{
+                throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_FORBIDDEN_PERMISSIONS,
+                        "Permission is prohibited");
+            }
+        }
 //=======
 //        Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
 //        Integer allOrganizationInteger = organizationProvider.countOrganizationMemberDetailsByOrgId(org.getNamespaceId(), cmd.getOwnerId());
@@ -7188,7 +7201,7 @@ public class PunchServiceImpl implements PunchService {
 		}
 
 		List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.PUNCHGROUP.getCode(), cmd.getOwnerId(),
-				orgIds, cmd.getGroupName(), locator, pageSize + 1);
+				orgIds, cmd.getGroupName(),creatorUid, locator, pageSize + 1);
 
         if (null == organizations)
 			return response;
@@ -7219,7 +7232,6 @@ public class PunchServiceImpl implements PunchService {
 	}
 	private PunchGroupDTO getPunchGroupDTOByOrg(Organization r) {
 		PunchRule pr = punchProvider.getPunchruleByPunchOrgId(r.getId());
-		checkAppPrivilege(pr.getOwnerId(),pr.getOwnerId(),PrivilegeConstants.PUNCH_SETTING);
 		if(null == pr )
 			return null;
 		PunchGroupDTO dto = ConvertHelper.convert(pr, PunchGroupDTO.class);
@@ -7463,8 +7475,9 @@ public class PunchServiceImpl implements PunchService {
 //			Long t0 = System.currentTimeMillis();
 //			LOGGER.debug("saveUnion Time t0 "+  System.currentTimeMillis());
 			Organization punchOrg = this.organizationProvider.findOrganizationById(cmd.getId());
-			checkAppPrivilege(cmd.getOwnerId(),cmd.getOwnerId(),PrivilegeConstants.PUNCH_SETTING);
-			punchOrg.setName(cmd.getGroupName());
+        checkAppPrivilege(punchOrg.getDirectlyEnterpriseId(),punchOrg.getDirectlyEnterpriseId(),PrivilegeConstants.PUNCH_RULE_UPDATE);
+
+        punchOrg.setName(cmd.getGroupName());
 			organizationProvider.updateOrganization(punchOrg);
 //			Long t1 = System.currentTimeMillis();
 //			LOGGER.debug("saveUnion Time1 "+  t1 + "cost: "+ (t1-t0));

@@ -797,7 +797,8 @@ public class PunchAdminController extends ControllerBase {
 	@RequestMapping("listPunchStatistics")
 	@RestReturn(value = ListPunchCountCommandResponse.class)
 	public RestResponse listPunchCount(@Valid ListPunchCountCommand cmd) {
-		punchService.checkAppPrivilege(cmd.getOwnerId(),cmd.getOwnerId(),PrivilegeConstants.PUNCH_STATISTIC);
+		Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
+		punchService.checkAppPrivilege(ownerId,cmd.getOwnerId(),PrivilegeConstants.PUNCH_STATISTIC_QUERY);
 		ListPunchCountCommandResponse commandResponse = punchService.listPunchCount(cmd);
 		RestResponse response = new RestResponse(commandResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -813,7 +814,8 @@ public class PunchAdminController extends ControllerBase {
 	 */
 	@RequestMapping("exportPunchStatistics")
 	public  RestResponse exportPunchStatistics(@Valid ListPunchCountCommand cmd,HttpServletResponse response ) {
-		punchService.checkAppPrivilege(cmd.getOwnerId(),cmd.getOwnerId(),PrivilegeConstants.PUNCH_STATISTIC);
+		Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
+		punchService.checkAppPrivilege(ownerId,cmd.getOwnerId(),PrivilegeConstants.PUNCH_STATISTIC_EXPORT);
 		HttpServletResponse commandResponse = punchService.exportPunchStatistics(cmd, response ); 
 		return new RestResponse();
 	}
@@ -843,13 +845,15 @@ public class PunchAdminController extends ControllerBase {
 	@RequestMapping("listPunchDetails")
 	@RestReturn(value = ListPunchDetailsResponse.class)
 	public RestResponse listPunchDetails(@Valid ListPunchDetailsCommand cmd) {
-		punchService.checkAppPrivilege(cmd.getOwnerId(),cmd.getOwnerId(),PrivilegeConstants.PUNCH_STATISTIC);
+		Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
+		punchService.checkAppPrivilege(ownerId,cmd.getOwnerId(),PrivilegeConstants.PUNCH_STATISTIC_QUERY);
 		ListPunchDetailsResponse commandResponse = punchService.listPunchDetails(cmd);
 		RestResponse response = new RestResponse(commandResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
+
 	/**
 	 * <b>URL: punch/exportPunchDetails</b>
 	 * <p>
@@ -857,9 +861,10 @@ public class PunchAdminController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("exportPunchDetails")
-	public  RestResponse exportPunchDetails(@Valid ListPunchDetailsCommand cmd,HttpServletResponse response ) {
-		punchService.checkAppPrivilege(cmd.getOwnerId(),cmd.getOwnerId(),PrivilegeConstants.PUNCH_STATISTIC);
-		HttpServletResponse commandResponse = punchService.exportPunchDetails(cmd, response );
+	public RestResponse exportPunchDetails(@Valid ListPunchDetailsCommand cmd, HttpServletResponse response) {
+		Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
+		punchService.checkAppPrivilege(ownerId,cmd.getOwnerId(), PrivilegeConstants.PUNCH_STATISTIC_EXPORT);
+		HttpServletResponse commandResponse = punchService.exportPunchDetails(cmd, response);
 //		RestResponse response = new RestResponse(commandResponse);
 //		response.setErrorCode(ErrorCodes.SUCCESS);
 //		response.setErrorDescription("OK");

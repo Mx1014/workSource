@@ -5424,8 +5424,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
 	@Override
-	public List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId,
-														   List<Long> orgIds, String groupName, CrossShardListingLocator locator, Integer pageSize) {
+	public List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId, List<Long> orgIds,
+														   String groupName, Long creatorUid, CrossShardListingLocator locator, Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectConditionStep<Record> step = context.select().from(Tables.EH_ORGANIZATIONS)
 				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType));
@@ -5434,6 +5434,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		if (!StringUtils.isEmpty(groupName)) {
 			step.and(Tables.EH_ORGANIZATIONS.NAME.like("%" + groupName + "%"));
+		}
+		if (null != creatorUid) {
+			step.and(Tables.EH_ORGANIZATIONS.CREATOR_UID.eq(creatorUid));
+
 		}
 		if(null != organizationId)
 			step.and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(organizationId));
