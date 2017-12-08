@@ -10,7 +10,8 @@ import java.util.List;
  * <ul>
  * <li>id：id</li>
  * <li>rentalSiteId：场所id</li> 
- * <li>rentalType： time(0),halfday(1){@link com.everhomes.rest.rentalv2.RentalType} </li> 
+ * <li>rentalType： time(0),halfday(1){@link com.everhomes.rest.rentalv2.RentalType} </li>
+ * <li>priceType: 0 按时长定价 1 起步价模式</li>
  * <li>amorpm： am(0),pm(1){@link com.everhomes.rest.rentalv2.AmorpmFlag} </li> 
  * <li>beginTime：开始时间(MM:SS)</li>
  * <li>endTime：结束时间(MM:SS)</li>
@@ -18,7 +19,8 @@ import java.util.List;
  * <li>unit：场所单位:1or0.5</li> 
  * <li>rentalStep：最小预定时间(整数，rentalType=0为多少个半小时，rentalType=1为多少个半天，rentalType=2为多少天)</li>
  * <li>TimeStep：坐标轴单位时间（小时）</li> 
- * <li>price：场所价格</li> 
+ * <li>price：场所价格</li>
+ * <li>initiatePrice: 起步后价格</li>
  * <li>	originalPrice：     	原价（如果不为null则price为打折价）	</li>
  * <li>halfsitePrice：半场价格</li> 
  * <li>	halfsiteOriginalPrice：     	半场原价（如果不为null则price为打折价）	</li>
@@ -31,20 +33,24 @@ import java.util.List;
  * <li>siteNumber：场所编号：订单详情中用</li>
  * <li>orgMemberOriginalPrice: 原价-如果打折则有(企业内部价)</li>
  * <li>orgMemberPrice: 实际价格-打折则为折后价(企业内部价)</li>
+ * <li>orgMemberInitiatePrice: 集团内部起步后价格</li>
  * <li>approvingUserOriginalPrice: 原价-如果打折则有（外部客户价）</li>
  * <li>approvingUserPrice: 实际价格-打折则为折后价（外部客户价）</li>
+ * <li>approvingUserInitiatePrice: 外部客户起步后价格</li>
  * </ul>
  */
 public class RentalSiteRulesDTO {
 	private Long id;
 	private Long rentalSiteId; 
 	private Byte rentalType;
+	private Byte priceType;
 	private Byte amorpm;
 	private Long beginTime;
 	private Long endTime;
 	private Double counts;
 	private Double unit;
 	private java.math.BigDecimal price;
+	private BigDecimal initiatePrice;
 	private java.math.BigDecimal originalPrice;
 	private java.math.BigDecimal halfsitePrice;
 	private java.math.BigDecimal halfsiteOriginalPrice;
@@ -60,9 +66,11 @@ public class RentalSiteRulesDTO {
 
 	private BigDecimal orgMemberOriginalPrice;
 	private BigDecimal orgMemberPrice;
+	private BigDecimal orgMemberInitiatePrice;
 
 	private BigDecimal approvingUserOriginalPrice;
 	private BigDecimal approvingUserPrice;
+	private BigDecimal approvingUserInitiatePrice;
 	private BigDecimal halfOrgMemberOriginalPrice;
 	private BigDecimal halfOrgMemberPrice;
 	private BigDecimal halfApprovingUserOriginalPrice;
@@ -388,6 +396,38 @@ public class RentalSiteRulesDTO {
 
 	public void setApprovingUserOriginalPrice(BigDecimal approvingUserOriginalPrice) {
 		this.approvingUserOriginalPrice = approvingUserOriginalPrice;
+	}
+
+	public Byte getPriceType() {
+		return priceType;
+	}
+
+	public void setPriceType(Byte priceType) {
+		this.priceType = priceType;
+	}
+
+	public BigDecimal getInitiatePrice() {
+		return initiatePrice;
+	}
+
+	public void setInitiatePrice(BigDecimal initiatePrice) {
+		this.initiatePrice = initiatePrice;
+	}
+
+	public BigDecimal getOrgMemberInitiatePrice() {
+		return orgMemberInitiatePrice;
+	}
+
+	public void setOrgMemberInitiatePrice(BigDecimal orgMemberInitiatePrice) {
+		this.orgMemberInitiatePrice = orgMemberInitiatePrice;
+	}
+
+	public BigDecimal getApprovingUserInitiatePrice() {
+		return approvingUserInitiatePrice;
+	}
+
+	public void setApprovingUserInitiatePrice(BigDecimal approvingUserInitiatePrice) {
+		this.approvingUserInitiatePrice = approvingUserInitiatePrice;
 	}
 
 	public BigDecimal getApprovingUserPrice() {

@@ -169,6 +169,24 @@ public class Rentalv2Controller extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /rental/findAutoAssignRentalSiteMonthStatusByWeek</b>
+	 * <p>
+	 * 查询带场所编号的资源一月的单元格(以周为粒度)
+	 * </p>
+	 */
+
+	@RequestMapping("findAutoAssignRentalSiteMonthStatusByWeek")
+	@RestReturn(value = FindAutoAssignRentalSiteMonthStatusByWeekResponse.class)
+	public RestResponse findAutoAssignRentalSiteMonthStatusByWeek(@Valid FindAutoAssignRentalSiteMonthStatusByWeekCommand cmd) {
+		FindAutoAssignRentalSiteMonthStatusByWeekResponse resp = rentalService
+				.findAutoAssignRentalSiteMonthStatusByWeek(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 	/**
 	 * <b>URL: /rental/findAutoAssignRentalSiteYearStatus</b>

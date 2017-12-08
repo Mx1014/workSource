@@ -122,6 +122,9 @@ public interface Rentalv2Service {
 	FindAutoAssignRentalSiteMonthStatusResponse findAutoAssignRentalSiteMonthStatus(
 			FindAutoAssignRentalSiteMonthStatusCommand cmd);
 
+	FindAutoAssignRentalSiteMonthStatusByWeekResponse findAutoAssignRentalSiteMonthStatusByWeek(
+			FindAutoAssignRentalSiteMonthStatusByWeekCommand cmd);
+
 
 	void addCheckOperator(AddCheckOperatorCommand cmd);
 

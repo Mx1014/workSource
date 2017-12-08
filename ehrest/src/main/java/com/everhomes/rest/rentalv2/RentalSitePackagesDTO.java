@@ -8,14 +8,18 @@ import java.math.BigDecimal;
  * <li>name：套餐名</li>
  * <li>rentalSiteId：场所id</li>
  * <li>rentalType： time(0),halfday(1){@link com.everhomes.rest.rentalv2.RentalType} </li>
+ * <li>priceType: 0 按时长定价 1 起步价模式</li>
  * <li>price：场所价格</li>
+ * <li>initiatePrice: 起步后价格</li>
  * <li>	originalPrice：     	原价（如果不为null则price为打折价）	</li>
  * <li>halfsitePrice：半场价格</li>
  * <li>	halfsiteOriginalPrice：     	半场原价（如果不为null则price为打折价）	</li>
  * <li>orgMemberOriginalPrice: 原价-如果打折则有(企业内部价)</li>
  * <li>orgMemberPrice: 实际价格-打折则为折后价(企业内部价)</li>
+ * <li>orgMemberInitiatePrice: 集团内部起步后价格</li>
  * <li>approvingUserOriginalPrice: 原价-如果打折则有（外部客户价）</li>
  * <li>approvingUserPrice: 实际价格-打折则为折后价（外部客户价）</li>
+ * <li>approvingUserInitiatePrice: 外部客户起步后价格</li>
  * </ul>
  */
 
@@ -24,15 +28,19 @@ public class RentalSitePackagesDTO {
     private String name;
     private Long rentalSiteId;
     private Byte rentalType;
+    private Byte priceType;
     private java.math.BigDecimal price;
+    private BigDecimal initiatePrice;
     private java.math.BigDecimal originalPrice;
     private java.math.BigDecimal halfsitePrice;
     private java.math.BigDecimal halfsiteOriginalPrice;
     private BigDecimal orgMemberOriginalPrice;
     private BigDecimal orgMemberPrice;
+    private BigDecimal orgMemberInitiatePrice;
 
     private BigDecimal approvingUserOriginalPrice;
     private BigDecimal approvingUserPrice;
+    private BigDecimal approvingUserInitiatePrice;
     private BigDecimal halfOrgMemberOriginalPrice;
     private BigDecimal halfOrgMemberPrice;
     private BigDecimal halfApprovingUserOriginalPrice;
@@ -164,5 +172,37 @@ public class RentalSitePackagesDTO {
 
     public void setHalfApprovingUserPrice(BigDecimal halfApprovingUserPrice) {
         this.halfApprovingUserPrice = halfApprovingUserPrice;
+    }
+
+    public Byte getPriceType() {
+        return priceType;
+    }
+
+    public void setPriceType(Byte priceType) {
+        this.priceType = priceType;
+    }
+
+    public BigDecimal getInitiatePrice() {
+        return initiatePrice;
+    }
+
+    public void setInitiatePrice(BigDecimal initiatePrice) {
+        this.initiatePrice = initiatePrice;
+    }
+
+    public BigDecimal getOrgMemberInitiatePrice() {
+        return orgMemberInitiatePrice;
+    }
+
+    public void setOrgMemberInitiatePrice(BigDecimal orgMemberInitiatePrice) {
+        this.orgMemberInitiatePrice = orgMemberInitiatePrice;
+    }
+
+    public BigDecimal getApprovingUserInitiatePrice() {
+        return approvingUserInitiatePrice;
+    }
+
+    public void setApprovingUserInitiatePrice(BigDecimal approvingUserInitiatePrice) {
+        this.approvingUserInitiatePrice = approvingUserInitiatePrice;
     }
 }

@@ -2,7 +2,6 @@ package com.everhomes.rest.rentalv2;
 
 import javax.validation.constraints.NotNull;
 
-
 /**
  * <ul>某日某场所预定状态
  * <li>siteId：场所id</li>
@@ -13,12 +12,13 @@ import javax.validation.constraints.NotNull;
  * <li>priceType: 0 按时长定价 1 起步价模式</li>
  * </ul>
  */
-public class FindRentalSiteMonthStatusByWeekCommand {
+public class FindAutoAssignRentalSiteMonthStatusByWeekCommand {
 
     @NotNull
     private Long siteId;
     @NotNull
     private Long ruleDate;
+
     private Byte rentalType;
     private Byte priceType;
     private String packageName;

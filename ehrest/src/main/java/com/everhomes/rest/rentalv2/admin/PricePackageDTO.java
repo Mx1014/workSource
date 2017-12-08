@@ -7,11 +7,15 @@ import java.math.BigDecimal;
 /**
  * <ul>
  * <li>rentalType: 0按小时，1按半天，2按天，3按半天带晚上，4按月，参考{@link com.everhomes.rest.rentalv2.RentalType}</li>
+ * <li>priceType: 0 按时长定价 1 起步价模式</li>
  * <li>price: 园区客户价格</li>
+ * <li>initiatePrice: 园区客户起步后价格</li>
  * <li>originalPrice: 原价-如果打折则有（园区客户）</li>
  * <li>orgMemberPrice: 集团内部价格</li>
+ * <li>orgMemberInitiatePrice: 集团内部起步后价格</li>
  * <li>orgMemberOriginalPrice: 原价-如果打折则有(企业内部价)</li>
  * <li>approvingUserPrice: 外部客户价格</li>
+ * <li>approvingUserInitiatePrice: 外部客户起步后价格</li>
  * <li>approvingUserOriginalPrice: 原价-如果打折则有（外部客户价）</li>
  * <li>discountType: 折扣类型，0不打折，1满减，2满天减，3比例折扣，参考{@link com.everhomes.rest.rentalv2.admin.DiscountType}</li>
  * <li>fullPrice: 满</li>
@@ -31,11 +35,15 @@ public class PricePackageDTO {
     private Long id;
     private String name;
     private Byte rentalType;
+    private Byte priceType;
     private BigDecimal price;
+    private BigDecimal initiatePrice;
     private java.math.BigDecimal originalPrice;
     private BigDecimal orgMemberPrice;
+    private BigDecimal orgMemberInitiatePrice;
     private BigDecimal orgMemberOriginalPrice;
     private BigDecimal approvingUserPrice;
+    private BigDecimal approvingUserInitiatePrice;
     private BigDecimal approvingUserOriginalPrice;
     private Byte discountType;
     private BigDecimal fullPrice;
@@ -234,6 +242,38 @@ public class PricePackageDTO {
 
     public void setApprovingUserOriginalPrice(BigDecimal approvingUserOriginalPrice) {
         this.approvingUserOriginalPrice = approvingUserOriginalPrice;
+    }
+
+    public Byte getPriceType() {
+        return priceType;
+    }
+
+    public void setPriceType(Byte priceType) {
+        this.priceType = priceType;
+    }
+
+    public BigDecimal getInitiatePrice() {
+        return initiatePrice;
+    }
+
+    public void setInitiatePrice(BigDecimal initiatePrice) {
+        this.initiatePrice = initiatePrice;
+    }
+
+    public BigDecimal getOrgMemberInitiatePrice() {
+        return orgMemberInitiatePrice;
+    }
+
+    public void setOrgMemberInitiatePrice(BigDecimal orgMemberInitiatePrice) {
+        this.orgMemberInitiatePrice = orgMemberInitiatePrice;
+    }
+
+    public BigDecimal getApprovingUserInitiatePrice() {
+        return approvingUserInitiatePrice;
+    }
+
+    public void setApprovingUserInitiatePrice(BigDecimal approvingUserInitiatePrice) {
+        this.approvingUserInitiatePrice = approvingUserInitiatePrice;
     }
 
     @Override
