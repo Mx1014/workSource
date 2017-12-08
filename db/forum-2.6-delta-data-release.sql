@@ -2,7 +2,7 @@
 -- 活动帖子
 UPDATE eh_forum_posts set module_type = 2, module_category_id = activity_category_id where activity_category_id IS NOT NULL and activity_category_id != 0;
 -- 论坛帖子
-UPDATE eh_forum_posts set module_type = 1, module_category_id = forum_entry_id where forum_entry_id != null and category_id != 1003;
+UPDATE eh_forum_posts set module_type = 1, module_category_id = forum_entry_id where forum_entry_id is not null and category_id != 1003;
 -- 公告帖子
 UPDATE eh_forum_posts set module_type = 3 where category_id = 1003;
 
