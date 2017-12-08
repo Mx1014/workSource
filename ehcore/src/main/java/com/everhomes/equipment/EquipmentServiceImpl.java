@@ -1002,6 +1002,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 						if(maps.size() > 0) {
 							maps.forEach(map -> {
 								map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
+								//fix bug #20247
+								map.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
 								equipmentProvider.updateEquipmentStandardMap(map);
 								equipmentStandardMapSearcher.feedDoc(map);
 							});
