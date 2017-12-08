@@ -459,7 +459,7 @@ public class FieldProviderImpl implements FieldProvider {
 
         List<Field> fields = context.select().from(Tables.EH_VAR_FIELDS)
                 .where(Tables.EH_VAR_FIELDS.MODULE_NAME.eq(moduleName))
-                .and(Tables.EH_VAR_FIELDS.GROUP_PATH.like(groupPath+"%"))
+                .and(Tables.EH_VAR_FIELDS.GROUP_PATH.like(groupPath+"/%"))
                 .fetch().map((record)-> {
                     return ConvertHelper.convert(record, Field.class);
                 });

@@ -104,3 +104,6 @@ SET @menu_scope_id = IFNULL((SELECT MAX(id) FROM `eh_web_menu_scopes`), 1);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '21100', '', 'EhNamespaces', '999964', '2');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '21110', '', 'EhNamespaces', '999964', '2');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '21120', '', 'EhNamespaces', '999964', '2');
+
+-- add by xiongying20171208
+update eh_var_fields set group_path = CONCAT(group_path,"/");
