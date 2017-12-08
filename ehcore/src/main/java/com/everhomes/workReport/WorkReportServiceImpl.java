@@ -8,6 +8,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.general_approval.CreateFormTemplatesCommand;
 import com.everhomes.rest.general_approval.PostGeneralFormCommand;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.rest.workReport.*;
 import com.everhomes.user.User;
@@ -263,33 +264,6 @@ public class WorkReportServiceImpl implements WorkReportService {
         }
     }
 
-    @Override
-    public ListWorkReportsResponse listActiveWorkReports(ListWorkReportsCommand cmd) {
-        ListWorkReportsResponse response = new ListWorkReportsResponse();
-        Long userId = UserContext.currentUserId();
-        List<WorkReportDTO> reports = new ArrayList<>();
-        Long nextPageAnchor = null;
-        //  set the conditions.
-        cmd.setPageSize(10000000);
-        List<WorkReport> results = workReportProvider.listWorkReports(
-                cmd.getPageAnchor(), cmd.getPageSize(), cmd.getOwnerId(), cmd.getOwnerType(),
-                cmd.getModuleId(), WorkReportStatus.RUNNING.getCode());
-        //  filter the result.
-        if (results != null && results.size() > 0) {
-            results.forEach(r -> {
-                WorkReportDTO dto = new WorkReportDTO();
-                dto.setReportName(r.getReportName());
-                dto.setReportId(r.getId());
-                dto.setScopes(listWorkReportScopeMap(r.getId()));
-                reports.add(dto);
-            });
-        }
-
-        response.setNextPageAnchor(nextPageAnchor);
-        response.setReports(reports);
-        return response;
-    }
-
     private void createWorkReportByTemplate(WorkReportTemplate template, Long formOriginId, CreateWorkReportTemplatesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         Long userId = UserContext.currentUserId();
@@ -322,11 +296,68 @@ public class WorkReportServiceImpl implements WorkReportService {
         }
     }
 
+    @Override
+    public ListWorkReportsResponse listActiveWorkReports(ListWorkReportsCommand cmd) {
+        ListWorkReportsResponse response = new ListWorkReportsResponse();
+        Long userId = UserContext.currentUserId();
+        List<WorkReportDTO> reports = new ArrayList<>();
+        cmd.setPageSize(10000000);
+
+        //  get all work reports.
+        List<WorkReport> results = workReportProvider.listWorkReports(
+                cmd.getPageAnchor(), cmd.getPageSize(), cmd.getOwnerId(), cmd.getOwnerType(),
+                cmd.getModuleId(), WorkReportStatus.RUNNING.getCode());
+
+        //  filter the result and return back to the user.
+        if (results != null && results.size() > 0) {
+            results.forEach(r -> {
+                WorkReportDTO dto = new WorkReportDTO();
+                dto.setReportName(r.getReportName());
+                dto.setReportId(r.getId());
+                //  check the scope.
+                if(checkTheScope(r.getId(), userId))
+                    reports.add(dto);
+            });
+        }
+
+        response.setReports(reports);
+        return response;
+    }
+
+    private boolean checkTheScope(Long reportId, Long userId) {
+        //  1.check the user id list.
+        //  2.check the user's department.
+        List<WorkReportValScopeMapDTO> scopes = listWorkReportScopeMap(reportId);
+        OrganizationMember user = getUserDepPath(userId);
+        List<Long> scopeUserIds = scopes.stream()
+                .filter(p1 -> p1.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))
+                .map(p2 -> p2.getSourceId()).collect(Collectors.toList());
+        List<Long> scopeDepartmentIds = scopes.stream()
+                .filter(p1 -> p1.getSourceType().equals(UniongroupTargetType.ORGANIZATION.getCode()))
+                .map(p2 -> p2.getSourceId()).collect(Collectors.toList());
+        if (scopeUserIds.contains(userId))
+            return true;
+        if (user != null)
+            for (Long departmentId : scopeDepartmentIds)
+                if (user.getGroupPath().contains(String.valueOf(departmentId)))
+                    return true;
+        return false;
+    }
+
     public String fixUpUserName(Long organizationId, Long userId) {
         OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
         if (om != null && om.getContactName() != null && !om.getContactName().isEmpty())
             return om.getContactName();
         return "";
+    }
+
+    public OrganizationMember getUserDepPath(Long userId) {
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(userId).stream().filter(r ->
+                r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())
+        ).collect(Collectors.toList());
+        if (members != null && members.size() > 0)
+            return members.get(0);
+        return null;
     }
 
     @Override
