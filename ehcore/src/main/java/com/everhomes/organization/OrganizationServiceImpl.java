@@ -1306,11 +1306,11 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     private void createEnterpriseCustomer(Organization organization, String logo, OrganizationDetail enterprise, Long communityId) {
-        if(organization.getNamespaceId() == 999971 || organization.getNamespaceId() == 999983) {
-            LOGGER.error("Insufficient privilege, createEnterpriseCustomer");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                    "Insufficient privilege");
-        }
+//        if(organization.getNamespaceId() == 999971 || organization.getNamespaceId() == 999983) {
+//            LOGGER.error("Insufficient privilege, createEnterpriseCustomer");
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+//                    "Insufficient privilege");
+//        }
         List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(organization.getNamespaceId(), organization.getName());
         if(customers != null && customers.size() > 0) {
             EnterpriseCustomer customer = customers.get(0);
