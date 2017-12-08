@@ -94,11 +94,6 @@ INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `field_param`) VALUES ((@field_id:=@field_id+1), 'enterprise_customer', 'remark', '备注', 'String', 29, '/29', '0', NULL, '2', '1', UTC_TIMESTAMP(),'{"fieldParamType": "multiText", "length": 128}');
 
 
--- 新的App add by xq.tian
-SET @eh_version_realm_id = IFNULL((SELECT MAX(id) FROM `eh_version_realm`), 1);
-INSERT INTO `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) VALUES ((@eh_version_realm_id := @eh_version_realm_id + 1), 'IOS_Xinweilai', NULL, NOW(), 999984);
-INSERT INTO `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) VALUES ((@eh_version_realm_id := @eh_version_realm_id + 1), 'Android_Xinweilai', NULL, NOW(), 999984);
-
 -- 成都孵化器菜单 add by xiongying20171208
 SET @menu_scope_id = IFNULL((SELECT MAX(id) FROM `eh_web_menu_scopes`), 1);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '21100', '', 'EhNamespaces', '999964', '2');
