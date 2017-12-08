@@ -383,7 +383,7 @@ public class VersionServiceImpl implements VersionService {
 		if (StringUtils.isBlank(url)) {
 			return "";
 		}
-		if (url.startsWith("http:") || url.startsWith("${")) {
+		if (url.startsWith("https://") || url.startsWith("http://") || url.startsWith("${")) {
 			return url;
 		}
 		return "${homeurl}"+url;
