@@ -15,5 +15,8 @@ public class FileDownloadScheduleJob extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
 
+        System.out.print("download file");
+
+
     }
 }

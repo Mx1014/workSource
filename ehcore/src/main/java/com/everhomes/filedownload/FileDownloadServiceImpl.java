@@ -6,13 +6,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class FileDownloadServiceImpl implements FileDownloadService {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileDownloadServiceImpl.class);
 
+
     @Override
-    public Long createJob(String fileName, List<Object> rows, List<CellMapper> cellMappers) {
+    public Long createJob(String jobClass, Map<String, String> params) {
         return null;
     }
 

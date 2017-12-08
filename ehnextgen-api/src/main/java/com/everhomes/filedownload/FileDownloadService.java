@@ -1,19 +1,16 @@
 package com.everhomes.filedownload;
 
-import java.util.List;
+import java.util.Map;
 
 public interface FileDownloadService {
 
     /**
-     * 新建下载文件
-     * @param fileName    文件名称
-     * @param rows        数据
-     * @param cellMappers 关系表
-     * @return 下载任务id
+     *
+     * @param jobClass
+     * @param params
+     * @return
      */
-    Long createJob(String fileName, List<Object> rows, List<CellMapper> cellMappers);
-
-    //List<FileDownloadJobDTO> listJob();
+    Long createJob(String jobClass, Map<String, String> params);
 
     void cancelJob(Long jobId);
     
