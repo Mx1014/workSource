@@ -219,8 +219,12 @@ public interface PrivilegeConstants {
     long BATCH_IMPORT_PERSON = 41011L;//批量导入人员
     long BATCH_EXPORT_PERSON = 41012L;//批量导出人员
 
-//    -------------- 考勤 ------------
-    long PUNCH_SETTING_ALL = 42000L;//考勤管理-全部
-    long PUNCH_SETTING_CREATOR = 42000L;//考勤管理-自定义
-    long PUNCH_STATISTIC = 42002L;//考勤统计
+//    -------------- 考勤 ------------ 
+    long PUNCH_RULE_QUERY_ALL = 42000L;//    查看打卡规则 （细化权限，下同）
+    long PUNCH_RULE_QUERY_CREATOR = 42001L;//    查看自己创建的打卡规则
+    long PUNCH_RULE_CREATE = 42002L;//    新建打卡规则
+    long PUNCH_RULE_UPDATE = 42003L;//    编辑打卡规则
+    long PUNCH_RULE_DELETE = 42004L;//    删除打卡规则 
+    long PUNCH_STATISTIC_QUERY = 42005L;//    查看打卡记录 （细化权限，下同）
+    long PUNCH_STATISTIC_EXPORT = 42006L;//    导出打卡记录
 }
