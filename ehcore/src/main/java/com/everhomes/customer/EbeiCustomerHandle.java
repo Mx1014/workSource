@@ -440,6 +440,9 @@ public class EbeiCustomerHandle implements CustomerHandle {
             customer.setOperatorUid(1L);
             customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             customer.setVersion(ebeiCustomer.getVersion());
+            if(customer.getTrackingUid() == null) {
+                customer.setTrackingUid(-1L);
+            }
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 

@@ -1332,6 +1332,7 @@ public class ZJGKOpenServiceImpl {
                 customer.setContactGenderItemId(sourceItemId);
             }
             customer.setStatus(CommonStatus.ACTIVE.getCode());
+            customer.setTrackingUid(-1L);
             customer.setCreatorUid(1L);
             customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             customer.setOperatorUid(1L);
@@ -1614,7 +1615,9 @@ public class ZJGKOpenServiceImpl {
             customer.setStatus(CommonStatus.ACTIVE.getCode());
             customer.setOperatorUid(1L);
             customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
+            if(customer.getTrackingUid() == null) {
+                customer.setTrackingUid(-1L);
+            }
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 

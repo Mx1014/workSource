@@ -214,7 +214,10 @@ public class CustomerServiceImpl implements CustomerService {
         	String geohash  = GeoHashUtils.encode(customer.getLatitude(), customer.getLongitude());
         	customer.setGeohash(geohash);
         }
-        if(null != customer && customer.getTrackingUid() != -1){
+        if(customer.getTrackingUid() == null) {
+            customer.setTrackingUid(-1L);
+        }
+        if(null != customer  && customer.getTrackingUid() != -1){
 	        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(customer.getTrackingUid());
 	    	if(null != detail && null != detail.getContactName()){
 	    		customer.setTrackingName(detail.getContactName());
@@ -227,6 +230,7 @@ public class CustomerServiceImpl implements CustomerService {
         
         OrganizationDTO organizationDTO = createOrganization(customer);
         customer.setOrganizationId(organizationDTO.getId());
+
         enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
 
@@ -405,7 +409,10 @@ public class CustomerServiceImpl implements CustomerService {
 	    		updateCustomer.setTrackingName(detail.getContactName());
 	    	}
         }
-        if(updateCustomer.getTrackingUid() == -1 || updateCustomer.getTrackingUid() == null){
+        if(updateCustomer.getTrackingUid() == null) {
+            updateCustomer.setTrackingUid(-1L);
+        }
+        if(updateCustomer.getTrackingUid() == -1){
         	updateCustomer.setTrackingName(null);
         }
         enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
@@ -617,6 +624,7 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setCommunityId(cmd.getCommunityId());
             customer.setNamespaceId(cmd.getNamespaceId());
             customer.setCreatorUid(userId);
+            customer.setTrackingUid(-1L);
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
 
             OrganizationDTO organizationDTO = createOrganization(customer);
