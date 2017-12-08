@@ -4069,7 +4069,7 @@ CREATE TABLE `eh_enterprise_customers` (
   `create_time` DATETIME,
   `operator_uid` BIGINT,
   `update_time` DATETIME,
-  `tracking_uid` BIGINT NOT NULL DEFAULT '-1' COMMENT '跟进人uid',
+  `tracking_uid` BIGINT DEFAULT '-1' COMMENT '跟进人uid',
   `tracking_name` VARCHAR(32) COMMENT '跟进人姓名',
   `property_area` DOUBLE COMMENT '资产面积',
   `property_unit_price` DOUBLE COMMENT '资产单价',
