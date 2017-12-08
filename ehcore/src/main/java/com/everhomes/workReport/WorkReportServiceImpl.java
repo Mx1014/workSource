@@ -61,8 +61,12 @@ public class WorkReportServiceImpl implements WorkReportService {
         report.setModuleId(cmd.getModuleId());
         report.setStatus(WorkReportStatus.VALID.getCode());
         report.setReportType(WorkReportType.DAY.getCode());
+        report.setReportAttribute(WorkReportAttribute.CUSTOMIZE.getCode());
+        report.setDeleteFlag(AttitudeFlag.YES.getCode());
+        report.setModifyFlag(AttitudeFlag.YES.getCode());
         report.setOperatorUserId(userId);
         report.setOperatorName(fixUpUserName(report.getOrganizationId(), userId));
+
         //  add it with the initial scope.
         dbProvider.execute((TransactionStatus status) -> {
             createWorkReport(report, cmd.getOrganizationId(), namespaceId);
@@ -261,11 +265,34 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Override
     public ListWorkReportsResponse listActiveWorkReports(ListWorkReportsCommand cmd) {
-        return null;
+        ListWorkReportsResponse response = new ListWorkReportsResponse();
+        Long userId = UserContext.currentUserId();
+        List<WorkReportDTO> reports = new ArrayList<>();
+        Long nextPageAnchor = null;
+        //  set the conditions.
+        cmd.setPageSize(10000000);
+        List<WorkReport> results = workReportProvider.listWorkReports(
+                cmd.getPageAnchor(), cmd.getPageSize(), cmd.getOwnerId(), cmd.getOwnerType(),
+                cmd.getModuleId(), WorkReportStatus.RUNNING.getCode());
+        //  filter the result.
+        if (results != null && results.size() > 0) {
+            results.forEach(r -> {
+                WorkReportDTO dto = new WorkReportDTO();
+                dto.setReportName(r.getReportName());
+                dto.setReportId(r.getId());
+                dto.setScopes(listWorkReportScopeMap(r.getId()));
+                reports.add(dto);
+            });
+        }
+
+        response.setNextPageAnchor(nextPageAnchor);
+        response.setReports(reports);
+        return response;
     }
 
     private void createWorkReportByTemplate(WorkReportTemplate template, Long formOriginId, CreateWorkReportTemplatesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Long userId = UserContext.currentUserId();
         WorkReport report = workReportProvider.getWorkReportByTemplateId(UserContext.getCurrentNamespaceId(),
                 template.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType(), template.getId());
         //  update the report if it is already existing.
@@ -273,6 +300,8 @@ public class WorkReportServiceImpl implements WorkReportService {
             report.setStatus(WorkReportStatus.RUNNING.getCode());
             report.setReportName(template.getReportName());
             report.setReportType(template.getReportType());
+            report.setOperatorUserId(userId);
+            report.setOperatorName(fixUpUserName(report.getOrganizationId(), userId));
             if (formOriginId != null)
                 report.setFormOriginId(formOriginId);
             workReportProvider.updateWorkReport(report);
@@ -284,6 +313,8 @@ public class WorkReportServiceImpl implements WorkReportService {
             report.setOwnerType(cmd.getOwnerType());
             report.setOrganizationId(cmd.getOrganizationId());
             report.setStatus(WorkReportStatus.RUNNING.getCode());
+            report.setOperatorUserId(userId);
+            report.setOperatorName(fixUpUserName(report.getOrganizationId(), userId));
             if (formOriginId != null)
                 report.setFormOriginId(formOriginId);
             report.setReportTemplateId(template.getId());
@@ -334,16 +365,16 @@ public class WorkReportServiceImpl implements WorkReportService {
         formCommand.setCurrentOrganizationId(cmd.getOrganizationId());
         formCommand.setValues(cmd.getValues());
 
-        dbProvider.execute((TransactionStatus status) ->{
+        dbProvider.execute((TransactionStatus status) -> {
             Long reportValId = workReportValProvider.createWorkReportVal(val);
             formCommand.setSourceId(reportValId);
             generalFormService.postGeneralForm(formCommand);
-            for(Long receiverId : cmd.getReceiverIds()){
+            for (Long receiverId : cmd.getReceiverIds()) {
                 WorkReportValReceiverMap receiver = new WorkReportValReceiverMap();
                 receiver.setNamespaceId(namespaceId);
                 receiver.setReportValId(reportValId);
                 receiver.setReceiverUserId(receiverId);
-                receiver.setReceiverName(fixUpUserName(cmd.getOrganizationId(),receiverId));
+                receiver.setReceiverName(fixUpUserName(cmd.getOrganizationId(), receiverId));
                 workReportValProvider.createWorkReportValReceiverMap(receiver);
             }
             return null;
