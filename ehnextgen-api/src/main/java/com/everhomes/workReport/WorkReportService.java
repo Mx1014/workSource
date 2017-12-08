@@ -32,7 +32,9 @@ public interface WorkReportService {
 
     WorkReportValDTO getWorkReportValItem(WorkReportValIdCommand cmd);
 
-    ListWorkReportsValResponse listWorkReportsVal(ListWorkReportsValCommand cmd);
+    ListWorkReportsValResponse listSubmittedWorkReportsVal(ListWorkReportsValCommand cmd);
+
+    ListWorkReportsValResponse listReceivedWorkReportsVal(ListWorkReportsValCommand cmd);
 
     Integer countUnReadWorkReportsVal();
 

@@ -355,7 +355,7 @@ public class WorkReportServiceImpl implements WorkReportService {
     }
 
     @Override
-    public ListWorkReportsValResponse listWorkReportsVal(ListWorkReportsValCommand cmd) {
+    public ListWorkReportsValResponse listSubmittedWorkReportsVal(ListWorkReportsValCommand cmd) {
         return null;
     }
 

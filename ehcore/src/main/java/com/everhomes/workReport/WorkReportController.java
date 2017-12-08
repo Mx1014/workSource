@@ -222,13 +222,27 @@ public class WorkReportController extends ControllerBase{
 
 
     /**
-     * <b>URL: /workReport/listWorkReportsVal</b>
-     * <p>4-5.工作汇报单列表 </p>
+     * <b>URL: /workReport/listSubmittedWorkReportsVal</b>
+     * <p>4-5.“我提交的”工作汇报单列表 </p>
      */
-    @RequestMapping("listWorkReportsVal")
+    @RequestMapping("listSubmittedWorkReportsVal")
     @RestReturn(value=ListWorkReportsValResponse.class)
-    public RestResponse listWorkReportsVal(ListWorkReportsValCommand cmd) {
-        ListWorkReportsValResponse res = workReportService.listWorkReportsVal(cmd);
+    public RestResponse listSubmittedWorkReportsVal(ListWorkReportsValCommand cmd) {
+        ListWorkReportsValResponse res = workReportService.listSubmittedWorkReportsVal(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /workReport/listReceivedWorkReportsVal</b>
+     * <p>4-6.“我接收的”工作汇报单列表 </p>
+     */
+    @RequestMapping("listReceivedWorkReportsVal")
+    @RestReturn(value=ListWorkReportsValResponse.class)
+    public RestResponse listReceivedWorkReportsVal(ListWorkReportsValCommand cmd) {
+        ListWorkReportsValResponse res = workReportService.listReceivedWorkReportsVal(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -237,7 +251,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/countUnReadWorkReportsVal</b>
-     * <p>4-6.获取汇报单未读条目数 </p>
+     * <p>4-7.获取汇报单未读条目数 </p>
      */
     @RequestMapping("countUnReadWorkReportsVal")
     @RestReturn(value=Integer.class)
