@@ -17,6 +17,8 @@ CREATE TABLE `eh_work_report_templates` (
   `delete_flag` TINYINT DEFAULT 1 COMMENT '0: no, 1: yes',
   `icon_uri` VARCHAR(1024) COMMENT 'the avatar of the approval',
 
+  `operator_user_id` BIGINT DEFAULT 0 COMMENT 'the user id of the operator',
+  `operator_name` VARCHAR(128) COMMENT 'the name of the operator',
   `update_time` DATETIME COMMENT 'last update time',
   `create_time` DATETIME COMMENT 'record create time',
   PRIMARY KEY (`id`)

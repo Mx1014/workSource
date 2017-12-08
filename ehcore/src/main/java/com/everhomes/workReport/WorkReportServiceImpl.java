@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,6 +41,8 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Autowired
     private GeneralFormService generalFormService;
+
+    private SimpleDateFormat reportFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     private static String WORK_REPORT = "WORK_REPORT";
 
@@ -164,6 +167,9 @@ public class WorkReportServiceImpl implements WorkReportService {
                 WorkReportDTO dto = ConvertHelper.convert(r, WorkReportDTO.class);
                 dto.setReportId(r.getId());
                 dto.setScopes(listWorkReportScopeMap(r.getId()));
+                String updateTime = reportFormat.format(r.getUpdateTime());
+                //todo:修改人
+                dto.setUpdateInfo(updateTime + " " );
                 reports.add(dto);
             });
         }
@@ -356,6 +362,11 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Override
     public ListWorkReportsValResponse listSubmittedWorkReportsVal(ListWorkReportsValCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public ListWorkReportsValResponse listReceivedWorkReportsVal(ListWorkReportsValCommand cmd) {
         return null;
     }
 
