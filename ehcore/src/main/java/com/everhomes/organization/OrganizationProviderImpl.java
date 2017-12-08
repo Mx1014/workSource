@@ -3484,6 +3484,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         Record r = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
                 .and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()))
 				.and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode())).fetchAny();
         if (r != null)
             return ConvertHelper.convert(r, Organization.class);
