@@ -88,6 +88,16 @@ public class EnergyMeterProviderImpl implements EnergyMeterProvider {
     }
 
     @Override
+    public EnergyMeter findAnyByCategoryId(Integer namespaceId, Long communityId, Long categoryId) {
+        return context().selectFrom(EH_ENERGY_METERS)
+                .where(EH_ENERGY_METERS.NAMESPACE_ID.eq(namespaceId))
+                .and(EH_ENERGY_METERS.COMMUNITY_ID.eq(communityId))
+                .and(EH_ENERGY_METERS.STATUS.ne(EnergyMeterStatus.INACTIVE.getCode()))
+                .and(EH_ENERGY_METERS.BILL_CATEGORY_ID.eq(categoryId).or(EH_ENERGY_METERS.SERVICE_CATEGORY_ID.eq(categoryId)))
+                .fetchAnyInto(EnergyMeter.class);
+    }
+
+    @Override
     public EnergyMeter findByName(Long communityId, String name) {
         return context().selectFrom(EH_ENERGY_METERS)
                 .where(EH_ENERGY_METERS.COMMUNITY_ID.eq(communityId))

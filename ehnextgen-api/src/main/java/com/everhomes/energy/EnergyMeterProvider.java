@@ -45,6 +45,7 @@ public interface EnergyMeterProvider {
      * 根据分类id查询表记
      */
     EnergyMeter findAnyByCategoryId(Integer namespaceId, Long categoryId);
+    EnergyMeter findAnyByCategoryId(Integer namespaceId, Long communityId, Long categoryId);
 
     EnergyMeter findByName(Long communityId, String name);
     EnergyMeter findByNumber(Long communityId, String number);

@@ -1125,14 +1125,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOwnerId());
         userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
-        EnergyMeterCategory category = new EnergyMeterCategory();
-        category.setOwnerId(cmd.getOwnerId());
-        category.setOwnerType(cmd.getOwnerType());
-        category.setCommunityId(cmd.getCommunityId());
-        category.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
-        category.setName(cmd.getName());
+        EnergyMeterCategory category = ConvertHelper.convert(cmd, EnergyMeterCategory.class);
+        if(cmd.getCommunityId() == null) {
+            category.setCommunityId(0L);
+        }
         category.setDeleteFlag(TrueOrFalseFlag.TRUE.getCode());
-        category.setCategoryType(cmd.getCategoryType());
         category.setStatus(EnergyCommonStatus.ACTIVE.getCode());
         meterCategoryProvider.createEnergyMeterCategory(category);
         return ConvertHelper.convert(category, EnergyMeterCategoryDTO.class);
@@ -1161,14 +1158,29 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_SETTING);
         coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_METER_CATEGORY.getCode() + cmd.getCategoryId()).tryEnter(() -> {
             EnergyMeterCategory category = meterCategoryProvider.findById(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCategoryId());
+
             if (category != null) {
-                EnergyMeter meter = meterProvider.findAnyByCategoryId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), category.getId());
-                if (meter != null) {
-                    LOGGER.info("Energy meter category has been reference, categoryId = {}", category.getId());
-                    throw errorWith(SCOPE, ERR_METER_CATEGORY_HAS_BEEN_REFERENCE, "Energy meter category has been reference");
+                //项目里删全部的 实质是解除关联关系
+                if(category.getCommunityId() == null && cmd.getCommunityId() != null) {
+                    EnergyMeter meter = meterProvider.findAnyByCategoryId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), category.getId());
+                    if (meter != null) {
+                        LOGGER.info("Energy meter category has been reference, categoryId = {}", category.getId());
+                        throw errorWith(SCOPE, ERR_METER_CATEGORY_HAS_BEEN_REFERENCE, "Energy meter category has been reference");
+                    }
+                    EnergyMeterCategoryMap map =
+
+                } else {
+                    //在全部里删全部和项目的，项目里删自己的 都是直接置inactive
+                    EnergyMeter meter = meterProvider.findAnyByCategoryId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), category.getId());
+                    if (meter != null) {
+                        LOGGER.info("Energy meter category has been reference, categoryId = {}", category.getId());
+                        throw errorWith(SCOPE, ERR_METER_CATEGORY_HAS_BEEN_REFERENCE, "Energy meter category has been reference");
+                    }
+                    category.setStatus(EnergyCommonStatus.INACTIVE.getCode());
+                    meterCategoryProvider.updateEnergyMeterCategory(category);
                 }
-                category.setStatus(EnergyCommonStatus.INACTIVE.getCode());
-                meterCategoryProvider.updateEnergyMeterCategory(category);
+
+
 //                meterCategoryProvider.deleteEnergyMeterCategory(category);
             }
         });
