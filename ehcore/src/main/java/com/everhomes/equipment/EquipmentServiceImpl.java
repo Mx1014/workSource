@@ -292,6 +292,19 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipmentProvider.creatEquipmentStandard(standard);
 
 			}else {
+				if (cmd.getCommunities() != null && cmd.getTargetId() == null) {
+					//如果项目应用列表不为空 且项目id等于null 表示在全部中修改标准 需要额外创建关系表
+					equipmentProvider.deleteStandardModleCommunityMapBystandardId(standard.getId());
+					for (Long communityId : cmd.getCommunities()) {
+						EquipmentModleCommunityMap map = new EquipmentModleCommunityMap();
+						map.setStandardId(standard.getId());
+						map.setTargetType(standard.getTargetType());
+						map.setTargetId(communityId);
+						map.setModelType(EquipmentModelType.STANDARD.getCode());
+						equipmentProvider.createEquipmentModleCommunityMap(map);
+					}
+
+				}
 				equipmentProvider.updateEquipmentStandard(standard);
 			}
 
@@ -4009,6 +4022,18 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if (!template.getName().equals(cmd.getName())) {
 				template.setName(cmd.getName());
 				equipmentProvider.updateEquipmentInspectionTemplates(template);
+			}
+			//增加应用项目列表修改 getCommunities不为空 getTargetId 为空则是在全部中修改template
+			if (cmd.getCommunities() != null && cmd.getTargetId() == null) {
+				equipmentProvider.deleteTemplateModleCommunityMapByTemplateId(template.getId());
+				for (Long communityId : cmd.getCommunities()) {
+					EquipmentModleCommunityMap communityMap = new EquipmentModleCommunityMap();
+					communityMap.setTemplateId(template.getId());
+					communityMap.setTargetType(template.getTargetType());
+					communityMap.setTargetId(communityId);
+					communityMap.setModelType(EquipmentModelType.TEMPLATE.getCode());
+					equipmentProvider.createEquipmentModleCommunityMap(communityMap);
+				}
 			}
 
 			List<InspectionItemDTO> updateItems = cmd.getItems();

@@ -156,4 +156,8 @@ public interface EquipmentProvider {
 	List<Long> getModuleCommunityMapByStandardId(Long standardId);
 
 	List<Long> getModuleCommunityMapByTemplateId(Long id);
+
+	void deleteStandardModleCommunityMapBystandardId(Long id);
+
+	void deleteTemplateModleCommunityMapByTemplateId(Long id);
 }

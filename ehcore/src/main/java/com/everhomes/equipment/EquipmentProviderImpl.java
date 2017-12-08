@@ -959,6 +959,24 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 				.fetchInto(Long.class);
 	}
 
+	@Override
+	public void deleteStandardModleCommunityMapBystandardId(Long standardId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
+				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.STANDARD_ID.eq(standardId))
+				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(EquipmentModelType.STANDARD.getCode()))
+				.execute();
+	}
+
+	@Override
+	public void deleteTemplateModleCommunityMapByTemplateId(Long templateId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
+				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TEMPLATE_ID.eq(templateId))
+				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(EquipmentModelType.TEMPLATE.getCode()))
+				.execute();
+	}
+
 	@Cacheable(value="listQualifiedEquipmentStandardEquipments", key="'AllEquipments'", unless="#result.size() == 0")
 	@Override
 	public List<EquipmentInspectionEquipments> listQualifiedEquipmentStandardEquipments() {
