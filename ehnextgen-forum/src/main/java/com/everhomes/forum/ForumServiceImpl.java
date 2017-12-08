@@ -6484,10 +6484,14 @@ public class ForumServiceImpl implements ForumService {
     @Override
     public InteractSettingDTO getInteractSetting(GetInteractSettingCommand cmd) {
         InteractSetting interactSetting = forumProvider.findInteractSetting(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId());
+        InteractSettingDTO dto = null;
         if(interactSetting != null){
-            return ConvertHelper.convert(interactSetting, InteractSettingDTO.class);
+            dto =  ConvertHelper.convert(interactSetting, InteractSettingDTO.class);
+        }else {
+            dto = ConvertHelper.convert(cmd, InteractSettingDTO.class);
+            dto.setInteractFlag(InteractFlag.SUPPORT.getCode());
         }
-        return null;
+        return dto;
     }
 
     @Override
