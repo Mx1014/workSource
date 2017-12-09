@@ -4015,7 +4015,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				EquipmentInspectionItems copyItem = ConvertHelper.convert(item, EquipmentInspectionItems.class);
 				Long copyItemId = equipmentProvider.createEquipmentInspectionItems(copyItem);
 				EquipmentInspectionTemplateItemMap map = new EquipmentInspectionTemplateItemMap();
-				map.setTemplateId(template.getId());
+				map.setTemplateId(templatesCopy.getId());
 				map.setItemId(copyItemId);
 				equipmentProvider.createEquipmentInspectionTemplateItemMap(map);
 			}
