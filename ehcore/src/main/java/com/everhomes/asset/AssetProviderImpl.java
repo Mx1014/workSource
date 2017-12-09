@@ -3673,6 +3673,7 @@ public class AssetProviderImpl implements AssetProvider {
                     amountOwed[0] = amountOwed[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED));
                 });
         getReadOnlyContext().select(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT)
+                .from(Tables.EH_PAYMENT_EXEMPTION_ITEMS)
                 .where(Tables.EH_PAYMENT_EXEMPTION_ITEMS.BILL_ID.in(billId))
                 .fetch()
                 .forEach(r ->{
