@@ -385,7 +385,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     }
 
     private void checkCustomerParameter(String targetType, Long targetId) {
-        if(!targetType.equals(AssetPaymentStrings.EH_USER) || !targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+        if(!targetType.equals(AssetPaymentStrings.EH_USER) && !targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
             LOGGER.error("target type is neither eh_user nor eh_organization");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"target type is neither eh_user nor eh_organization");
         }

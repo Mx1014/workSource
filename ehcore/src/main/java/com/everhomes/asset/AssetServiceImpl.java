@@ -286,11 +286,11 @@ public class AssetServiceImpl implements AssetService {
                 }
                 String[] telNOs = phoneNums.split(",");
                 List<Tuple<String, Object>> variables = new ArrayList<>();
-                injectSmsVars(noticeInfo, variables);
+                Integer nameSpaceId = UserContext.getCurrentNamespaceId();
+                injectSmsVars(noticeInfo, variables,nameSpaceId);
                 String templateLocale = UserContext.current().getUser().getLocale();
                 //phoneNums make it fake during test
-                Integer nameSpaceId = UserContext.getCurrentNamespaceId();
-                nameSpaceId = 999971;
+//                nameSpaceId = 999971;
                 smsProvider.sendSms(nameSpaceId, telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
             }
         } catch(Exception e){
@@ -360,13 +360,21 @@ public class AssetServiceImpl implements AssetService {
         }
     }
 
-    private void injectSmsVars(NoticeInfo noticeInfo, List<Tuple<String, Object>> variables) {
-        smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
-        //模板改了，所以这个也要改
+    private void injectSmsVars(NoticeInfo noticeInfo, List<Tuple<String, Object>> variables,Integer namespaceId) {
+        if(namespaceId == 999971){
+            smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
+            smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
+            smsProvider.addToTupleList(variables, "amount", noticeInfo.getAmountOwed().toString());
+            smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
+        }else{
+            smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
+            //模板改了，所以这个也要改
 //                smsProvider.addToTupleList(variables, "dateStr", noticeInfo.getDateStr());
-        smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
+            smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
 //            smsProvider.addToTupleList(variables,"amount2",noticeInfo.getAmountOwed());
-        smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
+            smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
+
+        }
     }
 
     private void NoticeWithTextAndMessage(List<Long> billIds, List<NoticeInfo> noticeInfos) {
@@ -380,10 +388,10 @@ public class AssetServiceImpl implements AssetService {
                 }
                 String[] telNOs = phoneNums.split(",");
                 List<Tuple<String, Object>> variables = new ArrayList<>();
-                injectSmsVars(noticeInfo, variables);
-                String templateLocale = UserContext.current().getUser().getLocale();
                 Integer nameSpaceId = UserContext.getCurrentNamespaceId();
-                nameSpaceId = 999971;
+                injectSmsVars(noticeInfo, variables,nameSpaceId);
+                String templateLocale = UserContext.current().getUser().getLocale();
+//                nameSpaceId = 999971;
                 smsProvider.sendSms(nameSpaceId, telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
             }
         } catch(Exception e){
