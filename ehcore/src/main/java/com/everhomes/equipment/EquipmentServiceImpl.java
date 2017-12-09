@@ -4010,6 +4010,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if (template.getTargetId() == 0L && cmd.getTargetId() != null) {
 			EquipmentInspectionTemplates templatesCopy = ConvertHelper.convert(cmd, EquipmentInspectionTemplates.class);
 			templatesCopy.setReferId(cmd.getId());
+			templatesCopy.setCreatorUid(UserContext.currentUserId());
 			equipmentProvider.createEquipmentInspectionTemplates(templatesCopy);
 			//创建item和模板map表关系
 			for (InspectionItemDTO item : cmd.getItems()) {
