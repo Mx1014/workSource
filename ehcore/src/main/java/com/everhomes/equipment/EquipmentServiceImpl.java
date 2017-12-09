@@ -4007,14 +4007,16 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		//cmd.getTargetId表示当前操作是在项目还是全部，template.getTargetId是用来判断是否为公共标准如果在项目上修改公共的则创建副本
 		if (template.getTargetId() == 0L && cmd.getTargetId() != null) {
-			EquipmentInspectionTemplates templatesNew = ConvertHelper.convert(cmd, EquipmentInspectionTemplates.class);
-			templatesNew.setReferId(cmd.getId());
-			equipmentProvider.createEquipmentInspectionTemplates(templatesNew);
+			EquipmentInspectionTemplates templatesCopy = ConvertHelper.convert(cmd, EquipmentInspectionTemplates.class);
+			templatesCopy.setReferId(cmd.getId());
+			equipmentProvider.createEquipmentInspectionTemplates(templatesCopy);
 			//创建item和模板map表关系
 			for (InspectionItemDTO item : cmd.getItems()) {
+				EquipmentInspectionItems copyItem = ConvertHelper.convert(item, EquipmentInspectionItems.class);
+				Long copyItemId = equipmentProvider.createEquipmentInspectionItems(copyItem);
 				EquipmentInspectionTemplateItemMap map = new EquipmentInspectionTemplateItemMap();
 				map.setTemplateId(template.getId());
-				map.setItemId(item.getId());
+				map.setItemId(copyItemId);
 				equipmentProvider.createEquipmentInspectionTemplateItemMap(map);
 			}
 		} else {
