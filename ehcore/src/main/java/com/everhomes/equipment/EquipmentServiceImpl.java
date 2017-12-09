@@ -262,6 +262,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			standard.setRepeatSettingId(exist.getRepeatSettingId());
 			standard.setStatus(exist.getStatus());
 			standard.setOperatorUid(user.getId());
+			standard.setCreateTime(exist.getCreateTime());
 			standard.setNamespaceId(UserContext.getCurrentNamespaceId());
 
 			if (EquipmentStandardStatus.NOT_COMPLETED.equals(EquipmentStandardStatus.fromStatus(standard.getStatus()))) {
@@ -286,7 +287,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 			if (exist.getTargetId() == 0L && cmd.getTargetId()!=null) {
 				//如果是项目上修改判断下是否为公共标准 创建副本将标准的referId设置成公共标准id
-				standard.setReferId(cmd.getId());
+				standard.setReferId(exist.getId());
 				standard.setTargetId(cmd.getTargetId());
 				standard.setCreatorUid(UserContext.currentUserId());
 				equipmentProvider.creatEquipmentStandard(standard);
