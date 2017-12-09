@@ -3665,7 +3665,7 @@ public class AssetProviderImpl implements AssetProvider {
         BigDecimal zero = new BigDecimal("0");
         getReadOnlyContext().select(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED,Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED)
                 .from(Tables.EH_PAYMENT_BILL_ITEMS)
-                .where(Tables.EH_PAYMENT_BILL_ITEMS.ID.eq(billId))
+                .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
                 .fetch()
                 .forEach(r -> {
                     amountReceivable[0] = amountReceivable[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE));
