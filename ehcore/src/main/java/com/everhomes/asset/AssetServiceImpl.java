@@ -297,7 +297,7 @@ public class AssetServiceImpl implements AssetService {
                 String templateLocale = UserContext.current().getUser().getLocale();
                 //phoneNums make it fake during test
                 Integer nameSpaceId = UserContext.getCurrentNamespaceId();
-                nameSpaceId = 999971;
+//                nameSpaceId = 999971;
                 smsProvider.sendSms(nameSpaceId, telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
             }
         } catch(Exception e){
