@@ -222,7 +222,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(cmd.getId() == null) {
 			standard = ConvertHelper.convert(cmd, EquipmentInspectionStandards.class);
 			standard.setCreatorUid(user.getId());
-			standard.setOperatorUid(user.getId());
 			standard.setNamespaceId(UserContext.getCurrentNamespaceId());
 			if(cmd.getRepeat() == null) {
 				throw RuntimeErrorException.errorWith(RepeatServiceErrorCode.SCOPE,
@@ -263,6 +262,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			standard.setStatus(exist.getStatus());
 			standard.setReferId(exist.getReferId());
 			standard.setOperatorUid(user.getId());
+			standard.setCreatorUid(exist.getCreatorUid());
 			standard.setCreateTime(exist.getCreateTime());
 			standard.setNamespaceId(UserContext.getCurrentNamespaceId());
 
