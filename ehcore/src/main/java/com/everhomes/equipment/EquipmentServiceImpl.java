@@ -261,7 +261,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			standard = ConvertHelper.convert(cmd, EquipmentInspectionStandards.class);
 			standard.setRepeatSettingId(exist.getRepeatSettingId());
 			standard.setStatus(exist.getStatus());
-			standard.setReferId(exist.getId());
+			standard.setReferId(exist.getReferId());
 			standard.setOperatorUid(user.getId());
 			standard.setCreateTime(exist.getCreateTime());
 			standard.setNamespaceId(UserContext.getCurrentNamespaceId());
