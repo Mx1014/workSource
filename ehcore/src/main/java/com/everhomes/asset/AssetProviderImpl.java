@@ -3644,6 +3644,7 @@ public class AssetProviderImpl implements AssetProvider {
         return getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
                 .where(Tables.EH_PAYMENT_BILLS.TARGET_ID.eq(targetId))
                 .and(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq(targetType))
+                .and(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte)1))
                 .fetchInto(PaymentBills.class);
     }
 
