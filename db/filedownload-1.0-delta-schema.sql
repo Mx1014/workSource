@@ -7,9 +7,12 @@ CREATE TABLE `eh_file_download_jobs` (
   `size` bigint(20) DEFAULT NULL,
   `count` bigint(20) DEFAULT NULL,
   `uri` varchar(255) DEFAULT NULL,
+  `rate` double(10,2) DEFAULT NULL COMMENT 'rate of progress',
   `status` tinyint(4) DEFAULT NULL,
   `create_time` datetime NOT NULL ON UPDATE CURRENT_TIMESTAMP,
   `finish_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
