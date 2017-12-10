@@ -10,5 +10,11 @@ import java.util.Map;
 
 
 public interface FileDownloadProvider {
+    void createFileDownloadJob(FileDownloadJob job);
 
+    void updateFileDownloadJob(FileDownloadJob job);
+
+    FileDownloadJob findById(Long id);
+
+    List<FileDownloadJob> listFileDownloadJobsByOwnerId(Long ownerId, Long pageAnchor, int count);
 }
