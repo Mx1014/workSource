@@ -2,8 +2,8 @@
 CREATE TABLE `eh_file_download_jobs` (
   `id` bigint(20) NOT NULL,
   `file_name` varchar(255) DEFAULT NULL,
-  `job_class` varchar(255) DEFAULT NULL,
-  `params` text,
+  `job_class_name` varchar(255) DEFAULT NULL,
+  `job_params` text,
   `size` bigint(20) DEFAULT NULL,
   `count` bigint(20) DEFAULT NULL,
   `uri` varchar(255) DEFAULT NULL,
