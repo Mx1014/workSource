@@ -653,7 +653,7 @@ public class AssetProviderImpl implements AssetProvider {
         if(isOwedBill==1){
             query.addConditions(t.STATUS.eq((byte)0));
         }
-        List<Byte> list  = new ArrayList<>();
+//        List<Byte> list  = new ArrayList<>();
         query.fetch()
                 .map(r -> {
                     BillDetailDTO dto = new BillDetailDTO();
@@ -665,23 +665,35 @@ public class AssetProviderImpl implements AssetProvider {
 //                    list.add(r.getValue(t.DATE_STR_DUE));
 //                    list.add(r.getValue(t.DUE_DAY_DEADLINE));
 //                    list.add(r.getValue(t.STATUS));
-                    list. add(r.getValue(t.CHARGE_STATUS));
-
+//                    list. add(r.getValue(t.CHARGE_STATUS));
+                    dto.setChargeStatus(r.getValue(t.CHARGE_STATUS));
                     dto.setStatus(r.getValue(t.STATUS));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
                     dto.setDeadline(r.getValue(t.DUE_DAY_DEADLINE));
                     dtos.add(dto);
                     return null;});
-//        Date today = new Date();
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date today = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         for(int i = 0; i < dtos.size(); i ++){
             //根据t.status 缴纳情况和 t.chargetStatus正常或者欠费来判定三个状态，注意，这里没有未缴状态，因为所有都是已出账单
             BillDetailDTO dto = dtos.get(i);
-            if(dto.getStatus().byteValue() == (byte)0 && list.get(i).byteValue() == (byte)1){
-                dto.setStatus((byte)2);
-            }else if(dto.getStatus().byteValue() == (byte)0 && list.get(i).byteValue() == (byte)0){
-                dto.setStatus((byte)0);
+            if(dto.getChargeStatus()!=null){
+                if(dto.getStatus().byteValue() == (byte)0 && dto.getChargeStatus().byteValue() == (byte)1){
+                    dto.setStatus((byte)2);
+                }else if(dto.getStatus().byteValue() == (byte)0 && dto.getChargeStatus().byteValue() == (byte)0){
+                    dto.setStatus((byte)0);
+                }
+            }else{
+                String deadline = dto.getDeadline();
+                try{
+                    Date dead = sdf.parse(deadline);
+                    if(dto.getStatus().byteValue() == (byte)0 && today.compareTo(dead) != -1){
+                        dto.setStatus((byte)2);
+                    }else if(dto.getStatus().byteValue() == (byte)0 && today.compareTo(dead) != 1){
+                        dto.setStatus((byte)0);
+                    }
+                }catch(Exception e){}
             }
             //这是按照时间来划分状态
 //            String due = (String)list.get(3*i);
