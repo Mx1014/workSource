@@ -83,6 +83,7 @@ import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.customer.DeleteEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.NamespaceCustomerType;
 import com.everhomes.rest.enterprise.*;
+import com.everhomes.rest.equipment.AdminFlag;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.family.ParamType;
 import com.everhomes.rest.forum.*;
@@ -94,6 +95,7 @@ import com.everhomes.rest.launchpad.ItemKind;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.module.Project;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
+import com.everhomes.rest.openapi.techpark.AllFlag;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
@@ -2883,6 +2885,10 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
 
             OrganizationDTO dto = toOrganizationDTO(userId, org);
+
+            if(OrganizationMemberGroupType.fromCode(member.getMemberGroup()) == OrganizationMemberGroupType.MANAGER){
+                dto.setManagerFlag(AdminFlag.YES.getCode());
+            }
             dtos.add(dto);
         }
 
