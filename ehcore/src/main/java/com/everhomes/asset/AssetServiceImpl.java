@@ -3,6 +3,7 @@ package com.everhomes.asset;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.zjgkVOs.PaymentStatus;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
@@ -241,7 +242,7 @@ public class AssetServiceImpl implements AssetService {
     public ListBillsResponse listBills(ListBillsCommand cmd) {
 //        Integer namespaceId = 999983;
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListBillsResponse response = new ListBillsResponse();
@@ -253,7 +254,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillItemsResponse listBillItems(ListBillItemsCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListBillItemsResponse response = new ListBillItemsResponse();
@@ -265,7 +266,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void selectNotice(SelectedNoticeCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         List<NoticeInfo> noticeInfos = handler.listNoticeInfoByBillId(cmd.getBillIdAndTypes());
@@ -296,7 +297,7 @@ public class AssetServiceImpl implements AssetService {
                 String templateLocale = UserContext.current().getUser().getLocale();
                 //phoneNums make it fake during test
                 Integer nameSpaceId = UserContext.getCurrentNamespaceId();
-                nameSpaceId = 999971;
+//                nameSpaceId = 999971;
                 smsProvider.sendSms(nameSpaceId, telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
             }
         } catch(Exception e){
@@ -381,7 +382,7 @@ public class AssetServiceImpl implements AssetService {
                 smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
                 String templateLocale = UserContext.current().getUser().getLocale();
                 Integer nameSpaceId = UserContext.getCurrentNamespaceId();
-                nameSpaceId = 999971;
+//                nameSpaceId = 999971;
                 smsProvider.sendSms(nameSpaceId, telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
             }
         } catch(Exception e){
@@ -447,7 +448,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd) {
         //app用户的权限还未判断，是否可以查看账单
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
         return handler.showBillForClient(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getBillGroupId(),cmd.getIsOnlyOwedBill(),cmd.getContractId());
@@ -455,7 +456,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ShowBillDetailForClientResponse getBillDetailForClient(BillIdCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
         return handler.getBillDetailForClient(cmd.getOwnerId(),cmd.getBillId(),cmd.getTargetType());
@@ -471,7 +472,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ShowCreateBillDTO showCreateBill(BillGroupIdCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         return handler.showCreateBill(cmd.getBillGroupId());
@@ -479,7 +480,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ShowBillDetailForClientResponse listBillDetailOnDateChange(ListBillDetailOnDateChangeCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
         if(cmd.getTargetType().equals("eh_user")) {
@@ -490,7 +491,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillsDTO createBill(CreateBillCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         return handler.createBill(cmd);
@@ -553,6 +554,14 @@ public class AssetServiceImpl implements AssetService {
             if(UserContext.getCurrentNamespaceId()==999971){
                 List<NoticeInfo> list = new ArrayList<>();
                 List<ListBillsDTO> listBillsDTOS1 = convertedResponse.getListBillsDTOS();
+                //已经处理过的审核中的账单不进行催缴
+                for(int k = 0; k < listBillsDTOS1.size(); k++){
+                    ListBillsDTO dto = listBillsDTOS1.get(k);
+                    if(dto.getPayStatus().equals(PaymentStatus.IN_PROCESS.getCode())){
+                        listBillsDTOS1.remove(k);
+                        k--;
+                    }
+                }
                 for(int i = 0; i < listBillsDTOS1.size(); i++){
                     ListBillsDTO dto = listBillsDTOS1.get(i);
                     NoticeInfo info = new NoticeInfo();
@@ -588,7 +597,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         return handler.listBillDetail(cmd);
@@ -596,7 +605,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         return handler.listBillStatics(cmd);
@@ -604,7 +613,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void modifyBillStatus(BillIdCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         handler.modifyBillStatus(cmd);
@@ -715,7 +724,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListSettledBillExemptionItemsResponse listBillExemptionItems(listBillExemtionItemsCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         return handler.listBillExemptionItems(cmd);
@@ -723,7 +732,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public String deleteBill(BillIdCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         String result = "OK";
@@ -744,7 +753,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public String deleteBillItem(BillItemIdCommand cmd) {
         String result = "OK";
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         handler.deleteBillItem(cmd);
@@ -754,7 +763,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public String deletExemptionItem(ExemptionItemIdCommand cmd) {
         String result = "OK";
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         handler.deletExemptionItem(cmd);
@@ -2181,7 +2190,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public PaymentExpectanciesResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         return handler.listBillExpectanciesOnContract(cmd);
@@ -2190,7 +2199,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void exportRentalExcelTemplate(HttpServletResponse response) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         handler.exportRentalExcelTemplate(response);
@@ -2198,7 +2207,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public FindUserInfoForPaymentResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vendor = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendor);
         return handler.findUserInfoForPayment(cmd);
@@ -2207,7 +2216,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void updateBillsToSettled(UpdateBillsToSettled cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         handler.updateBillsToSettled(cmd);
@@ -2215,7 +2224,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public GetAreaAndAddressByContractDTO getAreaAndAddressByContract(GetAreaAndAddressByContractCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vendor = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendor);
         return handler.getAreaAndAddressByContract(cmd);
@@ -2566,7 +2575,7 @@ public class AssetServiceImpl implements AssetService {
         return response;
     }
     public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
 //        AssetVendor assetVendor = checkAssetVendor(999983);
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
@@ -2575,7 +2584,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
-        AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId());
+        AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
         return handler.listAllBillsForClient(cmd);
     }
@@ -2627,7 +2636,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
-        AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId());
+        AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
         return handler.placeAnAssetOrder(cmd);
     }
@@ -3197,13 +3206,14 @@ public class AssetServiceImpl implements AssetService {
         return assetVendor;
     }
 
-    private AssetVendor checkAssetVendor(Integer namespaceId){
+    private AssetVendor checkAssetVendor(Integer namespaceId,Integer defaultNamespaceId){
         if(null == namespaceId) {
             LOGGER.error("checkAssetVendor namespaceId cannot be null.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "checkAssetVendor namespaceId cannot be null.");
         }
         AssetVendor assetVendor = assetProvider.findAssetVendorByNamespace(namespaceId);
+        if(null == assetVendor && defaultNamespaceId!=null)  assetVendor = assetProvider.findAssetVendorByNamespace(defaultNamespaceId);
         if(null == assetVendor) {
             LOGGER.error("assetVendor not found, assetVendor namespaceId={}, targetId={}", namespaceId);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,

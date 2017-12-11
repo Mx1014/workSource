@@ -1746,6 +1746,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhEquipmentInspectionStandardGroupMap.class), null, 
 				(DSLContext context, Object reducingContext) -> {
 					SelectQuery<EhEquipmentInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP);
+					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.STANDARD_ID.eq(standardId));
 		            query.fetch().map((EhEquipmentInspectionStandardGroupMapRecord record) -> {
 		            	deleteEquipmentInspectionStandardGroupMap(record.getId());
 		            	return null;

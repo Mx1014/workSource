@@ -31,6 +31,8 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceResource;
+import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.ImportFileTask;
 import com.everhomes.organization.OrganizationProvider;
@@ -49,6 +51,7 @@ import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.group.GroupMemberStatus;
+import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
@@ -56,6 +59,8 @@ import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.region.RegionServiceErrorCode;
+import com.everhomes.rest.ui.user.SceneDTO;
+import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.*;
@@ -85,6 +90,9 @@ import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static com.everhomes.rest.ui.user.SceneType.DEFAULT;
+import static com.everhomes.rest.ui.user.SceneType.PARK_TOURIST;
 
 @Component
 public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
@@ -155,6 +163,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Autowired
     private ContentServerService contentServerService;
+
+    @Autowired
+    private NamespaceResourceProvider namespaceResourceProvider;
 
     @PostConstruct
     public void setup() {
@@ -2326,19 +2337,20 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     public List<Community> listMixCommunitiesByDistanceWithNamespaceId(ListNearbyMixCommunitiesCommand cmd, ListingLocator locator, int pageSize){
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         Long userId = UserContext.current().getUser().getId();
-        List<Community> communities = this.communityProvider.listCommunitiesByNamespaceId(namespaceId);
-        if(communities != null){
-            List<Long> communityIds = communities.stream().map(r->{
-                return r.getId();
-            }).collect(Collectors.toList());
+        List<Long> communityIds = null;
+        List<NamespaceResource> resources = namespaceResourceProvider.listResourceByNamespaceOrderByDefaultOrder(namespaceId, NamespaceResourceType.COMMUNITY);
+        if(resources != null && resources.size() > 0){
+            communityIds = resources.stream().map(NamespaceResource::getResourceId).collect(Collectors.toList());
+        }
+        List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
+
+        if(communityIds != null){
             List<CommunityGeoPoint> pointList = this.communityProvider.listCommunityGeoPointByGeoHashInCommunities(cmd.getLatigtue(), cmd.getLongitude(), 5, communityIds);
             if(pointList != null && pointList.size() > 0){
                 List<Community> communities_after = pointList.stream().map(r->{
                     return this.communityProvider.findCommunityById(r.getCommunityId());
                 }).collect(Collectors.toList());
                 return communities_after;
-            }else {
-                return communities;
             }
         }
         return null;

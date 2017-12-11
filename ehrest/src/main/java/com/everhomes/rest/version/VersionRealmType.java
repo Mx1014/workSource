@@ -144,7 +144,12 @@ public enum VersionRealmType {
     ANDROID_OA("Android_OA"),
     IOS_OA("iOS_OA"),
     ANDROID_MYBAY("Android_MyBay"),
-    IOS_MYBAY("iOS_MyBay");
+    IOS_MYBAY("iOS_MyBay"),
+
+    ANDROID_XINWEILAI("Android_Xinweilai"),
+    IOS_XINWEILAI("IOS_Xinweilai"),
+
+    ;
 
     private String code;
     private VersionRealmType(String code) {

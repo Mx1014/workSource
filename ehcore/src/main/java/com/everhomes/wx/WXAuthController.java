@@ -365,6 +365,7 @@ public class WXAuthController {// extends ControllerBase
         if(pos != -1) {
             String sourceParam = hashUrl.substring(pos);
             baseUrl = baseUrl + sourceParam;
+            hashUrl = hashUrl.substring(0, pos);
         }
 	    
 	    // 若有问号，代表着有参数

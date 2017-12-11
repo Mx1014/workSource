@@ -376,11 +376,25 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		//查询已经配置的菜单
 		List<WebMenuScope> oldScopes = webMenuProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(cmd.getNamespaceId()));
-		List<Long> oldIds = oldScopes.stream().map(r -> r.getId()).collect(Collectors.toList());
+		List<Long> oldScopeIds = new ArrayList<>();
+
+		//只删除park菜单的，上面更新的也是park菜单的  fix
+		List<WebMenu> webMenus = webMenuProvider.listWebMenuByType(WebMenuType.PARK.getCode());
+		if(oldScopes != null){
+			for(WebMenuScope scope: oldScopes){
+				for (WebMenu webMenu: webMenus){
+					if(scope.getMenuId().longValue() == webMenu.getId()){
+						oldScopeIds.add(scope.getId());
+					}
+				}
+			}
+		}
 
 		//更新菜单
 		dbProvider.execute(status -> {
-			webMenuProvider.deleteWebMenuScopes(oldIds);
+			if(oldScopeIds.size() > 0){
+				webMenuProvider.deleteWebMenuScopes(oldScopeIds);
+			}
 			webMenuProvider.createWebMenuScopes(newScopes);
 			return true;
 		});
