@@ -265,6 +265,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Autowired
     private ImportFileService importFileService;
 
+    @Autowired
+    private EnergyMeterCategoryMapProvider energyMeterCategoryMapProvider;
+
     static final String TASK_EXECUTE = "energyTask.isexecute";
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
@@ -1132,6 +1135,21 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         category.setDeleteFlag(TrueOrFalseFlag.TRUE.getCode());
         category.setStatus(EnergyCommonStatus.ACTIVE.getCode());
         meterCategoryProvider.createEnergyMeterCategory(category);
+        //全部里面建的自动关联各个项目 energy3.2
+        if(cmd.getCommunityId() == null) {
+            List<OrganizationCommunity> communities = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+            if(communities != null && communities.size() > 0) {
+                communities.forEach(community -> {
+                    EnergyMeterCategoryMap map = new EnergyMeterCategoryMap();
+                    map.setOwnerId(cmd.getOwnerId());
+                    map.setNamespaceId(cmd.getNamespaceId());
+                    map.setCommunityId(community.getCommunityId());
+                    map.setCategoryId(category.getId());
+                    map.setCreatorUid(UserContext.currentUserId());
+                    energyMeterCategoryMapProvider.createEnergyMeterCategoryMap(map);
+                });
+            }
+        }
         return ConvertHelper.convert(category, EnergyMeterCategoryDTO.class);
     }
 
@@ -1167,7 +1185,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                         LOGGER.info("Energy meter category has been reference, categoryId = {}", category.getId());
                         throw errorWith(SCOPE, ERR_METER_CATEGORY_HAS_BEEN_REFERENCE, "Energy meter category has been reference");
                     }
-                    EnergyMeterCategoryMap map =
+                    EnergyMeterCategoryMap map = energyMeterCategoryMapProvider.findEnergyMeterCategoryMap(cmd.getCommunityId(), cmd.getCategoryId());
+                    if(map != null) {
+                        map.setStatus(EnergyCommonStatus.INACTIVE.getCode());
+                        map.setOperatorUid(UserContext.currentUserId());
+                        map.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        energyMeterCategoryMapProvider.updateEnergyMeterCategoryMap(map);
+                    }
 
                 } else {
                     //在全部里删全部和项目的，项目里删自己的 都是直接置inactive
@@ -2334,6 +2358,15 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOwnerId());
 //        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
+        //全部则查全部的和各个项目的
+        if(cmd.getCommunityId() == null) {
+
+        }
+
+        //单项目则查自己加的和关联的全部的
+        if(cmd.getCommunityId() != null) {
+
+        }
         List<EnergyMeterCategory> categoryList = meterCategoryProvider.listMeterCategories(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCategoryType(),
                 cmd.getOwnerId(), cmd.getOwnerType(), cmd.getCommunityId());
         return categoryList.stream().map(this::toMeterCategoryDto).collect(Collectors.toList());
