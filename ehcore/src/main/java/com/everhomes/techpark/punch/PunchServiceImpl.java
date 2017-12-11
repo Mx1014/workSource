@@ -3109,7 +3109,7 @@ public class PunchServiceImpl implements PunchService {
 	public Workbook createPunchStatisticsBook(List<PunchCountDTO> results, ListPunchCountCommand cmd) {
 		if (null == results || results.size() == 0)
 			return null;
-		int columnNo = 10;
+		int columnNo = 11;
 
 		if (null != results && results.size() > 0) {
 			if (null != results.get(0).getExts()) {
@@ -4757,7 +4757,7 @@ public class PunchServiceImpl implements PunchService {
 		XSSFWorkbook wb = new XSSFWorkbook();
 		XSSFSheet sheet = wb.createSheet("punchDetails");
 
-		sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 8));
+		sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 10));
 		XSSFCellStyle style = wb.createCellStyle();
 		Font font = wb.createFont();
 		font.setFontHeightInPoints((short) 20);
@@ -4775,7 +4775,7 @@ public class PunchServiceImpl implements PunchService {
 		rowTitle.setRowStyle(titleStyle);
 		//副标题
 
-		sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 8));
+		sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 10));
 		XSSFCellStyle style1 = wb.createCellStyle();
 		Font font1 = wb.createFont();
 
@@ -4820,7 +4820,17 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue((dto.getLeaveTime()==null)?"":timeSF.get().format(convertTime(dto.getLeaveTime())));
 		row.createCell(++i).setCellValue(String.valueOf(dto.getPunchCount()));
 		row.createCell(++i).setCellValue(convertTimeLongToString(dto.getWorkTime()));
-		row.createCell(++i).setCellValue(dto.getStatuString());
+        if (null != dto.getApprovalRecords()) {
+            StringBuilder sb = new StringBuilder();
+            for (GeneralApprovalRecordDTO record : dto.getApprovalRecords()) {
+                sb.append(record.getApprovalNo());
+            }
+            row.createCell(++i).setCellValue(sb.toString());
+        }else {
+            row.createCell(++i).setCellValue("");
+        }
+        row.createCell(++i).setCellValue(dto.getStatuString());
+        row.createCell(++i).setCellValue(dto.getApprovalStatuString());
 
 	}
 
@@ -4835,7 +4845,9 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue("最晚打卡");
 		row.createCell(++i).setCellValue("打卡次数");
 		row.createCell(++i).setCellValue("工作时长");
-		row.createCell(++i).setCellValue("状态");
+        row.createCell(++i).setCellValue("审批单");
+        row.createCell(++i).setCellValue("状态");
+        row.createCell(++i).setCellValue("校正状态");
 	}
 	private Organization checkOrganization(Long orgId) {
 		Organization org = organizationProvider.findOrganizationById(orgId);
