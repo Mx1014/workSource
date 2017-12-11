@@ -61,8 +61,8 @@ public class EnergyMeterFormulaProviderImpl implements EnergyMeterFormulaProvide
 
         SelectQuery<EhEnergyMeterFormulasRecord> query = context.selectQuery(EH_ENERGY_METER_FORMULAS);
         query.addConditions(EH_ENERGY_METER_FORMULAS.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(EH_ENERGY_METER_FORMULAS.OWNER_ID.eq(ownerId));
-        query.addConditions(EH_ENERGY_METER_FORMULAS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(EH_ENERGY_METER_FORMULAS.OWNER_ID.eq(ownerId));
+//        query.addConditions(EH_ENERGY_METER_FORMULAS.OWNER_TYPE.eq(ownerType));
         query.addConditions(EH_ENERGY_METER_FORMULAS.FORMULA_TYPE.eq(formulaType));
         query.addConditions(EH_ENERGY_METER_FORMULAS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()));
 

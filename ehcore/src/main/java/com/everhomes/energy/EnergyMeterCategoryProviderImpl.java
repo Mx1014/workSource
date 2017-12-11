@@ -66,8 +66,8 @@ public class EnergyMeterCategoryProviderImpl implements EnergyMeterCategoryProvi
 
         SelectQuery<EhEnergyMeterCategoriesRecord> query = context.selectQuery(EH_ENERGY_METER_CATEGORIES);
         query.addConditions(EH_ENERGY_METER_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(EH_ENERGY_METER_CATEGORIES.OWNER_ID.eq(ownerId));
-        query.addConditions(EH_ENERGY_METER_CATEGORIES.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(EH_ENERGY_METER_CATEGORIES.OWNER_ID.eq(ownerId));
+//        query.addConditions(EH_ENERGY_METER_CATEGORIES.OWNER_TYPE.eq(ownerType));
         query.addConditions(EH_ENERGY_METER_CATEGORIES.CATEGORY_TYPE.eq(categoryType));
         query.addConditions(EH_ENERGY_METER_CATEGORIES.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()));
 

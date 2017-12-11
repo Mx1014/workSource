@@ -419,10 +419,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             updateCmd.setCalculationType(cmd.getCalculationType());
             updateCmd.setConfigId(cmd.getConfigId());
             updateCmd.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
-            this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
-            this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
-            this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
-            this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd);
+            this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd, meter.getCommunityId());
+            this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd, meter.getCommunityId());
+            this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd, meter.getCommunityId());
+            this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd, meter.getCommunityId());
 
             // 创建一条初始读表记录
             ReadEnergyMeterCommand readEnergyMeterCmd = new ReadEnergyMeterCommand();
@@ -691,16 +691,16 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), meter.getCommunityId(), meter.getOwnerId(), PrivilegeConstants.METER_CREATE);
             dbProvider.execute(r -> {
                 if (cmd.getPrice() != null || cmd.getConfigId() != null) {
-                    this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, cmd);
+                    this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, cmd, meter.getCommunityId());
                 }
                 if (cmd.getRate() != null) {
-                    this.insertMeterSettingLog(EnergyMeterSettingType.RATE, cmd);
+                    this.insertMeterSettingLog(EnergyMeterSettingType.RATE, cmd, meter.getCommunityId());
                 }
                 if (cmd.getAmountFormulaId() != null) {
-                    this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, cmd);
+                    this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, cmd, meter.getCommunityId());
                 }
                 if (cmd.getCostFormulaId() != null) {
-                    this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, cmd);
+                    this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, cmd, meter.getCommunityId());
                 }
                 meterProvider.updateEnergyMeter(meter);
                 processEnergyMeterAddresses(meter.getId(), cmd.getAddresses());
@@ -712,7 +712,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         return result.second() ? toEnergyMeterDTO(result.first(),cmd.getNamespaceId()) : new EnergyMeterDTO();
     }
 
-    private void insertMeterSettingLog(EnergyMeterSettingType settingType, UpdateEnergyMeterCommand cmd) {
+    private void insertMeterSettingLog(EnergyMeterSettingType settingType, UpdateEnergyMeterCommand cmd, Long communityId) {
         checkUpdateCommand(cmd);
         EnergyMeterSettingLog log = new EnergyMeterSettingLog();
         log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
@@ -722,6 +722,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             log.setEndTime(new Timestamp(cmd.getEndTime()));
         }
         log.setMeterId(cmd.getMeterId());
+        log.setCommunityId(communityId);
         log.setSettingType(settingType.getCode());
         log.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
         switch (settingType) {
@@ -927,7 +928,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                         updateCmd.setRate(cmd.getRate());
                         updateCmd.setStartTime(cmd.getRateStart());
                         updateCmd.setEndTime(cmd.getRateEnd());
-                        this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
+                        this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd, r.getCommunityId());
                         r.setRate(cmd.getRate());
                     }
 //                    // 费用
@@ -943,7 +944,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                         updateCmd.setAmountFormulaId(cmd.getAmountFormulaId());
                         updateCmd.setStartTime(cmd.getAmountFormulaStart());
                         updateCmd.setEndTime(cmd.getAmountFormulaEnd());
-                        this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
+                        this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd, r.getCommunityId());
                         r.setAmountFormulaId(cmd.getAmountFormulaId());
                     }
                     meterProvider.updateEnergyMeter(r);
@@ -1382,7 +1383,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     private List<ImportFileResultLog<ImportEnergyMeterDataDTO>> importEnergyMeterData(ImportEnergyMeterCommand cmd, List<ImportEnergyMeterDataDTO> list, Long userId){
         List<ImportFileResultLog<ImportEnergyMeterDataDTO>> errorDataLogs = new ArrayList<>();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         list.forEach(str -> {
             ImportFileResultLog<ImportEnergyMeterDataDTO> log = new ImportFileResultLog<>(EnergyConsumptionServiceErrorCode.SCOPE);
             EnergyMeter meter = new EnergyMeter();
@@ -1522,10 +1523,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 updateCmd.setCalculationType(meter.getCalculationType());
                 updateCmd.setConfigId(meter.getConfigId());
                 updateCmd.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
-                this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
-                this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
-                this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
-                this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd);
+                this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd, meter.getCommunityId());
+                this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd, meter.getCommunityId());
+                this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd, meter.getCommunityId());
+                this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd, meter.getCommunityId());
 
                 // 创建一条初始读表记录
                 ReadEnergyMeterCommand readEnergyMeterCmd = new ReadEnergyMeterCommand();

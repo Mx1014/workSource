@@ -53,8 +53,8 @@ public class EnergyMeterDefaultSettingProviderImpl implements EnergyMeterDefault
     public List<EnergyMeterDefaultSetting> listDefaultSetting(Long ownerId, String ownerType, Long communityId, Integer namespaceId, Byte meterType) {
         SelectQuery<EhEnergyMeterDefaultSettingsRecord> query = context().selectFrom(EH_ENERGY_METER_DEFAULT_SETTINGS)
                 .where(EH_ENERGY_METER_DEFAULT_SETTINGS.NAMESPACE_ID.eq(namespaceId))
-                .and(EH_ENERGY_METER_DEFAULT_SETTINGS.OWNER_ID.eq(ownerId))
-                .and(EH_ENERGY_METER_DEFAULT_SETTINGS.OWNER_TYPE.eq(ownerType))
+//                .and(EH_ENERGY_METER_DEFAULT_SETTINGS.OWNER_ID.eq(ownerId))
+//                .and(EH_ENERGY_METER_DEFAULT_SETTINGS.OWNER_TYPE.eq(ownerType))
                 .and(EH_ENERGY_METER_DEFAULT_SETTINGS.COMMUNITY_ID.eq(communityId))
                 .getQuery();
         if (meterType != null) {
