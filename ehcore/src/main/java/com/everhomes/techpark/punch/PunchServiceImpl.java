@@ -4820,7 +4820,17 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue((dto.getLeaveTime()==null)?"":timeSF.get().format(convertTime(dto.getLeaveTime())));
 		row.createCell(++i).setCellValue(String.valueOf(dto.getPunchCount()));
 		row.createCell(++i).setCellValue(convertTimeLongToString(dto.getWorkTime()));
-		row.createCell(++i).setCellValue(dto.getStatuString());
+        if (null != dto.getApprovalRecords()) {
+            StringBuilder sb = new StringBuilder();
+            for (GeneralApprovalRecordDTO record : dto.getApprovalRecords()) {
+                sb.append(record.getApprovalNo());
+            }
+            row.createCell(++i).setCellValue(sb.toString());
+        }else {
+            row.createCell(++i).setCellValue("");
+        }
+        row.createCell(++i).setCellValue(dto.getStatuString());
+        row.createCell(++i).setCellValue(dto.getApprovalStatuString());
 
 	}
 
@@ -4835,7 +4845,9 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue("最晚打卡");
 		row.createCell(++i).setCellValue("打卡次数");
 		row.createCell(++i).setCellValue("工作时长");
-		row.createCell(++i).setCellValue("状态");
+        row.createCell(++i).setCellValue("审批单");
+        row.createCell(++i).setCellValue("状态");
+        row.createCell(++i).setCellValue("校正状态");
 	}
 	private Organization checkOrganization(Long orgId) {
 		Organization org = organizationProvider.findOrganizationById(orgId);
