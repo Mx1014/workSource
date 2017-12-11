@@ -9,4 +9,7 @@ public interface WorkReportValProvider {
     WorkReportVal getWorkReportValById(Long id);
 
     void createWorkReportValReceiverMap(WorkReportValReceiverMap receiver);
+
+    void deleteReportValReceiverByValId(Long valId);
+
 }

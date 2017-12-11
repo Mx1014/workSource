@@ -63,34 +63,13 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
 	@Override
 	public GeneralFormDTO getTemplateByFormId(GetTemplateByFormIdCommand cmd) {
-		//
 		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd.getFormId());
 		if(form == null )
 			throw RuntimeErrorException.errorWith(GeneralApprovalServiceErrorCode.SCOPE, 
 					GeneralApprovalServiceErrorCode.ERROR_FORM_NOTFOUND, "form not found");
 
 		GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
-//		form.setFormVersion(form.getFormVersion());
 		List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-//		//增加一个隐藏的field 用于存放sourceId
-//		GeneralFormFieldDTO sourceIdField = new GeneralFormFieldDTO();
-//		sourceIdField.setDataSourceType(GeneralFormDataSourceType.SOURCE_ID.getCode());
-//		sourceIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-//		sourceIdField.setFieldName(GeneralFormDataSourceType.SOURCE_ID.getCode());
-//		sourceIdField.setRequiredFlag(NormalFlag.NEED.getCode());
-//		sourceIdField.setDynamicFlag(NormalFlag.NEED.getCode());
-//		sourceIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
-//		fieldDTOs.add(sourceIdField);
-		
-//		GeneralFormFieldDTO organizationIdField = new GeneralFormFieldDTO();
-//		organizationIdField.setDataSourceType(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
-//		organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-//		organizationIdField.setFieldName(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
-//		organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
-//		organizationIdField.setDynamicFlag(NormalFlag.NEED.getCode());
-//		organizationIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
-//		fieldDTOs.add(organizationIdField);
-
 		dto.setFormFields(fieldDTOs);
 		return dto;
 	}

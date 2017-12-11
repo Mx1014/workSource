@@ -18,6 +18,7 @@ import com.everhomes.server.schema.tables.pojos.EhWorkReportVals;
 import com.everhomes.server.schema.tables.pojos.EhWorkReports;
 import com.everhomes.server.schema.tables.records.EhWorkReportScopeMapRecord;
 import com.everhomes.server.schema.tables.records.EhWorkReportTemplatesRecord;
+import com.everhomes.server.schema.tables.records.EhWorkReportValReceiverMapRecord;
 import com.everhomes.server.schema.tables.records.EhWorkReportsRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -83,5 +84,13 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         EhWorkReportValReceiverMapDao dao = new EhWorkReportValReceiverMapDao(context.configuration());
         dao.insert(receiver);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhWorkReportValReceiverMap.class, null);
+    }
+
+    @Override
+    public void deleteReportValReceiverByValId(Long valId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        DeleteQuery<EhWorkReportValReceiverMapRecord> query = context.deleteQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP);
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.REPORT_VAL_ID.eq(valId));
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWorkReportScopeMap.class, null);
     }
 }

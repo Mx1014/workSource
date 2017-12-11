@@ -7,6 +7,8 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.general_approval.CreateFormTemplatesCommand;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GetTemplateByFormIdCommand;
 import com.everhomes.rest.general_approval.PostGeneralFormCommand;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
@@ -377,6 +379,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         val.setOrganizationId(cmd.getOrganizationId());
         val.setModuleId(report.getModuleId());
         val.setModuleType(report.getModuleType());
+        val.setStatus(WorkReportStatus.VALID.getCode());
         //  set the content.
 /*        switch (WorkReportType.fromCode(cmd.getReportType())){
             case DAY:
@@ -414,16 +417,46 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Override
     public void deleteWorkReportVal(WorkReportValIdCommand cmd) {
-
+        WorkReportVal reportVal = workReportValProvider.getWorkReportValById(cmd.getReportValId());
+        if (reportVal != null) {
+            reportVal.setStatus(WorkReportStatus.INVALID.getCode());
+            dbProvider.execute((TransactionStatus status) -> {
+                //  1.delete the report value.
+                workReportValProvider.updateWorkReportVal(reportVal);
+                //  2.delete the report receivers.
+                workReportValProvider.deleteReportValReceiverByValId(reportVal.getId());
+                return null;
+            });
+        }
     }
 
     @Override
     public void updateWorkReportVal(PostWorkReportValCommand cmd) {
-
     }
 
     @Override
     public WorkReportValDTO getWorkReportValItem(WorkReportValIdCommand cmd) {
+        //  1.the reportValId is null means posting the report val.
+        //  2.the reportValId is not null means updating the report val.
+        WorkReportValDTO dto = new WorkReportValDTO();
+
+        if (cmd.getReportValId() != null) {
+            WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
+            WorkReportVal reportVal = workReportValProvider.getWorkReportValById(cmd.getReportValId());
+            dto.setReportId(report.getId());
+            dto.setReportType(reportVal.getReportType());
+            dto.setReportTime(reportVal.getReportTime());
+        } else {
+            WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
+            GetTemplateByFormIdCommand formCommand = new GetTemplateByFormIdCommand();
+            formCommand.setFormId(report.getFormOriginId());
+            GeneralFormDTO form = generalFormService.getTemplateByFormId(formCommand);
+            dto.setReportId(report.getId());
+            dto.setReportType(report.getReportType());
+            dto.setValues(form.getFormFields());
+            dto.setTitle(report.getReportName());
+            return dto;
+        }
         return null;
     }
 
