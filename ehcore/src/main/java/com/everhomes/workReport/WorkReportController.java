@@ -268,7 +268,7 @@ public class WorkReportController extends ControllerBase{
      * <p>4-8.当前用户汇报单均标记为已读 </p>
      */
     @RequestMapping("MarkWorkReportsValReading")
-    @RestReturn(value=Integer.class)
+    @RestReturn(value=String.class)
     public RestResponse MarkWorkReportsValReading() {
         workReportService.MarkWorkReportsValReading();
         RestResponse response = new RestResponse();
