@@ -3050,6 +3050,7 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue("应打卡天数");
 		row.createCell(++i).setCellValue("正常天数");
 		row.createCell(++i).setCellValue("异常天数");
+        row.createCell(++i).setCellValue("异常申请次数");
 		row.createCell(++i).setCellValue("缺勤小时数");
 		row.createCell(++i).setCellValue("迟到次数");
 		row.createCell(++i).setCellValue("早退次数");
@@ -3080,7 +3081,8 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue(statistic.getWorkDayCount());
 		row.createCell(++i).setCellValue(statistic.getWorkCount());
 		row.createCell(++i).setCellValue(statistic.getExceptionDayCount());
-		row.createCell(++i).setCellValue(statistic.getUnpunchCount());
+        row.createCell(++i).setCellValue(statistic.getExceptionRequestCount());
+        row.createCell(++i).setCellValue(statistic.getUnpunchCount());
 		row.createCell(++i).setCellValue(statistic.getBelateCount());
 		row.createCell(++i).setCellValue(statistic.getLeaveEarlyCount());
 		row.createCell(++i).setCellValue(statistic.getBlandleCount());

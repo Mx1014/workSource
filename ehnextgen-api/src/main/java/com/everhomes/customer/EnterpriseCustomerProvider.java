@@ -74,6 +74,18 @@ public interface EnterpriseCustomerProvider {
     CustomerInvestment findCustomerInvestmentById(Long id);
     List<CustomerInvestment> listCustomerInvestmentsByCustomerId(Long customerId);
 
+    void createCustomerEntryInfo(CustomerEntryInfo entryInfo);
+    void updateCustomerEntryInfo(CustomerEntryInfo entryInfo);
+    void deleteCustomerEntryInfo(CustomerEntryInfo entryInfo);
+    CustomerEntryInfo findCustomerEntryInfoById(Long id);
+    List<CustomerEntryInfo> listCustomerEntryInfos(Long customerId);
+
+    void createCustomerDepartureInfo(CustomerDepartureInfo departureInfo);
+    void updateCustomerDepartureInfo(CustomerDepartureInfo departureInfo);
+    void deleteCustomerDepartureInfo(CustomerDepartureInfo departureInfo);
+    CustomerDepartureInfo findCustomerDepartureInfoById(Long id);
+    List<CustomerDepartureInfo> listCustomerDepartureInfos(Long customerId);
+
     void createCustomerEconomicIndicator(CustomerEconomicIndicator economicIndicator);
     void updateCustomerEconomicIndicator(CustomerEconomicIndicator economicIndicator);
     void deleteCustomerEconomicIndicator(CustomerEconomicIndicator economicIndicator);

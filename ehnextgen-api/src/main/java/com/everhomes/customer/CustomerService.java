@@ -67,6 +67,18 @@ public interface CustomerService {
     CustomerEconomicIndicatorDTO getCustomerEconomicIndicator(GetCustomerEconomicIndicatorCommand cmd);
     List<CustomerEconomicIndicatorDTO> listCustomerEconomicIndicators(ListCustomerEconomicIndicatorsCommand cmd);
 
+    void createCustomerEntryInfo(CreateCustomerEntryInfoCommand cmd);
+    void updateCustomerEntryInfo(UpdateCustomerEntryInfoCommand cmd);
+    void deleteCustomerEntryInfo(DeleteCustomerEntryInfoCommand cmd);
+    CustomerEntryInfoDTO getCustomerEntryInfo(GetCustomerEntryInfoCommand cmd);
+    List<CustomerEntryInfoDTO> listCustomerEntryInfos(ListCustomerEntryInfosCommand cmd);
+
+    void createCustomerDepartureInfo(CreateCustomerDepartureInfoCommand cmd);
+    void updateCustomerDepartureInfo(UpdateCustomerDepartureInfoCommand cmd);
+    void deleteCustomerDepartureInfo(DeleteCustomerDepartureInfoCommand cmd);
+    CustomerDepartureInfoDTO getCustomerDepartureInfo(GetCustomerDepartureInfoCommand cmd);
+    List<CustomerDepartureInfoDTO> listCustomerDepartureInfos(ListCustomerDepartureInfosCommand cmd);
+
     EnterpriseCustomerStatisticsDTO listEnterpriseCustomerStatistics(ListEnterpriseCustomerStatisticsCommand cmd);
     CustomerIndustryStatisticsResponse listCustomerIndustryStatistics(ListEnterpriseCustomerStatisticsCommand cmd);
     CustomerIntellectualPropertyStatisticsResponse listCustomerIntellectualPropertyStatistics(ListEnterpriseCustomerStatisticsCommand cmd);
