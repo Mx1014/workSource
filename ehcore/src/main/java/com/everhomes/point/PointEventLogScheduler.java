@@ -158,7 +158,6 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                         PointEventLogStatus.WAITING_FOR_PROCESS.getCode(), 1000, locator);
                 List<Long> idList = pointEventLogs.stream().map(PointEventLog::getId).collect(Collectors.toList());
 
-
                 final List<PointResultAction> actions = new ArrayList<>();
                 dbProvider.execute(s -> {
                     pointEventLogProvider.updatePointEventLogStatus(idList, PointEventLogStatus.PROCESSING.getCode());
@@ -172,8 +171,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                             continue;
                         }
 
-                        List<PointRule> pointRules = pointRuleProvider.listPointRuleByEventName(log.getNamespaceId(),
-                                pointSystem.getId(), log.getEventName());
+                        List<PointRule> pointRules = getPointRules(pointSystem, log);
                         for (PointRule rule : pointRules) {
                             PointCommonStatus status = PointCommonStatus.fromCode(rule.getStatus());
                             if (status == PointCommonStatus.DISABLED) {
@@ -187,7 +185,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
 
                             List<PointAction> pointActions = pointActionProvider.listByOwner(pointSystem.getNamespaceId(), pointSystem.getId(), EhPointRules.class.getSimpleName(), rule.getId());
                             List<PointResultAction> resultActions = processor.getResultActions(pointActions, log, rule, pointSystem, category);
-                            if (resultActions != null) {
+                            if (resultActions != null && resultActions.size() > 0) {
                                 actions.addAll(resultActions);
                             }
 
@@ -217,6 +215,22 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                 });
             } while (locator.getAnchor() != null);
         }
+    }
+
+    private List<PointRule> getPointRules(PointSystem pointSystem, PointEventLog log) {
+        String[] split = log.getEventName().split("\\.");
+        String eventName = StringUtils.join(split, ".");
+
+        for (int i = split.length; i >= 0; i--) {
+            List<PointRule> pointRules = pointRuleProvider.listPointRuleByEventName(log.getNamespaceId(), pointSystem.getId(), eventName);
+            if (pointRules != null && pointRules.size() > 0) {
+                return pointRules;
+            }
+            String[] tokens = new String[i];
+            System.arraycopy(split, 0, tokens, 0, i);
+            eventName = StringUtils.join(tokens, ".");
+        }
+        return new ArrayList<>();
     }
 
     private PointEventProcessor getPointEventProcessor(String eventName) {

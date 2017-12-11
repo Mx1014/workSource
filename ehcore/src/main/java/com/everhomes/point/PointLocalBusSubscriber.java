@@ -191,7 +191,7 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
         log.setStatus(PointEventLogStatus.WAITING_FOR_PROCESS.getCode());
         log.setEventJson(StringHelper.toJsonString(localEvent));
 
-        PointEventGroup eventGroup = eventNameToPointEventGroupMap.get(localEvent.getEventName());
+        PointEventGroup eventGroup = eventNameToPointEventGroupMap.get(subscriptionPath);
         pointEventGroupCache.computeIfPresent(eventGroup, (group, pointEventLogs) -> {
             log.setCategoryId(eventGroup.getCategory().getId());
             pointEventLogs.add(log);

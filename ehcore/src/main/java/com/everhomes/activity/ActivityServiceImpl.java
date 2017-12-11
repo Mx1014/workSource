@@ -579,7 +579,7 @@ public class ActivityServiceImpl implements ActivityService {
 
 			event.setEntityType(EhForumPosts.class.getSimpleName());
 			event.setEntityId(postTemp.getId());
-			event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ENTER.suffix(postTemp.getModuleCategoryId()));
+			event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ENTER.suffix(postTemp.getModuleType(), postTemp.getModuleCategoryId()));
 		});
 	}
 
@@ -1857,12 +1857,12 @@ public class ActivityServiceImpl implements ActivityService {
 	        });
         }).first();
 
-		activityCancelSignupPoints(cmd.getActivityId());
+		activityCancelSignupEvent(cmd.getActivityId());
 		return  resDto;
     }
 
 
-	private void activityCancelSignupPoints(Long activityId){
+	private void activityCancelSignupEvent(Long activityId){
 		Activity activityTemp = activityProvider.findActivityById(activityId);
 		if(activityTemp == null){
 			return;
@@ -1884,7 +1884,7 @@ public class ActivityServiceImpl implements ActivityService {
 
 			event.setEntityType(EhForumPosts.class.getSimpleName());
 			event.setEntityId(postTemp.getId());
-			event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ENTER_CANCEL.suffix(postTemp.getModuleCategoryId()));
+			event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ENTER_CANCEL.suffix(postTemp.getModuleType(), postTemp.getModuleCategoryId()));
 		});
 	}
 

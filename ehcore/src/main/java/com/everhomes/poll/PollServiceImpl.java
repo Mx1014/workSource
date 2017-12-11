@@ -1,21 +1,25 @@
 // @formatter:off
 package com.everhomes.poll;
 
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
-import java.util.stream.Collectors;
-
 import com.everhomes.bus.LocalEventBus;
 import com.everhomes.bus.LocalEventContext;
 import com.everhomes.bus.SystemEvent;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.family.Family;
+import com.everhomes.family.FamilyProvider;
+import com.everhomes.forum.ForumProvider;
+import com.everhomes.forum.Post;
+import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.rest.poll.*;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StatusChecker;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -24,21 +28,12 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
-import com.everhomes.family.Family;
-import com.everhomes.family.FamilyProvider;
-import com.everhomes.forum.ForumProvider;
-import com.everhomes.forum.Post;
-import com.everhomes.poll.PollService;
-import com.everhomes.rest.forum.PostContentType;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StatusChecker;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class PollServiceImpl implements PollService {
@@ -227,14 +222,12 @@ public class PollServiceImpl implements PollService {
         dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:poll.getAnonymousFlag().intValue());
         dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:poll.getMultiSelectFlag().intValue());
 
-        //投票对接积分 add by yanjun 20171211
-        votePoints(post.getId(), post.getModuleCategoryId());
-
+        //投票 add by yanjun 20171211
+        voteEvents(post);
         return dto;
     }
 
-    private void votePoints(Long postId, Long moduleCategoryId){
-
+    private void voteEvents(Post post) {
         Long  userId = UserContext.currentUserId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
@@ -245,8 +238,8 @@ public class PollServiceImpl implements PollService {
             event.setContext(context);
 
             event.setEntityType(EhForumPosts.class.getSimpleName());
-            event.setEntityId(postId);
-            event.setEventName(SystemEvent.FORM_POST_VOTE.suffix(moduleCategoryId));
+            event.setEntityId(post.getId());
+            event.setEventName(SystemEvent.FORM_POST_VOTE.suffix(post.getModuleType(), post.getModuleCategoryId()));
         });
     }
 

@@ -67,12 +67,22 @@ public class ForumCommentHandler implements CommentHandler {
 		commentDto.setOwnerToken(cmd.getOwnerToken());
 
 		//评论对接积分  add by yanjun 20171211
-		createPostCommentPoints(post.getId(), post.getModuleType(), post.getModuleCategoryId());
+		// createPostCommentPoints(post.getId(), post.getModuleType(), post.getModuleCategoryId());
 
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(UserContext.currentUserId());
+            context.setNamespaceId(UserContext.getCurrentNamespaceId());
+            event.setContext(context);
+
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(postDTO.getId());
+            event.setEventName(SystemEvent.FORM_COMMENT_CREATE.suffix(postDTO.getModuleType(), postDTO.getModuleCategoryId()));
+        });
 		return commentDto;
 	}
 
-	private void createPostCommentPoints(Long parentPostId, Byte parentModuleType, Long moduleCategoryId){
+	/*private void createPostCommentPoints(Long parentPostId, Byte parentModuleType, Long moduleCategoryId){
 		String eventName = null;
 		switch (ForumModuleType.fromCode(parentModuleType)){
 			case FORUM:
@@ -109,7 +119,7 @@ public class ForumCommentHandler implements CommentHandler {
 			event.setEntityId(parentPostId);
 			event.setEventName(finalEventName);
 		});
-	}
+	}*/
 
 	@Override
 	public ListCommentsResponse listComments(ListCommentsCommand cmd) {
@@ -143,11 +153,23 @@ public class ForumCommentHandler implements CommentHandler {
 		this.forumService.deletePost(null, cmd.getId(), null, null, null);
 
 		//删除评论对接积分 add by yanjun 20171211
-		deletePostCommentPoints(cmd.getId());
+		// deletePostCommentPoints(cmd.getId());
+
+        Post tempPost = forumProvider.findPostById(cmd.getId());
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(UserContext.currentUserId());
+            context.setNamespaceId(UserContext.getCurrentNamespaceId());
+            event.setContext(context);
+
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(tempPost.getId());
+            event.setEventName(SystemEvent.FORM_COMMENT_DELETE.suffix(tempPost.getModuleType(), tempPost.getModuleCategoryId()));
+        });
 	}
 
 
-	private void deletePostCommentPoints(Long postCommentId){
+	/*private void deletePostCommentPoints(Long postCommentId){
 		Post commentPost = forumProvider.findPostById(postCommentId);
 		if(commentPost == null){
 			return;
@@ -195,7 +217,7 @@ public class ForumCommentHandler implements CommentHandler {
 			event.setEntityId(post.getId());
 			event.setEventName(finalEventName);
 		});
-	}
+	}*/
 
 	private CommentDTO toCommentDTO(PostDTO postDTO){
 		CommentDTO commentDto = ConvertHelper.convert(postDTO, CommentDTO.class);

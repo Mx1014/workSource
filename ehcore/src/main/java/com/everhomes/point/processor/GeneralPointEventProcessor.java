@@ -49,6 +49,11 @@ public class GeneralPointEventProcessor implements PointEventProcessor {
             return null;
         }
 
+        boolean passLimit = doLimit(localEvent, rule, pointSystem);
+        if (!passLimit) {
+            return null;
+        }
+
         Long uid = localEvent.getContext().getUid();
         Integer namespaceId = localEvent.getContext().getNamespaceId();
 
@@ -73,11 +78,6 @@ public class GeneralPointEventProcessor implements PointEventProcessor {
         pointLog.setCategoryName(pointRuleCategory.getDisplayName());
 
         Long points = rule.getPoints();
-
-        boolean passLimit = doLimit(localEvent, rule, pointSystem);
-        if (!passLimit) {
-            return null;
-        }
 
         if (rule.getBindingEventName() != null && rule.getBindingEventName().trim().length() > 0) {
             PointLog bindingPointLog = pointLogProvider.findByUidAndEntity(namespaceId, uid,

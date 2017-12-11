@@ -586,13 +586,11 @@ public class UserActivityServiceImpl implements UserActivityService {
 			 }
 		}
 
-		//举报管理对接积分 add by yanjun 20171211
-        updateFeedbackPoints(feedback);
-
+		//举报管理事件 add by yanjun 20171211
+        feedbackEvent(feedback);
 	}
 
-    private void updateFeedbackPoints(Feedback feedback){
-
+    private void feedbackEvent(Feedback feedback){
         //此处只对接帖子的举报
         if(feedback.getTargetType() != FeedbackTargetType.POST.getCode()){
             return;
@@ -602,7 +600,7 @@ public class UserActivityServiceImpl implements UserActivityService {
             return;
         }
 
-        String eventName = null;
+        /*String eventName = null;
         switch (ForumModuleType.fromCode(post.getModuleType())){
             case FORUM:
                 eventName = SystemEvent.FORM_POST_REPORT.suffix(post.getModuleCategoryId());
@@ -623,7 +621,7 @@ public class UserActivityServiceImpl implements UserActivityService {
             return;
         }
 
-        final String finalEventName = eventName;
+        final String finalEventName = eventName;*/
 
         Long  userId = UserContext.currentUserId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -636,7 +634,7 @@ public class UserActivityServiceImpl implements UserActivityService {
 
             event.setEntityType(EhForumPosts.class.getSimpleName());
             event.setEntityId(post.getId());
-            event.setEventName(finalEventName);
+            event.setEventName(SystemEvent.FORM_POST_REPORT.suffix(post.getModuleType(), post.getModuleCategoryId()));
         });
     }
 	

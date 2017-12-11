@@ -9,11 +9,13 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.OfficialActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.point.PointArithmeticType;
 import com.everhomes.rest.point.PointCommonStatus;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.StringHelper;
+import freemarker.template.Configuration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +30,8 @@ public class PointResultMessageAction implements PointResultAction {
     private PointRule pointRule;
     private PointEventLog pointEventLog;
 
+    private Configuration configuration;
+
     public PointResultMessageAction(PointAction pointAction, PointSystem pointSystem, PointRule pointRule, PointEventLog pointEventLog) {
         this.pointAction = pointAction;
         this.pointSystem = pointSystem;
@@ -36,6 +40,8 @@ public class PointResultMessageAction implements PointResultAction {
 
         messagingService = PlatformContext.getComponent(MessagingService.class);
         pointService = PlatformContext.getComponent(PointService.class);
+
+        configuration = new Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
     }
 
     public void doAction() {
@@ -54,7 +60,22 @@ public class PointResultMessageAction implements PointResultAction {
         }
 
         LocalEvent localEvent = (LocalEvent) StringHelper.fromJsonString(pointEventLog.getEventJson(), LocalEvent.class);
+
+        Long points = 0L;
+        PointArithmeticType arithmeticType = PointArithmeticType.fromCode(pointRule.getArithmeticType());
+        switch (arithmeticType) {
+            case SUBTRACT:
+                points = -pointRule.getPoints();
+                break;
+            case ADD:
+                points = pointRule.getPoints();
+        }
+
+        Map<String, String> map = new HashMap<>();
+        map.put("points", String.valueOf(points));
+
         String content = pointAction.getContent();
+        content = StringHelper.interpolate(content, map);
 
         MessageDTO messageDto = new MessageDTO();
         messageDto.setBodyType(MessageBodyType.TEXT.getCode());
