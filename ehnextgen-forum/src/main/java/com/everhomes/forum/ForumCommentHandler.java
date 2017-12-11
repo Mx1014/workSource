@@ -1,11 +1,15 @@
 // @formatter:off
 package com.everhomes.forum;
+import com.everhomes.bus.LocalEventBus;
+import com.everhomes.bus.LocalEventContext;
+import com.everhomes.bus.SystemEvent;
 import com.everhomes.comment.CommentHandler;
 import com.everhomes.rest.comment.*;
 import com.everhomes.rest.comment.AttachmentDTO;
 import com.everhomes.rest.comment.DeleteCommonCommentCommand;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -62,7 +66,49 @@ public class ForumCommentHandler implements CommentHandler {
 		CommentDTO commentDto = toCommentDTO(postDTO);
 		commentDto.setOwnerToken(cmd.getOwnerToken());
 
+		//评论对接积分  add by yanjun 20171211
+		createPostCommentPoints(post.getId(), post.getModuleType(), post.getModuleCategoryId());
+
 		return commentDto;
+	}
+
+	private void createPostCommentPoints(Long parentPostId, Byte parentModuleType, Long moduleCategoryId){
+		String eventName = null;
+		switch (ForumModuleType.fromCode(parentModuleType)){
+			case FORUM:
+				eventName = SystemEvent.FORM_COMMENT_CREATE.suffix(moduleCategoryId);
+				break;
+			case ACTIVITY:
+				eventName = SystemEvent.ACTIVITY_COMMENT_CREATE.suffix(moduleCategoryId);
+				break;
+			case ANNOUNCEMENT:
+				break;
+			case CLUB:
+				break;
+			case GUILD:
+				break;
+			case FEEDBACK:
+				break;
+		}
+		if(eventName == null){
+			return;
+		}
+
+		final String finalEventName = eventName;
+
+		Long  userId = UserContext.currentUserId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		LocalEventBus.publish(event -> {
+			LocalEventContext context = new LocalEventContext();
+			context.setUid(userId);
+			context.setNamespaceId(namespaceId);
+			event.setContext(context);
+
+			event.setEntityType(EhForumPosts.class.getSimpleName());
+			event.setEntityId(parentPostId);
+			event.setEventName(finalEventName);
+		});
 	}
 
 	@Override
@@ -95,8 +141,61 @@ public class ForumCommentHandler implements CommentHandler {
 	@Override
 	public void deleteComment(DeleteCommonCommentCommand cmd) {
 		this.forumService.deletePost(null, cmd.getId(), null, null, null);
+
+		//删除评论对接积分 add by yanjun 20171211
+		deletePostCommentPoints(cmd.getId());
 	}
 
+
+	private void deletePostCommentPoints(Long postCommentId){
+		Post commentPost = forumProvider.findPostById(postCommentId);
+		if(commentPost == null){
+			return;
+		}
+
+		final Post post = forumProvider.findPostById(commentPost.getParentPostId());
+		if(post == null){
+			return;
+		}
+
+
+		String eventName = null;
+		switch (ForumModuleType.fromCode(post.getModuleType())){
+			case FORUM:
+				eventName = SystemEvent.FORM_COMMENT_DELETE.suffix(post.getModuleCategoryId());
+				break;
+			case ACTIVITY:
+				eventName = SystemEvent.ACTIVITY_COMMENT_DELETE.suffix(post.getModuleCategoryId());
+				break;
+			case ANNOUNCEMENT:
+				break;
+			case CLUB:
+				break;
+			case GUILD:
+				break;
+			case FEEDBACK:
+				break;
+		}
+		if(eventName == null){
+			return;
+		}
+
+		final String finalEventName = eventName;
+
+		Long  userId = UserContext.currentUserId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		LocalEventBus.publish(event -> {
+			LocalEventContext context = new LocalEventContext();
+			context.setUid(userId);
+			context.setNamespaceId(namespaceId);
+			event.setContext(context);
+
+			event.setEntityType(EhForumPosts.class.getSimpleName());
+			event.setEntityId(post.getId());
+			event.setEventName(finalEventName);
+		});
+	}
 
 	private CommentDTO toCommentDTO(PostDTO postDTO){
 		CommentDTO commentDto = ConvertHelper.convert(postDTO, CommentDTO.class);

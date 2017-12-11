@@ -11,7 +11,11 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
+import com.everhomes.bus.LocalEventBus;
+import com.everhomes.bus.LocalEventContext;
+import com.everhomes.bus.SystemEvent;
 import com.everhomes.rest.poll.*;
+import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -222,7 +226,28 @@ public class PollServiceImpl implements PollService {
         dto.setProcessStatus(getStatus(poll).getCode());
         dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:poll.getAnonymousFlag().intValue());
         dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:poll.getMultiSelectFlag().intValue());
+
+        //投票对接积分 add by yanjun 20171211
+        votePoints(post.getId(), post.getModuleCategoryId());
+
         return dto;
+    }
+
+    private void votePoints(Long postId, Long moduleCategoryId){
+
+        Long  userId = UserContext.currentUserId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(userId);
+            context.setNamespaceId(namespaceId);
+            event.setContext(context);
+
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(postId);
+            event.setEventName(SystemEvent.FORM_POST_VOTE.suffix(moduleCategoryId));
+        });
     }
 
 

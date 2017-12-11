@@ -4,6 +4,9 @@ package com.everhomes.activity;
 import ch.hsr.geohash.GeoHash;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.bus.LocalEventBus;
+import com.everhomes.bus.LocalEventContext;
+import com.everhomes.bus.SystemEvent;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -80,6 +83,7 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.server.schema.tables.pojos.EhActivityCategories;
+import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
@@ -371,7 +375,7 @@ public class ActivityServiceImpl implements ActivityService {
     	this.cancelExpireRosters(cmd.getActivityId());
 
     	// 把锁放在查询语句的外面，update by tt, 20170210
-    	return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
+    	ActivityDTO resDto = (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 	        return (ActivityDTO)dbProvider.execute((status) -> {
 
 				LOGGER.warn("------signup start ");
@@ -546,8 +550,38 @@ public class ActivityServiceImpl implements ActivityService {
 	            return dto;
 	        });
         }).first();
+
+    	//活动报名对接积分 add by yanjun 20171211
+		activitySignPoints(cmd.getActivityId());
+    	return resDto;
 	 }
 
+
+	private void activitySignPoints(Long activityId){
+		Activity activityTemp = activityProvider.findActivityById(activityId);
+		if(activityTemp == null){
+			return;
+		}
+
+		Post postTemp = forumProvider.findPostById(activityTemp.getPostId());
+		if(postTemp == null){
+			return;
+		}
+
+		Long  userId = UserContext.currentUserId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		LocalEventBus.publish(event -> {
+			LocalEventContext context = new LocalEventContext();
+			context.setUid(userId);
+			context.setNamespaceId(namespaceId);
+			event.setContext(context);
+
+			event.setEntityType(EhForumPosts.class.getSimpleName());
+			event.setEntityId(postTemp.getId());
+			event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ENTER.suffix(postTemp.getModuleCategoryId()));
+		});
+	}
 
 	 private void checkPayVersion(ActivitySignupCommand cmd){
 		 Activity activity = activityProvider.findActivityById(cmd.getActivityId());
@@ -1737,8 +1771,8 @@ public class ActivityServiceImpl implements ActivityService {
 
 	@Override
     public ActivityDTO cancelSignup(ActivityCancelSignupCommand cmd) {
-		
-		return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
+
+		ActivityDTO resDto =  (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 	        return (ActivityDTO)dbProvider.execute((status) -> {
 				LOGGER.warn("------- cancelSignup start ");
 	        	long cancelStartTime = System.currentTimeMillis();
@@ -1822,7 +1856,37 @@ public class ActivityServiceImpl implements ActivityService {
 	        	
 	        });
         }).first();
+
+		activityCancelSignupPoints(cmd.getActivityId());
+		return  resDto;
     }
+
+
+	private void activityCancelSignupPoints(Long activityId){
+		Activity activityTemp = activityProvider.findActivityById(activityId);
+		if(activityTemp == null){
+			return;
+		}
+
+		Post postTemp = forumProvider.findPostById(activityTemp.getPostId());
+		if(postTemp == null){
+			return;
+		}
+
+		Long  userId = UserContext.currentUserId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		LocalEventBus.publish(event -> {
+			LocalEventContext context = new LocalEventContext();
+			context.setUid(userId);
+			context.setNamespaceId(namespaceId);
+			event.setContext(context);
+
+			event.setEntityType(EhForumPosts.class.getSimpleName());
+			event.setEntityId(postTemp.getId());
+			event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ENTER_CANCEL.suffix(postTemp.getModuleCategoryId()));
+		});
+	}
 
 	public void signupOrderRefund(Activity activity, Long userId){
 		long startTime = System.currentTimeMillis();

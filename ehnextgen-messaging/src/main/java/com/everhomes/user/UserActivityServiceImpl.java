@@ -5,6 +5,9 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.bus.LocalEventBus;
+import com.everhomes.bus.LocalEventContext;
+import com.everhomes.bus.SystemEvent;
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
 import com.everhomes.community.Community;
@@ -52,6 +55,7 @@ import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
+import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.statistics.terminal.AppVersion;
 import com.everhomes.statistics.terminal.StatTerminalProvider;
@@ -581,7 +585,60 @@ public class UserActivityServiceImpl implements UserActivityService {
 				 forumService.deletePost(post.getForumId(), post.getId(), null, null, null);
 			 }
 		}
+
+		//举报管理对接积分 add by yanjun 20171211
+        updateFeedbackPoints(feedback);
+
 	}
+
+    private void updateFeedbackPoints(Feedback feedback){
+
+        //此处只对接帖子的举报
+        if(feedback.getTargetType() != FeedbackTargetType.POST.getCode()){
+            return;
+        }
+        Post post = forumProvider.findPostById(feedback.getTargetId());
+        if(post == null){
+            return;
+        }
+
+        String eventName = null;
+        switch (ForumModuleType.fromCode(post.getModuleType())){
+            case FORUM:
+                eventName = SystemEvent.FORM_POST_REPORT.suffix(post.getModuleCategoryId());
+                break;
+            case ACTIVITY:
+                eventName = SystemEvent.ACTIVITY_ACTIVITY_REPORT.suffix(post.getModuleCategoryId());
+                break;
+            case ANNOUNCEMENT:
+                break;
+            case CLUB:
+                break;
+            case GUILD:
+                break;
+            case FEEDBACK:
+                break;
+        }
+        if(eventName == null){
+            return;
+        }
+
+        final String finalEventName = eventName;
+
+        Long  userId = UserContext.currentUserId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(userId);
+            context.setNamespaceId(namespaceId);
+            event.setContext(context);
+
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(post.getId());
+            event.setEventName(finalEventName);
+        });
+    }
 	
     @Override
     public void addUserFavorite(AddUserFavoriteCommand cmd) {

@@ -37,6 +37,7 @@ public enum SystemEvent {
     // 活动
     ACTIVITY_ACTIVITY_CREATE("activity.activity_create"),
     ACTIVITY_ACTIVITY_ENTER("activity.activity_enter"),
+    ACTIVITY_ACTIVITY_DELETE("activity.activity_delete"),
     ACTIVITY_ACTIVITY_ENTER_CANCEL("activity.activity_enter_cancel"),
     ACTIVITY_ACTIVITY_SHARE("activity.activity_share"),
     ACTIVITY_ACTIVITY_LIKE("activity.activity_like"),
