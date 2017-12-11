@@ -49,7 +49,7 @@ public interface ContractProvider {
 
 	void createContractParam(ContractParam param);
 	void updateContractParam(ContractParam param);
-	ContractParam findContractParamByCommunityId(Long communityId);
+	ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId);
 	Map<Long, List<Contract>> listContractGroupByCommunity();
 	String findLastContractVersionByCommunity(Integer namespaceId, Long communityId);
 

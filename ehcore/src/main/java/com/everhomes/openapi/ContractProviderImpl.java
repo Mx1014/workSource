@@ -446,11 +446,18 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public ContractParam findContractParamByCommunityId(Long communityId) {
+	public ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId) {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhContractParamsRecord> query = context.selectQuery(Tables.EH_CONTRACT_PARAMS);
-		query.addConditions(Tables.EH_CONTRACT_PARAMS.COMMUNITY_ID.eq(communityId));
+		query.addConditions(Tables.EH_CONTRACT_PARAMS.NAMESPACE_ID.eq(namespaceId));
+		if(communityId != null) {
+			query.addConditions(Tables.EH_CONTRACT_PARAMS.COMMUNITY_ID.eq(communityId));
+		}
+		if(communityId == null) {
+			query.addConditions(Tables.EH_CONTRACT_PARAMS.COMMUNITY_ID.eq(0L)
+					.or(Tables.EH_CONTRACT_PARAMS.COMMUNITY_ID.isNull()));
+		}
 
 		List<ContractParam> result = new ArrayList<>();
 		query.fetch().map((r) -> {

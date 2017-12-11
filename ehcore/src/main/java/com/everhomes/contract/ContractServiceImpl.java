@@ -1195,7 +1195,7 @@ public class ContractServiceImpl implements ContractService {
 	@Override
 	public void setContractParam(SetContractParamCommand cmd) {
 		ContractParam param = ConvertHelper.convert(cmd, ContractParam.class);
-		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getCommunityId());
+		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId());
 		if(cmd.getId() == null && communityExist == null) {
 			contractProvider.createContractParam(param);
 		} else if(cmd.getId() != null && communityExist != null && cmd.getId().equals(communityExist.getId())){
@@ -1210,9 +1210,14 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public ContractParamDTO getContractParam(GetContractParamCommand cmd) {
-		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getCommunityId());
+		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId());
 		if(communityExist != null) {
 			return ConvertHelper.convert(communityExist, ContractParamDTO.class);
+		} else if(communityExist == null && cmd.getCommunityId() != null) {
+			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null);
+			if(communityExist != null) {
+				return ConvertHelper.convert(communityExist, ContractParamDTO.class);
+			}
 		}
 		return null;
 	}
