@@ -8712,7 +8712,7 @@ public class PunchServiceImpl implements PunchService {
 
     @Override
     public ListPunchLogsResponse listPunchLogs(ListPunchLogsCommand cmd) {
-        List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(cmd.getUserId(),cmd.getEnterpriseId(),
+        List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(cmd.getUserId(), cmd.getEnterpriseId(),
                 dateSF.get().format(new Date(cmd.getQueryTime())), ClockCode.SUCESS.getCode());
         if (null == punchLogs) {
             return null;

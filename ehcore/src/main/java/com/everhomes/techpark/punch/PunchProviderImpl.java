@@ -176,7 +176,7 @@ public class PunchProviderImpl implements PunchProvider {
 		step.where(condition);
 		List<PunchLog> result = step.orderBy(Tables.EH_PUNCH_LOGS.USER_ID.asc(),
 				Tables.EH_PUNCH_LOGS.PUNCH_DATE.asc(),Tables.EH_PUNCH_LOGS.PUNCH_INTERVAL_NO.asc(),
-				Tables.EH_PUNCH_LOGS.PUNCH_TYPE.asc())
+				Tables.EH_PUNCH_LOGS.PUNCH_TYPE.asc(),Tables.EH_PUNCH_LOGS.PUNCH_TIME.asc())
 				.fetch().map((r) -> {
 					return ConvertHelper.convert(r, PunchLog.class);
 				});
