@@ -5,15 +5,20 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.energy.EnergyCommonStatus;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnergyMeterFormulasDao;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterFormulas;
+import com.everhomes.server.schema.tables.records.EhEnergyMeterFormulasRecord;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.everhomes.server.schema.Tables.EH_ENERGY_METER_FORMULAS;
@@ -51,11 +56,33 @@ public class EnergyMeterFormulaProviderImpl implements EnergyMeterFormulaProvide
 
     @Override
     public List<EnergyMeterFormula> listMeterFormulas(Long ownerId, String ownerType, Long communityId, Integer namespaceId, Byte formulaType) {
+        List<EnergyMeterFormula> formulas = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectQuery<EhEnergyMeterFormulasRecord> query = context.selectQuery(EH_ENERGY_METER_FORMULAS);
+        query.addConditions(EH_ENERGY_METER_FORMULAS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(EH_ENERGY_METER_FORMULAS.OWNER_ID.eq(ownerId));
+        query.addConditions(EH_ENERGY_METER_FORMULAS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(EH_ENERGY_METER_FORMULAS.FORMULA_TYPE.eq(formulaType));
+        query.addConditions(EH_ENERGY_METER_FORMULAS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()));
+
+        if(communityId != null) {
+            query.addConditions(EH_ENERGY_METER_FORMULAS.COMMUNITY_ID.eq(communityId));
+        }
+
+        query.fetch().map((r) -> {
+            formulas.add(ConvertHelper.convert(r, EnergyMeterFormula.class));
+            return null;
+        });
+
+        return formulas;
+
+    }
+
+    @Override
+    public List<EnergyMeterFormula> listMeterFormulas(List<Long> formularIds, Byte formulaType) {
         return context().selectFrom(EH_ENERGY_METER_FORMULAS)
-                .where(EH_ENERGY_METER_FORMULAS.NAMESPACE_ID.eq(namespaceId))
-                .and(EH_ENERGY_METER_FORMULAS.OWNER_ID.eq(ownerId))
-                .and(EH_ENERGY_METER_FORMULAS.OWNER_TYPE.eq(ownerType))
-                .and(EH_ENERGY_METER_FORMULAS.COMMUNITY_ID.eq(communityId))
+                .where(EH_ENERGY_METER_FORMULAS.ID.in(formularIds))
                 .and(EH_ENERGY_METER_FORMULAS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
                 .and(EH_ENERGY_METER_FORMULAS.FORMULA_TYPE.eq(formulaType))
                 .fetchInto(EnergyMeterFormula.class);

@@ -7,13 +7,17 @@ import com.everhomes.rest.energy.EnergyCommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhEnergyMeterCategoriesDao;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterCategories;
+import com.everhomes.server.schema.tables.records.EhEnergyMeterCategoriesRecord;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.everhomes.server.schema.Tables.EH_ENERGY_METER_CATEGORIES;
@@ -57,14 +61,27 @@ public class EnergyMeterCategoryProviderImpl implements EnergyMeterCategoryProvi
 
     @Override
     public List<EnergyMeterCategory> listMeterCategories(Integer namespaceId, Byte categoryType, Long ownerId, String ownerType, Long communityId) {
-        return context().selectFrom(EH_ENERGY_METER_CATEGORIES)
-                .where(EH_ENERGY_METER_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
-                .and(EH_ENERGY_METER_CATEGORIES.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
-                .and(EH_ENERGY_METER_CATEGORIES.CATEGORY_TYPE.eq(categoryType))
-                .and(EH_ENERGY_METER_CATEGORIES.OWNER_ID.eq(ownerId))
-                .and(EH_ENERGY_METER_CATEGORIES.OWNER_TYPE.eq(ownerType))
-                .and(EH_ENERGY_METER_CATEGORIES.COMMUNITY_ID.eq(communityId))
-                .fetchInto(EnergyMeterCategory.class);
+        List<EnergyMeterCategory> categories = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectQuery<EhEnergyMeterCategoriesRecord> query = context.selectQuery(EH_ENERGY_METER_CATEGORIES);
+        query.addConditions(EH_ENERGY_METER_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(EH_ENERGY_METER_CATEGORIES.OWNER_ID.eq(ownerId));
+        query.addConditions(EH_ENERGY_METER_CATEGORIES.OWNER_TYPE.eq(ownerType));
+        query.addConditions(EH_ENERGY_METER_CATEGORIES.CATEGORY_TYPE.eq(categoryType));
+        query.addConditions(EH_ENERGY_METER_CATEGORIES.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()));
+
+        if(communityId != null) {
+            query.addConditions(EH_ENERGY_METER_CATEGORIES.COMMUNITY_ID.eq(communityId));
+        }
+
+        query.fetch().map((r) -> {
+            categories.add(ConvertHelper.convert(r, EnergyMeterCategory.class));
+            return null;
+        });
+
+        return categories;
+
     }
 
     @Override

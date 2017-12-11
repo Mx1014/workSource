@@ -138,6 +138,16 @@ public class EnergyMeterSettingLogProviderImpl implements EnergyMeterSettingLogP
     }
 
     @Override
+    public EnergyMeterSettingLog findAnySettingByFormulaId(Integer namespaceId, Long communityId, Long formulaId) {
+        return context().selectFrom(EH_ENERGY_METER_SETTING_LOGS)
+                .where(EH_ENERGY_METER_SETTING_LOGS.NAMESPACE_ID.eq(namespaceId))
+                .and(EH_ENERGY_METER_SETTING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
+                .and(EH_ENERGY_METER_SETTING_LOGS.FORMULA_ID.eq(formulaId))
+                .and(EH_ENERGY_METER_SETTING_LOGS.COMMUNITY_ID.eq(communityId))
+                .fetchAnyInto(EnergyMeterSettingLog.class);
+    }
+
+    @Override
     public EnergyMeterSettingLog findSettingByPriceConfigId(Integer namespaceId, Long priceConfigId) {
         return context().selectFrom(EH_ENERGY_METER_SETTING_LOGS)
                 .where(EH_ENERGY_METER_SETTING_LOGS.NAMESPACE_ID.eq(namespaceId))

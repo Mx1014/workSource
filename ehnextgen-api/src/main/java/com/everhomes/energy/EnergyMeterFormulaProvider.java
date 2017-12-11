@@ -21,6 +21,7 @@ public interface EnergyMeterFormulaProvider {
      * 获取公式列表
      */
     List<EnergyMeterFormula> listMeterFormulas(Long ownerId, String ownerType, Long communityId, Integer namespaceId, Byte formulaType);
+    List<EnergyMeterFormula> listMeterFormulas(List<Long> formularIds, Byte formulaType);
 
     /**
      * 删除公式

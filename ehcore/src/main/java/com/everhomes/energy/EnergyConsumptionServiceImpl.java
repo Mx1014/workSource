@@ -268,6 +268,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Autowired
     private EnergyMeterCategoryMapProvider energyMeterCategoryMapProvider;
 
+    @Autowired
+    private EnergyMeterFormulaMapProvider energyMeterFormulaMapProvider;
+
     static final String TASK_EXECUTE = "energyTask.isexecute";
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
@@ -1087,7 +1090,19 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         formula.setDisplayExpression(cmd.getExpression());
         meterFormulaProvider.createEnergyMeterFormula(formula);
         if(cmd.getCommunityId() == null) {
-            //
+            List<OrganizationCommunity> communities = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+            if(communities != null && communities.size() > 0) {
+                Long uId = UserContext.currentUserId();
+                communities.forEach(community -> {
+                    EnergyMeterFormulaMap map = new EnergyMeterFormulaMap();
+                    map.setOwnerId(cmd.getOwnerId());
+                    map.setNamespaceId(cmd.getNamespaceId());
+                    map.setCommunityId(community.getCommunityId());
+                    map.setFomularId(formula.getId());
+                    map.setCreatorUid(uId);
+                    energyMeterFormulaMapProvider.createEnergyMeterFormulaMap(map);
+                });
+            }
         }
         return toEnergyMeterFormulaDTO(formula);
     }
@@ -2160,10 +2175,32 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Override
     public List<EnergyMeterFormulaDTO> listEnergyMeterFormulas(ListEnergyMeterFormulasCommand cmd) {
         validate(cmd);
+        List<EnergyMeterFormula> formulas = new ArrayList<>();
+        //全部则查全部的和各个项目的
+        if(cmd.getCommunityId() == null) {
+            formulas = meterFormulaProvider.listMeterFormulas(cmd.getOwnerId(), cmd.getOwnerType(),
+                    null, UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getFormulaType());
+        }
+
+        //单项目则查自己加的和关联的全部的
+        else if(cmd.getCommunityId() != null) {
+            formulas = meterFormulaProvider.listMeterFormulas(cmd.getOwnerId(), cmd.getOwnerType(),
+                    cmd.getCommunityId(), UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getFormulaType());
+            List<EnergyMeterFormulaMap> maps = energyMeterFormulaMapProvider.listEnergyMeterFormulaMap(cmd.getCommunityId());
+            if(maps != null && maps.size() > 0) {
+                List<Long> formulaIds = maps.stream().map(map -> {
+                    return map.getFomularId();
+                }).collect(Collectors.toList());
+                List<EnergyMeterFormula> formulaList = meterFormulaProvider.listMeterFormulas(formulaIds, cmd.getFormulaType()) ;
+                if(formulaList != null && formulaList.size() > 0) {
+                    formulas.addAll(formulaList);
+                }
+            }
+
+        }
 //        checkCurrentUserNotInOrg(cmd.getOwnerId());
 //        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
-        List<EnergyMeterFormula> formulas = meterFormulaProvider.listMeterFormulas(cmd.getOwnerId(), cmd.getOwnerType(),
-                cmd.getCommunityId(), UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getFormulaType());
+
         return formulas.stream().map(this::toEnergyMeterFormulaDTO).collect(Collectors.toList());
     }
 
@@ -2174,15 +2211,36 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_SETTING);
         coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_METER_FORMULA.getCode() + cmd.getFormulaId()).tryEnter(() -> {
             EnergyMeterFormula formula = meterFormulaProvider.findById(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getFormulaId());
+
             if (formula != null) {
-                // 查看当前公式是否被引用, 被引用则无法删除
-                EnergyMeterSettingLog settingLog = meterSettingLogProvider.findSettingByFormulaId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), formula.getId());
-                if (settingLog != null) {
-                    LOGGER.info("The formula has been reference, formula id = {}", formula.getId());
-                    throw errorWith(SCOPE, ERR_FORMULA_HAS_BEEN_REFERENCE, "The formula has been reference");
+                //项目里删全部的 实质是解除关联关系
+                if(formula.getCommunityId() == null && cmd.getCommunityId() != null) {
+                    EnergyMeterSettingLog settingLog = meterSettingLogProvider.findAnySettingByFormulaId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), formula.getId());
+                    if (settingLog != null) {
+                        LOGGER.info("The formula has been reference, formula id = {}", formula.getId());
+                        throw errorWith(SCOPE, ERR_FORMULA_HAS_BEEN_REFERENCE, "The formula has been reference");
+                    }
+
+                    EnergyMeterFormulaMap map = energyMeterFormulaMapProvider.findEnergyMeterFormulaMap(cmd.getCommunityId(), formula.getId());
+                    if(map != null) {
+                        map.setStatus(EnergyCommonStatus.INACTIVE.getCode());
+                        map.setOperatorUid(UserContext.currentUserId());
+                        map.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        energyMeterFormulaMapProvider.updateEnergyMeterFormulaMap(map);
+                    }
+
                 } else {
-                    meterFormulaProvider.deleteFormula(formula);
+                    //在全部里删全部和项目的，项目里删自己的 都是直接置inactive
+                    // 查看当前公式是否被引用, 被引用则无法删除
+                    EnergyMeterSettingLog settingLog = meterSettingLogProvider.findSettingByFormulaId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), formula.getId());
+                    if (settingLog != null) {
+                        LOGGER.info("The formula has been reference, formula id = {}", formula.getId());
+                        throw errorWith(SCOPE, ERR_FORMULA_HAS_BEEN_REFERENCE, "The formula has been reference");
+                    } else {
+                        meterFormulaProvider.deleteFormula(formula);
+                    }
                 }
+
             }
         });
     }
