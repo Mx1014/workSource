@@ -125,9 +125,9 @@ public class GeneralPointEventProcessor implements PointEventProcessor {
 
         switch (limitType) {
             case TIMES_PER_DAY: {
-                long milli = Clock.systemUTC().instant().toEpochMilli();
+                LocalDateTime dateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
                 Integer count = pointLogProvider.countPointLog(
-                        namespaceId, pointSystem.getId(), uid, rule.getEventName(), milli);
+                        namespaceId, pointSystem.getId(), uid, rule.getEventName(), dateTime.toInstant(ZoneOffset.UTC).toEpochMilli());
                 PointRuleLimitData limitData = (PointRuleLimitData) StringHelper.fromJsonString(rule.getLimitData(), PointRuleLimitData.class);
                 if (count >= limitData.getTimes()) {
                     return false;

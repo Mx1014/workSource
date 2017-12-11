@@ -135,15 +135,11 @@ public interface ConfigConstants {
 
     String APP_SYSTEM_UPLOAD_URL_IN_BROWSER = "app.system.upload_url_in_browser";
 
-<<<<<<< HEAD
     String POINT_DETAIL_PATH = "point.detail.path";
-=======
 
     public static final String ASSET_PAYMENT_ZJH_URL = "asset.payment.zjh.url";
     public static final String ASSET_PAYMENT_ZJH_API_8 = "asset.payment.zjh.api.2.2.4.8";
     public static final String ASSET_PAYMENT_ZJH_API_9 = "asset.payment.zjh.api.2.2.4.9";
     public static final String ASSET_PAYMENT_ZJH_API_10 = "asset.payment.zjh.api.2.2.4.10";
     public static final String ASSET_PAYMENT_ZJH_API_15 = "asset.payment.zjh.api.2.2.4.15";
-
->>>>>>> master
 }
