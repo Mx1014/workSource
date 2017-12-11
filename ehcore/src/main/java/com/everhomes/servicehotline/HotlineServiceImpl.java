@@ -162,6 +162,33 @@ public class HotlineServiceImpl implements HotlineService {
 	public void addHotline(AddHotlineCommand cmd) {
 		ServiceHotline hotline = ConvertHelper.convert(cmd,
 				ServiceHotline.class);
+		//查询是否有重复的
+		List<ServiceHotline> tmp = this.serviceHotlinesProvider.queryServiceHotlines(null,
+				Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
+
+					@Override
+					public SelectQuery<? extends Record> buildCondition(
+							ListingLocator locator,
+							SelectQuery<? extends Record> query) {
+						query.addConditions(Tables.EH_SERVICE_HOTLINES.OWNER_TYPE
+								.eq(cmd.getOwnerType()));
+						query.addConditions(Tables.EH_SERVICE_HOTLINES.OWNER_ID
+								.eq(cmd.getOwnerId()));
+						query.addConditions(Tables.EH_SERVICE_HOTLINES.NAMESPACE_ID
+								.eq(UserContext.getCurrentNamespaceId()));
+						query.addConditions(Tables.EH_SERVICE_HOTLINES.SERVICE_TYPE
+								.eq(cmd.getServiceType().intValue()));
+						query.addConditions(Tables.EH_SERVICE_HOTLINES.CONTACT
+								.eq(cmd.getContact()));
+						return query;
+					}
+				});
+		if (tmp!=null && tmp.size()>0)
+			throw RuntimeErrorException
+					.errorWith(ErrorCodes.SCOPE_GENERAL,
+							ErrorCodes.ERROR_INVALID_PARAMETER,
+							"hotline already exists");
+
 		hotline.setCreateTime(new Timestamp( DateHelper.currentGMTTime().getTime()));
 		hotline.setCreatorUid(UserContext.current().getUser().getId());
 		hotline.setNamespaceId(UserContext.getCurrentNamespaceId());
