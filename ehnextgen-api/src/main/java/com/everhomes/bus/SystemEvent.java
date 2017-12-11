@@ -69,8 +69,11 @@ public enum SystemEvent {
         return code;
     }
 
-    public String suffix(String suffix) {
-        return this.code + "." + suffix;
+    public String suffix(Object suffix) {
+        if (suffix == null) {
+            return dft();
+        }
+        return this.code + "." + suffix.toString();
     }
 
     public String dft() {

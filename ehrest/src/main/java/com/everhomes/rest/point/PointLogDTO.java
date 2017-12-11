@@ -37,7 +37,7 @@ public class PointLogDTO {
     private Long ruleId;
     private String ruleName;
     private Byte arithmeticType;
-    private Integer points;
+    private Long points;
     private Long targetUid;
     private String targetName;
     private String targetPhone;
@@ -121,11 +121,11 @@ public class PointLogDTO {
         this.operatorType = operatorType;
     }
 
-    public Integer getPoints() {
+    public Long getPoints() {
         return points;
     }
 
-    public void setPoints(Integer points) {
+    public void setPoints(Long points) {
         this.points = points;
     }
 

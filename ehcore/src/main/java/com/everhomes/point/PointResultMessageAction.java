@@ -59,6 +59,7 @@ public class PointResultMessageAction implements PointResultAction {
         MessageDTO messageDto = new MessageDTO();
         messageDto.setBodyType(MessageBodyType.TEXT.getCode());
         messageDto.setBody(content);
+        messageDto.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(localEvent.getContext().getUid())));
         // 组装路由
         OfficialActionData actionData = new OfficialActionData();
         actionData.setUrl(pointService.getPointSystemUrl(pointSystem.getId()));

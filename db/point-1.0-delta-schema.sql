@@ -6,7 +6,7 @@ CREATE TABLE `eh_point_systems` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `display_name` VARCHAR(32) NOT NULL,
   `point_name` VARCHAR(32) NOT NULL,
-  `point_exchange_flag` TINYINT NOT NULL DEFAULT 2 COMMENT 'point exchange cash flag, 1: enabled, 2: disabled',
+  `point_exchange_flag` TINYINT NOT NULL DEFAULT 2 COMMENT 'point exchange cash flag, 1: disable, 2: enabled',
   `exchange_point` INTEGER NOT NULL DEFAULT 0 COMMENT 'point exchange cash rate',
   `exchange_cash` INTEGER NOT NULL DEFAULT 0 COMMENT 'point exchange cash rate',
   `user_agreement` TEXT,
