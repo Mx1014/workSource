@@ -103,19 +103,15 @@ public class PointActionProviderImpl implements PointActionProvider {
     }
 
     @Override
-    public PointAction findByOwner(Integer namespaceId, Long systemId, String ownerType, Long ownerId) {
+    public List<PointAction> listByOwner(Integer namespaceId, Long systemId, String ownerType, Long ownerId) {
         com.everhomes.server.schema.tables.EhPointActions t = Tables.EH_POINT_ACTIONS;
-        List<PointAction> list = this.query(new ListingLocator(), 1, (locator, query) -> {
+        return query(new ListingLocator(), 1, (locator, query) -> {
             query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
             query.addConditions(t.SYSTEM_ID.eq(systemId));
             query.addConditions(t.OWNER_TYPE.eq(ownerType));
             query.addConditions(t.OWNER_ID.eq(ownerId));
             return query;
         });
-        if (list != null && list.size() > 0) {
-            return list.get(0);
-        }
-        return null;
     }
 
     private EhPointActionsDao rwDao() {

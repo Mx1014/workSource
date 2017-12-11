@@ -10,6 +10,8 @@ import com.everhomes.util.StringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * 完善用户信息事件处理器
  * Created by xq.tian on 2017/12/7.
@@ -44,5 +46,10 @@ public class AccountCompleteInfoPointEventProcessor implements PointEventProcess
 
     private boolean isValid(Object o) {
         return o != null && o.toString().trim().length() > 0;
+    }
+
+    @Override
+    public List<PointResultAction> getResultActions(List<PointAction> pointActions, PointEventLog log, PointRule rule, PointSystem pointSystem, PointRuleCategory category) {
+        return generalProcessor.getResultActions(pointActions, log, rule, pointSystem, category);
     }
 }

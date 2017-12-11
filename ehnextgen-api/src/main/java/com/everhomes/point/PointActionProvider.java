@@ -20,5 +20,5 @@ public interface PointActionProvider {
 
     void createPointActions(List<PointAction> pointActions);
 
-    PointAction findByOwner(Integer namespaceId, Long systemId, String ownerType, Long ownerId);
+    List<PointAction> listByOwner(Integer namespaceId, Long systemId, String ownerType, Long ownerId);
 }

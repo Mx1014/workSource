@@ -8,10 +8,6 @@ public class PointAction extends EhPointActions {
 	
 	private static final long serialVersionUID = 1123914970485522651L;
 
-	public void doAction() {
-
-    }
-	
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

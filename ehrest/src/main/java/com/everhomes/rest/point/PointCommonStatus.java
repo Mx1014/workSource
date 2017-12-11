@@ -3,15 +3,15 @@ package com.everhomes.rest.point;
 /**
  * <ul>
  *     <li>INACTIVE((byte) 0): INACTIVE</li>
- *     <li>ENABLED((byte) 1): 开启</li>
- *     <li>DISABLED((byte) 2): 关闭</li>
+ *     <li>DISABLED((byte) 1): DISABLED</li>
+ *     <li>ENABLED((byte) 2): ENABLED</li>
  * </ul>
  */
 public enum PointCommonStatus {
 
     INACTIVE((byte) 0),
-    ENABLED((byte) 1),
-    DISABLED((byte) 2);
+    DISABLED((byte) 1),
+    ENABLED((byte) 2);
 
     private Byte code;
 

@@ -1,6 +1,7 @@
 package com.everhomes.point;
 
 import com.everhomes.rest.point.*;
+import com.everhomes.rest.user.UserTreasureDTO;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -8,6 +9,8 @@ import javax.servlet.http.HttpServletResponse;
  * Created by xq.tian on 2017/11/24.
  */
 public interface PointService {
+
+    String getPointSystemUrl(Long systemId);
 
     GetEnabledPointSystemResponse getEnabledPointSystem(GetEnabledPointSystemCommand cmd);
 
@@ -59,4 +62,5 @@ public interface PointService {
 
     void restartEventLogScheduler();
 
+    void processUserPoint(UserTreasureDTO point);
 }

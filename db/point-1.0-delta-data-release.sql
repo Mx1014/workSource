@@ -52,6 +52,10 @@ INSERT INTO `eh_point_rules` (`id`, `namespace_id`, `system_id`, `category_id`, 
 -- 积分系统
 INSERT INTO `eh_point_systems` (`id`, `namespace_id`, `display_name`, `point_name`, `point_exchange_flag`, `exchange_point`, `exchange_cash`, `user_agreement`, `status`, `create_time`, `creator_uid`, `update_time`, `update_uid`) VALUES (1, 1000000, '积分系统', '积分', 1, 100, 1, NULL, 2, '2017-12-08 15:10:23.000', NULL, NULL, NULL);
 
+INSERT INTO `eh_point_tutorials` (`id`, `namespace_id`, `system_id`, `display_name`, `description`, `poster_uri`, `status`, `create_time`, `creator_uid`, `update_time`, `update_uid`) VALUES (1, 1000000, 1, '社区讨论', '话题/活动/投票', 'cs://1/image/aW1hZ2UvTVRwaU5EWmxOamMwTlRVek5UbGhNemxsTXpWa05tUmpZMkkwTldNMFpUWTRZUQ', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_point_tutorials` (`id`, `namespace_id`, `system_id`, `display_name`, `description`, `poster_uri`, `status`, `create_time`, `creator_uid`, `update_time`, `update_uid`) VALUES (2, 1000000, 1, '购物消费', '园区消费攒积分', 'cs://1/image/aW1hZ2UvTVRvNU5HTXdaREJoTTJZNVpHUXhZVGMwTTJRNE5XSTBZVEZsTkdWa1ptVXlOQQ', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_point_tutorials` (`id`, `namespace_id`, `system_id`, `display_name`, `description`, `poster_uri`, `status`, `create_time`, `creator_uid`, `update_time`, `update_uid`) VALUES (3, 1000000, 1, '园区服务', '使用公共服务送积分', 'cs://1/image/aW1hZ2UvTVRvM09HRTJZbU5sWXpFek9UUmtaREF5TkRNek1tVTRORFUzT1dJeE5ESXpNdw', 2, NULL, NULL, NULL, NULL);
+
 
 SET @eh_configurations_id = IFNULL((SELECT MAX(id) FROM `eh_configurations`), 1);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)

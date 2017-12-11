@@ -43,10 +43,8 @@ import com.everhomes.rest.forum.*;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
-import com.everhomes.rest.point.*;
 import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.*;
-import com.everhomes.rest.user.GetUserTreasureResponse;
 import com.everhomes.rest.version.VersionRequestCommand;
 import com.everhomes.rest.version.VersionUrlResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
@@ -843,47 +841,9 @@ public class UserActivityServiceImpl implements UserActivityService {
         order.setUrl(getMyOrderUrl());
         order.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
 
-        processUserPoint(point);
+        pointService.processUserPoint(point);
 
         return rsp;
-    }
-
-    private void processUserPoint(UserTreasureDTO point) {
-        GetEnabledPointSystemCommand cmd = new GetEnabledPointSystemCommand();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        cmd.setNamespaceId(namespaceId);
-        GetEnabledPointSystemResponse pointSystemResponse = pointService.getEnabledPointSystem(cmd);
-
-        if (pointSystemResponse == null || pointSystemResponse.getSystems() == null || pointSystemResponse.getSystems().size() == 0) {
-            point.setStatus(TrueOrFalseFlag.FALSE.getCode());
-
-            // point.setUrl(String.format("http://10.1.10.79/integral-management/build/index.html?systemId=%s&ehnavigatorstyle=2#/home#sign_suffix", 1));
-            // point.setStatus(TrueOrFalseFlag.TRUE.getCode());
-            // point.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
-            // point.setCount(UserContext.currentUserId());
-
-            return;
-        }
-
-        PointSystemDTO system = pointSystemResponse.getSystems().get(0);
-
-        GetUserPointCommand pointCommand = new GetUserPointCommand();
-        pointCommand.setUid(UserContext.currentUserId());
-        pointCommand.setSystemId(system.getId());
-        PointScoreDTO userPoint = pointService.getUserPoint(pointCommand);
-        if (userPoint != null) {
-            point.setCount(userPoint.getScore());
-        }
-        String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
-        String pointUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.POINT_DETAIL_PATH, "");
-        point.setUrl(homeUrl + String.format(pointUrl, system.getId()));
-
-        // point.setUrl(String.format("http://10.1.10.79/integral-management/build/index.html?systemId=%s&ehnavigatorstyle=2#/home#sign_suffix", 1));
-
-        TrueOrFalseFlag flag = TrueOrFalseFlag.fromCode(system.getPointExchangeFlag());
-        if (flag != null) {
-            point.setUrlStatus(flag.getCode());
-        }
     }
 
     @Override

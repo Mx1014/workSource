@@ -6,14 +6,12 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>points: 有符号的数</li>
  *     <li>log: log</li>
- *     <li>action: 消息</li>
  * </ul>
  */
 public class PointEventProcessResult {
 
     private Long points;
     private PointLog log;
-    private PointAction action;
 
     public PointEventProcessResult() {
     }
@@ -37,14 +35,6 @@ public class PointEventProcessResult {
 
     public void setLog(PointLog log) {
         this.log = log;
-    }
-
-    public PointAction getAction() {
-        return action;
-    }
-
-    public void setAction(PointAction action) {
-        this.action = action;
     }
 
     @Override

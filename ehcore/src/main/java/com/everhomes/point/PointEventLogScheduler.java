@@ -159,7 +159,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                 List<Long> idList = pointEventLogs.stream().map(PointEventLog::getId).collect(Collectors.toList());
 
 
-                final List<PointAction> actions = new ArrayList<>();
+                final List<PointResultAction> actions = new ArrayList<>();
                 dbProvider.execute(s -> {
                     pointEventLogProvider.updatePointEventLogStatus(idList, PointEventLogStatus.PROCESSING.getCode());
 
@@ -185,9 +185,10 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                                 continue;
                             }
 
-                            PointAction action = pointActionProvider.findByOwner(pointSystem.getNamespaceId(), pointSystem.getId(), EhPointRules.class.getSimpleName(), rule.getId());
-                            if (action != null) {
-                                actions.add(action);
+                            List<PointAction> pointActions = pointActionProvider.listByOwner(pointSystem.getNamespaceId(), pointSystem.getId(), EhPointRules.class.getSimpleName(), rule.getId());
+                            List<PointResultAction> resultActions = processor.getResultActions(pointActions, log, rule, pointSystem, category);
+                            if (resultActions != null) {
+                                actions.addAll(resultActions);
                             }
 
                             userIdToPointsScoreMap.compute(getKey(pointSystem.getNamespaceId(), pointSystem.getId(),

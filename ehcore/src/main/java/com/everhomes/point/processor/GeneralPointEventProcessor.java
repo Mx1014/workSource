@@ -4,6 +4,7 @@ import com.everhomes.bus.LocalEvent;
 import com.everhomes.bus.SystemEvent;
 import com.everhomes.point.*;
 import com.everhomes.point.limit.PointRuleLimitData;
+import com.everhomes.rest.point.PointActionType;
 import com.everhomes.rest.point.PointArithmeticType;
 import com.everhomes.rest.point.PointOperatorType;
 import com.everhomes.rest.point.PointRuleLimitType;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by xq.tian on 2017/12/7.
@@ -90,6 +93,20 @@ public class GeneralPointEventProcessor implements PointEventProcessor {
             }
         }
         return new PointEventProcessResult(points, pointLog);
+    }
+
+    @Override
+    public List<PointResultAction> getResultActions(List<PointAction> pointActions, PointEventLog log, PointRule rule, PointSystem pointSystem, PointRuleCategory category) {
+        List<PointResultAction> resultActions = new ArrayList<>();
+        for (PointAction pointAction : pointActions) {
+            PointActionType actionType = PointActionType.fromCode(pointAction.getActionType());
+            switch (actionType) {
+                case MESSAGE:
+                    resultActions.add(new PointResultMessageAction(pointAction, pointSystem, rule, log));
+                    break;
+            }
+        }
+        return resultActions;
     }
 
     private boolean isValidEvent(LocalEvent localEvent) {

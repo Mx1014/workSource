@@ -3,17 +3,21 @@ package com.everhomes.point;
 
 import com.everhomes.banner.Banner;
 import com.everhomes.banner.BannerProvider;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.banner.BannerDTO;
 import com.everhomes.rest.point.*;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.UserTreasureDTO;
 import com.everhomes.server.schema.tables.pojos.EhBanners;
 import com.everhomes.server.schema.tables.pojos.EhPointGoods;
+import com.everhomes.server.schema.tables.pojos.EhPointRules;
 import com.everhomes.server.schema.tables.pojos.EhPointTutorials;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -183,6 +187,51 @@ public class PointServiceImpl implements PointService {
     }
 
     @Override
+    public void processUserPoint(UserTreasureDTO point) {
+        GetEnabledPointSystemCommand cmd = new GetEnabledPointSystemCommand();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        cmd.setNamespaceId(namespaceId);
+        GetEnabledPointSystemResponse pointSystemResponse = this.getEnabledPointSystem(cmd);
+
+        if (pointSystemResponse == null || pointSystemResponse.getSystems() == null || pointSystemResponse.getSystems().size() == 0) {
+            point.setStatus(TrueOrFalseFlag.FALSE.getCode());
+
+            // point.setUrl(String.format("http://10.1.10.79/integral-management/build/index.html?systemId=%s&ehnavigatorstyle=2#/home#sign_suffix", 1));
+            // point.setStatus(TrueOrFalseFlag.TRUE.getCode());
+            // point.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
+            // point.setCount(UserContext.currentUserId());
+
+            return;
+        }
+
+        PointSystemDTO system = pointSystemResponse.getSystems().get(0);
+
+        GetUserPointCommand pointCommand = new GetUserPointCommand();
+        pointCommand.setUid(UserContext.currentUserId());
+        pointCommand.setSystemId(system.getId());
+        PointScoreDTO userPoint = this.getUserPoint(pointCommand);
+        if (userPoint != null) {
+            point.setCount(userPoint.getScore());
+        }
+        String url = getPointSystemUrl(system.getId());
+        point.setUrl(url);
+
+        // point.setUrl(String.format("http://10.1.10.79/integral-management/build/index.html?systemId=%s&ehnavigatorstyle=2#/home#sign_suffix", 1));
+
+        TrueOrFalseFlag flag = TrueOrFalseFlag.fromCode(system.getPointExchangeFlag());
+        if (flag != null) {
+            point.setUrlStatus(flag.getCode());
+        }
+    }
+
+    @Override
+    public String getPointSystemUrl(Long systemId) {
+        String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
+        String pointUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.POINT_DETAIL_PATH, "");
+        return homeUrl + String.format(pointUrl, systemId);
+    }
+
+    @Override
     public GetEnabledPointSystemResponse getEnabledPointSystem(GetEnabledPointSystemCommand cmd) {
         ValidatorUtil.validate(cmd);
         List<PointSystem> systems = pointSystemProvider.getEnabledPointSystems(cmd.getNamespaceId());
@@ -197,7 +246,12 @@ public class PointServiceImpl implements PointService {
         Integer namespaceId = cmd.getNamespaceId() != null ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId();
         Long uid = cmd.getUid() != null ? cmd.getUid() : UserContext.currentUserId();
 
-        return pointScoreProvider.findUserPointScore(namespaceId, cmd.getSystemId(), uid, PointScoreDTO.class);
+        PointScoreDTO scoreDTO = pointScoreProvider.findUserPointScore(namespaceId, cmd.getSystemId(), uid, PointScoreDTO.class);
+        if (scoreDTO == null) {
+            scoreDTO = new PointScoreDTO();
+            scoreDTO.setScore(0L);
+        }
+        return scoreDTO;
 
         // PointScoreDTO dto = new PointScoreDTO();
         // dto.setScore(UserContext.currentUserId());
@@ -259,7 +313,7 @@ public class PointServiceImpl implements PointService {
 
     private PointGoodDTO toPointGoodDTO(PointGood pointGood) {
         PointGoodDTO dto = ConvertHelper.convert(pointGood, PointGoodDTO.class);
-        dto.setPosterUrl(parseURI(pointGood.getPosterUri(),EhPointGoods.class.getSimpleName(), pointGood.getId()));
+        dto.setPosterUrl(parseURI(pointGood.getPosterUri(), EhPointGoods.class.getSimpleName(), pointGood.getId()));
         return dto;
     }
 
@@ -612,7 +666,7 @@ public class PointServiceImpl implements PointService {
 
     private PointTutorialDTO toPointTutorialWithoutMappingDTO(PointTutorial pointTutorial) {
         PointTutorialDTO dto = ConvertHelper.convert(pointTutorial, PointTutorialDTO.class);
-        dto.setPosterUrl(parseURI(pointTutorial.getPosterUri(),EhPointTutorials.class.getSimpleName(), pointTutorial.getId()));
+        dto.setPosterUrl(parseURI(pointTutorial.getPosterUri(), EhPointTutorials.class.getSimpleName(), pointTutorial.getId()));
         return dto;
     }
 
@@ -633,6 +687,11 @@ public class PointServiceImpl implements PointService {
                 mapping.setSystemId(pointSystem.getId());
                 mapping.setTutorialId(tutorial.getId());
                 mapping.setNamespaceId(pointSystem.getNamespaceId());
+                mapping.setDescription(map.getDescription());
+                if (map.getDescription() == null || map.getDescription().trim().length() == 0) {
+                    PointRule rule = pointRuleProvider.findById(map.getRuleId());
+                    mapping.setDescription(rule.getDisplayName());
+                }
                 pointTutorialToPointRuleMappingProvider.createPointTutorialToPointRuleMapping(mapping);
             }
         }
@@ -650,19 +709,35 @@ public class PointServiceImpl implements PointService {
         List<PointRule> pointRules = pointRuleProvider.listPointRuleBySystemId(
                 PointConstant.CONFIG_POINT_SYSTEM_ID, -1, new ListingLocator());
         pointRules.forEach(r -> {
+            Long oldId = r.getId();
             r.setSystemId(pointSystem.getId());
             r.setNamespaceId(pointSystem.getNamespaceId());
             r.setId(null);
-        });
-        pointRuleProvider.createPointRules(pointRules);
+            pointRuleProvider.createPointRule(r);
 
-        List<PointAction> pointActions = pointActionProvider.listPointActionsBySystemId(PointConstant.CONFIG_POINT_SYSTEM_ID);
-        pointActions.forEach(r -> {
-            r.setSystemId(pointSystem.getId());
-            r.setNamespaceId(pointSystem.getNamespaceId());
-            r.setId(null);
+            Long newId = r.getId();
+            List<PointAction> pointActions = pointActionProvider.listByOwner(Namespace.DEFAULT_NAMESPACE,
+                    PointConstant.CONFIG_POINT_SYSTEM_ID, EhPointRules.class.getSimpleName(), oldId);
+            pointActions.forEach(action -> {
+                action.setSystemId(pointSystem.getId());
+                action.setNamespaceId(pointSystem.getNamespaceId());
+                action.setOwnerId(newId);
+                action.setId(null);
+            });
+            pointActionProvider.createPointActions(pointActions);
         });
-        pointActionProvider.createPointActions(pointActions);
+    }
+
+    // 一年执行一次发送积分清零消息
+    // @Scheduled(cron = "0 0 18 24 12 ? ?")
+    public void everyYearEndSendMessageSchedule() {
+        List<PointSystem> systemList = pointSystemProvider.getEnabledPointSystems(null);
+    }
+
+    // 一年执行一次积分清零操作
+    // @Scheduled(cron = "0 0 0 31 12 ? ?")
+    public void everyYearEndClearPointSchedule() {
+        List<PointSystem> systemList = pointSystemProvider.getEnabledPointSystems(null);
     }
 
     @Override
