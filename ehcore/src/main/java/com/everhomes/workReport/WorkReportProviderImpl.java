@@ -119,7 +119,7 @@ public class WorkReportProviderImpl implements WorkReportProvider {
         return null;
     }
 
-    @Caching(evict = {@CacheEvict(value = "listWorkReportScopeMap", key = "#scopeMap.reportId")})
+    @Caching(evict = {@CacheEvict(value = "listWorkReportScopesMap", key = "#scopeMap.reportId")})
     @Override
     public void createWorkReportScopeMap(WorkReportScopeMap scopeMap) {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWorkReportScopeMap.class));
@@ -131,7 +131,7 @@ public class WorkReportProviderImpl implements WorkReportProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhWorkReportScopeMap.class, null);
     }
 
-    @Caching(evict = {@CacheEvict(value = "listWorkReportScopeMap", key = "#reportId")})
+    @Caching(evict = {@CacheEvict(value = "listWorkReportScopesMap", key = "#reportId")})
     @Override
     public void deleteWorkReportScopeMapNotInIds(Long reportId, List<Long> sourceIds) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -159,7 +159,7 @@ public class WorkReportProviderImpl implements WorkReportProvider {
         return query.fetchOneInto(WorkReportScopeMap.class);
     }
 
-    @Caching(evict = {@CacheEvict(value = "listWorkReportScopeMap", key = "#scopeMap.reportId")})
+    @Caching(evict = {@CacheEvict(value = "listWorkReportScopesMap", key = "#scopeMap.reportId")})
     @Override
     public void updateWorkReportScopeMap(WorkReportScopeMap scopeMap) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -168,9 +168,9 @@ public class WorkReportProviderImpl implements WorkReportProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhWorkReportScopeMap.class, scopeMap.getId());
     }
 
-    @Cacheable(value = "listWorkReportScopeMap", key = "#reportId", unless = "#result.size() == 0")
+    @Cacheable(value = "listWorkReportScopesMap", key = "#reportId", unless = "#result.size() == 0")
     @Override
-    public List<WorkReportScopeMap> listWorkReportScopeMap(Long reportId) {
+    public List<WorkReportScopeMap> listWorkReportScopesMap(Long reportId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWorkReportScopeMapRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_SCOPE_MAP);
         query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));

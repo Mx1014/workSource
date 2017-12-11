@@ -13,7 +13,7 @@ import java.util.List;
  * <li>reportId: 工作汇报id</li>
  * <li>reportName: 工作汇报名称</li>
  * <li>status: 汇报状态 0-无效 1-未启用 2-启用 参考{@link com.everhomes.rest.workReport.WorkReportStatus}</li>
- * <li>scopes: 可见范围 参考{@link WorkReportValScopeMapDTO}</li>
+ * <li>scopes: 可见范围 参考{@link WorkReportScopeMapDTO}</li>
  * <li>modifyFlag: 是否可修改 0-不可修改 1-可以修改 {@link com.everhomes.rest.workReport.AttitudeFlag}</li>
  * <li>deleteFlag: 是否可删除 0-不可删除 1-可以删除</li>
  * <li>reportType: 工作汇报类型 0-每日 1-每周 2-每月 参考{@link com.everhomes.rest.workReport.WorkReportType}</li>
@@ -37,8 +37,8 @@ public class WorkReportDTO {
 
     private Byte status;
 
-    @ItemType(WorkReportValScopeMapDTO.class)
-    private List<WorkReportValScopeMapDTO> scopes;
+    @ItemType(WorkReportScopeMapDTO.class)
+    private List<WorkReportScopeMapDTO> scopes;
 
     private Byte modifyFlag;
 
@@ -107,11 +107,11 @@ public class WorkReportDTO {
         this.status = status;
     }
 
-    public List<WorkReportValScopeMapDTO> getScopes() {
+    public List<WorkReportScopeMapDTO> getScopes() {
         return scopes;
     }
 
-    public void setScopes(List<WorkReportValScopeMapDTO> scopes) {
+    public void setScopes(List<WorkReportScopeMapDTO> scopes) {
         this.scopes = scopes;
     }
 

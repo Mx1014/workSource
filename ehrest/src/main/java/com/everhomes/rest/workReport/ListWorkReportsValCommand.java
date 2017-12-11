@@ -15,6 +15,7 @@ import java.util.List;
  * <li>reportId: 工作汇报id</li>
  * <li>startTime: 开始时间</li>
  * <li>endTime: 结束时间</li>
+ * <li>readStatus: 阅读状态 0-未读 参考{@link com.everhomes.rest.workReport.WorkReportReadStatus}</li>
  * <li>pageAnchor: 分页锚点</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
@@ -36,6 +37,8 @@ public class ListWorkReportsValCommand {
     private Timestamp startTime;
 
     private Timestamp endTime;
+
+    private Byte readStatus;
 
     private Long pageAnchor;
 
@@ -98,6 +101,14 @@ public class ListWorkReportsValCommand {
 
     public void setEndTime(Timestamp endTime) {
         this.endTime = endTime;
+    }
+
+    public Byte getReadStatus() {
+        return readStatus;
+    }
+
+    public void setReadStatus(Byte readStatus) {
+        this.readStatus = readStatus;
     }
 
     public Long getPageAnchor() {

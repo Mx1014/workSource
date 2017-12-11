@@ -6,11 +6,9 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.general_approval.CreateFormTemplatesCommand;
-import com.everhomes.rest.general_approval.GeneralFormDTO;
-import com.everhomes.rest.general_approval.GetTemplateByFormIdCommand;
-import com.everhomes.rest.general_approval.PostGeneralFormCommand;
+import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.ui.user.SceneContactDTO;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.rest.workReport.*;
 import com.everhomes.user.User;
@@ -47,7 +45,9 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     private SimpleDateFormat reportFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-    private static String WORK_REPORT = "WORK_REPORT";
+    private final String WORK_REPORT = "WORK_REPORT";
+
+    private final String WORK_REPORT_VAL = "work_report_val";
 
     @Override
     public WorkReportDTO addWorkReport(AddWorkReportCommand cmd) {
@@ -62,10 +62,10 @@ public class WorkReportServiceImpl implements WorkReportService {
         report.setOrganizationId(cmd.getOrganizationId());
         report.setReportName(cmd.getReportName());
         report.setModuleId(cmd.getModuleId());
-        report.setStatus(WorkReportStatus.VALID.getCode());
+        /*report.setStatus(WorkReportStatus.VALID.getCode());
         report.setReportAttribute(WorkReportAttribute.CUSTOMIZE.getCode());
         report.setDeleteFlag(AttitudeFlag.YES.getCode());
-        report.setModifyFlag(AttitudeFlag.YES.getCode());
+        report.setModifyFlag(AttitudeFlag.YES.getCode());*/
         report.setOperatorUserId(userId);
         report.setOperatorName(fixUpUserName(report.getOrganizationId(), userId));
 
@@ -78,8 +78,6 @@ public class WorkReportServiceImpl implements WorkReportService {
         //  return back some information.
         WorkReportDTO dto = new WorkReportDTO();
         dto.setReportName(report.getReportName());
-        dto.setReportType(report.getReportType());
-        dto.setReportAttribute(report.getReportAttribute());
         return dto;
     }
 
@@ -113,7 +111,8 @@ public class WorkReportServiceImpl implements WorkReportService {
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
         if (report != null) {
             //  update it.
-            report.setReportType(cmd.getReportType());
+            if(cmd.getReportType() != null)
+                report.setReportType(cmd.getReportType());
             report.setFormOriginId(cmd.getFormOriginId());
             report.setFormVersion(cmd.getFormVersion());
             report.setOperatorUserId(userId);
@@ -136,11 +135,11 @@ public class WorkReportServiceImpl implements WorkReportService {
         return null;
     }
 
-    private void updateWorkReportScopeMap(Long reportId, List<WorkReportValScopeMapDTO> scopes) {
+    private void updateWorkReportScopeMap(Long reportId, List<WorkReportScopeMapDTO> scopes) {
         if (scopes == null)
             return;
         List<Long> sourceIds = new ArrayList<>();
-        for (WorkReportValScopeMapDTO dto : scopes) {
+        for (WorkReportScopeMapDTO dto : scopes) {
             //  in order to record those ids.
             sourceIds.add(dto.getSourceId());
             WorkReportScopeMap scopeMap = workReportProvider.getWorkReportScopeMapBySourceId(reportId, dto.getSourceId());
@@ -178,7 +177,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             results.forEach(r -> {
                 WorkReportDTO dto = ConvertHelper.convert(r, WorkReportDTO.class);
                 dto.setReportId(r.getId());
-                dto.setScopes(listWorkReportScopeMap(r.getId()));
+                dto.setScopes(listWorkReportScopes(r.getId()));
                 String updateTime = reportFormat.format(r.getUpdateTime());
                 dto.setUpdateInfo(updateTime + " " + r.getOperatorName());
                 reports.add(dto);
@@ -216,11 +215,11 @@ public class WorkReportServiceImpl implements WorkReportService {
         workReportProvider.updateWorkReport(report);
     }
 
-    public List<WorkReportValScopeMapDTO> listWorkReportScopeMap(Long reportId) {
-        List<WorkReportScopeMap> results = workReportProvider.listWorkReportScopeMap(reportId);
+    public List<WorkReportScopeMapDTO> listWorkReportScopes(Long reportId) {
+        List<WorkReportScopeMap> results = workReportProvider.listWorkReportScopesMap(reportId);
         if (results != null && results.size() > 0) {
             return results.stream().map(r -> {
-                WorkReportValScopeMapDTO dto = ConvertHelper.convert(r, WorkReportValScopeMapDTO.class);
+                WorkReportScopeMapDTO dto = ConvertHelper.convert(r, WorkReportScopeMapDTO.class);
                 return dto;
             }).collect(Collectors.toList());
         }
@@ -328,7 +327,7 @@ public class WorkReportServiceImpl implements WorkReportService {
     private boolean checkTheScope(Long reportId, Long userId) {
         //  1.check the user id list.
         //  2.check the user's department.
-        List<WorkReportValScopeMapDTO> scopes = listWorkReportScopeMap(reportId);
+        List<WorkReportScopeMapDTO> scopes = listWorkReportScopes(reportId);
         OrganizationMember user = getUserDepPath(userId);
         List<Long> scopeUserIds = scopes.stream()
                 .filter(p1 -> p1.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))
@@ -362,7 +361,7 @@ public class WorkReportServiceImpl implements WorkReportService {
     }
 
     @Override
-    public void postWorkReportVal(PostWorkReportValCommand cmd) {
+    public WorkReportValDTO postWorkReportVal(PostWorkReportValCommand cmd) {
         //  There are three steps to finish this function.
         //  1.create the report val
         //  2.create the report form val
@@ -398,20 +397,28 @@ public class WorkReportServiceImpl implements WorkReportService {
         formCommand.setCurrentOrganizationId(cmd.getOrganizationId());
         formCommand.setValues(cmd.getValues());
 
-        dbProvider.execute((TransactionStatus status) -> {
-            Long reportValId = workReportValProvider.createWorkReportVal(val);
-            formCommand.setSourceId(reportValId);
+        Long reportValId = dbProvider.execute((TransactionStatus status) -> {
+            Long valId = workReportValProvider.createWorkReportVal(val);
+            formCommand.setSourceId(valId);
             generalFormService.postGeneralForm(formCommand);
             for (Long receiverId : cmd.getReceiverIds()) {
                 WorkReportValReceiverMap receiver = new WorkReportValReceiverMap();
                 receiver.setNamespaceId(namespaceId);
-                receiver.setReportValId(reportValId);
+                receiver.setReportValId(valId);
                 receiver.setReceiverUserId(receiverId);
                 receiver.setReceiverName(fixUpUserName(cmd.getOrganizationId(), receiverId));
+                receiver.setReceiverAvatar(user.getAvatar());
+                receiver.setReadStatus(WorkReportReadStatus.UNREAD.getCode());
                 workReportValProvider.createWorkReportValReceiverMap(receiver);
             }
-            return null;
+            return valId;
         });
+
+        //  return back;
+        WorkReportValDTO dto = new WorkReportValDTO();
+        dto.setReportId(report.getId());
+        dto.setReportValId(reportValId);
+        return dto;
     }
 
     @Override
@@ -430,7 +437,8 @@ public class WorkReportServiceImpl implements WorkReportService {
     }
 
     @Override
-    public void updateWorkReportVal(PostWorkReportValCommand cmd) {
+    public WorkReportValDTO updateWorkReportVal(PostWorkReportValCommand cmd) {
+        return null;
     }
 
     @Override
@@ -438,23 +446,78 @@ public class WorkReportServiceImpl implements WorkReportService {
         //  1.the reportValId is null means posting the report val.
         //  2.the reportValId is not null means updating the report val.
         WorkReportValDTO dto = new WorkReportValDTO();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Long userId = UserContext.currentUserId();
 
         if (cmd.getReportValId() != null) {
             WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
+            List<GeneralFormFieldDTO> fields = new ArrayList<>();
+
+            //  get the new form fields.
+            GetTemplateBySourceIdCommand formCommand = new GetTemplateBySourceIdCommand();
+            formCommand.setNamespaceId(namespaceId);
+            formCommand.setOwnerId(report.getOwnerId());
+            formCommand.setOwnerType(report.getOwnerType());
+            formCommand.setSourceId(report.getId());
+            formCommand.setSourceType(WORK_REPORT);
+            GeneralFormDTO form = generalFormService.getTemplateBySourceId(formCommand);
+
+            //  get the field values which has been post by the user.
+            GetGeneralFormValuesCommand valuesCommand = new GetGeneralFormValuesCommand();
+            valuesCommand.setSourceId(userId);
+            valuesCommand.setSourceType(WORK_REPORT_VAL);
+            List<PostApprovalFormItem> values = generalFormService.getGeneralFormValues(valuesCommand);
+
+            //  process the value.
+            for(GeneralFormFieldDTO field: form.getFormFields()){
+                for(PostApprovalFormItem value : values){
+                    if(field.getFieldName().equals(value.getFieldName())) {
+                        field.setFieldValue(value.getFieldValue());
+                        continue;
+                    }
+                    fields.add(field);
+                }
+            }
+
+            //  get the reportVal and receivers.
             WorkReportVal reportVal = workReportValProvider.getWorkReportValById(cmd.getReportValId());
+            List<SceneContactDTO> receivers = listWorkReportValReceivers(cmd.getReportValId());
+
+            //  return back the reportVal.
             dto.setReportId(report.getId());
             dto.setReportType(reportVal.getReportType());
             dto.setReportTime(reportVal.getReportTime());
+            dto.setValues(fields);
+            dto.setReceivers(receivers);
+            return dto;
         } else {
             WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
-            GetTemplateByFormIdCommand formCommand = new GetTemplateByFormIdCommand();
-            formCommand.setFormId(report.getFormOriginId());
-            GeneralFormDTO form = generalFormService.getTemplateByFormId(formCommand);
+            GetTemplateBySourceIdCommand formCommand = new GetTemplateBySourceIdCommand();
+            formCommand.setNamespaceId(namespaceId);
+            formCommand.setOwnerId(report.getOwnerId());
+            formCommand.setOwnerType(report.getOwnerType());
+            formCommand.setSourceId(report.getId());
+            formCommand.setSourceType(WORK_REPORT);
+            GeneralFormDTO form = generalFormService.getTemplateBySourceId(formCommand);
+
             dto.setReportId(report.getId());
             dto.setReportType(report.getReportType());
             dto.setValues(form.getFormFields());
             dto.setTitle(report.getReportName());
             return dto;
+        }
+    }
+
+    public List<SceneContactDTO> listWorkReportValReceivers (Long reportValId) {
+        List<WorkReportValReceiverMap> results = workReportValProvider.listReportValReceiversByValId(reportValId);
+        if(results !=null && results.size()>0){
+            return results.stream().map(r ->{
+                SceneContactDTO dto = new SceneContactDTO();
+                dto.setUserId(r.getReceiverUserId());
+                dto.setContactName(r.getReceiverName());
+                dto.setContactAvatar(r.getReceiverAvatar());
+                return dto;
+            }).collect(Collectors.toList());
         }
         return null;
     }
@@ -472,6 +535,11 @@ public class WorkReportServiceImpl implements WorkReportService {
     @Override
     public Integer countUnReadWorkReportsVal() {
         return null;
+    }
+
+    @Override
+    public void MarkWorkReportsValReading() {
+
     }
 
     @Override

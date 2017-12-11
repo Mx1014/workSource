@@ -1,11 +1,15 @@
 package com.everhomes.workReport;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.general_form.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "WORK_REPORT")
 public class WorkReportFormHandler implements GeneralFormModuleHandler {
@@ -56,6 +60,12 @@ public class WorkReportFormHandler implements GeneralFormModuleHandler {
 
     @Override
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
-        return null;
+        WorkReport report = workReportProvider.getWorkReportById(cmd.getSourceId());
+        GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(report.getFormOriginId());
+        form.setFormVersion(form.getFormVersion());
+        List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+        GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
+        dto.setFormFields(fieldDTOs);
+        return dto;
     }
 }

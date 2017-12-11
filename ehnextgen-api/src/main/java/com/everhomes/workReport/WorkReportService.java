@@ -24,11 +24,11 @@ public interface WorkReportService {
 
     ListWorkReportsResponse listActiveWorkReports(ListWorkReportsCommand cmd);
 
-    void postWorkReportVal(PostWorkReportValCommand cmd);
+    WorkReportValDTO postWorkReportVal(PostWorkReportValCommand cmd);
 
     void deleteWorkReportVal(WorkReportValIdCommand cmd);
 
-    void updateWorkReportVal(PostWorkReportValCommand cmd);
+    WorkReportValDTO updateWorkReportVal(PostWorkReportValCommand cmd);
 
     WorkReportValDTO getWorkReportValItem(WorkReportValIdCommand cmd);
 
@@ -37,6 +37,8 @@ public interface WorkReportService {
     ListWorkReportsValResponse listReceivedWorkReportsVal(ListWorkReportsValCommand cmd);
 
     Integer countUnReadWorkReportsVal();
+
+    void MarkWorkReportsValReading();
 
     WorkReportValDTO getWorkReportValDetail(WorkReportValIdCommand cmd);
 }

@@ -26,7 +26,7 @@ public interface WorkReportProvider {
 
     void updateWorkReportScopeMap(WorkReportScopeMap scopeMap);
 
-    List<WorkReportScopeMap> listWorkReportScopeMap(Long reportId);
+    List<WorkReportScopeMap> listWorkReportScopesMap(Long reportId);
 
     List<WorkReportTemplate> listWorkReportTemplates(Long moduleId);
 

@@ -75,6 +75,7 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         return ConvertHelper.convert(dao.findById(id), WorkReportVal.class);
     }
 
+    @Caching(evict = {@CacheEvict(value = "listReportValReceiversByValId", key = "#receiver.reportValId")})
     @Override
     public void createWorkReportValReceiverMap(WorkReportValReceiverMap receiver){
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWorkReportValReceiverMap.class));
@@ -86,11 +87,26 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhWorkReportValReceiverMap.class, null);
     }
 
+    @Caching(evict = {@CacheEvict(value = "listReportValReceiversByValId", key = "#reportValId")})
     @Override
-    public void deleteReportValReceiverByValId(Long valId){
+    public void deleteReportValReceiverByValId(Long reportValId){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhWorkReportValReceiverMapRecord> query = context.deleteQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP);
-        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.REPORT_VAL_ID.eq(valId));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.REPORT_VAL_ID.eq(reportValId));
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWorkReportScopeMap.class, null);
+    }
+
+    @Cacheable(value = "listReportValReceiversByValId", key = "#reportValId", unless = "#result.size() == 0")
+    @Override
+    public List<WorkReportValReceiverMap> listReportValReceiversByValId(Long reportValId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportValReceiverMapRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP);
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.REPORT_VAL_ID.eq(reportValId));
+        List<WorkReportValReceiverMap> results = new ArrayList<>();
+        query.fetch().map(r ->{
+            results.add(ConvertHelper.convert(r, WorkReportValReceiverMap.class));
+            return null;
+        });
+        return results;
     }
 }

@@ -168,9 +168,9 @@ public class WorkReportController extends ControllerBase{
      * <p>4-1.提交工作汇报单 </p>
      */
     @RequestMapping("postWorkReportVal")
-    @RestReturn(value=String.class)
+    @RestReturn(value=WorkReportValDTO.class)
     public RestResponse postWorkReportVal(PostWorkReportValCommand cmd) {
-        workReportService.postWorkReportVal(cmd);
+        WorkReportValDTO res = workReportService.postWorkReportVal(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -196,9 +196,9 @@ public class WorkReportController extends ControllerBase{
      * <p>4-3.编辑工作汇报单 </p>
      */
     @RequestMapping("updateWorkReportVal")
-    @RestReturn(value=String.class)
+    @RestReturn(value=WorkReportValDTO.class)
     public RestResponse updateWorkReportVal(PostWorkReportValCommand cmd) {
-        workReportService.updateWorkReportVal(cmd);
+        WorkReportValDTO res = workReportService.updateWorkReportVal(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -258,6 +258,20 @@ public class WorkReportController extends ControllerBase{
     public RestResponse countUnReadWorkReportsVal() {
         Integer res = workReportService.countUnReadWorkReportsVal();
         RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /workReport/MarkWorkReportsValReading</b>
+     * <p>4-8.当前用户汇报单均标记为已读 </p>
+     */
+    @RequestMapping("MarkWorkReportsValReading")
+    @RestReturn(value=Integer.class)
+    public RestResponse MarkWorkReportsValReading() {
+        workReportService.MarkWorkReportsValReading();
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
