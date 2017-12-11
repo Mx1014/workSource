@@ -35,7 +35,7 @@ CREATE TABLE `eh_work_reports` (
   `report_name` VARCHAR(128) NOT NULL,
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0-invalid, 1-valid, 2-running',
   `report_type` TINYINT COMMENT '0-Day, 1-Week, 2-Month',
-  `report_attribute` NOT NULL VARCHAR(128) DEFAULT 'CUSTOMIZE' COMMENT 'DEFAULT,CUSTOMIZE',
+  `report_attribute` VARCHAR(128) NOT NULL DEFAULT 'CUSTOMIZE' COMMENT 'DEFAULT,CUSTOMIZE',
   `form_origin_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'The id of the original form',
   `form_version` BIGINT NOT NULL DEFAULT 0 COMMENT 'the current using version',
   `report_template_id` BIGINT DEFAULT 0 COMMENT 'the id in eh_general_approval_templates',
