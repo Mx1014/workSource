@@ -93,8 +93,8 @@ CREATE TABLE `eh_work_report_val_receiver_map` (
   `id` BIGINT NOT NULL COMMENT 'the id of the report val map',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
 
-  `report_val_id` NOT NULL BIGINT COMMENT 'the id of the report val',
-  `receiver_user_id` NOT NULL BIGINT COMMENT 'the id of the receiver',
+  `report_val_id` BIGINT NOT NULL COMMENT 'the id of the report val',
+  `receiver_user_id` BIGINT NOT NULL COMMENT 'the id of the receiver',
   `receiver_name` VARCHAR(256) COMMENT 'the name of the receiver',
   `receiver_avatar` VARCHAR(2048) COMMENT 'the avatar of the receiver',
   `read_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0-unread 1-read',
