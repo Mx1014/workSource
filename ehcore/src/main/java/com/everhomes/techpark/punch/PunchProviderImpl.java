@@ -2835,7 +2835,11 @@ long id = sequenceProvider.getNextSequence(key);
 			result = step.orderBy(Tables.EH_APPROVAL_CATEGORIES.ID).fetch().map((r) -> {
 				ExtDTO dto = new ExtDTO();
 				dto.setName(r.value1());
-				dto.setTimeCount(r.value2().toString());
+				if (r.value2() == null)
+					dto.setTimeCount("0");
+				else
+					dto.setTimeCount(r.value2().toString());
+
 				return dto;
 			});
 			if (null == result || result.size() == 0) {
