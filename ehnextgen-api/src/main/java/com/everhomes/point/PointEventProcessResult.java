@@ -13,7 +13,7 @@ public class PointEventProcessResult {
 
     private Long points;
     private PointLog log;
-    private PointAction messageAction;
+    private PointAction action;
 
     public PointEventProcessResult() {
     }
@@ -39,12 +39,12 @@ public class PointEventProcessResult {
         this.log = log;
     }
 
-    public PointAction getMessageAction() {
-        return messageAction;
+    public PointAction getAction() {
+        return action;
     }
 
-    public void setMessageAction(PointAction messageAction) {
-        this.messageAction = messageAction;
+    public void setAction(PointAction action) {
+        this.action = action;
     }
 
     @Override
