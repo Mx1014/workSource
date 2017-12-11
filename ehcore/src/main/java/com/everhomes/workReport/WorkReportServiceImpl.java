@@ -63,7 +63,6 @@ public class WorkReportServiceImpl implements WorkReportService {
         report.setReportName(cmd.getReportName());
         report.setModuleId(cmd.getModuleId());
         report.setStatus(WorkReportStatus.VALID.getCode());
-        report.setReportType(WorkReportType.DAY.getCode());
         report.setReportAttribute(WorkReportAttribute.CUSTOMIZE.getCode());
         report.setDeleteFlag(AttitudeFlag.YES.getCode());
         report.setModifyFlag(AttitudeFlag.YES.getCode());
