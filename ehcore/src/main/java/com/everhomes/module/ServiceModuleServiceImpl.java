@@ -770,10 +770,10 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                         allProjectFlag = true;
                     }else{
                         List<ControlTarget> configs = authorizationProvider.listAuthorizationControlConfigs(userId,authorization.getControlId());
-                        List<Project> projectList = configs.stream().map(r->new Project(Tables.EH_AUTHORIZATIONS.OWNER_TYPE.toString(), r.getId())).collect(Collectors.toList());
+                        List<Project> projectList = configs.stream().map(r->new Project(EntityType.COMMUNITY.getCode(), r.getId())).collect(Collectors.toList());
                         for (Project project : projectList) {
                             processProject(project);
-                            dtos.add(ConvertHelper.convert(projectList, ProjectDTO.class));
+                            dtos.add(ConvertHelper.convert(project, ProjectDTO.class));
                         }
                     }
 
