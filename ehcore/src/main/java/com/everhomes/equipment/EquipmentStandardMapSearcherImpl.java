@@ -1,15 +1,27 @@
 package com.everhomes.equipment;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.entity.EntityType;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.quality.OwnerType;
+import com.everhomes.search.AbstractElasticSearch;
+import com.everhomes.search.EquipmentStandardMapSearcher;
+import com.everhomes.search.SearchUtils;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.util.RuntimeErrorException;
+import com.mysql.jdbc.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -26,21 +38,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.equipment.EquipmentReviewStatus;
-import com.everhomes.rest.equipment.EquipmentStandardRelationDTO;
-import com.everhomes.rest.equipment.InspectionStandardMapTargetType;
-import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsCommand;
-import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsResponse;
-import com.everhomes.rest.quality.OwnerType;
-import com.everhomes.search.AbstractElasticSearch;
-import com.everhomes.search.EquipmentStandardMapSearcher;
-import com.everhomes.search.SearchUtils;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.mysql.jdbc.StringUtils;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch implements
@@ -62,6 +62,9 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
+
+	@Autowired
+	private PortalService portalService;
 	
 	@Override
 	public void deleteById(Long id) {
@@ -125,12 +128,13 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 	@Override
 	public SearchEquipmentStandardRelationsResponse query(
 			SearchEquipmentStandardRelationsCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_RELATION_LIST, 0L);
+		/*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_RELATION_LIST, 0L);
 		if(cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
 			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-		}
+		}*/
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.EQUIPMENT_RELATION_LIST,cmd.getTargetId());
 
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 		QueryBuilder qb = null;
@@ -229,6 +233,23 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
         
         response.setRelations(dtos);
         return response;
+	}
+	private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) {
+		ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+		listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+		listServiceModuleAppsCommand.setModuleId(EquipmentConstant.EQUIPMENT_MODULE);
+		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+		boolean flag = false;
+		if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+			flag = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(),
+					orgId, orgId, privilegeId, apps.getServiceModuleApps().get(0).getId(), null, communityId);
+		}
+		if (!flag) {
+			LOGGER.error("Permission is denied, namespaceId={}, orgId={}, communityId={}," +
+					" privilege={}", UserContext.getCurrentNamespaceId(), orgId, communityId, privilegeId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+					"Insufficient privilege");
+		}
 	}
 
 	@Override

@@ -3,11 +3,16 @@ package com.everhomes.equipment;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EquipmentSearcher;
@@ -16,6 +21,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.mysql.jdbc.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -56,6 +62,9 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
 
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
+
+    @Autowired
+    private PortalService portalService;
 	
 	@Override
 	public void deleteById(Long id) {
@@ -113,8 +122,9 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
 
 	@Override
 	public SearchEquipmentsResponse queryEquipments(SearchEquipmentsCommand cmd) {
-        Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_LIST, 0L);
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
+        /*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_LIST, 0L);
+        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);*/
+        checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.EQUIPMENT_LIST,cmd.getTargetId());
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 		QueryBuilder qb = null;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
@@ -197,6 +207,23 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         response.setEquipment(dtos);
         return response;
 	}
+    private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) {
+        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+        listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+        listServiceModuleAppsCommand.setModuleId(EquipmentConstant.EQUIPMENT_MODULE);
+        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+        boolean flag = false;
+        if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+            flag = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(),
+                    orgId, orgId, privilegeId, apps.getServiceModuleApps().get(0).getId(), null, communityId);
+        }
+        if (!flag) {
+            LOGGER.error("Permission is denied, namespaceId={}, orgId={}, communityId={}," +
+                    " privilege={}", UserContext.getCurrentNamespaceId(), orgId, communityId, privilegeId);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
+    }
 
 	@Override
 	public SearchEquipmentStandardRelationsResponse queryEquipmentStandardRelations(

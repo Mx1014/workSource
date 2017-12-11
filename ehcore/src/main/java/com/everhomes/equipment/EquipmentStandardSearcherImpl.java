@@ -1,11 +1,16 @@
 package com.everhomes.equipment;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.portal.PortalService;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EquipmentStandardSearcher;
@@ -14,6 +19,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -51,7 +57,9 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
-	
+
+    @Autowired
+    private PortalService portalService;
 	@Override
 	public void deleteById(Long id) {
 		deleteById(id.toString());
@@ -110,22 +118,24 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 	public SearchEquipmentStandardsResponse query(
 			SearchEquipmentStandardsCommand cmd) {
 
-        Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_LIST, 0L);
+        /*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_LIST, 0L);
         if(cmd.getTargetId() != null) {
             userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
         } else {
             userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-        }
+        }*/
+        checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.EQUIPMENT_STANDARD_LIST,cmd.getTargetId());
 
-		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
-		QueryBuilder qb = null;
+
+        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+        QueryBuilder qb = null;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
             qb = QueryBuilders.matchAllQuery();
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-            		.field("standardName", 1.2f)
+                    .field("standardName", 1.2f)
                     .field("standardNumber", 1.0f);
-            
+
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
             builder.addHighlightedField("standardName").addHighlightedField("standardNumber");
@@ -133,7 +143,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 
         FilterBuilder fb = null;
         FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentStandardStatus.INACTIVE.getCode());
-    	fb = FilterBuilders.notFilter(nfb);
+        fb = FilterBuilders.notFilter(nfb);
 
         // 改用namespaceId by xiongying20170328
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId()));
@@ -148,20 +158,20 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         }
 
         if(cmd.getStandardType() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("standardType", cmd.getStandardType()));
-        
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("standardType", cmd.getStandardType()));
+
         if(cmd.getStatus() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
-        
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
+
         if(cmd.getInspectionCategoryId() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("inspectionCategoryId", cmd.getInspectionCategoryId()));
-        	
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("inspectionCategoryId", cmd.getInspectionCategoryId()));
+
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
-        
+
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
@@ -176,22 +186,22 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
             LOGGER.info("EquipmentStandardSearcherImpl query rsp ："+rsp);
 
         List<Long> ids = getIds(rsp);
-        
+
         Long nextPageAnchor = null;
         if(ids.size() > pageSize) {
-        	nextPageAnchor = anchor + 1;
+            nextPageAnchor = anchor + 1;
             ids.remove(ids.size() - 1);
-         } 
-        
+        }
+
         List<EquipmentStandardsDTO> eqStandards = new ArrayList<EquipmentStandardsDTO>();
         List <EquipmentModleCommunityMap> maps = equipmentProvider.getModuleCommunityMap(cmd.getTargetId(),EquipmentModelType.STANDARD.getCode());
         for(Long id : ids) {
-        	EquipmentInspectionStandards standard = equipmentProvider.findStandardById(id);
+            EquipmentInspectionStandards standard = equipmentProvider.findStandardById(id);
             if (cmd.getTargetId() != null) {
                 //权限细化增加   项目的增加上公共标准  过滤已经修改过的模板
                 if (standard.getReferId() != null) {
                     if (maps!=null && maps.size()>0)
-                    maps.removeIf((s) -> Objects.equals(s.getStandardId(), standard.getReferId()));
+                        maps.removeIf((s) -> Objects.equals(s.getStandardId(), standard.getReferId()));
                 }
             } else {
                 //全部里面
@@ -200,15 +210,15 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
                 }
             }
             if(standard != null) {
-        		processRepeatSetting(standard);
-        		EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
+                processRepeatSetting(standard);
+                EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
                 dto.setDescription("");
-        		if(null != standard.getRepeat()) {
-    	    		RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
-    	    		dto.setRepeat(rs);
-        		}
-        		eqStandards.add(dto);
-        	}
+                if(null != standard.getRepeat()) {
+                    RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
+                    dto.setRepeat(rs);
+                }
+                eqStandards.add(dto);
+            }
 
         }
         //过滤剩下的maps 增加到项目中
@@ -228,9 +238,26 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
                 }
             }
         }
-        
+
         return new SearchEquipmentStandardsResponse(nextPageAnchor, eqStandards);
-	}
+    }
+    private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) {
+        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+        listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+        listServiceModuleAppsCommand.setModuleId(EquipmentConstant.EQUIPMENT_MODULE);
+        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+        boolean flag = false;
+        if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+            flag = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(),
+                    orgId, orgId, privilegeId, apps.getServiceModuleApps().get(0).getId(), null, communityId);
+        }
+        if (!flag) {
+            LOGGER.error("Permission is denied, namespaceId={}, orgId={}, communityId={}," +
+                    " privilege={}", UserContext.getCurrentNamespaceId(), orgId, communityId, privilegeId);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
+    }
 
 	private void processRepeatSetting(EquipmentInspectionStandards standard) {
 		if(null != standard.getRepeatSettingId() && standard.getRepeatSettingId() != 0) {

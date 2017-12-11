@@ -25,9 +25,11 @@ import com.everhomes.pmNotify.PmNotifyConfigurations;
 import com.everhomes.pmNotify.PmNotifyProvider;
 import com.everhomes.pmNotify.PmNotifyRecord;
 import com.everhomes.pmNotify.PmNotifyService;
+import com.everhomes.portal.PortalService;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.ServiceModuleAuthorizationsDTO;
 import com.everhomes.rest.address.CommunityDTO;
@@ -46,6 +48,8 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.parking.ParkingLocalStringCode;
 import com.everhomes.rest.pmNotify.*;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityGroupType;
@@ -201,16 +205,19 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Autowired
 	private FieldProvider fieldProvider;
 
+	@Autowired
+	private PortalService portalService;
+
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(
 			UpdateEquipmentStandardCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_UPDATE, 0L);
-		if(cmd.getTargetId() != null) {
+		//Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_UPDATE, 0L);
+		/*if(cmd.getTargetId() != null) {
 			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-		}
-
+		}*/
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.EQUIPMENT_STANDARD_UPDATE,cmd.getTargetId());
 
 		User user = UserContext.current().getUser();
 		RepeatSettings repeat = null;
@@ -331,6 +338,24 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		EquipmentStandardsDTO dto = converStandardToDto(standard);
 		return dto;
+	}
+
+	private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) {
+		ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+		listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+		listServiceModuleAppsCommand.setModuleId(EquipmentConstant.EQUIPMENT_MODULE);
+		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+		boolean flag = false;
+		if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+			flag = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(),
+					orgId, orgId, privilegeId, apps.getServiceModuleApps().get(0).getId(), null, communityId);
+		}
+		if (!flag) {
+			LOGGER.error("Permission is denied, namespaceId={}, orgId={}, communityId={}," +
+					" privilege={}", UserContext.getCurrentNamespaceId(), orgId, communityId, privilegeId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+					"Insufficient privilege");
+		}
 	}
 
 	private void unReviewEquipmentStandardRelations(EquipmentStandardMap map) {
@@ -461,12 +486,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public void deleteEquipmentStandard(DeleteEquipmentStandardCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_DELETE, 0L);
+		/*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_DELETE, 0L);
 		if(cmd.getTargetId() != null) {
 			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-		}
+		}*/
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_STANDARD_DELETE,cmd.getTargetId());
 
 		User user = UserContext.current().getUser();
 
@@ -700,8 +726,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 	public void reviewEquipmentStandardRelations(
 			ReviewEquipmentStandardRelationsCommand cmd) {
 		User user = UserContext.current().getUser();
-		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_RELATION_REVIEW, 0L);
-		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
+		/*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_RELATION_REVIEW, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);*/
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_RELATION_REVIEW,cmd.getTargetId());
 
 		EquipmentStandardMap map = equipmentProvider.findEquipmentStandardMapById(cmd.getId());
 		EquipmentInspectionEquipments equipment = verifyEquipment(cmd.getEquipmentId(), cmd.getOwnerType(), cmd.getOwnerId());
@@ -784,8 +811,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	public void deleteEquipmentStandardRelations(
 			DeleteEquipmentStandardRelationsCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_RELATION_DELETE, 0L);
-		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
+		/*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_RELATION_DELETE, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);*/
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_RELATION_DELETE,cmd.getTargetId());
+
 		EquipmentStandardMap map = equipmentProvider.findEquipmentStandardMapById(cmd.getId());
 		if(map == null) {
 			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
@@ -808,8 +837,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public void updateEquipments(UpdateEquipmentsCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_UPDATE, 0L);
-		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
+		/*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_UPDATE, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);*/
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_UPDATE,cmd.getTargetId());
 
 		User user = UserContext.current().getUser();
 		EquipmentInspectionEquipments equipment = null;
@@ -1206,8 +1236,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 					EquipmentServiceErrorCode.ERROR_EQUIPMENT_ALREADY_DELETED,
  				"设备已删除");
 		}
-		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_DELETE, 0L);
-		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), equipment.getTargetId(), cmd.getOwnerId(), privilegeId);
+//		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_DELETE, 0L);
+//		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), equipment.getTargetId(), cmd.getOwnerId(), privilegeId);
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_DELETE,equipment.getTargetId());
 
 		equipment.setDeleterUid(user.getId());
 		equipment.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -3961,8 +3992,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public void createInspectionTemplate(CreateInspectionTemplateCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_ITEM_CREATE, 0L);
-		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
+		/*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_ITEM_CREATE, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);*/
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_ITEM_CREATE,cmd.getTargetId());
 
 		EquipmentInspectionTemplates template = ConvertHelper.convert(cmd, EquipmentInspectionTemplates.class);
 		template.setCreatorUid(UserContext.current().getUser().getId());
@@ -3997,8 +4029,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public void updateInspectionTemplate(UpdateInspectionTemplateCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_ITEM_UPDATE, 0L);
-		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
+//		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_ITEM_UPDATE, 0L);
+//		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_ITEM_UPDATE,cmd.getTargetId());
 		EquipmentInspectionTemplates template = equipmentProvider.findEquipmentInspectionTemplate(cmd.getId(), cmd.getOwnerId(), cmd.getOwnerType());
 		if(template == null || Status.INACTIVE.equals(Status.fromStatus(template.getStatus()))) {
 			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
@@ -4084,8 +4117,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public void deleteInspectionTemplate(DeleteInspectionTemplateCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_ITEM_DELETE, 0L);
-		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
+//		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_ITEM_DELETE, 0L);
+//		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_ITEM_DELETE,cmd.getTargetId());
 		EquipmentInspectionTemplates template = equipmentProvider.findEquipmentInspectionTemplate(cmd.getId(),
 				cmd.getOwnerId(), cmd.getOwnerType());
 		if(template == null || Status.INACTIVE.equals(Status.fromStatus(template.getStatus()))) {
@@ -4158,6 +4192,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			ListInspectionTemplatesCommand cmd) {
 //		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_ITEM_LIST, 0L);
 //		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_ITEM_LIST,cmd.getTargetId());
 		List<InspectionTemplateDTO> dtos = new ArrayList<InspectionTemplateDTO>();
 		//增加判断为全部里面查看还是项目中查看
 		List<EquipmentInspectionTemplates> templates = new ArrayList<>();
@@ -4546,12 +4581,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public StatTodayEquipmentTasksResponse statTodayEquipmentTasks(StatTodayEquipmentTasksCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STAT_PANDECT, 0L);
+		/*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STAT_PANDECT, 0L);
 		if(cmd.getTargetId() == null) {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-		}
+		}*/
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_STAT_PANDECT,cmd.getTargetId());
 
 		Calendar cal = Calendar.getInstance();
 		if(cmd.getDateTime() == null) {
@@ -4599,12 +4635,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public StatIntervalAllEquipmentTasksResponse statIntervalAllEquipmentTasks(StatIntervalAllEquipmentTasksCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STAT_ALLTASK, 0L);
+		/*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STAT_ALLTASK, 0L);
 		if(cmd.getTargetId() == null) {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-		}
+		}*/
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_STAT_ALLTASK,cmd.getTargetId());
 		Timestamp begin = null;
 		Timestamp end = null;
 		if(cmd.getStartTime() != null) {
