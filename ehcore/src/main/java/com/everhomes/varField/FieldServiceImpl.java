@@ -1116,7 +1116,7 @@ public class FieldServiceImpl implements FieldService {
                 scopeField.setNamespaceId(cmd.getNamespaceId());
                 scopeField.setCommunityId(cmd.getCommunityId());
                 if (scopeField.getId() == null) {
-                    scopeField.setGroupPath(scopeField.getGroupPath() + "/");
+                    scopeField.setGroupPath(scopeField.getGroupPath());
                     scopeField.setCreatorUid(userId);
                     fieldProvider.createScopeField(scopeField);
                 } else {
@@ -1129,7 +1129,7 @@ public class FieldServiceImpl implements FieldService {
                         fieldProvider.updateScopeField(scopeField);
                         existFields.remove(exist.getId());
                     } else {
-                        scopeField.setGroupPath(scopeField.getGroupPath() + "/");
+                        scopeField.setGroupPath(scopeField.getGroupPath());
                         scopeField.setCreatorUid(userId);
                         fieldProvider.createScopeField(scopeField);
                     }
