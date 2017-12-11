@@ -3109,7 +3109,7 @@ public class PunchServiceImpl implements PunchService {
 	public Workbook createPunchStatisticsBook(List<PunchCountDTO> results, ListPunchCountCommand cmd) {
 		if (null == results || results.size() == 0)
 			return null;
-		int columnNo = 10;
+		int columnNo = 11;
 
 		if (null != results && results.size() > 0) {
 			if (null != results.get(0).getExts()) {
@@ -4757,7 +4757,7 @@ public class PunchServiceImpl implements PunchService {
 		XSSFWorkbook wb = new XSSFWorkbook();
 		XSSFSheet sheet = wb.createSheet("punchDetails");
 
-		sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 8));
+		sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 10));
 		XSSFCellStyle style = wb.createCellStyle();
 		Font font = wb.createFont();
 		font.setFontHeightInPoints((short) 20);
@@ -4775,7 +4775,7 @@ public class PunchServiceImpl implements PunchService {
 		rowTitle.setRowStyle(titleStyle);
 		//副标题
 
-		sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 8));
+		sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 10));
 		XSSFCellStyle style1 = wb.createCellStyle();
 		Font font1 = wb.createFont();
 
