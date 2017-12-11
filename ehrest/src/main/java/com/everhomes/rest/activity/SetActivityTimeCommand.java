@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  *     <li>orderHours: 订单小时数</li>
  *     <li>wechatSignup: 是否支持微信报名，0-不支持，1-支持 参考  参考{@link com.everhomes.rest.activity.WechatSignupFlag }</li>
  *     <li>categoryId: categoryId</li>
+ *     <li>interactFlag: 是否支持交互 {@link com.everhomes.rest.forum.InteractFlag}</li>
  * </ul>
  */
 public class SetActivityTimeCommand {
@@ -22,6 +23,7 @@ public class SetActivityTimeCommand {
 	private Integer orderHours;
 	private Byte wechatSignup;
 	private Long categoryId;
+	private Byte interactFlag;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -77,6 +79,14 @@ public class SetActivityTimeCommand {
 
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
+	}
+
+	public Byte getInteractFlag() {
+		return interactFlag;
+	}
+
+	public void setInteractFlag(Byte interactFlag) {
+		this.interactFlag = interactFlag;
 	}
 
 	@Override
