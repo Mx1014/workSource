@@ -55,7 +55,6 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import javax.validation.constraints.Null;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
@@ -279,13 +278,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
-	public List<Organization> listOrganizations(String organizationType, Long parentId, Long pageAnchor, Integer pageSize) {
+	public List<Organization> listOrganizations(String organizationType, Integer namespaceId, Long parentId, Long pageAnchor, Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		List<Organization> result  = new ArrayList<Organization>();
 		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
 		if(!StringUtils.isEmpty(organizationType)) {
 			query.addConditions(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(organizationType));
+		}
+
+		if(namespaceId != null) {
+			query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
 		}
 
 		if (null != parentId) {
@@ -3576,6 +3579,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         Record r = context.select().from(Tables.EH_ORGANIZATIONS)
                 .where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
                 .and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()))
                 .and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
                 .fetchAny();
         if (r != null)
@@ -5420,8 +5424,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
 	@Override
-	public List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId,
-														   List<Long> orgIds, String groupName, CrossShardListingLocator locator, Integer pageSize) {
+	public List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId, List<Long> orgIds,
+														   String groupName, Long creatorUid, CrossShardListingLocator locator, Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectConditionStep<Record> step = context.select().from(Tables.EH_ORGANIZATIONS)
 				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType));
@@ -5430,6 +5434,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		if (!StringUtils.isEmpty(groupName)) {
 			step.and(Tables.EH_ORGANIZATIONS.NAME.like("%" + groupName + "%"));
+		}
+		if (null != creatorUid) {
+			step.and(Tables.EH_ORGANIZATIONS.CREATOR_UID.eq(creatorUid));
+
 		}
 		if(null != organizationId)
 			step.and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(organizationId));
@@ -5877,4 +5885,35 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityOrganizationDetailDisplay.class, detailDisplay.getId());
 	}
+	
+	@Override
+    public List checkOrgExistInOrgOrPaths(Integer namespaceId, Long organizationId, List<Long> orgIds, List<String> orgPaths) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+		// in
+		Condition cond1 = null;
+		if(orgIds != null && orgIds.size() > 0){
+			cond1 = Tables.EH_ORGANIZATIONS.ID.in(orgIds);
+		}
+		// like
+		Condition cond2 = null;
+		if(orgPaths != null && orgPaths.size() > 0){
+			for (String orgPath : orgPaths) {
+				if(cond2 == null){
+					cond2 = Tables.EH_ORGANIZATIONS.PATH.like(orgPath +"%");
+				}else{
+					cond2 = cond2.or(Tables.EH_ORGANIZATIONS.PATH.like(orgPath + "%"));
+				}
+			}
+		}
+		if (cond1 != null && cond2 != null) {
+			query.addConditions(cond1.or(cond2));
+		}else if(cond1 != null){
+			query.addConditions(cond1);
+		}else if(cond2 != null){
+			query.addConditions(cond2);
+		}
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		return query.fetch();
+    }
 }

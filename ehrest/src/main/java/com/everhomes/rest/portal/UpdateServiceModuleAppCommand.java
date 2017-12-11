@@ -21,6 +21,10 @@ public class UpdateServiceModuleAppCommand {
 
 	private String instanceConfig;
 
+	private String customTag;
+
+	private String customPath;
+
 	public UpdateServiceModuleAppCommand() {
 
 	}
@@ -69,4 +73,19 @@ public class UpdateServiceModuleAppCommand {
 		return StringHelper.toJsonString(this);
 	}
 
+	public String getCustomTag() {
+		return customTag;
+	}
+
+	public void setCustomTag(String customTag) {
+		this.customTag = customTag;
+	}
+
+	public String getCustomPath() {
+		return customPath;
+	}
+
+	public void setCustomPath(String customPath) {
+		this.customPath = customPath;
+	}
 }

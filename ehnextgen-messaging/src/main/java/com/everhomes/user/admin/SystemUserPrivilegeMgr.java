@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.everhomes.acl.*;
 import com.everhomes.domain.Domain;
+import com.everhomes.menu.Target;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModulePrivilege;
 import com.everhomes.module.ServiceModulePrivilegeType;
@@ -12,8 +13,17 @@ import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.portal.ServiceModuleApp;
+import com.everhomes.portal.ServiceModuleAppProvider;
+import com.everhomes.rest.acl.IdentityType;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.blacklist.BlacklistErrorCode;
+import com.everhomes.rest.common.AllFlagType;
+import com.everhomes.rest.common.IncludeChildFlagType;
+import com.everhomes.rest.module.ControlTarget;
+import com.everhomes.rest.oauth2.ControlTargetOption;
+import com.everhomes.rest.oauth2.ModuleManagementType;
+import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.user.*;
 
@@ -51,6 +61,11 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
     @Autowired
     private ServiceModuleProvider serviceModuleProvider;
 
+    @Autowired
+    private ServiceModuleAppProvider serviceModuleAppProvider;
+
+    @Autowired
+    private AuthorizationProvider authorizationProvider;
 
 
     @Override
@@ -180,6 +195,124 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         return false;
     }
 
+    // 按appId校验应用管理员（应用Id）
+    @Override
+    public boolean checkModuleAppAdmin(String ownerType, Long ownerId, Long userId, Long privilegeId, Long appId, Long communityId, Long organizationId){
+        Integer namespaceId = UserContext.current().getNamespaceId();
+        // 查询privilegeId关联的模块
+        Long p_moduleId = 0L;
+        List<ServiceModulePrivilege> serviceModules = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(privilegeId, ServiceModulePrivilegeType.ORDINARY);
+        if(0 < serviceModules.size()){
+            ServiceModule module = serviceModuleProvider.findServiceModuleById(serviceModules.get(0).getModuleId());
+            p_moduleId = module.getId();
+            if(module.getLevel() > 2){
+                p_moduleId = module.getParentId();
+            }
+        }
+        // 查询app关联的moduleId
+        ServiceModuleApp app = this.serviceModuleProvider.findReflectionServiceModuleAppByActiveAppId(appId);
+        if(app != null && p_moduleId != 0L && p_moduleId.longValue() == app.getModuleId().longValue()){//如果权限对应的moduleId和appId对应的模块Id相等，再校验是否对应用有权
+          return checkModuleAppAdmin(namespaceId, ownerType, ownerId, userId, p_moduleId, appId, communityId, organizationId);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkModuleAppAdmin(Integer namespaceId, String ownerType, Long ownerId, Long userId, Long moduleId, Long appId, Long communityId, Long organizationId) {
+        if(moduleId != null && appId != null){
+            // 检查模块对应范围内（园区控制、OA控制、无限制控制）的全部应用权限
+            ServiceModule module = this.serviceModuleProvider.findServiceModuleById(moduleId);
+            Authorization authorization_target = new Authorization();
+            List<Authorization> authorizations_Total = this.authorizationProvider.listAuthorizations(ownerType, ownerId, OwnerType.USER.getCode(), userId, EntityType.SERVICE_MODULE_APP.getCode(), 0L, IdentityType.MANAGE.getCode(), 0L, module.getModuleControlType(), AllFlagType.YES.getCode(), false);
+            if(authorizations_Total.size() > 0){
+                authorization_target = authorizations_Total.get(0);
+            }else{ // 如果是单个分配的应用权限
+                List<Authorization> authorizations = this.authorizationProvider.listAuthorizations(ownerType, ownerId, OwnerType.USER.getCode(), userId, EntityType.SERVICE_MODULE_APP.getCode(), moduleId, IdentityType.MANAGE.getCode(), appId, null, null, false);
+                if (authorizations.size() == 0){
+                    return false;
+                }else {
+                    authorization_target = authorizations.get(0);
+                }
+            }
+
+            List<ControlTarget> controlTargets = this.authorizationProvider.listAuthorizationControlConfigs(userId, authorization_target.getControlId());
+            Byte controlOption = authorization_target.getControlOption();
+
+            if(authorization_target != null ){
+                switch (ModuleManagementType.fromCode(authorization_target.getModuleControlType())){
+                    case COMMUNITY_CONTROL:
+                        if(communityId != null && communityId != 0L){
+                            if(controlOption == ControlTargetOption.ALL_COMMUNITY.getCode()){//配置为全园区时，返回true
+                                return true;
+                            }
+                            for (ControlTarget controlTarget : controlTargets) {
+                                if(controlTarget.getId() == communityId){
+                                    return true;
+                                }
+                            }
+                        }
+                        break;
+                    case ORG_CONTROL:
+                        if(organizationId != null && organizationId != 0L){
+                            List<Long> orgIds = new ArrayList<>();
+                            List<String> orgPaths = new ArrayList<>();
+                            for (ControlTarget controlTarget : controlTargets) {
+                                if(controlTarget.getIncludeChildFlag() == IncludeChildFlagType.YES.getCode()){
+                                    Organization org = this.organizationProvider.findOrganizationById(controlTarget.getId());
+                                    if(org != null)
+                                        orgPaths.add(org.getPath());
+                                }else{
+                                    orgIds.add(controlTarget.getId());
+                                }
+                            }
+
+                            List orgs = this.organizationProvider.checkOrgExistInOrgOrPaths(namespaceId, organizationId, orgIds, orgPaths);
+                            if(orgs != null && orgs.size() > 0)
+                                return true;
+                        }
+                    case UNLIMIT_CONTROL:
+                        return true;
+
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkModuleAppAdmin(Integer namespaceId, Long organizationId, Long userId, Long appId) {
+        ServiceModuleApp app = this.serviceModuleProvider.findReflectionServiceModuleAppByActiveAppId(appId);
+        if(app == null)
+            return false;
+        ServiceModule serviceModule = this.serviceModuleProvider.findServiceModuleById(app.getModuleId());
+        if(serviceModule != null){
+            List<Authorization> authorizations_Total =  this.authorizationProvider.listAuthorizations(EntityType.ORGANIZATIONS.getCode(), organizationId, OwnerType.USER.getCode(), userId, EntityType.SERVICE_MODULE_APP.getCode(), 0L, IdentityType.MANAGE.getCode(), 0L, serviceModule.getModuleControlType(), AllFlagType.YES.getCode(), false);
+            if(authorizations_Total.size() > 0){
+                return true;
+            }
+            List<Authorization> authorizations = this.authorizationProvider.listAuthorizations(EntityType.ORGANIZATIONS.getCode(), organizationId, OwnerType.USER.getCode(), userId, EntityType.SERVICE_MODULE_APP.getCode(), serviceModule.getId(), IdentityType.MANAGE.getCode(), appId, null, null, false);
+            if(authorizations.size() > 0){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkModuleAppRelation(Integer namespaceId, Long communityId, Long userId, Long appId) {
+//        List<Target> targets = new ArrayList<>();
+//        targets.add(new Target(com.everhomes.entity.EntityType.USER.getCode(), userId));
+//        //获取人员的所有相关机构
+//        List<Long> orgIds = organizationService.getIncludeOrganizationIdsByUserId(userId, organizationId);
+//        for (Long orgId: orgIds) {
+//            targets.add(new Target(com.everhomes.entity.EntityType.ORGANIZATIONS.getCode(), orgId));
+//        }
+//
+//        List<Authorization> listAuthorizations(EntityType.COMMUNITY, communityId, String targetType, Long targetId, null, Long authId, String identityType, Boolean targetFlag)
+//        listAuthorizations(EntityType.COMMUNITY, communityId, String targetType, Long targetId, null, null, ServiceModulePrivilegeType.ORDINARY.getCode(), appId, null, null, false)
+        return false;
+    }
+
     @Override
     public boolean checkSuperAdmin(Long userId, Long currentOrgId){
         if(null == currentOrgId){
@@ -250,6 +383,12 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
 
     @Override
     public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId){
+        return  checkUserPrivilege(userId, ownerType, ownerId, currentOrgId, privilegeId, null, null, null);
+    }
+
+    @Override
+    public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId, Long appId, Long checkOrgId, Long checkCommunityId){
+        LOGGER.debug("checkUserPrivilege start.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}, appId={}, checkOrgId={}, checkCommunityId= {}" , userId, ownerType, ownerId, currentOrgId, privilegeId, appId, checkOrgId, checkCommunityId);
 
         Domain domain = UserContext.current().getDomain();
 
@@ -270,6 +409,18 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
                             LOGGER.debug("check module admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
                             return true;
                         }
+                        // 当需要校验appId，by lei.lv
+                        if(appId != null){
+                            if(checkModuleAppAdmin(ownerType, ownerId, userId, privilegeId, appId, checkCommunityId, checkOrgId)){
+                                LOGGER.debug("check moduleApp admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, checkCommunityId={}, checkOrgId={}, privilegeId={}, appId={}" , userId, ownerType, ownerId, currentOrgId, checkCommunityId, checkOrgId, privilegeId, appId);
+                                return true;
+                            }
+                            // 校验权限细化
+                            if(checkAccess(userId, EntityType.COMMUNITY.getCode(), checkCommunityId, currentOrgId, privilegeId)){
+                                LOGGER.debug("check moduleApp relation privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, checkCommunityId={}, checkOrgId={}, privilegeId={}, appId={}" , userId, ownerType, ownerId, currentOrgId, checkCommunityId, checkOrgId, privilegeId, appId);
+                                return true;
+                            }
+                        }
                     }else{
                         if(checkOrganizationAdmin(userId, currentOrgId)){
                             LOGGER.debug("check organization admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
@@ -288,6 +439,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
             }
         }
 
+        //校验权限细化
         if(checkAccess(userId, ownerType, ownerId, currentOrgId, privilegeId)){
             LOGGER.debug("check privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
             return true;

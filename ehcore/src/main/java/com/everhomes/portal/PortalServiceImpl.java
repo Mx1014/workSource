@@ -19,11 +19,10 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.activity.ActivityActionData;
-import com.everhomes.rest.activity.ActivityEntryConfigulation;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.MoreActionData;
 import com.everhomes.rest.common.NavigationActionData;
@@ -49,10 +48,10 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
-import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.util.postgres.pg_catalog.routines.Count1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,6 +128,9 @@ public class PortalServiceImpl implements PortalService {
 	@Autowired
 	private OrganizationSearcher organizationSearcher;
 
+	@Autowired
+	private ServiceModuleService serviceModuleService;
+
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
 		List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId());
@@ -136,6 +138,24 @@ public class PortalServiceImpl implements PortalService {
 			return processServiceModuleAppDTO(r);
 		}).collect(Collectors.toList()));
 	}
+
+	@Override
+	public ListServiceModuleAppsResponse listServiceModuleAppsWithConditon(ListServiceModuleAppsCommand cmd) {
+		//由于园区后台的关系，使用reflectionServiceModuleApps代替serviceModuleApps
+//		List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getActionType(), cmd.getCustomTag(), cmd.getCustomPath());
+//		if(moduleApps != null && moduleApps.size() > 0){
+//			List dtos = Collections.singletonList( processServiceModuleAppDTO(moduleApps.get(0)));
+//			return new ListServiceModuleAppsResponse(dtos);
+//		}
+//		return null;
+		List<ServiceModuleAppDTO> moduleApps = serviceModuleProvider.listReflectionServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getActionType(), cmd.getCustomTag(), cmd.getCustomPath());
+		if(moduleApps != null && moduleApps.size() > 0){
+			List dtos = Collections.singletonList(moduleApps.get(0));
+			return new ListServiceModuleAppsResponse(dtos);
+		}
+		return null;
+	}
+
 
 	@Override
 	public ServiceModuleAppDTO createServiceModuleApp(CreateServiceModuleAppCommand cmd) {
@@ -150,6 +170,11 @@ public class PortalServiceImpl implements PortalService {
 		moduleApp.setCreatorUid(UserContext.current().getUser().getId());
 		moduleApp.setOperatorUid(moduleApp.getCreatorUid());
 		moduleApp.setActionType(serviceModule.getActionType());
+
+		//todo
+		moduleApp.setCustomTag(cmd.getCustomTag());
+		moduleApp.setCustomPath(cmd.getCustomPath());
+
 		serviceModuleAppProvider.createServiceModuleApp(moduleApp);
 		return processServiceModuleAppDTO(moduleApp);
 	}
@@ -174,6 +199,10 @@ public class PortalServiceImpl implements PortalService {
 			moduleApp.setOperatorUid(moduleApp.getCreatorUid());
 			moduleApp.setActionType(serviceModule.getActionType());
 			moduleApp.setNamespaceId(namespaceId);
+			//todo
+			moduleApp.setCustomTag(createModuleApp.getCustomTag());
+			moduleApp.setCustomPath(createModuleApp.getCustomPath());
+
 			serviceModuleApps.add(moduleApp);
 		}
 		serviceModuleAppProvider.createServiceModuleApps(serviceModuleApps);
@@ -194,6 +223,15 @@ public class PortalServiceImpl implements PortalService {
 				cmd.setInstanceConfig(serviceModule.getInstanceConfig());
 			}
 		}
+
+		//todo
+		if(!StringUtils.isEmpty(cmd.getCustomPath())){
+			moduleApp.setCustomPath(cmd.getCustomPath());
+		}
+		if(!StringUtils.isEmpty(cmd.getCustomTag())){
+			moduleApp.setCustomTag(cmd.getCustomTag());
+		}
+
 		moduleApp.setInstanceConfig(cmd.getInstanceConfig());
 		serviceModuleAppProvider.updateServiceModuleApp(moduleApp);
 		return processServiceModuleAppDTO(moduleApp);
@@ -1756,6 +1794,9 @@ public class PortalServiceImpl implements PortalService {
 	private PortalLayout syncLayout(Integer namespaceId, String location, String name){
 		User user = UserContext.current().getUser();
 		List<LaunchPadLayout> padLayouts = launchPadProvider.getLaunchPadLayouts(name, namespaceId);
+		// 每次同步开始的时候，先把reflectionServiceModuleApp中对应的数据状态置为无效
+		this.serviceModuleProvider.lapseReflectionServiceModuleAppByNamespaceId(namespaceId);
+
 		PortalLayout layout = null;
 		if(padLayouts.size() == 0){
 			LOGGER.error("Unable to find the lunch pad layout. namespaceId = {}, location = {}, layoutName = {}", namespaceId, location, name);
@@ -1969,13 +2010,12 @@ public class PortalServiceImpl implements PortalService {
 					AllOrMoreActionData actionData = new AllOrMoreActionData();
 					actionData.setType(AllOrMoreType.ALL.getCode());
 					item.setActionData(StringHelper.toJsonString(actionData));
-				}else if(ActionType.OFFICIAL_URL == ActionType.fromCode(padItem.getActionType())){
-					item.setActionType(PortalItemActionType.ZUOLINURL.getCode());
-					if(!StringUtils.isEmpty(padItem.getActionData())){
-						UrlActionData actionData = (UrlActionData)StringHelper.fromJsonString(padItem.getActionData(), UrlActionData.class);
-						item.setActionData(StringHelper.toJsonString(actionData));
-					}
-
+//				}else if(ActionType.OFFICIAL_URL == ActionType.fromCode(padItem.getActionType())){
+//					item.setActionType(PortalItemActionType.ZUOLINURL.getCode());
+//					if(!StringUtils.isEmpty(padItem.getActionData())){
+//						UrlActionData actionData = (UrlActionData)StringHelper.fromJsonString(padItem.getActionData(), UrlActionData.class);
+//						item.setActionData(StringHelper.toJsonString(actionData));
+//					}
 				}else if(ActionType.THIRDPART_URL == ActionType.fromCode(padItem.getActionType())){
 					item.setActionType(PortalItemActionType.THIRDURL.getCode());
 					if(!StringUtils.isEmpty(padItem.getActionData())){
@@ -2025,12 +2065,33 @@ public class PortalServiceImpl implements PortalService {
 		moduleApp.setStatus(ServiceModuleAppStatus.ACTIVE.getCode());
 		moduleApp.setCreatorUid(user.getId());
 		moduleApp.setOperatorUid(user.getId());
-		List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModule(actionType);
-		if(serviceModules.size() == 0 || ActionType.OFFLINE_WEBAPP  == ActionType.fromCode(actionType)
-				|| ActionType.ROUTER  == ActionType.fromCode(actionType)){
 
+		ServiceModule serviceModule = null;
+		if(ActionType.fromCode(actionType) == ActionType.OFFICIAL_URL){
+			Set<String> beans = PortalUrlParserBeanUtil.getkeys();
+			Long moduleId = 0L;
+			for (String bean : beans) {
+				PortalUrlParser parser = PlatformContext.getComponent(bean);
+				if(parser != null){
+					moduleId = parser.getModuleId(namespaceId, actionData, actionType, itemLabel);
+					if(moduleId != null && moduleId != 0L){
+						serviceModule = serviceModuleProvider.findServiceModuleById(moduleId);
+						if(serviceModule != null){
+							break;
+						}
+					}
+				}
+			}
+		}else if(ActionType.OFFLINE_WEBAPP  == ActionType.fromCode(actionType) || ActionType.THIRDPART_URL  == ActionType.fromCode(actionType)){
+			return moduleApp;
 		}else{
-			ServiceModule serviceModule = serviceModules.get(0);
+			List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModule(actionType);
+			if(serviceModules.size() != 0){
+				serviceModule = serviceModules.get(0);
+			}
+		}
+
+		if(serviceModule != null){
 			moduleApp.setModuleId(serviceModule.getId());
 			if(StringUtils.isEmpty(itemLabel)){
 				moduleApp.setName(serviceModule.getName());
@@ -2042,8 +2103,11 @@ public class PortalServiceImpl implements PortalService {
 					moduleApp.setInstanceConfig(instanceConfig);
 				}
 			}
+
+			// 同步reflectionServiceModule表
+			this.serviceModuleService.getOrCreateReflectionServiceModuleApp(namespaceId, actionData, moduleApp.getInstanceConfig(), itemLabel, serviceModule);
+			serviceModuleAppProvider.createServiceModuleApp(moduleApp);
 		}
-		serviceModuleAppProvider.createServiceModuleApp(moduleApp);
 		return moduleApp;
 	}
 
@@ -2105,7 +2169,7 @@ public class PortalServiceImpl implements PortalService {
 		return scope;
 	}
 
-	private PortalPublishHandler getPortalPublishHandler(Long moduleId) {
+	public PortalPublishHandler getPortalPublishHandler(Long moduleId) {
 		PortalPublishHandler handler = null;
 
 		if(moduleId != null && moduleId.longValue() > 0) {

@@ -31,7 +31,9 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
@@ -57,6 +59,8 @@ import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
@@ -184,6 +188,9 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private SequenceProvider sequenceProvider;
 
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+
 //    @Autowired
 //    private ContractService contractService;
 
@@ -198,6 +205,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private NamespaceResourceService namespaceResourceService;
+
+    @Autowired
+    private PortalService portalService;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -239,16 +249,28 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillsResponse listBills(ListBillsCommand cmd) {
-//        Integer namespaceId = 999983;
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        //校验查看的权限
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(), PrivilegeConstants.ASSET_MANAGEMENT_VIEW);
+        ListBillsResponse response = new ListBillsResponse();
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
-        ListBillsResponse response = new ListBillsResponse();
-
         List<ListBillsDTO> list = handler.listBills(cmd.getContractNum(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),cmd.getPageAnchor(),cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus(),cmd.getTargetType(), response);
         response.setListBillsDTOS(list);
         return response;
+    }
+
+    private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId) {
+        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
+        cmd1.setActionType((byte)13);
+        cmd1.setModuleId(20400l);
+        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
+        Long appId = res.getServiceModuleApps().get(0).getId();
+        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), 1000001L, 1000001L,priviledgeId , appId, null,communityId )){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
     }
 
     @Override
@@ -265,6 +287,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void selectNotice(SelectedNoticeCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_NOTICE);
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
@@ -498,6 +521,8 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void OneKeyNotice(OneKeyNoticeCommand cmd) {
+        //校验催缴的权限
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_NOTICE);
         ListBillsCommand convertedCmd = ConvertHelper.convert(cmd, ListBillsCommand.class);
         if(UserContext.getCurrentNamespaceId()!=999971){
             convertedCmd.setPageAnchor(0l);
@@ -596,6 +621,8 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd) {
+        //校验是否有查看账单统计的权限
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_STATISTICS_VIEW);
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
@@ -604,6 +631,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void modifyBillStatus(BillIdCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_CHANGE_STATUS);
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
@@ -1370,6 +1398,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListAutoNoticeConfigResponse listAutoNoticeConfig(ListAutoNoticeConfigCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_NOTICE);
         ListAutoNoticeConfigResponse response = new ListAutoNoticeConfigResponse();
         response.setNoticeDays(assetProvider.listAutoNoticeConfig(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId()));
         return response;
@@ -1377,6 +1406,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void autoNoticeConfig(AutoNoticeConfigCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_NOTICE);
         checkNullProhibit("所属者类型",cmd.getOwnerType());
         checkNullProhibit("园区id",cmd.getOwnerId());
         checkNullProhibit("域空间",cmd.getNamespaceId());
@@ -3537,6 +3567,8 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public AssetBillTemplateValueDTO creatAssetBill(CreatAssetBillCommand cmd) {
+        //校验创建账单的权限
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(), PrivilegeConstants.ASSET_MANAGEMENT_CREATE);
         AssetBill bill = ConvertHelper.convert(cmd, AssetBill.class);
         bill.setAccountPeriod(new Timestamp(cmd.getAccountPeriod()));
         bill.setSource(AssetBillSource.MANUAL.getCode());
