@@ -1,14 +1,11 @@
 package com.everhomes.acl;
 
 
-import java.util.List;
-
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.entity.EntityType;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.*;
@@ -17,12 +14,12 @@ import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.List;
 
 
 @RestDoc(value="acl controller", site="core")
