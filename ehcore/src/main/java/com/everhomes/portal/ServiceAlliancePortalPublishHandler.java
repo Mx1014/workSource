@@ -205,8 +205,9 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 		if(value == null){
 			value = "1";
 			valuemap.set(rkey, value, 20, TimeUnit.MINUTES);
-			ArrayList<Integer> socpeIds = new ArrayList<>(33*7);
-			for (int i = 0; i < 30; i++) {
+			int maxEntryId = configProvider.getIntValue("portal.max.entryid", 30);
+			ArrayList<Integer> socpeIds = new ArrayList<>(maxEntryId*7);
+			for (int i = 0; i < maxEntryId; i++) {
 				socpeIds.add(41700+i*100);
 				socpeIds.add(41700+i*100+10);
 				socpeIds.add(41700+i*100+20);
