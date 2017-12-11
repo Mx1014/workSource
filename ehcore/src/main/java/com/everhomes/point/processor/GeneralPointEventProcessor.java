@@ -14,9 +14,7 @@ import com.everhomes.util.StringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.OffsetTime;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -127,9 +125,9 @@ public class GeneralPointEventProcessor implements PointEventProcessor {
 
         switch (limitType) {
             case TIMES_PER_DAY: {
-                OffsetDateTime time = LocalDate.now().atTime(OffsetTime.MIN);
+                long milli = Clock.systemUTC().instant().toEpochMilli();
                 Integer count = pointLogProvider.countPointLog(
-                        namespaceId, pointSystem.getId(), uid, rule.getEventName(), time.toInstant().toEpochMilli());
+                        namespaceId, pointSystem.getId(), uid, rule.getEventName(), milli);
                 PointRuleLimitData limitData = (PointRuleLimitData) StringHelper.fromJsonString(rule.getLimitData(), PointRuleLimitData.class);
                 if (count >= limitData.getTimes()) {
                     return false;
