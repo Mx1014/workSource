@@ -27,3 +27,5 @@ CREATE TABLE `eh_energy_meter_fomular_map`(
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE eh_energy_meter_setting_logs ADD COLUMN `community_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'community id' AFTER `namespace_id`;
