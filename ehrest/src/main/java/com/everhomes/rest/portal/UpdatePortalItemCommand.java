@@ -18,6 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>actionType: 跳转类型</li>
  * <li>actionData: 跳转参数，无：无参数，门户：门户id(例如：{'layoutId':1})，业务应用：应用id(例如：{'moduleAppId':1})，电商：还未定义，更多/全部：类型(例如：{'type':'more'}或者{'type':'all'}</li>
  * <li>scopes: item范围</li>
+ * <li>itemWidth: 栏目占列比</li>
  * </ul>
  */
 public class UpdatePortalItemCommand {
@@ -40,6 +41,8 @@ public class UpdatePortalItemCommand {
 
 	private Integer bgcolor;
 
+	private Integer itemWidth;
+
 	@ItemType(PortalScope.class)
 	private List<PortalScope> scopes;
 
@@ -47,7 +50,7 @@ public class UpdatePortalItemCommand {
 
 	}
 
-	public UpdatePortalItemCommand(Long id, String label, String description, String iconUri, Byte status, String actionType, String actionData, List<PortalScope> scopes) {
+	public UpdatePortalItemCommand(Long id, String label, String description, String iconUri, Byte status, String actionType, String actionData, List<PortalScope> scopes, Integer itemWidth) {
 		super();
 		this.id = id;
 		this.label = label;
@@ -57,6 +60,7 @@ public class UpdatePortalItemCommand {
 		this.actionType = actionType;
 		this.actionData = actionData;
 		this.scopes = scopes;
+		this.itemWidth = itemWidth;
 	}
 
 	public Long getId() {
@@ -137,6 +141,14 @@ public class UpdatePortalItemCommand {
 
 	public void setBgcolor(Integer bgcolor) {
 		this.bgcolor = bgcolor;
+	}
+
+	public Integer getItemWidth() {
+		return itemWidth;
+	}
+
+	public void setItemWidth(Integer itemWidth) {
+		this.itemWidth = itemWidth;
 	}
 
 	@Override

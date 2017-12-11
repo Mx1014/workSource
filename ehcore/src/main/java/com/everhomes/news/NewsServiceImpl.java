@@ -692,7 +692,7 @@ public class NewsServiceImpl implements NewsService {
 		List<Long> communityIds = newsProvider.listNewsCommunities(newsId);
 		response.setCommunityIds(communityIds.stream().map(r->r.toString()).collect(Collectors.toList()));
 		response.setPublishTime(news.getPublishTime().getTime());
-		List<NewsTag> parentTags = newsProvider.listNewsTag(news.getOwnerType(),news.getOwnerId(),null,0l,
+		List<NewsTag> parentTags = newsProvider.listNewsTag(news.getNamespaceId(),null,0l,
 				null,null,news.getCategoryId());
 		List<NewsTagDTO> newsTags = parentTags.stream().map(r->ConvertHelper.convert(r,NewsTagDTO.class)).
 				collect(Collectors.toList());
@@ -709,7 +709,7 @@ public class NewsServiceImpl implements NewsService {
 		}).filter(r-> r.getId()!=null).collect(Collectors.toMap(NewsTagVals::getId,NewsTagVals::getNewsTagId));
 
 		newsTags.forEach(r->{
-			List<NewsTag> tags = newsProvider.listNewsTag(r.getOwnerType(),r.getOwnerId(),null,r.getId(),
+			List<NewsTag> tags = newsProvider.listNewsTag(news.getNamespaceId(),null,r.getId(),
 					null,null,r.getCategoryId());
 			List<NewsTagDTO> list = tags.stream().map(t->ConvertHelper.convert(t,NewsTagDTO.class)).
 					map(t->{
@@ -1144,12 +1144,12 @@ public class NewsServiceImpl implements NewsService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		if (cmd.getPageSize()==null)
 			pageSize = 9999999;
-		List<NewsTag> parentTags = newsProvider.listNewsTag(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getIsSearch(),0l,
+		List<NewsTag> parentTags = newsProvider.listNewsTag(UserContext.getCurrentNamespaceId(),cmd.getIsSearch(),0l,
 				cmd.getPageAnchor(),pageSize+1,cmd.getCategoryId());
 		List<NewsTagDTO> result = parentTags.stream().map(r->ConvertHelper.convert(r,NewsTagDTO.class)).
 				collect(Collectors.toList());
 		result.stream().forEach(r->{
-			List<NewsTag> tags = newsProvider.listNewsTag(r.getOwnerType(),r.getOwnerId(),null,r.getId(),
+			List<NewsTag> tags = newsProvider.listNewsTag(UserContext.getCurrentNamespaceId(),null,r.getId(),
 					null,null,r.getCategoryId());
 			List<NewsTagDTO> list = tags.stream().map(t->ConvertHelper.convert(t,NewsTagDTO.class)).collect(Collectors.toList());
 			r.setChildTags(JSONObject.toJSONString(list));

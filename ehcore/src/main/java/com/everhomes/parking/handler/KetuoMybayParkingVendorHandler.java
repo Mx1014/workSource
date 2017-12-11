@@ -4,6 +4,7 @@ package com.everhomes.parking.handler;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.parking.ParkingCardRequest;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingRechargeOrder;
 import com.everhomes.parking.ParkingVendorHandler;
@@ -61,6 +62,19 @@ public class KetuoMybayParkingVendorHandler extends KetuoParkingVendorHandler {
 
 	private boolean addMonthCard(ParkingRechargeOrder order){
 
+		//开通月卡走工作流 流程，为了兼容以前老版本app，这里查询做了判断，现根据订单CardRequestId来查询申请记录，
+		//如果查不到，在去查询当前用户 当前工作流模式， 当前车牌的有效申请记录，这个记录一定是唯一一条，如果查询出来多条，则业务逻辑错误
+		ParkingCardRequest request;
+		if (null != order.getCardRequestId()) {
+			request = parkingProvider.findParkingCardRequestById(order.getCardRequestId());
+		}else {
+			request = getParkingCardRequestByOrder(order);
+		}
+
+		if (request == null) {
+			return false;
+		}
+
 		JSONObject param = new JSONObject();
 
 		Calendar calendar = Calendar.getInstance();
@@ -77,7 +91,8 @@ public class KetuoMybayParkingVendorHandler extends KetuoParkingVendorHandler {
 		param.put("name", order.getPlateOwnerName());
 		param.put("tel", order.getPayerPhone());
 		param.put("areaInfo", "");
-		param.put("carType", CAR_TYPE);
+		//申请类型从申请记录中获取
+		param.put("carType", request.getCardTypeId());
 		param.put("validFrom", startTime);
 		param.put("validTo", endTime);
 		param.put("addUser", "");
@@ -96,7 +111,7 @@ public class KetuoMybayParkingVendorHandler extends KetuoParkingVendorHandler {
 		if(null != obj ) {
 			int resCode = (int) obj;
 			if(resCode == 0) {
-				updateFlowStatus(order);
+				updateFlowStatus(request);
 				return true;
 			}
 		}

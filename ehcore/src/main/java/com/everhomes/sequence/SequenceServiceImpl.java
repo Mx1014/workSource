@@ -2031,10 +2031,20 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhPointEventLogs.class, Tables.EH_POINT_EVENT_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_POINT_EVENT_LOGS.ID.max()).from(Tables.EH_POINT_EVENT_LOGS).fetchOne().value1();
         });
-        // syncTableSequence(null, EhSystemEvents.class, Tables.EH_SYSTEM_EVENTS.getName(), (dbContext) -> {
-        //     return dbContext.select(Tables.EH_SYSTEM_EVENTS.ID.max()).from(Tables.EH_SYSTEM_EVENTS).fetchOne().value1();
-        // });
+        syncTableSequence(null, EhSystemEvents.class, Tables.EH_SYSTEM_EVENTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SYSTEM_EVENTS.ID.max()).from(Tables.EH_SYSTEM_EVENTS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPointActions.class, Tables.EH_POINT_ACTIONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_ACTIONS.ID.max()).from(Tables.EH_POINT_ACTIONS).fetchOne().value1();
+        });
 
+        syncTableSequence(null, EhMeWebMenus.class, Tables.EH_ME_WEB_MENUS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ME_WEB_MENUS.ID.max()).from(Tables.EH_ME_WEB_MENUS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhForumServiceTypes.class, Tables.EH_FORUM_SERVICE_TYPES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FORUM_SERVICE_TYPES.ID.max()).from(Tables.EH_FORUM_SERVICE_TYPES).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")

@@ -69,8 +69,11 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     @Override
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum) {
         ShowBillForClientDTO finalDto = new ShowBillForClientDTO();
+        PaymentBillGroup group = assetProvider.getBillGroupById(billGroupId);
+        if(!group.getName().equals("租金")) return finalDto;
         List<BillDetailDTO> dtos = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+        SimpleDateFormat yyyy_MM_dd = new SimpleDateFormat("yyyy-MM-dd");
         //用时间区分待缴
         String dateStrEnd = "";
         if(isOwedBill==1 || isOwedBill==0){
@@ -157,6 +160,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             ContractBillResponse response = (ContractBillResponse)StringHelper.fromJsonString(postJson, ContractBillResponse.class);
             if(response.getErrorCode()==200){
                 List<ContractBillsDTO> res = response.getResponse();
+//                fakeData(res,targetType);
                 for(int i = 0; i < res.size(); i++){
                     ContractBillsDTO sourceDto = res.get(i);
                     BillDetailDTO dto = new BillDetailDTO();
@@ -168,28 +172,47 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dto.setDateStrEnd(sourceDto.getDateStrEnd());
                     Byte billStatus = sourceDto.getPayFlag();
                     try{
-                        String billDate = sourceDto.getBillDate();
-                        Date returnedDate = sdf.parse(billDate);
-                        Calendar c4 = Calendar.getInstance();
-                        c4.setTime(returnedDate);
-
                         Calendar local = Calendar.getInstance();
-                        Calendar local15 = Calendar.getInstance();
-                        local15.add(Calendar.DAY_OF_MONTH,15);
 
-                        //0:待缴；payflag为0，本地时间加15天大于等于 账期所在月,本地时间小于账期
-                        if(billStatus == 0 && (local.compareTo(c4)==-1 && local15.compareTo(c4)!=-1)){
-                            billStatus = 0;
-                        }else if(billStatus == 1){
-                            // 1：已缴；payflag为1
-                            billStatus = 1;
-                        }else if(billStatus == 0 && c4.compareTo(local)!=1){
-                            // 2：欠费；payfalg为0，账期小于本地时间
-                            billStatus = 2;
-                        }else if(billStatus == 0 && c4.compareTo(local15)==1){
-                            // 3：未缴，payflag为0，日期大于本地时间15天
-                            billStatus = 3;
+                        String dateStrBegin = sourceDto.getDateStrBegin();
+                        Calendar dateBegin = Calendar.getInstance();
+                        dateBegin.setTime(yyyy_MM_dd.parse(dateStrBegin));
+
+                        if(targetType.equals(AssetPaymentStrings.EH_USER)){
+                            Calendar localPlus15 = Calendar.getInstance();
+                            localPlus15.add(Calendar.DAY_OF_MONTH,15);
+                            //0:待缴；payflag为0，本地时间加15天大于等于 账期所在月,本地时间小于账期
+                            if(billStatus == 0 && (local.compareTo(dateBegin)==-1 && localPlus15.compareTo(dateBegin)!=-1)){
+                                billStatus = 0;
+                            }else if(billStatus == 1){
+                                // 1：已缴；payflag为1
+                                billStatus = 1;
+                            }else if(billStatus == 0 && dateBegin.compareTo(local)==-1){
+                                // 2：欠费；payfalg为0，计费开始时间小于本地时间
+                                billStatus = 2;
+                            }else if(billStatus == 0 && dateBegin.compareTo(localPlus15)==1){
+                                // 3：未缴，payflag为0，日期大于本地时间15天以上
+                                billStatus = 3;
+                            }
+                        }else if(targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+                            Calendar beginPlus10 = Calendar.getInstance();
+                            beginPlus10.setTime(dateBegin.getTime());
+                            beginPlus10.add(Calendar.DAY_OF_MONTH,10);
+                            //0:待缴；payflag为0，本地时间处于账期开始和10天的区间之内
+                            if(billStatus == 0 && (local.compareTo(dateBegin)!=-1 && local.compareTo(beginPlus10)!=1)){
+                                billStatus = 0;
+                            }else if(billStatus == 1){
+                                // 1：已缴；payflag为1
+                                billStatus = 1;
+                            }else if(billStatus == 0 && local.compareTo(beginPlus10)==1){
+                                // 2：欠费；payfalg为0，计费开始时间小于本地时间
+                                billStatus = 2;
+                            }else if(billStatus == 0 && local.compareTo(dateBegin)==-1){
+                                // 3：未缴，payflag为0，日期大于本地时间15天以上
+                                billStatus = 3;
+                            }
                         }
+
 
                     }catch (Exception e){
                         LOGGER.error("billStatus parse failed");
@@ -209,8 +232,100 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         return finalDto;
     }
 
+    private void fakeData(List<ContractBillsDTO> res,String targetType) {
+        res = new ArrayList<>();
+
+
+
+        if(targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+
+            ContractBillsDTO dtos[] = new ContractBillsDTO[4];
+            for(int i = 0; i < dtos.length; i++) {
+                ContractBillsDTO dto = new ContractBillsDTO();
+                dto.setCustomerName("账单"+i);
+                dto.setFeeName("租金");
+                dtos[i] = dto;
+            }
+            // local 待缴 10天
+            ContractBillsDTO dto = dtos[0];
+            dto.setAmountOwed("1000");
+            dto.setDateStrBegin("2017-11-25");
+            dto.setDateStrEnd("2017-12-25");
+            dto.setPayFlag((byte)0);
+            dto.setStatus("未缴");
+            res.add(dto);
+            // local  10天 欠费
+            ContractBillsDTO dto1 = dtos[1];
+            dto1.setAmountOwed("1000");
+            dto1.setDateStrBegin("2017-11-10");
+            dto1.setDateStrBegin("2017-12-10");
+            dto1.setPayFlag((byte)0);
+            dto1.setStatus("未缴");
+            res.add(dto1);
+            //   local  10天  未缴
+            ContractBillsDTO dto2 = dtos[2];
+            dto2.setAmountOwed("1000");
+            dto2.setDateStrBegin("2017-12-05");
+            dto2.setDateStrBegin("2018-01-05");
+            dto2.setPayFlag((byte)0);
+            dto2.setStatus("未缴");
+            res.add(dto2);
+            // 已缴
+            ContractBillsDTO dto3 = dtos[3];
+            dto3.setAmountOwed("1000");
+            dto3.setDateStrBegin("2017-10-05");
+            dto3.setDateStrBegin("2017-11-05");
+            dto3.setPayFlag((byte)1);
+            dto3.setStatus("已缴纳");
+            res.add(dto3);
+        }else if(targetType.equals(AssetPaymentStrings.EH_USER)){
+
+            ContractBillsDTO dtos[] = new ContractBillsDTO[4];
+            for(int i = 0; i < dtos.length; i++) {
+                ContractBillsDTO dto = new ContractBillsDTO();
+                dto.setCustomerName("账单"+i);
+                dto.setFeeName("租金");
+                dtos[i] = dto;
+            }
+            // local 待缴 10天
+            ContractBillsDTO dto = dtos[0];
+            dto.setAmountOwed("1000");
+            dto.setDateStrBegin("2017-12-05");
+            dto.setDateStrEnd("2018-01-25");
+            dto.setPayFlag((byte)0);
+            dto.setStatus("未缴");
+            res.add(dto);
+            // local  10天 欠费
+            ContractBillsDTO dto1 = dtos[1];
+            dto1.setAmountOwed("1000");
+            dto1.setDateStrBegin("2017-11-10");
+            dto1.setDateStrBegin("2017-12-10");
+            dto1.setPayFlag((byte)0);
+            dto1.setStatus("未缴");
+            res.add(dto1);
+            //   local  10天  未缴
+            ContractBillsDTO dto2 = dtos[2];
+            dto2.setAmountOwed("1000");
+            dto2.setDateStrBegin("2018-01-05");
+            dto2.setDateStrBegin("2018-02-05");
+            dto2.setPayFlag((byte)0);
+            dto2.setStatus("未缴");
+            res.add(dto2);
+            // 已缴
+            ContractBillsDTO dto3 = dtos[3];
+            dto3.setAmountOwed("1000");
+            dto3.setDateStrBegin("2017-10-05");
+            dto3.setDateStrBegin("2017-11-05");
+            dto3.setPayFlag((byte)1);
+            dto3.setStatus("已缴纳");
+            res.add(dto3);
+
+
+        }
+    }
+
     @Override
-    public ShowBillDetailForClientResponse getBillDetailForClient(String billId,String targetType) {
+    public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId,String targetType) {
         ShowBillDetailForClientResponse result = new ShowBillDetailForClientResponse();
         List<ShowBillDetailForClientDTO> list = new ArrayList<>();
         String postJson = "";
@@ -241,6 +356,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 List<com.everhomes.asset.zjgkVOs.BillDetailDTO> dtos = response.getResponse();
                 BigDecimal amountOwed = new BigDecimal("0");
                 BigDecimal amountReceivable = new BigDecimal("0");
+                TreeSet<Date> dates = new TreeSet<>();
+                SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
                 for(int i = 0 ; i < dtos.size(); i++){
                     com.everhomes.asset.zjgkVOs.BillDetailDTO sourceDto = dtos.get(i);
                     ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
@@ -261,8 +378,16 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dto.setDateStr(sourceDto.getBillDate());
                     dto.setDateStrBegin(sourceDto.getDateStrBegin());
                     dto.setDateStrEnd(sourceDto.getDateStrEnd());
-                    result.setDatestr(sourceDto.getBillDate());
+                    try{
+                        dates.add(yyyyMMdd.parse(sourceDto.getDateStrBegin()));
+                        dates.add((yyyyMMdd.parse(sourceDto.getDateStrEnd())));
+                    }catch (Exception e){
+                    }
+//                    result.setDatestr(sourceDto.getBillDate());
                     list.add(dto);
+                }
+                if(dates.first()!=null && dates.last()!=null){
+                    result.setDatestr(yyyyMMdd.format(dates.first())+"~"+yyyyMMdd.format(dates.last()));
                 }
                 result.setAmountOwed(amountOwed);
                 result.setAmountReceivable(amountReceivable);
@@ -681,6 +806,16 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     }
 
     @Override
+    public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
+        return null;
+    }
+
+    @Override
+    public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
+        return null;
+    }
+
+    @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
         return null;
     }
@@ -696,7 +831,13 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     }
 
     @Override
-    public List<ListBillsDTO> listBills(String communityIdentifier,String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Integer pageOffSet, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse carrier) {
+    public List<ListBillsDTO> listBills(String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Long pageAnchor, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse carrier) {
+        if(pageAnchor ==null || pageAnchor == 0l){
+            pageAnchor = 1l;
+        }
+        if(pageSize == null){
+            pageSize = 20;
+        }
         List<ListBillGroupsDTO> listBillGroupsDTOS = assetProvider.listBillGroups(ownerId, ownerType);
         List<ListBillsDTO> list = new ArrayList<>();
         if(status!=1){
@@ -724,7 +865,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 params.put("payFlag", billStatus==null?"":String.valueOf(billStatus));
                 params.put("sdateFrom",StringUtils.isEmpty(dateStrBegin)==true?"":dateStrBegin);
                 params.put("sdateTo",StringUtils.isEmpty(dateStrEnd)==true?"":dateStrEnd);
-                params.put("pageOffset",pageOffSet==null?"":String.valueOf(pageOffSet));
+                params.put("pageOffset",pageAnchor==null?"":String.valueOf(pageAnchor));
                 params.put("pageSize",pageSize==null?"":String.valueOf(pageSize));
                 params.put("contractNum", StringUtils.isEmpty(contractNum)?"":contractNum);
                 String json = generateJson(params);
@@ -750,7 +891,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     params.put("payFlag", billStatus==null?"":String.valueOf(billStatus));
                     params.put("sdateFrom",StringUtils.isEmpty(dateStrBegin)==true?"":dateStrBegin);
                     params.put("sdateTo",StringUtils.isEmpty(dateStrEnd)==true?"":dateStrEnd);
-                    params.put("pageOffset",pageOffSet==null?"":String.valueOf(pageOffSet));
+                    params.put("pageOffset",pageAnchor==null?"":String.valueOf(pageAnchor));
                     params.put("pageSize",pageSize==null?"":String.valueOf(pageSize));
                     params.put("contractNum", StringUtils.isEmpty(contractNum)?"":contractNum);
                     json = generateJson(params);
@@ -762,7 +903,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                             carrier.setNextPageAnchor(null);
                         }
                     }else{
-                        Integer next = pageOffSet+1;
+                        Long next = pageAnchor+1l;
                         carrier.setNextPageAnchor(next.longValue());
                     }
                     return list;
@@ -833,12 +974,17 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dto.setNoticeTel(phones.toString());
                     dto.setBillId(sourceDto.getBillID());
                     dto.setBillGroupName(sourceDto.getFeeName()==null?"租金":sourceDto.getFeeName());
-                    dto.setDateStr(sourceDto.getBillDate());
+//                    dto.setDateStr(sourceDto.getBillDate());
+                    dto.setDateStr(sourceDto.getDateStrBegin()+"~"+sourceDto.getDateStrEnd());
                     dto.setTargetType(RelTargetType);
                     dto.setTargetName(sourceDto.getCustomerName());
                     dto.setAmountOwed(new BigDecimal(sourceDto.getAmountOwed()));
                     dto.setAmountReceivable(new BigDecimal(sourceDto.getAmountReceivable()));
                     dto.setAmountReceived(new BigDecimal(sourceDto.getAmountReceived()));
+                    String szsm_status = sourceDto.getStatus();
+                    if(szsm_status.equals(PaymentStatus.SUSPEND.getCode())){
+                        dto.setPayStatus(PaymentStatus.IN_PROCESS.getCode());
+                    }
                     list.add(dto);
                 }
             }else{
@@ -858,7 +1004,13 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     }
 
     @Override
-    public List<BillDTO> listBillItems(String targetType,String billId, String targetName, Integer pageOffSet, Integer pageSize) {
+    public List<BillDTO> listBillItems(String targetType,String billId, String targetName, Integer pageOffSet, Integer pageSize,Long ownerId, ListBillItemsResponse res) {
+        if (pageOffSet == null) {
+            pageOffSet = 1;
+        }
+        if(pageSize == null){
+            pageSize = 20;
+        }
         List<BillDTO> list = new ArrayList<>();
         String postJson = "";
         Map<String, String> params=new HashMap<String, String> ();
@@ -904,12 +1056,16 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dto.setAmountReceived(sourceDto.getAmountReceived()!=null?new BigDecimal(sourceDto.getAmountReceived()):null);
                     dto.setBillItemName(sourceDto.getFeeName());
                     dto.setBillStatus(sourceDto.getPayFlag());
-                    dto.setDateStr(sourceDto.getBillDate());
+//                    dto.setDateStr(sourceDto.getBillDate());
+                    dto.setDateStr(sourceDto.getDateStrBegin()+"~"+sourceDto.getDateStrEnd());
 //                    dto.setDefaultOrder();
                     dto.setTargetId(sourceDto.getCustomerIdentifier());
                     dto.setTargetName(sourceDto.getCustomerName());
                     dto.setTargetType(targetType);
                     dto.setPayStatus(sourceDto.getStatus()!=null?sourceDto.getStatus().equals(PaymentStatus.SUSPEND.getCode())?PaymentStatus.IN_PROCESS.getCode():null:null);
+                    //增加计费周期
+//                    dto.setDateStrBegin();
+//                    dto.setDateStrEnd();
                     list.add(dto);
                 }
             }
@@ -952,6 +1108,15 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     List<com.everhomes.asset.zjgkVOs.BillDetailDTO> dtos = response.getResponse();
                     BigDecimal amountReceivable = new BigDecimal("0");
                     BigDecimal amountOwed = new BigDecimal("0");
+                    //过滤正在审核中的客户
+                    for(int k = 0; k < dtos.size(); k++){
+                        com.everhomes.asset.zjgkVOs.BillDetailDTO dto = dtos.get(k);
+                        if(dto.getStatus().equals(PaymentStatus.SUSPEND.getCode())){
+                            dtos.remove(k);
+                            k--;
+                        }
+                    }
+                    //过滤后的账单才是欠费的账单
                     if(dtos!=null&& dtos.size()>0){
                         for(int j = 0; j < dtos.size() ; j ++){
                             com.everhomes.asset.zjgkVOs.BillDetailDTO dto = dtos.get(j);

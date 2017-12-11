@@ -12,6 +12,7 @@ import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.*;
 
+import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -164,6 +165,7 @@ public interface OrganizationService {
 	
 	
 	ListEnterprisesCommandResponse listEnterprises(ListEnterprisesCommand cmd);
+	ListEnterpriseDetailResponse listEnterprisesAbstract(ListEnterprisesCommand cmd);
 	OrganizationDTO createEnterprise(CreateEnterpriseCommand cmd);
 	void createRoleOrganizationMember(CreateOrganizationMemberCommand cmd);
 	void updateChildrenOrganization(UpdateOrganizationsCommand cmd);
@@ -543,6 +545,7 @@ public interface OrganizationService {
 	ListOrganizationMemberCommandResponse syncOrganizationMemberStatus();
 
 	OrganizationDetailDTO getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd);
+	OrganizationDetailDTO getOrganizationDetailWithDefaultAttachmentById(GetOrganizationDetailByIdCommand cmd);
 
 	OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName, String contactToken);
 
@@ -578,4 +581,7 @@ public interface OrganizationService {
 
 	// todo 0:本部门；1:上级部门; 2:上上级部门; 3:上上上级部门
 	List<OrganizationManagerDTO> getManagerByTargetIdAndOrgId(Long orgId, Long targetId, Integer level);
+
+	Byte setOrganizationDetailFlag(SetOrganizationDetailFlagCommand cmd);
+	Byte getOrganizationDetailFlag(GetOrganizationDetailFlagCommand cmd);
 }

@@ -109,7 +109,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		userCompanyItem = getFormFieldDTO(GeneralFormDataSourceType.USER_COMPANY.getCode(),values);
 
 		CrossShardListingLocator locator = new CrossShardListingLocator();
-		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(category.getOwnerType(), category.getOwnerId(), ContactType.EMAIL.getCode(),
+		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(category.getNamespaceId(), ContactType.EMAIL.getCode(),
 				category.getId(), locator, Integer.MAX_VALUE);
 	}
 
@@ -250,8 +250,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			CrossShardListingLocator locator = new CrossShardListingLocator();
 
 
-			List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(category.getOwnerType(),
-					category.getOwnerId(), ContactType.MOBILE.getCode(), serviceOrg.getParentId(),locator, Integer.MAX_VALUE);
+			List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(category.getNamespaceId(), ContactType.MOBILE.getCode(), serviceOrg.getParentId(),locator, Integer.MAX_VALUE);
 			if(targets != null && targets.size() > 0) {
 				for(ServiceAllianceNotifyTargets target : targets) {
 					if(target.getStatus().byteValue() == 1) {

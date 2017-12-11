@@ -2019,7 +2019,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 					Long chargeUid = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId()).getChargeUid();
 					String notifyTextForOther = null;
-					if (orderReminderEndTimeLong % 3600 != 0)//检测是否在15分或45分结束
+					if (orderReminderEndTimeLong % 3600000 != 0)//检测是否在15分或45分结束
 						notifyTextForOther = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
 								RentalNotificationTemplateCode.RENTAL_END_NOTIFY_HOUR, RentalNotificationTemplateCode.locale, map, "");
 					else
@@ -2498,7 +2498,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //			rs.setApprovingUserWeekendPrice(approvingUserWeekendPrice);
 //			rs.setApprovingUserWorkdayPrice(approvingUserWorkdayPrice);
 
-			if (cmd.getNeedPay() == NormalFlag.NEED.getCode()) {
+			//if (cmd.getNeedPay() == NormalFlag.NEED.getCode()) {
 				for (PriceRuleDTO priceRuleDTO : cmd.getPriceRules()) {
 					currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)) );
 					seqNum.set(0L);
@@ -2570,7 +2570,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					priceRuleDTO.setCellBeginId(cellBeginId);
 					priceRuleDTO.setCellEndId(cellBeginId + seqNum.get()-1);
 				}
-			}
+			//}
 
 //			if(LOGGER.isDebugEnabled()) {
 //	            LOGGER.debug("eh rental cells get next sequence block, id=" + cellBeginId+",block count = "+ seqNum.get()); 

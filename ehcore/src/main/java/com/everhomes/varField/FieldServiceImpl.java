@@ -1,104 +1,26 @@
 package com.everhomes.varField;
 
 
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.asset.ImportFieldsExcelResponse;
 import com.everhomes.rest.customer.*;
-
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
-
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.customer.CustomerService;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.customer.CustomerApplyProjectDTO;
-import com.everhomes.rest.customer.CustomerCertificateDTO;
-import com.everhomes.rest.customer.CustomerCommercialDTO;
-import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
-import com.everhomes.rest.customer.CustomerInvestmentDTO;
-import com.everhomes.rest.customer.CustomerPatentDTO;
-import com.everhomes.rest.customer.CustomerTalentDTO;
-import com.everhomes.rest.customer.CustomerTrademarkDTO;
-import com.everhomes.rest.customer.ListCustomerApplyProjectsCommand;
-import com.everhomes.rest.customer.ListCustomerCertificatesCommand;
-import com.everhomes.rest.customer.ListCustomerCommercialsCommand;
-import com.everhomes.rest.customer.ListCustomerEconomicIndicatorsCommand;
-import com.everhomes.rest.customer.ListCustomerInvestmentsCommand;
-import com.everhomes.rest.customer.ListCustomerPatentsCommand;
-import com.everhomes.rest.customer.ListCustomerTalentsCommand;
-import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
-import com.everhomes.rest.varField.FieldDTO;
-import com.everhomes.rest.varField.FieldGroupDTO;
-import com.everhomes.rest.varField.FieldItemDTO;
-import com.everhomes.rest.varField.ImportFieldExcelCommand;
-import com.everhomes.rest.varField.ListFieldCommand;
-import com.everhomes.rest.varField.ListFieldGroupCommand;
-import com.everhomes.rest.varField.ListFieldItemCommand;
-import com.everhomes.rest.varField.ListSystemFieldCommand;
-import com.everhomes.rest.varField.ListSystemFieldGroupCommand;
-import com.everhomes.rest.varField.ListSystemFieldItemCommand;
-import com.everhomes.rest.varField.ScopeFieldGroupInfo;
-import com.everhomes.rest.varField.ScopeFieldInfo;
-import com.everhomes.rest.varField.ScopeFieldItemInfo;
-import com.everhomes.rest.varField.SystemFieldDTO;
-import com.everhomes.rest.varField.SystemFieldGroupDTO;
-import com.everhomes.rest.varField.SystemFieldItemDTO;
-import com.everhomes.rest.varField.UpdateFieldGroupsCommand;
-import com.everhomes.rest.varField.UpdateFieldItemsCommand;
-import com.everhomes.rest.varField.UpdateFieldsCommand;
-import com.everhomes.rest.varField.VarFieldStatus;
+import com.everhomes.rest.varField.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
-
-import com.sun.org.apache.regexp.internal.RE;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.spi.ErrorCode;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -110,20 +32,16 @@ import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.bouncycastle.asn1.x509.Target.targetName;
 
 
 /**
@@ -196,6 +114,7 @@ public class FieldServiceImpl implements FieldService {
             List<SystemFieldItemDTO> dtos = items.stream().map(item -> {
                 return ConvertHelper.convert(item, SystemFieldItemDTO.class);
             }).collect(Collectors.toList());
+            return dtos;
         }
         return null;
     }
@@ -321,6 +240,17 @@ public class FieldServiceImpl implements FieldService {
     @Override
     public void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response){
         List<FieldGroupDTO> groups = listFieldGroups(cmd);
+        //设备巡检中字段 暂时单sheet
+        if (cmd.getEquipmentCategoryName() != null) {
+            List<FieldGroupDTO> temp = new ArrayList<>();
+            for (FieldGroupDTO  group :groups) {
+                if (group.getGroupDisplayName().equals(cmd.getEquipmentCategoryName())) {
+                    //groups 中只有一个sheet 只保留传过来的那个（物业巡检）
+                    temp.add(group);
+                }
+            }
+            groups = temp;
+        }
         //先去掉 名为“基本信息” 的sheet，建议使用stream的方式
         if(groups==null){
             groups = new ArrayList<FieldGroupDTO>();
@@ -332,7 +262,9 @@ public class FieldServiceImpl implements FieldService {
             }
         }
         //创建一个要导出的workbook，将sheet放入其中
-        org.apache.poi.hssf.usermodel.HSSFWorkbook workbook = new HSSFWorkbook();
+//        org.apache.poi.hssf.usermodel.HSSFWorkbook workbook = new HSSFWorkbook();
+//        org.apache.poi.hssf.usermodel.HSSFWorkbook workbook = new HSSFWorkbook();
+        Workbook workbook = new XSSFWorkbook();
         //工具类excel
         ExcelUtils excel = new ExcelUtils();
         //注入workbook
@@ -342,8 +274,15 @@ public class FieldServiceImpl implements FieldService {
         ServletOutputStream out;
         ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-        String fileName = "客户数据模板导出"+sdf.format(Calendar.getInstance().getTime());
-        fileName = fileName + ".xls";
+        String fileName=null;
+        if (cmd.getEquipmentCategoryName()!=null){
+            fileName = cmd.getEquipmentCategoryName()+"数据模板导出"+sdf.format(Calendar.getInstance().getTime());
+            fileName = fileName + ".xls";
+        }else {
+            fileName = "客户数据模板导出"+sdf.format(Calendar.getInstance().getTime());
+            fileName = fileName + ".xls";
+        }
+
         response.setContentType("application/msexcel");
         try {
             response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
@@ -366,7 +305,7 @@ public class FieldServiceImpl implements FieldService {
     }
 
 
-    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel,Integer namespaceId,Long communityId) {
+    private void sheetGenerate(List<FieldGroupDTO> groups, org.apache.poi.ss.usermodel.Workbook workbook, ExcelUtils excel,Integer namespaceId,Long communityId) {
         //循环遍历所有的sheet
         for( int i = 0; i < groups.size(); i++){
             //sheet卡为真的标识
@@ -582,6 +521,50 @@ public class FieldServiceImpl implements FieldService {
                     setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
                 }
                 break;
+            case "跟进信息":
+                ListCustomerTrackingsCommand cmd9  = new ListCustomerTrackingsCommand();
+                cmd9.setCustomerId(customerId);
+                cmd9.setCustomerType(customerType);
+                List<CustomerTrackingDTO> customerTrackingDTOS = customerService.listCustomerTrackings(cmd9);
+                if(customerTrackingDTOS == null) customerTrackingDTOS = new ArrayList<>();
+                for(int j = 0; j < customerTrackingDTOS.size(); j++){
+                    setMutilRowDatas(fields,data,customerTrackingDTOS.get(j),communityId,namespaceId,moduleName);
+                }
+                break;
+            case "计划信息":
+                ListCustomerTrackingPlansCommand cmd10  = new ListCustomerTrackingPlansCommand();
+                cmd10.setCustomerId(customerId);
+                cmd10.setCustomerType(customerType);
+                List<CustomerTrackingPlanDTO> customerTrackingPlanDTOS = customerService.listCustomerTrackingPlans(cmd10);
+                if(customerTrackingPlanDTOS == null) customerTrackingPlanDTOS = new ArrayList<>();
+                for(int j = 0; j < customerTrackingPlanDTOS.size(); j++){
+                    setMutilRowDatas(fields,data,customerTrackingPlanDTOS.get(j),communityId,namespaceId,moduleName);
+                }
+                break;
+            case "入驻信息":
+                ListCustomerEntryInfosCommand cmd11 = new ListCustomerEntryInfosCommand();
+                cmd11.setCustomerId(customerId);
+                cmd11.setCustomerType(customerType);
+                LOGGER.info("入驻信息 command"+cmd11);
+                List<CustomerEntryInfoDTO> customerEntryInfoDTOS = customerService.listCustomerEntryInfos(cmd11);
+                if(customerEntryInfoDTOS == null) customerEntryInfoDTOS = new ArrayList<>();
+                for(int j = 0; j < customerEntryInfoDTOS.size(); j++){
+                    LOGGER.info("入驻信息 "+j+":"+customerEntryInfoDTOS.get(j));
+                    setMutilRowDatas(fields,data,customerEntryInfoDTOS.get(j),communityId,namespaceId,moduleName);
+                }
+                break;
+            case "离场信息":
+                ListCustomerDepartureInfosCommand cmd12 = new ListCustomerDepartureInfosCommand();
+                cmd12.setCommunityId(customerId);
+                cmd12.setCustomerType(customerType);
+                LOGGER.info("入驻信息 command"+cmd12);
+                List<CustomerDepartureInfoDTO> customerDepartureInfoDTOS = customerService.listCustomerDepartureInfos(cmd12);
+                if(customerDepartureInfoDTOS == null) customerDepartureInfoDTOS = new ArrayList<>();
+                for(int j = 0; j < customerDepartureInfoDTOS.size(); j++){
+                    LOGGER.info("离场信息 "+j+":"+customerDepartureInfoDTOS.get(j));
+                    setMutilRowDatas(fields,data,customerDepartureInfoDTOS.get(j),communityId,namespaceId,moduleName);
+                }
+                break;
         }
         return data;
     }
@@ -601,7 +584,7 @@ public class FieldServiceImpl implements FieldService {
         String fieldParam = field.getFieldParam();
         FieldParams params = (FieldParams) StringHelper.fromJsonString(fieldParam, FieldParams.class);
         //如果是select，则修改fieldName,在末尾加上Name，减去末尾的Id如果存在的话。由抽象跌入现实，拥有了名字，这是从神降格为人的过程---第六天天主波旬
-        if(params.getFieldParamType().equals("select")){
+        if(params.getFieldParamType().equals("select") && fieldName.split("Id").length > 1){
             if(!fieldName.equals("projectSource") && !fieldName.equals("status")){
                 fieldName = fieldName.split("Id")[0];
                 fieldName += "Name";
@@ -1202,6 +1185,25 @@ public class FieldServiceImpl implements FieldService {
         }
     }
 
+    /**
+     * 新增域空间模块字段选择项：
+     * 1、在系统表加一条 status置为customization
+     * 2、在相应域下增加一条 itemId为系统item表中的id
+     */
+    private void insertFieldItems(ScopeFieldItem scopeFieldItem) {
+        FieldItem item = ConvertHelper.convert(scopeFieldItem, FieldItem.class);
+        item.setDisplayName(scopeFieldItem.getItemDisplayName());
+        item.setCreatorUid(UserContext.currentUserId());
+        item.setStatus(VarFieldStatus.CUSTOMIZATION.getCode());
+        fieldProvider.createFieldItem(item);
+
+
+        scopeFieldItem.setItemId(item.getId());
+        scopeFieldItem.setStatus(VarFieldStatus.ACTIVE.getCode());
+        scopeFieldItem.setCreatorUid(UserContext.currentUserId());
+        fieldProvider.createScopeFieldItem(scopeFieldItem);
+    }
+
     @Override
     public void updateFieldItems(UpdateFieldItemsCommand cmd) {
         List<ScopeFieldItemInfo> items = cmd.getItems();
@@ -1209,24 +1211,31 @@ public class FieldServiceImpl implements FieldService {
             Long userId = UserContext.currentUserId();
             Map<Long, ScopeFieldItem> existItems = fieldProvider.listScopeFieldsItems(cmd.getFieldIds(), cmd.getNamespaceId(), cmd.getCommunityId());
             items.forEach(item -> {
-                ScopeFieldItem scopeFieldItem = ConvertHelper.convert(item, ScopeFieldItem.class);
-                scopeFieldItem.setNamespaceId(cmd.getNamespaceId());
-                scopeFieldItem.setCommunityId(cmd.getCommunityId());
-                if(scopeFieldItem.getId() == null) {
-                    scopeFieldItem.setCreatorUid(userId);
-                    fieldProvider.createScopeFieldItem(scopeFieldItem);
+                if(item.getItemId() == null) {
+                    ScopeFieldItem scopeFieldItem = ConvertHelper.convert(item, ScopeFieldItem.class);
+                    scopeFieldItem.setNamespaceId(cmd.getNamespaceId());
+                    scopeFieldItem.setCommunityId(cmd.getCommunityId());
+                    insertFieldItems(scopeFieldItem);
                 } else {
-                    ScopeFieldItem exist = fieldProvider.findScopeFieldItem(scopeFieldItem.getId(), cmd.getNamespaceId(), cmd.getCommunityId());
-                    if(exist != null) {
-                        scopeFieldItem.setCreatorUid(exist.getCreatorUid());
-                        scopeFieldItem.setCreateTime(exist.getCreateTime());
-                        scopeFieldItem.setOperatorUid(userId);
-                        scopeFieldItem.setStatus(VarFieldStatus.ACTIVE.getCode());
-                        fieldProvider.updateScopeFieldItem(scopeFieldItem);
-                        existItems.remove(exist.getId());
-                    } else {
+                    ScopeFieldItem scopeFieldItem = ConvertHelper.convert(item, ScopeFieldItem.class);
+                    scopeFieldItem.setNamespaceId(cmd.getNamespaceId());
+                    scopeFieldItem.setCommunityId(cmd.getCommunityId());
+                    if(scopeFieldItem.getId() == null) {
                         scopeFieldItem.setCreatorUid(userId);
                         fieldProvider.createScopeFieldItem(scopeFieldItem);
+                    } else {
+                        ScopeFieldItem exist = fieldProvider.findScopeFieldItem(scopeFieldItem.getId(), cmd.getNamespaceId(), cmd.getCommunityId());
+                        if(exist != null) {
+                            scopeFieldItem.setCreatorUid(exist.getCreatorUid());
+                            scopeFieldItem.setCreateTime(exist.getCreateTime());
+                            scopeFieldItem.setOperatorUid(userId);
+                            scopeFieldItem.setStatus(VarFieldStatus.ACTIVE.getCode());
+                            fieldProvider.updateScopeFieldItem(scopeFieldItem);
+                            existItems.remove(exist.getId());
+                        } else {
+                            scopeFieldItem.setCreatorUid(userId);
+                            fieldProvider.createScopeFieldItem(scopeFieldItem);
+                        }
                     }
                 }
             });

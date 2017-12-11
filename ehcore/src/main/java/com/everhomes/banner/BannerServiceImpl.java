@@ -535,8 +535,10 @@ public class BannerServiceImpl implements BannerService {
     }
     private String parserUri(String uri,String ownerType, long ownerId){
         try {
-            if(!org.apache.commons.lang.StringUtils.isEmpty(uri))
-                return contentServerService.parserUri(uri,ownerType,ownerId);
+            if(!org.apache.commons.lang.StringUtils.isEmpty(uri)) {
+                String url = contentServerService.parserUri(uri, ownerType, ownerId);
+                return url + "&w=750&h=450";
+            }
             
         } catch (Exception e) {
             LOGGER.error("Parser uri is error." + e.getMessage());

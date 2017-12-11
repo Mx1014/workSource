@@ -1,6 +1,8 @@
 package com.everhomes.blacklist;
 
 import com.everhomes.rest.blacklist.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserIdentifier;
 
 import java.util.List;
 
@@ -53,4 +55,17 @@ public interface BlacklistService {
      * @return
      */
     List<BlacklistPrivilegeDTO> listUserBlacklistPrivileges(ListUserBlacklistPrivilegesCommand cmd);
+
+    /**
+     * 判断手机号对应的权限是否在黑名单内
+     * @param namespaceId
+     * @param phone
+     * @param privilegeId
+     * @return
+     */
+    boolean checkUserPrivilege(Integer namespaceId, String phone,
+            Long privilegeId);
+
+    void updateUserBlackWhenUserSignup(User user, UserIdentifier userIdentifier);
+    
 }

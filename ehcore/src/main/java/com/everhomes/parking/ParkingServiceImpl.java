@@ -21,6 +21,7 @@ import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.PayService;
+import com.everhomes.parking.handler.DefaultParkingVendorHandler;
 import com.everhomes.rentalv2.RentalUtils;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
@@ -200,7 +201,7 @@ public class ParkingServiceImpl implements ParkingService {
 				parkingRechargeRateList.forEach(r -> {
 					r.setOriginalPrice(r.getPrice());
 					BigDecimal newPrice = r.getPrice().multiply(new BigDecimal(parkingLot.getMonthlyDiscount()))
-							.divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
+							.divide(new BigDecimal(10), DefaultParkingVendorHandler.CARD_RATE_RETAIN_DECIMAL, RoundingMode.HALF_UP);
 					r.setPrice(newPrice);
 				});
 			}
@@ -600,7 +601,7 @@ public class ParkingServiceImpl implements ParkingService {
 			if (null != parkingLot.getTempFeeDiscountFlag()) {
 				if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getTempFeeDiscountFlag()) {
 					tempFee = dto.getPrice().multiply(new BigDecimal(parkingLot.getTempFeeDiscount()))
-							.divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
+							.divide(new BigDecimal(10), DefaultParkingVendorHandler.TEMP_FEE_RETAIN_DECIMAL, RoundingMode.HALF_UP);
 				}
 			}
 			if(0 != tempFee.compareTo(cmd.getPrice())) {
@@ -1310,7 +1311,7 @@ public class ParkingServiceImpl implements ParkingService {
 				if (null != dto.getPrice()) {
 					dto.setOriginalPrice(dto.getPrice());
 					BigDecimal newPrice = dto.getPrice().multiply(new BigDecimal(parkingLot.getTempFeeDiscount()))
-							.divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
+							.divide(new BigDecimal(10), DefaultParkingVendorHandler.TEMP_FEE_RETAIN_DECIMAL, RoundingMode.HALF_UP);
 					dto.setPrice(newPrice);
 				}
 			}
@@ -1796,12 +1797,9 @@ public class ParkingServiceImpl implements ParkingService {
 
 		BigDecimal price = order.getPrice();
 
-		if (configProvider.getBooleanValue("parking.refund.amount", false)) {
-			price = price.divide(new BigDecimal(2), 2, RoundingMode.HALF_UP);
-		}
 		Long amount = payService.changePayAmount(price);
 
-		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.PARKING.getPycode(), order.getOrderNo(), refoundOrderNo, amount);
+		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.PARKING.getPycode(), order.getId(), refoundOrderNo, amount);
 
 		if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
 

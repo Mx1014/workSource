@@ -17,7 +17,7 @@ public enum ImportFileTaskType {
     ENTERPRISE_CUSTOMER("enterprise_customer"),
     PERSONNEL_FILE("psersonnel_file"),
     PERSONNEL_ARCHIVES("personnel_archives"),
-    SALARY_GROUP("salary_group"), ENERGY_METER("energy_meter");
+    SALARY_GROUP("salary_group"), ENERGY_METER("energy_meter"), ENERGY_PLAN_TASK("energy_plan_task");
 
 	private String code;
 

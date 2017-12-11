@@ -1332,6 +1332,7 @@ public class ZJGKOpenServiceImpl {
                 customer.setContactGenderItemId(sourceItemId);
             }
             customer.setStatus(CommonStatus.ACTIVE.getCode());
+            customer.setTrackingUid(-1L);
             customer.setCreatorUid(1L);
             customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             customer.setOperatorUid(1L);
@@ -1424,8 +1425,9 @@ public class ZJGKOpenServiceImpl {
             organizationAddress.setBuildingId(0L);
         }else {
             organizationAddress.setBuildingId(building.getId());
+            organizationAddress.setBuildingName(building.getName());
         }
-        organizationAddress.setBuildingName(building.getName());
+
         organizationProvider.createOrganizationAddress(organizationAddress);
     }
 
@@ -1439,7 +1441,7 @@ public class ZJGKOpenServiceImpl {
     }
 
     private Organization insertOrganization(EnterpriseCustomer customer) {
-        Organization org = organizationProvider.findOrganizationByNameAndNamespaceId(customer.getName(), customer.getNamespaceId());
+        Organization org = organizationProvider.findOrganizationByName(customer.getName(), customer.getNamespaceId());
         if(org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
             //已存在则更新 地址、官网地址、企业logo
             org.setWebsite(customer.getCorpWebsite());
@@ -1613,7 +1615,9 @@ public class ZJGKOpenServiceImpl {
             customer.setStatus(CommonStatus.ACTIVE.getCode());
             customer.setOperatorUid(1L);
             customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
+            if(customer.getTrackingUid() == null) {
+                customer.setTrackingUid(-1L);
+            }
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 

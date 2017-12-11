@@ -2945,10 +2945,10 @@ public class FlowServiceImpl implements FlowService {
             details = flowEventLogProvider.findProcessorFlowCases(locator, count, cmd, callback);
         }
 
-        List<FlowCaseDTO> dtos = new ArrayList<FlowCaseDTO>();
+        List<FlowCaseDTO> dtos = new ArrayList<>();
         if (details != null) {
             for (FlowCaseDetail detail : details) {
-                detail.setContent(onFlowCaseBriefRender(flowUserType, detail));
+                onFlowCaseBriefRender(flowUserType, detail);
 
                 FlowCaseDTO dto = ConvertHelper.convert(detail, FlowCaseDTO.class);
                 FlowNode flowNode = flowNodeProvider.getFlowNodeById(dto.getCurrentNodeId());
@@ -2973,17 +2973,8 @@ public class FlowServiceImpl implements FlowService {
         return resp;
     }
 
-    private String onFlowCaseBriefRender(FlowUserType flowUserType, FlowCase flowCase) {
-        String flowCaseContent = flowCase.getContent();
-        try {
-            String content = flowListenerManager.onFlowCaseBriefRender(flowCase, flowUserType);
-            if (content != null) {
-                flowCaseContent = content;
-            }
-        } catch (Exception e) {
-            LOGGER.error("Flow listener onFlowCaseBriefRender error, flowCaseId = "+flowCase.getId(), e);
-        }
-        return flowCaseContent;
+    private void onFlowCaseBriefRender(FlowUserType flowUserType, FlowCase flowCase) {
+        flowListenerManager.onFlowCaseBriefRender(flowCase, flowUserType);
     }
 
     @Override
@@ -3785,8 +3776,10 @@ public class FlowServiceImpl implements FlowService {
                     flowEventLogProvider.updateFlowEventLogs(flowCaseState.getUpdateLogs());
 
                     flowEvaluateProvider.createFlowEvaluate(ctx.getFlowEvas());
-                } else {
+                } else if (ctx.getStepType() != FlowStepType.NO_STEP) {
                     throw new FlowStepBusyException("already step by others, flowCaseId = " + flowCase.getId());
+                } else {
+                    LOGGER.warn("already step by others, flowCaseId = {}, but it is FlowStepType.NO_STEP", flowCase.getId());
                 }
             }
             return true;
@@ -5659,7 +5652,7 @@ public class FlowServiceImpl implements FlowService {
 
         // 督办按钮处理
         for (FlowCase aCase : allFlowCase) {
-            FlowEventLog enterLog = flowEventLogProvider.isSupervisors(userId, aCase);
+            FlowEventLog enterLog = flowEventLogProvider.isSupervisor(userId, aCase);
             if (enterLog != null) {
                 if (!flowUserTypes.contains(FlowUserType.SUPERVISOR)) {
                     flowUserTypes.add(FlowUserType.SUPERVISOR);
@@ -5799,6 +5792,7 @@ public class FlowServiceImpl implements FlowService {
 
         List<FlowOperateLogDTO> operateLogs = flowEventLogProvider.searchOperateLogs(
                 cmd.getModuleId(), cmd.getFlowCaseId(), userId, cmd.getServiceType(), cmd.getKeyword(), pageSize, locator);
+
         SearchFlowOperateLogResponse response = new SearchFlowOperateLogResponse();
         response.setLogs(operateLogs);
         response.setNextPageAnchor(locator.getAnchor());
@@ -6448,5 +6442,13 @@ public class FlowServiceImpl implements FlowService {
             flowCases.addAll(getAllChildFlowCase(flowCase));
         }
         return flowCases;
+    }
+
+    @Override
+    public String getFlowCaseRouteURI(Long flowCaseId, Long moduleId) {
+        FlowCaseDetailActionData actionData = new FlowCaseDetailActionData();
+        actionData.setFlowCaseId(flowCaseId);
+        actionData.setModuleId(moduleId);
+        return RouterBuilder.build(Router.WORKFLOW_DETAIL, actionData);
     }
 }

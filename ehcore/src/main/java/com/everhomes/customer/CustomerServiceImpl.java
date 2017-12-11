@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contract.ContractService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.contract.ContractStatus;
@@ -137,6 +140,9 @@ public class CustomerServiceImpl implements CustomerService {
 	
 	@Autowired
 	private ScheduleProvider scheduleProvider;
+
+    @Autowired
+    private AddressProvider addressProvider;
 	
     private static final  String queueDelay = "trackingPlanTaskDelays";
     private static final  String  queueNoDelay = "trackingPlanTaskNoDelays";
@@ -147,13 +153,14 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private FieldService fieldService;
 
-    private void checkPrivilege() {
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        if(namespaceId == 999971) {
-            LOGGER.error("Insufficient privilege, zjgk modify data");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                    "Insufficient privilege");
-        }
+    private void checkPrivilege(Integer ns) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId(ns);
+        //产品功能 #20796
+//        if(namespaceId == 999971 || namespaceId == 999983) {
+//            LOGGER.error("Insufficient privilege");
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+//                    "Insufficient privilege");
+//        }
     }
 
     private void checkEnterpriseCustomerNumberUnique(Long id, Integer namespaceId, String customerNumber, String customerName) {
@@ -192,19 +199,25 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public EnterpriseCustomerDTO createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd) {
-        checkPrivilege();
+        checkPrivilege(cmd.getNamespaceId());
         checkEnterpriseCustomerNumberUnique(null, cmd.getNamespaceId(), cmd.getCustomerNumber(), cmd.getName());
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         customer.setNamespaceId((null != cmd.getNamespaceId() ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId()));
         if(cmd.getCorpEntryDate() != null) {
             customer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }
+        if(cmd.getFoundingTime() != null) {
+            customer.setFoundingTime(new Timestamp(cmd.getFoundingTime()));
+        }
         customer.setCreatorUid(UserContext.currentUserId());
         if(null != customer.getLongitude() && null != customer.getLatitude()){
         	String geohash  = GeoHashUtils.encode(customer.getLatitude(), customer.getLongitude());
         	customer.setGeohash(geohash);
         }
-        if(null != customer && customer.getTrackingUid() != -1){
+        if(customer.getTrackingUid() == null) {
+            customer.setTrackingUid(-1L);
+        }
+        if(null != customer  && customer.getTrackingUid() != -1){
 	        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(customer.getTrackingUid());
 	    	if(null != detail && null != detail.getContactName()){
 	    		customer.setTrackingName(detail.getContactName());
@@ -217,6 +230,7 @@ public class CustomerServiceImpl implements CustomerService {
         
         OrganizationDTO organizationDTO = createOrganization(customer);
         customer.setOrganizationId(organizationDTO.getId());
+
         enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
 
@@ -257,11 +271,60 @@ public class CustomerServiceImpl implements CustomerService {
         	}
         }
 
+        if(null != dto.getRegistrationTypeId()){
+            ScopeFieldItem registrationTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getRegistrationTypeId());
+            if(null != registrationTypeItem){
+                dto.setRegistrationTypeName(registrationTypeItem.getItemDisplayName());
+            }
+        }
+
+        if(null != dto.getTechnicalFieldId()){
+            ScopeFieldItem technicalFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getTechnicalFieldId());
+            if(null != technicalFieldItem){
+                dto.setTechnicalFieldName(technicalFieldItem.getItemDisplayName());
+            }
+        }
+
+        if(null != dto.getTaxpayerTypeId()){
+            ScopeFieldItem taxpayerTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getTaxpayerTypeId());
+            if(null != taxpayerTypeItem){
+                dto.setTaxpayerTypeName(taxpayerTypeItem.getItemDisplayName());
+            }
+        }
+
+        if(null != dto.getRelationWillingId()){
+            ScopeFieldItem relationWillingItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getRelationWillingId());
+            if(null != relationWillingItem){
+                dto.setRelationWillingName(relationWillingItem.getItemDisplayName());
+            }
+        }
+
+        if(null != dto.getHighAndNewTechId()){
+            ScopeFieldItem highAndNewTechItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getHighAndNewTechId());
+            if(null != highAndNewTechItem){
+                dto.setHighAndNewTechName(highAndNewTechItem.getItemDisplayName());
+            }
+        }
+
+        if(null != dto.getEntrepreneurialCharacteristicsId()){
+            ScopeFieldItem entrepreneurialCharacteristicsItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getEntrepreneurialCharacteristicsId());
+            if(null != entrepreneurialCharacteristicsItem){
+                dto.setEntrepreneurialCharacteristicsName(entrepreneurialCharacteristicsItem.getItemDisplayName());
+            }
+        }
+
+        if(null != dto.getSerialEntrepreneurId()){
+            ScopeFieldItem serialEntrepreneurItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getSerialEntrepreneurId());
+            if(null != serialEntrepreneurItem){
+                dto.setSerialEntrepreneurName(serialEntrepreneurItem.getItemDisplayName());
+            }
+        }
+
         return dto;
     }
 
     private OrganizationDTO createOrganization(EnterpriseCustomer customer) {
-        Organization org = organizationProvider.findOrganizationByNameAndNamespaceId(customer.getName(), customer.getNamespaceId());
+        Organization org = organizationProvider.findOrganizationByName(customer.getName(), customer.getNamespaceId());
         if(org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
             //已存在则更新 地址、官网地址、企业logo
             org.setWebsite(customer.getCorpWebsite());
@@ -309,8 +372,17 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public EnterpriseCustomerDTO updateEnterpriseCustomer(UpdateEnterpriseCustomerCommand cmd) {
-        checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
+        checkPrivilege(customer.getNamespaceId());
+        //产品功能 #20796 同步过来的客户名称不可改
+        if(NamespaceCustomerType.EBEI.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))
+                || NamespaceCustomerType.SHENZHOU.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType())) ) {
+            if(!customer.getName().equals(cmd.getName())) {
+                LOGGER.error("Insufficient privilege");
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                        "Insufficient privilege");
+            }
+        }
         checkEnterpriseCustomerNumberUnique(customer.getId(), customer.getNamespaceId(), cmd.getCustomerNumber(), cmd.getName());
         EnterpriseCustomer updateCustomer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         updateCustomer.setNamespaceId(customer.getNamespaceId());
@@ -321,17 +393,24 @@ public class CustomerServiceImpl implements CustomerService {
         if(cmd.getCorpEntryDate() != null) {
             updateCustomer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }
+
+        if(cmd.getFoundingTime() != null) {
+            customer.setFoundingTime(new Timestamp(cmd.getFoundingTime()));
+        }
         updateCustomer.setStatus(CommonStatus.ACTIVE.getCode());
         //保存经纬度
         if(null != updateCustomer.getLongitude() && null != updateCustomer.getLatitude()){
         	String geohash  = GeoHashUtils.encode(updateCustomer.getLatitude(), updateCustomer.getLongitude());
         	updateCustomer.setGeohash(geohash);
         }
-        if(null != updateCustomer && updateCustomer.getTrackingUid() != -1){
+        if(null != updateCustomer && updateCustomer.getTrackingUid() != null && updateCustomer.getTrackingUid() != -1){
 	        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(updateCustomer.getTrackingUid());
 	    	if(null != detail && null != detail.getContactName()){
 	    		updateCustomer.setTrackingName(detail.getContactName());
 	    	}
+        }
+        if(updateCustomer.getTrackingUid() == null) {
+            updateCustomer.setTrackingUid(-1L);
         }
         if(updateCustomer.getTrackingUid() == -1){
         	updateCustomer.setTrackingName(null);
@@ -379,8 +458,15 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd) {
-        checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
+        checkPrivilege(customer.getNamespaceId());
+        //产品功能 #20796 同步过来的不能删
+        if(NamespaceCustomerType.EBEI.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))
+                || NamespaceCustomerType.SHENZHOU.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType())) ) {
+            LOGGER.error("Insufficient privilege");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
         List<Contract> contracts = contractProvider.listContractByCustomerId(customer.getCommunityId(),customer.getId(),CustomerType.ENTERPRISE.getCode());
         for(Contract contract : contracts) {
             if(contract.getStatus() == ContractStatus.ACTIVE.getCode() || contract.getStatus() == ContractStatus.WAITING_FOR_LAUNCH.getCode()
@@ -413,7 +499,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public ImportFileTaskDTO importEnterpriseCustomer(ImportEnterpriseCustomerDataCommand cmd, MultipartFile mfile, Long userId) {
-        checkPrivilege();
+        checkPrivilege(cmd.getNamespaceId());
         ImportFileTask task = new ImportFileTask();
         try {
             //解析excel
@@ -538,6 +624,7 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setCommunityId(cmd.getCommunityId());
             customer.setNamespaceId(cmd.getNamespaceId());
             customer.setCreatorUid(userId);
+            customer.setTrackingUid(-1L);
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
 
             OrganizationDTO organizationDTO = createOrganization(customer);
@@ -771,6 +858,7 @@ public class CustomerServiceImpl implements CustomerService {
         CustomerTalent talent = ConvertHelper.convert(cmd, CustomerTalent.class);
         talent.setCreateTime(exist.getCreateTime());
         talent.setCreatorUid(exist.getCreatorUid());
+        talent.setStatus(exist.getStatus());
         enterpriseCustomerProvider.updateCustomerTalent(talent);
     }
 
@@ -911,6 +999,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerApplyProjectDTO convertCustomerApplyProjectDTO(CustomerApplyProject project, Long communityId) {
         CustomerApplyProjectDTO dto = ConvertHelper.convert(project, CustomerApplyProjectDTO.class);
+        if(dto.getStatus() != null) {
+            CustomerApplyProjectStatus status = CustomerApplyProjectStatus.fromStatus(dto.getStatus());
+            if(status != null) {
+                dto.setStatusName(status.getName());
+            }
+        }
         //PROJECTGSOURCE不是必填项目，这里没有判断 为空字符串
         if(dto.getProjectSource() != null) {
             String[] ids = dto.getProjectSource().split(",");
@@ -1103,6 +1197,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
         commercial.setCreateTime(exist.getCreateTime());
         commercial.setCreateUid(exist.getCreateUid());
+        commercial.setStatus(exist.getStatus());
         enterpriseCustomerProvider.updateCustomerCommercial(commercial);
     }
 
@@ -1115,6 +1210,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
         patent.setCreateTime(exist.getCreateTime());
         patent.setCreateUid(exist.getCreateUid());
+        patent.setStatus(exist.getStatus());
         enterpriseCustomerProvider.updateCustomerPatent(patent);
     }
 
@@ -1127,6 +1223,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
         trademark.setCreateTime(exist.getCreateTime());
         trademark.setCreateUid(exist.getCreateUid());
+        trademark.setStatus(exist.getStatus());
         enterpriseCustomerProvider.updateCustomerTrademark(trademark);
     }
 
@@ -1162,6 +1259,9 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void createCustomerInvestment(CreateCustomerInvestmentCommand cmd) {
         CustomerInvestment investment = ConvertHelper.convert(cmd, CustomerInvestment.class);
+        if(cmd.getInvestmentTime() != null) {
+            investment.setInvestmentTime(new Timestamp(cmd.getInvestmentTime()));
+        }
         enterpriseCustomerProvider.createCustomerInvestment(investment);
     }
 
@@ -1270,6 +1370,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
         indicator.setCreateTime(exist.getCreateTime());
         indicator.setCreateUid(exist.getCreateUid());
+        indicator.setStatus(exist.getStatus());
         enterpriseCustomerProvider.updateCustomerEconomicIndicator(indicator);
 
         if(isSameYear(indicator.getMonth(), exist.getMonth())) {
@@ -1364,8 +1465,12 @@ public class CustomerServiceImpl implements CustomerService {
     public void updateCustomerInvestment(UpdateCustomerInvestmentCommand cmd) {
         CustomerInvestment exist = checkCustomerInvestment(cmd.getId(), cmd.getCustomerId());
         CustomerInvestment investment = ConvertHelper.convert(cmd, CustomerInvestment.class);
+        if(cmd.getInvestmentTime() != null) {
+            investment.setInvestmentTime(new Timestamp(cmd.getInvestmentTime()));
+        }
         investment.setCreateTime(exist.getCreateTime());
         investment.setCreateUid(exist.getCreateUid());
+        investment.setStatus(exist.getStatus());
         enterpriseCustomerProvider.updateCustomerInvestment(investment);
     }
 
@@ -1421,7 +1526,160 @@ public class CustomerServiceImpl implements CustomerService {
         }
         certificate.setCreateTime(exist.getCreateTime());
         certificate.setCreateUid(exist.getCreateUid());
+        certificate.setStatus(exist.getStatus());
         enterpriseCustomerProvider.updateCustomerCertificate(certificate);
+    }
+
+    @Override
+    public void createCustomerDepartureInfo(CreateCustomerDepartureInfoCommand cmd) {
+        CustomerDepartureInfo departureInfo = ConvertHelper.convert(cmd, CustomerDepartureInfo.class);
+        if(cmd.getReviewTime() != null) {
+            departureInfo.setReviewTime(new Timestamp(cmd.getReviewTime()));
+        }
+        enterpriseCustomerProvider.createCustomerDepartureInfo(departureInfo);
+    }
+
+    @Override
+    public void createCustomerEntryInfo(CreateCustomerEntryInfoCommand cmd) {
+        CustomerEntryInfo entryInfo = ConvertHelper.convert(cmd, CustomerEntryInfo.class);
+        if(cmd.getContractEndDate() != null) {
+            entryInfo.setContractEndDate(new Timestamp(cmd.getContractEndDate()));
+        }
+        if(cmd.getContractStartDate() != null) {
+            entryInfo.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
+        }
+        enterpriseCustomerProvider.createCustomerEntryInfo(entryInfo);
+    }
+
+    @Override
+    public void deleteCustomerDepartureInfo(DeleteCustomerDepartureInfoCommand cmd) {
+        CustomerDepartureInfo departureInfo = checkCustomerDepartureInfo(cmd.getId(), cmd.getCustomerId());
+        enterpriseCustomerProvider.deleteCustomerDepartureInfo(departureInfo);
+    }
+
+    @Override
+    public void deleteCustomerEntryInfo(DeleteCustomerEntryInfoCommand cmd) {
+        CustomerEntryInfo entryInfo = checkCustomerEntryInfo(cmd.getId(), cmd.getCustomerId());
+        enterpriseCustomerProvider.deleteCustomerEntryInfo(entryInfo);
+    }
+
+    private CustomerEntryInfo checkCustomerEntryInfo(Long id, Long customerId) {
+        CustomerEntryInfo entryInfo = enterpriseCustomerProvider.findCustomerEntryInfoById(id);
+        if(entryInfo == null || !entryInfo.getCustomerId().equals(customerId)
+                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(entryInfo.getStatus()))) {
+            LOGGER.error("enterprise customer entryInfo is not exist or active. id: {}, certificate: {}", id, entryInfo);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_CERTIFICATE_NOT_EXIST,
+                    "customer entryInfo is not exist or active");
+        }
+        return entryInfo;
+    }
+
+    private CustomerDepartureInfo checkCustomerDepartureInfo(Long id, Long customerId) {
+        CustomerDepartureInfo departureInfo = enterpriseCustomerProvider.findCustomerDepartureInfoById(id);
+        if(departureInfo == null || !departureInfo.getCustomerId().equals(customerId)
+                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(departureInfo.getStatus()))) {
+            LOGGER.error("enterprise customer departureInfo is not exist or active. id: {}, departureInfo: {}", id, departureInfo);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_CERTIFICATE_NOT_EXIST,
+                    "customer departureInfo is not exist or active");
+        }
+        return departureInfo;
+    }
+
+    @Override
+    public CustomerDepartureInfoDTO getCustomerDepartureInfo(GetCustomerDepartureInfoCommand cmd) {
+        CustomerDepartureInfo departureInfo = checkCustomerDepartureInfo(cmd.getId(), cmd.getCustomerId());
+        return convertCustomerDepartureInfoDTO(departureInfo, cmd.getCommunityId());
+    }
+
+    @Override
+    public CustomerEntryInfoDTO getCustomerEntryInfo(GetCustomerEntryInfoCommand cmd) {
+        CustomerEntryInfo entryInfo = checkCustomerEntryInfo(cmd.getId(), cmd.getCustomerId());
+        if(entryInfo.getAddressId() != null) {
+
+        }
+        return convertCustomerEntryInfoDTO(entryInfo);
+    }
+
+    @Override
+    public List<CustomerDepartureInfoDTO> listCustomerDepartureInfos(ListCustomerDepartureInfosCommand cmd) {
+        List<CustomerDepartureInfo> departureInfos = enterpriseCustomerProvider.listCustomerDepartureInfos(cmd.getCustomerId());
+        if(departureInfos != null && departureInfos.size() > 0) {
+            return departureInfos.stream().map(departureInfo -> {
+                return convertCustomerDepartureInfoDTO(departureInfo, cmd.getCommunityId());
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    private CustomerDepartureInfoDTO convertCustomerDepartureInfoDTO(CustomerDepartureInfo departureInfo, Long communityId) {
+        CustomerDepartureInfoDTO dto = ConvertHelper.convert(departureInfo, CustomerDepartureInfoDTO.class);
+
+        if(dto.getDepartureDirectionId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(departureInfo.getNamespaceId(), communityId, dto.getDepartureDirectionId());
+            if(scopeFieldItem != null) {
+                dto.setDepartureDirectionName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+        if(dto.getDepartureNatureId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(departureInfo.getNamespaceId(), communityId, dto.getDepartureNatureId());
+            if(scopeFieldItem != null) {
+                dto.setDepartureNatureName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+        return dto;
+    }
+
+    private CustomerEntryInfoDTO convertCustomerEntryInfoDTO(CustomerEntryInfo entryInfo) {
+        CustomerEntryInfoDTO dto = ConvertHelper.convert(entryInfo, CustomerEntryInfoDTO.class);
+
+        if(dto.getAddressId() != null) {
+            Address address = addressProvider.findAddressById(dto.getAddressId());
+            if(address != null) {
+                dto.setAddressName(address.getAddress());
+            }
+        }
+
+        return dto;
+    }
+
+    @Override
+    public List<CustomerEntryInfoDTO> listCustomerEntryInfos(ListCustomerEntryInfosCommand cmd) {
+        List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
+        if(entryInfos != null && entryInfos.size() > 0) {
+            return entryInfos.stream().map(entryInfo -> {
+                return convertCustomerEntryInfoDTO(entryInfo);
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
+    public void updateCustomerDepartureInfo(UpdateCustomerDepartureInfoCommand cmd) {
+        CustomerDepartureInfo exist = checkCustomerDepartureInfo(cmd.getId(), cmd.getCustomerId());
+        CustomerDepartureInfo departureInfo = ConvertHelper.convert(cmd, CustomerDepartureInfo.class);
+        if(cmd.getReviewTime() != null) {
+            departureInfo.setReviewTime(new Timestamp(cmd.getReviewTime()));
+        }
+        departureInfo.setCreateTime(exist.getCreateTime());
+        departureInfo.setCreateUid(exist.getCreateUid());
+        departureInfo.setStatus(exist.getStatus());
+        enterpriseCustomerProvider.updateCustomerDepartureInfo(departureInfo);
+    }
+
+    @Override
+    public void updateCustomerEntryInfo(UpdateCustomerEntryInfoCommand cmd) {
+        CustomerEntryInfo exist = checkCustomerEntryInfo(cmd.getId(), cmd.getCustomerId());
+        CustomerEntryInfo entryInfo = ConvertHelper.convert(cmd, CustomerEntryInfo.class);
+        if(cmd.getContractEndDate() != null) {
+            entryInfo.setContractEndDate(new Timestamp(cmd.getContractEndDate()));
+        }
+        if(cmd.getContractStartDate() != null) {
+            entryInfo.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
+        }
+        entryInfo.setCreateTime(exist.getCreateTime());
+        entryInfo.setCreateUid(exist.getCreateUid());
+        entryInfo.setStatus(exist.getStatus());
+        enterpriseCustomerProvider.updateCustomerEntryInfo(entryInfo);
     }
 
     @Override
@@ -1738,7 +1996,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void syncEnterpriseCustomers(SyncCustomersCommand cmd) {
         if(cmd.getNamespaceId() == 999971) {
-            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode()).tryEnter(()-> {
+            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
                 ExecutorUtil.submit(new Runnable() {
                     @Override
                     public void run() {
@@ -1758,8 +2016,28 @@ public class CustomerServiceImpl implements CustomerService {
                     }
                 });
             });
+        } else {
+            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
+                ExecutorUtil.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try{
+                            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+                            if(community == null) {
+                                return;
+                            }
+                            String version = enterpriseCustomerProvider.findLastEnterpriseCustomerVersionByCommunity(cmd.getNamespaceId(), community.getId());
+                            CustomerHandle customerHandle = PlatformContext.getComponent(CustomerHandle.CUSTOMER_PREFIX + cmd.getNamespaceId());
+                            if(customerHandle != null) {
+                                customerHandle.syncEnterprises("1", version, community.getNamespaceCommunityToken());
+                            }
 
-
+                        }catch (Exception e){
+                            LOGGER.error("syncEnterpriseCustomers error.", e);
+                        }
+                    }
+                });
+            });
         }
 
     }

@@ -10,7 +10,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.TypeReference;
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.parking.*;
 import com.everhomes.parking.bosigao.*;
 import com.everhomes.rest.organization.VendorType;
@@ -18,11 +17,9 @@ import com.everhomes.rest.parking.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -33,7 +30,7 @@ import com.everhomes.util.RuntimeErrorException;
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "BOSIGAO3")
 public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Bosigao3ParkingVendorHandler.class);
-	
+
 	@Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
         
@@ -379,7 +376,7 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 			dto.setPayTime(payTime);
 			dto.setParkingTime((int)((tempFee.getPayTime() - entranceDate) / (1000 * 60)));
 			dto.setDelayTime(tempFee.getOutTime());
-			dto.setPrice(pkorder.getAmount().divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
+			dto.setPrice(pkorder.getAmount().divide(new BigDecimal(100), TEMP_FEE_RETAIN_DECIMAL, RoundingMode.HALF_UP));
 			dto.setOrderToken(pkorder.getOrderID());
 		}else if (tempFee.getResult() == 2 || tempFee.getResult() == 10) {
 			dto.setPlateNumber(plateNumber);

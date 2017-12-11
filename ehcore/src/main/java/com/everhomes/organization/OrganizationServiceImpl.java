@@ -78,7 +78,9 @@ import com.everhomes.rest.common.*;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.customer.DeleteEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.NamespaceCustomerType;
 import com.everhomes.rest.enterprise.*;
+import com.everhomes.rest.equipment.AdminFlag;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.family.ParamType;
 import com.everhomes.rest.forum.*;
@@ -90,6 +92,7 @@ import com.everhomes.rest.launchpad.ItemKind;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.module.Project;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
+import com.everhomes.rest.openapi.techpark.AllFlag;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
@@ -100,6 +103,8 @@ import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.search.OrganizationQueryResult;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
+import com.everhomes.rest.techpark.expansion.EnterpriseDetailDTO;
+import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
 import com.everhomes.rest.ui.privilege.EntrancePrivilege;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
@@ -834,6 +839,67 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
+    public ListEnterpriseDetailResponse listEnterprisesAbstract(ListEnterprisesCommand cmd) {
+        ListEnterpriseDetailResponse resp = new ListEnterpriseDetailResponse();
+        List<EnterpriseDetailDTO> dtos = new ArrayList<>();
+        SearchOrganizationCommand command = ConvertHelper.convert(cmd, SearchOrganizationCommand.class);
+        command.setKeyword(cmd.getKeywords());  //两个字段不一样，操蛋
+        GroupQueryResult rlt = organizationSearcher.query(command);
+        for (Long id : rlt.getIds()) {
+            EnterpriseDetailDTO dto = new EnterpriseDetailDTO();
+            Organization organization = organizationProvider.findOrganizationById(id);
+            OrganizationDetail org = organizationProvider.findOrganizationDetailByOrganizationId(id);
+            if (null == organization) {
+                LOGGER.debug("organization is null, id = " + id);
+                return null;
+            } else if (OrganizationGroupType.fromCode(organization.getGroupType()) != OrganizationGroupType.ENTERPRISE) {
+                LOGGER.debug("organization not is enterprise, id = " + id);
+                return null;
+            } else if (organization.getParentId() != 0L) {
+                LOGGER.debug("organization is children organization, id = " + id);
+                return null;
+            }
+            dto.setId(organization.getId());
+            dto.setEnterpriseName(organization.getName());
+            if(dto.getEnterpriseName() == null || com.mysql.jdbc.StringUtils.isNullOrEmpty(dto.getEnterpriseName()))
+                dto.setEnterpriseName(org.getDisplayName());
+
+            String pinyin = PinYinHelper.getPinYin(dto.getEnterpriseName());
+            dto.setFullInitial(PinYinHelper.getFullCapitalInitial(pinyin));
+            dto.setFullPinyin(pinyin.replaceAll(" ", ""));
+            dto.setInitial(PinYinHelper.getCapitalInitial(dto.getFullPinyin()));
+
+            dto.setAvatarUri(org.getAvatar());
+            if (!StringUtils.isEmpty(org.getAvatar()))
+                dto.setAvatarUrl(contentServerService.parserUri(dto.getAvatarUri(), EntityType.ORGANIZATIONS.getCode(), organization.getId()));
+
+            List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organization.getId());
+
+            if(organizationAddresses != null && organizationAddresses.size() > 0) {
+                if(StringUtils.isEmpty(cmd.getBuildingName())) {
+                    Address addr = addressProvider.findAddressById(organizationAddresses.get(0).getAddressId());
+                    if(addr != null)
+                        dto.setAddress(addr.getAddress());
+                } else {
+                    for (OrganizationAddress organizationAddress : organizationAddresses) {
+                        Address addr = addressProvider.findAddressById(organizationAddress.getAddressId());
+                        if(addr != null && cmd.getBuildingName().equals(addr.getBuildingName())) {
+                            dto.setAddress(addr.getAddress());
+                            break ;
+                        }
+                    }
+                }
+
+            }
+            dtos.add(dto);
+        }
+
+        resp.setDetails(dtos);
+        resp.setNextPageAnchor(rlt.getPageAnchor());
+        return resp;
+    }
+
+    @Override
     public ListEnterprisesCommandResponse listEnterprises(
             ListEnterprisesCommand cmd) {
         // 更改成全部走搜索引擎
@@ -1130,11 +1196,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         User user = UserContext.current().getUser();
 
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-        if(namespaceId == 999971) {
-            LOGGER.error("Insufficient privilege, createEnterprise");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                    "Insufficient privilege");
-        }
 
         if(org.apache.commons.lang.StringUtils.isNotBlank(cmd.getUnifiedSocialCreditCode())) {
             checkUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode(), namespaceId, null);
@@ -1242,11 +1303,11 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     private void createEnterpriseCustomer(Organization organization, String logo, OrganizationDetail enterprise, Long communityId) {
-        if(organization.getNamespaceId() == 999971) {
-            LOGGER.error("Insufficient privilege, createEnterpriseCustomer");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                    "Insufficient privilege");
-        }
+//        if(organization.getNamespaceId() == 999971 || organization.getNamespaceId() == 999983) {
+//            LOGGER.error("Insufficient privilege, createEnterpriseCustomer");
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+//                    "Insufficient privilege");
+//        }
         List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(organization.getNamespaceId(), organization.getName());
         if(customers != null && customers.size() > 0) {
             EnterpriseCustomer customer = customers.get(0);
@@ -1256,6 +1317,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             customer.setContactAddress(enterprise.getAddress());
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
+            if(customer.getTrackingUid() == null) {
+                customer.setTrackingUid(-1L);
+            }
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 
@@ -1270,6 +1334,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             customer.setContactAddress(enterprise.getAddress());
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
+            customer.setTrackingUid(-1L);
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
         }
@@ -1351,11 +1416,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public void updateEnterprise(UpdateEnterpriseCommand cmd, boolean updateAttachmentAndAddress) {
-        if(cmd.getNamespaceId() == 999971) {
-            LOGGER.error("Insufficient privilege, createEnterprise");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                    "Insufficient privilege");
-        }
         //先判断，后台管理员才能创建。状态直接设为正常
         Organization organization = checkOrganization(cmd.getId());
         User user = UserContext.current().getUser();
@@ -1364,6 +1424,32 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         checkOrgNameUnique(cmd.getId(), cmd.getNamespaceId(), cmd.getName());
         dbProvider.execute((TransactionStatus status) -> {
+            //查到有关联的客户则同步修改过去
+            EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(organization.getId());
+            if(customer != null) {
+                //产品功能 #20796 同步过来的客户名称不可改
+                if(NamespaceCustomerType.EBEI.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))
+                        || NamespaceCustomerType.SHENZHOU.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType())) ) {
+                    if(!customer.getName().equals(cmd.getName())) {
+                        LOGGER.error("Insufficient privilege");
+                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                                "Insufficient privilege");
+                    }
+                }
+                customer.setName(cmd.getName());
+                customer.setNickName(cmd.getDisplayName());
+                customer.setContactAddress(cmd.getAddress());
+                customer.setLatitude(cmd.getLatitude());
+                customer.setLongitude(cmd.getLongitude());
+                customer.setCorpWebsite(organization.getWebsite());
+                customer.setCorpLogoUri(cmd.getAvatar());
+                if(customer.getTrackingUid() == null) {
+                    customer.setTrackingUid(-1L);
+                }
+                enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+                enterpriseCustomerSearcher.feedDoc(customer);
+            }
+
             organization.setId(cmd.getId());
             organization.setName(cmd.getName());
             organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -1432,20 +1518,6 @@ public class OrganizationServiceImpl implements OrganizationService {
             organization.setDescription(organizationDetail.getDescription());
             organizationSearcher.feedDoc(organization);
 
-            //查到有关联的客户则同步修改过去
-            EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(organization.getId());
-            if(customer != null) {
-                customer.setName(organization.getName());
-                customer.setNickName(organizationDetail.getDisplayName());
-                customer.setContactAddress(organizationDetail.getAddress());
-                customer.setLatitude(organizationDetail.getLatitude());
-                customer.setLongitude(organizationDetail.getLongitude());
-                customer.setCorpWebsite(organization.getWebsite());
-                customer.setCorpLogoUri(organizationDetail.getAvatar());
-                enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
-                enterpriseCustomerSearcher.feedDoc(customer);
-            }
-
             return null;
         });
 
@@ -1466,11 +1538,12 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public void deleteEnterpriseById(DeleteOrganizationIdCommand cmd) {
         Organization organization = checkOrganization(cmd.getId());
-        if(organization.getNamespaceId() == 999971) {
-            LOGGER.error("Insufficient privilege, createEnterprise");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                    "Insufficient privilege");
-        }
+        //产品功能 #20796
+//        if(organization.getNamespaceId() == 999971 || organization.getNamespaceId() == 999983) {
+//            LOGGER.error("Insufficient privilege, createEnterprise");
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+//                    "Insufficient privilege");
+//        }
         User user = UserContext.current().getUser();
 
 		dbProvider.execute((TransactionStatus status) -> {
@@ -2807,6 +2880,10 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
 
             OrganizationDTO dto = toOrganizationDTO(userId, org);
+
+            if(OrganizationMemberGroupType.fromCode(member.getMemberGroup()) == OrganizationMemberGroupType.MANAGER){
+                dto.setManagerFlag(AdminFlag.YES.getCode());
+            }
             dtos.add(dto);
         }
 
@@ -2871,6 +2948,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (communityId != null) {
             Community community = communityProvider.findCommunityById(communityId);
             if (community != null) {
+                organizationDto.setCityId(community.getCityId());
+                organizationDto.setCityName(community.getCityName());
+                organizationDto.setAreaId(community.getAreaId());
+                organizationDto.setAreaName(community.getAreaName());
                 organizationDto.setCommunityId(communityId);
                 organizationDto.setCommunityName(community.getName());
                 organizationDto.setCommunityAliasName(community.getAliasName());
@@ -7503,11 +7584,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<ImportFileResultLog<ImportEnterpriseDataDTO>> errorDataLogs = new ArrayList<>();
 
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-        if(namespaceId == 999971) {
-            LOGGER.error("Insufficient privilege, createEnterprise");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                    "Insufficient privilege");
-        }
+
         Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 
         // 业务太复杂，导入企业时如果本身系统里面已存在，要覆盖掉，如果是本次导入了同一企业多行，要合并门牌及管理员
@@ -9846,6 +9923,24 @@ public class OrganizationServiceImpl implements OrganizationService {
     public OrganizationDetailDTO getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd) {
 
         return toOrganizationDetailDTO(cmd.getId(), false);
+    }
+
+    @Override
+    public OrganizationDetailDTO getOrganizationDetailWithDefaultAttachmentById(GetOrganizationDetailByIdCommand cmd) {
+        OrganizationDetailDTO dto = toOrganizationDetailDTO(cmd.getId(), false);
+        if(dto.getAttachments() == null || dto.getAttachments().size() == 0) {
+            List<AttachmentDescriptor> attachmentDescriptors = new ArrayList<>();
+            AttachmentDescriptor ad = new AttachmentDescriptor();
+            ad.setContentType(PostContentType.IMAGE.getCode());
+            String uri = configurationProvider.getValue("enterprise.default.attachment", "");
+            ad.setContentUri(uri);
+            if(uri != null) {
+                ad.setContentUrl(contentServerService.parserUri(uri, EntityType.ORGANIZATIONS.getCode(), dto.getOrganizationId()));
+            }
+            attachmentDescriptors.add(ad);
+            dto.setAttachments(attachmentDescriptors);
+        }
+        return dto;
     }
 
     @Override
@@ -14027,6 +14122,25 @@ public class OrganizationServiceImpl implements OrganizationService {
 
             return null;
         }
+    }
+
+    @Override
+    public Byte getOrganizationDetailFlag(GetOrganizationDetailFlagCommand cmd) {
+        CommunityOrganizationDetailDisplay display = organizationProvider.findOrganizationDetailFlag(cmd.getNamespaceId(), cmd.getCommunityId());
+        return display == null ? 0 : display.getDetailFlag();
+    }
+
+    @Override
+    public Byte setOrganizationDetailFlag(SetOrganizationDetailFlagCommand cmd) {
+        CommunityOrganizationDetailDisplay display = organizationProvider.findOrganizationDetailFlag(cmd.getNamespaceId(), cmd.getCommunityId());
+        if(display == null) {
+            display = ConvertHelper.convert(cmd, CommunityOrganizationDetailDisplay.class);
+            organizationProvider.createCommunityOrganizationDetailDisplay(display);
+        } else {
+            display.setDetailFlag(cmd.getDetailFlag());
+            organizationProvider.updateCommunityOrganizationDetailDisplay(display);
+        }
+        return display.getDetailFlag();
     }
 }
 
