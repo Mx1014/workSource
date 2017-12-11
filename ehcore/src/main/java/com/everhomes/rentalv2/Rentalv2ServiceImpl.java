@@ -49,7 +49,8 @@ import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.rest.rentalv2.admin.AttachmentType;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.user.*; 
+import com.everhomes.server.schema.tables.EhRentalv2Orders;
+import com.everhomes.user.*;
 import net.greghaines.jesque.Job;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
@@ -1880,8 +1881,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				context.setUid(order.getRentalUid());
 				context.setNamespaceId(order.getNamespaceId());
 				event.setContext(context);
-				event.setEntityType(EntityType.USER.getCode());
-				event.setEntityId(order.getRentalUid());
+				event.setEntityType(EhRentalv2Orders.class.getSimpleName());
+				event.setEntityId(order.getId());
 				event.setEventName(SystemEvent.RENTAL_RESOURCE_APPLY.dft());
 			});
 		}
@@ -3136,8 +3137,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				context.setUid(order.getRentalUid());
 				context.setNamespaceId(order.getNamespaceId());
 				event.setContext(context);
-				event.setEntityType(EntityType.USER.getCode());
-				event.setEntityId(order.getRentalUid());
+				event.setEntityType(EhRentalv2Orders.class.getSimpleName());
+				event.setEntityId(order.getId());
 				event.setEventName(SystemEvent.RENTAL_RESOURCE_APPLY_CANCEL.dft());
 			});
 			return null;
