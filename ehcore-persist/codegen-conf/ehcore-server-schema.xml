@@ -195,7 +195,7 @@
             eh_rentalv2_price_packages |
 			eh_payment_withdraw_orders |eh_community_organization_detail_display |
             eh_forum_service_types |
-            eh_me_web_menus | eh_energy_meter_category_map |
+            eh_me_web_menus | eh_energy_meter_category_map | eh_energy_meter_fomular_map |
         </includes>
 
             <!-- All elements that are excluded from your schema

@@ -68,6 +68,14 @@ public class EnergyMeterCategoryProviderImpl implements EnergyMeterCategoryProvi
     }
 
     @Override
+    public List<EnergyMeterCategory> listMeterCategories(List<Long> categoryIds) {
+        return context().selectFrom(EH_ENERGY_METER_CATEGORIES)
+                .where(EH_ENERGY_METER_CATEGORIES.ID.in(categoryIds))
+                .and(EH_ENERGY_METER_CATEGORIES.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
+                .fetchInto(EnergyMeterCategory.class);
+    }
+
+    @Override
     public long createEnergyMeterCategory(EnergyMeterCategory category) {
         long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnergyMeterCategories.class));
         category.setId(id);

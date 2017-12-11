@@ -21,7 +21,9 @@ public interface EnergyMeterCategoryProvider {
      * 获取表记分类列表
      */
     List<EnergyMeterCategory> listMeterCategories(Integer namespaceId, Byte categoryType, Long ownerId, String ownerType, Long communityId);
- 
+
+    List<EnergyMeterCategory> listMeterCategories(List<Long> categoryIds);
+
 	EnergyMeterCategory findById(Long id); 
     /**
      * 新建分类
