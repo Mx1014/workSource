@@ -13,7 +13,7 @@ CREATE TABLE `eh_work_report_templates` (
   `report_type` TINYINT COMMENT '0-Day, 1-Week, 2-Month',
   `report_attribute` VARCHAR(128) NOT NULL DEFAULT 'CUSTOMIZE' COMMENT 'DEFAULT,CUSTOMIZE',
   `form_template_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'The id of the template form',
-  `modify_flag` TINYINT NOT NULL  DEFAULT 1 COMMENT '0: no, 1: yes',
+  `modify_flag` TINYINT NOT NULL DEFAULT 1 COMMENT '0: no, 1: yes',
   `delete_flag` TINYINT NOT NULL DEFAULT 1 COMMENT '0: no, 1: yes',
   `icon_uri` VARCHAR(1024) COMMENT 'the avatar of the approval',
 
