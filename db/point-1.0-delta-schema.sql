@@ -78,6 +78,7 @@ CREATE TABLE `eh_point_actions` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `system_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_systems id',
+  `action_type` VARCHAR(64),
   `owner_type` VARCHAR(64),
   `owner_id` BIGINT NOT NULL DEFAULT 0,
   `display_name` VARCHAR(64) NOT NULL,

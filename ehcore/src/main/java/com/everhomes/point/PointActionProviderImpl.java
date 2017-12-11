@@ -20,6 +20,7 @@ import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Repository
@@ -81,7 +82,43 @@ public class PointActionProviderImpl implements PointActionProvider {
 		return ConvertHelper.convert(dao().findById(id), PointAction.class);
 	}
 
-	private EhPointActionsDao rwDao() {
+    @Override
+    public List<PointAction> listPointActionsBySystemId(Long systemId) {
+        com.everhomes.server.schema.tables.EhPointActions t = Tables.EH_POINT_ACTIONS;
+        return this.query(new ListingLocator(), -1, (locator, query) -> {
+            query.addConditions(t.SYSTEM_ID.eq(systemId));
+            return query;
+        });
+    }
+
+    @Override
+    public void createPointActions(List<PointAction> pointActions) {
+        Timestamp createTime = DateUtils.currentTimestamp();
+        for (PointAction action : pointActions) {
+            Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointActions.class));
+            action.setId(id);
+            action.setCreateTime(createTime);
+        }
+        rwDao().insert(pointActions.toArray(new EhPointActions[pointActions.size()]));
+    }
+
+    @Override
+    public PointAction findByOwner(Integer namespaceId, Long systemId, String ownerType, Long ownerId) {
+        com.everhomes.server.schema.tables.EhPointActions t = Tables.EH_POINT_ACTIONS;
+        List<PointAction> list = this.query(new ListingLocator(), 1, (locator, query) -> {
+            query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+            query.addConditions(t.SYSTEM_ID.eq(systemId));
+            query.addConditions(t.OWNER_TYPE.eq(ownerType));
+            query.addConditions(t.OWNER_ID.eq(ownerId));
+            return query;
+        });
+        if (list != null && list.size() > 0) {
+            return list.get(0);
+        }
+        return null;
+    }
+
+    private EhPointActionsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhPointActionsDao(context.configuration());
 	}

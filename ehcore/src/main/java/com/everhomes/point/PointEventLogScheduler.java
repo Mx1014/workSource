@@ -7,6 +7,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.point.PointCommonStatus;
 import com.everhomes.rest.point.PointEventLogStatus;
+import com.everhomes.server.schema.tables.pojos.EhPointRules;
 import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -18,9 +19,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -68,6 +67,9 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
 
     @Autowired
     private CoordinationProvider coordinationProvider;
+
+    @Autowired
+    private PointActionProvider pointActionProvider;
 
     @Autowired
     private DbProvider dbProvider;
@@ -157,7 +159,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                 List<Long> idList = pointEventLogs.stream().map(PointEventLog::getId).collect(Collectors.toList());
 
 
-
+                final List<PointAction> actions = new ArrayList<>();
                 dbProvider.execute(s -> {
                     pointEventLogProvider.updatePointEventLogStatus(idList, PointEventLogStatus.PROCESSING.getCode());
 
@@ -183,6 +185,11 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                                 continue;
                             }
 
+                            PointAction action = pointActionProvider.findByOwner(pointSystem.getNamespaceId(), pointSystem.getId(), EhPointRules.class.getSimpleName(), rule.getId());
+                            if (action != null) {
+                                actions.add(action);
+                            }
+
                             userIdToPointsScoreMap.compute(getKey(pointSystem.getNamespaceId(), pointSystem.getId(),
                                     localEvent.getContext().getUid()), (uid, score) -> {
                                 if (score == null) {
@@ -198,6 +205,14 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                     persistPointScore(userIdToPointsScoreMap);
                     pointEventLogProvider.updatePointEventLogStatus(idList, PointEventLogStatus.PROCESSED.getCode());
                     return true;
+                });
+
+                actions.stream().filter(Objects::nonNull).forEach(r -> {
+                    try {
+                        r.doAction();
+                    } catch (Exception e) {
+                        LOGGER.error("Point action doAction error, action = " + r.toString(), e);
+                    }
                 });
             } while (locator.getAnchor() != null);
         }

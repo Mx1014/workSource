@@ -662,9 +662,7 @@ public class PointServiceImpl implements PointService {
             r.setNamespaceId(pointSystem.getNamespaceId());
             r.setId(null);
         });
-        for (PointAction action : pointActions) {
-
-        }
+        pointActionProvider.createPointActions(pointActions);
     }
 
     @Override
