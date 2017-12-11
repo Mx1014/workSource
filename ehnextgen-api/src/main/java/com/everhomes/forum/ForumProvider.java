@@ -6,6 +6,8 @@ import java.util.List;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 
 /**
  * ForumProvider defines server-side forum API
@@ -292,7 +294,11 @@ public interface ForumProvider {
 
     ForumCategory findForumCategoryById(Long Id);
 
-    InteractSetting findInteractSetting(Integer namespaceId, Long forumId, String type, Long entryId);
+    InteractSetting findInteractSetting(Integer namespaceId, Byte moduleType, Long entryId);
+
+    void createInteractSetting(InteractSetting setting);
+
+    void updateInteractSetting(InteractSetting setting);
 
     void createForumServiceTypes(List<ForumServiceType> list);
 

@@ -5413,7 +5413,12 @@ public class UserServiceImpl implements UserService {
         }
 
         Long l = configurationProvider.getLongValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.PAY_PLATFORM, 0l);
+
         resp.setPaymentPlatform(l);
+
+		Integer mypublishFlag = configurationProvider.getIntValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.MY_PUBLISH_FLAG, 1);
+
+		resp.setMyPublishFlag(mypublishFlag.byteValue());
         
         return resp;
     }
