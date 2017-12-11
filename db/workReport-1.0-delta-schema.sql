@@ -96,6 +96,7 @@ CREATE TABLE `eh_work_report_val_receiver_map` (
   `report_val_id` BIGINT COMMENT 'the id of the report val',
   `receiver_user_id` BIGINT COMMENT 'the id of the receiver',
   `receiver_name` VARCHAR(256) COMMENT 'the name of the receiver',
+  `receiver_avatar` VARCHAR(2048) COMMENT 'the avatar of the receiver',
   `read_status` TINYINT DEFAULT 0 COMMENT '0-unread 1-read',
 
   `create_time` DATETIME COMMENT 'record create time',
