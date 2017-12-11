@@ -1,12 +1,11 @@
 package com.everhomes.rest.quality;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -20,6 +19,8 @@ import com.everhomes.util.StringHelper;
  *  <li>specificationIds: eh_quality_inspection_specifications表的id</li>
  *  <li>repeat: 执行周期 com.everhomes.rest.quality.RepeatSettingDTO</li>
  *  <li>group: 业务组信息 com.everhomes.rest.quality.StandardGroupDTO</li>
+ *  <li>communities: 应用到的项目id列表</li>
+ *
  * </ul>
  */
 public class CreatQualityStandardCommand {
@@ -46,6 +47,9 @@ public class CreatQualityStandardCommand {
 	
 	@ItemType(StandardGroupDTO.class)
 	private List<StandardGroupDTO> group;
+
+	@ItemType(Long.class)
+	private List<Long> communities;
 	
 	public Long getOwnerId() {
 		return ownerId;
@@ -125,6 +129,14 @@ public class CreatQualityStandardCommand {
 
 	public void setGroup(List<StandardGroupDTO> group) {
 		this.group = group;
+	}
+
+	public List<Long> getCommunities() {
+		return communities;
+	}
+
+	public void setCommunities(List<Long> communities) {
+		this.communities = communities;
 	}
 
 	@Override

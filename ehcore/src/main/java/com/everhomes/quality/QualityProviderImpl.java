@@ -2686,4 +2686,32 @@ public class QualityProviderImpl implements QualityProvider {
 
 		return result;
 	}
+
+	@Override
+	public void createQualityModelCommunityMap(QualityInspectionModleCommunityMap map) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQualityInspectionModleCommunityMap.class));
+		map.setId(id);
+		EhQualityInspectionModleCommunityMapDao dao = new EhQualityInspectionModleCommunityMapDao();
+		dao.insert(map);
+	}
+
+	@Override
+	public void deleteQualityModelCommunityMapByCommunityAndStandardId(Long standardId, Long targetId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP)
+				.where(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP.STANDARD_ID.eq(standardId))
+				.and(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(QualityModelType.STANDARD.getCode()))
+				.and(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP.TARGET_ID.eq(targetId))
+				.execute();
+	}
+
+	@Override
+	public List<QualityInspectionModleCommunityMap> getQualityModelCommunityMapByTargetId(Long targetId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		context.selectFrom(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP)
+				.where(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP.TARGET_ID.eq(targetId))
+				.and(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(QualityModelType.STANDARD.getCode()))
+				.fetchInto(QualityInspectionModleCommunityMap.class);
+		return null;
+	}
 }

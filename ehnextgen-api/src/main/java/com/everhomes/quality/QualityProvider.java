@@ -1,16 +1,15 @@
 package com.everhomes.quality;
 
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.rest.quality.ExecuteGroupAndPosition;
+import com.everhomes.rest.quality.ScoreDTO;
+import com.everhomes.rest.quality.TaskCountDTO;
+
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.rest.quality.CommunitySpecification;
-import com.everhomes.rest.quality.ExecuteGroupAndPosition;
-import com.everhomes.rest.quality.ScoreDTO;
-import com.everhomes.rest.quality.TaskCountDTO;
 
 
 public interface QualityProvider {
@@ -171,4 +170,10 @@ public interface QualityProvider {
 
 	Map<Long, QualityInspectionSpecifications> listSpecificationByIds(List<Long> ids);
 	Map<Long, QualityInspectionTaskRecords> listLastRecordByTaskIds(Set<Long> taskIds);
+
+    void createQualityModelCommunityMap(QualityInspectionModleCommunityMap map);
+
+	void deleteQualityModelCommunityMapByCommunityAndStandardId(Long id, Long targetId);
+
+	List<QualityInspectionModleCommunityMap> getQualityModelCommunityMapByTargetId(Long targetId);
 }
