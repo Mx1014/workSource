@@ -27,7 +27,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-
+/**
+ * 位置预定
+ */
 @RestDoc(value="Reserver controller", site="reserver")
 @RestController
 @RequestMapping("/reserver")
