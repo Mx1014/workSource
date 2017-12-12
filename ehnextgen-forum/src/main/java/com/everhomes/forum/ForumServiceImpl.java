@@ -6568,6 +6568,7 @@ public class ForumServiceImpl implements ForumService {
 
         Long moduleId = ForumModuleType.fromCode(cmd.getModuleType()).getModuleId();
         if(moduleId == null){
+            LOGGER.debug("check moduleApp admin privilege fail, moduleId dest not exists. userId={}, forumModuleType={}, organizationId={}" , userId, cmd.getModuleType(), cmd.getCurrentOrgId());
             res.setFlag(TrueOrFalseFlag.FALSE.getCode());
             return res;
         }
