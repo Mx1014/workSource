@@ -33,6 +33,7 @@ public class UpdateInspectionTemplateCommand {
 
 	private String targetType;
 
+	@ItemType(Long.class)
 	private  List<Long> communities;
 	
 	@ItemType(InspectionItemDTO.class)

@@ -1144,29 +1144,6 @@ public class EquipmentController extends ControllerBase {
 		return response;
 	}
 
-/*
-	@RequestMapping("disableStandardModle")
-	@RestReturn(value = String.class)
-	public RestResponse disableModleStandard (DeleteEquipmentStandardCommand cmd) {
-
-		equipmentService.disableModleStandard(cmd.getStandardId());
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	@RequestMapping("disableTemplateModle")
-	@RestReturn(value = String.class)
-	public RestResponse disableModleTemplate (DeleteEquipmentStandardCommand cmd) {
-
-		equipmentService.disableModleTemplate(cmd.getStandardId());
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}*/
-
 	/**
 	 * <b>URL: /equipment/syscTemplates</b>
 	 * <p>不同域空间下巡检模板全部应用到对应域空间下所有项目</p>

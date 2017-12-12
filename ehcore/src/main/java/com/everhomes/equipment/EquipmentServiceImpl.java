@@ -297,6 +297,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				//如果是项目上修改判断下是否为公共标准 创建副本将标准的referId设置成公共标准id
 				standard.setTargetId(cmd.getTargetId());
 				standard.setCreatorUid(UserContext.currentUserId());
+				standard.setReferId(cmd.getId());
 				equipmentProvider.creatEquipmentStandard(standard);
 
 			}else {
