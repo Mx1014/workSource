@@ -51,7 +51,6 @@ import com.everhomes.util.*;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
-import org.jooq.util.postgres.pg_catalog.routines.Count1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,7 +147,7 @@ public class PortalServiceImpl implements PortalService {
 //			return new ListServiceModuleAppsResponse(dtos);
 //		}
 //		return null;
-		List<ServiceModuleAppDTO> moduleApps = serviceModuleProvider.listReflectionServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getActionType(), cmd.getCustomTag(), cmd.getCustomPath());
+		List<ServiceModuleAppDTO> moduleApps = serviceModuleProvider.listReflectionServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getActionType(), cmd.getCustomTag(), cmd.getCustomPath(), null);
 		if(moduleApps != null && moduleApps.size() > 0){
 			List dtos = Collections.singletonList(moduleApps.get(0));
 			return new ListServiceModuleAppsResponse(dtos);
