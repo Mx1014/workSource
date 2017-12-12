@@ -39,6 +39,7 @@ public class CustomerTalentDTO {
     private Byte customerType;
     private Long customerId;
     private String name;
+    private String age;
     private Long gender;
     private String genderName;
     private String phone;
@@ -61,6 +62,86 @@ public class CustomerTalentDTO {
     private String personalCertificate;
     private String careerExperience;
     private String remark;
+    private Integer totalEmployees;
+    private Integer juniorColleges;
+    private Integer undergraduates;
+    private Integer masters;
+    private Integer doctors;
+    private Integer overseas;
+    private Integer thousandTalentsProgram;
+    private Integer freshGraduates;
+
+    public String getAge() {
+        return age;
+    }
+
+    public void setAge(String age) {
+        this.age = age;
+    }
+
+    public Integer getDoctors() {
+        return doctors;
+    }
+
+    public void setDoctors(Integer doctors) {
+        this.doctors = doctors;
+    }
+
+    public Integer getFreshGraduates() {
+        return freshGraduates;
+    }
+
+    public void setFreshGraduates(Integer freshGraduates) {
+        this.freshGraduates = freshGraduates;
+    }
+
+    public Integer getJuniorColleges() {
+        return juniorColleges;
+    }
+
+    public void setJuniorColleges(Integer juniorColleges) {
+        this.juniorColleges = juniorColleges;
+    }
+
+    public Integer getMasters() {
+        return masters;
+    }
+
+    public void setMasters(Integer masters) {
+        this.masters = masters;
+    }
+
+    public Integer getOverseas() {
+        return overseas;
+    }
+
+    public void setOverseas(Integer overseas) {
+        this.overseas = overseas;
+    }
+
+    public Integer getThousandTalentsProgram() {
+        return thousandTalentsProgram;
+    }
+
+    public void setThousandTalentsProgram(Integer thousandTalentsProgram) {
+        this.thousandTalentsProgram = thousandTalentsProgram;
+    }
+
+    public Integer getTotalEmployees() {
+        return totalEmployees;
+    }
+
+    public void setTotalEmployees(Integer totalEmployees) {
+        this.totalEmployees = totalEmployees;
+    }
+
+    public Integer getUndergraduates() {
+        return undergraduates;
+    }
+
+    public void setUndergraduates(Integer undergraduates) {
+        this.undergraduates = undergraduates;
+    }
 
     public String getGenderName() {
         return genderName;

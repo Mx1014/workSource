@@ -332,6 +332,7 @@ public class PortalServiceImpl implements PortalService {
 							portalItemGroup.setLayoutId(portalLayout.getId());
 							portalItemGroup.setCreatorUid(user.getId());
 							portalItemGroup.setOperatorUid(user.getId());
+							portalItemGroup.setNamespaceId(namespaceId);
 							groups.add(portalItemGroup);
 						}
 						portalItemGroupProvider.createPortalItemGroups(groups);
@@ -583,6 +584,7 @@ public class PortalServiceImpl implements PortalService {
 		portalItem.setIconUri(cmd.getIconUri());
 		portalItem.setBgcolor(cmd.getBgcolor());
 		portalItem.setSelectedIconUri(cmd.getSelectedIconUri());
+		portalItem.setItemWidth(cmd.getItemWidth());
 		this.dbProvider.execute((status) -> {
 			portalItemProvider.updatePortalItem(portalItem);
 			if(null != cmd.getScopes() && cmd.getScopes().size() > 0){

@@ -248,9 +248,10 @@ public class ContractServiceImpl implements ContractService {
     	if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
 	    	//使用tryEnter()防止分布式部署重复执行
 	    	coordinationProvider.getNamedLock(CoordinationLocks.CONTRACT_SCHEDULE.getCode()).tryEnter(()->{
-				sendMessageToBackTwoMonthsOrganizations(1000000);
-				sendMessageToBackOneMonthOrganizations(1000000);
-				sendMessageToNewOrganizations(1000000);
+
+	    		sendMessageToBackTwoMonthsOrganizations(1000000);
+	        	sendMessageToBackOneMonthOrganizations(1000000);
+	        	sendMessageToNewOrganizations(1000000);
 	    	});
     	}
     }

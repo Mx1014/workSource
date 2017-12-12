@@ -294,6 +294,7 @@ public class EbeiCustomerHandle implements CustomerHandle {
             customer.setContactPhone(ebeiCustomer.getContactPhone());
             customer.setStatus(CommonStatus.ACTIVE.getCode());
             customer.setCreatorUid(1L);
+            customer.setTrackingUid(-1L);
             customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             customer.setOperatorUid(1L);
             customer.setUpdateTime(customer.getCreateTime());
@@ -338,7 +339,7 @@ public class EbeiCustomerHandle implements CustomerHandle {
     }
 
     private Organization insertOrganization(EnterpriseCustomer customer) {
-        Organization org = organizationProvider.findOrganizationByNameAndNamespaceId(customer.getName(), customer.getNamespaceId());
+        Organization org = organizationProvider.findOrganizationByName(customer.getName(), customer.getNamespaceId());
         if(org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
             return org;
         }
@@ -439,6 +440,9 @@ public class EbeiCustomerHandle implements CustomerHandle {
             customer.setOperatorUid(1L);
             customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             customer.setVersion(ebeiCustomer.getVersion());
+            if(customer.getTrackingUid() == null) {
+                customer.setTrackingUid(-1L);
+            }
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 

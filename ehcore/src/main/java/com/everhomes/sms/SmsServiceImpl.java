@@ -1,13 +1,20 @@
 package com.everhomes.sms;
 
+import com.everhomes.acl.AclProvider;
+import com.everhomes.acl.Privilege;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.sms.*;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.BufferedReader;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,6 +36,7 @@ public class SmsServiceImpl implements SmsService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SmsServiceImpl.class);
 
     private Map<String, SmsHandler> handlers = new HashMap<>();
+    private List<String> handlerNames = new ArrayList();
 
     @Autowired
     private SmsLogProvider smsLogProvider;
@@ -37,10 +46,14 @@ public class SmsServiceImpl implements SmsService {
 
     @Autowired
     private ConfigurationProvider configurationProvider;
+    
+    @Autowired
+    private AclProvider aclProvider;
 
     @Autowired
     public void setHandlers(Map<String, SmsHandler> prop) {
         prop.forEach((name, handler) -> handlers.put(name.toLowerCase(), handler));
+        prop.forEach((name, handler) -> handlerNames.add(name));
     }
 
     @Override
@@ -82,6 +95,12 @@ public class SmsServiceImpl implements SmsService {
 
     @Override
     public ListSmsLogsResponse listReportLogs(ListReportLogCommand cmd) {
+        if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
+                UserContext.current().getUser().getId(), Privilege.Write, null)) {
+            
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
+            }
+        
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
 
@@ -91,7 +110,15 @@ public class SmsServiceImpl implements SmsService {
 
         ListSmsLogsResponse response = new ListSmsLogsResponse();
         response.setLogs(smsLogs.stream().map(this::toSmsLogDTO).collect(Collectors.toList()));
+        response.setNextPageAnchor(locator.getAnchor());
         return response;
+    }
+    
+    @Override
+    public SmsHandlerResponse listSmsHandlers() {
+        SmsHandlerResponse resp = new SmsHandlerResponse();
+        resp.setHandlers(handlerNames);
+        return resp;
     }
 
     @Override
