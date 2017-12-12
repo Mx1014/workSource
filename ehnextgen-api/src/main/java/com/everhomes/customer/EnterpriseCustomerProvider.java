@@ -27,6 +27,18 @@ public interface EnterpriseCustomerProvider {
     Map<Long, Long> listEnterpriseCustomerSourceByCommunityId(Long communityId);
     Map<Long, Long> listEnterpriseCustomerIndustryByCommunityId(Long communityId);
 
+    void createCustomerAccount(CustomerAccount account);
+    void updateCustomerAccount(CustomerAccount account);
+    void deleteCustomerAccount(CustomerAccount account);
+    CustomerAccount findCustomerAccountById(Long id);
+    List<CustomerAccount> listCustomerAccountsByCustomerId(Long customerId);
+
+    void createCustomerTax(CustomerTax tax);
+    void updateCustomerTax(CustomerTax tax);
+    void deleteCustomerTax(CustomerTax tax);
+    CustomerTax findCustomerTaxById(Long id);
+    List<CustomerTax> listCustomerTaxesByCustomerId(Long customerId);
+
     void createCustomerTalent(CustomerTalent talent);
     void updateCustomerTalent(CustomerTalent talent);
     void deleteCustomerTalent(CustomerTalent talent);
@@ -73,6 +85,18 @@ public interface EnterpriseCustomerProvider {
     void deleteCustomerInvestment(CustomerInvestment investment);
     CustomerInvestment findCustomerInvestmentById(Long id);
     List<CustomerInvestment> listCustomerInvestmentsByCustomerId(Long customerId);
+
+    void createCustomerEntryInfo(CustomerEntryInfo entryInfo);
+    void updateCustomerEntryInfo(CustomerEntryInfo entryInfo);
+    void deleteCustomerEntryInfo(CustomerEntryInfo entryInfo);
+    CustomerEntryInfo findCustomerEntryInfoById(Long id);
+    List<CustomerEntryInfo> listCustomerEntryInfos(Long customerId);
+
+    void createCustomerDepartureInfo(CustomerDepartureInfo departureInfo);
+    void updateCustomerDepartureInfo(CustomerDepartureInfo departureInfo);
+    void deleteCustomerDepartureInfo(CustomerDepartureInfo departureInfo);
+    CustomerDepartureInfo findCustomerDepartureInfoById(Long id);
+    List<CustomerDepartureInfo> listCustomerDepartureInfos(Long customerId);
 
     void createCustomerEconomicIndicator(CustomerEconomicIndicator economicIndicator);
     void updateCustomerEconomicIndicator(CustomerEconomicIndicator economicIndicator);

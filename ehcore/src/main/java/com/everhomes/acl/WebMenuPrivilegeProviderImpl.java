@@ -287,6 +287,21 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 		return objs;
 	}
 
+	@Override
+	public List<WebMenu> listWebMenusByPath(String path, List<String> types) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWebMenus.class));
+
+		SelectQuery<EhWebMenusRecord> query = context.selectQuery(Tables.EH_WEB_MENUS);
+		query.addConditions(Tables.EH_WEB_MENUS.PATH.like(path+"%"));
+		if(types != null)
+			query.addConditions(Tables.EH_WEB_MENUS.TYPE.in(types));
+		query.addConditions(Tables.EH_WEB_MENUS.STATUS.eq(WebMenuStatus.ACTIVE.getCode()));
+		query.addOrderBy(Tables.EH_WEB_MENUS.SORT_NUM.asc());
+
+		List<WebMenu> objs = query.fetch().map((r) -> ConvertHelper.convert(r, WebMenu.class));
+
+		return objs;
+	}
 
 	@Override
 	public void deleteWebMenuScopes(List<Long> ids) {
@@ -309,4 +324,12 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 		dao.insert(scopes.toArray(new WebMenuScope[scopes.size()]));
 	}
 
+	@Override
+	public void deleteWebMenuScopesByMenuIdAndNamespace(List<Integer> socpeIds, Integer namespaceId) {
+		dbProvider.getDslContext(AccessSpec.readWrite()).delete(Tables.EH_WEB_MENU_SCOPES)
+			.where(Tables.EH_WEB_MENU_SCOPES.MENU_ID.in(socpeIds))
+			.and(Tables.EH_WEB_MENU_SCOPES.OWNER_ID.eq(Long.valueOf(namespaceId)))
+			.and(Tables.EH_WEB_MENU_SCOPES.OWNER_TYPE.eq("EhNamespaces"))
+			.execute();
+	}
 }

@@ -585,4 +585,6 @@ public interface OrganizationService {
 	List<Organization> listUserOrganizations(Integer namespaceId, Long userId, OrganizationGroupType groupType);
 	Byte setOrganizationDetailFlag(SetOrganizationDetailFlagCommand cmd);
 	Byte getOrganizationDetailFlag(GetOrganizationDetailFlagCommand cmd);
+
+	void checkOrganizationpPivilege(Long orgId, Long pivilegeId);
 }

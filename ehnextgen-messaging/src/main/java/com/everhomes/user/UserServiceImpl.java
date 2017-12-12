@@ -4877,6 +4877,9 @@ public class UserServiceImpl implements UserService {
 			listNearbyMixCommunitiesCommand.setPageAnchor(0L);
 
 			List<Community> communities = this.addressService.listMixCommunitiesByDistanceWithNamespaceId(listNearbyMixCommunitiesCommand, locator, pageSize);
+			//如果查询不出结果
+			if(communities == null)
+				return this.listTouristRelatedScenes();
 
 			List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
 
@@ -5395,7 +5398,12 @@ public class UserServiceImpl implements UserService {
         }
 
         Long l = configurationProvider.getLongValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.PAY_PLATFORM, 0l);
+
         resp.setPaymentPlatform(l);
+
+		Integer mypublishFlag = configurationProvider.getIntValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.MY_PUBLISH_FLAG, 1);
+
+		resp.setMyPublishFlag(mypublishFlag.byteValue());
         
         return resp;
     }

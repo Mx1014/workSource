@@ -30,8 +30,11 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.approval.*;
 import com.everhomes.rest.general_approval.GeneralApprovalRecordDTO;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.rest.techpark.punch.ApprovalStatus;
@@ -87,6 +90,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.EnterpriseContactProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.general_approval.GeneralApproval;
@@ -103,10 +107,13 @@ import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationMemberLog;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.blacklist.BlacklistErrorCode;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
+import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -173,6 +180,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.excel.RowResult;
@@ -299,6 +307,36 @@ public class PunchServiceImpl implements PunchService {
     private BusBridgeProvider busBridgeProvider;
 
 
+	@Autowired
+	private PortalService portalService;
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
+	@Override
+	public void checkAppPrivilege(Long orgId,Long checkOrgId, Long privilege){
+		if(checkBooleanAppPrivilege(orgId,checkOrgId,privilege)){
+			return;
+		}
+		LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
+				" privilege={},check org id = {}", UserContext.getCurrentNamespaceId(), "", orgId, EntityType.COMMUNITY.getCode(),
+				orgId, privilege,checkOrgId);
+		throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_FORBIDDEN_PERMISSIONS,
+			"Permission is prohibited");
+	} 
+	
+	private boolean checkBooleanAppPrivilege(Long orgId,Long checkOrgId, Long privilege){
+		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
+		cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		cmd.setModuleId(PunchConstants.PUNCH_MODULE_ID);
+		cmd.setActionType(ActionType.PUNCH.getCode());
+		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd ); 
+		if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+			if(userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
+					orgId, privilege, apps.getServiceModuleApps().get(0).getId(), checkOrgId, null)){
+				return true;
+			}
+		}
+		return false;
+	}
 	private void checkCompanyIdIsNull(Long companyId) {
 		if (null == companyId || companyId.equals(0L)) {
 			LOGGER.error("Invalid company Id parameter in the command");
@@ -3050,6 +3088,7 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue("应打卡天数");
 		row.createCell(++i).setCellValue("正常天数");
 		row.createCell(++i).setCellValue("异常天数");
+        row.createCell(++i).setCellValue("异常申请次数");
 		row.createCell(++i).setCellValue("缺勤小时数");
 		row.createCell(++i).setCellValue("迟到次数");
 		row.createCell(++i).setCellValue("早退次数");
@@ -3080,7 +3119,8 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue(statistic.getWorkDayCount());
 		row.createCell(++i).setCellValue(statistic.getWorkCount());
 		row.createCell(++i).setCellValue(statistic.getExceptionDayCount());
-		row.createCell(++i).setCellValue(statistic.getUnpunchCount());
+        row.createCell(++i).setCellValue(statistic.getExceptionRequestCount());
+        row.createCell(++i).setCellValue(statistic.getUnpunchCount());
 		row.createCell(++i).setCellValue(statistic.getBelateCount());
 		row.createCell(++i).setCellValue(statistic.getLeaveEarlyCount());
 		row.createCell(++i).setCellValue(statistic.getBlandleCount());
@@ -3107,7 +3147,7 @@ public class PunchServiceImpl implements PunchService {
 	public Workbook createPunchStatisticsBook(List<PunchCountDTO> results, ListPunchCountCommand cmd) {
 		if (null == results || results.size() == 0)
 			return null;
-		int columnNo = 10;
+		int columnNo = 11;
 
 		if (null != results && results.size() > 0) {
 			if (null != results.get(0).getExts()) {
@@ -4755,7 +4795,7 @@ public class PunchServiceImpl implements PunchService {
 		XSSFWorkbook wb = new XSSFWorkbook();
 		XSSFSheet sheet = wb.createSheet("punchDetails");
 
-		sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 8));
+		sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 10));
 		XSSFCellStyle style = wb.createCellStyle();
 		Font font = wb.createFont();
 		font.setFontHeightInPoints((short) 20);
@@ -4773,7 +4813,7 @@ public class PunchServiceImpl implements PunchService {
 		rowTitle.setRowStyle(titleStyle);
 		//副标题
 
-		sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 8));
+		sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 10));
 		XSSFCellStyle style1 = wb.createCellStyle();
 		Font font1 = wb.createFont();
 
@@ -4818,7 +4858,17 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue((dto.getLeaveTime()==null)?"":timeSF.get().format(convertTime(dto.getLeaveTime())));
 		row.createCell(++i).setCellValue(String.valueOf(dto.getPunchCount()));
 		row.createCell(++i).setCellValue(convertTimeLongToString(dto.getWorkTime()));
-		row.createCell(++i).setCellValue(dto.getStatuString());
+        if (null != dto.getApprovalRecords()) {
+            StringBuilder sb = new StringBuilder();
+            for (GeneralApprovalRecordDTO record : dto.getApprovalRecords()) {
+                sb.append(record.getApprovalNo());
+            }
+            row.createCell(++i).setCellValue(sb.toString());
+        }else {
+            row.createCell(++i).setCellValue("");
+        }
+        row.createCell(++i).setCellValue(dto.getStatuString());
+        row.createCell(++i).setCellValue(dto.getApprovalStatuString());
 
 	}
 
@@ -4833,7 +4883,9 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue("最晚打卡");
 		row.createCell(++i).setCellValue("打卡次数");
 		row.createCell(++i).setCellValue("工作时长");
-		row.createCell(++i).setCellValue("状态");
+        row.createCell(++i).setCellValue("审批单");
+        row.createCell(++i).setCellValue("状态");
+        row.createCell(++i).setCellValue("校正状态");
 	}
 	private Organization checkOrganization(Long orgId) {
 		Organization org = organizationProvider.findOrganizationById(orgId);
@@ -6731,8 +6783,9 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public void deletePunchGroup(DeleteCommonCommand cmd) {
 		this.dbProvider.execute((TransactionStatus status) -> {
-			 Organization organization = this.organizationProvider.findOrganizationById(cmd.getId());
-			 this.organizationProvider.deleteOrganization(organization);
+            Organization organization = this.organizationProvider.findOrganizationById(cmd.getId());
+            checkAppPrivilege(organization.getDirectlyEnterpriseId(),organization.getDirectlyEnterpriseId(),PrivilegeConstants.PUNCH_RULE_DELETE);
+            this.organizationProvider.deleteOrganization(organization);
 			 //  组织架构删除薪酬组人员关联及配置
 			 this.uniongroupService.deleteUniongroupConfigresByGroupId(cmd.getId(),cmd.getOwnerId());
 			 this.uniongroupService.deleteUniongroupMemberDetailByGroupId(cmd.getId(),cmd.getOwnerId());
@@ -6758,8 +6811,10 @@ public class PunchServiceImpl implements PunchService {
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                         ErrorCodes.ERROR_INVALID_PARAMETER,
                         "Invalid rule type parameter in the command");
+            Long originOwnerId = cmd.getOwnerId();
             cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
-			Integer currentVersion = getPunchGroupCurrentVersion(cmd.getOwnerId());
+            checkAppPrivilege(cmd.getOwnerId(),originOwnerId,PrivilegeConstants.PUNCH_RULE_CREATE);
+            Integer currentVersion = getPunchGroupCurrentVersion(cmd.getOwnerId());
 
 			Long t7 = System.currentTimeMillis();
 			//建立考勤组
@@ -7108,6 +7163,16 @@ public class PunchServiceImpl implements PunchService {
 		ListPunchGroupsResponse response = new ListPunchGroupsResponse();
 //<<<<<<< HEAD
 		Integer currentVersion = getPunchGroupCurrentVersion(cmd.getOwnerId());
+        Long creatorUid= null;
+        if (!checkBooleanAppPrivilege(cmd.getOwnerId(), cmd.getDeptId() == null ? cmd.getOwnerId() : cmd.getDeptId(), PrivilegeConstants.PUNCH_RULE_QUERY_ALL)) {
+            //没通过全部校验的就要进行creator校验
+            if ((!checkBooleanAppPrivilege(cmd.getOwnerId(), cmd.getDeptId() == null ? cmd.getOwnerId() : cmd.getDeptId(), PrivilegeConstants.PUNCH_RULE_QUERY_CREATOR))) {
+                creatorUid = UserContext.current().getUser().getId();
+            }else{
+                throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_FORBIDDEN_PERMISSIONS,
+                        "Permission is prohibited");
+            }
+        }
 //=======
 //        Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
 //        Integer allOrganizationInteger = organizationProvider.countOrganizationMemberDetailsByOrgId(org.getNamespaceId(), cmd.getOwnerId());
@@ -7150,7 +7215,7 @@ public class PunchServiceImpl implements PunchService {
 		}
 
 		List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.PUNCHGROUP.getCode(), cmd.getOwnerId(),
-				orgIds, cmd.getGroupName(), locator, pageSize + 1);
+				orgIds, cmd.getGroupName(),creatorUid, locator, pageSize + 1);
 
         if (null == organizations)
 			return response;
@@ -7424,7 +7489,9 @@ public class PunchServiceImpl implements PunchService {
 //			Long t0 = System.currentTimeMillis();
 //			LOGGER.debug("saveUnion Time t0 "+  System.currentTimeMillis());
 			Organization punchOrg = this.organizationProvider.findOrganizationById(cmd.getId());
-			punchOrg.setName(cmd.getGroupName());
+        checkAppPrivilege(punchOrg.getDirectlyEnterpriseId(),punchOrg.getDirectlyEnterpriseId(),PrivilegeConstants.PUNCH_RULE_UPDATE);
+
+        punchOrg.setName(cmd.getGroupName());
 			organizationProvider.updateOrganization(punchOrg);
 //			Long t1 = System.currentTimeMillis();
 //			LOGGER.debug("saveUnion Time1 "+  t1 + "cost: "+ (t1-t0));
@@ -8698,7 +8765,7 @@ public class PunchServiceImpl implements PunchService {
 
     @Override
     public ListPunchLogsResponse listPunchLogs(ListPunchLogsCommand cmd) {
-        List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(cmd.getUserId(),cmd.getEnterpriseId(),
+        List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(cmd.getUserId(), cmd.getEnterpriseId(),
                 dateSF.get().format(new Date(cmd.getQueryTime())), ClockCode.SUCESS.getCode());
         if (null == punchLogs) {
             return null;

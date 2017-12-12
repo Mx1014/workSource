@@ -1134,7 +1134,8 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/deleteOrganizationJobPosition</b>
+     * <b>URL:
+     * /org/deleteOrganizationJobPosition</b>
      * <p>删除通用岗位</p>
      */
     @RequestMapping("deleteOrganizationJobPosition")

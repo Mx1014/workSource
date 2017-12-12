@@ -874,8 +874,15 @@ public class ForumServiceImpl implements ForumService {
                     this.forumProvider.updatePost(post);
                  // 删除评论时帖子的child count减1 mod by xiongying 20160428
                     if(parentPost != null) {
-                        parentPost.setChildCount(parentPost.getChildCount() - 1);
-                        this.forumProvider.updatePost(parentPost);
+//                        parentPost.setChildCount(parentPost.getChildCount() - 1);
+//                        this.forumProvider.updatePost(parentPost);
+
+                        //更新前需要在锁内部重新查询，因为当前的parentPost可能已经是过期的数据了   edit by yanjun 20171207
+                        Post updateParentPost = forumProvider.findPostById(parentPost.getId());
+                        if(updateParentPost != null){
+                            updateParentPost.setChildCount(updateParentPost.getChildCount() - 1);
+                            forumProvider.updatePost(updateParentPost);
+                        }
                     }
                     if(deleteUserPost) {
                         if(userId.equals(post.getCreatorUid())){
@@ -3328,6 +3335,9 @@ public class ForumServiceImpl implements ForumService {
         post.setInteractFlag(InteractFlag.SUPPORT.getCode());
         post.setStickFlag(StickFlag.DEFAULT.getCode());
 
+        post.setModuleType(cmd.getModuleType());
+        post.setModuleCategoryId(cmd.getModuleCategoryId());
+
         return post;
     }
     
@@ -4088,7 +4098,7 @@ public class ForumServiceImpl implements ForumService {
                 populateOwnerToken(post);
 
                 //添加是否支持评论字段 add by yanjun 20171025
-                Byte flag = getInteractFlag(post);
+                Byte flag = getInteractFlagByPost(post);
                 post.setInteractFlag(flag);
                 
                 String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
@@ -4135,7 +4145,7 @@ public class ForumServiceImpl implements ForumService {
      * @param post
      */
     @Override
-    public Byte getInteractFlag(Post post){
+    public Byte getInteractFlagByPost(Post post){
         //如果帖子时关闭评论的，直接是关闭
         if(post.getInteractFlag() != null && InteractFlag.fromCode(post.getInteractFlag()) == InteractFlag.UNSUPPORT){
             return InteractFlag.UNSUPPORT.getCode();
@@ -4153,24 +4163,32 @@ public class ForumServiceImpl implements ForumService {
 
     @Override
     public InteractSetting findInteractSettingByPost(Post post){
-        InteractSetting setting = null;
+//        InteractSetting setting = null;
+
+        if(post.getModuleType() == null){
+            return null;
+        }
 
         Integer namespaceId = post.getNamespaceId();
         if(namespaceId == null){
             namespaceId = UserContext.getCurrentNamespaceId();
         }
 
-        //非常不靠谱的判断，可是真的没有其他办法，急需在创建帖子的时候从来源处传来是哪个应用的  add by yanjun 20171109
-        if(post.getActivityCategoryId() != null && post.getActivityCategoryId().longValue() != 0){
-            //活动应用的帖子
-            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.ACTIVITY.getCode(), post.getActivityCategoryId());
-        }else if(post.getForumEntryId() != null && (post.getCategoryId() == null || post.getCategoryId() != 1003)){
-            //论坛应用的帖子
-            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.FORUM.getCode(), post.getForumEntryId());
-        }else if(post.getCategoryId() != null && post.getCategoryId() == 1003){
-            //公告应用的帖子
-            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.ANNOUNCEMENT.getCode(), null);
-        }
+
+        InteractSetting setting = forumProvider.findInteractSetting(namespaceId, post.getModuleType(), post.getModuleCategoryId());
+
+
+//        //非常不靠谱的判断，可是真的没有其他办法，急需在创建帖子的时候从来源处传来是哪个应用的  add by yanjun 20171109
+//        if(post.getActivityCategoryId() != null && post.getActivityCategoryId().longValue() != 0){
+//            //活动应用的帖子
+//            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.ACTIVITY.getCode(), post.getActivityCategoryId());
+//        }else if(post.getForumEntryId() != null && (post.getCategoryId() == null || post.getCategoryId() != 1003)){
+//            //论坛应用的帖子
+//            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.FORUM.getCode(), post.getForumEntryId());
+//        }else if(post.getCategoryId() != null && post.getCategoryId() == 1003){
+//            //公告应用的帖子
+//            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.ANNOUNCEMENT.getCode(), null);
+//        }
 
         return setting;
     }
@@ -4689,6 +4707,7 @@ public class ForumServiceImpl implements ForumService {
 //        if(null == EntityType.fromCode(ownerType) && null == ownerId && null == currentOrgId){
 //            return;
 //        }
+        // 对接权限，先去掉权限校验 -- by yanjun
         if(categoryId != null && CategoryConstants.CATEGORY_ID_NOTICE == categoryId){
             resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.PUBLISH_NOTICE_TOPIC);
         }
@@ -4795,7 +4814,11 @@ public class ForumServiceImpl implements ForumService {
                 visibleRegionType = VisibleRegionType.fromCode(cmd.getVisibleRegionType());
                 visibleRegionType = (visibleRegionType == null) ? VisibleRegionType.REGION : visibleRegionType;
                 visibleRegionId = cmd.getVisibleRegionId();
-                visibleRegionId = (visibleRegionId == null) ? org.getId() : visibleRegionId;
+
+                if(cmd.getVisibleRegionIds() == null || cmd.getVisibleRegionIds().size() == 0){
+                    visibleRegionId = (visibleRegionId == null) ? org.getId() : visibleRegionId;
+                }
+
                 if(OrganizationType.isGovAgencyOrganization(orgType)) {
 //                    if(VisibleRegionType.fromCode(cmd.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
 //                    	creatorTag = PostEntityTag.fromCode(orgType);
@@ -6385,8 +6408,14 @@ public class ForumServiceImpl implements ForumService {
         tagDTOS = hotTagService.listHotTag(tagCommand);
         response.setPollTags(tagDTOS);
 
-        //暂时不对评论做处理。
-        response.setInteractFlag(InteractFlag.SUPPORT.getCode());
+        //评论配置
+        InteractSetting interactSetting = forumProvider.findInteractSetting(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId());
+        if(interactSetting == null){
+            response.setInteractFlag(InteractFlag.SUPPORT.getCode());
+        }else {
+            response.setInteractFlag(interactSetting.getInteractFlag());
+        }
+
 
         return response;
     }
@@ -6449,7 +6478,8 @@ public class ForumServiceImpl implements ForumService {
                 resetHotTagCommand.setNames(cmd.getPollTags().stream().map(r -> r.getName()).collect(Collectors.toList()));
                 hotTagService.resetHotTag(resetHotTagCommand);
 
-                //暂时不对评论做处理。
+                //更新评论开关
+                saveInteractSetting(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId(), cmd.getInteractFlag());
 
                 return null;
 
@@ -6457,6 +6487,44 @@ public class ForumServiceImpl implements ForumService {
             return null;
         });
 
+    }
+
+    @Override
+    public InteractSettingDTO getInteractSetting(GetInteractSettingCommand cmd) {
+        InteractSetting interactSetting = forumProvider.findInteractSetting(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId());
+        InteractSettingDTO dto = null;
+        if(interactSetting != null){
+            dto =  ConvertHelper.convert(interactSetting, InteractSettingDTO.class);
+        }else {
+            dto = ConvertHelper.convert(cmd, InteractSettingDTO.class);
+            dto.setInteractFlag(InteractFlag.SUPPORT.getCode());
+        }
+        return dto;
+    }
+
+    @Override
+    public void updateInteractSetting(UpdateInteractSettingCommand cmd) {
+        saveInteractSetting(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId(), cmd.getInteractFlag());
+    }
+
+    @Override
+    public void saveInteractSetting(Integer namespaceId, Byte moduleType, Long categoryId, Byte interactFlag){
+
+        //更新评论开关
+        InteractSetting interactSetting = forumProvider.findInteractSetting(namespaceId, moduleType, categoryId);
+        if(interactSetting != null){
+            interactSetting.setInteractFlag(interactFlag);
+            interactSetting.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            forumProvider.updateInteractSetting(interactSetting);
+        }else {
+            interactSetting = new InteractSetting();
+            interactSetting.setNamespaceId(namespaceId);
+            interactSetting.setModuleType(moduleType);
+            interactSetting.setCategoryId(categoryId);
+            interactSetting.setInteractFlag(interactFlag);
+            interactSetting.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            forumProvider.createInteractSetting(interactSetting);
+        }
     }
 
     @Override

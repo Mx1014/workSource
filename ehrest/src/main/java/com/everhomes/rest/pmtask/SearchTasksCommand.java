@@ -35,6 +35,8 @@ public class SearchTasksCommand {
 
 	private  Long currentOrgId;
 
+	private Long currentCommunityId;
+
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
@@ -121,5 +123,13 @@ public class SearchTasksCommand {
 
 	public void setCurrentOrgId(Long currentOrgId) {
 		this.currentOrgId = currentOrgId;
+	}
+
+	public Long getCurrentCommunityId() {
+		return currentCommunityId;
+	}
+
+	public void setCurrentCommunityId(Long currentCommunityId) {
+		this.currentCommunityId = currentCommunityId;
 	}
 }

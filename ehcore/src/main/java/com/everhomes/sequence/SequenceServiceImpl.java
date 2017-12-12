@@ -3,6 +3,8 @@ package com.everhomes.sequence;
 
 import java.util.List;
 
+import com.everhomes.acl.AuthorizationProvider;
+import com.everhomes.module.ServiceModuleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +46,12 @@ public class SequenceServiceImpl implements SequenceService {
 
     @Autowired
     private UserProvider userProvider;
+
+    @Autowired
+    private AuthorizationProvider authorizationProvider;
+
+    @Autowired
+    private ServiceModuleProvider serviceModuleProvider;
 
     @Override
     public void syncSequence() {
@@ -88,6 +96,8 @@ public class SequenceServiceImpl implements SequenceService {
 
         // user account is a special field, it default to be number stype, but it can be changed to any character only if they are unique in db
         syncUserAccountName();
+
+        syncAuthorizationControlId();
 
         syncTableSequence(EhUniongroupConfigures.class, EhUniongroupConfigures.class, Tables.EH_UNIONGROUP_CONFIGURES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_UNIONGROUP_CONFIGURES.ID.max()).from(Tables.EH_UNIONGROUP_CONFIGURES).fetchOne().value1();
@@ -336,6 +346,9 @@ public class SequenceServiceImpl implements SequenceService {
 
         syncTableSequence(null, EhPunchSchedulings.class, Tables.EH_PUNCH_SCHEDULINGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PUNCH_SCHEDULINGS.ID.max()).from(Tables.EH_PUNCH_SCHEDULINGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhUniongroupVersion.class, Tables.EH_UNIONGROUP_VERSION.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_UNIONGROUP_VERSION.ID.max()).from(Tables.EH_UNIONGROUP_VERSION).fetchOne().value1();
         });
 
         syncTableSequence(null, EhRentalBillAttachments.class, Tables.EH_RENTAL_BILL_ATTACHMENTS.getName(), (dbContext) -> {
@@ -2101,6 +2114,38 @@ public class SequenceServiceImpl implements SequenceService {
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Sync user account name sequence, key=" + key + ", newSequence=" + (maxAccountSequence + 1)
                     + ", nextSequenceBeforeReset=" + nextSequenceBeforeReset + ", nextSequenceAfterReset=" + nextSequenceAfterReset);
+            }
+        }
+    }
+
+    private void syncAuthorizationControlId() {
+        long maxAuthorizationControlId = 0;
+        maxAuthorizationControlId = this.authorizationProvider.getMaxControlIdInAuthorizations();
+
+        if (maxAuthorizationControlId > 0) {
+            String key = "authControlId";
+            long nextSequenceBeforeReset = sequenceProvider.getNextSequence(key);
+            sequenceProvider.resetSequence(key, maxAuthorizationControlId + 1);
+            long nextSequenceAfterReset = sequenceProvider.getNextSequence(key);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("maxAuthorizationControlId sequence, key=" + key + ", newSequence=" + (maxAuthorizationControlId + 1)
+                        + ", nextSequenceBeforeReset=" + nextSequenceBeforeReset + ", nextSequenceAfterReset=" + nextSequenceAfterReset);
+            }
+        }
+    }
+
+    private void syncActiveAppId() {
+        long maxSyncActiveAppId = 0;
+        maxSyncActiveAppId = this.serviceModuleProvider.getMaxActiveAppId();
+
+        if (maxSyncActiveAppId > 0) {
+            String key = "activeAppId";
+            long nextSequenceBeforeReset = sequenceProvider.getNextSequence(key);
+            sequenceProvider.resetSequence(key, maxSyncActiveAppId + 1);
+            long nextSequenceAfterReset = sequenceProvider.getNextSequence(key);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("maxSyncActiveAppId sequence, key=" + key + ", newSequence=" + (maxSyncActiveAppId + 1)
+                        + ", nextSequenceBeforeReset=" + nextSequenceBeforeReset + ", nextSequenceAfterReset=" + nextSequenceAfterReset);
             }
         }
     }

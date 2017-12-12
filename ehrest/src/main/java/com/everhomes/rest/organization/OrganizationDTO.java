@@ -45,6 +45,7 @@ import java.util.List;
  * <li>emailDomain: 邮箱域名 </li>
  * <li>order:排序</li>
  * <li>errorCode:错误码</li>
+ * <li>managerFlag: 地址列表需要的默认是否是这个公司的管理员字段</li>
  * </ul>
  */
 public class OrganizationDTO {
@@ -111,6 +112,10 @@ public class OrganizationDTO {
     private Integer order;
 
     private Integer errorCode;
+
+
+    //地址列表需要的默认是否是这个公司的管理员字段
+	private Byte managerFlag;
 
 	public Long getAreaId() {
 		return areaId;
@@ -462,5 +467,13 @@ public class OrganizationDTO {
 
 	public void setErrorCode(Integer errorCode) {
 		this.errorCode = errorCode;
+	}
+
+	public Byte getManagerFlag() {
+		return managerFlag;
+	}
+
+	public void setManagerFlag(Byte managerFlag) {
+		this.managerFlag = managerFlag;
 	}
 }

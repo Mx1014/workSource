@@ -487,5 +487,33 @@ public class ForumController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    /**
+     * <b>URL: /forum/updateInteractSetting</b>
+     * <p>更新评论配置，此为评论配置的通用接口，不要在里面加具体应用的数据。如果页面要扩展参考updateForumSetting新建自己的接口</p>
+     * @return
+     */
+    @RequestMapping("updateInteractSetting")
+    @RestReturn(value=String.class)
+    public RestResponse updateInteractSetting(UpdateInteractSettingCommand cmd) {
+        forumService.updateInteractSetting(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
+    /**
+     * <b>URL: /forum/getInteractSetting</b>
+     * <p>查询评论配置，此为评论配置的通用接口，不要在里面加具体应用的数据。如果页面要扩展参考getForumSetting新建自己的接口</p>
+     * @return
+     */
+    @RequestMapping("getInteractSetting")
+    @RestReturn(value=InteractSettingDTO.class)
+    public RestResponse getInteractSetting(GetInteractSettingCommand cmd) {
+        InteractSettingDTO interactSetting = forumService.getInteractSetting(cmd);
+        RestResponse response = new RestResponse(interactSetting);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

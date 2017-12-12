@@ -86,7 +86,7 @@ public interface ForumService {
      */
     SearchTopicAdminCommandResponse searchTopic(SearchTopicAdminCommand cmd);
 
-    Byte getInteractFlag(Post post);
+    Byte getInteractFlagByPost(Post post);
 
     InteractSetting findInteractSettingByPost(Post post);
 
@@ -127,6 +127,12 @@ public interface ForumService {
     GetForumSettingResponse getForumSetting(GetForumSettingCommand cmd);
 
     void updateForumSetting(UpdateForumSettingCommand cmd);
+
+    InteractSettingDTO getInteractSetting(GetInteractSettingCommand cmd);
+
+    void updateInteractSetting(UpdateInteractSettingCommand cmd);
+
+    void saveInteractSetting(Integer namespaceId, Byte moduleType, Long categoryId, Byte interactFlag);
 
     ListForumServiceTypesResponse listForumServiceTypes(ListForumServiceTypesCommand cmd);
 }

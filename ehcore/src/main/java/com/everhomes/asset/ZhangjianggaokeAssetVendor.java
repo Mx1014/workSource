@@ -774,6 +774,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         //组装command ， 请求支付模块的下预付单
         PreOrderCommand cmd2pay = new PreOrderCommand();
 //        cmd2pay.setAmount(amountsInCents);
+        cmd2pay.setCommunityId(cmd.getCommunityId());
         cmd2pay.setAmount(1l);
         cmd2pay.setClientAppName(cmd.getClientAppName());
         cmd2pay.setExpiration(ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);
@@ -1108,6 +1109,15 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     List<com.everhomes.asset.zjgkVOs.BillDetailDTO> dtos = response.getResponse();
                     BigDecimal amountReceivable = new BigDecimal("0");
                     BigDecimal amountOwed = new BigDecimal("0");
+                    //过滤正在审核中的客户
+                    for(int k = 0; k < dtos.size(); k++){
+                        com.everhomes.asset.zjgkVOs.BillDetailDTO dto = dtos.get(k);
+                        if(dto.getStatus().equals(PaymentStatus.SUSPEND.getCode())){
+                            dtos.remove(k);
+                            k--;
+                        }
+                    }
+                    //过滤后的账单才是欠费的账单
                     if(dtos!=null&& dtos.size()>0){
                         for(int j = 0; j < dtos.size() ; j ++){
                             com.everhomes.asset.zjgkVOs.BillDetailDTO dto = dtos.get(j);
