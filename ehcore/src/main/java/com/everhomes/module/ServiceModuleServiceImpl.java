@@ -1022,7 +1022,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         }
     }
 
-    private List<ServiceModuleDTO> processServiceModuleDtoTreeToAppTree(List<ServiceModuleDTO> dtos){
+    private List<ServiceModuleDTO> processServiceModuleDtoTreeToAppTree(List<ServiceModuleDTO> dtos) {
         List dtos_ = dtos.stream().filter(r -> (r.getServiceModules() != null && r.getServiceModules().size() != 0)).map(r -> {
             List<ServiceModuleAppDTO> apps = new ArrayList<>();
             for (ServiceModuleDTO dto : r.getServiceModules()) {
@@ -1034,5 +1034,26 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             return r;
         }).collect(Collectors.toList());
         return dtos_;
+    }
+
+    @Override
+    public List<Long> listServiceModulefunctions(ListServiceModulefunctionsCommand cmd) {
+        List<Long> functionIds = new ArrayList<>();
+        List<Long> privilegeIds = rolePrivilegeService.listUserPrivilegeByModuleId(cmd.getNamespaceId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), UserContext.currentUserId(), cmd.getModuleId());
+        privilegeIds.add(0L);
+        List<ServiceModuleFunction> moduleFunctions = serviceModuleProvider.listFunctions(cmd.getModuleId(), privilegeIds);
+        if(moduleFunctions != null && moduleFunctions.size() > 0) {
+            moduleFunctions.forEach(moduleFunction -> {
+                functionIds.add(moduleFunction.getId());
+            });
+        }
+        List<ServiceModuleExcludeFunction> excludeFunctions = serviceModuleProvider.listExcludeFunctions(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleId());
+        if (excludeFunctions != null && excludeFunctions.size() > 0) {
+            excludeFunctions.forEach(excludeFunction -> {
+                functionIds.remove(excludeFunction.getFunctionId());
+            });
+        }
+
+        return functionIds;
     }
 }
