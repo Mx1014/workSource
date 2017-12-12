@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>timeRangeList: 请假时间列表</li>
  * <li>timeTotal: 时间总计</li>
  * <li>punchDate: 打卡日期</li>
- * <li>exceptionRequestType: 异常申请类型，参考{@link com.everhomes.rest.approval.ExceptionRequestType}</li> 
+ * <li>punchIntervalNo: 第几次班</li>
  * <li>punchStatusName: 打卡状态</li>
  * <li>requestInfo: 申请信息(对于加班是"加班日期和时长")</li>
  * <li>punchDetail: 打卡详情</li>
@@ -30,7 +30,7 @@ public class RequestDTO {
 	private List<TimeRange> timeRangeList;
 	private String timeTotal; 
 	private Timestamp punchDate;
-	private Byte exceptionRequestType; 
+	private Integer punchIntervalNo;
 	private String punchStatusName;
 	private String requestInfo;
 	private String punchDetail;
@@ -96,14 +96,6 @@ public class RequestDTO {
 		this.punchDate = punchDate;
 	}
 
-	public Byte getExceptionRequestType() {
-		return exceptionRequestType;
-	}
-
-	public void setExceptionRequestType(Byte exceptionRequestType) {
-		this.exceptionRequestType = exceptionRequestType;
-	}
-
 	public String getPunchStatusName() {
 		return punchStatusName;
 	}
@@ -127,5 +119,13 @@ public class RequestDTO {
 	public void setPunchDetail(String punchDetail) {
 		this.punchDetail = punchDetail;
 	}
-	
+ 
+
+	public Integer getPunchIntervalNo() {
+		return punchIntervalNo;
+	}
+
+	public void setPunchIntervalNo(Integer punchIntervalNo) {
+		this.punchIntervalNo = punchIntervalNo;
+	}
 }

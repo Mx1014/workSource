@@ -33,11 +33,11 @@ public class FlowEventLog extends EhFlowEventLogs {
 	}
 
 	public Long getTrackerApplier() {
-		return FlowEventCustomField.TRACKER_APLIER.getIntegralValue(this);
+		return FlowEventCustomField.TRACKER_APPLIER.getIntegralValue(this);
 	}
 
 	public void setTrackerApplier(Long trackerApplier) {
-		FlowEventCustomField.TRACKER_APLIER.setIntegralValue(this, trackerApplier);
+		FlowEventCustomField.TRACKER_APPLIER.setIntegralValue(this, trackerApplier);
 	}
 
 	public Long getButtonFiredCount() {
@@ -46,6 +46,14 @@ public class FlowEventLog extends EhFlowEventLogs {
 
 	public void setButtonFiredCount(Long buttonFiredCount) {
 		FlowEventCustomField.BUTTON_FIRED_COUNT.setIntegralValue(this, buttonFiredCount);
+	}
+
+	public Long getCrossLaneRejectFlag() {
+		return FlowEventCustomField.CROSS_LANE_REJECT_FLAG.getIntegralValue(this);
+	}
+
+	public void setCrossLaneRejectFlag(Long flag) {
+		FlowEventCustomField.CROSS_LANE_REJECT_FLAG.setIntegralValue(this, flag);
 	}
 
 	@Override

@@ -1,6 +1,9 @@
 package com.everhomes.rest.ui.user;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  *<ul>
@@ -12,7 +15,9 @@ import com.everhomes.util.StringHelper;
  *</ul>
  */
 public class SearchContentsBySceneCommand {
-	
+
+	private Long buildingId;
+
 	private String sceneToken;
 	
 	private String keyword;
@@ -22,6 +27,14 @@ public class SearchContentsBySceneCommand {
 	private Long pageAnchor;
     
     private Integer pageSize;
+
+	public Long getBuildingId() {
+		return buildingId;
+	}
+
+	public void setBuildingId(Long buildingId) {
+		this.buildingId = buildingId;
+	}
 
 	public String getSceneToken() {
 		return sceneToken;

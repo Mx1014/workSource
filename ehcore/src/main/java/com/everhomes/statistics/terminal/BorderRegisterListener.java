@@ -17,6 +17,9 @@ public class BorderRegisterListener implements ApplicationListener<BorderRegiste
     @Autowired
     private UserActivityProvider userActivityProvider;
 
+    @Autowired
+    private StatTerminalProvider statTerminalProvider;
+
     @Async
     @Override
     public void onApplicationEvent(BorderRegisterEvent event) {
@@ -34,6 +37,16 @@ public class BorderRegisterListener implements ApplicationListener<BorderRegiste
                 appVersion = lastUserActivity.getAppVersionName();
             }
         }
+        if (appVersion == null) {
+            AppVersion version = statTerminalProvider.findLastAppVersion(login.getNamespaceId());
+            if (version != null) {
+                appVersion = version.getName();
+            } else {
+                appVersion = "1.0.0";
+            }
+        }
+        // end
+
         activity.setAppVersionName(appVersion);
         activity.setCreateTime(DateUtils.currentTimestamp());
         activity.setActivityType(ActivityType.BORDER_REGISTER.getCode());

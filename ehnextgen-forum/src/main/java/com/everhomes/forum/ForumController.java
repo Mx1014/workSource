@@ -3,6 +3,9 @@ package com.everhomes.forum;
 
 import javax.validation.Valid;
 
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.rest.forum.*;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,29 +17,6 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.forum.CancelLikeTopicCommand;
-import com.everhomes.rest.forum.CheckUserPostCommand;
-import com.everhomes.rest.forum.CheckUserPostDTO;
-import com.everhomes.rest.forum.DeleteCommentCommand;
-import com.everhomes.rest.forum.DeleteTopicCommand;
-import com.everhomes.rest.forum.FreeStuffCommand;
-import com.everhomes.rest.forum.GetTopicCommand;
-import com.everhomes.rest.forum.IncreasePostViewCountCommand;
-import com.everhomes.rest.forum.LikeTopicCommand;
-import com.everhomes.rest.forum.ListPostCommandResponse;
-import com.everhomes.rest.forum.ListTopicCommand;
-import com.everhomes.rest.forum.ListTopicCommentCommand;
-import com.everhomes.rest.forum.ListUserRelatedTopicCommand;
-import com.everhomes.rest.forum.LostAndFoundCommand;
-import com.everhomes.rest.forum.MakeTopCommand;
-import com.everhomes.rest.forum.NewCommentCommand;
-import com.everhomes.rest.forum.NewTopicCommand;
-import com.everhomes.rest.forum.PostDTO;
-import com.everhomes.rest.forum.PublishTopicCommand;
-import com.everhomes.rest.forum.QueryTopicByCategoryCommand;
-import com.everhomes.rest.forum.QueryTopicByEntityAndCategoryCommand;
-import com.everhomes.rest.forum.SearchTopicCommand;
-import com.everhomes.rest.forum.UsedAndRentalCommand;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.search.SearchSyncManager;
 import com.everhomes.search.SearchSyncType;
@@ -44,6 +24,8 @@ import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
+
+import java.util.List;
 
 @RestDoc(value="Forum controller", site="forum")
 @RestController
@@ -407,4 +389,103 @@ public class ForumController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /forum/stickPost</b>
+     * <p>管理员置顶帖子</p>
+     * @param cmd 参数命令
+     * @return
+     */
+    @RequestMapping("stickPost")
+    @RestReturn(value=String.class)
+    public RestResponse stickPost(StickPostCommand cmd) {
+        forumService.stickPost(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+
+    /**
+     * <b>URL: /forum/findForumCategory</b>
+     * <p>获取论坛入口</p>
+     * @return ForumCategoryDTO
+     */
+    @RequestMapping("findForumCategory")
+    @RestReturn(value=ForumCategoryDTO.class)
+    public RestResponse findForumCategory(FindForumCategoryCommand cmd) {
+        ForumCategoryDTO dto = this.forumService.findForumCategory(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+	
+	
+    /**
+     * <b>URL: /forum/listForumCategory</b>
+     * <p>获取论坛入口</p>
+     * @return
+     */
+    @RequestMapping("listForumCategory")
+    @RestReturn(value=ListForumCategoryResponse.class)
+    public RestResponse listForumCategory(ListForumCategoryCommand cmd) {
+        ListForumCategoryResponse  res  = this.forumService.listForumCategory(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /forum/getForumSetting</b>
+     * <p>获取论坛基本配置</p>
+     * @return
+     */
+    @RequestMapping("getForumSetting")
+    @RestReturn(value=GetForumSettingResponse.class)
+    public RestResponse getForumSetting(GetForumSettingCommand cmd) {
+
+        GetForumSettingResponse res = forumService.getForumSetting(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /forum/updateForumSetting</b>
+     * <p>更新论坛基本配置</p>
+     * @return
+     */
+    @RequestMapping("updateForumSetting")
+    @RestReturn(value=String.class)
+    public RestResponse updateForumSetting(UpdateForumSettingCommand cmd) {
+        forumService.updateForumSetting(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /forum/listForumServiceTypes</b>
+     * <p>获取论坛服务类型</p></p>
+     * @return
+     */
+    @RequestMapping("listForumServiceTypes")
+    @RestReturn(value=ListForumServiceTypesResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse listForumServiceTypes(ListForumServiceTypesCommand cmd) {
+
+        ListForumServiceTypesResponse res = forumService.listForumServiceTypes(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

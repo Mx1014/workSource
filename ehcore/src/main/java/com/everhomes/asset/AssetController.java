@@ -1,28 +1,34 @@
 package com.everhomes.asset;
 
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.pmkexing.PmKeXingBillService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.contract.FindContractCommand;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestDoc(value = "Asset Controller", site = "core")
@@ -33,6 +39,10 @@ public class AssetController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(AssetController.class);
     @Autowired
     private AssetService assetService;
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+    @Autowired
+    private PaymentService paymentService;
 
 //    根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
     /**
@@ -117,20 +127,20 @@ public class AssetController extends ControllerBase {
 
 //    新增账单
     /**
-	 * <b>URL: /asset/creatAssetBill</b>
-	 * <p>新增账单</p>
-	 */
-	@RequestMapping("creatAssetBill")
-	@RestReturn(value = AssetBillTemplateValueDTO.class)
-	public RestResponse creatAssetBill(@Valid CreatAssetBillCommand cmd) {
+     * <b>URL: /asset/creatAssetBill</b>
+     * <p>新增账单</p>
+     */
+    @RequestMapping("creatAssetBill")
+    @RestReturn(value = AssetBillTemplateValueDTO.class)
+    public RestResponse creatAssetBill(@Valid CreatAssetBillCommand cmd) {
 
         AssetBillTemplateValueDTO bill = assetService.creatAssetBill(cmd);
 
-		RestResponse response = new RestResponse(bill);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+        RestResponse response = new RestResponse(bill);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 //            查看账单
     /**
      * <b>URL: /asset/findAssetBill</b>
@@ -291,4 +301,875 @@ public class AssetController extends ControllerBase {
         return response;
     }
 //    脚本配置设置用户模板
+
+    // wentian's controlls for payment module
+
+    // this is for 展示所有收费项目   4
+    /**
+     * <p>获取园区启用的收费项目列表</p>
+     * <b>URL: /asset/listAllChargingItems</b>
+     */
+    @RequestMapping("listAllChargingItems")
+    @RestReturn(value = ListChargingItemsDTO.class, collection = true)
+    public RestResponse listAllChargingItems(OwnerIdentityCommand cmd) {
+        List<ListChargingItemsDTO> list = assetService.listChargingItems(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 展示所有收费项目   4
+    /**
+     * <p>获取账单组启用的收费项目列表</p>
+     * <b>URL: /asset/listChargingItems</b>
+     */
+    @RequestMapping("listChargingItems")
+    @RestReturn(value = ListChargingItemsDTO.class, collection = true)
+    public RestResponse listChargingItems(OwnerIdentityCommand cmd) {
+        List<ListChargingItemsDTO> list = assetService.listAvailableChargingItems(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    //左邻管理员可以进入，点击收费项目，传递所在园区，点击保存，其园区可以看到此收费项目          ---   4
+    // 查看时，全部情况是查看域空间为namespaceid的，(接口为listAllChargingItems
+    // )
+    // 修改时(此修改支持删除,增加)，只使用此接口，全部：储存到namespaceid，同步到下面的communityid； 单个：修改单个的并且修改decoupleFlag
+    //
+    /**
+     * <p>园区收费项权限配置</p>
+     * <b>URL: /asset/configChargingItems</b>
+     */
+    @RequestMapping("configChargingItems")
+    @RestReturn(value = String.class)
+    public RestResponse configChargingItems(ConfigChargingItemsCommand cmd) {
+        assetService.configChargingItems(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 展示一个收费项目的客户可见的所有标准列表         4
+    /**
+     * <p>展示一* <b>URL: /asset/listChargingStandards</b>
+     * <p>个收费项目的园区下的所有标准列表</p>
+     *
+     * */
+
+    @RequestMapping("listChargingStandards")
+    @RestReturn(value = ListChargingStandardsDTO.class, collection = true)
+    public RestResponse listChargingStandards(ListChargingStandardsCommand cmd) {
+        List<ListChargingStandardsDTO> list = assetService.listChargingStandards(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 展示一个收费项目的客户可见的所有标准列表         1
+    /**
+     * <p>展示一个收费项目的园区下的的所有标准列表</p>
+     * <b>URL: /asset/listOnlyChargingStandards</b>
+     */
+    @RequestMapping("listOnlyChargingStandards")
+    @RestReturn(value = ListChargingStandardsResponse.class, collection = true)
+    public RestResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd) {
+        ListChargingStandardsResponse resp = assetService.listOnlyChargingStandards(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 增加一个收费标准         4
+    /**
+     * <p>增加一个收费标准</p>
+     * <b>URL: /asset/createChargingStandard</b>
+     */
+    @RequestMapping("createChargingStandard")
+    @RestReturn(value = String.class)
+    public RestResponse createChargingStandard(CreateChargingStandardCommand cmd) {
+        assetService.createChargingStandard(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+
+    // this is for 修改一个收费标准         4
+    /**
+     * <p>修改一个收费标准</p>
+     * <b>URL: /asset/modifyChargingStandard</b>
+     */
+    @RequestMapping("modifyChargingStandard")
+    @RestReturn(value = String.class)
+    public RestResponse modifyChargingStandard(ModifyChargingStandardCommand cmd) {
+        assetService.modifyChargingStandard(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 查看一个收费标准详情       4
+    /**
+     * <p>查看一个收费标准详情</p>
+     * <b>URL: /asset/getChargingStandardDetail</b>
+     */
+    @RequestMapping("getChargingStandardDetail")
+    @RestReturn(value = GetChargingStandardDTO.class)
+    public RestResponse getChargingStandardDetail(GetChargingStandardCommand cmd) {
+        GetChargingStandardDTO dto = assetService.getChargingStandardDetail(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 删除一个收费标准         4
+    /**
+     * <p>删除一个收费标准</p>
+     * <b>URL: /asset/deleteChargingStandard</b>
+     */
+    @RequestMapping("deleteChargingStandard")
+    @RestReturn(value = DeleteChargingStandardDTO.class)
+    public RestResponse deleteChargingStandard(DeleteChargingStandardCommand cmd) {
+        DeleteChargingStandardDTO dto = assetService.deleteChargingStandard(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 展示所有可以插入的变量          4
+    /**
+     * <p>展示所有可以插入的变量</p>
+     * <b>URL: /asset/listAvailableVariables</b>
+     */
+    @RequestMapping("listAvailableVariables")
+    @RestReturn(value = ListAvailableVariablesDTO.class, collection = true)
+    public RestResponse listAvailableVariables(ListAvailableVariablesCommand cmd) {
+        List<ListAvailableVariablesDTO> dtos = assetService.listAvailableVariables(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 展示账单组列表          4
+    /**
+     * <p>展示账单组列表</p>
+     * <b>URL: /asset/listBillGroups</b>
+     */
+    @RequestMapping("listBillGroups")
+    @RestReturn(value = ListBillGroupsDTO.class, collection = true)
+    public RestResponse listBillGroups(OwnerIdentityCommand cmd) {
+        List<ListBillGroupsDTO> list = assetService.listBillGroups(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 创建一个账单组          4
+    /**
+     * <p>创建一个账单组</p>
+     * <b>URL: /asset/createBillGroup</b>
+     */
+    @RequestMapping("createBillGroup")
+    @RestReturn(value = String.class)
+    public RestResponse createBillGroup(CreateBillGroupCommand cmd) {
+        assetService.createBillGroup(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 修改一个账单组          4
+    /**
+     * <p>修改一个账单组</p>
+     * <b>URL: /asset/modifyBillGroup</b>
+     */
+    @RequestMapping("modifyBillGroup")
+    @RestReturn(value = String.class)
+    public RestResponse modifyBillGroup(ModifyBillGroupCommand cmd) {
+        assetService.modifyBillGroup(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 调整账单组的顺序     4
+    /**
+     * <p>调整账单组的顺序</p>
+     * <b>URL: /asset/adjustBillGroupOrder</b>
+     */
+    @RequestMapping("adjustBillGroupOrder")
+    @RestReturn(value = String.class)
+    public RestResponse adjustBillGroupOrder(AdjustBillGroupOrderCommand cmd) {
+        assetService.adjustBillGroupOrder(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    /**
+     * <p>删除一个账单组</p>
+     * <b>URL: /asset/deleteBillGroup</b>
+     */
+    @RequestMapping("deleteBillGroup")
+    @RestReturn(value = DeleteBillGroupReponse.class)
+    public RestResponse deleteBillGroup(DeleteBillGroupCommand cmd) {
+        DeleteBillGroupReponse res = assetService.deleteBillGroup(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 展示一个账单组的收费项目列表         4
+    /**
+     * <p>展示一个账单组的收费项目列表</p>
+     * <b>URL: /asset/listChargingStandardForBillGroup</b>
+     */
+    @RequestMapping("listChargingStandardForBillGroup")
+    @RestReturn(value = ListChargingItemsForBillGroupResponse.class, collection = true)
+    public RestResponse listChargingItemsForBillGroup(BillGroupIdCommand cmd) {
+        ListChargingItemsForBillGroupResponse list = assetService.listChargingItemsForBillGroup(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 展示一个账单组的一个收费项目详情     1
+    /**
+     * <p>展示一个账单组的一个收费项目详情</p>
+     * <b>URL: /asset/listChargingItemDetailForBillGroup</b>
+     */
+    @RequestMapping("listChargingItemDetailForBillGroup")
+    @RestReturn(value = ListChargingItemDetailForBillGroupDTO.class)
+    public RestResponse listChargingItemDetailForBillGroup(BillGroupRuleIdCommand cmd) {
+        ListChargingItemDetailForBillGroupDTO dto = assetService.listChargingItemDetailForBillGroup(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 为一个账单组添加或修改一个收费项目，如果billGroupRuleId不为空则为修改，一个账单组不能重复收费项目id       4
+    /**
+     * <p>为一个账单组添加或修改一个收费项目，如果billGroupRuleId不为空则为修改</p>
+     * <b>URL: /asset/addOrModifyRuleForBillGroup</b>
+     */
+    @RequestMapping("addOrModifyRuleForBillGroup")
+    @RestReturn(value = AddOrModifyRuleForBillGroupResponse.class)
+    public RestResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
+//        AddOrModifyRuleForBillGroupResponse res = assetService.addOrModifyRuleForBillGroup(cmd);
+//        RestResponse response = new RestResponse(res);
+        assetService.addOrModifyRuleForBillGroup(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 删除一个账单组的收费项目         4
+    /**
+     * <p>删除一个账单组的收费项目</p>
+     * <b>URL: /asset/deleteChargingItemForBillGroup</b>
+     */
+    @RequestMapping("deleteChargingItemForBillGroup")
+    @RestReturn(value = DeleteChargingItemForBillGroupResponse.class)
+    public RestResponse deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd) {
+        RestResponse response = new RestResponse(assetService.deleteChargingItemForBillGroup(cmd));
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 按照账单组展示未出账单          4
+    /**
+     * <p>按照账单组展示未出账单,先按照账期排序，再按照公司，最后按照账单组的defaultOrder</p>
+     * <b>URL: /asset/listNotSettledBill</b>
+     */
+    @RequestMapping("listNotSettledBill")
+    @RestReturn(value = ListBillsResponse.class)
+    public RestResponse listNotSettledBill(ListBillsCommand cmd) {
+        ListBillsResponse res = assetService.listBills(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 展示未出账单的一项的详情         4
+    /**
+     * <p>编辑账单，展示未出账单的一项的详情</p>
+     * <b>URL: /asset/listNotSettledBillDetail</b>
+     */
+    @RequestMapping("listNotSettledBillDetail")
+    @RestReturn(value = ListBillDetailResponse.class)
+    public RestResponse listNotSettledBillDetail(ListBillDetailCommand cmd) {
+        ListBillDetailResponse res = assetService.listBillDetail(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 修改后保存一个未出账单          4?
+    /**
+     * <p>保存一个未出账单的修改,若账单状态更改为已出，则不能修改</p>
+     * <b>URL: /asset/modifyNotSettledBill</b>
+     */
+    @RequestMapping("modifyNotSettledBill")
+    @RestReturn(value = String.class)
+    public RestResponse modifyNotSettledBill(ModifyNotSettledBillCommand cmd) {
+        assetService.modifyNotSettledBill(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 删除一个账单         2
+    /**
+     * <p>删除一个账单</p>
+     * <b>URL: /asset/deletBill</b>
+     */
+    @RequestMapping("deletBill")
+    @RestReturn(value = String.class)
+    public RestResponse deletBill(BillIdCommand cmd) {
+        String result = assetService.deleteBill(cmd);
+        RestResponse response = new RestResponse();
+        if(result.equals("OK")){
+            response.setErrorDescription("OK");
+        }else{
+            response.setErrorDescription(result);
+        }
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 删除一个账单的收费项     1
+    /**
+     * <p>删除一个账单的收费项</p>
+     * <b>URL: /asset/deletBillItem</b>
+     */
+    @RequestMapping("deletBillItem")
+    @RestReturn(value = String.class)
+    public RestResponse deletBillItem(BillItemIdCommand cmd) {
+        String result = assetService.deleteBillItem(cmd);
+        RestResponse response = new RestResponse();
+        if(result.equals("OK")){
+            response.setErrorDescription("OK");
+        }else{
+            response.setErrorDescription(result);
+        }
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 删除一个账单的减免项     2
+    /**
+     * <p>删除一个未出账单的减免项</p>
+     * <b>URL: /asset/deletExemptionItem</b>
+     */
+    @RequestMapping("deletExemptionItem")
+    @RestReturn(value = String.class)
+    public RestResponse deletExemptionItem(ExemptionItemIdCommand cmd) {
+        String result = assetService.deletExemptionItem(cmd);
+        RestResponse response = new RestResponse();
+        if(result.equals("OK")){
+            response.setErrorDescription("OK");
+        }else{
+            response.setErrorDescription(result);
+        }
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 新增账单的页面          4
+    /**
+     * <p>新增账单的页面</p>
+     * <b>URL: /asset/showCreateBill</b>
+     */
+    @RequestMapping("showCreateBill")
+    @RestReturn(value = ShowCreateBillDTO.class)
+    public RestResponse showCreateBill(BillGroupIdCommand cmd) {
+        ShowCreateBillDTO dto = assetService.showCreateBill(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 保存一个新增账单         4
+    /**
+     * <p>保存一个新增账单</p>
+     * <b>URL: /asset/createBill</b>
+     */
+    @RequestMapping("createBill")
+    @RestReturn(value = ListBillsDTO.class)
+    public RestResponse createBill(CreateBillCommand cmd) {
+        ListBillsDTO dto = assetService.createBill(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 批量导入账单           2
+    /**
+     * <p>批量导入账单</p>
+     * <b>URL: /asset/importBills</b>
+     */
+    @RequestMapping("importBills")
+    @RestReturn(value = String.class)
+    public RestResponse importBills(HttpServletResponse response) {
+        // unfinished, under plan
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return restResponse;
+    }
+
+
+
+    // this is for 按照账单组展示已出账单          4
+    /**
+     * <p>按照账单组展示已出账单</p>
+     * <b>URL: /asset/listSettledBill</b>
+     */
+    @RequestMapping("listSettledBill")
+    @RestReturn(value = ListBillsResponse.class)
+    public RestResponse listSettledBill(ListBillsCommand cmd) {
+        ListBillsResponse listBillsResponse = assetService.listBills(cmd);
+        RestResponse response = new RestResponse(listBillsResponse);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 展示账单的收费项       4
+    /**
+     * <p>展示已出账单的收费项</p>
+     * <b>URL: /asset/listBillItems</b>
+     */
+    @RequestMapping("listBillItems")
+    @RestReturn(value = ListBillItemsResponse.class)
+    public RestResponse listBillItems(ListBillItemsCommand cmd) {
+        ListBillItemsResponse res = assetService.listBillItems(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 一键部分催缴           4
+    /**
+     * <p>一键部分催缴</p>
+     * <b>URL: /asset/selectedNotice</b>
+     */
+    @RequestMapping("selectedNotice")
+    @RestReturn(value = String.class)
+    public RestResponse selectedNotice(SelectedNoticeCommand cmd) {
+        assetService.selectNotice(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 更改缴费状态           4
+    /**
+     * <p>更改账单的缴费状态</p>
+     * <b>URL: /asset/modifyBillStatus</b>
+     */
+    @RequestMapping("modifyBillStatus")
+    @RestReturn(value = String.class)
+    public RestResponse modifyBillStatus(BillIdCommand cmd) {
+        assetService.modifyBillStatus(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 一键全部催缴       4
+    /**
+     * <p>一键全部催缴</p>
+     * <b>URL: /asset/oneKeyNotice</b>
+     */
+    @RequestMapping("oneKeyNotice")
+    @RestReturn(value = String.class)
+    public RestResponse oneKeyNotice(OneKeyNoticeCommand cmd) {
+        assetService.OneKeyNotice(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 导出所有账单       4
+    /**
+     * <p>导出筛选过的所有账单</p>
+     * <b>URL: /asset/exportPaymentBills</b>
+     */
+    @RequestMapping("exportPaymentBills")
+    public HttpServletResponse exportPaymentBills(ListBillsCommand cmd,HttpServletResponse response) {
+        assetService.exportPaymentBills(cmd,response);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return null;
+    }
+
+    // this is for 展示账单的减免项           4
+    /**
+     * <p>展示账单的减免项</p>
+     * <b>URL: /asset/listBillExemptionItems</b>
+     */
+    @RequestMapping("listBillExemptionItems")
+    @RestReturn(value = ListSettledBillExemptionItemsResponse.class)
+    public RestResponse listBillExemptionItems(listBillExemtionItemsCommand cmd) {
+        ListSettledBillExemptionItemsResponse res = assetService.listBillExemptionItems(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 按照不同维度统计应收，已收，欠收的数额信息            4
+    /**
+     * <p>按照不同维度统计应收，已收，欠收的数额信息</p>
+     * <b>URL: /asset/billStatics</b>
+     */
+    @RequestMapping("billStatics")
+    @RestReturn(value = BillStaticsDTO.class, collection = true)
+    public RestResponse billStatics(BillStaticsCommand cmd) {
+        List<BillStaticsDTO> list = assetService.listBillStatics(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 显示一个用户的物业账单          4
+    /**
+     * <p>显示一个用户的物业账单</p>
+     * <b>URL: /asset/showBillForClient</b>
+     */
+    @RequestMapping("showBillForClient")
+    @RestReturn(value = ShowBillForClientDTO.class)
+    public RestResponse showBillForClient(ClientIdentityCommand cmd) {
+        ShowBillForClientDTO dto = assetService.showBillForClient(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 显示一个用户的物业账单          4
+    /**
+     * <p>显示一个用户的物业账单</p>
+     * <b>URL: /asset/showBillForClientV2</b>
+     */
+    @RequestMapping("showBillForClientV2")
+    @RestReturn(value = ShowBillForClientV2DTO.class,collection = true)
+    public RestResponse showBillForClientV2(ShowBillForClientV2Command cmd) {
+        if(cmd.getNamespaceId()!=UserContext.getCurrentNamespaceId()){
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        }
+        List<ShowBillForClientV2DTO> dtos = assetService.showBillForClientV2(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 显示一个用户的物业账单          4
+    /**
+     * <p>显示一个用户的物业账单</p>
+     * <b>URL: /asset/listAllBillsForClient</b>
+     */
+    @RequestMapping("listAllBillsForClient")
+    @RestReturn(value = ListAllBillsForClientDTO.class,collection = true)
+    public RestResponse listAllBillsForClient(ListAllBillsForClientCommand cmd) {
+        List<ListAllBillsForClientDTO> dtos = assetService.listAllBillsForClient(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    //this is for 查看缴费详情
+    /**
+     * <p>查看缴费详情</p>
+     * <b>URL: /asset/getPaymentLog</b>
+     */
+//    public RestResponse getPaymentLog(getPaymentLog)
+
+    // this is for 用户的账单详情          4
+    /**
+     * <p>用户的账单的收费细项</p>
+     * <b>URL: /asset/showBillDetailForClient</b>
+     */
+    @RequestMapping("showBillDetailForClient")
+    @RestReturn(value = ShowBillDetailForClientResponse.class, collection = true)
+    public RestResponse showBillDetailForClient(BillIdCommand cmd) {
+        ShowBillDetailForClientResponse res = assetService.getBillDetailForClient(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+
+    //this is for app选择切换月份查看账单      4
+    /**
+     * <p>app选择切换月份查看账单</p>
+     * <b>URL: /asset/listBillDetailOnDateChange</b>
+     */
+    @RequestMapping("listBillDetailOnDateChange")
+    @RestReturn(value = ShowBillDetailForClientResponse.class, collection = true)
+    public RestResponse listBillDetailOnDateChange(ListBillDetailOnDateChangeCommand cmd) {
+        ShowBillDetailForClientResponse res = assetService.listBillDetailOnDateChange(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+
+//    /**
+//     * <p>测试清单产生</p>
+//     * <b>URL: /asset/xxd</b>
+//     *
+//     * 这个会自动生成一个错误的doctor！restresponse，因为我写的@RequestBody？下次测试下
+//     */
+//    @RequestMapping("doctor!")
+//    @RestReturn(PaymentExpectanciesResponse.class)
+//    public PaymentExpectanciesResponse hi(@RequestBody PaymentExpectanciesCommand cmd){
+//        List<FeeRules> feesRules = cmd.getFeesRules();
+//        for(int i = 0; i < feesRules.size(); i++) {
+//            List<VariableIdAndValue> list = feesRules.get(i).getVariableIdAndValueList();
+//            for(int j = 0; j < list.size(); j++){
+//                Integer variableValue = (Integer)list.get(j).getVariableValue();
+//                BigDecimal c = new BigDecimal(variableValue);
+//                list.get(j).setVariableValue(c);
+//            }
+//        }
+//        return assetService.paymentExpectancies(cmd);
+//    }http://wangwt.lab.everhomes.com/evh/asset/listBillExpectanciesOnContract
+
+    /**
+     * <p>展示预期的费用清单</p>
+     * <b>URL: /asset/listBillExpectanciesOnContract</b>
+     *
+     */
+    @RequestMapping("listBillExpectanciesOnContract")
+    @RestReturn(PaymentExpectanciesResponse.class)
+    public RestResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd){
+        PaymentExpectanciesResponse res = assetService.listBillExpectanciesOnContract(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 导出租金模板       4
+    /**
+     * <p>导出租金模板</p>
+     * <b>URL: /asset/exportRentalExcelTemplate</b>
+     */
+    @RequestMapping("exportRentalExcelTemplate")
+    public HttpServletResponse exportRentalExcelTemplate(HttpServletResponse response) {
+        assetService.exportRentalExcelTemplate(response);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return null;
+    }
+
+    /**
+     * <b>URL: /asset/findUserInfoForPayment</b>
+     * <p>展示用户名称，合同，门牌楼栋和面积和</p>
+     */
+    @RequestMapping("findUserInfoForPayment")
+    @RestReturn(value=FindUserInfoForPaymentResponse.class)
+    public RestResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
+        FindUserInfoForPaymentResponse res = this.assetService.findUserInfoForPayment(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /asset/getAreaAndAddressByContract</b>
+     * <p>根据合同的id获取合同下的楼栋门牌和面积</p>
+     */
+    @RequestMapping("getAreaAndAddressByContract")
+    @RestReturn(value=GetAreaAndAddressByContractDTO.class,collection=true)
+    public RestResponse getAreaAndAddressByContract(GetAreaAndAddressByContractCommand cmd) {
+        GetAreaAndAddressByContractDTO dto = this.assetService.getAreaAndAddressByContract(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /asset/updateBillsToSettled</b>
+     * <p>将未出账单转为已出账单</p>
+     */
+    @RequestMapping("updateBillsToSettled")
+    @RestReturn(String.class)
+    public RestResponse updateBillsToSettled(UpdateBillsToSettled cmd) {
+        this.assetService.updateBillsToSettled(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /asset/payBills</b>
+     * <p></p>
+     */
+    @RequestMapping("payBills")
+    @RestReturn(PreOrderDTO.class)
+    public RestResponse placeAnAssetOrder(PlaceAnAssetOrderCommand cmd){
+        PreOrderDTO response = assetService.placeAnAssetOrder(cmd);
+        RestResponse restResponse = new RestResponse(response);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /asset/listPaymentBill</b>
+     * <p>结算-账单明细</p>
+     */
+    @RequestMapping(value = "listPaymentBill")
+    @RestReturn(ListPaymentBillResp.class)
+    public RestResponse listPaymentBill(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
+//        UserInfo user = (UserInfo) request.getSession().getAttribute(SessionConstants.MC_LOGIN_USER);
+        ListPaymentBillResp result = paymentService.listPaymentBill(cmd);
+        RestResponse response = new RestResponse(result);
+        return response;
+    }
+
+
+    /**
+     * <p>测试清单产生</p>
+     * <b>URL: /asset/doctor</b>
+     *
+     * 这个会自动生成一个错误的doctor！restresponse，因为我写的@RequestBody？下次测试下
+     */
+    @RequestMapping("doctor")
+    @RestReturn(String.class)
+    public String hi(@RequestBody PaymentExpectanciesCommand cmd){
+//        List<FeeRules> feesRules = cmd.getFeesRules();
+//        for(int i = 0; i < feesRules.size(); i++) {
+//            List<VariableIdAndValue> list = feesRules.get(i).getVariableIdAndValueList();
+//            for(int j = 0; j < list.size(); j++){
+//                Integer variableValue = (Integer)list.get(j).getVariableValue();
+//                BigDecimal c = new BigDecimal(variableValue);
+//                list.get(j).setVariableValue(c);
+//            }
+//        }
+        assetService.paymentExpectancies_re_struct(cmd);
+        return "ROU ARE WA GA DEKI ROU KU ROU!";
+    }
+    /**
+     * <b>URL: /asset/autoNoticeConfig</b>
+     * <p></p>
+     */
+    @RequestMapping("autoNoticeConfig")
+    @RestReturn(String.class)
+    public RestResponse autoNoticeConfig(AutoNoticeConfigCommand cmd){
+        assetService.autoNoticeConfig(cmd);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /asset/listAutoNoticeConfig</b>
+     * <p></p>
+     */
+    @RequestMapping("listAutoNoticeConfig")
+    @RestReturn(ListAutoNoticeConfigResponse.class)
+    public RestResponse listAutoNoticeConfig(ListAutoNoticeConfigCommand cmd){
+        ListAutoNoticeConfigResponse response = assetService.listAutoNoticeConfig(cmd);
+        RestResponse restResponse = new RestResponse(response);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /asset/activeAutoBillNotice</b>
+     * <p></p>
+     */
+    @RequestMapping("activeAutoBillNotice")
+    @RestReturn(String.class)
+    public RestResponse listAutoNoticeConfig(){
+        assetService.activeAutoBillNotice();
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+    /**
+     * <b>URL: /asset/checkEnterpriseHasArrearage</b>
+     * <p>检查企业是否有欠费的账单</p>
+     */
+    @RequestMapping("checkEnterpriseHasArrearage")
+    @RestReturn(value = CheckEnterpriseHasArrearageResponse.class)
+    public RestResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd){
+        CheckEnterpriseHasArrearageResponse res = assetService.checkEnterpriseHasArrearage(cmd);
+        RestResponse restResponse = new RestResponse(res);
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /asset/functionDisableList</b>
+     * <p></p>
+     */
+    @RequestMapping("functionDisableList")
+    @RestReturn(value = FunctionDisableListDto.class)
+    public RestResponse functionDisableList(FunctionDisableListCommand cmd){
+        FunctionDisableListDto dto = assetService.functionDisableList(cmd);
+        RestResponse restResponse = new RestResponse(dto);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /asset/sc</b>
+     * <p></p>
+     */
+    @RequestMapping("sc")
+    @RequireAuthentication(value = false)
+    public RestResponse syncCustomer(SyncCustomerCommand cmd){
+        RestResponse restResponse = new RestResponse();
+        assetService.syncCustomer(cmd.getNamespaceId());
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
 }

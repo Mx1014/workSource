@@ -17,4 +17,7 @@ public interface FlowConstants {
     
     //认证模块
     Long AUTHORIZATION_MODULE = 35000L;
+
+    //合同模块id
+    Long CONTRACT_MODULE = 21200L;
 }

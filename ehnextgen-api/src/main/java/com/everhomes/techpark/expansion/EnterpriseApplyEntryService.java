@@ -8,7 +8,9 @@ import java.util.List;
 
 
 public interface EnterpriseApplyEntryService {
-	
+
+	long OTHER_BUILDING_ID = 0L;
+
 	GetEnterpriseDetailByIdResponse getEnterpriseDetailById(GetEnterpriseDetailByIdCommand cmd);
 	
 	ListEnterpriseApplyEntryResponse listApplyEntrys(ListEnterpriseApplyEntryCommand cmd);
@@ -19,9 +21,9 @@ public interface EnterpriseApplyEntryService {
 	
 	ListBuildingForRentResponse listLeasePromotions(ListBuildingForRentCommand cmd);
 
-	BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd);
+	BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd, Byte adminFlag);
 
-	BuildingForRentDTO updateLeasePromotion(UpdateLeasePromotionCommand cmd);
+	BuildingForRentDTO updateLeasePromotion(UpdateLeasePromotionCommand cmd, Byte adminFlag);
 	
 	BuildingForRentDTO findLeasePromotionById(Long id);
 	
@@ -41,6 +43,8 @@ public interface EnterpriseApplyEntryService {
 
 	LeasePromotionConfigDTO getLeasePromotionConfig(GetLeasePromotionConfigCommand cmd);
 
+	void setLeasePromotionConfig(SetLeasePromotionConfigCommand cmd);
+
 	CheckIsLeaseIssuerDTO checkIsLeaseIssuer(CheckIsLeaseIssuerCommand cmd);
 
 	ListLeaseIssuerBuildingsResponse listBuildings(ListLeaseIssuerBuildingsCommand cmd);
@@ -52,5 +56,7 @@ public interface EnterpriseApplyEntryService {
 	LeaseFormRequestDTO getLeasePromotionRequestForm(@Valid GetLeasePromotionRequestFormCommand cmd);
 
 	void updateLeasePromotionOrder(@Valid UpdateLeasePromotionOrderCommand cmd);
+
+	String getSourceTypeName(String type);
 	
 }

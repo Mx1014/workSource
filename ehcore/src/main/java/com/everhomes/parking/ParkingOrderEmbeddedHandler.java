@@ -5,7 +5,10 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Locale;
 
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bus.BusBridgeProvider;
 import com.everhomes.bus.LocalBus;
+import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -43,8 +46,24 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 	@Autowired
 	private LocaleStringService localeService;
 
+	@Autowired
+	private BusBridgeProvider busBridgeProvider;
+
 	@Override
 	public void paySuccess(PayCallbackCommand cmd) {
+		//TODO:ceshi
+		if (configProvider.getBooleanValue("parking.order.amount", false)) {
+			Long orderId = Long.parseLong(cmd.getOrderNo());
+			Long payTime = System.currentTimeMillis();
+			Timestamp payTimeStamp = new Timestamp(payTime);
+			ParkingRechargeOrder order = checkOrder(orderId);
+			order.setPaidTime(payTimeStamp);
+			order.setPaidType(cmd.getVendorType());
+			order.setStatus(ParkingRechargeOrderStatus.RECHARGED.getCode());
+			order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+			parkingProvider.updateParkingRechargeOrder(order);
+			return;
+		}
 
 		LOGGER.info("Parking pay info, cmd={}", cmd);
 
@@ -57,11 +76,12 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		BigDecimal payAmount = new BigDecimal(cmd.getPayAmount());
 
 		//支付宝回调时，可能会同时回调多次，
-		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode()).enter(()-> {
+		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode() + orderId).enter(()-> {
 
 			ParkingRechargeOrder order = checkOrder(orderId);
 			//加一个开关，方便在beta环境测试
 			boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+
 			if (!flag) {
 				if (0 != order.getPrice().compareTo(payAmount)) {
 					LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
@@ -90,7 +110,7 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 						order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
 						parkingProvider.updateParkingRechargeOrder(order);
 
-						LOGGER.info("Notify parking recharge failed, cmd={}, order={}", cmd, order);
+						LOGGER.info("Notify parking recharge success, cmd={}, order={}", cmd, order);
 					}else {
 						//充值失败
 						order.setStatus(ParkingRechargeOrderStatus.FAILED.getCode());
@@ -113,7 +133,11 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 					ExecutorUtil.submit(new Runnable() {
 						@Override
 						public void run() {
-							localBus.publish(this, "Parking-Recharge" + order.getId(), dto);
+
+							LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider;
+							localBusSubscriber.onLocalBusMessage(null, "Parking-Recharge" + order.getId(), JSONObject.toJSONString(dto), null);
+
+							localBus.publish(this, "Parking-Recharge" + order.getId(), JSONObject.toJSONString(dto));
 						}
 					});
 				}

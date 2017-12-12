@@ -1,44 +1,24 @@
 package com.everhomes.version;
 
-import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.DbProvider;
+import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.rest.version.*;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.configuration.ConfigConstants;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.db.DbProvider;
-import com.everhomes.namespace.NamespaceProvider;
-import com.everhomes.rest.version.CreateVersionCommand;
-import com.everhomes.rest.version.DeleteVersionCommand;
-import com.everhomes.rest.version.GetUpgradeContentCommand;
-import com.everhomes.rest.version.GetUpgradeContentResponse;
-import com.everhomes.rest.version.ListVersionInfoCommand;
-import com.everhomes.rest.version.ListVersionInfoResponse;
-import com.everhomes.rest.version.UpdateVersionCommand;
-import com.everhomes.rest.version.UpgradeInfoResponse;
-import com.everhomes.rest.version.VersionDTO;
-import com.everhomes.rest.version.VersionInfoDTO;
-import com.everhomes.rest.version.VersionRealmDTO;
-import com.everhomes.rest.version.VersionRequestCommand;
-import com.everhomes.rest.version.VersionServiceErrorCode;
-import com.everhomes.rest.version.VersionUrlResponse;
-import com.everhomes.rest.version.WithoutCurrentVersionRequestCommand;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Version;
-import com.everhomes.util.VersionRange;
+import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class VersionServiceImpl implements VersionService {
@@ -205,6 +185,7 @@ public class VersionServiceImpl implements VersionService {
         params.put("homeurl", this.configurationProvider.getValue(ConfigConstants.HOME_URL, ""));
         response.setDownloadUrl(StringHelper.interpolate(versionUrl.getDownloadUrl(), params));
         response.setInfoUrl(StringHelper.interpolate(versionUrl.getInfoUrl(), params));
+        response.setUpgradeDescription(versionUrl.getUpgradeDescription());
         return response;
         	
 	}
@@ -255,13 +236,17 @@ public class VersionServiceImpl implements VersionService {
 			rule.setMatchingLowerBound(versionRange.getLowerBound());
 			rule.setMatchingUpperBound(versionRange.getUpperBound());
 			rule.setOrder(0);
-			rule.setTargetVersion(cmd.getTargetVersion());
+            rule.setTargetVersion(cmd.getTargetVersion());
 			rule.setForceUpgrade(cmd.getForceUpgrade());
 			rule.setNamespaceId(realm.getNamespaceId());
 			versionProvider.createVersionUpgradeRule(rule);
 			
 			VersionUrl url = new VersionUrl();
-			url.setRealmId(cmd.getRealmId());
+
+            Version version = Version.fromVersionString(cmd.getTargetVersion());
+            url.setVersionEncodedValue(version.getEncodedValue());
+
+            url.setRealmId(cmd.getRealmId());
 			url.setTargetVersion(cmd.getTargetVersion());
 			url.setDownloadUrl(processUrl(cmd.getDownloadUrl()));
 			url.setUpgradeDescription(cmd.getUpgradeDescription());
@@ -302,28 +287,30 @@ public class VersionServiceImpl implements VersionService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Not found versionUpgradeRule: cmd="+cmd);
 		}
-		
-		VersionUrl versionUrl = null;
-		if (cmd.getUrlId() != null) {
-			versionUrl = versionProvider.findVersionUrlById(cmd.getUrlId());
-		}
-		final VersionUrl url = versionUrl;
-		
-		VersionInfoDTO versionInfoDTO = ConvertHelper.convert(cmd, VersionInfoDTO.class);
-		
-		dbProvider.execute(s->{
-			rule.setRealmId(cmd.getRealmId());
-			VersionRange versionRange = new VersionRange("["+cmd.getMinVersion()+","+cmd.getMaxVersion()+")");
-			rule.setMatchingLowerBound(versionRange.getLowerBound());
-			rule.setMatchingUpperBound(versionRange.getUpperBound());
-			rule.setOrder(0);
-			rule.setTargetVersion(cmd.getTargetVersion());
-			rule.setForceUpgrade(cmd.getForceUpgrade());
-			rule.setNamespaceId(realm.getNamespaceId());
-			versionProvider.updateVersionUpgradeRule(rule);
-			
-			VersionUrl innerUrl = url;
-			if (innerUrl != null) {
+
+        VersionUrl versionUrl = null;
+        if (cmd.getUrlId() != null) {
+            versionUrl = versionProvider.findVersionUrlById(cmd.getUrlId());
+        }
+        final VersionUrl url = versionUrl;
+
+        VersionInfoDTO versionInfoDTO = ConvertHelper.convert(cmd, VersionInfoDTO.class);
+        Version version = Version.fromVersionString(cmd.getTargetVersion());
+
+        dbProvider.execute(s->{
+            rule.setRealmId(cmd.getRealmId());
+            VersionRange versionRange = new VersionRange("["+cmd.getMinVersion()+","+cmd.getMaxVersion()+")");
+            rule.setMatchingLowerBound(versionRange.getLowerBound());
+            rule.setMatchingUpperBound(versionRange.getUpperBound());
+            rule.setOrder(0);
+            rule.setTargetVersion(cmd.getTargetVersion());
+            rule.setForceUpgrade(cmd.getForceUpgrade());
+            rule.setNamespaceId(realm.getNamespaceId());
+            versionProvider.updateVersionUpgradeRule(rule);
+
+            VersionUrl innerUrl = url;
+            if (innerUrl != null) {
+                innerUrl.setVersionEncodedValue(version.getEncodedValue());
 				innerUrl.setRealmId(cmd.getRealmId());
 				innerUrl.setTargetVersion(cmd.getTargetVersion());
 				innerUrl.setDownloadUrl(processUrl(cmd.getDownloadUrl()));
@@ -335,6 +322,7 @@ public class VersionServiceImpl implements VersionService {
 				versionProvider.updateVersionUrl(innerUrl);
 			}else {
 				innerUrl = new VersionUrl();
+                innerUrl.setVersionEncodedValue(version.getEncodedValue());
 				innerUrl.setRealmId(cmd.getRealmId());
 				innerUrl.setTargetVersion(cmd.getTargetVersion());
 				innerUrl.setDownloadUrl(processUrl(cmd.getDownloadUrl()));
@@ -395,7 +383,7 @@ public class VersionServiceImpl implements VersionService {
 		if (StringUtils.isBlank(url)) {
 			return "";
 		}
-		if (url.startsWith("http:") || url.startsWith("${")) {
+		if (url.startsWith("https://") || url.startsWith("http://") || url.startsWith("${")) {
 			return url;
 		}
 		return "${homeurl}"+url;

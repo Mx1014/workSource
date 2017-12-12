@@ -17,6 +17,9 @@ import com.everhomes.device.DeviceProvider;
 import com.everhomes.messaging.ApnsServiceFactory;
 import com.everhomes.messaging.PushMessageResolver;
 import com.everhomes.messaging.PusherService;
+import com.everhomes.messaging.PusherVenderType;
+import com.everhomes.messaging.PusherVendorData;
+import com.everhomes.messaging.PusherVendorService;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.msgbox.MessageLocator;
@@ -37,6 +40,11 @@ import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
 import com.notnoop.apns.*;
 import com.notnoop.exceptions.NetworkIOException;
+import com.xiaomi.xmpush.server.Constants;
+import com.xiaomi.xmpush.server.Result;
+import com.xiaomi.xmpush.server.Sender;
+
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +54,9 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -75,11 +85,11 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     @Autowired
     ConfigurationProvider configProvider;
     
-    @Autowired
-    WorkerPoolFactory workerPoolFactory;
-    
-    @Autowired
-    JesqueClientFactory jesqueClientFactory;
+//    @Autowired
+//    WorkerPoolFactory workerPoolFactory;
+//    
+//    @Autowired
+//    JesqueClientFactory jesqueClientFactory;
     
     @Autowired
     private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
@@ -90,9 +100,12 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     @Autowired
     BigCollectionProvider bigCollectionProvider;
     
+    @Autowired
+    PusherVendorService pusherVendorService;
+    
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     
-    private String queueName = "iOS-pusher2";
+//    private String queueName = "iOS-pusher2";
 
     ApnsService service = null;
 
@@ -107,7 +120,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 
     @PostConstruct
     public void setup() {
-        workerPoolFactory.getWorkerPool().addQueue(queueName);
+//        workerPoolFactory.getWorkerPool().addQueue(queueName);
     }
     
     @Override
@@ -163,6 +176,8 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         if(server != null) {
             server.stop();    
             }
+        
+        pusherVendorService.stopService(partner);
     }
     
     private void pushMessageAndroid(UserLogin senderLogin, UserLogin destLogin, long msgId, Message msg, String platform, DeviceMessage devMessage) {
@@ -193,7 +208,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         long requestId = LocalSequenceGenerator.getNextSequence();
         borderConnectionProvider.broadcastToAllBorders(requestId, pdu);
         
-        LOGGER.info("pushing to uid=" + destLogin.getUserId() );
+        LOGGER.info("Pushing to uid=" + destLogin.getUserId() );
     }
     private void pushMessageApple(UserLogin senderLogin, UserLogin destLogin, long msgId, Message msg, String platform, DeviceMessage devMessage) {
         PayloadBuilder payloadBuilder = APNS.newPayload();
@@ -295,6 +310,11 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
             
     }
 
+    /**
+     * 
+     * @param destLogin
+     * @return iOS Xiaomi Huawei Android
+     */
     private String getPlatform(UserLogin destLogin) {
         if(destLogin.getStatus() == UserLoginStatus.LOGGED_OFF) {
             LOGGER.error("Pushing message, destLogin loggedoff, destLogin=" + destLogin);
@@ -303,6 +323,14 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         
         if(destLogin.getDeviceIdentifier() == null || destLogin.getDeviceIdentifier().isEmpty()) {
             return null;
+        }
+        
+        if(destLogin.getPusherIdentify() != null) {
+            if(destLogin.getPusherIdentify().startsWith("xiaomi:")) {
+                return "xiaomi";
+            } else if(destLogin.getPusherIdentify().startsWith("huawei:")) {
+                return "huawei";
+            }            
         }
 
         Device d = this.deviceProvider.findDeviceByDeviceId(destLogin.getDeviceIdentifier());
@@ -359,6 +387,10 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         
         if(platform.equals("iOS")) {
             pushMessageApple(senderLogin, destLogin, msgId, msg, platform, devMessage);
+        } else if (platform.equals("xiaomi")) {
+            pusherVendorService.pushMessageAsync(PusherVenderType.XIAOMI, senderLogin, destLogin, msg, devMessage);
+        } else if (platform.equals("huawei")) {
+            pusherVendorService.pushMessageAsync(PusherVenderType.HUAWEI, senderLogin, destLogin, msg, devMessage);
         } else {
             //Android or other here
             pushMessageAndroid(senderLogin, destLogin, msgId, msg, platform, devMessage);
@@ -524,4 +556,34 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
             pushMessage(senderLogin, destLogin, msgId, msg);
         }
     }
+    
+    //xiaomi test
+    @Override
+    public void sendXiaomiMessage() {
+        //Constants.useOfficial();
+        Sender sender = new Sender("3ijRnJlb08iLMfh6hyMvqw==");
+        String messagePayload = "This is a message by zuolin";
+        String title = "notification title zuolin";
+        String description = "notification description zuolin";
+        com.xiaomi.xmpush.server.Message message = new com.xiaomi.xmpush.server.Message.Builder()
+            .title(title)
+            .description(description).payload(messagePayload)
+            .restrictedPackageName("com.everhomes.android.oa.debug")
+            .passThrough(0)
+            .notifyType(1)     // 使用默认提示音提示
+            .build();
+        String regId = "mCSNgs9e5UWI6En0EAI9guxt4Qje6UcqLo295M3DORs=";
+        Result result;
+        try {
+            result = sender.send(message, regId, 3);
+            LOGGER.info("Server response: ", "MessageId: " + result.getMessageId()
+                    + " ErrorCode: " + result.getErrorCode().toString()
+                    + " Reason: " + result.getReason());
+        } catch (IOException | ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+    }
+
 }

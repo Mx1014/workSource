@@ -366,7 +366,11 @@ public class BannerServiceImpl implements BannerService {
         SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
         
         GetBannersCommand getCmd = new GetBannersCommand();
-        getCmd.setBannerGroup(cmd.getBannerGroup());
+
+        //先注释掉bannerGroup，原因是运营后台配置是多入口的，但是园区后台发布banner是单入口的，他们的bannerGroup字段不一致会导致查询失败
+        //当前所有域空间的banner都是单入口的，因此此处临时去除bannerGroup，待园区后台实现多入口后可开放   add by yanjun 20171116
+        //getCmd.setBannerGroup(cmd.getBannerGroup());
+
         getCmd.setBannerLocation(cmd.getBannerLocation());
         getCmd.setNamespaceId(sceneToken.getNamespaceId());
         
@@ -418,7 +422,11 @@ public class BannerServiceImpl implements BannerService {
         case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
         case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
             GetBannersByOrgCommand orgCmd = new GetBannersByOrgCommand();
-            orgCmd.setBannerGroup(cmd.getBannerGroup());
+
+            //先注释掉bannerGroup，原因是运营后台配置是多入口的，但是园区后台发布banner是单入口的，他们的bannerGroup字段不一致会导致查询失败
+            //当前所有域空间的banner都是单入口的，因此此处临时去除bannerGroup，待园区后台实现多入口后可开放   add by yanjun 20171116
+            //orgCmd.setBannerGroup(cmd.getBannerGroup());
+
             orgCmd.setBannerLocation(cmd.getBannerLocation());
             orgCmd.setNamespaceId(sceneToken.getNamespaceId());
             orgCmd.setSceneType(baseScene);
@@ -528,8 +536,10 @@ public class BannerServiceImpl implements BannerService {
     }
     private String parserUri(String uri,String ownerType, long ownerId){
         try {
-            if(!org.apache.commons.lang.StringUtils.isEmpty(uri))
-                return contentServerService.parserUri(uri,ownerType,ownerId);
+            if(!org.apache.commons.lang.StringUtils.isEmpty(uri)) {
+                String url = contentServerService.parserUri(uri, ownerType, ownerId);
+                return url + "&w=750&h=450";
+            }
             
         } catch (Exception e) {
             LOGGER.error("Parser uri is error." + e.getMessage());

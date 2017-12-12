@@ -5,19 +5,27 @@ package com.everhomes.rest.express;
  * 
  * <ul>
  * <li>SELF: 1，服务点自寄</li>
+ * <li>VISIT: 2，快递员上门收件</li>
  * </ul>
  */
 public enum ExpressSendMode {
-	SELF((byte)1);
+	SELF((byte)1, "服务点自寄"),
+	VISIT((byte)2, "快递员上门收件");
 	
 	private byte code;
+	private String desc;
 	
-	private ExpressSendMode(byte code) {
+	private ExpressSendMode(byte code, String desc) {
 		this.code = code;
+		this.desc = desc;
 	}
 	
 	public Byte getCode() {
 		return code;
+	}
+	
+	public String getDesc() {
+		return desc;
 	}
 	
 	public static ExpressSendMode fromCode(Byte code) {

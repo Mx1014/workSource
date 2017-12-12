@@ -744,6 +744,13 @@ public class UserActivityServiceImpl implements UserActivityService {
         	if (NumberUtils.toInt(applied.getItemValue(), 0) != 0) 
         		rsp.setApplyShopUrl(getManageShopUrl(user.getId()));
         }
+        //#17132
+        //INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('always.store.management', 'true', '是否始终是店铺管理', 0, NULL);
+        boolean alwaysStoreManage = configurationProvider.getBooleanValue("always.store.management", false);
+        if(alwaysStoreManage){
+        	rsp.setIsAppliedShop(1);
+            rsp.setApplyShopUrl(getManageShopUrl(user.getId()));
+        }
         
         if(couponCount != null) {
         	rsp.setCouponCount(NumberUtils.toInt(couponCount.getItemValue(), 0));
@@ -1180,7 +1187,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         
-        List<ActivityRoster> result = activityProivider.findRostersByUid(uid, locator, pageSize + 1);
+        List<ActivityRoster> result = activityProivider.findRostersByUid(uid, locator, pageSize + 1, ActivityRosterStatus.NORMAL.getCode());
         
         if (CollectionUtils.isEmpty(result)) {
             return new ListActivitiesReponse(null, new ArrayList<ActivityDTO>());
@@ -1397,7 +1404,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         gm.setNamespaceId(UserContext.getCurrentNamespaceId());
         gm.setOrganizationId(cmd.getCreatorOrganizationId());
         gm.setProjectId(cmd.getOwnerId());
-        gm.setProjectType(EhCommunities.class.getName());
+        gm.setProjectType(EntityType.COMMUNITY.getCode());
         gm.setOwnerType(FlowOwnerType.CUSTOM_REQUEST.getCode());
         gm.setOwnerId(template.getId());
         gm.setModuleId(40500l);//服务联盟id

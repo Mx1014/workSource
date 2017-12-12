@@ -5,27 +5,30 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 	   <li>tag: 标签 </li>
+ *     <li>tag: 标签</li>
  *     <li>startTime: 统计开始时间</li>
  *     <li>endTime: 统计结束时间</li>
  *     <li>orderBy: 排序方式 排序方式 1-报名人数降序，2-报名人数升序，3-发布时间降序，4-发布时间升序，5-发布活动数升序，6-发布活动数升序</li>
  *     <li>categoryId: 活动类型id</li>
  *     <li>contentCategoryId: 内容类型ID，{@link com.everhomes.rest.category.CategoryConstants}</li>
+ *     <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class StatisticsActivityCommand {
-	
+
 	private String tag;
 
 	private Long startTime;
-    
-    private Long endTime;
-    
-    private Byte orderBy;
-    
-    private Long categoryId;
+
+	private Long endTime;
+
+	private Byte orderBy;
+
+	private Long categoryId;
 	private Long contentCategoryId;
-    
+
+	private Integer namespaceId;
+
 	public String getTag() {
 		return tag;
 	}
@@ -57,6 +60,7 @@ public class StatisticsActivityCommand {
 	public void setOrderBy(Byte orderBy) {
 		this.orderBy = orderBy;
 	}
+
 	public Long getCategoryId() {
 		return categoryId;
 	}
@@ -73,8 +77,16 @@ public class StatisticsActivityCommand {
 		this.contentCategoryId = contentCategoryId;
 	}
 
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
 	@Override
 	public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+		return StringHelper.toJsonString(this);
+	}
 }

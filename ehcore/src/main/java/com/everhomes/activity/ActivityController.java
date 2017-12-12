@@ -1,14 +1,13 @@
 // @formatter:off
 package com.everhomes.activity;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.order.CreateWechatJsPayOrderResp;
 import org.apache.commons.collections.CollectionUtils;
@@ -97,9 +96,23 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
-     * 
+     * <b>URL: /activity/createSignupOrderV2</b>
+     * <p>支付2.0</p>
+     */
+    @RequestMapping("createSignupOrderV2")
+    @RestReturn(value=PreOrderDTO.class)
+    public RestResponse createSignupOrderV2(@Valid CreateSignupOrderV2Command cmd) {
+        PreOrderDTO dto = activityService.createSignupOrderV2(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
      * <p>后台手动添加活动报名</p>
      * <b>URL: /activity/manualSignup</b>
      */
@@ -136,10 +149,10 @@ public class ActivityController extends ControllerBase {
      * <b>URL: /activity/importSignupInfo</b>
      */
     @RequestMapping("importSignupInfo")
-    @RestReturn(value=String.class)
+    @RestReturn(value=ImportSignupInfoResponse.class)
     public RestResponse importSignupInfo(@Valid ImportSignupInfoCommand cmd, @RequestParam("attachment") MultipartFile[] files) {
-    	activityService.importSignupInfo(cmd, files);
-    	RestResponse response = new RestResponse();
+        ImportSignupInfoResponse importSignupInfoResponse = activityService.importSignupInfo(cmd, files);
+    	RestResponse response = new RestResponse(importSignupInfoResponse);
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");
     	return response;
@@ -175,6 +188,21 @@ public class ActivityController extends ControllerBase {
     	restResponse.setErrorDescription("OK");
     	return restResponse;
     }
+
+//    /**
+//     *
+//     * <p>导出活动错误信息</p>
+//     * <b>URL: /activity/exportErrorInfo</b>
+//     */
+//    @RequestMapping("exportErrorInfo")
+//    @RestReturn(value=String.class)
+//    public RestResponse exportErrorInfo(@Valid ExportErrorInfoCommand cmd, HttpServletResponse response) {
+//        activityService.exportErrorInfo(cmd, response);
+//        RestResponse restResponse = new RestResponse();
+//        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+//        restResponse.setErrorDescription("OK");
+//        return restResponse;
+//    }
     
     /**
      * 
@@ -314,7 +342,7 @@ public class ActivityController extends ControllerBase {
         rsp.setNextPageAnchor(ret.first());
         return new RestResponse(rsp);
     }
-    
+
     /**
      * 查询周边活动2.0
      * @return
@@ -322,7 +350,7 @@ public class ActivityController extends ControllerBase {
     @RequestMapping("listNearbyActivitiesV2")
     @RestReturn(ListNearbyActivitiesResponse.class)
     public RestResponse listNearbyActivitiesV2(@Valid ListNearByActivitiesCommandV2 cmdV2){
-    	
+
         Tuple<Long, List<ActivityDTO>> ret = activityService.listNearByActivitiesV2(cmdV2);
         ListNearbyActivitiesResponse rsp=new ListNearbyActivitiesResponse();
         rsp.setActivities(ret.second());
@@ -797,6 +825,6 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
        return response;
    }
-    
+
     
 }

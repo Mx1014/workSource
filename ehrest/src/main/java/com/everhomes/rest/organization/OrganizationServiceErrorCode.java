@@ -90,5 +90,9 @@ public interface OrganizationServiceErrorCode {
     int ERROR_DATE_FORMAT_WRONG = 900023;   //  日期格式错误
     int ERROR_GENDER_FORMAT_WRONG = 900024;   //  性别仅支持"男""女"
     int ERROR_CONTACTNAME_FORMAT_WRONG = 900025;    //  姓名长度需小于16
+    int ERROR_UNIFIEDSOCIALCREDITCODE_EXIST = 900026;    //  unifiedSocialCreditCode唯一性
+
+    static final int ERROR_DEPARTMENT_EXISTS = 300002; //部门已存在
+    static final int ERROR_JOB_POSITION_EXISTS = 300003; //通用岗位已存在
 
 }

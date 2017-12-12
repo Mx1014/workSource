@@ -1,11 +1,24 @@
 package com.everhomes.pmtask;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
+import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
+import com.everhomes.flow.node.FlowGraphNodeEnd;
+import com.everhomes.general_form.GeneralFormVal;
+import com.everhomes.general_form.GeneralFormValProvider;
+import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.general_approval.PostApprovalFormSubformItemValue;
+import com.everhomes.rest.general_approval.PostApprovalFormSubformValue;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -17,7 +30,10 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,11 +43,12 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class PmtaskFlowModuleListener implements FlowModuleListener {
-	
-    private static final Logger LOGGER = LoggerFactory.getLogger(PmtaskFlowModuleListener.class);
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(PmtaskFlowModuleListener.class);
 	@Autowired
 	private FlowService flowService;
 	@Autowired
@@ -43,16 +60,24 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Autowired
 	private PmTaskSearch pmTaskSearch;
 	@Autowired
-    private FlowUserSelectionProvider flowUserSelectionProvider;
+	private FlowUserSelectionProvider flowUserSelectionProvider;
 	@Autowired
 	private SmsProvider smsProvider;
 	@Autowired
 	private CategoryProvider categoryProvider;
 	@Autowired
 	private UserProvider userProvider;
+	@Autowired
+	private ConfigurationProvider configProvider;
+	@Autowired
+	private PmTaskService pmTaskService;
+	@Autowired
+	private GeneralFormValProvider generalFormValProvider;
+	@Autowired
+	FlowEventLogProvider flowEventLogProvider;
 
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
-	
+
 	@Override
 	public FlowModuleInfo initModule() {
 		FlowModuleInfo module = new FlowModuleInfo();
@@ -65,12 +90,12 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Override
 	public void onFlowCaseStart(FlowCaseState ctx) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onFlowCaseAbsorted(FlowCaseState ctx) {
-		
+
 	}
 
 	//状态改变之后
@@ -102,25 +127,39 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 			if (currentNode instanceof FlowGraphNodeEnd)
 				return;
-
-			if(StringUtils.isBlank(params)) {
-				LOGGER.error("Invalid flowNode param.");
-				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
-						"Invalid flowNode param.");
+//motify by st.zheng 修改为非每个节点都必须配参数值
+//			if(StringUtils.isBlank(params)) {
+//				LOGGER.error("Invalid flowNode param.");
+//				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+//						"Invalid flowNode param.");
+//			}
+			String nodeType = "";
+			if (!StringUtils.isBlank(params)) {
+				JSONObject paramJson = JSONObject.parseObject(params);
+				nodeType = paramJson.getString("nodeType");
 			}
-			JSONObject paramJson = JSONObject.parseObject(params);
-			String nodeType = paramJson.getString("nodeType");
 			LOGGER.debug("update pmtask request, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
 
 			if ("ACCEPTING".equals(nodeType)) {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
 
-				//TODO: 同步数据到科技园
+			}else if ("ASSIGNING".equals(nodeType)) {
+
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
+				pmTaskProvider.updateTask(task);
+
+			}else if ("PROCESSING".equals(nodeType)) {
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
+				task.setProcessingTime(new Timestamp(System.currentTimeMillis()));
+				pmTaskProvider.updateTask(task);
+
+				//TODO: 同步数据到科技园 （当受理之后才同步） 此处由于不好获取工作流中分配的人，所以当节点值（ASSIGNING）待分配时
+				// 在fireButton存在eh_pm_task_logs表中，onFlowCaseStateChanged方法是状态已经更新之后，此处节点值是当前节点的下一个节点
 				Integer namespaceId = UserContext.getCurrentNamespaceId();
 				if(namespaceId == 1000000) {
 					LOGGER.debug("synchronizedTaskToTechpark, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
-					List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.ASSIGNING.getCode());
+					List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.PROCESSING.getCode());
 					if (null != logs && logs.size() != 0) {
 						for (PmTaskLog r: logs) {
 							if (null != r.getTargetId()) {
@@ -130,16 +169,6 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 						}
 					}
 				}
-			}else if ("ASSIGNING".equals(nodeType)) {
-
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
-				pmTaskProvider.updateTask(task);
-
-
-			}else if ("PROCESSING".equals(nodeType)) {
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
-				task.setProcessingTime(new Timestamp(System.currentTimeMillis()));
-				pmTaskProvider.updateTask(task);
 			}else if ("COMPLETED".equals(nodeType)) {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
@@ -147,7 +176,31 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
 				//通知第三方 config表中配置api请求地址
-				pmTaskCommonService.handoverTaskToTrd(task);
+				//要求传的是转发项目经理填写的内容和图片 add by xiongying20170922
+				FlowSubjectDTO subjectDTO = flowService.getSubectById(ctx.getCurrentEvent().getSubject().getId());
+				pmTaskCommonService.handoverTaskToTrd(task, subjectDTO.getContent(), subjectDTO.getImages());
+			}else if("MOTIFYFEE".equals(nodeType)){
+				List<GeneralFormVal> vals = generalFormValProvider.queryGeneralFormVals(EntityType.PM_TASK.getCode(),flowCase.getReferId());
+				//没产生费用
+				if (vals==null || vals.size()==0){
+					FlowEventLog log = new FlowEventLog();
+					log.setId(flowEventLogProvider.getNextId());
+					log.setFlowMainId(flowCase.getFlowMainId());
+					log.setFlowVersion(flowCase.getFlowVersion());
+					log.setNamespaceId(flowCase.getNamespaceId());
+					log.setFlowNodeId(flowCase.getCurrentNodeId());
+					log.setFlowCaseId(flowCase.getId());
+					log.setStepCount(flowCase.getStepCount());
+					log.setSubjectId(0L);
+					log.setParentId(0L);
+					log.setLogType(FlowLogType.NODE_TRACKER.getCode());
+					log.setButtonFiredStep(FlowStepType.NO_STEP.getCode());
+					log.setTrackerApplier(1L);
+					log.setTrackerProcessor(1L);
+					String content = "本次服务没有产生维修费";
+					log.setLogContent(content);
+					ctx.getLogs().add(log);
+				}
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
 
@@ -157,7 +210,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		//elasticsearch更新
 		pmTaskSearch.deleteById(task.getId());
 		pmTaskSearch.feedDoc(task);
-		
+
 	}
 
 	@Override
@@ -171,13 +224,13 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	}
 
 	@Override
-	public String onFlowCaseBriefRender(FlowCase flowCase) {
+	public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
 		return null;
 	}
 
 	@Override
 	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
-		
+
 		GetTaskDetailCommand cmd = new GetTaskDetailCommand();
 		cmd.setId(flowCase.getReferId());
 		cmd.setOwnerId(flowCase.getProjectId());
@@ -189,18 +242,18 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		//TODO:为科兴与一碑对接
 		if(task.getNamespaceId() == 999983 &&
 				task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
-			PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
+			EbeiPmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
 			dto = handler.getTaskDetail(cmd);
 		}else {
 			dto = pmTaskCommonService.getTaskDetail(cmd, false);
 
 		}
 
-		flowCase.setCustomObject(JSONObject.toJSONString(dto));
-		
+
+
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		FlowCaseEntity e;
-		
+
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 		e.setKey("服务内容");
@@ -230,13 +283,13 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			e.setValue(dto.getCategoryName());
 			entities.add(e);
 		}
-		
+
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
 		e.setKey("发起人");
 		e.setValue(dto.getRequestorName());
 		entities.add(e);
-		
+
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
 		e.setKey("联系电话");
@@ -249,11 +302,77 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			e = new FlowCaseEntity();
 			e.setEntityType(FlowCaseEntityType.LIST.getCode());
 			e.setKey("状态");
-			e.setValue(pmTaskCommonService.convertStatus(dto.getStatus()));
+			e.setValue(EbeiPmTaskStatus.fromCode(dto.getStatus()).getDesc());
 			entities.add(e);
 		}
 
+		//填写费用清单
+		List<GeneralFormVal> list = generalFormValProvider.queryGeneralFormVals(EntityType.PM_TASK.getCode(),task.getId());
+		if (flowCase.getStatus() == FlowCaseStatus.FINISHED.getCode())
+			if (list!=null && list.size()>0){
+				e = new FlowCaseEntity();
+				e.setEntityType(FlowCaseEntityType.TEXT.getCode());
+				e.setKey("费用清单");
+				String content = "";
+				List<PostApprovalFormItem> items = list.stream().map(p->ConvertHelper.convert(p, PostApprovalFormItem.class))
+						.collect(Collectors.toList());
+				content += "本次服务的费用清单如下，请进行确认\n";
+				Long total = Long.valueOf(getTextString(getFormItem(items,"总计").getFieldValue()));
+				content += "总计:"+total+"元\n";
+				Long serviceFee = Long.valueOf(getTextString(getFormItem(items,"服务费").getFieldValue()));
+				content += "服务费:"+total+"元\n";
+				content += "物品费:"+(total-serviceFee)+"元\n";
+				PostApprovalFormItem subForm = getFormItem(items,"物品");
+				if (subForm!=null) {
+					PostApprovalFormSubformValue subFormValue = JSON.parseObject(subForm.getFieldValue(), PostApprovalFormSubformValue.class);
+					List<PostApprovalFormSubformItemValue> array = subFormValue.getForms();
+					if (array.size()!=0) {
+						content += "物品费详情：\n";
+						Gson g=new Gson();
+						for (PostApprovalFormSubformItemValue itemValue : array){
+							List<PostApprovalFormItem> values = itemValue.getValues();
+							content += getTextString(getFormItem(values,"物品名称").getFieldValue())+":";
+							content += getTextString(getFormItem(values,"小计").getFieldValue())+"元";
+							content += "("+getTextString(getFormItem(values,"单价").getFieldValue())+"元*"+
+									getTextString(getFormItem(values,"数量").getFieldValue())+")";
+						}
+						content += "如对上述费用有疑义请附言说明";
+					}
+				}
+				e.setValue(content);
+				entities.add(e);
+			}else {
+				e = new FlowCaseEntity();
+				e.setEntityType(FlowCaseEntityType.LIST.getCode());
+				e.setKey("费用清单");
+				e.setValue("本次服务没有产生维修费");
+				entities.add(e);
+			}
+		JSONObject jo = JSONObject.parseObject(JSONObject.toJSONString(dto));
+		jo.put("formUrl",processFormURL(EntityType.PM_TASK.getCode(),""+task.getId(),FlowOwnerType.PMTASK.getCode(),"","费用确认"));
+		if (flowUserType!=null)
+			jo.put("flowUserType",flowUserType.getCode());
+		flowCase.setCustomObject(jo.toJSONString());
+
 		return entities;
+	}
+
+	private String getTextString(String json){
+		if (StringUtils.isEmpty(json))
+			return "";
+		return JSONObject.parseObject(json).getString("text");
+	}
+
+	private String processFormURL(String sourceType, String sourceId, String ownerType,String ownerId,String displayName) {
+		return "zl://form/create?sourceType="+sourceType+"&sourceId="+sourceId+"&ownerType="+ownerType+"&ownerId="+ownerId
+				+"&displayName="+displayName+"&metaObject=";
+	}
+
+	private PostApprovalFormItem getFormItem(List<PostApprovalFormItem> values,String name){
+		for (PostApprovalFormItem p:values)
+			if (p.getFieldName().equals(name))
+				return p;
+		return null;
 	}
 
 	@Override
@@ -271,63 +390,104 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 		String stepType = ctx.getStepType().getCode();
 		String params = flowNode.getParams();
+//motify by st.zheng 节点参数改为非必填
+//		if(StringUtils.isBlank(params)) {
+//			LOGGER.error("Invalid flowNode param.");
+//			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+//					"Invalid flowNode param.");
+//		}
 
-		if(StringUtils.isBlank(params)) {
-			LOGGER.error("Invalid flowNode param.");
-			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
-					"Invalid flowNode param.");
+		String nodeType = "";
+		if (!StringUtils.isBlank(params)) {
+			JSONObject paramJson = JSONObject.parseObject(params);
+			nodeType = paramJson.getString("nodeType");
 		}
 
-		JSONObject paramJson = JSONObject.parseObject(params);
-		String nodeType = paramJson.getString("nodeType");
 
 		LOGGER.debug("update pmtask request, stepType={}, nodeType={}", stepType, nodeType);
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
 			if ("ASSIGNING".equals(nodeType)) {
-					FlowGraphEvent evt = ctx.getCurrentEvent();
-					if(evt != null) {
-						for(FlowEntitySel es : evt.getEntitySel()) {
-							//update by janson
-							if(!FlowEntityType.FLOW_SELECTION.getCode().equals(es.getFlowEntityType())) {
-								continue;
-							}
-							PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
-							FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(es.getEntityId());
-							Long targetId = sel.getSourceIdA();
-
-							PmTaskLog pmTaskLog = new PmTaskLog();
-							pmTaskLog.setNamespaceId(task.getNamespaceId());
-							pmTaskLog.setOperatorTime(new Timestamp(System.currentTimeMillis()));
-							pmTaskLog.setOperatorUid(UserContext.current().getUser().getId());
-							pmTaskLog.setOwnerId(task.getOwnerId());
-							pmTaskLog.setOwnerType(task.getOwnerType());
-							pmTaskLog.setStatus(task.getStatus());
-							pmTaskLog.setTargetId(targetId);
-							pmTaskLog.setTargetType(PmTaskTargetType.USER.getCode());
-							pmTaskLog.setTaskId(task.getId());
-							pmTaskProvider.createTaskLog(pmTaskLog);							
+				FlowGraphEvent evt = ctx.getCurrentEvent();
+				if(evt != null) {
+					for(FlowEntitySel es : evt.getEntitySel()) {
+						//update by janson
+						if(!FlowEntityType.FLOW_SELECTION.getCode().equals(es.getFlowEntityType())) {
+							continue;
 						}
+						PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+						FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(es.getEntityId());
+						Long targetId = sel.getSourceIdA();
 
+						PmTaskLog pmTaskLog = new PmTaskLog();
+						pmTaskLog.setNamespaceId(task.getNamespaceId());
+						pmTaskLog.setOperatorTime(new Timestamp(System.currentTimeMillis()));
+						pmTaskLog.setOperatorUid(UserContext.current().getUser().getId());
+						pmTaskLog.setOwnerId(task.getOwnerId());
+						pmTaskLog.setOwnerType(task.getOwnerType());
+						pmTaskLog.setStatus(PmTaskFlowStatus.PROCESSING.getCode());
+						pmTaskLog.setTargetId(targetId);
+						pmTaskLog.setTargetType(PmTaskTargetType.USER.getCode());
+						pmTaskLog.setTaskId(task.getId());
+						pmTaskProvider.createTaskLog(pmTaskLog);
 					}
+
+				}
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
-			if ("ASSIGNING".equals(nodeType)) {
+			PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+			//TODO:为科兴与一碑对接
+			if(task.getNamespaceId() == 999983 &&
+					task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+				EbeiPmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
+				CancelTaskCommand command = new CancelTaskCommand();
+				command.setId(task.getId());
+				command.setOwnerId(task.getOwnerId());
+				command.setOwnerType(task.getOwnerType());
+				handler.cancelTask(command);
+
+				FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
+				stepDTO.setFlowCaseId(flowCase.getId());
+				stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+				stepDTO.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
+				flowService.processAutoStep(stepDTO);
+				ctx.setContinueFlag(false);
+
+			}else if ("ASSIGNING".equals(nodeType)) {
 				FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
 				stepDTO.setFlowCaseId(flowCase.getId());
 				stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
 				stepDTO.setAutoStepType(FlowStepType.END_STEP.getCode());
+                FlowSubject subject = ctx.getCurrentEvent().getSubject();
+                if (subject != null) {
+                    stepDTO.setSubjectId(subject.getId());
+                }
 				flowService.processAutoStep(stepDTO);
-				ctx.setContinueStep(false);
+				ctx.setContinueFlag(false);
 
-				PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+
 //				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
 				pmTaskProvider.updateTask(task);
 				pmTaskSearch.feedDoc(task);
 			}
+		}else if(FlowStepType.NO_STEP.getCode().equals(stepType)) {
+			if ("MOTIFYFEE".equals(nodeType)) {
+				FlowGraphEvent evt = ctx.getCurrentEvent();
+				if (FlowUserType.APPLIER.equals(evt.getUserType())){
+					FlowAutoStepDTO dto = new FlowAutoStepDTO();
+					dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+					dto.setFlowCaseId(flowCase.getId());
+					dto.setFlowMainId(flowCase.getFlowMainId());
+					dto.setFlowNodeId(flowCase.getCurrentNodeId());
+					dto.setFlowVersion(flowCase.getFlowVersion());
+					dto.setStepCount(flowCase.getStepCount());
+					flowService.processAutoStep(dto);
+				}
+			}
 		}
 
 	}
+
 
 	//同步数据到科技园
 	private void synchronizedTaskToTechpark(PmTask task, Long targetId, Long organizationId) {
@@ -338,10 +498,10 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			handler.pushToQueque(task.getId() + "," + targetId + "," + organizationId);
 		}
 	}
-	
+
 	@Override
 	public void onFlowCreating(Flow flow) {
-		
+
 
 	}
 
@@ -357,10 +517,17 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
-			List<Tuple<String, Object>> variables) {
+										List<Tuple<String, Object>> variables) {
 		FlowCase flowCase = ctx.getFlowCase();
 		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
-		Category category = categoryProvider.findCategoryById(task.getTaskCategoryId());
+		Category category = null;
+		//Todo:为科兴与一碑对接
+		if (task.getNamespaceId()==999983 && null!= task.getTaskCategoryId() &&
+				task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+			category = new Category();
+			category.setName("物业报修");
+		}else
+			category = categoryProvider.findCategoryById(task.getTaskCategoryId());
 
 		if (SmsTemplateCode.PM_TASK_CREATOR_CODE == templateId) {
 
@@ -369,7 +536,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			smsProvider.addToTupleList(variables, "categoryName", category.getName());
 		}else if (SmsTemplateCode.PM_TASK_FLOW_ASSIGN_CODE == templateId) {
 			//分配任务
-			List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.ASSIGNING.getCode());
+			List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.PROCESSING.getCode());
 
 			if (logs.size() != 0) {
 				Long targetId = logs.get(0).getTargetId();
@@ -398,5 +565,68 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			smsProvider.addToTupleList(variables, "categoryName", category.getName());
 		}
 
+	}
+
+	@Override
+	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
+
+		List<Category> categories = new ArrayList<>();
+		for (Long id: PmTaskAppType.TYPES) {
+			categories.addAll(categoryProvider.listTaskCategories(namespaceId, id, null,
+					null, null));
+		}
+
+		if(namespaceId == 999983) {
+			EbeiPmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
+			CategoryDTO dto = handler.createCategoryDTO();
+			Category category = ConvertHelper.convert(dto, Category.class);
+			categories.add(category);
+		}
+
+		return categories.stream().map(c -> {
+			FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+			dto.setId(c.getId());
+			dto.setNamespaceId(namespaceId);
+			dto.setServiceName(c.getName());
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+		List<FlowConditionVariableDTO> list = new ArrayList<>();
+		FlowConditionVariableDTO dto = new FlowConditionVariableDTO();
+		dto.setDisplayName("报修类型");
+		dto.setName("taskCategoryId");
+		dto.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+		dto.setOperators(new ArrayList<>());
+		dto.getOperators().add(FlowConditionRelationalOperatorType.EQUAL.getCode());
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		ListTaskCategoriesCommand cmd = new ListTaskCategoriesCommand();
+		cmd.setNamespaceId(namespaceId);
+		if (flow.getModuleType().equals(FlowModuleType.NO_MODULE.getCode()))
+			cmd.setTaskCategoryId(PmTaskAppType.REPAIR_ID);
+		else
+			cmd.setTaskCategoryId(PmTaskAppType.SUGGESTION_ID);
+		ListTaskCategoriesResponse response = pmTaskService.listTaskCategories(cmd);
+		dto.setOptions(new ArrayList<>());
+		response.getRequests().forEach(p->{
+			dto.getOptions().add(p.getName());
+		});
+		list.add(dto);
+		return list;
+	}
+
+	@Override
+	public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) {
+		//目前只有类型一个分支参数
+		if ("taskCategoryId".equals(variable)) {
+			FlowCase flowcase = ctx.getFlowCase();
+			PmTask pmTask = pmTaskProvider.findTaskById(flowcase.getReferId());
+			Category category = categoryProvider.findCategoryById(pmTask.getTaskCategoryId());
+			FlowConditionStringVariable flowConditionStringVariable = new FlowConditionStringVariable(category.getName());
+			return flowConditionStringVariable;
+		}
+		return null;
 	}
 }

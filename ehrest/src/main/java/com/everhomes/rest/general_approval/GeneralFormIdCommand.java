@@ -12,6 +12,16 @@ import com.everhomes.util.StringHelper;
 public class GeneralFormIdCommand {
 	private Long formOriginId;
 
+	//	added by LiMingDang for approval1.6
+	private String moduleType;
+	
+	public GeneralFormIdCommand() {
+	}
+
+	public GeneralFormIdCommand(Long formOriginId) {
+		this.formOriginId = formOriginId;
+	}
+
 	public Long getFormOriginId() {
 		return formOriginId;
 	}
@@ -19,7 +29,15 @@ public class GeneralFormIdCommand {
 	public void setFormOriginId(Long formOriginId) {
 		this.formOriginId = formOriginId;
 	}
-	
+
+	public String getModuleType() {
+		return moduleType;
+	}
+
+	public void setModuleType(String moduleType) {
+		this.moduleType = moduleType;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

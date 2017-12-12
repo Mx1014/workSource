@@ -1,9 +1,5 @@
 package com.everhomes.statistics.terminal;
 
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.statistics.transaction.*;
-import org.jooq.Condition;
-
 import java.util.List;
 
 
@@ -15,11 +11,11 @@ public interface StatTerminalProvider {
 	
 	void createTerminalAppVersionStatistics(TerminalAppVersionStatistics terminalAppVersionStatistics);
 	
-	void deleteTerminalDayStatistics(String date);
+	void deleteTerminalDayStatistics(Integer namespaceId, String date);
 
-	void deleteTerminalHourStatistics(String date);
+	void deleteTerminalHourStatistics(Integer namespaceId, String date);
 
-	void deleteTerminalAppVersionStatistics(String startDate);
+	void deleteTerminalAppVersionStatistics(Integer namespaceId, String startDate);
 
 	TerminalDayStatistics statisticalUserActivity(String date, String hour, Integer namespaceId);
 
@@ -37,7 +33,7 @@ public interface StatTerminalProvider {
 
 	List<AppVersion> listAppVersions(Integer namespaceId);
 
-	TerminalStatisticsTask getTerminalStatisticsTaskByTaskNo(String taskNo);
+	TerminalStatisticsTask getTerminalStatisticsTaskByTaskNo(Integer namespaceId, String taskNo);
 
 	void createTerminalStatisticsTask(TerminalStatisticsTask task);
 
@@ -64,4 +60,12 @@ public interface StatTerminalProvider {
 	void createAppVersion(AppVersion appVersion);
 
 	AppVersion findAppVersion(Integer namespaceId, String name, String type);
+
+    void deleteTerminalStatTask(Integer namespaceId, String startDate, String endDate);
+
+    void cleanTerminalAppVersionCumulativeByCondition(Integer namespaceId);
+
+    AppVersion findLastAppVersion(Integer namespaceId);
+
+    void cleanUserActivitiesWithNullAppVersion(Integer namespaceId);
 }

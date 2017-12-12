@@ -24,7 +24,7 @@ public interface YellowPageProvider {
 	
 	
 	List<ServiceAlliances> queryServiceAlliance(CrossShardListingLocator locator, int pageSize,
-												String ownerType, Long ownerId, Long parentId, Long categoryId, String keywords, Condition condition);
+												String ownerType, Long ownerId, Long parentId, Long categoryId, String keywords,Condition conditionOR );
 
 	/**
 	 * add by dengs,20170428 不仅查小区，也查询物业公司下的 服务联盟机构
@@ -55,6 +55,7 @@ public interface YellowPageProvider {
 	
 	ServiceAllianceCategories findCategoryById(Long id);
 	ServiceAllianceCategories findCategoryByName(Integer namespaceId, String name);
+	ServiceAllianceCategories findCategoryByEntryId(Integer namespaceId, Integer EntryId);
 	void createCategory(ServiceAllianceCategories category);
 	void updateCategory(ServiceAllianceCategories category);
 	void createServiceAlliances(ServiceAlliances sa);
@@ -73,7 +74,7 @@ public interface YellowPageProvider {
 	void deleteNotifyTarget(Long id);
 	ServiceAllianceNotifyTargets findNotifyTarget(String ownerType, Long ownerId, Long id);
 	ServiceAllianceNotifyTargets findNotifyTarget(String ownerType, Long ownerId, Long categoryId, Byte contactType, String contactToken);
-	List<ServiceAllianceNotifyTargets> listNotifyTargets(String ownerType, Long ownerId, Byte contactType, 
+	List<ServiceAllianceNotifyTargets> listNotifyTargets(Integer namespaceId, Byte contactType, 
 			Long categoryId, CrossShardListingLocator locator, int pageSize);
 	
 	Long createServiceAllianceRequests(ServiceAllianceRequests request);
@@ -133,4 +134,19 @@ public interface YellowPageProvider {
 	 */
 	void updateServiceAlliancesDisplayFlag(Long id, Byte showFlag);
 
+	void createServiceAllianceCategory(ServiceAllianceCategories serviceAllianceCategories);
+
+	void updateServiceAllianceCategory(ServiceAllianceCategories serviceAllianceCategories);
+
+	void createServiceAllianceSkipRule(ServiceAllianceSkipRule serviceAllianceSkipRule);
+
+	void deleteServiceAllianceSkipRule(Long id);
+
+	ServiceAllianceSkipRule getCateorySkipRule(Long categoryId, Integer namespaceId);
+
+
+	List<Integer> listAscEntryIds(int namespaceId);
+
+
+	void updateEntryIdNullByNamespaceId(Integer namespaceId);
 }

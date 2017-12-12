@@ -1,9 +1,11 @@
 package com.everhomes.rest.energy;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -28,6 +30,9 @@ import java.sql.Timestamp;
  *     <li>monthPrompt: 每月读表提示</li>
  *     <li>calculationType: 价格计算方式 参考{@link com.everhomes.rest.energy.PriceCalculationType}</li>
  *     <li>priceConfig: 梯度价格方案 参考{@link com.everhomes.rest.energy.EnergyMeterPriceConfigDTO}</li>
+ *     <li>addresses: 表记所属楼栋门牌</li>
+ *     <li>assignedPlan: 是否关联计划</li>
+ *     <li>planName: 关联计划名称列表</li>
  * </ul>
  */
 public class EnergyMeterDTO {
@@ -48,13 +53,50 @@ public class EnergyMeterDTO {
     private String status;
     private Timestamp lastReadTime;
     private BigDecimal lastReading;
+    private BigDecimal lastTaskReading;
 
     private Byte todayReadStatus;
     private BigDecimal dayPrompt;
     private BigDecimal monthPrompt;
-
+    @ItemType(String.class)
+    private List<String> planName;
+    private Boolean assignedPlan;
     private Byte calculationType;
     private EnergyMeterPriceConfigDTO priceConfig;
+    @ItemType(EnergyMeterAddressDTO.class)
+    private List<EnergyMeterAddressDTO> addresses;
+
+    public List<String> getPlanName() {
+        return planName;
+    }
+
+    public void setPlanName(List<String> planName) {
+        this.planName = planName;
+    }
+
+    public BigDecimal getLastTaskReading() {
+        return lastTaskReading;
+    }
+
+    public void setLastTaskReading(BigDecimal lastTaskReading) {
+        this.lastTaskReading = lastTaskReading;
+    }
+
+    public Boolean getAssignedPlan() {
+        return assignedPlan;
+    }
+
+    public void setAssignedPlan(Boolean assignedPlan) {
+        this.assignedPlan = assignedPlan;
+    }
+
+    public List<EnergyMeterAddressDTO> getAddresses() {
+        return addresses;
+    }
+
+    public void setAddresses(List<EnergyMeterAddressDTO> addresses) {
+        this.addresses = addresses;
+    }
 
     public Long getId() {
         return id;

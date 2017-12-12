@@ -1,12 +1,14 @@
 // @formatter:off
 package com.everhomes.rest.flow;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
+ *     <li>flowCaseId: 预先申请的flowCaseId, 可以使用flowService#getNextFlowCaseId申请，推荐设置这个值</li>
  *     <li>flowMainId: enabled flow id</li>
  *     <li>flowVersion: flow 版本</li>
  *     <li>applyUserId: 申请人id</li>
@@ -16,11 +18,14 @@ import javax.validation.constraints.NotNull;
  *     <li>projectType: 小区类型 {@link com.everhomes.rest.common.EntityType#COMMUNITY}</li>
  *     <li>content: 列表展示内容</li>
  *     <li>title: 标题</li>
- *     <li>currentOrganizationId: 用户当前场景下的公司id</li>
+ *     <li>currentOrganizationId: 用户当前场景下的公司id,推荐传这个值，要不然就无法设置工作流的某些功能</li>
+ *     <li>serviceType: 业务类型</li>
+ *     <li>routeUri: 路由</li>
  * </ul>
  */
 public class CreateFlowCaseCommand {
 
+    private Long flowCaseId;
     private Long flowMainId;
     private Integer flowVersion;
     private Long applyUserId;
@@ -32,6 +37,12 @@ public class CreateFlowCaseCommand {
     private String title;
     @NotNull
     private Long currentOrganizationId;
+    private String serviceType;
+
+    private String routeUri;
+
+    @ItemType(FlowCaseAdditionalFieldDTO.class)
+    private FlowCaseAdditionalFieldDTO additionalFieldDTO;
 
     public Long getFlowMainId() {
         return flowMainId;
@@ -111,6 +122,38 @@ public class CreateFlowCaseCommand {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(String serviceType) {
+        this.serviceType = serviceType;
+    }
+
+    public FlowCaseAdditionalFieldDTO getAdditionalFieldDTO() {
+        return additionalFieldDTO;
+    }
+
+    public void setAdditionalFieldDTO(FlowCaseAdditionalFieldDTO additionalFieldDTO) {
+        this.additionalFieldDTO = additionalFieldDTO;
+    }
+
+    public String getRouteUri() {
+        return routeUri;
+    }
+
+    public void setRouteUri(String routeUri) {
+        this.routeUri = routeUri;
+    }
+
+    public Long getFlowCaseId() {
+        return flowCaseId;
+    }
+
+    public void setFlowCaseId(Long flowCaseId) {
+        this.flowCaseId = flowCaseId;
     }
 
     @Override

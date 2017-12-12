@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>expressCompanyId: 快递公司id</li>
  * <li>status: 状态，参考{@link com.everhomes.rest.express.ExpressOrderStatus}</li>
  * <li>keyword: 关键字</li>
+ * <li>sendType: 寄件类型</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
@@ -33,12 +34,15 @@ public class ListExpressOrderCommand {
 	private Long pageAnchor;
 
 	private Integer pageSize;
+	
+	private Byte sendType;
 
 	public ListExpressOrderCommand() {
 
 	}
 
-	public ListExpressOrderCommand(String ownerType, Long ownerId, Long serviceAddressId, Long expressCompanyId, Byte status, String keyword, Long pageAnchor, Integer pageSize) {
+	public ListExpressOrderCommand(String ownerType, Long ownerId, Long serviceAddressId, Long expressCompanyId,
+			Byte status, String keyword, Long pageAnchor, Integer pageSize, Byte sendType) {
 		super();
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
@@ -48,6 +52,7 @@ public class ListExpressOrderCommand {
 		this.keyword = keyword;
 		this.pageAnchor = pageAnchor;
 		this.pageSize = pageSize;
+		this.sendType = sendType;
 	}
 
 	public String getOwnerType() {
@@ -112,6 +117,14 @@ public class ListExpressOrderCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public Byte getSendType() {
+		return sendType;
+	}
+
+	public void setSendType(Byte sendType) {
+		this.sendType = sendType;
 	}
 
 	@Override

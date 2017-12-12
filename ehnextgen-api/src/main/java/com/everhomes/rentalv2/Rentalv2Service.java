@@ -7,46 +7,26 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
 
 public interface Rentalv2Service { 
-//	void updateRentalRule(UpdateRentalRuleCommand cmd);
-
-//	Long addRentalSite(AddRentalSiteCommand cmd);
 
 	void addItem(AddItemAdminCommand cmd);
- 
-
-//	FindRentalSitesStatusCommandResponse findRentalSiteDayStatus(
-//			FindRentalSitesStatusCommand cmd);
-
-//	GetRentalSiteTypeResponse findRentalSiteTypes();
 
 	FindRentalSiteItemsAndAttachmentsResponse findRentalSiteItems(
 			FindRentalSiteItemsAndAttachmentsCommand cmd);
 
 	FindRentalSitesCommandResponse findRentalSites(FindRentalSitesCommand cmd);
 
-	FindRentalSiteRulesCommandResponse findRentalSiteRules(
-			FindRentalSiteRulesCommand cmd);
-
 	RentalBillDTO addRentalBill(AddRentalBillCommand cmd);
 
 	FindRentalBillsCommandResponse findRentalBills(FindRentalBillsCommand cmd);
 
-//	GetRentalTypeRuleCommandResponse getRentalTypeRule(
-//			GetRentalTypeRuleCommand cmd);
-
 	void addRentalSiteSimpleRules(AddRentalSiteRulesAdminCommand cmd);
- 
-	void deleteRentalSiteRules(DeleteRentalSiteRulesCommand cmd);
 
 	void cancelRentalBill(CancelRentalBillCommand cmd);
-
-	void updateRentalSite(UpdateRentalSiteCommand cmd);
-
-	void deleteRentalSite(DeleteRentalSiteCommand cmd);
 
 	void deleteRentalSiteItem(DeleteItemAdminCommand cmd);
 
@@ -54,6 +34,8 @@ public interface Rentalv2Service {
 			GetItemListAdminCommand cmd);
 
 	AddRentalBillItemCommandResponse addRentalItemBill(AddRentalBillItemCommand cmd);
+
+	AddRentalBillItemV2Response addRentalItemBillV2(AddRentalBillItemCommand cmd);
 
 	ListRentalBillsCommandResponse listRentalBills(ListRentalBillsCommand cmd);
 
@@ -65,16 +47,9 @@ public interface Rentalv2Service {
 	FindRentalSiteWeekStatusCommandResponse findRentalSiteWeekStatus(
 			FindRentalSiteWeekStatusCommand cmd);
 
-	RentalBillDTO confirmBill(ConfirmBillCommand cmd);
-
 	RentalBillDTO completeBill(CompleteBillCommand cmd);
 
 	RentalBillDTO incompleteBill(IncompleteBillCommand cmd);
-
-	void disableRentalSite(DisableRentalSiteCommand cmd);
-
-	void enableRentalSite(EnableRentalSiteCommand cmd);
- 
 
 	BatchCompleteBillCommandResponse batchIncompleteBill(
 			BatchIncompleteBillCommand cmd);
@@ -82,19 +57,14 @@ public interface Rentalv2Service {
 	BatchCompleteBillCommandResponse batchCompleteBill(
 			BatchCompleteBillCommand cmd);
 
-	ListRentalBillCountCommandResponse listRentalBillCount(
-			ListRentalBillCountCommand cmd);
-
-//	VerifyRentalBillCommandResponse VerifyRentalBill(AddRentalBillCommand cmd);
-	
-	public HttpServletResponse exportRentalBills(@Valid ListRentalBillsCommand cmd,HttpServletResponse response);
+	HttpServletResponse exportRentalBills(ListRentalBillsCommand cmd,HttpServletResponse response);
 	void mappingRentalBillDTO(RentalBillDTO dto, RentalOrder bill);
 	void addDefaultRule(AddDefaultRuleAdminCommand cmd);
 	QueryDefaultRuleAdminResponse queryDefaultRule(QueryDefaultRuleAdminCommand cmd);
 	GetResourceListAdminResponse getResourceList(GetResourceListAdminCommand cmd);
 	void addResource(AddResourceAdminCommand cmd);
 	void updateResource(UpdateResourceAdminCommand cmd);
-	void updateResourceOrder(@Valid UpdateResourceOrderAdminCommand cmd);
+	void updateResourceOrder(UpdateResourceOrderAdminCommand cmd);
 	void updateItem(UpdateItemAdminCommand cmd);
 	void updateItems(UpdateItemsAdminCommand cmd);
 	FindAutoAssignRentalSiteWeekStatusResponse findAutoAssignRentalSiteWeekStatus(
@@ -102,9 +72,7 @@ public interface Rentalv2Service {
 	FindAutoAssignRentalSiteDayStatusResponse findAutoAssignRentalSiteDayStatus(
 			FindAutoAssignRentalSiteDayStatusCommand cmd);
 	void updateRentalSiteSimpleRules(UpdateRentalSiteRulesAdminCommand cmd);
-	void updateRentalSiteDiscount(UpdateRentalSiteDiscountAdminCommand cmd);
 	void valiRentalBill(List<RentalBillRuleDTO> ruleDTOs);
-	void valiRentalBill(Double rentalcount, List<RentalBillRuleDTO> ruleDTOs);
 
 	void updateDefaultRule(UpdateDefaultRuleAdminCommand cmd);
 
@@ -185,10 +153,14 @@ public interface Rentalv2Service {
 
 	CommonOrderDTO getRentalBillPayInfo(GetRentalBillPayInfoCommand cmd);
 
+	PreOrderDTO getRentalBillPayInfoV2(GetRentalBillPayInfoCommand cmd);
 
 	FindRentalSiteYearStatusCommandResponse findRentalSiteYearStatus(FindRentalSiteYearStatusCommand cmd);
 
 
 	FindAutoAssignRentalSiteYearStatusResponse findAutoAssignRentalSiteYearStatus(
 			FindAutoAssignRentalSiteYearStatusCommand cmd);
+
+	void rentalSchedule();
+
 }

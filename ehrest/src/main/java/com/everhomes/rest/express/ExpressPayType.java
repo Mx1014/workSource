@@ -5,10 +5,11 @@ package com.everhomes.rest.express;
  * 
  * <ul>
  * <li>CASH: 1，寄付现结</li>
+ * <li>OFFLINE: 2，线下支付</li>
  * </ul>
  */
 public enum ExpressPayType {
-	CASH((byte)1);
+	CASH((byte)1),OFFLINE((byte)2);
 	
 	private byte code;
 	

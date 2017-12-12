@@ -1,8 +1,18 @@
 package com.everhomes.rest.flow;
 
+/**
+ * 
+ * <ul>
+ * <li>any-module : 任何模块</li>
+ * <li>service_alliance : 服务联盟应用模块</li>
+ * </ul>
+ *
+ *  @author:dengs
+ */
 public enum FlowModuleType {
 
-	NO_MODULE("any-module");
+	NO_MODULE("any-module"),REPAIR_MODULE("repair"),SUGGESTION_MODULE("suggestion"),
+	SERVICE_ALLIANCE("service_alliance");
 	
 	private String code;
     private FlowModuleType(String code) {
@@ -18,9 +28,11 @@ public enum FlowModuleType {
     		return null;
     	}
         
-        if(code.equalsIgnoreCase(NO_MODULE.getCode())) {
-        	return NO_MODULE;
-        }
+    	for(FlowModuleType t : FlowModuleType.values()) {
+    		if(code.equalsIgnoreCase(t.getCode())) {
+    			return t;
+    		}
+    	}
 
         return null;
     }

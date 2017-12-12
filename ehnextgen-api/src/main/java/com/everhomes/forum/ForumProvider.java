@@ -282,4 +282,24 @@ public interface ForumProvider {
 	List<Post> listForumCommentByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, int pageSize);
 
 	List<Post> listForumCommentByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
+
+
+    Forum findForumByNamespaceId(Integer namespaceId);
+
+    List<Post> listPostsByRealPostId(Long realPostId);
+
+    List<ForumCategory> listForumCategoryByForumId(Long forumId);
+
+    ForumCategory findForumCategoryById(Long Id);
+
+    InteractSetting findInteractSetting(Integer namespaceId, Long forumId, String type, Long entryId);
+
+    void createForumServiceTypes(List<ForumServiceType> list);
+
+    List<ForumServiceType> listForumServiceTypes(Integer namespaceId, Byte moduleType, Long categoryId);
+
+    void deleteForumServiceTypes(List<Long> ids);
+
+    //ForumCategory findForumCategory(Long forumId, Long entryId);
+
 }

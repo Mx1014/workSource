@@ -34,6 +34,8 @@ public class ListOrgNearbyActivitiesCommand {
     @ItemType(Integer.class)
     private List<Integer> activityStatusList;
 
+    private String sceneToken;
+
     public Long getContentCategoryId() {
 		return contentCategoryId;
 	}
@@ -96,6 +98,14 @@ public class ListOrgNearbyActivitiesCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public String getSceneToken() {
+        return sceneToken;
+    }
+
+    public void setSceneToken(String sceneToken) {
+        this.sceneToken = sceneToken;
     }
 
     @Override

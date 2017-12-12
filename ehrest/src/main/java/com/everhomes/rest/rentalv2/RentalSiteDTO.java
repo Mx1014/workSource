@@ -66,6 +66,8 @@ import com.everhomes.util.StringHelper;
  * <li>payMode: 支付模式</li>
  * <li>sitePriceRules: 价格策略，参考{@link com.everhomes.rest.rentalv2.SitePriceRuleDTO}</li>
  * <li>unauthVisible: 非认证用户是否可见，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ * <li>AclinkId: 门禁组id</li>
+ * <li>AclinkName: 门禁组名</li>
  * </ul>
  */
 public class RentalSiteDTO {
@@ -129,18 +131,20 @@ public class RentalSiteDTO {
     private Byte payMode;
 
     private Byte unauthVisible;
-    
+
+	private Long aclinkId;
+	private String aclinkName;
     @ItemType(SitePriceRuleDTO.class)
     private List<SitePriceRuleDTO> sitePriceRules;
     
-    @Deprecated
-	private java.lang.Byte       discountType;
-    @Deprecated
-	private java.math.BigDecimal fullPrice;
-    @Deprecated
-	private java.math.BigDecimal cutPrice;
-    @Deprecated
-	private java.lang.Double     discountRatio;
+//    @Deprecated
+//	private java.lang.Byte       discountType;
+//    @Deprecated
+//	private java.math.BigDecimal fullPrice;
+//    @Deprecated
+//	private java.math.BigDecimal cutPrice;
+//    @Deprecated
+//	private java.lang.Double     discountRatio;
     @Deprecated
 	private java.lang.Byte       rentalType;
     
@@ -391,44 +395,44 @@ public class RentalSiteDTO {
 	}
 
 
-	public java.lang.Byte getDiscountType() {
-		return discountType;
-	}
-
-
-	public void setDiscountType(java.lang.Byte discountType) {
-		this.discountType = discountType;
-	}
-
-
-	public java.math.BigDecimal getFullPrice() {
-		return fullPrice;
-	}
-
-
-	public void setFullPrice(java.math.BigDecimal fullPrice) {
-		this.fullPrice = fullPrice;
-	}
-
-
-	public java.math.BigDecimal getCutPrice() {
-		return cutPrice;
-	}
-
-
-	public void setCutPrice(java.math.BigDecimal cutPrice) {
-		this.cutPrice = cutPrice;
-	}
-
-
-	public java.lang.Double getDiscountRatio() {
-		return discountRatio;
-	}
-
-
-	public void setDiscountRatio(java.lang.Double discountRatio) {
-		this.discountRatio = discountRatio;
-	}
+//	public java.lang.Byte getDiscountType() {
+//		return discountType;
+//	}
+//
+//
+//	public void setDiscountType(java.lang.Byte discountType) {
+//		this.discountType = discountType;
+//	}
+//
+//
+//	public java.math.BigDecimal getFullPrice() {
+//		return fullPrice;
+//	}
+//
+//
+//	public void setFullPrice(java.math.BigDecimal fullPrice) {
+//		this.fullPrice = fullPrice;
+//	}
+//
+//
+//	public java.math.BigDecimal getCutPrice() {
+//		return cutPrice;
+//	}
+//
+//
+//	public void setCutPrice(java.math.BigDecimal cutPrice) {
+//		this.cutPrice = cutPrice;
+//	}
+//
+//
+//	public java.lang.Double getDiscountRatio() {
+//		return discountRatio;
+//	}
+//
+//
+//	public void setDiscountRatio(java.lang.Double discountRatio) {
+//		this.discountRatio = discountRatio;
+//	}
 
 
 	public java.lang.Byte getRentalType() {
@@ -683,5 +687,21 @@ public class RentalSiteDTO {
 
 	public void setRentalEndTime(Long rentalEndTime) {
 		this.rentalEndTime = rentalEndTime;
+	}
+
+	public Long getAclinkId() {
+		return aclinkId;
+	}
+
+	public void setAclinkId(Long aclinkId) {
+		this.aclinkId = aclinkId;
+	}
+
+	public String getAclinkName() {
+		return aclinkName;
+	}
+
+	public void setAclinkName(String aclinkName) {
+		this.aclinkName = aclinkName;
 	}
 }

@@ -1,3 +1,4 @@
+
 package com.everhomes.rest.energy;
 
 import com.everhomes.util.StringHelper;
@@ -14,9 +15,19 @@ import javax.validation.constraints.Size;
  */
 public class UpdateEnergyMeterCategoryCommand {
 
+    private Long communityId;
     @NotNull private Long organizationId;
     @NotNull private Long categoryId;
     @NotNull @Size(max = 255) private String name;
+    private Integer namespaceId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Long getOrganizationId() {
         return organizationId;
@@ -42,8 +53,17 @@ public class UpdateEnergyMeterCategoryCommand {
         this.name = name;
     }
 
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 }
+

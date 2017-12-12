@@ -5,27 +5,28 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 
 /**
  * <ul>
  * <li>id：实体id</li>
  * <li>namespaceId：命名空间</li>
+ * <li>communityId：招租信息归属园区</li>
  * <li>buildingId：楼栋ID</li>
  * <li>buildingName：楼栋名</li>
  * <li>rentPosition：招租位置</li>
  * <li>rentType：招租类型：1：出租{@link com.everhomes.rest.techpark.expansion.LeasePromotionType} </li>
- * <li>posterUri：封面uri，标题图 </li>
- * <li>posterUrl：标题图的URL </li>
+ * <li>posterUrl：封面,标题图的URL </li>
  * <li>rentAreas：招租面积</li>
  * <li>contacts：联系人</li>
  * <li>contactPhone：联系电话</li>
+ * <li>enterTimeFlag：入住时间是否启用 {@link com.everhomes.rest.techpark.expansion.LeasePromotionFlag  0 ：否  1 是}</li>
  * <li>enterTime：入住时间</li>
  * <li>status：命名空间 参考{@link com.everhomes.rest.techpark.expansion.LeasePromotionStatus}}</li>
- * <li>description：随便写一点什么</li> 
+ * <li>description：描述信息</li>
  * <li>address：地址</li> 
  * <li>attachments：附件{@link com.everhomes.rest.techpark.expansion.BuildingForRentAttachmentDTO}</li>
- * <li>enterTimeFlag：入住时间是否启用 {@link com.everhomes.rest.techpark.expansion.LeasePromotionFlag  0 ：否  1 是}</li>
  * <li>addressId：门牌ID</li>
  * <li>apartmentName：门牌地址</li>
  * <li>orientation：朝向</li>
@@ -40,21 +41,20 @@ import com.everhomes.rest.general_approval.PostApprovalFormItem;
  * <li>leasePromotionFormId：招租表单id</li>
  * <li>customFormFlag：是否启用表单 {@link com.everhomes.rest.techpark.expansion.LeasePromotionFlag  0 ：否  1 是}</li>
  * <li>formValues：招租表单字段列表 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
- * <li>requestFormId：申请表单id</li>
+ * <li>projectDTOS：招租信息可见范围列表</li>
  * </ul>
  */
 public class BuildingForRentDTO {
 	private Long id;
 	private Integer  namespaceId;
 	private Long     communityId;
+	private String communityName;
 	private Long     buildingId;
 	private String buildingName;
 	private String   rentPosition;
 	private String   rentType;
 	private String   posterUri;
 	private String   posterUrl;
-//	private String   subject;
-	private Long createUid;
 	private String   rentAreas;
 	private String   contacts;
 	private String   contactPhone;
@@ -87,22 +87,41 @@ public class BuildingForRentDTO {
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
 
-	private Long requestFormId;
+	@ItemType(ProjectDTO.class)
+	private List<ProjectDTO> projectDTOS;
 
-	public Long getCreateUid() {
-		return createUid;
+	private Byte consultFlag;
+
+	public Byte getConsultFlag() {
+		return consultFlag;
 	}
 
-	public void setCreateUid(Long createUid) {
-		this.createUid = createUid;
+	public void setConsultFlag(Byte consultFlag) {
+		this.consultFlag = consultFlag;
 	}
 
-	public Long getRequestFormId() {
-		return requestFormId;
+	public String getCommunityName() {
+		return communityName;
 	}
 
-	public void setRequestFormId(Long requestFormId) {
-		this.requestFormId = requestFormId;
+	public void setCommunityName(String communityName) {
+		this.communityName = communityName;
+	}
+
+	public String getPosterUri() {
+		return posterUri;
+	}
+
+	public void setPosterUri(String posterUri) {
+		this.posterUri = posterUri;
+	}
+
+	public List<ProjectDTO> getProjectDTOS() {
+		return projectDTOS;
+	}
+
+	public void setProjectDTOS(List<ProjectDTO> projectDTOS) {
+		this.projectDTOS = projectDTOS;
 	}
 
 	public Long getLeasePromotionFormId() {
@@ -266,14 +285,6 @@ public class BuildingForRentDTO {
 		this.rentType = rentType;
 	}
 
-	public String getPosterUri() {
-		return posterUri;
-	}
-
-	public void setPosterUri(String posterUri) {
-		this.posterUri = posterUri;
-	}
-
 	public String getPosterUrl() {
 		return posterUrl;
 	}
@@ -281,14 +292,6 @@ public class BuildingForRentDTO {
 	public void setPosterUrl(String posterUrl) {
 		this.posterUrl = posterUrl;
 	}
-
-//	public String getSubject() {
-//		return subject;
-//	}
-//
-//	public void setSubject(String subject) {
-//		this.subject = subject;
-//	}
 
 	public String getRentAreas() {
 		return rentAreas;
@@ -377,6 +380,4 @@ public class BuildingForRentDTO {
 	public void setLatitude(Double latitude) {
 		this.latitude = latitude;
 	}
-	
-	
 }

@@ -10,10 +10,7 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityGeoPoint;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.community.CommunityService;
+import com.everhomes.community.*;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -31,16 +28,21 @@ import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.oauth2.Clients;
+import com.everhomes.order.PayService;
+import com.everhomes.order.PaymentUser;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.pay.user.BusinessUserType;
 import com.everhomes.promotion.BizHttpRestCallProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.asset.CheckPaymentUserCommand;
+import com.everhomes.rest.asset.CheckPaymentUserResponse;
 import com.everhomes.rest.business.*;
 import com.everhomes.rest.business.admin.*;
 import com.everhomes.rest.category.CategoryDTO;
@@ -52,8 +54,6 @@ import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.openapi.*;
 import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
@@ -66,8 +66,8 @@ import com.everhomes.rest.user.*;
 import com.everhomes.server.schema.tables.pojos.EhBusinessPromotions;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
+import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.*;
-import com.google.gson.annotations.SerializedName;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.lucene.spatial.DistanceUtils;
@@ -144,7 +144,8 @@ public class BusinessServiceImpl implements BusinessService {
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
-
+	@Autowired
+	private PayService payService;
 	@Override
 	public void syncBusiness(SyncBusinessCommand cmd) {
 		if(cmd.getUserId() == null){
@@ -554,6 +555,7 @@ public class BusinessServiceImpl implements BusinessService {
 		}
 		
 		Community community = communityProvider.findCommunityById(communityId);
+		LOGGER.debug("processStat communityId is :" + communityId);
 		
 		if(community == null){
 			LOGGER.error("Invalid paramter communityId,community is not exists.,communityId=" + communityId);
@@ -857,7 +859,7 @@ public class BusinessServiceImpl implements BusinessService {
 		//recommand business first
 		/*dtos.sort(new Comparator<BusinessDTO>() {
 			@Override
-			public int compare(BusinessDTO o1, BusinessDTO o2) {
+			public int compareTo(BusinessDTO o1, BusinessDTO o2) {
 				return o2.getRecommendStatus() - o1.getRecommendStatus();
 			}
 		});*/
@@ -1598,6 +1600,15 @@ public class BusinessServiceImpl implements BusinessService {
 		if(null != area){
 			dto.setAreaName(area.getName());
 		}
+		Community community = this.communityProvider.findCommunityById(address.getCommunityId());
+		if(community != null){
+			dto.setCommunityName(community.getName());
+		}
+
+		Region province = regionProvider.findRegionById(city.getParentId());
+		if(null != province){
+			dto.setProvinceName(province.getName());
+		}
 		return dto;
 	}
 
@@ -1692,13 +1703,45 @@ public class BusinessServiceImpl implements BusinessService {
 
 	@Override
 	public UserAddressDTO getUserAddress(GetUserDefaultAddressCommand cmd) {
+		if(null == cmd.getUserId()){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid paramter userId null.");
+		}
+
 		UserAddressDTO dto = new UserAddressDTO();
 		Long userId = cmd.getUserId();
 		List<UserServiceAddress> serviceAddresses = userActivityProvider.findUserRelateServiceAddresses(userId);
-		dto.setServiceAddresses(serviceAddresses.stream().map(r ->{
-			return ConvertHelper.convert(r, UserServiceAddressDTO.class);
-		}).collect(Collectors.toList()));
-
+		List<UserServiceAddressDTO> userServiceAddressDTOs = new ArrayList<>();
+		for (UserServiceAddress userServiceAddress: serviceAddresses) {
+			UserServiceAddressDTO userServiceAddressDTO = ConvertHelper.convert(userServiceAddress, UserServiceAddressDTO.class);
+			Address addr = this.addressProvider.findAddressById(userServiceAddress.getAddressId());
+			if(addr == null){
+				LOGGER.error("getUserAddress-error=Address is not found,addressId = {}", userServiceAddress.getAddressId());
+				continue;
+			}
+			Region city = this.regionProvider.findRegionById(addr.getCityId());
+			if(city != null){
+				Region province = this.regionProvider.findRegionById(city.getParentId());
+				if(province != null)
+					userServiceAddressDTO.setProvince(province.getName());
+			}
+			userServiceAddressDTO.setAddressType(AddressType.SERVICE_ADDRESS.getCode());
+			userServiceAddressDTO.setId(addr.getId());
+			userServiceAddressDTO.setCity(addr.getCityName());
+			userServiceAddressDTO.setArea(addr.getAreaName());
+			userServiceAddressDTO.setAddress(addr.getAddress());
+			if(addr.getCommunityId() != null){
+				Community com = this.communityProvider.findCommunityById(addr.getCommunityId());
+				if(com != null){
+					userServiceAddressDTO.setCommunityId(addr.getCommunityId());
+					userServiceAddressDTO.setCommunityName(com.getName());
+				}
+			}
+			userServiceAddressDTO.setUserName(userServiceAddress.getContactName());
+			userServiceAddressDTO.setCallPhone(userServiceAddress.getContactToken());
+			userServiceAddressDTOs.add(userServiceAddressDTO);
+		}
+		dto.setServiceAddresses(userServiceAddressDTOs);
 		List<FamilyAddressDTO> familyAddresses = listUserFamilyAddresses(userId);
 		dto.setFamilyAddresses(familyAddresses);
 
@@ -1706,6 +1749,39 @@ public class BusinessServiceImpl implements BusinessService {
 		dto.setOrganizationAddresses(orgAddresses);
 
 		return dto;
+	}
+
+	@Override
+	public List<OrganizationDTO> getUserOrganizations(GetUserDefaultAddressCommand cmd) {
+		if(null == cmd.getUserId()){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid paramter userId null.");
+		}
+		List<OrganizationDTO> dtos = new ArrayList<>();
+		List<UserOrganizations> userOrganizations = organizationProvider.listUserOrganizationByUserId(cmd.getUserId());
+		for (UserOrganizations userOrganization: userOrganizations) {
+			Organization organizaiton = organizationProvider.findOrganizationById(userOrganization.getOrganizationId());
+			if(null != organizaiton && OrganizationStatus.fromCode(organizaiton.getStatus()) == OrganizationStatus.ACTIVE){
+				dtos.add(ConvertHelper.convert(organizaiton, OrganizationDTO.class));
+			}
+		}
+		return dtos;
+	}
+
+	@Override
+	public CheckPaymentUserResponse checkPaymentUser(CheckPaymentUserCommand cmd) {
+		CheckPaymentUserResponse res = businessProvider.checkoutPaymentUser(cmd.getUserId());
+		if(res==null){
+			res = new CheckPaymentUserResponse();
+			PaymentUser paymentUser = payService.createPaymentUser(BusinessUserType.PERSONAL.getCode(), cmd.getOwnerType(), cmd.getUserId());
+			res.setCreateTime(paymentUser.getCreateTime());
+			res.setId(paymentUser.getId());
+			res.setOwnerId(paymentUser.getOwnerId());
+			res.setOwnerType(paymentUser.getOwnerType());
+			res.setPayment_user_id(paymentUser.getPaymentUserId());
+			res.setPaymentUserType(paymentUser.getPaymentUserType());
+		}
+		return res;
 	}
 
 	@Override
@@ -2005,6 +2081,18 @@ public class BusinessServiceImpl implements BusinessService {
 	}
 
 	@Override
+	public List<BuildingDTO> listBuildingsByKeywordAndNameSpace(ListBuildingsByKeywordAndNameSpaceCommand cmd) {
+		List<Building> buildings = communityProvider.ListBuildingsBykeywordAndNameSpace(cmd.getNamespaceId(), cmd.getKeyword());
+		return buildings.stream().map(r -> {
+			BuildingDTO dto = new BuildingDTO();
+			dto.setBuildingId(r.getId());
+			dto.setBuildingName(r.getName());
+			dto.setCommunityId(r.getCommunityId());
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+	@Override
 	public Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeyword(
 			ListPropApartmentsByKeywordCommand cmd) {
 		return addressService.listApartmentsByKeywordForBusiness(cmd);
@@ -2257,7 +2345,7 @@ public class BusinessServiceImpl implements BusinessService {
             LOGGER.debug("list business promotion namespaceId={}", namespaceId);
 
         if ("biz".equals(source)) {// 从电商服务器获取数据
-            return fetchBusinessPromotionEntitiesFromBiz(namespaceId, pageSize);
+            return fetchBusinessPromotionEntitiesFromBiz(namespaceId, pageSize, cmd.getRecommendType());
         }
         // 从数据库获取数据
         else {
@@ -2274,36 +2362,7 @@ public class BusinessServiceImpl implements BusinessService {
         }
     }
 
-    /*// 商品对象
-    private static class Commodity {
-        private String id;// 商品id
-        private String commoNo;// 商品编号
-        private String commoName;// 商品名称
-        private String defaultPic;// 商品图片
-        private BigDecimal price;// 商品价格
-        private String shopNo;// 店铺编号
-        private String uri;// 商品详情链接
-
-        @Override
-        public String toString() {
-            return StringHelper.toJsonString(this);
-        }
-    }*/
-
-    // 电商服务器响应对象
-    private static class Resp {
-        private String version;
-        private Integer errorCode;
-        @SerializedName("response")
-        private List<ModulePromotionEntityDTO> response = new ArrayList<>();
-
-        @Override
-        public String toString() {
-            return StringHelper.toJsonString(this);
-        }
-    }
-
-    private ListBusinessPromotionEntitiesReponse fetchBusinessPromotionEntitiesFromBiz(Integer namespaceId, Integer pageSize) {
+    private ListBusinessPromotionEntitiesReponse fetchBusinessPromotionEntitiesFromBiz(Integer namespaceId, Integer pageSize, Byte recommendType) {
         String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_BUSINESS_PROMOTION_API, "zl-ec/rest/openapi/commodity/listRecommend");
 
         String bizServer = configurationProvider.getValue("stat.biz.server.url", "");
@@ -2317,13 +2376,16 @@ public class BusinessServiceImpl implements BusinessService {
         Map<String, String> param = new HashMap<>();
         param.put("namespaceId", String.valueOf(namespaceId));
         param.put("pageSize", String.valueOf(pageSize));
+        if (recommendType != null) {
+            param.put("recommendType", String.valueOf(recommendType));
+        }
 
         ListBusinessPromotionEntitiesReponse reponse = new ListBusinessPromotionEntitiesReponse();
         try {
             String jsonStr = HttpUtils.postJson((bizServer + bizApi), StringHelper.toJsonString(param), 10, "UTF-8");
-            Resp resp = (Resp) StringHelper.fromJsonString(jsonStr, Resp.class);
+            CommodityRespDTO resp = (CommodityRespDTO) StringHelper.fromJsonString(jsonStr, CommodityRespDTO.class);
             if (resp != null) {
-                reponse.setEntities(resp.response);
+                reponse.setEntities(resp.getResponse());
             }
             return reponse;
         } catch (Exception e) {
@@ -2417,9 +2479,9 @@ public class BusinessServiceImpl implements BusinessService {
 	@Override
 	public SearchContentsBySceneReponse searchShops(SearchContentsBySceneCommand cmd) {
 		SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
-		Integer namespaceId = sceneTokenDto.getNamespaceId();;
-		SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.SHOP.getCode());
-		
+		Integer namespaceId = sceneTokenDto.getNamespaceId();
+		SearchTypes searchType =  userService.getSearchTypes(namespaceId, SearchContentType.SHOP.getCode());
+
 		String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_SEARCH_SHOPS_API, "");
 
         String bizServer = configurationProvider.getValue("stat.biz.server.url", "");
@@ -2435,7 +2497,8 @@ public class BusinessServiceImpl implements BusinessService {
     	
         Map<String, Object> param = new HashMap<>();
         param.put("namespaceId", namespaceId);
-        param.put("keyword", String.valueOf(cmd.getKeyword()));
+		param.put("buildingId", cmd.getBuildingId());
+        param.put("keyword", cmd.getKeyword()==null?"":cmd.getKeyword());
 //        param.put("shopNo", String.valueOf(searchShopsCommand.getShopNo()));
 //        param.put("shopName", String.valueOf(searchShopsCommand.getShopName()));
         Integer pageNo = cmd.getPageAnchor() == null ? 1 : cmd.getPageAnchor().intValue();
@@ -2458,7 +2521,7 @@ public class BusinessServiceImpl implements BusinessService {
             	response.setShopDTOs(searchShopsResponse.getBody().getRows());
             	
             	if(searchShopsResponse.getBody().getHasNext())
-            	response.setNextPageAnchor(cmd.getPageAnchor() + 1);
+            	response.setNextPageAnchor(cmd.getPageAnchor()==null ? 2: cmd.getPageAnchor() + 1);
             }
 //            if (resp != null) {
 //                List<ModulePromotionEntityDTO> dtoList = new ArrayList<>();

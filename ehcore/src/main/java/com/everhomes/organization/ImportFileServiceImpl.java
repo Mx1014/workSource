@@ -60,7 +60,7 @@ public class ImportFileServiceImpl implements ImportFileService{
                     task.setStatus(ImportFileTaskStatus.FINISH.getCode());
                     task.setResult(StringHelper.toJsonString(response));
                 }catch (Exception e){
-                    LOGGER.error("executor task error.", e);
+                    LOGGER.error("executor task error. error: {}", e);
                     task.setStatus(ImportFileTaskStatus.EXCEPTION.getCode());
                     task.setResult(e.toString());
                 }finally {
@@ -85,8 +85,10 @@ public class ImportFileServiceImpl implements ImportFileService{
             if(ImportFileTaskStatus.FINISH == ImportFileTaskStatus.fromCode(task.getStatus())){
                 response =  (ImportFileResponse)StringHelper.fromJsonString(task.getResult(), ImportFileResponse.class);
                 List<ImportFileResultLog> logs =  response.getLogs();
-                for (ImportFileResultLog log: logs) {
-                    log.setErrorDescription(localeStringService.getLocalizedString(log.getScope(), log.getCode().toString(), user.getLocale(), ""));
+                if (logs != null) {
+                    for (ImportFileResultLog log : logs) {
+                        log.setErrorDescription(localeStringService.getLocalizedString(log.getScope(), log.getCode().toString(), user.getLocale(), ""));
+                    }
                 }
             }
             response.setImportStatus(task.getStatus());

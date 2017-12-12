@@ -1,6 +1,10 @@
 // @formatter:off
 package com.everhomes.express;
 
+import java.util.Map;
+
+import com.everhomes.rest.express.*;
+import com.everhomes.rest.order.PreOrderDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -9,34 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.express.AddExpressUserCommand;
-import com.everhomes.rest.express.CancelExpressOrderCommand;
-import com.everhomes.rest.express.CreateExpressOrderCommand;
-import com.everhomes.rest.express.CreateExpressOrderResponse;
-import com.everhomes.rest.express.CreateOrUpdateExpressAddressCommand;
-import com.everhomes.rest.express.CreateOrUpdateExpressAddressResponse;
-import com.everhomes.rest.express.DeleteExpressAddressCommand;
-import com.everhomes.rest.express.DeleteExpressUserCommand;
-import com.everhomes.rest.express.GetExpressLogisticsDetailCommand;
-import com.everhomes.rest.express.GetExpressLogisticsDetailResponse;
-import com.everhomes.rest.express.GetExpressOrderDetailCommand;
-import com.everhomes.rest.express.GetExpressOrderDetailResponse;
-import com.everhomes.rest.express.ListExpressAddressCommand;
-import com.everhomes.rest.express.ListExpressAddressResponse;
-import com.everhomes.rest.express.ListExpressCompanyCommand;
-import com.everhomes.rest.express.ListExpressCompanyResponse;
-import com.everhomes.rest.express.ListExpressOrderCommand;
-import com.everhomes.rest.express.ListExpressOrderResponse;
-import com.everhomes.rest.express.ListExpressQueryHistoryResponse;
-import com.everhomes.rest.express.ListExpressUserCommand;
-import com.everhomes.rest.express.ListExpressUserResponse;
-import com.everhomes.rest.express.ListPersonalExpressOrderCommand;
-import com.everhomes.rest.express.ListPersonalExpressOrderResponse;
-import com.everhomes.rest.express.ListServiceAddressCommand;
-import com.everhomes.rest.express.ListServiceAddressResponse;
-import com.everhomes.rest.express.PayExpressOrderCommand;
-import com.everhomes.rest.express.PrintExpressOrderCommand;
-import com.everhomes.rest.express.UpdatePaySummaryCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 
 @RestController
@@ -137,6 +113,16 @@ public class ExpressController extends ControllerBase {
 	@RestReturn(CommonOrderDTO.class)
 	public RestResponse payExpressOrder(PayExpressOrderCommand cmd){
 		return new RestResponse(expressService.payExpressOrder(cmd));
+	}
+
+	/**
+	 * <p>9.1. 立即支付 V2</p>
+	 * <b>URL: /express/payExpressOrderV2</b>
+	 */
+	@RequestMapping("payExpressOrderV2")
+	@RestReturn(PreOrderDTO.class)
+	public RestResponse payExpressOrderV2(PayExpressOrderCommandV2 cmd){
+		return new RestResponse(expressService.payExpressOrderV2(cmd));
 	}
 
 	/**
@@ -242,5 +228,149 @@ public class ExpressController extends ControllerBase {
 		expressService.clearExpressQueryHistory();
 		return new RestResponse();
 	}
+	
+	/**
+	 * <p>20.查询参数设置tab的显示标签(后台)</p>
+	 * <b>URL: /express/getExpressParamSetting</b>
+	 */
+	@RequestMapping("getExpressParamSetting")
+	@RestReturn(GetExpressParamSettingResponse.class)
+	public RestResponse getExpressParamSetting(){
+		return new RestResponse(expressService.getExpressParamSetting());
+	}
 
+	/**
+	 * <p>21.查询业务说明</p>
+	 * <b>URL: /express/getExpressBusinessNote</b>
+	 */
+	@RequestMapping("getExpressBusinessNote")
+	@RestReturn(GetExpressBusinessNoteResponse.class)
+	public RestResponse getExpressBusinessNote(GetExpressBusinessNoteCommand cmd){
+		return new RestResponse(expressService.getExpressBusinessNote(cmd));
+	}
+	
+	/**
+	 * <p>22.更新 业务说明</p>
+	 * <b>URL: /express/updateExpressBusinessNote</b>
+	 */
+	@RequestMapping("updateExpressBusinessNote")
+	@RestReturn(String.class)
+	public RestResponse updateExpressBusinessNote(UpdateExpressBusinessNoteCommand cmd){
+		expressService.updateExpressBusinessNote(cmd);
+		return new RestResponse();
+	}
+	
+	/**
+	 * <p>23.查询热线</p>
+	 * <b>URL: /express/listExpressHotlines</b>
+	 */
+	@RequestMapping("listExpressHotlines")
+	@RestReturn(ListExpressHotlinesResponse.class)
+	public RestResponse listExpressHotlines(ListExpressHotlinesCommand cmd){
+		return new RestResponse(expressService.listExpressHotlines(cmd));
+	}
+	
+	/**
+	 * <p>24.更新热线是否在app端显示标志</p>
+	 * <b>URL: /express/updateExpressHotlineFlag</b>
+	 */
+	@RequestMapping("updateExpressHotlineFlag")
+	@RestReturn(String.class)
+	public RestResponse updateExpressHotlineFlag(UpdateExpressHotlineFlagCommand cmd){
+		expressService.updateExpressHotlineFlag(cmd);
+		return new RestResponse();
+	}
+	
+	/**
+	 * <p>25.创建or更新热线</p>
+	 * <b>URL: /express/createOrUpdateExpressHotline</b>
+	 */
+	@RequestMapping("createOrUpdateExpressHotline")
+	@RestReturn(CreateOrUpdateExpressHotlineResponse.class)
+	public RestResponse createOrUpdateExpressHotline(CreateOrUpdateExpressHotlineCommand cmd){
+		return new RestResponse(expressService.createOrUpdateExpressHotline(cmd));
+	}
+	
+	/**
+	 * <p>26.删除热线</p>
+	 * <b>URL: /express/deleteExpressHotline</b>
+	 */
+	@RequestMapping("deleteExpressHotline")
+	@RestReturn(String.class)
+	public RestResponse deleteExpressHotline(DeleteExpressHotlineCommand cmd){
+		expressService.deleteExpressHotline(cmd);
+		return new RestResponse();
+	}
+	
+	/**
+	 * <p>27.查询寄件类型列表(后台，app)</p>
+	 * <b>URL: /express/listExpressSendTypes</b>
+	 */
+	@RequestMapping("listExpressSendTypes")
+	@RestReturn(ListExpressSendTypesResponse.class)
+	public RestResponse listExpressSendTypes(ListExpressSendTypesCommand cmd){
+		return new RestResponse(expressService.listExpressSendTypes(cmd));
+	}
+	
+	/**
+	 * <p>28.查询 热线和业务说明在app端是否显示(app)</p>
+	 * <b>URL: /express/getExpressHotlineAndBusinessNoteFlag</b>
+	 */
+	@RequestMapping("getExpressHotlineAndBusinessNoteFlag")
+	@RestReturn(GetExpressHotlineAndBusinessNoteFlagResponse.class)
+	public RestResponse getExpressHotlineAndBusinessNoteFlag(GetExpressHotlineAndBusinessNoteFlagCommand cmd){
+		return new RestResponse(expressService.getExpressHotlineAndBusinessNoteFlag(cmd));
+	}
+	
+	/**
+	 * <p>29.查询寄件方式列表 （app）</p>
+	 * <b>URL: /express/listExpressSendModes</b>
+	 */
+	@RequestMapping("listExpressSendModes")
+	@RestReturn(ListExpressSendModesResponse.class)
+	public RestResponse listExpressSendModes(ListExpressSendModesCommand cmd){
+		return new RestResponse(expressService.listExpressSendModes(cmd));
+	}
+	
+	/**
+	 * <p>30.查询封装类型列表 （app）</p>
+	 * <b>URL: /express/listExpressPackageTypes</b>
+	 */
+	@RequestMapping("listExpressPackageTypes")
+	@RestReturn(ListExpressPackageTypesResponse.class)
+	public RestResponse listExpressPackageTypes(ListExpressPackageTypesCommand cmd){
+		return new RestResponse(expressService.listExpressPackageTypes(cmd));
+	}
+	
+	/**
+	 * <p>31.查询封装文案 （app）</p>
+	 * <b>URL: /express/getExpressInsuredDocuments</b>
+	 */
+	@RequestMapping("getExpressInsuredDocuments")
+	@RestReturn(GetExpressInsuredDocumentsResponse.class)
+	public RestResponse getExpressInsuredDocuments(GetExpressInsuredDocumentsCommand cmd){
+		return new RestResponse(expressService.getExpressInsuredDocuments(cmd));
+	}
+	
+
+	/**
+	 * <p>32.订单状态列表</p>
+	 * <b>URL: /express/listExpressOrderStatus</b>
+	 */
+	@RequestMapping("listExpressOrderStatus")
+	@RestReturn(ListExpressOrderStatusResponse.class)
+	public RestResponse listExpressOrderStatus(){
+		return new RestResponse(expressService.listExpressOrderStatus());
+	}
+	
+	/**
+	 * <p>33.国贸支付，直接调用我方payserver预支付</p>
+	 * <b>URL: /express/prePayExpressOrder</b>
+	 */
+	@RequestMapping("prePayExpressOrder")
+	@RestReturn(Map.class)
+	public RestResponse prePayExpressOrder(PrePayExpressOrderCommand cmd){
+		return new RestResponse(expressService.prePayExpressOrder(cmd));
+	}
+	
 }

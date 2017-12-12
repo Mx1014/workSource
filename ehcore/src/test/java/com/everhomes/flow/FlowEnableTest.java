@@ -1,8 +1,14 @@
 package com.everhomes.flow;
 
+import com.alibaba.fastjson.JSON;
+import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.general_approval.GeneralApprovalProvider;
+import com.everhomes.general_approval.GeneralApprovalService;
+import com.everhomes.general_form.GeneralForm;
+import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.flow.*;
-import com.everhomes.rest.organization.*;
+import com.everhomes.rest.general_approval.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -68,6 +74,15 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     
     @Autowired
     private FlowEvaluateItemProvider flowEvaluateItemProvider;
+
+    @Autowired
+    private GeneralFormProvider generalFormProvider;
+
+    @Autowired
+    private GeneralApprovalProvider generalApprovalProvider;
+
+    @Autowired
+    private GeneralApprovalService generalApprovalService;
     
     private User testUser1;
     private User testUser2;
@@ -85,9 +100,9 @@ public class FlowEnableTest  extends LoginAuthTestCase {
         super.setUp();
         
     	String u1 = "15002095483";
-    	String u2 = "17788754324";
-    	String u3 = "13927485221";
-    	String u4 = "13632650699";
+    	String u2 = "12045670006";
+    	String u3 = "12045670004";
+    	String u4 = "12045670003";
     	testUser1 = userService.findUserByIndentifier(namespaceId, u1);
     	testUser2 = userService.findUserByIndentifier(namespaceId, u2);
     	testUser3 = userService.findUserByIndentifier(namespaceId, u3);
@@ -253,10 +268,10 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	
     	//evaluate support
     	UpdateFlowEvaluateCommand evaluateCmd = new UpdateFlowEvaluateCommand();
-    	evaluateCmd.setEvaluateStart(node2.getId());
-    	evaluateCmd.setEvaluateEnd(node3.getId());
-    	evaluateCmd.setEvaluateStep(FlowStepType.APPROVE_STEP.getCode());
-    	evaluateCmd.setNeedEvaluate((byte)1);
+    	// evaluateCmd.setEvaluateStart(node2.getId());
+    	// evaluateCmd.setEvaluateEnd(node3.getId());
+    	// evaluateCmd.setEvaluateStep(FlowStepType.APPROVE_STEP.getCode());
+    	// evaluateCmd.setNeedEvaluate((byte)1);
     	evaluateCmd.setFlowId(flowDTO.getId());
     	List<FlowEvaluateItemDTO> items = new ArrayList<>();
 
@@ -269,7 +284,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
         items.add(evaluateItemDTO);
         // items.add("test item1");
     	// items.add("test item2");
-    	evaluateCmd.setItems(items);
+    	// evaluateCmd.setItems(items);
     	FlowEvaluateDetailDTO evaDTO = flowService.updateFlowEvaluate(evaluateCmd);
     	Assert.assertTrue(evaDTO.getItems().size() == 2);
     	
@@ -375,7 +390,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	
 		FlowSingleUserSelectionCommand singCmd = new FlowSingleUserSelectionCommand();
 		singCmd.setFlowUserSelectionType(FlowUserSelectionType.VARIABLE.getCode());
-		singCmd.setSourceIdA(resp.getDtos().get(resp.getDtos().size()-1).getId());
+		singCmd.setSourceIdA(resp.getFlowVars().get(resp.getFlowVars().size()-1).getId());
 		singCmd.setSourceTypeA(FlowUserSourceType.SOURCE_VARIABLE.getCode());
 		action.getUserSelections().getSelections().add(singCmd);
     }
@@ -400,23 +415,23 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     }
     
     private List<Long> getOrgUsers(Long id) {
-    	List<String> groupTypes = new ArrayList<String>();
-    	groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-    	ListOrganizationsCommandResponse orgResps = organizationService.listAllChildrenOrganizations(id, groupTypes);
-    	List<OrganizationDTO> orgs = orgResps.getDtos();
-    	Assert.assertTrue(orgs.size() > 0);
-    	
-    	OrganizationDTO org = orgs.get(0);
-    	ListOrganizationContactCommand cmdContact = new ListOrganizationContactCommand();
-    	cmdContact.setVisibleFlag(VisibleFlag.ALL.getCode());
-    	cmdContact.setOrganizationId(org.getId());
-    	ListOrganizationContactCommandResponse contactResp = organizationService.listOrganizationContacts(cmdContact);
+    	// List<String> groupTypes = new ArrayList<String>();
+    	// groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+    	// ListOrganizationsCommandResponse orgResps = organizationService.listAllChildrenOrganizations(id, groupTypes);
+    	// List<OrganizationDTO> orgs = orgResps.getDtos();
+    	// Assert.assertTrue(orgs.size() > 0);
+    	//
+    	// OrganizationDTO org = orgs.get(0);
+    	// ListOrganizationContactCommand cmdContact = new ListOrganizationContactCommand();
+    	// cmdContact.setVisibleFlag(VisibleFlag.ALL.getCode());
+    	// cmdContact.setOrganizationId(org.getId());
+    	// ListOrganizationContactCommandResponse contactResp = organizationService.listOrganizationContacts(cmdContact);
     	List<Long> users = new ArrayList<>();
-    	for(OrganizationContactDTO member : contactResp.getMembers()) {
+    	/*for(OrganizationContactDTO member : contactResp.getMembers()) {
     		if(OrganizationMemberTargetType.USER.getCode().equals(member.getTargetType())) {
     			users.add(member.getTargetId());	
     		}
-    	}
+    	}*/
     	
     	//add two test users
     	users.add(testUser1.getId());
@@ -1103,7 +1118,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	cmd.setEntityType(FlowEntityType.FLOW.getCode());
     	
     	FlowVariableResponse resp = flowService.listFlowVariables(cmd);
-    	Assert.assertTrue(resp.getDtos() != null && resp.getDtos().get(0).getLabel() != null);
+    	Assert.assertTrue(resp.getFlowVars() != null && resp.getFlowVars().get(0).getLabel() != null);
     }
     
     @Test
@@ -1119,10 +1134,10 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	FlowGraph flowGraph = flowService.getFlowGraph(flow.getFlowMainId(), 0);
     	
     	UpdateFlowEvaluateCommand evaluateCmd = new UpdateFlowEvaluateCommand();
-    	evaluateCmd.setEvaluateStart(flowGraph.getNodes().get(1).getFlowNode().getId());
-    	evaluateCmd.setEvaluateEnd(flowGraph.getNodes().get(2).getFlowNode().getId());
-    	evaluateCmd.setEvaluateStep(FlowStepType.APPROVE_STEP.getCode());
-    	evaluateCmd.setNeedEvaluate((byte)1);
+    	// evaluateCmd.setEvaluateStart(flowGraph.getNodes().get(1).getFlowNode().getId());
+    	// evaluateCmd.setEvaluateEnd(flowGraph.getNodes().get(2).getFlowNode().getId());
+    	// evaluateCmd.setEvaluateStep(FlowStepType.APPROVE_STEP.getCode());
+    	// evaluateCmd.setNeedEvaluate((byte)1);
     	evaluateCmd.setFlowId(flowGraph.getFlow().getId());
         List<FlowEvaluateItemDTO> items = new ArrayList<>();
 
@@ -1135,7 +1150,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
         items.add(evaluateItemDTO);
         // items.add("test item1");
         // items.add("test item2");
-        evaluateCmd.setItems(items);
+        // evaluateCmd.setItems(items);
     	
     	FlowEvaluateDetailDTO evaDTO = flowService.updateFlowEvaluate(evaluateCmd);
     	Assert.assertTrue(evaDTO.getEvaluateStart().equals(flowGraph.getNodes().get(1).getFlowNode().getId()));
@@ -1214,8 +1229,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	Assert.assertTrue(detailDTO.getNodes().size() == 5);
     	
     }
-    
-    
+
     @Test
     public void testSMSTemplates() {
     	Long userId = testUser2.getId();
@@ -1240,5 +1254,291 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	sc.setEntityType(FlowEntityType.FLOW.getCode());
     	ListScriptsResponse scResp = flowService.listScripts(sc);
     	Assert.assertTrue(scResp.getScripts().size() > 0);
+    }
+
+    @Test
+    public void testConditionEvaluate() {
+        FlowGraphCondition condition = new FlowGraphConditionNormal();
+        FlowCondition cond = new FlowCondition();
+        cond.setConditionLevel(1);
+        cond.setNextNodeId(1L);
+        cond.setFlowNodeLevel(1);
+        condition.setCondition(cond);
+        List<FlowConditionExpression> expressions = new ArrayList<>();
+        FlowConditionExpression exp1 = new FlowConditionExpression();
+        expressions.add(exp1);
+        exp1.setVariable1("${a}");
+        exp1.setVariable2("${b}");
+        exp1.setLogicOperator("&&");
+        exp1.setRelationalOperator(">=");
+        exp1.setVariableType1("variable");
+        exp1.setVariableType2("variable");
+        FlowConditionExpression exp2 = new FlowConditionExpression();
+        expressions.add(exp2);
+        exp2.setVariable1("${a}");
+        exp2.setVariable2("1");
+        exp2.setLogicOperator("&&");
+        exp2.setRelationalOperator("==");
+        exp2.setVariableType1("variable");
+        exp2.setVariableType2("const");
+        condition.setExpressions(expressions);
+
+        FlowCaseState ctx = new FlowCaseState();
+        FlowModuleInfo module = flowListenerManager.getModule(111L);
+        ctx.setModule(module);
+
+        boolean ok = condition.isTrue(ctx);
+        assertTrue(ok);
+    }
+
+    @Test
+    public void testEnableFlow() {
+        Long flowId = 801L;
+
+        CreateFlowGraphJsonCommand cmd = new CreateFlowGraphJsonCommand();
+        cmd.setBody("{\"flowId\":801,\"nodes\":[{\"nodeLevel\":1,\"nodeName\":\"nodeName\",\"flowLaneLevel\":1,\"nodeType\":\"start\"},{\"nodeLevel\":2,\"nodeName\":\"nodeName\",\"nodeType\":\"normal\",\"flowLaneLevel\":2},{\"nodeLevel\":3,\"nodeName\":\"nodeName\",\"nodeType\":\"condition_front\",\"flowLaneLevel\":3,\"branch\":{\"branchDecider\":\"condition\",\"processMode\":\"single\",\"originalNodeLevel\":3,\"convergenceNodeLevel\":12}},{\"nodeLevel\":4,\"nodeName\":\"nodeName\",\"nodeType\":\"normal\",\"flowLaneLevel\":3},{\"nodeLevel\":5,\"nodeName\":\"nodeName\",\"flowLaneLevel\":3,\"nodeType\":\"normal\"},{\"nodeLevel\":6,\"nodeName\":\"nodeName\",\"nodeType\":\"normal\",\"flowLaneLevel\":3},{\"nodeLevel\":7,\"nodeName\":\"nodeName\",\"flowLaneLevel\":3,\"nodeType\":\"condition_front\",\"branch\":{\"branchDecider\":\"processor\",\"processMode\":\"concurrent\",\"originalNodeLevel\":7,\"convergenceNodeLevel\":12}},{\"nodeLevel\":8,\"nodeName\":\"nodeName\",\"flowLaneLevel\":3,\"nodeType\":\"normal\"},{\"nodeLevel\":9,\"nodeName\":\"nodeName\",\"flowLaneLevel\":3,\"nodeType\":\"normal\"},{\"nodeLevel\":10,\"nodeName\":\"nodeName\",\"flowLaneLevel\":3,\"nodeType\":\"normal\"},{\"nodeLevel\":11,\"nodeName\":\"nodeName\",\"flowLaneLevel\":3,\"nodeType\":\"normal\"},{\"nodeLevel\":12,\"nodeName\":\"nodeName\",\"flowLaneLevel\":4,\"nodeType\":\"normal\"},{\"nodeLevel\":13,\"nodeName\":\"nodeName\",\"flowLaneLevel\":5,\"nodeType\":\"end\"}],\"links\":[{\"linkLevel\":1,\"fromNodeLevel\":1,\"toNodeLevel\":2},{\"fromNodeLevel\":2,\"linkLevel\":2,\"toNodeLevel\":3},{\"fromNodeLevel\":3,\"linkLevel\":3,\"toNodeLevel\":4},{\"fromNodeLevel\":3,\"linkLevel\":4,\"toNodeLevel\":5},{\"fromNodeLevel\":4,\"linkLevel\":5,\"toNodeLevel\":6},{\"fromNodeLevel\":6,\"linkLevel\":6,\"toNodeLevel\":7},{\"fromNodeLevel\":7,\"linkLevel\":7,\"toNodeLevel\":8},{\"fromNodeLevel\":7,\"linkLevel\":8,\"toNodeLevel\":9},{\"fromNodeLevel\":8,\"linkLevel\":9,\"toNodeLevel\":10},{\"fromNodeLevel\":10,\"linkLevel\":10,\"toNodeLevel\":11},{\"fromNodeLevel\":9,\"linkLevel\":11,\"toNodeLevel\":11},{\"fromNodeLevel\":11,\"linkLevel\":12,\"toNodeLevel\":12},{\"fromNodeLevel\":12,\"linkLevel\":13,\"toNodeLevel\":13}],\"lanes\":[{\"displayName\":\"displayName\",\"laneLevel\":1},{\"displayName\":\"displayName\",\"laneLevel\":2},{\"displayName\":\"displayName\",\"laneLevel\":3},{\"displayName\":\"displayName\",\"laneLevel\":4},{\"displayName\":\"displayName\",\"laneLevel\":5}],\"conditions\":[{\"conditionLevel\":1,\"flowNodeLevel\":3,\"nextNodeLevel\":4,\"flowLinkLevel\":3,\"expressions\":[{\"logicOperator\":\"&&\",\"relationalOperator\":\">=\",\"variableType1\":1,\"variable1\":\"${pa1}\",\"variableType2\":1,\"variable2\":\"${pa2}\"}]}]}");
+        FlowGraphDTO graph = flowService.createOrUpdateFlowGraph(cmd);
+        assertNotNull(graph);
+
+        ListBriefFlowNodeResponse nodes = flowService.listBriefFlowNodes(flowId);
+        for (FlowNodeDTO nodeDTO : nodes.getFlowNodes()) {
+            addNodeProcessor(nodeDTO, orgId);
+        }
+
+        Boolean enableOK = flowService.enableFlow(graph.getFlowId());
+        assertTrue(enableOK);
+    }
+
+    @Test
+    public void testCreateFlowCase() {
+        setTestContext(testUser2.getId());
+        // testEnableFlow();
+
+        Flow enabledFlow = flowService.getEnabledFlow(namespaceId, 40100L, null, 240111044331048623L, "COMMUNITY");
+        CreateFlowCaseCommand createCmd = new CreateFlowCaseCommand();
+        createCmd.setFlowMainId(enabledFlow.getFlowMainId());
+        createCmd.setFlowVersion(enabledFlow.getFlowVersion());
+        createCmd.setApplyUserId(testUser1.getId());
+        createCmd.setReferType("referType");
+        createCmd.setReferId(1L);
+        createCmd.setTitle("title");
+
+        FlowCase flowCase = flowService.createFlowCase(createCmd);
+        assertNotNull(flowCase);
+
+        List<FlowButton> processorButtons = flowButtonProvider.findFlowButtonsByUserType(flowCase.getCurrentNodeId(), flowCase.getFlowVersion(), FlowUserType.PROCESSOR.getCode());
+        assertNotNull(processorButtons);
+        assertTrue(processorButtons.size() > 0);
+
+        processorButtons.stream().filter(r -> r.getFlowStepType().equals(FlowStepType.APPROVE_STEP.getCode())).findFirst().ifPresent(r -> {
+            FlowFireButtonCommand fireCmd = new FlowFireButtonCommand();
+            fireCmd.setFlowCaseId(flowCase.getId());
+            fireCmd.setButtonId(r.getId());
+            fireCmd.setContent("fire button 1");
+            fireCmd.setStepCount(flowCase.getStepCount());
+            FlowButtonDTO buttonDTO = flowService.fireButton(fireCmd);
+            assertNotNull(buttonDTO);
+
+            fireCmd = new FlowFireButtonCommand();
+            fireCmd.setFlowCaseId(flowCase.getId());
+            fireCmd.setButtonId(r.getId());
+            fireCmd.setContent("fire button 1");
+            fireCmd.setStepCount(flowCase.getStepCount() + 1);
+            buttonDTO = flowService.fireButton(fireCmd);
+            assertNotNull(buttonDTO);
+
+            /*fireCmd = new FlowFireButtonCommand();
+            fireCmd.setFlowCaseId(flowCase.getId());
+            fireCmd.setButtonId(r.getId());
+            fireCmd.setContent("fire button 1");
+            fireCmd.setStepCount(flowCase.getStepCount());
+            buttonDTO = flowService.fireButton(fireCmd);
+            assertNotNull(buttonDTO);*/
+        });
+    }
+
+    @Test
+    public void testFireButton() {
+        setTestContext(testUser2.getId());
+
+        FlowCaseDetailDTOV2 detail = flowService.getFlowCaseDetailByIdV2(3773L, testUser1.getId(), FlowUserType.PROCESSOR, false, true);
+
+        FlowCaseDetailDTOV2 case1 = detail;
+        detail.getButtons().stream().filter(r -> r.getFlowStepType().equals(FlowStepType.APPROVE_STEP.getCode())).findFirst().ifPresent(r -> {
+            FlowFireButtonCommand fireCmd = new FlowFireButtonCommand();
+            fireCmd.setFlowCaseId(case1.getId());
+            fireCmd.setButtonId(r.getId());
+            fireCmd.setContent("fire button 1");
+            fireCmd.setStepCount(case1.getStepCount());
+            FlowButtonDTO buttonDTO = flowService.fireButton(fireCmd);
+            assertNotNull(buttonDTO);
+        });
+    }
+
+    @Test
+    public void testGetFlowCaseDetail() {
+        FlowCaseDetailDTOV2 detail = flowService.getFlowCaseDetailByIdV2(3773L, testUser1.getId(), FlowUserType.PROCESSOR, false, true);
+        System.out.println(detail);
+        assertNotNull(detail);
+    }
+
+    @Test
+    public void testGetFlowCaseTrack() {
+        setTestContext(testUser1.getId());
+
+        GetFlowCaseTrackCommand cmd = new GetFlowCaseTrackCommand();
+        cmd.setFlowCaseId(3773L);
+        FlowCaseTrackDTO flowCaseTrack = flowService.getFlowCaseTrack(cmd);
+        System.out.println(flowCaseTrack);
+        assertNotNull(flowCaseTrack);
+    }
+
+    @Test
+    public void testGetFlowCaseBrief() {
+        setTestContext(testUser1.getId());
+
+        GetFlowCaseBriefCommand cmd = new GetFlowCaseBriefCommand();
+        cmd.setFlowCaseId(3773L);
+        FlowCaseBriefDTO flowCaseBrief = flowService.getFlowCaseBrief(cmd);
+        System.out.println(flowCaseBrief);
+        assertNotNull(flowCaseBrief);
+    }
+
+    @Test
+    public void testSearchOperateLogs() {
+        setTestContext(testUser1.getId());
+        SearchFlowOperateLogsCommand cmd = new SearchFlowOperateLogsCommand();
+        SearchFlowOperateLogResponse response = flowService.searchFlowOperateLogs(cmd);
+        System.out.println(response);
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testListNextBranch() {
+        setTestContext(testUser1.getId());
+
+        ListNextBranchesCommand cmd = new ListNextBranchesCommand();
+        cmd.setFlowCaseId(3773L);
+        cmd.setConditionNodeId(3840L);
+
+        ListNextBranchesResponse response = flowService.listNextBranches(cmd);
+        System.out.println(response);
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testGetOldFlowGraph() {
+        Long oldFlowId = 1197L;
+
+        FlowIdCommand cmd = new FlowIdCommand();
+        cmd.setFlowId(oldFlowId);
+        FlowGraphDTO flowGraphNew = flowService.getFlowGraphNew(cmd);
+        System.out.println(flowGraphNew);
+
+        assertTrue(flowGraphNew.getNodes().size() == 5);
+        assertTrue(flowGraphNew.getLanes().size() == 5);
+        assertTrue(flowGraphNew.getLinks().size() == 4);
+    }
+
+    @Test
+    public void testGetOldSnapshotGraph() {
+        Long oldFlowId = 1198L;
+        FlowGraph flowGraph = flowService.getFlowGraph(oldFlowId, 1);
+        assertNotNull(flowGraph);
+
+        System.out.println(flowGraph);
+
+        assertTrue(flowGraph.getLanes().size() == 4);
+        for (FlowGraphNode graphNode : flowGraph.getNodes()) {
+            if (graphNode.getFlowNode().getNodeName().equals("END")) {
+                assertTrue(graphNode.getLinksIn().size() == 1);
+            } else if (graphNode.getFlowNode().getNodeName().equals("START")) {
+                assertTrue(graphNode.getLinksOut().size() == 1);
+            } else {
+                assertTrue(graphNode.getLinksOut().size() == 1);
+                assertTrue(graphNode.getLinksIn().size() == 1);
+            }
+        }
+    }
+
+    @Test
+    public void testFlowCondition() {
+        FlowCaseState ctx = new FlowCaseState();
+        FlowModuleInfo module = flowListenerManager.getModule(52000L);
+        ctx.setModule(module);
+        ctx.setFlowCase(createFlowCase());
+
+        GeneralApproval generalApproval = generalApprovalProvider.getGeneralApprovalById(527L);
+        GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(generalApproval.getFormOriginId());
+
+        List<GeneralFormFieldDTO> fieldDTOList = JSON.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+
+        FlowGraphCondition condition = new FlowGraphConditionNormal();
+        FlowCondition cond = new FlowCondition();
+        cond.setConditionLevel(1);
+        cond.setNextNodeId(1L);
+        cond.setFlowNodeLevel(1);
+        condition.setCondition(cond);
+
+        List<FlowConditionExpression> expressions = new ArrayList<>();
+        for (int i = fieldDTOList.size() - 4; i < fieldDTOList.size(); i+=2) {
+            FlowConditionExpression exp1 = new FlowConditionExpression();
+            exp1.setVariable1(fieldDTOList.get(i).getFieldName());
+            exp1.setVariable2(fieldDTOList.get(i+1).getFieldName());
+            exp1.setLogicOperator("||");
+            exp1.setRelationalOperator("==");
+            exp1.setVariableType1(FlowConditionExpressionVarType.FORM.getCode());
+            exp1.setVariableType2(FlowConditionExpressionVarType.FORM.getCode());
+            expressions.add(exp1);
+        }
+
+        condition.setExpressions(expressions);
+
+        boolean ok = condition.isTrue(ctx);
+        assertTrue(!ok);
+    }
+
+    private FlowCase createFlowCase() {
+        setTestContext(testUser1.getId());
+
+        GeneralApproval generalApproval = generalApprovalProvider.getGeneralApprovalById(527L);
+        GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(generalApproval.getFormOriginId());
+
+        List<GeneralFormFieldDTO> fieldDTOList = JSON.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+
+        PostApprovalFormCommand cmd1 = new PostApprovalFormCommand();
+        cmd1.setApprovalId(527L);
+        cmd1.setOrganizationId(orgId);
+        cmd1.setValues(new ArrayList<>());
+
+        for (GeneralFormFieldDTO fieldDTO : fieldDTOList) {
+            PostApprovalFormItem item = new PostApprovalFormItem();
+            cmd1.getValues().add(item);
+            item.setFieldDisplayName(fieldDTO.getFieldDisplayName());
+            item.setFieldName(fieldDTO.getFieldName());
+            item.setFieldType(fieldDTO.getFieldType());
+
+            String value = "";
+            GeneralFormFieldType fieldType = GeneralFormFieldType.fromCode(item.getFieldType());
+            switch (fieldType) {
+                case DATE:
+                    value = "2017/11/11 17:50";
+                    break;
+                case NUMBER_TEXT:
+                    value = "1112.666";
+                    break;
+                case SINGLE_LINE_TEXT:
+                case DROP_BOX:
+                    value = "2017/11/11 17:50";
+                    break;
+                default:
+                    value = "1";
+            }
+
+            item.setFieldValue(String.format("{\"text\":\"%s\"}", value));
+        }
+
+        GetTemplateByApprovalIdResponse approvalForm = generalApprovalService.postApprovalForm(cmd1);
+        return flowService.getFlowCaseById(approvalForm.getFlowCaseId());
     }
 }

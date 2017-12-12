@@ -1,40 +1,84 @@
 package com.everhomes.asset;
 
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.equipment.EquipmentInspectionEquipments;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.namespace.NamespaceResourceService;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.asset.AssetBillStatus;
-import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
+import com.everhomes.order.PaymentAccount;
+import com.everhomes.order.PaymentServiceConfig;
+import com.everhomes.order.PaymentUser;
+import com.everhomes.rest.asset.*;
+import com.everhomes.rest.launchpad.ItemScope;
+import com.everhomes.rest.order.OrderType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhAssetBillTemplateFieldsDao;
-import com.everhomes.server.schema.tables.daos.EhAssetBillsDao;
+import com.everhomes.server.schema.tables.*;
+import com.everhomes.server.schema.tables.EhAddresses;
+import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
+import com.everhomes.server.schema.tables.EhCommunities;
+import com.everhomes.server.schema.tables.EhOrganizationOwners;
+import com.everhomes.server.schema.tables.EhOrganizations;
+import com.everhomes.server.schema.tables.EhPaymentAccounts;
+import com.everhomes.server.schema.tables.EhPaymentBillGroups;
+import com.everhomes.server.schema.tables.EhPaymentBillGroupsRules;
+import com.everhomes.server.schema.tables.EhPaymentBillItems;
+import com.everhomes.server.schema.tables.EhPaymentBills;
+import com.everhomes.server.schema.tables.EhPaymentChargingItemScopes;
+import com.everhomes.server.schema.tables.EhPaymentChargingItems;
+import com.everhomes.server.schema.tables.EhPaymentChargingStandards;
+import com.everhomes.server.schema.tables.EhPaymentChargingStandardsScopes;
+import com.everhomes.server.schema.tables.EhPaymentContractReceiver;
+import com.everhomes.server.schema.tables.EhPaymentExemptionItems;
+import com.everhomes.server.schema.tables.EhPaymentNoticeConfig;
+import com.everhomes.server.schema.tables.EhPaymentUsers;
+import com.everhomes.server.schema.tables.EhPaymentVariables;
+import com.everhomes.server.schema.tables.EhUserIdentifiers;
+import com.everhomes.server.schema.tables.EhUsers;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
-import com.everhomes.server.schema.tables.records.EhAssetBillNotifyRecordsRecord;
-import com.everhomes.server.schema.tables.records.EhAssetBillTemplateFieldsRecord;
-import com.everhomes.server.schema.tables.records.EhAssetBillsRecord;
-import com.everhomes.server.schema.tables.records.EhAssetVendorRecord;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
 
+import com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills;
+
+import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
+import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.*;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.StringUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
+import com.sun.xml.ws.api.SOAPVersion;
+import freemarker.core.ArithmeticEngine;
+import freemarker.core.ReturnInstruction;
+import freemarker.template.SimpleDate;
+import org.apache.log4j.spi.ErrorCode;
+import org.jooq.*;
+import org.jooq.exception.DataAccessException;
+import org.jooq.impl.DSL;
+import org.jooq.impl.TableImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jca.cci.CciOperationNotSupportedException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import scala.Char;
+import sun.util.resources.cldr.aa.CalendarData_aa_DJ;
 
+import java.io.StringBufferInputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Administrator on 2017/2/20.
@@ -49,6 +93,10 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Autowired
     private SequenceProvider sequenceProvider;
+
+    @Autowired
+    private CoordinationProvider coordinationProvider;
+
 
     @Override
     public void creatAssetBill(AssetBill bill) {
@@ -121,7 +169,7 @@ public class AssetProviderImpl implements AssetProvider {
             LOGGER.debug("findTemplateFieldByTemplateVersion, sql=" + query.getSQL());
             LOGGER.debug("findTemplateFieldByTemplateVersion, bindValues=" + query.getBindValues());
         }
-       
+
         List<AssetBillTemplateFieldDTO> templateVersions = new ArrayList<>();
         query.fetch().map((EhAssetBillTemplateFieldsRecord record) -> {
             templateVersions.add(ConvertHelper.convert(record, AssetBillTemplateFieldDTO.class));
@@ -253,7 +301,7 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public List<BigDecimal> listPeriodUnpaidAccountAmount(Long ownerId, String ownerType, Long targetId, String targetType,
-                                Long addressId, String tenantType, Long tenantId, Timestamp currentAccountPeriod) {
+                                                          Long addressId, String tenantType, Long tenantId, Timestamp currentAccountPeriod) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhAssetBillsRecord> query = context.selectQuery(Tables.EH_ASSET_BILLS);
         query.addConditions(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId));
@@ -435,4 +483,3182 @@ public class AssetProviderImpl implements AssetProvider {
 
         return query.fetchAnyInto(AssetBill.class);
     }
+
+    @Override
+    public List<ListBillsDTO> listBills(String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType,  String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status,String targetType) {
+        List<ListBillsDTO> list = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        SelectQuery<EhPaymentBillsRecord> query = context.selectQuery(t);
+//        if(currentNamespaceId.intValue() != (int)0){
+//            query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
+//        }
+        query.addConditions(t.OWNER_ID.eq(ownerId));
+        query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        if(!org.springframework.util.StringUtils.isEmpty(status)){
+            query.addConditions(t.SWITCH.eq(status));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(billGroupId)) {
+            query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(billStatus)) {
+            query.addConditions(t.STATUS.eq(billStatus));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(targetName)) {
+            query.addConditions(t.TARGET_NAME.like("%"+targetName+"%"));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(targetType)){
+            query.addConditions(t.TARGET_TYPE.eq(targetType));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(contractNum)){
+            query.addConditions(t.CONTRACT_NUM.eq(contractNum));
+        }
+        if(status!=null && status == 1){
+            query.addOrderBy(t.STATUS);
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)){
+            query.addConditions(t.DATE_STR.greaterOrEqual(dateStrBegin));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)){
+            query.addConditions(t.DATE_STR.lessOrEqual(dateStrEnd));
+        }
+        query.addOrderBy(t.DATE_STR.desc());
+//        query.addGroupBy(t.TARGET_NAME);
+        query.addLimit(pageOffSet,pageSize+1);
+        query.fetch().map(r -> {
+            ListBillsDTO dto = new ListBillsDTO();
+            dto.setBuildingName(r.getBuildingName());
+            dto.setApartmentName(r.getApartmentName());
+            dto.setAmountOwed(r.getAmountOwed());
+            dto.setAmountReceivable(r.getAmountReceivable());
+            dto.setAmountReceived(r.getAmountReceived());
+            if(!org.springframework.util.StringUtils.isEmpty(billGroupName)) {
+                dto.setBillGroupName(billGroupName);
+            }else{
+                String billGroupNameFound = context.select(Tables.EH_PAYMENT_BILL_GROUPS.NAME).from(Tables.EH_PAYMENT_BILL_GROUPS).where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(r.getValue(t.BILL_GROUP_ID))).fetchOne(0,String.class);
+                dto.setBillGroupName(billGroupNameFound);
+            }
+            dto.setBillId(String.valueOf(r.getValue(t.ID)));
+            dto.setBillStatus(r.getValue(t.STATUS));
+            dto.setNoticeTel(r.getValue(t.NOTICETEL));
+            dto.setNoticeTimes(r.getNoticeTimes());
+            dto.setDateStr(r.getDateStr());
+            dto.setTargetName(r.getTargetName());
+            dto.setTargetId(String.valueOf(r.getTargetId()));
+            dto.setTargetType(r.getTargetType());
+            dto.setOwnerId(String.valueOf(r.getOwnerId()));
+            dto.setOwnerType(r.getOwnerType());
+            dto.setContractNum(r.getContractNum());
+            dto.setContractId(String.valueOf(r.getContractId()));
+            list.add(dto);
+            return null;});
+        return list;
+    }
+
+    @Override
+    public List<BillDTO> listBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize) {
+        List<BillDTO> dtos = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
+        EhAddresses t2 = Tables.EH_ADDRESSES.as("t2");
+        context.select(t.DATE_STR,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVED,t.AMOUNT_OWED,t.STATUS,t.ID,t2.APARTMENT_NAME,t2.BUILDING_NAME,t.BILL_GROUP_RULE_ID)
+                .from(t)
+                .leftOuterJoin(t2)
+                .on(t.ADDRESS_ID.eq(t2.ID))
+                .where(t.BILL_ID.eq(billId))
+                .limit(pageOffSet,pageSize+1)
+                .fetch()
+                .map(r ->{
+                    BillDTO dto =new BillDTO();
+                    dto.setTargetName(targetName);
+                    dto.setDateStr(r.getValue(t.DATE_STR));
+                    dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
+                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setAmountReceived(r.getValue(t.AMOUNT_RECEIVED));
+                    dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
+                    dto.setBillStatus(r.getValue(t.STATUS));
+                    dto.setBillItemId(r.getValue(t.ID));
+                    dto.setBillGroupRuleId(r.getValue(t.BILL_GROUP_RULE_ID));
+                    dto.setApartmentName(r.getValue(t2.APARTMENT_NAME));
+                    dto.setBuildingName(r.getValue(t2.BUILDING_NAME));
+                    dtos.add(dto);
+                    return null;});
+        for(int i = 0; i < dtos.size(); i ++){
+            if(org.apache.commons.lang.StringUtils.isEmpty(dtos.get(i).getBillItemName())) {
+                BillDTO dto = dtos.get(i);
+                String projectLevelName = context.select(itemScope.PROJECT_LEVEL_NAME)
+                        .from(itemScope, groupRule)
+                        .where(groupRule.CHARGING_STANDARDS_ID.eq(itemScope.ID))
+                        .and(groupRule.ID.eq(dto.getBillGroupRuleId()))
+                        .fetchOne(itemScope.PROJECT_LEVEL_NAME);
+                dto.setBillItemName(projectLevelName);
+            }
+        }
+        return dtos;
+    }
+
+    @Override
+    public List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<NoticeInfo> list = new ArrayList<>();
+        dslContext.select(Tables.EH_PAYMENT_BILLS.NOTICETEL,Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILLS.AMOUNT_OWED,Tables.EH_PAYMENT_BILLS.TARGET_ID,Tables.EH_PAYMENT_BILLS.TARGET_TYPE,Tables.EH_PAYMENT_BILLS.TARGET_NAME)
+                .from(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
+                .fetch().map(r -> {
+            NoticeInfo info = new NoticeInfo();
+            info.setPhoneNums(r.getValue(Tables.EH_PAYMENT_BILLS.NOTICETEL));
+            info.setAmountRecevable(r.getValue(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE));
+            info.setAmountOwed(r.getValue(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED));
+            info.setTargetId(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_ID));
+            info.setTargetType(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_TYPE));
+            info.setTargetName(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_NAME));
+            list.add(info);
+            return null;});
+        List<String> fetch = dslContext.select(Tables.EH_APP_URLS.NAME)
+                .from(Tables.EH_APP_URLS)
+                .where(Tables.EH_APP_URLS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
+                .fetch(Tables.EH_APP_URLS.NAME);
+        String appName = fetch.get(0);
+        for(int i = 0; i < list.size(); i++){
+            list.get(i).setAppName(appName);
+        }
+        return list;
+    }
+
+    @Override
+    public List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,Long contractId,String contractNum) {
+        List<BillDetailDTO> dtos = new ArrayList<>();
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        SelectQuery<Record> query = dslContext.selectQuery();
+        query.addFrom(t);
+        if(ownerType!=null){
+            query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        }
+        if(ownerId!=null){
+            query.addConditions(t.OWNER_ID.eq(ownerId));
+        }
+
+        if(billGroupId!=null){
+            query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
+        }
+        query.addConditions(t.SWITCH.eq((byte)1));
+        if(contractId!=null){
+            query.addConditions(t.CONTRACT_ID.eq(contractId));
+        }else{
+            if(targetType!=null){
+                query.addConditions(t.TARGET_TYPE.eq(targetType));
+            }
+            if(targetId!=null){
+                query.addConditions(t.TARGET_ID.eq(targetId));
+            }
+        }
+        if(contractNum!=null){
+            query.addConditions(t.CONTRACT_NUM.eq(contractNum));
+        }
+        if(isOwedBill==1){
+            query.addConditions(t.STATUS.eq((byte)0));
+        }
+        List<Object> list  = new ArrayList<>();
+        query.fetch()
+                .map(r -> {
+                    BillDetailDTO dto = new BillDetailDTO();
+                    dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
+                    dto.setAmountReceviable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setBillId(String.valueOf(r.getValue(t.ID)));
+                    dto.setDateStr(r.getValue(t.DATE_STR));
+
+                    list.add(r.getValue(t.DATE_STR_DUE));
+                    list.add(r.getValue(t.DUE_DAY_DEADLINE));
+                    list.add(r.getValue(t.STATUS));
+
+                    dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
+                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+                    dto.setDeadline(r.getValue(t.DUE_DAY_DEADLINE));
+                    dtos.add(dto);
+                    return null;});
+        Date today = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        for(int i = 0; i < dtos.size(); i ++){
+            BillDetailDTO dto = dtos.get(i);
+            String due = (String)list.get(3*i);
+            String deadline = (String)list.get(3*i+1);
+            Byte status = (Byte)list.get(3*i+2);
+            if(status != null && status.byteValue() == (byte)1){
+                dto.setStatus((byte)1);
+                continue;
+            }
+            try{
+                if(due!=null && sdf.parse(due).compareTo(today) != 1){
+                    dto.setStatus((byte)0);
+                    //状态进阶为待缴
+                }else if(due!=null && sdf.parse(due).compareTo(today) == 1){
+                    dto.setStatus((byte)3);
+                    //未缴
+                }
+                if(deadline!=null && sdf.parse(deadline).compareTo(today)== -1){
+                    //状态进阶为欠费
+                    dto.setStatus((byte)2);
+                }
+            }catch (Exception e){
+                dto.setStatus((byte)0);
+            }
+        }
+        for(int i = 0; i < dtos.size(); i++){
+            BillDetailDTO dto = dtos.get(i);
+            if(isOwedBill.byteValue() == (byte)1 && dto.getStatus().byteValue() == (byte)3){
+                dtos.remove(dto);
+                i--;
+            }
+        }
+        return dtos;
+    }
+
+    @Override
+    public ShowBillDetailForClientResponse getBillDetailForClient(Long billId) {
+        ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
+        final String[] dateStr = {""};
+        final BigDecimal[] amountOwed = {new BigDecimal("0")};
+        final BigDecimal[] amountReceivable = {new BigDecimal("0")};
+        List<ShowBillDetailForClientDTO> dtos = new ArrayList<>();
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
+
+        dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE,t.DATE_STR_BEGIN,t.DATE_STR_END)
+                .from(t)
+                .where(t.BILL_ID.eq(billId))
+                .fetch()
+                .map(r -> {
+                    ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
+                    dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
+                    dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
+                    dto.setAddressName(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
+                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
+                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+                    dtos.add(dto);
+                    dateStr[0] = r.getValue(t.DATE_STR);
+                    amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
+                    amountReceivable[0] = amountReceivable[0].add(r.getValue(t.AMOUNT_RECEIVABLE));
+                    return null;
+                });
+        response.setAmountReceivable(amountReceivable[0]);
+        response.setAmountOwed(amountOwed[0]);
+        response.setDatestr(dateStr[0]);
+        response.setShowBillDetailForClientDTOList(dtos);
+        return response;
+    }
+
+    @Override
+    public List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType) {
+        List<ListBillGroupsDTO> list = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
+        context.select()
+                .from(t)
+                .where(t.OWNER_ID.eq(ownerId))
+                .and(t.OWNER_TYPE.eq(ownerType))
+                .orderBy(t.DEFAULT_ORDER)
+                .fetch()
+                .map(r -> {
+                    ListBillGroupsDTO dto = new ListBillGroupsDTO();
+                    dto.setBillGroupId(r.getValue(t.ID));
+                    dto.setBillGroupName(r.getValue(t.NAME));
+                    dto.setDefaultOrder(r.getValue(t.DEFAULT_ORDER));
+                    dto.setBillingCycle(r.getValue(t.BALANCE_DATE_TYPE));
+                    dto.setBillingDay(r.getValue(t.BILLS_DAY));
+                    dto.setDueDay(r.getValue(t.DUE_DAY));
+                    dto.setDueDayType(r.getValue(t.DUE_DAY_TYPE));
+                    list.add(dto);
+                    return null;
+                });
+        return list;
+    }
+
+    @Override
+    public ShowCreateBillDTO showCreateBill(Long billGroupId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillGroupsRules rule = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("rule");
+//        EhPaymentBillGroups bg = Tables.EH_PAYMENT_BILL_GROUPS.as("bg");
+        EhPaymentChargingItemScopes ci = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("ci");
+
+
+        ShowCreateBillDTO response = new ShowCreateBillDTO();
+        List<BillItemDTO> list = new ArrayList<>();
+
+        context.select(rule.CHARGING_ITEM_ID,ci.PROJECT_LEVEL_NAME,rule.ID)
+                .from(rule,ci)
+                .where(rule.CHARGING_ITEM_ID.eq(ci.CHARGING_ITEM_ID))
+                .and(rule.OWNERID.eq(ci.OWNER_ID))
+                .and(rule.BILL_GROUP_ID.eq(billGroupId))
+                .fetch()
+                .map(r -> {
+                    BillItemDTO dto = new BillItemDTO();
+                    dto.setBillItemId(r.getValue(rule.CHARGING_ITEM_ID));
+                    dto.setBillItemName(r.getValue(ci.PROJECT_LEVEL_NAME));
+                    dto.setBillGroupRuleId(r.getValue(rule.ID));
+                    list.add(dto);
+                    return null;});
+
+        response.setBillGroupId(billGroupId);
+        response.setBillItemDTOList(list);
+        return response;
+    }
+
+    @Override
+    public ShowBillDetailForClientResponse getBillDetailByDateStr(Byte billStatus,Long ownerId, String ownerType, Long targetId, String targetType, String dateStr,Long contractId) {
+        ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
+        final BigDecimal[] amountOwed = {new BigDecimal("0")};
+        final BigDecimal[] amountReceivable = {new BigDecimal("0")};
+        List<ShowBillDetailForClientDTO> dtos = new ArrayList<>();
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
+
+        SelectQuery<Record> query = dslContext.selectQuery();
+        query.addSelect(t.AMOUNT_RECEIVABLE, t.CHARGING_ITEM_NAME, t.DATE_STR, t.AMOUNT_OWED, t.AMOUNT_RECEIVABLE);
+        query.addFrom(t);
+        query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        query.addConditions(t.OWNER_ID.eq(ownerId));
+        query.addConditions(t.TARGET_TYPE.eq(targetType));
+        query.addConditions(t.TARGET_ID.eq(targetId));
+        query.addConditions(t.DATE_STR.eq(dateStr));
+        query.addConditions(t.CONTRACT_ID.eq(contractId));
+        if(billStatus!=null){
+            query.addConditions(t.STATUS.eq(billStatus));
+        }
+        try {
+            query.fetch()
+                    .map(r -> {
+                        ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
+                        dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
+                        dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
+                        dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                        dtos.add(dto);
+                        amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
+                        amountReceivable[0] = amountReceivable[0].add(r.getValue(t.AMOUNT_RECEIVABLE));
+                        return null;
+                    });
+        } catch (DataAccessException e) {
+            e.printStackTrace();
+        }
+        response.setAmountReceivable(amountReceivable[0]);
+        response.setAmountOwed(amountOwed[0]);
+        response.setDatestr(dateStr);
+        response.setShowBillDetailForClientDTOList(dtos);
+        return response;
+    }
+
+    @Override
+    public ListBillsDTO creatPropertyBill( BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String contractNum,Long contractId) {
+        final ListBillsDTO[] response = {new ListBillsDTO()};
+        this.dbProvider.execute((TransactionStatus status) -> {
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+            //普通信息卸载
+
+            Long billGroupId = billGroupDTO.getBillGroupId();
+            List<BillItemDTO> list1 = billGroupDTO.getBillItemDTOList();
+            List<ExemptionItemDTO> list2 = billGroupDTO.getExemptionItemDTOList();
+            //需要billGroup查看生成账单周期
+            PaymentBillGroup group = getBillGroupById(billGroupId);
+            //根据billGroup获得时间，如需重复使用，则请抽象出来
+            SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
+            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+            List<String> dates = new ArrayList<>();
+            Byte balanceDateType = group.getBalanceDateType();
+            byte dueDayType = group.getDueDayType();
+            Integer dueDay = group.getDueDay();
+            Integer billsDay = group.getBillsDay();
+            Calendar start = Calendar.getInstance();
+            try{
+                start.setTime(yyyyMM.parse(dateStr));
+                start.set(Calendar.DAY_OF_MONTH,start.getActualMinimum(Calendar.DAY_OF_MONTH));
+                dates.add(yyyyMMdd.format(start.getTime()));
+                int cycle = 0;
+                switch(balanceDateType){
+                    case 2:
+                        cycle = 1;
+                        break;
+                    case 3:
+                        cycle = 3;
+                        break;
+                    case 4:
+                        cycle = 12;
+                        break;
+                }
+                start.add(Calendar.MONTH,cycle);
+                if(cycle == 0){
+                    //自然周期
+                    start.set(Calendar.DAY_OF_MONTH,start.getActualMaximum(Calendar.DAY_OF_MONTH));
+                }
+                start.add(Calendar.DAY_OF_MONTH,-1);
+                dates.add(yyyyMMdd.format(start.getTime()));
+                start.add(Calendar.MONTH,1);
+                start.set(Calendar.DAY_OF_MONTH,billsDay);
+                dates.add(yyyyMMdd.format(start.getTime()));
+                if(dueDayType == (byte)1){
+                    start.add(Calendar.DAY_OF_MONTH,dueDay);
+                }else if(dueDayType == (byte)0){
+                    start.add(Calendar.MONTH,dueDay);
+                }
+                dates.add(yyyyMMdd.format(start.getTime()));
+            }catch (Exception e){
+                dates.add(null);
+                dates.add(null);
+                dates.add(null);
+                dates.add(null);
+                LOGGER.error(e.toString());
+            }
+            //需要组装的信息
+            BigDecimal amountExemption = new BigDecimal("0");
+            BigDecimal amountSupplement = new BigDecimal("0");
+            BigDecimal amountReceivable = new BigDecimal("0");
+            BigDecimal amountOwed = new BigDecimal("0");
+            BigDecimal zero = new BigDecimal("0");
+
+            long nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBills.class));
+            if(nextBillId == 0){
+                nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBills.class));
+            }
+
+            if(list2!=null) {
+                //bill exemption
+                List<com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems> exemptionItems = new ArrayList<>();
+//                long nextExemItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems.class), list2.size());
+                for(int i = 0; i < list2.size(); i++){
+                    long currentExemItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems.class));
+                    if(currentExemItemSeq == 0){
+                        currentExemItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems.class));
+                    }
+                    ExemptionItemDTO exemptionItemDTO = list2.get(i);
+                    PaymentExemptionItems exemptionItem = new PaymentExemptionItems();
+                    BigDecimal amount = exemptionItemDTO.getAmount();
+                    if(amount == null){
+                        continue;
+                    }
+                    exemptionItem.setAmount(amount);
+                    exemptionItem.setBillGroupId(billGroupId);
+                    exemptionItem.setBillId(nextBillId);
+                    exemptionItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    exemptionItem.setCreatorUid(UserContext.currentUserId());
+                    exemptionItem.setId(currentExemItemSeq);
+                    currentExemItemSeq += 1;
+                    exemptionItem.setRemarks(exemptionItemDTO.getRemark());
+                    if(targetType!=null){
+                        exemptionItem.setTargetType(targetType);
+                    }
+                    if(targetId != null) {
+                        exemptionItem.setTargetId(targetId);
+                    }
+                    exemptionItem.setTargetname(targetName);
+                    exemptionItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+                    exemptionItems.add(exemptionItem);
+
+                    if(amount.compareTo(zero)==-1){
+                        amount = amount.multiply(new BigDecimal("-1"));
+                        amountExemption = amountExemption.add(amount);
+                    }else if(amount.compareTo(zero)==1){
+                        amountSupplement = amountSupplement.add(amount);
+                    }
+                }
+                //应收否应该计算减免项
+//                amountReceivable = amountReceivable.subtract(amountExemption);
+//                amountReceivable = amountReceivable.add(amountSupplement);
+                amountOwed = amountOwed.subtract(amountExemption);
+                amountOwed = amountOwed.add(amountSupplement);
+                EhPaymentExemptionItemsDao exemptionItemsDao = new EhPaymentExemptionItemsDao(context.configuration());
+                exemptionItemsDao.insert(exemptionItems);
+            }
+            Byte billStatus = 0;
+            if(list1!=null){
+                //billItems assemble
+                List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
+//                long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class), list1.size());
+//                long currentBillItemSeq = nextBillItemBlock - list1.size() + 1;
+
+                for(int i = 0; i < list1.size() ; i++) {
+                    long currentBillItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
+                    if(currentBillItemSeq == 0){
+                        this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
+                    }
+                    BillItemDTO dto = list1.get(i);
+                    PaymentBillItems item = new PaymentBillItems();
+                    item.setBillGroupRuleId(dto.getBillGroupRuleId());
+                    item.setAddressId(dto.getAddressId());
+                    item.setBuildingName(dto.getBuildingName());
+                    item.setApartmentName(dto.getApartmentName());
+                    BigDecimal var1 = dto.getAmountReceivable();
+                    //减免项不覆盖收费项目的收付，暂时
+                    if(var1==null){
+                        var1 = new BigDecimal("0");
+                    }
+                    item.setAmountOwed(var1);
+                    item.setAmountReceivable(var1);
+                    item.setAmountReceived(new BigDecimal("0"));
+                    item.setBillGroupId(billGroupId);
+                    item.setBillId(nextBillId);
+                    item.setChargingItemName(dto.getBillItemName());
+                    item.setChargingItemsId(dto.getBillItemId());
+                    item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    item.setCreatorUid(UserContext.currentUserId());
+                    item.setDateStr(dateStr);
+                    //时间假定
+                    item.setDateStrBegin(dates.get(0));
+                    item.setDateStrEnd(dates.get(1));
+
+
+
+                    item.setId(currentBillItemSeq);
+                    item.setNamespaceId(UserContext.getCurrentNamespaceId());
+                    item.setOwnerType(ownerType);
+                    item.setOwnerId(ownerId);
+                    item.setContractId(contractId);
+                    item.setContractNum(contractNum);
+                    if(targetType!=null){
+                        item.setTargetType(targetType);
+                    }
+                    if(targetId != null) {
+                        item.setTargetId(targetId);
+                    }
+                    item.setTargetName(targetName);
+                    item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    billItemsList.add(item);
+
+                    amountReceivable = amountReceivable.add(var1);
+                    amountOwed = amountOwed.add(var1);
+                }
+
+                if(amountOwed.compareTo(new BigDecimal("0"))!=1){
+                    billStatus = 1;
+                }
+                for(int i = 0; i < billItemsList.size(); i++) {
+                    billItemsList.get(i).setStatus(billStatus);
+                }
+                EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
+                billItemsDao.insert(billItemsList);
+            }
+
+
+            com.everhomes.server.schema.tables.pojos.EhPaymentBills newBill = new PaymentBills();
+            //  缺少创造者信息，先保存在其他地方，比如持久化日志
+            newBill.setAmountOwed(amountOwed);
+            newBill.setAmountReceivable(amountReceivable);
+            newBill.setAmountReceived(zero);
+            newBill.setAmountSupplement(amountSupplement);
+            newBill.setAmountExemption(amountExemption);
+            newBill.setBillGroupId(billGroupId);
+            //时间
+            newBill.setDateStr(dateStr);
+            newBill.setDateStrBegin(dates.get(0));
+            newBill.setDateStrEnd(dates.get(1));
+            newBill.setDateStrDue(dates.get(2));
+            newBill.setDueDayDeadline(dates.get(3));
+
+
+
+
+
+
+            newBill.setId(nextBillId);
+            newBill.setNamespaceId(UserContext.getCurrentNamespaceId());
+            newBill.setNoticetel(noticeTel);
+            newBill.setOwnerId(ownerId);
+            newBill.setTargetName(targetName);
+            newBill.setOwnerType(ownerType);
+            newBill.setTargetType(targetType);
+            newBill.setTargetId(targetId);
+            newBill.setCreatTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            newBill.setCreatorId(UserContext.currentUserId());
+            newBill.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            newBill.setNoticeTimes(0);
+            newBill.setStatus(billStatus);
+            newBill.setSwitch(isSettled);
+            newBill.setContractId(contractId);
+            newBill.setContractNum(contractNum);
+            EhPaymentBillsDao billsDao = new EhPaymentBillsDao(context.configuration());
+            billsDao.insert(newBill);
+            response[0] = ConvertHelper.convert(newBill, ListBillsDTO.class);
+            response[0].setBillGroupName(billGroupDTO.getBillGroupName());
+            response[0].setBillId(String.valueOf(nextBillId));
+            response[0].setNoticeTel(noticeTel);
+            response[0].setBillStatus(billStatus);
+            response[0].setTargetType(targetType);
+            response[0].setTargetId(String.valueOf(targetId));
+            return null;
+        });
+        return response[0];
+    }
+
+    @Override
+    public ListBillDetailVO listBillDetail(Long billId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBills r = Tables.EH_PAYMENT_BILLS.as("r");
+        EhPaymentBillItems o = Tables.EH_PAYMENT_BILL_ITEMS.as("o");
+        EhPaymentExemptionItems t = Tables.EH_PAYMENT_EXEMPTION_ITEMS.as("t");
+        EhPaymentChargingItems k = Tables.EH_PAYMENT_CHARGING_ITEMS.as("k");
+        EhAddresses t1 = Tables.EH_ADDRESSES.as("t1");
+        ListBillDetailVO vo = new ListBillDetailVO();
+        BillGroupDTO dto = new BillGroupDTO();
+        List<BillItemDTO> list1 = new ArrayList<>();
+        List<ExemptionItemDTO> list2 = new ArrayList<>();
+
+        context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.DATE_STR,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM)
+                .from(r)
+                .where(r.ID.eq(billId))
+                .fetch()
+                .map(f -> {
+                    vo.setBillId(f.getValue(r.ID));
+                    vo.setBillGroupId(f.getValue(r.BILL_GROUP_ID));
+                    vo.setTargetId(f.getValue(r.TARGET_ID));
+                    vo.setNoticeTel(f.getValue(r.NOTICETEL));
+                    vo.setDateStr(f.getValue(r.DATE_STR));
+                    vo.setTargetName(f.getValue(r.TARGET_NAME));
+                    vo.setTargetType(f.getValue(r.TARGET_TYPE));
+                    //bill can has multiple addresses, thus one single address may confuse user
+//                    vo.setBuildingName(f.getValue(r.BUILDING_NAME));
+//                    vo.setApartmentName(f.getValue(r.APARTMENT_NAME));
+                    vo.setContractNum(f.getValue(r.CONTRACT_NUM));
+                    return null;
+                });
+        context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE,t1.APARTMENT_NAME,t1.BUILDING_NAME)
+                .from(o)
+                .leftOuterJoin(k)
+                .on(o.CHARGING_ITEMS_ID.eq(k.ID))
+                .leftOuterJoin(t1)
+                .on(o.ADDRESS_ID.eq(t1.ID))
+                .where(o.BILL_ID.eq(billId))
+                .orderBy(k.DEFAULT_ORDER)
+                .fetch()
+                .map(f -> {
+                    BillItemDTO itemDTO = new BillItemDTO();
+                    itemDTO.setBillItemName(f.getValue(o.CHARGING_ITEM_NAME));
+                    itemDTO.setBillItemId(f.getValue(o.ID));
+                    itemDTO.setAmountReceivable(f.getValue(o.AMOUNT_RECEIVABLE));
+                    itemDTO.setApartmentName(f.getValue(t1.APARTMENT_NAME));
+                    itemDTO.setBuildingName(f.getValue(t1.BUILDING_NAME));
+                    list1.add(itemDTO);
+                    return null;
+                });
+        context.select()
+                .from(t)
+                .where(t.BILL_ID.eq(billId))
+                .fetch()
+                .map(f -> {
+                    ExemptionItemDTO exemDto = new ExemptionItemDTO();
+                    exemDto.setAmount(f.getValue(t.AMOUNT));
+                    exemDto.setExemptionId(f.getValue(t.ID));
+                    exemDto.setRemark(f.getValue(t.REMARKS));
+                    list2.add(exemDto);
+                    return null;
+                });
+
+        dto.setBillItemDTOList(list1);
+        dto.setExemptionItemDTOList(list2);
+        vo.setBillGroupDTO(dto);
+        return vo;
+    }
+
+    @Override
+    public List<BillStaticsDTO> listBillStaticsByDateStrs(String beginLimit, String endLimit, Long ownerId, String ownerType) {
+        List<BillStaticsDTO> list = new ArrayList<>();
+        EhPaymentBills r = Tables.EH_PAYMENT_BILLS.as("r");
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(r);
+        query.addSelect(DSL.sum(r.AMOUNT_RECEIVABLE),DSL.sum(r.AMOUNT_RECEIVED),DSL.sum(r.AMOUNT_OWED),r.DATE_STR);
+        if(beginLimit!=null) {
+            query.addConditions(r.DATE_STR.greaterOrEqual(beginLimit));
+        }
+        if(endLimit!=null) {
+            query.addConditions(r.DATE_STR.lessOrEqual(endLimit));
+        }
+        query.addConditions(r.OWNER_ID.eq(ownerId));
+        query.addConditions(r.OWNER_TYPE.eq(ownerType));
+        query.addConditions(r.SWITCH.eq((byte)1));
+        query.addGroupBy(r.DATE_STR);
+        query.addOrderBy(r.DATE_STR);
+        query.fetch()
+                .map(f -> {
+                    BillStaticsDTO dto = new BillStaticsDTO();
+                    dto.setAmountOwed(f.getValue(DSL.sum(r.AMOUNT_OWED)));
+                    dto.setAmountReceivable(f.getValue(DSL.sum(r.AMOUNT_RECEIVABLE)));
+                    dto.setAmountReceived(f.getValue(DSL.sum(r.AMOUNT_RECEIVED)));
+                    dto.setValueOfX(f.getValue(r.DATE_STR));
+                    list.add(dto);
+                    return null;
+                });
+        return list;
+    }
+
+    @Override
+    public List<BillStaticsDTO> listBillStaticsByChargingItems(String ownerType, Long ownerId,String beginLimit, String endLimit) {
+        List<BillStaticsDTO> list = new ArrayList<>();
+        EhPaymentBillItems o = Tables.EH_PAYMENT_BILL_ITEMS.as("o");
+        EhPaymentChargingItems t = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t");
+        EhPaymentBills t1 = Tables.EH_PAYMENT_BILLS.as("t1");
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> settledBillIds = context.select(t1.ID)
+                .from(t1)
+                .where(t1.SWITCH.eq((byte) 1))
+                .fetch(t1.ID);
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(DSL.sum(o.AMOUNT_RECEIVABLE),DSL.sum(o.AMOUNT_RECEIVED),DSL.sum(o.AMOUNT_OWED),t.NAME,t.ID);
+//        query.addFrom(t,o);
+        query.addFrom(t);
+        query.addJoin(o);
+
+//        query.addJoin(o);
+        if(settledBillIds!=null&& settledBillIds.size()>0){
+            query.addConditions(o.BILL_ID.in(settledBillIds));
+        }
+        query.addConditions(o.OWNER_TYPE.eq(ownerType));
+        query.addConditions(o.OWNER_ID.eq(ownerId));
+        query.addConditions(o.CHARGING_ITEMS_ID.eq(t.ID));
+        if(beginLimit!=null){
+            query.addConditions(o.DATE_STR.greaterOrEqual(beginLimit));
+        }
+        if(endLimit!=null){
+            query.addConditions(o.DATE_STR.lessOrEqual(endLimit));
+        }
+        query.addGroupBy(t.ID);
+        query.addOrderBy(t.DEFAULT_ORDER);
+        List<Long> itemIds = new ArrayList<>();
+        query.fetch()
+                .map(f -> {
+                    BillStaticsDTO dto = new BillStaticsDTO();
+                    dto.setAmountOwed(f.getValue(DSL.sum(o.AMOUNT_OWED)));
+                    dto.setAmountReceivable(f.getValue(DSL.sum(o.AMOUNT_RECEIVABLE)));
+                    dto.setAmountReceived(f.getValue(DSL.sum(o.AMOUNT_RECEIVED)));
+                    dto.setValueOfX(f.getValue(t.NAME));
+                    itemIds.add(f.getValue(t.ID));
+                    list.add(dto);
+                    return null;
+                });
+        for(int i = 0; i < list.size(); i++){
+            String projectName = getProjectName(ownerId, ownerType, itemIds.get(i));
+            if(projectName != null){
+                list.get(i).setValueOfX(projectName);
+            }
+
+        }
+//        context.select(DSL.sum(o.AMOUNT_RECEIVABLE),DSL.sum(o.AMOUNT_RECEIVED),DSL.sum(o.AMOUNT_OWED),o.CHARGING_ITEM_NAME)
+//                .from(o,t)
+//                .where(o.OWNER_TYPE.eq(ownerType))
+//                .and(o.OWNER_ID.eq(ownerId))
+//                .and(o.CHARGING_ITEMS_ID.eq(t.ID))
+//                .groupBy(t.ID)
+//                .orderBy(t.DEFAULT_ORDER)
+//                .fetch()
+//                .map(f -> {
+//                    BillStaticsDTO dto = new BillStaticsDTO();
+//                    dto.setAmountOwed(f.getValue(DSL.sum(o.AMOUNT_OWED)));
+//                    dto.setAmountReceivable(f.getValue(DSL.sum(o.AMOUNT_RECEIVABLE)));
+//                    dto.setAmountReceived(f.getValue(DSL.sum(o.AMOUNT_RECEIVED)));
+//                    dto.setValueOfX(f.getValue(o.CHARGING_ITEM_NAME));
+//                    list.add(dto);
+//                    return null;
+//                });
+        return list;
+    }
+
+    private String getProjectName(Long ownerId, String ownerType, Long aLong) {
+        List<String> names = getReadOnlyContext().select(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.PROJECT_LEVEL_NAME)
+                .from(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES)
+                .where(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID.eq(aLong))
+                .fetch(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.PROJECT_LEVEL_NAME);
+        if(names.size() > 1){
+            return names.get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public List<BillStaticsDTO> listBillStaticsByCommunities(String dateStrBegin,String dateStrEnd,Integer currentNamespaceId) {
+        List<BillStaticsDTO> list = new ArrayList<>();
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        EhCommunities o = Tables.EH_COMMUNITIES.as("o");
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(t);
+        if(dateStrBegin!=null){
+            query.addConditions(t.DATE_STR.greaterOrEqual(dateStrBegin));
+        }
+        if(dateStrEnd!=null){
+            query.addConditions(t.DATE_STR.lessOrEqual(dateStrEnd));
+        }
+        query.addConditions(t.SWITCH.eq((byte)1));
+        Table<Record> r = query.asTable("r");
+
+        context.select(DSL.sum(r.field(t.AMOUNT_RECEIVED)), DSL.sum(r.field(t.AMOUNT_RECEIVABLE)), DSL.sum(r.field(t.AMOUNT_OWED)), o.NAME)
+                .from(r)
+                .rightOuterJoin(o)
+                .on(r.field(t.OWNER_ID).eq(o.ID))
+                .where(o.NAMESPACE_ID.eq(currentNamespaceId))
+                .groupBy(o.NAME)
+                .fetch()
+                .map(f -> {
+                    BillStaticsDTO dto = new BillStaticsDTO();
+                    dto.setAmountOwed(f.getValue(DSL.sum(r.field(t.AMOUNT_OWED))));
+                    dto.setAmountReceivable(f.getValue(DSL.sum(r.field(t.AMOUNT_RECEIVABLE))));
+                    dto.setAmountReceived(f.getValue(DSL.sum(r.field(t.AMOUNT_RECEIVED))));
+                    dto.setValueOfX(f.getValue(o.NAME));
+                    list.add(dto);
+                    return null;
+                });
+        return list;
+    }
+
+    @Override
+    public void modifyBillStatus(Long billId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        //更新 状态，更新 金钱数目，不可逆
+        EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
+        EhPaymentBillItems item = Tables.EH_PAYMENT_BILL_ITEMS.as("item");
+        //BILL
+        context.update(bill)
+                .set(bill.STATUS,(byte)1)
+                .set(bill.AMOUNT_RECEIVED,bill.AMOUNT_RECEIVABLE)
+                .set(bill.AMOUNT_OWED,new BigDecimal("0"))
+                .where(bill.ID.eq(billId))
+                .execute();
+        //bill item
+        context.update(item)
+                .set(item.STATUS,(byte)1)
+                .set(item.AMOUNT_RECEIVED,item.AMOUNT_RECEIVABLE)
+                .set(item.AMOUNT_OWED,new BigDecimal("0"))
+                .where(item.BILL_ID.eq(billId))
+                .execute();
+        //bill exemption已经减到bill中了
+    }
+
+    @Override
+    public List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId) {
+        List<ListChargingItemsDTO> list = new ArrayList<>();
+        DSLContext context = getReadOnlyContext();
+        EhPaymentChargingItems t = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t");
+        EhPaymentChargingItemScopes t1 = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t1");
+        List<PaymentChargingItem> items = context.selectFrom(t)
+                .fetchInto(PaymentChargingItem.class);
+
+        List<PaymentChargingItemScope> scopes = context.selectFrom(t1)
+                .where(t1.OWNER_ID.eq(ownerId))
+                .and(t1.OWNER_TYPE.eq(ownerType))
+                .fetchInto(PaymentChargingItemScope.class);
+
+        Byte isSelected = 0;
+        for(int i = 0; i < items.size(); i ++){
+            PaymentChargingItem item = items.get(i);
+            ListChargingItemsDTO dto = new ListChargingItemsDTO();
+            dto.setChargingItemName(item.getName());
+            dto.setChargingItemId(item.getId());
+            dto.setIsSelected(isSelected);
+            for(int j = 0; j < scopes.size(); j ++){
+                PaymentChargingItemScope scope = scopes.get(j);
+                if(item.getId() == scope.getChargingItemId()){
+                    isSelected = 1;
+                    dto.setProjectChargingItemName(scope.getProjectLevelName());
+                    dto.setIsSelected(isSelected);
+                    isSelected = 0;
+                }
+            }
+            list.add(dto);
+        }
+        return list;
+    }
+
+    @Override
+    public List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId) {
+        List<ListChargingStandardsDTO> list = new ArrayList<>();
+
+        EhPaymentChargingStandardsScopes standardScopeT = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScopeT");
+        EhPaymentChargingStandards standardT = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("standardT");
+        DSLContext context = getReadOnlyContext();
+
+        List<Long> suggestPrices = new ArrayList<>();
+        context.select()
+                .from(standardScopeT,standardT)
+                .where(standardT.ID.eq(standardScopeT.CHARGING_STANDARD_ID))
+                .and(standardScopeT.OWNER_ID.eq(ownerId))
+                .and(standardScopeT.OWNER_TYPE.eq(ownerType))
+                .and(standardT.CHARGING_ITEMS_ID.eq(chargingItemId))
+                .fetch()
+                .map(r -> {
+                    ListChargingStandardsDTO dto = new ListChargingStandardsDTO();
+                    dto.setChargingStandardName(r.getValue(standardT.NAME));
+                    dto.setBillingCycle(r.getValue(standardT.BILLING_CYCLE));
+                    dto.setFormula(r.getValue(standardT.FORMULA));
+                    dto.setFormulaType(r.getValue(standardT.FORMULA_TYPE));
+                    dto.setChargingStandardId(r.getValue(standardT.ID));
+//                    formulaJsons.add(r.getValue(standardT.FORMULA_JSON));
+                    suggestPrices.add(r.getValue(standardT.SUGGEST_UNIT_PRICE)==null?null:r.getValue(standardT.SUGGEST_UNIT_PRICE).longValue());
+                    list.add(dto);
+                    return null;
+                });
+        List<List<String>> formus = new ArrayList<>();
+        List<List<String>> conditionVarIdens = new ArrayList<>();
+        for(int i =0; i < list.size(); i++){
+            ListChargingStandardsDTO dto = list.get(i);
+            List<String> formu = new ArrayList<>();
+            List<String> conditionVarIden = new ArrayList<>();
+            context.select(Tables.EH_PAYMENT_FORMULA.FORMULA_JSON,Tables.EH_PAYMENT_FORMULA.CONSTRAINT_VARIABLE_IDENTIFER)
+                    .from(Tables.EH_PAYMENT_FORMULA)
+                    .where(Tables.EH_PAYMENT_FORMULA.CHARGING_STANDARD_ID.eq(dto.getChargingStandardId()))
+                    .fetch()
+                    .map(r -> {
+                        formu.add(r.getValue(Tables.EH_PAYMENT_FORMULA.FORMULA_JSON));
+                        conditionVarIden.add(r.getValue(Tables.EH_PAYMENT_FORMULA.CONSTRAINT_VARIABLE_IDENTIFER));
+                        return null;
+                    });
+
+            formus.add(formu);
+            conditionVarIdens.add(conditionVarIden);
+        }
+        //从公式中取得参数值
+        for(int j = 0; j < formus.size(); j++){
+            ListChargingStandardsDTO dto = list.get(j);
+            List<String> formulaJsons = formus.get(j);
+            Set<String> replaces = new HashSet<>();
+            for(int i =0; i < formulaJsons.size();i++){
+                String formulaJson = formulaJsons.get(i);
+                if(formulaJson!=null){
+                    char[] formularChars = formulaJson.toCharArray();
+                    int index = 0;
+                    int start = 0;
+                    while(index < formularChars.length){
+                        if(formularChars[index]=='+'||formularChars[index]=='-'||formularChars[index]=='*'||formularChars[index]=='/'||index == formularChars.length-1){
+                            String substring = formulaJson.substring(start, index == formulaJson.length() - 1 ? index + 1 : index);
+                            if(!hasDigit(substring)){
+                                replaces.add(substring);
+                            }
+                            start = index+1;
+                        }
+                        index++;
+                    }
+                }
+            }
+            List<String> conditionVarIden = conditionVarIdens.get(j);
+            for(int i = 0; i < conditionVarIden.size(); i ++){
+                replaces.add(conditionVarIden.get(i));
+            }
+            List<PaymentVariable> vars = new ArrayList<>();
+            Iterator<String> iterator = replaces.iterator();
+            while(iterator.hasNext()){
+                PaymentVariable var = new PaymentVariable();
+                String varIden = iterator.next();
+                if(varIden == null ){
+                    continue;
+                }
+                String varName = getNameByVariableIdenfitier(varIden);
+                if(StringUtils.isNullOrEmpty(varName)){
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"formula variable name does not exist in schema");
+                }
+                var.setVariableIdentifier(varIden);
+                var.setVariableName(varName);
+                if(varIden.equals("dj")){
+                    var.setVariableValue(suggestPrices.get(j)==null?null:new BigDecimal(suggestPrices.get(j)));
+                }
+                vars.add(var);
+            }
+            if(vars.size()>0){
+                dto.setVariables(vars);
+            }else{
+                dto.setVariables(null);
+            }
+        }
+        //把水费和电费的用量干掉
+        String itemName = context.select(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME)
+                .from(Tables.EH_PAYMENT_CHARGING_ITEMS)
+                .where(Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(chargingItemId))
+                .fetchOne(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME);
+        if(itemName.equals(AssetPaymentStrings.CHARGING_ITEM_NAME_WATER) || itemName.equals(AssetPaymentStrings.CHARGING_ITEM_NAME_ELECTRICITY)) {
+            for( int i = 0; i < list.size(); i ++){
+                ListChargingStandardsDTO dto = list.get(i);
+                List<PaymentVariable> variables = dto.getVariables();
+                for(int j = 0; j < variables.size(); j ++){
+                    PaymentVariable variable = variables.get(j);
+                    if(variable.getVariableName().equals(AssetPaymentStrings.VARIABLE_YJ)){
+                        variables.remove(j);
+                        j--;
+                    }
+                }
+            }
+        }
+        return list;
+    }
+
+    private String getNameByVariableIdenfitier(String varIden) {
+        DSLContext context = getReadOnlyContext();
+        EhPaymentVariables variable = Tables.EH_PAYMENT_VARIABLES.as("variable");
+        return context.select(variable.NAME)
+                .from(variable)
+                .where(variable.IDENTIFIER.eq(varIden))
+                .fetchOne(variable.NAME);
+    }
+
+    private com.everhomes.server.schema.tables.pojos.EhPaymentVariables findVariableByIden(String iden) {
+        DSLContext context = getReadOnlyContext();
+        return context.selectFrom(Tables.EH_PAYMENT_VARIABLES)
+                .where(Tables.EH_PAYMENT_VARIABLES.IDENTIFIER.eq(iden))
+                .fetchOneInto(com.everhomes.server.schema.tables.pojos.EhPaymentVariables.class);
+    }
+
+    private boolean hasDigit(String iden) {
+        char[] chars = iden.toCharArray();
+        for(char c : chars){
+            if(Character.isDigit(c)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId,String targetName) {
+        this.dbProvider.execute((TransactionStatus status) -> {
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+            EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+            EhPaymentBillItems t1 = Tables.EH_PAYMENT_BILL_ITEMS.as("t1");
+            EhPaymentExemptionItems t2 = Tables.EH_PAYMENT_EXEMPTION_ITEMS.as("t2");
+            Long billGroupId = billGroupDTO.getBillGroupId();
+            List<BillItemDTO> list1 = billGroupDTO.getBillItemDTOList();
+            List<ExemptionItemDTO> list2 = billGroupDTO.getExemptionItemDTOList();
+            //需要组装的信息
+            BigDecimal amountExemption = new BigDecimal("0");
+            BigDecimal amountSupplement = new BigDecimal("0");
+            BigDecimal amountReceivable = new BigDecimal("0");
+            BigDecimal zero = new BigDecimal("0");
+
+            if(list1!=null){
+                for(int i = 0; i < list1.size() ; i++) {
+                    BillItemDTO dto = list1.get(i);
+                    context.update(t1)
+                            .set(t1.AMOUNT_RECEIVABLE,dto.getAmountReceivable()==null?new BigDecimal("0"):dto.getAmountReceivable())
+                            .set(t1.AMOUNT_OWED,dto.getAmountReceivable()==null?new BigDecimal("0"):dto.getAmountReceivable())
+                            .set(t1.UPDATE_TIME,new Timestamp(DateHelper.currentGMTTime().getTime()))
+                            .set(t1.OPERATOR_UID,UserContext.currentUserId())
+                            .where(t1.BILL_ID.in(billId))
+                            .and(t1.ID.eq(dto.getBillItemId()))
+                            .execute();
+                    amountReceivable = amountReceivable.add(dto.getAmountReceivable()==null?new BigDecimal("0"):dto.getAmountReceivable());
+                }
+            }
+            List<com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems> exemptionItems = new ArrayList<>();
+            if(list2!=null){
+                //bill exemption
+                for(int i = 0; i < list2.size(); i++){
+                    ExemptionItemDTO exemptionItemDTO = list2.get(i);
+                    if(exemptionItemDTO.getExemptionId()!=null){
+                        context.update(t2)
+                                .set(t2.AMOUNT,exemptionItemDTO.getAmount()==null?new BigDecimal("0"):exemptionItemDTO.getAmount())
+                                .set(t2.REMARKS,exemptionItemDTO.getRemark())
+                                .set(t2.UPDATE_TIME,new Timestamp(DateHelper.currentGMTTime().getTime()))
+                                .set(t2.OPERATOR_UID,UserContext.currentUserId())
+                                .where(t2.BILL_ID.eq(billId))
+                                .and(t2.ID.eq(exemptionItemDTO.getExemptionId()))
+                                .execute();
+                    }else{
+                        long nextId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems.class));
+                        PaymentExemptionItems exemptionItem = new PaymentExemptionItems();
+                        BigDecimal amount = exemptionItemDTO.getAmount();
+                        exemptionItem.setAmount(amount);
+                        exemptionItem.setBillGroupId(billGroupId);
+                        exemptionItem.setBillId(billId);
+                        exemptionItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        exemptionItem.setCreatorUid(UserContext.currentUserId());
+                        exemptionItem.setId(nextId);
+                        exemptionItem.setRemarks(exemptionItemDTO.getRemark());
+                        exemptionItem.setTargetType(targetType);
+                        exemptionItem.setTargetId(targetId);
+                        exemptionItem.setTargetname(targetName);
+                        exemptionItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        exemptionItems.add(exemptionItem);
+                    }
+                    if(exemptionItemDTO.getAmount()!=null&&exemptionItemDTO.getAmount().compareTo(zero)==-1){
+                        amountExemption = amountExemption.add(exemptionItemDTO.getAmount());
+                    }else if(exemptionItemDTO.getAmount()!=null&&exemptionItemDTO.getAmount().compareTo(zero)==1){
+                        amountSupplement = amountSupplement.add(exemptionItemDTO.getAmount());
+                    }
+                }
+            }
+            EhPaymentExemptionItemsDao exemptionItemsDao = new EhPaymentExemptionItemsDao(context.configuration());
+            exemptionItemsDao.insert(exemptionItems);
+
+            //  缺少创造者信息，先保存在其他地方，比如持久化日志
+            amountReceivable = amountReceivable.add(amountExemption);
+            amountReceivable = amountReceivable.add(amountSupplement);
+            context.update(t)
+                    .set(t.AMOUNT_RECEIVABLE,amountReceivable)
+                    .set(t.AMOUNT_OWED,amountReceivable)
+                    .set(t.AMOUNT_SUPPLEMENT,amountSupplement)
+                    .set(t.AMOUNT_EXEMPTION,amountExemption)
+                    .set(t.UPDATE_TIME,new Timestamp(DateHelper.currentGMTTime().getTime()))
+                    .set(t.OPERATOR_UID,UserContext.currentUserId())
+                    .where(t.ID.eq(billId))
+                    .execute();
+            return null;
+        });
+    }
+
+    @Override
+    public List<ListBillExemptionItemsDTO> listBillExemptionItems(String billIdstr, int pageOffSet, Integer pageSize, String dateStr, String targetName) {
+        Long billId = Long.parseLong(billIdstr);
+        List<ListBillExemptionItemsDTO> list = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentExemptionItems t = Tables.EH_PAYMENT_EXEMPTION_ITEMS.as("t");
+        EhPaymentBills t1 = Tables.EH_PAYMENT_BILLS.as("t1");
+        dateStr = context.select(t1.DATE_STR)
+                .from(t1)
+                .where(t1.ID.eq(billId))
+                .fetchOne(0,String.class);
+        String finalDateStr = dateStr;
+        context.select(t.AMOUNT,t.ID,t.REMARKS)
+                .from(t)
+                .where(t.BILL_ID.eq(billId))
+                .fetch()
+                .map(r -> {
+                    ListBillExemptionItemsDTO dto = new ListBillExemptionItemsDTO();
+                    dto.setAmount(r.getValue(t.AMOUNT));
+                    dto.setDateStr(finalDateStr);
+                    dto.setExemptionId(r.getValue(t.ID));
+                    dto.setRemark(r.getValue(t.REMARKS));
+                    list.add(dto);
+                    return null;
+                });
+        return list;
+    }
+
+    @Override
+    public void deleteBill(Long billId) {
+        this.dbProvider.execute((TransactionStatus status) -> {
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+            int execute = context.delete(Tables.EH_PAYMENT_BILLS)
+                    .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+                    .and(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte) 0))
+                    .execute();
+            if(execute == 0){
+                throw new RuntimeException("删除账单失败，账单已出或者无法找到此账单");
+            }
+            context.delete(Tables.EH_PAYMENT_BILL_ITEMS)
+                    .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
+                    .execute();
+            context.delete(Tables.EH_PAYMENT_EXEMPTION_ITEMS)
+                    .where(Tables.EH_PAYMENT_EXEMPTION_ITEMS.BILL_ID.eq(billId))
+                    .execute();
+            return null;
+        });
+
+    }
+
+    @Override
+    public void deleteBillItem(Long billItemId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_PAYMENT_BILL_ITEMS)
+                .where(Tables.EH_PAYMENT_BILL_ITEMS.ID.eq(billItemId))
+                .execute();
+    }
+
+    @Override
+    public void deletExemptionItem(Long exemptionItemId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_PAYMENT_EXEMPTION_ITEMS)
+                .where(Tables.EH_PAYMENT_EXEMPTION_ITEMS.ID.eq(exemptionItemId))
+                .execute();
+    }
+
+    @Override
+    public String findFormulaByChargingStandardId(Long chargingStandardId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(Tables.EH_PAYMENT_CHARGING_STANDARDS.FORMULA_JSON)
+                .from(Tables.EH_PAYMENT_CHARGING_STANDARDS)
+                .where(Tables.EH_PAYMENT_CHARGING_STANDARDS.ID.eq(chargingStandardId))
+                .fetchOne(0,String.class);
+    }
+
+    @Override
+    public String findChargingItemNameById(Long chargingItemId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME)
+                .from(Tables.EH_PAYMENT_CHARGING_ITEMS)
+                .where(Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(chargingItemId))
+                .fetchOne(0,String.class);
+    }
+
+    @Override
+    public void saveContractVariables(List<com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver> contractDateList) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentContractReceiverDao dao = new EhPaymentContractReceiverDao(context.configuration());
+        dao.insert(contractDateList);
+    }
+
+    @Override
+    public List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId,Long ownerId,String ownerType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<VariableIdAndValue> list = new ArrayList<>();
+//<<<<<<< HEAD
+        EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
+        String variableJson = context.select(t.VARIABLES_JSON_STRING)
+                .from(t)
+                .where(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
+                .and(t.OWNERID.eq(ownerId))
+                .and(t.OWNERTYPE.eq(ownerType))
+                .fetchOne(0, String.class);
+        Gson gson = new Gson();
+        Map<String,String> map = gson.fromJson(variableJson, Map.class);
+        for(Map.Entry entry : map.entrySet()){
+            VariableIdAndValue vid = new VariableIdAndValue();
+            vid.setVariableValue(entry.getValue());
+            vid.setVariableId(entry.getKey());
+            list.add(vid);
+//=======
+//
+//
+//        com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards standard = findChargingStandardById(chargingStandardId);
+//        String formulaJson = standard.getFormulaJson();
+//
+//        //获得不重复的字母的变量标识的集合
+//
+//        String formulaCopy = formulaJson;
+//        Set<String> variableIdentifiers = new HashSet<>();
+//        int index = 0;
+//        getVaraibleIdenInHashset(formulaCopy, variableIdentifiers, index);
+//        Iterator<String> iterator = variableIdentifiers.iterator();
+//        while(iterator.hasNext()){
+//            String iden = iterator.next();
+//            com.everhomes.server.schema.tables.pojos.EhPaymentVariables varia = findVariableByIden(iden);
+//            VariableIdAndValue viv = new VariableIdAndValue();
+//            viv.setVaribleIdentifier(iden);
+//            viv.setVariableId(varia.getId());
+//            if(viv.equals("dj")){
+//                viv.setVariableValue(standard.getSuggestUnitPrice());
+//            }
+//            list.add(viv);
+//>>>>>>> payment_wentian_2.0
+        }
+        return list;
+    }
+
+    private void getVaraibleIdenInHashset(String formulaCopy, Set<String> variableIdentifiers, int index) {
+        for(int i = 0; i < formulaCopy.length(); i ++){
+            char c = formulaCopy.charAt(i);
+            if(c == '*' || c == '/' || c == '+' || c == '-' || i == formulaCopy.length()-1){
+                String iden = formulaCopy.substring(index, i == formulaCopy.length() - 1 ? i + 1 : i);
+                if(hasDigit(iden)){
+                    variableIdentifiers.add(iden);
+                }
+                index = i + 1;
+            }
+        }
+    }
+
+    @Override
+    public void increaseNoticeTime(List<Long> billIds) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        context.update(Tables.EH_PAYMENT_BILLS)
+                .set(Tables.EH_PAYMENT_BILLS.NOTICE_TIMES,Tables.EH_PAYMENT_BILLS.NOTICE_TIMES.add(1))
+                .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
+                .execute();
+    }
+
+    @Override
+    public List<PaymentContractReceiver> findContractReceiverByContractNumAndTimeLimit(String contractNum) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_PAYMENT_CONTRACT_RECEIVER)
+                .where(Tables.EH_PAYMENT_CONTRACT_RECEIVER.CONTRACT_NUM.eq(contractNum))
+                .fetch().map(r -> ConvertHelper.convert(r, PaymentContractReceiver.class));
+    }
+
+    @Override
+    public String getStandardNameById(Long chargingStandardId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(Tables.EH_PAYMENT_CHARGING_STANDARDS.NAME)
+                .from(Tables.EH_PAYMENT_CHARGING_STANDARDS)
+                .where(Tables.EH_PAYMENT_CHARGING_STANDARDS.ID.eq(chargingStandardId))
+                .fetchOne(0,String.class);
+    }
+
+    @Override
+    public List<Object> getBillDayAndCycleByChargingItemId(Long chargingStandardId,Long chargingItemId,String ownerType, Long ownerId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
+        EhPaymentBillGroups t1 = Tables.EH_PAYMENT_BILL_GROUPS.as("t1");
+        final Integer[] billDay = new Integer[1];
+        final Byte[] balanceType = new Byte[1];
+        context.select(t1.BILLS_DAY,t1.BALANCE_DATE_TYPE)
+                .from(t,t1)
+                .where(t1.ID.eq(t.BILL_GROUP_ID))
+                .and(t.CHARGING_ITEM_ID.eq(chargingItemId))
+                .and(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
+                .and(t.OWNERID.eq(ownerId))
+                .and(t.OWNERTYPE.eq(ownerType))
+                .fetch()
+                .map(r -> {
+                    billDay[0] = r.getValue(t1.BILLS_DAY);
+                    balanceType[0] = r.getValue(t1.BALANCE_DATE_TYPE);
+                    return null;
+                });
+        List<Object> list = new ArrayList<>();
+        list.add(billDay[0]);
+        list.add(balanceType[0]);
+        return list;
+    }
+
+    @Override
+    public PaymentBillGroupRule getBillGroupRule(Long chargingItemId, Long chargingStandardId, String ownerType, Long ownerId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
+        List<PaymentBillGroupRule> rules = context.select()
+                .from(t)
+                .where(t.CHARGING_ITEM_ID.eq(chargingItemId))
+                .and(t.OWNERTYPE.eq(ownerType))
+                .and(t.OWNERID.eq(ownerId))
+                .fetch()
+                .map(r -> ConvertHelper.convert(r, PaymentBillGroupRule.class));
+//        if(rules.size() > 1){
+//            List<PaymentBillGroupRule> rules2 = context.select()
+//                    .from(t)
+//                    .where(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
+//                    .and(t.OWNERTYPE.eq(ownerType))
+//                    .and(t.OWNERID.eq(ownerId))
+//                    .fetch()
+//                    .map(r -> ConvertHelper.convert(r, PaymentBillGroupRule.class));
+//            return rules2.get(0);
+//        }
+        return rules.get(0);
+    }
+
+    @Override
+    public void saveBillItems(List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentBillItemsDao dao = new EhPaymentBillItemsDao(context.configuration());
+        dao.insert(billItemsList);
+    }
+
+    @Override
+    public void saveBills(List<com.everhomes.server.schema.tables.pojos.EhPaymentBills> billList) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentBillsDao dao = new EhPaymentBillsDao(context.configuration());
+        dao.insert(billList);
+    }
+
+    @Override
+    public Byte findBillyCycleById(Long chargingStandardId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        return context.select(Tables.EH_PAYMENT_CHARGING_STANDARDS.BILLING_CYCLE)
+                .from(Tables.EH_PAYMENT_CHARGING_STANDARDS)
+                .where(Tables.EH_PAYMENT_CHARGING_STANDARDS.ID.eq(chargingStandardId))
+                .fetchOne(0,Byte.class);
+    }
+
+    @Override
+    public void changeBillStatusOnContractSaved(Long contractId) {
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        EhPaymentContractReceiver t1 = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("t1");
+        this.dbProvider.execute((TransactionStatus status) -> {
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+            context.update(t)
+                    .set(t.SWITCH,t.NEXT_SWITCH)
+                    .where(t.CONTRACT_ID.eq(contractId))
+                    .and(t.SWITCH.eq((byte)3))
+                    .execute();
+            context.update(t1)
+                    .set(t1.STATUS,(byte)1)
+                    .where(t1.CONTRACT_ID.eq(contractId))
+                    .execute();
+            return null;
+        });
+    }
+
+    @Override
+    public void deleteContractPayment(Long contractId) {
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        EhPaymentContractReceiver t1 = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("t1");
+        EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
+        this.coordinationProvider.getNamedLock(contractId.toString()).enter(() -> {
+            this.dbProvider.execute((TransactionStatus status) -> {
+                DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+                List<Long> billIds = context.select(t.ID)
+                        .from(t)
+                        .where(t.CONTRACT_ID.eq(contractId))
+                        .and(t.SWITCH.eq((byte) 3))
+                        .fetch(t.ID);
+                context.delete(t)
+                        .where(t.ID.in(billIds))
+                        .execute();
+                context.delete(t2)
+                        .where(t2.BILL_ID.in(billIds))
+                        .execute();
+                context.delete(t1)
+                        .where(t1.CONTRACT_ID.eq(contractId))
+                        .execute();
+                return null;
+            });
+            return null;
+        });
+    }
+
+    @Override
+    public List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize,Long contractId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
+        EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
+        EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
+        Set<PaymentExpectancyDTO> set = new LinkedHashSet<>();
+
+        List<Long> fetch = context.select(bill.ID)
+                .from(bill)
+                .where(bill.CONTRACT_NUM.eq(contractNum))
+                .fetch(bill.ID);
+        context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
+                .from(t,t1)
+                .where(t.BILL_ID.in(fetch))
+                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
+                .orderBy(t1.NAME,t.DATE_STR)
+                .limit(pageOffset,pageSize+1)
+                .fetch()
+                .map(r -> {
+                    PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
+
+                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+                    dto.setPropertyIdentifier(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
+                    dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
+                    dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
+                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setChargingItemName(r.getValue(t1.NAME));
+                    dto.setBillItemId(r.getValue(t.ID));
+                    set.add(dto);
+                    return null;
+                });
+
+        List<Long> fetch1 = context.select(bill.ID)
+                .from(bill)
+                .where(bill.CONTRACT_ID.eq(contractId))
+                .fetch(bill.ID);
+        context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
+                .from(t,t1)
+                .where(t.BILL_ID.in(fetch1))
+                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
+                .orderBy(t1.NAME,t.DATE_STR)
+                .limit(pageOffset,pageSize+1)
+                .fetch()
+                .map(r -> {
+                    PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
+                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+                    dto.setPropertyIdentifier(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
+                    dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
+                    dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
+                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setChargingItemName(r.getValue(t1.NAME));
+                    dto.setBillItemId(r.getValue(t.ID));
+                    set.add(dto);
+                    return null;
+                });
+
+        return set.stream().collect(Collectors.toList());
+    }
+
+    @Override
+    public void updateBillsToSettled(Long contractId, String ownerType, Long ownerId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.server.schema.tables.EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        context.update(t)
+                .set(t.SWITCH,(byte)1)
+                .where(t.CONTRACT_ID.eq(contractId))
+                .and(t.OWNER_TYPE.eq(ownerType))
+                .and(t.OWNER_ID.eq(ownerId))
+                .and(t.SWITCH.eq((byte)0))
+                .execute();
+    }
+
+    @Override
+    public void updatePaymentBill(Long billId, BigDecimal amountReceivable, BigDecimal amountReceived, BigDecimal amountOwed) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        context.update(t)
+                .set(t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVABLE.sub(amountReceivable))
+                .set(t.AMOUNT_RECEIVED,t.AMOUNT_RECEIVED.sub(amountReceived))
+                .set(t.AMOUNT_OWED,t.AMOUNT_OWED.sub(amountOwed))
+                .execute();
+    }
+
+    @Override
+    public PaymentBillItems findBillItemById(Long billItemId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select()
+                .from(Tables.EH_PAYMENT_BILL_ITEMS)
+                .where(Tables.EH_PAYMENT_BILL_ITEMS.ID.eq(billItemId))
+                .fetchOneInto(PaymentBillItems.class);
+    }
+
+    @Override
+    public PaymentExemptionItems findExemptionItemById(Long exemptionItemId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select()
+                .from(Tables.EH_PAYMENT_EXEMPTION_ITEMS)
+                .where(Tables.EH_PAYMENT_EXEMPTION_ITEMS.ID.eq(exemptionItemId))
+                .fetchOneInto(PaymentExemptionItems.class);
+    }
+
+    @Override
+    public void updatePaymentBillByExemItemChanges(Long billId, BigDecimal amount) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        context.update(t)
+                .set(t.AMOUNT_OWED,t.AMOUNT_OWED.sub(amount))
+                .execute();
+        if(amount.compareTo(new BigDecimal("0"))<0){
+            context.update(t)
+                    .set(t.AMOUNT_EXEMPTION,t.AMOUNT_EXEMPTION.add(amount))
+                    .execute();
+        }else{
+            context.update(t)
+                    .set(t.AMOUNT_SUPPLEMENT,t.AMOUNT_SUPPLEMENT.sub(amount))
+                    .execute();
+        }
+    }
+
+    @Override
+    public List<PaymentBillGroup> listAllBillGroups() {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
+        EhPaymentBillGroupsRules t1 = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t1");
+        List<PaymentBillGroup> list = new ArrayList<>();
+        context.select()
+                .from(t)
+                .fetch()
+                .map(r -> {
+                    list.add(ConvertHelper.convert(r, PaymentBillGroup.class));
+                    return null;
+                });
+        return list;
+    }
+
+    @Override
+    public void updateBillSwitchOnTime(String billDateStr) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        context.update(t)
+                .set(t.SWITCH,(byte)1)
+                .where(t.DATE_STR.lessThan(billDateStr))
+                .and(t.SWITCH.eq((byte)0))
+                .execute();
+    }
+
+    @Override
+    public String findZjgkCommunityIdentifierById(Long ownerId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCommunities t = Tables.EH_COMMUNITIES.as("t");
+        return context.select(t.NAMESPACE_COMMUNITY_TOKEN)
+                .from(t)
+                .where(t.ID.eq(ownerId))
+                .fetchAny(0,String.class);
+    }
+
+    @Override
+    public Long findTargetIdByIdentifier(String customerIdentifier) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhUserIdentifiers t1 = Tables.EH_USER_IDENTIFIERS.as("t1");
+        EhOrganizationOwners t2 = Tables.EH_ORGANIZATION_OWNERS.as("t2");
+        return context.select(t1.OWNER_UID)
+                .from(t1,t2)
+                .where(t2.CONTACT_TOKEN.eq(t1.IDENTIFIER_TOKEN))
+                .and(t2.NAMESPACE_CUSTOMER_TOKEN.eq(customerIdentifier))
+                .fetchOne(0,Long.class);
+    }
+
+    @Override
+    public String findAppName(Integer currentNamespaceId) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<String> fetch = dslContext.select(Tables.EH_APP_URLS.NAME)
+                .from(Tables.EH_APP_URLS)
+                .where(Tables.EH_APP_URLS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
+                .fetch(Tables.EH_APP_URLS.NAME);
+        if(fetch!=null && fetch.size()>0){
+            return fetch.get(0);
+        }
+        return "";
+    }
+
+    @Override
+    public Long findOrganizationIdByIdentifier(String targetId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhOrganizations t = Tables.EH_ORGANIZATIONS.as("t");
+        return context.select(t.ID)
+                .from(t)
+                .where(t.NAMESPACE_ORGANIZATION_TOKEN.eq(targetId))
+                .fetchOne(0,Long.class);
+    }
+
+    @Override
+    public AssetVendor findAssetVendorByNamespace(Integer namespaceId) {
+        List<AssetVendor> list = new ArrayList<>();
+        dbProvider.getDslContext(AccessSpec.readOnly()).selectFrom(Tables.EH_ASSET_VENDOR)
+                .where(Tables.EH_ASSET_VENDOR.NAMESPACE_ID.eq(namespaceId))
+                .fetch()
+                .map(r -> {
+                    list.add(ConvertHelper.convert(r, AssetVendor.class));
+                    return null;
+                });
+        if(list!=null&&list.size()>0){
+            return (AssetVendor)list.get(0);
+        }else{
+            return null;
+        }
+    }
+
+    @Override
+    public String findIdentifierByUid(Long aLong) {
+        DSLContext con = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhUserIdentifiers t = Tables.EH_USER_IDENTIFIERS.as("t");
+        return con.select(t.IDENTIFIER_TOKEN)
+                .from(t)
+                .where(t.OWNER_UID.eq(aLong))
+                .fetchOne(0,String.class);
+    }
+
+
+    @Override
+    public Long saveAnOrderCopy(String payerType, String payerId, String amountOwed, String clientAppName, Long communityId, String contactNum, String openid, String payerName,Long expireTimePeriod,Integer namespaceId,String orderType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        //TO SAVE A PRE ORDER COPY IN THE ORDER TABLE WITH STATUS BEING NOT BEING PAID YET
+        long nextOrderId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrder.class));
+        AssetPaymentOrder order = new AssetPaymentOrder();
+        order.setClientAppName(clientAppName);
+        order.setCommunityId(String.valueOf(communityId));
+        order.setContractId(contactNum);
+        order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        order.setId(nextOrderId);
+        order.setNamespaceId(namespaceId);
+        // GET THE START TIME AND EXPIRTIME
+        Timestamp startTime = new Timestamp(DateHelper.currentGMTTime().getTime());
+        Calendar c = Calendar.getInstance();
+        //expiretime为妙，所以乘以1000得到milliseconds
+        long l = startTime.getTime() + expireTimePeriod*1000l;
+
+        Timestamp endTime = new Timestamp(l);
+        order.setOrderStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        order.setOrderExpireTime(endTime);
+        order.setOrderType(orderType);
+
+        Random r = new Random();
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < 17; i++){
+            sb.append(r.nextInt(10));
+        }
+        order.setOrderNo(Long.parseLong(sb.toString()));
+        order.setUid(UserContext.currentUserId());
+        order.setPayAmount(new BigDecimal(amountOwed));
+        order.setPayerType(payerType);
+        order.setStatus((byte)0);
+        EhAssetPaymentOrderDao dao = new EhAssetPaymentOrderDao(context.configuration());
+        dao.insert(order);
+        return nextOrderId;
+    }
+
+
+    @Override
+    public Long findAssetOrderByBillIds(List<String> billIds) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        HashSet<Long> idSet = new HashSet<>();
+        Long id = null;
+        context.select(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.ORDER_ID)
+                .from(Tables.EH_ASSET_PAYMENT_ORDER_BILLS)
+                .where(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.BILL_ID.in(billIds))
+                .fetch()
+                .map(r -> {
+                    idSet.add(r.getValue(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.ORDER_ID));
+                    return null;});
+        if(idSet.size()==1){
+            id = idSet.iterator().next();
+        }
+        return id;
+    }
+
+    @Override
+    public void saveOrderBills(List<BillIdAndAmount> bills, Long orderId) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        long nextBlockSequence = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhAssetPaymentOrderBills.class),bills.size());
+        long nextSequence = nextBlockSequence - bills.size()+1;
+        List<EhAssetPaymentOrderBills> orderBills = new ArrayList<>();
+        for(int i = 0; i < bills.size(); i ++){
+            EhAssetPaymentOrderBills orderBill  = new EhAssetPaymentOrderBills();
+            BillIdAndAmount billIdAndAmount = bills.get(i);
+            orderBill.setId(nextSequence++);
+            orderBill.setAmount(new BigDecimal(billIdAndAmount.getAmountOwed()));
+            orderBill.setBillId(billIdAndAmount.getBillId());
+            orderBill.setOrderId(orderId);
+            orderBill.setStatus(0);
+            orderBills.add(orderBill);
+        }
+        EhAssetPaymentOrderBillsDao dao = new EhAssetPaymentOrderBillsDao(dslContext.configuration());
+        dao.insert(orderBills);
+    }
+
+    @Override
+    public AssetPaymentOrder findAssetPaymentById(Long orderId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhAssetPaymentOrder t = Tables.EH_ASSET_PAYMENT_ORDER.as("t");
+        return context.select()
+                .from(t)
+                .where(t.ID.eq(orderId))
+                .fetchOneInto(AssetPaymentOrder.class);
+    }
+
+    @Override
+    public List<AssetPaymentOrderBills> findBillsById(Long orderId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t");
+        return context.selectFrom(t)
+                .where(t.ORDER_ID.eq(orderId))
+                .fetchInto(AssetPaymentOrderBills.class);
+    }
+
+    @Override
+    public void changeOrderStaus(Long orderId, Byte finalOrderStatus) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhAssetPaymentOrder t = Tables.EH_ASSET_PAYMENT_ORDER.as("t");
+        context.update(t)
+                .set(t.STATUS,finalOrderStatus)
+                .where(t.ID.eq(orderId))
+                .execute();
+    }
+
+    @Override
+    public void changeBillStatusOnOrder(Map<String, Integer> billStatuses,Long orderId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t");
+        for(Map.Entry<String,Integer> entry : billStatuses.entrySet()){
+            context.update(t)
+                    .set(t.STATUS,entry.getValue())
+                    .where(t.BILL_ID.eq(entry.getKey()))
+                    .and(t.ORDER_ID.eq(orderId))
+                    .execute();
+        }
+    }
+
+    @Override
+    public PaymentUser findByOwner(String userType, Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentUsers t = Tables.EH_PAYMENT_USERS.as("t");
+        List<PaymentUser> list = new ArrayList<>();
+        context.select()
+                .from(t)
+                .where(t.OWNER_ID.eq(id))
+                .and(t.OWNER_TYPE.eq(userType))
+                .fetch()
+                .map(r -> {
+                    PaymentUser convert = ConvertHelper.convert(r, PaymentUser.class);
+                    list.add(convert);
+                    return null;
+                });
+        return list.size()>0?list.get(0):null;
+    }
+
+    @Override
+    public PaymentAccount findPaymentAccount() {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<PaymentAccount> list = new ArrayList<>();
+        EhPaymentAccounts t = Tables.EH_PAYMENT_ACCOUNTS.as("t");
+        context.select()
+                .from(t)
+                .fetch()
+                .map(r -> {
+                    PaymentAccount convert = ConvertHelper.convert(r, PaymentAccount.class);
+                    list.add(convert);
+                    return null;
+                });
+        return list.size() > 0 ? list.get(0) : null;
+    }
+
+    @Override
+    public void changeBillStatusOnPaiedOff(List<Long> billIds) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        EhPaymentBillItems t1 = Tables.EH_PAYMENT_BILL_ITEMS.as("t1");
+        context.update(t)
+                .set(t.STATUS,(byte)1)
+                .where(t.ID.in(billIds))
+                .execute();
+        context.update(t1)
+                .set(t1.STATUS,(byte)1)
+                .where(t1.BILL_ID.in(billIds))
+                .execute();
+        //更改金钱
+        context.update(t)
+                .set(t.AMOUNT_OWED,new BigDecimal("0"))
+                .set(t.AMOUNT_RECEIVED,t.AMOUNT_RECEIVABLE)
+                .where(t.ID.in(billIds))
+                .execute();
+        context.update(t1)
+                .set(t1.AMOUNT_OWED,new BigDecimal("0"))
+                .set(t1.AMOUNT_RECEIVED,t1.AMOUNT_RECEIVABLE)
+                .where(t1.BILL_ID.in(billIds))
+                .execute();
+
+    }
+
+    @Override
+    public void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType,Integer namespaceId,List<Long> communityIds) {
+        byte de_coupling = 1;
+        if(communityIds!=null && communityIds.size() >1){
+            for(int i = 0; i < communityIds.size(); i ++){
+                Long cid = communityIds.get(i);
+//                只要园区还有自己的scope，且一个scope的独立权得到承认，那么不能修改
+                Boolean coupled = true;
+                if(cid.longValue() != namespaceId.longValue()){
+                    coupled = checkCoupling(cid,ownerType);
+                }
+                if(coupled){
+                    de_coupling = 0;
+                    configChargingItemForOneCommunity(configChargingItems, cid, ownerType, namespaceId, de_coupling);
+                }
+            }
+        }else{
+            //只有一个园区,不是list过来的
+            configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, de_coupling);
+        }
+    }
+
+    private Boolean checkCoupling(Long communityId, String ownerType) {
+        DSLContext context = getReadOnlyContext();
+        List<Byte> flags = context.select(itemScope.DECOUPLING_FLAG)
+                .from(itemScope)
+                .where(itemScope.OWNER_TYPE.eq(ownerType))
+                .and(itemScope.OWNER_ID.eq(communityId))
+                .fetch(itemScope.DECOUPLING_FLAG);
+        for(int i = 0; i < flags.size(); i ++){
+            if(flags.get(i).byteValue() == (byte)1){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void configChargingItemForOneCommunity(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType, Integer namespaceId, Byte decouplingFlag) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentChargingItemScopes t = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t");
+        EhPaymentChargingItemScopesDao dao = new EhPaymentChargingItemScopesDao(context.configuration());
+        List<com.everhomes.server.schema.tables.pojos.EhPaymentChargingItemScopes> list = new ArrayList<>();
+        if(configChargingItems == null){
+            context.delete(t)
+                    .where(t.OWNER_TYPE.eq(ownerType))
+                    .and(t.OWNER_ID.eq(communityId))
+                    .execute();
+            return;
+        }
+        for(int i = 0; i < configChargingItems.size(); i ++) {
+            ConfigChargingItems vo = configChargingItems.get(i);
+            PaymentChargingItemScope scope = new PaymentChargingItemScope();
+            scope.setChargingItemId(vo.getChargingItemId());
+            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentChargingItemScopes.class));
+            scope.setId(nextSequence);
+            scope.setNamespaceId(namespaceId);
+            scope.setOwnerId(communityId);
+            scope.setOwnerType(ownerType);
+            scope.setProjectLevelName(vo.getProjectChargingItemName());
+            scope.setDecouplingFlag(decouplingFlag);
+            scope.setDecouplingFlag(decouplingFlag);
+            list.add(scope);
+        }
+        this.dbProvider.execute((TransactionStatus status) -> {
+            context.delete(t)
+                    .where(t.OWNER_TYPE.eq(ownerType))
+                    .and(t.OWNER_ID.eq(communityId))
+                    .execute();
+            if(list.size()>0){
+                dao.insert(list);
+            }
+            return null;
+        });
+    }
+
+    @Override
+    public void createChargingStandard(com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards c, com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        if(c!=null){
+            EhPaymentChargingStandardsDao ChargingStandardsDao = new EhPaymentChargingStandardsDao(context.configuration());
+            ChargingStandardsDao.insert(c);
+        }
+        if(s != null){
+            EhPaymentChargingStandardsScopesDao chargingStandardsScopesDao = new EhPaymentChargingStandardsScopesDao(context.configuration());
+            chargingStandardsScopesDao.insert(s);
+        }
+        if(f!=null){
+            EhPaymentFormulaDao paymentFormulaDao = new EhPaymentFormulaDao(context.configuration());
+            paymentFormulaDao.insert(f);
+        }
+    }
+
+    @Override
+    public void modifyChargingStandard(Long chargingStandardId,String chargingStandardName,String instruction,byte deCouplingFlag,String ownerType,Long ownerId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentChargingStandards t = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("t");
+        EhPaymentChargingStandardsScopes standardScope = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScope");
+        if(deCouplingFlag == (byte)1){
+            //去解耦
+            Long nullId = null;
+            context.update(t)
+                    .set(t.NAME,chargingStandardName)
+                    .set(t.INSTRUCTION,instruction)
+                    .where(t.ID.eq(chargingStandardId))
+                    .execute();
+            context.update(standardScope)
+                    .set(standardScope.BROTHER_STANDARD_ID,nullId)
+                    .where(standardScope.OWNER_TYPE.eq(ownerType))
+                    .and(standardScope.OWNER_ID.eq(ownerId))
+                    .execute();
+        }else if(deCouplingFlag == (byte)0 ) {
+            //bro和本人是 chargingStandardId的进行修改
+            List<Long> fetch = context.select(standardScope.CHARGING_STANDARD_ID)
+                    .from(standardScope)
+                    .where(standardScope.BROTHER_STANDARD_ID.eq(chargingStandardId))
+                    .or(standardScope.BROTHER_STANDARD_ID.eq(chargingStandardId))
+                    .fetch(standardScope.CHARGING_STANDARD_ID);
+            context.update(t)
+                    .set(t.NAME,chargingStandardName)
+                    .set(t.INSTRUCTION,instruction)
+                    .where(t.ID.in(fetch))
+                    .execute();
+        }
+    }
+
+    @Override
+    public GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd) {
+        DSLContext context = getReadOnlyContext();
+        GetChargingStandardDTO dto = new GetChargingStandardDTO();
+        EhPaymentChargingStandards t = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("t");
+        context.select(t.NAME,t.FORMULA,t.BILLING_CYCLE,t.INSTRUCTION,t.FORMULA_TYPE,t.SUGGEST_UNIT_PRICE,t.AREA_SIZE_TYPE)
+                .from(t)
+                .where(t.ID.eq(cmd.getChargingStandardId()))
+                .fetch()
+                .map(r -> {
+                    dto.setChargingStandardName(r.getValue(t.NAME));
+                    dto.setFormula(r.getValue(t.FORMULA));
+                    dto.setBillingCycle(r.getValue(t.BILLING_CYCLE));
+                    dto.setInstruction(r.getValue(t.INSTRUCTION));
+                    dto.setFormulaType(r.getValue(t.FORMULA_TYPE));
+                    dto.setSuggestUnitPrice(r.getValue(t.SUGGEST_UNIT_PRICE));
+                    dto.setAreaSizeType(r.getValue(t.AREA_SIZE_TYPE));
+                    return null;
+                });
+        return dto;
+    }
+
+    @Override
+    public void deleteChargingStandard(Long chargingStandardId, Long ownerId, String ownerType, byte deCouplingFlag) {
+        DSLContext context = getReadWriteContext();
+        EhPaymentChargingStandardsScopes standardScope = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScope");
+        com.everhomes.server.schema.tables.EhPaymentFormula formula = Tables.EH_PAYMENT_FORMULA.as("formula");
+        Long nullId = null;
+        if(deCouplingFlag == (byte)1){
+            //去解耦
+            context.delete(standard)
+                    .where(standard.ID.eq(chargingStandardId))
+                    .execute();
+            Long bro = context.select(standardScope.BROTHER_STANDARD_ID)
+                    .from(standardScope)
+                    .where(standardScope.CHARGING_STANDARD_ID.eq(chargingStandardId))
+                    .fetchOne(standardScope.BROTHER_STANDARD_ID);
+            if(bro!=null){
+                context.update(standardScope)
+                        .set(standardScope.BROTHER_STANDARD_ID,nullId)
+                        .where(standardScope.OWNER_ID.eq(ownerId))
+                        .and(standardScope.OWNER_TYPE.eq(ownerType))
+                        .execute();
+            }
+            context.delete(standardScope)
+                    .where(standardScope.CHARGING_STANDARD_ID.eq(chargingStandardId))
+                    .execute();
+            context.delete(formula)
+                    .where(formula.CHARGING_STANDARD_ID.eq(chargingStandardId))
+                    .execute();
+        }else if(deCouplingFlag == (byte)0){
+            //耦合
+            List<Long> standardIds = context.select(standardScope.CHARGING_STANDARD_ID)
+                    .from(standardScope)
+                    .where(standardScope.BROTHER_STANDARD_ID.eq(chargingStandardId))
+                    .fetch(standardScope.CHARGING_STANDARD_ID);
+            standardIds.add(chargingStandardId);
+            context.delete(standard)
+                    .where(standard.ID.eq(chargingStandardId))
+                    .execute();
+            context.delete(standardScope)
+                    .where(standardScope.CHARGING_STANDARD_ID.in(standardIds))
+                    .execute();
+            context.delete(formula)
+                    .where(formula.CHARGING_STANDARD_ID.in(standardIds))
+                    .execute();
+        }
+    }
+
+    @Override
+    public List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd) {
+        DSLContext context = getReadOnlyContext();
+        List<ListAvailableVariablesDTO> list = new ArrayList<>();
+        EhPaymentVariables t = Tables.EH_PAYMENT_VARIABLES.as("t");
+        context.select(t.ID,t.NAME,t.IDENTIFIER)
+                .from(t)
+                .fetch()
+                .map(r ->{
+                    ListAvailableVariablesDTO dto = new ListAvailableVariablesDTO();
+                    dto.setVariableIdentifier(r.getValue(t.IDENTIFIER));
+                    dto.setVariableId(r.getValue(t.ID));
+                    dto.setVariableName(r.getValue(t.NAME));
+                    list.add(dto);
+                    return null;});
+        return list;
+
+    }
+
+    @Override
+    public String getVariableIdenfitierById(Long variableId) {
+        DSLContext context = getReadOnlyContext();
+        EhPaymentVariables t = Tables.EH_PAYMENT_VARIABLES.as("t");
+        return context.select(t.IDENTIFIER)
+                .from(t)
+                .where(t.ID.eq(variableId))
+                .fetchOne(0,String.class);
+    }
+
+
+
+    @Override
+    public String getVariableIdenfitierByName(String targetStr) {
+        DSLContext context = getReadOnlyContext();
+        EhPaymentVariables t = Tables.EH_PAYMENT_VARIABLES.as("t");
+        return context.select(t.IDENTIFIER)
+                .from(t)
+                .where(t.NAME.eq(targetStr))
+                .fetchOne(0,String.class);
+    }
+
+    @Override
+    public Long createBillGroup(CreateBillGroupCommand cmd,byte deCouplingFlag,Long brotherGroupId) {
+        DSLContext context = getReadWriteContext();
+        EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
+        Long nullId = null;
+        if(deCouplingFlag == (byte) 1){
+            //去解耦
+            //添加
+            Long nextGroupId = getNextSequence(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups.class);
+            InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
+            //去解耦同伴
+            context.update(t)
+                    .set(t.BROTHER_GROUP_ID,nullId)
+                    .where(t.OWNER_ID.eq(cmd.getOwnerId()))
+                    .and(t.OWNER_TYPE.eq(cmd.getOwnerType()))
+                    .execute();
+            return nextGroupId;
+        }else if(deCouplingFlag == (byte)0){
+            //添加
+            Long nextGroupId = getNextSequence(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups.class);
+            InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
+            return nextGroupId;
+        }
+        return null;
+    }
+
+    private void InsertBillGroup(CreateBillGroupCommand cmd, Long brotherGroupId, DSLContext context, EhPaymentBillGroups t, Long nextGroupId) {
+        com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups group = new PaymentBillGroup();
+        group.setId(nextGroupId);
+        group.setBalanceDateType(cmd.getBillingCycle());
+        group.setBillsDay(cmd.getBillDay());
+        group.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        group.setCreatorUid(UserContext.currentUserId());
+        group.setBrotherGroupId(brotherGroupId);
+        Integer nextOrder = context.select(DSL.max(t.DEFAULT_ORDER))
+                .from(t)
+                .where(t.OWNER_ID.eq(cmd.getOwnerId()))
+                .and(t.OWNER_TYPE.eq(cmd.getOwnerType()))
+                .and(t.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                .fetchOne(0,Integer.class);
+        group.setDefaultOrder(nextOrder==null?1:nextOrder+1);
+        group.setDueDay(cmd.getDueDay());
+        group.setDueDayType(cmd.getDueDayType());
+        group.setName(cmd.getBillGroupName());
+        group.setNamespaceId(cmd.getNamespaceId());
+        group.setOwnerId(cmd.getOwnerId());
+        group.setOwnerType(cmd.getOwnerType());
+        group.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhPaymentBillGroupsDao dao = new EhPaymentBillGroupsDao(context.configuration());
+        dao.insert(group);
+    }
+
+    @Override
+    public void modifyBillGroup(ModifyBillGroupCommand cmd,byte deCouplingFlag) {
+        DSLContext context = getReadWriteContext();
+        EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
+        if(deCouplingFlag == (byte)0){
+            context.update(t)
+                    .set(t.NAME,cmd.getBillGroupName())
+                    .set(t.BILLS_DAY,cmd.getBillDay())
+                    .set(t.BALANCE_DATE_TYPE,cmd.getBillingCycle())
+                    .set(t.DUE_DAY,cmd.getDueDay())
+                    .set(t.DUE_DAY_TYPE,cmd.getDueDayType())
+                    .where(t.ID.eq(cmd.getBillGroupId()))
+                    .or(t.BROTHER_GROUP_ID.eq(cmd.getBillGroupId()))
+                    .execute();
+            return;
+        }
+        Long nullId = null;
+        context.update(t)
+                .set(t.BROTHER_GROUP_ID,nullId)
+                .where(t.OWNER_ID.eq(cmd.getOwnerId()))
+                .and(t.OWNER_TYPE.eq(cmd.getOwnerType()))
+                .execute();
+        context.update(t)
+                .set(t.NAME,cmd.getBillGroupName())
+                .set(t.BILLS_DAY,cmd.getBillDay())
+                .set(t.BALANCE_DATE_TYPE,cmd.getBillingCycle())
+                .set(t.DUE_DAY,cmd.getDueDay())
+                .set(t.DUE_DAY_TYPE,cmd.getDueDayType())
+                .where(t.ID.eq(cmd.getBillGroupId()))
+                .execute();
+    }
+
+    @Override
+    public List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd) {
+        List<ListChargingStandardsDTO> list = new ArrayList<>();
+        DSLContext context = getReadOnlyContext();
+        EhPaymentChargingStandardsScopes t1 = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t1");
+        EhPaymentChargingStandards t = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("t");
+        EhPaymentVariables t3 = Tables.EH_PAYMENT_VARIABLES.as("t3");
+//        com.everhomes.server.schema.tables.EhPaymentFormula t3 = Tables.EH_PAYMENT_FORMULA.as("t3");
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(t.BILLING_CYCLE,t.ID,t.NAME,t.FORMULA,t.FORMULA_TYPE,t.SUGGEST_UNIT_PRICE,t.AREA_SIZE_TYPE);
+        query.addFrom(t,t1);
+        query.addConditions(t.CHARGING_ITEMS_ID.eq(cmd.getChargingItemId()));
+        query.addConditions(t1.CHARGING_STANDARD_ID.eq(t.ID));
+        query.addConditions(t1.OWNER_ID.eq(cmd.getOwnerId()));
+        query.addConditions(t1.OWNER_TYPE.eq(cmd.getOwnerType()));
+        query.addLimit(cmd.getPageAnchor().intValue(),cmd.getPageSize()+1);
+        query.fetch().map(r -> {
+            ListChargingStandardsDTO dto = new ListChargingStandardsDTO();
+            dto.setBillingCycle(r.getValue(t.BILLING_CYCLE));
+            dto.setChargingStandardId(r.getValue(t.ID));
+            dto.setChargingStandardName(r.getValue(t.NAME));
+            dto.setFormula(r.getValue(t.FORMULA));
+            dto.setFormulaType(r.getValue(t.FORMULA_TYPE));
+            dto.setSuggestUnitPrice(r.getValue(t.SUGGEST_UNIT_PRICE));
+            dto.setAreaSizeType(r.getValue(t.AREA_SIZE_TYPE));
+            list.add(dto);
+            return null;
+        });
+//        List<String> fetch = context.select(t3.NAME)
+//                .from(t3)
+////                .where(t3.CHARGING_ITEMS_ID.eq(cmd.getChargingItemId()))
+//                .fetch(t3.NAME);
+
+        for(int i = 0; i < list.size(); i ++){
+            ListChargingStandardsDTO dto = list.get(i);
+            Long chargingStandardId = dto.getChargingStandardId();
+
+            //获得标准
+            com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards standard = findChargingStandardById(chargingStandardId);
+            Set<String> varIdens = new HashSet<>();
+            //获得formula的额外内容
+            List<PaymentFormula> formulaCondition = null;
+            if(standard.getFormulaType()==3 || standard.getFormulaType() == 4){
+                formulaCondition = getFormulas(standard.getId());
+                for(int m = 0; m < formulaCondition.size(); m ++){
+                    varIdens.add(findVariableByIden(formulaCondition.get(m).getConstraintVariableIdentifer()).getName());
+                }
+            }
+            //获得standard公式
+            String formula = null;
+            if(standard.getFormulaType()==1 || standard.getFormulaType() == 2){
+                formulaCondition = getFormulas(standard.getId());
+                if(formulaCondition!=null){
+                    if(formulaCondition.size()>1){
+                        LOGGER.error("普通公式的标准的id为"+standard.getId()+",对应了"+formulaCondition.size()+"条公式!");
+                    }
+                    PaymentFormula paymentFormula = formulaCondition.get(0);
+                    formula = paymentFormula.getFormulaJson();
+                }else{
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"找不到公式,标准的id为"+standard.getId()+"");
+                }
+            }
+            if(formula!=null){
+                char[] formularChars = formula.toCharArray();
+                int index = 0;
+                int start = 0;
+                while(index < formularChars.length){
+                    if(formularChars[index]=='+'||formularChars[index]=='-'||formularChars[index]=='*'||formularChars[index]=='/'||index == formularChars.length-1){
+                        String var = formula.substring(start,index==formula.length()-1?index+1:index);
+                        if(!IntegerUtil.hasDigit(var)){
+                            varIdens.add(findVariableByIden(var).getName());
+                        }
+                        start = index+1;
+                    }
+                    index++;
+                }
+
+            }
+            dto.setVariableNames(new ArrayList<>(varIdens));
+        }
+        return list;
+    }
+
+    @Override
+    public void adjustBillGroupOrder(Long subjectBillGroupId, Long targetBillGroupId) {
+        DSLContext context = getReadWriteContext();
+        EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
+        Integer subjectDefaultOrder = context.select(t.DEFAULT_ORDER)
+                .from(t)
+                .where(t.ID.eq(subjectBillGroupId))
+                .fetchOne(t.DEFAULT_ORDER);
+        Integer targetDefaultOrder = context.select(t.DEFAULT_ORDER)
+                .from(t)
+                .where(t.ID.eq(targetBillGroupId))
+                .fetchOne(t.DEFAULT_ORDER);
+        context.update(t)
+                .set(t.DEFAULT_ORDER,targetDefaultOrder)
+                .where(t.ID.eq(subjectBillGroupId))
+                .execute();
+        context.update(t)
+                .set(t.DEFAULT_ORDER,subjectDefaultOrder)
+                .where(t.ID.eq(targetBillGroupId))
+                .execute();
+    }
+
+    @Override
+    public List<ListChargingItemsForBillGroupDTO> listChargingItemsForBillGroup(Long billGroupId,Long pageAnchor,Integer pageSize) {
+        List<ListChargingItemsForBillGroupDTO> list = new ArrayList<>();
+        DSLContext context = getReadOnlyContext();
+        EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
+        EhPaymentBillGroups t1 = Tables.EH_PAYMENT_BILL_GROUPS.as("t1");
+        EhPaymentChargingItemScopes t4 = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t4");
+
+        List<PaymentBillGroupRule> rules = context.selectFrom(t)
+                .where(t.BILL_GROUP_ID.eq(billGroupId))
+                .limit(pageAnchor.intValue(),pageSize+1)
+                .fetchInto(PaymentBillGroupRule.class);
+        for(int i = 0 ; i < rules.size(); i ++){
+            PaymentBillGroupRule rule = rules.get(i);
+            ListChargingItemsForBillGroupDTO dto = new ListChargingItemsForBillGroupDTO();
+            dto.setBillGroupRuleId(rule.getId());
+            PaymentBillGroup group = context.selectFrom(t1)
+                    .where(t1.ID.eq(rule.getBillGroupId()))
+                    .fetchOneInto(PaymentBillGroup.class);
+            String ItemName = context.select(t4.PROJECT_LEVEL_NAME)
+                    .from(t4)
+                    .where(t4.CHARGING_ITEM_ID.eq(rule.getChargingItemId()))
+                    .and(t4.OWNER_ID.eq(group.getOwnerId()))
+                    .and(t4.OWNER_TYPE.eq(group.getOwnerType()))
+                    .and(t4.NAMESPACE_ID.eq(group.getNamespaceId()))
+                    .fetchOne(t4.PROJECT_LEVEL_NAME);
+            if(StringUtils.isNullOrEmpty(ItemName)){
+                ItemName = context.select(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME)
+                        .from(Tables.EH_PAYMENT_CHARGING_ITEMS)
+                        .where(Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(rule.getChargingItemId()))
+                        .fetchOne(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME);
+            }
+            dto.setBillingCycle(group.getBalanceDateType());
+
+//            PaymentChargingStandards standard = context.selectFrom(t3)
+//                    .where(t3.ID.eq(rule.getChargingStandardsId()))
+//                    .fetchOneInto(PaymentChargingStandards.class);
+//            dto.setFormula(standard.getFormula());
+            dto.setProjectChargingItemName(ItemName==null?"":ItemName);
+//            dto.setChargingStandardName(standard.getName());
+            dto.setBillItemGenerationMonth(rule.getBillItemMonthOffset());
+            dto.setBillItemGenerationDay(rule.getBillItemDayOffset());
+            list.add(dto);
+        }
+        return list;
+    }
+
+    @Override
+    public Long addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd,Long brotherRuleId,byte deCouplingFlag) {
+        EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
+        EhPaymentBillGroups group = Tables.EH_PAYMENT_BILL_GROUPS.as("group");
+        DSLContext readOnlyContext = getReadOnlyContext();
+        DSLContext writeContext = getReadWriteContext();
+        EhPaymentBillGroupsRulesDao dao = new EhPaymentBillGroupsRulesDao(writeContext.configuration());
+        if(deCouplingFlag == (byte) 0){
+            //耦合中
+            return insertOrUpdateBillGroupRule(cmd, brotherRuleId, t, readOnlyContext, dao,deCouplingFlag);
+        }else if(deCouplingFlag == (byte) 1){
+            //解耦合
+            insertOrUpdateBillGroupRule(cmd, brotherRuleId, t, readOnlyContext, dao,deCouplingFlag);
+            Long nullId = null;
+            writeContext.update(t)
+                    .set(t.BROTHER_RULE_ID,nullId)
+                    .where(t.OWNERID.eq(cmd.getOwnerId()))
+                    .and(t.OWNERTYPE.eq(cmd.getOwnerType()))
+                    .execute();
+            writeContext.update(group)
+                    .set(group.BROTHER_GROUP_ID,nullId)
+                    .where(group.OWNER_ID.eq(cmd.getOwnerId()))
+                    .and(group.OWNER_TYPE.eq(cmd.getOwnerType()))
+                    .execute();
+        }
+        return null;
+//        AddOrModifyRuleForBillGroupResponse response = new AddOrModifyRuleForBillGroupResponse();
+//        Long ruleId = cmd.getBillGroupRuleId();
+//        com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups group = readOnlyContext.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS)
+//                .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(cmd.getBillGroupId())).fetchOneInto(PaymentBillGroup.class);
+//
+//        List<Long> fetch = readOnlyContext.select(t.CHARGING_ITEM_ID).from(t).where(t.OWNERID.eq(group.getOwnerId()))
+//                .and(t.OWNERTYPE.eq(group.getOwnerType()))
+//                .fetch(t.CHARGING_ITEM_ID);
+//        com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule = new PaymentBillGroupRule();
+//        if(ruleId == null){
+//            if(fetch.contains(cmd.getChargingItemId())){
+//                response.setFailCause(AssetPaymentStrings.CREATE_CHARGING_ITEM_FAIL);
+//                return response;
+//            }
+//            //新增 一条billGroupRule
+//            long nextRuleId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules.class));
+//            ruleId = nextRuleId;
+//            rule.setId(nextRuleId);
+//            rule.setBillGroupId(cmd.getBillGroupId());
+//            rule.setChargingItemId(cmd.getChargingItemId());
+//            rule.setChargingItemName(cmd.getGroupChargingItemName());
+//            rule.setChargingStandardsId(cmd.getChargingStandardId());
+//            rule.setNamespaceId(group.getNamespaceId());
+//            rule.setOwnerid(group.getOwnerId());
+//            rule.setOwnertype(group.getOwnerType());
+//            rule.setBillItemMonthOffset(cmd.getBillItemMonthOffset());
+//            rule.setBillItemDayOffset(cmd.getBillItemDayOffset());
+//            dao.insert(rule);
+////            response.setFailCause(AssetPaymentStrings.SAVE_SUCCESS);
+//        }else{
+//            //拿到正确的rule
+////            if(cmd.getOwnerId().longValue() == cmd.getNamespaceId().longValue()){
+//            rule = readOnlyContext.selectFrom(t)
+//                    .where(t.ID.eq(ruleId))
+//                    .fetchOneInto(PaymentBillGroupRule.class);
+////            }else{
+////                rule = readOnlyContext.selectFrom(t)
+////                        .where(t.OWNERID.eq(group.getOwnerId()))
+////                        .and(t.OWNERTYPE.eq(group.getOwnerType()))
+////                        .and(t.BROTHER_RULE_ID.eq(ruleId))
+////                        .fetchOneInto(PaymentBillGroupRule.class);
+////            }
+//            boolean workFlag = isInWorkGroupRule(rule);
+//            if(workFlag){
+//                response.setFailCause(AssetPaymentStrings.MODIFY_GROUP_RULE_UNSAFE);
+//                return response;
+//            }
+//            //如果没有关联则不修改
+//            rule.setBillGroupId(cmd.getBillGroupId());
+//            rule.setChargingItemId(cmd.getChargingItemId());
+//            rule.setChargingItemName(cmd.getGroupChargingItemName());
+//            rule.setChargingStandardsId(cmd.getChargingStandardId());
+//            rule.setNamespaceId(group.getNamespaceId());
+//            rule.setOwnerid(group.getOwnerId());
+//            rule.setOwnertype(group.getOwnerType());
+//            rule.setBillItemMonthOffset(cmd.getBillItemMonthOffset());
+//            rule.setBillItemDayOffset(cmd.getBillItemDayOffset());
+//            dao.update(rule);
+////            response.setFailCause(AssetPaymentStrings.MODIFY_SUCCESS);
+//        }
+//        Long nullId = null;
+//        writeContext.update(Tables.EH_PAYMENT_BILL_GROUPS)
+//                .set(Tables.EH_PAYMENT_BILL_GROUPS.BROTHER_GROUP_ID,nullId)
+//                .where(Tables.EH_PAYMENT_BILL_GROUPS.OWNER_ID.eq(cmd.getOwnerId()))
+//                .and(Tables.EH_PAYMENT_BILL_GROUPS.OWNER_TYPE.eq(cmd.getOwnerType()))
+//                .execute();
+//        return response;
+    }
+
+    private Long insertOrUpdateBillGroupRule(AddOrModifyRuleForBillGroupCommand cmd, Long brotherRuleId, EhPaymentBillGroupsRules t, DSLContext readOnlyContext, EhPaymentBillGroupsRulesDao dao,byte deCouplingFlag) {
+        Long ruleId = cmd.getBillGroupRuleId();
+//        com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups group = readOnlyContext.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS)
+//                .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(cmd.getBillGroupId())).fetchOneInto(PaymentBillGroup.class);
+//
+//        List<Long> fetch = readOnlyContext.select(t.CHARGING_ITEM_ID).from(t).where(t.OWNERID.eq(group.getOwnerId()))
+//                .and(t.OWNERTYPE.eq(group.getOwnerType()))
+//                .fetch(t.CHARGING_ITEM_ID);
+        List<Long> fetch = readOnlyContext.select(t.CHARGING_ITEM_ID).from(t).where(t.OWNERID.eq(cmd.getOwnerId()))
+            .and(t.OWNERTYPE.eq(cmd.getOwnerType()))
+            .fetch(t.CHARGING_ITEM_ID);
+        com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule = new PaymentBillGroupRule();
+        if(ruleId == null){
+            if(fetch.contains(cmd.getChargingItemId())){
+                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.UNIQUE_BILL_ITEM_CHECK,"a bill item can only exists in one bill group for a specific community");
+            }
+            //新增 一条billGroupRule
+            long nextRuleId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules.class));
+            ruleId = nextRuleId;
+            Long billGroupId = cmd.getBillGroupId();
+            //拿到正确的billGroupId
+            if(deCouplingFlag == 0 && cmd.getOwnerId().intValue() != cmd.getNamespaceId().intValue()){
+                List<Long> groupIds = readOnlyContext.select(Tables.EH_PAYMENT_BILL_GROUPS.ID)
+                        .from(Tables.EH_PAYMENT_BILL_GROUPS)
+                        .where(Tables.EH_PAYMENT_BILL_GROUPS.BROTHER_GROUP_ID.eq(cmd.getBillGroupId()))
+                        .and(Tables.EH_PAYMENT_BILL_GROUPS.OWNER_TYPE.eq(cmd.getOwnerType()))
+                        .and(Tables.EH_PAYMENT_BILL_GROUPS.OWNER_ID.eq(cmd.getOwnerId()))
+                        .fetch(Tables.EH_PAYMENT_BILL_GROUPS.ID);
+                if(groupIds.size()<0 || groupIds.size() > 1){
+                    LOGGER.error("add group rule for coupled communities, "+groupIds.size()+" brother groups are found, not one which leads to a violation to the law here");
+                    return null;
+                }
+                billGroupId = groupIds.get(0);
+            }
+            rule.setId(nextRuleId);
+            rule.setBillGroupId(billGroupId);
+            rule.setChargingItemId(cmd.getChargingItemId());
+            rule.setChargingItemName(cmd.getGroupChargingItemName());
+            rule.setChargingStandardsId(cmd.getChargingStandardId());
+            rule.setNamespaceId(cmd.getNamespaceId());
+            rule.setOwnerid(cmd.getOwnerId());
+            rule.setOwnertype(cmd.getOwnerType());
+            rule.setBillItemMonthOffset(cmd.getBillItemMonthOffset());
+            rule.setBillItemDayOffset(cmd.getBillItemDayOffset());
+            rule.setBrotherRuleId(brotherRuleId);
+            dao.insert(rule);
+//            response.setFailCause(AssetPaymentStrings.SAVE_SUCCESS);
+        }else{
+            //拿到正确的rule
+            if(cmd.getOwnerId().longValue() == cmd.getNamespaceId().longValue() || deCouplingFlag == 1){
+                rule = readOnlyContext.selectFrom(t)
+                        .where(t.ID.eq(ruleId))
+                        .fetchOneInto(PaymentBillGroupRule.class);
+            }else{
+                rule = readOnlyContext.selectFrom(t)
+                        .where(t.OWNERID.eq(cmd.getOwnerId()))
+                        .and(t.OWNERTYPE.eq(cmd.getOwnerType()))
+                        .and(t.BROTHER_RULE_ID.eq(ruleId))
+                        .fetchOneInto(PaymentBillGroupRule.class);
+            }
+            boolean workFlag = isInWorkGroupRule(rule);
+            if(workFlag){
+                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.CHANGE_SAFE_CHECK,"object is on work, modify or delete is not allowed.");
+            }
+            //如果没有关联则不修改
+//            rule.setBillGroupId(rule.getBillGroupId());
+            rule.setChargingItemId(cmd.getChargingItemId());
+//            rule.setChargingItemName(cmd.getGroupChargingItemName());
+//            rule.setChargingStandardsId(cmd.getChargingStandardId());
+//            rule.setNamespaceId(cmd.getNamespaceId());
+//            rule.setOwnerid(cmd.getOwnerId());
+//            rule.setOwnertype(cmd.getOwnerType());
+            rule.setBillItemMonthOffset(cmd.getBillItemMonthOffset());
+            rule.setBillItemDayOffset(cmd.getBillItemDayOffset());
+            rule.setBrotherRuleId(brotherRuleId);
+            dao.update(rule);
+//            response.setFailCause(AssetPaymentStrings.MODIFY_SUCCESS);
+        }
+        return ruleId;
+    }
+
+    @Override
+    public com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules findBillGroupRuleById(Long billGroupRuleId) {
+        DSLContext context = getReadOnlyContext();
+        return context.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.ID.eq(billGroupRuleId))
+                .fetchOneInto(PaymentBillGroupRule.class);
+    }
+    @Override
+    public boolean isInWorkGroupRule(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule) {
+        DSLContext context = getReadOnlyContext();
+        EhPaymentContractReceiver t = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("t");
+        EhPaymentBills bills = Tables.EH_PAYMENT_BILLS.as("bills");
+        //看是否关联了合同
+        List<Long> fetch1 = context.select(t.ID)
+                .from(t)
+                .where(t.OWNER_ID.eq(rule.getOwnerid()))
+                .and(t.OWNER_TYPE.eq(rule.getOwnertype()))
+                .and(t.NAMESPACE_ID.eq(rule.getNamespaceId()))
+                .and(t.EH_PAYMENT_CHARGING_ITEM_ID.eq(rule.getChargingItemId()))
+                .fetch(t.ID);
+        if(fetch1.size()>0){
+            return true;
+        }
+        //先看是否产生了账单
+        List<Long> fetch = context.select(bills.ID)
+                .from(bills)
+                .where(bills.BILL_GROUP_ID.eq(rule.getBillGroupId()))
+                .fetch(bills.ID);
+
+        if(fetch.size()>0){
+            List<Long> fetch2 = context.select(Tables.EH_PAYMENT_BILL_ITEMS.ID)
+                    .from(Tables.EH_PAYMENT_BILL_ITEMS)
+                    .where(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID.eq(rule.getChargingItemId()))
+                    .fetch(Tables.EH_PAYMENT_BILL_ITEMS.ID);
+            if(fetch2.size()>0){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public DeleteChargingItemForBillGroupResponse deleteBillGroupRuleById(Long billGroupRuleId,byte deCouplingFlag) {
+        DeleteChargingItemForBillGroupResponse response = new DeleteChargingItemForBillGroupResponse();
+        DSLContext context = getReadWriteContext();
+        if(deCouplingFlag == 0){
+            List<com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules> rules = context.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
+                    .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.ID.eq(billGroupRuleId))
+                    .or(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BROTHER_RULE_ID.eq(billGroupRuleId))
+                    .fetchInto(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules.class);
+            rules:for(int i = 0; i < rules.size(); i ++){
+                boolean workFlag = isInWorkGroupRule(rules.get(i));
+                if(workFlag){
+                    continue rules;
+                }
+                context.delete(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
+                        .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.ID.eq(rules.get(i).getId()))
+                        .execute();
+            }
+        }else{
+            com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule = findBillGroupRuleById(billGroupRuleId);
+            boolean workFlag = isInWorkGroupRule(rule);
+            if(workFlag){
+                response.setFailCause(AssetPaymentStrings.DELETE_GROUP_RULE_UNSAFE);
+                return response;
+            }
+            context.delete(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
+                    .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.ID.eq(billGroupRuleId))
+                    .execute();
+        }
+        return response;
+    }
+
+    @Override
+    public com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards findChargingStandardById(Long chargingStandardId) {
+        DSLContext context = getReadOnlyContext();
+        return context.selectFrom(Tables.EH_PAYMENT_CHARGING_STANDARDS)
+                .where(Tables.EH_PAYMENT_CHARGING_STANDARDS.ID.eq(chargingStandardId))
+                .fetchOneInto(PaymentChargingStandards.class);
+    }
+
+    @Override
+    public PaymentBillGroup getBillGroupById(Long billGroupId) {
+        DSLContext context = getReadOnlyContext();
+        return context.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(billGroupId))
+                .fetchOneInto(PaymentBillGroup.class);
+    }
+
+    @Override
+    public boolean checkBillsByBillGroupId(Long billGroupId) {
+        DSLContext context = getReadOnlyContext();
+        List<PaymentBillGroupRule> rules = context.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BILL_GROUP_ID.eq(billGroupId))
+                .fetchInto(PaymentBillGroupRule.class);
+        for(int i = 0; i < rules.size(); i ++) {
+            boolean inWorkGroupRule = isInWorkGroupRule(rules.get(i));
+            if(inWorkGroupRule){
+                return true;
+            }
+        }
+        return  false;
+
+    }
+
+    @Override
+    public DeleteBillGroupReponse deleteBillGroupAndRules(Long billGroupId,byte deCouplingFlag,String ownerType,Long ownerId) {
+        DeleteBillGroupReponse response = new DeleteBillGroupReponse();
+        DSLContext context = getReadWriteContext();
+        EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
+        EhPaymentBillGroups t1 = Tables.EH_PAYMENT_BILL_GROUPS.as("t1");
+        if(deCouplingFlag == (byte)0){
+            List<Long> groupIds = context.select(t1.ID)
+                    .from(t1)
+                    .where(t1.ID.eq(billGroupId))
+                    .or(t1.BROTHER_GROUP_ID.eq(billGroupId))
+                    .fetch(t1.ID);
+            ids:for( int i = 0; i < groupIds.size(); i ++){
+                boolean workFlag = checkBillsByBillGroupId(groupIds.get(i));
+                if(workFlag){
+//                    response.setFailCause(AssetPaymentStrings.DELTE_GROUP_UNSAFE);
+//                    return response;
+                    continue ids;
+                }
+                int finalI = i;
+                this.dbProvider.execute((TransactionStatus status) -> {
+                    context.delete(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
+                            .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BILL_GROUP_ID.eq(groupIds.get(finalI)))
+                            .execute();
+
+                    context.delete(Tables.EH_PAYMENT_BILL_GROUPS)
+                            .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(groupIds.get(finalI)))
+                            .execute();
+                    return null;
+                });
+            }
+        }else if(deCouplingFlag == (byte)1){
+            boolean workFlag = checkBillsByBillGroupId(billGroupId);
+            if(workFlag) {
+                response.setFailCause(AssetPaymentStrings.DELTE_GROUP_UNSAFE);
+                return response;
+            }
+//             删除不用导致其他同伴解耦，先这么试试
+//            Long nullId = null;
+            this.dbProvider.execute((TransactionStatus status) -> {
+                context.delete(t)
+                        .where(t.BILL_GROUP_ID.eq(billGroupId))
+                        .execute();
+                context.delete(t1)
+                        .where(t1.ID.eq(billGroupId))
+                        .execute();
+//                context.update(t1)
+//                        .set(t1.BROTHER_GROUP_ID,nullId)
+//                        .where(t1.OWNER_ID.eq(ownerId))
+//                        .and(t1.OWNER_TYPE.eq(ownerType))
+//                        .execute();
+                return null;
+            });
+        }
+        return response;
+    }
+
+    @Override
+    public ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(Long billGroupRuleId) {
+        DSLContext context = getReadOnlyContext();
+        ListChargingItemDetailForBillGroupDTO dto = new ListChargingItemDetailForBillGroupDTO();
+        EhPaymentChargingStandards t = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("t");
+        EhPaymentBillGroupsRules t1 = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t1");
+        PaymentBillGroupRule rule = context.selectFrom(t1)
+                .where(t1.ID.eq(billGroupRuleId))
+                .fetchOneInto(PaymentBillGroupRule.class);
+//        PaymentChargingStandards standard = context.selectFrom(t)
+//                .where(t.ID.eq(rule.getChargingStandardsId()))
+//                .fetchOneInto(PaymentChargingStandards.class);
+//        dto.setBillCycle(standard.getBillingCycle());
+        dto.setBillGroupRuleId(rule.getId());
+        dto.setChargingItemId(rule.getChargingItemId());
+//        dto.setChargingStandardId(standard.getId());
+        dto.setDayOffset(rule.getBillItemDayOffset());
+        dto.setMonthOffset(rule.getBillItemMonthOffset());
+//        dto.setFormula(standard.getFormula());
+        dto.setGroupChargingItemName(rule.getChargingItemName());
+        return dto;
+    }
+
+    @Override
+    public List<ListChargingItemsDTO> listAvailableChargingItems(OwnerIdentityCommand cmd) {
+        List<ListChargingItemsDTO> list = new ArrayList<>();
+        DSLContext context = getReadOnlyContext();
+        EhPaymentChargingItemScopes t1 = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t1");
+//        List<Long> availableIds = context.select(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID)
+//                .from(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
+//                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERID.eq(cmd.getOwnerId()))
+//                .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERTYPE.eq(cmd.getOwnerType()))
+//                .fetch(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID);
+//        List<PaymentChargingItemScope> scopes = context.selectFrom(t1)
+//                .where(t1.CHARGING_ITEM_ID.in(availableIds))
+//                .and(t1.OWNER_ID.eq(cmd.getOwnerId()))
+//                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+//                .fetchInto(PaymentChargingItemScope.class);
+        List<PaymentChargingItemScope> scopes = context.select(t1.fields())
+                .from(Tables.EH_PAYMENT_BILL_GROUPS_RULES,t1)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID.eq(t1.CHARGING_ITEM_ID))
+                .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERTYPE.eq(cmd.getOwnerType()))
+                .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERID.eq(cmd.getOwnerId()))
+                .fetchInto(PaymentChargingItemScope.class);
+        for(int j = 0; j < scopes.size(); j ++){
+            ListChargingItemsDTO dto = new ListChargingItemsDTO();
+            PaymentChargingItemScope scope = scopes.get(j);
+            dto.setChargingItemName(scope.getProjectLevelName());
+            dto.setChargingItemId(scope.getChargingItemId());
+            list.add(dto);
+        }
+
+        return list;
+    }
+
+    @Override
+    public List<PaymentFormula> getFormulas(Long id) {
+        DSLContext context = getReadOnlyContext();
+        return context.selectFrom(Tables.EH_PAYMENT_FORMULA)
+                .where(Tables.EH_PAYMENT_FORMULA.CHARGING_STANDARD_ID.eq(id))
+                .fetchInto(PaymentFormula.class);
+    }
+
+    @Override
+    public boolean cheackGroupRuleExistByChargingStandard(Long chargingStandardId,String ownerType,Long ownerId) {
+        DSLContext context = getReadOnlyContext();
+        Long itemId = context.select(Tables.EH_PAYMENT_CHARGING_STANDARDS.CHARGING_ITEMS_ID)
+                .from(Tables.EH_PAYMENT_CHARGING_STANDARDS)
+                .where(Tables.EH_PAYMENT_CHARGING_STANDARDS.ID.eq(chargingStandardId))
+                .fetchOne(Tables.EH_PAYMENT_CHARGING_STANDARDS.CHARGING_ITEMS_ID);
+        List<Long> fetch = context.select(Tables.EH_PAYMENT_BILL_GROUPS_RULES.ID)
+                .from(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID.eq(itemId))
+                .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERTYPE.eq(ownerType))
+                .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERID.eq(ownerId))
+                .fetch(Tables.EH_PAYMENT_BILL_GROUPS_RULES.ID);
+        if(fetch.size()>0){
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void setInworkFlagInContractReceiver(Long contractId,String contractNum) {
+        DSLContext writeContext = getReadWriteContext();
+        PaymentContractReceiver cr = new PaymentContractReceiver();
+        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver.class));
+        cr.setId(nextSequence);
+        cr.setContractId(contractId);
+        cr.setContractNum(contractNum);
+        cr.setInWork((byte)1);
+        cr.setIsRecorder((byte)1);
+        EhPaymentContractReceiverDao dao = new EhPaymentContractReceiverDao(writeContext.configuration());
+        dao.insert(cr);
+    }
+
+    @Override
+    public void setInworkFlagInContractReceiverWell(Long contractId) {
+        DSLContext writeContext = getReadWriteContext();
+        PaymentContractReceiver cr = new PaymentContractReceiver();
+        EhPaymentContractReceiver contract = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("contract");
+        writeContext.update(contract)
+                .set(contract.IN_WORK,(byte)0)
+                .where(contract.CONTRACT_ID.eq(contractId))
+                .execute();
+    }
+
+    @Override
+    public Boolean checkContractInWork(Long contractId,String contractNum) {
+        EhPaymentContractReceiver contract = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("contract");
+        DSLContext context = getReadOnlyContext();
+        Byte aByte = context.select(contract.IN_WORK)
+                .from(contract)
+                .where(contract.IS_RECORDER.eq((byte) 1))
+                .and(contract.CONTRACT_NUM.eq(contractNum))
+                .fetchOne(contract.IN_WORK);
+        if( aByte == null ){
+             aByte = context.select(contract.IN_WORK)
+                    .from(contract)
+                    .where(contract.IS_RECORDER.eq((byte) 1))
+                    .and(contract.CONTRACT_ID.eq(contractId))
+                    .fetchOne(contract.IN_WORK);
+        }
+        if ( aByte == null) {
+            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.FAIL_IN_GENERATION,"mission failed");
+        }
+        if( aByte == (byte)0){
+            return false;
+        }
+        return true;
+    }
+
+//    @Override
+//    public List<Long> deleteAllChargingStandardScope(Long ownerId, String ownerType) {
+//        DSLContext context = getReadWriteContext();
+//        EhPaymentChargingStandardsScopes standardScope = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScope");
+//        List<Long> standardIds = context.select(standardScope.CHARGING_STANDARD_ID)
+//                .from(standardScope)
+//                .where(standardScope.OWNER_TYPE.eq(ownerType))
+//                .and(standardScope.OWNER_ID.eq(ownerId))
+//                .fetch(standardScope.CHARGING_STANDARD_ID);
+//        context.delete(standardScope)
+//                .where(standardScope.OWNER_TYPE.eq(ownerType))
+//                .and(standardScope.OWNER_ID.eq(ownerId))
+//                .execute();
+//        return standardIds;
+//    }
+
+    @Override
+    public void updateChargingStandardByCreating(String standardName,String instruction,Long chargingStandardId, Long ownerId, String ownerType) {
+        //个体园区点击修改时的操作
+        DSLContext context = getReadWriteContext();
+        EhPaymentChargingStandardsScopes standardScope = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScope");
+        com.everhomes.server.schema.tables.EhPaymentFormula formulaSchema = Tables.EH_PAYMENT_FORMULA.as("formulaSchema");
+        //拿到所有的standard的id
+        List<Long> standardIds = context.select(standardScope.CHARGING_STANDARD_ID)
+                .from(standardScope)
+                .where(standardScope.OWNER_TYPE.eq(ownerType))
+                .and(standardScope.OWNER_ID.eq(ownerId))
+                .fetch(standardScope.CHARGING_STANDARD_ID);
+        //拿到原来的所有的standard
+        List<com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards> standards = context.selectFrom(standard)
+                .where(standard.ID.in(standardIds))
+                .fetchInto(PaymentChargingStandards.class);
+        //公式和scope都要存一份
+        List<com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes> scopes = new ArrayList<>();
+        List<EhPaymentFormula> formulas = new ArrayList<>();
+        for(int i = 0; i < standards.size(); i ++){
+            com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards origin = standards.get(i);
+            //如果是需要修改的那个standard，修改之
+            if(origin.getId().longValue() == chargingStandardId.longValue()){
+                origin.setName(standardName);
+                origin.setInstruction(instruction);
+            }
+            //standard的公式
+            EhPaymentFormula formula = context.selectFrom(formulaSchema)
+                    .where(formulaSchema.CHARGING_STANDARD_ID.eq(origin.getId()))
+                    .fetchOneInto(PaymentFormula.class);
+            //standard的scope
+            com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes scope = context.selectFrom(standardScope).
+                    where(standardScope.CHARGING_STANDARD_ID.eq(origin.getId()))
+                    .and(standardScope.OWNER_ID.eq(ownerId))
+                    .and(standardScope.OWNER_TYPE.eq(ownerType))
+                    .fetchOneInto(PaymentChargingStandardScope.class);
+            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards.class));
+            //c，s，f均修改id
+            formula.setChargingStandardId(nextSequence);
+            formulas.add(formula);
+            scope.setChargingStandardId(nextSequence);
+            scopes.add(scope);
+            origin.setId(nextSequence);
+        }
+        //删除个体园区所有的scope
+        context.delete(standardScope)
+                .where(standardScope.OWNER_TYPE.eq(ownerType))
+                .and(standardScope.OWNER_ID.eq(ownerId))
+                .execute();
+        EhPaymentChargingStandardsDao dao = new EhPaymentChargingStandardsDao(context.configuration());
+        EhPaymentFormulaDao dao1 = new EhPaymentFormulaDao(context.configuration());
+        EhPaymentChargingStandardsScopesDao dao2 = new EhPaymentChargingStandardsScopesDao(context.configuration());
+        //插入新的c，s，f
+        dao.insert(standards);
+        dao1.insert(formulas);
+        dao2.insert(scopes);
+    }
+
+    @Override
+    public boolean checkCoupledChargingStandard(Long cid) {
+        DSLContext context = getReadWriteContext();
+        List<Long> bros = context.select(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.ID)
+                .from(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES)
+                .where(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.OWNER_ID.eq(cid))
+                .fetch(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.ID);
+        if(bros.size() < 1){
+            return true;
+        }
+//        Long bro = context.select(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.BROTHER_STANDARD_ID)
+//                .from(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES)
+//                .where(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.CHARGING_STANDARD_ID.eq(cid))
+//                .fetchOne(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.BROTHER_STANDARD_ID);
+//        if(bro == null){
+//            return false;
+//        }else{
+//            return true;
+//        }
+        return false;
+    }
+
+    @Override
+    public void deCoupledForChargingItem(Long ownerId, String ownerType) {
+        DSLContext context = getReadWriteContext();
+        context.update(itemScope)
+                .set(itemScope.DECOUPLING_FLAG,(byte)1)
+                .where(itemScope.OWNER_TYPE.eq(ownerType))
+                .and(itemScope.OWNER_ID.eq(ownerId))
+                .execute();
+    }
+
+    @Override
+    public List<com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules> getBillGroupRuleByCommunity(Long ownerId, String ownerType) {
+        DSLContext context = getReadOnlyContext();
+        return context.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERID.eq(ownerId))
+                .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERTYPE.eq(ownerType))
+                .fetchInto(PaymentBillGroupRule.class);
+    }
+
+    @Override
+    public PaymentChargingItemScope findChargingItemScope(Long chargingItemId, String ownerType, Long ownerId) {
+        DSLContext context = getReadOnlyContext();
+        List<PaymentChargingItemScope> scopes = context.selectFrom(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES)
+                .where(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID.eq(chargingItemId))
+                .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_TYPE.eq(ownerType))
+                .fetchInto(PaymentChargingItemScope.class);
+        if(scopes.size()>0){
+            return scopes.get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public List<Integer> listAutoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId) {
+        DSLContext context = getReadOnlyContext();
+        return context.select(Tables.EH_PAYMENT_NOTICE_CONFIG.NOTICE_DAY_BEFORE)
+                .from(Tables.EH_PAYMENT_NOTICE_CONFIG)
+                .where(Tables.EH_PAYMENT_NOTICE_CONFIG.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_PAYMENT_NOTICE_CONFIG.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_PAYMENT_NOTICE_CONFIG.OWNER_TYPE.eq(ownerType))
+                .fetch(Tables.EH_PAYMENT_NOTICE_CONFIG.NOTICE_DAY_BEFORE);
+    }
+
+    @Override
+    public void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, List<Integer> configDays) {
+        DSLContext writeContext = getReadWriteContext();
+        EhPaymentNoticeConfig noticeConfig = Tables.EH_PAYMENT_NOTICE_CONFIG.as("noticeConfig");
+        EhPaymentNoticeConfigDao noticeConfigDao = new EhPaymentNoticeConfigDao(writeContext.configuration());
+        this.dbProvider.execute((TransactionStatus status) -> {
+            writeContext.delete(noticeConfig)
+                    .where(noticeConfig.NAMESPACE_ID.eq(namespaceId))
+                    .and(noticeConfig.OWNER_TYPE.eq(ownerType))
+                    .and(noticeConfig.OWNER_ID.eq(ownerId))
+                    .execute();
+            if(configDays != null){
+                for(int i = 0; i < configDays.size(); i++){
+                    PaymentNoticeConfig config = new PaymentNoticeConfig();
+                    config.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentNoticeConfig.class)));
+                    config.setNamespaceId(namespaceId);
+                    config.setOwnerId(ownerId);
+                    config.setOwnerType(ownerType);
+                    config.setNoticeDayBefore(configDays.get(i));
+                    noticeConfigDao.insert(config);
+                }
+            }
+            return null;
+        });
+    }
+
+    @Override
+    public AssetPaymentOrder getOrderById(Long orderId) {
+        DSLContext context = getReadOnlyContext();
+        List<AssetPaymentOrder> assetPaymentOrders = context.selectFrom(Tables.EH_ASSET_PAYMENT_ORDER)
+                .where(Tables.EH_ASSET_PAYMENT_ORDER.ID.eq(orderId))
+                .fetchInto(AssetPaymentOrder.class);
+        if(assetPaymentOrders.size() > 0) {
+            return assetPaymentOrders.get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public String getBillSource(String billId) {
+        Long id = null;
+        try{
+            id = Long.parseLong(billId);
+        }catch(Exception e){
+            return "";
+        }
+        DSLContext context = getReadOnlyContext();
+        PaymentBills bill = context.selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.ID.eq(id))
+                .fetchOneInto(PaymentBills.class);
+        StringBuilder sb = new StringBuilder();
+        sb.append(bill==null?"":bill.getDateStr()==null?"":bill.getDateStr());
+        if(bill != null) {
+            PaymentBillGroup group = context.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS)
+                    .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(bill.getBillGroupId()))
+                    .fetchOneInto(PaymentBillGroup.class);
+            sb.append(group == null? "":group.getName()==null?"":group.getName());
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public List<PaymentNoticeConfig> listAllNoticeConfigs() {
+        DSLContext context = getReadOnlyContext();
+        List<PaymentNoticeConfig> list = new ArrayList<>();
+        return context.selectFrom(Tables.EH_PAYMENT_NOTICE_CONFIG)
+                .fetchInto(PaymentNoticeConfig.class);
+
+    }
+
+    @Override
+    public List<PaymentBills> getAllBillsByCommunity(Long key) {
+        DSLContext context = getReadOnlyContext();
+        return context.selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(key))
+                .and(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq("community"))
+                .fetchInto(PaymentBills.class);
+    }
+
+    @Override
+    public List<PaymentBills> findAssetArrearage(Integer namespaceId, Long communityId, Long organizationId) {
+        SelectQuery<EhPaymentBillsRecord> query = getReadOnlyContext().selectQuery(Tables.EH_PAYMENT_BILLS);
+        if (namespaceId != null) query.addConditions(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(namespaceId));
+        if (communityId != null) {
+            query.addConditions(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq("community"));
+            query.addConditions(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(communityId));
+        }
+
+        if (organizationId != null) {
+            query.addConditions(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq("eh_organization"));
+            query.addConditions(Tables.EH_PAYMENT_BILLS.TARGET_ID.eq(organizationId));
+        }
+        query.addConditions(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte) 1));
+        return query.fetchInto(PaymentBills.class);
+    }
+    public List<com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules> getBillGroupRuleByCommunityWithBro(Long ownerId, String ownerType, boolean withBro) {
+        DSLContext context = getReadOnlyContext();
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_PAYMENT_BILL_GROUPS_RULES);
+        query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERID.eq(ownerId));
+        query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERTYPE.eq(ownerType));
+        if(withBro){
+            query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BROTHER_RULE_ID.isNotNull());
+        }else{
+            query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BROTHER_RULE_ID.isNull());
+        }
+        return query.fetchInto(PaymentBillGroupRule.class);
+    }
+
+    @Override
+    public List<PaymentBills> findSettledBillsByContractIds(List<Long> contractIds) {
+        return getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.CONTRACT_ID.in(contractIds))
+                .and(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte)1))
+                .fetchInto(PaymentBills.class);
+    }
+
+    @Override
+    public String getbillGroupNameById(Long billGroupId) {
+        return getReadOnlyContext().select(Tables.EH_PAYMENT_BILL_GROUPS.NAME)
+                .from(Tables.EH_PAYMENT_BILL_GROUPS)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(billGroupId))
+                .fetchOne(Tables.EH_PAYMENT_BILL_GROUPS.NAME);
+    }
+
+    @Override
+    public Collection<? extends Long> getAddressIdByBillId(Long id) {
+        Set<Long> ids = new HashSet<>();
+        getReadOnlyContext().select(Tables.EH_PAYMENT_BILL_ITEMS.ADDRESS_ID)
+                .from(Tables.EH_PAYMENT_BILL_ITEMS)
+                .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(id))
+                .fetch()
+                .forEach(r -> {
+                    ids.add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.ADDRESS_ID));
+                });
+        return ids;
+    }
+
+    @Override
+    public String getAddressStrByIds(List<Long> collect) {
+        StringBuilder sb = new StringBuilder();
+        getReadOnlyContext().select(Tables.EH_ADDRESSES.BUILDING_NAME,Tables.EH_ADDRESSES.APARTMENT_NAME)
+                .from(Tables.EH_ADDRESSES)
+                .where(Tables.EH_ADDRESSES.ID.in(collect))
+                .fetch()
+                .forEach(r -> {
+                    sb.append(r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME)+r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME)+",");
+                });
+        return sb.toString();
+    }
+
+    @Override
+    public BigDecimal getBillExpectanciesAmountOnContract(String contractNum, Long contractId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
+        EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
+        EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
+        HashSet<PaymentExpectancyDTO> set = new HashSet<>();
+        List<Long> fetch = context.select(bill.ID)
+                .from(bill)
+                .where(bill.CONTRACT_NUM.eq(contractNum))
+                .fetch(bill.ID);
+        context.select(t.ID,t.AMOUNT_RECEIVABLE)
+                .from(t,t1)
+                .where(t.BILL_ID.in(fetch))
+                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
+                .orderBy(t1.NAME,t.DATE_STR)
+                .fetch()
+                .map(r -> {
+                    PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
+                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setBillItemId(r.getValue(t.ID));
+                    set.add(dto);
+                    return null;
+                });
+
+        List<Long> fetch1 = context.select(bill.ID)
+                .from(bill)
+                .where(bill.CONTRACT_ID.eq(contractId))
+                .fetch(bill.ID);
+        context.select(t.ID,t.AMOUNT_RECEIVABLE)
+                .from(t,t1)
+                .where(t.BILL_ID.in(fetch1))
+                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
+                .orderBy(t1.NAME,t.DATE_STR)
+                .fetch()
+                .map(r -> {
+                    PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
+                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setBillItemId(r.getValue(t.ID));
+                    set.add(dto);
+                    return null;
+                });
+        BigDecimal amount = new BigDecimal("0");
+        Iterator<PaymentExpectancyDTO> it = set.iterator();
+        while(it.hasNext()){
+            amount = amount.add(it.next().getAmountReceivable());
+        }
+        return amount;
+    }
+
+    @Override
+    public List<ListAllBillsForClientDTO> listAllBillsForClient(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId) {
+        List<ListAllBillsForClientDTO> list = new ArrayList<>();
+        DSLContext context = getReadOnlyContext();
+        ArrayList<Long> groupIds = new ArrayList<>();
+        EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(bill);
+        query.addSelect(bill.BILL_GROUP_ID);
+        query.addSelect(bill.AMOUNT_OWED);
+        query.addSelect(bill.AMOUNT_RECEIVABLE);
+        query.addSelect(bill.DATE_STR_BEGIN);
+        query.addSelect(bill.DATE_STR_END);
+        query.addSelect(bill.STATUS);
+        query.addSelect(bill.ID);
+        if(namespaceId!=null){
+            query.addConditions(bill.NAMESPACE_ID.eq(namespaceId));
+        }
+        query.addConditions(bill.OWNER_ID.eq(ownerId));
+        query.addConditions(bill.TARGET_TYPE.eq(targetType));
+        query.addConditions(bill.TARGET_ID.eq(targetId));
+        query.fetch()
+                .map(r -> {
+                    ListAllBillsForClientDTO dto = new ListAllBillsForClientDTO();
+                    groupIds.add(r.getValue(bill.BILL_GROUP_ID));
+                    dto.setAmountOwed(r.getValue(bill.AMOUNT_OWED).toString());
+                    dto.setAmountReceivable(r.getValue(bill.AMOUNT_RECEIVABLE).toString());
+                    dto.setDateStrBegin(r.getValue(bill.DATE_STR_BEGIN));
+                    dto.setDateStrEnd(r.getValue(bill.DATE_STR_END));
+                    dto.setChargeStatus(r.getValue(bill.STATUS));
+                    dto.setBillId(String.valueOf(r.getValue(bill.ID)));
+                    list.add(dto);
+                    return null;
+                });
+        Map<Long,String> groupNames = getGroupNames(groupIds);
+        for(int i = 0 ; i < list.size(); i ++){
+            list.get(i).setBillGroupName(groupNames.get(groupIds.get(i)));
+        }
+        return list;
+    }
+
+    @Override
+    public PaymentServiceConfig findServiceConfig(Integer namespaceId) {
+        List<PaymentServiceConfig> configs = getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_SERVICE_CONFIGS)
+                .where(Tables.EH_PAYMENT_SERVICE_CONFIGS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_PAYMENT_SERVICE_CONFIGS.NAME.eq("物业缴费"))
+                .fetchInto(PaymentServiceConfig.class);
+        return configs.get(0);
+    }
+
+    private Map<Long,String> getGroupNames(ArrayList<Long> groupIds) {
+        Map<Long,String> map = new HashMap<>();
+        EhPaymentBillGroups group = Tables.EH_PAYMENT_BILL_GROUPS.as("group");
+        for(int i = 0 ; i < groupIds.size(); i++ ){
+            Long groupId = groupIds.get(i);
+            if(map.containsKey(groupId)) continue;
+            map.put(groupId,getReadOnlyContext().select(group.NAME).from(group).where(group.ID.eq(groupId)).fetchOne(group.NAME));
+        }
+        return map;
+    }
+
+
+
+    private DSLContext getReadOnlyContext(){
+        return this.dbProvider.getDslContext(AccessSpec.readOnly());
+    }
+    private DSLContext getReadWriteContext(){
+        return this.dbProvider.getDslContext(AccessSpec.readWrite());
+    }
+    private Long getNextSequence(Class clz){
+        return this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(clz));
+    }
+    private static EhPaymentChargingStandards standard = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("standard");
+    private static EhPaymentChargingItemScopes itemScope = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("itemScope");
+    private static EhPaymentBillGroupsRules groupRule = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("groupRule");
+
+
 }

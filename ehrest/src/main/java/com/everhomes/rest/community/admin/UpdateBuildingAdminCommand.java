@@ -23,6 +23,10 @@ import com.everhomes.rest.general_approval.PostApprovalFormItem;
  *  <li>description: 楼栋介绍</li>
  *  <li>posterUri: 标题图</li>
  *  <li>attachments: 附件图</li>
+ *  <li>constructionCompany: 施工单位</li>
+ *  <li>entryDate: 入驻时间</li>
+ *  <li>height: 楼高</li>
+ *  <li>buildingNumber: 楼栋编号</li>
  * </ul>
  *
  */
@@ -59,6 +63,7 @@ public class UpdateBuildingAdminCommand {
 
 	private String floorCount;
 	private String trafficDescription;
+
 	private String liftDescription;
 	private String pmDescription;
 	private String parkingLotDescription;
@@ -72,8 +77,38 @@ public class UpdateBuildingAdminCommand {
 	private Long generalFormId;
 	private Byte customFormFlag;
 
+	private String constructionCompany;
+	private Long entryDate;
+	private Double height;
+
+	private String buildingNumber;
+
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
+
+	public Double getHeight() {
+		return height;
+	}
+
+	public void setHeight(Double height) {
+		this.height = height;
+	}
+
+	public String getConstructionCompany() {
+		return constructionCompany;
+	}
+
+	public void setConstructionCompany(String constructionCompany) {
+		this.constructionCompany = constructionCompany;
+	}
+
+	public Long getEntryDate() {
+		return entryDate;
+	}
+
+	public void setEntryDate(Long entryDate) {
+		this.entryDate = entryDate;
+	}
 
 	public Long getGeneralFormId() {
 		return generalFormId;
@@ -98,6 +133,7 @@ public class UpdateBuildingAdminCommand {
 	public void setFormValues(List<PostApprovalFormItem> formValues) {
 		this.formValues = formValues;
 	}
+
 
 	public Long getId() {
 		return id;
@@ -211,78 +247,6 @@ public class UpdateBuildingAdminCommand {
 		this.trafficDescription = trafficDescription;
 	}
 
-	public String getLiftDescription() {
-		return liftDescription;
-	}
-
-	public void setLiftDescription(String liftDescription) {
-		this.liftDescription = liftDescription;
-	}
-
-	public String getPmDescription() {
-		return pmDescription;
-	}
-
-	public void setPmDescription(String pmDescription) {
-		this.pmDescription = pmDescription;
-	}
-
-	public String getParkingLotDescription() {
-		return parkingLotDescription;
-	}
-
-	public void setParkingLotDescription(String parkingLotDescription) {
-		this.parkingLotDescription = parkingLotDescription;
-	}
-
-	public String getEnvironmentalDescription() {
-		return environmentalDescription;
-	}
-
-	public void setEnvironmentalDescription(String environmentalDescription) {
-		this.environmentalDescription = environmentalDescription;
-	}
-
-	public String getPowerDescription() {
-		return powerDescription;
-	}
-
-	public void setPowerDescription(String powerDescription) {
-		this.powerDescription = powerDescription;
-	}
-
-	public String getTelecommunicationDescription() {
-		return telecommunicationDescription;
-	}
-
-	public void setTelecommunicationDescription(String telecommunicationDescription) {
-		this.telecommunicationDescription = telecommunicationDescription;
-	}
-
-	public String getAirConditionDescription() {
-		return airConditionDescription;
-	}
-
-	public void setAirConditionDescription(String airConditionDescription) {
-		this.airConditionDescription = airConditionDescription;
-	}
-
-	public String getSecurityDescription() {
-		return securityDescription;
-	}
-
-	public void setSecurityDescription(String securityDescription) {
-		this.securityDescription = securityDescription;
-	}
-
-	public String getFireControlDescription() {
-		return fireControlDescription;
-	}
-
-	public void setFireControlDescription(String fireControlDescription) {
-		this.fireControlDescription = fireControlDescription;
-	}
-
 	public String getFloorCount() {
 		return floorCount;
 	}
@@ -299,4 +263,83 @@ public class UpdateBuildingAdminCommand {
 		this.managerName = managerName;
 	}
 
+	public String getAirConditionDescription() {
+		return airConditionDescription;
+	}
+
+	public void setAirConditionDescription(String airConditionDescription) {
+		this.airConditionDescription = airConditionDescription;
+	}
+
+	public String getBuildingNumber() {
+		return buildingNumber;
+	}
+
+	public void setBuildingNumber(String buildingNumber) {
+		this.buildingNumber = buildingNumber;
+	}
+
+	public String getEnvironmentalDescription() {
+		return environmentalDescription;
+	}
+
+	public void setEnvironmentalDescription(String environmentalDescription) {
+		this.environmentalDescription = environmentalDescription;
+	}
+
+	public String getFireControlDescription() {
+		return fireControlDescription;
+	}
+
+	public void setFireControlDescription(String fireControlDescription) {
+		this.fireControlDescription = fireControlDescription;
+	}
+
+	public String getLiftDescription() {
+		return liftDescription;
+	}
+
+	public void setLiftDescription(String liftDescription) {
+		this.liftDescription = liftDescription;
+	}
+
+	public String getParkingLotDescription() {
+		return parkingLotDescription;
+	}
+
+	public void setParkingLotDescription(String parkingLotDescription) {
+		this.parkingLotDescription = parkingLotDescription;
+	}
+
+	public String getPmDescription() {
+		return pmDescription;
+	}
+
+	public void setPmDescription(String pmDescription) {
+		this.pmDescription = pmDescription;
+	}
+
+	public String getPowerDescription() {
+		return powerDescription;
+	}
+
+	public void setPowerDescription(String powerDescription) {
+		this.powerDescription = powerDescription;
+	}
+
+	public String getSecurityDescription() {
+		return securityDescription;
+	}
+
+	public void setSecurityDescription(String securityDescription) {
+		this.securityDescription = securityDescription;
+	}
+
+	public String getTelecommunicationDescription() {
+		return telecommunicationDescription;
+	}
+
+	public void setTelecommunicationDescription(String telecommunicationDescription) {
+		this.telecommunicationDescription = telecommunicationDescription;
+	}
 }

@@ -67,13 +67,16 @@ public interface ConfigConstants {
     public static final String SCHEDULE_EQUIPMENT_TASK_TIME = "equipment.task.schedule.time";
 
 	public static final String NEWS_PAGE_URL = "news.url";
-	
+	public static final String NEWS_WEB_PAGE_URL = "news.web.url";
+
 	public static final String SYNCH_USER_APP_KEY = "synch.user.app.key"; 
 	public static final String SYNCH_USER_SECRET_KEY = "synch.user.secret.key"; 
 	public static final String OAUTH_SERVER = "oauth.server";
 	public static final String PAY_SERVER = "pay.server";
 	
-	public static final String ACTIVITY_CONTENT_URL = "activity.content.url"; 
+	public static final String ACTIVITY_CONTENT_URL = "activity.content.url";
+
+    public static final String CLUB_DESCRIPTION_URL = "club.description.url";
 	
 	public static final String CLUB_PLACEHOLDER_NAME = "club.placeholder.name"; 
 	
@@ -103,16 +106,39 @@ public interface ConfigConstants {
 
     String APPLY_ENTRY_BUILDING_DETAIL_URL = "apply.entry.building.detail.url";
 
+    String APPLY_ENTRY_LEASE_BUILDING_DETAIL_URL = "apply.entry.lease.building.detail.url";
+
+    String APPLY_ENTRY_LEASE_PROJECT_DETAIL_URL = "apply.entry.lease.project.detail.url";
+
     String APP_ROUTE_BROWSER_OUTER_URI = "app.route.browser.outer.uri";
 
     String APP_ROUTE_BROWSER_INNER_URI = "app.route.browser.inner.uri";
     
     public static final String BIZ_SEARCH_SHOPS_API = "biz.search.shops.api";
     public static final String QUALITY_STAT_CORN = "quality.stat.corn";
+    public static final String BIZ_COMMONDITY_DETAIL_API = "biz.queryCommodityDetail.api";
 
     public static final String PORTAL_LAYOUT_TITLE = "portal.layout.title";
     public static final String PORTAL_MODULE_APP_TITLE = "portal.module.app.title";
     public static final String PORTAL_ITEM_ALL_TITLE = "portal.item.all.title";
     public static final String PORTAL_ITEM_MORE_TITLE = "portal.item.more.title";
+    public static final String PAY_V2_HOME_URL = "pay.v2.home.url";
+    public static final String PAY_PLATFORM = "pay.platform";
+
+    public static final String QUESTIONNAIRE_DETAIL_URL = "questionnaire.detail.url";
+    public static final String QUESTIONNAIRE_SEND_MESSAGE_EXPRESS = "questionnaire.send.message.express";
+    public static final String QUESTIONNAIRE_REMIND_TIME_INTERVAL = "questionnaire.remind.time.interval";
+
+    String PARKING_CAR_VERIFICATION_FLOWCASE_URL = "parking.car.verification.flowCase.url";
+    String ARCHIVES_FORM_ORIGIN_ID = "archives.form.origin.id";
+
+    String APP_SYSTEM_UPLOAD_URL_IN_BROWSER = "app.system.upload_url_in_browser";
+
+
+    public static final String ASSET_PAYMENT_ZJH_URL = "asset.payment.zjh.url";
+    public static final String ASSET_PAYMENT_ZJH_API_8 = "asset.payment.zjh.api.2.2.4.8";
+    public static final String ASSET_PAYMENT_ZJH_API_9 = "asset.payment.zjh.api.2.2.4.9";
+    public static final String ASSET_PAYMENT_ZJH_API_10 = "asset.payment.zjh.api.2.2.4.10";
+    public static final String ASSET_PAYMENT_ZJH_API_15 = "asset.payment.zjh.api.2.2.4.15";
 
 }

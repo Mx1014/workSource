@@ -201,6 +201,8 @@ public interface PropertyMgrProvider {
      */
     List<OrganizationOwnerBehavior> listOrganizationOwnerBehaviors(Integer namespaceId, Long ownerId);
 
+    List<OrganizationOwnerBehavior> listApartmentOrganizationOwnerBehaviors(Long addressId);
+
     /**
      * 创建地址与业主对应记录
      * @param ownerAddress
@@ -491,4 +493,6 @@ public interface PropertyMgrProvider {
 	public Map<Long, CommunityPmBill> mapNewestBillByAddressIds(List<Long> addressIds);
 
 	public OrganizationOwner findOrganizationOwnerById(Long organizationOwnerId);
+
+	List<CommunityAddressMapping> listCommunityAddressMappingByAddressIds(List<Long> addressIds);
 }

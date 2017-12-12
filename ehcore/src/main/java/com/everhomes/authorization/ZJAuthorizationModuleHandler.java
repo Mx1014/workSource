@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.jooq.exception.DataAccessException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -51,7 +53,7 @@ import com.everhomes.util.StringHelper;
 
 @Component(AuthorizationModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX+"EhNamespaces"+999971)
 public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler {
-//	private static final Logger LOGGER = LoggerFactory.getLogger(ZJAuthorizationModuleHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ZJAuthorizationModuleHandler.class);
 
 
 	private String url = "http://139.129.220.146:3578/openapi/Authenticate";
@@ -156,6 +158,8 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 			String jsonStr = null;
 			try {
 				jsonStr = HttpUtils.post(url, params, 20, "UTF-8");
+				LOGGER.info("params = "+StringHelper.toJsonString(params));
+				LOGGER.info("result = "+jsonStr);
 				//向第张江认证。
 				entity = JSONObject.parseObject(jsonStr,new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
 			} catch (Exception e) {
@@ -164,6 +168,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 				entity.setErrorDescription("请求失败");
 			}
 		}
+		replaceCommunityNameByMappingRule(entity);
 		//请求成功，返回承租地址，那么创建家庭。
 		AuthorizationThirdPartyRecord record = createFamily(cmd,entity,params,type);
 		//创建工作流
@@ -175,18 +180,33 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		return processGeneralFormDTO(cmd,entity,type,flowCase);
 	}
 
+	private void replaceCommunityNameByMappingRule(ZjgkJsonEntity<List<ZjgkResponse>> entity) {
+		List<ZjgkResponse> list = entity.getResponse();
+		if(entity.isSuccess() && list != null && list.size() > 0){
+			String mappingjson = configProvider.getValue("zj_community_name_mapping","{\"天之骄子北块\":\"天之骄子专家楼\"}");
+			Map<String,String> communityMap = JSONObject.parseObject(mappingjson,new TypeReference<Map<String, String>>(){});
+			for (ZjgkResponse zjgkResponse : list) {
+				String mapingName = communityMap.get(zjgkResponse.getCommunityName());
+				if(mapingName != null){
+					zjgkResponse.setCommunityName(mapingName);
+				}
+			}
+		}
+	}
 	//生成调试对象。
 	private ZjgkJsonEntity<List<ZjgkResponse>> generateBebugEntity(ZjgkJsonEntity<List<ZjgkResponse>> entity) {
 		List<ZjgkResponse> responses = new ArrayList<>();
 		if(length == 18){
 			entity.setErrorCode(ZjgkJsonEntity.ERRORCODE_SUCCESS);
 			entity.setErrorDescription("认证成功");
-			ZjgkResponse response = new ZjgkResponse();
-			response.setCommunityName(communites[(int)(Math.random()*communites.length)]); // TODO
-			response.setBuildingName(String.valueOf(generateRandomNumber(2)));// TODO
-			response.setApartmentName(String.valueOf(generateRandomNumber(3)));
-			response.setAddress(response.getCommunityName()+response.getBuildingName()+"-"+response.getApartmentName());
-			responses.add(response);
+			for(String c:communites){
+				ZjgkResponse response = new ZjgkResponse();
+				response.setCommunityName(c); // TODO
+				response.setBuildingName(String.valueOf(generateRandomNumber(2)));// TODO
+				response.setApartmentName(String.valueOf(generateRandomNumber(3)));
+				response.setAddress(response.getCommunityName()+response.getBuildingName()+"-"+response.getApartmentName());
+				responses.add(response);
+			}
 		}else if(length == 2){
 			entity.setErrorCode(ZjgkJsonEntity.ERRORCODE_MISMATCHING);
 			entity.setErrorDescription("签名证书非法");
@@ -499,13 +519,15 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	private Map<String, String> generateParams(PostGeneralFormCommand cmd, String type){
 		List<PostApprovalFormItem> values = cmd.getValues();
 		Map<String, String> params= new HashMap<String,String>();
-//		params.put("organizationCode","1232123");
-//		params.put("organizationContact","Test");
-//		params.put("organizationPhone","1234567890");
-//		params.put("phone","18761600673");
-//		params.put("name","dsf");
-//		params.put("certificateType","1");
-//		params.put("certificateNo","321201199307070219");
+		//神码有点神，什么几把认证都要穿这个个几把。
+		params.put("organizationCode","1232123");
+		params.put("organizationContact","Test");
+		params.put("organizationPhone","1234567890");
+		params.put("phone","18761600673");
+		params.put("name","dsf");
+		params.put("certificateType","1");
+		params.put("certificateNo","321201199307070219");
+		params.put("crypto","sss");
 		for (PostApprovalFormItem item : values) {
 			GeneralFormFieldType fieldType = GeneralFormFieldType.fromCode(item.getFieldType());
 			switch (fieldType) {

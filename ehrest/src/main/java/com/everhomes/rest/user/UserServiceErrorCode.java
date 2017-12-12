@@ -25,6 +25,8 @@ public interface UserServiceErrorCode {
     int ERROR_INVALID_PARAMS = 100016;
     int ERROR_INVALID_PERMISSION = 100017;
     int ERROR_KICKOFF_BY_OTHER = 100018;
+
+    int ERROR_IDENTIFY_TOKEN_REGISTERED = 100019;
     int ERROR_UNAUTHENTITICATION = 401;
     int ERROR_FORBIDDEN = 403;
     int ERROR_FILE_CONTEXT_ISNULL = 200001;
@@ -42,5 +44,10 @@ public interface UserServiceErrorCode {
     int ERROR_NEW_IDENTIFIER_USER_EXIST = 300008;//该手机号码已被注册
 
     static final int DOMAIN_NOT_CONFIGURED = 400000;
+
+    int ERROR_INVALID_PHONE = 400001; //手机号码错误
+
+    int ERROR_INVALID_USERTOKEN = 400002; //无效的用户token
+
 
 }

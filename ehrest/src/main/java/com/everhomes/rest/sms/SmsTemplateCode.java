@@ -5,6 +5,9 @@ public interface SmsTemplateCode {
     String SCOPE = "sms.default";
 
     String YZX_SUFFIX = "yzx";
+    String YOU_XUN_TONG_SUFFIX = "YouXunTong";
+    String LIAN_XIN_TONG_SUFFIX = "LianXinTong";
+
     String SCOPE_YZX = SCOPE + "." + YZX_SUFFIX;
 
     String KEY_VCODE = "vcode";
@@ -28,6 +31,8 @@ public interface SmsTemplateCode {
     String KEY_PHONE = "phone";
     String KEY_TOPICTYPE = "topicType";
     String KEY_MSG = "msg";
+
+    int SIGN_CODE = 0; // 签名code
 
     int VERIFICATION_CODE = 1; // 验证码
     int WY_BILL_CODE = 3; //物业账单信息
@@ -110,4 +115,13 @@ public interface SmsTemplateCode {
 
     // 申诉修改手机号审核成功
     int RESET_IDENTIFIER_APPEAL_SUCCESS_CODE = 53;// 申诉手机号：【深圳科技园】您的申诉已通过，账号手机已更新为{newIdentifier}，若非本人操作请联系客服，感谢您的使用。
+
+    //物业缴费催款
+    int PAYMENT_NOTICE_CODE = 54;
+
+    //任务消息提醒短信
+    int PM_NOTIFY_BEFORE_TASK = 55;
+    int PM_NOTIFY_BEFORE_TASK_DELAY = 56;
+    int PM_NOTIFY_AFTER_TASK_DELAY = 57;
+
 }

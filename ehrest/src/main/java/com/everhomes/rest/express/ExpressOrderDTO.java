@@ -16,8 +16,13 @@ import com.everhomes.util.StringHelper;
  * <li>expressCompanyName: 快递公司</li>
  * <li>billNo: 快递单号</li>
  * <li>sendType: 寄件类型，参考{@link com.everhomes.rest.express.ExpressSendType}</li>
+ * <li>quantityAndWeight: 数量及重量</li>
+ * <li>packageType: 封装类型，参考{@link com.everhomes.rest.express.ExpressPackageType}</li>
+ * <li>invoiceHead: 发票抬头</li>
+ * <li>invoiceFlag: 需要发票，参考{@link com.everhomes.rest.express.ExpressInvoiceFlagType}</li>
  * <li>payType: 付款方式，参考{@link com.everhomes.rest.express.ExpressPayType}</li>
  * <li>status: 订单状态，参考{@link com.everhomes.rest.express.ExpressOrderStatus}</li>
+ * <li>statusDesc: 订单状态描述</li>
  * <li>paySummary: 付费总计</li>
  * <li>sendOrganization: 寄件人公司</li>
  * <li>sendProvince: 寄件省</li>
@@ -48,8 +53,13 @@ public class ExpressOrderDTO {
 	private String expressCompanyName;
 	private String billNo;
 	private Byte sendType;
+	private String quantityAndWeight;
+	private Byte packageType;
+	private String invoiceHead;
+	private Byte invoiceFlag;
 	private Byte payType;
 	private Byte status;
+	private String statusDesc;
 	private BigDecimal paySummary;
 	private String sendOrganization;
 	private String sendProvince;
@@ -288,6 +298,38 @@ public class ExpressOrderDTO {
 		this.sendType = sendType;
 	}
 
+	public String getQuantityAndWeight() {
+		return quantityAndWeight;
+	}
+
+	public void setQuantityAndWeight(String quantityAndWeight) {
+		this.quantityAndWeight = quantityAndWeight;
+	}
+
+	public Byte getPackageType() {
+		return packageType;
+	}
+
+	public void setPackageType(Byte packageType) {
+		this.packageType = packageType;
+	}
+
+	public String getInvoiceHead() {
+		return invoiceHead;
+	}
+
+	public void setInvoiceHead(String invoiceHead) {
+		this.invoiceHead = invoiceHead;
+	}
+
+	public Byte getInvoiceFlag() {
+		return invoiceFlag;
+	}
+
+	public void setInvoiceFlag(Byte invoiceFlag) {
+		this.invoiceFlag = invoiceFlag;
+	}
+
 	public Byte getPayType() {
 		return payType;
 	}
@@ -310,6 +352,14 @@ public class ExpressOrderDTO {
 
 	public void setPaySummary(BigDecimal paySummary) {
 		this.paySummary = paySummary;
+	}
+
+	public String getStatusDesc() {
+		return statusDesc;
+	}
+
+	public void setStatusDesc(String statusDesc) {
+		this.statusDesc = statusDesc;
 	}
 
 	@Override

@@ -1,15 +1,28 @@
 package com.everhomes.contentserver;
 
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.bus.BusBridgeProvider;
+import com.everhomes.bus.LocalBus;
+import com.everhomes.bus.LocalBusOneshotSubscriber;
+import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
+import com.everhomes.bus.LocalBusSubscriber;
+import com.everhomes.bus.LocalBusSubscriber.Action;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.contentserver.*;
 import com.everhomes.rest.contentserver.WebSocketConstant;
 import com.everhomes.rest.messaging.ImageBody;
 import com.everhomes.rest.rpc.PduFrame;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -25,16 +38,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Component
@@ -48,10 +68,26 @@ public class ContentServerServiceImpl implements ContentServerService {
     @Autowired
     private ContentServerProvider contentServerProvider;
     
+    @Autowired
+    BigCollectionProvider bigCollectionProvider;
+   
+    @Autowired
+    private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
+    
+    @Autowired
+    private LocalBus localBus;
+
+    @Autowired
+    private BusBridgeProvider busBridgeProvider;
+    
+    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+    
     private CloseableHttpClient httpClient;
 
     private static final String HTTP = "http";
     private static final String HTTPS = "https";
+    private static final String UPLOAD_FMT = "upload_%s";
+    Random R = new Random(System.currentTimeMillis());
     
     @PostConstruct
     protected void init() {
@@ -472,7 +508,7 @@ public class ContentServerServiceImpl implements ContentServerService {
         try {
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
             builder.addBinaryBody("upload_file", fileStream,
-                    ContentType.APPLICATION_OCTET_STREAM, fileSuffix);
+                    ContentType.APPLICATION_OCTET_STREAM, fileName);
             HttpEntity multipart = builder.build();
 
             httpPost.setEntity(multipart);
@@ -506,5 +542,317 @@ public class ContentServerServiceImpl implements ContentServerService {
             }
             
         }
+    }
+    
+    private void setUploadFileInfo() {
+        String key = String.format("%d", 1);
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+      
+        Object v = redisTemplate.opsForValue().get(key);
+        
+        Long rv ;
+        if(v == null) {
+            rv = 0l;
+        } else {
+            rv = Long.valueOf((String)v);    
+        }
+        
+        redisTemplate.opsForValue().set(key, String.valueOf(System.currentTimeMillis()));
+    }
+    
+    @SuppressWarnings("unchecked")
+    private boolean checkAndSetUploadId(String uuid) {
+        String key = String.format(UPLOAD_FMT, uuid);
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+      
+        UploadFileInfoDTO dto = new UploadFileInfoDTO();
+        dto.setUploadId(uuid);
+        
+        Boolean ok = redisTemplate.opsForValue().setIfAbsent(key, StringHelper.toJsonString(dto));
+        
+        if(ok) {
+            redisTemplate.expire(key, 120l, TimeUnit.SECONDS);
+        }
+        
+        return ok;
+    }
+
+    @Override
+    public String newUploadId() {
+        for(int i = 0; i < 5; i++) {
+            String uuid = UUID.randomUUID().toString();
+            uuid = "evhUploader-" + uuid.replace("-", "");
+            boolean ok = checkAndSetUploadId(uuid);
+            if(ok) {
+                return uuid;    
+            }
+        }
+        
+        throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
+                ContentServerErrorCode.ERROR_INVALID_UUID, "invalid uuid"); 
+        
+    }
+    
+    private UploadFileInfoDTO getFileDTO(String uploadId) {
+        String key = String.format(UPLOAD_FMT, uploadId);
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        Object obj = redisTemplate.opsForValue().get(key);
+        if(obj == null) {
+            return null;
+        }
+        String str = (String)obj;
+        UploadFileInfoDTO dto = (UploadFileInfoDTO)StringHelper.fromJsonString(str, UploadFileInfoDTO.class);
+        return dto;
+    }
+    
+    @Override
+    public DeferredResult<RestResponse> waitScan(String uploadId) {
+        DeferredResult<RestResponse> deferredResult = new DeferredResult<>();
+        RestResponse response = new RestResponse();
+        String subject = "upload_scan." + uploadId;
+        int scanTimeout = 30*1000;
+        UploadFileInfoDTO dto = getFileDTO(uploadId);
+        if(dto == null) {
+            response.setResponseObject("uuid timeout");
+            response.setErrorCode(ContentServerErrorCode.ERROR_INVALID_UUID);
+            deferredResult.setResult(response);
+            return deferredResult;
+        }
+        
+        //dto 只有一个线程能成功，如果某一个线程失败，则需要重新请求 uuid
+        
+        localBusSubscriberBuilder.build(subject, new LocalBusOneshotSubscriber() {
+            @Override
+            public Action onLocalBusMessage(Object sender, String subject,
+                                            Object dtoResp, String path) {
+                response.setResponseObject(StringHelper.fromJsonString((String)dtoResp, UploadFileInfoDTO.class));
+                deferredResult.setResult(response);
+                return null;
+            }
+            @Override
+            public void onLocalBusListeningTimeout() {
+                //wait again
+                response.setResponseObject("continue");
+                response.setErrorCode(200);
+                deferredResult.setResult(response);
+            }
+        
+        }).setTimeout(scanTimeout).create();
+        
+        return deferredResult;
+    }
+    
+    private UploadFileInfoDTO signalFileDTO(UploadFileInfoCommand cmd, Long userId) {
+        String key = String.format(UPLOAD_FMT, cmd.getUploadId());
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        Object obj = redisTemplate.opsForValue().get(key);
+        if(obj == null) {
+            return null;
+        }
+        String str = (String)obj;
+        UploadFileInfoDTO dto = (UploadFileInfoDTO)StringHelper.fromJsonString(str, UploadFileInfoDTO.class);
+        
+        if(dto.getUserId() != null && !dto.getUserId().equals(userId)) {
+            throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
+                    ContentServerErrorCode.ERROR_INVALID_UUID, "invalid uuid"); 
+        }
+        
+        if(dto.getUserId() != null) {
+            return dto;
+        }
+        
+        dto.setContentServer(cmd.getContentServer());
+        dto.setFileExtension(cmd.getFileExtension());
+        dto.setInfos(cmd.getInfos());
+        dto.setLimitCount(cmd.getLimitCount());
+        dto.setLimitPerSize(cmd.getLimitPerSize());
+        dto.setUserId(userId);
+        dto.setUserToken(cmd.getUserToken());
+        dto.setTitle(cmd.getTitle());
+        
+        obj = redisTemplate.opsForValue().getAndSet(key, StringHelper.toJsonString(dto));
+        if(obj != null) {
+            str = (String)obj;
+            UploadFileInfoDTO dto2 = (UploadFileInfoDTO)StringHelper.fromJsonString(str, UploadFileInfoDTO.class);
+            if(dto2.getUserId() != null && !dto.getUserId().equals(dto2.getUserId())) {
+                //double check, changed by others, throw failed
+                throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
+                        ContentServerErrorCode.ERROR_INVALID_UUID, "invalid uuid");
+            }
+            
+        }
+        
+        //timeout at 10 minutes
+        redisTemplate.expire(key, 10*60, TimeUnit.SECONDS);
+        
+        return dto;
+    }
+
+    @Override
+    public String signalScanEvent(UploadFileInfoCommand cmd) {
+        String subject = "upload_scan." + cmd.getUploadId();
+        UploadFileInfoDTO dto = signalFileDTO(cmd, UserContext.currentUserId());
+        
+        ExecutorUtil.submit(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider;
+                    localBusSubscriber.onLocalBusMessage(null, subject, StringHelper.toJsonString(dto), null);
+                } catch (Exception e) {
+                    LOGGER.error("submit LocalBusSubscriber failed, subject=" + subject, e);
+                }
+                
+                try {
+                    localBus.publish(null, subject, StringHelper.toJsonString(dto));    
+                } catch (Exception e) {
+                    LOGGER.error("submit localBus failed, subject=" + subject, e);
+                }
+                
+            }
+        },"subscriberUpload"));
+        
+        return "ok";
+    }
+
+    @Override
+    public DeferredResult<RestResponse> waitComplete(String uploadId) {
+        DeferredResult<RestResponse> deferredResult = new DeferredResult<>();
+        RestResponse response =  new RestResponse();
+        String subject = "upload_complete." + uploadId;
+        int scanTimeout = 30*1000;
+        UploadFileInfoDTO dto = getFileDTO(uploadId);
+        if(dto == null) {
+            response.setResponseObject("uuid timeout");
+            response.setErrorCode(ContentServerErrorCode.ERROR_INVALID_UUID);
+            deferredResult.setResult(response);
+            return deferredResult;
+        }
+        
+        if(dto.getComplete() != null && dto.getComplete() > 0) {
+            //already complete
+            response.setResponseObject(dto);
+            deferredResult.setResult(response);
+            return deferredResult;
+        }
+        
+        localBusSubscriberBuilder.build(subject, new LocalBusOneshotSubscriber() {
+            @Override
+            public Action onLocalBusMessage(Object sender, String subject,
+                                            Object dtoResp, String path) {
+                response.setResponseObject(dtoResp);
+                deferredResult.setResult(response);
+                return null;
+            }
+            @Override
+            public void onLocalBusListeningTimeout() {
+                //wait again
+                response.setResponseObject("continue");
+                response.setErrorCode(200);
+                deferredResult.setResult(response);
+            }
+        
+        }).setTimeout(scanTimeout).create();
+        
+        return deferredResult;
+    }
+
+    @Override
+    public UploadFileInfoDTO queryUploadResult(String uploadId) {
+        String subject = "upload_complete." + uploadId;
+        
+        //mark as complete
+        String key = String.format(UPLOAD_FMT, uploadId);
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        Object obj = redisTemplate.opsForValue().get(key);
+        if(obj == null) {
+            throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
+                    ContentServerErrorCode.ERROR_INVALID_UUID, "invalid uuid"); 
+        }
+        String str = (String)obj;
+        UploadFileInfoDTO dto = (UploadFileInfoDTO)StringHelper.fromJsonString(str, UploadFileInfoDTO.class);
+        if(dto.getComplete() != null && dto.getComplete() > 0) {
+            return dto;
+        }
+        
+        dto.setComplete(1l);
+        redisTemplate.opsForValue().set(key, StringHelper.toJsonString(dto), 120, TimeUnit.SECONDS);
+        
+        ExecutorUtil.submit(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider;
+                    localBusSubscriber.onLocalBusMessage(null, subject, "OK", null);
+                } catch (Exception e) {
+                    LOGGER.error("submit LocalBusSubscriber failed, subject=" + subject, e);
+                }
+                
+                try {
+                    localBus.publish(null, subject, "OK");    
+                } catch (Exception e) {
+                    LOGGER.error("submit localBus failed, subject=" + subject, e);
+                }
+                
+            }
+        },"subscriberUploadComplete"));
+        
+        return dto;
+    }
+
+    @Override
+    public String updateUploadInfo(UploadFileInfoCommand cmd) {
+        Long userId = UserContext.currentUserId();
+        String key = String.format(UPLOAD_FMT, cmd.getUploadId());
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        Object obj = redisTemplate.opsForValue().get(key);
+        if(obj == null) {
+            throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
+                    ContentServerErrorCode.ERROR_INVALID_UUID, "invalid uuid"); 
+        }
+        String str = (String)obj;
+        UploadFileInfoDTO dto = (UploadFileInfoDTO)StringHelper.fromJsonString(str, UploadFileInfoDTO.class);
+        
+        if(dto.getUserId() != null && !dto.getUserId().equals(userId)) {
+            throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
+                    ContentServerErrorCode.ERROR_INVALID_UUID, "invalid user"); 
+        }
+        
+        if(dto.getComplete() != null && dto.getComplete() > 0) {
+            throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
+                    ContentServerErrorCode.ERROR_INVALID_UUID, "already complete");
+        }
+        
+//        dto.setContentServer(cmd.getContentServer());
+        dto.setFileExtension(cmd.getFileExtension());
+        dto.setInfos(cmd.getInfos());
+        dto.setLimitCount(cmd.getLimitCount());
+        dto.setLimitPerSize(cmd.getLimitPerSize());
+        dto.setTitle(cmd.getTitle());
+//        dto.setUserId(userId);
+//        dto.setUserToken(cmd.getUserToken());
+        
+        obj = redisTemplate.opsForValue().getAndSet(key, StringHelper.toJsonString(dto));
+        if(obj != null) {
+            str = (String)obj;
+            UploadFileInfoDTO dto2 = (UploadFileInfoDTO)StringHelper.fromJsonString(str, UploadFileInfoDTO.class);
+            if(!dto2.getUserId().equals(dto.getUserId())) {
+                //double check, changed by others, throw failed
+                throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
+                        ContentServerErrorCode.ERROR_INVALID_UUID, "invalid uuid");
+            }
+            
+        }
+        
+        //timeout at 10 minutes
+        redisTemplate.expire(key, 10*60, TimeUnit.SECONDS);
+        
+        return "ok";
     }
 }

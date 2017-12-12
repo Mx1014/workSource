@@ -15,6 +15,7 @@ import java.util.List;
  *     <li>rate: 倍率参数</li>
  *     <li>amountFormulaId: 用量计算公式 </li>
  *     <li>costFormulaId: 费用计算公式 </li>
+ *     <li>costFormulaSource: 费用计算公式来源 </li>
  *     <li>rateStart: 倍率开始时间 </li>
  *     <li>rateEnd: 倍率结束时间 </li>
  *     <li>priceStart: 价格开始时间 </li>
@@ -29,6 +30,7 @@ import java.util.List;
  */
 public class BatchUpdateEnergyMeterSettingsCommand {
 
+    private Long communityId;
     @NotNull
     private Long organizationId;
     @ItemType(Long.class)
@@ -37,6 +39,7 @@ public class BatchUpdateEnergyMeterSettingsCommand {
     private BigDecimal price;
     private BigDecimal rate;
     private Long costFormulaId;
+    private Byte costFormulaSource;
     private Long amountFormulaId;
 
     private Long priceStart;
@@ -53,6 +56,32 @@ public class BatchUpdateEnergyMeterSettingsCommand {
 
     private Byte calculationType;
     private Long configId;
+
+    private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Byte getCostFormulaSource() {
+        return costFormulaSource;
+    }
+
+    public void setCostFormulaSource(Byte costFormulaSource) {
+        this.costFormulaSource = costFormulaSource;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Long getOrganizationId() {
         return organizationId;

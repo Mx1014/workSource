@@ -1,12 +1,15 @@
 package com.everhomes.hotTag;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.elasticsearch.action.WriteConsistencyLevel;
-import org.elasticsearch.action.index.IndexRequestBuilder;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.rest.hotTag.SearchTagCommand;
+import com.everhomes.rest.hotTag.SearchTagResponse;
+import com.everhomes.rest.hotTag.TagDTO;
+import com.everhomes.search.AbstractElasticSearch;
+import com.everhomes.search.HotTagSearcher;
+import com.everhomes.search.SearchUtils;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -23,17 +26,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.organization.Organization;
-import com.everhomes.rest.hotTag.SearchTagCommand;
-import com.everhomes.rest.hotTag.SearchTagResponse;
-import com.everhomes.rest.hotTag.TagDTO;
-import com.everhomes.search.AbstractElasticSearch;
-import com.everhomes.search.SearchUtils;
-import com.everhomes.search.HotTagSearcher;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.videoconf.ConfEnterpriseSearcherImpl;
-import com.everhomes.videoconf.ConfEnterprises;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class HotTagSearcherImpl extends AbstractElasticSearch implements HotTagSearcher{
@@ -45,11 +41,10 @@ public class HotTagSearcherImpl extends AbstractElasticSearch implements HotTagS
 	
 
 	@Override
-	public void feedDoc(HotTags tag) {
+	public void feedDoc(HotTag tag) {
 		XContentBuilder source = createDoc(tag);
         
-		feedDoc(tag.getName()+"-"+tag.getServiceType(), source);
-		
+		feedDoc(tag.getNamespaceId() + "-" + tag.getModuleType() + "-"  + tag.getCategoryId() + "-" +  tag.getServiceType() + "-" + tag.getName(), source);
 	}
 
 	@Override
@@ -80,8 +75,27 @@ public class HotTagSearcherImpl extends AbstractElasticSearch implements HotTagS
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
-        
+
+        //热门标签增加 namespaceId    add by yanjun 20170804
+        if(cmd.getNamespaceId() == null){
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        }
+
+        //热门标签增加 categoryId 业务模块   add by yanjun 20171124
+        if(cmd.getModuleType() != null){
+            fb = FilterBuilders.termFilter("moduleType", cmd.getModuleType());
+        }
+
+        //热门标签增加 categoryId    add by yanjun 20170920
+        if(cmd.getCategoryId() != null){
+            fb = FilterBuilders.termFilter("categoryId", cmd.getCategoryId());
+        }
+
+        FilterBuilder fbNamespaceId = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
+
         qb = QueryBuilders.filteredQuery(qb, fb);
+        qb = QueryBuilders.filteredQuery(qb, fbNamespaceId);
+
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
@@ -99,17 +113,18 @@ public class HotTagSearcherImpl extends AbstractElasticSearch implements HotTagS
         }
         
         List<TagDTO> tags = ids.stream().map(r -> {
-        	TagDTO tag = new TagDTO();
+        	TagDTO tag = ConvertHelper.convert(cmd, TagDTO.class);
         	String[] t = r.split("-");
         	if(t.length > 0) {
-        		tag.setName(t[0]);
+        		tag.setName(t[4]);
+        		tag.setNamespaceId(cmd.getNamespaceId());
         	}
         	return tag;
         }).collect(Collectors.toList());
 
         // 默认第一个值要返回搜索的关键字。如果有关键字一样的标签，根据elasticsearch匹配度，它会排第一。因此仅需和第一个返回值比较。 add by yanjun 20170613
         if(tags.size() == 0 || tags.get(0).getName()==null || !tags.get(0).getName().equals(cmd.getKeyword())){
-            TagDTO tag = new TagDTO();
+            TagDTO tag = ConvertHelper.convert(cmd, TagDTO.class);
             tag.setName(cmd.getKeyword());
             tags.add(0, tag);
         }
@@ -139,17 +154,20 @@ public class HotTagSearcherImpl extends AbstractElasticSearch implements HotTagS
 		return SearchUtils.HOTTAGINDEXTYPE;
 	}
 	
-	private XContentBuilder createDoc(HotTags tag){
+	private XContentBuilder createDoc(HotTag tag){
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
+            b.field("namespaceId", tag.getNamespaceId());
+            b.field("moduleType", tag.getModuleType());
+            b.field("categoryId", tag.getCategoryId());
             b.field("name", tag.getName());
             b.field("serviceType", tag.getServiceType());
             b.field("hotFlag", tag.getHotFlag());
-            
+
             b.endObject();
             return b;
         } catch (IOException ex) {
-            LOGGER.error("Create tag " + tag.getName() + " error");
+            LOGGER.error("Create tag error " + tag.toString());
             return null;
         }
     }

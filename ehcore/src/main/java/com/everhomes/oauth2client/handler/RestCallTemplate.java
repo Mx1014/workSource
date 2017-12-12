@@ -47,14 +47,19 @@ public class RestCallTemplate {
     private String body;
     private Gson gson = new Gson();
 
+    private RestEntityHandler restEntityHandler;
     private RestHasErrorHandler hasErrorHandler;
     private RestErrorHandler restErrorHandler;
 
-    interface RestErrorHandler<E> {
+    public interface RestErrorHandler<E> {
         void error(HttpErrorEntity<E> e);
     }
 
-    interface RestHasErrorHandler {
+    public interface RestEntityHandler<E> {
+        void success(HttpResponseEntity<E> e);
+    }
+
+    public interface RestHasErrorHandler {
         boolean hasError(HttpStatus statusCode);
     }
 
@@ -112,6 +117,15 @@ public class RestCallTemplate {
 
     public RestCallTemplate errorHandler(RestHasErrorHandler hasErrorHandler, RestErrorHandler restErrorHandler) {
         this.hasErrorHandler = hasErrorHandler;
+        this.restErrorHandler = restErrorHandler;
+        return this;
+    }
+
+    public <E> RestCallTemplate onSuccess(RestEntityHandler<E> restEntityHandler) {
+        this.restEntityHandler = restEntityHandler;
+        return this;
+    }
+    public <E> RestCallTemplate onError(RestErrorHandler<E> restErrorHandler) {
         this.restErrorHandler = restErrorHandler;
         return this;
     }
@@ -196,7 +210,11 @@ public class RestCallTemplate {
             return (HttpResponseEntity<R>) new HttpResponseEntity<>(result.getBody(), result.getHeaders(), result.getStatusCode());
         }
         R r = gson.fromJson(result.getBody(), (Class<R>) responseType);
-        return new HttpResponseEntity<>(r, result.getHeaders(), result.getStatusCode());
+        HttpResponseEntity<R> responseEntity = new HttpResponseEntity<>(r, result.getHeaders(), result.getStatusCode());
+        if (restEntityHandler != null) {
+            restEntityHandler.success(responseEntity);
+        }
+        return responseEntity;
     }
 
     public static QueryStringBuilder queryStringBuilder() {

@@ -48,6 +48,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+import com.mysql.jdbc.log.Log;
 import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -277,12 +278,13 @@ public class FamilyProviderImpl implements FamilyProvider {
 			if(community != null){
 				family.setCommunityId(communityId);
 				family.setCommunityName(community.getName());
+				family.setCommunityAliasName(community.getAliasName());
 				family.setCityId(community.getCityId());
 				family.setCityName(community.getCityName()+community.getAreaName());
 				family.setCommunityType(community.getCommunityType());
 				family.setDefaultForumId(community.getDefaultForumId());
 				family.setFeedbackForumId(community.getFeedbackForumId());
-				
+				LOGGER.debug("community is :" + community.getName());
 			}
 			if(group.getCreatorUid().longValue() == userId.longValue())
 				family.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
@@ -300,6 +302,8 @@ public class FamilyProviderImpl implements FamilyProvider {
 
 			Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
 			if(address != null){
+				//用address字段覆盖family name
+				family.setName(address.getAddress());
 				family.setBuildingName(address.getBuildingName());
 				family.setApartmentName(address.getApartmentName());
 				family.setAddressStatus(address.getStatus());
@@ -317,6 +321,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 	// @Cacheable(value="FamiliesOfUser", key="#userId", unless="#result.size() == 0")
 	@Override
 	public List<FamilyDTO> getUserFamiliesByUserId(long userId) {
+		LOGGER.debug("userId :" + userId);
 
 		List<UserGroup> list = this.userProvider.listUserGroups(userId, GroupDiscriminator.FAMILY.getCode());
 
@@ -328,6 +333,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 			GroupMember groupMember = this.groupProvider.findGroupMemberByMemberInfo(u.getGroupId(), EntityType.USER.getCode(), userId);
 			if(groupMember != null){
 				familyIds.add(u.getGroupId());
+				LOGGER.debug("groupId is :" + u.getGroupId());
 			}
 		}
 		LOGGER.info("Get user families by userId,familyIds size=" + familyIds.size());
@@ -443,6 +449,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 						    f.setCityName(community.getCityName());
 	                        f.setAreaName(community.getAreaName());
 	                        f.setCommunityId(community.getId());
+	                        f.setCommunityAliasName(community.getAliasName());
 	                        f.setCommunityName(community.getName());
 	                        f.setCommunityType(community.getCommunityType());
 	                        f.setDefaultForumId(community.getDefaultForumId());
@@ -590,6 +597,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 			if(community != null){
 				family.setCommunityId(communityId);
 				family.setCommunityName(community.getName());
+				family.setCommunityAliasName(community.getAliasName());
 				family.setCityId(community.getCityId());
 				family.setCityName(community.getCityName());
 			}

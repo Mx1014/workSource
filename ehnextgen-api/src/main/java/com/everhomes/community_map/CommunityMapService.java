@@ -1,0 +1,26 @@
+package com.everhomes.community_map;
+
+import com.everhomes.rest.community_map.*;
+
+/**
+ * @author sw on 2017/8/14.
+ */
+public interface CommunityMapService {
+    ListCommunityMapSearchTypesResponse listCommunityMapSearchTypesByScene(ListCommunityMapSearchTypesCommand cmd);
+
+    SearchCommunityMapContentsResponse searchContentsByScene(SearchCommunityMapContentsCommand cmd);
+
+    CommunityMapBuildingDetailDTO getCommunityMapBuildingDetailById(GetCommunityMapBuildingDetailByIdCommand cmd);
+
+    CommunityMapInitDataDTO getCommunityMapInitData(GetCommunityMapInitDataCommand cmd);
+
+    CommunityMapShopDetailDTO createCommunityMapShop(CreateCommunityMapShopCommand cmd);
+
+    void deleteCommunityMapShop(DeleteCommunityMapShopCommand cmd);
+
+    CommunityMapShopDetailDTO updateCommunityMapShop(UpdateCommunityMapShopCommand cmd);
+
+    CommunityMapShopDetailDTO getCommunityMapShopDetailById(GetCommunityMapShopDetailByIdCommand cmd);
+
+    SearchCommunityMapShopsResponse searchCommunityMapShops(SearchCommunityMapShopsCommand cmd);
+}

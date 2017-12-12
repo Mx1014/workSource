@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.rest.activity.ActivityAttachmentDTO;
+import com.everhomes.rest.activity.ActivityRosterStatus;
 import org.jooq.Condition;
 import org.jooq.Operator;
 
@@ -36,7 +37,7 @@ public interface ActivityProivider {
 
     List<ActivityRoster> listRosterPagination(CrossShardListingLocator locator, int count, Long activityId, boolean onlyConfirm);
 
-    List<ActivityRoster> listRosters(Long activityId);
+    List<ActivityRoster> listRosters(Long activityId, ActivityRosterStatus status);
     
     /**
      * 按条件统计报名人数 add by yanjun 20170502
@@ -54,11 +55,11 @@ public interface ActivityProivider {
     
     Activity findActivityByUuid(String uuid);
     
-    List<ActivityRoster> findRostersByUid(Long uid, CrossShardListingLocator locator, int count);
+    List<ActivityRoster> findRostersByUid(Long uid, CrossShardListingLocator locator, int count, Byte rosterStatus);
     
     List<Activity> listNewActivities(CrossShardListingLocator locator, int count, Timestamp lastViewedTime, Condition condition);
 
-	List<Activity> listActivitiesForWarning(Integer namespaceId, Timestamp queryStartTime, Timestamp queryEndTime);
+	List<Activity> listActivitiesForWarning(Integer namespaceId, Long categoryId, Timestamp queryStartTime, Timestamp queryEndTime);
 	
 	List<ActivityCategories> listActivityEntryCategories(Integer namespaceId, String ownerType, Long ownerId, Long parentId, CategoryAdminStatus status);
 
@@ -164,4 +165,9 @@ public interface ActivityProivider {
 	 * @param id
 	 */
 	void deleteActivityCategories(Long id);
+	
+//	void createActivityRosterError(ActivityRosterError rosterError);
+//
+//	List<ActivityRosterError> listActivityRosterErrorByJobId(Long jobId);
+
 }

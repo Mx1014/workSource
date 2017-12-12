@@ -3,23 +3,30 @@ package com.everhomes.rest.hotTag;
 import com.everhomes.util.StringHelper;
 
 /**
- *<ul>
- * <li>keyword:关键字</li>
- * <li>serviceType:标签服务类型 参考{@link com.everhomes.rest.hotTag.HotTagServiceType}</li>
- * <li>pageAnchor: 本页开始的锚点</li>
- * <li>pageSize: 每页的数量</li>
- *</ul>
+ * <ul>
+ *     <li>keyword: 关键字</li>
+ *     <li>serviceType: 标签服务类型 参考{@link com.everhomes.rest.hotTag.HotTagServiceType}</li>
+ *     <li>pageAnchor: 本页开始的锚点</li>
+ *     <li>pageSize: 每页的数量</li>
+ *     <li>namespaceId: 域空间Id，不传则取当前域空间的，域空间的热门标签都应该从总列表中设置得到</li>
+ *     <li>categoryId: categoryId</li>
+ * </ul>
  */
 public class SearchTagCommand {
 
-	private String keyword;
-	
+	private Integer namespaceId;
+
+	private Byte moduleType;
+
+	private Long categoryId;
+
 	private String serviceType;
-	
+
+	private String keyword;
+
 	private Long pageAnchor;
-	
-    private Integer pageSize;
-	
+
+	private Integer pageSize;
 	public String getKeyword() {
 		return keyword;
 	}
@@ -52,8 +59,32 @@ public class SearchTagCommand {
 		this.pageSize = pageSize;
 	}
 
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public Byte getModuleType() {
+		return moduleType;
+	}
+
+	public void setModuleType(Byte moduleType) {
+		this.moduleType = moduleType;
+	}
+
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

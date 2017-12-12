@@ -8,6 +8,7 @@ import java.sql.Timestamp;
  * <ul>
  *     <li>id: id</li>
  *     <li>flowName: flowName</li>
+ *     <li>description: description</li>
  *     <li>flowMainId: flowMainId</li>
  *     <li>ownerType: ownerType</li>
  *     <li>endNode: endNode</li>
@@ -25,12 +26,13 @@ import java.sql.Timestamp;
  *     <li>ownerId: ownerId</li>
  *     <li>projectId: projectId</li>
  *     <li>projectType: projectType</li>
- *     <li>stringTag1: stringTag1</li>
+ *     <li>validationStatus: 检测状态</li>
  * </ul>
  */
 public class FlowDTO {
     private Long id;
     private String flowName;
+    private String description;
     private Long flowMainId;
     private String ownerType;
     private Long endNode;
@@ -48,6 +50,9 @@ public class FlowDTO {
     private Long ownerId;
     private Long projectId;
     private String projectType;
+    private Byte validationStatus;
+
+    private Byte needFormFlag;
 
     private String stringTag1;
 
@@ -203,17 +208,41 @@ public class FlowDTO {
         this.updateTime = updateTime;
     }
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
     public String getStringTag1() {
         return stringTag1;
     }
 
     public void setStringTag1(String stringTag1) {
         this.stringTag1 = stringTag1;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Byte getValidationStatus() {
+        return validationStatus;
+    }
+
+    public void setValidationStatus(Byte validationStatus) {
+        this.validationStatus = validationStatus;
+    }
+
+    public Byte getNeedFormFlag() {
+        return needFormFlag;
+    }
+
+    public void setNeedFormFlag(Byte needFormFlag) {
+        this.needFormFlag = needFormFlag;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
 

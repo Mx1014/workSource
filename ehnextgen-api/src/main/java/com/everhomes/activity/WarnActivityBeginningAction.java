@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.rest.activity.ActivityRosterStatus;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import org.slf4j.Logger;
@@ -79,9 +80,9 @@ public class WarnActivityBeginningAction implements Runnable {
 //		if (warningSetting != null) {
 //			time = warningSetting.getTime();
 //		}
-			ActivityWarningResponse queryActivityWarningResponse = activityService.queryActivityWarning(new GetActivityWarningCommand(activity.getNamespaceId()));
+			ActivityWarningResponse queryActivityWarningResponse = activityService.queryActivityWarning(new GetActivityWarningCommand(activity.getNamespaceId(), activity.getCategoryId()));
 			String time = (queryActivityWarningResponse.getDays() == null || queryActivityWarningResponse.getDays().intValue() == 0 ? "" : queryActivityWarningResponse.getDays() + "天") + queryActivityWarningResponse.getHours() + "小时";
-			List<ActivityRoster> activityRosters = activityProivider.listRosters(activityId);
+			List<ActivityRoster> activityRosters = activityProivider.listRosters(activityId, ActivityRosterStatus.NORMAL);
 			String scope = ActivityNotificationTemplateCode.SCOPE;
 			int code = ActivityNotificationTemplateCode.ACTIVITY_WARNING_PARTICIPANT;
 			String locale = "zh_CN";

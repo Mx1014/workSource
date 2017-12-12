@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.acl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -50,5 +51,12 @@ public interface WebMenuPrivilegeProvider {
 	void createWebMenus(List<WebMenu> objs);
 
 	Map<Long, WebMenuScope> getWebMenuScopeMapByOwnerId(String ownerType, Long ownerId);
-	
+
+	List<WebMenu> listWebMenus(Long parentId, String type);
+
+	void deleteWebMenuScopes(List<Long> ids);
+
+	void createWebMenuScopes(List<WebMenuScope> scopes);
+
+	void deleteWebMenuScopesByMenuIdAndNamespace(List<Integer> socpeIds, Integer namespaceId);
 }

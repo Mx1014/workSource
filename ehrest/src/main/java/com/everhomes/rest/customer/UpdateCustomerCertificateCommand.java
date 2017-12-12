@@ -1,0 +1,129 @@
+package com.everhomes.rest.customer;
+
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ *     <li>id: id</li>
+ *     <li>customerType: 所属客户类型 参考{@link com.everhomes.rest.customer.CustomerType}</li>
+ *     <li>customerId: 所属客户id</li>
+ *     <li>name: 证书名称</li>
+ *     <li>certificateNumber: 证书编号</li>
+ *     <li>registeDate: 获得日期 时间戳</li>
+ * </ul>
+ * Created by ying.xiong on 2017/8/30.
+ */
+public class UpdateCustomerCertificateCommand {
+    private Long id;
+    private Integer namespaceId;
+    private Byte customerType;
+    private Long customerId;
+    private String name;
+    private String certificateNumber;
+    private Long registeDate;
+    private Integer buyPatents;
+    private Integer technologyContracts;
+    private Integer technologyContractAmount;
+    private Integer nationalProjects;
+    private Integer provincialAwards;
+
+    public Integer getBuyPatents() {
+        return buyPatents;
+    }
+
+    public void setBuyPatents(Integer buyPatents) {
+        this.buyPatents = buyPatents;
+    }
+
+    public Integer getNationalProjects() {
+        return nationalProjects;
+    }
+
+    public void setNationalProjects(Integer nationalProjects) {
+        this.nationalProjects = nationalProjects;
+    }
+
+    public Integer getProvincialAwards() {
+        return provincialAwards;
+    }
+
+    public void setProvincialAwards(Integer provincialAwards) {
+        this.provincialAwards = provincialAwards;
+    }
+
+    public Integer getTechnologyContractAmount() {
+        return technologyContractAmount;
+    }
+
+    public void setTechnologyContractAmount(Integer technologyContractAmount) {
+        this.technologyContractAmount = technologyContractAmount;
+    }
+
+    public Integer getTechnologyContracts() {
+        return technologyContracts;
+    }
+
+    public void setTechnologyContracts(Integer technologyContracts) {
+        this.technologyContracts = technologyContracts;
+    }
+
+    public String getCertificateNumber() {
+        return certificateNumber;
+    }
+
+    public void setCertificateNumber(String certificateNumber) {
+        this.certificateNumber = certificateNumber;
+    }
+
+    public Long getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
+    }
+
+    public Byte getCustomerType() {
+        return customerType;
+    }
+
+    public void setCustomerType(Byte customerType) {
+        this.customerType = customerType;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getRegisteDate() {
+        return registeDate;
+    }
+
+    public void setRegisteDate(Long registeDate) {
+        this.registeDate = registeDate;
+    }
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

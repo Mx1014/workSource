@@ -14,20 +14,17 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>id：主键id</li>
  * <li>ownerType：organization/user</li>
- * <li>ownerId：id</li>
- * <li>name：名称</li>
- * <li>description：描述</li>
- * <li>startEarlyTime：最早上班时间</li>
- * <li>startLateTime：最晚上班时间（如果是硬性工作时间，startLateTime = startEarlyTime）</li>
- * <li>endEarlyTime：最早下班班时间</li>
- * <li>endLateTime：最晚下班时间（如果是硬性工作时间，startLateTime = startEarlyTime）</li>
- * <li>workTime：每天工作时间 ,有由后台处理 (startLateTime - startEarlyTime)</li>
- * <li>createUid：创建人id</li>
- * <li>createTime：创建时间</li>
- * <li>updateUid：更新人id</li>
- * <li>updateTime：更新时间</li>
- * <li>punchTimesPerDay：每天打卡次数，2次或者4次)</li>
- * <li>daySplitTime：前一天与后一天的分界点</li>
+ * <li>ownerId：id</li>  
+ * <li>name : 名称</li>  
+ * <li>description : 描述</li>  
+ * <li>openWeekday : 一周开放日期: 7位二进制，0000000每一位表示星期7123456</li>   
+ * <li>punchTimeIntervals：上班时间段列表 {@link com.everhomes.rest.techpark.punch.PunchTimeIntervalDTO} </li> 
+ * <li>hommizationType：人性化设置:0-无 1-弹性 2晚到晚走</li> 
+ * <li>flexTime：弹性时间</li> 
+ * <li>noonLeaveTime：午休开始时间 (只有一段打卡可以设置)</li>
+ * <li>afternoonArriveTime：午休结束时间 (只有一段打卡可以设置)</li> 
+ * <li>beginPunchTime：允许开始打开时间--上班时间前多久可以打开</li> 
+ * <li>endPunchTime: 允许结束打卡时间--下班时间后多久可以打卡 (排班制字段)</li>  
  * </ul>
  */
 public class PunchTimeRuleDTO {
@@ -39,28 +36,36 @@ public class PunchTimeRuleDTO {
 	@NotNull
 	private Long ownerId;
 	
-	@NotNull
-	private Long      startEarlyTime;
-	@NotNull
-	private Long      startLateTime;
-	@NotNull
-	private Long      endEarlyTime;
+	@ItemType(PunchTimeIntervalDTO.class)
+	private List<PunchTimeIntervalDTO> punchTimeIntervals;
+	
+	private Byte hommizationType;
+    private Long flexTime;
+    
 	@NotNull
 	private Long noonLeaveTime;
 	@NotNull
 	private Long afternoonArriveTime;
-	
-	private Byte punchTimesPerDay;
-
+	 
 	private Long daySplitTime;
 	
 	private String description;
-	 
-	 
+	  
+	private Long beginPunchTime;
+	
+	private Long endPunchTime;
+	
+	private String openWeekday;
+	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+
+
 	public Long getId() {
 		return id;
 	}
-
 
 
 	public void setId(Long id) {
@@ -68,91 +73,9 @@ public class PunchTimeRuleDTO {
 	}
 
 
- 
-
-	public Long getStartEarlyTime() {
-		return startEarlyTime;
-	}
-
-
-
-	public void setStartEarlyTime(Long startEarlyTime) {
-		this.startEarlyTime = startEarlyTime;
-	}
-
-
-
-	public Long getStartLateTime() {
-		return startLateTime;
-	}
-
-
-
-	public void setStartLateTime(Long startLateTime) {
-		this.startLateTime = startLateTime;
-	}
-
-
-
-	public Long getEndEarlyTime() {
-		return endEarlyTime;
-	}
-
-
-
-	public void setEndEarlyTime(Long endEarlyTime) {
-		this.endEarlyTime = endEarlyTime;
-	}
-
-
-
-	public Long getNoonLeaveTime() {
-		return noonLeaveTime;
-	}
-
-
-
-	public void setNoonLeaveTime(Long noonLeaveTime) {
-		this.noonLeaveTime = noonLeaveTime;
-	}
-
-
-
-	public Long getAfternoonArriveTime() {
-		return afternoonArriveTime;
-	}
-
-
-
-	public void setAfternoonArriveTime(Long afternoonArriveTime) {
-		this.afternoonArriveTime = afternoonArriveTime;
-	}
-
-
-
-	public Byte getPunchTimesPerDay() {
-		return punchTimesPerDay;
-	}
-
-
-
-	public void setPunchTimesPerDay(Byte punchTimesPerDay) {
-		this.punchTimesPerDay = punchTimesPerDay;
-	}
-
- 
-
-	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
-
-
 	public String getName() {
 		return name;
 	}
-
 
 
 	public void setName(String name) {
@@ -160,11 +83,70 @@ public class PunchTimeRuleDTO {
 	}
 
 
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+
+	public List<PunchTimeIntervalDTO> getPunchTimeIntervals() {
+		return punchTimeIntervals;
+	}
+
+
+	public void setPunchTimeIntervals(List<PunchTimeIntervalDTO> punchTimeIntervals) {
+		this.punchTimeIntervals = punchTimeIntervals;
+	}
+
+
+	public Long getFlexTime() {
+		return flexTime;
+	}
+
+
+	public void setFlexTime(Long flexTime) {
+		this.flexTime = flexTime;
+	}
+
+ 
+
+	public Long getNoonLeaveTime() {
+		return noonLeaveTime;
+	}
+
+
+	public void setNoonLeaveTime(Long noonLeaveTime) {
+		this.noonLeaveTime = noonLeaveTime;
+	}
+
+
+	public Long getAfternoonArriveTime() {
+		return afternoonArriveTime;
+	}
+
+
+	public void setAfternoonArriveTime(Long afternoonArriveTime) {
+		this.afternoonArriveTime = afternoonArriveTime;
+	}
+
 
 	public Long getDaySplitTime() {
 		return daySplitTime;
 	}
-
 
 
 	public void setDaySplitTime(Long daySplitTime) {
@@ -172,14 +154,53 @@ public class PunchTimeRuleDTO {
 	}
 
 
-
 	public String getDescription() {
 		return description;
 	}
 
 
-
 	public void setDescription(String description) {
 		this.description = description;
 	}
+
+
+	public Long getBeginPunchTime() {
+		return beginPunchTime;
+	}
+
+
+	public void setBeginPunchTime(Long beginPunchTime) {
+		this.beginPunchTime = beginPunchTime;
+	}
+
+
+	public Long getEndPunchTime() {
+		return endPunchTime;
+	}
+
+
+	public void setEndPunchTime(Long endPunchTime) {
+		this.endPunchTime = endPunchTime;
+	}
+
+
+	public String getOpenWeekday() {
+		return openWeekday;
+	}
+
+
+	public void setOpenWeekday(String openWeekday) {
+		this.openWeekday = openWeekday;
+	}
+
+
+	public Byte getHommizationType() {
+		return hommizationType;
+	}
+
+
+	public void setHommizationType(Byte hommizationType) {
+		this.hommizationType = hommizationType;
+	}
+ 
 }

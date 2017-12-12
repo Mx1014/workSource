@@ -33,9 +33,15 @@ import com.everhomes.util.StringHelper;
  * <li>defaultForumId: 默认论坛ID，每个园区都有一个自己的默认论坛用于放园区整体的帖子（如公告）</li>
  * <li>feedbackForumId: 意见论坛ID，每个园区都有一个自己的意见反馈论坛用于放园区意见反馈帖子</li>
  * <li>areaSize: 面积</li>
+ * <li>sharedArea: 公摊面积</li>
+ * <li>chargeArea: 收费面积</li>
+ * <li>buildArea: 建筑面积</li>
+ * <li>rentArea: 出租面积</li>
  * <li>updateTime: 更新时间</li>
  * <li>categoryId: 分类id</li>
  * <li>categoryName: 分类名称</li>
+ * <li>communityUserCount : 统计人数</li>
+ * <li>communityNumber: 园区编号</li>
  * </ul>
  */
 public class CommunityDTO {
@@ -68,11 +74,19 @@ public class CommunityDTO {
     private Long feedbackForumId;
     private Timestamp updateTime;
     private Double areaSize;
+    private Double sharedArea;
+    private Double chargeArea;
+    private Double buildArea;
+    private Double rentArea;
 
     private String categoryName;
 
     private Long categoryId;
-    
+
+    private Integer communityUserCount;
+
+    private String communityNumber;
+
     @ItemType(CommunityGeoPointDTO.class)
     private List<CommunityGeoPointDTO> geoPointList;
 
@@ -335,8 +349,56 @@ public class CommunityDTO {
         this.categoryId = categoryId;
     }
 
+    public Double getBuildArea() {
+        return buildArea;
+    }
+
+    public void setBuildArea(Double buildArea) {
+        this.buildArea = buildArea;
+    }
+
+    public Double getChargeArea() {
+        return chargeArea;
+    }
+
+    public void setChargeArea(Double chargeArea) {
+        this.chargeArea = chargeArea;
+    }
+
+    public Double getRentArea() {
+        return rentArea;
+    }
+
+    public void setRentArea(Double rentArea) {
+        this.rentArea = rentArea;
+    }
+
+    public Double getSharedArea() {
+        return sharedArea;
+    }
+
+    public void setSharedArea(Double sharedArea) {
+        this.sharedArea = sharedArea;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Integer getCommunityUserCount() {
+        return communityUserCount;
+    }
+
+    public void setCommunityUserCount(Integer communityUserCount) {
+        this.communityUserCount = communityUserCount;
+    }
+
+    public String getCommunityNumber() {
+        return communityNumber;
+    }
+
+    public void setCommunityNumber(String communityNumber) {
+        this.communityNumber = communityNumber;
     }
 }

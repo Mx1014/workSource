@@ -168,5 +168,28 @@ public interface PrivilegeConstants {
     long PMTASK_DETAIL_CATEGORY_DELETE = 30095L;
     long PMTASK_TASK_STATISTICS_LIST = 30096L;
     long PMTASK_ALL_TASK_STATISTICS_LIST = 30097L;
+    
+    // ---------------- 门禁权限 -----------------------
+    long MODULE_ACLINK_MANAGER = 10041L; //公司门禁 管理员
+    long MODULE_ACLINK_VISITOR_DENY = 1009L; //禁止门禁访客访问
+
+    // 能耗权限
+    long METER_CREATE = 21000L;
+    long METER_BATCHUPDATE = 21001L;
+    long METER_IMPORT = 21002L;
+    long METER_READ = 21003L;
+    long METER_LIST = 21004L;
+    long METER_CHANGE = 21005L;
+    long METER_INACTIVE = 21006L;
+    long METER_READING_SEARCH = 21007L;
+    long METER_READING_DELETE = 21008L;
+    long ENERGY_STAT_BY_DAY = 21009L;
+    long ENERGY_STAT_BY_MONTH = 21010L;
+    long ENERGY_STAT_BY_YEAR = 21011L;
+    long ENERGY_STAT_BY_YOY = 21012L;
+    long ENERGY_SETTING = 21013L;
+    long ENERGY_PLAN_CREATE = 21014L;
+    long ENERGY_PLAN_LIST = 21015L;
+    long ENERGY_PLAN_DELETE = 21016L;
 
 }

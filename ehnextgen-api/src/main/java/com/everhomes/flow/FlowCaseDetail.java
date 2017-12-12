@@ -1,7 +1,5 @@
 package com.everhomes.flow;
 
-import java.sql.Timestamp;
-
 import com.everhomes.util.StringHelper;
 
 public class FlowCaseDetail extends FlowCase {
@@ -12,7 +10,7 @@ public class FlowCaseDetail extends FlowCase {
 	
 	private Long eventLogId;
 
-//	private String title;
+    //	private String title;
 //
 //	@Override
 //	public String getTitle() {

@@ -91,7 +91,7 @@ public interface Rentalv2Provider {
 
 	RentalOrderPayorderMap findRentalBillPaybillMapByOrderNo(String orderNo);
 
-	List<RentalOrder> listRentalBills(Long userId, Long resourceTypeId, ListingLocator locator,
+	List<RentalOrder> listRentalBills(Long id,Long userId, Long resourceTypeId, ListingLocator locator,
 			int count, List<Byte> status, Byte payMode);
 
 	int countRentalSites(Long  resourceTypeId,String keyword,List<Byte>  status,List<Long>  siteIds);
@@ -124,7 +124,7 @@ public interface Rentalv2Provider {
 
 	RentalItem getRentalSiteItemById(Long id);
 
- 
+    void setAuthDoorId(Long rentalId,Long AuthDoorId);
 
 	void createRentalDefaultRule(RentalDefaultRule defaultRule);
 
@@ -261,10 +261,6 @@ public interface Rentalv2Provider {
 
 
 	RentalCell getRentalCellById(Long cellId);
-
-
-	String getPriceStringByResourceId(Long rentalSiteId);
-
  
 	void deleteRentalCellsByResourceId(Long rentalSiteId); 
 
@@ -290,5 +286,9 @@ public interface Rentalv2Provider {
 
 	boolean findOtherModeClosed(RentalResource rentalResource, RentalCell rentalCell,
 			List<Rentalv2PriceRule> priceRules);
+
+	RentalResourceType findRentalResourceTypeById (Long resoureceTypeId);
+
+	List<Long> listCellPackageId (Long ownerId, Byte rentalType);
 
 }

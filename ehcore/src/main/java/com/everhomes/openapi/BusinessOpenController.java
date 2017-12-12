@@ -16,6 +16,8 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.asset.CheckPaymentUserCommand;
+import com.everhomes.rest.asset.CheckPaymentUserResponse;
 import com.everhomes.rest.business.*;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
@@ -427,6 +429,15 @@ public class BusinessOpenController extends ControllerBase {
 		return response;
 	}
 
+	@RequestMapping("getUserOrganizations")
+	@RestReturn(value=OrganizationDTO.class, collection = true)
+	public RestResponse getUserOrganizations(@Valid GetUserDefaultAddressCommand cmd) {
+		RestResponse response =  new RestResponse(businessService.getUserOrganizations(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	@RequestMapping("listUser")
 	@RestReturn(value=UserDtoForBiz.class, collection=true)
 	public RestResponse listUser(@Valid ListUserCommand cmd) {
@@ -534,18 +545,32 @@ public class BusinessOpenController extends ControllerBase {
 	}
 	
 	/**
-     * <b>URL: /openapi/listBuildingsByKeyword</b>
-     * <p>根据小区Id和关键字查询小区楼栋</p>
+     * <b>URL: /openapi/listBuildingsByKeywordAndNameSpace</b>
+     * <p>根据关键字查询域空间楼栋</p>
      */
-    @RequestMapping("listBuildingsByKeyword")
+    @RequestMapping("listBuildingsByKeywordAndNameSpace")
     @RestReturn(value=BuildingDTO.class, collection=true)
-    public RestResponse listBuildingsByKeyword(@Valid ListBuildingByCommunityIdsCommand cmd) {
-        List<BuildingDTO> data = this.businessService.listBuildingsByKeyword(cmd);
+    public RestResponse listBuildingsByKeywordAndNameSpace(@Valid ListBuildingsByKeywordAndNameSpaceCommand cmd) {
+        List<BuildingDTO> data = this.businessService.listBuildingsByKeywordAndNameSpace(cmd);
         RestResponse response = new RestResponse(data);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
+
+	/**
+	 * <b>URL: /openapi/listBuildingsByKeyword</b>
+	 * <p>根据小区Id和关键字查询小区楼栋</p>
+	 */
+	@RequestMapping("listBuildingsByKeyword")
+	@RestReturn(value=BuildingDTO.class, collection=true)
+	public RestResponse listBuildingsByKeyword(@Valid ListBuildingByCommunityIdsCommand cmd) {
+		List<BuildingDTO> data = this.businessService.listBuildingsByKeyword(cmd);
+		RestResponse response = new RestResponse(data);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
     
     /**
      * <b>URL: /openapi/listApartmentFloor</b>
@@ -791,4 +816,18 @@ public class BusinessOpenController extends ControllerBase {
 		response.setErrorDescription("OK");
     	return response;
     }
+
+	/**
+	 * <p>查看付款方是否有会员</p>
+	 * <b>URL: /business/checkPaymentUser</b>
+	 */
+	@RequestMapping("checkPaymentUser")
+	@RestReturn(value = CheckPaymentUserResponse.class)
+	public RestResponse checkPaymentUser(CheckPaymentUserCommand cmd){
+		CheckPaymentUserResponse response = businessService.checkPaymentUser(cmd);
+		RestResponse restResponse = new RestResponse(response);
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
+	}
 }

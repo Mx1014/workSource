@@ -1,25 +1,23 @@
 package com.everhomes.techpark.punch;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.approval.*;
+import com.everhomes.rest.approval.ApprovalStatus;
+import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
+import com.everhomes.rest.techpark.punch.*;
+import com.everhomes.server.schema.tables.daos.*;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.DeleteWhereStep;
-import org.jooq.InsertQuery;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.Record3;
-import org.jooq.Record5;
-import org.jooq.Result;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectHavingStep;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,32 +31,8 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.approval.ExceptionRequestType;
-import com.everhomes.rest.approval.ListTargetType;
-import com.everhomes.rest.techpark.punch.DateStatus;
-import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
-import com.everhomes.rest.techpark.punch.PunchOwnerType;
-import com.everhomes.rest.techpark.punch.PunchRquestType;
-import com.everhomes.rest.techpark.punch.PunchStatus;
-import com.everhomes.rest.techpark.punch.TimeCompareFlag;
-import com.everhomes.rest.techpark.punch.UserPunchStatusCount;
-import com.everhomes.rest.techpark.punch.ViewFlags;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhPunchDayLogsDao;
-import com.everhomes.server.schema.tables.daos.EhPunchExceptionApprovalsDao;
-import com.everhomes.server.schema.tables.daos.EhPunchExceptionRequestsDao;
-import com.everhomes.server.schema.tables.daos.EhPunchGeopointsDao;
-import com.everhomes.server.schema.tables.daos.EhPunchHolidaysDao;
-import com.everhomes.server.schema.tables.daos.EhPunchLocationRulesDao;
-import com.everhomes.server.schema.tables.daos.EhPunchRuleOwnerMapDao;
-import com.everhomes.server.schema.tables.daos.EhPunchRulesDao;
-import com.everhomes.server.schema.tables.daos.EhPunchStatisticsDao;
-import com.everhomes.server.schema.tables.daos.EhPunchTimeRulesDao;
-import com.everhomes.server.schema.tables.daos.EhPunchWifiRulesDao;
-import com.everhomes.server.schema.tables.daos.EhPunchWifisDao;
-import com.everhomes.server.schema.tables.daos.EhPunchWorkdayRulesDao;
 import com.everhomes.server.schema.tables.pojos.EhPunchDayLogs;
 import com.everhomes.server.schema.tables.pojos.EhPunchExceptionApprovals;
 import com.everhomes.server.schema.tables.pojos.EhPunchExceptionRequests;
@@ -68,7 +42,9 @@ import com.everhomes.server.schema.tables.pojos.EhPunchLocationRules;
 import com.everhomes.server.schema.tables.pojos.EhPunchLogs;
 import com.everhomes.server.schema.tables.pojos.EhPunchRuleOwnerMap;
 import com.everhomes.server.schema.tables.pojos.EhPunchRules;
+import com.everhomes.server.schema.tables.pojos.EhPunchSpecialDays;
 import com.everhomes.server.schema.tables.pojos.EhPunchStatistics;
+import com.everhomes.server.schema.tables.pojos.EhPunchTimeIntervals;
 import com.everhomes.server.schema.tables.pojos.EhPunchTimeRules;
 import com.everhomes.server.schema.tables.pojos.EhPunchWifiRules;
 import com.everhomes.server.schema.tables.pojos.EhPunchWifis;
@@ -83,8 +59,9 @@ import com.everhomes.server.schema.tables.records.EhPunchLocationRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchLogsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchRuleOwnerMapRecord;
 import com.everhomes.server.schema.tables.records.EhPunchRulesRecord;
-import com.everhomes.server.schema.tables.records.EhPunchSchedulingsRecord;
+import com.everhomes.server.schema.tables.records.EhPunchSpecialDaysRecord;
 import com.everhomes.server.schema.tables.records.EhPunchStatisticsRecord;
+import com.everhomes.server.schema.tables.records.EhPunchTimeIntervalsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchTimeRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWifiRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWifisRecord;
@@ -197,7 +174,9 @@ public class PunchProviderImpl implements PunchProvider {
 		condition = condition.and(condition3);
 		condition = condition.and(condition4);
 		step.where(condition);
-		List<PunchLog> result = step.orderBy(Tables.EH_PUNCH_LOGS.ID.desc())
+		List<PunchLog> result = step.orderBy(Tables.EH_PUNCH_LOGS.USER_ID.asc(),
+				Tables.EH_PUNCH_LOGS.PUNCH_DATE.asc(),Tables.EH_PUNCH_LOGS.PUNCH_INTERVAL_NO.asc(),
+				Tables.EH_PUNCH_LOGS.PUNCH_TYPE.asc())
 				.fetch().map((r) -> {
 					return ConvertHelper.convert(r, PunchLog.class);
 				});
@@ -1071,7 +1050,8 @@ long id = sequenceProvider.getNextSequence(key);
 			Date startDate = Date.valueOf(startDay);
 			Date endDate = Date.valueOf(endDay);
 			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.greaterOrEqual(startDate));
-			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.lt(endDate));
+			//modify by 2017-09-30 由于月刷新的endate是前一天,所以要包含enddate
+			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.lessOrEqual(endDate));
 		}
 		// modify by wh 2017-4-25 order by punch date asc
 		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
@@ -2303,7 +2283,7 @@ long id = sequenceProvider.getNextSequence(key);
     }
 
 	@Override
-	public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, String month, Byte exceptionStatus,
+	public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, List<String> months, Byte exceptionStatus,
 			List<Long> userIds, CrossShardListingLocator locator, int i) {
 		List<PunchStatistic> result = queryPunchStatistics(locator,  i, new ListingQueryBuilderCallback() {
             @Override
@@ -2315,8 +2295,8 @@ long id = sequenceProvider.getNextSequence(key);
                 	query.addConditions(Tables.EH_PUNCH_STATISTICS.EXCEPTION_STATUS.eq(exceptionStatus));   
                 if(null != userIds )
                 	query.addConditions(Tables.EH_PUNCH_STATISTICS.USER_ID.in(userIds));   
-                if(null != month)
-                	query.addConditions(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.eq(month));   
+                if(null != months)
+                	query.addConditions(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.in(months));   
                 	
                 return query;
             }
@@ -2417,22 +2397,14 @@ long id = sequenceProvider.getNextSequence(key);
 	//用于查询是否有过异常申请
 	@Override
 	public PunchExceptionRequest findPunchExceptionRequest(Long userId, Long ownerId, Long punchDate,
-			Byte exceptionRequestType) {
+														   Integer intervalNo) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectConditionStep<Record> step = context.select().from(Tables.EH_PUNCH_EXCEPTION_REQUESTS)
 				.where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId))
 				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(ownerId))
+				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_INTERVAL_NO.eq(intervalNo))
 				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.eq(new Date(punchDate)))
 				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
-				
-		if (exceptionRequestType.byteValue() == ExceptionRequestType.ALL_DAY.getCode()) {
-			step.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_STATUS.eq(PunchStatus.NORMAL.getCode()));
-		}else if (exceptionRequestType.byteValue() == ExceptionRequestType.MORNING.getCode()) {
-			step.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.MORNING_APPROVAL_STATUS.eq(PunchStatus.NORMAL.getCode()));
-		}else if (exceptionRequestType.byteValue() == ExceptionRequestType.AFTERNOON.getCode()) {
-			step.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.AFTERNOON_APPROVAL_STATUS.eq(PunchStatus.NORMAL.getCode()));
-		}
-		
 		Record record = step.limit(1).fetchOne();
 		
 		if (record != null) {
@@ -2449,7 +2421,7 @@ long id = sequenceProvider.getNextSequence(key);
 				.where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(creatorUid))
 				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(ownerId))
 				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.REQUEST_ID.eq(requestId))
-				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+//				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.limit(1)
 				.fetchOne();
 		
@@ -2503,16 +2475,11 @@ long id = sequenceProvider.getNextSequence(key);
 	public Integer countPunchLogDevice(Long userId, Long companyId,
 			Date beginDate, Date endDate) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		Result<Record1<String>> records = context.selectDistinct(Tables.EH_PUNCH_LOGS.IDENTIFICATION).from(Tables.EH_PUNCH_LOGS)
+		return context.selectDistinct(Tables.EH_PUNCH_LOGS.IDENTIFICATION).from(Tables.EH_PUNCH_LOGS)
 				.where(Tables.EH_PUNCH_LOGS.USER_ID.eq(userId))
 				.and(Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.eq(companyId))
 				.and(Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(beginDate, endDate))
-				.fetch();
-		
-		if (records != null) {
-			return records.size();
-		}
-		return 0;
+				.fetchCount();  
 	}
 
 	@Override
@@ -2528,7 +2495,478 @@ long id = sequenceProvider.getNextSequence(key);
 		step.where(condition);
 		step.execute();
 	}
+
+	@Override
+	public void createPunchTimeInterval(PunchTimeInterval ptInterval) {
+		 String key = NameMapper.getSequenceDomainFromTablePojo(EhPunchTimeIntervals.class);
+			long id = sequenceProvider.getNextSequence(key);
+		 DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		 ptInterval.setId(id); 
+		 EhPunchTimeIntervalsDao dao = new EhPunchTimeIntervalsDao(context.configuration());
+		 dao.insert(ptInterval);  
+	}
+
+
+	@Override
+	public void createPunchSpecialDay(PunchSpecialDay psd){
+		 String key = NameMapper.getSequenceDomainFromTablePojo(EhPunchSpecialDays.class);
+			long id = sequenceProvider.getNextSequence(key);
+		 DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		 psd.setId(id); 
+		 EhPunchSpecialDaysDao dao = new EhPunchSpecialDaysDao(context.configuration());
+		 dao.insert(psd);  
+		
+	}
+
+	@Override
+	public void deletePunchGeopointsByOwnerId(Long id) { 
+        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteWhereStep<EhPunchGeopointsRecord> step = context.delete(Tables.EH_PUNCH_GEOPOINTS);
+		Condition condition = Tables.EH_PUNCH_GEOPOINTS.OWNER_ID.equal(id); 
+		step.where(condition);
+		step.execute();
+	}
+
+	@Override
+	public void deletePunchWifisByOwnerId(Long id) {
+        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteWhereStep<EhPunchWifisRecord> step = context.delete(Tables.EH_PUNCH_WIFIS);
+		Condition condition = Tables.EH_PUNCH_WIFIS.OWNER_ID.equal(id); 
+		step.where(condition);
+		step.execute();
+		
+	}
+
+	@Override
+	public PunchRule getPunchruleByPunchOrgId(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select().from(Tables.EH_PUNCH_RULES)
+				.where(Tables.EH_PUNCH_RULES.PUNCH_ORGANIZATION_ID.eq(id)) 
+				.fetchOne();
+		if (record != null) {
+			return ConvertHelper.convert(record, PunchRule.class);
+		}
+		return null;
+	}
+
+	@Override
+	public void deletePunchTimeRuleByPunchOrgId(Long punchOrgId) {
+		 DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+			DeleteWhereStep<EhPunchTimeRulesRecord> step = context.delete(Tables.EH_PUNCH_TIME_RULES);
+			Condition condition = Tables.EH_PUNCH_TIME_RULES.OWNER_ID.equal(punchOrgId); 
+			step.where(condition);
+			step.execute();
+	}
+
+	@Override
+	public void deletePunchSpecialDaysByPunchOrgId(Long id) {
+		 DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+			DeleteWhereStep<EhPunchSpecialDaysRecord> step = context.delete(Tables.EH_PUNCH_SPECIAL_DAYS);
+			Condition condition = Tables.EH_PUNCH_SPECIAL_DAYS.PUNCH_ORGANIZATION_ID.equal(id); 
+			step.where(condition);
+			step.execute();
+	}
+
+	@Override
+	public void deletePunchTimeIntervalByPunchRuleId(Long id) { 
+		 DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+			DeleteWhereStep<EhPunchTimeIntervalsRecord> step = context.delete(Tables.EH_PUNCH_TIME_INTERVALS);
+			Condition condition = Tables.EH_PUNCH_TIME_INTERVALS.PUNCH_RULE_ID.equal(id); 
+			step.where(condition);
+			step.execute();
+		
+	}
+
+	@Override
+	public List<PunchTimeRule> listActivePunchTimeRuleByOwner(String ownerType, Long ownerId, Byte status) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_TIME_RULES);
+		Condition condition = Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.equal(ownerType)
+				.and(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.equal(ownerId))
+				.and(Tables.EH_PUNCH_TIME_RULES.STATUS.eq(status));
+		step.where(condition);
+		List<PunchTimeRule> result = step
+				.orderBy(Tables.EH_PUNCH_TIME_RULES.ID.desc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, PunchTimeRule.class);
+				});
+		return result;
+	}
+
+	@Override
+	public List<PunchTimeInterval> listPunchTimeIntervalByTimeRuleId(Long timeRuleId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_TIME_INTERVALS);
+		Condition condition = Tables.EH_PUNCH_TIME_INTERVALS.TIME_RULE_ID.equal(timeRuleId) ; 
+		step.where(condition);
+		List<PunchTimeInterval> result = step
+				.orderBy(Tables.EH_PUNCH_TIME_INTERVALS.ARRIVE_TIME_LONG.asc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, PunchTimeInterval.class);
+				});
+		return result;
+	}
+
+	@Override
+	public List<PunchGeopoint> listPunchGeopointsByOwner(String ownerType, Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_GEOPOINTS);
+		Condition condition = Tables.EH_PUNCH_GEOPOINTS.OWNER_TYPE.equal(ownerType)
+				.and(Tables.EH_PUNCH_GEOPOINTS.OWNER_ID.equal(ownerId)); 
+		step.where(condition);
+		List<PunchGeopoint> result = step
+				.orderBy(Tables.EH_PUNCH_GEOPOINTS.ID.asc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, PunchGeopoint.class);
+				});
+		return result;
+	}
+
+	@Override
+	public List<PunchWifi> listPunchWifsByOwner(String ownerType, Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_WIFIS);
+		Condition condition = Tables.EH_PUNCH_WIFIS.OWNER_TYPE.equal(ownerType)
+				.and(Tables.EH_PUNCH_WIFIS.OWNER_ID.equal(ownerId)); 
+		step.where(condition);
+		List<PunchWifi> result = step
+				.orderBy(Tables.EH_PUNCH_WIFIS.ID.asc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, PunchWifi.class);
+				});
+		return result;
+	}
+
+	@Override
+	public List<PunchSpecialDay> listPunchSpecailDaysByOrgId(Long punchOrganizationId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_SPECIAL_DAYS);
+		Condition condition = Tables.EH_PUNCH_SPECIAL_DAYS.PUNCH_ORGANIZATION_ID.equal(punchOrganizationId) ; 
+		step.where(condition);
+		List<PunchSpecialDay> result = step
+				.orderBy(Tables.EH_PUNCH_SPECIAL_DAYS.ID.asc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, PunchSpecialDay.class);
+				});
+		return result;
+	}
+
+	@Override
+	public PunchSpecialDay findSpecialDayByDateAndOrgId(Long punchOrganizationId,
+			java.util.Date date) {
+		try{ 
+	        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
 	
+	        PunchSpecialDay  result = context.select().from(Tables.EH_PUNCH_SPECIAL_DAYS)
+	            .where(Tables.EH_PUNCH_SPECIAL_DAYS.PUNCH_ORGANIZATION_ID.eq(punchOrganizationId))
+	            .and(Tables.EH_PUNCH_SPECIAL_DAYS.RULE_DATE.eq(new java.sql.Date(date.getTime())))
+	            .fetchAny().map((r) -> {
+	                return ConvertHelper.convert(r, PunchSpecialDay.class);
+	            });
 	
+	        return result ;
+        } catch (Exception ex) {
+            //fetchAny() maybe return null
+            return null;
+        }
+	}
+
+	@Override
+	public PunchHoliday findHolidayByDate(Date punchDate) {
+		try{ 
+	        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+	
+	        PunchHoliday  result = context.select().from(Tables.EH_PUNCH_HOLIDAYS)
+	            .where(Tables.EH_PUNCH_HOLIDAYS.RULE_DATE.eq(new java.sql.Date(punchDate.getTime())))
+	            .fetchAny().map((r) -> {
+	                return ConvertHelper.convert(r, PunchHoliday.class);
+	            }); 
+	        return result ;
+        } catch (Exception ex) {
+            //fetchAny() maybe return null
+            return null;
+        }
+	}
+
+	@Override
+	public List<PunchTimeRule> listPunchTimeRulesBySplitTime(long beginTime, long endTime) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_TIME_RULES);
+		Condition condition = Tables.EH_PUNCH_TIME_RULES.DAY_SPLIT_TIME_LONG.greaterOrEqual(beginTime)
+				.and(Tables.EH_PUNCH_TIME_RULES.DAY_SPLIT_TIME_LONG.lessOrEqual(endTime));
+		step.where(condition);
+		List<PunchTimeRule> result = step
+				.orderBy(Tables.EH_PUNCH_TIME_RULES.ID.asc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, PunchTimeRule.class);
+				});
+		return result;
+	}
+
+	@Override
+	public void deletePunchTimeRuleByRuleId(Long id) {
+		DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteWhereStep<EhPunchTimeRulesRecord> step = context.delete(Tables.EH_PUNCH_TIME_RULES);
+		Condition condition = Tables.EH_PUNCH_TIME_RULES.PUNCH_RULE_ID.eq(id);
+		step.where(condition);
+		step.execute();
+	}
+
+	@Override
+	public Integer approveAbnormalPunch(Long userId, Date punchDate, Integer punchIntervalNo, Byte punchType) {
+
+		DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		return context.update(Tables.EH_PUNCH_LOGS).set(Tables.EH_PUNCH_LOGS.APPROVAL_STATUS, PunchStatus.NORMAL.getCode())
+				.where(Tables.EH_PUNCH_LOGS.PUNCH_DATE.eq(punchDate))
+				.and(Tables.EH_PUNCH_LOGS.PUNCH_INTERVAL_NO.eq(punchIntervalNo))
+				.and(Tables.EH_PUNCH_LOGS.PUNCH_TYPE.eq(punchType))
+				.and(Tables.EH_PUNCH_LOGS.USER_ID.eq(userId)).execute();
+	}
+
+	@Override
+	public List<PunchExceptionRequest> listPunchExceptionRequestBetweenBeginAndEndTime(Long userId, Long enterpriseId, Timestamp dayStart, Timestamp dayEnd) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields())
+				.from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
+		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(enterpriseId));
+		condition = condition.and((Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lessOrEqual(dayEnd)
+				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.greaterOrEqual(dayStart)))
+				.or(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.lessOrEqual(dayEnd)
+						.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(dayStart)))
+				.or(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(dayEnd)
+						.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lessOrEqual(dayStart))));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(ApprovalStatus.AGREEMENT.getCode()));
+
+		List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
+				.orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
+				.map(new EhPunchExceptionRequestMapper());
+
+		List<PunchExceptionRequest> result = resultRecord.stream().map((r) -> {
+			return ConvertHelper.convert(r, PunchExceptionRequest.class);
+		}).collect(Collectors.toList());
+		if (result == null || result.size() == 0) {
+			return null;
+		}
+		return result;
+	}
+
+	@Override
+	public List<PunchExceptionRequest> listpunchexceptionRequestByDate(Long userId, Long enterpriseId, Date punchDate) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
+		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(enterpriseId));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.eq(punchDate));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
+
+		List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
+				.orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
+				.map(new EhPunchExceptionRequestMapper());
+
+		List<PunchExceptionRequest> result = resultRecord.stream().map((r) -> {
+			return ConvertHelper.convert(r, PunchExceptionRequest.class);
+		}).collect(Collectors.toList());
+		if (result == null || result.size() == 0) {
+			return null;
+		}
+		return result;
+	}
+
+	@Override
+	public Integer countExceptionRequests(Long userId, String ownerType, Long ownerId, String punchMonth) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+		Date beginDate;
+		try {
+			beginDate = new Date(dateFormat.parse(punchMonth+"01").getTime());
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(beginDate);
+			calendar.add(Calendar.MONTH, 1);
+			Date endDate = new Date(calendar.getTimeInMillis());
+			SelectConditionStep<Record1<Integer>> step = getReadOnlyContext().select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.count()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS)
+					.where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.CREATOR_UID.eq(userId))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(ownerId))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.greaterOrEqual(beginDate))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.lt(endDate))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.ABNORMAL_PUNCH.getCode()));
+//					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(com.everhomes.rest.approval.ApprovalStatus.AGREEMENT.getCode()));
+//			LOGGER.debug(step.toString());
+			return step.fetchOneInto(Integer.class);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return 0;
+		}
+
+	}
+
+	@Override
+	public List<ExtDTO> listAskForLeaveExtDTOs(Long userId, String ownerType, Long ownerId, String punchMonth) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+		Timestamp beginDate;
+		try {
+			beginDate = new Timestamp(dateFormat.parse(punchMonth+"01").getTime());
+			List<ExtDTO> result = null;
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(beginDate);
+			calendar.add(Calendar.MONTH, 1);
+			Timestamp endDate = new Timestamp(calendar.getTimeInMillis());
+			SelectHavingStep<Record2<String, BigDecimal>> step = getReadOnlyContext()
+					.select(Tables.EH_APPROVAL_CATEGORIES.CATEGORY_NAME,Tables.EH_PUNCH_EXCEPTION_REQUESTS.DURATION.sum().round(3))
+					.from(Tables.EH_APPROVAL_CATEGORIES).leftOuterJoin(Tables.EH_PUNCH_EXCEPTION_REQUESTS)
+					.on(Tables.EH_APPROVAL_CATEGORIES.ID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.CATEGORY_ID))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.CREATOR_UID.eq(userId))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(ownerId))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(beginDate))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lt(endDate))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.ASK_FOR_LEAVE.getCode()))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(ApprovalStatus.AGREEMENT.getCode()))
+					.where(Tables.EH_APPROVAL_CATEGORIES.NAMESPACE_ID.eq(0))
+					.and(Tables.EH_APPROVAL_CATEGORIES.OWNER_ID.eq(0L))
+					.groupBy(Tables.EH_APPROVAL_CATEGORIES.ID)
+					;
+//			LOGGER.debug(step.toString());
+			result = step.orderBy(Tables.EH_APPROVAL_CATEGORIES.ID).fetch().map((r) -> {
+				ExtDTO dto = new ExtDTO();
+				dto.setName(r.value1());
+				dto.setTimeCount(r.value2().toString());
+				return dto;
+			});
+			if (null == result || result.size() == 0) {
+				return null;
+			}
+			return result;
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private EhApprovalRequestsDao getReadWriteDao() {
+		return getDao(getReadWriteContext());
+	}
+
+	private EhApprovalRequestsDao getReadOnlyDao() {
+		return getDao(getReadOnlyContext());
+	}
+
+	private EhApprovalRequestsDao getDao(DSLContext context) {
+		return new EhApprovalRequestsDao(context.configuration());
+	}
+
+	private DSLContext getReadWriteContext() {
+		return getContext(AccessSpec.readWrite());
+	}
+
+	private DSLContext getReadOnlyContext() {
+		return getContext(AccessSpec.readOnly());
+	}
+
+	private DSLContext getContext(AccessSpec accessSpec) {
+		return dbProvider.getDslContext(accessSpec);
+	}
+
+@Override
+	public List<PunchRule> listPunchRulesByStatus(List<Byte> statusList) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhPunchRulesRecord> query = context
+				.selectQuery(Tables.EH_PUNCH_RULES);
+
+		Condition condition = Tables.EH_PUNCH_RULES.STATUS.in(statusList);
+		query.addConditions(condition);
+		List<PunchRule> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, PunchRule.class));
+			return null;
+		});
+		if (null != result && result.size() > 0)
+			return result ;
+		return null;
+	}
+
+	@Override
+	public List<PunchRule> listPunchRulesByOwnerAndRuleType(String ownerType, Long ownerId, byte ruleType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhPunchRulesRecord> query = context
+				.selectQuery(Tables.EH_PUNCH_RULES);
+
+		Condition condition = Tables.EH_PUNCH_RULES.OWNER_ID.eq(ownerId)
+				.and(Tables.EH_PUNCH_RULES.RULE_TYPE.eq(ruleType));
+
+		query.addConditions(condition);
+		List<PunchRule> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, PunchRule.class));
+			return null;
+		});
+		if (null != result && result.size() > 0)
+			return result ;
+		return null;
+	}
+
+	@Override
+	public PunchExceptionRequest findPunchExceptionRequest(Long userId, Long enterpriseId, Date punchDate, Integer punchIntervalNo, Byte punchType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields())
+				.from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
+		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(enterpriseId));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.eq(punchDate));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_INTERVAL_NO.eq(punchIntervalNo));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_TYPE.eq(punchType));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.ABNORMAL_PUNCH.getCode()));
+
+		List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
+				.orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
+				.map(new EhPunchExceptionRequestMapper());
+
+		List<PunchExceptionRequest> result = resultRecord.stream().map((r) -> {
+			return ConvertHelper.convert(r, PunchExceptionRequest.class);
+		}).collect(Collectors.toList());
+		if (result == null || result.size() == 0) {
+			return null;
+		}
+		return result.get(0);
+	}
+
+	@Override
+	public PunchLog findPunchLog(Long organizationId, Long applyUserId, Date punchDate, Byte punchType, Integer punchIntervalNo) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select().from(Tables.EH_PUNCH_LOGS)
+				.where(Tables.EH_PUNCH_LOGS.USER_ID.eq(applyUserId))
+				.and(Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.eq(organizationId))
+				.and(Tables.EH_PUNCH_LOGS.PUNCH_DATE.eq(punchDate))
+				.and(Tables.EH_PUNCH_LOGS.PUNCH_TYPE.eq(punchType))
+				.and(Tables.EH_PUNCH_LOGS.PUNCH_INTERVAL_NO.eq(punchIntervalNo))
+				.limit(1)
+				.fetchOne();
+
+		if (record != null) {
+			return ConvertHelper.convert(record, PunchLog.class);
+		}
+		return null;
+	}
+
+	@Override
+	public void updatePunchLog(PunchLog punchLog) {
+
+		assert (punchLog.getId() == null);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPunchLogsDao dao = new EhPunchLogsDao(
+				context.configuration());
+		dao.update(punchLog);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchLogs.class,
+				punchLog.getId());
+
+	}
 }
 

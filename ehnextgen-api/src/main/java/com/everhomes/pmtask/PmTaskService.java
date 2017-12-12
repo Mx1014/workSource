@@ -6,6 +6,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.community.ListBuildingCommand;
+import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.pmtask.*;
 
 public interface PmTaskService {
@@ -13,17 +15,19 @@ public interface PmTaskService {
 	
 	ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd);
 	
-	void evaluateTask(EvaluateTaskCommand cmd);
+//	void evaluateTask(EvaluateTaskCommand cmd);
 	
-	void completeTask(CompleteTaskCommand cmd);
+//	void completeTask(CompleteTaskCommand cmd);
 	
-	void closeTask(CloseTaskCommand cmd);
+//	void closeTask(CloseTaskCommand cmd);
 
-	void assignTask(AssignTaskCommand cmd);
+//	void assignTask(AssignTaskCommand cmd);
 	
 	PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd);
 	
 	PmTaskDTO createTask(CreateTaskCommand cmd);
+
+	ListBuildingCommandResponse listBuildings(ListBuildingCommand cmd);
 	
 	PmTaskDTO createTaskByOrg(CreateTaskCommand cmd);
 	
@@ -41,25 +45,19 @@ public interface PmTaskService {
 	
 	GetStatisticsResponse getStatistics(GetStatisticsCommand cmd);
 	
-	PmTaskLogDTO getTaskLog(GetTaskLogCommand cmd);
+//	PmTaskLogDTO getTaskLog(GetTaskLogCommand cmd);
 	
-	void cancelTask(CancelTaskCommand cmd);
+//	void cancelTask(CancelTaskCommand cmd);
 	
-	GetPrivilegesDTO getPrivileges(GetPrivilegesCommand cmd);
+//	GetPrivilegesDTO getPrivileges(GetPrivilegesCommand cmd);
 	
 	void exportStatistics(GetStatisticsCommand cmd, HttpServletResponse resp);
 	
 	void exportListStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp);
 	
-	void createStatistics();
+//	ListOperatePersonnelsResponse listOperatePersonnels(ListOperatePersonnelsCommand cmd);
 	
-	ListOperatePersonnelsResponse listOperatePersonnels(ListOperatePersonnelsCommand cmd);
-	
-	void revisit(RevisitCommand cmd);
-	
-	void createTaskOperatePerson(CreateTaskOperatePersonCommand cmd);
-	
-	void deleteTaskOperatePerson(DeleteTaskOperatePersonCommand cmd);
+//	void revisit(RevisitCommand cmd);
 	
 	SearchTaskCategoryStatisticsResponse searchTaskCategoryStatistics(SearchTaskStatisticsCommand cmd);
 	
@@ -72,16 +70,10 @@ public interface PmTaskService {
 	ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd);
 	
 	GetUserRelatedAddressByCommunityResponse getUserRelatedAddressesByCommunity(GetUserRelatedAddressesByCommunityCommand cmd);
-	
-	SearchTaskOperatorStatisticsResponse searchTaskOperatorStatistics(SearchTaskOperatorStatisticsCommand cmd);
-	
-	void exportTaskOperatorStatistics(SearchTaskOperatorStatisticsCommand cmd, HttpServletResponse resp);
-	
-	void createTaskTargetStatistics();
-	
+
 	NamespaceHandlerDTO getNamespaceHandler(GetNamespaceHandlerCommand cmd);
 
-	void synchronizedData(SearchTasksCommand cmd);
+//	void synchronizedData(SearchTasksCommand cmd);
 
 	void deleteTaskHistoryAddress(DeleteTaskHistoryAddressCommand cmd);
 
@@ -90,4 +82,10 @@ public interface PmTaskService {
 	void notifyTaskResult(NotifyTaskResultCommand cmd);
 
 	void exportTasksCard(ExportTasksCardCommand cmd, HttpServletResponse response);
+
+	void changeTasksStatus(UpdateTasksStatusCommand cmd);
+
+	ListAuthorizationCommunityByUserResponse listOrganizationCommunityByUser(ListOrganizationCommunityByUserCommand cmd);
+
+	void syncTaskStatistics(HttpServletResponse resp);
 }

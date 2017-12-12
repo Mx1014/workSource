@@ -8,33 +8,27 @@ import java.util.Date;
 
 import com.everhomes.rest.hotTag.HotFlag;
 import com.everhomes.rest.activity.*;
-import com.everhomes.user.User;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
 import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
-import com.everhomes.hotTag.HotTags;
+import com.everhomes.hotTag.HotTag;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
 import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.rest.hotTag.HotTagServiceType;
-import com.everhomes.rest.hotTag.HotTagStatus;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.search.HotTagSearcher;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.user.ActivityType;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -263,6 +257,10 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         if(cmd.getTag() != null) {
             post.setTag(cmd.getTag());
         }
+
+        //保证帖子和活动的clone状态是一致的  add by yanjun 20170807
+        cmd.setCloneFlag(post.getCloneFlag());
+
         
 //        if (OfficialFlag.fromCode(cmd.getOfficialFlag())!=OfficialFlag.YES) {
 //			cmd.setOfficialFlag(OfficialFlag.NO.getCode());
@@ -364,6 +362,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         if(cmd.getWechatSignup() == null){
 			GetRosterOrderSettingCommand getRosterOrderSettingCommand = new GetRosterOrderSettingCommand();
 			getRosterOrderSettingCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+			getRosterOrderSettingCommand.setCategoryId(cmd.getCategoryId());
 			RosterOrderSettingDTO rosterOrderSettingDTO = activityService.getRosterOrderSetting(getRosterOrderSettingCommand);
 
 			if(rosterOrderSettingDTO != null){
@@ -404,10 +403,16 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
             //if 与 try 防止tag保存Elastic异常导致发布活动的失败   add by yanjun
 			if(StringUtils.isNotEmpty(cmd.getTag())){
 				try{
-					HotTags tag = new HotTags();
+					HotTag tag = new HotTag();
+					Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+					tag.setNamespaceId(namespaceId);
+					//TODO 业务类型、入口ID
+
+					tag.setServiceType(HotTagServiceType.ACTIVITY.getCode());
 					tag.setName(cmd.getTag());
 					tag.setHotFlag(HotFlag.NORMAL.getCode());
-					tag.setServiceType(HotTagServiceType.ACTIVITY.getCode());
+
+
 					hotTagSearcher.feedDoc(tag);
 				}catch (Exception e){
 					LOGGER.error("feedDoc activity tag error",e);

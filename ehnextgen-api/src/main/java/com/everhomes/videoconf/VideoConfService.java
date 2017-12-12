@@ -3,6 +3,7 @@ package com.everhomes.videoconf;
 import java.util.List;
 import java.util.Set;
 
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.rest.videoconf.AddSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.AssignVideoConfAccountCommand;
@@ -13,6 +14,7 @@ import com.everhomes.rest.videoconf.ConfAccountOrderDTO;
 import com.everhomes.rest.videoconf.CreateAccountOwnerCommand;
 import com.everhomes.rest.videoconf.CreateConfAccountOrderCommand;
 import com.everhomes.rest.videoconf.CreateConfAccountOrderOnlineCommand;
+import com.everhomes.rest.videoconf.CreateConfAccountOrderOnlineV2Command;
 import com.everhomes.rest.videoconf.CreateInvoiceCommand;
 import com.everhomes.rest.videoconf.CreateVideoConfInvitationCommand;
 import com.everhomes.rest.videoconf.DeleteConfEnterpriseCommand;
@@ -65,6 +67,7 @@ import com.everhomes.rest.videoconf.StartVideoConfResponse;
 import com.everhomes.rest.videoconf.UnassignAccountResponse;
 import com.everhomes.rest.videoconf.UpdateAccountOrderCommand;
 import com.everhomes.rest.videoconf.UpdateConfAccountCategoriesCommand;
+import com.everhomes.rest.videoconf.UpdateConfAccountPeriodV2Command;
 import com.everhomes.rest.videoconf.UpdateContactorCommand;
 import com.everhomes.rest.videoconf.UpdateInvoiceCommand;
 import com.everhomes.rest.videoconf.UpdateVideoConfAccountCommand;
@@ -163,5 +166,9 @@ public interface VideoConfService {
 			CheckVideoConfTrialAccountCommand cmd);
 	void getVideoTrialConfAccount(GetVideoConfTrialAccountCommand cmd);
 	void testSendPhoneMsg(String phoneNum, int templateId, int namespaceId);
-	GetVideoConfHelpUrlResponse getVideoConfHelpUrl();
+	GetVideoConfHelpUrlResponse getVideoConfHelpUrl(); 
+	PreOrderDTO updateConfAccountPeriodV2(UpdateConfAccountPeriodV2Command cmd);
+	PreOrderDTO createConfAccountOrderOnlineV2(CreateConfAccountOrderOnlineV2Command cmd);
+	ConfOrders onlinePayBillSuccess(OnlinePayBillCommand cmd);
+	ConfOrders onlinePayBillFail(OnlinePayBillCommand cmd);
 }

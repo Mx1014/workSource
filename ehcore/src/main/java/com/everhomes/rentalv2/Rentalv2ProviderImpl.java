@@ -344,14 +344,14 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.getSequenceDomainFromTablePojo(EhRentalv2Orders.class));
 		rentalBill.setId(id);
 		//生成订单编号
-		SimpleDateFormat sdf = new SimpleDateFormat("YYYYMMddHHmmssSSS");
-		String numberEnd = String.valueOf(id%1000);
-		if(numberEnd.length()==1)
-			numberEnd="00"+numberEnd;
-		if(numberEnd.length()==2)
-			numberEnd="0"+numberEnd;
-		String orderNo = sdf.format(new java.util.Date())+numberEnd;
-		rentalBill.setOrderNo(orderNo);
+//		SimpleDateFormat sdf = new SimpleDateFormat("YYYYMMddHHmmssSSS");
+//		String numberEnd = String.valueOf(id%1000);
+//		if(numberEnd.length()==1)
+//			numberEnd="00"+numberEnd;
+//		if(numberEnd.length()==2)
+//			numberEnd="0"+numberEnd;
+//		String orderNo = sdf.format(new java.util.Date())+numberEnd;
+//		rentalBill.setOrderNo(orderNo);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhRentalv2OrdersRecord record = ConvertHelper.convert(rentalBill,
 				EhRentalv2OrdersRecord.class);
@@ -786,7 +786,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public List<RentalOrder> listRentalBills(Long userId,Long resourceTypeId,
+	public List<RentalOrder> listRentalBills(Long id,Long userId,Long resourceTypeId,
 			ListingLocator locator, int count, List<Byte> status, Byte payMode) {
 		final List<RentalOrder> result = new ArrayList<RentalOrder>();
 		Condition condition = Tables.EH_RENTALV2_ORDERS.ID.lt(locator.getAnchor());
@@ -801,6 +801,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 //		if (StringUtils.isNotEmpty(siteType))
 //			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE
 //					.eq(siteType));
+		if (null != id)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.ID.eq(id));
 		if (null != payMode) {
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.PAY_MODE.eq(payMode));
 		}
@@ -1183,13 +1185,20 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		if (null != rentalSiteId)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID
 					.equal(rentalSiteId));
-		if (null != endTime)
-			condition = condition.and(Tables.EH_RENTALV2_ORDERS.START_TIME
-					.lessThan(new Timestamp(endTime)));
-		if (null !=  startTime)
-			condition = condition.and(Tables.EH_RENTALV2_ORDERS.END_TIME
-					.greaterThan(new Timestamp(startTime)));
-		 
+//		if (null != endTime)
+//			condition = condition.and(Tables.EH_RENTALV2_ORDERS.START_TIME
+//					.lt(new Timestamp(endTime)));
+//		if (null != startTime)
+//			condition = condition.and(Tables.EH_RENTALV2_ORDERS.END_TIME
+//					.gt(new Timestamp(startTime)));
+
+		if (null != startTime) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.gt(new Timestamp(startTime)));
+		}
+		if (null != endTime) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(endTime)));
+		}
+
 		if (null != billStatus)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
 					.equal(billStatus));
@@ -1201,8 +1210,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_UID
 								.equal(userId)); 
 		if(null!=locator && locator.getAnchor() != null)
-			condition=condition.and(Tables.EH_RENTALV2_ORDERS.ID.lt(locator.getAnchor()));
-								
+			condition=condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(locator.getAnchor())));
+
+		step.orderBy(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.desc());
 		step.limit(pageSize);
 		step.where(condition);
 		List<RentalOrder> result = step
@@ -1475,7 +1485,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				Tables.EH_RENTALV2_ORDERS);
 		//TODO：
 		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS
-				.eq(SiteBillStatus.SUCCESS.getCode()); 
+				.eq(SiteBillStatus.SUCCESS.getCode());
 		step.where(condition);
 		List<RentalOrder> result = step
 				.orderBy(Tables.EH_RENTALV2_ORDERS.ID.desc()).fetch().map((r) -> {
@@ -2172,8 +2182,14 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, RentalResourceType.class,resourceType.getId());
 	}
-	
-	
+
+	@Override
+	public RentalResourceType findRentalResourceTypeById (Long resoureceTypeId) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		EhRentalv2ResourceTypesDao dao = new EhRentalv2ResourceTypesDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(resoureceTypeId), RentalResourceType.class);
+	}
 
 	@Override
 	public List<RentalResourceType> findRentalResourceTypes(Integer namespaceId, Byte status, ListingLocator locator) {
@@ -2259,66 +2275,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				 null);
 	}
 
-	@Override
-	public String getPriceStringByResourceId(Long rentalSiteId) {
-		// TODO Auto-generated method stub
-		BigDecimal minPrice = new BigDecimal(0);
-		BigDecimal maxPrice = new BigDecimal(0);
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		Record4<BigDecimal, BigDecimal, Byte, Double> record = context.select(Tables.EH_RENTALV2_RESOURCES.WEEKEND_PRICE,
-				Tables.EH_RENTALV2_RESOURCES.WORKDAY_PRICE , Tables.EH_RENTALV2_RESOURCES.RENTAL_TYPE,
-				Tables.EH_RENTALV2_RESOURCES.TIME_STEP)
-				.from(Tables.EH_RENTALV2_RESOURCES).where(Tables.EH_RENTALV2_RESOURCES.ID.eq(rentalSiteId)).fetchOne();
-		BigDecimal weekendPrice = record.value1();
-		BigDecimal workdayPrice = record.value2();
-		Byte rentalType = record.value3();
-		Double timeStep = record.value4();
-		int compareValue = workdayPrice.compareTo(weekendPrice);
-		switch(compareValue){
-			case -1:
-				minPrice = workdayPrice;
-				maxPrice = weekendPrice;
-				break;
-			case 0:
-				minPrice = weekendPrice;
-				maxPrice = weekendPrice;
-				break;
-			case 1:
-				minPrice = weekendPrice;
-				maxPrice = workdayPrice;
-				break;
-		}
-		BigDecimal min2 = context.select(Tables.EH_RENTALV2_CELLS.PRICE.min())
-		.from(Tables.EH_RENTALV2_CELLS).where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(rentalSiteId)).fetchOne().value1();
-		if(null!=min2 && minPrice.compareTo(min2) == 1)
-			minPrice = min2;
-		BigDecimal max2 = context.select(Tables.EH_RENTALV2_CELLS.PRICE.max())
-		.from(Tables.EH_RENTALV2_CELLS).where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(rentalSiteId)).fetchOne().value1();
-		if(null!=max2 &&  maxPrice.compareTo(max2) == -1)
-			maxPrice = max2;
-		
-		if(minPrice.compareTo(maxPrice) == 0){
-			return priceToString(minPrice,rentalType,timeStep);
-		}
-		return priceToString(minPrice,rentalType,timeStep)+"~" +priceToString(maxPrice,rentalType,timeStep);
-	}
- 
 	private boolean isInteger(double d){
 		double eps = 0.0001;
 		return Math.abs(d - (double)((int)d)) < eps;
-	}
-	private String priceToString(BigDecimal price, Byte rentalType, Double timeStep) {
-		if(price.compareTo(new BigDecimal(0)) == 0)
-			return "免费";
-		if(rentalType.equals(RentalType.DAY.getCode()))
-			return "￥"+price.toString()+"/天";
-		if(rentalType.equals(RentalType.HALFDAY.getCode()))
-			return "￥"+price.toString()+"/半天";
-		if(rentalType.equals(RentalType.THREETIMEADAY.getCode()))
-			return "￥"+price.toString()+"/半天";
-		if(rentalType.equals(RentalType.HOUR.getCode()))
-			return "￥"+price.toString()+"/"+(isInteger(timeStep.doubleValue())?timeStep.intValue():timeStep)+"小时";
-		return "";
 	}
  
 	@Override
@@ -2429,7 +2388,25 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 		return null;
 	}
-	
+
+	@Override
+	public List<Long> listCellPackageId(Long resourceId, Byte rentalType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select(Tables.EH_RENTALV2_CELLS.PRICE_PACKAGE_ID).from(Tables.EH_RENTALV2_CELLS)
+				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
+				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(rentalType))
+				.and(Tables.EH_RENTALV2_CELLS.STATUS.eq(RentalSiteStatus.NORMAL.getCode()))
+				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.ge(new Date(new java.util.Date().getTime())))
+				.fetch().map(r->r.value1());
+	}
+
+	@Override
+	public void setAuthDoorId(Long rentalId, Long AuthDoorId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		context.update(Tables.EH_RENTALV2_ORDERS).set(Tables.EH_RENTALV2_ORDERS.DOOR_AUTH_ID,AuthDoorId).where(
+				Tables.EH_RENTALV2_ORDERS.ID.eq(rentalId)
+		).execute();
+	}
 	private BigDecimal max(BigDecimal ... b) {
 		BigDecimal max = new BigDecimal(Integer.MIN_VALUE);
 		for (BigDecimal bigDecimal : b) {
@@ -2459,5 +2436,6 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 		return b1;
 	}
-	
+
+
 }

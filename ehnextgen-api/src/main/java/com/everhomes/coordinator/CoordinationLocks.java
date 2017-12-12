@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.coordinator;
 
+import com.everhomes.organization.Organization;
+
 public enum CoordinationLocks {
     CREATE_FAMILY("family.create"),
     LEAVE_FAMILY("family.leave"),
@@ -14,6 +16,7 @@ public enum CoordinationLocks {
     CREATE_F_BILL_ACCOUNT("family.bill.account.create"),
     CREATE_RENTAL_BILL("techpark.rental.bill.create"),
     CREATE_PUNCH_LOG("techpark.punch.log.create"),
+    REFRESH_PUNCH_RULE("techpark.punch.rule.refresh"),
     DOOR_ACCESS("aclink.door.access"),
     SCHEDULE_QUALITY_TASK("quality.task.schedule"),
     SCHEDULE_QUALITY_STAT("quality.task.stat"),
@@ -84,9 +87,30 @@ public enum CoordinationLocks {
     PRINT_UPDATE_ORDER_STATUS("print.update.order.status"),
 
     USER_APPEAL_LOG("user.appeal.log"),
-	SALARY_GROUP_LOCK("salary.group"),
-    ;
+	SALARY_GROUP_LOCK("salary.group"), 
+    UNION_GROUP_LOCK("union.group"),
+    UNION_GROUP_CLONE_LOCK("union_group_clone"),
 
+    PAY_CREATE_PREORDER("pay.create.preorder"),
+
+    BILL_STATUS_UPDATE("bill.status.update"),
+    SYNC_ENTERPRISE_CUSTOMER("sync.enterprise.customer"),
+
+    TRACKING_PLAN_WARNING_SCHEDULE("tracking.plan.warning.schedule"),
+ 
+    EVENT_STAT_SCHEDULE("event.stat.schedule"),
+    ORGANIZATION_ORDER_LOCK("organization.order.lock"),
+
+    FLOW_LANE("flow.lane"),
+    FLOW("flow"),
+
+    CLEANWRONGSTATUS_ORGANIZATIONMEMBERS("cleanwrongstatus.organizationmembers"),
+    CREATE_ENERGY_TASK("energy.task.create"),
+    SCHEDULE_ENERGY_TASK("energy.task.schedule"),
+	ADD_ORGANIZATION_PERSONEL("add.organization.personel"),
+    SYNC_CONTRACT("sync.contract"),
+    FORUM_SETTING("forum.setting")
+    ;
     private String code;
     private CoordinationLocks(String code) {
         this.code = code;

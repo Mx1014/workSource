@@ -87,7 +87,7 @@ public class SearchProviderImpl implements SearchProvider {
 		try {
 			return HttpUtils.putJson(url, json, TIME_OUT, CHARSET);
 		} catch (IOException e) {
-			LOGGER.error("request to elasticsearch error: url=" + url + ", json=" + json);
+			LOGGER.error("request to elasticsearch error: url={}, json={}", url, json, e);
 			throw RuntimeErrorException.errorWith(SearchErrorCode.SCOPE,
 					SearchErrorCode.ERROR_REQUEST_ELASTICSEARCH_ERROR, "request to elasticsearch error");
 		}
@@ -310,7 +310,9 @@ public class SearchProviderImpl implements SearchProvider {
 		if (hits == null)
 			return list;
 		for (int i = 0; i < hits.size(); i++) {
-			list.add(hits.getJSONObject(i).getJSONObject("_source"));
+			JSONObject o = hits.getJSONObject(i).getJSONObject("_source");
+			o.put("highlight",hits.getJSONObject(i).getJSONObject("highlight"));
+			list.add(o);
 		}
 		return list;
 	}

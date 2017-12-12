@@ -11,6 +11,7 @@ package com.everhomes.rest.order;
  *	<li>10000006-rentalrefund-思源物业</li>
  *  <li>10000007-activitySignupOrder-活动报名缴费</li>
  *  <li>10000008-PRINT_ORDER_CODE-活动报名缴费</li>
+ *  <li>10000010-ZJGK_RENTAL_CODE-张江高科租金缴费</li>
  *</ul>
  */
 public class OrderType {
@@ -23,27 +24,36 @@ public class OrderType {
 	public static final int ACTIVITY_SIGNUP_ORDER_CODE = 10000007;
 	public static final int PRINT_ORDER_CODE = 10000008;
 	public static final int ACTIVITY_SIGNUP_ORDER_WECHAT_CODE = 10000009;
+	public static final int ZJGK_RENTAL_CODE = 10000010;
+	public static final int VIDEOCONF_CODE = 10000011;
+	public static final int WUYE_CODE = 10000088;
+	public static final int WITHDRAW_CODE = 10000012;
 
 	public static enum OrderTypeEnum{
-		WUYETEST(OrderType.WU_YE_TEST_CODE,"wuyetest","物业支付-测试用"),
-		PARKING(OrderType.PARKING_CODE,"parking","停车充值支付"),
-		PMSIYUAN(OrderType.PM_SIYUAN_CODE,"pmsy","思源物业"), 
-		PAYMENTCARD(OrderType.PAYMENT_CARD_CODE,"paymentCard","一卡通"),
-		RENTALORDER(OrderType.RENTAL_ORDER_CODE,"rentalOrder","资源预订"),
-		EXPRESS_ORDER(OrderType.EXPRESS_ORDER_CODE,"expressOrder","快递订单"),
-		ACTIVITYSIGNUPORDER(OrderType.ACTIVITY_SIGNUP_ORDER_CODE,"activitySignupOrder","活动报名缴费"),
-		PRINT_ORDER(OrderType.PRINT_ORDER_CODE,"printOrder","打印订单"),
-		ACTIVITYSIGNUPORDERWECHAT(OrderType.ACTIVITY_SIGNUP_ORDER_WECHAT_CODE,"activitysignuporderwechat","活动报名（微信）缴费");
-		
+		WUYETEST(OrderType.WU_YE_TEST_CODE,"wuyetest","物业支付-测试用",""),
+		PARKING(OrderType.PARKING_CODE,"parking","停车充值支付","PAK"),
+		PMSIYUAN(OrderType.PM_SIYUAN_CODE,"pmsy","思源物业",""),
+		RENTALORDER(OrderType.RENTAL_ORDER_CODE,"rentalOrder","资源预订","RTO"),
+		EXPRESS_ORDER(OrderType.EXPRESS_ORDER_CODE,"expressOrder","快递订单","EXO"),
+		PAYMENTCARD(OrderType.PAYMENT_CARD_CODE,"paymentCard","一卡通","PCC"),
+		ACTIVITYSIGNUPORDER(OrderType.ACTIVITY_SIGNUP_ORDER_CODE,"activitySignupOrder","活动报名缴费","ACT"),
+		PRINT_ORDER(OrderType.PRINT_ORDER_CODE,"printOrder","打印订单","PRO"),
+		ACTIVITYSIGNUPORDERWECHAT(OrderType.ACTIVITY_SIGNUP_ORDER_WECHAT_CODE,"activitysignuporderwechat","活动报名（微信）缴费","ACW"),
+		ZJGK_RENTAL_CODE(OrderType.ZJGK_RENTAL_CODE,"zjgkrentalcode","张江高科租金缴费","ZJW"),
+		VIDEOCONF_CODE(OrderType.VIDEOCONF_CODE,"videoConf","视频会议","VMT"),
+		WUYE_CODE(OrderType.WUYE_CODE,"wuyeCode","物业缴费","WUF"),
+		WITHDRAW_CODE(OrderType.WITHDRAW_CODE,"withdrawCode","提现","WDW");
 
 		private int code;
 		private String pycode;
 		private String msg;
+		private String v2code;
 
-		private OrderTypeEnum(int code,String pycode,String msg){
+		private OrderTypeEnum(int code,String pycode,String msg,String v2code){
 			this.code=code;
 			this.pycode=pycode;
 			this.msg=msg;
+			this.v2code=v2code;
 		}
 		public int getCode() {
 			return code;
@@ -54,11 +64,19 @@ public class OrderType {
 		public String getMsg() {
 			return msg;
 		}
+		public String getV2code(){ return v2code; }
 
 		public static Integer getCodeByPyCode(String pycode){
 			for(OrderTypeEnum r:OrderTypeEnum.values()){
 				if(r.getPycode().equals(pycode))
 					return r.getCode();
+			}
+			return null;
+		}
+		public static String getV2codeByPyCode(String pycode){
+			for(OrderTypeEnum r:OrderTypeEnum.values()){
+				if(r.getPycode().equals(pycode))
+					return r.getV2code();
 			}
 			return null;
 		}

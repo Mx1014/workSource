@@ -941,3 +941,6 @@ VALUES ((@max_id := @max_id + 1), 'business.url', 'https://biz.zuolin.com/zl-ec/
 SET @scope_id = (SELECT MAX FROM `eh_web_menu_scopes`); 
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id:=@scope_id+1, 41300, '', 'EhNamespaces', 999990, 2);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id:=@scope_id+1, 41310, '', 'EhNamespaces', 999990, 2);
+
+-- 理财更换连接 by dengs,20170831
+UPDATE eh_launch_pad_items SET action_data='{"url":"https://action.juzilicai.com/event/2017080904/index.html?_ctag=6D7C331-C262970"}'  WHERE item_label = '理财' AND namespace_id = 999990;

@@ -5,21 +5,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.messaging.admin.MessagingAdminController;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.common.FlowCaseDetailActionData;
 import com.everhomes.rest.common.Router;
-import com.everhomes.rest.common.ThirdPartActionData;
-import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.messaging.*;
 
@@ -29,8 +27,6 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
-import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayDestination;
-import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.user.*;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.StringHelper;
@@ -51,10 +47,6 @@ import com.everhomes.general_approval.GeneralApprovalFlowModuleListener;
 import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.module.ServiceModule;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseEntityType;
-import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.util.DateHelper;
@@ -117,7 +109,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		userCompanyItem = getFormFieldDTO(GeneralFormDataSourceType.USER_COMPANY.getCode(),values);
 
 		CrossShardListingLocator locator = new CrossShardListingLocator();
-		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(category.getOwnerType(), category.getOwnerId(), ContactType.EMAIL.getCode(),
+		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(category.getNamespaceId(), ContactType.EMAIL.getCode(),
 				category.getId(), locator, Integer.MAX_VALUE);
 	}
 
@@ -201,13 +193,22 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		request.setCreatorName(user.getNickName());
 		request.setCreatorOrganizationId(Long.valueOf(JSON.parseObject(organizationVal.getFieldValue(), PostApprovalFormTextValue.class).getText()));
 		request.setCreatorMobile(identifier.getIdentifierToken());
-		if (OwnerType.COMMUNITY.getCode().equals(flowCase.getProjectType())){
-			request.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-			List<Organization> communityList = organizationProvider.findOrganizationByCommunityId(flowCase.getProjectId());
-			request.setOwnerId(communityList.get(0).getId());
+		if (EntityType.COMMUNITY.getCode().equals(flowCase.getProjectType()) || "community".equals(flowCase.getProjectType())){
+			// bydengs,修改owner
+	       	request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+	       	request.setOwnerId(flowCase.getProjectId());
+//			request.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+//			List<Organization> communityList = organizationProvider.findOrganizationByCommunityId(flowCase.getProjectId());
+//			request.setOwnerId(communityList.get(0).getId());
 		}else{
-			request.setOwnerType(flowCase.getProjectType());
-			request.setOwnerId(flowCase.getProjectId());
+			OrganizationCommunityRequest ocr =organizationProvider.getOrganizationCommunityRequestByOrganizationId(flowCase.getProjectId());
+        	if(ocr != null){
+        		request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+            	request.setOwnerId(ocr.getCommunityId());
+        	}else{
+        		request.setOwnerType(flowCase.getProjectType());
+            	request.setOwnerId(flowCase.getProjectId());
+        	}
 		}
 		request.setFlowCaseId(flowCase.getId());
 		request.setId(flowCase.getId());
@@ -249,8 +250,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			CrossShardListingLocator locator = new CrossShardListingLocator();
 
 
-			List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(category.getOwnerType(),
-					category.getOwnerId(), ContactType.MOBILE.getCode(), serviceOrg.getParentId(),locator, Integer.MAX_VALUE);
+			List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(category.getNamespaceId(), ContactType.MOBILE.getCode(), serviceOrg.getParentId(),locator, Integer.MAX_VALUE);
 			if(targets != null && targets.size() > 0) {
 				for(ServiceAllianceNotifyTargets target : targets) {
 					if(target.getStatus().byteValue() == 1) {
@@ -491,5 +491,19 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		}
 		LOGGER.info("onFlowMessageSend title = {}",flowCase.getTitle());
 		metaMap.put(MessageMetaConstant.MESSAGE_SUBJECT, flowCase.getTitle());
+	}
+
+	@Override
+	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
+		List<ServiceAllianceCategories> serviceAllianceCategories = yellowPageProvider.listChildCategories(null, null, namespaceId, 0L, null, null);
+		if(serviceAllianceCategories == null || serviceAllianceCategories.size() == 0 ){
+			return new ArrayList<>();
+		}
+		return serviceAllianceCategories.stream().map(r->{
+			FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+			dto.setNamespaceId(namespaceId);
+			dto.setServiceName(r.getName());
+			return dto;
+		}).collect(Collectors.toList());
 	}
 }

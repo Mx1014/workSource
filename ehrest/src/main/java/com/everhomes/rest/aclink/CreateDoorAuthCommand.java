@@ -6,14 +6,15 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>userId: 授权给的用户</li>
- * <li>doorId: 门禁 ID</li>
+ * <li>userId: 授权给的用户，必填项</li>
+ * <li>doorId: 门禁 ID，必填项</li>
  * <li>approveUserId: 谁授权的用户ID</li>
  * <li>AuthType: 0 永久授权， 1 临时授权</li>
  * <li>validFromMs: 授权开始有效时间</li>
  * <li>validEndMs: 授权失效时间</li>
- * <li>organization: 用户来自于</li>
- * <li>description: 授权描述</li>
+ * <li>operatorOrgId: 操作人所在的公司</li>
+ * <li>organization: 用户来自于，访客授权使用</li>
+ * <li>description: 授权描述，访客授权使用</li>
  * </ul>
  * @author janson
  *
@@ -36,9 +37,10 @@ public class CreateDoorAuthCommand {
     
     private Long     validFromMs;
     private Long     validEndMs;
+    private Long operatorOrgId;
     private String organization;
     private String description;
-    private Long namespaceId;
+    private Integer namespaceId;
     private String phone;
     private String authMethod;
     
@@ -92,10 +94,10 @@ public class CreateDoorAuthCommand {
         this.approveUserId = approveUserId;
     }
     
-    public Long getNamespaceId() {
+    public Integer getNamespaceId() {
         return namespaceId;
     }
-    public void setNamespaceId(Long namespaceId) {
+    public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
     }
     public String getPhone() {
@@ -129,6 +131,12 @@ public class CreateDoorAuthCommand {
     }
     public void setAuthMethod(String authMethod) {
         this.authMethod = authMethod;
+    }
+    public Long getOperatorOrgId() {
+        return operatorOrgId;
+    }
+    public void setOperatorOrgId(Long operatorOrgId) {
+        this.operatorOrgId = operatorOrgId;
     }
     @Override
     public String toString() {

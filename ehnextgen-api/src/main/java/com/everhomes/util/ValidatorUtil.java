@@ -1,29 +1,26 @@
 // @formatter:off
 package com.everhomes.util;
 
-import static com.everhomes.util.RuntimeErrorException.errorWith;
-
-import java.util.Set;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.energy.util.ParamErrorCodes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
+import java.util.Set;
 
-import org.slf4j.LoggerFactory;
-
-import org.slf4j.Logger;
-
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.rest.energy.util.ParamErrorCodes;
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 public class ValidatorUtil {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ValidatorUtil.class);
     private static final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 	
 	public static void validate(Object o) {
-		LOGGER.debug(o == null ? "null" : o.toString());
+		// LOGGER.debug(o == null ? "null" : o.toString());
         Set<ConstraintViolation<Object>> result = validator.validate(o);
         for (ConstraintViolation<Object> v : result) {
             ConstraintDescriptor<?> constraintDescriptor = v.getConstraintDescriptor();

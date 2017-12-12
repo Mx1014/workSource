@@ -32,6 +32,8 @@ public class GetVisitorResponse {
     String approveName;
     Byte permissionDeny;
     Long validEndMs;
+    String namespaceName;
+    String qrIntro;
     
     public String getUserName() {
         return userName;
@@ -119,7 +121,20 @@ public class GetVisitorResponse {
 	public void setDoorId(Long doorId) {
 		this.doorId = doorId;
 	}
-	@Override
+	public String getNamespaceName() {
+        return namespaceName;
+    }
+    public void setNamespaceName(String namespaceName) {
+        this.namespaceName = namespaceName;
+    }
+
+    public String getQrIntro() {
+        return qrIntro;
+    }
+    public void setQrIntro(String qrIntro) {
+        this.qrIntro = qrIntro;
+    }
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

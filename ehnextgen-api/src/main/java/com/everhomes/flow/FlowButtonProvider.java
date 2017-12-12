@@ -21,7 +21,10 @@ public interface FlowButtonProvider {
 	FlowButton findFlowButtonByStepType(Long flowNodeId, Integer flowVer,
 			String flowStepType, String userType);
 
-	List<FlowButton> findFlowButtonsByUserType(Long flowNodeId,
-			Integer flowVer, String userType);
+    FlowButton findFlowButtonByStepType(Long flowMainId, Long flowNodeId, Integer flowVer, String flowStepType, String userType);
 
+    List<FlowButton> findFlowButtonsByUserType(Long flowNodeId,
+                                               Integer flowVer, String userType);
+
+    List<FlowButton> findFlowButtonsByUserType(Long flowMainId, Long flowNodeId, Integer flowVer, String userType);
 }

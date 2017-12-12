@@ -325,6 +325,12 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
+		<dependency>
+		    <groupId>alipay-sdk</groupId>
+		    <artifactId>alipay-sdk</artifactId>
+		    <version>20170725114550</version>
+		</dependency>
 		
 		<!--<dependency>
 			<groupId>org.quartz-scheduler</groupId>
@@ -332,6 +338,23 @@
 			<version>2.2.1</version>
 		</dependency>-->
 
+        <dependency>
+            <groupId>com.everhomes.pay</groupId>
+            <artifactId>ehpay-rest</artifactId>
+            <version>${ehpay-rest.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.everhomes.pay</groupId>
+            <artifactId>ehpay-rest-response</artifactId>
+            <version>${ehpay-rest-response.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.xiaomi.miliao</groupId>
+            <artifactId>xmpush-server-api</artifactId>
+            <version>0.0.9-20171017.103132-1</version>
+        </dependency>
 	</dependencies>
 
 	<build>

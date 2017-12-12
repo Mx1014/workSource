@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.parking.clearance;
 
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.flow.*;
@@ -11,9 +10,8 @@ import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
-import com.everhomes.parking.ParkingVendorHandler;
 import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.FlowServiceTypeDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.parking.ParkingLocalStringCode;
 import com.everhomes.rest.parking.clearance.ParkingClearanceLogStatus;
@@ -33,10 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 
 import static com.everhomes.rest.parking.clearance.ParkingClearanceConst.MODULE_ID;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
@@ -102,7 +97,7 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
 
     @Override
     public void onFlowCaseStateChanged(FlowCaseState ctx) {
-//        String params = ctx.getCurrentNode().getFlowNode().getParams();
+//        String params = ctx.getCurrentNode().getFlowNode().getGroupByParams();
 //        Map map = (Map)StringHelper.fromJsonString(params, HashMap.class);
 //
 //        if (map != null) {
@@ -160,13 +155,13 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
     }
 
     @Override
-    public String onFlowCaseBriefRender(FlowCase flowCase) {
+    public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
         return flowCase.getContent();
     }
 
     @Override
     public void onFlowButtonFired(FlowCaseState ctx) {
-//        String params = ctx.getCurrentNode().getFlowNode().getParams();
+//        String params = ctx.getCurrentNode().getFlowNode().getGroupByParams();
 //        Map map = (Map)StringHelper.fromJsonString(params, HashMap.class);
 //
 //        if (map != null && ctx.getStepType() == FlowStepType.APPROVE_STEP) {
@@ -302,4 +297,13 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
 		// TODO Auto-generated method stub
 		
 	}
+
+    @Override
+    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
+        List<FlowServiceTypeDTO> result = new ArrayList<>();
+        FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+        dto.setNamespaceId(namespaceId);
+        dto.setServiceName("车辆放行");
+        return result;
+    }
 }

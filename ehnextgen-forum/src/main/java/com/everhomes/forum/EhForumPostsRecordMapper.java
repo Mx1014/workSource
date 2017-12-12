@@ -74,6 +74,10 @@ public class EhForumPostsRecordMapper implements RecordMapper<Record, EhForumPos
         post.setOfficialFlag(r.getValue((Field<Byte>)r.field("official_flag")));
         post.setMediaDisplayFlag(r.getValue((Field<Byte>)r.field("media_display_flag")));
         post.setTag(r.getValue((Field<String>)r.field("tag")));
+        post.setStickFlag(r.getValue((Field<Byte>)r.field("stick_flag")));
+        post.setStickTime(r.getValue((Field<Timestamp>)r.field("stick_time")));
+		post.setForumEntryId(r.getValue((Field<Long>)r.field("forum_entry_id")));
+        post.setInteractFlag(r.getValue((Field<Byte>)r.field("interact_flag")));
         return post;
     }
 }

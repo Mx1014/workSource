@@ -2,15 +2,7 @@
 package com.everhomes.organization.pm;
 
 import com.everhomes.community.Community;
-import com.everhomes.rest.address.BuildingDTO;
-import com.everhomes.rest.address.CreateApartmentCommand;
-import com.everhomes.rest.address.DeleteApartmentCommand;
-import com.everhomes.rest.address.GetApartmentDetailCommand;
-import com.everhomes.rest.address.GetApartmentDetailResponse;
-import com.everhomes.rest.address.ListBuildingByKeywordCommand;
-import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
-import com.everhomes.rest.address.ListPropApartmentsResponse;
-import com.everhomes.rest.address.UpdateApartmentCommand;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.order.CommonOrderDTO;
@@ -173,6 +165,7 @@ public interface PropertyMgrService {
      * @return behavior列表
      */
     List<OrganizationOwnerBehaviorDTO> listOrganizationOwnerBehaviors(ListOrganizationOwnerBehaviorsCommand cmd);
+    List<OrganizationOwnerBehaviorDTO> listApartmentOrganizationOwnerBehaviors(ListApartmentOrganizationOwnerBehaviorsCommand cmd);
 
     /**
      * 修改业主信息
@@ -471,4 +464,10 @@ public interface PropertyMgrService {
 	void deleteApartment(DeleteApartmentCommand cmd);
 
 	GetApartmentDetailResponse getApartmentDetail(GetApartmentDetailCommand cmd);
+
+    ListApartmentsResponse listApartments(ListApartmentsCommand cmd);
+
+    void deleteDefaultChargingItem(DeleteDefaultChargingItemCommand cmd);
+    DefaultChargingItemDTO updateDefaultChargingItem(UpdateDefaultChargingItemCommand cmd);
+    List<DefaultChargingItemDTO> listDefaultChargingItems(ListDefaultChargingItemsCommand cmd);
 }

@@ -432,7 +432,7 @@ public class CommunityAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/community/qryCommunityUserEnterpriseByUserId</b>
+     * <b>URL: /admin/community/qryCommunityUserAddressByUserId</b>
      * <p>查询用户所在的地址</p>
      */
     @RequestMapping("qryCommunityUserAddressByUserId")
@@ -461,13 +461,13 @@ public class CommunityAdminController extends ControllerBase {
     
     /**
      * <b>URL: /admin/community/listUserBycommunityId</b>
-     * <p>查询已注册的用户</p>
+     * <p>查询用户</p>
      */
     @RequestMapping("listUserBycommunityId")
     @RestReturn(value=CommunityUserAddressResponse.class)
     public RestResponse listUserBycommunityId(@Valid ListCommunityUsersCommand cmd) {
         
-        RestResponse response =  new RestResponse(communityService.listUserBycommunityId(cmd));
+        RestResponse response =  new RestResponse(communityService.listUserBycommunityIdV2(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -5,13 +5,18 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.everhomes.server.schema.tables.daos.EhNewsCommunitiesDao;
-import com.everhomes.server.schema.tables.pojos.EhNewsCommunities;
+import com.everhomes.rest.news.NewsTagValsDTO;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.EhNewsCommunitiesRecord;
+import com.everhomes.server.schema.tables.records.EhNewsTagRecord;
 import com.everhomes.user.UserContext;
 import org.jooq.*;
 import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
@@ -22,9 +27,6 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.news.NewsStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhNewsCategoriesDao;
-import com.everhomes.server.schema.tables.daos.EhNewsDao;
-import com.everhomes.server.schema.tables.pojos.EhNews;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
@@ -38,7 +40,7 @@ public class NewsProviderImpl implements NewsProvider {
 	private SequenceProvider sequenceProvider;
 
 	@Override
-	public void createNews(News news) {
+	public Long createNews(News news) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhNews.class));
 		news.setId(id);
 		news.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -47,10 +49,39 @@ public class NewsProviderImpl implements NewsProvider {
 		}
 		getReadWriteDao().insert(news);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhNews.class, null);
+		return  id;
 	}
 
-	
-	
+	@Override
+	public void createNewsCategory(NewsCategory newsCategory) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhNewsCategories.class));
+		newsCategory.setId(id);
+		newsCategory.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		new EhNewsCategoriesDao(getContext(AccessSpec.readWrite()).configuration()).insert(newsCategory);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhNewsCategories.class, null);
+	}
+
+	@Override
+	public void createNewsTagVals(NewsTagVals newsTagVals) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhNewsTagVals.class));
+		newsTagVals.setId(id);
+		new EhNewsTagValsDao(getContext(AccessSpec.readWrite()).configuration()).insert(newsTagVals);
+		DaoHelper.publishDaoAction(DaoAction.CREATE,EhNewsTagVals.class,null);
+	}
+
+	@Override
+	public void deletNewsTagVals(Long newsId) {
+		DeleteQuery query = getContext(AccessSpec.readWrite()).deleteQuery(Tables.EH_NEWS_TAG_VALS);
+		query.addConditions(Tables.EH_NEWS_TAG_VALS.NEWS_ID.eq(newsId));
+		query.execute();
+	}
+
+	@Override
+	public List<NewsTagVals> listNewsTagVals(Long newsId) {
+		return dbProvider.getDslContext(AccessSpec.readOnlyWith(EhNewsTagVals.class)).select().from(Tables.EH_NEWS_TAG_VALS)
+				.where(Tables.EH_NEWS_TAG_VALS.NEWS_ID.eq(newsId)).fetch().map(r->ConvertHelper.convert(r, NewsTagVals.class));
+	}
+
 	@Override
 	public void createNewsList(List<News> newsList) {
 		List<EhNews> list = newsList.stream().map(news->{
@@ -66,7 +97,31 @@ public class NewsProviderImpl implements NewsProvider {
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhNews.class, null);
 	}
 
+	@Override
+	public void updateNewsCategory(NewsCategory newsCategory) {
+		new EhNewsCategoriesDao(getContext(AccessSpec.readWrite()).configuration()).update(newsCategory);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhNewsCategories.class, null);
+	}
 
+	@Override
+	public Long createNewsTag(NewsTag newsTag) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhNewsTag.class));
+		newsTag.setId(id);
+		newsTag.setDefaultOrder(id);
+		newsTag.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+		new EhNewsTagDao(getContext(AccessSpec.readWrite()).configuration()).insert(newsTag);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhNewsTag.class, null);
+		return id;
+	}
+
+	//@CacheEvict(value="findNewsTagById", key="#id")
+	@CacheEvict(value="findNewsTagById", allEntries=true)
+	@Override
+	public void updateNewsTag(NewsTag newsTag) {
+		new EhNewsTagDao(getContext(AccessSpec.readWrite()).configuration()).update(newsTag);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhNewsTag.class, null);
+	}
 
 	@Override
 	public void updateNews(News news) {
@@ -104,6 +159,32 @@ public class NewsProviderImpl implements NewsProvider {
 
 		return step.where(cond).orderBy(Tables.EH_NEWS.TOP_INDEX.desc(), Tables.EH_NEWS.PUBLISH_TIME.desc(), Tables.EH_NEWS.ID.desc())
 				.limit(from.intValue(), pageSize).fetch().map(new DefaultRecordMapper(Tables.EH_NEWS.recordType(), News.class));
+	}
+
+	@Override
+	public List<NewsTag> listNewsTag(Integer namespaceId, Byte isSearch,Long parentId,Long pageAnchor, Integer pageSize,Long categoryId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhNewsTag.class));
+		SelectQuery<EhNewsTagRecord> query = context.selectQuery(Tables.EH_NEWS_TAG);
+//		query.addConditions(Tables.EH_NEWS_TAG.OWNER_TYPE.eq(ownerType));
+//		query.addConditions(Tables.EH_NEWS_TAG.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_NEWS_TAG.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_NEWS_TAG.DELETE_FLAG.eq((byte)0));
+		if (isSearch != null)
+			query.addConditions(Tables.EH_NEWS_TAG.IS_SEARCH.eq(isSearch));
+		if (parentId != null)
+			query.addConditions(Tables.EH_NEWS_TAG.PARENT_ID.eq(parentId));
+		if(null != pageAnchor && pageAnchor != 0)
+			query.addConditions(Tables.EH_NEWS_TAG.DEFAULT_ORDER.gt(pageAnchor));
+		if(categoryId !=null){
+			query.addConditions(Tables.EH_NEWS_TAG.CATEGORY_ID.eq(categoryId));
+		}
+		if(null != pageSize)
+			query.addLimit(pageSize);
+		query.addOrderBy(Tables.EH_NEWS_TAG.DEFAULT_ORDER.asc());
+
+		List<NewsTag> result = query.fetch().stream().map(r->ConvertHelper.convert(r,NewsTag.class))
+				.collect(Collectors.toList());
+		return result;
 	}
 
 	@Override
@@ -184,5 +265,31 @@ public class NewsProviderImpl implements NewsProvider {
 		assert(categoryId != null);
 		EhNewsCategoriesDao dao = new EhNewsCategoriesDao(getReadOnlyContext().configuration());
 		return ConvertHelper.convert(dao.findById(categoryId), NewsCategory.class);
+	}
+
+	@Override
+	public void increaseViewCount(Long newsId, Long nViewCount) {
+		Long newViewCount = (nViewCount==null?0:nViewCount)+1;
+		dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_NEWS).set(Tables.EH_NEWS.VIEW_COUNT,newViewCount)
+				.where(Tables.EH_NEWS.ID.eq(newsId)).execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhNews.class, null);
+	}
+
+	@Cacheable(value="findNewsTagById", key="{#id}", unless="#result == null")
+	@Override
+	public NewsTag findNewsTagById(Long id) {
+		assert (id!=null);
+		return ConvertHelper.convert(new EhNewsTagDao(getContext(AccessSpec.readOnly()).configuration()).findById(id),NewsTag.class);
+	}
+
+	@Override
+	public NewsCategory getCategoryIdByEntryId(Integer entryId,Integer namespaceId) {
+		List<NewsCategory> categories = dbProvider.getDslContext(AccessSpec.readOnly()).select().from(Tables.EH_NEWS_CATEGORIES)
+				.where(Tables.EH_NEWS_CATEGORIES.ENTRY_ID.eq(entryId)).and(Tables.EH_NEWS_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+				.fetch().map(r -> ConvertHelper.convert(r, NewsCategory.class));
+		if(categories!=null && categories.size()>0){
+			return categories.get(0);
+		}
+		return null;
 	}
 }

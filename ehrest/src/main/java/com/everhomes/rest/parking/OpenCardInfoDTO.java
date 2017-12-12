@@ -21,7 +21,16 @@ public class OpenCardInfoDTO {
     private BigDecimal monthCount;
     private BigDecimal price;
     private String cardType;
-    
+    private Byte orderType;
+
+	public Byte getOrderType() {
+		return orderType;
+	}
+
+	public void setOrderType(Byte orderType) {
+		this.orderType = orderType;
+	}
+
 	public String getOwnerType() {
 		return ownerType;
 	}

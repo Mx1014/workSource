@@ -1,5 +1,7 @@
 package com.everhomes.pmtask;
 
+import java.util.List;
+
 /**
  * Created by ying.xiong on 2017/7/17.
  */
@@ -8,5 +10,5 @@ public interface HandoverTaskHandler {
     int ZJGK = 9999;
 //    Integer ZJGK = 9999;
 
-    void handoverTaskToTrd(PmTask task);
+    void handoverTaskToTrd(PmTask task, String content, List<String> attachments);
 }

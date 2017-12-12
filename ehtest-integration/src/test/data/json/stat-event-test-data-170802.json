@@ -1,0 +1,229 @@
+{
+  "eh_stat_event_upload_strategies": [
+    {
+      "id": 1,
+      "namespace_id": 999992,
+      "owner_type": "EhNamespaces",
+      "owner_id": 999992,
+      "access": "WIFI",
+      "scope": 1,
+      "strategy": "STARTUP",
+      "status": 2
+    },
+    {
+      "id": 2,
+      "namespace_id": 999992,
+      "owner_type": "EhNamespaces",
+      "owner_id": 999992,
+      "access": "WIFI",
+      "scope": 2,
+      "strategy": "STARTUP",
+      "status": 2
+    },
+    {
+      "id": 3,
+      "namespace_id": 999992,
+      "owner_type": "EhUsers",
+      "owner_id": 123465,
+      "access": "GSM",
+      "scope": 2,
+      "strategy": "STARTIP",
+      "status": 2
+    },
+    {
+      "id": 4,
+      "namespace_id": 999992,
+      "owner_type": "EhNamespaces",
+      "owner_id": 999992,
+      "access": "GSM",
+      "scope": 2,
+      "strategy": "INTERVAL",
+      "interval_seconds": 60,
+      "status": 2
+    }
+  ],
+  "eh_stat_event_portal_statistics": [
+    {
+      "id": 1,
+      "namespace_id": 999992,
+      "parent_id": 0,
+      "stat_type": 1,
+      "identifier": "Home",
+      "remark": "服务广场【首页】",
+      "owner_type": "",
+      "owner_id": 5,
+      "display_name": "业务组2",
+      "time_interval": "DAILY",
+      "stat_date": "2017-08-02",
+      "status": 2
+    },
+    {
+      "id": 2,
+      "namespace_id": 999992,
+      "parent_id": 0,
+      "stat_type": 2,
+      "identifier": "Home",
+      "remark": "服务广场【资产管理】",
+      "owner_type": "",
+      "owner_id": 5,
+      "display_name": "业务组2",
+      "time_interval": "DAILY",
+      "stat_date": "2017-08-02",
+      "status": 2
+    },
+    {
+      "id": 3,
+      "namespace_id": 999992,
+      "parent_id": 0,
+      "stat_type": 1,
+      "identifier": "ASS",
+      "remark": "社群1",
+      "owner_type": "",
+      "owner_id": 3,
+      "display_name": "业务组2",
+      "time_interval": "DAILY",
+      "stat_date": "2017-08-01",
+      "status": 2
+    },
+    {
+      "id": 4,
+      "namespace_id": 999992,
+      "parent_id": 0,
+      "stat_type": 1,
+      "identifier": "ASS",
+      "remark": "社群1",
+      "owner_type": "",
+      "owner_id": 2,
+      "display_name": "业务组2",
+      "time_interval": "DAILY",
+      "stat_date": "2017-08-01",
+      "status": 2
+    },
+    {
+      "id": 5,
+      "namespace_id": 999992,
+      "parent_id": 0,
+      "stat_type": 1,
+      "identifier": "NavigationBizs",
+      "remark": "社群1",
+      "owner_type": "",
+      "owner_id": 3,
+      "display_name": "业务组2",
+      "time_interval": "DAILY",
+      "stat_date": "2017-07-29",
+      "status": 2
+    },
+    {
+      "id": 6,
+      "namespace_id": 999992,
+      "parent_id": 1,
+      "stat_type": 4,
+      "identifier": "ASS",
+      "remark": "社群1",
+      "owner_type": "",
+      "owner_id": 4,
+      "display_name": "业务组2",
+      "time_interval": "DAILY",
+      "stat_date": "2017-07-29",
+      "status": 2
+    },
+    {
+      "id": 7,
+      "namespace_id": 999992,
+      "parent_id": 1,
+      "stat_type": 4,
+      "identifier": "NavigationBizs1",
+      "remark": "item组1",
+      "owner_type": "",
+      "owner_id": 5,
+      "display_name": "业务组1",
+      "time_interval": "DAILY",
+      "stat_date": "2017-07-29",
+      "status": 2
+    },
+    {
+      "id": 8,
+      "namespace_id": 999992,
+      "parent_id": 1,
+      "stat_type": 4,
+      "identifier": "BannerDefault",
+      "remark": "社群1",
+      "owner_type": "",
+      "owner_id": 5,
+      "display_name": "Banner",
+      "time_interval": "DAILY",
+      "stat_date": "2017-07-29",
+      "status": 2
+    }
+  ],
+  "eh_stat_event_statistics": [
+    {
+      "id": 1,
+      "namespace_id": 999992,
+      "event_type": 1,
+      "event_name": "portal_on_item_click",
+      "event_display_name": "item点击事件",
+      "event_version": 1,
+      "event_portal_stat_id": 7,
+      "time_interval": "DAILY",
+      "stat_date": "2017-08-02",
+      "total_count": 102,
+      "unique_users": 30,
+      "completed_sessions": 40,
+      "status": 2
+    },
+    {
+      "id": 2,
+      "namespace_id": 999992,
+      "event_type": 1,
+      "event_name": "portal_on_item_click",
+      "event_display_name": "item点击事件",
+      "event_version": 1,
+      "event_portal_stat_id": 7,
+      "time_interval": "DAILY",
+      "stat_date": "2017-08-02",
+      "total_count": 50,
+      "unique_users": 30,
+      "completed_sessions": 40,
+      "status": 2
+    }
+  ],
+  "eh_stat_event_param_statistics": [
+    {
+      "id": 1,
+      "namespace_id": 999992,
+      "event_stat_id": 1,
+      "stat_key": "item_name",
+      "stat_value": "打卡",
+      "status": 2,
+      "create_time": "2017-08-02 20:34:36.000"
+    },
+    {
+      "id": 2,
+      "namespace_id": 999992,
+      "event_stat_id": 1,
+      "stat_key": "item_label",
+      "stat_value": "PUNCH",
+      "status": 2,
+      "create_time": "2017-08-02 20:34:36.000"
+    },
+    {
+      "id": 3,
+      "namespace_id": 999992,
+      "event_stat_id": 2,
+      "stat_key": "item_name",
+      "stat_value": "门禁",
+      "status": 2,
+      "create_time": "2017-08-02 20:34:36.000"
+    },
+    {
+      "id": 4,
+      "namespace_id": 999992,
+      "event_stat_id": 2,
+      "stat_key": "item_label",
+      "stat_value": "DOOR",
+      "status": 2,
+      "create_time": "2017-08-02 20:34:36.000"
+    }
+  ]
+}

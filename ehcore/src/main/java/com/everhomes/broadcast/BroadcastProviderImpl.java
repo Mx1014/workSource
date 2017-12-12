@@ -82,6 +82,15 @@ public class BroadcastProviderImpl implements BroadcastProvider {
 	}
 
 	@Override
+	public Integer countBroadcastByOwner(String ownerType, Long ownerId) {
+		return getReadOnlyContext().selectCount().from(Tables.EH_BROADCASTS)
+				.where(Tables.EH_BROADCASTS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_BROADCASTS.OWNER_ID.eq(ownerId))
+				.fetchAny().value1();
+	}
+
+
+	@Override
 	public Integer selectBroadcastCountToday(Integer namespaceId, String ownerType, Long ownerId) {
 		Date now = new Date();
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");

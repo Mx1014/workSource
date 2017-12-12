@@ -3,9 +3,6 @@ package com.everhomes.parking.handler;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.*;
 import com.everhomes.parking.clearance.ParkingClearanceLog;
 import com.everhomes.parking.jinyi.JinyiCard;
@@ -15,17 +12,13 @@ import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.MD5Utils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 
 import java.time.LocalDateTime;
@@ -36,7 +29,7 @@ import java.util.*;
  * 清华信息港 停车
  */
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "JIN_YI")
-public class JinyiParkingVendorHandler implements ParkingVendorHandler {
+public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JinyiParkingVendorHandler.class);
 
 	private static final String GET_CARD = "parkingjet.open.s2s.parkingfee.month.calcfee.plateno";
@@ -53,72 +46,43 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 	DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-//	static String url = "HTTP://TGD.POAPI.PARKINGJET.CN:8082/COMMONOPENAPI/DEFAULT.ASHX";
-//	STATIC STRING APPID = "201706221000";
-//	STATIC STRING APPKEY = "QYRUIRXN20145601739";
-//	STATIC STRING PARKINGID = "0755000120170301000000000003";
-
-	@Autowired
-	private ParkingProvider parkingProvider;
-	@Autowired
-    private ConfigurationProvider configProvider;
-	@Autowired
-	private LocaleTemplateService localeTemplateService;
 	@Override
-    public GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId,
-    		Long parkingLotId, String plateNumber) {
+    public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
         
     	List<ParkingCardDTO> resultList = new ArrayList<>();
-		GetParkingCardsResponse response = new GetParkingCardsResponse();
-		response.setCards(resultList);
 
 		JinyiCard card = getCardInfo(plateNumber);
     	
         ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
 		if(null != card){
 			//格式yyyy-MM-dd
-			String expiredate = card.getExpiredate() + " 23:59:59";
+			String expiredate = card.getMaxuseddate() + " 23:59:59";
 			LocalDateTime time = LocalDateTime.parse(expiredate, dtf2);
 			Long endTime = Timestamp.valueOf(time).getTime();
 
-			long now = System.currentTimeMillis();
-			long cardReserveTime = 0;
-			
-	    	ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
-	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
-	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
-	    		Integer cardReserveDay = parkingLot.getCardReserveDays();
-	    		cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000L;
+			setCardStatus(parkingLot, endTime, parkingCardDTO);
 
-	    	}
-			
-			if(endTime + cardReserveTime < now){
-				response.setToastType(ParkingToastType.CARD_EXPIRED.getCode());
-				return response;
-			}
-			
 			String plateOwnerName = card.getOwnername();
 
-			String cardNumber = null;
+
 			ParkingCardType parkingCardType = createDefaultCardType();
 			String cardType = parkingCardType.getTypeName();
 			
-			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
-			parkingCardDTO.setOwnerId(ownerId);
-			parkingCardDTO.setParkingLotId(parkingLotId);
+			parkingCardDTO.setOwnerType(parkingLot.getOwnerType());
+			parkingCardDTO.setOwnerId(parkingLot.getOwnerId());
+			parkingCardDTO.setParkingLotId(parkingLot.getId());
 			
 			parkingCardDTO.setPlateOwnerName(plateOwnerName);
 			parkingCardDTO.setPlateNumber(card.getPlateno());
 			parkingCardDTO.setEndTime(endTime);
 			parkingCardDTO.setCardType(cardType);
-			parkingCardDTO.setCardNumber(cardNumber);
+			//金溢 没有返回卡号
+//			parkingCardDTO.setCardNumber();
 			parkingCardDTO.setIsValid(true);
 			
 			resultList.add(parkingCardDTO);
-		}else{
-			response.setToastType(ParkingToastType.NOT_CARD_USER.getCode());
 		}
-        return response;
+        return resultList;
     }
 
     private JinyiCard getCardInfo(String plateNumber){
@@ -165,21 +129,10 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 		});
 		String p = sb.substring(0,sb.length() - 1);
 
-		String md5Sign = stringMD5(p + appkey);
+		String md5Sign = MD5Utils.getMD5(p + appkey);
 		params.put("sign", md5Sign);
 
 		return params;
-	}
-
-	private String stringMD5(String pw) {
-		try {
-			MessageDigest messageDigest =MessageDigest.getInstance("MD5");
-			messageDigest.update(pw.getBytes());
-			return new BigInteger(1, messageDigest.digest()).toString(16);
-		} catch (NoSuchAlgorithmException e) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"Convert md5 failed");
-		}
 	}
 
 	private JSONObject createGetCardParam(String plateNo) {
@@ -228,10 +181,11 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 		return json;
 	}
 
-    @Override
-	public boolean recharge(ParkingRechargeOrder order){
-		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
+	@Override
+	public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
+		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode())) {
 			return rechargeMonthlyCard(order);
+		}
 		return false;
 	}
 
@@ -241,7 +195,11 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 
 		JinyiCard card = getCardInfo(order.getPlateNumber());
 
+
 		if (null != card) {
+
+			String startTime = card.getMaxuseddate() + " 23:59:59";
+
 			//根据查询月卡时的计费id来创建订单
 			order.setOrderToken(card.getCalcid());
 
@@ -269,15 +227,15 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 				JinyiCard newCard = getCardInfo(order.getPlateNumber());
 
 				if (null != newCard) {
-					String expiredate = newCard.getExpiredate() + " 23:59:59";
-					String effectdate = newCard.getEffectdate() + " 00:00:00";
-					LocalDateTime expireTime = LocalDateTime.parse(expiredate, dtf2);
-					LocalDateTime effectTime = LocalDateTime.parse(effectdate, dtf2);
+					String endTime = newCard.getMaxuseddate() + " 23:59:59";
+					LocalDateTime tempStartTime = LocalDateTime.parse(startTime, dtf2);
+					tempStartTime = tempStartTime.plusSeconds(1L);
+					LocalDateTime tempEndTime = LocalDateTime.parse(endTime, dtf2);
 
 					order.setErrorDescriptionJson(notifyJson);
 
-					order.setStartPeriod(Timestamp.valueOf(effectTime));
-					order.setEndPeriod(Timestamp.valueOf(expireTime));
+					order.setStartPeriod(Timestamp.valueOf(tempStartTime));
+					order.setEndPeriod(Timestamp.valueOf(tempEndTime));
 				}
 
 				if(notifyEntity.isSuccess()) {
@@ -300,30 +258,29 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
     	return ret;
     }
 
-	private ParkingCardType createDefaultCardType() {
-		//金溢对接停车 没有月卡类型，默认一个月卡类型
-		ParkingCardType cardType = new ParkingCardType();
-		cardType.setTypeId("月卡");
-		cardType.setTypeName("月卡");
+	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
 
-		return cardType;
+		JinyiCard card = getCardInfo(order.getPlateNumber());
+
+		BigDecimal ratePrice = card.getPaidin();
+
+		checkAndSetOrderPrice(parkingLot, order, ratePrice);
+
 	}
 
     @Override
-    public List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId,String plateNumber,String cardNo) {
+    public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot,String plateNumber,String cardNo) {
     	
     	List<ParkingRechargeRateDTO> parkingRechargeRateList = new ArrayList<>();
 
-    	if(StringUtils.isBlank(plateNumber)) {
-//    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId, null);
-    	}else{
+    	if(!StringUtils.isBlank(plateNumber)) {
     		JinyiCard card = getCardInfo(plateNumber);
 
     		if (null != card) {
 				ParkingRechargeRateDTO rate = new ParkingRechargeRateDTO();
-				rate.setOwnerId(ownerId);
-				rate.setOwnerType(ownerType);
-				rate.setParkingLotId(parkingLotId);
+				rate.setOwnerId(parkingLot.getOwnerId());
+				rate.setOwnerType(parkingLot.getOwnerType());
+				rate.setParkingLotId(parkingLot.getId());
 				rate.setRateToken("");
 
 				Map<String, Object> map = new HashMap<>();
@@ -335,6 +292,7 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 				rate.setRateName(rateName);
 
 				ParkingCardType parkingCardType = createDefaultCardType();
+				rate.setCardTypeId(parkingCardType.getTypeId());
 				rate.setCardType(parkingCardType.getTypeName());
 				rate.setMonthCount(new BigDecimal(MONTH_COUNT));
 				rate.setPrice(card.getPaidin());
@@ -352,57 +310,6 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 			return user.getLocale();
 
 		return Locale.SIMPLIFIED_CHINESE.toString();
-	}
-
-    @Override
-    public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
-    	return recharge(order);
-    }
-
-    @Override
-    public ParkingRechargeRateDTO createParkingRechargeRate(CreateParkingRechargeRateCommand cmd){
-
-		return null;
-    }
-    
-    @Override
-    public void deleteParkingRechargeRate(DeleteParkingRechargeRateCommand cmd){
-
-    }
-
-	@Override
-	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
-
-		
-	}
-
-	@Override
-	public ParkingTempFeeDTO getParkingTempFee(String ownerType, Long ownerId, Long parkingLotId, String plateNumber) {
-
-		return null;
-	}
-
-	@Override
-	public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd) {
-
-		return null;
-	}
-
-	@Override
-	public void lockParkingCar(LockParkingCarCommand cmd) {
-
-	}
-
-	@Override
-	public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
-
-		return null;
 	}
 
 	public String applyTempCard(ParkingClearanceLog log) {

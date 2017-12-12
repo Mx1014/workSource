@@ -3,7 +3,9 @@ package com.everhomes.aclink;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.aclink.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.util.List;
 
 public interface DoorAccessService {
@@ -129,4 +131,20 @@ public interface DoorAccessService {
 	void joinCompanyAutoAuth(Integer namespaceId, Long orgId, Long userId);
 
     void exportVisitorDoorAuth(ExportDoorAuthCommand cmd, HttpServletResponse httpResponse);
+
+    DoorAuthLevelDTO createDoorAuthLevel(CreateDoorAuthLevelCommand cmd);
+
+    void aliTest(HttpServletRequest request);
+
+    String aliTest2(HttpServletRequest request);
+
+    ListDoorAuthLevelResponse listDoorAuthLevel(ListDoorAuthLevelCommand cmd);
+    
+    void deleteDoorAuthLevel(Long id);
+    
+    String faceTest();
+
+    //要不要生成门禁二维码信息，如果是 web 端，则需要直接生成给 web
+    ListDoorAccessQRKeyResponse listDoorAccessQRKeyAndGenerateQR(
+            boolean generate);
 }

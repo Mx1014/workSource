@@ -16,8 +16,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumProvider;
-import com.everhomes.general_form.GeneralFormService;
-import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.group.*;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -29,31 +27,30 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.namespace.*;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.*;
+import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserLevel;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.ProjectDTO;
-import com.everhomes.rest.address.AddressDTO;
-import com.everhomes.rest.address.CommunityAdminStatus;
-import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.*;
+import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.admin.*;
+import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.forum.AttachmentDescriptor;
-import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
-import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.region.RegionServiceErrorCode;
-import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.rest.techpark.expansion.LeasePromotionFlag;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
@@ -61,12 +58,9 @@ import com.everhomes.search.CommunitySearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
-import com.everhomes.techpark.expansion.LeaseFormRequest;
 import com.everhomes.techpark.servicehotline.ServiceConfiguration;
 import com.everhomes.techpark.servicehotline.ServiceConfigurationsProvider;
 import com.everhomes.user.*;
-import com.everhomes.userOrganization.UserOrganizationProvider;
 import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
@@ -119,15 +113,11 @@ public class CommunityServiceImpl implements CommunityService {
 	private CommunitySearcher communitySearcher;
 	@Autowired
 	private ContentServerService contentServerService;
-
-    @Autowired
-    private UserGroupHistoryProvider userGroupHistoryProvider;
 	@Autowired
 	private OrganizationProvider organizationProvider;
 	
 	@Autowired
 	private OrganizationService organizationService;
-	
 
 	@Autowired
 	private GroupProvider groupProvider;
@@ -167,12 +157,6 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Autowired
 	private  RolePrivilegeService rolePrivilegeService;
-	@Autowired
-	private GeneralFormService generalFormService;
-	@Autowired
-	private GeneralFormValProvider generalFormValProvider;
-	@Autowired
-	private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
 
 	@Autowired
 	private  ImportFileService importFileService;
@@ -180,14 +164,17 @@ public class CommunityServiceImpl implements CommunityService {
 	@Autowired
 	private  UserActivityProvider userActivityProvider;
 
-	@Autowired
-	private UserOrganizationProvider userOrganizationProvider;
-
     @Autowired
     private GroupMemberLogProvider groupMemberLogProvider;
 
     @Autowired
     private ServiceConfigurationsProvider serviceConfigurationsProvider;
+
+	@Autowired
+	private ContractProvider contractProvider;
+
+	@Autowired
+	private PropertyMgrService propertyMgrService;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -268,6 +255,10 @@ public class CommunityServiceImpl implements CommunityService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid areaId parameter,area is not found.");
 		}
+		if(StringUtils.isNotBlank(cmd.getCommunityNumber())) {
+			checkCommunityNumberUnique(community.getId(), cmd.getCommunityNumber(), community.getNamespaceId());
+		}
+		community.setCommunityNumber(cmd.getCommunityNumber());
 		community.setAreaId(cmd.getAreaId());
 		community.setCityId(cmd.getCityId());
 		community.setOperatorUid(userId);
@@ -277,7 +268,7 @@ public class CommunityServiceImpl implements CommunityService {
 		community.setAreaSize(cmd.getAreaSize());
 		this.dbProvider.execute((TransactionStatus status) ->  {
 			this.communityProvider.updateCommunity(community);
-
+			communitySearcher.feedDoc(community);
 			List<CommunityGeoPointDTO> geoList = cmd.getGeoPointList();
 			
 			if(geoList != null && geoList.size() > 0){
@@ -322,6 +313,25 @@ public class CommunityServiceImpl implements CommunityService {
 			return null;
 		});
 	}
+
+	private void checkCommunityNumberUnique(Long id, String communityNumber, Integer namespaceId) {
+		Community community = communityProvider.findCommunityByCommunityNumber(communityNumber, namespaceId);
+		if(community != null && !community.getId().equals(id)) {
+			LOGGER.error("Community number is already exsit.communityNumber=" + communityNumber);
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NUMBER_EXIST,
+					"Community number is already exsit.");
+		}
+	}
+
+	private void checkBuildingNumberUnique(Long id, String buildingNumber, Long communityId) {
+		Building building = communityProvider.findBuildingByCommunityIdAndNumber(communityId, buildingNumber);
+		if(building != null && !building.getId().equals(id)) {
+			LOGGER.error("building number is already exsit.buildingNumber=" + buildingNumber);
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_BUILDING_NUMBER_EXIST,
+					"building number is already exsit.");
+		}
+	}
+
 	@Override
 	public void approveCommuniy(ApproveCommunityAdminCommand cmd){
 		if(cmd.getCommunityId() == null){
@@ -338,7 +348,7 @@ public class CommunityServiceImpl implements CommunityService {
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
 		
-		if(community.getCityId() == null || community.getCityId().longValue() == 0){
+		if(community.getCityId() == null || community.getCityId() == 0L){
 		    LOGGER.error("Community missing infomation,cityId is null.communityId=" + cmd.getCommunityId());
             throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_CITY_NOT_EXIST, 
                     "Community missing infomation,cityId is null.");
@@ -581,7 +591,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 		ListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		List<Community> list = this.communityProvider.listCommunitiesByKeyWord(locator, pageSize+1,cmd.getKeyword());
+		List<Community> list = this.communityProvider.listCommunitiesByKeyWord(locator, pageSize+1,cmd.getKeyword(), cmd.getNamespaceId(), cmd.getCommunityType());
 
 		ListCommunitiesByKeywordCommandResponse response = new ListCommunitiesByKeywordCommandResponse();
 		if(list != null && list.size() > pageSize){
@@ -607,44 +617,25 @@ public class CommunityServiceImpl implements CommunityService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-		List<Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, pageSize + 1,communityId, UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
+		List<Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, pageSize + 1,communityId, UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), null);
 		
 		this.communityProvider.populateBuildingAttachments(buildings);
         
         Long nextPageAnchor = null;
         if(buildings.size() > pageSize) {
         	buildings.remove(buildings.size() - 1);
-            nextPageAnchor = buildings.get(buildings.size() - 1).getId();
+            nextPageAnchor = buildings.get(buildings.size() - 1).getDefaultOrder();
         }
-        
-        populateBuildings(buildings);
-        
-        List<BuildingDTO> dtoList = buildings.stream().map((r) -> {
-        	
-        	BuildingDTO dto = ConvertHelper.convert(r, BuildingDTO.class);  
-        	
-        	dto.setBuildingName(dto.getName());
-        	
-        	dto.setName(org.springframework.util.StringUtils.isEmpty(dto.getAliasName()) ? dto.getName() : dto.getAliasName());
-        	
-        	if(null != dto.getManagerUid()){
-        		OrganizationMember member = organizationProvider.findOrganizationMemberById(dto.getManagerUid());
-        		if(null != member){
-        			dto.setManagerNickName(member.getContactName());
-        			//modify by wh 2016-11-8 加了管理员电话新字段
-        			//dto.setContact(member.getContactToken());
-        			dto.setManagerContact(member.getContactToken());
-        		}
-        	}
 
-			//TODO: set detail url
-			processDetailUrl(dto);
-        	populateBuildingDTO(dto);
-        	
+        List<BuildingDTO> dtoList = buildings.stream().map((r) -> {
+
+        	BuildingDTO dto = ConvertHelper.convert(r, BuildingDTO.class);
+
+			populateBuilding(dto, r);
+
         	return dto;
         }).collect(Collectors.toList());
-        
-        
+
         return new ListBuildingCommandResponse(nextPageAnchor, dtoList);
 	}
 
@@ -654,42 +645,10 @@ public class CommunityServiceImpl implements CommunityService {
 
 		detailUrl = String.format(detailUrl, dto.getId());
 
-//            detailUrl = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2));
 		dto.setDetailUrl(homeUrl + detailUrl);
 
 	}
 
-    private void populateBuildingDTO(BuildingDTO building) {
-        if(building == null) {
-            return;
-        }
-        
-        String posterUrl = building.getPosterUri();
-        if(posterUrl != null && posterUrl.length() > 0) {
-            try{
-                String url = contentServerService.parserUri(posterUrl, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-                building.setPosterUrl(url);
-            }catch(Exception e){
-                LOGGER.error("Failed to parse poster uri of building, building=" + building, e);
-            }
-        }
-
-		GetGeneralFormValuesCommand cmd = new GetGeneralFormValuesCommand();
-		cmd.setSourceType(EntityType.BUILDING.getCode());
-		cmd.setSourceId(building.getId());
-		cmd.setOriginFieldFlag(NormalFlag.NEED.getCode());
-
-		List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmd);
-		building.setFormValues(formValues);
-
-		if (LeasePromotionFlag.ENABLED.getCode() == building.getCustomFormFlag()) {
-			LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(building.getNamespaceId(),
-					building.getCommunityId(), EntityType.COMMUNITY.getCode(), EntityType.BUILDING.getCode());
-			if (null != request) {
-				building.setRequestFormId(request.getSourceId());
-			}
-		}
-    }
 	@Override
 	public BuildingDTO getBuilding(GetBuildingCommand cmd) {
 		
@@ -702,10 +661,10 @@ public class CommunityServiceImpl implements CommunityService {
         				BuildingServiceErrorCode.ERROR_BUILDING_DELETED, "Building already deleted");
             }
 			this.communityProvider.populateBuildingAttachments(building);
-	        populateBuilding(building);
 
 			BuildingDTO dto = ConvertHelper.convert(building, BuildingDTO.class);
-			populateFormInfo(dto);
+
+			populateBuilding(dto, building);
 
 			return dto;
 		}else {
@@ -714,50 +673,42 @@ public class CommunityServiceImpl implements CommunityService {
             		BuildingServiceErrorCode.ERROR_BUILDING_NOT_FOUND, "Building not found");
         }
 	}
-	
-	private void populateBuildings(List<Building> buildingList) {
-        if(buildingList == null || buildingList.size() == 0) {
-            if(LOGGER.isInfoEnabled()) {
-                LOGGER.info("The building list is empty");
-            }
-            return;
-        } else {
-            for(Building building : buildingList) {
-            	populateBuilding(building);
-            }
-        }
-    }
 
 	/**
 	 * 填充楼栋信息
 	 */
-	 private void populateBuilding(Building building) {
+	 private void populateBuilding(BuildingDTO dto, Building building) {
 		 if(building == null) {
             if(LOGGER.isInfoEnabled()) {
                 LOGGER.info("The building is null");
             }
 		 } else {
+
+			 dto.setBuildingName(dto.getName());
+			 dto.setName(StringUtils.isBlank(dto.getAliasName()) ? dto.getName() : dto.getAliasName());
+
 		     String posterUri = building.getPosterUri();
              if(posterUri != null && posterUri.length() > 0) {
                  try{
                      String url = contentServerService.parserUri(posterUri, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-                     building.setPosterUrl(url);
+					 dto.setPosterUrl(url);
                  }catch(Exception e){
                      LOGGER.error("Failed to parse building poster uri, buildingId=" + building.getId() + ", posterUri=" + posterUri, e);
                  }
              } 
 		     
-			 populateBuildingCreatorInfo(building);
-			 populateBuildingManagerInfo(building);
-			 populateBuildingOperatorInfo(building);
-             
-			 populateBuildingAttachements(building, building.getAttachments());
-	        
+//			 populateBuildingCreatorInfo(building);
+			 populateBuildingManagerInfo(dto);
+//			 populateBuildingOperatorInfo(building);
+
+			 populateBuildingAttachments(dto, building.getAttachments());
+
+			 processDetailUrl(dto);
 		 }
 	 }
 	 
 	 
-	 private void populateBuildingCreatorInfo(Building building) {
+	 private void populateBuildingCreatorInfo(BuildingDTO building) {
 		 
 		 String creatorNickName = building.getCreatorNickName();
          String creatorAvatar = building.getCreatorAvatar();
@@ -779,30 +730,24 @@ public class CommunityServiceImpl implements CommunityService {
 		 
 	 }
 	 
-	 private void populateBuildingManagerInfo(Building building) {
-		 
-		 String managerNickName = building.getManagerNickName();
-         String managerAvatar = building.getManagerAvatar();
+	 private void populateBuildingManagerInfo(BuildingDTO building) {
+
          if(null == building.getManagerUid()){
         	 return;
          }
-         User manager = userProvider.findUserById(building.getManagerUid());
-         if(manager != null) {
-             if(managerNickName == null || managerNickName.trim().length() == 0) {
-            	 building.setManagerNickName(manager.getNickName());
-             }
-             if(managerAvatar == null || managerAvatar.trim().length() == 0) {
-            	 building.setManagerAvatar(manager.getAvatar());
-             }
-         }
-         managerAvatar = building.getManagerAvatar();
-         if(managerAvatar != null && managerAvatar.length() > 0) {
-             String avatarUrl = contentServerService.parserUri(managerAvatar, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-             building.setManagerAvatarUrl(avatarUrl);
-         }
+
+		 OrganizationMember member = organizationProvider.findOrganizationMemberById(building.getManagerUid());
+		 if(null != member){
+			 building.setManagerNickName(member.getContactName());
+			 building.setManagerName(member.getContactName());
+			 //modify by wh 2016-11-8 加了管理员电话新字段
+			 //dto.setContact(member.getContactToken());
+			 building.setManagerContact(member.getContactToken());
+		 }
+
 	 }
 
-	 private void populateBuildingOperatorInfo(Building building) {
+	 private void populateBuildingOperatorInfo(BuildingDTO building) {
 	 
 		 String operatorNickName = building.getOperateNickName();
          String operatorAvatar = building.getOperateAvatar();
@@ -825,7 +770,7 @@ public class CommunityServiceImpl implements CommunityService {
          }
 	 }
 	 
-	 private void populateBuildingAttachements(Building building, List<BuildingAttachment> attachmentList) {
+	 private void populateBuildingAttachments(BuildingDTO building, List<BuildingAttachment> attachmentList) {
 	 
 		 if(attachmentList == null || attachmentList.size() == 0) {
 	            if(LOGGER.isInfoEnabled()) {
@@ -833,12 +778,12 @@ public class CommunityServiceImpl implements CommunityService {
 	            }
 		 } else {
 	            for(BuildingAttachment attachment : attachmentList) {
-	                populateBuildingAttachement(building, attachment);
+					populateBuildingAttachment(building, attachment);
 	            }
 		 }
 	 }
 	 
-	 private void populateBuildingAttachement(Building building, BuildingAttachment attachment) {
+	 private void populateBuildingAttachment(BuildingDTO building, BuildingAttachment attachment) {
         
 		 if(attachment == null) {
 			 if(LOGGER.isInfoEnabled()) {
@@ -855,7 +800,7 @@ public class CommunityServiceImpl implements CommunityService {
 				 }
 			 } else {
 				 if(LOGGER.isWarnEnabled()) {
-					 LOGGER.warn("The content uri is empty, attchmentId=" + attachment.getId());
+					 LOGGER.warn("The content uri is empty, attachmentId=" + attachment.getId());
 				 }
 			 }
 		 }
@@ -866,15 +811,7 @@ public class CommunityServiceImpl implements CommunityService {
 	public BuildingDTO updateBuilding(UpdateBuildingAdminCommand cmd) {
 		
 		Building building = ConvertHelper.convert(cmd, Building.class);
-		building.setAddress(cmd.getAddress());
-		building.setAliasName(cmd.getAliasName());
-		building.setAreaSize(cmd.getAreaSize());
-		building.setCommunityId(cmd.getCommunityId());
-		building.setContact(cmd.getContact());
-		building.setDescription(cmd.getDescription());
-		building.setManagerUid(cmd.getManagerUid());
-		building.setName(cmd.getName());
-		building.setPosterUri(cmd.getPosterUri());
+
 		building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 		building.setNamespaceId(null == cmd.getNamespaceId() ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId());
 		if(StringUtils.isNotBlank(cmd.getGeoString())){
@@ -886,77 +823,79 @@ public class CommunityServiceImpl implements CommunityService {
 			String geohash = GeoHashUtils.encode(latitude, longitude);
 			building.setGeohash(geohash);
 		}
-		
-		User user = UserContext.current().getUser();
-		long userId = user.getId();
+		if(cmd.getEntryDate() != null) {
+			building.setEntryDate(new Timestamp(cmd.getEntryDate()));
+		}
+
+		if(StringUtils.isNotBlank(cmd.getBuildingNumber())){
+			checkBuildingNumberUnique(building.getId(), cmd.getBuildingNumber(), building.getCommunityId());
+		}
+		building.setBuildingNumber(cmd.getBuildingNumber());
+
+		Long userId = UserContext.currentUserId();
 
 		dbProvider.execute((TransactionStatus status) -> {
 			if (cmd.getId() == null) {
 
-				LOGGER.info("add building");
+				LOGGER.info("add building, cmd={}", cmd);
 				this.communityProvider.createBuilding(userId, building);
-				addGeneralFormInfo(cmd.getGeneralFormId(), cmd.getFormValues(), EntityType.BUILDING.getCode(),
-						building.getId(), cmd.getCustomFormFlag());
+
 			} else {
-				LOGGER.info("update building");
-				building.setId(cmd.getId());
+				LOGGER.info("update building, cmd={}", cmd);
 				Building b = this.communityProvider.findBuildingById(cmd.getId());
 				building.setCreatorUid(b.getCreatorUid());
 				building.setCreateTime(b.getCreateTime());
 				building.setNamespaceId(b.getNamespaceId());
 				this.communityProvider.updateBuilding(building);
 
-				generalFormValProvider.deleteGeneralFormVals(EntityType.BUILDING.getCode(), building.getId());
-				addGeneralFormInfo(cmd.getGeneralFormId(), cmd.getFormValues(), EntityType.BUILDING.getCode(),
-						building.getId(), cmd.getCustomFormFlag());
 			}
+			processBuildingAttachments(userId, cmd.getAttachments(), building);
+
 			return null;
 		});
-		processBuildingAttachments(userId, cmd.getAttachments(), building);
-		
-		populateBuilding(building);
 
 		BuildingDTO dto = ConvertHelper.convert(building, BuildingDTO.class);
 
-		populateFormInfo(dto);
+		populateBuilding(dto, building);
+
 		return dto;
-		
 	}
 
-	private void populateFormInfo(BuildingDTO dto) {
-		GetGeneralFormValuesCommand cmdValues = new GetGeneralFormValuesCommand();
-		cmdValues.setSourceType(EntityType.BUILDING.getCode());
-		cmdValues.setSourceId(dto.getId());
-		cmdValues.setOriginFieldFlag(NormalFlag.NEED.getCode());
-		List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmdValues);
-		dto.setFormValues(formValues);
-
-		if (LeasePromotionFlag.ENABLED.getCode() == dto.getCustomFormFlag()) {
-			LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(dto.getNamespaceId(),
-					dto.getCommunityId(), EntityType.COMMUNITY.getCode(), EntityType.BUILDING.getCode());
-			if (null != request) {
-				dto.setRequestFormId(request.getSourceId());
-			}
-		}
-	}
-
-	private void addGeneralFormInfo(Long generalFormId, List<PostApprovalFormItem> formValues, String sourceType,
-		Long sourceId, Byte customFormFlag) {
-		if (LeasePromotionFlag.ENABLED.getCode() == customFormFlag) {
-			addGeneralFormValuesCommand cmd = new addGeneralFormValuesCommand();
-			cmd.setGeneralFormId(generalFormId);
-			cmd.setValues(formValues);
-			cmd.setSourceId(sourceId);
-			cmd.setSourceType(sourceType);
-			generalFormService.addGeneralFormValues(cmd);
-		}
-	}
 	@Override
 	public void deleteBuilding(DeleteBuildingAdminCommand cmd) {
 		
 		Building building = this.communityProvider.findBuildingById(cmd.getBuildingId());
-		
-		this.communityProvider.deleteBuilding(building);
+//		1.若楼栋或楼栋下的门牌关联了合同或其他业务（如车辆、服务等），则
+//		不允许删除；
+//		2.若楼栋或楼栋下的门牌没有做任何关联，则删除楼栋时，连同楼栋下的
+//		子节点一同删除；
+		dbProvider.execute((TransactionStatus status) -> {
+			if(building != null) {
+				List<Contract> contracts = contractProvider.listContractByBuildingName(building.getName(), building.getCommunityId());
+				if(contracts != null && contracts.size() > 0) {
+					contracts.forEach(contract -> {
+						if(contract.getStatus() == ContractStatus.ACTIVE.getCode() || contract.getStatus() == ContractStatus.WAITING_FOR_LAUNCH.getCode()
+								|| contract.getStatus() == ContractStatus.WAITING_FOR_APPROVAL.getCode() || contract.getStatus() == ContractStatus.APPROVE_QUALITIED.getCode()
+								|| contract.getStatus() == ContractStatus.EXPIRING.getCode() || contract.getStatus() == ContractStatus.DRAFT.getCode()) {
+							LOGGER.error("the building has attach to contract. address id: {}", cmd.getBuildingId());
+							throw RuntimeErrorException.errorWith(BuildingServiceErrorCode.SCOPE, BuildingServiceErrorCode.ERROR_BUILDING_HAS_CONTRACT,
+									"the building has attach to contract");
+						}
+					});
+				}
+				List<ApartmentDTO> apartments = addressProvider.listApartmentsByBuildingName(building.getCommunityId(), building.getName() , 0 , Integer.MAX_VALUE-1);
+				if(apartments != null && apartments.size() > 0) {
+					apartments.forEach(apartmentDTO -> {
+						DeleteApartmentCommand command = new DeleteApartmentCommand();
+						command.setId(apartmentDTO.getAddressId());
+						propertyMgrService.deleteApartment(command);
+					});
+				}
+				this.communityProvider.deleteBuilding(building);
+			}
+			return null;
+		});
+
 	}
 
 
@@ -966,13 +905,12 @@ public class CommunityServiceImpl implements CommunityService {
 		return isValid;
 	}
 	
-    private void processBuildingAttachments(long userId, List<AttachmentDescriptor> attachmentList, Building building) {
-        List<BuildingAttachment> results = null;
-        
+    private void processBuildingAttachments(Long userId, List<AttachmentDescriptor> attachmentList, Building building) {
+
         this.communityProvider.deleteBuildingAttachmentsByBuildingId(building.getId());
         
         if(attachmentList != null) {
-            results = new ArrayList<BuildingAttachment>();
+			List<BuildingAttachment> results = new ArrayList<BuildingAttachment>();
             
             BuildingAttachment attachment = null;
             for(AttachmentDescriptor descriptor : attachmentList) {
@@ -988,8 +926,7 @@ public class CommunityServiceImpl implements CommunityService {
                 	this.communityProvider.createBuildingAttachment(attachment);
                     results.add(attachment);
                 } catch(Exception e) {
-                    LOGGER.error("Failed to save the attachment, userId=" + userId 
-                        + ", attachment=" + attachment, e);
+                    LOGGER.error("Failed to save the attachment, userId={}, attachment={}", userId, attachment, e);
                 }
             }
             
@@ -1210,7 +1147,8 @@ public class CommunityServiceImpl implements CommunityService {
 				building.setCommunityId(communityId);
 				building.setDescription(data.getDescription());
 				building.setTrafficDescription(data.getTrafficDescription());
-				
+				building.setNamespaceBuildingType(data.getNamespaceBuildingType());
+				building.setNamespaceBuildingToken(data.getNamespaceBuildingToken());
 				if (StringUtils.isNotEmpty(data.getLongitudeLatitude())) {
 					String[] temp = data.getLongitudeLatitude().replace("，", ",").replace("、", ",").split(",");
 					building.setLongitude(Double.parseDouble(temp[0]));
@@ -1242,14 +1180,18 @@ public class CommunityServiceImpl implements CommunityService {
 					String[] temp = data.getLongitudeLatitude().replace("，", ",").replace("、", ",").split(",");
 					building.setLongitude(Double.parseDouble(temp[0]));
 					building.setLatitude(Double.parseDouble(temp[1]));
+				} else {
+					building.setLongitude(null);
+					building.setLatitude(null);
 				}
-				
+
+				building.setNamespaceBuildingType(data.getNamespaceBuildingType());
+				building.setNamespaceBuildingToken(data.getNamespaceBuildingToken());
 				building.setNamespaceId(org.getNamespaceId());
 				building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 				
 				communityProvider.updateBuilding(building);
 			}
-			
 		}
 		return list;
 	}
@@ -1313,6 +1255,9 @@ public class CommunityServiceImpl implements CommunityService {
 				data.setContactor(trim(r.getG()));
 				data.setPhone(trim(r.getH()));
 				data.setDescription(trim(r.getI()));
+				//加上来源第三方和在第三方的唯一标识 没有则不填 by xiongying20170814
+				data.setNamespaceBuildingType(trim(r.getJ()));
+				data.setNamespaceBuildingToken(trim(r.getK()));
 				list.add(data);
 			}
 		}
@@ -1605,16 +1550,23 @@ public class CommunityServiceImpl implements CommunityService {
         }).collect(Collectors.toList());*/
 	}
 
+	@Override
+	public CommunityUserAddressResponse listUserBycommunityIdV2(ListCommunityUsersCommand cmd){
+		if(AuthFlag.UNAUTHORIZED == AuthFlag.fromCode(cmd.getIsAuth())){
+			return  listUnAuthUsersForResidential(cmd);
+		}else{
+			return listUserBycommunityId(cmd);
+		}
+	}
 
 	@Override
 	public CommunityUserAddressResponse listUserBycommunityId(ListCommunityUsersCommand cmd){
 		Long communityId = cmd.getCommunityId();
 		
 		CommunityUserAddressResponse res = new CommunityUserAddressResponse();
-		List<CommunityUserAddressDTO> dtos = new ArrayList<CommunityUserAddressDTO>();
+		List<CommunityUserAddressDTO> dtos = new ArrayList<>();
 		
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
 		
 		List<Group> groups = groupProvider.listGroupByCommunityId(communityId, (loc, query) -> {
             Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
@@ -1626,48 +1578,56 @@ public class CommunityServiceImpl implements CommunityService {
 		for (Group group : groups) {
 			groupIds.add(group.getId());
 		}
-		
-		if(StringUtils.isNotBlank(cmd.getKeywords())){
-			UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId , cmd.getKeywords());
-			
-			if(null == identifier){
-				return res;
-			}
-			
-			List<UserGroup> userGroups = userProvider.listUserGroups(identifier.getOwnerUid(), GroupDiscriminator.FAMILY.getCode());
-			
-			if(null == userGroups || userGroups.size() == 0){
-				return res;
-			}
-			
-			for (UserGroup userGroup : userGroups) {
-				if(groupIds.contains(userGroup.getGroupId())){
-					User user = userProvider.findUserById(identifier.getOwnerUid());
-					CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
-					dto.setUserId(user.getId());
-					dto.setUserName(user.getNickName());
-					dto.setNikeName(user.getNickName());
-					dto.setGender(user.getGender());
-					dto.setPhone(identifier.getIdentifierToken());
-					dto.setIsAuth(2);
-					if(GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.ACTIVE)
-						dto.setIsAuth(1);
-					dtos.add(dto);
-					break;
-				}
-			}
-			res.setDtos(dtos);
-			return res;
-		}
+		//哪有加了一个keyword搜索条件就另写一段代码的 edit by yj 20171101
+//		if(StringUtils.isNotBlank(cmd.getKeywords())){
+//			UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId , cmd.getKeywords());
+//
+//			if(null == identifier){
+//				return res;
+//			}
+//
+//			List<UserGroup> userGroups = userProvider.listUserGroups(identifier.getOwnerUid(), GroupDiscriminator.FAMILY.getCode());
+//
+//			if(null == userGroups || userGroups.size() == 0){
+//				return res;
+//			}
+//
+//			User user = userProvider.findUserById(identifier.getOwnerUid());
+//			CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
+//			dto.setUserId(user.getId());
+//			dto.setUserName(user.getNickName());
+//			dto.setNikeName(user.getNickName());
+//			dto.setApplyTime(user.getCreateTime());
+//			dto.setGender(user.getGender());
+//			dto.setPhone(identifier.getIdentifierToken());
+//			dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
+//			if(NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.WX){
+//				dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+//			}
+//			//添加地址信息
+//			addGroupAddressDto(dto, userGroups);
+//
+//			//最新活跃时间 add by sfyan 20170620
+//			List<UserActivity> userActivities = userActivityProvider.listUserActivetys(user.getId(), 1);
+//			if(userActivities.size() > 0){
+//				dto.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
+//			}
+//
+//			dtos.add(dto);
+//			res.setDtos(dtos);
+//			return res;
+//		}
+
+
 		
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds,locator,pageSize,(loc, query) -> {
 			Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
-			if(cmd.getIsAuth() == 1){
+			if(AuthFlag.fromCode(cmd.getIsAuth()) == AuthFlag.AUTHENTICATED){
 				c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()));
-			}else if(cmd.getIsAuth() == 2){
+			}else if(AuthFlag.fromCode(cmd.getIsAuth()) == AuthFlag.PENDING_AUTHENTICATION){
 				Condition cond = Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.WAITING_FOR_ACCEPTANCE.getCode());
 				cond = cond.or(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode()));
 				c = c.and(cond);
@@ -1675,11 +1635,29 @@ public class CommunityServiceImpl implements CommunityService {
 				c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.ne(GroupMemberStatus.INACTIVE.getCode()));
 			}
             query.addConditions(c);
+
+			if(UserSourceType.WEIXIN == UserSourceType.fromCode(cmd.getUserSourceType())){
+				query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode()));
+			}else if(UserSourceType.APP == UserSourceType.fromCode(cmd.getUserSourceType())){
+				query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.isNull());
+			}
+
+			if(!StringUtils.isEmpty(cmd.getKeywords())){
+				Condition cond = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%" + cmd.getKeywords() + "%");
+				cond = cond.or(Tables.EH_USERS.NICK_NAME.like("%" + cmd.getKeywords() + "%"));
+				cond = cond.or(Tables.EH_ADDRESSES.CITY_NAME.like("%" + cmd.getKeywords() + "%"));
+				cond = cond.or(Tables.EH_ADDRESSES.AREA_NAME.like("%" + cmd.getKeywords() + "%"));
+				cond = cond.or(Tables.EH_ADDRESSES.BUILDING_NAME.like("%" + cmd.getKeywords() + "%"));
+				cond = cond.or(Tables.EH_ADDRESSES.APARTMENT_NAME.like("%" + cmd.getKeywords() + "%"));
+				query.addConditions(cond);
+			}
+
             if(null != locator.getAnchor())
             	query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.lt(locator.getAnchor()));
             //query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
 			query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID.desc());
 			query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.desc());
+			query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
             return query;
         });
 		
@@ -1687,19 +1665,34 @@ public class CommunityServiceImpl implements CommunityService {
 		List<Long> userIdList = new ArrayList<Long>();
 		for (GroupMember member : groupMembers) {
 			User user = userProvider.findUserById(member.getMemberId());
-			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(member.getMemberId(), IdentifierType.MOBILE.getCode());
+
 			if(null != user && !userIdList.contains(user.getId())){
+				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(member.getMemberId(), IdentifierType.MOBILE.getCode());
+
 				CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
 				dto.setUserId(user.getId());
-				dto.setUserName(user.getNickName());
-				dto.setNikeName(user.getNickName());
+				//dto.setUserName(user.getNickName());
+				dto.setNickName(user.getNickName());
 				dto.setGender(user.getGender());
+				dto.setApplyTime(user.getCreateTime());
 				if(null != userIdentifier)
 					dto.setPhone(userIdentifier.getIdentifierToken());
-				dto.setIsAuth(2);
-				if(GroupMemberStatus.fromCode(member.getMemberStatus()) == GroupMemberStatus.ACTIVE)
-					dto.setIsAuth(1);
-				
+				dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
+
+				if(NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.WX){
+					dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+				}
+
+				List<UserGroup> userGroups = userProvider.listUserGroups(user.getId(), GroupDiscriminator.FAMILY.getCode());
+				//添加地址信息
+				addGroupAddressDto(dto, userGroups);
+
+				//最新活跃时间 add by sfyan 20170620
+				List<UserActivity> userActivities = userActivityProvider.listUserActivetys(user.getId(), 1);
+				if(userActivities.size() > 0){
+					dto.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
+				}
+
 				userIdList.add(user.getId());
 				dtos.add(dto);
 			}
@@ -1708,6 +1701,33 @@ public class CommunityServiceImpl implements CommunityService {
 		res.setDtos(dtos);
 		res.setNextPageAnchor(locator.getAnchor());
 		return res;
+	}
+
+
+	private void addGroupAddressDto(CommunityUserAddressDTO dto, List<UserGroup> userGroups){
+		List<AddressDTO> addressDtos = new ArrayList<>();
+		if(userGroups == null){
+			dto.setAddressDtos(addressDtos);
+			return;
+		}
+
+		for (UserGroup userGroup : userGroups) {
+			Address groupAddress = addressProvider.findGroupAddress(userGroup.getGroupId());
+			AddressDTO addressDTO = ConvertHelper.convert(groupAddress, AddressDTO.class);
+			if(addressDTO != null){
+				if(GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.ACTIVE){
+					addressDTO.setUserAuth(AuthFlag.AUTHENTICATED.getCode().byteValue());
+					dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
+				}else if(GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.WAITING_FOR_ACCEPTANCE || GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.WAITING_FOR_APPROVAL){
+					addressDTO.setUserAuth(AuthFlag.PENDING_AUTHENTICATION.getCode().byteValue());
+				}else {
+					addressDTO.setUserAuth(AuthFlag.UNAUTHORIZED.getCode().byteValue());
+				}
+			}
+
+			addressDtos.add(addressDTO);
+		}
+		dto.setAddressDtos(addressDtos);
 	}
 	
 	@Override
@@ -1736,7 +1756,7 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 			
 			dto.setUserName(organizationOwner.getContactName());
-			dto.setNikeName(organizationOwner.getContactName());
+			dto.setNickName(organizationOwner.getContactName());
 			dto.setPhone(organizationOwner.getContactToken());
 			dtos.add(dto);
 		}
@@ -1759,32 +1779,44 @@ public class CommunityServiceImpl implements CommunityService {
 				if(null != address)
 					addressDtos.add(ConvertHelper.convert(address, AddressDTO.class));
 			}
+			dto.setAddressDtos(addressDtos);
 			return dto;
 		}
 		User user = userProvider.findUserById(userIdentifier.getOwnerUid());
 		List<UserGroup> usreGroups = userProvider.listUserGroups(user.getId(), GroupDiscriminator.FAMILY.getCode());
-		List<AddressDTO> addressDtos = new ArrayList<AddressDTO>();
-		if(null != usreGroups){
-			for (UserGroup userGroup : usreGroups) {
-				Group group = groupProvider.findGroupById(userGroup.getGroupId());
-				if(null != group && group.getFamilyCommunityId().equals(cmd.getCommunityId())){
-					Address address = addressProvider.findAddressById(group.getFamilyAddressId());
-					if(null != address){
-						address.setMemberStatus(userGroup.getMemberStatus());
-						addressDtos.add(ConvertHelper.convert(address, AddressDTO.class));
-					}
-				}
-			}
-		}
+		//List<AddressDTO> addressDtos = new ArrayList<AddressDTO>();
+
+		dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
+		//添加地址信息
+		addGroupAddressDto(dto, usreGroups);
+
+//		if(null != usreGroups){
+//			for (UserGroup userGroup : usreGroups) {
+//				Group group = groupProvider.findGroupById(userGroup.getGroupId());
+//				if(null != group && group.getFamilyCommunityId().equals(cmd.getCommunityId())){
+//					Address address = addressProvider.findAddressById(group.getFamilyAddressId());
+//					if(null != address){
+//						address.setMemberStatus(userGroup.getMemberStatus());
+//						addressDtos.add(ConvertHelper.convert(address, AddressDTO.class));
+//					}
+//				}
+//			}
+//		}
 		if(null != user){
 			dto.setUserId(user.getId());
-			dto.setUserName(user.getNickName());
+			//dto.setUserName(user.getNickName());
+			dto.setNickName(user.getNickName());
 			dto.setGender(user.getGender());
 			dto.setPhone(null != userIdentifier ? userIdentifier.getIdentifierToken() : null);
 			dto.setApplyTime(user.getCreateTime());
-			dto.setAddressDtos(addressDtos);
+			//dto.setAddressDtos(addressDtos);
+
+			//最新活跃时间 add by sfyan 20170620
+			List<UserActivity> userActivities = userActivityProvider.listUserActivetys(user.getId(), 1);
+			if(userActivities.size() > 0){
+				dto.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
+			}
 		}
-		
 		return dto;
 	}
 	
@@ -1795,17 +1827,25 @@ public class CommunityServiceImpl implements CommunityService {
 		User user = userProvider.findUserById(cmd.getUserId());
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(cmd.getUserId(), IdentifierType.MOBILE.getCode());
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembers(user.getId());
-		
+
+		dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
+
 		List<OrganizationDetailDTO> orgDtos = new ArrayList<OrganizationDetailDTO>();
 		if(null != members){
-
 			orgDtos.addAll(populateOrganizationDetails(members));
+
+			for (OrganizationMember member : members) {
+				if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())) {
+					dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
+				}
+			}
 		}
 
 
 		if(null != user){
 			dto.setUserId(user.getId());
-			dto.setUserName(user.getNickName());
+			//dto.setUserName(user.getNickName());
+			dto.setNickName(user.getNickName());
 			dto.setGender(user.getGender());
 			dto.setPhone(null != userIdentifier ? userIdentifier.getIdentifierToken() : null);
 			dto.setApplyTime(user.getCreateTime());
@@ -1830,6 +1870,12 @@ public class CommunityServiceImpl implements CommunityService {
 					logDTO.setOperatorNickName(operator.getNickName());
 				dto.getMemberLogDTOs().add(logDTO);
 			}
+		}
+
+		//最新活跃时间 add by sfyan 20170620
+		List<UserActivity> userActivities = userActivityProvider.listUserActivetys(cmd.getUserId(), 1);
+		if(userActivities.size() > 0){
+			dto.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
 		}
 		return dto;
 	}
@@ -1867,6 +1913,8 @@ public class CommunityServiceImpl implements CommunityService {
 
 			OrganizationDetailDTO detailDto = ConvertHelper.convert(detail, OrganizationDetailDTO.class);
 
+			detailDto.setOrganizationMemberName(member.getContactName());
+
 			List<OrganizationAddress> orgAddresses = organizationProvider.findOrganizationAddressByOrganizationId(detailDto.getOrganizationId());
 
 			List<AddressDTO> addressDtos = new ArrayList<AddressDTO>();
@@ -1881,6 +1929,16 @@ public class CommunityServiceImpl implements CommunityService {
 
 			if (null != organization && organization.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())
 					&& OrganizationStatus.fromCode(organization.getStatus()) == OrganizationStatus.ACTIVE) {
+
+				//增加返回用户在企业中是否是高管、职位的信息  add by yanjun 20171017
+				UserOrganizations userOrg = organizationProvider.findActiveAndWaitUserOrganizationByUserIdAndOrgId(member.getTargetId(), detailDto.getOrganizationId());
+				if(userOrg != null){
+					CommunityUserOrgDetailDTO communityUserOrgDetailDTO = new CommunityUserOrgDetailDTO();
+					communityUserOrgDetailDTO.setDetailId(userOrg.getId());
+					communityUserOrgDetailDTO.setExecutiveFlag(userOrg.getExecutiveTag());
+					communityUserOrgDetailDTO.setPositionTag(userOrg.getPositionTag());
+					detailDto.setCommunityUserOrgDetailDTO(communityUserOrgDetailDTO);
+				}
 
 				set.add(detailDto);
 			}
@@ -1980,7 +2038,17 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		return organizationIds;
 	}
-	
+
+	@Override
+	public CommunityUserResponse listUserCommunitiesV2(
+			ListCommunityUsersCommand cmd) {
+		if(AuthFlag.UNAUTHORIZED == AuthFlag.fromCode(cmd.getIsAuth())){
+			return  listUnAuthUsersForCommercial(cmd);
+		}else{
+			return listUserCommunities(cmd);
+		}
+	}
+
 	@Override
 	public CommunityUserResponse listUserCommunities(
 			ListCommunityUsersCommand cmd) {
@@ -2001,13 +2069,22 @@ public class CommunityServiceImpl implements CommunityService {
 					query.addConditions(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
 				}
 
+
+				if(UserSourceType.WEIXIN == UserSourceType.fromCode(cmd.getUserSourceType())){
+					query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode()));
+				}else if(UserSourceType.APP == UserSourceType.fromCode(cmd.getUserSourceType())){
+					query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.isNull());
+				}
+
 				if(null != cmd.getCommunityId()){
 					query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
 				}
 
 				if(!StringUtils.isEmpty(cmd.getKeywords())){
-					Condition cond = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(cmd.getKeywords());
+					Condition cond = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%" + cmd.getKeywords() + "%");
 					cond = cond.or(Tables.EH_USERS.NICK_NAME.like("%" + cmd.getKeywords() + "%"));
+					cond = cond.or(Tables.EH_ORGANIZATIONS.NAME.like("%" + cmd.getKeywords() + "%"));
+					cond = cond.or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%" + cmd.getKeywords() + "%"));
 					query.addConditions(cond);
 				}
 
@@ -2015,20 +2092,39 @@ public class CommunityServiceImpl implements CommunityService {
 					query.addConditions(Tables.EH_USERS.GENDER.eq(cmd.getGender()));
 				}
 
-				if(null != cmd.getExecutiveFlag()){
-					query.addConditions(Tables.EH_USERS.EXECUTIVE_TAG.eq(cmd.getExecutiveFlag()));
+				if(ExecutiveFlag.fromCode(cmd.getExecutiveFlag()) == ExecutiveFlag.YES){
+					query.addConditions(Tables.EH_USER_ORGANIZATIONS.EXECUTIVE_TAG.eq(cmd.getExecutiveFlag()));
 				}
 
-				if(AuthFlag.YES == AuthFlag.fromCode(cmd.getIsAuth())){
+				if(AuthFlag.AUTHENTICATED == AuthFlag.fromCode(cmd.getIsAuth())){
 					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(UserOrganizationStatus.ACTIVE.getCode()));
+				}else if(AuthFlag.PENDING_AUTHENTICATION == AuthFlag.fromCode(cmd.getIsAuth())){
+					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(UserOrganizationStatus.WAITING_FOR_APPROVAL.getCode()));
+				}else if(AuthFlag.UNAUTHORIZED == AuthFlag.fromCode(cmd.getIsAuth())){
+					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.isNull());
 				}
+
+				if(cmd.getStartTime() != null){
+					query.addConditions(Tables.EH_USERS.CREATE_TIME.ge(new Timestamp(cmd.getStartTime())));
+				}
+				if(cmd.getEndTime() != null){
+					query.addConditions(Tables.EH_USERS.CREATE_TIME.le(new Timestamp(cmd.getEndTime())));
+				}
+
 
 				query.addGroupBy(Tables.EH_USERS.ID);
 
 				Condition cond = Tables.EH_USERS.ID.isNotNull();
-				if(AuthFlag.NO == AuthFlag.fromCode(cmd.getIsAuth())){
-					cond = cond.and("`eh_user_organizations`.`status` is null or (`eh_user_organizations`.`status` <> " + UserOrganizationStatus.ACTIVE.getCode() + " and `eh_users`.`id` not in (select user_id from eh_user_organizations where status = " + UserOrganizationStatus.ACTIVE.getCode() + "))");
+				if(AuthFlag.UNAUTHORIZED == AuthFlag.fromCode(cmd.getIsAuth())){
+					cond = cond.and(" `eh_users`.`id` not in (select user_id from eh_user_organizations where status = " + UserOrganizationStatus.ACTIVE.getCode() + " or status = " + UserOrganizationStatus.WAITING_FOR_APPROVAL.getCode() + ")");
+				}else if(AuthFlag.PENDING_AUTHENTICATION == AuthFlag.fromCode(cmd.getIsAuth())){
+					cond = cond.and(" `eh_users`.`id` not in (select user_id from eh_user_organizations where status = " + UserOrganizationStatus.ACTIVE.getCode() + ")");
 				}
+
+				if(ExecutiveFlag.fromCode(cmd.getExecutiveFlag()) == ExecutiveFlag.NO){
+					cond = cond.and(" `eh_users`.`id` not in (select user_id from eh_user_organizations where executive_tag = " + ExecutiveFlag.YES.getCode()  + ")");
+				}
+
 				query.addHaving(cond);
 
 				return query;
@@ -2040,7 +2136,8 @@ public class CommunityServiceImpl implements CommunityService {
 
 		for(UserOrganizations r: users){
 			CommunityUserDto dto = ConvertHelper.convert(r, CommunityUserDto.class);
-			dto.setUserName(r.getNickName());
+			//dto.setUserName(r.getNickName());
+			dto.setNickName(r.getNickName());
 			dto.setPhone(r.getPhoneNumber());
 			dto.setApplyTime(r.getRegisterTime());
 			dto.setIdentityNumber(r.getIdentityNumberTag());
@@ -2052,24 +2149,34 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 
 			LOGGER.debug("user,userName:{}/userPhone:{}/userStatus:{}",r.getNickName(), r.getPhoneNumber(),r.getStatus());
-			dto.setIsAuth(AuthFlag.NO.getCode());
+			dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
 
 			if (UserOrganizationStatus.WAITING_FOR_APPROVAL == UserOrganizationStatus.fromCode(r.getStatus()) || UserOrganizationStatus.ACTIVE == UserOrganizationStatus.fromCode(r.getStatus())) {
 				List<OrganizationMember> ms = new ArrayList<>();
 				List<OrganizationMember> members = organizationProvider.listOrganizationMembers(r.getUserId());
+				dto.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
 				for (OrganizationMember member : members) {
 					if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())) {
-						dto.setOrganizationMemberName(member.getContactName());
-						ms.add(member);
-						dto.setIsAuth(AuthFlag.YES.getCode());
+						dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
 					}
+					//dto.setOrganizationMemberName(member.getContactName());
+					ms.add(member);
 				}
 				List<OrganizationDetailDTO> organizations = new ArrayList<>();
 				organizations.addAll(populateOrganizationDetails(ms));
 				dto.setOrganizations(organizations);
 			} else {
-				dto.setIsAuth(AuthFlag.NO.getCode());
+				dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
 			}
+
+			User user = userProvider.findUserById(r.getUserId());
+			if(user != null && NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.WX){
+				dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+			}
+
+//			if(null != dto.getPhone()){
+//				dto.setUserSourceType(UserSourceType.APP.getCode());
+//			}
 			userCommunities.add(dto);
 		}
 		LOGGER.debug("Get user detail list time:{}", System.currentTimeMillis() - time);
@@ -2078,13 +2185,124 @@ public class CommunityServiceImpl implements CommunityService {
 		return res;
 	}
 
+	private CommunityUserResponse listUnAuthUsersForCommercial(ListCommunityUsersCommand cmd){
+		CommunityUserResponse response = new CommunityUserResponse();
+		//未认证的用户就不是高管，反正后面就是当这个参数没有。就在这限制一下吧，不然要是前端没限制这个条件会吓到测试
+		if(ExecutiveFlag.fromCode(cmd.getExecutiveFlag()) == ExecutiveFlag.YES){
+			return response;
+		}
+		List<CommunityUserDto> dtos = new ArrayList<>();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1, CommunityType.COMMERCIAL.getCode(), cmd.getUserSourceType(), cmd.getKeywords());
+		if(users != null){
+			if(users.size() > pageSize){
+				users.remove(pageSize);
+				response.setNextPageAnchor(users.get(pageSize -1).getId());
+			}
+			for(User u: users){
+				CommunityUserDto dto = new CommunityUserDto();
+				//dto.setUserName(u.getNickName());
+				dto.setNickName(u.getNickName());
+				dto.setUserId(u.getId());
+				// dto.setPhone(r.getPhoneNumber());
+				dto.setApplyTime(u.getCreateTime());
+				dto.setIdentityNumber(u.getIdentityNumberTag());
+				dto.setGender(u.getGender());
+				dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
+				if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
+					dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+				}
+
+				//最新活跃时间 add by sfyan 20170620
+				List<UserActivity> userActivities = userActivityProvider.listUserActivetys(u.getId(), 1);
+				if(userActivities.size() > 0){
+					dto.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
+				}
+
+				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(u.getId(), IdentifierType.MOBILE.getCode());
+				if(userIdentifier != null){
+					dto.setPhone(userIdentifier.getIdentifierToken());
+				}
+
+				dtos.add(dto);
+			}
+
+			response.setUserCommunities(dtos);
+		}
+
+		return response;
+	}
+
+	private CommunityUserAddressResponse listUnAuthUsersForResidential(ListCommunityUsersCommand cmd){
+		CommunityUserAddressResponse response = new CommunityUserAddressResponse();
+
+		//未认证的用户就不是高管，反正后面就是当这个参数没有。就在这限制一下吧，不然要是前端没限制这个条件会吓到测试
+		if(ExecutiveFlag.fromCode(cmd.getExecutiveFlag()) == ExecutiveFlag.YES){
+			return response;
+		}
+		List<CommunityUserAddressDTO> dtos = new ArrayList<>();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1, CommunityType.RESIDENTIAL.getCode(), cmd.getUserSourceType(), cmd.getKeywords());
+		if(users != null){
+			if(users.size() > pageSize){
+				users.remove(pageSize);
+				response.setNextPageAnchor(users.get(pageSize -1).getId());
+			}
+			for(User u: users){
+				CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
+				//dto.setUserName(u.getNickName());
+				dto.setNickName(u.getNickName());
+				// dto.setPhone(r.getPhoneNumber());
+				dto.setApplyTime(u.getCreateTime());
+				dto.setIdentityNumber(u.getIdentityNumberTag());
+				dto.setGender(u.getGender());
+				dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
+				if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
+					dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+				}
+
+				//最新活跃时间 add by sfyan 20170620
+				List<UserActivity> userActivities = userActivityProvider.listUserActivetys(u.getId(), 1);
+				if(userActivities.size() > 0){
+					dto.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
+				}
+
+				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(u.getId(), IdentifierType.MOBILE.getCode());
+				if(userIdentifier != null){
+					dto.setPhone(userIdentifier.getIdentifierToken());
+				}
+
+				dtos.add(dto);
+			}
+
+
+			response.setDtos(dtos);
+		}
+
+
+		return response;
+	}
+
 	@Override
 	public void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpServletResponse response) {
 		//暂时定成查询1000条记录，且总是从第一条开始导出 by 20170630
 		cmd.setPageSize(1000);
 		cmd.setPageAnchor(null);
 
-		CommunityUserResponse resp = listUserCommunities(cmd);
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+
+		if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.RESIDENTIAL){
+			exportCommunityUsersForResidential(cmd, response);
+		}else {
+			exportCommunityUsersForCommercial(cmd, response);
+		}
+
+	}
+
+	public void exportCommunityUsersForCommercial(ListCommunityUsersCommand cmd, HttpServletResponse response) {
+
+		CommunityUserResponse resp = listUserCommunitiesV2(cmd);
+
 		List<CommunityUserDto> dtos = resp.getUserCommunities();
 
 		Workbook wb = new XSSFWorkbook();
@@ -2099,14 +2317,17 @@ public class CommunityServiceImpl implements CommunityService {
 		sheet.setDefaultColumnWidth(20);
 		sheet.setDefaultRowHeightInPoints(20);
 		Row row = sheet.createRow(0);
-		row.createCell(0).setCellValue("昵称");
-		row.createCell(1).setCellValue("性别");
+		row.createCell(0).setCellValue("姓名");
+		row.createCell(1).setCellValue("昵称");
 		row.createCell(2).setCellValue("手机号");
-		row.createCell(3).setCellValue("注册时间");
-		row.createCell(4).setCellValue("认证状态");
-		row.createCell(5).setCellValue("企业");
-		row.createCell(6).setCellValue("是否高管");
-		row.createCell(7).setCellValue("职位");
+		row.createCell(3).setCellValue("性别");
+		row.createCell(4).setCellValue("企业");
+		row.createCell(5).setCellValue("是否高管");
+		row.createCell(6).setCellValue("职位");
+		row.createCell(7).setCellValue("用户状态");
+		row.createCell(8).setCellValue("社交账号绑定");
+		row.createCell(9).setCellValue("注册时间");
+		row.createCell(10).setCellValue("最近活跃时间");
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -2116,24 +2337,58 @@ public class CommunityServiceImpl implements CommunityService {
 			CommunityUserDto dto = dtos.get(i);
 			List<OrganizationDetailDTO> organizations = dto.getOrganizations();
 
+			String name = "";
 			StringBuilder enterprises = new StringBuilder();
+			StringBuilder executiveFlag = new StringBuilder();
+			StringBuilder positionFlag = new StringBuilder();
             if (organizations != null) {
-                for (int k = 0,l = organizations.size(); k < l; k++) {
-                    if (k == l-1)
-                        enterprises.append(organizations.get(k).getDisplayName());
-                    else
-                        enterprises.append(organizations.get(k).getDisplayName()).append(",");
+                for (int k = 0; k < organizations.size(); k++) {
+					OrganizationDetailDTO org = organizations.get(k);
+
+					if(StringUtils.isNotEmpty(org.getOrganizationMemberName()) && StringUtils.isEmpty(name)){
+						name = org.getOrganizationMemberName();
+					}
+
+					enterprises.append(organizations.get(k).getDisplayName() + ",");
+
+					//是否高管、职位
+					if(org.getCommunityUserOrgDetailDTO() != null){
+						if(org.getCommunityUserOrgDetailDTO().getExecutiveFlag() == null || org.getCommunityUserOrgDetailDTO().getExecutiveFlag() == 0){
+							executiveFlag.append("否,");
+						}else {
+							executiveFlag.append("是,");
+						}
+
+						if(org.getCommunityUserOrgDetailDTO().getPositionTag() == null || org.getCommunityUserOrgDetailDTO().getPositionTag().equals("")){
+							positionFlag.append("#,");
+						}else {
+							positionFlag.append(org.getCommunityUserOrgDetailDTO().getPositionTag() + ",");
+						}
+
+					}else {
+						executiveFlag.append("#,");
+						positionFlag.append("#,");
+					}
                 }
             }
 
-			tempRow.createCell(0).setCellValue(dto.getUserName());
-			tempRow.createCell(1).setCellValue(UserGender.fromCode(dto.getGender()).getText());
+            if(enterprises != null && enterprises.length() > 0 && executiveFlag != null && executiveFlag.length() > 0 && positionFlag != null && positionFlag.length() > 0){
+				enterprises.deleteCharAt(enterprises.length() - 1);
+				executiveFlag.deleteCharAt(executiveFlag.length() - 1);
+				positionFlag.deleteCharAt(positionFlag.length() - 1);
+			}
+
+			tempRow.createCell(0).setCellValue(name);
+			tempRow.createCell(1).setCellValue(dto.getNickName());
 			tempRow.createCell(2).setCellValue(dto.getPhone());
-			tempRow.createCell(3).setCellValue(null != dto.getApplyTime() ? sdf.format(dto.getApplyTime()) : "");
-			tempRow.createCell(4).setCellValue(dto.getIsAuth() == 1 ? "认证" : "非认证");
-			tempRow.createCell(5).setCellValue(enterprises.toString());
-			tempRow.createCell(6).setCellValue(null == dto.getExecutiveFlag() ? "否" : (dto.getExecutiveFlag() == 0 ? "否" : "是"));
-			tempRow.createCell(7).setCellValue(null == dto.getPosition() ? "无" : dto.getPosition());
+			tempRow.createCell(3).setCellValue(UserGender.fromCode(dto.getGender()).getText());
+			tempRow.createCell(4).setCellValue(enterprises.toString());
+			tempRow.createCell(5).setCellValue(executiveFlag.toString());
+			tempRow.createCell(6).setCellValue(positionFlag.toString());
+			tempRow.createCell(7).setCellValue(AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.AUTHENTICATED ? "认证" : AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.PENDING_AUTHENTICATION ? "待认证" : "非认证");
+			tempRow.createCell(8).setCellValue(UserSourceType.fromCode(dto.getUserSourceType()) == UserSourceType.WEIXIN ? "微信": "无");
+			tempRow.createCell(9).setCellValue(null != dto.getApplyTime() ? sdf.format(dto.getApplyTime()) : "");
+			tempRow.createCell(10).setCellValue(null != dto.getRecentlyActiveTime() ? sdf.format(dto.getRecentlyActiveTime()) : "");
 
 		}
 		ByteArrayOutputStream out = null;
@@ -2149,97 +2404,282 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 
+	public void exportCommunityUsersForResidential(ListCommunityUsersCommand cmd, HttpServletResponse response) {
+
+		CommunityUserAddressResponse resp = listUserBycommunityIdV2(cmd);
+
+		List<CommunityUserAddressDTO> dtos = resp.getDtos();
+
+		Workbook wb = new XSSFWorkbook();
+
+		Font font = wb.createFont();
+		font.setFontName("黑体");
+		font.setFontHeightInPoints((short) 16);
+		CellStyle style = wb.createCellStyle();
+		style.setFont(font);
+
+		Sheet sheet = wb.createSheet("parkingRechargeOrders");
+		sheet.setDefaultColumnWidth(20);
+		sheet.setDefaultRowHeightInPoints(20);
+		Row row = sheet.createRow(0);
+		row.createCell(0).setCellValue("姓名");
+		row.createCell(1).setCellValue("昵称");
+		row.createCell(2).setCellValue("手机号");
+		row.createCell(3).setCellValue("性别");
+		row.createCell(4).setCellValue("家庭地址");
+		row.createCell(5).setCellValue("用户状态");
+		row.createCell(6).setCellValue("社交账号绑定");
+		row.createCell(7).setCellValue("注册时间");
+		row.createCell(8).setCellValue("最近活跃时间");
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+		int size = dtos.size();
+		for(int i = 0; i < size; i++){
+			Row tempRow = sheet.createRow(i + 1);
+			CommunityUserAddressDTO dto = dtos.get(i);
+
+			tempRow.createCell(0).setCellValue(dto.getUserName());
+			tempRow.createCell(1).setCellValue(dto.getNickName());
+			tempRow.createCell(2).setCellValue(dto.getPhone());
+			tempRow.createCell(3).setCellValue(UserGender.fromCode(dto.getGender()).getText());
+
+			StringBuffer address = new StringBuffer();
+			if(dto.getAddressDtos() != null){
+				for (AddressDTO addressDTO: dto.getAddressDtos()){
+					address.append(addressDTO.getAddress());
+					address.append("-");
+					address.append(addressDTO.getApartmentName());
+					address.append("、");
+				}
+			}
+			if(address.length() > 0){
+				address.deleteCharAt(address.length() -1);
+			}
+
+			tempRow.createCell(4).setCellValue(address.toString());
+			tempRow.createCell(5).setCellValue(AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.AUTHENTICATED ? "认证" : AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.PENDING_AUTHENTICATION ? "待认证" : "非认证");
+			tempRow.createCell(6).setCellValue(UserSourceType.fromCode(dto.getUserSourceType()) == UserSourceType.WEIXIN ? "微信": "无");
+			tempRow.createCell(7).setCellValue(null != dto.getApplyTime() ? sdf.format(dto.getApplyTime()) : "");
+			tempRow.createCell(8).setCellValue(null != dto.getRecentlyActiveTime() ? sdf.format(dto.getRecentlyActiveTime()) : "");
+
+		}
+		ByteArrayOutputStream out = null;
+		try {
+			out = new ByteArrayOutputStream();
+			wb.write(out);
+			DownloadUtils.download(out, response);
+		} catch (IOException e) {
+			LOGGER.error("exportParkingRechageOrders is fail. {}",e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"exportParkingRechageOrders is fail.");
+		}
+	}
+
 	@Override
 	public CountCommunityUserResponse countCommunityUsers(
 			CountCommunityUsersCommand cmd) {
-		
-		/**
-		 * 园区用户统计
-		 */
+
 		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		int communityUserCount  = 0;
-		List<Long> orgIds  = new ArrayList<Long>();
-
-		if(cmd.getCommunityId() != null) {
-			Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-			
-			/**
-			 * 小区用户统计
-			 */
-			if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.RESIDENTIAL){
-				List<Group> groups = groupProvider.listGroupByCommunityId(community.getId(), (loc, query) -> {
-		            Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
-		            query.addConditions(c);
-		            return query;
-		        });
-				
-				List<Long> groupIds = new ArrayList<Long>(); 
-				for (Group group : groups) {
-					groupIds.add(group.getId());
-				}
-				
-				CrossShardListingLocator locator = new CrossShardListingLocator();
-				List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds,locator,null,(loc, query) -> {
-					Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
-					c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.ne(GroupMemberStatus.INACTIVE.getCode()));
-		            query.addConditions(c);
-		            query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
-		            return query;
-		        });
-				
-				int allCount = groupMembers.size();
-				
-				List<GroupMember> authMembers = new ArrayList<GroupMember>();
-				for (GroupMember groupMember : groupMembers) {
-					
-					if(GroupMemberStatus.fromCode(groupMember.getMemberStatus()) == GroupMemberStatus.ACTIVE){
-						authMembers.add(groupMember);
-					}
-				}
-				
-				int authCount = authMembers.size();
-				
-				CountCommunityUserResponse resp = new CountCommunityUserResponse();
-				resp.setCommunityUsers(allCount);
-				resp.setAuthUsers(authCount);
-				resp.setNotAuthUsers(allCount - authCount);
-				
-				return resp;
-			}else{
-
-			}
-		}
-		int authUserCount = 0;
 		if(namespaceId == Namespace.DEFAULT_NAMESPACE){
-			if(null == cmd.getOrganizationId() && null == cmd.getCommunityId()){
-				LOGGER.error("organizationId and communityId All are empty");
-				throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"organizationId and communityId All are empty");
-			}
-			communityUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), null);
+            LOGGER.error("Invalid parameter namespaceId={}", namespaceId);
+            throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid parameter namespaceId=" + namespaceId );
+        }
 
-		}else{
-			// 如果是其他域的情况，则获取域下面所有的公司
-			if(null == cmd.getCommunityId())
-				communityUserCount = userProvider.countUserByNamespaceId(namespaceId, null);
-			else
-				communityUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), null);
+        if(cmd.getCommunityId() == null){
+            int allCount = userProvider.countUserByNamespaceId(namespaceId, null);
+            int wxCount = userProvider.countUserByNamespaceIdAndNamespaceUserType(namespaceId, NamespaceUserType.WX.getCode());
+            int maleCount = userProvider.countUserByNamespaceIdAndGender(namespaceId, UserGender.MALE.getCode());
+            int femaleCount = userProvider.countUserByNamespaceIdAndGender(namespaceId, UserGender.FEMALE.getCode());
 
-			authUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), UserOrganizationStatus.ACTIVE.getCode());
+            CountCommunityUserResponse resp = new CountCommunityUserResponse();
+            resp.setCommunityUsers(allCount);
+            resp.setAuthUsers(0);
+            resp.setAuthingUsers(0);
+            resp.setNotAuthUsers(0);
+            resp.setWxUserCount(wxCount);
+            resp.setAppUserCount(allCount - wxCount);
+            resp.setMaleCount(maleCount);
+            resp.setFemaleCount(femaleCount);
 
+            return resp;
+        }
+
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+		if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.RESIDENTIAL){
+		    //小区用户统计
+			return countCommunityUsersForResidential(cmd);
+		}else {
+            //园区用户统计
+			return  countCommunityUsersForCommercial(cmd);
+		}
+	}
+
+	private CountCommunityUserResponse countCommunityUsersForResidential(
+			CountCommunityUsersCommand cmd) {
+		List<Group> groups = groupProvider.listGroupByCommunityId(cmd.getCommunityId(), (loc, query) -> {
+			Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
+			query.addConditions(c);
+			return query;
+		});
+
+		List<Long> groupIds = new ArrayList<Long>();
+		for (Group group : groups) {
+			groupIds.add(group.getId());
 		}
 
-		//总注册用户-认证用户 = 非认证用户
-		int notAuthUsers = communityUserCount - authUserCount;
-		
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds,locator,null,(loc, query) -> {
+			Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
+			c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.notIn(GroupMemberStatus.INACTIVE.getCode(), GroupMemberStatus.REJECT.getCode()));
+			query.addConditions(c);
+			query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
+			return query;
+		});
+
+		//全部用户、已认证用户(只要有一个已认证) add by yanjun 20171018
+		Set<Long> memberIds = new HashSet<>();
+		Set<Long> authMemberIds = new HashSet<>();
+		for(GroupMember m: groupMembers){
+			memberIds.add(m.getMemberId());
+			if(GroupMemberStatus.fromCode(m.getMemberStatus()) == GroupMemberStatus.ACTIVE){
+				authMemberIds.add(m.getMemberId());
+			}
+		}
+
+		//已认证
+		int authCount = authMemberIds.size();
+		//认证中 = 已认证、认证中 - 已认证
+		int authingCount = memberIds.size() - authCount;
+
+		//未认证用户 userprofile表中的用户-已认证或者认证中的用户
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.RESIDENTIAL.getCode(), null, null);
+
+		//未认证
+		int notAuthCount = 0;
+		if(users != null){
+			notAuthCount = users.size();
+		}
+
+		//全部 = 认证 + 认证中 + 未认证
+		int allCount = authCount + authingCount + notAuthCount;
+
+        //绑定微信的、男性、女性
+        Set<Long> wxMemberIds = new HashSet<>();
+        Set<Long> maleMemberIds = new HashSet<>();
+        Set<Long> femaleMemberIds = new HashSet<>();
+
+        List<User> allUsers = new ArrayList<>();
+		allUsers.addAll(users);
+
+        //已认证或认证中
+        List<Long> userIds = new ArrayList<>(memberIds);
+        List<User> memberUsers = userProvider.listUserByIds(cmd.getNamespaceId(), userIds);
+		allUsers.addAll(memberUsers);
+
+        for(User u: allUsers){
+            if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
+                wxMemberIds.add(u.getId());
+            }
+
+            if(UserGender.fromCode(u.getGender()) == UserGender.MALE){
+                maleMemberIds.add(u.getId());
+            }
+
+            if(UserGender.fromCode(u.getGender()) == UserGender.FEMALE){
+                femaleMemberIds.add(u.getId());
+            }
+        }
+
+		//绑定微信
+		int wxCount = wxMemberIds.size();
+        //男性用户
+        int maleCount = maleMemberIds.size();
+        //女性用户
+        int femaleCount = femaleMemberIds.size();
+
 		CountCommunityUserResponse resp = new CountCommunityUserResponse();
-		resp.setCommunityUsers(communityUserCount);
-		resp.setAuthUsers(authUserCount);
-		resp.setNotAuthUsers(notAuthUsers);
+		resp.setCommunityUsers(allCount);
+		resp.setAuthUsers(authCount);
+		resp.setAuthingUsers(authingCount);
+		resp.setNotAuthUsers(notAuthCount);
+		resp.setWxUserCount(wxCount);
+		resp.setAppUserCount(allCount - wxCount);
+		resp.setMaleCount(maleCount);
+		resp.setFemaleCount(femaleCount);
 
 		return resp;
 	}
-	
+
+	private CountCommunityUserResponse countCommunityUsersForCommercial(
+			CountCommunityUsersCommand cmd) {
+
+		//已认证、认证中
+		int communityUserCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId());
+
+		//已认证
+		int authCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), UserOrganizationStatus.ACTIVE.getCode());
+
+		//已认证、认证中的微信微信用户
+		int wxAuthCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, NamespaceUserType.WX.getCode(), null);
+
+		//未认证用户 userprofile表中的用户-已认证或者认证中的用户
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null, null);
+		if(users == null){
+			users = new ArrayList<>();
+		}
+		int notAuthCount = users.size();
+
+		//认证中 = 已认证、认证中 - 已认证
+		int authingCount = communityUserCount - authCount;
+
+		//总用户 =  已认证 + 认证中 + 未认证
+		int allCount = authCount + authingCount + notAuthCount;
+
+        //未认证中绑定微信的、男性、女性
+        Set<Long> wxMemberIds = new HashSet<>();
+        Set<Long> maleMemberIds = new HashSet<>();
+        Set<Long> femaleMemberIds = new HashSet<>();
+
+        if(users != null){
+			for(User u: users){
+				if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
+					wxMemberIds.add(u.getId());
+				}
+                if(UserGender.fromCode(u.getGender()) == UserGender.FEMALE){
+                    femaleMemberIds.add(u.getId());
+                }
+                if(UserGender.fromCode(u.getGender()) == UserGender.MALE){
+                    maleMemberIds.add(u.getId());
+                }
+			}
+		}
+
+		//微信用户 = 已认证、认证中的微信微信用户 + 未认证中绑定微信的
+		int wxCount =  wxAuthCount + wxMemberIds.size();
+
+        //男性用户
+        //已认证、认证中
+        int maleAuthCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, null, UserGender.MALE.getCode());
+        int maleCount = maleMemberIds.size() + maleAuthCount;
+        //女性用户
+        int femaleAuthCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, null, UserGender.FEMALE.getCode());
+        int femaleCount = femaleMemberIds.size() + femaleAuthCount;
+
+		CountCommunityUserResponse resp = new CountCommunityUserResponse();
+		resp.setCommunityUsers(allCount);
+		resp.setAuthUsers(authCount);
+		resp.setAuthingUsers(authingCount);
+		resp.setNotAuthUsers(notAuthCount);
+		resp.setWxUserCount(wxCount);
+		resp.setAppUserCount(allCount - wxCount);
+		resp.setMaleCount(maleCount);
+		resp.setFemaleCount(femaleCount);
+
+		return resp;
+	}
+
 	@Override
 	public CommunityUserAddressResponse listUserByNotJoinedCommunity(
 			ListCommunityUsersCommand cmd) {
@@ -2424,9 +2864,9 @@ public class CommunityServiceImpl implements CommunityService {
 		try {
 			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
 		} catch (IOException e) {
-			LOGGER.error("process Excel error, operatorId=" + userId + ", cmd=" + cmd);
+			LOGGER.error("processStat Excel error, operatorId=" + userId + ", cmd=" + cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_GENERAL_EXCEPTION, "process Excel error");
+					ErrorCodes.ERROR_GENERAL_EXCEPTION, "processStat Excel error");
 		}
 
 		if (resultList != null && resultList.size() > 0) {
@@ -2856,13 +3296,15 @@ public class CommunityServiceImpl implements CommunityService {
         List<Long> communityIds = resourceList.stream().map(NamespaceResource::getResourceId).collect(Collectors.toList());
         List<OrganizationCommunityRequest> orgs = this.organizationProvider.listOrganizationCommunityRequests(communityIds);
         if (null == orgs || orgs.size() == 0) {
-            return response;
+			LOGGER.debug("orgs is null");
+			return response;
         }
 
 		List<Long> orgIds = new ArrayList<>();
 		for(OrganizationCommunityRequest org : orgs) {
 			orgIds.add(org.getMemberId());
 		}
+		LOGGER.debug("orgIds is：" + orgIds);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
 		CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -2902,6 +3344,8 @@ public class CommunityServiceImpl implements CommunityService {
         } else {
             organizationMembers = this.organizationProvider.listOrganizationPersonnels(
                     cmd.getUserInfoKeyword(), cmd.getOrgNameKeyword(), orgIds, cmd.getStatus(), null, locator, pageSize);
+			LOGGER.debug("wait approve organizationMembers cmd:" + cmd);
+			LOGGER.debug("wait approve organizationMembers size " + organizationMembers.size());
         }
 
 		if(organizationMembers == null || organizationMembers.size() == 0) {
@@ -2952,10 +3396,24 @@ public class CommunityServiceImpl implements CommunityService {
 		if(null == user)
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid userid parameter: no this user");
-		user.setExecutiveTag(cmd.getExecutiveFlag());
 		user.setIdentityNumberTag(cmd.getIdentityNumber());
-		user.setPositionTag(cmd.getPosition());
-		userProvider.updateUser(user); 
+
+		//更新用户信息和公司信息   edit by yanjun 20171016
+		dbProvider.execute((status) -> {
+			userProvider.updateUser(user);
+			if(cmd.getOrganizations() != null){
+				for (CommunityUserOrgDetailDTO dto: cmd.getOrganizations()){
+					UserOrganizations userOrganization = organizationProvider.findUserOrganizationById(dto.getDetailId());
+
+					if(userOrganization != null){
+						userOrganization.setExecutiveTag(dto.getExecutiveFlag());
+						userOrganization.setPositionTag(dto.getPositionTag());
+						organizationProvider.updateUserOrganization(userOrganization);
+					}
+				}
+			}
+			return null;
+		});
 		
 	}
 	
@@ -3096,10 +3554,7 @@ public class CommunityServiceImpl implements CommunityService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"ResourceType cannot be null.");
         }
-		
-//    	ResourceCategory category = communityProvider.findResourceCategoryById(cmd.getResourceCategoryId());
-//		checkResourceCategoryIsNull(category);
-		
+
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
 		ResourceCategoryAssignment rca = communityProvider.findResourceCategoryAssignment(cmd.getResourceId(), cmd.getResourceType(), 
 				namespaceId);
@@ -3193,28 +3648,12 @@ public class CommunityServiceImpl implements CommunityService {
 	public List<ResourceCategoryDTO> listResourceCategories(ListResourceCategoryCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		
-//		List<ResourceCategoryDTO> result = new ArrayList<ResourceCategoryDTO>();
-//		String path = null;
-//		Long parentId = null == cmd.getParentId() ? 0L : cmd.getParentId();
-//		if(null != cmd.getParentId()) {
-//			ResourceCategory resourceCategory = communityProvider.findResourceCategoryById(cmd.getParentId());
-//			checkResourceCategoryIsNull(resourceCategory);
-//			path = resourceCategory.getPath();
-//		}
-		
 		List<ResourceCategoryDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getParentId(), null, ResourceCategoryType.CATEGORY.getCode())
 			.stream().map(r -> {
 				ResourceCategoryDTO dto = ConvertHelper.convert(r, ResourceCategoryDTO.class);
 				
 				return dto;
 			}).collect(Collectors.toList());
-		
-//		for(ResourceCategoryDTO s: temp) {
-//			getChildCategories(temp, s);
-//			if(s.getParentId() == parentId) {
-//				result.add(s);
-//			}
-//		}
 		
 		return temp;
 	}
@@ -3226,12 +3665,12 @@ public class CommunityServiceImpl implements CommunityService {
 		List<ResourceCategoryDTO> list = listTreeResourceCategories(cmd);
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
 
-		setresourceDTOs(list, namespaceId);
+		setResourceDTOs(list, namespaceId);
 		
 		return list;
 	}
 	
-	private void setresourceDTOs(List<ResourceCategoryDTO> list, Integer namespaceId){
+	private void setResourceDTOs(List<ResourceCategoryDTO> list, Integer namespaceId){
 		if(null != list) {
 			for(ResourceCategoryDTO r: list) {
 				List<ResourceCategoryAssignment> resourceCategoryAssignments = communityProvider.listResourceCategoryAssignment(r.getId(), namespaceId);
@@ -3241,7 +3680,7 @@ public class CommunityServiceImpl implements CommunityService {
 					dto.setResourceName(community.getName());
 					return dto;
 				}).collect(Collectors.toList());
-				setresourceDTOs(r.getCategoryDTOs(), namespaceId);
+				setResourceDTOs(r.getCategoryDTOs(), namespaceId);
 				r.setResourceDTOs(resourceDTOs);
 			}
 		}
@@ -3302,7 +3741,8 @@ public class CommunityServiceImpl implements CommunityService {
 			ProjectDTO dto = new ProjectDTO();
 			dto.setProjectName(category.getName());
 			dto.setProjectId(category.getId());
-			dto.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
+			dto.setProjectType(EntityType.CHILD_PROJECT.getCode());
+			dto.setParentId(cmd.getProjectId());
 			List<ResourceCategoryAssignment> buildingCategorys = communityProvider.listResourceCategoryAssignment(category.getId(), namespaceId);
 			List<ProjectDTO> buildingProjects = new ArrayList<>();
 			for (ResourceCategoryAssignment buildingCategory: buildingCategorys) {
@@ -3310,6 +3750,7 @@ public class CommunityServiceImpl implements CommunityService {
 					Building building = communityProvider.findBuildingById(buildingCategory.getResourceId());
 					if(null != building){
 						ProjectDTO buildingProject = new ProjectDTO();
+						buildingProject.setParentId(category.getId());
 						buildingProject.setProjectId(building.getId());
 						buildingProject.setProjectName(building.getName());
 						buildingProject.setProjectType(EntityType.BUILDING.getCode());
@@ -3519,4 +3960,32 @@ public class CommunityServiceImpl implements CommunityService {
         }
         return new CommunityAuthPopupConfigDTO(Byte.valueOf(conf.getValue()));
     }
+	
+		@Override
+	public ListCommunitiesByOrgIdResponse listCommunitiesByOrgId(ListCommunitiesByOrgIdCommand cmd) {
+		if(cmd.getPageAnchor()==null)
+			cmd.setPageAnchor(0L);
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+
+		ListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<Community> list = this.communityProvider.listCommunitiesByOrgId(locator, pageSize+1,cmd.getOrgId(), cmd.getKeyword());
+
+		ListCommunitiesByOrgIdResponse response = new ListCommunitiesByOrgIdResponse();
+		if(list != null && list.size() > pageSize){
+			list.remove(list.size()-1);
+			response.setNextPageAnchor(list.get(list.size()-1).getId());
+		}
+		if(list != null){
+			List<CommunityDTO> resultList = list.stream().map((c) -> {
+				return ConvertHelper.convert(c, CommunityDTO.class);
+			}).collect(Collectors.toList());
+
+			response.setList(resultList);
+		}
+
+		return response;
+
+	}
 }
+

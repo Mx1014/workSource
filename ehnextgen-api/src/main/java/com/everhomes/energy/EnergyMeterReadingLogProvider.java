@@ -35,4 +35,7 @@ public interface EnergyMeterReadingLogProvider {
     void deleteMeterReadingLogsByMeterId(Integer namespaceId, Long meterId);
 
     // List<EnergyMeterReadingLog> listMeterReadingLogs(Integer namespaceId, Long meterId, Long pageAnchor, int pageSize);
+	List<EnergyMeterReadingLog> listMeterReadingLogByTask(Long taskId);
+
+	EnergyMeterReadingLog findLastReadingLogByTaskId(Long taskId);
 }

@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  *
  */
 public class FlowEntitySel {
+
 	private Long entityId;
 	private String flowEntityType;
 

@@ -2,21 +2,18 @@ package com.everhomes.general_form;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormValsDao;
 import com.everhomes.server.schema.tables.pojos.EhGeneralFormVals;
 import com.everhomes.server.schema.tables.records.EhGeneralFormValsRecord;
-import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.DeleteQuery;
-import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -100,4 +97,16 @@ public class GeneralFormValProviderImpl implements GeneralFormValProvider {
         query.execute();
     }
 
+    @Override
+    public GeneralFormVal getGeneralFormValBySourceIdAndName(Long sourceId, String sourceType, String fieldName){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralFormVals.class));
+
+        SelectQuery<EhGeneralFormValsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_VALS);
+        query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId));
+        query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_TYPE.eq(sourceType));
+        query.addConditions(Tables.EH_GENERAL_FORM_VALS.FIELD_NAME.eq(fieldName));
+
+        query.addOrderBy(Tables.EH_GENERAL_FORM_VALS.ID.desc());
+        return query.fetchAnyInto(GeneralFormVal.class);
+    }
 }

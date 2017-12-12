@@ -8,7 +8,7 @@ import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
+ *
  * <ul>
  * <li>buildingName: 楼栋名称</li>
  * <li>apartmentName: 门牌名称</li>
@@ -17,6 +17,15 @@ import com.everhomes.util.StringHelper;
  * <li>enterpriseName: 企业名称，园区有小区无</li>
  * <li>owerList: 用户列表，园区无小区有,,参考{@link com.everhomes.rest.organization.OrganizationOwnerDTO}</li>
  * <li>nextPageAnchor: 下页锚点，园区无小区有</li>
+ * <li>sharedArea: 公摊面积</li>
+ * <li>chargeArea: 收费面积</li>
+ * <li>buildArea: 建筑面积</li>
+ * <li>rentArea: 出租面积</li>
+ * <li>categoryItemId: 资产类型：住宅、写字楼、酒店式公寓、厂房、库房、车位、其他...</li>
+ * <li>sourceItemId: 资产来源：自管、业主放盘、大业主交管、其他...</li>
+ * <li>decorateStatus: 装修状态</li>
+ * <li>orientation: 朝向</li>
+ * <li>apartmentFloor: 楼层名称</li>
  * </ul>
  */
 public class GetApartmentDetailResponse {
@@ -24,13 +33,93 @@ public class GetApartmentDetailResponse {
 	private String apartmentName;
 	private Byte status;
 	private Double areaSize;
+	private Double sharedArea;
+	private Double chargeArea;
+	private Double buildArea;
+	private Double rentArea;
+	private Long categoryItemId;
+	private Long sourceItemId;
+	private Byte decorateStatus;
+	private String orientation;
+	private String apartmentFloor;
 	private Byte communityType;
 	private String enterpriseName;
 	@ItemType(OrganizationOwnerDTO.class)
 	private List<OrganizationOwnerDTO> owerList;
 	private Long nextPageAnchor;
 
-	
+	public String getApartmentFloor() {
+		return apartmentFloor;
+	}
+
+	public void setApartmentFloor(String apartmentFloor) {
+		this.apartmentFloor = apartmentFloor;
+	}
+
+	public Double getBuildArea() {
+		return buildArea;
+	}
+
+	public void setBuildArea(Double buildArea) {
+		this.buildArea = buildArea;
+	}
+
+	public Long getCategoryItemId() {
+		return categoryItemId;
+	}
+
+	public void setCategoryItemId(Long categoryItemId) {
+		this.categoryItemId = categoryItemId;
+	}
+
+	public Double getChargeArea() {
+		return chargeArea;
+	}
+
+	public void setChargeArea(Double chargeArea) {
+		this.chargeArea = chargeArea;
+	}
+
+	public Byte getDecorateStatus() {
+		return decorateStatus;
+	}
+
+	public void setDecorateStatus(Byte decorateStatus) {
+		this.decorateStatus = decorateStatus;
+	}
+
+	public String getOrientation() {
+		return orientation;
+	}
+
+	public void setOrientation(String orientation) {
+		this.orientation = orientation;
+	}
+
+	public Double getRentArea() {
+		return rentArea;
+	}
+
+	public void setRentArea(Double rentArea) {
+		this.rentArea = rentArea;
+	}
+
+	public Double getSharedArea() {
+		return sharedArea;
+	}
+
+	public void setSharedArea(Double sharedArea) {
+		this.sharedArea = sharedArea;
+	}
+
+	public Long getSourceItemId() {
+		return sourceItemId;
+	}
+
+	public void setSourceItemId(Long sourceItemId) {
+		this.sourceItemId = sourceItemId;
+	}
+
 	public Byte getCommunityType() {
 		return communityType;
 	}

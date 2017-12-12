@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.questionnaire;
 
+import com.everhomes.rest.questionnaire.*;
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,27 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.questionnaire.CreateQuestionnaireCommand;
-import com.everhomes.rest.questionnaire.CreateQuestionnaireResponse;
-import com.everhomes.rest.questionnaire.CreateTargetQuestionnaireCommand;
-import com.everhomes.rest.questionnaire.CreateTargetQuestionnaireResponse;
-import com.everhomes.rest.questionnaire.DeleteQuestionnaireCommand;
-import com.everhomes.rest.questionnaire.GetQuestionnaireDetailCommand;
-import com.everhomes.rest.questionnaire.GetQuestionnaireDetailResponse;
-import com.everhomes.rest.questionnaire.GetQuestionnaireResultDetailCommand;
-import com.everhomes.rest.questionnaire.GetQuestionnaireResultDetailResponse;
-import com.everhomes.rest.questionnaire.GetQuestionnaireResultSummaryCommand;
-import com.everhomes.rest.questionnaire.GetQuestionnaireResultSummaryResponse;
-import com.everhomes.rest.questionnaire.GetTargetQuestionnaireDetailCommand;
-import com.everhomes.rest.questionnaire.GetTargetQuestionnaireDetailResponse;
-import com.everhomes.rest.questionnaire.ListBlankQuestionAnswersCommand;
-import com.everhomes.rest.questionnaire.ListBlankQuestionAnswersResponse;
-import com.everhomes.rest.questionnaire.ListOptionTargetsCommand;
-import com.everhomes.rest.questionnaire.ListOptionTargetsResponse;
-import com.everhomes.rest.questionnaire.ListQuestionnairesCommand;
-import com.everhomes.rest.questionnaire.ListQuestionnairesResponse;
-import com.everhomes.rest.questionnaire.ListTargetQuestionnairesCommand;
-import com.everhomes.rest.questionnaire.ListTargetQuestionnairesResponse;
+
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/questionnaire")
@@ -89,6 +72,17 @@ public class QuestionnaireController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /questionnaire/exportQuestionnaireResultDetail</b>
+	 * <p>5.1.问卷调查结果详情导出-园区</p>
+	 */
+	@RequestMapping("exportQuestionnaireResultDetail")
+	@RestReturn(String.class)
+	public RestResponse exportQuestionnaireResultDetail(GetQuestionnaireResultDetailCommand cmd, HttpServletResponse response){
+		questionnaireService.exportQuestionnaireResultDetail(cmd,response);
+		return new RestResponse();
+	}
+
+	/**
      * <b>URL: /questionnaire/getQuestionnaireResultSummary</b>
 	 * <p>6.问卷调查结果统计-园区</p>
 	 */
@@ -119,8 +113,18 @@ public class QuestionnaireController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /questionnaire/getAnsweredQuestionnaireDetail</b>
+	 * <p>9.问卷调查详情-后台调用</p>
+	 */
+	@RequestMapping("getAnsweredQuestionnaireDetail")
+	@RestReturn(GetTargetQuestionnaireDetailResponse.class)
+	public RestResponse getAnsweredQuestionnaireDetail(GetTargetQuestionnaireDetailCommand cmd){
+		return new RestResponse(questionnaireService.getAnsweredQuestionnaireDetail(cmd));
+	}
+
+	/**
      * <b>URL: /questionnaire/listTargetQuestionnaires</b>
-	 * <p>9.问卷调查列表-企业</p>
+	 * <p>10.问卷调查列表-企业&个人</p>
 	 */
 	@RequestMapping("listTargetQuestionnaires")
 	@RestReturn(ListTargetQuestionnairesResponse.class)
@@ -130,7 +134,7 @@ public class QuestionnaireController extends ControllerBase {
 
 	/**
      * <b>URL: /questionnaire/getTargetQuestionnaireDetail</b>
-	 * <p>10.问卷调查详情-企业</p>
+	 * <p>11.问卷调查详情-企业&个人</p>
 	 */
 	@RequestMapping("getTargetQuestionnaireDetail")
 	@RestReturn(GetTargetQuestionnaireDetailResponse.class)
@@ -140,12 +144,46 @@ public class QuestionnaireController extends ControllerBase {
 
 	/**
      * <b>URL: /questionnaire/createTargetQuestionnaire</b>
-	 * <p>11.提交问卷调查-企业</p>
+	 * <p>12.提交问卷调查-企业&个人</p>
 	 */
 	@RequestMapping("createTargetQuestionnaire")
 	@RestReturn(CreateTargetQuestionnaireResponse.class)
 	public RestResponse createTargetQuestionnaire(CreateTargetQuestionnaireCommand cmd){
 		return new RestResponse(questionnaireService.createTargetQuestionnaire(cmd));
+	}
+
+	/**
+	 * <b>URL: /questionnaire/listUsersbyIdentifiers</b>
+	 * <p>13.通过手机号查询用户信息</p>
+	 */
+	@RequestMapping("listUsersbyIdentifiers")
+	@RestReturn(ListUsersbyIdentifiersResponse.class)
+	public RestResponse listUsersbyIdentifiers(ListUsersbyIdentifiersCommand cmd){
+		return new RestResponse(questionnaireService.listUsersbyIdentifiers(cmd));
+	}
+
+	/**
+	 * <b>URL: /questionnaire/reScopeQuesionnaireRanges</b>
+	 * <p>14.重新计算问卷的范围</p>
+	 */
+	@RequestMapping("reScopeQuesionnaireRanges")
+	@RestReturn(String.class)
+	@RequireAuthentication(false)
+	public RestResponse reScopeQuesionnaireRanges(ReScopeQuesionnaireRangesCommand cmd){
+		questionnaireService.reScopeQuesionnaireRanges(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <b>URL: /questionnaire/reSendQuesionnaireMessages</b>
+	 * <p>15.给未回答问卷，且在一天之内到期的用户发送消息</p>
+	 */
+	@RequestMapping("reSendQuesionnaireMessages")
+	@RestReturn(String.class)
+	@RequireAuthentication(false)
+	public RestResponse reSendQuesionnaireMessages(){
+		questionnaireService.reSendQuesionnaireMessages();
+		return new RestResponse();
 	}
 
 }

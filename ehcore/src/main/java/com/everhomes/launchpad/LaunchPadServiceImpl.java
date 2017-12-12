@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.launchpad;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
 import com.everhomes.business.BusinessService;
@@ -264,8 +265,12 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 					"Invalid itemGroup paramter,itemGroup is null");
 		}
 		long startTime = System.currentTimeMillis();
+		OrganizationDTO org = organizationService.getOrganizationById(cmd.getOrganizationId());
+		Long communityId = null;
+		if(null != org)
+			communityId = org.getCommunityId();
 		List<CategryItemDTO> categryItemDTOs = new ArrayList<CategryItemDTO>();
-		List<ItemServiceCategry> categries = getItemServiceCategriesByScopeType(namespaceId, cmd.getItemLocation(), cmd.getItemGroup(), cmd.getCurrentSceneType(), cmd.getOrganizationId(), null);
+		List<ItemServiceCategry> categries = getItemServiceCategriesByScopeType(namespaceId, cmd.getItemLocation(), cmd.getItemGroup(), cmd.getCurrentSceneType(), cmd.getOrganizationId(), communityId);
 		for (ItemServiceCategry categry: categries) {
 			CategryItemDTO categryItemDTO = new CategryItemDTO();
 			categryItemDTO.setCategryId(categry.getId());
@@ -412,7 +417,6 @@ public class LaunchPadServiceImpl implements LaunchPadService {
    public GetLaunchPadItemsCommandResponse getLaunchPadItemsByScene(GetLaunchPadItemsBySceneCommand cmd, HttpServletRequest request) {
        User user = UserContext.current().getUser();
        SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
-       
        GetLaunchPadItemsCommand getCmd = new GetLaunchPadItemsCommand();
        getCmd.setItemGroup(cmd.getItemGroup());
        getCmd.setItemLocation(cmd.getItemLocation());
@@ -429,13 +433,14 @@ public class LaunchPadServiceImpl implements LaunchPadService {
            LOGGER.error("Scene is not found, cmd={}, sceneToken={}", cmd, sceneToken);
        }
        getCmd.setSceneType(baseScene);
-       
+
        Community community = null;
        GetLaunchPadItemsCommandResponse cmdResponse = null;
        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
 
 	   //检查游客是否能继续访问此场景 by sfyan 20161009
 	   userService.checkUserScene(sceneType);
+	   LOGGER.debug("Scene type is" + sceneType);
 
        switch(sceneType) {
        case DEFAULT:
@@ -477,7 +482,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
            break;
        }
-       
+
+	   refreshActionData(cmdResponse.getLaunchPadItems(), sceneToken);
        return cmdResponse;
    }
    
@@ -547,6 +553,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
            break;
        }
+
+	   refreshActionData(cmdResponse.getLaunchPadItems(), sceneToken);
        
        return cmdResponse;
    }
@@ -617,6 +625,16 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
 				break;
 		}
+
+		//刷新actionData
+		if(categryItemDTOs != null && categryItemDTOs.size() > 0){
+			List<LaunchPadItemDTO> dtos  = new ArrayList<>();
+			categryItemDTOs.forEach(r ->
+				dtos.addAll(r.getLaunchPadItems())
+			);
+			refreshActionData(dtos, sceneToken);
+		}
+
 
 		return categryItemDTOs;
 	}
@@ -1135,12 +1153,35 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 					});
 			}
 
-
         }catch(Exception e){
             LOGGER.error("Process item aciton data is error.",e);
             return null;
         }
         return result;
+	}
+
+	private void refreshActionData(List<LaunchPadItemDTO> dtos, SceneTokenDTO sceneToken){
+		if(dtos != null && dtos.size() > 0){
+			dtos.forEach(r ->{
+				if(r.getActionData() != null && !"".equals(r.getActionData().trim())){
+					//调用各个业务的handler处理action
+					JSONObject jsonObject = (JSONObject) JSONValue.parse(r.getActionData());
+					if(jsonObject.get("handler") != null){
+						LaunchPadItemActionDataHandler handler = PlatformContext.getComponent(LaunchPadItemActionDataHandler.LAUNCH_PAD_ITEM_ACTIONDATA_RESOLVER_PREFIX+ String.valueOf(jsonObject.get("handler")));
+						if(handler != null){
+							String newActionData = handler.refreshActionData(r.getActionData(), sceneToken);
+							r.setActionData(newActionData);
+						}
+					}
+
+					//调用默认的default_host handler处理url，将{key}等转换成实际的host
+					LaunchPadItemActionDataHandler handler = PlatformContext.getComponent(LaunchPadItemActionDataHandler.LAUNCH_PAD_ITEM_ACTIONDATA_RESOLVER_PREFIX+ LaunchPadItemActionDataHandler.DEFAULT);
+					String newActionData = handler.refreshActionData(r.getActionData(), sceneToken);
+					r.setActionData(newActionData);
+				}
+			});
+		}
+
 	}
 
 	private List<BusinessDTO> getBusinessesInfo(List<String> businessIds){
@@ -1366,7 +1407,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		// 按id排序 可以去掉 by sfyan
 //		Collections.sort(result, new Comparator<LaunchPadItemDTO>(){
 //			@Override
-//			public int compare(LaunchPadItemDTO o1, LaunchPadItemDTO o2){
+//			public int compareTo(LaunchPadItemDTO o1, LaunchPadItemDTO o2){
 //				return o1.getId().intValue() - o2.getId().intValue();
 //			}
 //		});
@@ -1735,11 +1776,22 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		List<LaunchPadLayoutDTO> results = getLaunchPadLayoutByVersionCode(cmd, scopeType,scopeId);
 		if(results != null && !results.isEmpty()){
 			LaunchPadLayoutDTO dto =  results.get(0);
+			populateLaunchPadLayoutDTO(dto);
 			return dto;
 		}
 		return null;
 	}
-	
+
+	private void populateLaunchPadLayoutDTO(LaunchPadLayoutDTO dto){
+		if(dto == null || StringUtils.isEmpty(dto.getBgImageUri()) || dto.getId() == null){
+			return;
+		}
+
+		String url = contentServerService.parserUri(dto.getBgImageUri(), LaunchPadLayoutDTO.class.getSimpleName(), dto.getId());
+
+		dto.setBgImageUrl(url);
+	}
+
 	@Override
     public LaunchPadLayoutDTO getLastLaunchPadLayoutByScene(@Valid GetLaunchPadLayoutBySceneCommand cmd) {
 	    User user = UserContext.current().getUser();
@@ -2409,7 +2461,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	           LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
 	           break;
 	       }
-	       
+
 	       return ConvertHelper.convert(userItem, UserLaunchPadItemDTO.class);
 	}
 
@@ -2541,14 +2593,20 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		Integer namespaceId = sceneTokenDto.getNamespaceId();
 		String sceneType = sceneTokenDto.getScene();
 		
-		SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.LAUNCHPADITEM.getCode());
-		
+		SearchTypes searchType = userService.getSearchTypes(namespaceId, SearchContentType.LAUNCHPADITEM.getCode());
+
 		//根据场景获取应用scope：配置为all和user的固定选择，配置为organization和community的根据场景sceneType获取 
 		//switch内的逻辑根据this.getLaunchPadItemsByScene方法改编
 		//add by yanjun 20170419
 		Map<Byte, Long> scopeMap = new HashMap<Byte, Long>();		
 		scopeMap.put(ScopeType.USER.getCode(), userId);
-		scopeMap.put(ScopeType.ALL.getCode(), 0L);
+
+		//园区的item包括当前园区和0园区的，不能使用一个map  add by yanjun
+		Map<Byte, Long> defaultScopeMap = new HashMap<Byte, Long>();
+		defaultScopeMap.put(ScopeType.ALL.getCode(), 0L);
+		defaultScopeMap.put(ScopeType.COMMUNITY.getCode(), 0L);
+		defaultScopeMap.put(ScopeType.RESIDENTIAL.getCode(), 0L);
+
 		if(SceneType.fromCode(sceneType) != null){
 			switch(SceneType.fromCode(sceneType)) {
 			case DEFAULT:
@@ -2587,7 +2645,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
 		Integer offset = pageSize * Integer.valueOf(pageAnchor.intValue());
-		List<LaunchPadItem> launchPadItems= this.launchPadProvider.searchLaunchPadItemsByKeyword(namespaceId, sceneType, scopeMap, cmd.getKeyword(), offset, pageSize + 1);
+		List<LaunchPadItem> launchPadItems= this.launchPadProvider.searchLaunchPadItemsByKeyword(namespaceId, sceneType, scopeMap, defaultScopeMap, cmd.getKeyword(), offset, pageSize + 1);
 		// 处理分页
 		Long nextPageAnchor = null;
 		if (launchPadItems.size() > pageSize) {

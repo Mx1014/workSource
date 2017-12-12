@@ -2,11 +2,11 @@ package com.everhomes.activity;
 
 import com.everhomes.category.Category;
 import com.everhomes.forum.Post;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.CreateWechatJsPayOrderResp;
-import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneReponse;
 import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
@@ -31,7 +31,9 @@ public interface ActivityService {
 
     CommonOrderDTO createSignupOrder(CreateSignupOrderCommand cmd);
 
-	CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd);
+    PreOrderDTO createSignupOrderV2(CreateSignupOrderV2Command cmd);
+
+    CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd);
 
     ActivityDTO cancelSignup(ActivityCancelSignupCommand cmd);
 
@@ -155,7 +157,7 @@ public interface ActivityService {
 
 	SignupInfoDTO updateSignupInfo(UpdateSignupInfoCommand cmd);
 
-	void importSignupInfo(ImportSignupInfoCommand cmd, MultipartFile[] files);
+	ImportSignupInfoResponse importSignupInfo(ImportSignupInfoCommand cmd, MultipartFile[] files);
 
 	ListSignupInfoResponse listSignupInfo(ListSignupInfoCommand cmd);
 
@@ -197,5 +199,7 @@ public interface ActivityService {
 	 * 同步报名人数
 	 */
 	void syncActivitySignupAttendeeCount();
+
+//	void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response);
 }
 

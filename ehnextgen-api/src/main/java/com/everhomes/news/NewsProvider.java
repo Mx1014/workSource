@@ -5,7 +5,7 @@ import java.util.List;
 
 public interface NewsProvider {
 
-	void createNews(News news);
+	Long createNews(News news);
 
 	void updateNews(News news);
 
@@ -28,4 +28,26 @@ public interface NewsProvider {
 	List<Long> listNewsCommunities(Long newsId);
 
 	Boolean getCommentForbiddenFlag(Long categoryId, Integer namespaceId);
+
+	void createNewsCategory(NewsCategory newsCategory);
+
+	void updateNewsCategory(NewsCategory newsCategory);
+
+	Long createNewsTag(NewsTag newsTag);
+
+	void createNewsTagVals(NewsTagVals newsTagVals);
+
+	void deletNewsTagVals(Long newsId);
+
+	List<NewsTagVals> listNewsTagVals(Long newsId);
+
+	NewsTag findNewsTagById(Long id);
+
+	void updateNewsTag(NewsTag newsTag);
+
+	List<NewsTag> listNewsTag(Integer namespaceId,Byte isSearch,Long parentId,Long pageAnchor,Integer pageSize, Long categoryId);
+
+	void increaseViewCount(Long newsId, Long nViewCount);
+
+	NewsCategory getCategoryIdByEntryId(Integer entryId,Integer namespaceId);
 }

@@ -58,8 +58,10 @@ public enum EntityType {
     AUTHORIZATION_RELATION(EhAuthorizationRelations.class.getSimpleName()),
     ZUOLIN_ADMIN("EhZuolinAdmins"),
     ALL("EhAll"),
-    LEASEPROMOTION(EhLeasePromotions.class.getSimpleName()),
+    LEASE_PROMOTION(EhLeasePromotions.class.getSimpleName()),
     WAREHOUSE_REQUEST(EhWarehouseRequests.class.getSimpleName()),
+    CONTRACT(EhContracts.class.getSimpleName()),
+    ENTERPRISE_CUSTOMER(EhEnterpriseCustomers.class.getSimpleName()),
     PORTAL_ITEM(EhPortalItems.class.getSimpleName()),
     PORTAL_ITEM_CATEGORY(EhPortalItemCategories.class.getSimpleName()),
     PORTAL_LAYOUT(EhPortalLayouts.class.getSimpleName()),
@@ -70,7 +72,20 @@ public enum EntityType {
     ORGANIZATION_FILE("EhOrganizationFiles"),
     COMMUNITY_APPROVE(EhCommunityApprove.class.getSimpleName()),
 	TALENT_REQUEST(EhTalentRequests.class.getSimpleName()),
-    CHILD_PROJECT("child_project");
+
+	EQUIPMENT_TASK(EhEquipmentInspectionTasks.class.getSimpleName()),
+    CHILD_PROJECT("child_project"),
+    LEASE_BUILDING(EhLeaseBuildings.class.getSimpleName()),
+
+    LEASE_PROJECT(EhLeaseProjects.class.getSimpleName()),
+	CUSTOMER_TRACKING(EhCustomerTrackings.class.getSimpleName()),
+
+    PARKING_CAR_VERIFICATION(EhParkingCarVerifications.class.getSimpleName()),
+
+    ENERGY_TASK(EhEnergyMeterTasks.class.getSimpleName());
+
+
+
 
     private String code;
     

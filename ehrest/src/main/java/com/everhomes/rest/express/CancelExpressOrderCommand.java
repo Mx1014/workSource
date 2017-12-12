@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 所属者类型，参考{@link com.everhomes.rest.express.ExpressOwnerType}</li>
  * <li>ownerId: 所属者id</li>
  * <li>id: 订单id</li>
+ * <li>statusDesc: 取消原因</li>
  * </ul>
  */
 public class CancelExpressOrderCommand {
@@ -18,17 +19,22 @@ public class CancelExpressOrderCommand {
 	private Long ownerId;
 
 	private Long id;
+	
+	private String statusDesc;
 
 	public CancelExpressOrderCommand() {
 
 	}
 
-	public CancelExpressOrderCommand(String ownerType, Long ownerId, Long id) {
+
+	public CancelExpressOrderCommand(String ownerType, Long ownerId, Long id, String statusDesc) {
 		super();
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
 		this.id = id;
+		this.statusDesc = statusDesc;
 	}
+
 
 	public String getOwnerType() {
 		return ownerType;
@@ -52,6 +58,14 @@ public class CancelExpressOrderCommand {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+	
+	public String getStatusDesc() {
+		return statusDesc;
+	}
+
+	public void setStatusDesc(String statusDesc) {
+		this.statusDesc = statusDesc;
 	}
 
 	@Override

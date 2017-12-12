@@ -60,13 +60,17 @@ public interface CommunityService {
 	
 	CommunityUserResponse listUserCommunities(ListCommunityUsersCommand cmd);
 
+	CommunityUserResponse listUserCommunitiesV2(ListCommunityUsersCommand cmd);
+
 	void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpServletResponse response);
 	
 	CountCommunityUserResponse countCommunityUsers(CountCommunityUsersCommand cmd);
 	
 	CommunityUserAddressDTO qryCommunityUserAddressByUserId(QryCommunityUserAddressByUserIdCommand cmd);
-	
-	CommunityUserAddressResponse listUserBycommunityId(ListCommunityUsersCommand cmd);
+
+    CommunityUserAddressResponse listUserBycommunityIdV2(ListCommunityUsersCommand cmd);
+
+    CommunityUserAddressResponse listUserBycommunityId(ListCommunityUsersCommand cmd);
 	
 	CommunityUserAddressDTO qryCommunityUserEnterpriseByUserId(QryCommunityUserAddressByUserIdCommand cmd);
 	
@@ -133,4 +137,7 @@ public interface CommunityService {
      * 修改用户认证弹窗设置
      */
     CommunityAuthPopupConfigDTO updateCommunityAuthPopupConfig(UpdateCommunityAuthPopupConfigCommand cmd);
+	
+	ListCommunitiesByOrgIdResponse listCommunitiesByOrgId(ListCommunitiesByOrgIdCommand cmd);
+
 }

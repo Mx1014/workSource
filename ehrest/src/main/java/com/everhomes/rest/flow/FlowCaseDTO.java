@@ -6,299 +6,356 @@ import java.sql.Timestamp;
 
 /**
  * <ul>
- * <li>applyUserId: 申请的用户ID</li>
- * <li>applyUserName: 申请用户名字</li>
- * <li>flowMainId: 工作流ID</li>
- * <li>moduleId: 业务模块ID</li>
- * <li>moduleName: 业务名字</li>
- * <li>moduleLink: 路由信息，比如 zl://停车月卡申请/[申请ID] </li>
- * <li>content: 业务处理的内容 </li>
- * <li>createTime: 创建时间 </li>
- * <li>status: 状态 {@link com.everhomes.rest.flow.FlowCaseStatus}</li>
- * <li>needEvaluate: 0: 不需要评价， 1:待评价，2: 已评价</li>
- * <li>evaluateScore: 评价分数</li>
- * <li>allowApplierUpdate: 是否可以编辑</li>
- * <li>flowNodeName: 当前节点名字</li>
- * <li>processorUserName: 当前处理人</li>
+ *     <li>id: id</li>
+ *     <li>applyUserId: 申请的用户ID</li>
+ *     <li>applierName: applierName</li>
+ *     <li>applierPhone: applierPhone</li>
+ *     <li>flowMainId: 工作流ID</li>
+ *     <li>ownerType: ownerType</li>
+ *     <li>referId: referId</li>
+ *     <li>referType: referType</li>
+ *     <li>moduleType: moduleType</li>
+ *     <li>processUserId: processUserId</li>
+ *     <li>processUserName: processUserName</li>
+ *     <li>namespaceId: namespaceId</li>
+ *     <li>content: 业务处理的内容</li>
+ *     <li>status: 状态 {@link com.everhomes.rest.flow.FlowCaseStatus}</li>
+ *     <li>flowVersion: flowVersion</li>
+ *     <li>moduleId: 业务模块ID</li>
+ *     <li>moduleName: 业务名字</li>
+ *     <li>currentNodeId: currentNodeId</li>
+ *     <li>ownerId: ownerId</li>
+ *     <li>moduleLink: 路由信息，比如 zl://停车月卡申请/[申请ID]</li>
+ *     <li>needEvaluate: 0: 不需要评价， 1:待评价，2: 已评价</li>
+ *     <li>evaluateScore: 评价分数</li>
+ *     <li>lastStepTime: lastStepTime</li>
+ *     <li>createTime: 创建时间</li>
+ *     <li>allowApplierUpdate: 是否可以编辑</li>
+ *     <li>flowNodeName: 当前节点名字</li>
+ *     <li>currNodeParams: currNodeParams</li>
+ *     <li>rejectCount: rejectCount</li>
+ *     <li>stepCount: stepCount</li>
+ *     <li>title: title</li>
+ *     <li>currentLane: 当前泳道</li>
+ *     <li>evaluateBtn: 评价按钮，替代原来的needEvaluate字段，统一使用fireButton接口提交评价 {@link com.everhomes.rest.flow.FlowButtonDTO}</li>
+ *     <li>concurrentFlag: 是否是并发执行标记</li>
+ *     <li>routeUri: 路由跳转</li>
  * </ul>
- * @author janson
- *
  */
 public class FlowCaseDTO {
-    private Long     id;
-    private Long     applyUserId;
+
+    private Long id;
+    private Long applyUserId;
     private String applierName;
     private String applierPhone;
-    private Long     flowMainId;
-    private String     ownerType;
-    private Long     referId;
-    private String     referType;
-    private String     moduleType;
-    private Long     processUserId;
+    private Long flowMainId;
+    private String ownerType;
+    private Long referId;
+    private String referType;
+    private String moduleType;
+    private Long processUserId;
     private String processUserName;
-    private Integer     namespaceId;
-    private String     content;
-    private Byte     status;
-    private Integer     flowVersion;
-    private Long     moduleId;
+    private Integer namespaceId;
+    private String content;
+    private Byte status;
+    private Integer flowVersion;
+    private Long moduleId;
     private String moduleName;
-    private Long     currentNodeId;
-    private Long     ownerId;
+    private Long currentNodeId;
+    private Long ownerId;
     private String moduleLink;
     private Byte needEvaluate;
     private Integer evaluateScore;
-	private Timestamp lastStepTime;
-	private Timestamp createTime;
+    private Timestamp lastStepTime;
+    private Timestamp createTime;
     private Byte allowApplierUpdate;
     private String flowNodeName;
     private String currNodeParams;
     private Integer rejectCount;
     private Long stepCount;
     private String title;
-    
-	public Long getId() {
-		return id;
-	}
+    private String currentLane;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    private FlowButtonDTO evaluateBtn;
+    private Byte concurrentFlag;
 
-	public Long getApplyUserId() {
-		return applyUserId;
-	}
+    private String routeUri;
 
-	public void setApplyUserId(Long applyUserId) {
-		this.applyUserId = applyUserId;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public String getApplierName() {
-		return applierName;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setApplierName(String applierName) {
-		this.applierName = applierName;
-	}
+    public Long getApplyUserId() {
+        return applyUserId;
+    }
 
-	public String getApplierPhone() {
-		return applierPhone;
-	}
+    public void setApplyUserId(Long applyUserId) {
+        this.applyUserId = applyUserId;
+    }
 
-	public void setApplierPhone(String applierPhone) {
-		this.applierPhone = applierPhone;
-	}
+    public String getApplierName() {
+        return applierName;
+    }
 
-	public Long getFlowMainId() {
-		return flowMainId;
-	}
+    public void setApplierName(String applierName) {
+        this.applierName = applierName;
+    }
 
-	public void setFlowMainId(Long flowMainId) {
-		this.flowMainId = flowMainId;
-	}
+    public String getApplierPhone() {
+        return applierPhone;
+    }
 
-	public String getOwnerType() {
-		return ownerType;
-	}
+    public String getCurrentLane() {
+        return currentLane;
+    }
 
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
+    public void setCurrentLane(String currentLane) {
+        this.currentLane = currentLane;
+    }
 
-	public Long getReferId() {
-		return referId;
-	}
+    public void setApplierPhone(String applierPhone) {
+        this.applierPhone = applierPhone;
+    }
 
-	public void setReferId(Long referId) {
-		this.referId = referId;
-	}
+    public String getRouteUri() {
+        return routeUri;
+    }
 
-	public String getReferType() {
-		return referType;
-	}
+    public void setRouteUri(String routeUri) {
+        this.routeUri = routeUri;
+    }
 
-	public void setReferType(String referType) {
-		this.referType = referType;
-	}
+    public Long getFlowMainId() {
+        return flowMainId;
+    }
 
-	public String getModuleType() {
-		return moduleType;
-	}
+    public void setFlowMainId(Long flowMainId) {
+        this.flowMainId = flowMainId;
+    }
 
-	public void setModuleType(String moduleType) {
-		this.moduleType = moduleType;
-	}
+    public String getOwnerType() {
+        return ownerType;
+    }
 
-	public Long getProcessUserId() {
-		return processUserId;
-	}
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
 
-	public void setProcessUserId(Long processUserId) {
-		this.processUserId = processUserId;
-	}
+    public Long getReferId() {
+        return referId;
+    }
 
-	public String getProcessUserName() {
-		return processUserName;
-	}
+    public void setReferId(Long referId) {
+        this.referId = referId;
+    }
 
-	public void setProcessUserName(String processUserName) {
-		this.processUserName = processUserName;
-	}
+    public String getReferType() {
+        return referType;
+    }
 
-	public Integer getNamespaceId() {
-		return namespaceId;
-	}
+    public void setReferType(String referType) {
+        this.referType = referType;
+    }
 
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
+    public String getModuleType() {
+        return moduleType;
+    }
 
-	public String getContent() {
-		return content;
-	}
+    public void setModuleType(String moduleType) {
+        this.moduleType = moduleType;
+    }
 
-	public void setContent(String content) {
-		this.content = content;
-	}
+    public Long getProcessUserId() {
+        return processUserId;
+    }
 
-	public Byte getStatus() {
-		return status;
-	}
+    public void setProcessUserId(Long processUserId) {
+        this.processUserId = processUserId;
+    }
 
-	public void setStatus(Byte status) {
-		this.status = status;
-	}
+    public String getProcessUserName() {
+        return processUserName;
+    }
 
-	public Integer getFlowVersion() {
-		return flowVersion;
-	}
+    public void setProcessUserName(String processUserName) {
+        this.processUserName = processUserName;
+    }
 
-	public void setFlowVersion(Integer flowVersion) {
-		this.flowVersion = flowVersion;
-	}
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
 
-	public Long getModuleId() {
-		return moduleId;
-	}
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
-	public void setModuleId(Long moduleId) {
-		this.moduleId = moduleId;
-	}
+    public String getContent() {
+        return content;
+    }
 
-	public String getModuleName() {
-		return moduleName;
-	}
+    public void setContent(String content) {
+        this.content = content;
+    }
 
-	public void setModuleName(String moduleName) {
-		this.moduleName = moduleName;
-	}
+    public Byte getStatus() {
+        return status;
+    }
 
-	public Long getCurrentNodeId() {
-		return currentNodeId;
-	}
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
 
-	public void setCurrentNodeId(Long currentNodeId) {
-		this.currentNodeId = currentNodeId;
-	}
+    public Integer getFlowVersion() {
+        return flowVersion;
+    }
 
-	public Long getOwnerId() {
-		return ownerId;
-	}
+    public void setFlowVersion(Integer flowVersion) {
+        this.flowVersion = flowVersion;
+    }
 
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
-	}
+    public Long getModuleId() {
+        return moduleId;
+    }
 
-	public String getModuleLink() {
-		return moduleLink;
-	}
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
+    }
 
-	public void setModuleLink(String moduleLink) {
-		this.moduleLink = moduleLink;
-	}
+    public String getModuleName() {
+        return moduleName;
+    }
 
-	public Byte getNeedEvaluate() {
-		return needEvaluate;
-	}
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
+    }
 
-	public void setNeedEvaluate(Byte needEvaluate) {
-		this.needEvaluate = needEvaluate;
-	}
+    public Long getCurrentNodeId() {
+        return currentNodeId;
+    }
 
-	public Integer getEvaluateScore() {
-		return evaluateScore;
-	}
+    public void setCurrentNodeId(Long currentNodeId) {
+        this.currentNodeId = currentNodeId;
+    }
 
-	public void setEvaluateScore(Integer evaluateScore) {
-		this.evaluateScore = evaluateScore;
-	}
+    public Long getOwnerId() {
+        return ownerId;
+    }
 
-	public Timestamp getLastStepTime() {
-		return lastStepTime;
-	}
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
 
-	public void setLastStepTime(Timestamp lastStepTime) {
-		this.lastStepTime = lastStepTime;
-	}
+    public String getModuleLink() {
+        return moduleLink;
+    }
 
-	public Timestamp getCreateTime() {
-		return createTime;
-	}
+    public void setModuleLink(String moduleLink) {
+        this.moduleLink = moduleLink;
+    }
 
-	public void setCreateTime(Timestamp createTime) {
-		this.createTime = createTime;
-	}
+    public Byte getNeedEvaluate() {
+        return needEvaluate;
+    }
 
-	public Byte getAllowApplierUpdate() {
-		return allowApplierUpdate;
-	}
+    public void setNeedEvaluate(Byte needEvaluate) {
+        this.needEvaluate = needEvaluate;
+    }
 
-	public void setAllowApplierUpdate(Byte allowApplierUpdate) {
-		this.allowApplierUpdate = allowApplierUpdate;
-	}
+    public Integer getEvaluateScore() {
+        return evaluateScore;
+    }
 
-	public String getFlowNodeName() {
-		return flowNodeName;
-	}
+    public void setEvaluateScore(Integer evaluateScore) {
+        this.evaluateScore = evaluateScore;
+    }
 
-	public void setFlowNodeName(String flowNodeName) {
-		this.flowNodeName = flowNodeName;
-	}
+    public Timestamp getLastStepTime() {
+        return lastStepTime;
+    }
 
-	public String getCurrNodeParams() {
-		return currNodeParams;
-	}
+    public void setLastStepTime(Timestamp lastStepTime) {
+        this.lastStepTime = lastStepTime;
+    }
 
-	public void setCurrNodeParams(String currNodeParams) {
-		this.currNodeParams = currNodeParams;
-	}
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
 
-	public Integer getRejectCount() {
-		return rejectCount;
-	}
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
+    }
 
-	public void setRejectCount(Integer rejectCount) {
-		this.rejectCount = rejectCount;
-	}
+    public Byte getAllowApplierUpdate() {
+        return allowApplierUpdate;
+    }
 
-	public Long getStepCount() {
-		return stepCount;
-	}
+    public void setAllowApplierUpdate(Byte allowApplierUpdate) {
+        this.allowApplierUpdate = allowApplierUpdate;
+    }
 
-	public void setStepCount(Long stepCount) {
-		this.stepCount = stepCount;
-	}
+    public String getFlowNodeName() {
+        return flowNodeName;
+    }
 
-	public String getTitle() {
-		return title;
-	}
+    public void setFlowNodeName(String flowNodeName) {
+        this.flowNodeName = flowNodeName;
+    }
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+    public String getCurrNodeParams() {
+        return currNodeParams;
+    }
 
-	@Override
+    public void setCurrNodeParams(String currNodeParams) {
+        this.currNodeParams = currNodeParams;
+    }
+
+    public Integer getRejectCount() {
+        return rejectCount;
+    }
+
+    public void setRejectCount(Integer rejectCount) {
+        this.rejectCount = rejectCount;
+    }
+
+    public Long getStepCount() {
+        return stepCount;
+    }
+
+    public void setStepCount(Long stepCount) {
+        this.stepCount = stepCount;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public FlowButtonDTO getEvaluateBtn() {
+        return evaluateBtn;
+    }
+
+    public void setEvaluateBtn(FlowButtonDTO evaluateBtn) {
+        this.evaluateBtn = evaluateBtn;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public void setConcurrentFlag(Byte concurrentFlag) {
+        this.concurrentFlag = concurrentFlag;
+    }
+
+    public Byte getConcurrentFlag() {
+        return concurrentFlag;
     }
 }
 

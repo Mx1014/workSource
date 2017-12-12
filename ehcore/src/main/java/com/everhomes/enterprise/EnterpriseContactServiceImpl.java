@@ -189,7 +189,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	            }
 	        }
 		} catch(Exception e) {
-		    LOGGER.error("Failed to process the enterprise contact for the user, userId=" + identifier.getOwnerUid(), e);
+		    LOGGER.error("Failed to processStat the enterprise contact for the user, userId=" + identifier.getOwnerUid(), e);
 		}
 		return null;
 	}
@@ -228,7 +228,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	/**
 	 * 申请加入企业
 	 * 
-	 * @param contact
+	 * @param
 	 */
 	@Override
 	public EnterpriseContactDTO applyForContact(CreateContactByUserIdCommand cmd) {
@@ -443,7 +443,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     /**
      * 当企业成员加入group或者接受别人邀请加入group时，成员状态则待审核变为active，
      * 此时group里的成员数需要增加，为了保证成员数的正确性，需要添加锁；
-     * @param member 成员
+     * @param
      */
     private void updatePendingEnterpriseContactToAuthenticated(EnterpriseContact contact) {
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_GROUP.getCode()).enter(()-> {
@@ -531,7 +531,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     /**
      * 对于通信录联系人，如果是主动申请进来的，若处理待审核状态则可直接删除
      * @param operatorUid 操作者
-     * @param member 成员
+     * @param
      */
     private void deletePendingEnterpriseContact(Long operatorUid, EnterpriseContact contact, boolean removeFromDb) {
         this.dbProvider.execute((status) -> {
@@ -598,7 +598,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	 * 
 	 * @param locator
 	 * @param enterpriseId
-	 * @param count
+	 * @param
 	 * @return
 	 */
 	@Override
@@ -1752,7 +1752,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	/**
 	 * 申请加入企业
 	 * 
-	 * @param contact
+	 * @param
 	 */
 	@Override
 	public EnterpriseContactDTO applyForEnterpriseContact(CreateOrganizationMemberCommand cmd) {
@@ -1895,6 +1895,11 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	
 	@Override
 	public ListOrganizationMemberCommandResponse listOrganizationPersonnels(ListOrganizationContactCommand cmd) {
+
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
 		ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
 		Organization org = this.checkOrganization(cmd.getOrganizationId());
 		if(null == org)
@@ -1910,7 +1915,8 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		orgCommoand.setStatus(GroupMemberStatus.ACTIVE.getCode());
 		orgCommoand.setGroupType(org.getGroupType());
 		
-		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(),orgCommoand, null,null, locator, pageSize);
+		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getNamespaceId(),
+				cmd.getKeywords(),orgCommoand, null,null, locator, pageSize);
 		
 		if(0 == organizationMembers.size()){
 			return response;
@@ -1925,6 +1931,11 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	
 	@Override
 	public ListOrganizationMemberCommandResponse listOrgAuthPersonnels(ListOrganizationContactCommand cmd) {
+
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
 		ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
 		Organization org = this.checkOrganization(cmd.getOrganizationId());
 		if(null == org)
@@ -1940,7 +1951,8 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		orgCommoand.setStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
 		orgCommoand.setGroupType(org.getGroupType());
 		
-		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(), orgCommoand, null,null, locator, pageSize);
+		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getNamespaceId(),
+				cmd.getKeywords(), orgCommoand, null,null, locator, pageSize);
 		
 		if(0 == organizationMembers.size()){
 			return response;
@@ -2126,12 +2138,11 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	/**
 	 * 补充返回用户信息，部门 角色
 	 * @param organizationMembers
-	 * @param depts
+	 * @param
 	 * @return
 	 */
 	private List<OrganizationMemberDTO> convertDTO(List<OrganizationMember> organizationMembers, Organization org){
-		List<Organization> depts = organizationProvider.listDepartments(org.getPath()+"/%", 1, 1000);
-		
+		List<Organization> depts = organizationProvider.listDepartments(org.getPath().split("/")[1]+"/%", 1, 1000);
 		Long orgId = null;
 
 		if(org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){

@@ -6,7 +6,6 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.rest.parking.ParkingLotVendor;
 import org.jooq.SortField;
 
 public interface ParkingProvider {
@@ -47,10 +46,10 @@ public interface ParkingProvider {
     
     List<ParkingCardRequest> searchParkingCardRequests(String ownerType, Long ownerId, Long parkingLotId,
                                                        String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate,
-                                                       Timestamp endDate, Byte status, String carBrand, String carSerieName, String plateOwnerEntperiseName,
-                                                       Long flowId, SortField order, Long pageAnchor, Integer pageSize);
+                                                       Timestamp endDate, Byte status, String carBrand, String carSeriesName, String plateOwnerEnterpriseName,
+                                                       Long flowId, SortField order, String cardTypeId, Long pageAnchor, Integer pageSize);
     
-    void setParkingLotConfig(ParkingLot parkingLot);
+    void updateParkingLot(ParkingLot parkingLot);
     
     ParkingCardRequest findParkingCardRequestById(Long id);
     
@@ -91,4 +90,41 @@ public interface ParkingProvider {
     Integer countParkingCardRequest(String ownerType, Long ownerId, Long parkingLotId, Long flowId, Byte geStatus, Byte status);
     
     ParkingFlow findParkingRequestCardConfig(Long id);
+
+    ParkingInvoiceType findParkingInvoiceTypeById(Long id);
+
+    ParkingCardRequestType findParkingCardTypeByTypeId(String ownerType, Long ownerId, Long parkingLotId, String cardTypeId);
+
+    List<ParkingInvoiceType> listParkingInvoiceTypes(String ownerType, Long ownerId, Long parkingLotId);
+
+    List<ParkingCardRequestType> listParkingCardTypes(String ownerType, Long ownerId, Long parkingLotId);
+
+    void createParkingUserInvoice(ParkingUserInvoice parkingUserInvoice);
+
+    void updateParkingUserInvoice(ParkingUserInvoice parkingUserInvoice);
+
+    ParkingUserInvoice findParkingUserInvoiceByUserId(String ownerType, Long ownerId, Long parkingLotId, Long userId);
+
+    ParkingRechargeRate findParkingRechargeRateByMonthCount(String ownerType, Long ownerId, Long parkingLotId,
+                                                            String cardType, BigDecimal monthCount);
+
+    void createParkingCarVerification(ParkingCarVerification parkingCarVerification);
+
+    void updateParkingCarVerification(ParkingCarVerification parkingCarVerification);
+
+    ParkingCarVerification findParkingCarVerificationById(Long id);
+
+    List<ParkingCarVerification> searchParkingCarVerifications(String ownerType, Long ownerId, Long parkingLotId,
+                                                               String plateNumber, String plateOwnerName, String plateOwnerPhone,
+                                                               Timestamp startDate, Timestamp endDate, Byte status,
+                                                               String requestorEnterpriseName, Long pageAnchor, Integer pageSize);
+
+    List<ParkingCarVerification> listParkingCarVerifications(String ownerType, Long ownerId, Long parkingLotId,
+                                                             Long requestorUid, Byte sourceType, Long pageAnchor, Integer pageSize);
+
+    ParkingCarVerification findParkingCarVerificationByUserId(String ownerType, Long ownerId, Long parkingLotId, String plateNumber,
+                                                              Long userId);
+
+    ParkingRechargeOrder getParkingRechargeTempOrder(String ownerType, Long ownerId, Long parkingLotId,
+                                                     String plateNumber, Timestamp startDate, Timestamp endDate);
 }

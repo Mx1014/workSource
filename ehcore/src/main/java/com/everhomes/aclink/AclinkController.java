@@ -1,5 +1,6 @@
 package com.everhomes.aclink;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -12,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.discover.SuppressDiscover;
 import com.everhomes.entity.EntityType;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -44,6 +47,7 @@ import com.everhomes.rest.aclink.AclinkMessageTestCommand;
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
 import com.everhomes.rest.aclink.AclinkRemoteOpenByHardwareIdCommand;
 import com.everhomes.rest.aclink.AclinkRemoteOpenCommand;
+import com.everhomes.rest.aclink.AclinkServiceErrorCode;
 import com.everhomes.rest.aclink.AclinkSyncTimerCommand;
 import com.everhomes.rest.aclink.AclinkUpdateLinglingStoreyCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeCommand;
@@ -72,8 +76,10 @@ import com.everhomes.rest.aclink.ListDoorAuthCommand;
 import com.everhomes.rest.aclink.ListDoorAuthResponse;
 import com.everhomes.rest.aclink.QueryDoorMessageCommand;
 import com.everhomes.rest.aclink.QueryDoorMessageResponse;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
+import com.everhomes.util.RuntimeErrorException;
 
 @RestDoc(value="Aclink controller", site="core")
 @RestController
@@ -93,6 +99,9 @@ public class AclinkController extends ControllerBase {
     
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
+    
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
     
     /**
      * <b>URL: /aclink/activing</b>
@@ -214,21 +223,13 @@ public class AclinkController extends ControllerBase {
         Long role = 0l;
         
         if(cmd.getOrganizationId() != null) {
-            
-            //Only for active door
+       
             try {
-                rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.AclinkManager);
+                userPrivilegeMgr.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.MODULE_ACLINK_MANAGER);
+                //rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.AclinkInnerManager);
                 role = 1l;
-            } catch(Exception e) {
-                
-            }
+            } catch(Exception e) {}
             
-            try {
-                rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.AclinkInnerManager);
-                role = 1l;
-            } catch(Exception e) {
-                
-            }
         }
         
         resp.setRole(role);
@@ -399,6 +400,24 @@ public class AclinkController extends ControllerBase {
     
     /**
      * 
+     * <b>URL: /aclink/listDoorAccessWebQRKey</b>
+     * <p>列出所有二维码门禁列表 </p>
+     * @return
+     */
+    @RequestMapping("listDoorAccessWebQRKey")
+    @RestReturn(value=ListDoorAccessQRKeyResponse.class)
+    public RestResponse listDoorAccessWebQRKey() {
+        RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.listDoorAccessQRKeyAndGenerateQR(true));
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
      * <b>URL: /aclink/getVisitor</b>
      * <p> 设备访客二维码 </p>
      * @return
@@ -471,7 +490,10 @@ public class AclinkController extends ControllerBase {
             //https://core.zuolin.com/mobile/static/qr_access/qrCode.html?id=10ae5-15016
             //getVisitor
             DoorAuth auth = doorAccessService.getLinglingDoorAuthByUuid(cmd.getId());
-            if(auth.getDriver().equals(DoorAccessDriverType.PHONE_VISIT.getCode())) {
+//            if(auth == null) {
+//                throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "DoorAuth error");
+//            }
+            if(auth != null && auth.getDriver().equals(DoorAccessDriverType.PHONE_VISIT.getCode())) {
                 httpHeaders.setLocation(new URI("/mobile/static/qr_access/qrPhoneCode.html?id=" + cmd.getId()));
                 
             } else {
@@ -601,7 +623,7 @@ public class AclinkController extends ControllerBase {
     
     /**
      * 
-     * <b>URL: /aclink/remoteOpen</b>
+     * <b>URL: /aclink/updateAndQueryQR</b>
      * <p>删除一个组或者单独一个门禁设备</p>
      * @return
      */
@@ -661,4 +683,68 @@ public class AclinkController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /aclink/aliTest</b>
+     * <p>alitest 001</p>
+     * @return 
+     */
+    @SuppressDiscover
+    @RequireAuthentication(false)
+    @RequestMapping("aliTest")
+    public String aliTest(HttpServletRequest request, HttpServletResponse response) {
+        String redirectUrl = "https://openauth.alipay.com/oauth2/publicAppAuthorize.htm?app_id=2017072507886723&scope=auth_user&state=testbyzuolin&redirect_uri=";
+        try {
+            redirectUrl += URLEncoder.encode("https://ali.ddns.to/evh/aclink/aliTest2?", "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        try {
+            response.sendRedirect(redirectUrl);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return "";
+    }
+    
+    /**
+     * <b>URL: /aclink/aliTest</b>
+     * <p>alitest 002</p>
+     * @return 
+     */
+    @SuppressDiscover
+    @RequireAuthentication(false)
+    @RequestMapping("aliTest2")
+    public String aliTest2(HttpServletRequest request) {
+        return doorAccessService.aliTest2(request);
+    }
+    
+    /**
+     * <b>URL: /aclink/faceTest</b>
+     * <p>alitest 002</p>
+     * @return 
+     */
+    @SuppressDiscover
+    @RequireAuthentication(false)
+    @RequestMapping("faceTest")
+    public String faceTest(HttpServletRequest request) {
+        return doorAccessService.faceTest();
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/v</b>
+     * <p>列出所有二维码门禁列表 </p>
+     * @return
+     */
+    /*@RequestMapping("doorTest3")
+    @RequireAuthentication(false)
+    public Object doorTest3(HttpServletRequest request) {
+        doorAccessService.sendXiaomiMessage();
+        Map<String,Long> m = new HashMap<String,Long>();
+        m.put("result", 0l);
+        return m;
+    }*/
 }

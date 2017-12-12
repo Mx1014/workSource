@@ -1,8 +1,12 @@
 // @formatter:off
 package com.everhomes.openapi;
 
+import com.everhomes.contract.ContractParam;
+import com.everhomes.listing.CrossShardListingLocator;
+
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
 public interface ContractProvider {
 
@@ -22,14 +26,33 @@ public interface ContractProvider {
 
 	List<Contract> listContractByNamespaceId(Integer namespaceId, int from, int pageSize);
 
-	List<Contract> listContractsByEndDateRange(Timestamp minValue, Timestamp maxValue);
+	List<Contract> listContractsByEndDateRange(Timestamp minValue, Timestamp maxValue, Integer namespaceId);
 
-	List<Contract> listContractsByCreateDateRange(Timestamp minValue, Timestamp maxValue);
+	List<Contract> listContractsByCreateDateRange(Timestamp minValue, Timestamp maxValue, Integer namespaceId);
 
 	void deleteContract(Contract contract);
 
 	List<Contract> listContractByOrganizationId(Integer namespaceId, Long organizationId);
 
 	List<Contract> listContractByOrganizationId(Long organizationId);
+	List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType);
 
+	Map<Long, Contract> listContractsByIds(List<Long> ids);
+	List<Contract> listContracts(CrossShardListingLocator locator, Integer pageSize);
+
+	Contract findActiveContractByContractNumber(Integer namespaceId, String contractNumber);
+
+	List<Contract> listContractByAddressId(Long addressId);
+	List<Contract> listContractByBuildingName(String buildingName, Long communityId);
+
+    List<Object> findCustomerByContractNum(String contractNum);
+
+	void createContractParam(ContractParam param);
+	void updateContractParam(ContractParam param);
+	ContractParam findContractParamByCommunityId(Long communityId);
+	Map<Long, List<Contract>> listContractGroupByCommunity();
+	String findLastContractVersionByCommunity(Integer namespaceId, Long communityId);
+
+	List<Contract> listContractByNamespaceType(Integer namespaceId, String namespaceType, Long communityId);
+	List<Contract> listContractsByAddressId(Long addressId);
 }

@@ -8,6 +8,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.organization.Organization;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.user.InvitationRoster;
 import com.everhomes.rest.user.UserInvitationsDTO;
 
@@ -21,6 +22,7 @@ public interface UserProvider {
     List<User> queryUsers(CrossShardListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
     
     List<UserIdentifier> listUserIdentifiersOfUser(long userId);
+    UserIdentifier findUserIdentifiersOfUser(long userId, Integer namespaceId);
 
     void createIdentifier(UserIdentifier userIdentifier);
     void updateIdentifier(UserIdentifier userIdentifier);
@@ -29,10 +31,14 @@ public interface UserProvider {
     UserIdentifier findIdentifierById(long id);
     List<UserIdentifier> findClaimingIdentifierByToken(String identifierToken);
     List<UserIdentifier> findClaimedIdentifiersByToken(String identifierToken);
+    List<UserIdentifier> listClaimedIdentifiersByTokens(Integer namespaceId,List<String> identifiers);
+
     UserIdentifier findClaimedIdentifierByToken(String identifierToken);
     UserIdentifier findClaimedIdentifierByToken(Integer namespaceId, String identifierToken);
     UserIdentifier findClaimedIdentifierByOwnerAndType(long ownerId, byte identifierType);
-    
+
+    UserIdentifier findIdentifierByOwnerAndTypeAndClaimStatus(long ownerUid, byte identifierType, byte claimStatus);
+
     void createUserGroup(UserGroup userGroup);
     void updateUserGroup(UserGroup userGroup);
     void deleteUserGroup(UserGroup userGroup);
@@ -70,19 +76,16 @@ public interface UserProvider {
 	UserCommunity findUserCommunityByOwnerAndCommunity(long ownerUid, long communityId);
 	List<User> findUserByNamespaceId(Integer namespaceId, CrossShardListingLocator locator, int pageSize);
 	List<User> listUserByKeywords(String keyword);
-	
-	int countUserByNamespaceId(Integer namespaceId, Boolean isAuth);
+
+    int countUserByNamespaceIdAndGender(Integer namespaceId, Byte gender);
+
+    int countUserByNamespaceId(Integer namespaceId, Boolean isAuth);
 	List<User> listUserByNickNameOrIdentifier(String keyword);
 	List<UserIdentifier> listUserIdentifierByIdentifier(String identifier);
 	List<User> listUserByIds(Integer namespaceId, List<Long> userIds);
 	
 	/**
 	 * Added by Janson
-	 * @param namespaceId
-	 * @param organizationId
-	 * @param buildingId
-	 * @param isAuth
-	 * @param keyword
 	 * @param locator
 	 * @param pageSize
 	 * @return
@@ -127,4 +130,30 @@ public interface UserProvider {
      * @return  返回该记录的id
      */
     long createUserNotificationSetting(UserNotificationSetting setting);
+
+
+    List<TargetDTO> findUesrIdByNameAndAddressId(String targetName, List<Long> ids, String tel);
+
+    TargetDTO findUserByTokenAndName(String tel, String targetName);
+
+    /**
+     * 查询非当前userId的正常用户数据
+     * @param namespaceId
+     * @param identifierToken
+     * @param userId
+     * @return
+     */
+    UserIdentifier findClaimedIdentifierByTokenAndNotUserId(Integer namespaceId, String identifierToken, Long userId);
+
+    int countUserByNamespaceIdAndNamespaceUserType(Integer namespaceId, String namespaceUserType);
+
+    /**
+     * 用于测试缓存使用是否正常，不要用于业务使用 by lqs 20171019
+     */
+    String checkCacheStatus();
+    
+    /**
+     * 用于测试缓存使用是否正常，不要用于业务使用 by lqs 20171019
+     */
+    void updateCacheStatus();
 }
