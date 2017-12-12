@@ -324,4 +324,12 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 		dao.insert(scopes.toArray(new WebMenuScope[scopes.size()]));
 	}
 
+	@Override
+	public void deleteWebMenuScopesByMenuIdAndNamespace(List<Integer> socpeIds, Integer namespaceId) {
+		dbProvider.getDslContext(AccessSpec.readWrite()).delete(Tables.EH_WEB_MENU_SCOPES)
+			.where(Tables.EH_WEB_MENU_SCOPES.MENU_ID.in(socpeIds))
+			.and(Tables.EH_WEB_MENU_SCOPES.OWNER_ID.eq(Long.valueOf(namespaceId)))
+			.and(Tables.EH_WEB_MENU_SCOPES.OWNER_TYPE.eq("EhNamespaces"))
+			.execute();
+	}
 }

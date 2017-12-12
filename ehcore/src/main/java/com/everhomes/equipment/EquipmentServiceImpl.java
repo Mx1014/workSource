@@ -274,6 +274,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 			equipmentProvider.updateEquipmentStandard(standard);
 
+			//PS:这里删除是因为荣超需求
 			/*List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
 			if(maps != null && maps.size() > 0) {
 				for(EquipmentStandardMap map : maps) {
@@ -301,6 +302,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	private void unReviewEquipmentStandardRelations(EquipmentStandardMap map) {
 		map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
 		map.setReviewResult(ReviewResult.NONE.getCode());
+		map.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
 		equipmentProvider.updateEquipmentStandardMap(map);
 		equipmentStandardMapSearcher.feedDoc(map);
 
@@ -324,7 +326,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		List<StandardGroupDTO> executiveGroup = new ArrayList<StandardGroupDTO>();
 		List<StandardGroupDTO> reviewGroup = new ArrayList<StandardGroupDTO>();
-		LOGGER.info("converStandardToDto  standard.getExecutiveGroup:"+standard.getExecutiveGroup());
 		if(standard.getExecutiveGroup() != null) {
 			executiveGroup = standard.getExecutiveGroup().stream().map((r) -> {
 
@@ -377,8 +378,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 		standardDto.setRepeat(repeatDto);
 		standardDto.setExecutiveGroup(executiveGroup);
 		standardDto.setReviewGroup(reviewGroup);
-		LOGGER.info("converStandardToDto  executiveGroup:"+executiveGroup);
-		LOGGER.info("converStandardToDto  standardDTO.getExecutiveGroup:"+standardDto.getExecutiveGroup());
 		return standardDto;
 	}
 
@@ -421,6 +420,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	private void inActiveEquipmentStandardRelations(EquipmentStandardMap map) {
 		map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
 		map.setReviewResult(ReviewResult.INACTIVE.getCode());
+		map.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
 		equipmentProvider.updateEquipmentStandardMap(map);
 		equipmentStandardMapSearcher.feedDoc(map);
 
@@ -611,8 +611,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 		processRepeatSetting(standard);
 
 		equipmentProvider.populateStandardGroups(standard);
-		LOGGER.info("stamdard executeGroups:" + standard.getExecutiveGroup());
-		LOGGER.info("stamdard reviewGroups:" + standard.getReviewGroup());
 		EquipmentStandardsDTO dto = converStandardToDto(standard);
 
 		return dto;
@@ -754,6 +752,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(EquipmentReviewStatus.INACTIVE.equals(EquipmentReviewStatus.fromStatus(map.getReviewStatus()))) {
 			map.setReviewStatus(EquipmentReviewStatus.DELETE.getCode());
 			map.setReviewResult(ReviewResult.NONE.getCode());
+			//fix bug #20247
+			map.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
 			equipmentProvider.updateEquipmentStandardMap(map);
 			equipmentStandardMapSearcher.feedDoc(map);
 		} else {
@@ -1003,6 +1003,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 						if(maps.size() > 0) {
 							maps.forEach(map -> {
 								map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
+								//fix bug #20247
+								map.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
 								equipmentProvider.updateEquipmentStandardMap(map);
 								equipmentStandardMapSearcher.feedDoc(map);
 							});
@@ -1021,6 +1023,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 				for(EquipmentStandardMap map : maps) {
                     if(!updateStandardIds.contains(map.getStandardId())) {
                         map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
+                        //fix bug #20247
+						map.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
                         equipmentProvider.updateEquipmentStandardMap(map);
                         equipmentStandardMapSearcher.feedDoc(map);
 

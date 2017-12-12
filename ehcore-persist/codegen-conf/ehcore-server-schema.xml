@@ -196,7 +196,7 @@
             eh_payment_withdraw_orders |eh_community_organization_detail_display |
             eh_forum_service_types |
             eh_me_web_menus |
-	        eh_authorization_control_configs | eh_reflection_service_module_apps |
+	        eh_authorization_control_configs | eh_reflection_service_module_apps | 
         </includes>
 
             <!-- All elements that are excluded from your schema

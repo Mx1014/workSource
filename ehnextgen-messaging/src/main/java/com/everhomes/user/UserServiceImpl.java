@@ -4877,6 +4877,9 @@ public class UserServiceImpl implements UserService {
 			listNearbyMixCommunitiesCommand.setPageAnchor(0L);
 
 			List<Community> communities = this.addressService.listMixCommunitiesByDistanceWithNamespaceId(listNearbyMixCommunitiesCommand, locator, pageSize);
+			//如果查询不出结果
+			if(communities == null)
+				return this.listTouristRelatedScenes();
 
 			List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
 

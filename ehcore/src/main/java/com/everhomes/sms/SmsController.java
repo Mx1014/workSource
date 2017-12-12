@@ -10,7 +10,9 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.sms.ListReportLogCommand;
 import com.everhomes.rest.sms.ListSmsLogsResponse;
 import com.everhomes.rest.sms.SendTestSmsCommand;
+import com.everhomes.rest.sms.SmsHandlerResponse;
 import com.everhomes.util.RequireAuthentication;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,6 +96,16 @@ public class SmsController extends ControllerBase {
     public RestResponse smsReport(@PathVariable("handler") String handlerName, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         smsService.smsReport(handlerName, httpServletRequest, httpServletResponse);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
+    @RequestMapping("handlers")
+    @RestReturn(value = SmsHandlerResponse.class)
+    public RestResponse smsHandlers() {
+        RestResponse response = new RestResponse(smsService.listSmsHandlers());
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

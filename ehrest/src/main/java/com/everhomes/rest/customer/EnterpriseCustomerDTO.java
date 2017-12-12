@@ -151,8 +151,161 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private Double longitude;
     private Double latitude;
     private String contactDuty;
-    
-    
+
+    private String founderIntroduce;
+    private Timestamp foundingTime;
+    private Long registrationTypeId;
+    private String registrationTypeName;
+    private Long technicalFieldId;
+    private String technicalFieldName;
+    private Long taxpayerTypeId;
+    private String taxpayerTypeName;
+    private Long relationWillingId;
+    private String relationWillingName;
+    private Long highAndNewTechId;
+    private String highAndNewTechName;
+    private Long entrepreneurialCharacteristicsId;
+    private String entrepreneurialCharacteristicsName;
+    private Long serialEntrepreneurId;
+    private String serialEntrepreneurName;
+    private BigDecimal riskInvestmentAmount;
+
+    public Long getEntrepreneurialCharacteristicsId() {
+        return entrepreneurialCharacteristicsId;
+    }
+
+    public void setEntrepreneurialCharacteristicsId(Long entrepreneurialCharacteristicsId) {
+        this.entrepreneurialCharacteristicsId = entrepreneurialCharacteristicsId;
+    }
+
+    public String getEntrepreneurialCharacteristicsName() {
+        return entrepreneurialCharacteristicsName;
+    }
+
+    public void setEntrepreneurialCharacteristicsName(String entrepreneurialCharacteristicsName) {
+        this.entrepreneurialCharacteristicsName = entrepreneurialCharacteristicsName;
+    }
+
+    public String getFounderIntroduce() {
+        return founderIntroduce;
+    }
+
+    public void setFounderIntroduce(String founderIntroduce) {
+        this.founderIntroduce = founderIntroduce;
+    }
+
+    public Timestamp getFoundingTime() {
+        return foundingTime;
+    }
+
+    public void setFoundingTime(Timestamp foundingTime) {
+        this.foundingTime = foundingTime;
+    }
+
+    public Long getHighAndNewTechId() {
+        return highAndNewTechId;
+    }
+
+    public void setHighAndNewTechId(Long highAndNewTechId) {
+        this.highAndNewTechId = highAndNewTechId;
+    }
+
+    public String getHighAndNewTechName() {
+        return highAndNewTechName;
+    }
+
+    public void setHighAndNewTechName(String highAndNewTechName) {
+        this.highAndNewTechName = highAndNewTechName;
+    }
+
+    public Long getRegistrationTypeId() {
+        return registrationTypeId;
+    }
+
+    public void setRegistrationTypeId(Long registrationTypeId) {
+        this.registrationTypeId = registrationTypeId;
+    }
+
+    public String getRegistrationTypeName() {
+        return registrationTypeName;
+    }
+
+    public void setRegistrationTypeName(String registrationTypeName) {
+        this.registrationTypeName = registrationTypeName;
+    }
+
+    public Long getRelationWillingId() {
+        return relationWillingId;
+    }
+
+    public void setRelationWillingId(Long relationWillingId) {
+        this.relationWillingId = relationWillingId;
+    }
+
+    public String getRelationWillingName() {
+        return relationWillingName;
+    }
+
+    public void setRelationWillingName(String relationWillingName) {
+        this.relationWillingName = relationWillingName;
+    }
+
+    public BigDecimal getRiskInvestmentAmount() {
+        return riskInvestmentAmount;
+    }
+
+    public void setRiskInvestmentAmount(BigDecimal riskInvestmentAmount) {
+        this.riskInvestmentAmount = riskInvestmentAmount;
+    }
+
+    public Long getSerialEntrepreneurId() {
+        return serialEntrepreneurId;
+    }
+
+    public void setSerialEntrepreneurId(Long serialEntrepreneurId) {
+        this.serialEntrepreneurId = serialEntrepreneurId;
+    }
+
+    public String getSerialEntrepreneurName() {
+        return serialEntrepreneurName;
+    }
+
+    public void setSerialEntrepreneurName(String serialEntrepreneurName) {
+        this.serialEntrepreneurName = serialEntrepreneurName;
+    }
+
+    public Long getTaxpayerTypeId() {
+        return taxpayerTypeId;
+    }
+
+    public void setTaxpayerTypeId(Long taxpayerTypeId) {
+        this.taxpayerTypeId = taxpayerTypeId;
+    }
+
+    public String getTaxpayerTypeName() {
+        return taxpayerTypeName;
+    }
+
+    public void setTaxpayerTypeName(String taxpayerTypeName) {
+        this.taxpayerTypeName = taxpayerTypeName;
+    }
+
+    public Long getTechnicalFieldId() {
+        return technicalFieldId;
+    }
+
+    public void setTechnicalFieldId(Long technicalFieldId) {
+        this.technicalFieldId = technicalFieldId;
+    }
+
+    public String getTechnicalFieldName() {
+        return technicalFieldName;
+    }
+
+    public void setTechnicalFieldName(String technicalFieldName) {
+        this.technicalFieldName = technicalFieldName;
+    }
+
     public String getContactAvatarUrl() {
         return contactAvatarUrl;
     }
