@@ -18,6 +18,7 @@ import com.everhomes.server.schema.tables.pojos.EhLeaseProjects;
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotionCommunities;
 import com.everhomes.server.schema.tables.records.EhLeaseBuildingsRecord;
 import com.everhomes.server.schema.tables.records.EhLeaseProjectCommunitiesRecord;
+import com.everhomes.server.schema.tables.records.EhLeaseProjectsRecord;
 import com.everhomes.server.schema.tables.records.EhLeasePromotionCommunitiesRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -42,7 +43,8 @@ public class EnterpriseApplyBuildingProviderImpl implements EnterpriseApplyBuild
     private SequenceProvider sequenceProvider;
 
     @Override
-    public List<LeaseBuilding> listLeaseBuildings(Integer namespaceId, Long communityId, Long pageAnchor, Integer pageSize) {
+    public List<LeaseBuilding> listLeaseBuildings(Integer namespaceId, Long communityId, Long categoryId, Long pageAnchor,
+                                                  Integer pageSize) {
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseBuildings.class));
 
@@ -54,6 +56,9 @@ public class EnterpriseApplyBuildingProviderImpl implements EnterpriseApplyBuild
 
         if (null != namespaceId) {
             query.addConditions(Tables.EH_LEASE_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
+        }
+        if (null != categoryId) {
+            query.addConditions(Tables.EH_LEASE_BUILDINGS.CATEGORY_ID.eq(categoryId));
         }
         if (null != communityId) {
             query.addConditions(Tables.EH_LEASE_BUILDINGS.COMMUNITY_ID.eq(communityId));
@@ -69,7 +74,7 @@ public class EnterpriseApplyBuildingProviderImpl implements EnterpriseApplyBuild
     }
 
     @Override
-    public Boolean verifyBuildingName(Integer namespaceId, Long communityId, String buildingName) {
+    public Boolean verifyBuildingName(Integer namespaceId, Long communityId, String buildingName, Long categoryId) {
 
         final Integer[] count = new Integer[1];
         this.dbProvider.mapReduce(AccessSpec.readWrite(), null,
@@ -81,6 +86,7 @@ public class EnterpriseApplyBuildingProviderImpl implements EnterpriseApplyBuild
                     Condition condition = Tables.EH_LEASE_BUILDINGS.COMMUNITY_ID.eq(communityId);
                     condition = condition.and(Tables.EH_LEASE_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
                     condition = condition.and(Tables.EH_LEASE_BUILDINGS.NAME.eq(buildingName));
+                    condition = condition.and(Tables.EH_LEASE_BUILDINGS.CATEGORY_ID.eq(categoryId));
 
                     count[0] = query.where(condition).fetchOneInto(Integer.class);
                     return true;
@@ -247,13 +253,14 @@ public class EnterpriseApplyBuildingProviderImpl implements EnterpriseApplyBuild
     }
 
     @Override
-    public List<Long> listLeaseProjectCommunities(Long leaseProjectId) {
+    public List<Long> listLeaseProjectCommunities(Long leaseProjectId, Long categoryId) {
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseProjectCommunities.class));
 
         SelectQuery<EhLeaseProjectCommunitiesRecord> query = context.selectQuery(Tables.EH_LEASE_PROJECT_COMMUNITIES);
 
         query.addConditions(Tables.EH_LEASE_PROJECT_COMMUNITIES.LEASE_PROJECT_ID.eq(leaseProjectId));
+        query.addConditions(Tables.EH_LEASE_PROJECT_COMMUNITIES.CATEGORY_ID.eq(categoryId));
 
         return query.fetch(Tables.EH_LEASE_PROJECT_COMMUNITIES.COMMUNITY_ID);
     }
@@ -271,13 +278,16 @@ public class EnterpriseApplyBuildingProviderImpl implements EnterpriseApplyBuild
     }
 
     @Override
-    public LeaseProject findLeaseProjectByProjectId(Long projectId) {
+    public LeaseProject findLeaseProjectByProjectId(Long projectId, Long categoryId) {
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
-        EhLeaseProjectsDao dao = new EhLeaseProjectsDao(context.configuration());
+        SelectQuery<EhLeaseProjectsRecord> query = context.selectQuery(Tables.EH_LEASE_PROJECTS);
 
-        return ConvertHelper.convert(dao.fetchOne(Tables.EH_LEASE_PROJECTS.PROJECT_ID, projectId), LeaseProject.class);
+        query.addConditions(Tables.EH_LEASE_PROJECTS.PROJECT_ID.eq(projectId));
+        query.addConditions(Tables.EH_LEASE_PROJECTS.CATEGORY_ID.eq(categoryId));
+
+        return ConvertHelper.convert(query.fetchOne(), LeaseProject.class);
 
     }
 }

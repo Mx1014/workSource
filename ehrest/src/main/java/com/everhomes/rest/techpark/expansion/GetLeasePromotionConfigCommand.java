@@ -10,6 +10,16 @@ import com.everhomes.util.StringHelper;
 public class GetLeasePromotionConfigCommand {
     private Integer namespaceId;
 
+    private Long categoryId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
     public Integer getNamespaceId() {
         return namespaceId;
     }

@@ -2862,10 +2862,34 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public List<OrganizationDTO> listUserRelateOrganizations(Integer namespaceId, Long userId, OrganizationGroupType groupType) {
         Long startTime = System.currentTimeMillis();
+
+        List<Organization> organizations = listUserOrganizations(namespaceId, userId, groupType);
+
+        List<OrganizationDTO> dtos = new ArrayList<>();
+
+        for (Organization org: organizations) {
+            OrganizationDTO dto = toOrganizationDTO(userId, org);
+
+            dtos.add(dto);
+        }
+
+        //：todo 去重
+        dtos = new ArrayList<>(new HashSet<>(dtos));
+
+        Long endTime = System.currentTimeMillis();
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("TrackUserRelatedCost:listUserRelateOrganizations:elapse:{}", endTime - startTime);
+        }
+        return dtos;
+    }
+
+    @Override
+    public List<Organization> listUserOrganizations(Integer namespaceId, Long userId, OrganizationGroupType groupType) {
+        OrganizationGroupType tempGroupType = null;
+
         List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(userId);
 
-        OrganizationGroupType tempGroupType = null;
-        List<OrganizationDTO> dtos = new ArrayList<OrganizationDTO>();
+        List<Organization> dtos = new ArrayList<>();
         for (OrganizationMember member : orgMembers) {
             // 如果机构不存在，则丢弃该成员对应的机构
             Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
@@ -2902,34 +2926,16 @@ public class OrganizationServiceImpl implements OrganizationService {
                         + ", namespaceId=" + namespaceId + ", groupType=" + groupType + ", orgStatus" + orgStatus);
                 continue;
             }
+            dtos.add(org);
 
-            OrganizationDTO dto = toOrganizationDTO(userId, org);
-
-            if(OrganizationMemberGroupType.fromCode(member.getMemberGroup()) == OrganizationMemberGroupType.MANAGER){
-                dto.setManagerFlag(AdminFlag.YES.getCode());
-            }
-            dtos.add(dto);
         }
 
-        //：todo 去重
-        dtos = new ArrayList<>(new HashSet<>(dtos));
-
-        Long endTime = System.currentTimeMillis();
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("TrackUserRelatedCost:listUserRelateOrganizations:elapse:{}", endTime - startTime);
-        }
         return dtos;
     }
 
     private OrganizationDTO toOrganizationDTO(Long userId, Organization organization) {
         OrganizationDTO organizationDto = ConvertHelper.convert(organization, OrganizationDTO.class);
         organizationDto.setOrganizationType(organization.getOrganizationType());
-
-        OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organization.getId());
-        if (member != null && member.getStatus() != null)
-            organizationDto.setMemberStatus(member.getStatus());
-        else
-            organizationDto.setMemberStatus(OrganizationMemberStatus.INACTIVE.getCode());
 
         OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
         if (organizationDetail == null) {
@@ -2998,6 +3004,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         OrganizationMember orgMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organization.getId());
         if (orgMember != null) {
             organizationDto.setMemberStatus(orgMember.getStatus());
+            if(OrganizationMemberGroupType.fromCode(orgMember.getMemberGroup()) == OrganizationMemberGroupType.MANAGER){
+                organizationDto.setManagerFlag(AdminFlag.YES.getCode());
+            }
         }
 
         return organizationDto;

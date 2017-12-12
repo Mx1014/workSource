@@ -134,6 +134,7 @@ public interface ConfigConstants {
 
     String APP_SYSTEM_UPLOAD_URL_IN_BROWSER = "app.system.upload_url_in_browser";
 
+    String RELOCATION_FLOWCASE_URL = "relocation.flowCase.url";
 
     public static final String ASSET_PAYMENT_ZJH_URL = "asset.payment.zjh.url";
     public static final String ASSET_PAYMENT_ZJH_API_8 = "asset.payment.zjh.api.2.2.4.8";

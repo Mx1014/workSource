@@ -11,6 +11,7 @@ public class UpdateLeaseProjectCommand {
 
     private Integer namespaceId;
     private Long projectId;
+    private Long categoryId;
     private Long cityId;
     private String cityName;
     private Long areaId;
@@ -49,6 +50,14 @@ public class UpdateLeaseProjectCommand {
     private String parkingSpaceAmount;
     private String parkingTempFee;
     private String enteredEnterprises;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     public String getFloorHeight() {
         return floorHeight;

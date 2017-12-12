@@ -193,10 +193,12 @@
             eh_questionnaire_ranges | eh_payment_formula | eh_customer_economic_indicator_statistics |
             eh_industry_types | eh_guild_applies |
             eh_rentalv2_price_packages |
+            eh_relocation_requests | eh_relocation_request_items | eh_relocation_request_attachments |
             eh_payment_withdraw_orders |eh_community_organization_detail_display |
             eh_forum_service_types |
             eh_me_web_menus |
 	        eh_authorization_control_configs | eh_reflection_service_module_apps | 
+            eh_customer_entry_infos | eh_customer_departure_infos |
 			eh_service_module_exclude_functions | eh_service_module_functions | eh_customer_accounts | eh_customer_taxes |
         </includes>
 
