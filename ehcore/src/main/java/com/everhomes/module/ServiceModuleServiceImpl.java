@@ -1,7 +1,6 @@
 package com.everhomes.module;
 
-import com.everhomes.acl.AuthorizationProvider;
-import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.acl.*;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -18,15 +17,25 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.portal.PortalPublishHandler;
+import com.everhomes.portal.ServiceModuleAppProvider;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.module.*;
+import com.everhomes.rest.oauth2.ControlTargetOption;
+import com.everhomes.rest.oauth2.ModuleManagementType;
+import com.everhomes.rest.portal.MultipleFlag;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
+import com.everhomes.rest.portal.ServiceModuleAppStatus;
+import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
@@ -45,9 +54,14 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
+
+import static com.everhomes.rest.oauth2.ControlTargetOption.ALL_COMMUNITY;
+import static com.everhomes.rest.oauth2.ModuleManagementType.COMMUNITY_CONTROL;
 
 @Service
 public class ServiceModuleServiceImpl implements ServiceModuleService {
@@ -79,6 +93,18 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Autowired
     private ConfigurationProvider configurationProvider;
+
+    @Autowired
+    private ServiceModuleAppProvider serviceModuleAppProvider;
+
+    @Autowired
+    private SequenceProvider sequenceProvider;
+
+    @Autowired
+    private WebMenuPrivilegeProvider webMenuPrivilegeProvider;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 
 
     @Override
@@ -185,12 +211,15 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         if(null != cmd.getModuleId()){
             ServiceModule module = serviceModuleProvider.findServiceModuleById(cmd.getModuleId());
             startLevel = module.getLevel() + 1;
-            if(null != module)
+            if(null != module)//查找三级菜单
                 serviceModules = serviceModuleProvider.listServiceModule(module.getPath() + "/%");
+                if(serviceModules == null || serviceModules.size() == 0){//如果三级菜单不存在，则直接使用二级菜单
+                    serviceModules = Collections.singletonList(module);
+                    startLevel --;
+                }
         }else{
             serviceModules =  serviceModuleProvider.listServiceModule(startLevel, types);
         }
-
 
         List<ServiceModuleDTO> dtos = serviceModules.stream().map(r -> {
             ServiceModuleDTO dto = ConvertHelper.convert(r, ServiceModuleDTO.class);
@@ -497,6 +526,58 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     }
 
     @Override
+    public TreeServiceModuleAppsResponse treeServiceModuleApps(TreeServiceModuleCommand cmd) {
+        checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        //过滤出与scopes匹配的serviceModule
+        List<ServiceModuleDTO> tempList = filterByScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId());
+
+        TreeServiceModuleAppsResponse response = new TreeServiceModuleAppsResponse();
+        List<ServiceModuleDTO> communityControlList = new ArrayList<>();
+        List<ServiceModuleDTO> orgControlList = new ArrayList<>();
+        List<ServiceModuleDTO> unlimitControlList = new ArrayList<>();
+        //按控制范围进行区分
+        //把二级模块加入list
+        tempList.stream().filter(r->r.getModuleControlType() != "" && r.getLevel() == 2).map(r->{
+            switch (ModuleManagementType.fromCode(r.getModuleControlType())){
+                case COMMUNITY_CONTROL:
+                    communityControlList.add(r);
+                    break;
+                case ORG_CONTROL:
+                    orgControlList.add(r);
+                    break;
+                case UNLIMIT_CONTROL:
+                    unlimitControlList.add(r);
+                    break;
+            }
+            return null;
+        }).collect(Collectors.toList());
+
+        //把一级分类加入所有list
+        tempList.stream().filter(r -> r.getLevel() == 1).map(r -> {
+            communityControlList.add(ConvertHelper.convert(r,ServiceModuleDTO.class));
+            orgControlList.add(ConvertHelper.convert(r,ServiceModuleDTO.class));
+            unlimitControlList.add(ConvertHelper.convert(r,ServiceModuleDTO.class));
+            return null;
+        }).collect(Collectors.toList());
+
+        List<ServiceModuleDTO> c = this.getServiceModuleAppsAsLevelTree(communityControlList, 0L);
+        List<ServiceModuleDTO> o = this.getServiceModuleAppsAsLevelTree(orgControlList, 0L);
+        List<ServiceModuleDTO> u = this.getServiceModuleAppsAsLevelTree(unlimitControlList, 0L);
+
+        c=c.stream().filter(r->r.getServiceModuleApps() != null && r.getServiceModuleApps().size() > 0).collect(Collectors.toList());
+        o=o.stream().filter(r->r.getServiceModuleApps() != null && r.getServiceModuleApps().size() > 0).collect(Collectors.toList());
+        u=u.stream().filter(r->r.getServiceModuleApps() != null && r.getServiceModuleApps().size() > 0).collect(Collectors.toList());
+
+        response.setCommunityControlList(c);
+        response.setOrgControlList(o);
+        response.setUnlimitControlList(u);
+
+        return response;
+    }
+
+    @Override
     public ServiceModuleDTO getServiceModule(GetServiceModuleCommand cmd) {
         checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
         ServiceModule serviceModule = this.serviceModuleProvider.findServiceModuleById(cmd.getModuleId());
@@ -587,6 +668,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         if(checkModuleManage(userId, cmd.getOrganizationId(), cmd.getModuleId())){
             return 1;
         }
+        if(userPrivilegeMgr.checkModuleAppAdmin(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), cmd.getUserId(), cmd.getAppId())){
+            return 1;
+        }
         return 0;
     }
 
@@ -663,7 +747,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 targets.add(new Target(com.everhomes.entity.EntityType.ORGANIZATIONS.getCode(), orgId));
             }
 
-            //获取人员和人员所有机构所赋予模块的所属项目范围
+            //获取人员和人员所有机构所赋予模块的所属项目范围(模块管理员+权限细化的)
             List<Project> projects = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(EntityType.SERVICE_MODULE.getCode(), moduleId, targets);
             for (Project project: projects) {
                 //在模块下拥有全部项目权限
@@ -675,6 +759,27 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                     dtos.add(ConvertHelper.convert(project, ProjectDTO.class));
                 }
             }
+
+            //获取人员和人员所有机构所赋予模块的所属项目范围(应用管理员) -- add by lei.lv
+            List<Authorization> authorizations_apps =  authorizationProvider.listAuthorizations(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), userId, com.everhomes.entity.EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(), true, null, null);
+            if(authorizations_apps != null && authorizations_apps.size() > 0){
+                authorizations_apps = authorizations_apps.stream().filter(r->ModuleManagementType.fromCode(r.getModuleControlType()) == COMMUNITY_CONTROL).limit(1).collect(Collectors.toList());
+                if(authorizations_apps !=null && authorizations_apps.size() > 0) {
+                    Authorization authorization = authorizations_apps.get(0);//每一个userId+organizationId在同一个type下只有一个control_id
+                    if (ControlTargetOption.fromCode(authorization.getControlOption()) == ALL_COMMUNITY){
+                        allProjectFlag = true;
+                    }else{
+                        List<ControlTarget> configs = authorizationProvider.listAuthorizationControlConfigs(userId,authorization.getControlId());
+                        List<Project> projectList = configs.stream().map(r->new Project(EntityType.COMMUNITY.getCode(), r.getId())).collect(Collectors.toList());
+                        for (Project project : projectList) {
+                            processProject(project);
+                            dtos.add(ConvertHelper.convert(project, ProjectDTO.class));
+                        }
+                    }
+
+                }
+            }
+
         }
 
         if(allProjectFlag){
@@ -761,6 +866,63 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         return temp;
     }
 
+    @Override
+    public ReflectionServiceModuleApp getOrCreateReflectionServiceModuleApp(Integer namespaceId, String actionData, String instanceConfig, String itemLabel, ServiceModule serviceModule) {
+        ReflectionServiceModuleApp reflectionApp = null;
+        String customTag = "";
+        Long webMenuId = 0L;
+        switch (MultipleFlag.fromCode(serviceModule.getMultipleFlag())){
+            case NO:
+                reflectionApp = this.serviceModuleProvider.findReflectionServiceModuleAppByParam(namespaceId, serviceModule.getId(), null);
+                // 取非多入口的模块的菜单id
+                List<WebMenu>  webMenus = this.webMenuPrivilegeProvider.listWebMenuByMenuIds(Collections.singletonList(serviceModule.getId()));
+                if(webMenus != null && webMenus.size() > 0){
+                    webMenuId = webMenus.get(0).getId();
+                }
+                break;
+            case YES:
+                String handlerPrefix = PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX;
+                PortalPublishHandler handler = PlatformContext.getComponent(handlerPrefix + serviceModule.getId());
+                if(null != handler){
+                    customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), actionData, instanceConfig);
+                    LOGGER.debug("get customTag from handler = {}, customTag =s {}",handler,customTag);
+                    // 取多入口的模块的菜单id
+                    webMenuId = handler.getWebMenuId(namespaceId, serviceModule.getId(), actionData, instanceConfig);
+                }
+                reflectionApp = this.serviceModuleProvider.findReflectionServiceModuleAppByParam(namespaceId, serviceModule.getId(), customTag);
+                break;
+        }
+        if (reflectionApp != null){//更新为有效
+            reflectionApp.setName(itemLabel);
+            reflectionApp.setStatus(ServiceModuleAppStatus.ACTIVE.getCode());
+            reflectionApp.setInstanceConfig(instanceConfig);
+            reflectionApp.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            reflectionApp.setActionData(actionData);
+            reflectionApp.setCustomTag(customTag);
+            reflectionApp.setMenuId(webMenuId);
+            this.serviceModuleProvider.updateReflectionServiceModuleApp(reflectionApp);
+        }else{//创建
+            ReflectionServiceModuleApp reflectionApp_new = new ReflectionServiceModuleApp();
+            Long activeAppId = this.sequenceProvider.getNextSequence("activeAppId");
+            reflectionApp_new.setActiveAppId(activeAppId);
+            reflectionApp_new.setNamespaceId(namespaceId);
+            reflectionApp_new.setActionData(actionData);
+            reflectionApp_new.setModuleControlType(serviceModule.getModuleControlType());
+            reflectionApp_new.setActionType(serviceModule.getActionType());
+            reflectionApp_new.setMultipleFlag(serviceModule.getMultipleFlag());
+            reflectionApp_new.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            reflectionApp_new.setInstanceConfig(instanceConfig);
+            reflectionApp_new.setStatus(ServiceModuleAppStatus.ACTIVE.getCode());
+            reflectionApp_new.setCustomTag(customTag);
+            reflectionApp_new.setName(itemLabel);
+            reflectionApp_new.setModuleId(serviceModule.getId());
+            reflectionApp_new.setMenuId(webMenuId);
+            this.serviceModuleProvider.createReflectionServiceModuleApp(reflectionApp_new);
+        }
+
+        return null;
+    }
+
     /**
      * 获取serviceModule的树形目录（level  = 2）
      *
@@ -780,6 +942,52 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             }
         }
         return results;
+    }
+
+
+    /**
+     * 获取serviceModuleApps的树形目录（level  = 2）
+     *
+     * @param tempList
+     * @param parentId
+     * @return
+     */
+    private List<ServiceModuleDTO> getServiceModuleAppsAsLevelTree(List<ServiceModuleDTO> tempList, Long parentId) {
+        List<ServiceModuleDTO> results = new ArrayList<>();
+        Iterator<ServiceModuleDTO> iter = tempList.iterator();
+        while (iter.hasNext()) {
+            ServiceModuleDTO current = iter.next();
+            if (current.getParentId().equals(parentId) && current.getLevel() < 3) {
+                List<ServiceModuleDTO> c_node = getServiceModuleAppsAsLevelTree(tempList, current.getId());
+                current.setServiceModules(c_node);
+                if (current.getLevel() == 1){
+                    List<Long> moduleIds = c_node.stream().map(ServiceModuleDTO::getId).collect(Collectors.toList());
+                    if(moduleIds.size() != 0){
+                        //给一级模块设置APPS
+                        // 这里因为运营后台的不完善，暂时使用reflectionServiceModuleApps代替真正的serviceModuleApps。原来的代码为serviceModuleAppProvider.listServiceModuleAppsByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
+                        List<ServiceModuleAppDTO> apps = serviceModuleProvider.listReflectionServiceModuleAppsByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
+                        if(apps != null){
+                            current.setServiceModuleApps(apps);
+                            LOGGER.debug(current.getName()+ "分类下一共有"+moduleIds.toString() +"的模块和"+ apps.size() + "个应用");
+                        }
+                    }
+                }
+                results.add(current);
+            }
+        }
+        return results;
+    }
+
+    /**
+     * 获取serviceModuleApps的平行结构（level  = 2）
+     *
+     * @param tempList
+     * @return
+     */
+    private List<ServiceModuleAppDTO> getServiceModuleAppsAsList(List<ServiceModuleDTO> tempList) {
+        List<Long> moduleIds = tempList.stream().map(ServiceModuleDTO::getId).collect(Collectors.toList());
+        List<ServiceModuleAppDTO> serviceModuleAppDTOS = serviceModuleAppProvider.listServiceModuleAppsByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
+        return serviceModuleAppDTOS;
     }
 
     /**
@@ -814,4 +1022,17 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         }
     }
 
+    private List<ServiceModuleDTO> processServiceModuleDtoTreeToAppTree(List<ServiceModuleDTO> dtos){
+        List dtos_ = dtos.stream().filter(r -> (r.getServiceModules() != null && r.getServiceModules().size() != 0)).map(r -> {
+            List<ServiceModuleAppDTO> apps = new ArrayList<>();
+            for (ServiceModuleDTO dto : r.getServiceModules()) {
+                if (dto.getServiceModuleApps() != null) {
+                    apps.addAll(dto.getServiceModuleApps());
+                }
+            }
+            r.setServiceModuleApps(apps);
+            return r;
+        }).collect(Collectors.toList());
+        return dtos_;
+    }
 }

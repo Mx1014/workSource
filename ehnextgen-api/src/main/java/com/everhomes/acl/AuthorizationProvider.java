@@ -14,7 +14,11 @@ public interface AuthorizationProvider {
 
     List<Authorization> listAuthorizations(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType, Boolean targetFlag);
 
+    List<Authorization> listAuthorizations(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType, Boolean targetFlag, CrossShardListingLocator locator, Integer pageSize);
+
     List<Authorization> listAuthorizations(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType);
+
+    List<Authorization> listAuthorizations(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType, Long appId, String moduleControlType, Byte all_control_flag, Boolean targetFlag);
 
     Long createAuthorization(Authorization authorization);
 
@@ -26,7 +30,11 @@ public interface AuthorizationProvider {
 
     void deleteAuthorizationById(Long id);
 
+    void deleteAuthorizationWithConditon(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType, String moduleControlType, Long appId, Long controlId);
+
     List<Long> getAuthorizationModuleIdsByTarget(List<Target> targets);
+
+    List<Long> getAuthorizationAppModuleIdsByTarget(List<Target> targets);
 
     List<Authorization> listTargetAuthorizations(String ownerType, Long ownerId, String authType, Long authId, String identityType);
 
@@ -59,4 +67,16 @@ public interface AuthorizationProvider {
     List<String> getAuthorizationScopesByAuthAndTargets(String authType, Long authId, List<Target> targets);
 
     List<Project> getManageAuthorizationProjectsByAuthAndTargets(String authType, Long authId, List<Target> targets);
+
+    Long getMaxControlIdInAuthorizations();
+
+    // eh_authorization_control_configs表的接口
+    Long createAuthorizationControlConfig(AuthorizationControlConfig authorizationControlConfig);
+
+    // batch
+    Long createAuthorizationControlConfigs(List<AuthorizationControlConfig> authorizationControlConfigs);
+
+    void delteAuthorizationControlConfigsWithCondition(Integer namespaceId, Long userId);
+
+    List listAuthorizationControlConfigs(Long userId, Long controlId);
 }

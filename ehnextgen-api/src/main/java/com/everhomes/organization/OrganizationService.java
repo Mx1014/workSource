@@ -584,4 +584,6 @@ public interface OrganizationService {
 
 	Byte setOrganizationDetailFlag(SetOrganizationDetailFlagCommand cmd);
 	Byte getOrganizationDetailFlag(GetOrganizationDetailFlagCommand cmd);
+
+	void checkOrganizationpPivilege(Long orgId, Long pivilegeId);
 }

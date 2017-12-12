@@ -10,6 +10,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.*;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.*;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.archives.*;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.general_approval.*;
@@ -109,6 +110,9 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
 
+        //校验权限
+        organizationService.checkOrganizationpPivilege(cmd.getOrganizationId(), PrivilegeConstants.CREATE_OR_MODIFY_PERSON);
+
         ArchivesContactDTO dto = new ArchivesContactDTO();
         //  组织架构添加人员
         AddOrganizationPersonnelCommand addCommand = new AddOrganizationPersonnelCommand();
@@ -181,6 +185,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void deleteArchivesContacts(DeleteArchivesContactsCommand cmd) {
+        //权限校验
+        organizationService.checkOrganizationpPivilege(cmd.getOrganizationId(), PrivilegeConstants.DELETE_PERSON);
+
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         dbProvider.execute((TransactionStatus status) -> {
             if (cmd.getDetailIds() != null) {

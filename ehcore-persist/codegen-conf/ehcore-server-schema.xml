@@ -180,7 +180,7 @@
             eh_forum_categories | eh_interact_settings |
             eh_archives_sticky_contacts | eh_archives_dismiss_employees | eh_general_form_groups | eh_archives_forms | eh_archives_configurations | eh_archives_logs | eh_archives_notifications |
             eh_lease_projects | eh_lease_project_communities |
-            eh_customer_events  | eh_customer_tracking_plans  | eh_customer_trackings  |   eh_tracking_notify_logs  | 
+            eh_customer_events  | eh_customer_tracking_plans  | eh_customer_trackings  |   eh_tracking_notify_logs  |
             eh_address_attachments | eh_contract_charging_changes | eh_contract_charging_change_addresses |
             eh_parking_car_verifications |
             eh_siyin_print_settings | eh_siyin_print_printers | eh_siyin_print_orders | eh_siyin_print_records | eh_siyin_print_emails |eh_community_approve |
@@ -193,9 +193,10 @@
             eh_questionnaire_ranges | eh_payment_formula | eh_customer_economic_indicator_statistics |
             eh_industry_types | eh_guild_applies |
             eh_rentalv2_price_packages |
-			eh_payment_withdraw_orders |eh_community_organization_detail_display |
+            eh_payment_withdraw_orders |eh_community_organization_detail_display |
             eh_forum_service_types |
-            eh_me_web_menus | eh_customer_entry_infos | eh_customer_departure_infos |
+            eh_me_web_menus |
+	        eh_authorization_control_configs | eh_reflection_service_module_apps | 
         </includes>
 
             <!-- All elements that are excluded from your schema

@@ -335,6 +335,30 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
         return instanceConfig;
     }
     
+    final Pattern pattern = Pattern.compile("^.*\"parentId\":[\\s]*([\\d]*)");
+    @Override
+    public String getCustomTag(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
+    	if(actionData == null || actionData.length() == 0){
+    		return null;
+    	}
+    	Matcher m = pattern.matcher(actionData);
+    	if(m.find()){
+    		return m.group(1);
+    	}
+    	LOGGER.info("ServiceAlliancePortalPublishHandler actionData = "+actionData);
+    	return null;
+    }
+
+    @Override
+    public Long getWebMenuId(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
+       String categoriesId = this.getCustomTag(namespaceId,moudleId,actionData,instanceConfig);
+       ServiceAllianceCategories category = yellowPageProvider.findCategoryById(Long.valueOf(categoriesId));
+       if(category == null || category.getEntryId() == null){
+           return null;
+       }
+       return 41600L+category.getEntryId()*100L;
+    }
+	
     /**
 	 * 获取key在redis操作的valueOperations
 	 */
