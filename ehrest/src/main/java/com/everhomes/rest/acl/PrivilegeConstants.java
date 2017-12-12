@@ -192,4 +192,16 @@ public interface PrivilegeConstants {
     long ENERGY_PLAN_LIST = 21015L;
     long ENERGY_PLAN_DELETE = 21016L;
 
+    //客户和合同的权限
+    long ENTERPRISE_CUSTOMER_CREATE = 21101L;//客户的增导入改
+    long ENTERPRISE_CUSTOMER_DELETE = 21102L;//客户的删
+    long ENTERPRISE_CUSTOMER_LIST = 21103L;//客户的查
+    long ENTERPRISE_CUSTOMER_MANAGE_LIST = 21104L;//管理的查 导出
+    long ENTERPRISE_CUSTOMER_MANAGE_CREATE = 21105L;//管理的增改 导入
+    long ENTERPRISE_CUSTOMER_MANAGE_DELETE = 21106L;//管理的删
+    long ENTERPRISE_CUSTOMER_STAT = 21107L;//客户的统计分析查看
+
+
+
+//    21200
 }
