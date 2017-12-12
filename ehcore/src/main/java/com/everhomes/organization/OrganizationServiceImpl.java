@@ -14208,8 +14208,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
             if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), organizaitonId, organizaitonId, pivilegeId, apps.getServiceModuleApps().get(0).getId(), orgId, null)){
                 LOGGER.error("error_no_privileged. orgId = {}, userId = {}, pivilegeId={}", orgId, UserContext.currentUserId(), pivilegeId);
-                throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
-                        "error_no_privileged");
+                throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                        "check app privilege error");
             }
         }else{
             LOGGER.error("no appId. rgId = {}, userId = {}", orgId, UserContext.currentUserId());
