@@ -37,7 +37,7 @@ CREATE TABLE `eh_customer_accounts` (
   `branch_name` VARCHAR(128) COMMENT '开户网点',
   `account_holder` VARCHAR(128) COMMENT '开户人',
   `account_number`  VARCHAR(128) COMMENT '账号',
-  `account_number_type` VARCHAR(128) COMMENT '账号类型',
+  `account_number_type_id` BIGINT COMMENT '账号类型',
   `branch_province` VARCHAR(128) COMMENT '开户行所在省',
   `branch_city` VARCHAR(128) COMMENT '开户行所在市',
   `account_type_id` BIGINT COMMENT '账户类型 refer to the id of eh_var_field_items',
