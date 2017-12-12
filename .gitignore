@@ -4,6 +4,7 @@
 /logs
 /statistics
 ehborder/target/
+ehcore/src/test/
 ehnextgen-api/target/
 ehnextgen-forum/target/
 ehnextgen-messaging/target/
