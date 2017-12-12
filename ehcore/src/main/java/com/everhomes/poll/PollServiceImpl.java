@@ -2,13 +2,10 @@
 package com.everhomes.poll;
 
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import com.everhomes.rest.poll.*;
@@ -27,7 +24,6 @@ import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
-import com.everhomes.poll.PollService;
 import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -138,7 +134,7 @@ public class PollServiceImpl implements PollService {
         }
 
         //检查是否重复投票，1、不支持重复投票，2、支持重复投票，时间间隔未过
-        boolean repeat = checkRepeatPoll(poll, user.getId());
+        boolean repeat = checkValidPoll(poll, user.getId());
         if(repeat){
             LOGGER.error("can not vote again.pollId={}", poll.getId());
             throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_DUPLICATE_VOTE, "cannot vote again");
@@ -227,33 +223,41 @@ public class PollServiceImpl implements PollService {
     }
 
 
-    //检查是否能够投票，1、不支持重复投票，2、支持重复投票，时间间隔未过
-    private boolean checkRepeatPoll(Poll poll, Long userId){
+    //检查有有效投票
+    private boolean checkValidPoll(Poll poll, Long userId){
         PollVote voteResult = pollProvider.findPollVoteByUidAndPollId(userId, poll.getId());
 
         //投过票
-        if (voteResult!=null) {
-
-            //1、不支持重复投票
-            if (poll.getRepeatFlag() == null || poll.getRepeatFlag().byteValue() == RepeatFlag.NO.getCode()) {
-                return true;
-            }
-
-            //2、支持重复投票
-            if(poll.getRepeatFlag().byteValue() == RepeatFlag.YES.getCode() && poll.getRepeatPeriod() != null && voteResult.getCreateTime() !=null){
-
-                java.sql.Date now = new java.sql.Date(System.currentTimeMillis());
-
-                java.sql.Date voteDate = new java.sql.Date(voteResult.getCreateTime().getTime());
-
-                //如果当前日期在下次投票日期之前则报异常
-                if(now.toLocalDate().isBefore(voteDate.toLocalDate().plusDays(poll.getRepeatPeriod()))){
-                    return true;
-                }
-            }
-
+        if (voteResult == null) {
+            return false;
         }
-        return false;
+
+        //检查该投票是否超过时间间隔
+        boolean flag =checkVoteExpirePeriod(poll, voteResult);
+
+        //过期--没有有效投票，未过期--有有效投票
+        return !flag;
+
+//            //1、不支持重复投票
+//            if (poll.getRepeatFlag() == null || poll.getRepeatFlag().byteValue() == RepeatFlag.NO.getCode()) {
+//                return true;
+//            }
+//
+//            //2、支持重复投票
+//            if(poll.getRepeatFlag().byteValue() == RepeatFlag.YES.getCode() && poll.getRepeatPeriod() != null && voteResult.getCreateTime() !=null){
+//
+//                java.sql.Date now = new java.sql.Date(System.currentTimeMillis());
+//
+//                java.sql.Date voteDate = new java.sql.Date(voteResult.getCreateTime().getTime());
+//
+//                //如果当前日期在下次投票日期之前则报异常
+//                if(now.toLocalDate().isBefore(voteDate.toLocalDate().plusDays(poll.getRepeatPeriod()))){
+//                    return true;
+//                }
+//            }
+//
+//        }
+//        return false;
     }
     
     
@@ -364,9 +368,12 @@ public class PollServiceImpl implements PollService {
         dto.setPollId(poll.getId());
 
         //检查是否重复投票  edit by yanjun 20170825
-        boolean repeat = checkRepeatPoll(poll, user.getId());
+        boolean repeat = checkValidPoll(poll, user.getId());
         if(repeat){
             dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
+            //对选项进行遍历，填充选项是否被选择
+            populateItemVoteStatus(poll, response.getItems());
+
         }else {
             dto.setPollVoterStatus(VotedStatus.UNVOTED.getCode());
         }
@@ -374,6 +381,62 @@ public class PollServiceImpl implements PollService {
         dto.setProcessStatus(getStatus(poll).getCode());
         response.setPoll(dto);
         return response;
+    }
+
+    private void populateItemVoteStatus(Poll poll, List<PollItemDTO> items){
+        List<PollVote> pollVotes = pollProvider.listPollVoteByPollId(poll.getId());
+
+        //对选项进行遍历，找到对应的不过期的投票则将该选项改成“已选择”
+        if(pollVotes != null){
+            for(PollItemDTO itemDTO: items){
+                for (PollVote vo: pollVotes){
+                    if(itemDTO.getItemId().longValue() == vo.getItemId()){
+                        //已经投过票，检查投票是否超过重复投票间隔
+                        boolean flag = checkVoteExpirePeriod(poll, vo);
+                        //未超过时间间隔
+                        if(!flag){
+                            itemDTO.setPollVoterStatus(PollVoterStatus.YES.getCode());
+                            break;
+                        }
+                    }
+                }
+
+
+            }
+        }
+
+
+    }
+
+
+    /**
+     * 已经投过票，检查投票是否超过重复投票间隔
+     * @param poll
+     * @param vo
+     * @return
+     */
+    private boolean checkVoteExpirePeriod(Poll poll, PollVote vo){
+
+        //不支持重复投票，未过期
+        if(poll.getRepeatFlag() == null || poll.getRepeatFlag().byteValue() == RepeatFlag.NO.getCode()){
+            return false;
+        }
+
+        //支持重复投票，并且 “当前日期” > “上次投票日” + “投票间隔”，此时上次投票已经过期
+        if(poll.getRepeatFlag() != null && poll.getRepeatFlag().byteValue() == RepeatFlag.YES.getCode() && poll.getRepeatPeriod() != null && vo.getCreateTime() !=null){
+
+            java.sql.Date now = new java.sql.Date(System.currentTimeMillis());
+
+            java.sql.Date voteDate = new java.sql.Date(vo.getCreateTime().getTime());
+
+            //如果当前日期在下次投票日期之前则报异常
+            if(now.toLocalDate().isAfter(voteDate.toLocalDate().plusDays(poll.getRepeatPeriod()))){
+                return true;
+            }
+        }
+
+        return false;
+
     }
     
     private static Date convert(String time,String format){
@@ -413,7 +476,7 @@ public class PollServiceImpl implements PollService {
 
 
         //检查是否重复投票  edit by yanjun 20170825
-        boolean repeat = checkRepeatPoll(poll, user.getId());
+        boolean repeat = checkValidPoll(poll, user.getId());
         if(repeat){
             dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         }else {
