@@ -11,6 +11,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.pojos.EhReflectionServiceModuleApps;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignmentRelations;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignments;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleExcludeFunctions;
