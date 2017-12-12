@@ -27,6 +27,9 @@ public class ShowBillForClientV2DTO {
     @ItemType(BillForClientV2.class)
     List<BillForClientV2> bills;
 
+    public ShowBillForClientV2DTO() {
+    }
+
     public ShowBillForClientV2DTO(Long billGroupId, String contractId) {
         this.billGroupId = billGroupId;
         this.contractId = contractId;
