@@ -3,10 +3,12 @@ package com.everhomes.rest.print;
 
 import java.util.Map;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 public class UnlockPrinterResponse {
 	private String url;
+	@ItemType(String.class)
 	private Map<String,String> params;
 	
 	public UnlockPrinterResponse(String url, Map<String, String> params) {
