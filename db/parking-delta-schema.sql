@@ -14,10 +14,12 @@ CREATE TABLE `eh_reserve_rules` (
   `holiday_type` tinyint(4) DEFAULT NULL COMMENT '1-普通双休, 0-同步中国节假日',
 
   `reserve_type` tinyint(4) DEFAULT NULL COMMENT '1: 时, 2: 半天, 3: 天',
-  `reserve_unit` int(11) DEFAULT NULL COMMENT '预约时间单元，例如当在小时模式时，半个小时，一个小时',
+  `reserve_unit` int(11) DEFAULT NULL COMMENT '预约时间单元，例如当在小时模式时，半个小时，一个小时,（半小时是0.5）',
+  `workday_price` decimal(10,2) DEFAULT NULL COMMENT '工作日价格',
+  `holiday_price` decimal(10,2) DEFAULT NULL COMMENT '节假日价格',
 
   `refund_strategy` tinyint(4) DEFAULT NULL COMMENT '1-custom, 2-full',
-  `refund_ratio` int(11) DEFAULT NULL COMMENT '退款比例',
+  `overtime_strategy` tinyint(4) DEFAULT NULL COMMENT '1-custom, 2-full',
 
   `pay_start_time` bigint(20) DEFAULT NULL,
   `pay_end_time` bigint(20) DEFAULT NULL,
@@ -35,11 +37,21 @@ CREATE TABLE `eh_reserve_rules` (
   `auto_assign` tinyint(4) DEFAULT NULL COMMENT '是否动态分配: 1-是, 0-否',
   `multi_unit` tinyint(4) DEFAULT NULL COMMENT '是否允许预约多个场所: 1-是, 0-否',
   `multi_time_interval` tinyint(4) DEFAULT NULL COMMENT '是否允许预约多个时段: 1-是, 0-否',
-  `workday_price` decimal(10,2) DEFAULT NULL COMMENT '工作日价格',
-  `holiday_price` decimal(10,2) DEFAULT NULL COMMENT '周末价格',
+
   `open_weekday` varchar(7) DEFAULT NULL COMMENT '7位二进制，0000000每一位表示星期7123456',
   `time_step` double DEFAULT NULL COMMENT '步长，每个单元格是多少小时（半小时是0.5）',
 
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_reserve_discount_users` (
+  `id` bigint(20) NOT NULL DEFAULT '0',
+  `owner_type` varchar(255) DEFAULT NULL COMMENT '"default_rule","resource_rule"',
+  `owner_id` bigint(20) DEFAULT NULL,
+  `duration_type` tinyint(4) DEFAULT NULL COMMENT '1: 时长内, 2: 时长外',
+  `duration_unit` varchar(20) DEFAULT NULL COMMENT '时长单位，比如 天，小时',
+  `duration` double DEFAULT NULL COMMENT '时长',
+  `discount` double DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -47,7 +59,10 @@ CREATE TABLE `eh_reserve_rule_strategies` (
   `id` bigint(20) NOT NULL DEFAULT '0',
   `owner_type` varchar(255) DEFAULT NULL COMMENT '"default_rule","resource_rule"',
   `owner_id` bigint(20) DEFAULT NULL,
-  `close_date` date DEFAULT NULL,
+  `duration_type` tinyint(4) DEFAULT NULL COMMENT '1: 时长内, 2: 时长外',
+  `duration_unit` varchar(20) DEFAULT NULL COMMENT '时长单位，比如 天，小时',
+  `duration` double DEFAULT NULL COMMENT '时长',
+  `discount` double DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
