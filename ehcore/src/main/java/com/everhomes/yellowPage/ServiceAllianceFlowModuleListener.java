@@ -225,7 +225,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(category.getOwnerType(),
 					category.getOwnerId(), ContactType.MOBILE.getCode(), serviceOrg.getParentId(),locator, Integer.MAX_VALUE);
 			if ((serviceOrg.getContactMemid()!=null && serviceOrg.getContactMemid()!=0) || (targets != null && targets.size() > 0)) {
-				String body = "收到一条" + category.getName() + "的申请";
+				String body = new StringBuffer().append("收到一条").append(category.getName()).append("的申请,服务名称：").append(serviceOrg.getName()).toString();
 				FlowCaseDetailActionData actionData = new FlowCaseDetailActionData();
 				actionData.setFlowCaseId(flowCase.getId());
 				actionData.setFlowUserType(FlowUserType.PROCESSOR.getCode());
