@@ -10,7 +10,8 @@ package com.everhomes.rest.customer;
  *     <li>branchName: 开户网点</li>
  *     <li>accountHolder: 开户人</li>
  *     <li>accountNumber: 账号</li>
- *     <li>accountNumberType: 账号类型</li>
+ *     <li>accountNumberTypeId: 账号类型id</li>
+ *     <li>accountNumberTypeName: 账号类型名称</li>
  *     <li>branchProvince: 开户行所在省</li>
  *     <li>branchCity: 开户行所在市</li>
  *     <li>accountTypeId: 账户类型id</li>
@@ -28,7 +29,8 @@ public class CustomerAccountDTO {
     private String branchName;
     private String accountHolder;
     private String accountNumber;
-    private String accountNumberType;
+    private Long accountNumberTypeId;
+    private String accountNumberTypeName;
     private String branchProvince;
     private String branchCity;
     private Long accountTypeId;
@@ -51,12 +53,20 @@ public class CustomerAccountDTO {
         this.accountNumber = accountNumber;
     }
 
-    public String getAccountNumberType() {
-        return accountNumberType;
+    public Long getAccountNumberTypeId() {
+        return accountNumberTypeId;
     }
 
-    public void setAccountNumberType(String accountNumberType) {
-        this.accountNumberType = accountNumberType;
+    public void setAccountNumberTypeId(Long accountNumberTypeId) {
+        this.accountNumberTypeId = accountNumberTypeId;
+    }
+
+    public String getAccountNumberTypeName() {
+        return accountNumberTypeName;
+    }
+
+    public void setAccountNumberTypeName(String accountNumberTypeName) {
+        this.accountNumberTypeName = accountNumberTypeName;
     }
 
     public Long getAccountTypeId() {

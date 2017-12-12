@@ -29,7 +29,7 @@ public class UpdateCustomerAccountCommand {
     private String branchName;
     private String accountHolder;
     private String accountNumber;
-    private String accountNumberType;
+    private Long accountNumberTypeId;
     private String branchProvince;
     private String branchCity;
     private Long accountTypeId;
@@ -51,12 +51,12 @@ public class UpdateCustomerAccountCommand {
         this.accountNumber = accountNumber;
     }
 
-    public String getAccountNumberType() {
-        return accountNumberType;
+    public Long getAccountNumberTypeId() {
+        return accountNumberTypeId;
     }
 
-    public void setAccountNumberType(String accountNumberType) {
-        this.accountNumberType = accountNumberType;
+    public void setAccountNumberTypeId(Long accountNumberTypeId) {
+        this.accountNumberTypeId = accountNumberTypeId;
     }
 
     public Long getAccountTypeId() {

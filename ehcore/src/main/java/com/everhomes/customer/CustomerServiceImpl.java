@@ -738,6 +738,13 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
 
+        if(dto.getAccountNumberTypeId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(account.getNamespaceId(), communityId, dto.getAccountNumberTypeId());
+            if(scopeFieldItem != null) {
+                dto.setAccountNumberTypeName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+
         return dto;
     }
 
