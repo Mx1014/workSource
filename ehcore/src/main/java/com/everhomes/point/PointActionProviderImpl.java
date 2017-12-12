@@ -114,6 +114,15 @@ public class PointActionProviderImpl implements PointActionProvider {
         });
     }
 
+    @Override
+    public void deleteBySystemId(Long systemId) {
+        com.everhomes.server.schema.tables.EhPointActions t = Tables.EH_POINT_ACTIONS;
+
+        rwContext().delete(t)
+                .where(t.SYSTEM_ID.eq(systemId))
+                .execute();
+    }
+
     private EhPointActionsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhPointActionsDao(context.configuration());
@@ -126,5 +135,9 @@ public class PointActionProviderImpl implements PointActionProvider {
 
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());
+    }
+
+    private DSLContext rwContext() {
+        return dbProvider.getDslContext(AccessSpec.readWrite());
     }
 }

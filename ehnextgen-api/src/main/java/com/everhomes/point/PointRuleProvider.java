@@ -19,11 +19,13 @@ public interface PointRuleProvider {
 
     List<PointRule> listPointRuleBySystemId(Long systemId, Integer pageSize, ListingLocator locator);
 
-    List<PointRule> listPointRuleByCategoryId(Long categoryId, Integer pageSize, ListingLocator locator);
-
     void createPointRules(List<PointRule> pointRules);
 
     List<PointRule> listPointRules(ListPointRulesCommand cmd, int pageSize, ListingLocator locator);
 
-    List<PointRule> listPointRuleByEventName(Integer namespaceId, Long systemId, String eventName);
+    // List<PointRule> listPointRuleByEventName(Integer namespaceId, Long systemId, String eventName);
+
+    List<PointRule> listPointRuleByIds(List<Long> ruleIds);
+
+    void deleteBySystemId(Long systemId);
 }

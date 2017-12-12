@@ -280,7 +280,8 @@ public class ForumServiceImpl implements ForumService {
 
             event.setEntityType(EhForumPosts.class.getSimpleName());
             event.setEntityId(tempDto.getId());
-            event.setEventName(SystemEvent.FORM_POST_CREATE.suffix(tempDto.getModuleType(), tempDto.getModuleCategoryId()));
+            event.setEventName(SystemEvent.FORUM_POST_CREATE.suffix(
+                    tempDto.getContentCategory(), tempDto.getModuleType(), tempDto.getModuleCategoryId()));
         });
 
         return dto;
@@ -293,7 +294,7 @@ public class ForumServiceImpl implements ForumService {
         String eventName = null;
         switch (ForumModuleType.fromCode(dto.getModuleType())){
             case FORUM:
-                eventName = SystemEvent.FORM_POST_CREATE.suffix(dto.getModuleCategoryId());
+                eventName = SystemEvent.FORUM_POST_CREATE.suffix(dto.getModuleCategoryId());
                 break;
             case ACTIVITY:
                 eventName = SystemEvent.ACTIVITY_ACTIVITY_CREATE.suffix(dto.getModuleCategoryId());
@@ -305,7 +306,7 @@ public class ForumServiceImpl implements ForumService {
             case GUILD:
                 break;
             case FEEDBACK:
-                eventName = SystemEvent.FORM_POST_CREATE.suffix(dto.getModuleCategoryId());
+                eventName = SystemEvent.FORUM_POST_CREATE.suffix(dto.getModuleCategoryId());
                 break;
         }
         if(eventName == null){
@@ -1068,7 +1069,8 @@ public class ForumServiceImpl implements ForumService {
 
             event.setEntityType(EhForumPosts.class.getSimpleName());
             event.setEntityId(tempPost.getId());
-            event.setEventName(SystemEvent.FORM_POST_DELETE.suffix(tempPost.getModuleType(), tempPost.getModuleCategoryId()));
+            event.setEventName(SystemEvent.FORUM_POST_DELETE.suffix(
+                    tempPost.getContentCategory(), tempPost.getModuleType(), tempPost.getModuleCategoryId()));
         });
 
     }
@@ -1077,7 +1079,7 @@ public class ForumServiceImpl implements ForumService {
         String eventName = null;
         switch (ForumModuleType.fromCode(moduleType)){
             case FORUM:
-                eventName = SystemEvent.FORM_POST_DELETE.suffix(moduleCategoryId);
+                eventName = SystemEvent.FORUM_POST_DELETE.suffix(moduleCategoryId);
                 break;
             case ACTIVITY:
                 eventName = SystemEvent.ACTIVITY_ACTIVITY_DELETE.suffix(moduleCategoryId);
@@ -1089,7 +1091,7 @@ public class ForumServiceImpl implements ForumService {
             case GUILD:
                 break;
             case FEEDBACK:
-                eventName = SystemEvent.FORM_POST_DELETE.dft();
+                eventName = SystemEvent.FORUM_POST_DELETE.dft();
                 break;
         }
         if(eventName == null){
@@ -2149,7 +2151,8 @@ public class ForumServiceImpl implements ForumService {
 
                 event.setEntityType(EhForumPosts.class.getSimpleName());
                 event.setEntityId(tempPost.getId());
-                event.setEventName(SystemEvent.FORM_POST_LIKE.suffix(tempPost.getModuleType(), tempPost.getModuleCategoryId()));
+                event.setEventName(SystemEvent.FORUM_POST_LIKE.suffix(
+                        tempPost.getContentCategory(), tempPost.getModuleType(), tempPost.getModuleCategoryId()));
             });
         } catch(Exception e) {
             LOGGER.error("Failed to update the like count of post, userId=" + operatorId + ", topicId=" + topicId, e);
@@ -2165,7 +2168,7 @@ public class ForumServiceImpl implements ForumService {
         String eventName = null;
         switch (ForumModuleType.fromCode(post.getModuleType())){
             case FORUM:
-                eventName = SystemEvent.FORM_POST_LIKE.suffix(post.getModuleCategoryId());
+                eventName = SystemEvent.FORUM_POST_LIKE.suffix(post.getModuleCategoryId());
                 break;
             case ACTIVITY:
                 eventName = SystemEvent.ACTIVITY_ACTIVITY_LIKE.suffix(post.getModuleCategoryId());
@@ -2228,7 +2231,8 @@ public class ForumServiceImpl implements ForumService {
 
                 event.setEntityType(EhForumPosts.class.getSimpleName());
                 event.setEntityId(tempPost.getId());
-                event.setEventName(SystemEvent.FORM_POST_LIKE_CANCEL.suffix(tempPost.getModuleType(), tempPost.getModuleCategoryId()));
+                event.setEventName(SystemEvent.FORUM_POST_LIKE_CANCEL.suffix(
+                        tempPost.getContentCategory(), tempPost.getModuleType(), tempPost.getModuleCategoryId()));
             });
         } catch(Exception e) {
             LOGGER.error("Failed to update the dislike count of post, userId=" + operatorId + ", topicId=" + topicId, e);
@@ -2244,7 +2248,7 @@ public class ForumServiceImpl implements ForumService {
         String eventName = null;
         switch (ForumModuleType.fromCode(post.getModuleType())){
             case FORUM:
-                eventName = SystemEvent.FORM_POST_LIKE_CANCEL.suffix(post.getModuleCategoryId());
+                eventName = SystemEvent.FORUM_POST_LIKE_CANCEL.suffix(post.getModuleCategoryId());
                 break;
             case ACTIVITY:
                 eventName = SystemEvent.ACTIVITY_ACTIVITY_LIKE_CANCEL.suffix(post.getModuleCategoryId());
@@ -2510,6 +2514,18 @@ public class ForumServiceImpl implements ForumService {
             }).collect(Collectors.toList());
             postdto.setAttachments(listAttachementdto);
         }
+
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(UserContext.currentUserId());
+            context.setNamespaceId(UserContext.getCurrentNamespaceId());
+            event.setContext(context);
+
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(postdto.getId());
+            event.setEventName(SystemEvent.FORUM_COMMENT_CREATE.suffix(
+                    ownerPost.getContentCategory(), ownerPost.getModuleType(), ownerPost.getModuleCategoryId()));
+        });
         return postdto;
 
     }

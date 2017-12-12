@@ -8,6 +8,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.point.ListPointRulesCommand;
 import com.everhomes.rest.point.PointCommonStatus;
 import com.everhomes.sequence.SequenceProvider;
@@ -15,6 +16,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPointRulesDao;
 import com.everhomes.server.schema.tables.pojos.EhPointRules;
 import com.everhomes.server.schema.tables.records.EhPointRulesRecord;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
 import org.jooq.DSLContext;
@@ -43,7 +45,7 @@ public class PointRuleProviderImpl implements PointRuleProvider {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointRules.class));
 		pointRule.setId(id);
 		pointRule.setCreateTime(DateUtils.currentTimestamp());
-		// pointRule.setCreatorUid(UserContext.currentUserId());
+		pointRule.setCreatorUid(UserContext.currentUserId());
 		rwDao().insert(pointRule);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointRules.class, id);
 	}
@@ -51,8 +53,8 @@ public class PointRuleProviderImpl implements PointRuleProvider {
     @CacheEvict(value = "PointRule", allEntries = true)
 	@Override
 	public void updatePointRule(PointRule pointRule) {
-		// pointRule.setUpdateTime(DateUtils.currentTimestamp());
-		// pointRule.setUpdateUid(UserContext.currentUserId());
+		pointRule.setUpdateTime(DateUtils.currentTimestamp());
+		pointRule.setUpdateUid(UserContext.currentUserId());
         rwDao().update(pointRule);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointRules.class, pointRule.getId());
 	}
@@ -69,6 +71,7 @@ public class PointRuleProviderImpl implements PointRuleProvider {
             query.addConditions(t.ID.lt(locator.getAnchor()));
         }
         query.addConditions(t.STATUS.ne(PointCommonStatus.INACTIVE.getCode()));
+        query.addConditions(t.DISPLAY_FLAG.eq(TrueOrFalseFlag.TRUE.getCode()));
 
         if (count > 0) {
             query.addLimit(count + 1);
@@ -97,16 +100,6 @@ public class PointRuleProviderImpl implements PointRuleProvider {
         com.everhomes.server.schema.tables.EhPointRules t = Tables.EH_POINT_RULES;
         return this.query(locator, pageSize, (locator1, query) -> {
             query.addConditions(t.SYSTEM_ID.eq(systemId));
-            return query;
-        });
-    }
-
-    @Cacheable(value = "PointRule")
-    @Override
-    public List<PointRule> listPointRuleByCategoryId(Long categoryId, Integer pageSize, ListingLocator locator) {
-        com.everhomes.server.schema.tables.EhPointRules t = Tables.EH_POINT_RULES;
-        return this.query(locator, pageSize, (locator1, query) -> {
-            query.addConditions(t.CATEGORY_ID.eq(categoryId));
             return query;
         });
     }
@@ -146,7 +139,7 @@ public class PointRuleProviderImpl implements PointRuleProvider {
         });
     }
 
-    @Override
+    /*@Override
     public List<PointRule> listPointRuleByEventName(Integer namespaceId, Long systemId, String eventName) {
         com.everhomes.server.schema.tables.EhPointRules t = Tables.EH_POINT_RULES;
         return this.query(new ListingLocator(), 1, (locator, query) -> {
@@ -155,6 +148,25 @@ public class PointRuleProviderImpl implements PointRuleProvider {
             query.addConditions(t.EVENT_NAME.eq(eventName));
             return query;
         });
+    }*/
+
+    @Override
+    public List<PointRule> listPointRuleByIds(List<Long> ruleIds) {
+        com.everhomes.server.schema.tables.EhPointRules t = Tables.EH_POINT_RULES;
+        return this.query(new ListingLocator(), 1, (locator, query) -> {
+            query.addConditions(t.ID.in(ruleIds));
+            query.addConditions(t.STATUS.ne(PointCommonStatus.INACTIVE.getCode()));
+            return query;
+        });
+    }
+
+    @Override
+    public void deleteBySystemId(Long systemId) {
+        com.everhomes.server.schema.tables.EhPointRules t = Tables.EH_POINT_RULES;
+
+        rwContext().delete(t)
+                .where(t.SYSTEM_ID.eq(systemId))
+                .execute();
     }
 
     private EhPointRulesDao rwDao() {
@@ -169,5 +181,9 @@ public class PointRuleProviderImpl implements PointRuleProvider {
 
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());
+    }
+
+    private DSLContext rwContext() {
+        return dbProvider.getDslContext(AccessSpec.readWrite());
     }
 }

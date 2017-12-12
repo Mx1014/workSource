@@ -16,4 +16,6 @@ public interface PointTutorialProvider {
     List<PointTutorial> listPointTutorials(Long systemId, int pageSize, ListingLocator locator);
 
     void deleteTutorial(PointTutorial tutorial);
+
+    void deleteBySystemId(Long systemId);
 }

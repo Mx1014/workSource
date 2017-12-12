@@ -144,6 +144,17 @@ public class PointAdminController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /admin/point/updatePointRule</b>
+     * <p>获取积分规则列表</p>
+     */
+    @RestReturn(PointRuleDTO.class)
+    @RequestMapping("updatePointRule")
+    public RestResponse updatePointRule(UpdatePointRuleCommand cmd) {
+        PointRuleDTO dto = pointService.updatePointRule(cmd);
+        return success(dto);
+    }
+
+    /**
      * <b>URL: /admin/point/listPointLogs</b>
      * <p>获取积分记录列表</p>
      */
@@ -228,6 +239,39 @@ public class PointAdminController extends ControllerBase {
     @RequestMapping("restartEventLogScheduler")
     public RestResponse restartEventLogScheduler() {
         pointService.restartEventLogScheduler();
+        return SUCCESS;
+    }
+
+    /**
+     * <b>URL: /admin/point/reloadEventMapping</b>
+     * <p>重新加载事件mapping</p>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("reloadEventMapping")
+    public RestResponse reloadEventMapping() {
+        pointService.reloadEventMapping();
+        return SUCCESS;
+    }
+
+    /**
+     * <b>URL: /admin/point/createPointRule</b>
+     * <p>新增积分规则</p>
+     */
+    @RestReturn(PointRuleDTO.class)
+    @RequestMapping("createPointRule")
+    public RestResponse createPointRule(CreatePointRuleCommand cmd) {
+        PointRuleDTO dto = pointService.createPointRule(cmd);
+        return success(dto);
+    }
+
+    /**
+     * <b>URL: /admin/point/createPointRuleToEventMapping</b>
+     * <p>新增积分规则与事件的映射</p>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("createPointRuleToEventMapping")
+    public RestResponse createPointRuleToEventMapping(CreatePointRuleToEventMappingCommand cmd) {
+        pointService.createPointRuleToEventMapping(cmd);
         return SUCCESS;
     }
 

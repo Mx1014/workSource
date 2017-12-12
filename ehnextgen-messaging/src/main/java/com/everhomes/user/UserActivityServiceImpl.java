@@ -603,7 +603,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         /*String eventName = null;
         switch (ForumModuleType.fromCode(post.getModuleType())){
             case FORUM:
-                eventName = SystemEvent.FORM_POST_REPORT.suffix(post.getModuleCategoryId());
+                eventName = SystemEvent.FORUM_POST_REPORT.suffix(post.getModuleCategoryId());
                 break;
             case ACTIVITY:
                 eventName = SystemEvent.ACTIVITY_ACTIVITY_REPORT.suffix(post.getModuleCategoryId());
@@ -623,18 +623,18 @@ public class UserActivityServiceImpl implements UserActivityService {
 
         final String finalEventName = eventName;*/
 
-        Long  userId = UserContext.currentUserId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         LocalEventBus.publish(event -> {
             LocalEventContext context = new LocalEventContext();
-            context.setUid(userId);
+            context.setUid(post.getCreatorUid());
             context.setNamespaceId(namespaceId);
             event.setContext(context);
 
             event.setEntityType(EhForumPosts.class.getSimpleName());
             event.setEntityId(post.getId());
-            event.setEventName(SystemEvent.FORM_POST_REPORT.suffix(post.getModuleType(), post.getModuleCategoryId()));
+            event.setEventName(SystemEvent.FORUM_POST_REPORT.suffix(
+                    post.getContentCategory(), post.getModuleType(), post.getModuleCategoryId()));
         });
     }
 	

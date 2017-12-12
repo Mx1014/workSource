@@ -19,4 +19,6 @@ public interface PointTutorialToPointRuleMappingProvider {
     List<PointTutorialToPointRuleMapping> listMappings(Long tutorialId, int pageSize, ListingLocator locator);
 
     void deleteByTutorialId(Long tutorialId);
+
+    void deleteBySystemId(Long systemId);
 }

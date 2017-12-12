@@ -6,7 +6,7 @@ CREATE TABLE `eh_point_systems` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `display_name` VARCHAR(32) NOT NULL,
   `point_name` VARCHAR(32) NOT NULL,
-  `point_exchange_flag` TINYINT NOT NULL DEFAULT 2 COMMENT 'point exchange cash flag, 1: disable, 2: enabled',
+  `point_exchange_flag` TINYINT NOT NULL DEFAULT 1 COMMENT 'point exchange cash flag, 0: disable, 1: enabled',
   `exchange_point` INTEGER NOT NULL DEFAULT 0 COMMENT 'point exchange cash rate',
   `exchange_cash` INTEGER NOT NULL DEFAULT 0 COMMENT 'point exchange cash rate',
   `user_agreement` TEXT,
@@ -61,14 +61,28 @@ CREATE TABLE `eh_point_rules` (
   `points` BIGINT NOT NULL DEFAULT 0,
   `limit_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: times per day, 2: times',
   `limit_data` TEXT,
-  `event_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'event name',
-  `binding_event_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'binding event name',
+#   `event_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'event name',
+#   `binding_event_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'binding event name',
+  `binding_rule_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'binding rule id',
   `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: disabled, 2: enabled',
   `display_flag` TINYINT NOT NULL DEFAULT 1 COMMENT '0: hidden, 1: display',
   `create_time` DATETIME(3),
   `creator_uid` BIGINT,
   `update_time` DATETIME(3),
   `update_uid` BIGINT,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 积分规则
+DROP TABLE IF EXISTS `eh_point_rule_to_event_mappings`;
+CREATE TABLE `eh_point_rule_to_event_mappings` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `system_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_systems id',
+  `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rule_categories id',
+  `rule_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rules id',
+  `event_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'event name',
+#   `binding_event_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'binding event name',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -132,8 +146,8 @@ CREATE TABLE `eh_point_goods` (
   `detail_url` VARCHAR(512) NOT NULL DEFAULT '',
   `points` BIGINT NOT NULL DEFAULT 0,
   `sold_amount` BIGINT NOT NULL DEFAULT 0,
-  `original_price` DECIMAL NOT NULL DEFAULT 0,
-  `discount_price` DECIMAL NOT NULL DEFAULT 0,
+  `original_price` DECIMAL(10, 2) NOT NULL DEFAULT 0,
+  `discount_price` DECIMAL(10, 2) NOT NULL DEFAULT 0,
   `point_rule` VARCHAR(256) NOT NULL DEFAULT '',
   `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: disabled, 2: enabled',
   `top_status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: disabled, 2: enabled',

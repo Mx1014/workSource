@@ -3,6 +3,7 @@ package com.everhomes.bus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.util.StringHelper;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -24,7 +25,7 @@ public class LocalEvent {
     private Long entityId;
     private Long createTime;
     private LocalEventContext context;
-    private Map<String, Object> params;
+    private Map<String, String> params;
 
     public LocalEvent() {
         syncFlag = TrueOrFalseFlag.FALSE.getCode();
@@ -37,12 +38,20 @@ public class LocalEvent {
         this.entityId = entityId;
     }
 
-    public LocalEvent(Byte syncFlag, String eventName, String entityType, Long entityId, Long createTime, LocalEventContext context, Map<String, Object> params) {
+    public LocalEvent(Byte syncFlag, String eventName, String entityType, Long entityId, Long createTime, LocalEventContext context, Map<String, String> params) {
         this(eventName, entityType, entityId);
         this.syncFlag = syncFlag;
         this.createTime = createTime;
         this.context = context;
         this.params = params;
+    }
+
+    public LocalEvent addParam(String key, String value) {
+        if (this.params == null) {
+            this.params = new HashMap<>();
+        }
+        this.params.put(key, value);
+        return this;
     }
 
     public Byte getSyncFlag() {
@@ -93,11 +102,11 @@ public class LocalEvent {
         this.context = context;
     }
 
-    public Map<String, Object> getParams() {
+    public Map<String, String> getParams() {
         return params;
     }
 
-    public void setParams(Map<String, Object> params) {
+    public void setParams(Map<String, String> params) {
         this.params = params;
     }
 

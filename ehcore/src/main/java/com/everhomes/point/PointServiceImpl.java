@@ -3,6 +3,7 @@ package com.everhomes.point;
 
 import com.everhomes.banner.Banner;
 import com.everhomes.banner.BannerProvider;
+import com.everhomes.bus.SystemEvent;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
@@ -33,9 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
@@ -92,6 +91,12 @@ public class PointServiceImpl implements PointService {
 
     @Autowired
     private PointEventLogScheduler pointEventLogScheduler;
+
+    @Autowired
+    private PointRuleToEventMappingProvider pointRuleToEventMappingProvider;
+
+    @Autowired
+    private PointLocalBusSubscriber pointLocalBusSubscriber;
 
     @Override
     public ListPointSystemsResponse listPointSystems(ListPointSystemsCommand cmd) {
@@ -169,7 +174,17 @@ public class PointServiceImpl implements PointService {
         PointCommonStatus status = PointCommonStatus.fromCode(pointSystem.getStatus());
         if (status != PointCommonStatus.INACTIVE) {
             pointSystem.setStatus(PointCommonStatus.INACTIVE.getCode());
-            pointSystemProvider.updatePointSystem(pointSystem);
+
+            dbProvider.execute(s -> {
+                pointSystemProvider.updatePointSystem(pointSystem);
+
+                pointRuleProvider.deleteBySystemId(pointSystem.getId());
+                pointRuleToEventMappingProvider.deleteBySystemId(pointSystem.getId());
+                pointTutorialProvider.deleteBySystemId(pointSystem.getId());
+                pointTutorialToPointRuleMappingProvider.deleteBySystemId(pointSystem.getId());
+                pointActionProvider.deleteBySystemId(pointSystem.getId());
+                return true;
+            });
         }
     }
 
@@ -184,6 +199,28 @@ public class PointServiceImpl implements PointService {
     @Override
     public void restartEventLogScheduler() {
         pointEventLogScheduler.initScheduledTask();
+    }
+
+    @Override
+    public void reloadEventMapping() {
+        pointLocalBusSubscriber.initPointRuleCategoryQueue();
+    }
+
+    @Override
+    public PointRuleDTO createPointRule(CreatePointRuleCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        PointRule rule = ConvertHelper.convert(cmd, PointRule.class);
+
+
+        return toPointRuleDTO(rule);
+    }
+
+    @Override
+    public void createPointRuleToEventMapping(CreatePointRuleToEventMappingCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+
     }
 
     @Override
@@ -222,6 +259,28 @@ public class PointServiceImpl implements PointService {
         if (flag != null) {
             point.setUrlStatus(flag.getCode());
         }
+    }
+
+    @Override
+    public PointRuleDTO updatePointRule(UpdatePointRuleCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        PointRule pointRule = pointRuleProvider.findById(cmd.getId());
+        if (pointRule == null) {
+            throw errorWith(PointServiceErrorCode.SCOPE, PointServiceErrorCode.ERROR_POINT_RULE_NOT_EXIST_CODE,
+                    "Point rule not exist");
+        }
+
+        if (cmd.getDescription() != null) {
+            pointRule.setDescription(cmd.getDescription().trim());
+        }
+        pointRule.setLimitType(cmd.getLimitType());
+        pointRule.setLimitData(cmd.getLimitData());
+        pointRule.setStatus(cmd.getStatus());
+        pointRule.setPoints(cmd.getPoints());
+
+        pointRuleProvider.updatePointRule(pointRule);
+        return toPointRuleDTO(pointRule);
     }
 
     @Override
@@ -412,6 +471,7 @@ public class PointServiceImpl implements PointService {
         locator.setAnchor(cmd.getPageAnchor());
 
         ListPointLogsCommand logsCmd = ConvertHelper.convert(cmd, ListPointLogsCommand.class);
+        logsCmd.setEventName(SystemEvent.BIZ_ORDER_CREATE.dft());
 
         List<PointLog> logs = pointLogProvider.listPointLogs(logsCmd, locator);
         List<PointLogDTO> dtoList = logs.stream().map(this::toPointLogDTO).collect(Collectors.toList());
@@ -427,8 +487,8 @@ public class PointServiceImpl implements PointService {
         ValidatorUtil.validate(cmd);
 
         PointSystem pointSystem = ConvertHelper.convert(cmd, PointSystem.class);
-        pointSystem.setNamespaceId(UserContext.getCurrentNamespaceId());
-        pointSystem.setPointExchangeFlag(TrueOrFalseFlag.FALSE.getCode());
+        pointSystem.setNamespaceId(cmd.getNamespaceId());
+        pointSystem.setPointExchangeFlag(TrueOrFalseFlag.TRUE.getCode());
         pointSystem.setExchangeCash(1);
         pointSystem.setExchangePoint(100);
         pointSystem.setUserAgreement("");
@@ -698,7 +758,12 @@ public class PointServiceImpl implements PointService {
     }
 
     private PointRuleDTO toPointRuleDTO(PointRule pointRule) {
-        return ConvertHelper.convert(pointRule, PointRuleDTO.class);
+        PointRuleDTO dto = ConvertHelper.convert(pointRule, PointRuleDTO.class);
+        PointRuleCategory category = pointRuleCategoryProvider.findById(pointRule.getCategoryId());
+        if (category != null) {
+            dto.setCategoryName(category.getDisplayName());
+        }
+        return dto;
     }
 
     private PointRuleCategoryDTO toPointRuleCategoryDTO(PointRuleCategory pointRuleCategory) {
@@ -708,23 +773,45 @@ public class PointServiceImpl implements PointService {
     private void doSnapshotPointRule(PointSystem pointSystem) {
         List<PointRule> pointRules = pointRuleProvider.listPointRuleBySystemId(
                 PointConstant.CONFIG_POINT_SYSTEM_ID, -1, new ListingLocator());
-        pointRules.forEach(r -> {
-            Long oldId = r.getId();
-            r.setSystemId(pointSystem.getId());
-            r.setNamespaceId(pointSystem.getNamespaceId());
-            r.setId(null);
-            pointRuleProvider.createPointRule(r);
 
-            Long newId = r.getId();
+        Map<Long, Long> oldRuleIdToNewRuleIdMap = new HashMap<>();
+        for (PointRule pointRule : pointRules) {
+            Long oldId = pointRule.getId();
+            pointRule.setSystemId(pointSystem.getId());
+            pointRule.setNamespaceId(pointSystem.getNamespaceId());
+            pointRule.setId(null);
+            pointRuleProvider.createPointRule(pointRule);
+
+            Long newId = pointRule.getId();
+            oldRuleIdToNewRuleIdMap.put(oldId, newId);
+        }
+
+        // bindingRuleId改成复本id
+        pointRules = pointRuleProvider.listPointRuleBySystemId( pointSystem.getId(), -1, new ListingLocator());
+        for (PointRule pointRule : pointRules) {
+            pointRule.setBindingRuleId(oldRuleIdToNewRuleIdMap.get(pointRule.getBindingRuleId()));
+            pointRuleProvider.updatePointRule(pointRule);
+        }
+
+        oldRuleIdToNewRuleIdMap.forEach((oldId, newId) -> {
             List<PointAction> pointActions = pointActionProvider.listByOwner(Namespace.DEFAULT_NAMESPACE,
                     PointConstant.CONFIG_POINT_SYSTEM_ID, EhPointRules.class.getSimpleName(), oldId);
-            pointActions.forEach(action -> {
+            for (PointAction action : pointActions) {
                 action.setSystemId(pointSystem.getId());
                 action.setNamespaceId(pointSystem.getNamespaceId());
                 action.setOwnerId(newId);
                 action.setId(null);
-            });
+            }
             pointActionProvider.createPointActions(pointActions);
+
+            List<PointRuleToEventMapping> mappings = pointRuleToEventMappingProvider.listByPointRule(PointConstant.CONFIG_POINT_SYSTEM_ID, oldId);
+            for (PointRuleToEventMapping mapping : mappings) {
+                mapping.setId(null);
+                mapping.setNamespaceId(pointSystem.getNamespaceId());
+                mapping.setRuleId(newId);
+                mapping.setSystemId(pointSystem.getId());
+            }
+            pointRuleToEventMappingProvider.createPointRuleToEventMappings(mappings);
         });
     }
 

@@ -99,6 +99,15 @@ public class PointTutorialToPointRuleMappingProviderImpl implements PointTutoria
                 .execute();
     }
 
+    @Override
+    public void deleteBySystemId(Long systemId) {
+        com.everhomes.server.schema.tables.EhPointTutorialToPointRuleMappings t = Tables.EH_POINT_TUTORIAL_TO_POINT_RULE_MAPPINGS;
+
+        rwContext().delete(t)
+                .where(t.SYSTEM_ID.eq(systemId))
+                .execute();
+    }
+
     private EhPointTutorialToPointRuleMappingsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhPointTutorialToPointRuleMappingsDao(context.configuration());
@@ -111,5 +120,9 @@ public class PointTutorialToPointRuleMappingProviderImpl implements PointTutoria
 
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());
+    }
+
+    private DSLContext rwContext() {
+        return dbProvider.getDslContext(AccessSpec.readWrite());
     }
 }

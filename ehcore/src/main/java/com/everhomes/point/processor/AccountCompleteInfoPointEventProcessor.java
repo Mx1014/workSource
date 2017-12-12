@@ -1,12 +1,10 @@
-package com.everhomes.point.processor.account;
+package com.everhomes.point.processor;
 
 import com.everhomes.bus.LocalEvent;
 import com.everhomes.bus.SystemEvent;
 import com.everhomes.point.*;
-import com.everhomes.point.processor.GeneralPointEventProcessor;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.StringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,10 +29,9 @@ public class AccountCompleteInfoPointEventProcessor implements PointEventProcess
     }
 
     @Override
-    public PointEventProcessResult execute(PointEventLog log, PointRule rule, PointSystem pointSystem, PointRuleCategory pointRuleCategory) {
-        LocalEvent localEvent = (LocalEvent) StringHelper.fromJsonString(log.getEventJson(), LocalEvent.class);
+    public PointEventProcessResult execute(LocalEvent localEvent, PointRule rule, PointSystem pointSystem, PointRuleCategory pointRuleCategory) {
         if (isValidEvent(localEvent)) {
-            return generalProcessor.execute(log, rule, pointSystem, pointRuleCategory);
+            return generalProcessor.execute(localEvent, rule, pointSystem, pointRuleCategory);
         }
         return null;
     }
@@ -49,7 +46,13 @@ public class AccountCompleteInfoPointEventProcessor implements PointEventProcess
     }
 
     @Override
-    public List<PointResultAction> getResultActions(List<PointAction> pointActions, PointEventLog log, PointRule rule, PointSystem pointSystem, PointRuleCategory category) {
-        return generalProcessor.getResultActions(pointActions, log, rule, pointSystem, category);
+    public List<PointResultAction> getResultActions(List<PointAction> pointActions, LocalEvent localEvent,
+                                                    PointRule rule, PointSystem pointSystem, PointRuleCategory category) {
+        return generalProcessor.getResultActions(pointActions, localEvent, rule, pointSystem, category);
+    }
+
+    @Override
+    public List<PointRule> getPointRules(PointSystem pointSystem, LocalEvent localEvent) {
+        return generalProcessor.getPointRules(pointSystem, localEvent);
     }
 }

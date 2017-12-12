@@ -11,12 +11,17 @@ import com.everhomes.rest.point.PointRuleLimitType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.user.UserService;
 import com.everhomes.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by xq.tian on 2017/12/7.
@@ -30,6 +35,12 @@ public class GeneralPointEventProcessor implements PointEventProcessor {
     @Autowired
     protected PointLogProvider pointLogProvider;
 
+    @Autowired
+    private PointRuleProvider pointRuleProvider;
+
+    @Autowired
+    private PointRuleToEventMappingProvider pointRuleToEventMappingProvider;
+
     @Override
     public String[] init() {
         SystemEvent[] values = SystemEvent.values();
@@ -41,9 +52,7 @@ public class GeneralPointEventProcessor implements PointEventProcessor {
     }
 
     @Override
-    public PointEventProcessResult execute(PointEventLog log, PointRule rule, PointSystem pointSystem, PointRuleCategory pointRuleCategory) {
-        LocalEvent localEvent = (LocalEvent) StringHelper.fromJsonString(log.getEventJson(), LocalEvent.class);
-
+    public PointEventProcessResult execute(LocalEvent localEvent, PointRule rule, PointSystem pointSystem, PointRuleCategory pointRuleCategory) {
         boolean isValidEvent = isValidEvent(localEvent);
         if (!isValidEvent) {
             return null;
@@ -63,7 +72,7 @@ public class GeneralPointEventProcessor implements PointEventProcessor {
         pointLog.setTargetUid(uid);
         pointLog.setNamespaceId(namespaceId);
         pointLog.setSystemId(pointSystem.getId());
-        pointLog.setEventName(log.getEventName());
+        pointLog.setEventName(localEvent.getEventName());
         pointLog.setEntityType(localEvent.getEntityType());
         pointLog.setEntityId(localEvent.getEntityId());
         pointLog.setDescription(rule.getDescription());
@@ -79,9 +88,9 @@ public class GeneralPointEventProcessor implements PointEventProcessor {
 
         Long points = rule.getPoints();
 
-        if (rule.getBindingEventName() != null && rule.getBindingEventName().trim().length() > 0) {
-            PointLog bindingPointLog = pointLogProvider.findByUidAndEntity(namespaceId, uid,
-                    rule.getBindingEventName(), localEvent.getEntityType(), localEvent.getEntityId());
+        if (rule.getBindingRuleId() != null && rule.getBindingRuleId() != 0) {
+            PointLog bindingPointLog = pointLogProvider.findByRuleIdAndEntity(namespaceId, uid, rule.getBindingRuleId(),
+                    localEvent.getEntityType(), localEvent.getEntityId());
             if (bindingPointLog != null) {
                 if (PointArithmeticType.fromCode(rule.getArithmeticType()) == PointArithmeticType.SUBTRACT) {
                     points = -rule.getPoints();
@@ -94,17 +103,35 @@ public class GeneralPointEventProcessor implements PointEventProcessor {
     }
 
     @Override
-    public List<PointResultAction> getResultActions(List<PointAction> pointActions, PointEventLog log, PointRule rule, PointSystem pointSystem, PointRuleCategory category) {
+    public List<PointResultAction> getResultActions(List<PointAction> pointActions, LocalEvent localEvent, PointRule rule, PointSystem pointSystem, PointRuleCategory category) {
         List<PointResultAction> resultActions = new ArrayList<>();
         for (PointAction pointAction : pointActions) {
             PointActionType actionType = PointActionType.fromCode(pointAction.getActionType());
             switch (actionType) {
                 case MESSAGE:
-                    resultActions.add(new PointResultMessageAction(pointAction, pointSystem, rule, log));
+                    resultActions.add(new PointResultMessageAction(pointAction, pointSystem, rule, localEvent));
                     break;
             }
         }
         return resultActions;
+    }
+
+    @Override
+    public List<PointRule> getPointRules(PointSystem pointSystem, LocalEvent localEvent) {
+        String[] split = localEvent.getEventName().split("\\.");
+        for (int i = split.length; i >= 0; i--) {
+            String[] tokens = new String[i];
+            System.arraycopy(split, 0, tokens, 0, i);
+            String eventName = StringUtils.join(tokens, ".");
+
+            List<PointRuleToEventMapping> mappings = pointRuleToEventMappingProvider.listByEventName(
+                    localEvent.getContext().getNamespaceId(), pointSystem.getId(), eventName);
+            if (mappings != null && mappings.size() > 0) {
+                List<Long> ruleIds = mappings.stream().map(PointRuleToEventMapping::getRuleId).collect(Collectors.toList());
+                return pointRuleProvider.listPointRuleByIds(ruleIds);
+            }
+        }
+        return new ArrayList<>();
     }
 
     private boolean isValidEvent(LocalEvent localEvent) {
@@ -123,23 +150,29 @@ public class GeneralPointEventProcessor implements PointEventProcessor {
         Long uid = localEvent.getContext().getUid();
         Integer namespaceId = localEvent.getContext().getNamespaceId();
 
+        List<PointRuleToEventMapping> mappings = pointRuleToEventMappingProvider.listByPointRule(pointSystem.getId(), rule.getId());
+
         switch (limitType) {
             case TIMES_PER_DAY: {
                 LocalDateTime dateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
-                Integer count = pointLogProvider.countPointLog(
-                        namespaceId, pointSystem.getId(), uid, rule.getEventName(), dateTime.toInstant(ZoneOffset.UTC).toEpochMilli());
-                PointRuleLimitData limitData = (PointRuleLimitData) StringHelper.fromJsonString(rule.getLimitData(), PointRuleLimitData.class);
-                if (count >= limitData.getTimes()) {
-                    return false;
+                for (PointRuleToEventMapping mapping : mappings) {
+                    Integer count = pointLogProvider.countPointLog(
+                            namespaceId, pointSystem.getId(), uid, mapping.getEventName(), dateTime.toInstant(ZoneOffset.UTC).toEpochMilli());
+                    PointRuleLimitData limitData = (PointRuleLimitData) StringHelper.fromJsonString(rule.getLimitData(), PointRuleLimitData.class);
+                    if (count >= limitData.getTimes()) {
+                        return false;
+                    }
                 }
                 break;
             }
             case TIMES: {
-                Integer count = pointLogProvider.countPointLog(
-                        namespaceId, pointSystem.getId(), uid, rule.getEventName(), null);
-                PointRuleLimitData limitData = (PointRuleLimitData) StringHelper.fromJsonString(rule.getLimitData(), PointRuleLimitData.class);
-                if (count >= limitData.getTimes()) {
-                    return false;
+                for (PointRuleToEventMapping mapping : mappings) {
+                    Integer count = pointLogProvider.countPointLog(
+                            namespaceId, pointSystem.getId(), uid, mapping.getEventName(), null);
+                    PointRuleLimitData limitData = (PointRuleLimitData) StringHelper.fromJsonString(rule.getLimitData(), PointRuleLimitData.class);
+                    if (count >= limitData.getTimes()) {
+                        return false;
+                    }
                 }
                 break;
             }

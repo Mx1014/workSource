@@ -10,6 +10,7 @@ import java.sql.Timestamp;
  *     <li>namespaceId: namespaceId</li>
  *     <li>systemId: 积分系统id</li>
  *     <li>categoryId: 积分模块id</li>
+ *     <li>categoryName: 积分模块名称</li>
  *     <li>moduleId: 模块id</li>
  *     <li>displayName: 显示名称</li>
  *     <li>description: 描述</li>
@@ -19,6 +20,10 @@ import java.sql.Timestamp;
  *     <li>limitData: 限制data, e.g: {"times": 1}</li>
  *     <li>eventName: 事件名称</li>
  *     <li>status: status</li>
+ *     <li>createTime: createTime</li>
+ *     <li>creatorUid: creatorUid</li>
+ *     <li>updateTime: updateTime</li>
+ *     <li>updateUid: updateUid</li>
  * </ul>
  */
 public class PointRuleDTO {
@@ -27,6 +32,7 @@ public class PointRuleDTO {
     private Integer namespaceId;
     private Long systemId;
     private Long categoryId;
+    private String categoryName;
     private Long moduleId;
     private String displayName;
     private String description;
@@ -34,7 +40,6 @@ public class PointRuleDTO {
     private Long points;
     private Byte limitType;
     private String limitData;
-    private String eventName;
     private Byte status;
     private Timestamp createTime;
     private Long creatorUid;
@@ -105,14 +110,6 @@ public class PointRuleDTO {
         this.limitData = limitData;
     }
 
-    public String getEventName() {
-        return eventName;
-    }
-
-    public void setEventName(String eventName) {
-        this.eventName = eventName;
-    }
-
     public Byte getStatus() {
         return status;
     }
@@ -175,6 +172,14 @@ public class PointRuleDTO {
 
     public void setUpdateUid(Long updateUid) {
         this.updateUid = updateUid;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 
     @Override

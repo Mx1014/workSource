@@ -63,4 +63,12 @@ public interface PointService {
     void restartEventLogScheduler();
 
     void processUserPoint(UserTreasureDTO point);
+
+    PointRuleDTO updatePointRule(UpdatePointRuleCommand cmd);
+
+    void reloadEventMapping();
+
+    PointRuleDTO createPointRule(CreatePointRuleCommand cmd);
+
+    void createPointRuleToEventMapping(CreatePointRuleToEventMappingCommand cmd);
 }

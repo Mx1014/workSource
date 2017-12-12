@@ -1,5 +1,6 @@
 package com.everhomes.rest.point;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
@@ -34,6 +35,7 @@ public class PointTutorialDTO {
     private Timestamp createTime;
     private Timestamp updateTime;
 
+    @ItemType(PointTutorialToPointRuleMappingDTO.class)
     private List<PointTutorialToPointRuleMappingDTO> mappings = new ArrayList<>();
 
     public Long getId() {

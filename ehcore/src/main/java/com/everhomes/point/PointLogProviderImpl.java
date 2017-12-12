@@ -88,6 +88,9 @@ public class PointLogProviderImpl implements PointLogProvider {
             if (cmd.getUserId() != null) {
                 query.addConditions(t.TARGET_UID.eq(cmd.getUserId()));
             }
+            if (cmd.getEventName() != null) {
+                query.addConditions(t.EVENT_NAME.eq(cmd.getEventName()));
+            }
             if (cmd.getArithmeticType() != null) {
                 query.addConditions(t.ARITHMETIC_TYPE.eq(cmd.getArithmeticType()));
             }
@@ -120,7 +123,7 @@ public class PointLogProviderImpl implements PointLogProvider {
                 query.addConditions(t.TARGET_UID.eq(uid));
             }
             if (eventName != null) {
-                query.addConditions(t.EVENT_NAME.eq(eventName));
+                query.addConditions(t.EVENT_NAME.startsWith(eventName));
             }
             if (entityType != null && entityId != null) {
                 query.addConditions(t.ENTITY_TYPE.eq(entityType));
@@ -139,12 +142,38 @@ public class PointLogProviderImpl implements PointLogProvider {
         com.everhomes.server.schema.tables.EhPointLogs t = Tables.EH_POINT_LOGS;
         SelectQuery<EhPointLogsRecord> query = context().selectFrom(t).getQuery();
         query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(t.SYSTEM_ID.eq(systemId));
         query.addConditions(t.TARGET_UID.eq(uid));
-        query.addConditions(t.EVENT_NAME.eq(eventName));
+        query.addConditions(t.EVENT_NAME.startsWith(eventName));
         if (createTime != null) {
             query.addConditions(t.CREATE_TIME.gt(new Timestamp(createTime)));
         }
         return query.fetchCount();
+    }
+
+    @Override
+    public PointLog findByRuleIdAndEntity(Integer namespaceId, Long uid, Long ruleId, String entityType, Long entityId) {
+        com.everhomes.server.schema.tables.EhPointLogs t = Tables.EH_POINT_LOGS;
+        List<PointLog> logList = this.query(new ListingLocator(), 1, (locator1, query) -> {
+            if (namespaceId != null) {
+                query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+            }
+            if (uid != null) {
+                query.addConditions(t.TARGET_UID.eq(uid));
+            }
+            if (ruleId != null) {
+                query.addConditions(t.RULE_ID.eq(ruleId));
+            }
+            if (entityType != null && entityId != null) {
+                query.addConditions(t.ENTITY_TYPE.eq(entityType));
+                query.addConditions(t.ENTITY_ID.eq(entityId));
+            }
+            return query;
+        });
+        if (logList.size() > 0) {
+            return logList.get(0);
+        }
+        return null;
     }
 
     private EhPointLogsDao rwDao() {

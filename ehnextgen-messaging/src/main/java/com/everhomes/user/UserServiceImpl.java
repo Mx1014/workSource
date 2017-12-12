@@ -1362,6 +1362,18 @@ public class UserServiceImpl implements UserService {
 			// 发布用户切换App到前台事件   add by xq.tian 2017/07/13
             applicationEventPublisher.publishEvent(new BorderRegisterEvent(login));
 
+            // 打开App事件
+            LocalEventBus.publish(event -> {
+                LocalEventContext context = new LocalEventContext();
+                context.setNamespaceId(login.getNamespaceId());
+                context.setUid(login.getUserId());
+                event.setContext(context);
+
+                event.setEntityType(EntityType.USER.getCode());
+                event.setEntityId(login.getUserId());
+                event.setEventName(SystemEvent.ACCOUNT_OPEN_APP.dft());
+            });
+
 			registerBorderTracker(borderId, loginToken.getUserId(), loginToken.getLoginId());
 			return login;
 		} else {

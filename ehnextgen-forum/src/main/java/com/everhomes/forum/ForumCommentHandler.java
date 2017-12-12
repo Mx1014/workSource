@@ -68,17 +68,6 @@ public class ForumCommentHandler implements CommentHandler {
 
 		//评论对接积分  add by yanjun 20171211
 		// createPostCommentPoints(post.getId(), post.getModuleType(), post.getModuleCategoryId());
-
-        LocalEventBus.publish(event -> {
-            LocalEventContext context = new LocalEventContext();
-            context.setUid(UserContext.currentUserId());
-            context.setNamespaceId(UserContext.getCurrentNamespaceId());
-            event.setContext(context);
-
-            event.setEntityType(EhForumPosts.class.getSimpleName());
-            event.setEntityId(postDTO.getId());
-            event.setEventName(SystemEvent.FORM_COMMENT_CREATE.suffix(postDTO.getModuleType(), postDTO.getModuleCategoryId()));
-        });
 		return commentDto;
 	}
 
@@ -86,7 +75,7 @@ public class ForumCommentHandler implements CommentHandler {
 		String eventName = null;
 		switch (ForumModuleType.fromCode(parentModuleType)){
 			case FORUM:
-				eventName = SystemEvent.FORM_COMMENT_CREATE.suffix(moduleCategoryId);
+				eventName = SystemEvent.FORUM_COMMENT_CREATE.suffix(moduleCategoryId);
 				break;
 			case ACTIVITY:
 				eventName = SystemEvent.ACTIVITY_COMMENT_CREATE.suffix(moduleCategoryId);
@@ -155,7 +144,8 @@ public class ForumCommentHandler implements CommentHandler {
 		//删除评论对接积分 add by yanjun 20171211
 		// deletePostCommentPoints(cmd.getId());
 
-        Post tempPost = forumProvider.findPostById(cmd.getId());
+        Post commentPost = forumProvider.findPostById(cmd.getId());
+        Post parentPost = forumProvider.findPostById(commentPost.getParentPostId());
         LocalEventBus.publish(event -> {
             LocalEventContext context = new LocalEventContext();
             context.setUid(UserContext.currentUserId());
@@ -163,8 +153,9 @@ public class ForumCommentHandler implements CommentHandler {
             event.setContext(context);
 
             event.setEntityType(EhForumPosts.class.getSimpleName());
-            event.setEntityId(tempPost.getId());
-            event.setEventName(SystemEvent.FORM_COMMENT_DELETE.suffix(tempPost.getModuleType(), tempPost.getModuleCategoryId()));
+            event.setEntityId(commentPost.getId());
+            event.setEventName(SystemEvent.FORUM_COMMENT_DELETE.suffix(
+                    parentPost.getContentCategory(), parentPost.getModuleType(), parentPost.getModuleCategoryId()));
         });
 	}
 
@@ -184,7 +175,7 @@ public class ForumCommentHandler implements CommentHandler {
 		String eventName = null;
 		switch (ForumModuleType.fromCode(post.getModuleType())){
 			case FORUM:
-				eventName = SystemEvent.FORM_COMMENT_DELETE.suffix(post.getModuleCategoryId());
+				eventName = SystemEvent.FORUM_COMMENT_DELETE.suffix(post.getModuleCategoryId());
 				break;
 			case ACTIVITY:
 				eventName = SystemEvent.ACTIVITY_COMMENT_DELETE.suffix(post.getModuleCategoryId());

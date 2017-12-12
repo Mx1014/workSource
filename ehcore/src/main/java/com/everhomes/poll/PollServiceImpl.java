@@ -239,7 +239,8 @@ public class PollServiceImpl implements PollService {
 
             event.setEntityType(EhForumPosts.class.getSimpleName());
             event.setEntityId(post.getId());
-            event.setEventName(SystemEvent.FORM_POST_VOTE.suffix(post.getModuleType(), post.getModuleCategoryId()));
+            event.setEventName(SystemEvent.FORUM_POST_VOTE.suffix(
+                    post.getContentCategory(), post.getModuleType(), post.getModuleCategoryId()));
         });
     }
 

@@ -54,9 +54,6 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
     private PointRuleCategoryProvider pointRuleCategoryProvider;
 
     @Autowired
-    private PointRuleProvider pointRuleProvider;
-
-    @Autowired
     private PointLogProvider pointLogProvider;
 
     @Autowired
@@ -171,20 +168,19 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                             continue;
                         }
 
-                        List<PointRule> pointRules = getPointRules(pointSystem, log);
+                        List<PointRule> pointRules = processor.getPointRules(pointSystem, localEvent);
                         for (PointRule rule : pointRules) {
                             PointCommonStatus status = PointCommonStatus.fromCode(rule.getStatus());
                             if (status == PointCommonStatus.DISABLED) {
                                 continue;
                             }
-
-                            PointEventProcessResult result = processor.execute(log, rule, pointSystem, category);
+                            PointEventProcessResult result = processor.execute(localEvent, rule, pointSystem, category);
                             if (result == null) {
                                 continue;
                             }
 
                             List<PointAction> pointActions = pointActionProvider.listByOwner(pointSystem.getNamespaceId(), pointSystem.getId(), EhPointRules.class.getSimpleName(), rule.getId());
-                            List<PointResultAction> resultActions = processor.getResultActions(pointActions, log, rule, pointSystem, category);
+                            List<PointResultAction> resultActions = processor.getResultActions(pointActions, localEvent, rule, pointSystem, category);
                             if (resultActions != null && resultActions.size() > 0) {
                                 actions.addAll(resultActions);
                             }
@@ -217,35 +213,17 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
         }
     }
 
-    private List<PointRule> getPointRules(PointSystem pointSystem, PointEventLog log) {
-        String[] split = log.getEventName().split("\\.");
-        String eventName = StringUtils.join(split, ".");
-
-        for (int i = split.length; i >= 0; i--) {
-            List<PointRule> pointRules = pointRuleProvider.listPointRuleByEventName(log.getNamespaceId(), pointSystem.getId(), eventName);
-            if (pointRules != null && pointRules.size() > 0) {
-                return pointRules;
-            }
-            String[] tokens = new String[i];
-            System.arraycopy(split, 0, tokens, 0, i);
-            eventName = StringUtils.join(tokens, ".");
-        }
-        return new ArrayList<>();
-    }
-
     private PointEventProcessor getPointEventProcessor(String eventName) {
         String[] split = eventName.split("\\.");
-        String name = StringUtils.join(split, ".");
-
         for (int i = split.length; i >= 0; i--) {
+            String[] tokens = new String[i];
+            System.arraycopy(split, 0, tokens, 0, i);
+            String name = StringUtils.join(tokens, ".");
+
             PointEventProcessor processor = processorMap.get(name);
             if (processor != null) {
                 return processor;
             }
-
-            String[] tokens = new String[i];
-            System.arraycopy(split, 0, tokens, 0, i);
-            name = StringUtils.join(tokens, ".");
         }
         return null;
     }

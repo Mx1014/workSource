@@ -579,7 +579,8 @@ public class ActivityServiceImpl implements ActivityService {
 
 			event.setEntityType(EhForumPosts.class.getSimpleName());
 			event.setEntityId(postTemp.getId());
-			event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ENTER.suffix(postTemp.getModuleType(), postTemp.getModuleCategoryId()));
+			event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ENTER.suffix(
+			        postTemp.getContentCategory(), postTemp.getModuleType(), postTemp.getModuleCategoryId()));
 		});
 	}
 
@@ -1884,7 +1885,8 @@ public class ActivityServiceImpl implements ActivityService {
 
 			event.setEntityType(EhForumPosts.class.getSimpleName());
 			event.setEntityId(postTemp.getId());
-			event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ENTER_CANCEL.suffix(postTemp.getModuleType(), postTemp.getModuleCategoryId()));
+			event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ENTER_CANCEL.suffix(
+			        postTemp.getContentCategory(), postTemp.getModuleType(), postTemp.getModuleCategoryId()));
 		});
 	}
 

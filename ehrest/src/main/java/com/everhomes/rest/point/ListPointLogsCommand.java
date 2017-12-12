@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
  *     <li>startTime: startTime</li>
  *     <li>endTime: endTime</li>
  *     <li>phone: phone</li>
+ *     <li>eventName: eventName</li>
  *     <li>userId: 用户id, 不传就是不区分用户</li>
  *     <li>arithmeticType: 计算类型</li>
  *     <li>pageAnchor: 锚点</li>
@@ -25,6 +26,7 @@ public class ListPointLogsCommand {
     private Long endTime;
 
     private String phone;
+    private String eventName;
 
     private Long userId;
     private Byte arithmeticType;
@@ -93,6 +95,14 @@ public class ListPointLogsCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public String getEventName() {
+        return eventName;
+    }
+
+    public void setEventName(String eventName) {
+        this.eventName = eventName;
     }
 
     @Override

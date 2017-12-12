@@ -28,15 +28,15 @@ public class PointResultMessageAction implements PointResultAction {
     private PointAction pointAction;
     private PointSystem pointSystem;
     private PointRule pointRule;
-    private PointEventLog pointEventLog;
+    private LocalEvent localEvent;
 
     private Configuration configuration;
 
-    public PointResultMessageAction(PointAction pointAction, PointSystem pointSystem, PointRule pointRule, PointEventLog pointEventLog) {
+    public PointResultMessageAction(PointAction pointAction, PointSystem pointSystem, PointRule pointRule, LocalEvent localEvent) {
         this.pointAction = pointAction;
         this.pointSystem = pointSystem;
         this.pointRule = pointRule;
-        this.pointEventLog = pointEventLog;
+        this.localEvent = localEvent;
 
         messagingService = PlatformContext.getComponent(MessagingService.class);
         pointService = PlatformContext.getComponent(PointService.class);
@@ -58,8 +58,6 @@ public class PointResultMessageAction implements PointResultAction {
         if (pointRule.getPoints() == 0) {
             return;
         }
-
-        LocalEvent localEvent = (LocalEvent) StringHelper.fromJsonString(pointEventLog.getEventJson(), LocalEvent.class);
 
         Long points = 0L;
         PointArithmeticType arithmeticType = PointArithmeticType.fromCode(pointRule.getArithmeticType());

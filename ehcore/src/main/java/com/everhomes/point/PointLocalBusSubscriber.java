@@ -6,6 +6,7 @@ import com.everhomes.bus.LocalEventBus;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.rest.point.ListPointRulesCommand;
 import com.everhomes.rest.point.PointEventLogStatus;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateUtils;
@@ -27,6 +28,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 /**
@@ -42,6 +44,8 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
 
     @Value("#{T(java.util.Arrays).asList(${core.serverIdList})}")
     private List<String> serverIdList;
+
+    private final ReentrantLock lock = new ReentrantLock();
 
     private final Map<String, PointEventGroup> eventNameToPointEventGroupMap = new HashMap<>();
     private final Map<PointEventGroup, CopyOnWriteArrayList<PointEventLog>> pointEventGroupCache = new HashMap<>();
@@ -61,6 +65,9 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
     @Autowired
     private PointEventLogProvider pointEventLogProvider;
 
+    @Autowired
+    private PointRuleToEventMappingProvider pointRuleToEventMappingProvider;
+
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if (event.getApplicationContext().getParent() == null) {
@@ -76,10 +83,12 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
 
     private void persistAllEventLog() {
         try {
+            lock.lock();
             pointEventGroupCache.keySet().forEach(this::persistGroupEventLog);
         } catch (Exception e) {
             LOGGER.error("Point persist group event log error", e);
         } finally {
+            lock.unlock();
             scheduledExecutorService.schedule(this::persistAllEventLog, 60, TimeUnit.SECONDS);
         }
     }
@@ -108,19 +117,31 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
         }
     }
 
-    private void initPointRuleCategoryQueue() {
-        List<PointRuleCategory> pointRuleCategoryList = pointRuleCategoryProvider.listPointRuleCategories();
-        // 事件队列
-        for (PointRuleCategory category : pointRuleCategoryList) {
-            PointEventGroup eventGroup = new PointEventGroup(category);
-            pointEventGroupCache.put(eventGroup, new CopyOnWriteArrayList<>());
+    void initPointRuleCategoryQueue() {
+        try {
+            lock.lock();
+            List<PointRuleCategory> pointRuleCategoryList = pointRuleCategoryProvider.listPointRuleCategories();
+            // 事件队列
+            for (PointRuleCategory category : pointRuleCategoryList) {
+                PointEventGroup eventGroup = new PointEventGroup(category);
+                pointEventGroupCache.put(eventGroup, new CopyOnWriteArrayList<>());
 
-            List<PointRule> pointRules = pointRuleProvider.listPointRuleByCategoryId(category.getId(), -1, new ListingLocator());
-            // 事件监听器
-            for (PointRule rule : pointRules) {
-                eventNameToPointEventGroupMap.put(rule.getEventName(), eventGroup);
-                LocalEventBus.subscribe(rule.getEventName(), this);
+                ListPointRulesCommand cmd = new ListPointRulesCommand();
+                cmd.setCategoryId(category.getId());
+                cmd.setSystemId(PointConstant.CONFIG_POINT_SYSTEM_ID);
+
+                List<PointRule> pointRules = pointRuleProvider.listPointRules(cmd, -1, new ListingLocator());
+                for (PointRule rule : pointRules) {
+                    List<PointRuleToEventMapping> mappings = pointRuleToEventMappingProvider.listByPointRule(PointConstant.CONFIG_POINT_SYSTEM_ID, rule.getId());
+                    // 事件监听器
+                    for (PointRuleToEventMapping mapping : mappings) {
+                        eventNameToPointEventGroupMap.put(mapping.getEventName(), eventGroup);
+                        LocalEventBus.subscribe(mapping.getEventName(), this);
+                    }
+                }
             }
+        } finally {
+            lock.unlock();
         }
     }
 

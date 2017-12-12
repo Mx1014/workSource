@@ -2,6 +2,7 @@ package com.everhomes.rest.point;
 
 import com.everhomes.util.StringHelper;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 /**
@@ -32,10 +33,10 @@ public class PointGoodDTO {
     private String posterUri;
     private String posterUrl;
     private String detailUrl;
-    private Integer points;
+    private Long points;
     private Long soldAmount;
-    private Long originalPrice;
-    private Long discountPrice;
+    private BigDecimal originalPrice;
+    private BigDecimal discountPrice;
     private String pointRuleDescription;
     private Byte status;
     private Timestamp topTime;
@@ -98,11 +99,11 @@ public class PointGoodDTO {
         this.detailUrl = detailUrl;
     }
 
-    public Integer getPoints() {
+    public Long getPoints() {
         return points;
     }
 
-    public void setPoints(Integer points) {
+    public void setPoints(Long points) {
         this.points = points;
     }
 
@@ -114,19 +115,19 @@ public class PointGoodDTO {
         this.soldAmount = soldAmount;
     }
 
-    public Long getOriginalPrice() {
+    public BigDecimal getOriginalPrice() {
         return originalPrice;
     }
 
-    public void setOriginalPrice(Long originalPrice) {
+    public void setOriginalPrice(BigDecimal originalPrice) {
         this.originalPrice = originalPrice;
     }
 
-    public Long getDiscountPrice() {
+    public BigDecimal getDiscountPrice() {
         return discountPrice;
     }
 
-    public void setDiscountPrice(Long discountPrice) {
+    public void setDiscountPrice(BigDecimal discountPrice) {
         this.discountPrice = discountPrice;
     }
 

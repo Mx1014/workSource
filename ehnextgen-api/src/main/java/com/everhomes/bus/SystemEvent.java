@@ -20,19 +20,20 @@ public enum SystemEvent {
     ACCOUNT_REGISTER_SUCCESS("account.register_success"),
     ACCOUNT_AUTH_SUCCESS("account.auth_success"),
     ACCOUNT_COMPLETE_INFO("account.complete_info"),
+    ACCOUNT_OPEN_APP("account.open_app"),
 
     // 论坛
-    FORM_POST_CREATE("form.post_create"),
-    FORM_POST_DELETE("form.post_delete"),
-    FORM_POST_LIKE("form.post_like"),
-    FORM_POST_LIKE_CANCEL("form.post_like_cancel"),
-    // FORM_POST_SHARE("form.post_share"),
-    FORM_POST_VOTE("form.post_vote"),
-    FORM_POST_REPORT("form.post_report"),
+    FORUM_POST_CREATE("forum.post_create"),
+    FORUM_POST_DELETE("forum.post_delete"),
+    FORUM_POST_LIKE("forum.post_like"),
+    FORUM_POST_LIKE_CANCEL("forum.post_like_cancel"),
+    // FORUM_POST_SHARE("forum.post_share"),
+    FORUM_POST_VOTE("forum.post_vote"),
+    FORUM_POST_REPORT("forum.post_report"),
 
-    FORM_COMMENT_CREATE("form.comment_create"),
-    FORM_COMMENT_DELETE("form.comment_delete"),
-    // FORM_COMMENT_REPORT("form.comment_report"),
+    FORUM_COMMENT_CREATE("forum.comment_create"),
+    FORUM_COMMENT_DELETE("forum.comment_delete"),
+    // FORUM_COMMENT_REPORT("forum.comment_report"),
 
     // 活动
     // ACTIVITY_ACTIVITY_CREATE("activity.activity_create"),

@@ -80,6 +80,15 @@ public class PointTutorialProviderImpl implements PointTutorialProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointTutorials.class, tutorial.getId());
     }
 
+    @Override
+    public void deleteBySystemId(Long systemId) {
+        com.everhomes.server.schema.tables.EhPointTutorials t = Tables.EH_POINT_TUTORIALS;
+
+        rwContext().delete(t)
+                .where(t.SYSTEM_ID.eq(systemId))
+                .execute();
+    }
+
     private EhPointTutorialsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhPointTutorialsDao(context.configuration());
@@ -92,5 +101,9 @@ public class PointTutorialProviderImpl implements PointTutorialProvider {
 
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());
+    }
+
+    private DSLContext rwContext() {
+        return dbProvider.getDslContext(AccessSpec.readWrite());
     }
 }

@@ -6,12 +6,15 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
+ *     <li>namespaceId: namespaceId</li>
  *     <li>displayName: 系统名称</li>
  *     <li>pointName: 积分名称</li>
  * </ul>
  */
 public class CreatePointSystemCommand {
 
+    @NotNull
+    private Integer namespaceId;
     @NotNull
     private String displayName;
     @NotNull
@@ -31,6 +34,14 @@ public class CreatePointSystemCommand {
 
     public void setPointName(String pointName) {
         this.pointName = pointName;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override
