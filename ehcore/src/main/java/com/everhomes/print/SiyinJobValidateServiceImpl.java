@@ -17,6 +17,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.community.Community;
@@ -94,6 +95,23 @@ public class SiyinJobValidateServiceImpl {
 		SiyinPrintRecord record = convertMapToRecordObject(jobMap);
 		if(record==null)
 			return ;
+		generateOrders(record);
+	}
+	
+	public boolean mfpLogNotification(String jobData) {
+		try{
+			SiyinPrintRecord record = convertJsonToRecordObject(jobData);
+			if(record == null){
+				return false;
+			}
+			generateOrders(record);
+		}catch (Exception e) {
+			return false;
+		}
+		return true;
+	}
+	
+	private void generateOrders(SiyinPrintRecord record) {
 		//记录重复通知
 		SiyinPrintRecord oldrecord = siyinPrintRecordProvider.findSiyinPrintRecordByJobId(record.getJobId());
 		if(oldrecord!=null){
@@ -108,7 +126,45 @@ public class SiyinJobValidateServiceImpl {
 			reducePrintingJobCount(key);
 		}
 	}
-	
+
+	private SiyinPrintRecord convertJsonToRecordObject(String jobData) {
+		SiyinPrintRecord record = new SiyinPrintRecord();
+		JSONObject object = JSONObject.parseObject(jobData);
+		//user_name发送给司印方的时候，包括了用户id和小区id
+		String userIdcommuntiyID = object.getString("user_name").toString();
+		String[] ids = userIdcommuntiyID.split(SiyinPrintServiceImpl.PRINT_LOGON_ACCOUNT_SPLIT);
+		if(ids.length!=2){//user_name不符合格式
+			LOGGER.info("Unknown user_name = {}" , userIdcommuntiyID);
+			return null;
+		}
+		// 校验用户是否正确
+		User user = userProvider.findUserById(Long.valueOf(ids[0]));
+		if(user == null || user.getId().longValue() != Long.valueOf(ids[0]).longValue()){
+			LOGGER.info("Unknown userId = {}" , Long.valueOf(ids[0]));
+			return null;
+		}
+		record.setCreatorUid(Long.valueOf(ids[0]));
+		record.setOperatorUid(Long.valueOf(ids[0]));
+		record.setOwnerId(Long.valueOf(ids[1]));
+		record.setOwnerType(PrintOwnerType.COMMUNITY.getCode());
+		Community community = communityProvider.findCommunityById(record.getOwnerId());
+		if(community != null)
+			record.setNamespaceId(community.getNamespaceId());
+		record.setUserDisplayName(userIdcommuntiyID);
+		record.setColorSurfaceCount(object.getInteger("color_surface"));
+		record.setDuplex(object.getByte("duplex"));
+		record.setJobId(object.getString("job_id"));
+		record.setDocumentName(object.getString("job_name"));
+		record.setJobType(getPrintTypeCode(object.getString("job_type")));
+		record.setMonoSurfaceCount(object.getInteger("mono_surface"));
+		record.setPaperSize(getPaperSizeCode(object.getString("paper_size")));
+		record.setStartTime(object.getString("print_time"));
+		record.setJobStatus("FinishJob");
+		record.setGroupName("___OAUTH___");
+		record.setStatus(CommonStatus.ACTIVE.getCode());
+		return record;
+	}
+
 	public void createOrder(SiyinPrintRecord record){
 		//支付和合并订单，必须上锁。
 		coordinationProvider.getNamedLock(CoordinationLocks.PRINT_ORDER_LOCK_FLAG.getCode()).enter(()->{
@@ -121,14 +177,14 @@ public class SiyinJobValidateServiceImpl {
            mergeRecordToOrder(record,order);
            dbProvider.execute(r->{
         	   //订单金额为0，那么设置成支付状态。
-        	   	if(order.getOrderTotalFee() == null || order.getOrderTotalFee().compareTo(new BigDecimal(0)) == 0){
-        	   		//如果详情为空，并且价格为0，那么不做记录。
-        	   		if(record.getColorSurfaceCount() == 0 && record.getMonoSurfaceCount() == 0){
-        	   			return null;
-        	   		}
-        	   		order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
-        	   		order.setLockFlag(PrintOrderLockType.LOCKED.getCode());
-        	   	}
+//        	   	if(order.getOrderTotalFee() == null || order.getOrderTotalFee().compareTo(new BigDecimal(0)) == 0){
+//        	   		//如果详情为空，并且价格为0，那么不做记录。
+//        	   		if(record.getColorSurfaceCount() == 0 && record.getMonoSurfaceCount() == 0){
+//        	   			return null;
+//        	   		}
+//        	   		order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
+//        	   		order.setLockFlag(PrintOrderLockType.LOCKED.getCode());
+//        	   	}
 	   			if(order.getId() == null){
 	   				siyinPrintOrderProvider.createSiyinPrintOrder(order);
 	   			}else{
