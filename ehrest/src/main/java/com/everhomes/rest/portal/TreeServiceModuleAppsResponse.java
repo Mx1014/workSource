@@ -1,5 +1,6 @@
 package com.everhomes.rest.portal;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.acl.ServiceModuleDTO;
 import com.everhomes.rest.energy.util.EnumType;
 import com.everhomes.util.StringHelper;
@@ -15,8 +16,11 @@ import java.util.List;
  * </ul>
  */
 public class TreeServiceModuleAppsResponse {
+    @ItemType(ServiceModuleDTO.class)
     private List<ServiceModuleDTO> communityControlList;
+    @ItemType(ServiceModuleDTO.class)
     private List<ServiceModuleDTO> orgControlList;
+    @ItemType(ServiceModuleDTO.class)
     private List<ServiceModuleDTO> unlimitControlList;
     @Override
     public String toString() {
