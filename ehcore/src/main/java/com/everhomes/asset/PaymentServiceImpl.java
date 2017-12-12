@@ -8,6 +8,7 @@ import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
 import com.everhomes.pay.order.TransactionType;
 import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -50,7 +51,8 @@ public class PaymentServiceImpl implements PaymentService {
         ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
         Long appId = res.getServiceModuleApps().get(0).getId();
         if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), 1000001L, 1000001L, 40078L, appId, null, 240111044331048623L)){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"checkUserPrivilege false");
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                    "check app privilege error");
         }
 
         if(cmd.getNamespaceId() == null){
