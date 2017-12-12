@@ -13,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -33,6 +34,7 @@ import java.util.*;
  *
  */
 @Component(SmsHandler.YUN_ZHI_XUN_HANDLER_NAME)
+@DependsOn("platformContext")
 public class YunZhiXunSmsHandler implements SmsHandler {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(YunZhiXunSmsHandler.class);
