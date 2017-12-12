@@ -68,6 +68,8 @@ import com.everhomes.util.StringHelper;
  *     <li>interactFlag: 是否支持评论 0-no, 1-yes 参考{@link InteractFlag}</li>
  *	   <li>stickFlag: 置顶标志，0-否，1-是，参考{@link StickFlag}</li>
  *	   <li>stickTime: 置顶时间</li>
+ *	   <li>moduleType: 模块类型，现在所有的帖子都要往帖子表里写，通过判断条件已经很难区分是哪里来的帖子了，现在由创建帖子的时候带来。 参考{@link ForumModuleType}</li>
+ *     <li>moduleCategoryId: 业务模块的入口id</li>
  * </ul>
  */
 public class PostDTO {
@@ -191,6 +193,10 @@ public class PostDTO {
 	private Byte stickFlag;
 
     private Timestamp stickTime;
+
+    private Byte moduleType;
+
+    private Long moduleCategoryId;
 
     public Long getGroupId() {
         return groupId;
@@ -661,6 +667,22 @@ public class PostDTO {
 
     public void setStickTime(Timestamp stickTime) {
         this.stickTime = stickTime;
+    }
+
+    public Byte getModuleType() {
+        return moduleType;
+    }
+
+    public void setModuleType(Byte moduleType) {
+        this.moduleType = moduleType;
+    }
+
+    public Long getModuleCategoryId() {
+        return moduleCategoryId;
+    }
+
+    public void setModuleCategoryId(Long moduleCategoryId) {
+        this.moduleCategoryId = moduleCategoryId;
     }
 
     @Override

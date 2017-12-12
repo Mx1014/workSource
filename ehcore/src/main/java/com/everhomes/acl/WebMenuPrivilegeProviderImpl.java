@@ -287,6 +287,21 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 		return objs;
 	}
 
+	@Override
+	public List<WebMenu> listWebMenusByPath(String path, List<String> types) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWebMenus.class));
+
+		SelectQuery<EhWebMenusRecord> query = context.selectQuery(Tables.EH_WEB_MENUS);
+		query.addConditions(Tables.EH_WEB_MENUS.PATH.like(path+"%"));
+		if(types != null)
+			query.addConditions(Tables.EH_WEB_MENUS.TYPE.in(types));
+		query.addConditions(Tables.EH_WEB_MENUS.STATUS.eq(WebMenuStatus.ACTIVE.getCode()));
+		query.addOrderBy(Tables.EH_WEB_MENUS.SORT_NUM.asc());
+
+		List<WebMenu> objs = query.fetch().map((r) -> ConvertHelper.convert(r, WebMenu.class));
+
+		return objs;
+	}
 
 	@Override
 	public void deleteWebMenuScopes(List<Long> ids) {

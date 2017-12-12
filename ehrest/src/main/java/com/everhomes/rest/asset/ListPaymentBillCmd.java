@@ -17,6 +17,7 @@ public class ListPaymentBillCmd {
     private String startPayTime;
     private String endPayTime;
     private Integer namespaceId;
+    private Long communityId;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -167,5 +168,12 @@ public class ListPaymentBillCmd {
     }
     public void setDistributionRemarkIsNull(Boolean distributionRemarkIsNull) {
         this.distributionRemarkIsNull = distributionRemarkIsNull;
+    }
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 }

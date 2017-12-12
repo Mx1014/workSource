@@ -5,6 +5,12 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.blacklist.BlacklistErrorCode;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.rest.techpark.punch.admin.*;
 
@@ -22,12 +28,18 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.entity.EntityType;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.techpark.punch.PunchConstants;
 import com.everhomes.techpark.punch.PunchService;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RequireAuthentication;
+import com.everhomes.util.RuntimeErrorException;
 import com.google.zxing.Result;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 @RestDoc(value = "Punch controller", site = "ehccore")
 @RestController
 @RequestMapping("/punch")
@@ -38,8 +50,7 @@ public class PunchAdminController extends ControllerBase {
 	@Autowired
 	private PunchService punchService;
 	@Autowired
-	private UserService userService;
-	
+	private UserService userService; 
 //	/**
 //	 * <b>URL: /punch/addPunchTimeRule</b>
 //	 * <p>
@@ -786,6 +797,8 @@ public class PunchAdminController extends ControllerBase {
 	@RequestMapping("listPunchStatistics")
 	@RestReturn(value = ListPunchCountCommandResponse.class)
 	public RestResponse listPunchCount(@Valid ListPunchCountCommand cmd) {
+		Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
+		punchService.checkAppPrivilege(ownerId,cmd.getOwnerId(),PrivilegeConstants.PUNCH_STATISTIC_QUERY);
 		ListPunchCountCommandResponse commandResponse = punchService.listPunchCount(cmd);
 		RestResponse response = new RestResponse(commandResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -801,6 +814,8 @@ public class PunchAdminController extends ControllerBase {
 	 */
 	@RequestMapping("exportPunchStatistics")
 	public  RestResponse exportPunchStatistics(@Valid ListPunchCountCommand cmd,HttpServletResponse response ) {
+		Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
+		punchService.checkAppPrivilege(ownerId,cmd.getOwnerId(),PrivilegeConstants.PUNCH_STATISTIC_EXPORT);
 		HttpServletResponse commandResponse = punchService.exportPunchStatistics(cmd, response ); 
 		return new RestResponse();
 	}
@@ -830,12 +845,15 @@ public class PunchAdminController extends ControllerBase {
 	@RequestMapping("listPunchDetails")
 	@RestReturn(value = ListPunchDetailsResponse.class)
 	public RestResponse listPunchDetails(@Valid ListPunchDetailsCommand cmd) {
+		Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
+		punchService.checkAppPrivilege(ownerId,cmd.getOwnerId(),PrivilegeConstants.PUNCH_STATISTIC_QUERY);
 		ListPunchDetailsResponse commandResponse = punchService.listPunchDetails(cmd);
 		RestResponse response = new RestResponse(commandResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
+
 	/**
 	 * <b>URL: punch/exportPunchDetails</b>
 	 * <p>
@@ -843,8 +861,10 @@ public class PunchAdminController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("exportPunchDetails")
-	public  RestResponse exportPunchDetails(@Valid ListPunchDetailsCommand cmd,HttpServletResponse response ) {
-		HttpServletResponse commandResponse = punchService.exportPunchDetails(cmd, response );
+	public RestResponse exportPunchDetails(@Valid ListPunchDetailsCommand cmd, HttpServletResponse response) {
+		Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
+		punchService.checkAppPrivilege(ownerId,cmd.getOwnerId(), PrivilegeConstants.PUNCH_STATISTIC_EXPORT);
+		HttpServletResponse commandResponse = punchService.exportPunchDetails(cmd, response);
 //		RestResponse response = new RestResponse(commandResponse);
 //		response.setErrorCode(ErrorCodes.SUCCESS);
 //		response.setErrorDescription("OK");
