@@ -425,7 +425,6 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 		e.setKey("申请来源");
 		e.setValue(parentPage==null?"未知":parentPage.getName());
-		e = new FlowCaseEntity();
 		entities.add(e);
 		
 //		GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(val.getApprovalId());
