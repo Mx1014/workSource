@@ -18,7 +18,7 @@ public class ListEnergyMeterCategoriesCommand {
 
     @NotNull private Long ownerId;
     @NotNull private String ownerType;
-    @NotNull private Long communityId;
+    private Long communityId;
     @EnumType(value = EnergyCategoryType.class)
     @NotNull private Byte categoryType;
     

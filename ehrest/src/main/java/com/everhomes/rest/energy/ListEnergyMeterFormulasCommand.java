@@ -17,7 +17,7 @@ public class ListEnergyMeterFormulasCommand {
 
     @NotNull private Long ownerId;
     @NotNull private String ownerType;
-    @NotNull private Long communityId;
+   private Long communityId;
     @NotNull private Byte formulaType;
     
     private Integer namespaceId;
