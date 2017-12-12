@@ -62,14 +62,14 @@ INSERT INTO eh_service_module_exclude_functions (id, namespace_id, module_id, fu
     VALUES(1, 999983, 20400, 96);
 INSERT INTO eh_service_module_exclude_functions (id, namespace_id, module_id, function_id)
     VALUES(2, 999971, 20400, 96);
-    
+
 DROP PROCEDURE if exists create_exclude_function;
 delimiter //
 CREATE PROCEDURE `create_exclude_function` ()
-BEGIN  
+BEGIN
   DECLARE ns INTEGER;
   DECLARE done INT DEFAULT FALSE;
-  DECLARE cur CURSOR FOR select id from eh_namespaces; 
+  DECLARE cur CURSOR FOR select id from eh_namespaces;
   DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
   OPEN cur;
   read_loop: LOOP
@@ -188,5 +188,9 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 
 
 
-                                                                                                                                                                                                                                                                                                           
-                                                                                                                                                                                                                                                                                                           
+
+
+-- update address mappings, add building_id and building_name added by Janson 2017-12-12
+update eh_organization_address_mappings gg INNER JOIN eh_addresses as t1 on t1.id = gg.address_id set gg.building_name = t1.building_name where gg.building_name is null;
+update eh_organization_address_mappings gg INNER JOIN eh_buildings as t1 on (t1.community_id = gg.community_id and t1.`name` = gg.building_name) set gg.building_id = t1.id where gg.building_id = 0;
+
