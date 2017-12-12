@@ -1108,6 +1108,15 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     List<com.everhomes.asset.zjgkVOs.BillDetailDTO> dtos = response.getResponse();
                     BigDecimal amountReceivable = new BigDecimal("0");
                     BigDecimal amountOwed = new BigDecimal("0");
+                    //过滤正在审核中的客户
+                    for(int k = 0; k < dtos.size(); k++){
+                        com.everhomes.asset.zjgkVOs.BillDetailDTO dto = dtos.get(k);
+                        if(dto.getStatus().equals(PaymentStatus.SUSPEND.getCode())){
+                            dtos.remove(k);
+                            k--;
+                        }
+                    }
+                    //过滤后的账单才是欠费的账单
                     if(dtos!=null&& dtos.size()>0){
                         for(int j = 0; j < dtos.size() ; j ++){
                             com.everhomes.asset.zjgkVOs.BillDetailDTO dto = dtos.get(j);
