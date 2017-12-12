@@ -4,10 +4,7 @@ package com.everhomes.filedownload;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
-import com.everhomes.rest.filedownload.FileDownloadJobDTO;
-import com.everhomes.rest.filedownload.FileDownloadStatus;
-import com.everhomes.rest.filedownload.ListFileDownloadJobsCommand;
-import com.everhomes.rest.filedownload.ListFileDownloadJobsResponse;
+import com.everhomes.rest.filedownload.*;
 import com.everhomes.scheduler.FileDownloadScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -38,20 +35,12 @@ public class FileDownloadServiceImpl implements FileDownloadService {
     private ConfigurationProvider configProvider;
 
     @Override
-    public Long createJob(String fileName, String jobClassName, Map<String, Object> jobParams) {
+    public Long createJob(String fileName, Class jobClass, Map<String, Object> jobParams) {
 
-        FileDownloadJob job = saveJob(fileName, jobClassName, jobParams);
+        FileDownloadJob job = saveJob(fileName, jobClass.getName(), jobParams);
         runJob(job);
 
         return null;
-    }
-
-    @Override
-    public void cancelJob(Long jobId) {
-
-        //TODO cancel
-
-        updateJobStatus(jobId, FileDownloadStatus.CANCEL);
     }
 
 
@@ -64,6 +53,16 @@ public class FileDownloadServiceImpl implements FileDownloadService {
         }
         fileDownloadProvider.updateFileDownloadJob(job);
 
+    }
+
+
+    @Override
+    public void cancelJob(CancelJobCommand cmd) {
+
+        //TODO 判断权限
+        //TODO cancel
+
+        updateJobStatus(cmd.getJobId(), FileDownloadStatus.CANCEL);
     }
 
     @Override

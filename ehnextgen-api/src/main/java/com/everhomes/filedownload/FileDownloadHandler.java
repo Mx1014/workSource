@@ -9,9 +9,6 @@ public interface FileDownloadHandler {
      * @param params  此处的参数需要在创建任务的时候传过来，并且文件下载中心会自动加上一个参数jobId
      * @return  载结果文件的uri
      */
-    String run(Map<String, String> params);
-
-
-
+    String run(Map<String, Object> params);
     
 }

@@ -1,5 +1,6 @@
 package com.everhomes.scheduler;
 
+import com.everhomes.filedownload.FileDownloadHandler;
 import com.everhomes.util.StringHelper;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -33,8 +34,10 @@ public class FileDownloadScheduleJob extends QuartzJobBean {
 
         try {
             Class c1 = forName(jobClass);
-            Method run = c1.getMethod("run", Map.class);
-            run.invoke(params);
+            FileDownloadHandler handler = (FileDownloadHandler) c1.newInstance();
+            handler.run(params);
+//            Method run = c1.getMethod("run", Map.class);
+//            run.invoke(params);
         } catch (Exception e) {
             e.printStackTrace();
         }
