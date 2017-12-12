@@ -197,6 +197,7 @@
             eh_forum_service_types |
             eh_me_web_menus |
 	        eh_authorization_control_configs | eh_reflection_service_module_apps | 
+            eh_customer_entry_infos | eh_customer_departure_infos |
 			eh_service_module_exclude_functions | eh_service_module_functions | eh_customer_accounts | eh_customer_taxes |
         </includes>
 
