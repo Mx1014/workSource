@@ -325,12 +325,13 @@ public class ContractProviderImpl implements ContractProvider {
 
 
 	@Override
-	public List<Contract> listContractsByEndDateRange(Timestamp minValue, Timestamp maxValue) {
+	public List<Contract> listContractsByEndDateRange(Timestamp minValue, Timestamp maxValue, Integer namespaceId) {
 		Result<Record> result = getReadOnlyContext().select()
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.and(Tables.EH_CONTRACTS.CONTRACT_END_DATE.gt(minValue))
 				.and(Tables.EH_CONTRACTS.CONTRACT_END_DATE.le(maxValue))
+				.and(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
 				.fetch();
 			
 		if (result != null) {
@@ -341,12 +342,13 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public List<Contract> listContractsByCreateDateRange(Timestamp minValue, Timestamp maxValue) {
+	public List<Contract> listContractsByCreateDateRange(Timestamp minValue, Timestamp maxValue, Integer namespaceId) {
 		Result<Record> result = getReadOnlyContext().select()
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.and(Tables.EH_CONTRACTS.CREATE_TIME.gt(minValue))
 				.and(Tables.EH_CONTRACTS.CREATE_TIME.le(maxValue))
+				.and(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
 				.fetch();
 			
 		if (result != null) {

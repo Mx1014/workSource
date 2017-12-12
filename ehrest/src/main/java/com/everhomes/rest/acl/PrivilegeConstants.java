@@ -227,4 +227,26 @@ public interface PrivilegeConstants {
     long PUNCH_RULE_DELETE = 42004L;//    删除打卡规则 
     long PUNCH_STATISTIC_QUERY = 42005L;//    查看打卡记录 （细化权限，下同）
     long PUNCH_STATISTIC_EXPORT = 42006L;//    导出打卡记录
+
+    //设备巡检权限
+    long EQUIPMENT_STANDARD_UPDATE = 30067L;  //	设备巡检 标准新增修改权限
+    long EQUIPMENT_STANDARD_LIST = 30068L;   //设备巡检 标准查看权限
+    long EQUIPMENT_STANDARD_DELETE = 30069L;  //设备巡检 标准删除权限
+    long EQUIPMENT_RELATION_LIST = 30070L;    //设备巡检 巡检关联审批查看权限
+    long EQUIPMENT_RELATION_REVIEW = 30071L;  //设备巡检 巡检关联审批审核权限
+    long EQUIPMENT_RELATION_DELETE = 30072L;  //设备巡检 巡检关联审批删除失效关联权限
+    long EQUIPMENT_LIST = 30073L;            //设备巡检 巡检对象查看权限
+    long EQUIPMENT_UPDATE = 30074L;        //设备巡检 巡检对象新增修改权限
+    long EQUIPMENT_DELETE = 30075L;          //设备巡检 巡检对象删除权限
+    long EQUIPMENT_TASK_LIST = 30076L;       //设备巡检 任务查询权限
+    long EQUIPMENT_ITEM_LIST = 30077L;        //设备巡检 巡检项查看权限
+    long EQUIPMENT_ITEM_CREATE = 30078L;      //设备巡检 巡检项新增权限
+    long EQUIPMENT_ITEM_DELETE = 30079L;       //设备巡检 巡检项删除权限
+    long EQUIPMENT_ITEM_UPDATE = 30080L;       //设备巡检 巡检项修改权限
+    long EQUIPMENT_STAT_PANDECT = 30081L;      //设备巡检 统计总览权限
+    long EQUIPMENT_STAT_ALLTASK = 30082L;     //设备巡检 统计查看所有任务权限
+
+
+
+
 }

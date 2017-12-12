@@ -26,9 +26,9 @@ public interface ContractProvider {
 
 	List<Contract> listContractByNamespaceId(Integer namespaceId, int from, int pageSize);
 
-	List<Contract> listContractsByEndDateRange(Timestamp minValue, Timestamp maxValue);
+	List<Contract> listContractsByEndDateRange(Timestamp minValue, Timestamp maxValue, Integer namespaceId);
 
-	List<Contract> listContractsByCreateDateRange(Timestamp minValue, Timestamp maxValue);
+	List<Contract> listContractsByCreateDateRange(Timestamp minValue, Timestamp maxValue, Integer namespaceId);
 
 	void deleteContract(Contract contract);
 

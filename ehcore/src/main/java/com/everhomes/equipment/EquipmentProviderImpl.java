@@ -892,6 +892,91 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		return result;
 	}
 
+	@Override
+	public void createEquipmentModleCommunityMap(EquipmentModleCommunityMap  map) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentModleCommunityMap.class));
+		EhEquipmentModleCommunityMapDao dao = new EhEquipmentModleCommunityMapDao(context.configuration());
+		map.setId(id);
+		map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		dao.insert(map);
+	}
+
+	@Override
+	public List<EquipmentModleCommunityMap> getModuleCommunityMap(Long targetId, byte modelType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.selectFrom(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
+				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TARGET_ID.eq(targetId))
+				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(modelType))
+				.fetchInto(EquipmentModleCommunityMap.class);
+	}
+
+	@Override
+	public void deleteStandardModleCommunityMap(Long standardId,Long targetId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
+				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.STANDARD_ID.eq(standardId))
+				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TARGET_ID.eq(targetId))
+				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(EquipmentModelType.STANDARD.getCode()))
+				.execute();
+	}
+
+	@Override
+	public void deleteTemplateModleCommunityMap(Long templateId,Long targetId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
+				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TEMPLATE_ID.eq(templateId))
+				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TARGET_ID.eq(targetId))
+				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(EquipmentModelType.TEMPLATE.getCode()))
+				.execute();
+	}
+
+	@Override
+	public List<Integer> getDistinctNameSpace() {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.selectDistinct(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.NAMESPACE_ID)
+				.from(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES)
+				.fetchInto(Integer.class);
+	}
+
+	@Override
+	public List<Long> getModuleCommunityMapByStandardId(Long standardId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		return context.select(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TARGET_ID)
+				.from(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
+				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.STANDARD_ID.eq(standardId))
+				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(EquipmentModelType.STANDARD.getCode()))
+				.fetchInto(Long.class);
+	}
+
+	@Override
+	public List<Long> getModuleCommunityMapByTemplateId(Long templateId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		return context.select(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TARGET_ID)
+				.from(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
+				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TEMPLATE_ID.eq(templateId))
+				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(EquipmentModelType.TEMPLATE.getCode()))
+				.fetchInto(Long.class);
+	}
+
+	@Override
+	public void deleteStandardModleCommunityMapBystandardId(Long standardId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
+				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.STANDARD_ID.eq(standardId))
+				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(EquipmentModelType.STANDARD.getCode()))
+				.execute();
+	}
+
+	@Override
+	public void deleteTemplateModleCommunityMapByTemplateId(Long templateId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
+				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TEMPLATE_ID.eq(templateId))
+				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(EquipmentModelType.TEMPLATE.getCode()))
+				.execute();
+	}
+
 	@Cacheable(value="listQualifiedEquipmentStandardEquipments", key="'AllEquipments'", unless="#result.size() == 0")
 	@Override
 	public List<EquipmentInspectionEquipments> listQualifiedEquipmentStandardEquipments() {
@@ -1157,6 +1242,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	@Override
 	public EquipmentInspectionTemplates findEquipmentInspectionTemplate(
 			Long id, Long ownerId, String ownerType) {
+		assert id!=null;
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhEquipmentInspectionTemplatesRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES);
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.ID.eq(id));
@@ -1286,7 +1372,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
-	public List<EquipmentInspectionTemplates> listInspectionTemplates(Integer namespaceId, String name) {
+	public List<EquipmentInspectionTemplates> listInspectionTemplates(Integer namespaceId, String name,Long targetId) {
 		List<EquipmentInspectionTemplates> templates = new ArrayList<EquipmentInspectionTemplates>();
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1296,6 +1382,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 		if(!StringUtils.isNullOrEmpty(name)) {
 			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.NAME.like("%"+name+"%"));
+		}
+		//如果为项目查看自定义 增加项目id过滤
+		if(targetId!=null && targetId!=0L) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.TARGET_ID.eq(targetId));
 		}
 
 		query.fetch().map((r) -> {
@@ -1746,6 +1836,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhEquipmentInspectionStandardGroupMap.class), null, 
 				(DSLContext context, Object reducingContext) -> {
 					SelectQuery<EhEquipmentInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP);
+					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.STANDARD_ID.eq(standardId));
 		            query.fetch().map((EhEquipmentInspectionStandardGroupMapRecord record) -> {
 		            	deleteEquipmentInspectionStandardGroupMap(record.getId());
 		            	return null;
