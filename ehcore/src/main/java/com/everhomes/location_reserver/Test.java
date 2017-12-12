@@ -1,4 +1,4 @@
-package com.everhomes.reserver;
+package com.everhomes.location_reserver;
 
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
