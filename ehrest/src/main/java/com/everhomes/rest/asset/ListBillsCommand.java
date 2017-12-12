@@ -52,7 +52,7 @@ public class ListBillsCommand {
     private String targetType;
     private String contractNum;
 
-    
+
     public Integer getNamespaceId() {
         return namespaceId;
     }
