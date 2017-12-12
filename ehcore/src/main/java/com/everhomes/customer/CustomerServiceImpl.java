@@ -745,6 +745,13 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
 
+        if(dto.getContractId() != null) {
+            Contract contract = contractProvider.findContractById(dto.getContractId());
+            if(contract != null) {
+                dto.setContractName(contract.getName());
+            }
+        }
+
         return dto;
     }
 

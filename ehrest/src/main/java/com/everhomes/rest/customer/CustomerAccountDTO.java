@@ -35,7 +35,25 @@ public class CustomerAccountDTO {
     private String branchCity;
     private Long accountTypeId;
     private String accountTypeName;
+    private Long contractId;
+    private String contractName;
     private String memo;
+
+    public Long getContractId() {
+        return contractId;
+    }
+
+    public void setContractId(Long contractId) {
+        this.contractId = contractId;
+    }
+
+    public String getContractName() {
+        return contractName;
+    }
+
+    public void setContractName(String contractName) {
+        this.contractName = contractName;
+    }
 
     public String getAccountHolder() {
         return accountHolder;

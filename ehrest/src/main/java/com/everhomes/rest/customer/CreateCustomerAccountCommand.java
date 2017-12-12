@@ -31,7 +31,16 @@ public class CreateCustomerAccountCommand {
     private String branchProvince;
     private String branchCity;
     private Long accountTypeId;
+    private Long contractId;
     private String memo;
+
+    public Long getContractId() {
+        return contractId;
+    }
+
+    public void setContractId(Long contractId) {
+        this.contractId = contractId;
+    }
 
     public String getAccountHolder() {
         return accountHolder;
