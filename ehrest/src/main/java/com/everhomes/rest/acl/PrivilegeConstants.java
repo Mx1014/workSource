@@ -201,7 +201,9 @@ public interface PrivilegeConstants {
     long ENTERPRISE_CUSTOMER_MANAGE_DELETE = 21106L;//管理的删
     long ENTERPRISE_CUSTOMER_STAT = 21107L;//客户的统计分析查看
 
+    long CONTRACT_CREATE = 21101L;//合同的查看
+    long CONTRACT_DELETE = 21102L;//客户的删
+    long CONTRACT_LIST = 21103L;//客户的查
+    long CONTRACT_UPDATE = 21104L;//管理的查 导出
 
-
-//    21200
 }
