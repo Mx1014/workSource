@@ -1,4 +1,3 @@
--- merge from forum2.6 by yanjun 201712121010 start
 -- 在post表中更新模块和入口信息
 -- 活动帖子
 UPDATE eh_forum_posts set module_type = 2, module_category_id = activity_category_id where activity_category_id IS NOT NULL and activity_category_id != 0;
@@ -13,5 +12,3 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 
 -- 更新banner的覆盖策略 add by yanjun 20171211
 UPDATE eh_banners SET apply_policy = 0 where apply_policy = 3;
-
--- merge from forum2.6 by yanjun 201712121010 end

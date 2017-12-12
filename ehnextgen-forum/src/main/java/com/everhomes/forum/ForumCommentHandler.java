@@ -34,7 +34,7 @@ public class ForumCommentHandler implements CommentHandler {
 
 		Post post = this.forumProvider.findPostById(ownerTokenDto.getId());
 
-		Byte interactFlag = forumService.getInteractFlag(post);
+		Byte interactFlag = forumService.getInteractFlagByPost(post);
 
 		//不支持评论
 		if(interactFlag == null || InteractFlag.fromCode(interactFlag) == InteractFlag.UNSUPPORT){
