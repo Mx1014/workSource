@@ -37,6 +37,16 @@ public class ListEnterpriseApplyEntryCommand {
 
 	private Long LeaseIssuerId;
 
+	private Long categoryId;
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
 	public String getIssuerType() {
 		return issuerType;
 	}
