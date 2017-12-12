@@ -246,7 +246,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
                                 return true;
                             }
                             for (ControlTarget controlTarget : controlTargets) {
-                                if(controlTarget.getId() == communityId){
+                                if(controlTarget.getId().equals(communityId)){
                                     return true;
                                 }
                             }
