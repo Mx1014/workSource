@@ -75,7 +75,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         List<Long> roles = resolver.determineRoleInResource(userId, null, EntityType.USER.getCode(), null);
         if(!this.aclProvider.checkAccess("system", null, EntityType.USER.getCode(),
                 userId, Privilege.All, roles))
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, 
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                     "Insufficient privilege");
     }
 
