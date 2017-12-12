@@ -554,6 +554,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		//当配置 APP端显示楼栋介绍信息时，才返回楼栋列表，园区入驻3.6
 		GetLeasePromotionConfigCommand configCmd = new GetLeasePromotionConfigCommand();
 		configCmd.setNamespaceId(community.getNamespaceId());
+		configCmd.setCategoryId(cmd.getCategoryId());
 		LeasePromotionConfigDTO config = enterpriseApplyEntryService.getLeasePromotionConfig(configCmd);
 
 		if (config.getBuildingIntroduceFlag() == LeasePromotionFlag.ENABLED.getCode()) {
