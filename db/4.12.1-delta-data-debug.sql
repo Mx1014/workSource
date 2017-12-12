@@ -29,7 +29,7 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-  VALUES((@menu_scope_id := @menu_scope_id + 1),40140,'招租管理2', 'EhNamespaces', 1000000,2);
+  VALUES((@menu_scope_id := @menu_scope_id + 1),40140,'招租管理2', 'EhNamespaces', 1000000,1);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
   VALUES((@menu_scope_id := @menu_scope_id + 1),40142,'', 'EhNamespaces', 1000000,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
