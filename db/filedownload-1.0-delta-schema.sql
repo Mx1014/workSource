@@ -6,7 +6,6 @@ CREATE TABLE `eh_file_download_jobs` (
   `job_class_name` varchar(255) DEFAULT NULL,
   `job_params` text,
   `size` bigint(20) DEFAULT NULL,
-  `count` bigint(20) DEFAULT NULL,
   `uri` varchar(255) DEFAULT NULL,
   `rate` float DEFAULT NULL COMMENT 'rate of progress',
   `status` tinyint(4) DEFAULT NULL,

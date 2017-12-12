@@ -13,7 +13,6 @@ import java.sql.Timestamp;
  *     <li>jobClassName: jobClassName</li>
  *     <li>jobParams: jobParams</li>
  *     <li>size: size</li>
- *     <li>count: count</li>
  *     <li>uri: uri</li>
  *     <li>url: url</li>
  *     <li>rate: rate</li>
@@ -30,7 +29,6 @@ public class FileDownloadJobDTO {
     String jobClassName;
     String jobParams;
     Long size;
-    Long count;
     String uri;
     String url;
     Float rate;
@@ -77,14 +75,6 @@ public class FileDownloadJobDTO {
 
     public void setSize(Long size) {
         this.size = size;
-    }
-
-    public Long getCount() {
-        return count;
-    }
-
-    public void setCount(Long count) {
-        this.count = count;
     }
 
     public String getUri() {
