@@ -1412,15 +1412,29 @@ public class OrganizationServiceImpl implements OrganizationService {
         dbProvider.execute((TransactionStatus status) -> {
 
             this.organizationProvider.deleteOrganizationAddressByOrganizationId(id);
-
             if (addressDTOs != null && addressDTOs.size() > 0) {
                 for (OrganizationAddressDTO organizationAddressDTO : addressDTOs) {
+                    Address addr = this.addressProvider.findAddressById(organizationAddressDTO.getAddressId());
                     OrganizationAddress address = ConvertHelper.convert(organizationAddressDTO, OrganizationAddress.class);
                     address.setOrganizationId(id);
                     address.setCreatorUid(userId);
                     address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     address.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    
+                    if(addr != null) {
+                        //地址冗余字段 added by jannson
+                        address.setBuildingName(addr.getBuildingName());
+                        Building building = this.communityProvider.findBuildingByCommunityIdAndName(addr.getCommunityId(), addr.getBuildingName());
+                        if(building != null) {
+                            address.setBuildingId(building.getId());
+                            }
+                        
+                    }
+                    
                     address.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
+                    
+                    
+                    
                     this.organizationProvider.createOrganizationAddress(address);
                 }
             }
