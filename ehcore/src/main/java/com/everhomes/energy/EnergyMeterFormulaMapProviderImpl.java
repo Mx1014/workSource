@@ -14,6 +14,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.List;
 /**
  * Created by ying.xiong on 2017/12/11.
  */
+@Component
 public class EnergyMeterFormulaMapProviderImpl implements EnergyMeterFormulaMapProvider {
 
     @Autowired
