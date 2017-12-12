@@ -134,6 +134,36 @@ INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field
 
 -- merge from customer1129 by xiongying20171212 end
 
+-- 物品搬迁 add by sw 20171212
+INSERT INTO `eh_web_menus` (`name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('41800', '物品搬迁', '40000', NULL, NULL, '1', '2', '/40000/41800', 'park', '470', '41800', '2', NULL, 'module');
+INSERT INTO `eh_web_menus` (`name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('41802', '申请列表', '41800', NULL, 'react:/goods-move/apply-list', '0', '2', '/40000/41800/41802', 'park', '471', '41800', '3', NULL, 'module');
+INSERT INTO `eh_web_menus` (`name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('41804', '工作流设置', '41800', NULL, 'react:/working-flow/flow-list/goods-move/41800', '0', '2', '/40000/41800/41804', 'park', '475', '41800', '3', NULL, 'module');
+
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('relocation', '1', 'zh_CN', '物品搬迁', '物品搬迁', '0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('relocation', '2', 'zh_CN', '物品搬迁工作流申请人显示内容', '搬迁物品：${items}共${totalNum}件\r\n搬迁时间：${relocationDate}', '0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('relocation', '3', 'zh_CN', '物品搬迁工作流处理人显示内容', '申请人：${requestorName}  企业名称：${requestorEnterpriseName}\r\n搬迁物品：${items}共${totalNum}件\r\n搬迁时间：${relocationDate}', '0');
+
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`)
+	VALUES (41800, '物品搬迁', 40000, '/40000/41800', 1, 2, 2, 0, UTC_TIME(), NULL, NULL, UTC_TIME(), 0, 0, 0, 0);
+
+-- 园区入驻多入口 add by sw 20171212
+UPDATE eh_enterprise_op_requests set category_id = 1;
+UPDATE eh_lease_promotions set category_id = 1;
+UPDATE eh_lease_projects set category_id = 1;
+UPDATE eh_lease_project_communities set category_id = 1;
+UPDATE eh_lease_issuers set category_id = 1;
+UPDATE eh_lease_form_requests set category_id = 1;
+UPDATE eh_lease_configs set category_id = 1;
+UPDATE eh_lease_buildings set category_id = 1;
+
+
+
 
                                                                                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                            
