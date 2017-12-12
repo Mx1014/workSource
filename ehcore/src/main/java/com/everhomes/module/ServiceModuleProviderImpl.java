@@ -1,6 +1,33 @@
 // @formatter:off
 package com.everhomes.module;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.server.schema.tables.*;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.pojos.EhReflectionServiceModuleApps;
+import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignmentRelations;
+import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignments;
+import com.everhomes.server.schema.tables.pojos.EhServiceModuleExcludeFunctions;
+import com.everhomes.server.schema.tables.pojos.EhServiceModuleFunctions;
+import com.everhomes.server.schema.tables.pojos.EhServiceModuleScopes;
+import com.everhomes.server.schema.tables.pojos.EhServiceModules;
+import com.everhomes.server.schema.tables.records.*;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
+import org.jooq.tools.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -713,9 +740,54 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
                 .and(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()))
                 .orderBy(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ID.asc())
                 .fetch().map(r -> {
-                    appMap.put(r.getValue(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.MENU_ID), ReflectionServiceModuleApp.getServiceModuleApp(ConvertHelper.convert(r, ReflectionServiceModuleApp.class)));
-                    return null;
-                });
+            appMap.put(r.getValue(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.MENU_ID), ReflectionServiceModuleApp.getServiceModuleApp(ConvertHelper.convert(r, ReflectionServiceModuleApp.class)));
+            return null;
+        });
         return appMap;
+    }
+
+    @Override
+    public List<ServiceModuleFunction> listFunctions(Long moduleId, List<Long> privilegeIds) {
+        List<ServiceModuleFunction> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModuleFunctions.class));
+        SelectQuery<EhServiceModuleFunctionsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_FUNCTIONS);
+
+        if (moduleId != null)
+            query.addConditions(Tables.EH_SERVICE_MODULE_FUNCTIONS.MODULE_ID.eq(moduleId));
+
+        if(privilegeIds != null && privilegeIds.size() > 0)
+            query.addConditions(Tables.EH_SERVICE_MODULE_FUNCTIONS.PRIVILEGE_ID.in(privilegeIds));
+
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, ServiceModuleFunction.class));
+            return null;
+        });
+        return results;
+    }
+
+    @Override
+    public List<ServiceModuleExcludeFunction> listExcludeFunctions(Integer namespaceId, Long comunityId, Long moduleId) {
+        List<ServiceModuleExcludeFunction> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModuleExcludeFunctions.class));
+        SelectQuery<EhServiceModuleExcludeFunctionsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS);
+
+        Condition cond = Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.NAMESPACE_ID.eq(namespaceId);
+        if (comunityId != null)
+            cond = cond.and(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.COMMUNITY_ID.eq(comunityId)
+                    .or(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.COMMUNITY_ID.eq(0L))
+                    .or(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.COMMUNITY_ID.isNull()));
+        if (moduleId != null)
+            cond = cond.and(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.MODULE_ID.eq(moduleId));
+
+        query.addConditions(cond);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listExcludeFunctions, sql=" + query.getSQL());
+            LOGGER.debug("listExcludeFunctions, bindValues=" + query.getBindValues());
+        }
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, ServiceModuleExcludeFunction.class));
+            return null;
+        });
+        return results;
     }
 }

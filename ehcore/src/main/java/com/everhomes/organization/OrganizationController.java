@@ -911,7 +911,7 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/ listUserRelatexdEnterprises</b>
+     * <b>URL: /org/listUserRelatedEnterprises</b>
      * <p>列出个人相关的企业</p>
      *
      * @return {@link OrganizationDetailDTO}
