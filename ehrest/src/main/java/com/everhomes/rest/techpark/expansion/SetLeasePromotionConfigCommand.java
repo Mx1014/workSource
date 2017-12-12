@@ -9,6 +9,16 @@ public class SetLeasePromotionConfigCommand {
     private Integer namespaceId;
     private Byte buildingIntroduceFlag;
 
+    private Long categoryId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
     public Byte getBuildingIntroduceFlag() {
         return buildingIntroduceFlag;
     }

@@ -2020,6 +2020,15 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_RENTALV2_PRICE_PACKAGES.ID.max()).from(Tables.EH_RENTALV2_PRICE_PACKAGES).fetchOne().value1();
         });
 
+        syncTableSequence(null, EhRelocationRequests.class, Tables.EH_RELOCATION_REQUESTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_RELOCATION_REQUESTS.ID.max()).from(Tables.EH_RELOCATION_REQUESTS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhRelocationRequestItems.class, Tables.EH_RELOCATION_REQUEST_ITEMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_RELOCATION_REQUEST_ITEMS.ID.max()).from(Tables.EH_RELOCATION_REQUEST_ITEMS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhRelocationRequestAttachments.class, Tables.EH_RELOCATION_REQUEST_ATTACHMENTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_RELOCATION_REQUEST_ATTACHMENTS.ID.max()).from(Tables.EH_RELOCATION_REQUEST_ATTACHMENTS).fetchOne().value1();
+        });
         syncTableSequence(null, EhBanners.class, Tables.EH_BANNERS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_BANNERS.ID.max()).from(Tables.EH_BANNERS).fetchOne().value1();
         });
