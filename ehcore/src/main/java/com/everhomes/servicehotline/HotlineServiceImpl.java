@@ -2,7 +2,9 @@ package com.everhomes.servicehotline;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.aspectj.internal.lang.annotation.ajcDeclareAnnotation;
 import org.hibernate.type.YesNoType;
@@ -50,6 +52,7 @@ import com.everhomes.util.RuntimeErrorException;
 @Component
 public class HotlineServiceImpl implements HotlineService {
 	public static final String HOTLINE_SCOPE = "hotline";
+	public static final String HOTLINE_NOTSHOW_SCOPE = "hotline-notshow";
 
 	@Autowired
 	private ServiceConfigurationsProvider serviceConfigurationsProvider;
@@ -110,7 +113,40 @@ public class HotlineServiceImpl implements HotlineService {
 			}
 			// 新增的类型在后面加,仿照专属客服
 		}
+		setShowSubjects(cmd,response);
 		return response;
+	}
+
+	private void setShowSubjects(GetHotlineSubjectCommand cmd ,GetHotlineSubjectResponse response){
+		List<ServiceConfiguration> sConfigurations = serviceConfigurationsProvider
+				.queryServiceConfigurations(null, 1,
+						new ListingQueryBuilderCallback() {
+
+							@Override
+							public SelectQuery<? extends Record> buildCondition(
+									ListingLocator locator,
+									SelectQuery<? extends Record> query) {
+								query.addConditions(Tables.EH_SERVICE_CONFIGURATIONS.OWNER_TYPE
+										.eq(cmd.getOwnerType()));
+								query.addConditions(Tables.EH_SERVICE_CONFIGURATIONS.OWNER_ID
+										.eq(cmd.getOwnerId()));
+								query.addConditions(Tables.EH_SERVICE_CONFIGURATIONS.NAMESPACE_ID
+										.eq(UserContext.getCurrentNamespaceId()));
+								query.addConditions(Tables.EH_SERVICE_CONFIGURATIONS.NAME
+										.eq(HOTLINE_NOTSHOW_SCOPE));
+								return query;
+							}
+						});
+		Set<String> set = new HashSet<>();
+		if (sConfigurations!=null && sConfigurations.size()>0)
+			sConfigurations.stream().forEach(r->{
+				set.add(r.getDisplayName());
+			});
+		response.setShowSubjecs(new ArrayList<>());
+		response.getSubjects().stream().forEach(r->{
+			if (!set.contains(r.getTitle()))
+				response.getShowSubjecs().add(r.getTitle());
+		});
 	}
 
 	@Override

@@ -13,6 +13,8 @@ import com.everhomes.util.StringHelper;
 public class GetHotlineSubjectResponse {
 	@ItemType(HotlineSubject.class)
 	private List<HotlineSubject> subjects;
+
+	private List<String> showSubjecs;
 	 
 	
     @Override
@@ -30,5 +32,11 @@ public class GetHotlineSubjectResponse {
 		this.subjects = subjects;
 	}
 
- 
+	public List<String> getShowSubjecs() {
+		return showSubjecs;
+	}
+
+	public void setShowSubjecs(List<String> showSubjecs) {
+		this.showSubjecs = showSubjecs;
+	}
 }
