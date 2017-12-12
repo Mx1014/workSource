@@ -521,7 +521,7 @@ public class ForumController extends ControllerBase {
      * <p>检查应用管理员权限</p>
      */
     @RequestMapping("checkForumModuleAppAdmin")
-    @RestReturn(value=String.class)
+    @RestReturn(value=CheckModuleAppAdminResponse.class)
     @RequireAuthentication(false)
     public RestResponse checkForumModuleAppAdmin(CheckModuleAppAdminCommand cmd) {
         CheckModuleAppAdminResponse res = forumService.checkForumModuleAppAdmin(cmd);
