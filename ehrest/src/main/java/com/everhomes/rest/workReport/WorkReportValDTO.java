@@ -16,6 +16,7 @@ import java.util.List;
  * <li>title: 标题</li>
  * <li>applierName: 申请人姓名</li>
  * <li>applierUserId: 申请人id</li>
+ * <li>applierUserAvatar: 申请人头像</li>
  * <li>receiverNames: 接收人姓名(外部快速显示)</li>
  * <li>receivers: 接收人 参考{@link com.everhomes.rest.ui.user.SceneContactDTO}</li>
  * <li>reportTime: 汇报时间</li>
@@ -37,6 +38,8 @@ public class WorkReportValDTO {
     private String applierName;
 
     private Long applierUserId;
+
+    private String applierUserAvatar;
 
     private String receiverNames;
 
@@ -97,6 +100,14 @@ public class WorkReportValDTO {
 
     public void setApplierUserId(Long applierUserId) {
         this.applierUserId = applierUserId;
+    }
+
+    public String getApplierUserAvatar() {
+        return applierUserAvatar;
+    }
+
+    public void setApplierUserAvatar(String applierUserAvatar) {
+        this.applierUserAvatar = applierUserAvatar;
     }
 
     public String getReceiverNames() {

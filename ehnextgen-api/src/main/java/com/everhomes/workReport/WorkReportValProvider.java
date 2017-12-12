@@ -10,6 +10,8 @@ public interface WorkReportValProvider {
 
     WorkReportVal getWorkReportValById(Long id);
 
+    List<WorkReportVal> listWorkReportValsByUserIds(Integer pageOffset, Integer pageSize, Long ownerId, String ownerType, List<Long> applierIds);
+
     void createWorkReportValReceiverMap(WorkReportValReceiverMap receiver);
 
     void deleteReportValReceiverByValId(Long valId);

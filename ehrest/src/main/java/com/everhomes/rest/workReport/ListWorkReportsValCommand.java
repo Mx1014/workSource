@@ -16,7 +16,7 @@ import java.util.List;
  * <li>startTime: 开始时间</li>
  * <li>endTime: 结束时间</li>
  * <li>readStatus: 阅读状态 0-未读 参考{@link com.everhomes.rest.workReport.WorkReportReadStatus}</li>
- * <li>pageAnchor: 分页锚点</li>
+ * <li>pageOffset: 页码</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
  */
@@ -40,7 +40,7 @@ public class ListWorkReportsValCommand {
 
     private Byte readStatus;
 
-    private Long pageAnchor;
+    private Integer pageOffset;
 
     private Integer pageSize;
 
@@ -111,12 +111,12 @@ public class ListWorkReportsValCommand {
         this.readStatus = readStatus;
     }
 
-    public Long getPageAnchor() {
-        return pageAnchor;
+    public Integer getPageOffset() {
+        return pageOffset;
     }
 
-    public void setPageAnchor(Long pageAnchor) {
-        this.pageAnchor = pageAnchor;
+    public void setPageOffset(Integer pageOffset) {
+        this.pageOffset = pageOffset;
     }
 
     public Integer getPageSize() {

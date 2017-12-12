@@ -88,8 +88,10 @@ public class WorkReportProviderImpl implements WorkReportProvider {
 
     @Override
     public List<WorkReport> listWorkReports(
-            Long pageAnchor, Integer count, Long organizationId, String ownerType,
+            Long pageAnchor, Integer pageSize, Long organizationId, String ownerType,
             Long moduleId, Byte status) {
+        List<WorkReport> results = new ArrayList<>();
+
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWorkReportsRecord> query = context.selectQuery(Tables.EH_WORK_REPORTS);
         query.addConditions(Tables.EH_WORK_REPORTS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
@@ -104,19 +106,15 @@ public class WorkReportProviderImpl implements WorkReportProvider {
         //  find by the pageAnchor
         if (pageAnchor != null)
             query.addConditions(Tables.EH_WORK_REPORTS.ID.lt(pageAnchor));
-        query.addLimit(count + 1);
+        query.addLimit(pageSize + 1);
         query.addOrderBy(Tables.EH_WORK_REPORTS.ID.asc());
 
         //  return back results
-        List<WorkReport> results = new ArrayList<>();
         query.fetch().map(r -> {
             results.add(ConvertHelper.convert(r, WorkReport.class));
             return null;
         });
-        if (null != results && 0 < results.size()) {
-            return results;
-        }
-        return null;
+        return results;
     }
 
     @Caching(evict = {@CacheEvict(value = "listWorkReportScopesMap", key = "#scopeMap.reportId")})

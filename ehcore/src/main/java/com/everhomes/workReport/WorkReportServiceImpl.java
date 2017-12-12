@@ -22,6 +22,7 @@ import org.springframework.transaction.TransactionStatus;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -111,7 +112,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
         if (report != null) {
             //  update it.
-            if(cmd.getReportType() != null)
+            if (cmd.getReportType() != null)
                 report.setReportType(cmd.getReportType());
             report.setFormOriginId(cmd.getFormOriginId());
             report.setFormVersion(cmd.getFormVersion());
@@ -315,7 +316,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 dto.setReportName(r.getReportName());
                 dto.setReportId(r.getId());
                 //  check the scope.
-                if(checkTheScope(r.getId(), userId))
+                if (checkTheScope(r.getId(), userId))
                     reports.add(dto);
             });
         }
@@ -469,9 +470,9 @@ public class WorkReportServiceImpl implements WorkReportService {
             List<PostApprovalFormItem> values = generalFormService.getGeneralFormValues(valuesCommand);
 
             //  process the value.
-            for(GeneralFormFieldDTO field: form.getFormFields()){
-                for(PostApprovalFormItem value : values){
-                    if(field.getFieldName().equals(value.getFieldName())) {
+            for (GeneralFormFieldDTO field : form.getFormFields()) {
+                for (PostApprovalFormItem value : values) {
+                    if (field.getFieldName().equals(value.getFieldName())) {
                         field.setFieldValue(value.getFieldValue());
                         continue;
                     }
@@ -508,10 +509,10 @@ public class WorkReportServiceImpl implements WorkReportService {
         }
     }
 
-    public List<SceneContactDTO> listWorkReportValReceivers (Long reportValId) {
+    public List<SceneContactDTO> listWorkReportValReceivers(Long reportValId) {
         List<WorkReportValReceiverMap> results = workReportValProvider.listReportValReceiversByValId(reportValId);
-        if(results !=null && results.size()>0){
-            return results.stream().map(r ->{
+        if (results != null && results.size() > 0) {
+            return results.stream().map(r -> {
                 SceneContactDTO dto = new SceneContactDTO();
                 dto.setUserId(r.getReceiverUserId());
                 dto.setContactName(r.getReceiverName());
@@ -524,7 +525,56 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Override
     public ListWorkReportsValResponse listSubmittedWorkReportsVal(ListWorkReportsValCommand cmd) {
-        return null;
+        ListWorkReportsValResponse response = new ListWorkReportsValResponse();
+        List<WorkReportValDTO> reportVals = new ArrayList<>();
+        Integer nextPageOffset = null;
+        Long currentUserId = UserContext.currentUserId();
+        //  set the condition
+        if (cmd.getPageOffset() == null)
+            cmd.setPageOffset(1);
+        if (cmd.getPageSize() == null)
+            cmd.setPageSize(20);
+        List<Long> applierIds = Arrays.asList(currentUserId);
+        //  calculate the pageOffset
+        Integer pageOffset = (cmd.getPageOffset() - 1) * cmd.getPageSize();
+
+        List<WorkReportVal> results = workReportValProvider.listWorkReportValsByUserIds(pageOffset, cmd.getPageSize(), cmd.getOwnerId(), cmd.getOwnerType(), applierIds);
+        if (results != null && results.size() > 0) {
+            //  pageOffset.
+            if (results.size() > cmd.getPageSize()) {
+                results.remove(results.size() - 1);
+                nextPageOffset = cmd.getPageOffset() + 1;
+            }
+
+            //  DTO
+            results.forEach(r -> {
+                WorkReportValDTO dto = new WorkReportValDTO();
+                WorkReport report = workReportProvider.getWorkReportById(r.getReportId());
+                dto.setReportId(r.getReportId());
+                dto.setReportValId(r.getId());
+                dto.setTitle(report.getReportName());
+                dto.setReportTime(r.getReportTime());
+                dto.setUpdateTime(r.getUpdateTime());
+                List<SceneContactDTO> receivers = listWorkReportValReceivers(r.getId());
+                dto.setReceivers(receivers);
+                dto.setReceiverNames(convertReceiversToNames(receivers));
+                reportVals.add(dto);
+            });
+        }
+        response.setNextPageOffset(nextPageOffset);
+        response.setReportVals(reportVals);
+        return response;
+    }
+
+    private String convertReceiversToNames(List<SceneContactDTO> receivers){
+        String names = "";
+        if(receivers != null && receivers.size()>0){
+            for(SceneContactDTO dto : receivers){
+                names += dto.getContactName() + ",";
+            }
+            names = names.substring(0,names.length()-1);
+        }
+        return names;
     }
 
     @Override

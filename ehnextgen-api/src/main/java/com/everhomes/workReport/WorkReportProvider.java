@@ -14,7 +14,7 @@ public interface WorkReportProvider {
 
     WorkReport getWorkReportByTemplateId(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long templateId);
 
-    List<WorkReport> listWorkReports(Long pageAnchor, Integer count, Long organizationId, String ownerType, Long moduleId, Byte status);
+    List<WorkReport> listWorkReports(Long pageAnchor, Integer pageSize, Long organizationId, String ownerType, Long moduleId, Byte status);
 
     void createWorkReportScopeMap(WorkReportScopeMap scopeMap);
 
