@@ -19,12 +19,11 @@ public class EquipmentAuthParser implements PortalUrlParser {
     public Long getModuleId(Integer namespaceId, String actionData, Byte actionType, String itemLabel) {
         Long res = null;
         if (actionType == 13) {
-            Map<String, String> data = new Gson().fromJson(actionData, new TypeToken<HashMap<String, String>>() {
-            }.getType());
+            Map<String, String> data = new Gson().fromJson(actionData, new TypeToken<HashMap<String, String>>() {}.getType());
             if (data != null && data.size() > 0 && data.get("url") != null) {
                 String url = data.get("url");
                 if (url.contains("equipment-inspection"))
-                    res = 20080L;
+                    res = 20800L;
             }
         }
         return res;
