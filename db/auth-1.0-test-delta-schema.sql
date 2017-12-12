@@ -1,3 +1,4 @@
+-- 物业巡检权限细化 start  by jiarui
 CREATE TABLE `eh_equipment_modle_community_map` (
   `id`          BIGINT(20) NOT NULL,
   `standard_id` BIGINT(20) DEFAULT 0 NOT NULL,
@@ -21,7 +22,7 @@ ALTER TABLE `eh_equipment_inspection_templates`
 ALTER TABLE `eh_equipment_inspection_templates`
   ADD COLUMN `target_type` VARCHAR(32) NOT NULL DEFAULT '',
   ADD COLUMN `target_id` BIGINT(20) NOT NULL DEFAULT 0 ;
-
+-- 物业巡检权限细化 end  by  jiarui
 
 -- 权限细化 start
 ALTER TABLE `eh_service_modules` ADD COLUMN `module_control_type`  varchar(64)  DEFAULT '' COMMENT 'community_control;org_control;unlimit' ;
