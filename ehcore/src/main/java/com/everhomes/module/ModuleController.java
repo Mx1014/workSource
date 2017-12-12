@@ -250,4 +250,14 @@ public class ModuleController extends ControllerBase {
     public RestResponse listAllServiceModules(@Valid ListServiceModulesCommand cmd) {
         return new RestResponse(serviceModuleService.listAllServiceModules(cmd));
     }
+
+    /**
+     * <b>URL: /module/listUserServiceModulefunctions</b>
+     * 个人在业务模块下的功能
+     */
+    @RequestMapping("listUserServiceModulefunctions")
+    @RestReturn(value = Long.class, collection = true)
+    public RestResponse listUserServiceModulefunctions(@Valid ListServiceModulefunctionsCommand cmd) {
+        return new RestResponse(serviceModuleService.listServiceModulefunctions(cmd));
+    }
 }

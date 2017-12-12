@@ -647,12 +647,11 @@ public class PunchServiceImpl implements PunchService {
 	 * 刷新取某人某日的打卡日状态
 	 * */
 	@Override
-	public PunchDayLog refreshPunchDayLog(Long userId, Long companyId1,
+	public PunchDayLog refreshPunchDayLog(Long userId, Long companyId,
 										  Calendar logDay) throws ParseException {
 		//每一个user建立dayLog的地方加锁
 		PunchDayLog newPunchDayLog = new PunchDayLog();
 		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_PUNCH_LOG.getCode() + userId).enter(() -> {
-			Long companyId = getTopEnterpriseId(companyId1);
 			PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(userId,
 					companyId, dateSF.get().format(logDay.getTime()));
 			PunchTimeRule ptr = null;
@@ -5721,27 +5720,32 @@ public class PunchServiceImpl implements PunchService {
 		}
 
     }
-    /**刷新punCalendar 当天日数据 和 start到pun 之间的月数据*/
-	private void refreshDayLogAndMonthStat(OrganizationMemberDTO member, Long orgId,
-			Calendar punCalendar, Calendar startCalendar) {
-		try {
-			LOGGER.debug("refresh day log stat "+ member.toString());
-			//刷新 daylog
+
+    /**
+     * 刷新punCalendar 当天日数据 和 start到pun 之间的月数据
+     */
+    private void refreshDayLogAndMonthStat(OrganizationMemberDTO member, Long orgId,
+                                           Calendar punCalendar, Calendar startCalendar) {
+        orgId = getTopEnterpriseId(orgId);
+        try {
+            LOGGER.debug("refresh day log stat " + member.toString());
+            //刷新 daylog
             PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(member.getTargetId(), orgId,
                     dateSF.get().format(punCalendar.getTime()));
             if (null == punchDayLog) {
-			    this.refreshPunchDayLog(member.getTargetId(), orgId, punCalendar);
+                this.refreshPunchDayLog(member.getTargetId(), orgId, punCalendar);
             }
-			//刷月报
+            //刷月报
 
-			addPunchStatistics(member, orgId, startCalendar, punCalendar);
+            addPunchStatistics(member, orgId, startCalendar, punCalendar);
 
-		} catch (Exception e) {
-			LOGGER.error("#####refresh day log error!! userid:["+member.getTargetId()
-					+"] organization id :["+orgId+"] ",e);
-		}
-	}
-	@Override
+        } catch (Exception e) {
+            LOGGER.error("#####refresh day log error!! userid:[" + member.getTargetId()
+                    + "] organization id :[" + orgId + "] ", e);
+        }
+    }
+
+    @Override
 	public void deletePunchRuleMap(DeletePunchRuleMapCommand cmd) {
 		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
 			LOGGER.error("Invalid owner type or  Id parameter in the command");

@@ -18,6 +18,16 @@ public class GetLeasePromotionRequestFormCommand {
 
     private String sourceType;
 
+    private Long categoryId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
     public String getSourceType() {
         return sourceType;
     }
