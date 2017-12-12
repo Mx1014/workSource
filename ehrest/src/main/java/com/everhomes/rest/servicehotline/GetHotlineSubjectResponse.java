@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
 public class GetHotlineSubjectResponse {
 	@ItemType(HotlineSubject.class)
 	private List<HotlineSubject> subjects;
-
+    @ItemType(String.class)
 	private List<String> showSubjecs;
 	 
 	
