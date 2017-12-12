@@ -41,6 +41,7 @@ public class ResetServiceModuleAdministratorsCommand {
     private Long ownerId;
 
     @NotNull
+    @ItemType(Long.class)
     private List<Long> targetIds;
 
     private String targetType;

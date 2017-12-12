@@ -135,4 +135,6 @@ public interface ForumService {
     void saveInteractSetting(Integer namespaceId, Byte moduleType, Long categoryId, Byte interactFlag);
 
     ListForumServiceTypesResponse listForumServiceTypes(ListForumServiceTypesCommand cmd);
+
+    CheckModuleAppAdminResponse checkForumModuleAppAdmin(CheckModuleAppAdminCommand cmd);
 }

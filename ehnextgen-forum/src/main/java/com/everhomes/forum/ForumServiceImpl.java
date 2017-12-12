@@ -49,6 +49,7 @@ import com.everhomes.rest.activity.*;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.comment.OwnerTokenDTO;
 import com.everhomes.rest.comment.OwnerType;
@@ -205,6 +206,9 @@ public class ForumServiceImpl implements ForumService {
 
     @Autowired
     private HotTagService hotTagService;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
     
     @Override
     public boolean isSystemForum(long forumId, Long communityId) {
@@ -6545,5 +6549,37 @@ public class ForumServiceImpl implements ForumService {
         return response;
 
     }
-    
+
+    @Override
+    public CheckModuleAppAdminResponse checkForumModuleAppAdmin(CheckModuleAppAdminCommand cmd) {
+        CheckModuleAppAdminResponse res = new CheckModuleAppAdminResponse();
+
+        Long userId = UserContext.currentUserId();
+        if(userId == null){
+            res.setFlag(TrueOrFalseFlag.FALSE.getCode());
+            return res;
+        }
+
+        if(userPrivilegeMgr.checkSuperAdmin(userId, cmd.getCurrentOrgId())){
+            LOGGER.debug("check super admin privilege success.userId={}, organizationId={}" , userId, cmd.getCurrentOrgId());
+            res.setFlag(TrueOrFalseFlag.TRUE.getCode());
+            return res;
+        }
+
+        Long moduleId = ForumModuleType.fromCode(cmd.getModuleType()).getModuleId();
+        if(moduleId == null){
+            LOGGER.debug("check moduleApp admin privilege fail, moduleId dest not exists. userId={}, forumModuleType={}, organizationId={}" , userId, cmd.getModuleType(), cmd.getCurrentOrgId());
+            res.setFlag(TrueOrFalseFlag.FALSE.getCode());
+            return res;
+        }
+
+        if(userPrivilegeMgr.checkModuleAdmin(EntityType.ORGANIZATIONS.getCode(), cmd.getCurrentOrgId(), userId, moduleId)){
+            LOGGER.debug("check moduleApp admin privilege success. ownerType={}, ownerId={}, userId={}, moduleId={}" , EntityType.ORGANIZATIONS.getCode(), cmd.getCurrentOrgId(), userId, moduleId);
+            res.setFlag(TrueOrFalseFlag.TRUE.getCode());
+            return res;
+        }
+
+        res.setFlag(TrueOrFalseFlag.FALSE.getCode());
+        return res;
+    }
 }
