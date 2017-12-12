@@ -41,6 +41,7 @@ CREATE TABLE `eh_customer_accounts` (
   `branch_province` VARCHAR(128) COMMENT '开户行所在省',
   `branch_city` VARCHAR(128) COMMENT '开户行所在市',
   `account_type_id` BIGINT COMMENT '账户类型 refer to the id of eh_var_field_items',
+  `contract_id` BIGINT COMMENT '合同 refer to the id of eh_contracts',
   `memo` VARCHAR(128) COMMENT '备注',
   `status` TINYINT NOT NULL DEFAULT 2,
   `create_uid` BIGINT NOT NULL DEFAULT 0,
