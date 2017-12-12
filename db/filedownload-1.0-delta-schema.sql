@@ -7,7 +7,7 @@ CREATE TABLE `eh_file_download_jobs` (
   `job_params` text,
   `size` bigint(20) DEFAULT NULL,
   `uri` varchar(255) DEFAULT NULL,
-  `rate` float DEFAULT NULL COMMENT 'rate of progress',
+  `rate` DOUBLE DEFAULT NULL COMMENT 'rate of progress',
   `status` tinyint(4) DEFAULT NULL,
   `create_time` datetime NOT NULL ON UPDATE CURRENT_TIMESTAMP,
   `finish_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
