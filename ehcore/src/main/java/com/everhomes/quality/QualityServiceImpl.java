@@ -2609,6 +2609,7 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public void createQualitySpecification(CreateQualitySpecificationCommand cmd) {
+		//ScopeCode ==0 表示全部  1表示项目
 		if(SpecificationInspectionType.CATEGORY.equals(SpecificationInspectionType.fromStatus(cmd.getInspectionType()))) {
 			Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_CREATE, 0L);
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {

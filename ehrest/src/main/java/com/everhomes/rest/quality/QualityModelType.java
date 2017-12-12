@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 public enum QualityModelType {
     //后面再扩展
-    STANDARD((byte) 0);
+    STANDARD((byte) 0),SPECIFICATION((byte)1), CATEGORY((byte)2);
 
     private byte code;
 
