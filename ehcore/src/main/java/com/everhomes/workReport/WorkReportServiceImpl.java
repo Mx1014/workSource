@@ -153,6 +153,12 @@ public class WorkReportServiceImpl implements WorkReportService {
                 scopeMap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                 workReportProvider.updateWorkReportScopeMap(scopeMap);
             } else {
+                scopeMap = new WorkReportScopeMap();
+                scopeMap.setNamespaceId(UserContext.getCurrentNamespaceId());
+                scopeMap.setReportId(reportId);
+                scopeMap.setSourceType(dto.getSourceType());
+                scopeMap.setSourceId(dto.getSourceId());
+                scopeMap.setSourceDescription(dto.getSourceDescription());
                 workReportProvider.createWorkReportScopeMap(scopeMap);
             }
         }
@@ -476,7 +482,6 @@ public class WorkReportServiceImpl implements WorkReportService {
             //  get the new form fields.
             GetTemplateBySourceIdCommand formCommand = new GetTemplateBySourceIdCommand();
             formCommand.setNamespaceId(namespaceId);
-            formCommand.setOwnerId(report.getOwnerId());
             formCommand.setOwnerType(report.getOwnerType());
             formCommand.setSourceId(report.getId());
             formCommand.setSourceType(WORK_REPORT);
