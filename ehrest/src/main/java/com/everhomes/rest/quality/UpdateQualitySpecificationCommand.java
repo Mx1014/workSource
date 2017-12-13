@@ -1,8 +1,10 @@
 package com.everhomes.rest.quality;
 
-import javax.validation.constraints.NotNull;
-
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -17,6 +19,7 @@ import com.everhomes.util.StringHelper;
  *  <li>description: 规范内容</li>
  *  <li>scopeType: specification可见范围类型 0: all, 1: community</li>
  *  <li>scopeId: 看见范围具体Id，全部为0</li>
+ *  <li>communities: 全部中应用的项目id列表</li>
  * </ul>
  */
 public class UpdateQualitySpecificationCommand {
@@ -43,6 +46,9 @@ public class UpdateQualitySpecificationCommand {
 	private String description;
   
 	private Double weight;
+
+	@ItemType(Long.class)
+	private List<Long> communities;
 
 	public Long getId() {
 		return id;
@@ -131,7 +137,15 @@ public class UpdateQualitySpecificationCommand {
 	public void setWeight(Double weight) {
 		this.weight = weight;
 	}
-	
+
+	public List<Long> getCommunities() {
+		return communities;
+	}
+
+	public void setCommunities(List<Long> communities) {
+		this.communities = communities;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

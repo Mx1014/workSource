@@ -20,7 +20,7 @@ public enum QualityModelType {
         this.code = code;
     }
 
-    private static QualityModelType formStatu(byte code) {
+    public static QualityModelType fromStatu(byte code) {
         for (QualityModelType v : QualityModelType.values()) {
             if (v.code == code) {
                 return v;

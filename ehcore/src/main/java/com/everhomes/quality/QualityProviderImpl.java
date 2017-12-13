@@ -2690,6 +2690,7 @@ public class QualityProviderImpl implements QualityProvider {
 	@Override
 	public void createQualityModelCommunityMap(QualityInspectionModleCommunityMap map) {
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQualityInspectionModleCommunityMap.class));
+		map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		map.setId(id);
 		EhQualityInspectionModleCommunityMapDao dao = new EhQualityInspectionModleCommunityMapDao();
 		dao.insert(map);
@@ -2713,5 +2714,32 @@ public class QualityProviderImpl implements QualityProvider {
 				.and(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(QualityModelType.STANDARD.getCode()))
 				.fetchInto(QualityInspectionModleCommunityMap.class);
 		return null;
+	}
+
+	@Override
+	public void deleteQualityModelCommunityMapByCommunityAndSpecificationId(Long id, Long scopeId, Byte inspectionType) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteQuery query = context.deleteQuery(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(inspectionType));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP.TARGET_ID.eq(scopeId));
+		if (QualityModelType.SPECIFICATION.equals(QualityModelType.fromStatu(inspectionType))) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP.SPECIFICATION_ID.eq(id));
+		} else if (QualityModelType.CATEGORY.equals(QualityModelType.fromStatu(inspectionType))) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP.CATEGORY_ID.eq(id));
+		}
+		query.execute();
+	}
+
+	@Override
+	public void deleteQualityModelCommunityMapBySpecificationId(Long id, Byte inspectionType) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteQuery query = context.deleteQuery(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(inspectionType));
+		if (QualityModelType.SPECIFICATION.equals(QualityModelType.fromStatu(inspectionType))) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP.SPECIFICATION_ID.eq(id));
+		} else if (QualityModelType.CATEGORY.equals(QualityModelType.fromStatu(inspectionType))) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP.CATEGORY_ID.eq(id));
+		}
+		query.execute();
 	}
 }

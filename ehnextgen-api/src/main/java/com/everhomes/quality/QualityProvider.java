@@ -176,4 +176,8 @@ public interface QualityProvider {
 	void deleteQualityModelCommunityMapByCommunityAndStandardId(Long id, Long targetId);
 
 	List<QualityInspectionModleCommunityMap> getQualityModelCommunityMapByTargetId(Long targetId);
+
+    void deleteQualityModelCommunityMapByCommunityAndSpecificationId(Long id, Long scopeId, Byte inspectionType);
+
+	void deleteQualityModelCommunityMapBySpecificationId(Long id, Byte inspectionType);
 }
