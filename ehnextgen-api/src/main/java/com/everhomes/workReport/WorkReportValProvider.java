@@ -1,5 +1,8 @@
 package com.everhomes.workReport;
 
+import org.jooq.Record;
+import org.jooq.RecordMapper;
+
 import java.util.List;
 
 public interface WorkReportValProvider {
@@ -10,7 +13,9 @@ public interface WorkReportValProvider {
 
     WorkReportVal getWorkReportValById(Long id);
 
-    List<WorkReportVal> listWorkReportValsByUserIds(Integer pageOffset, Integer pageSize, Long ownerId, String ownerType, List<Long> applierIds);
+    List<WorkReportVal> listWorkReportValsByApplierIds(Integer namespaceId, Integer pageOffset, Integer pageSize, Long ownerId, String ownerType, List<Long> applierIds);
+
+    List<WorkReportVal> listWorkReportValsByReceiverId(Integer namespaceId, Integer pageOffset, Integer pageSize, Long ownerId, String ownerType, Long receiverId, Byte readStatus);
 
     void createWorkReportValReceiverMap(WorkReportValReceiverMap receiver);
 

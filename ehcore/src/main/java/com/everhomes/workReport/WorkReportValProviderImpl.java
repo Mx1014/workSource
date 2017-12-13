@@ -8,22 +8,15 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.workReport.WorkReportStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhWorkReportScopeMapDao;
 import com.everhomes.server.schema.tables.daos.EhWorkReportValReceiverMapDao;
 import com.everhomes.server.schema.tables.daos.EhWorkReportValsDao;
-import com.everhomes.server.schema.tables.daos.EhWorkReportsDao;
 import com.everhomes.server.schema.tables.pojos.EhWorkReportScopeMap;
 import com.everhomes.server.schema.tables.pojos.EhWorkReportValReceiverMap;
 import com.everhomes.server.schema.tables.pojos.EhWorkReportVals;
-import com.everhomes.server.schema.tables.pojos.EhWorkReports;
 import com.everhomes.server.schema.tables.records.*;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import org.jooq.DSLContext;
-import org.jooq.DeleteQuery;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -74,13 +67,13 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
     }
 
     @Override
-    public List<WorkReportVal> listWorkReportValsByUserIds(
-            Integer pageOffset, Integer pageSize, Long ownerId, String ownerType, List<Long> applierIds) {
+    public List<WorkReportVal> listWorkReportValsByApplierIds(
+            Integer namespaceId, Integer pageOffset, Integer pageSize, Long ownerId, String ownerType, List<Long> applierIds) {
         List<WorkReportVal> results = new ArrayList<>();
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWorkReportValsRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VALS);
-        query.addConditions(Tables.EH_WORK_REPORT_VALS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+        query.addConditions(Tables.EH_WORK_REPORT_VALS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_WORK_REPORT_VALS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_WORK_REPORT_VALS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_WORK_REPORT_VALS.STATUS.eq(WorkReportStatus.VALID.getCode()));
@@ -93,6 +86,47 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         //  return back
         query.fetch().map(r -> {
             results.add(ConvertHelper.convert(r, WorkReportVal.class));
+            return null;
+        });
+        return results;
+    }
+
+    @Override
+    public List<WorkReportVal> listWorkReportValsByReceiverId(
+            Integer namespaceId, Integer pageOffset, Integer pageSize, Long ownerId, String ownerType, Long receiverId, Byte readStatus) {
+        List<WorkReportVal> results = new ArrayList<>();
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportValReceiverMapRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP);
+        query.addJoin(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP, JoinType.JOIN,
+                Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.REPORT_VAL_ID.eq(Tables.EH_WORK_REPORT_VALS.ID));
+/*        query.addSelect(Tables.EH_WORK_REPORT_VALS.ID.as("reportValId"));
+        query.addSelect(Tables.EH_WORK_REPORT_VALS.REPORT_ID.as("reportId"));
+        query.addSelect(Tables.EH_WORK_REPORT_VALS.REPORT_TIME);
+        query.addSelect(Tables.EH_WORK_REPORT_VALS.UPDATE_TIME);
+        query.addSelect(Tables.EH_WORK_REPORT_VALS.APPLIER_NAME);*/
+//        query.addSelect(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.READ_STATUS);
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.RECEIVER_USER_ID.eq(receiverId));
+        if (readStatus != null)
+            query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.READ_STATUS.eq(readStatus));
+        query.addConditions(Tables.EH_WORK_REPORT_VALS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_WORK_REPORT_VALS.OWNER_TYPE.eq(ownerType));
+
+        //  set the pageOffset condition
+        query.addLimit(pageOffset, pageSize + 1);
+        query.addOrderBy(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.CREATE_TIME.desc());
+
+        //  return back
+        query.fetch().map(r ->{
+            WorkReportVal reportVal = new WorkReportVal();
+            reportVal.setId(r.getValue(Tables.EH_WORK_REPORT_VALS.ID));
+            reportVal.setReportId(r.getValue(Tables.EH_WORK_REPORT_VALS.REPORT_ID));
+            reportVal.setReportTime(r.getValue(Tables.EH_WORK_REPORT_VALS.REPORT_TIME));
+            reportVal.setApplierName(r.getValue(Tables.EH_WORK_REPORT_VALS.APPLIER_NAME));
+            reportVal.setReadStatus(r.getValue(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.READ_STATUS));
+            reportVal.setUpdateTime(r.getValue(Tables.EH_WORK_REPORT_VALS.UPDATE_TIME));
+            results.add(reportVal);
             return null;
         });
         return results;

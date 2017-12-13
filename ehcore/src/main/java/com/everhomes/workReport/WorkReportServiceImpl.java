@@ -174,7 +174,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 results.remove(results.size() - 1);
                 nextPageAnchor = results.get(results.size() - 1).getId();
             }
-            //  DTO.
+            //  DTO(name, scopes).
             results.forEach(r -> {
                 WorkReportDTO dto = ConvertHelper.convert(r, WorkReportDTO.class);
                 dto.setReportId(r.getId());
@@ -281,7 +281,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 report.setFormOriginId(formOriginId);
             workReportProvider.updateWorkReport(report);
         } else {
-            //  otherwise, create the report
+            //  otherwise, create the report.
             report = ConvertHelper.convert(template, WorkReport.class);
             report.setNamespaceId(namespaceId);
             report.setOwnerId(cmd.getOwnerId());
@@ -415,7 +415,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             return valId;
         });
 
-        //  return back;
+        //  return back.
         WorkReportValDTO dto = new WorkReportValDTO();
         dto.setReportId(report.getId());
         dto.setReportValId(reportValId);
@@ -528,17 +528,20 @@ public class WorkReportServiceImpl implements WorkReportService {
         ListWorkReportsValResponse response = new ListWorkReportsValResponse();
         List<WorkReportValDTO> reportVals = new ArrayList<>();
         Integer nextPageOffset = null;
-        Long currentUserId = UserContext.currentUserId();
-        //  set the condition
+        Long applierId = UserContext.currentUserId();
+
+        //  set the condition.
         if (cmd.getPageOffset() == null)
             cmd.setPageOffset(1);
         if (cmd.getPageSize() == null)
             cmd.setPageSize(20);
-        List<Long> applierIds = Arrays.asList(currentUserId);
-        //  calculate the pageOffset
+        List<Long> applierIds = Arrays.asList(applierId);
+
+        //  calculate the pageOffset.
         Integer pageOffset = (cmd.getPageOffset() - 1) * cmd.getPageSize();
 
-        List<WorkReportVal> results = workReportValProvider.listWorkReportValsByUserIds(pageOffset, cmd.getPageSize(), cmd.getOwnerId(), cmd.getOwnerType(), applierIds);
+        List<WorkReportVal> results = workReportValProvider.listWorkReportValsByApplierIds(
+                UserContext.getCurrentNamespaceId(), pageOffset, cmd.getPageSize(), cmd.getOwnerId(), cmd.getOwnerType(), applierIds);
         if (results != null && results.size() > 0) {
             //  pageOffset.
             if (results.size() > cmd.getPageSize()) {
@@ -546,13 +549,14 @@ public class WorkReportServiceImpl implements WorkReportService {
                 nextPageOffset = cmd.getPageOffset() + 1;
             }
 
-            //  DTO
+            //  DTO(receiverNames).
             results.forEach(r -> {
                 WorkReportValDTO dto = new WorkReportValDTO();
                 WorkReport report = workReportProvider.getWorkReportById(r.getReportId());
                 dto.setReportId(r.getReportId());
                 dto.setReportValId(r.getId());
-                dto.setTitle(report.getReportName());
+                if (report != null)
+                    dto.setTitle(report.getReportName());
                 dto.setReportTime(r.getReportTime());
                 dto.setUpdateTime(r.getUpdateTime());
                 List<SceneContactDTO> receivers = listWorkReportValReceivers(r.getId());
@@ -566,20 +570,61 @@ public class WorkReportServiceImpl implements WorkReportService {
         return response;
     }
 
-    private String convertReceiversToNames(List<SceneContactDTO> receivers){
+    private String convertReceiversToNames(List<SceneContactDTO> receivers) {
         String names = "";
-        if(receivers != null && receivers.size()>0){
-            for(SceneContactDTO dto : receivers){
+        if (receivers != null && receivers.size() > 0) {
+            for (SceneContactDTO dto : receivers) {
                 names += dto.getContactName() + ",";
             }
-            names = names.substring(0,names.length()-1);
+            names = names.substring(0, names.length() - 1);
         }
         return names;
     }
 
     @Override
     public ListWorkReportsValResponse listReceivedWorkReportsVal(ListWorkReportsValCommand cmd) {
-        return null;
+        ListWorkReportsValResponse response = new ListWorkReportsValResponse();
+        List<WorkReportValDTO> reportVals = new ArrayList<>();
+        User user = UserContext.current().getUser();
+        Integer nextPageOffset = null;
+
+        //  set the condition.
+        if (cmd.getPageOffset() == null)
+            cmd.setPageOffset(1);
+        if (cmd.getPageSize() == null)
+            cmd.setPageSize(20);
+
+        //  calculate the pageOffset.
+        Integer pageOffset = (cmd.getPageOffset() - 1) * cmd.getPageSize();
+        List<WorkReportVal> results = workReportValProvider.listWorkReportValsByReceiverId(
+                user.getNamespaceId(), pageOffset, cmd.getPageSize(), cmd.getOwnerId(),
+                cmd.getOwnerType(), user.getId(), cmd.getReadStatus());
+
+        if (results != null && results.size() > 0) {
+            //  pageOffset.
+            if (results.size() > cmd.getPageSize()) {
+                results.remove(results.size() - 1);
+                nextPageOffset = cmd.getPageOffset() + 1;
+            }
+
+            //  DTO(applierName, readStatus).
+            results.forEach(r -> {
+                WorkReportValDTO dto = new WorkReportValDTO();
+                WorkReport report = workReportProvider.getWorkReportById(r.getReportId());
+                dto.setReportId(r.getReportId());
+                dto.setReportValId(r.getId());
+                if (report != null)
+                    dto.setTitle(report.getReportName());
+                dto.setReportTime(r.getReportTime());
+                dto.setReadStatus(r.getReadStatus());
+                dto.setApplierName(r.getApplierName());
+                dto.setUpdateTime(r.getUpdateTime());
+                reportVals.add(dto);
+            });
+        }
+        response.setNextPageOffset(nextPageOffset);
+        response.setReportVals(reportVals);
+        return response;
     }
 
     @Override
