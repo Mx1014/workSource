@@ -9,5 +9,6 @@ public interface EnergyMeterCategoryMapProvider {
     void createEnergyMeterCategoryMap(EnergyMeterCategoryMap map);
     void updateEnergyMeterCategoryMap(EnergyMeterCategoryMap map);
     List<EnergyMeterCategoryMap> listEnergyMeterCategoryMap(Long communityId);
+    List<Long> listCommunityIdByCategory(Long categoryId);
     EnergyMeterCategoryMap findEnergyMeterCategoryMap(Long community, Long categoryId);
 }

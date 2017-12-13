@@ -9,5 +9,6 @@ public interface EnergyMeterFormulaMapProvider {
     void createEnergyMeterFormulaMap(EnergyMeterFormulaMap map);
     void updateEnergyMeterFormulaMap(EnergyMeterFormulaMap map);
     List<EnergyMeterFormulaMap> listEnergyMeterFormulaMap(Long communityId);
-    EnergyMeterFormulaMap findEnergyMeterFormulaMap(Long community, Long categoryId);
+    List<Long> listCommunityIdByFormula(Long formulaId);
+    EnergyMeterFormulaMap findEnergyMeterFormulaMap(Long community, Long formulaId);
 }

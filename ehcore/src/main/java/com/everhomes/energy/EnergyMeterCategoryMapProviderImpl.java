@@ -69,6 +69,20 @@ public class EnergyMeterCategoryMapProviderImpl implements EnergyMeterCategoryMa
     }
 
     @Override
+    public List<Long> listCommunityIdByCategory(Long categoryId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<Long> communityIds = context.select().from(Tables.EH_ENERGY_METER_CATEGORY_MAP)
+                .where(Tables.EH_ENERGY_METER_CATEGORY_MAP.CATEGORY_ID.eq(categoryId))
+                .and(Tables.EH_ENERGY_METER_CATEGORY_MAP.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
+                .fetch().map((record)-> {
+                    return record.getValue(Tables.EH_ENERGY_METER_CATEGORY_MAP.COMMUNITY_ID);
+                });
+
+        return communityIds;
+    }
+
+    @Override
     public EnergyMeterCategoryMap findEnergyMeterCategoryMap(Long community, Long categoryId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.select().from(Tables.EH_ENERGY_METER_CATEGORY_MAP)

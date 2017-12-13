@@ -8,6 +8,7 @@ import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
+import com.everhomes.category.Category;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
@@ -2226,7 +2227,30 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 //        checkCurrentUserNotInOrg(cmd.getOwnerId());
 //        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
 
-        return formulas.stream().map(this::toEnergyMeterFormulaDTO).collect(Collectors.toList());
+        List<EnergyMeterFormulaDTO> dtos = formulas.stream().map(formula -> {
+            EnergyMeterFormulaDTO dto = toEnergyMeterFormulaDTO(formula);
+            List<String> communityName = new ArrayList<String>();
+            if(dto.getCommunityId() == null || dto.getCommunityId() == 0L) {
+                List<Long> communityIds = energyMeterFormulaMapProvider.listCommunityIdByFormula(dto.getId());
+                List<Community> communities = communityProvider.findCommunitiesByIds(communityIds);
+                if(communities != null && communities.size() > 0) {
+                    communities.forEach(community -> {
+                        if(community != null) {
+                            communityName.add(community.getName());
+                        }
+                    });
+                }
+            } else {
+                Community community = communityProvider.findCommunityById(dto.getCommunityId());
+                if(community != null) {
+                    communityName.add(community.getName());
+                }
+            }
+            dto.setCommunityName(communityName);
+            return dto;
+        }).collect(Collectors.toList());
+
+        return dtos;
     }
 
     @Override
@@ -2482,7 +2506,30 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         }
 
-        return categoryList.stream().map(this::toMeterCategoryDto).collect(Collectors.toList());
+        List<EnergyMeterCategoryDTO> dtos = categoryList.stream().map(category -> {
+            EnergyMeterCategoryDTO dto = toMeterCategoryDto(category);
+            List<String> communityName = new ArrayList<String>();
+            if(dto.getCommunityId() == null || dto.getCommunityId() == 0L) {
+                List<Long> communityIds = energyMeterCategoryMapProvider.listCommunityIdByCategory(dto.getId());
+                List<Community> communities = communityProvider.findCommunitiesByIds(communityIds);
+                if(communities != null && communities.size() > 0) {
+                    communities.forEach(community -> {
+                        if(community != null) {
+                            communityName.add(community.getName());
+                        }
+                    });
+                }
+            } else {
+                Community community = communityProvider.findCommunityById(dto.getCommunityId());
+                if(community != null) {
+                    communityName.add(community.getName());
+                }
+            }
+            dto.setCommunityName(communityName);
+            return dto;
+        }).collect(Collectors.toList());
+
+        return dtos;
     }
 
     @Override

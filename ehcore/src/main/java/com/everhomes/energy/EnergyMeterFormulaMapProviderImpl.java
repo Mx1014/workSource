@@ -67,6 +67,20 @@ public class EnergyMeterFormulaMapProviderImpl implements EnergyMeterFormulaMapP
     }
 
     @Override
+    public List<Long> listCommunityIdByFormula(Long formulaId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<Long> communityIds = context.select().from(Tables.EH_ENERGY_METER_FOMULAR_MAP)
+                .where(Tables.EH_ENERGY_METER_FOMULAR_MAP.FOMULAR_ID.eq(formulaId))
+                .and(Tables.EH_ENERGY_METER_FOMULAR_MAP.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
+                .fetch().map((record)-> {
+                    return record.getValue(Tables.EH_ENERGY_METER_FOMULAR_MAP.COMMUNITY_ID);
+                });
+
+        return communityIds;
+    }
+
+    @Override
     public EnergyMeterFormulaMap findEnergyMeterFormulaMap(Long community, Long formulaId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.select().from(Tables.EH_ENERGY_METER_FOMULAR_MAP)
