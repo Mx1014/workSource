@@ -55,6 +55,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.everhomes.rest.acl.PrivilegeConstants.BATCH_EXPORT_PERSON;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 @Component
@@ -581,6 +582,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void exportArchivesContacts(ExportArchivesContactsCommand cmd, HttpServletResponse httpResponse) {
+        organizationService.checkOrganizationpPivilege(cmd.getOrganizationId(), PrivilegeConstants.BATCH_EXPORT_PERSON);
         ListArchivesContactsCommand listCommand = new ListArchivesContactsCommand();
         listCommand.setOrganizationId(cmd.getOrganizationId());
         listCommand.setKeywords(cmd.getKeywords());
