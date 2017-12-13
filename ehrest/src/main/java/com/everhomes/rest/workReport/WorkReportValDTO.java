@@ -39,6 +39,8 @@ public class WorkReportValDTO {
 
     private Long applierUserId;
 
+    private Long applierDetailId;
+
     private String applierUserAvatar;
 
     private String receiverNames;
@@ -92,6 +94,14 @@ public class WorkReportValDTO {
 
     public void setApplierName(String applierName) {
         this.applierName = applierName;
+    }
+
+    public Long getApplierDetailId() {
+        return applierDetailId;
+    }
+
+    public void setApplierDetailId(Long applierDetailId) {
+        this.applierDetailId = applierDetailId;
     }
 
     public Long getApplierUserId() {

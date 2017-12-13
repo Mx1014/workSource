@@ -1,5 +1,6 @@
 package com.everhomes.workReport;
 
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.organization.Organization;
@@ -13,6 +14,7 @@ import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.rest.workReport.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +46,12 @@ public class WorkReportServiceImpl implements WorkReportService {
     @Autowired
     private GeneralFormService generalFormService;
 
+    @Autowired
+    private UserProvider userProvider;
+
+    @Autowired
+    private ContentServerService contentServerService;
+
     private SimpleDateFormat reportFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     private final String WORK_REPORT = "WORK_REPORT";
@@ -63,10 +71,6 @@ public class WorkReportServiceImpl implements WorkReportService {
         report.setOrganizationId(cmd.getOrganizationId());
         report.setReportName(cmd.getReportName());
         report.setModuleId(cmd.getModuleId());
-        /*report.setStatus(WorkReportStatus.VALID.getCode());
-        report.setReportAttribute(WorkReportAttribute.CUSTOMIZE.getCode());
-        report.setDeleteFlag(AttitudeFlag.YES.getCode());
-        report.setModifyFlag(AttitudeFlag.YES.getCode());*/
         report.setOperatorUserId(userId);
         report.setOperatorName(fixUpUserName(report.getOrganizationId(), userId));
 
@@ -361,6 +365,21 @@ public class WorkReportServiceImpl implements WorkReportService {
         return null;
     }
 
+    public SceneContactDTO getUserRealInfo(Long userId){
+        SceneContactDTO dto = new SceneContactDTO();
+
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(userId);
+        if (members != null && members.size() > 0)
+            dto.setDetailId(members.get(0).getDetailId());
+
+        User user = userProvider.findUserById(userId);
+        if (null != user) {
+            dto.setContactAvatar(contentServerService.parserUri(user.getAvatar()));
+        }
+
+        return null;
+    }
+
     @Override
     public WorkReportValDTO postWorkReportVal(PostWorkReportValCommand cmd) {
         //  There are three steps to finish this function.
@@ -486,6 +505,7 @@ public class WorkReportServiceImpl implements WorkReportService {
 
             //  return back the reportVal.
             dto.setReportId(report.getId());
+            dto.setReportValId(reportVal.getId());
             dto.setReportType(reportVal.getReportType());
             dto.setReportTime(reportVal.getReportTime());
             dto.setValues(fields);
@@ -642,6 +662,50 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Override
     public WorkReportValDTO getWorkReportValDetail(WorkReportValIdCommand cmd) {
-        return null;
+        //  1.update the workReportVal's status.
+        //  2.return back the result.
+        WorkReportValDTO dto = new WorkReportValDTO();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Long currentUserId = UserContext.currentUserId();
+
+
+        WorkReportVal reportVal = workReportValProvider.getWorkReportValById(cmd.getReportValId());
+        if (reportVal != null) {
+            /** update the status **/
+            WorkReportValReceiverMap receiverMap = workReportValProvider.findWorkReportValReceiverByReceiverId(
+                    namespaceId, reportVal.getId(), currentUserId);
+            receiverMap.setReadStatus(WorkReportReadStatus.READ.getCode());
+            workReportValProvider.updateWorkReportValReceiverMap(receiverMap);
+
+            /** get the result **/
+            //  1) get receivers.
+            List<SceneContactDTO> receivers = listWorkReportValReceivers(cmd.getReportValId());
+            //  2) get the applier's avatar and detailId
+            SceneContactDTO user = getUserRealInfo(reportVal.getApplierUserId());
+            //  3) get the field values which has been post by the user.
+            GetGeneralFormValuesCommand valuesCommand = new GetGeneralFormValuesCommand();
+            valuesCommand.setSourceId(reportVal.getApplierUserId());
+            valuesCommand.setSourceType(WORK_REPORT_VAL);
+            List<PostApprovalFormItem> values = generalFormService.getGeneralFormValues(valuesCommand);
+            List<GeneralFormFieldDTO> fields = values.stream().map(r ->
+                ConvertHelper.convert(r, GeneralFormFieldDTO.class)
+            ).collect(Collectors.toList());
+
+            //  4) convert the result and return back.
+            //todo: 可能少了 title 需要定义
+            dto.setReportValId(reportVal.getId());
+            dto.setReportId(reportVal.getReportId());
+            dto.setReportType(reportVal.getReportType());
+            dto.setReportTime(reportVal.getReportTime());
+            dto.setApplierUserId(reportVal.getApplierUserId());
+            dto.setApplierName(reportVal.getApplierName());
+            dto.setApplierDetailId(user.getDetailId());
+            dto.setApplierUserAvatar(user.getContactAvatar());
+            dto.setCreateTime(reportVal.getCreateTime());
+            dto.setReceivers(receivers);
+            dto.setUpdateTime(reportVal.getUpdateTime());
+            dto.setValues(fields);
+        }
+        return dto;
     }
 }

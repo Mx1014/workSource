@@ -146,6 +146,16 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhWorkReportValReceiverMap.class, null);
     }
 
+    @Caching(evict = {@CacheEvict(value = "listReportValReceiversByValId", key = "#receiver.reportValId")})
+    @Override
+    public void updateWorkReportValReceiverMap(WorkReportValReceiverMap receiver){
+        receiver.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWorkReportValReceiverMapDao dao = new EhWorkReportValReceiverMapDao(context.configuration());
+        dao.update(receiver);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWorkReportValReceiverMap.class, receiver.getId());
+    }
+
     @Caching(evict = {@CacheEvict(value = "listReportValReceiversByValId", key = "#reportValId")})
     @Override
     public void deleteReportValReceiverByValId(Long reportValId) {
@@ -154,6 +164,16 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.REPORT_VAL_ID.eq(reportValId));
         query.execute();
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWorkReportScopeMap.class, null);
+    }
+
+    @Override
+    public WorkReportValReceiverMap findWorkReportValReceiverByReceiverId(Integer namespaceId, Long reportValId, Long receiverId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportValReceiverMapRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP);
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.REPORT_VAL_ID.eq(reportValId));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.RECEIVER_USER_ID.eq(receiverId));
+        return query.fetchOneInto(WorkReportValReceiverMap.class);
     }
 
     @Cacheable(value = "listReportValReceiversByValId", key = "#reportValId", unless = "#result.size() == 0")
@@ -184,6 +204,7 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         UpdateQuery<EhWorkReportValReceiverMapRecord> query = context.updateQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP);
         query.addValue(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.READ_STATUS, WorkReportReadStatus.READ.getCode());
+        query.addValue(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.UPDATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()));
         query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.RECEIVER_USER_ID.eq(receiverId));
         query.execute();

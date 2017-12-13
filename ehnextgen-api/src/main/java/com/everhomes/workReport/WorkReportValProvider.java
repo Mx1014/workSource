@@ -19,7 +19,11 @@ public interface WorkReportValProvider {
 
     void createWorkReportValReceiverMap(WorkReportValReceiverMap receiver);
 
+    void updateWorkReportValReceiverMap(WorkReportValReceiverMap receiver);
+
     void deleteReportValReceiverByValId(Long valId);
+
+    WorkReportValReceiverMap findWorkReportValReceiverByReceiverId(Integer namespaceId, Long reportValId, Long receiverId);
 
     List<WorkReportValReceiverMap> listReportValReceiversByValId(Long reportValId);
 
