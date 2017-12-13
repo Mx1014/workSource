@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>ownerType: 库存所属类型 eg：EhOrganizations</li>
  *     <li>ownerId: 库存所属类型id</li>
+ *     <li>communityId: 园区id</li>
  *     <li>warehouseId: 仓库id</li>
  *     <li>materialId: 物品id</li>
  *     <li>materialName: 物品名称</li>
@@ -38,6 +39,16 @@ public class SearchWarehouseStockLogsCommand {
     private Long pageAnchor;
 
     private Integer pageSize;
+
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Long getPageAnchor() {
         return pageAnchor;

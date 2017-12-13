@@ -11,8 +11,8 @@ public interface WarehouseProvider {
 
     void creatWarehouse(Warehouses warehouse);
     void updateWarehouse(Warehouses warehouse);
-    Warehouses findWarehouse(Long id, String ownerType, Long ownerId);
-    Warehouses findWarehouseByNumber(String warehouseNumber, String ownerType, Long ownerId);
+    Warehouses findWarehouse(Long id, String ownerType, Long ownerId,Long communityId);
+    Warehouses findWarehouseByNumber(String warehouseNumber, String ownerType, Long ownerId,Long communityId);
 
     void creatWarehouseMaterialCategories(WarehouseMaterialCategories category);
     void updateWarehouseMaterialCategories(WarehouseMaterialCategories category);
@@ -22,8 +22,8 @@ public interface WarehouseProvider {
 
     void creatWarehouseMaterials(WarehouseMaterials materials);
     void updateWarehouseMaterials(WarehouseMaterials materials);
-    WarehouseMaterials findWarehouseMaterials(Long id, String ownerType, Long ownerId);
-    WarehouseMaterials findWarehouseMaterialsByNumber(String materialNumber, String ownerType, Long ownerId);
+    WarehouseMaterials findWarehouseMaterials(Long id, String ownerType, Long ownerId,Long communityId);
+    WarehouseMaterials findWarehouseMaterialsByNumber(String materialNumber, String ownerType, Long ownerId,Long communityId);
     List<WarehouseMaterials> listWarehouseMaterialsByCategory(String categoryPath, String ownerType, Long ownerId);
 
     void creatWarehouseStockLogs(WarehouseStockLogs log);
@@ -32,7 +32,7 @@ public interface WarehouseProvider {
     void creatWarehouseStock(WarehouseStocks stock);
     void updateWarehouseStock(WarehouseStocks stock);
     WarehouseStocks findWarehouseStocks(Long id, String ownerType, Long ownerId);
-    WarehouseStocks findWarehouseStocksByWarehouseAndMaterial(Long warehouseId, Long materialId, String ownerType, Long ownerId);
+    WarehouseStocks findWarehouseStocksByWarehouseAndMaterial(Long warehouseId, Long materialId, String ownerType, Long ownerId,Long communityId);
     List<WarehouseStocks> listWarehouseStocks(Long warehouseId, String ownerType, Long ownerId);
     Long getWarehouseStockAmount(Long warehouseId, String ownerType, Long ownerId);
     Long getWarehouseStockAmountByMaterialId(Long materialId, String ownerType, Long ownerId);
@@ -51,15 +51,15 @@ public interface WarehouseProvider {
     List<WarehouseUnits> listWarehouseMaterialUnits(String ownerType, Long ownerId);
 
     void creatWarehouseRequest(WarehouseRequests request);
-    WarehouseRequests findWarehouseRequests(Long id, String ownerType, Long ownerId);
+    WarehouseRequests findWarehouseRequests(Long id, String ownerType, Long ownerId,Long communityId);
     void updateWarehouseRequest(WarehouseRequests request);
 
     void creatWarehouseRequestMaterial(WarehouseRequestMaterials requestMaterial);
     void updateWarehouseRequestMaterial(WarehouseRequestMaterials requestMaterial);
     WarehouseRequestMaterials findWarehouseRequestMaterials(Long requestId, Long warehouseId, Long materialId);
-    List<WarehouseRequestMaterials> listWarehouseRequestMaterials(Long requestId, String ownerType, Long ownerId);
+    List<WarehouseRequestMaterials> listWarehouseRequestMaterials(Long requestId, String ownerType, Long ownerId,Long communityId);
     List<WarehouseRequestMaterials> listUnDeliveryWarehouseRequestMaterials(Long requestId, String ownerType, Long ownerId);
-    List<WarehouseRequestMaterials> listWarehouseRequestMaterials(List<Long> ids, String ownerType, Long ownerId);
+    List<WarehouseRequestMaterials> listWarehouseRequestMaterials(List<Long> ids, String ownerType, Long ownerId,Long communityId);
 
     List<WarehouseStocks> listMaterialStocks(Long materialId, String ownerType, Long ownerId);
 }

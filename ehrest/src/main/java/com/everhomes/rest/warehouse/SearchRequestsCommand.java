@@ -33,6 +33,16 @@ public class SearchRequestsCommand {
 
     private Integer pageSize;
 
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
     public Byte getDeliveryFlag() {
         return deliveryFlag;
     }

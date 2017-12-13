@@ -195,7 +195,7 @@ public class WarehouseMaterialSearcherImpl extends AbstractElasticSearch impleme
             b.field("materialNumber", material.getMaterialNumber());
             b.field("categoryId", material.getCategoryId());
             b.field("updateTime", material.getUpdateTime());
-
+            b.field("community", material.getCommunityId());
             b.endObject();
             return b;
         } catch (IOException ex) {

@@ -9,6 +9,7 @@ import java.util.List;
  * <ul>
  *     <li>ownerType: 库存所属类型 eg：EhOrganizations</li>
  *     <li>ownerId: 库存所属类型id</li>
+ *     <li>communityId: 园区id</li>
  *     <li>requestType: 操作类型 参考{@link com.everhomes.rest.warehouse.WarehouseStockRequestType}</li>
  *     <li>stocks: 库存列表 参考{@link com.everhomes.rest.warehouse.WarehouseMaterialStock}</li>
  * </ul>
@@ -26,6 +27,16 @@ public class UpdateWarehouseStockCommand {
 
     @ItemType(WarehouseMaterialStock.class)
     private List<WarehouseMaterialStock> stocks;
+
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Long getRequestId() {
         return requestId;

@@ -130,6 +130,7 @@ public class WarehouseRequestMaterialSearcherImpl extends AbstractElasticSearch 
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType().toLowerCase()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
 
         if(cmd.getReviewResult() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewResult", cmd.getReviewResult()));
@@ -181,7 +182,7 @@ public class WarehouseRequestMaterialSearcherImpl extends AbstractElasticSearch 
             b.field("reviewResult", material.getReviewResult());
             b.field("deliveryFlag", material.getDeliveryFlag());
             b.field("warehouseId", material.getWarehouseId());
-
+            b.field("communityId", material.getCommunityId());
             WarehouseMaterials warehouseMaterial = warehouseProvider.findWarehouseMaterials(material.getMaterialId(), material.getOwnerType(), material.getOwnerId());
             if(warehouseMaterial != null) {
                 b.field("materialName", warehouseMaterial.getName());

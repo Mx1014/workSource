@@ -125,6 +125,8 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
+        //新增， 兼容性还没有
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
 
         if(cmd.getWarehouseId() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("warehouseId", cmd.getWarehouseId()));
@@ -226,6 +228,7 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
             b.field("materialId", log.getMaterialId());
             b.field("requestType", log.getRequestType());
             b.field("createTime", log.getCreateTime());
+            b.field("communityId", log.getCommunityId());
 
             if(log.getRequestUid() != null) {
                 b.field("requestUid", log.getRequestUid());

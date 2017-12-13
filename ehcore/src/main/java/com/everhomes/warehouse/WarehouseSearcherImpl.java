@@ -174,6 +174,7 @@ public class WarehouseSearcherImpl extends AbstractElasticSearch implements Ware
             b.field("ownerType", warehouse.getOwnerType());
             b.field("status", warehouse.getStatus());
             b.field("name", warehouse.getName());
+            b.field("communityId",warehouse.getCommunityId());
 
 
             b.endObject();

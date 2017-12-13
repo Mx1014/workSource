@@ -121,6 +121,7 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", Status.ACTIVE.getCode()));
 
         if(cmd.getWarehouseId() != null) {
@@ -213,6 +214,7 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
             b.field("materialId", stock.getMaterialId());
             b.field("updateTime", stock.getUpdateTime());
             b.field("status", stock.getStatus());
+            b.field("communityId", stock.getCommunityId());
 
             Warehouses warehouse = warehouseProvider.findWarehouse(stock.getWarehouseId(), stock.getOwnerType(), stock.getOwnerId());
             if(warehouse != null) {
