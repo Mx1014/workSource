@@ -111,7 +111,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
 
         //校验权限
-        organizationService.checkOrganizationpPivilege(cmd.getOrganizationId(), PrivilegeConstants.CREATE_OR_MODIFY_PERSON);
+        organizationService.checkOrganizationpPivilege(cmd.getDepartmentIds().get(0), PrivilegeConstants.CREATE_OR_MODIFY_PERSON);
 
         ArchivesContactDTO dto = new ArchivesContactDTO();
         //  组织架构添加人员
