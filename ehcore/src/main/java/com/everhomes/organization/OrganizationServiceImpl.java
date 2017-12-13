@@ -5955,11 +5955,17 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public Boolean deleteChildrenOrganizationAsList(DeleteChildrenOrganizationAsListCommand cmd) {
         if(cmd.getIds() != null && cmd.getTag() != null && (cmd.getTag().equals(OrganizationGroupType.JOB_LEVEL.getCode()) || cmd.getTag().equals(OrganizationGroupType.JOB_POSITION.getCode()))){
-
         }else {
             LOGGER.error("deleteChildrenOrganizationAsList is not allowed.");
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
                     "deleteChildrenOrganizationAsList is not allowed. ");
+        }
+
+
+        if(cmd.getTag().equals(OrganizationGroupType.JOB_POSITION.getCode())){
+            cmd.getIds().forEach(r->{
+                checkOrganizationpPivilege(r, PrivilegeConstants.BATCH_EXPORT_PERSON);
+            });
         }
 
         //：todo 判断该机构（子公司/部门/职级）是否有活动状态的人员
