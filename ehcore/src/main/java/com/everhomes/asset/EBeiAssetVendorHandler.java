@@ -462,7 +462,9 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
                 bill.setAmountOwed(value.getActualMoney());
                 overallOwedAmount = overallOwedAmount.add(new BigDecimal(value.getActualMoney()));
                 bill.setAmountReceivable(value.getShouldMoney());
-                bill.setBillDuration(value.getDateStrBegin()+"至"+value.getDateStrEnd());
+//                bill.setBillDuration(value.getDateStrBegin()+"至"+value.getDateStrEnd());
+                //改为账期
+                bill.setBillDuration(value.getChargePeriod());
                 addresses.add(value.getBuildingRename());
                 bills.add(bill);
             }
@@ -493,8 +495,10 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
             GetLeaseContractBillOnFiPropertyData source = data.get(i);
             ListAllBillsForClientDTO dto = new ListAllBillsForClientDTO();
             dto.setBillGroupName(getFiPropertyName(source.getFiProperty()));
-            dto.setDateStrEnd(source.getDateStrEnd());
-            dto.setDateStrBegin(source.getDateStrBegin());
+//            dto.setDateStrEnd(source.getDateStrEnd());
+//            dto.setDateStrBegin(source.getDateStrBegin());
+            //改为账期
+            dto.setDateStrBegin(source.getChargePeriod());
             dto.setAmountReceivable(source.getShouldMoney());
             dto.setAmountOwed(source.getActualMoney());
             dto.setBillId(source.getBillId());
