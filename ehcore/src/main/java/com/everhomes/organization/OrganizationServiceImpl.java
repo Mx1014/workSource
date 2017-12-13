@@ -897,19 +897,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organization.getId());
 
             if(organizationAddresses != null && organizationAddresses.size() > 0) {
-                if(StringUtils.isEmpty(cmd.getBuildingName())) {
-                    Address addr = addressProvider.findAddressById(organizationAddresses.get(0).getAddressId());
-                    if(addr != null)
-                        dto.setAddress(addr.getAddress());
-                } else {
-                    for (OrganizationAddress organizationAddress : organizationAddresses) {
-                        Address addr = addressProvider.findAddressById(organizationAddress.getAddressId());
-                        if(addr != null && cmd.getBuildingName().equals(addr.getBuildingName())) {
-                            dto.setAddress(addr.getAddress());
-                            break ;
-                        }
-                    }
-                }
+                Address addr = addressProvider.findAddressById(organizationAddresses.get(0).getAddressId());
+                if(addr != null)
+                    dto.setAddress(addr.getAddress());
 
             }
             dtos.add(dto);
