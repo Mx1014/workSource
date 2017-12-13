@@ -4242,8 +4242,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(templates != null && templates.size() > 0) {
 			for(EquipmentInspectionTemplates template : templates) {
 				InspectionTemplateDTO dto = ConvertHelper.convert(template, InspectionTemplateDTO.class);
-				if(template.getId()==0L){
-					dto.setCommunities(equipmentProvider.getModuleCommunityMapByTemplateId(template.getId()));
+                if (template.getTargetId() == 0L) {
+                    dto.setCommunities(equipmentProvider.getModuleCommunityMapByTemplateId(template.getId()));
 				}
 				dtos.add(dto);
 			}
