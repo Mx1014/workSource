@@ -205,14 +205,14 @@ public class WorkReportServiceImpl implements WorkReportService {
     @Override
     public void enableWorkReport(WorkReportIdCommand cmd) {
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
-        report.setReportType(WorkReportStatus.RUNNING.getCode());
+        report.setStatus(WorkReportStatus.RUNNING.getCode());
         workReportProvider.updateWorkReport(report);
     }
 
     @Override
     public void disableWorkReport(WorkReportIdCommand cmd) {
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
-        report.setReportType(WorkReportStatus.VALID.getCode());
+        report.setStatus(WorkReportStatus.VALID.getCode());
         workReportProvider.updateWorkReport(report);
     }
 
@@ -629,12 +629,15 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Override
     public Integer countUnReadWorkReportsVal() {
-        return null;
+        User user = UserContext.current().getUser();
+        Integer count = workReportValProvider.countUnReadWorkReportsVal(user.getNamespaceId(), user.getId());
+        return count;
     }
 
     @Override
-    public void MarkWorkReportsValReading() {
-
+    public void markWorkReportsValReading() {
+        User user = UserContext.current().getUser();
+        workReportValProvider.markWorkReportsValReading(user.getNamespaceId(), user.getId());
     }
 
     @Override

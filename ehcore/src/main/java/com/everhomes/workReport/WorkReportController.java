@@ -264,13 +264,13 @@ public class WorkReportController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /workReport/MarkWorkReportsValReading</b>
+     * <b>URL: /workReport/markWorkReportsValReading</b>
      * <p>4-8.当前用户汇报单均标记为已读 </p>
      */
-    @RequestMapping("MarkWorkReportsValReading")
+    @RequestMapping("markWorkReportsValReading")
     @RestReturn(value=String.class)
-    public RestResponse MarkWorkReportsValReading() {
-        workReportService.MarkWorkReportsValReading();
+    public RestResponse markWorkReportsValReading() {
+        workReportService.markWorkReportsValReading();
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -38,7 +38,7 @@ public interface WorkReportService {
 
     Integer countUnReadWorkReportsVal();
 
-    void MarkWorkReportsValReading();
+    void markWorkReportsValReading();
 
     WorkReportValDTO getWorkReportValDetail(WorkReportValIdCommand cmd);
 }

@@ -9,15 +9,12 @@ import com.everhomes.rest.workReport.WorkReportStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhWorkReportScopeMapDao;
-import com.everhomes.server.schema.tables.daos.EhWorkReportValsDao;
 import com.everhomes.server.schema.tables.daos.EhWorkReportsDao;
 import com.everhomes.server.schema.tables.pojos.EhWorkReportScopeMap;
-import com.everhomes.server.schema.tables.pojos.EhWorkReportVals;
 import com.everhomes.server.schema.tables.pojos.EhWorkReports;
 import com.everhomes.server.schema.tables.records.EhWorkReportScopeMapRecord;
 import com.everhomes.server.schema.tables.records.EhWorkReportTemplatesRecord;
 import com.everhomes.server.schema.tables.records.EhWorkReportsRecord;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -62,7 +59,7 @@ public class WorkReportProviderImpl implements WorkReportProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhWorkReportsDao dao = new EhWorkReportsDao(context.configuration());
         dao.update(report);
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhWorkReports.class, report.getId());
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWorkReports.class, report.getId());
     }
 
     @Override
@@ -137,6 +134,7 @@ public class WorkReportProviderImpl implements WorkReportProvider {
         query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
         query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.REPORT_ID.eq(reportId));
         query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.SOURCE_ID.notIn(sourceIds));
+        query.execute();
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWorkReportScopeMap.class, null);
     }
 
@@ -163,7 +161,7 @@ public class WorkReportProviderImpl implements WorkReportProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhWorkReportScopeMapDao dao = new EhWorkReportScopeMapDao(context.configuration());
         dao.update(scopeMap);
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhWorkReportScopeMap.class, scopeMap.getId());
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWorkReportScopeMap.class, scopeMap.getId());
     }
 
     @Cacheable(value = "listWorkReportScopesMap", key = "#reportId", unless = "#result.size() == 0")

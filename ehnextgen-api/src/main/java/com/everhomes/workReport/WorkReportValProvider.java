@@ -23,4 +23,7 @@ public interface WorkReportValProvider {
 
     List<WorkReportValReceiverMap> listReportValReceiversByValId(Long reportValId);
 
+    Integer countUnReadWorkReportsVal(Integer namespaceId, Long receiverId);
+
+    void markWorkReportsValReading(Integer namespaceId, Long receiverId);
 }

@@ -5,6 +5,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.workReport.WorkReportReadStatus;
 import com.everhomes.rest.workReport.WorkReportStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -55,7 +56,7 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhWorkReportValsDao dao = new EhWorkReportValsDao(context.configuration());
         dao.update(val);
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhWorkReportVals.class, val.getId());
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWorkReportVals.class, val.getId());
 
     }
 
@@ -151,6 +152,7 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhWorkReportValReceiverMapRecord> query = context.deleteQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP);
         query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.REPORT_VAL_ID.eq(reportValId));
+        query.execute();
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWorkReportScopeMap.class, null);
     }
 
@@ -166,5 +168,24 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
             return null;
         });
         return results;
+    }
+
+    @Override
+    public Integer countUnReadWorkReportsVal(Integer namespaceId, Long receiverId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportValReceiverMapRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP);
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.RECEIVER_USER_ID.eq(receiverId));
+        return query.fetchCount();
+    }
+
+    @Override
+    public void markWorkReportsValReading(Integer namespaceId, Long receiverId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        UpdateQuery<EhWorkReportValReceiverMapRecord> query = context.updateQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP);
+        query.addValue(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.READ_STATUS, WorkReportReadStatus.READ.getCode());
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.RECEIVER_USER_ID.eq(receiverId));
+        query.execute();
     }
 }
