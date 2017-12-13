@@ -17,6 +17,7 @@ import java.math.BigDecimal;
  *     <li>referencePrice: 参考单价</li>
  *     <li>unitId: 单位id</li>
  *     <li>specificationInformation: 规格信息</li>
+ *     <li>communityId: 园区id</li>
  * </ul>
  * Created by ying.xiong on 2017/5/11.
  */
@@ -42,6 +43,16 @@ public class UpdateWarehouseMaterialCommand {
     private Long unitId;
 
     private String specificationInformation;
+
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public String getBrand() {
         return brand;
