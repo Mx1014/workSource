@@ -40,6 +40,7 @@ import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.contract.*;
@@ -48,8 +49,11 @@ import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.repeat.RangeDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.search.ContractSearcher;
@@ -174,6 +178,21 @@ public class ContractServiceImpl implements ContractService {
 	@Autowired
 	private ContractChargingChangeAddressProvider contractChargingChangeAddressProvider;
 
+	@Autowired
+	private PortalService portalService;
+
+	private Long getContractAppId(Integer namespaceId) {
+		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
+		cmd.setNamespaceId(namespaceId);
+		cmd.setModuleId(21200L);
+		cmd.setActionType(ActionType.THIRDPART_URL.getCode());
+		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
+		if(apps != null && apps.getServiceModuleApps() != null && apps.getServiceModuleApps().size() > 0) {
+			return apps.getServiceModuleApps().get(0).getId();
+		}
+		return null;
+	}
+
 	@PostConstruct
 	public void setup(){
 		String triggerName = ContractScheduleJob.SCHEDELE_NAME + System.currentTimeMillis();
@@ -185,7 +204,7 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public ListContractsResponse listContracts(ListContractsCommand cmd) {
-		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 
 //		if(namespaceId == 999971) {
 //			ThirdPartContractHandler handler = PlatformContext.getComponent(ThirdPartContractHandler.CONTRACT_PREFIX + namespaceId);
