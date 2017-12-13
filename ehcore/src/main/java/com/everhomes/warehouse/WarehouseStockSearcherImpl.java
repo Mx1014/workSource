@@ -175,12 +175,12 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
         for(Long id : ids) {
             WarehouseStocks stock = warehouseProvider.findWarehouseStocks(id, cmd.getOwnerType(), cmd.getOwnerId());
             WarehouseStockDTO dto = ConvertHelper.convert(stock, WarehouseStockDTO.class);
-            Warehouses warehouse = warehouseProvider.findWarehouse(dto.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId());
+            Warehouses warehouse = warehouseProvider.findWarehouse(dto.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
             if(warehouse != null) {
                 dto.setWarehouseName(warehouse.getName());
             }
 
-            WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(dto.getMaterialId(), cmd.getOwnerType(), cmd.getOwnerId());
+            WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(dto.getMaterialId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
             if(material != null) {
                 dto.setMaterialName(material.getName());
                 dto.setMaterialNumber(material.getMaterialNumber());
@@ -216,7 +216,7 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
             b.field("status", stock.getStatus());
             b.field("communityId", stock.getCommunityId());
 
-            Warehouses warehouse = warehouseProvider.findWarehouse(stock.getWarehouseId(), stock.getOwnerType(), stock.getOwnerId());
+            Warehouses warehouse = warehouseProvider.findWarehouse(stock.getWarehouseId(), stock.getOwnerType(), stock.getOwnerId(),stock.getCommunityId());
             if(warehouse != null) {
                 b.field("warehouseStatus", warehouse.getStatus());
             } else {
@@ -224,7 +224,7 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
             }
 
 
-            WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(stock.getMaterialId(), stock.getOwnerType(), stock.getOwnerId());
+            WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(stock.getMaterialId(), stock.getOwnerType(), stock.getOwnerId(),stock.getCommunityId());
             if(material != null) {
                 b.field("name", material.getName());
                 b.field("materialNumber", material.getMaterialNumber());

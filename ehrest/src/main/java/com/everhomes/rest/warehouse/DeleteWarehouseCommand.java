@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  *     <li>warehouseId: 仓库id</li>
  *     <li>ownerType: 仓库所属类型 eg：EhOrganizations</li>
  *     <li>ownerId: 仓库所属类型id</li>
+ *     <li>communityId: 园区id</li>
  * </ul>
  * Created by ying.xiong on 2017/5/10.
  */
@@ -15,6 +16,8 @@ public class DeleteWarehouseCommand {
     private String ownerType;
 
     private Long ownerId;
+
+    private Long communityId;
 
     private Long warehouseId;
 
@@ -36,6 +39,14 @@ public class DeleteWarehouseCommand {
 
     public Long getWarehouseId() {
         return warehouseId;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public void setWarehouseId(Long warehouseId) {

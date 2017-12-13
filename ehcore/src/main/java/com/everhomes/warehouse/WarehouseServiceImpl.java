@@ -118,7 +118,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 warehouse.setCreatorUid(UserContext.current().getUser().getId());
                 warehouseProvider.creatWarehouse(warehouse);
             } else {
-                Warehouses exist = verifyWarehouses(warehouse.getId(), warehouse.getOwnerType(), warehouse.getOwnerId());
+                Warehouses exist = verifyWarehouses(warehouse.getId(), warehouse.getOwnerType(), warehouse.getOwnerId(),warehouse.getCommunityId());
                 warehouse.setNamespaceId(exist.getNamespaceId());
                 warehouse.setCreatorUid(exist.getCreatorUid());
                 warehouse.setCreateTime(exist.getCreateTime());
@@ -156,8 +156,8 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
     }
 
-    private Warehouses verifyWarehouses(Long warehouseId, String ownerType, Long ownerId) {
-        Warehouses warehouse = warehouseProvider.findWarehouse(warehouseId, ownerType, ownerId);
+    private Warehouses verifyWarehouses(Long warehouseId, String ownerType, Long ownerId,Long communityId) {
+        Warehouses warehouse = warehouseProvider.findWarehouse(warehouseId, ownerType, ownerId,communityId);
         if(warehouse == null) {
             throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE,
                     WarehouseServiceErrorCode.ERROR_WAREHOUSE_NOT_EXIST,
@@ -171,7 +171,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public void deleteWarehouse(DeleteWarehouseCommand cmd) {
-        Warehouses warehouse = verifyWarehouses(cmd.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId());
+        Warehouses warehouse = verifyWarehouses(cmd.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
 
         //库存不为0时不能删除
         Long amount = warehouseProvider.getWarehouseStockAmount(cmd.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId());
@@ -195,7 +195,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public WarehouseDTO findWarehouse(DeleteWarehouseCommand cmd) {
-        Warehouses warehouse = verifyWarehouses(cmd.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId());
+        Warehouses warehouse = verifyWarehouses(cmd.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
         WarehouseDTO dto = ConvertHelper.convert(warehouse, WarehouseDTO.class);
         return dto;
 
@@ -386,7 +386,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 warehouseProvider.creatWarehouseMaterials(material);
             } else {
                 //有，则进行修改该
-                WarehouseMaterials exist = verifyWarehouseMaterials(material.getId(), material.getOwnerType(), material.getOwnerId());
+                WarehouseMaterials exist = verifyWarehouseMaterials(material.getId(), material.getOwnerType(), material.getOwnerId(),material.getCommunityId());
                 material.setNamespaceId(exist.getNamespaceId());
                 material.setCreatorUid(exist.getCreatorUid());
                 material.setCreateTime(exist.getCreateTime());
@@ -437,8 +437,8 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
     }
 
-    private WarehouseMaterials verifyWarehouseMaterials(Long matetial, String ownerType, Long ownerId) {
-        WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(matetial, ownerType, ownerId);
+    private WarehouseMaterials verifyWarehouseMaterials(Long matetial, String ownerType, Long ownerId,Long communityId) {
+        WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(matetial, ownerType, ownerId,communityId);
         if(material == null) {
             throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE,
                     WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_NOT_EXIST,
@@ -452,7 +452,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public void deleteWarehouseMaterial(DeleteWarehouseMaterialCommand cmd) {
-        WarehouseMaterials material = verifyWarehouseMaterials(cmd.getMaterialId(), cmd.getOwnerType(), cmd.getOwnerId());
+        WarehouseMaterials material = verifyWarehouseMaterials(cmd.getMaterialId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
 
         //物品有库存引用时，该物品不可删除
         Long amount = warehouseProvider.getWarehouseStockAmountByMaterialId(cmd.getMaterialId(), cmd.getOwnerType(), cmd.getOwnerId());
@@ -484,7 +484,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public WarehouseMaterialDTO findWarehouseMaterial(DeleteWarehouseMaterialCommand cmd) {
-        WarehouseMaterials material = verifyWarehouseMaterials(cmd.getMaterialId(), cmd.getOwnerType(), cmd.getOwnerId());
+        WarehouseMaterials material = verifyWarehouseMaterials(cmd.getMaterialId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
         WarehouseMaterialDTO dto = ConvertHelper.convert(material, WarehouseMaterialDTO.class);
 
         WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategories(dto.getCategoryId(), dto.getOwnerType(), dto.getOwnerId());
@@ -1009,7 +1009,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 continue;
             }
 
-            WarehouseMaterials exist = warehouseProvider.findWarehouseMaterialsByNumber(str.getMaterialNumber(), cmd.getOwnerType(), cmd.getOwnerId());
+            WarehouseMaterials exist = warehouseProvider.findWarehouseMaterialsByNumber(str.getMaterialNumber(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
             if(exist != null) {
                 LOGGER.error("materialNumber already exist, data = {}, cmd = {}" , str, cmd);
                 log.setData(str);
@@ -1388,7 +1388,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public WarehouseRequestDetailsDTO findRequest(FindRequestCommand cmd) {
         WarehouseRequestDetailsDTO dto = new WarehouseRequestDetailsDTO();
-        WarehouseRequests request = warehouseProvider.findWarehouseRequests(cmd.getRequestId(), cmd.getOwnerType(), cmd.getOwnerId());
+        WarehouseRequests request = warehouseProvider.findWarehouseRequests(cmd.getRequestId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
         if(request != null) {
             dto = ConvertHelper.convert(request, WarehouseRequestDetailsDTO.class);
             if(dto.getRequestUid() != null) {
@@ -1405,7 +1405,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 dto.setRequestOrganizationName(organization.getName());
             }
 
-            List<WarehouseRequestMaterials> materials = warehouseProvider.listWarehouseRequestMaterials(cmd.getRequestId(), cmd.getOwnerType(), cmd.getOwnerId());
+            List<WarehouseRequestMaterials> materials = warehouseProvider.listWarehouseRequestMaterials(cmd.getRequestId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
             if(materials != null && materials.size() > 0) {
                 String requestUserName = dto.getRequestUserName();
                 List<WarehouseRequestMaterialDetailDTO> materialDetailDTOs = materials.stream().map(material -> {
@@ -1423,7 +1423,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     private WarehouseRequestMaterialDetailDTO convertToDetail(WarehouseRequestMaterials material) {
         WarehouseRequestMaterialDetailDTO materialDetailDTO = ConvertHelper.convert(material, WarehouseRequestMaterialDetailDTO.class);
-        WarehouseMaterials warehouseMaterial = warehouseProvider.findWarehouseMaterials(material.getMaterialId(), material.getOwnerType(), material.getOwnerId());
+        WarehouseMaterials warehouseMaterial = warehouseProvider.findWarehouseMaterials(material.getMaterialId(), material.getOwnerType(), material.getOwnerId(),material.getCommunityId());
         materialDetailDTO.setDeliveryAmount(material.getAmount());
         if(warehouseMaterial != null) {
             materialDetailDTO.setMaterialName(warehouseMaterial.getName());
@@ -1435,12 +1435,12 @@ public class WarehouseServiceImpl implements WarehouseService {
                 materialDetailDTO.setCategoryName(category.getName());
             }
 
-            Warehouses warehouse = warehouseProvider.findWarehouse(material.getWarehouseId(), material.getOwnerType(), material.getOwnerId());
+            Warehouses warehouse = warehouseProvider.findWarehouse(material.getWarehouseId(), material.getOwnerType(), material.getOwnerId(),material.getCommunityId());
             if(warehouse != null) {
                 materialDetailDTO.setWarehouseName(warehouse.getName());
             }
 
-            WarehouseStocks stock = warehouseProvider.findWarehouseStocksByWarehouseAndMaterial(material.getWarehouseId(), material.getMaterialId(), material.getOwnerType(), material.getOwnerId());
+            WarehouseStocks stock = warehouseProvider.findWarehouseStocksByWarehouseAndMaterial(material.getWarehouseId(), material.getMaterialId(), material.getOwnerType(), material.getOwnerId(),material.getCommunityId());
             if(stock != null) {
                 materialDetailDTO.setStockAmount(stock.getAmount());
             }

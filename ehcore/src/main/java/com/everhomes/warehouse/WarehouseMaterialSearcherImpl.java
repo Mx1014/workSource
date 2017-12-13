@@ -160,7 +160,7 @@ public class WarehouseMaterialSearcherImpl extends AbstractElasticSearch impleme
 
         List<WarehouseMaterialDTO> materialDTOs = new ArrayList<WarehouseMaterialDTO>();
         for(Long id : ids) {
-            WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(id, cmd.getOwnerType(), cmd.getOwnerId());
+            WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(id, cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
             WarehouseMaterialDTO dto = ConvertHelper.convert(material, WarehouseMaterialDTO.class);
 
             WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategories(dto.getCategoryId(), dto.getOwnerType(), dto.getOwnerId());

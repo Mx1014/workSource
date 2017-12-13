@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  *     <li>requestId: 申请id</li>
  *     <li>ownerType: 所属类型 eg：EhOrganizations</li>
  *     <li>ownerId: 所属类型id</li>
+ *     <li>communityId: 园区id</li>
  * </ul>
  * Created by ying.xiong on 2017/5/11.
  */
@@ -17,6 +18,16 @@ public class FindRequestCommand {
     private Long ownerId;
 
     private Long requestId;
+
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Long getOwnerId() {
         return ownerId;

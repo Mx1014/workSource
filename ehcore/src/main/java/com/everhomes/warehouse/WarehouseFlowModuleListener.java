@@ -88,7 +88,7 @@ public class WarehouseFlowModuleListener implements FlowModuleListener {
         FlowCase flowCase = ctx.getFlowCase();
         Long operatorId = ctx.getOperator().getId();
         Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime());
-        WarehouseRequests request = warehouseProvider.findWarehouseRequests(flowCase.getReferId(), flowCase.getProjectType(), flowCase.getProjectId());
+        WarehouseRequests request = warehouseProvider.findWarehouseRequests(flowCase.getReferId(),null , flowCase.getOrganizationId(),flowCase.getProjectId());
         if(FlowCaseStatus.ABSORTED.equals(FlowCaseStatus.fromCode(flowCase.getStatus()))) {
             request.setReviewResult(ReviewResult.UNQUALIFIED.getCode());
             request.setUpdateTime(current);
@@ -105,7 +105,7 @@ public class WarehouseFlowModuleListener implements FlowModuleListener {
     }
 
     private void updateWarehouseRequestMaterials(WarehouseRequests request, Long operatorId) {
-        List<WarehouseRequestMaterials> materials = warehouseProvider.listWarehouseRequestMaterials(request.getId(), request.getOwnerType(), request.getOwnerId());
+        List<WarehouseRequestMaterials> materials = warehouseProvider.listWarehouseRequestMaterials(request.getId(), request.getOwnerType(), request.getOwnerId(),request.getCommunityId());
         if(materials != null && materials.size() > 0) {
             Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime());
             materials.forEach(material -> {

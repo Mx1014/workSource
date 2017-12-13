@@ -910,7 +910,9 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseRequestsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_REQUESTS);
         query.addConditions(Tables.EH_WAREHOUSE_REQUESTS.ID.eq(id));
-        query.addConditions(Tables.EH_WAREHOUSE_REQUESTS.OWNER_TYPE.eq(ownerType));
+        if(ownerType == null){
+            query.addConditions(Tables.EH_WAREHOUSE_REQUESTS.OWNER_TYPE.eq(ownerType));
+        }
         query.addConditions(Tables.EH_WAREHOUSE_REQUESTS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_WAREHOUSE_REQUESTS.COMMUNITY_ID.eq(communityId));
 

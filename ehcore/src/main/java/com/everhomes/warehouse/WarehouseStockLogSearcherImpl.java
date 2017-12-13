@@ -196,12 +196,12 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
                 dto.setDeliveryUserName(deliveries.get(0).getContactName());
             }
 
-            Warehouses warehouse = warehouseProvider.findWarehouse(dto.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId());
+            Warehouses warehouse = warehouseProvider.findWarehouse(dto.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
             if(warehouse != null) {
                 dto.setWarehouseName(warehouse.getName());
             }
 
-            WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(dto.getMaterialId(), cmd.getOwnerType(), cmd.getOwnerId());
+            WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(dto.getMaterialId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
             if(material != null) {
                 dto.setMaterialName(material.getName());
                 dto.setMaterialNumber(material.getMaterialNumber());
@@ -243,7 +243,7 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
                 b.field("requestName", "");
             }
 
-            WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(log.getMaterialId(), log.getOwnerType(), log.getOwnerId());
+            WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(log.getMaterialId(), log.getOwnerType(), log.getOwnerId(),log.getCommunityId());
             if(material != null) {
                 b.field("materialName", material.getName());
                 b.field("materialNumber", material.getMaterialNumber());
