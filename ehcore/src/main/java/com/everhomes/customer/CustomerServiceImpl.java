@@ -825,6 +825,20 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
 
+        if(dto.getAccountNumberTypeId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(account.getNamespaceId(), communityId, dto.getAccountNumberTypeId());
+            if(scopeFieldItem != null) {
+                dto.setAccountNumberTypeName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+
+        if(dto.getContractId() != null) {
+            Contract contract = contractProvider.findContractById(dto.getContractId());
+            if(contract != null) {
+                dto.setContractName(contract.getName());
+            }
+        }
+
         return dto;
     }
 
