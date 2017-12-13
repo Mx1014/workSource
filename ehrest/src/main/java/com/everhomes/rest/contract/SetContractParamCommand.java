@@ -19,6 +19,7 @@ package com.everhomes.rest.contract;
 public class SetContractParamCommand {
     private Long id;
     private Integer namespaceId;
+    private Long orgId;
     private Long communityId;
     private Integer expiringPeriod;
     private Byte expiringUnit;
@@ -43,6 +44,14 @@ public class SetContractParamCommand {
 
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
     }
 
     public Integer getExpiredPeriod() {

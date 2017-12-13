@@ -4,6 +4,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.customer.IndividualCustomerProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
@@ -12,14 +13,23 @@ import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.pm.OrganizationOwnerType;
 import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.ScopeField;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -72,6 +82,12 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 
     @Autowired
     private PropertyMgrProvider propertyMgrProvider;
+
+    @Autowired
+    private PortalService portalService;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 
     @Override
     public String getIndexType() {
@@ -157,8 +173,25 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         LOGGER.info("sync for contracts ok");
     }
 
+    private void checkContractAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
+        ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
+        cmd.setNamespaceId(namespaceId);
+        cmd.setModuleId(ServiceModuleConstants.CONTRACT_MODULE);
+        cmd.setActionType(ActionType.THIRDPART_URL.getCode());
+        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
+        Long appId = apps.getServiceModuleApps().get(0).getId();
+        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
+                orgId, privilegeId, appId, null, communityId)) {
+            LOGGER.error("Permission is prohibited, namespaceId={}, orgId={}, ownerType={}, ownerId={}, privilegeId={}",
+                    namespaceId, orgId, EntityType.COMMUNITY.getCode(), communityId, privilegeId);
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                    "check user privilege error");
+        }
+    }
+
     @Override
     public ListContractsResponse queryContracts(SearchContractCommand cmd) {
+        checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_LIST, cmd.getOrgId(), cmd.getCommunityId());
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
         if(cmd.getKeywords() == null || cmd.getKeywords().isEmpty()) {

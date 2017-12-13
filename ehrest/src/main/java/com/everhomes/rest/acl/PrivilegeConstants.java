@@ -265,7 +265,7 @@ public interface PrivilegeConstants {
     long ENTERPRISE_CUSTOMER_STAT = 21113L;//客户的统计分析查看
 
     long CONTRACT_CREATE = 21201L;//新增合同
-    long CONTRACT_SIGN = 21202L;//签约 发起审批
+    long CONTRACT_LAUNCH = 21202L;//签约 发起审批
     long CONTRACT_UPDATE = 21203L;//修改
     long CONTRACT_DELETE = 21204L;//删除
     long CONTRACT_INVALID = 21205L;//作废
@@ -276,5 +276,6 @@ public interface PrivilegeConstants {
     long CONTRACT_PARAM_LIST = 21210L;//合同参数查看
     long CONTRACT_PARAM_UPDATE = 21211L;//合同参数修改
     long CONTRACT_FLOW = 21212L;//合同工作流
+    long CONTRACT_SYNC = 21213L;//从第三方同步合同
 
 }

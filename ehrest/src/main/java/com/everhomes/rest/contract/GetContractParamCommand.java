@@ -11,6 +11,7 @@ public class GetContractParamCommand {
 
     private Integer namespaceId;
     private Long communityId;
+    private Long orgId;
 
     public Long getCommunityId() {
         return communityId;
@@ -26,5 +27,13 @@ public class GetContractParamCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
     }
 }

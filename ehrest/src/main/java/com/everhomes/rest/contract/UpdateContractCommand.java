@@ -65,6 +65,7 @@ public class UpdateContractCommand {
     private Long id;
     private Integer namespaceId;
     private Long communityId;
+    private Long orgId;
     private Long parentId;
     private Long rootParentId;
     private Long customerId;
@@ -539,5 +540,13 @@ public class UpdateContractCommand {
 
     public void setSignedTime(Long signedTime) {
         this.signedTime = signedTime;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
     }
 }
