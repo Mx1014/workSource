@@ -1,11 +1,18 @@
 package com.everhomes.servicehotline;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import com.everhomes.community.Community;
+import com.everhomes.region.Region;
+import com.everhomes.rest.user.GetUserInfoByIdCommand;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.user.*;
 import org.aspectj.internal.lang.annotation.ajcDeclareAnnotation;
 import org.hibernate.type.YesNoType;
 import org.jooq.Record;
@@ -41,10 +48,6 @@ import com.everhomes.techpark.servicehotline.ServiceConfiguration;
 import com.everhomes.techpark.servicehotline.ServiceConfigurationsProvider;
 import com.everhomes.techpark.servicehotline.ServiceHotline;
 import com.everhomes.techpark.servicehotline.ServiceHotlinesProvider;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -337,6 +340,20 @@ public class HotlineServiceImpl implements HotlineService {
 			}
 			return null;
 		}); 
+	}
+
+	@Override
+	public UserInfo getUserInfoById(GetUserInfoByIdCommand cmd) {
+		User queryUser = userProvider.findUserById(cmd.getId());
+		if(queryUser == null){
+			return null;
+		}
+		List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(queryUser.getId());
+		List<String> phones = identifiers.stream().filter((r)-> { return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.MOBILE; })
+				.map(r->r.getIdentifierToken()).collect(Collectors.toList());
+		UserInfo info=ConvertHelper.convert(queryUser, UserInfo.class);
+		info.setPhones(phones);
+		return info;
 	}
 
 }

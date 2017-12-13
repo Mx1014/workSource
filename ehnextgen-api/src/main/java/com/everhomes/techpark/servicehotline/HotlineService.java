@@ -9,6 +9,8 @@ import com.everhomes.rest.servicehotline.GetHotlineSubjectResponse;
 import com.everhomes.rest.servicehotline.SetHotlineSubjectCommand;
 import com.everhomes.rest.servicehotline.UpdateHotlineCommand;
 import com.everhomes.rest.servicehotline.UpdateHotlinesCommand;
+import com.everhomes.rest.user.GetUserInfoByIdCommand;
+import com.everhomes.rest.user.UserInfo;
 
 public interface HotlineService {
 
@@ -27,6 +29,8 @@ public interface HotlineService {
 	void setHotlineSubject(SetHotlineSubjectCommand cmd);
 
 	void updateHotlineOrder(UpdateHotlinesCommand cmd);
+
+	UserInfo getUserInfoById(GetUserInfoByIdCommand cmd);
 
 
 }

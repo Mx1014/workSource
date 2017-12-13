@@ -174,7 +174,7 @@ public class ServiceHotlineController extends ControllerBase {
 	@RequestMapping("getUserInfoById")
 	@RestReturn(value=UserInfo.class)
 	public RestResponse getUserInfoById(@Valid GetUserInfoByIdCommand cmd) {
-		UserInfo user = this.userService.getUserInfoById(cmd);
+		UserInfo user = this.hotlineService.getUserInfoById(cmd);
 		RestResponse response =  new RestResponse(user);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
