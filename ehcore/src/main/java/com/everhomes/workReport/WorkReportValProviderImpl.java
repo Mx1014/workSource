@@ -138,6 +138,7 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWorkReportValReceiverMap.class));
         receiver.setId(id);
         receiver.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        receiver.setUpdateTime(receiver.getCreateTime());
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhWorkReportValReceiverMapDao dao = new EhWorkReportValReceiverMapDao(context.configuration());
         dao.insert(receiver);
