@@ -21,25 +21,15 @@ CREATE TABLE `eh_reserve_rules` (
   `refund_strategy` tinyint(4) DEFAULT NULL COMMENT '1-custom, 2-full',
   `overtime_strategy` tinyint(4) DEFAULT NULL COMMENT '1-custom, 2-full',
 
-  `pay_start_time` bigint(20) DEFAULT NULL,
-  `pay_end_time` bigint(20) DEFAULT NULL,
-  `payment_ratio` int(11) DEFAULT NULL COMMENT 'payment ratio',
-
-  `contact_num` varchar(20) DEFAULT NULL COMMENT 'phone number',
   `creator_uid` bigint(20) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   `update_uid` bigint(20) DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
-  `cancel_time` bigint(20) DEFAULT NULL COMMENT '至少提前取消时间',
-  `overtime_time` bigint(20) DEFAULT NULL COMMENT '超期时间',
-  `exclusive_flag` tinyint(4) DEFAULT NULL COMMENT '是否为独占资源: 0-否, 1-是',
-  `unit` double DEFAULT NULL COMMENT '1-整租, 0.5-可半个租',
+
   `auto_assign` tinyint(4) DEFAULT NULL COMMENT '是否动态分配: 1-是, 0-否',
   `multi_unit` tinyint(4) DEFAULT NULL COMMENT '是否允许预约多个场所: 1-是, 0-否',
-  `multi_time_interval` tinyint(4) DEFAULT NULL COMMENT '是否允许预约多个时段: 1-是, 0-否',
 
   `open_weekday` varchar(7) DEFAULT NULL COMMENT '7位二进制，0000000每一位表示星期7123456',
-  `time_step` double DEFAULT NULL COMMENT '步长，每个单元格是多少小时（半小时是0.5）',
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -48,10 +38,12 @@ CREATE TABLE `eh_reserve_discount_users` (
   `id` bigint(20) NOT NULL DEFAULT '0',
   `owner_type` varchar(255) DEFAULT NULL COMMENT '"default_rule","resource_rule"',
   `owner_id` bigint(20) DEFAULT NULL,
-  `duration_type` tinyint(4) DEFAULT NULL COMMENT '1: 时长内, 2: 时长外',
-  `duration_unit` varchar(20) DEFAULT NULL COMMENT '时长单位，比如 天，小时',
-  `duration` double DEFAULT NULL COMMENT '时长',
-  `discount` double DEFAULT NULL,
+  `user_str` text COMMENT '存取用户信息，以逗号隔开 域空间-手机号',
+  `discount` double DEFAULT NULL COMMENT '折扣',
+  `creator_uid` bigint(20) NOT NULL DEFAULT '0',
+  `create_time` datetime DEFAULT NULL,
+  `update_uid` bigint(20) DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -59,10 +51,15 @@ CREATE TABLE `eh_reserve_rule_strategies` (
   `id` bigint(20) NOT NULL DEFAULT '0',
   `owner_type` varchar(255) DEFAULT NULL COMMENT '"default_rule","resource_rule"',
   `owner_id` bigint(20) DEFAULT NULL,
+  `strategy_type` tinyint(4) DEFAULT NULL COMMENT '1: 退款, 2: 加收',
   `duration_type` tinyint(4) DEFAULT NULL COMMENT '1: 时长内, 2: 时长外',
   `duration_unit` varchar(20) DEFAULT NULL COMMENT '时长单位，比如 天，小时',
   `duration` double DEFAULT NULL COMMENT '时长',
-  `discount` double DEFAULT NULL,
+  `factor` double DEFAULT NULL COMMENT '价格系数',
+  `creator_uid` bigint(20) NOT NULL DEFAULT '0',
+  `create_time` datetime DEFAULT NULL,
+  `update_uid` bigint(20) DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -71,9 +68,42 @@ CREATE TABLE `eh_reserve_close_dates` (
   `owner_type` varchar(255) DEFAULT NULL COMMENT '"default_rule","resource_rule"',
   `owner_id` bigint(20) DEFAULT NULL,
   `close_date` date DEFAULT NULL,
+  `creator_uid` bigint(20) NOT NULL DEFAULT '0',
+  `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `eh_parking_spaces` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0',
+  `space_no` varchar(64) NOT NULL DEFAULT '' COMMENT 'used to display',
+  `space_address` varchar(64) NOT NULL DEFAULT '' COMMENT 'reference to name of eh_parking_vendors',
+  `lock_id` varchar(128) DEFAULT NULL COMMENT 'parking lot id from vendor',
+  `lock_status` varchar(128) DEFAULT NULL COMMENT 'parking lot id from vendor',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: waitingForApproval, 2: active',
+  `creator_uid` bigint(20) NOT NULL DEFAULT '0',
+  `create_time` datetime DEFAULT NULL,
+  `update_uid` bigint(20) DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_parking_space_logs` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0',
+  `contact_phone` varchar(64) DEFAULT NULL,
+  `contact_name` varchar(64) DEFAULT NULL,
+  `contact_enterprise_name` varchar(128) DEFAULT NULL,
+  `operate_type` tinyint(4) NOT NULL COMMENT '1: raise, 2: down',
+  `user_type` tinyint(4) NOT NULL COMMENT '1: raise, 2: down',
+  `operate_uid` bigint(20) NOT NULL DEFAULT '0',
+  `operate_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `eh_reserve_orders` (
   `id` bigint(20) NOT NULL COMMENT 'id',
