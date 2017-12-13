@@ -22,7 +22,7 @@ public interface FlowConstants {
     Long CONTRACT_MODULE = 21200L;
 
     // 物品搬迁模块id
-    Long RELOCATION_MODULE = 41800L;
+    Long RELOCATION_MODULE = 49200L;
     //组织架构
     Long ORGANIZATION_MODULE = 50100L;
 }

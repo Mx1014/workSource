@@ -1103,7 +1103,7 @@ public class AssetController extends ControllerBase {
     }
     /**
      * <b>URL: /asset/autoNoticeConfig</b>
-     * <p></p>
+     * <p>自动缴费配置</p>
      */
     @RequestMapping("autoNoticeConfig")
     @RestReturn(String.class)
