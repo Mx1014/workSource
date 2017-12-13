@@ -2,6 +2,9 @@ package com.everhomes.servicehotline;
 
 import javax.validation.Valid;
 
+import com.everhomes.rest.user.GetUserInfoByIdCommand;
+import com.everhomes.rest.user.UserInfo;
+import com.everhomes.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,8 @@ public class ServiceHotlineController extends ControllerBase {
 
 	@Autowired
 	private HotlineService hotlineService;
+	@Autowired
+	private UserService userService;
  
 
 	/**
@@ -161,6 +166,16 @@ public class ServiceHotlineController extends ControllerBase {
 	public RestResponse setHotlineSubject(@Valid SetHotlineSubjectCommand cmd) {
 		this.hotlineService.setHotlineSubject(cmd);
 		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	@RequestMapping("getUserInfoById")
+	@RestReturn(value=UserInfo.class)
+	public RestResponse getUserInfoById(@Valid GetUserInfoByIdCommand cmd) {
+		UserInfo user = this.userService.getUserInfoById(cmd);
+		RestResponse response =  new RestResponse(user);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
