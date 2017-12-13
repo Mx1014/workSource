@@ -515,6 +515,7 @@ public class UserActivityServiceImpl implements UserActivityService {
     	locator.setAnchor(cmd.getPageAnchor());
     	int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
     	List<Feedback> results = userActivityProvider.ListFeedbacks(locator, UserContext.getCurrentNamespaceId(), FeedbackTargetType.POST.getCode(), cmd.getStatus(), pageSize + 1);
+    	LOGGER.info("result = "+results);
     	if (null == results)
     		return response;
     	Long nextPageAnchor = null;
