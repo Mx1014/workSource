@@ -23,6 +23,8 @@ import com.everhomes.util.StringHelper;
  * <li>needPay: 是否需要支付</li>
  * <li>attachments: 预约需要提交的信息</li>
  * <li>rentalType: 预约类型，参考{@link com.everhomes.rest.rentalv2.RentalType}</li>
+ * <li>priceType: 0 按时长定价 1 起步价模式</li>
+ * <li>initiatePrice: 起步后价格</li>
  * <li>rentalEndTime: 至少提前预约时间</li>
  * <li>rentalStartTime: 最多提前预约时间</li>
  * <li>rentalStep: 最短可预约时长</li>
@@ -42,8 +44,10 @@ import com.everhomes.util.StringHelper;
  * <li>rentalEndTimeFlag: 至少提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
  * <li>orgMemberWorkdayPrice: 企业内部工作日价格</li>
  * <li>orgMemberWeekendPrice: 企业内部节假日价格</li>
+ * <li>orgMemberInitiatePrice: 集团内部起步后价格</li>
  * <li>approvingUserWorkdayPrice: 外部客户工作日价格</li>
  * <li>approvingUserWeekendPrice: 外部客户节假日价格</li>
+ * <li>approvingUserInitiatePrice: 外部客户起步后价格</li>
  * <li>halfDayTimeIntervals: 半天时间设置 {@link com.everhomes.rest.rentalv2.admin.TimeIntervalDTO}</li>
  * </ul>
  */
@@ -63,6 +67,7 @@ public class AddRentalSiteSingleSimpleRule {
 	@ItemType(AttachmentConfigDTO.class)
 	private List<AttachmentConfigDTO> attachments;
 	private Byte rentalType;
+	private Byte priceType;
 	private Long rentalEndTime;
 	private Long rentalStartTime;
 	private Double timeStep;
@@ -77,6 +82,7 @@ public class AddRentalSiteSingleSimpleRule {
 	private List<Long> closeDates;
 	private BigDecimal workdayPrice;
 	private BigDecimal weekendPrice;
+	private BigDecimal initiatePrice;
 	private Double siteCounts;
 	@ItemType(SiteNumberDTO.class)
 	private List<SiteNumberDTO> siteNumbers;
@@ -88,6 +94,8 @@ public class AddRentalSiteSingleSimpleRule {
 	private Byte rentalEndTimeFlag;
 	private BigDecimal orgMemberWorkdayPrice;
 	private BigDecimal orgMemberWeekendPrice;
+	private BigDecimal orgMemberInitiatePrice;
+	private BigDecimal approvingUserInitiatePrice;
 
 	private BigDecimal approvingUserWorkdayPrice;
 	private BigDecimal approvingUserWeekendPrice;
@@ -411,6 +419,38 @@ public class AddRentalSiteSingleSimpleRule {
 
 	public List<TimeIntervalDTO> getHalfDayTimeIntervals() {
 		return halfDayTimeIntervals;
+	}
+
+	public Byte getPriceType() {
+		return priceType;
+	}
+
+	public void setPriceType(Byte priceType) {
+		this.priceType = priceType;
+	}
+
+	public BigDecimal getInitiatePrice() {
+		return initiatePrice;
+	}
+
+	public void setInitiatePrice(BigDecimal initiatePrice) {
+		this.initiatePrice = initiatePrice;
+	}
+
+	public BigDecimal getOrgMemberInitiatePrice() {
+		return orgMemberInitiatePrice;
+	}
+
+	public void setOrgMemberInitiatePrice(BigDecimal orgMemberInitiatePrice) {
+		this.orgMemberInitiatePrice = orgMemberInitiatePrice;
+	}
+
+	public BigDecimal getApprovingUserInitiatePrice() {
+		return approvingUserInitiatePrice;
+	}
+
+	public void setApprovingUserInitiatePrice(BigDecimal approvingUserInitiatePrice) {
+		this.approvingUserInitiatePrice = approvingUserInitiatePrice;
 	}
 
 	public void setHalfDayTimeIntervals(List<TimeIntervalDTO> halfDayTimeIntervals) {

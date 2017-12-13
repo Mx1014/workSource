@@ -30,10 +30,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.configuration.ConfigConstants;
-import com.everhomes.flow.action.FlowTimeoutJob;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PayService;
-import com.everhomes.pay.order.PaymentType;
 import com.everhomes.pay.order.PaymentType;
 import com.everhomes.rest.aclink.CreateDoorAuthCommand;
 import com.everhomes.rest.aclink.DoorAuthDTO;
@@ -494,6 +492,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		PriceRuleDTO priceRuleDTO = new PriceRuleDTO();
 		priceRuleDTO.setRentalType(RentalType.DAY.getCode());
+		priceRuleDTO.setPriceType(RentalPriceType.LINEARITY.getCode());
 		priceRuleDTO.setWorkdayPrice(new BigDecimal(0));
 		priceRuleDTO.setApprovingUserWorkdayPrice(new BigDecimal(0));
 		priceRuleDTO.setOrgMemberWorkdayPrice(new BigDecimal(0));
@@ -1073,6 +1072,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return null;
 		SitePriceRuleDTO sitePriceRuleDTO = new SitePriceRuleDTO();
 		sitePriceRuleDTO.setRentalType(pricePackages.get(0).getRentalType());
+		sitePriceRuleDTO.setPriceType(pricePackages.get(0).getPriceType());
 		List<Long> packageIds = rentalv2Provider.listCellPackageId(rentalSite.getId(),pricePackages.get(0).getRentalType());
 		MaxMinPrice maxMinPrice = rentalv2PricePackageProvider.findMaxMinPrice(packageIds,pricePackages.get(0).getRentalType(),null);
 		if (maxMinPrice ==null) {
@@ -1090,19 +1090,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				minPrice = min(maxMinPrice.getMinOrgMemberPrice(),pricePackages.stream().map(p-> p.getOrgMemberPrice()).max((o1,o2)->o2.compareTo(o1)).get());
 				sitePriceRuleDTO.setMaxPrice(maxPrice);
 				sitePriceRuleDTO.setMinPrice(minPrice);
-				sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, pricePackages.get(0).getRentalType(), rentalSite.getTimeStep()));
+				sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, pricePackages.get(0).getRentalType(),pricePackages.get(0).getPriceType(), rentalSite.getTimeStep()));
 			}else if (SceneType.ENTERPRISE.getCode().equals(scene)) {
 				maxPrice = max(maxMinPrice.getMaxPrice(), pricePackages.stream().map(p-> p.getPrice()).max((o1,o2)->o1.compareTo(o2)).get());
 				minPrice = min(maxMinPrice.getMinPrice(), pricePackages.stream().map(p-> p.getPrice()).max((o1,o2)->o2.compareTo(o1)).get());
 				sitePriceRuleDTO.setMaxPrice(maxPrice);
 				sitePriceRuleDTO.setMinPrice(minPrice);
-				sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, pricePackages.get(0).getRentalType(), rentalSite.getTimeStep()));
+				sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, pricePackages.get(0).getRentalType(),pricePackages.get(0).getPriceType(), rentalSite.getTimeStep()));
 			}else if (TrueOrFalseFlag.fromCode(resourceType.getUnauthVisible()) == TrueOrFalseFlag.TRUE) {
 				maxPrice = max(maxMinPrice.getMaxApprovingUserPrice(), pricePackages.stream().map(p-> p.getApprovingUserPrice()).max((o1,o2)->o1.compareTo(o2)).get());
 				minPrice = min(maxMinPrice.getMinApprovingUserPrice(), pricePackages.stream().map(p-> p.getApprovingUserPrice()).max((o1,o2)->o2.compareTo(o1)).get());
 				sitePriceRuleDTO.setMaxPrice(maxPrice);
 				sitePriceRuleDTO.setMinPrice(minPrice);
-				sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice,pricePackages.get(0).getRentalType(), rentalSite.getTimeStep()));
+				sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice,pricePackages.get(0).getRentalType(),pricePackages.get(0).getPriceType(), rentalSite.getTimeStep()));
 			}else {
 				sitePriceRuleDTO.setPriceStr("");
 			}
@@ -1111,7 +1111,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			minPrice = min(maxMinPrice.getMinPrice(), pricePackages.stream().map(p-> p.getPrice()).max((o1,o2)->o2.compareTo(o1)).get());
 			sitePriceRuleDTO.setMaxPrice(maxPrice);
 			sitePriceRuleDTO.setMinPrice(minPrice);
-			sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, pricePackages.get(0).getRentalType(), rentalSite.getTimeStep()));
+			sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, pricePackages.get(0).getRentalType(),pricePackages.get(0).getPriceType(), rentalSite.getTimeStep()));
 		}
 		sitePriceRuleDTO.setPricePackages(new ArrayList<>()); //设置每个套餐的价格范围
 		pricePackages.forEach(r->{
@@ -1127,19 +1127,28 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					minPrice2 = min(maxMinPrice2.getMinOrgMemberPrice(),r.getOrgMemberPrice());
 					dto.setMaxPrice(maxPrice2);
 					dto.setMinPrice(minPrice2);
-					dto.setPriceStr(getPriceStr(maxPrice2, minPrice2, r.getRentalType(), rentalSite.getTimeStep()));
+					if (r.getPriceType().equals(RentalPriceType.LINEARITY.getCode()))
+						dto.setPriceStr(getPriceStr(maxPrice2, minPrice2, r.getRentalType(),r.getPriceType(), rentalSite.getTimeStep()));
+					else
+						dto.setPriceStr(getInitiatePriceStr(r.getOrgMemberPrice(),r.getOrgMemberInitiatePrice(),r.getRentalType(),rentalSite.getTimeStep()));
 				}else if (SceneType.ENTERPRISE.getCode().equals(scene)) {
 					maxPrice2 = max(maxMinPrice2.getMaxPrice(), r.getPrice());
 					minPrice2 = min(maxMinPrice2.getMinPrice(), r.getPrice());
 					dto.setMaxPrice(maxPrice2);
 					dto.setMinPrice(minPrice2);
-					dto.setPriceStr(getPriceStr(maxPrice2, minPrice2, r.getRentalType(), rentalSite.getTimeStep()));
+					if (r.getPriceType().equals(RentalPriceType.LINEARITY.getCode()))
+						dto.setPriceStr(getPriceStr(maxPrice2, minPrice2, r.getRentalType(),r.getPriceType(), rentalSite.getTimeStep()));
+					else
+						dto.setPriceStr(getInitiatePriceStr(r.getPrice(),r.getInitiatePrice(),r.getRentalType(),rentalSite.getTimeStep()));
 				}else if (TrueOrFalseFlag.fromCode(resourceType.getUnauthVisible()) == TrueOrFalseFlag.TRUE) {
 					maxPrice2 = max(maxMinPrice2.getMaxApprovingUserPrice(), r.getApprovingUserPrice());
 					minPrice2 = min(maxMinPrice2.getMinApprovingUserPrice(), r.getApprovingUserPrice());
 					dto.setMaxPrice(maxPrice2);
 					dto.setMinPrice(minPrice2);
-					dto.setPriceStr(getPriceStr(maxPrice2, minPrice2,r.getRentalType(), rentalSite.getTimeStep()));
+					if (r.getPriceType().equals(RentalPriceType.LINEARITY.getCode()))
+						dto.setPriceStr(getPriceStr(maxPrice2, minPrice2,r.getRentalType(),r.getPriceType(), rentalSite.getTimeStep()));
+					else
+						dto.setPriceStr(getInitiatePriceStr(r.getApprovingUserPrice(),r.getApprovingUserInitiatePrice(),r.getRentalType(),rentalSite.getTimeStep()));
 				}else {
 					dto.setPriceStr("");
 				}
@@ -1148,7 +1157,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				minPrice2 = min(maxMinPrice2.getMinPrice(), r.getPrice());
 				dto.setMaxPrice(maxPrice2);
 				dto.setMinPrice(minPrice2);
-				dto.setPriceStr(getPriceStr(maxPrice2, minPrice2, r.getRentalType(), rentalSite.getTimeStep()));
+				if (r.getPriceType().equals(RentalPriceType.LINEARITY.getCode()))
+					dto.setPriceStr(getPriceStr(maxPrice2, minPrice2, r.getRentalType(),r.getPriceType(), rentalSite.getTimeStep()));
+				else
+					dto.setPriceStr(getInitiatePriceStr(r.getPrice(),r.getInitiatePrice(),r.getRentalType(),rentalSite.getTimeStep()));
 			}
 			sitePriceRuleDTO.getPricePackages().add(dto);
 		});
@@ -1158,6 +1170,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private SitePriceRuleDTO convertToSitePriceRuleDTO(RentalResource rentalSite, Rentalv2PriceRule priceRule, RentalResourceType resourceType, SceneTokenDTO sceneTokenDTO) {
 		SitePriceRuleDTO sitePriceRuleDTO = new SitePriceRuleDTO();
 		sitePriceRuleDTO.setRentalType(priceRule.getRentalType());
+		sitePriceRuleDTO.setPriceType(priceRule.getPriceType());
 		
 		MaxMinPrice maxMinPrice = rentalv2Provider.findMaxMinPrice(priceRule.getOwnerId(), priceRule.getRentalType());
 
@@ -1170,19 +1183,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				minPrice = min(maxMinPrice.getMinOrgMemberPrice(), priceRule.getOrgMemberWorkdayPrice());
 				sitePriceRuleDTO.setMaxPrice(maxPrice);
 				sitePriceRuleDTO.setMinPrice(minPrice);
-				sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, priceRule.getRentalType(), rentalSite.getTimeStep()));
+				sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, priceRule.getRentalType(),priceRule.getPriceType(), rentalSite.getTimeStep()));
 			}else if (SceneType.ENTERPRISE.getCode().equals(scene)) {
 				maxPrice = max(maxMinPrice.getMaxPrice(), priceRule.getWorkdayPrice());
 				minPrice = min(maxMinPrice.getMinPrice(), priceRule.getWorkdayPrice());
 				sitePriceRuleDTO.setMaxPrice(maxPrice);
 				sitePriceRuleDTO.setMinPrice(minPrice);
-				sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, priceRule.getRentalType(), rentalSite.getTimeStep()));
+				sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, priceRule.getRentalType(),priceRule.getPriceType(), rentalSite.getTimeStep()));
 			}else if (TrueOrFalseFlag.fromCode(resourceType.getUnauthVisible()) == TrueOrFalseFlag.TRUE) {
 				maxPrice = max(maxMinPrice.getMaxApprovingUserPrice(), priceRule.getApprovingUserWorkdayPrice());
 				minPrice = min(maxMinPrice.getMinApprovingUserPrice(), priceRule.getApprovingUserWorkdayPrice());
 				sitePriceRuleDTO.setMaxPrice(maxPrice);
 				sitePriceRuleDTO.setMinPrice(minPrice);
-				sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, priceRule.getRentalType(), rentalSite.getTimeStep()));
+				sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, priceRule.getRentalType(),priceRule.getPriceType(), rentalSite.getTimeStep()));
 			}else {
 				sitePriceRuleDTO.setPriceStr("");
 			}
@@ -1191,19 +1204,43 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			minPrice = min(maxMinPrice.getMinPrice(), priceRule.getWorkdayPrice());
 			sitePriceRuleDTO.setMaxPrice(maxPrice);
 			sitePriceRuleDTO.setMinPrice(minPrice);
-			sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, priceRule.getRentalType(), rentalSite.getTimeStep()));
+			sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, priceRule.getRentalType(),priceRule.getPriceType(), rentalSite.getTimeStep()));
 		}
 		
 		return sitePriceRuleDTO;
 	}
 
-	private String getPriceStr(BigDecimal maxPrice, BigDecimal minPrice, Byte rentalType, Double timeStep) {
-		if( minPrice.compareTo(maxPrice) == 0){
-			return priceToString(minPrice,rentalType,timeStep);
-		}else{
-			return priceToString(minPrice,rentalType,timeStep)
-					+ "~" + priceToString(maxPrice,rentalType,timeStep);
-		}
+	private String getPriceStr(BigDecimal maxPrice, BigDecimal minPrice, Byte rentalType, Byte priceType,Double timeStep) {
+		if (priceType.equals(RentalPriceType.LINEARITY.getCode()))
+			if( minPrice.compareTo(maxPrice) == 0){
+				return priceToString(minPrice,rentalType,timeStep);
+			}else{
+				return priceToString(minPrice,rentalType,timeStep)
+						+ "~" + priceToString(maxPrice,rentalType,timeStep);
+			}
+		else
+			return "￥"+ minPrice +"起";
+	}
+
+	private String getInitiatePriceStr(BigDecimal price,BigDecimal initiatePrice, Byte rentalType,Double timeStep){
+		String priceString = isInteger(price)? String.valueOf(price.intValue()): price.toString() ;
+		String initiatePriceString = isInteger(initiatePrice)? String.valueOf(initiatePrice.intValue()): initiatePrice.toString() ;
+		if(price.compareTo(new BigDecimal(0)) == 0 && initiatePrice.compareTo(new BigDecimal(0)) == 0)
+			return "免费";
+		if(rentalType.equals(RentalType.DAY.getCode()))
+			return "起步价第一天￥"+ priceString +"，以后￥"+initiatePriceString+"/天";
+		if(rentalType.equals(RentalType.MONTH.getCode()))
+			return "起步价第一月￥"+ priceString +"，以后￥"+initiatePriceString+"/月";
+		if(rentalType.equals(RentalType.HALFDAY.getCode()))
+			return "起步价半天￥"+ priceString +"，以后￥"+initiatePriceString+"/半天";
+		if(rentalType.equals(RentalType.THREETIMEADAY.getCode()))
+			return "起步价半天￥"+ priceString +"，以后￥"+initiatePriceString+"/半天";
+		if(rentalType.equals(RentalType.WEEK.getCode()))
+			return "起步价第一周￥"+ priceString +"，以后￥"+initiatePriceString+"/周";
+		String tmp = ""+(isInteger(timeStep)?String.valueOf(timeStep.intValue()).equals("1")?"":String.valueOf(timeStep.intValue()):timeStep);
+		if(rentalType.equals(RentalType.HOUR.getCode()))
+			return "起步价" +tmp+"小时￥"+priceString +"，以后￥"+initiatePriceString+"/"+tmp;
+		return "";
 	}
 
 	private BigDecimal max(BigDecimal ... b) {
@@ -1259,6 +1296,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return "￥"+ priceString +"/半天";
 		if(rentalType.equals(RentalType.THREETIMEADAY.getCode()))
 			return "￥"+ priceString +"/半天";
+		if(rentalType.equals(RentalType.WEEK.getCode()))
+		return "￥"+ priceString +"/周";
 		if(rentalType.equals(RentalType.HOUR.getCode()))
 			return "￥"+ priceString +"/"+(isInteger(timeStep)?String.valueOf(timeStep.intValue()).equals("1")?"":String.valueOf(timeStep.intValue()):timeStep)+"小时";
 		return "";
@@ -2733,8 +2772,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			singleCmd.setBeginDate(rs.getBeginDate().getTime());
 			singleCmd.setEndDate(rs.getEndDate().getTime());
 			singleCmd.setWorkdayPrice(workdayPrice);
+			singleCmd.setInitiatePrice(priceRule.getInitiatePrice());
 			singleCmd.setOrgMemberWorkdayPrice(orgMemberWorkdayPrice);
+			singleCmd.setOrgMemberInitiatePrice(priceRule.getOrgMemberInitiatePrice());
 			singleCmd.setApprovingUserWorkdayPrice(approvingUserWorkdayPrice);
+			singleCmd.setApprovingUserInitiatePrice(priceRule.getApprovingUserInitiatePrice());
 			if (rentalType == RentalType.HOUR.getCode())  {
 				if(singleCmd.getTimeIntervals() != null){
 					Double beginTime = null;
@@ -2799,8 +2841,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rsr.setRentalStep(1);
 			rsr.setUnit(cmd.getUnit());
 			rsr.setPrice(cmd.getWorkdayPrice());
+			rsr.setInitiatePrice(cmd.getInitiatePrice());
 			rsr.setApprovingUserPrice(cmd.getApprovingUserWorkdayPrice());
+			rsr.setApprovingUserInitiatePrice(cmd.getApprovingUserInitiatePrice());
 			rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
+			rsr.setOrgMemberInitiatePrice(cmd.getOrgMemberInitiatePrice());
 			rsr.setStatus(RentalSiteStatus.NORMAL.getCode());
 			rsr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			rsr.setCreatorUid(userId);
@@ -2826,8 +2871,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rsr.setRentalStep(1);
 			rsr.setUnit(cmd.getUnit());
 			rsr.setPrice(cmd.getWorkdayPrice());
+			rsr.setInitiatePrice(cmd.getInitiatePrice());
 			rsr.setApprovingUserPrice(cmd.getApprovingUserWorkdayPrice());
+			rsr.setApprovingUserInitiatePrice(cmd.getApprovingUserInitiatePrice());
 			rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
+			rsr.setOrgMemberInitiatePrice(cmd.getOrgMemberInitiatePrice());
 			rsr.setStatus(RentalSiteStatus.NORMAL.getCode());
 			rsr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			rsr.setCreatorUid(userId);
@@ -2874,8 +2922,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 								rsr.setUnit(cmd.getUnit());
 
 								rsr.setPrice(cmd.getWorkdayPrice());
-								rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
+								rsr.setInitiatePrice(cmd.getInitiatePrice());
 								rsr.setApprovingUserPrice(cmd.getApprovingUserWorkdayPrice());
+								rsr.setApprovingUserInitiatePrice(cmd.getApprovingUserInitiatePrice());
+								rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
+								rsr.setOrgMemberInitiatePrice(cmd.getOrgMemberInitiatePrice());
 
 								if(rsr.getUnit()<1){
 									rsr.setHalfresourcePrice(rsr.getPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
@@ -2904,8 +2955,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						rsr.setRentalStep(1);
 
 						rsr.setPrice(cmd.getWorkdayPrice());
-						rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
+						rsr.setInitiatePrice(cmd.getInitiatePrice());
 						rsr.setApprovingUserPrice(cmd.getApprovingUserWorkdayPrice());
+						rsr.setApprovingUserInitiatePrice(cmd.getApprovingUserInitiatePrice());
+						rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
+						rsr.setOrgMemberInitiatePrice(cmd.getOrgMemberInitiatePrice());
 
 						rsr.setAmorpm(AmorpmFlag.AM.getCode());
 						if (rsr.getUnit() < 1) {
@@ -2933,8 +2987,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						rsr.setUnit(cmd.getUnit());
 
 						rsr.setPrice(cmd.getWorkdayPrice());
+						rsr.setInitiatePrice(cmd.getInitiatePrice());
 						rsr.setApprovingUserPrice(cmd.getApprovingUserWorkdayPrice());
+						rsr.setApprovingUserInitiatePrice(cmd.getApprovingUserInitiatePrice());
 						rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
+						rsr.setOrgMemberInitiatePrice(cmd.getOrgMemberInitiatePrice());
 
 						rsr.setResourceRentalDate(Date.valueOf(dateSF.get().format(start.getTime())));
 						rsr.setStatus(RentalSiteStatus.NORMAL.getCode());
@@ -4278,12 +4335,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			if (SceneType.PM_ADMIN.getCode().equals(scene)) {
 				dtos2.forEach(p->{
 					p.setPrice(p.getOrgMemberPrice());
+					p.setInitiatePrice(p.getOrgMemberInitiatePrice());
 					p.setOriginalPrice(p.getOrgMemberOriginalPrice());
 				});
 				t = dtos2;
 			}else if (!SceneType.ENTERPRISE.getCode().equals(scene)) {
 				dtos2.forEach(p->{
 					p.setPrice(p.getApprovingUserPrice());
+					p.setInitiatePrice(p.getApprovingUserInitiatePrice());
 					p.setOriginalPrice(p.getApprovingUserOriginalPrice());
 			});
 				t = dtos2;
@@ -4295,8 +4354,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if (ifCover && t!=null && t.size()>0){ //给客户端使用时 覆盖非套餐价格
 			RentalSitePackagesDTO dto = t.get(0);
 			rulesDtos.setPrice(dto.getPrice());
+			rulesDtos.setInitiatePrice(dto.getInitiatePrice());
 			rulesDtos.setOriginalPrice(dto.getOriginalPrice());
+			rulesDtos.setOrgMemberInitiatePrice(dto.getOrgMemberInitiatePrice());
 			rulesDtos.setOrgMemberPrice(dto.getOrgMemberPrice());
+			rulesDtos.setApprovingUserInitiatePrice(dto.getOrgMemberInitiatePrice());
 			rulesDtos.setApprovingUserPrice(dto.getApprovingUserPrice());
 		}
 	}
@@ -4325,9 +4387,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			if (SceneType.PM_ADMIN.getCode().equals(scene)) {
 				dto.setPrice(dto.getOrgMemberPrice());
+				dto.setInitiatePrice(dto.getOrgMemberInitiatePrice());
 				dto.setOriginalPrice(dto.getOrgMemberOriginalPrice());
 			}else if (!SceneType.ENTERPRISE.getCode().equals(scene)) {
 				dto.setPrice(dto.getApprovingUserPrice());
+				dto.setInitiatePrice(dto.getApprovingUserInitiatePrice());
 				dto.setOriginalPrice(dto.getApprovingUserOriginalPrice());
 			}
 		}
