@@ -18,15 +18,6 @@ public class DeleteWarehouseMaterialCategoryCommand {
 
     private Long categoryId;
 
-    private Long communityId;
-
-    public Long getCommunityId() {
-        return communityId;
-    }
-
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
-    }
 
     public Long getCategoryId() {
         return categoryId;

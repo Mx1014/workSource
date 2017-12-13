@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  *     <li>categoryId: 物品分类id</li>
  *     <li>pageAnchor: 锚点</li>
  *     <li>pageSize: 页面大小</li>
+ *     <li>communityId: 园区id</li>
  * </ul>
  * Created by ying.xiong on 2017/5/11.
  */
@@ -28,6 +29,16 @@ public class SearchWarehouseMaterialsCommand {
     private Long pageAnchor;
 
     private Integer pageSize;
+
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Long getCategoryId() {
         return categoryId;
