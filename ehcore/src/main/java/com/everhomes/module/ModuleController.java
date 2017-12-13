@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.module.*;
+import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -70,6 +71,21 @@ public class ModuleController extends ControllerBase {
     public RestResponse treeServiceModules(@Valid TreeServiceModuleCommand cmd) {
         List<ServiceModuleDTO> dto = serviceModuleService.treeServiceModules(cmd);
         RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /module/treeServiceModuleApps</b>
+     * <p>
+     * 树状结构的业务模块列表
+     * </p>
+     */
+    @RequestMapping("treeServiceModuleApps")
+    @RestReturn(value = TreeServiceModuleAppsResponse.class)
+    public RestResponse treeServiceModuleApps(@Valid TreeServiceModuleCommand cmd) {
+        RestResponse response = new RestResponse(serviceModuleService.treeServiceModuleApps(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -233,5 +249,15 @@ public class ModuleController extends ControllerBase {
     @RestReturn(value = ListServiceModulesResponse.class, collection = true)
     public RestResponse listAllServiceModules(@Valid ListServiceModulesCommand cmd) {
         return new RestResponse(serviceModuleService.listAllServiceModules(cmd));
+    }
+
+    /**
+     * <b>URL: /module/listUserServiceModulefunctions</b>
+     * 个人在业务模块下的功能
+     */
+    @RequestMapping("listUserServiceModulefunctions")
+    @RestReturn(value = Long.class, collection = true)
+    public RestResponse listUserServiceModulefunctions(@Valid ListServiceModulefunctionsCommand cmd) {
+        return new RestResponse(serviceModuleService.listServiceModulefunctions(cmd));
     }
 }

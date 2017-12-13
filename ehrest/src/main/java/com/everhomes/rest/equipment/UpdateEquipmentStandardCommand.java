@@ -1,12 +1,11 @@
 package com.everhomes.rest.equipment;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -25,6 +24,7 @@ import com.everhomes.util.StringHelper;
  *  <li>templateId: 巡检项模板id</li>
  *  <li>reviewExpiredDays: 审批过期时间限制（天）</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
+ *  <li>communities: 应用项目id列表</li>
  * </ul>
  */
 public class UpdateEquipmentStandardCommand {
@@ -65,6 +65,9 @@ public class UpdateEquipmentStandardCommand {
 	
 	@ItemType(StandardGroupDTO.class)
 	private List<StandardGroupDTO> group;
+
+	@ItemType(Long.class)
+	private  List<Long> communities;
 
 	public Long getTargetId() {
 		return targetId;
@@ -192,6 +195,14 @@ public class UpdateEquipmentStandardCommand {
 
 	public void setReviewExpiredDays(Integer reviewExpiredDays) {
 		this.reviewExpiredDays = reviewExpiredDays;
+	}
+
+	public List<Long> getCommunities() {
+		return communities;
+	}
+
+	public void setCommunities(List<Long> communities) {
+		this.communities = communities;
 	}
 
 	@Override

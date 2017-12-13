@@ -3472,7 +3472,7 @@ public class AssetProviderImpl implements AssetProvider {
         }
 
         if (organizationId != null) {
-            query.addConditions(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq("eh_organization"));
+            query.addConditions(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq("eh_organization"));
             query.addConditions(Tables.EH_PAYMENT_BILLS.TARGET_ID.eq(organizationId));
         }
         query.addConditions(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte) 1));

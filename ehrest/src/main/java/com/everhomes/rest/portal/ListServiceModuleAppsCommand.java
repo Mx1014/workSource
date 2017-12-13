@@ -7,6 +7,10 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>namespaceId: 域空间</li>
+ * <li>moduleId: 模块id</li>
+ * <li>actionType：模块action类型</li>
+ * <li>customTag：业务Tag</li>
+ * <li>customPath：业务参数</li>
  * </ul>
  */
 public class ListServiceModuleAppsCommand {
@@ -14,6 +18,12 @@ public class ListServiceModuleAppsCommand {
 	private Integer namespaceId;
 
 	private Long moduleId;
+
+	private Byte actionType;
+
+	private String customTag;
+
+	private String customPath;
 
 	public ListServiceModuleAppsCommand() {
 
@@ -45,4 +55,27 @@ public class ListServiceModuleAppsCommand {
 		return StringHelper.toJsonString(this);
 	}
 
+	public Byte getActionType() {
+		return actionType;
+	}
+
+	public void setActionType(Byte actionType) {
+		this.actionType = actionType;
+	}
+
+	public String getCustomTag() {
+		return customTag;
+	}
+
+	public void setCustomTag(String customTag) {
+		this.customTag = customTag;
+	}
+
+	public String getCustomPath() {
+		return customPath;
+	}
+
+	public void setCustomPath(String customPath) {
+		this.customPath = customPath;
+	}
 }

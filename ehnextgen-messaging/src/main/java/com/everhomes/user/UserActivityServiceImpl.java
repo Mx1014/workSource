@@ -1385,12 +1385,12 @@ public class UserActivityServiceImpl implements UserActivityService {
 
         ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(cmd.getServiceAllianceId(), null, null);
         if(serviceOrg != null) {
-            content += CustomRequestConstants.APPROVAL_TYPE + ":" + serviceOrg.getName() + "\n";
+            content += "服务名称 : " + serviceOrg.getName() + "\n";
             ServiceAllianceCategories category = yellowPageProvider.findCategoryById(serviceOrg.getParentId());
             cmd21.setTitle(category.getName());
         }
-        if (user.getNickName()!=null)
-            content += CustomRequestConstants.USER_NAME+":"+user.getNickName()+"\n";
+//        if (user.getNickName()!=null)
+//            content += CustomRequestConstants.USER_NAME+":"+user.getNickName()+"\n";
 
 
         cmd21.setContent(content);

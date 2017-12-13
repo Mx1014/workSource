@@ -8,7 +8,6 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.archives.ArchivesProvider;
 import com.everhomes.archives.ArchivesService;
-import com.everhomes.archives.ArchivesStickyContacts;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -56,6 +55,7 @@ import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.payment.util.DownloadUtil;
+import com.everhomes.portal.PortalService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
@@ -68,7 +68,6 @@ import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
@@ -86,6 +85,7 @@ import com.everhomes.rest.enterprise.*;
 import com.everhomes.rest.equipment.AdminFlag;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.family.ParamType;
+import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupJoinPolicy;
@@ -101,6 +101,8 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
 import com.everhomes.rest.organization.pm.*;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.search.OrganizationQueryResult;
@@ -298,6 +300,12 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Autowired
     private CustomerService customerService;
 
+    @Autowired
+    private PortalService portalService;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+
 
     private int getPageCount(int totalCount, int pageSize) {
         int pageCount = totalCount / pageSize;
@@ -310,8 +318,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationDTO createChildrenOrganization(CreateOrganizationCommand cmd) {
-
         User user = UserContext.current().getUser();
+
+        //权限校验
+        checkOrganizationpPivilege(cmd.getParentId(),PrivilegeConstants.CREATE_DEPARTMENT);
+
         if (null == OrganizationGroupType.fromCode(cmd.getGroupType())) {
             LOGGER.error("organization group type error. cmd = {}", cmd);
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ASSIGNMENT_EXISTS,
@@ -578,6 +589,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public void updateChildrenOrganization(UpdateOrganizationsCommand cmd) {
+        if(cmd.getJobPositionIds() == null || cmd.getJobPositionIds().size() == 0){
+            checkOrganizationpPivilege(cmd.getId(),PrivilegeConstants.MODIFY_DEPARTMENT);//修改部门校验
+        }else{
+            checkOrganizationpPivilege(cmd.getParentId(),PrivilegeConstants.MODIFY_DEPARTMENT_JOB_POSITION);//修改部门岗位校验
+        }
 
         User user = UserContext.current().getUser();
 
@@ -2432,6 +2448,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         User user = UserContext.current().getUser();
 
+        //权限校验
+        checkOrganizationpPivilege(cmd.getId(),PrivilegeConstants.DELETE_DEPARTMENT);
+
         this.checkOrganizationIdIsNull(cmd.getId());
         Organization organization = this.checkOrganization(cmd.getId());
 
@@ -2843,10 +2862,34 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public List<OrganizationDTO> listUserRelateOrganizations(Integer namespaceId, Long userId, OrganizationGroupType groupType) {
         Long startTime = System.currentTimeMillis();
+
+        List<Organization> organizations = listUserOrganizations(namespaceId, userId, groupType);
+
+        List<OrganizationDTO> dtos = new ArrayList<>();
+
+        for (Organization org: organizations) {
+            OrganizationDTO dto = toOrganizationDTO(userId, org);
+
+            dtos.add(dto);
+        }
+
+        //：todo 去重
+        dtos = new ArrayList<>(new HashSet<>(dtos));
+
+        Long endTime = System.currentTimeMillis();
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("TrackUserRelatedCost:listUserRelateOrganizations:elapse:{}", endTime - startTime);
+        }
+        return dtos;
+    }
+
+    @Override
+    public List<Organization> listUserOrganizations(Integer namespaceId, Long userId, OrganizationGroupType groupType) {
+        OrganizationGroupType tempGroupType = null;
+
         List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(userId);
 
-        OrganizationGroupType tempGroupType = null;
-        List<OrganizationDTO> dtos = new ArrayList<OrganizationDTO>();
+        List<Organization> dtos = new ArrayList<>();
         for (OrganizationMember member : orgMembers) {
             // 如果机构不存在，则丢弃该成员对应的机构
             Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
@@ -2883,34 +2926,16 @@ public class OrganizationServiceImpl implements OrganizationService {
                         + ", namespaceId=" + namespaceId + ", groupType=" + groupType + ", orgStatus" + orgStatus);
                 continue;
             }
+            dtos.add(org);
 
-            OrganizationDTO dto = toOrganizationDTO(userId, org);
-
-            if(OrganizationMemberGroupType.fromCode(member.getMemberGroup()) == OrganizationMemberGroupType.MANAGER){
-                dto.setManagerFlag(AdminFlag.YES.getCode());
-            }
-            dtos.add(dto);
         }
 
-        //：todo 去重
-        dtos = new ArrayList<>(new HashSet<>(dtos));
-
-        Long endTime = System.currentTimeMillis();
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("TrackUserRelatedCost:listUserRelateOrganizations:elapse:{}", endTime - startTime);
-        }
         return dtos;
     }
 
     private OrganizationDTO toOrganizationDTO(Long userId, Organization organization) {
         OrganizationDTO organizationDto = ConvertHelper.convert(organization, OrganizationDTO.class);
         organizationDto.setOrganizationType(organization.getOrganizationType());
-
-        OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organization.getId());
-        if (member != null && member.getStatus() != null)
-            organizationDto.setMemberStatus(member.getStatus());
-        else
-            organizationDto.setMemberStatus(OrganizationMemberStatus.INACTIVE.getCode());
 
         OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
         if (organizationDetail == null) {
@@ -2979,6 +3004,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         OrganizationMember orgMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organization.getId());
         if (orgMember != null) {
             organizationDto.setMemberStatus(orgMember.getStatus());
+            if(OrganizationMemberGroupType.fromCode(orgMember.getMemberGroup()) == OrganizationMemberGroupType.MANAGER){
+                organizationDto.setManagerFlag(AdminFlag.YES.getCode());
+            }
         }
 
         return organizationDto;
@@ -3017,6 +3045,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
             }
         }
+
+        // 如果是模块管理员，则列出模块管理员所在的公司
         Set<Long> orgIds = new HashSet<>();
         List<Target> targets = new ArrayList<>();
         targets.add(new Target(EntityType.USER.getCode(), userId));
@@ -3025,6 +3055,22 @@ public class OrganizationServiceImpl implements OrganizationService {
         for (Project project : projects) {
             if (EntityType.fromCode(project.getProjectType()) == EntityType.ORGANIZATIONS) {
                 organizationIds.add(project.getProjectId());
+            }
+        }
+
+        //检查应用管理员+权限细化 add by lei.lv
+        List<Project> projects_app = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(EntityType.SERVICE_MODULE_APP.getCode(), null, targets);
+        for (Project project : projects_app) {
+            // 应用管理员
+            if (EntityType.fromCode(project.getProjectType()) == EntityType.ORGANIZATIONS) {
+                organizationIds.add(project.getProjectId());
+            }
+            // 权限细化 (敢哥说先这么改)
+            if(EntityType.fromCode(project.getProjectType()) == EntityType.COMMUNITY || EntityType.fromCode(project.getProjectType()) == EntityType.ALL){
+                List<Organization> organizations = organizationProvider.listOrganizations(OrganizationType.PM.getCode(), UserContext.getCurrentNamespaceId(), 0L, null, null);
+                if(organizations != null && organizations.size() > 0){
+                    organizationIds.add(organizations.get(0).getId());
+                }
             }
         }
 
@@ -3039,7 +3085,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         }
 
-        //把用户所有关联的部门放到targets里面查询
+        //把用户 所有关联的部门放到targets里面查询
         for (Long orgId : orgIds) {
             targets.add(new Target(EntityType.ORGANIZATIONS.getCode(), orgId));
         }
@@ -3059,6 +3105,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
             }
         }
+
 
         for (Long organizationId : organizationIds) {
             Organization org = organizationProvider.findOrganizationById(organizationId);
@@ -5815,6 +5862,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public void sortOrganizationsAtSameLevel(SortOrganizationsAtSameLevelCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
+        // 权限校验
+        checkOrganizationpPivilege(cmd.getChildIds().get(0),PrivilegeConstants.CHANGE_DEPARTMENT_ORDER);
+
         this.coordinationProvider.getNamedLock(CoordinationLocks.ORGANIZATION_ORDER_LOCK.getCode()).enter(() -> {
             if(cmd.getChildIds() != null && cmd.getChildIds().size() > 0){
                 List<Long> childIds = cmd.getChildIds();
@@ -7241,7 +7291,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public OrganizationMemberDTO processUserForMember(UserIdentifier identifier) {
+    public OrganizationMemberDTO  processUserForMember(UserIdentifier identifier) {
         return processUserForMember(identifier, true);
     }
 
@@ -10785,14 +10835,15 @@ public class OrganizationServiceImpl implements OrganizationService {
             organizationTreeDTOs.add(orgTreeDTO);
 //			}
         }
+
         dto = this.processOrganizationTree(organizationTreeDTOs, dto);
         return dto;
     }
 
     @Override
     public List<OrganizationDTO> listAllPmOrganizations() {
-        List<Organization> organizations = organizationProvider.listOrganizations(OrganizationType.PM.getCode(), 0L,
-                null, null);
+        List<Organization> organizations = organizationProvider.listOrganizations(OrganizationType.PM.getCode(), null,
+                0L, null, null);
         return organizations.stream().map(r -> ConvertHelper.convert(r, OrganizationDTO.class)).collect(Collectors.toList());
     }
 
@@ -10812,6 +10863,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         for (OrganizationTreeDTO orgTreeDTO : dtos) {
             if (orgTreeDTO.getParentId().equals(dto.getOrganizationId())) {
                 OrganizationTreeDTO organizationTreeDTO = processOrganizationTree(dtos, orgTreeDTO);
+                organizationTreeDTO.getTrees();
                 trees.add(organizationTreeDTO);
             }
         }
@@ -11006,6 +11058,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public void createOrganizationJobPosition(CreateOrganizationJobPositionCommand cmd) {
+
+        //权限
+        checkOrganizationpPivilege(cmd.getOwnerId(),PrivilegeConstants.CREATE_JOB_POSITION);
+
         checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
         checkName(cmd.getName());
 
@@ -11033,6 +11089,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public Long updateOrganizationJobPosition(UpdateOrganizationJobPositionCommand cmd) {
+        // 权限
+        checkOrganizationpPivilege(cmd.getId(),PrivilegeConstants.MODIFY_JOB_POSITION);
         checkId(cmd.getId());
 
         OrganizationJobPosition organizationJobPosition = checkOrganizationJobPositionIsNull(cmd.getId());
@@ -11052,6 +11110,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public Boolean deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd) {
 
+        // 权限
+        checkOrganizationpPivilege(cmd.getId(),PrivilegeConstants.DELETE_JOB_POSITION);
         checkId(cmd.getId());
 
         OrganizationJobPosition organizationJobPosition = checkOrganizationJobPositionIsNull(cmd.getId());
@@ -11317,6 +11377,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public void createChildrenOrganizationJobPosition(CreateOrganizationCommand cmd) {
 //		checkOwnerIdAndOwnerType(cmd.getownerType, ownerId);
+        //权限校验
+        checkOrganizationpPivilege(cmd.getParentId(),PrivilegeConstants.MODIFY_DEPARTMENT_JOB_POSITION);
         checkName(cmd.getName());
         cmd.setGroupType(OrganizationGroupType.JOB_POSITION.getCode());
         createChildrenOrganization(cmd);
@@ -14134,6 +14196,24 @@ public class OrganizationServiceImpl implements OrganizationService {
             organizationProvider.updateCommunityOrganizationDetailDisplay(display);
         }
         return display.getDetailFlag();
+    }
+
+    @Override
+    public void checkOrganizationpPivilege(Long orgId, Long pivilegeId){
+        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+        listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+        listServiceModuleAppsCommand.setModuleId(FlowConstants.ORGANIZATION_MODULE);
+        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+        Long organizaitonId = getTopEnterpriserIdOfOrganization(orgId);
+        if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+            if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), organizaitonId, organizaitonId, pivilegeId, apps.getServiceModuleApps().get(0).getId(), orgId, null)){
+                LOGGER.error("error_no_privileged. orgId = {}, userId = {}, pivilegeId={}", orgId, UserContext.currentUserId(), pivilegeId);
+                throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                        "check app privilege error");
+            }
+        }else{
+            LOGGER.error("no appId. rgId = {}, userId = {}", orgId, UserContext.currentUserId());
+        }
     }
 }
 

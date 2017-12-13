@@ -37,6 +37,8 @@ import org.springframework.transaction.TransactionStatus;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.everhomes.techpark.expansion.EnterpriseApplyEntryServiceImpl.DEFAULT_CATEGORY_ID;
+
 
 @Component
 public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildingService {
@@ -74,10 +76,14 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
 
+		if (null == cmd.getCategoryId()) {
+			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
+		}
+
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
 		List<LeaseBuilding> leaseBuildings = enterpriseApplyBuildingProvider.listLeaseBuildings(cmd.getNamespaceId(),
-				cmd.getCommunityId(), cmd.getPageAnchor(), pageSize);
+				cmd.getCommunityId(), cmd.getCategoryId(), cmd.getPageAnchor(), pageSize);
 
 		int size = leaseBuildings.size();
 
@@ -104,8 +110,12 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
 
+		if (null == cmd.getCategoryId()) {
+			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
+		}
+
 		//检查楼栋名
-		if (!enterpriseApplyBuildingProvider.verifyBuildingName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getName())) {
+		if (!enterpriseApplyBuildingProvider.verifyBuildingName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getName(), cmd.getCategoryId())) {
 			throw RuntimeErrorException.errorWith(ApplyEntryErrorCodes.SCOPE, ApplyEntryErrorCodes.ERROR_BUILDING_NAME_EXIST,
 					"Building name exist");
 		}
@@ -251,11 +261,11 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 	}
 
-	private void processProjectDetailUrl(LeaseProjectDTO dto) {
+	private void processProjectDetailUrl(LeaseProjectDTO dto, Long categoryId) {
 		String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
 		String detailUrl = configProvider.getValue(ConfigConstants.APPLY_ENTRY_LEASE_PROJECT_DETAIL_URL, "");
 
-		detailUrl = String.format(detailUrl, dto.getProjectId(), dto.getNamespaceId());
+		detailUrl = String.format(detailUrl, dto.getProjectId(), dto.getNamespaceId(), categoryId);
 
 		dto.setDetailUrl(homeUrl + detailUrl);
 
@@ -304,7 +314,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 
 		List<LeaseBuilding> existLeaseBuildings = enterpriseApplyBuildingProvider.listLeaseBuildings(cmd.getNamespaceId(),
-				cmd.getCommunityId(), null, null);
+				cmd.getCommunityId(), null, null, null);
 
 		List<Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, Integer.MAX_VALUE,
 				cmd.getCommunityId(), cmd.getNamespaceId(), null);
@@ -352,6 +362,10 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
 
+		if (null == cmd.getCategoryId()) {
+			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
+		}
+
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
 		List<Community> communities = communityProvider.listCommunitiesByCityIdAndAreaId(cmd.getNamespaceId(), cmd.getCityId(),
@@ -363,9 +377,9 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 		response.setProjects(communities.stream().map(r -> {
 			LeaseProjectDTO dto = new LeaseProjectDTO();
-			populateProjectBasicInfo(dto, r);
+			populateProjectBasicInfo(dto, r, cmd.getCategoryId());
 
-			processProjectDetailUrl(dto);
+			processProjectDetailUrl(dto, cmd.getCategoryId());
 			return dto;
 		}).collect(Collectors.toList()));
 
@@ -378,9 +392,9 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		return response;
 	}
 
-	private void populateProjectBasicInfo (LeaseProjectDTO dto, Community r) {
+	private void populateProjectBasicInfo(LeaseProjectDTO dto, Community r, Long categoryId) {
 
-		LeaseProject leaseProject = enterpriseApplyBuildingProvider.findLeaseProjectByProjectId(r.getId());
+		LeaseProject leaseProject = enterpriseApplyBuildingProvider.findLeaseProjectByProjectId(r.getId(), categoryId);
 
 		if (null == leaseProject) {
 			dto.setProjectId(r.getId());
@@ -391,6 +405,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 			dto.setAreaId(r.getAreaId());
 			dto.setAreaName(r.getAreaName());
 			dto.setAddress(r.getAddress());
+			dto.setCategoryId(categoryId);
 //			dto.setContactPhone(r.get);
 		}else {
 			dto.setProjectId(leaseProject.getProjectId());
@@ -409,17 +424,19 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 				dto.setPosterUrl(contentServerService.parserUri(dto.getPosterUri(), EntityType.USER.getCode(), userId));
 			}
 			dto.setDescription(leaseProject.getDescription());
+			dto.setCategoryId(categoryId);
+
 		}
 	}
 
-	private void populateProjectDetailInfo (LeaseProjectDTO dto, Community r, LeaseProject leaseProject) {
+	private void populateProjectDetailInfo(LeaseProjectDTO dto, Community r, LeaseProject leaseProject, Long categoryId) {
 //		populateProjectBasicInfo(dto, r);
 		dto.setName(r.getName());
 		String json = leaseProject.getExtraInfoJson();
 		LeaseProjectExtraInfo extraInfo = JSONObject.parseObject(json, LeaseProjectExtraInfo.class);
 		BeanUtils.copyProperties(extraInfo, dto);
 
-		List<Long> communityIds = enterpriseApplyBuildingProvider.listLeaseProjectCommunities(leaseProject.getId());
+		List<Long> communityIds = enterpriseApplyBuildingProvider.listLeaseProjectCommunities(leaseProject.getId(), categoryId);
 		dto.setProjectDTOS(communityIds.stream().map(c -> {
 			ProjectDTO d = new ProjectDTO();
 			d.setProjectId(c);
@@ -445,6 +462,10 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 	@Override
 	public LeaseProjectDTO updateLeaseProject(UpdateLeaseProjectCommand cmd) {
 
+		if (null == cmd.getCategoryId()) {
+			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
+		}
+
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
@@ -459,7 +480,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 			cmd.setAreaName(region.getName());
 		}
 
-		LeaseProject leaseProject = enterpriseApplyBuildingProvider.findLeaseProjectByProjectId(cmd.getProjectId());
+		LeaseProject leaseProject = enterpriseApplyBuildingProvider.findLeaseProjectByProjectId(cmd.getProjectId(), cmd.getCategoryId());
 		LeaseProject[] leaseProjects = new LeaseProject[1];
 
 		if (null == leaseProject) {
@@ -505,6 +526,10 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 	@Override
 	public LeaseProjectDTO getLeaseProjectById(GetLeaseProjectByIdCommand cmd) {
 
+		if (null == cmd.getCategoryId()) {
+			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
+		}
+
 		LeaseProjectDTO dto;
 
 		Community community = communityProvider.findCommunityById(cmd.getProjectId());
@@ -514,26 +539,27 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 					"Community not found");
 		}
 
-		LeaseProject leaseProject = enterpriseApplyBuildingProvider.findLeaseProjectByProjectId(cmd.getProjectId());
+		LeaseProject leaseProject = enterpriseApplyBuildingProvider.findLeaseProjectByProjectId(cmd.getProjectId(), cmd.getCategoryId());
 
 		if (null == leaseProject) {
 			dto = new LeaseProjectDTO();
 
-			populateProjectBasicInfo(dto, community);
+			populateProjectBasicInfo(dto, community, cmd.getCategoryId());
 		}else {
 			dto = ConvertHelper.convert(leaseProject, LeaseProjectDTO.class);
 
-			populateProjectDetailInfo(dto, community, leaseProject);
+			populateProjectDetailInfo(dto, community, leaseProject, cmd.getCategoryId());
 		}
 
 		//当配置 APP端显示楼栋介绍信息时，才返回楼栋列表，园区入驻3.6
 		GetLeasePromotionConfigCommand configCmd = new GetLeasePromotionConfigCommand();
 		configCmd.setNamespaceId(community.getNamespaceId());
+		configCmd.setCategoryId(cmd.getCategoryId());
 		LeasePromotionConfigDTO config = enterpriseApplyEntryService.getLeasePromotionConfig(configCmd);
 
 		if (config.getBuildingIntroduceFlag() == LeasePromotionFlag.ENABLED.getCode()) {
 			List<LeaseBuilding> leaseBuildings = enterpriseApplyBuildingProvider.listLeaseBuildings(community.getNamespaceId(),
-					cmd.getProjectId(), null, 5);
+					cmd.getProjectId(), cmd.getCategoryId(), null, 5);
 
 			dto.setBuildings(leaseBuildings.stream().map(r -> {
 				LeaseBuildingDTO d = ConvertHelper.convert(r, LeaseBuildingDTO.class);
@@ -554,6 +580,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 				LeaseProjectCommunity leaseProjectCommunity = new LeaseProjectCommunity();
 				leaseProjectCommunity.setLeaseProjectId(leaseProject.getId());
 				leaseProjectCommunity.setCommunityId(m);
+				leaseProjectCommunity.setCategoryId(leaseProject.getCategoryId());
 				enterpriseApplyBuildingProvider.createLeaseProjectCommunity(leaseProjectCommunity);
 			});
 		}

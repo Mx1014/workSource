@@ -1,27 +1,25 @@
 package com.everhomes.acl;
 
 
-import java.util.List;
-
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.entity.EntityType;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
+import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.List;
 
 
 @RestDoc(value="acl controller", site="core")
@@ -558,6 +556,22 @@ public class AclController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /acl/deleteServiceModuleAppsAdministrators</b>
+     * <p>删除业务模块应用管理员</p>
+     */
+    @RequestMapping("deleteServiceModuleAppsAdministrators")
+    @RestReturn(value=String.class)
+    public RestResponse deleteServiceModuleAppsAdministrators(@Valid DeleteServiceModuleAdministratorsCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.MODULE_ADMIN_DELETE);
+        rolePrivilegeService.deleteServiceModuleAppsAdministrators(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /acl/listServiceModulesByTarget</b>
      * <p>查询管理员对象授权业务模块</p>
      */
@@ -626,6 +640,53 @@ public class AclController extends ControllerBase {
         resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_CREATE);
         rolePrivilegeService.transferOrganizationSuperAdmin(cmd);
         RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /acl/resetServiceModuleAdministrators</b>
+     * <p>重建对象授权关系</p>
+     */
+    @RequestMapping("resetServiceModuleAdministrators")
+    @RestReturn(value=String.class)
+    public RestResponse resetServiceModuleAdministrators(@Valid ResetServiceModuleAdministratorsCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.AUTH_RELATION_CREATE);
+        rolePrivilegeService.resetServiceModuleAdministrators(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /acl/listServiceModuleAppsAdministrators</b>
+     * <p>业务模块应用管理员列表</p>
+     */
+    @RequestMapping("listServiceModuleAppsAdministrators")
+    @RestReturn(value=ListServiceModuleAppsAdministratorResponse.class)
+    public RestResponse listServiceModuleAppsAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.MODULE_ADMIN_LIST);
+        RestResponse response = new RestResponse(rolePrivilegeService.listServiceModuleAppsAdministrators(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /acl/listServiceModuleAppsAdministratorTargetIds</b>
+     * <p>业务模块应用管理员targetIds列表</p>
+     */
+    @RequestMapping("listServiceModuleAppsAdministratorTargetIds")
+    @RestReturn(value=Long.class, collection = true)
+    public RestResponse listServiceModuleAppsAdministratorTargetIds(@Valid ListServiceModuleAdministratorsCommand cmd) {
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.MODULE_ADMIN_LIST);
+        RestResponse response = new RestResponse(rolePrivilegeService.listServiceModuleAppsAdministratorTargetIds(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

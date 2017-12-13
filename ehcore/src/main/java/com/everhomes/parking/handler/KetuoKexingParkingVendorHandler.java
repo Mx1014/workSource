@@ -245,7 +245,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 
 					dto.setStartPeriod(startPeriod);
 
-					dto.setEndPeriod(Utils.getLongByAddNatureMonth(Utils.getlastDayOfMonth(now), parkingLot.getExpiredRechargeMonthCount() -1));
+					dto.setEndPeriod(Utils.getLongByAddNatureMonth(Utils.getLastDayOfMonth(now), parkingLot.getExpiredRechargeMonthCount() -1));
 
 					//计算优惠
 					if (null != parkingLot.getMonthlyDiscountFlag()) {
@@ -554,6 +554,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 			}
 		}
 
+		//当开卡月数为一时,在这里把开卡周期设置成当前月的最后一天23:59:59
 		Calendar calendar = Calendar.getInstance();
 		int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 		calendar.set(Calendar.DAY_OF_MONTH, d);

@@ -43,6 +43,16 @@ public class LeaseBuildingDTO {
     @ItemType(PostApprovalFormItem.class)
     private List<PostApprovalFormItem> formValues;
 
+    private Long categoryId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
     public Byte getConsultFlag() {
         return consultFlag;
     }
