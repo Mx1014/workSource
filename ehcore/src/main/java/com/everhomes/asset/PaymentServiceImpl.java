@@ -6,10 +6,18 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pay.order.TransactionType;
 import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.order.OrderType;
+
+import com.everhomes.rest.organization.OrganizationMemberGroupType;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
+
+import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.order.OrderType;
@@ -39,6 +47,8 @@ public class PaymentServiceImpl implements PaymentService {
     private PortalService portalService;
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentServiceImpl.class);
     @Override
@@ -49,8 +59,10 @@ public class PaymentServiceImpl implements PaymentService {
         cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
         ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
         Long appId = res.getServiceModuleApps().get(0).getId();
-        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), 1000001L, 1000001L, 40078L, appId, null, 240111044331048623L)){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"checkUserPrivilege false");
+        OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), UserContext.currentUserId(), OrganizationType.ENTERPRISE.getCode());
+        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), member.getOrganizationId(), member.getOrganizationId(), 40078L, appId, null,  cmd.getCommunityId())){
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                    "check app privilege error");
         }
 
         if(cmd.getNamespaceId() == null){

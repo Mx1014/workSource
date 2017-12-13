@@ -138,3 +138,56 @@ SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES
 (@mp_id:=@mp_id+1, '50600', '0', @p_id, '导出打卡记录', '0', NOW());
+
+
+-- lei.lv
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41001, null, '新增部门', '新增部门', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41002, null, '修改部门', '修改部门', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41003, null, '删除部门', '删除部门', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41004, null, '调整部门顺序', '调整部门顺序', NULL);
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41005, null, '新增通用岗位', '新增通用岗位', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41006, null, '编辑通用岗位', '编辑通用岗位', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41007, null, '删除通用岗位', '删除通用岗位', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41008, null, '编辑部门岗位', '编辑部门岗位', NULL);
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41009, null, '新增/修改人员', '新增/修改人员', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41010, null, '删除人员', '删除人员', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41011, null, '批量导入人员', '批量导入人员', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41012, null, '批量导出人员', '批量导出人员', NULL);
+
+set @mp_id = (select MAX(id) from eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES 
+(@mp_id:=@mp_id+1, '50100', '0', 41001, '新增部门', '0', NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES 
+(@mp_id:=@mp_id+1, '50100', '0', 41002, '修改部门', '0', NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES 
+(@mp_id:=@mp_id+1, '50100', '0', 41003, '删除部门', '0', NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES 
+(@mp_id:=@mp_id+1, '50100', '0', 41004, '调整部门顺序', '0', NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES 
+(@mp_id:=@mp_id+1, '50100', '0', 41005, '新增通用岗位', '0', NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES 
+(@mp_id:=@mp_id+1, '50100', '0', 41006, '编辑通用岗位', '0', NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES 
+(@mp_id:=@mp_id+1, '50100', '0', 41007, '删除通用岗位', '0', NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES 
+(@mp_id:=@mp_id+1, '50100', '0', 41008, '编辑部门岗位', '0', NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES 
+(@mp_id:=@mp_id+1, '50100', '0', 41009, '新增/修改人员', '0', NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES 
+(@mp_id:=@mp_id+1, '50100', '0', 41010, '删除人员', '0', NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES 
+(@mp_id:=@mp_id+1, '50100', '0', 41011, '批量导入人员', '0', NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES 
+(@mp_id:=@mp_id+1, '50100', '0', 41012, '批量导出人员', '0', NOW());
+
+
+-- 更新action_type
+update eh_service_modules set action_type = 46 WHERE id = 50100 and name = '组织架构';
+
+update eh_service_modules set action_type = null where id = 50400 and name = '人事档案';
+
+-- 更新提示
+SET @sid = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `ehcore`.`eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@sid:=@sid+1), 'privilege', '100055', 'zh_CN', '校验应用权限失败');

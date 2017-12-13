@@ -1,5 +1,6 @@
 package com.everhomes.rest.module;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.acl.ServiceModuleAppsAuthorizationsDto;
 import com.everhomes.util.StringHelper;
 
@@ -17,6 +18,7 @@ public class ListServiceModuleAppsAdministratorResponse {
 
     private Integer pageSize;
 
+    @ItemType(ServiceModuleAppsAuthorizationsDto.class)
     private List<ServiceModuleAppsAuthorizationsDto> dtos;
 
     public Integer getPageSize() {

@@ -1412,15 +1412,29 @@ public class OrganizationServiceImpl implements OrganizationService {
         dbProvider.execute((TransactionStatus status) -> {
 
             this.organizationProvider.deleteOrganizationAddressByOrganizationId(id);
-
             if (addressDTOs != null && addressDTOs.size() > 0) {
                 for (OrganizationAddressDTO organizationAddressDTO : addressDTOs) {
+                    Address addr = this.addressProvider.findAddressById(organizationAddressDTO.getAddressId());
                     OrganizationAddress address = ConvertHelper.convert(organizationAddressDTO, OrganizationAddress.class);
                     address.setOrganizationId(id);
                     address.setCreatorUid(userId);
                     address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     address.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    
+                    if(addr != null) {
+                        //地址冗余字段 added by jannson
+                        address.setBuildingName(addr.getBuildingName());
+                        Building building = this.communityProvider.findBuildingByCommunityIdAndName(addr.getCommunityId(), addr.getBuildingName());
+                        if(building != null) {
+                            address.setBuildingId(building.getId());
+                            }
+                        
+                    }
+                    
                     address.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
+                    
+                    
+                    
                     this.organizationProvider.createOrganizationAddress(address);
                 }
             }
@@ -14208,8 +14222,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
             if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), organizaitonId, organizaitonId, pivilegeId, apps.getServiceModuleApps().get(0).getId(), orgId, null)){
                 LOGGER.error("error_no_privileged. orgId = {}, userId = {}, pivilegeId={}", orgId, UserContext.currentUserId(), pivilegeId);
-                throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
-                        "error_no_privileged");
+                throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                        "check app privilege error");
             }
         }else{
             LOGGER.error("no appId. rgId = {}, userId = {}", orgId, UserContext.currentUserId());

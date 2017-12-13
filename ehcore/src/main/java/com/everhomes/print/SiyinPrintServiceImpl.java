@@ -2,14 +2,15 @@
 package com.everhomes.print;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -19,12 +20,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import com.alibaba.fastjson.JSONObject;
-import com.everhomes.bus.*;
-import com.everhomes.order.PayService;
-import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.rest.print.*;
-import com.google.gson.JsonObject;
+import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,16 +32,24 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.bus.BusBridgeProvider;
+import com.everhomes.bus.LocalBus;
+import com.everhomes.bus.LocalBusOneshotSubscriber;
+import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
+import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.order.OrderUtil;
+import com.everhomes.order.PayService;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -53,14 +58,64 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
+import com.everhomes.rest.print.DeleteQueueJobsCommand;
+import com.everhomes.rest.print.GetPrintLogonUrlCommand;
+import com.everhomes.rest.print.GetPrintLogonUrlResponse;
+import com.everhomes.rest.print.GetPrintSettingCommand;
+import com.everhomes.rest.print.GetPrintSettingResponse;
+import com.everhomes.rest.print.GetPrintStatCommand;
+import com.everhomes.rest.print.GetPrintStatResponse;
+import com.everhomes.rest.print.GetPrintUnpaidOrderCommand;
+import com.everhomes.rest.print.GetPrintUnpaidOrderResponse;
+import com.everhomes.rest.print.GetPrintUserEmailCommand;
+import com.everhomes.rest.print.GetPrintUserEmailResponse;
+import com.everhomes.rest.print.InformPrintCommand;
+import com.everhomes.rest.print.InformPrintResponse;
+import com.everhomes.rest.print.ListPrintJobTypesCommand;
+import com.everhomes.rest.print.ListPrintJobTypesResponse;
+import com.everhomes.rest.print.ListPrintOrderStatusCommand;
+import com.everhomes.rest.print.ListPrintOrderStatusResponse;
+import com.everhomes.rest.print.ListPrintOrdersCommand;
+import com.everhomes.rest.print.ListPrintOrdersResponse;
+import com.everhomes.rest.print.ListPrintRecordsCommand;
+import com.everhomes.rest.print.ListPrintRecordsResponse;
+import com.everhomes.rest.print.ListPrintUserOrganizationsCommand;
+import com.everhomes.rest.print.ListPrintUserOrganizationsResponse;
+import com.everhomes.rest.print.ListPrintingJobsCommand;
+import com.everhomes.rest.print.ListPrintingJobsResponse;
+import com.everhomes.rest.print.ListQueueJobsCommand;
+import com.everhomes.rest.print.ListQueueJobsDTO;
+import com.everhomes.rest.print.ListQueueJobsResponse;
+import com.everhomes.rest.print.PayPrintOrderCommand;
+import com.everhomes.rest.print.PayPrintOrderCommandV2;
+import com.everhomes.rest.print.PrintErrorCode;
+import com.everhomes.rest.print.PrintJobTypeType;
+import com.everhomes.rest.print.PrintLogonStatusType;
+import com.everhomes.rest.print.PrintOrderDTO;
+import com.everhomes.rest.print.PrintOrderLockType;
+import com.everhomes.rest.print.PrintOrderStatusType;
+import com.everhomes.rest.print.PrintOwnerType;
+import com.everhomes.rest.print.PrintPaperSizeType;
+import com.everhomes.rest.print.PrintRecordDTO;
+import com.everhomes.rest.print.PrintSettingColorTypeDTO;
+import com.everhomes.rest.print.PrintSettingPaperSizePriceDTO;
+import com.everhomes.rest.print.PrintSettingType;
+import com.everhomes.rest.print.PrintStatDTO;
+import com.everhomes.rest.print.ReleaseQueueJobsCommand;
+import com.everhomes.rest.print.UnlockPrinterCommand;
+import com.everhomes.rest.print.UnlockPrinterResponse;
+import com.everhomes.rest.print.UpdatePrintSettingCommand;
+import com.everhomes.rest.print.UpdatePrintUserEmailCommand;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.xml.XMLToJSON;
 /**
@@ -78,7 +133,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	public static final String REDIS_PRINT_JOB_CHECK_TIME = "redis_print_job_check_time";
 	private static final String PRINT_SUBJECT = "print";
 	//用户登录司印使用的用户id-园区id的分割字符串。
-	public static final String PRINT_LOGON_ACCOUNT_SPLIT = "-";
+//	public static final String PRINT_LOGON_ACCOUNT_SPLIT = "-";
+	public static final String PRINT_LOGON_ACCOUNT_SPLIT = "_";
 	public static final String PRINT_COMPANY_SPLIT = ",";
 	
 	@Autowired
@@ -126,6 +182,12 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Autowired
 	private PayService payService;
+	
+	@Autowired
+	private SiyinUserPrinterMappingProvider siyinUserPrinterMappingProvider;
+	
+	@Autowired
+	private DbProvider dbProvider;
 
 	@Override
 	public GetPrintSettingResponse getPrintSetting(GetPrintSettingCommand cmd) {
@@ -289,7 +351,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public DeferredResult<RestResponse> logonPrint(String identifierToken) {
-		// TODO 
 		//不知道这里对不对
 		DeferredResult<RestResponse> deferredResult = new DeferredResult<>();
 		RestResponse response =  new RestResponse();
@@ -321,7 +382,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	@Override
 	public InformPrintResponse informPrint(InformPrintCommand cmd) {
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-		if(PrintLogonStatusType.HAVE_UNPAID_ORDER.getCode() == checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId())){
+		if(PrintLogonStatusType.HAVE_UNPAID_ORDER == checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId())){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "have unpaid orders");
 		}
 
@@ -369,7 +430,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	public void addPrintingTaskCount(InformPrintCommand cmd) {
 		Long id = UserContext.current().getUser().getId();
 		
-		PrintLogonStatusType statusType = PrintLogonStatusType.fromCode(checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId()));
+		PrintLogonStatusType statusType = checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId());
 		if(statusType == PrintLogonStatusType.HAVE_UNPAID_ORDER){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "have unpaid orders");
 		}
@@ -418,21 +479,31 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	@Override
 	public GetPrintUnpaidOrderResponse getPrintUnpaidOrder(GetPrintUnpaidOrderCommand cmd) {
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-		return new GetPrintUnpaidOrderResponse(checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId()));
+		GetPrintUnpaidOrderResponse r = new GetPrintUnpaidOrderResponse();
+		r.setExistFlag(checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId(),r).getCode());
+		return r;
 	}
 
 	@Override
 	public CommonOrderDTO payPrintOrder(PayPrintOrderCommand cmd) {
 		//检查订单id是否存在，是否已经是  已支付状态
 		SiyinPrintOrder order = checkPrintOrder(cmd.getOrderId());
-		
+
 		//检查订单是否被锁定
 		//没有被锁定的订单，锁定他
 		PrintOrderLockType lockType = PrintOrderLockType.fromCode(order.getLockFlag());
 		if(lockType == PrintOrderLockType.UNLOCKED){
 			order = lockOrder(cmd.getOrderId());
 		}
-		
+
+		//锁定了，金额为0，设置为已支付
+		if(order.getOrderTotalFee() == null || order.getOrderTotalFee().compareTo(new BigDecimal(0)) == 0){
+			order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
+			order.setLockFlag(PrintOrderLockType.LOCKED.getCode());
+			siyinPrintOrderProvider.updateSiyinPrintOrder(order);
+			return null;
+		}
+
 		//调用统一处理订单接口，返回统一订单格式
 		CommonOrderCommand orderCmd = new CommonOrderCommand();
 		orderCmd.setBody(PrintJobTypeType.fromCode(order.getJobType()).getDescribe());
@@ -474,6 +545,14 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			order = lockOrder(cmd.getOrderId());
 		}
 
+		//锁定了，金额为0，设置为已支付
+		if(order.getOrderTotalFee() == null || order.getOrderTotalFee().compareTo(new BigDecimal(0)) == 0){
+			order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
+			order.setLockFlag(PrintOrderLockType.LOCKED.getCode());
+			siyinPrintOrderProvider.updateSiyinPrintOrder(order);
+			return null;
+		}
+
 		Long paysummay = payService.changePayAmount(order.getOrderTotalFee());
 		PreOrderDTO dto = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(),cmd.getClientAppName(),
 				OrderType.OrderTypeEnum.PRINT_ORDER.getPycode(),order.getOrderNo(),UserContext.current().getUser().getId(),paysummay);
@@ -496,14 +575,14 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	}
 	
 	@Override
-	public void unlockPrinter(UnlockPrinterCommand cmd) {
+	public UnlockPrinterResponse unlockPrinter(UnlockPrinterCommand cmd) {
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		//解锁打印机之前检查是否存在未支付订单。
 		//前端必须先调用接口 /siyinprint/getPrintUnpaidOrder,如此处存在未支付订单，那么抛出异常
-		if(PrintLogonStatusType.HAVE_UNPAID_ORDER.getCode() == checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId())){
+		if(PrintLogonStatusType.HAVE_UNPAID_ORDER == checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId())){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "Have unpaid order");
 		}
-		unlockPrinter(cmd,false);
+		return unlockPrinter(cmd,false);
 	}
 	
 	/**
@@ -597,7 +676,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return tuple.first();
 	}
 
-	private void unlockPrinter(UnlockPrinterCommand cmd, boolean isDirectPrint) {
+	private UnlockPrinterResponse unlockPrinter(UnlockPrinterCommand cmd, boolean isDirectPrint) {
         String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
         String moduleIp = getSiyinModuleIp(siyinUrl, cmd.getReaderName());
         String loginData = getLoginData(siyinUrl,cmd);
@@ -621,31 +700,60 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         	LOGGER.error("Unknown readerName = {}, register on table eh_siyin_print_printers",cmd.getReaderName());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unknown readerName = "+cmd.getReaderName());
         }
-        directLogin(moduleIp,printer,loginData);
+        mappingReaderToUser(cmd.getReaderName());
+        return directLogin(moduleIp,printer,loginData);
 	}
 	
+	private void mappingReaderToUser(String readerName) {
+		//理论上应该给这里加锁，但是解锁打印机应该是低频率，这里上锁。
+		SiyinUserPrinterMapping mapping = siyinUserPrinterMappingProvider.findSiyinUserPrinterMappingByUserAndPrinter(UserContext.current().getUser().getId(),readerName);
+		if(mapping==null){
+			mapping = new SiyinUserPrinterMapping();
+			mapping.setUserId(UserContext.current().getUser().getId());
+			mapping.setReaderName(readerName);
+			mapping.setNamespaceId(UserContext.getCurrentNamespaceId());
+			mapping.setUnlockTimes(1L);
+			siyinUserPrinterMappingProvider.createSiyinUserPrinterMapping(mapping);
+		}else{
+			mapping.setUnlockTimes(mapping.getUnlockTimes()+1);
+			siyinUserPrinterMappingProvider.updateSiyinUserPrinterMapping(mapping);
+		}
+		
+	}
+
+
 	/**
 	 * 解锁打印机
 	 */
-	private void directLogin(String moduleIp, SiyinPrintPrinter printer, String loginData) {
+	private UnlockPrinterResponse directLogin(String moduleIp, SiyinPrintPrinter printer, String loginData) {
 		Map<String, String> params = new HashMap<>();
 		params.put("reader_name", printer.getReaderName());
 		params.put("action", "QueryModule");
 		params.put("login_data", loginData);
-		String url = "http://" + moduleIp  + ":" + printer.getModulePort() + printer.getLoginContext();
-		String result;
-		try {
-			result = HttpUtils.post(url, params, 30);
-			String siyinCode = getSiyinCode(result);
-			if(!siyinCode.equals("OK")){
-				LOGGER.error("siyin api:"+url+"request failed : "+result);
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, printer.getLoginContext()+" request failed, message = "+result);
+		StringBuffer buffer = new StringBuffer();
+		String url = buffer.append("http://").append(moduleIp).append(":").append(printer.getModulePort()).append(printer.getLoginContext()).toString();
+		boolean isunlockbg = configurationProvider.getBooleanValue("print.isunlockbg", false);
+		if(isunlockbg){
+			String result;
+			try {
+				result = HttpUtils.post(url, params, 30);
+				String siyinCode = getSiyinCode(result);
+				if(!siyinCode.equals("OK")){
+					LOGGER.error("siyin api:"+url+"request failed : "+result);
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, printer.getLoginContext()+" request failed, message = "+result);
+				}
+			} catch (IOException e) {
+				LOGGER.error("siyin api:"+url+" request exception : "+e.getMessage());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, printer.getLoginContext()+" return exception, message = "+e.getMessage());
 			}
-		} catch (IOException e) {
-			LOGGER.error("siyin api:"+url+" request exception : "+e.getMessage());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, printer.getLoginContext()+" return exception, message = "+e.getMessage());
+			return null;
 		}
 		
+		
+//			url = buffer.append("?").append("reader_name=").append(printer.getReaderName())
+//					.append("&action=QueryModule&login_data=").append(URLEncoder.encode(StringHelper.toJsonString(loginData),"UTF-8")).toString();
+			
+			return new UnlockPrinterResponse(url, params);
 	}
 
 
@@ -1025,15 +1133,23 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	 * @param ownerId 
 	 * @param ownerType 
 	 */
-	private Byte checkUnpaidOrder(String ownerType, Long ownerId) {
+	private PrintLogonStatusType checkUnpaidOrder(String ownerType, Long ownerId) {
+		return checkUnpaidOrder(ownerType, ownerId, null);
+	}
+	
+	private PrintLogonStatusType checkUnpaidOrder(String ownerType, Long ownerId, GetPrintUnpaidOrderResponse r) {
 		User user = UserContext.current().getUser();
 		
 		List<SiyinPrintOrder> list = siyinPrintOrderProvider.listSiyinPrintUnpaidOrderByUserId(user.getId(),ownerType,ownerId);
 		
 		if(list == null || list.size() == 0){
-			return PrintLogonStatusType.LOGON_SUCCESS.getCode();
+			return PrintLogonStatusType.LOGON_SUCCESS;
 		}
-		return PrintLogonStatusType.HAVE_UNPAID_ORDER.getCode();
+		if(r != null){
+			r.setOrderId(list.get(0).getId());
+			r.setTotalFee(list.get(0).getOrderTotalFee());
+		}
+		return PrintLogonStatusType.HAVE_UNPAID_ORDER;
 	}
 	
 	/**
@@ -1053,10 +1169,188 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return siyinPrintEmail;
 	}
 	private String getSiyinCode(String result){
+		LOGGER.info("result = "+result);
         return result.substring(0, result.indexOf(":"));
     }
 
 	private String getSiyinData(String result){
         return result.substring(result.indexOf(":") + 1);
     }
+
+
+	@Override
+	public ListQueueJobsResponse listQueueJobs(ListQueueJobsCommand cmd) {
+        String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
+        List<SiyinUserPrinterMapping> mappings = siyinUserPrinterMappingProvider.listSiyinUserPrinterMappingByUserId(UserContext.current().getUser().getId(), UserContext.getCurrentNamespaceId());
+        List<String> readers = new ArrayList<>(5);
+        if(mappings == null || mappings.size() == 0){
+        	List<SiyinPrintPrinter> lists = siyinPrintPrinterProvider.listSiyinPrintPrinter();
+        	for (SiyinPrintPrinter printer : lists) {
+				readers.add(printer.getReaderName());
+			}
+        }else{
+        	for (SiyinUserPrinterMapping mapping : mappings) {
+        		readers.add(mapping.getReaderName());
+			}
+        }
+        List<ListQueueJobsDTO> jobs = getQueueJobs(readers,siyinUrl,cmd.getOwnerId());
+        return new ListQueueJobsResponse(jobs);
+	}
+
+
+	private List<ListQueueJobsDTO> getQueueJobs(List<String> printers, String siyinUrl, Long communityId) {
+		List<ListQueueJobsDTO> list = new ArrayList<>();
+		readerLoop:
+		for (String printer : printers) {
+			Map<String, String> params = new HashMap<>();
+	        params.put("host_name", printer);
+	        params.put("mode", "USERLIST");
+	        params.put("card_id", new StringBuffer().append(UserContext.current().getUser().getId()).append(PRINT_LOGON_ACCOUNT_SPLIT).append(communityId).toString());
+//	        params.put("card_id", "310183-240111044331058733");
+	        params.put("language", "zh-cn");
+	        String result;
+			try {
+				result = HttpUtils.post(siyinUrl + "/console/cardListener", params, 30);
+				String siyinCode = getSiyinCode(result);
+				if(siyinCode!=null && siyinCode.startsWith("INF")){
+					if(siyinCode.equals("INF0008") || siyinCode.equals("INF0009") || siyinCode.equals("INF0001")){
+						continue readerLoop;
+					}else{
+						LOGGER.error("siyin api:/console/cardListener request failed, result = {} ",result);
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/cardListener return failed, result = "+result);
+					}
+				}else if(siyinCode!=null){
+					addjobs(list,result,printer);
+				}else{
+					LOGGER.error("siyin api:/console/cardListener request failed, result = {} ",result);
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/cardListener return failed, result = "+result);
+				}
+			} catch (IOException e) {
+				LOGGER.error("siyin api:/console/cardListener request exception : "+e.getMessage());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/cardListener return exception, message = "+e.getMessage());
+				
+			}
+		}
+		return list;
+	}
+
+
+	private void addjobs(List<ListQueueJobsDTO> list, String result,String printer) {
+		Map<String, Object> object = XMLToJSON.convertOriginalMap(result);
+		Map<?, ?> data = (Map<?,?>)object.get("brocadesoft");
+		Object job_list = data.get("job_list");
+		List<Map<?,?>> jobList = new ArrayList<>();
+		if(job_list instanceof Map){
+			@SuppressWarnings("unchecked")
+			Map<String,Map<?,?>> map = (Map<String,Map<?,?>>)job_list;
+			jobList.add(map.get("job"));
+		}else{
+		    jobList = (List<Map<?,?>>)job_list;
+		}
+		list.addAll(jobList.stream().map(map->{
+			ListQueueJobsDTO dto = new ListQueueJobsDTO();
+			dto.setJobId(map.get("job_id").toString());
+			dto.setJobName(map.get("job_name").toString());
+			dto.setPrintTime(map.get("print_time").toString());
+			dto.setReaderName(printer);
+			dto.setTotalPage(map.get("total_page").toString());
+        	return dto;
+        }).collect(Collectors.toList()));
+	}
+
+
+	@Override
+	public void releaseQueueJobs(ReleaseQueueJobsCommand cmd) {
+		checkPrinters(cmd.getJobs());
+		Map<String,String> rmjobsMap = generateXmlData(cmd.getJobs());
+		releaseQueueJobs(rmjobsMap,cmd.getOwnerId());
+	}
+
+	private void releaseQueueJobs(Map<String, String> rmjobsMap, Long communityId) {
+		String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
+		rmjobsMap.entrySet().forEach(r->{
+			Map<String, String> params = new HashMap<>();
+	        params.put("host_name", r.getKey());
+	        params.put("mode", "USERLIST");
+	        params.put("card_id", new StringBuffer().append(UserContext.current().getUser().getId()).append(PRINT_LOGON_ACCOUNT_SPLIT).append(communityId).toString());
+//	        params.put("card_id", "310183-240111044331058733");
+	        params.put("language", "zh-cn");
+	        params.put("data", r.getValue());
+			try {
+				String result = HttpUtils.post(siyinUrl + "/console/cardListener", params, 30);
+			} catch (IOException e) {
+				LOGGER.error("siyin api:/console/cardListener request exception : "+e.getMessage());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/cardListener return exception, message = "+e.getMessage());
+			}
+		});
+	}
+
+	static final String rootxml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><xml><job_list>#{job}</job_list></xml>";
+	static final String jobxml = "<job><job_id>#{job_id}</job_id></job>";
+	private Map<String, String> generateXmlData(List<ListQueueJobsDTO> jobs) {
+		Map<String, List<ListQueueJobsDTO>> printerMap = new HashMap<>();
+		for (ListQueueJobsDTO job : jobs) {
+			List<ListQueueJobsDTO> printerJobs = printerMap.get(job.getReaderName());
+			if(printerJobs == null){
+				printerJobs = new ArrayList<>();
+				printerMap.put(job.getReaderName(), printerJobs);
+			}
+			printerJobs.add(job);
+		}
+		
+		Map<String, String> xmlMap = new HashMap<String,String>();
+		printerMap.entrySet().forEach(r->{
+			StringBuffer buffer = new StringBuffer();
+			r.getValue().forEach(dto->{
+				buffer.append(jobxml.replace("#{job_id}", dto.getJobId()));
+			});
+			xmlMap.put(r.getKey(), rootxml.replace("#{job}", buffer.toString()));
+		});
+		return xmlMap;
+	}
+
+
+	private void checkPrinters(List<ListQueueJobsDTO> jobs) {
+		for (ListQueueJobsDTO job : jobs) {
+			if(job.getJobId() == null || job.getReaderName() == null){
+				LOGGER.error("jobs data error");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, " job = "+job);
+			}
+		}
+	}
+
+
+	@Override
+	public void deleteQueueJobs(DeleteQueueJobsCommand cmd) {
+		checkPrinters(cmd.getJobs());
+		String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
+		Map<String, String> params = new HashMap<>();
+        params.put("format", "String");
+        params.put("action", "Cancel");
+        StringBuffer buffer = new StringBuffer();
+        cmd.getJobs().forEach(r->{
+        	buffer.append(r.getJobId()).append(',');
+        });
+        params.put("job_data", buffer.substring(0,buffer.length()-1));
+		try {
+			String result = HttpUtils.post(siyinUrl + "/console/jobHandler", params, 30);
+		} catch (IOException e) {
+			LOGGER.error("siyin api:/console/cardListener request exception : "+e.getMessage());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/jobHandler return exception, message = "+e.getMessage());
+		}
+	
+	}
+
+
+	public void mfpLogNotification(String jobData, HttpServletResponse response) {
+		try {
+			if(siyinJobValidateServiceImpl.mfpLogNotification(jobData)){
+				response.getOutputStream().write("OK".getBytes());
+				return ;
+			}
+			response.getOutputStream().write("FAIL".getBytes());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
