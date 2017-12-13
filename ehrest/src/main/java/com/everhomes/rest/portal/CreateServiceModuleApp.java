@@ -16,6 +16,10 @@ public class CreateServiceModuleApp {
 
 	private String name;
 
+	private String customTag;
+
+	private String customPath;
+
 	public Long getModuleId() {
 		return moduleId;
 	}
@@ -37,4 +41,19 @@ public class CreateServiceModuleApp {
 		return StringHelper.toJsonString(this);
 	}
 
+	public String getCustomTag() {
+		return customTag;
+	}
+
+	public void setCustomTag(String customTag) {
+		this.customTag = customTag;
+	}
+
+	public String getCustomPath() {
+		return customPath;
+	}
+
+	public void setCustomPath(String customPath) {
+		this.customPath = customPath;
+	}
 }

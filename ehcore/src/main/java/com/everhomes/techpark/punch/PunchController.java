@@ -2,10 +2,11 @@ package com.everhomes.techpark.punch;
 
 import javax.validation.Valid;
 
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
-
 import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -381,6 +382,8 @@ public class PunchController extends ControllerBase {
 	@RequestMapping("listPunchCount")
 	@RestReturn(value = ListPunchCountCommandResponse.class)
 	public RestResponse listPunchCount(@Valid ListPunchCountCommand cmd) {
+		Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
+		punchService.checkAppPrivilege(ownerId,cmd.getOwnerId(),PrivilegeConstants.PUNCH_STATISTIC_QUERY);
 		ListPunchCountCommandResponse commandResponse = punchService.listPunchCount(cmd);
 		RestResponse response = new RestResponse(commandResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);

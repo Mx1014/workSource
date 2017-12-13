@@ -191,5 +191,40 @@ public interface PrivilegeConstants {
     long ENERGY_PLAN_CREATE = 21014L;
     long ENERGY_PLAN_LIST = 21015L;
     long ENERGY_PLAN_DELETE = 21016L;
+    //物业缴费权限
+    long ASSET_DEAL_VIEW = 40078L;
+    long ASSET_MANAGEMENT_VIEW = 40073L;
+    long ASSET_MANAGEMENT_CREATE = 40074L;
+    long ASSET_MANAGEMENT_NOTICE = 40075L;
+    long ASSET_MANAGEMENT_CHANGE_STATUS = 40076L;
+    long ASSET_STATISTICS_VIEW = 40077L;
 
+    // ---------------- 组织架构权限 -----------------------
+
+    //部门
+    long CREATE_DEPARTMENT = 41001L;//新增部门
+    long MODIFY_DEPARTMENT = 41002L;//修改部门
+    long DELETE_DEPARTMENT = 41003L;//删除部门
+    long CHANGE_DEPARTMENT_ORDER = 41004L;//修改部门殊勋
+
+    //岗位
+    long CREATE_JOB_POSITION = 41005L;//创建岗位
+    long MODIFY_JOB_POSITION = 41006L;//修改岗位
+    long DELETE_JOB_POSITION = 41007L;//删除岗位
+    long MODIFY_DEPARTMENT_JOB_POSITION = 41008L;//修改部门岗位
+
+    //人员
+    long CREATE_OR_MODIFY_PERSON = 41009L;//创建或修改人员
+    long DELETE_PERSON = 41010L;//删除人员
+    long BATCH_IMPORT_PERSON = 41011L;//批量导入人员
+    long BATCH_EXPORT_PERSON = 41012L;//批量导出人员
+
+//    -------------- 考勤 ------------ 
+    long PUNCH_RULE_QUERY_ALL = 42000L;//    查看打卡规则 （细化权限，下同）
+    long PUNCH_RULE_QUERY_CREATOR = 42001L;//    查看自己创建的打卡规则
+    long PUNCH_RULE_CREATE = 42002L;//    新建打卡规则
+    long PUNCH_RULE_UPDATE = 42003L;//    编辑打卡规则
+    long PUNCH_RULE_DELETE = 42004L;//    删除打卡规则 
+    long PUNCH_STATISTIC_QUERY = 42005L;//    查看打卡记录 （细化权限，下同）
+    long PUNCH_STATISTIC_EXPORT = 42006L;//    导出打卡记录
 }

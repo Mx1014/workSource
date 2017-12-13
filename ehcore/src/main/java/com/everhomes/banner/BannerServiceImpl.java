@@ -768,11 +768,11 @@ public class BannerServiceImpl implements BannerService {
 	@Override
 	public ListBannersByOwnerCommandResponse listBannersByOwner(ListBannersByOwnerCommand cmd) {
 		checkUserNotInOrg(cmd.getOwnerType(), cmd.getOwnerId());
-		
-		if(cmd.getScope() == null || cmd.getScope().getScopeCode() == null || cmd.getScope().getScopeId() == null) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scope parameter.");
-		}
+//
+//		if(cmd.getScope() == null || cmd.getScope().getScopeCode() == null || cmd.getScope().getScopeId() == null) {
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+//                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scope parameter.");
+//		}
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         Integer pageSize = cmd.getPageSize() != null ? cmd.getPageSize()
@@ -780,15 +780,38 @@ public class BannerServiceImpl implements BannerService {
 
         // 看是否有自定义banner
         // 如果有, 则说明该场景下只需要自定义的banner了, 不需要默认的banner了
-        Banner customizedBanner = bannerProvider.findAnyCustomizedBanner(namespaceId, cmd.getScope().getScopeCode(), cmd.getScope().getScopeId(), cmd.getSceneType());
-        List<BannerDTO> bannerList;
-        if (customizedBanner != null) {
-            bannerList = bannerProvider.listBannersByOwner(namespaceId, cmd.getScope(), cmd.getSceneType(), cmd.getPageAnchor(),
-                    pageSize + 1, ApplyPolicy.CUSTOMIZED);
-        } else {
+        List<BannerDTO> bannerList = null;
+
+        if(cmd.getScope() == null || cmd.getScope().getScopeCode() == null || cmd.getScope().getScopeId() == null){
+            //查询全部
             bannerList = bannerProvider.listBannersByOwner(namespaceId, null, cmd.getSceneType(), cmd.getPageAnchor(), pageSize + 1,
                     ApplyPolicy.DEFAULT);
+        }else {
+
+            //按照园区查询
+            Banner customizedBanner = bannerProvider.findAnyCustomizedBanner(namespaceId, cmd.getScope().getScopeCode(), cmd.getScope().getScopeId(), cmd.getSceneType());
+
+            if (customizedBanner != null) {
+                //有定制的
+                bannerList = bannerProvider.listBannersByOwner(namespaceId, cmd.getScope(), cmd.getSceneType(), cmd.getPageAnchor(),
+                        pageSize + 1, ApplyPolicy.CUSTOMIZED);
+            } else {
+                //无定制的，包括发送到全部的和单个园区的。
+                BannerScope allScope = new BannerScope();
+                allScope.setScopeCode((byte)0);
+                allScope.setScopeId(0L);
+
+                List<BannerScope> scopes = new ArrayList<>();
+                scopes.add(allScope);
+                scopes.add(cmd.getScope());
+
+                bannerList = bannerProvider.listBannersByOwnerAndScopes(namespaceId, scopes, cmd.getSceneType(), cmd.getPageAnchor(), pageSize + 1,
+                        ApplyPolicy.DEFAULT);
+            }
         }
+
+
+
 
         for(BannerDTO dto : bannerList) {
         	dto.setPosterUrl(parserUri(dto.getPosterPath(), cmd.getOwnerType(), cmd.getOwnerId()));
@@ -1006,10 +1029,10 @@ public class BannerServiceImpl implements BannerService {
                  banner.setOrder(cmd.getDefaultOrder());
                  // 设置最大的order值
                  List<BannerDTO> bannerDTOList = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
-                         cmd.getScope(), sceneStr, null, null, ApplyPolicy.CUSTOMIZED);
+                         cmd.getScope(), sceneStr, null, null, ApplyPolicy.DEFAULT);
                  bannerDTOList.stream().mapToInt(BannerDTO::getOrder).distinct().reduce(Math::max).ifPresent(r -> banner.setOrder(r + 1));
 
-                 banner.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
+                 banner.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
                  banner.setSceneType(sceneType.getCode());
                  
                  bannerProvider.createBanner(banner);
