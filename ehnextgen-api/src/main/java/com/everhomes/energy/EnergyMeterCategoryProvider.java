@@ -22,7 +22,7 @@ public interface EnergyMeterCategoryProvider {
      */
     List<EnergyMeterCategory> listMeterCategories(Integer namespaceId, Byte categoryType, Long ownerId, String ownerType, Long communityId);
 
-    List<EnergyMeterCategory> listMeterCategories(List<Long> categoryIds);
+    List<EnergyMeterCategory> listMeterCategories(List<Long> categoryIds, Byte categoryType);
 
 	EnergyMeterCategory findById(Long id); 
     /**

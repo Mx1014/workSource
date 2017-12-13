@@ -85,9 +85,10 @@ public class EnergyMeterCategoryProviderImpl implements EnergyMeterCategoryProvi
     }
 
     @Override
-    public List<EnergyMeterCategory> listMeterCategories(List<Long> categoryIds) {
+    public List<EnergyMeterCategory> listMeterCategories(List<Long> categoryIds, Byte categoryType) {
         return context().selectFrom(EH_ENERGY_METER_CATEGORIES)
                 .where(EH_ENERGY_METER_CATEGORIES.ID.in(categoryIds))
+                .and(EH_ENERGY_METER_CATEGORIES.CATEGORY_TYPE.eq(categoryType))
                 .and(EH_ENERGY_METER_CATEGORIES.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
                 .fetchInto(EnergyMeterCategory.class);
     }

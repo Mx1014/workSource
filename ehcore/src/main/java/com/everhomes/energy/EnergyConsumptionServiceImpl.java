@@ -2498,7 +2498,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 List<Long> categoryIds = maps.stream().map(map -> {
                     return map.getCategoryId();
                 }).collect(Collectors.toList());
-                List<EnergyMeterCategory> categories = meterCategoryProvider.listMeterCategories(categoryIds);
+                List<EnergyMeterCategory> categories = meterCategoryProvider.listMeterCategories(categoryIds, cmd.getCategoryType());
                 if(categories != null && categories.size() > 0) {
                     categoryList.addAll(categories);
                 }
