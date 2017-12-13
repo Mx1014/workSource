@@ -196,6 +196,9 @@
 			eh_payment_withdraw_orders |eh_community_organization_detail_display |
             eh_forum_service_types |
             eh_me_web_menus | eh_customer_entry_infos | eh_customer_departure_infos |
+            eh_social_security_bases | eh_accumulation_fund_bases | eh_social_security_settings | 
+			eh_accumulation_fund_settings | eh_social_security_payments | eh_accumulation_fund_payments | eh_social_security_payment_logs | 
+			eh_social_security_summary | eh_social_security_department_summary | eh_social_security_report | eh_social_security_inout_report |
         </includes>
 
             <!-- All elements that are excluded from your schema
