@@ -99,6 +99,7 @@ CREATE TABLE `eh_work_report_val_receiver_map` (
   `receiver_avatar` VARCHAR(2048) COMMENT 'the avatar of the receiver',
   `read_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0-unread 1-read',
 
+  `update_time` DATETIME COMMENT 'last update time',
   `create_time` DATETIME COMMENT 'record create time',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
