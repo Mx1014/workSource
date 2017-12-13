@@ -514,8 +514,8 @@ public class UserActivityServiceImpl implements UserActivityService {
     	CrossShardListingLocator locator = new CrossShardListingLocator();
     	locator.setAnchor(cmd.getPageAnchor());
     	int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-    	List<Feedback> results = userActivityProvider.ListFeedbacks(locator, UserContext.getCurrentNamespaceId(), FeedbackTargetType.POST.getCode(), cmd.getStatus(), pageSize + 1);
-    	LOGGER.info("result = "+results);
+//    	List<Feedback> results = userActivityProvider.ListFeedbacks(locator, UserContext.getCurrentNamespaceId(), FeedbackTargetType.POST.getCode(), cmd.getStatus(), pageSize + 1);
+    	List<Feedback> results = userActivityProvider.ListFeedbacks(locator, UserContext.getCurrentNamespaceId(), null, cmd.getStatus(), pageSize + 1);
     	if (null == results)
     		return response;
     	Long nextPageAnchor = null;
