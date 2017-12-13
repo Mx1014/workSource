@@ -4712,9 +4712,9 @@ public class ForumServiceImpl implements ForumService {
 //            return;
 //        }
         // 对接权限，先去掉权限校验 -- by yanjun
-        if(categoryId != null && CategoryConstants.CATEGORY_ID_NOTICE == categoryId){
-            resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.PUBLISH_NOTICE_TOPIC);
-        }
+//        if(categoryId != null && CategoryConstants.CATEGORY_ID_NOTICE == categoryId){
+//            resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.PUBLISH_NOTICE_TOPIC);
+//        }
     }
 
     private void checkBlacklist(String ownerType, Long ownerId, Long categoryId, Long forumId){

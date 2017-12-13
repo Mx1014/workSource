@@ -682,78 +682,87 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         return users;
     }
     
-    /*@Override
-    public List<User> listDoorAuthByBuildingId(Byte isAuth, Byte isOpenAuth, Long doorId, CrossShardListingLocator locator, int pageSize, Integer namespaceId){
-        List<User> users = new ArrayList<>();
-
+    /**
+     * 办公楼的门禁授权
+     * @param isOpenAuth
+     * @param doorId
+     * @param buildingName
+     * @param locator
+     * @param pageSize
+     * @param namespaceId
+     * @return
+     */
+    @Override
+    public List<Long> listDoorAuthByBuildingName2(Byte isOpenAuth, Long doorId, Long communityId, String buildingName, CrossShardListingLocator locator, int pageSize, Integer namespaceId){
+        List<Long> users = new ArrayList<>();
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context, obj)->{
-            Condition cond = Tables.EH_USERS.ID.isNotNull();
-            cond = getIsAuthCond(cond, isAuth);
-            cond = getIsOpenAuthCond(cond, isOpenAuth);
-            if(locator.getAnchor() != null ) {
-                cond = cond.and(Tables.EH_USERS.ID.lt(locator.getAnchor()));
+            Condition condOrg = Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.BUILDING_NAME.eq(buildingName)
+                    .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+                    .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
+                    .and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
+                    .and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.COMMUNITY_ID.eq(communityId));
+                    
+            Condition cond = Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId)
+                    .and(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()))
+                    ;
+            
+            if(isOpenAuth != null) {
+                Condition openCond = Tables.EH_DOOR_AUTH.RIGHT_OPEN.eq((byte)1);
+                openCond = openCond.or(Tables.EH_DOOR_AUTH.RIGHT_REMOTE.eq((byte)1));
+                openCond = openCond.or(Tables.EH_DOOR_AUTH.RIGHT_VISITOR.eq((byte)1));
+                cond = cond.and(openCond);
             }
-
-            SelectOffsetStep<Record> step = context.select().from(
-                    context.select().from(Tables.EH_USERS)
-                            .where(
-                                    Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId)
-                            ).asTable(Tables.EH_USERS.getName()))
-                    .leftOuterJoin(
-                            context.select().from(Tables.EH_DOOR_AUTH)
-                                    .where(
-                                            Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()))
-                                    .and(
-                                            Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode())
-                                    .and(
-                                            Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId)))
-                                    .asTable(Tables.EH_DOOR_AUTH.getName()))
-                    .on(Tables.EH_USERS.ID.eq(Tables.EH_DOOR_AUTH.USER_ID))
-                    .leftOuterJoin(
-                            context.select(
-                                    Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID,
-                                    Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE,
-                                    Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN,
-                                    Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME,
-                                    Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID)
-                                    .from(Tables.EH_ORGANIZATION_MEMBERS)
-                                    .leftOuterJoin(Tables.EH_ORGANIZATIONS)
-                                    .on(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID))
-                                    .where(
-                                            Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
-                                    .and(
-                                            Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
-                                    .and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
-                                    .and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0L))
-                                    .and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()))
-                                    .groupBy(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID)
-                                    .asTable(Tables.EH_ORGANIZATION_MEMBERS.getName()))
-                    .on(Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID))
-                    .where(cond).orderBy(Tables.EH_USERS.ID.desc())
-                    .limit(pageSize + 1);
-
-//            System.out.println("query sql:" + step.getSQL());
-
-            step.fetch().map(r ->{
-                User user = new User();
-                user.setId(r.getValue(Tables.EH_USERS.ID));
-                user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
-                user.setIdentifierToken(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN));
-                user.setGender(r.getValue(Tables.EH_USERS.GENDER));
-                user.setCreateTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
-                users.add(user);
+            
+            Long anchor = 0l;
+            if(null != locator.getAnchor()) {
+                anchor = locator.getAnchor();
+            }
+            
+            SelectOffsetStep<Record1<Long>> userIdStep = null;
+            SelectOnConditionStep<Record1<Long>> firstStep = context.select(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID).from(Tables.EH_ORGANIZATION_MEMBERS)
+            .join(Tables.EH_DOOR_AUTH)
+            .on(Tables.EH_DOOR_AUTH.USER_ID.eq(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID))
+            .join(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+            .on(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID))
+            ;
+            
+            if(isOpenAuth == null) {
+                userIdStep = context.select(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID).from(Tables.EH_ORGANIZATION_MEMBERS)
+                        .join(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+                        .on(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID))
+                        .where(condOrg.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.gt(anchor))).groupBy(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID).limit(pageSize);
+            } else if(isOpenAuth == 0) {
+                userIdStep = context.select(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID).from(Tables.EH_ORGANIZATION_MEMBERS)
+                .join(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+                .on(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID))
+                .where(condOrg
+                        .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.notIn(firstStep.where(cond.and(condOrg)).groupBy(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID)))
+                        .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.gt(anchor))
+                        )
+                .groupBy(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID).limit(pageSize);
+            } else {
+                userIdStep = firstStep.where(cond.and(condOrg).and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.gt(anchor))).groupBy(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID).limit(pageSize);
+            }
+            
+            userIdStep.fetch().map(r ->{
+                if(users.size() >= pageSize) {
+                    return null;
+                }
+                users.add(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID));        
                 return null;
+                
             });
             return true;
+
         });
 
         locator.setAnchor(null);
-        if(users.size() > pageSize){
-            users.remove(users.size() - 1);
-            locator.setAnchor(users.get(users.size() - 1).getId());
+        if(users.size() >= pageSize){
+            locator.setAnchor(users.get(users.size() - 1));
         }
+        
         return users;
-    }*/
+    }
 
 
     @Override
@@ -881,44 +890,66 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     }
 
     @Override
-    public List<User> listDoorAuthByBuildingName(Long communityId, String buildingName, CrossShardListingLocator locator, int pageSize) {
-        List<User> users = new ArrayList<>();
+    public List<Long> listDoorAuthByBuildingName(Byte isOpenAuth, Long doorId, Long communityId, String buildingName, CrossShardListingLocator locator, int pageSize, Integer namespaceId) {
+        List<Long> users = new ArrayList<>();
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context, obj)->{
-            Condition cond = GroupCustomField.FAMILY_COMMUNITY_ID.getField().eq(communityId)
+            Condition condMember = GroupCustomField.FAMILY_COMMUNITY_ID.getField().eq(communityId)
                     .and(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
                     .and(Tables.EH_GROUPS.NAME.like(buildingName+"%"))
                     .and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()))
-                    .and(Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode()));
-            if(locator.getAnchor() != null) {
-                cond = cond.and(Tables.EH_USERS.ID.lt(locator.getAnchor()));
+                    .and(Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode()))
+                    .and(Tables.EH_GROUPS.NAMESPACE_ID.eq(namespaceId));
+            
+            Condition cond = Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId)
+                    .and(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()))
+                    ;
+
+            if(isOpenAuth != null) {
+                Condition openCond = Tables.EH_DOOR_AUTH.RIGHT_OPEN.eq((byte)1);
+                openCond = openCond.or(Tables.EH_DOOR_AUTH.RIGHT_REMOTE.eq((byte)1));
+                openCond = openCond.or(Tables.EH_DOOR_AUTH.RIGHT_VISITOR.eq((byte)1));
+                cond = cond.and(openCond);
+            }
+
+            Long anchor = 0l;
+            if(null != locator.getAnchor()) {
+                anchor = locator.getAnchor();
+            }
+            SelectOffsetStep<Record1<Long>> userIdStep = null;
+            SelectOnConditionStep<Record1<Long>> firstStep = context.select(Tables.EH_GROUP_MEMBERS.MEMBER_ID).from(Tables.EH_GROUP_MEMBERS).join(Tables.EH_GROUPS)
+            .on(Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID)).join(Tables.EH_DOOR_AUTH)
+            .on(Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(Tables.EH_DOOR_AUTH.USER_ID));
+            
+            if(isOpenAuth == null) {
+                userIdStep = context.select(Tables.EH_GROUP_MEMBERS.MEMBER_ID).from(Tables.EH_GROUP_MEMBERS).join(Tables.EH_GROUPS)
+                .on(Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID))
+                .where(condMember).and(Tables.EH_GROUP_MEMBERS.MEMBER_ID.gt(anchor))
+                .groupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID).limit(pageSize);
+            } else if(isOpenAuth == 0) {
+                userIdStep = context.select(Tables.EH_GROUP_MEMBERS.MEMBER_ID).from(Tables.EH_GROUP_MEMBERS).join(Tables.EH_GROUPS)
+                .on(Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID))
+                .where(condMember.and(Tables.EH_GROUP_MEMBERS.MEMBER_ID.notIn(firstStep.where(cond.and(condMember)).groupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID)))
+                        .and(Tables.EH_GROUP_MEMBERS.MEMBER_ID.gt(anchor)))
+                .groupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID).limit(pageSize);
+            } else {
+                userIdStep = firstStep.where(cond.and(condMember).and(Tables.EH_GROUP_MEMBERS.MEMBER_ID.gt(anchor)))
+                        .groupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID).limit(pageSize);
             }
             
-            SelectOffsetStep<Record> step = context.select().from(Tables.EH_GROUP_MEMBERS).join(Tables.EH_GROUPS).on(Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID))
-            .join(Tables.EH_USERS).on(Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(Tables.EH_USERS.ID))
-            .where(cond).orderBy(Tables.EH_USERS.ID.desc())
-            .limit(pageSize + 1);
-            ;
-            
-//            if(LOGGER.isInfoEnabled()) {
-//                LOGGER.info("query sql:" + step.getSQL());    
-//            }
-            
-            step.fetch().map(r ->{
-                User user = new User();
-                user.setId(r.getValue(Tables.EH_USERS.ID));
-                user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
-                user.setGender(r.getValue(Tables.EH_USERS.GENDER));
-                user.setCreateTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
-                users.add(user);
+            userIdStep.fetch().map(r ->{
+                if(users.size() >= pageSize) {
+                    return null;
+                }
+                users.add(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_ID));            
                 return null;
+                
             });
             return true;
         });
         
         locator.setAnchor(null);
-        if(users.size() > pageSize){
-            users.remove(users.size() - 1);
-            locator.setAnchor(users.get(users.size() - 1).getId());
+        if(users.size() >= pageSize){
+            locator.setAnchor(users.get(users.size() - 1));
         }
         
         return users;

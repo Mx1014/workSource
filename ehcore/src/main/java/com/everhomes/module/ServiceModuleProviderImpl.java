@@ -8,9 +8,6 @@ import java.util.stream.Collectors;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.server.schema.tables.*;
-import com.everhomes.server.schema.tables.daos.*;
-import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.pojos.EhReflectionServiceModuleApps;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignmentRelations;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignments;
@@ -32,8 +29,6 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.portal.ServiceModuleApp;
 import com.everhomes.rest.module.ServiceModuleStatus;
@@ -45,23 +40,12 @@ import com.everhomes.server.schema.tables.daos.EhReflectionServiceModuleAppsDao;
 import com.everhomes.server.schema.tables.daos.EhServiceModuleAssignmentRelationsDao;
 import com.everhomes.server.schema.tables.daos.EhServiceModuleAssignmentsDao;
 import com.everhomes.server.schema.tables.daos.EhServiceModulesDao;
-import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.*;
-import org.jooq.tools.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.everhomes.server.schema.tables.EhReflectionServiceModuleApps.EH_REFLECTION_SERVICE_MODULE_APPS;
 
@@ -670,7 +654,7 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
     }
 
     @Override
-    public List<ServiceModuleAppDTO> listReflectionServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String customPath) {
+    public List<ServiceModuleAppDTO> listReflectionServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String customPath, String controlOption) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         Condition cond = Tables.EH_REFLECTION_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId);
         if (null != moduleId)
@@ -681,6 +665,8 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
             cond = cond.and(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.CUSTOM_TAG.eq(customTag));
         if (null != customPath)
             cond = cond.and(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.CUSTOM_PATH.eq(customPath));
+        if(!StringUtils.isEmpty(controlOption))
+            cond = cond.and(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.MODULE_CONTROL_TYPE.eq(controlOption));
         List<ReflectionServiceModuleApp> apps = context.select().from(Tables.EH_REFLECTION_SERVICE_MODULE_APPS)
                 .where(cond)
                 .and(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()))
