@@ -43,7 +43,24 @@ public class NewsController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /news/updateNews</b>
+	 * <b>URL: /news/publishNews</b>
+	 * <p>
+	 * 发布一条新闻
+	 * </p>
+	 */
+	@RequestMapping("publishNews")
+	@RestReturn(String.class)
+	public RestResponse publishNews(publishNewsCommand cmd) {
+		newsService.publishNews(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /news/publi</b>
 	 * <p>
 	 * 修改一条新闻
 	 * </p>

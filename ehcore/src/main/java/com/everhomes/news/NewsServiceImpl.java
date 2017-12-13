@@ -1652,6 +1652,21 @@ public class NewsServiceImpl implements NewsService {
 		}
 		return new GetCategoryIdByEntryIdResponse(category.getId());
 	}
-
-
+	
+	@Override
+	public void publishNews(publishNewsCommand cmd) {
+		Long userId = UserContext.current().getUser().getId();
+		if(cmd.getNewsToken() == null){
+			LOGGER.error("Invalid parameters, operatorId=" + userId + ", cmd=" + cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters");
+		}
+		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
+		News news = findNewsById(userId, newsId);
+		NewsStatus eStatus = NewsStatus.fromCode(news.getStatus());
+		if(eStatus == NewsStatus.DRAFT){
+			news.setStatus(NewsStatus.ACTIVE.getCode());
+			newsProvider.updateNews(news);
+		}
+	}
 }
