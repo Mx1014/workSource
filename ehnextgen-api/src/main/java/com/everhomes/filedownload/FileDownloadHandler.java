@@ -3,6 +3,13 @@ package com.everhomes.filedownload;
 import java.util.Map;
 
 public interface FileDownloadHandler {
+
+    /**
+     * 进度比例，业务实现内部可以更新，下载中心会不定期获取该进度更新任务状态
+     */
+    int rate = 0;
+
+
     /**
      * 下载任务的具体业务逻辑
      * 具体业务由业务自己实现

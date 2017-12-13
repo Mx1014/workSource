@@ -1,6 +1,7 @@
 package com.everhomes.scheduler;
 
 import com.everhomes.filedownload.FileDownloadHandler;
+import com.everhomes.filedownload.FileDownloadService;
 import com.everhomes.util.StringHelper;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -10,6 +11,7 @@ import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +25,9 @@ import static java.lang.Class.forName;
 public class FileDownloadScheduleJob extends QuartzJobBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileDownloadScheduleJob.class);
 
+    @Autowired
+    FileDownloadService fileDownloadService;
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
 
@@ -35,13 +40,25 @@ public class FileDownloadScheduleJob extends QuartzJobBean {
         try {
             Class c1 = forName(jobClass);
             FileDownloadHandler handler = (FileDownloadHandler) c1.newInstance();
-            handler.run(params);
-//            Method run = c1.getMethod("run", Map.class);
-//            run.invoke(params);
+
+
+            Thread rateThread = new Thread(){
+                fileDownloadService
+            };
+
+            String url = handler.run(params);
+
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }
 
 
     }
+
+
+
+
+
 }
