@@ -167,6 +167,8 @@ UPDATE eh_lease_form_requests set category_id = 1;
 UPDATE eh_lease_configs set category_id = 1;
 UPDATE eh_lease_buildings set category_id = 1;
 
+UPDATE eh_configurations set `value` = '/park-entry/dist/index.html?hideNavigationBar=1#/project_intro/%s/%s/%s' where `name` = 'apply.entry.lease.project.detail.url';
+
 -- dengs,20171212,服务联盟消息格式修改
 update eh_locale_templates SET text = '您收到一条${categoryName}的申请；
 
