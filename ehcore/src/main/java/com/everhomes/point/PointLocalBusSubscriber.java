@@ -71,7 +71,8 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if (event.getApplicationContext().getParent() == null
-                && serverId != null && serverIdList != null) {
+                && serverId != null && serverId.trim().length() > 0
+                && serverIdList != null && serverIdList.size() > 0) {
             registerPointRuleCategory();
             initPointRuleCategoryQueue();
             initScheduledExecutorService();
