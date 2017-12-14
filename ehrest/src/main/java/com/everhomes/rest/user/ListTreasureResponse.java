@@ -1,30 +1,37 @@
 package com.everhomes.rest.user;
 
 import com.everhomes.util.StringHelper;
+
 /**
- * 查询用户的财富
- * @author elians
- *<ul>
- *<li>points:积分数</li>
- *<li>couponCount:礼券数</li>
- *<li>topicFavoriteCount:收藏的帖子数</li>
- *<li>sharedCount:发帖数</li>
- *<li>pointRuleUrl:积分规则url</li>
- *<li>level:用户等级</li>
- *<li>myCoupon:我的礼券</li>
- *<li>myOrderUrl:我的订单</li>
- *<li>applyShopUrl:申请开店</li>
- *<li>isAppliedShop:是否已申请过开店</li>
- *<li>orderCount:待发货订单数量</li>
- *<li>businessUrl:电商链接</li>
- *<li>businessRealm:电商realm</li>
- *<li>activityDefaultListStyle:活动列表默认样式</li>
- *<li>shakeOpenDoorUser:当前用户是否开启摇一摇</li>
- *<li>shakeOpenDoorNamespace:当前域空间是否开启</li>
- *</ul>
+ * <ul>
+ *     <li>points: 积分数</li>
+ *     <li>pointsStatus: 是否显示积分</li>
+ *     <li>pointsUrl: 积分点击跳转链接</li>
+ *     <li>pointsUrlStatus: 积分链接点击是否跳转</li>
+ *     <li>couponCount: 礼券数</li>
+ *     <li>topicFavoriteCount: 收藏的帖子数</li>
+ *     <li>sharedCount: 发帖数</li>
+ *     <li>pointRuleUrl: 积分规则url</li>
+ *     <li>level: 用户等级</li>
+ *     <li>myCoupon: 我的礼券</li>
+ *     <li>myOrderUrl: 我的订单</li>
+ *     <li>applyShopUrl: 申请开店</li>
+ *     <li>isAppliedShop: 是否已申请过开店</li>
+ *     <li>orderCount: 待发货订单数量</li>
+ *     <li>businessUrl: 电商链接</li>
+ *     <li>businessRealm: 电商realm</li>
+ *     <li>activityDefaultListStyle: 活动列表默认样式</li>
+ *     <li>shakeOpenDoorUser: 当前用户是否开启摇一摇</li>
+ *     <li>shakeOpenDoorNamespace: 当前域空间是否开启</li>
+ * </ul>
  */
 public class ListTreasureResponse {
-    private Integer points;
+
+    private Long points;
+    private Byte pointsStatus;
+    private String pointsUrl;
+    private Byte pointsUrlStatus;
+
     private Integer couponCount;
     private Integer topicFavoriteCount;
     private Integer sharedCount;
@@ -40,45 +47,45 @@ public class ListTreasureResponse {
     private Byte activityDefaultListStyle;
     private Byte shakeOpenDoorUser;
     private Byte shakeOpenDoorNamespace;
-	
-	public Byte getActivityDefaultListStyle() {
-		return activityDefaultListStyle;
-	}
 
-	public void setActivityDefaultListStyle(Byte activityDefaultListStyle) {
-		this.activityDefaultListStyle = activityDefaultListStyle;
-	}
+    public Byte getActivityDefaultListStyle() {
+        return activityDefaultListStyle;
+    }
 
-	public String getMyOrderUrl() {
-		return myOrderUrl;
-	}
+    public void setActivityDefaultListStyle(Byte activityDefaultListStyle) {
+        this.activityDefaultListStyle = activityDefaultListStyle;
+    }
 
-	public void setMyOrderUrl(String myOrderUrl) {
-		this.myOrderUrl = myOrderUrl;
-	}
+    public String getMyOrderUrl() {
+        return myOrderUrl;
+    }
 
-	public String getApplyShopUrl() {
-		return applyShopUrl;
-	}
+    public void setMyOrderUrl(String myOrderUrl) {
+        this.myOrderUrl = myOrderUrl;
+    }
 
-	public void setApplyShopUrl(String applyShopUrl) {
-		this.applyShopUrl = applyShopUrl;
-	}
+    public String getApplyShopUrl() {
+        return applyShopUrl;
+    }
 
-	public Integer getIsAppliedShop() {
-		return isAppliedShop;
-	}
+    public void setApplyShopUrl(String applyShopUrl) {
+        this.applyShopUrl = applyShopUrl;
+    }
 
-	public void setIsAppliedShop(Integer isAppliedShop) {
-		this.isAppliedShop = isAppliedShop;
-	}
+    public Integer getIsAppliedShop() {
+        return isAppliedShop;
+    }
+
+    public void setIsAppliedShop(Integer isAppliedShop) {
+        this.isAppliedShop = isAppliedShop;
+    }
 
 
-    public Integer getPoints() {
+    public Long getPoints() {
         return points;
     }
 
-    public void setPoints(Integer points) {
+    public void setPoints(Long points) {
         this.points = points;
     }
 
@@ -131,48 +138,71 @@ public class ListTreasureResponse {
     }
 
     public Integer getOrderCount() {
-		return orderCount;
-	}
+        return orderCount;
+    }
 
-	public void setOrderCount(Integer orderCount) {
-		this.orderCount = orderCount;
-	}
+    public void setOrderCount(Integer orderCount) {
+        this.orderCount = orderCount;
+    }
 
-	public String getBusinessUrl() {
-		return businessUrl;
-	}
+    public String getBusinessUrl() {
+        return businessUrl;
+    }
 
-	public void setBusinessUrl(String businessUrl) {
-		this.businessUrl = businessUrl;
-	}
+    public void setBusinessUrl(String businessUrl) {
+        this.businessUrl = businessUrl;
+    }
 
-	@Override
+    public String getBusinessRealm() {
+        return businessRealm;
+    }
+
+    public void setBusinessRealm(String businessRealm) {
+        this.businessRealm = businessRealm;
+    }
+
+    public Byte getShakeOpenDoorUser() {
+        return shakeOpenDoorUser;
+    }
+
+    public void setShakeOpenDoorUser(Byte shakeOpenDoorUser) {
+        this.shakeOpenDoorUser = shakeOpenDoorUser;
+    }
+
+    public Byte getShakeOpenDoorNamespace() {
+        return shakeOpenDoorNamespace;
+    }
+
+    public void setShakeOpenDoorNamespace(Byte shakeOpenDoorNamespace) {
+        this.shakeOpenDoorNamespace = shakeOpenDoorNamespace;
+    }
+
+    public Byte getPointsStatus() {
+        return pointsStatus;
+    }
+
+    public void setPointsStatus(Byte pointsStatus) {
+        this.pointsStatus = pointsStatus;
+    }
+
+    public String getPointsUrl() {
+        return pointsUrl;
+    }
+
+    public void setPointsUrl(String pointsUrl) {
+        this.pointsUrl = pointsUrl;
+    }
+
+    public Byte getPointsUrlStatus() {
+        return pointsUrlStatus;
+    }
+
+    public void setPointsUrlStatus(Byte pointsUrlStatus) {
+        this.pointsUrlStatus = pointsUrlStatus;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-
-	public String getBusinessRealm() {
-		return businessRealm;
-	}
-
-	public void setBusinessRealm(String businessRealm) {
-		this.businessRealm = businessRealm;
-	}
-
-	public Byte getShakeOpenDoorUser() {
-		return shakeOpenDoorUser;
-	}
-
-	public void setShakeOpenDoorUser(Byte shakeOpenDoorUser) {
-		this.shakeOpenDoorUser = shakeOpenDoorUser;
-	}
-
-	public Byte getShakeOpenDoorNamespace() {
-		return shakeOpenDoorNamespace;
-	}
-
-	public void setShakeOpenDoorNamespace(Byte shakeOpenDoorNamespace) {
-		this.shakeOpenDoorNamespace = shakeOpenDoorNamespace;
-	}
-
 }

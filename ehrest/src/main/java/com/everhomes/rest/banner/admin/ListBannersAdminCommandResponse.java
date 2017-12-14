@@ -1,16 +1,16 @@
 package com.everhomes.rest.banner.admin;
 
 
-import java.util.List;
-
-import com.everhomes.rest.banner.BannerDTO;
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.banner.BannerDTO;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
  * <li>keyword: 查询banner关键字</li>
- * <li>nextPageOffset: 下一页码</li>
+ * <li>nextPageAnchor: 下一页锚点</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
  */
@@ -19,7 +19,7 @@ public class ListBannersAdminCommandResponse {
     @ItemType(BannerDTO.class)
     private List<BannerDTO> requests;
     
-    private Integer nextPageOffset;
+    private Long nextPageAnchor;
     
     public List<BannerDTO> getRequests() {
         return requests;
@@ -29,12 +29,12 @@ public class ListBannersAdminCommandResponse {
         this.requests = requests;
     }
 
-    public Integer getNextPageOffset() {
-        return nextPageOffset;
+    public Long getNextPageAnchor() {
+        return nextPageAnchor;
     }
 
-    public void setNextPageOffset(Integer nextPageOffset) {
-        this.nextPageOffset = nextPageOffset;
+    public void setNextPageAnchor(Long nextPageAnchor) {
+        this.nextPageAnchor = nextPageAnchor;
     }
 
     @Override

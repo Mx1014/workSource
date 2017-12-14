@@ -1,16 +1,22 @@
 package com.everhomes.rest.point;
 
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+
 /**
- * 
- * @author elians
- *<ul>
- *<li>uid:用户ID</li>
- *<li>anchor:页码</li>
+ * <ul>
+ *     <li>namespaceId: namespaceId</li>
+ *     <li>systemId: systemId</li>
+ *     <li>uid: 用户ID</li>
+ * </ul>
  */
 public class GetUserPointCommand {
+
+    private Integer namespaceId;
+    @NotNull
+    private Long systemId;
     private Long uid;
-    private Long anchor;
 
     public Long getUid() {
         return uid;
@@ -20,12 +26,20 @@ public class GetUserPointCommand {
         this.uid = uid;
     }
 
-    public Long getAnchor() {
-        return anchor;
+    public Long getSystemId() {
+        return systemId;
     }
 
-    public void setAnchor(Long anchor) {
-        this.anchor = anchor;
+    public void setSystemId(Long systemId) {
+        this.systemId = systemId;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

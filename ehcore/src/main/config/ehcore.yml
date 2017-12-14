@@ -139,3 +139,8 @@ ems.sys.account: A1234567890Z
 ems.sys.password: e10adc3949ba59abbe56e057f20f883e
 
 schedule.running.flag: 1
+
+# core server list
+core.serverIdList: 1,2
+# current core id
+core.serverId: 2
