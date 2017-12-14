@@ -165,8 +165,7 @@ CREATE TABLE `eh_social_security_summary` (
   `create_time` DATETIME,
   `file_uid` BIGINT (20) COMMENT '归档人',
   `file_time` DATETIME COMMENT '归档时间',
-  PRIMARY KEY (`id`),
-  KEY `i_eh_user_detail_id` (`detail_id`),
+  PRIMARY KEY (`id`), 
   KEY `i_eh_organization_id` (`organization_id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
@@ -315,7 +314,7 @@ CREATE TABLE `eh_social_security_report` (
   `file_time` DATETIME COMMENT '归档时间',
   PRIMARY KEY (`id`),
   KEY `i_eh_user_detail_id` (`detail_id`),
-  KEY `i_eh_owner_id` (`owner_id`)
+  KEY `i_eh_organization_id` (`organization_id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
 -- 社保报表
@@ -354,6 +353,6 @@ CREATE TABLE `eh_social_security_inout_report` (
   `file_time` DATETIME COMMENT '归档时间',
   PRIMARY KEY (`id`),
   KEY `i_eh_user_detail_id` (`detail_id`),
-  KEY `i_eh_owner_id` (`owner_id`)
+  KEY `i_eh_organization_id` (`organization_id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
