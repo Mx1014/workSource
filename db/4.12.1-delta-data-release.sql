@@ -180,6 +180,13 @@ UPDATE eh_lease_buildings SET category_id = 1;
 
 UPDATE eh_configurations SET `value` = '/park-entry/dist/index.html?hideNavigationBar=1#/project_intro/%s/%s/%s' WHERE `name` = 'apply.entry.lease.project.detail.url';
 
+UPDATE eh_web_menus set data_type = 'react:/working-flow/flow-list/rent-manage/40100?moduleType=lease_promotion_1' where id = 40130;
+UPDATE eh_flows SET module_type = 'lease_promotion_1' WHERE module_type = 'any-module' AND module_id = 40100;
+UPDATE eh_flows SET module_type = 'lease_promotion_1' WHERE module_type = 'any-module' AND module_id = 40100;
+UPDATE eh_flow_cases SET module_type = 'lease_promotion_1' WHERE module_type = 'any-module' AND module_id = 40100;
+UPDATE eh_flow_evaluates SET module_type = 'lease_promotion_1' WHERE module_type = 'any-module' AND module_id = 40100;
+
+
 -- dengs,20171212,服务联盟消息格式修改
 UPDATE eh_locale_templates SET TEXT = '您收到一条${categoryName}的申请；
 
