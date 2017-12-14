@@ -152,6 +152,14 @@ INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `te
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`)
 	VALUES (49200, '物品搬迁', 40000, '/40000/49200', 1, 2, 2, 0, UTC_TIME(), NULL, NULL, UTC_TIME(), 0, 0, 0, 0);
 
+SET @flow_predefined_params_id = IFNULL((SELECT MAX(id) FROM `eh_flow_predefined_params`), 1);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), '0', '0', '', '49200', 'any-module', 'flow_node', '通过审核', '通过审核', '{\"nodeType\":\"APPROVED\"}', '2', NULL, NULL, NULL, NULL);
+
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES ('relocation.flowCase.url', 'zl://workflow/detail?flowCaseId=%s&flowUserType=%s&moduleId=49200', NULL, '0', NULL);
+
+
 -- 园区入驻多入口 add by sw 20171212
 UPDATE eh_web_menus set data_type = 'react:/project-intro/project-list/1' where id = 40103;
 UPDATE eh_web_menus set data_type = 'projects_introduce/1' where id = 40105;
