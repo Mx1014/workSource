@@ -171,7 +171,7 @@ public class CustomerServiceImpl implements CustomerService {
         ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
         cmd.setNamespaceId(namespaceId);
         cmd.setModuleId(ServiceModuleConstants.ENTERPRISE_CUSTOMER_MODULE);
-        cmd.setActionType(ActionType.THIRDPART_URL.getCode());
+        cmd.setActionType(ActionType.OFFICIAL_URL.getCode());
         ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
         Long appId = apps.getServiceModuleApps().get(0).getId();
         if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
@@ -532,6 +532,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public ImportFileTaskDTO importEnterpriseCustomer(ImportEnterpriseCustomerDataCommand cmd, MultipartFile mfile, Long userId) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
         checkPrivilege(cmd.getNamespaceId());
         ImportFileTask task = new ImportFileTask();
         try {
