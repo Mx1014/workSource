@@ -40,4 +40,50 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
   VALUES((@menu_scope_id := @menu_scope_id + 1),40148,'', 'EhNamespaces', 1000000,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
   VALUES((@menu_scope_id := @menu_scope_id + 1),40149,'', 'EhNamespaces', 1000000,2);
+  
+  -- by dengs,beta执行
+SELECT * FROM  eh_launch_pad_items  WHERE action_data LIKE "%cloud-print%" AND action_type IN (13,14);
+UPDATE eh_launch_pad_items SET action_data = '{"url":"http://beta.zuolin.com/cloud-print/build/index.html#/home#sign_suffix"}' WHERE action_data LIKE "%cloud-print%" AND action_type IN (13,14);
 
+
+
+
+
+-- add by wh 考勤菜单分二级
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) 
+VALUES('50601','打卡记录','50600',NULL,'react:/attendance-management/attendance-record/1','1','2','/50000/50600/50601','park','543','50600','3',NULL,'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) 
+VALUES('50602','考勤规则','50600',NULL,'react:/attendance-management/attendance-record/2','1','2','/50000/50600/50602','park','544','50600','3',NULL,'module');
+
+SET @scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50601', '打卡记录', 'EhNamespaces', '999971', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50602', '考勤规则', 'EhNamespaces', '999971', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50601', '打卡记录', 'EhNamespaces', '999975', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50602', '考勤规则', 'EhNamespaces', '999975', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50601', '打卡记录', 'EhNamespaces', '999970', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50602', '考勤规则', 'EhNamespaces', '999970', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50601', '打卡记录', 'EhNamespaces', '999981', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50602', '考勤规则', 'EhNamespaces', '999981', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50601', '打卡记录', 'EhNamespaces', '999985', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50602', '考勤规则', 'EhNamespaces', '999985', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50601', '打卡记录', 'EhNamespaces', '999992', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50602', '考勤规则', 'EhNamespaces', '999992', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50601', '打卡记录', 'EhNamespaces', '1', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50602', '考勤规则', 'EhNamespaces', '1', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50601', '打卡记录', 'EhNamespaces', '999978', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50602', '考勤规则', 'EhNamespaces', '999978', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50601', '打卡记录', 'EhNamespaces', '1000000', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50602', '考勤规则', 'EhNamespaces', '1000000', '2'); 
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50601', '打卡记录', 'EhNamespaces', '999958', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50602', '考勤规则', 'EhNamespaces', '999958', '2'); 
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50601', '打卡记录', 'EhNamespaces', '999965', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50602', '考勤规则', 'EhNamespaces', '999965', '2'); 
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50601', '打卡记录', 'EhNamespaces', '999972', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50602', '考勤规则', 'EhNamespaces', '999972', '2'); 
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50601', '打卡记录', 'EhNamespaces', '999969', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50602', '考勤规则', 'EhNamespaces', '999969', '2'); 
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50601', '打卡记录', 'EhNamespaces', '999973', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50602', '考勤规则', 'EhNamespaces', '999973', '2'); 
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50601', '打卡记录', 'EhNamespaces', '999974', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50602', '考勤规则', 'EhNamespaces', '999974', '2');  

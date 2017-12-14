@@ -267,14 +267,17 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
                             }
 
                             List orgs = this.organizationProvider.checkOrgExistInOrgOrPaths(namespaceId, organizationId, orgIds, orgPaths);
-                            if(orgs != null && orgs.size() > 0)
+                            if(orgs != null && orgs.size() > 0){
                                 return true;
+                            }else{
+                                return false;
+                            }
                         }
                     case UNLIMIT_CONTROL:
                         return true;
-
                 }
             }
+            return false;
         }
         return false;
     }

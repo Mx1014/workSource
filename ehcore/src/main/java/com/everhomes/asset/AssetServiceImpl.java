@@ -267,7 +267,7 @@ public class AssetServiceImpl implements AssetService {
     private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId) {
         ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
         cmd1.setActionType((byte)13);
-        cmd1.setModuleId(20400l);
+        cmd1.setModuleId(PrivilegeConstants.ASSET_MODULE_ID);
         cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
         ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
         Long appId = res.getServiceModuleApps().get(0).getId();

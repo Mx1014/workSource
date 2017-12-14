@@ -353,10 +353,6 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.ISSUER_TYPE.eq(request.getIssuerType()));
 		}
 
-		if(null != request.getApplyType()){
-			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.APPLY_TYPE.eq(request.getApplyType()));
-		}
-
 		if(!StringUtils.isEmpty(request.getStatus())){
 			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.STATUS.eq(request.getStatus()));
 		}
