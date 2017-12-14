@@ -25,6 +25,7 @@ import java.util.List;
  * <li>readStatus: 0-未读 1-已读 参考{@link com.everhomes.rest.workReport.WorkReportReadStatus}</li>
  * <li>updateTime: 修改时间</li>
  * <li>createTime: 创建时间</li>
+ * <li>ownerToken: 实体标识(对接评论模块)</li>
  * </ul>
  */
 public class WorkReportValDTO {
@@ -60,6 +61,8 @@ public class WorkReportValDTO {
     private Timestamp updateTime;
 
     private Timestamp createTime;
+
+    private String ownerToken;
 
     public WorkReportValDTO() {
     }
@@ -182,6 +185,14 @@ public class WorkReportValDTO {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+
+    public String getOwnerToken() {
+        return ownerToken;
+    }
+
+    public void setOwnerToken(String ownerToken) {
+        this.ownerToken = ownerToken;
     }
 
     @Override

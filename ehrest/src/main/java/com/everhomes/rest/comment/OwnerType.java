@@ -5,11 +5,12 @@ package com.everhomes.rest.comment;
  * <li>FORUM(1)</li>
  * <li>NEWS(2)</li>
  * <li>SERVICEALLIANCE(3)</li>
+ * <li>WORK_REPORT(4)</li>
  * </ul>
  */
 public enum OwnerType {
 
-	FORUM((byte)1),NEWS((byte)2),SERVICEALLIANCE((byte)3);
+	FORUM((byte)1),NEWS((byte)2),SERVICEALLIANCE((byte)3),WORK_REPORT((byte)4);
 
     private byte code;
 
