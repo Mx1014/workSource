@@ -799,7 +799,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void createCustomerTax(CreateCustomerTaxCommand cmd) {
-        
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerTax tax = ConvertHelper.convert(cmd, CustomerTax.class);
         enterpriseCustomerProvider.createCustomerTax(tax);
     }

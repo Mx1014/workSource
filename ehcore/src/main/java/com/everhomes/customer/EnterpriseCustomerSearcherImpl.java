@@ -172,7 +172,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
         cmd.setNamespaceId(namespaceId);
         cmd.setModuleId(ServiceModuleConstants.ENTERPRISE_CUSTOMER_MODULE);
-        cmd.setActionType(ActionType.THIRDPART_URL.getCode());
+        cmd.setActionType(ActionType.OFFICIAL_URL.getCode());
         ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
         Long appId = apps.getServiceModuleApps().get(0).getId();
         if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
