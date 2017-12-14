@@ -39,10 +39,10 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PointLocalBusSubscriber.class);
 
-    @Value("${core.server.id:}")
+    @Value("${core.serverId}")
     private String serverId;
 
-    @Value("#{T(java.util.Arrays).asList(${core.server.list})}")
+    @Value("#{T(java.util.Arrays).asList(${core.serverIdList})}")
     private List<String> serverIdList;
 
     private final ReentrantLock lock = new ReentrantLock();

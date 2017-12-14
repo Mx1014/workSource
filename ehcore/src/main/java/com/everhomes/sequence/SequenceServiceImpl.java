@@ -2060,9 +2060,9 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhPointEventLogs.class, Tables.EH_POINT_EVENT_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_POINT_EVENT_LOGS.ID.max()).from(Tables.EH_POINT_EVENT_LOGS).fetchOne().value1();
         });
-        /*syncTableSequence(null, EhSystemEvents.class, Tables.EH_SYSTEM_EVENTS.getName(), (dbContext) -> {
+        syncTableSequence(null, EhSystemEvents.class, Tables.EH_SYSTEM_EVENTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_SYSTEM_EVENTS.ID.max()).from(Tables.EH_SYSTEM_EVENTS).fetchOne().value1();
-        });*/
+        });
         syncTableSequence(null, EhPointActions.class, Tables.EH_POINT_ACTIONS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_POINT_ACTIONS.ID.max()).from(Tables.EH_POINT_ACTIONS).fetchOne().value1();
         });
