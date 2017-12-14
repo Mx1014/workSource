@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -738,7 +740,9 @@ public class NewsServiceImpl implements NewsService {
 		List<NewsTagDTO> newsTags = parentTags.stream().map(r->ConvertHelper.convert(r,NewsTagDTO.class)).
 				collect(Collectors.toList());
 		List<NewsTagVals> newsTagVals = newsProvider.listNewsTagVals(newsId);
-		Map<Long,Long> map = newsTagVals.stream().map(r->{  //创建旧新闻的父标签-子标签id映射
+		
+		final Map<Long,List<Long>> map = new HashMap();
+		newsTagVals.stream().map(r->{  //创建旧新闻的父标签-子标签id映射
 			NewsTag newsTag = newsProvider.findNewsTagById(r.getNewsTagId());
 			NewsTagVals t= new NewsTagVals();
 			if (newsTag.getDeleteFlag()!=(byte)1) //没被删除
@@ -747,16 +751,36 @@ public class NewsServiceImpl implements NewsService {
 			if (newsTag.getDeleteFlag()!=(byte)1) //没被删除
 				t.setId(newsTag.getId()); //父标签id
 			return t;
-		}).filter(r-> r.getId()!=null).collect(Collectors.toMap(NewsTagVals::getId,NewsTagVals::getNewsTagId));
+		}).filter(r-> r.getId()!=null).forEach(r->{
+			List<Long> list = map.get(r.getId());
+			if(list == null){
+				list = new ArrayList<Long>();
+				map.put(r.getId(), list);
+			}
+			list.add(r.getNewsTagId());
+		});
+//		System.out.println(StringHelper.toJsonString(map));
+		
+//		Map<Long,Long> map = newsTagVals.stream().map(r->{  //创建旧新闻的父标签-子标签id映射
+//			NewsTag newsTag = newsProvider.findNewsTagById(r.getNewsTagId());
+//			NewsTagVals t= new NewsTagVals();
+//			if (newsTag.getDeleteFlag()!=(byte)1) //没被删除
+//				t.setNewsTagId(newsTag.getId()); //子标签id
+//			newsTag = newsProvider.findNewsTagById(newsTag.getParentId());
+//			if (newsTag.getDeleteFlag()!=(byte)1) //没被删除
+//				t.setId(newsTag.getId()); //父标签id
+//			return t;
+//		}).filter(r-> r.getId()!=null).collect(Collectors.toMap(NewsTagVals::getId,NewsTagVals::getNewsTagId));
 
 		newsTags.forEach(r->{
 			List<NewsTag> tags = newsProvider.listNewsTag(news.getNamespaceId(),null,r.getId(),
 					null,null,r.getCategoryId());
 			List<NewsTagDTO> list = tags.stream().map(t->ConvertHelper.convert(t,NewsTagDTO.class)).
 					map(t->{
-						if (map.get(r.getId())!=null)
-							t.setIsDefault((byte)0);
-						if (t.getId().equals(map.get(r.getId())))
+//						if (map.get(r.getId())!=null)
+						t.setIsDefault((byte)0);
+						List<Long> childrentags = map.get(r.getId());
+						if (childrentags!=null && childrentags.contains(t.getId()))
 							t.setIsDefault((byte)1);
 						return t;
 					}).collect(Collectors.toList());
