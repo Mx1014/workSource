@@ -101,6 +101,7 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
     
     
     
+INSERT INTO `eh_reflection_service_module_apps` (`id`, `active_app_id`, `namespace_id`, `name`, `module_id`, `instance_config`, `status`, `action_type`, `action_data`, `update_time`, `module_control_type`, `multiple_flag`, `custom_tag`, `custom_path`, `menu_id`) VALUES ('225', '225', '999999', '园区热线', '40300', NULL, '2', '45', NULL, '2017-12-13 10:01:14', 'community_control', '0', '', NULL, '40300');
     
     
     
