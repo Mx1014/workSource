@@ -500,3 +500,4 @@ INSERT INTO `eh_point_tutorial_to_point_rule_mappings` (`id`, `namespace_id`, `s
   -- by dengs,云打印连接更换20171214
 SELECT * FROM  eh_launch_pad_items  WHERE action_data LIKE "%cloud-print%" AND action_type IN (13,14);
 UPDATE eh_launch_pad_items SET action_data = '{"url":"http://core.zuolin.com/cloud-print/build/index.html#/home#sign_suffix"}' WHERE action_data LIKE "%cloud-print%" AND action_type IN (13,14);
+update eh_siyin_print_settings a,eh_siyin_print_settings b SET a.print_course = b.scan_copy_course,a.scan_copy_course=b.print_course WHERE a.setting_type = 2 AND b.setting_type = 2 AND a.id = b.id;
