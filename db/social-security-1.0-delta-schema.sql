@@ -18,6 +18,10 @@ CREATE TABLE `eh_social_security_bases` (
   `effect_time_begin` DATETIME COMMENT '生效起始日期',
   `effect_time_end` DATETIME COMMENT '生效结束日期',
   `ratio_options` TEXT COMMENT '比例可选项,如果为null就是手动填写:eq:[120,230,380,480,520]',
+  `creator_uid` BIGINT  DEFAULT '0',
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
   PRIMARY KEY (`id`),
   KEY `i_eh_city_id` (`city_id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
@@ -38,6 +42,10 @@ CREATE TABLE `eh_accumulation_fund_bases` (
   `effect_time_begin` DATETIME COMMENT '生效起始日期',
   `effect_time_end` DATETIME COMMENT '生效结束日期',
   `ratio_options` TEXT COMMENT '比例可选项,如果为null就是手动填写:eq:[120,230,380,480,520]',
+  `creator_uid` BIGINT  DEFAULT '0',
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
   PRIMARY KEY (`id`),
   KEY `i_eh_city_id` (`city_id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
@@ -52,12 +60,17 @@ CREATE TABLE `eh_social_security_settings` (
   `detail_id` BIGINT,
   `household_type` VARCHAR (32) COMMENT '户籍类型',
   `pay_item` VARCHAR (32) COMMENT '缴费项:医疗/养老/失业/工伤/生育/大病/残障金/补充医疗',
+  `radix` DECIMAL (10, 2) COMMENT '基数',
   `company_radix` DECIMAL (10, 2) COMMENT '企业基数',
   `company_ratio` INT COMMENT '企业比例万分之 eq:100=1%;1=0.01%',
   `employee_radix` DECIMAL (10, 2) COMMENT '个人基数',
   `employee_ratio` INT COMMENT '个人比例 万分之 eq:100=1%;1=0.01%',
   `editable_flag` TINYINT COMMENT '是否可编辑',
   `is_default` TINYINT COMMENT '是否是默认选项(1-是:普通社保;0-否:补充保险)',
+  `creator_uid` BIGINT  DEFAULT '0',
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
   PRIMARY KEY (`id`),
   KEY `i_eh_user_detail_id` (`detail_id`),
   KEY `i_eh_organization_id` (`organization_id`)
@@ -72,10 +85,15 @@ CREATE TABLE `eh_accumulation_fund_settings` (
   `user_id` BIGINT,
   `detail_id` BIGINT,
   `household_type` VARCHAR (32) COMMENT '户籍类型',
+  `radix` DECIMAL (10, 2) COMMENT '基数',
   `company_radix` DECIMAL (10, 2) COMMENT '企业基数',
   `company_ratio` INT COMMENT '企业比例万分之 eq:100=1%;1=0.01%',
   `employee_radix` DECIMAL (10, 2) COMMENT '个人基数',
   `employee_ratio` INT COMMENT '个人比例 万分之 eq:100=1%;1=0.01%',
+  `creator_uid` BIGINT  DEFAULT '0',
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
   PRIMARY KEY (`id`),
   KEY `i_eh_user_detail_id` (`detail_id`),
   KEY `i_eh_organization_id` (`organization_id`)
@@ -101,6 +119,10 @@ CREATE TABLE `eh_social_security_payments` (
   `is_default` TINYINT COMMENT '是否是默认选项(1-是:普通社保;0-否:补充保险)',
   `is_new` TINYINT COMMENT '增减员:0正常,1增员,-1减员',
   `is_work` TINYINT COMMENT '入职离职:0正常,1入职,-1离职',
+  `creator_uid` BIGINT  DEFAULT '0',
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
   PRIMARY KEY (`id`),
   KEY `i_eh_user_detail_id` (`detail_id`),
   KEY `i_eh_organization_id` (`organization_id`)
@@ -123,6 +145,10 @@ CREATE TABLE `eh_accumulation_fund_payments` (
   `employee_ratio` INT COMMENT '个人比例 万分之 eq:100=1%;1=0.01%',
   `is_new` TINYINT COMMENT '增减员:0正常,1增员,-1减员',
   `is_work` TINYINT COMMENT '入职离职:0正常,1入职,-1离职',
+  `creator_uid` BIGINT  DEFAULT '0',
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
   PRIMARY KEY (`id`),
   KEY `i_eh_user_detail_id` (`detail_id`),
   KEY `i_eh_organization_id` (`organization_id`)
@@ -148,6 +174,11 @@ CREATE TABLE `eh_social_security_payment_logs` (
   `is_default` TINYINT COMMENT '是否是默认选项(1-是:普通社保;0-否:补充保险)',
   `is_new` TINYINT COMMENT '增减员:0正常,1增员,-1减员',
   `is_work` TINYINT COMMENT '入职离职:0正常,1入职,-1离职',
+  `file_flag` TINYINT COMMENT '是否归档',
+  `creator_uid` BIGINT  DEFAULT '0',
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
   PRIMARY KEY (`id`),
   KEY `i_eh_user_detail_id` (`detail_id`),
   KEY `i_eh_organization_id` (`organization_id`)
@@ -161,8 +192,10 @@ CREATE TABLE `eh_social_security_summary` (
   `pay_month` VARCHAR (8) DEFAULT NULL COMMENT 'yyyymm',
   `company_payment` DECIMAL (10, 2) COMMENT '企业缴纳',
   `employee_payment` DECIMAL (10, 2) COMMENT '个人缴纳',
-  `creator_uid` BIGINT (20),
+  `creator_uid` BIGINT  DEFAULT '0',
   `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
   `file_uid` BIGINT (20) COMMENT '归档人',
   `file_time` DATETIME COMMENT '归档时间',
   PRIMARY KEY (`id`), 
@@ -170,6 +203,7 @@ CREATE TABLE `eh_social_security_summary` (
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
 -- 部门汇总表
+-- drop table eh_social_security_department_summary;
 CREATE TABLE `eh_social_security_department_summary` (
   `id` BIGINT,
   `namespace_id` INT (11) DEFAULT '0',
@@ -214,8 +248,10 @@ CREATE TABLE `eh_social_security_department_summary` (
   `accumulation_fund_employee_sum` DECIMAL (10, 2) COMMENT '公积金个人合计',
   `after_accumulation_fund_company_sum` DECIMAL (10, 2) COMMENT '补缴公积金企业合计',
   `after_accumulation_fund_employee_sum` DECIMAL (10, 2) COMMENT '补缴公积金个人合计',
-  `creator_uid` BIGINT (20),
+  `creator_uid` BIGINT  DEFAULT '0',
   `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
   `file_uid` BIGINT (20) COMMENT '归档人',
   `file_time` DATETIME COMMENT '归档时间',
   PRIMARY KEY (`id`),
@@ -223,6 +259,7 @@ CREATE TABLE `eh_social_security_department_summary` (
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
 -- 社保报表
+-- drop table eh_social_security_report;
 CREATE TABLE `eh_social_security_report` (
   `id` BIGINT,
   `namespace_id` INT (11) DEFAULT '0',
@@ -310,6 +347,10 @@ CREATE TABLE `eh_social_security_report` (
   `after_critical_illness_employee_sum` DECIMAL (10, 2) COMMENT '补缴大病个人合计',
   `disability_sum` DECIMAL (10, 2) COMMENT '残障金',
   `commercial_insurance` DECIMAL (10, 2) COMMENT '商业保险',
+  `creator_uid` BIGINT  DEFAULT '0',
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
   `file_uid` BIGINT (20) COMMENT '归档人',
   `file_time` DATETIME COMMENT '归档时间',
   PRIMARY KEY (`id`),
@@ -318,6 +359,7 @@ CREATE TABLE `eh_social_security_report` (
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
 -- 社保报表
+-- drop table eh_social_security_inout_report;
 CREATE TABLE `eh_social_security_inout_report` (
   `id` BIGINT,
   `namespace_id` INT (11) DEFAULT '0',
@@ -349,6 +391,10 @@ CREATE TABLE `eh_social_security_inout_report` (
   `accumulation_fund_increase` DECIMAL (10, 2) COMMENT '公积金增',
   `accumulation_fund_decrease` DECIMAL (10, 2) COMMENT '公积金减',
   `accumulation_fund_after` DECIMAL (10, 2) COMMENT '公积金补缴',
+  `creator_uid` BIGINT  DEFAULT '0',
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
   `file_uid` BIGINT (20) COMMENT '归档人',
   `file_time` DATETIME COMMENT '归档时间',
   PRIMARY KEY (`id`),

@@ -1,0 +1,89 @@
+// @formatter:off
+package com.everhomes.socialSecurity;
+
+import com.everhomes.rest.socialSecurity.AddSocialSecurityCommand;
+import com.everhomes.rest.socialSecurity.CalculateSocialSecurityReportsCommand;
+import com.everhomes.rest.socialSecurity.ExportSocialSecurityDepartmentSummarysCommand;
+import com.everhomes.rest.socialSecurity.ExportSocialSecurityInoutReportsCommand;
+import com.everhomes.rest.socialSecurity.ExportSocialSecurityReportsCommand;
+import com.everhomes.rest.socialSecurity.FileSocialSecurityCommand;
+import com.everhomes.rest.socialSecurity.GetSocialSecurityPaymentDetailsCommand;
+import com.everhomes.rest.socialSecurity.GetSocialSecurityPaymentDetailsResponse;
+import com.everhomes.rest.socialSecurity.ImportSocialSecurityPaymentsCommand;
+import com.everhomes.rest.socialSecurity.ListAccumulationFundCitysCommand;
+import com.everhomes.rest.socialSecurity.ListAccumulationFundCitysResponse;
+import com.everhomes.rest.socialSecurity.ListFilterItemsCommand;
+import com.everhomes.rest.socialSecurity.ListFilterItemsResponse;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityCitysCommand;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityCitysResponse;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityDepartmentSummarysCommand;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityDepartmentSummarysResponse;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityEmployeeStatusCommand;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityEmployeeStatusResponse;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityHistoryFilesCommand;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityHistoryFilesResponse;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityInoutReportsCommand;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityInoutReportsResponse;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityPaymentsCommand;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityPaymentsResponse;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityReportsCommand;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityReportsResponse;
+import com.everhomes.rest.socialSecurity.UpdateSocialSecurityPaymentCommand;
+
+public interface SocialSecurityService {
+
+ 
+	public void addSocialSecurity(AddSocialSecurityCommand cmd);
+
+
+	public ListSocialSecurityCitysResponse listSocialSecurityCitys(ListSocialSecurityCitysCommand cmd);
+
+
+	public ListAccumulationFundCitysResponse listAccumulationFundCitys(ListAccumulationFundCitysCommand cmd);
+
+
+	public ListFilterItemsResponse listFilterItems(ListFilterItemsCommand cmd);
+
+
+	public ListSocialSecurityPaymentsResponse listSocialSecurityPayments(ListSocialSecurityPaymentsCommand cmd);
+
+
+	public ListSocialSecurityEmployeeStatusResponse listSocialSecurityEmployeeStatus(ListSocialSecurityEmployeeStatusCommand cmd);
+
+
+	public GetSocialSecurityPaymentDetailsResponse getSocialSecurityPaymentDetails(GetSocialSecurityPaymentDetailsCommand cmd);
+
+
+	public void updateSocialSecurityPayment(UpdateSocialSecurityPaymentCommand cmd);
+
+
+	public void importSocialSecurityPayments(ImportSocialSecurityPaymentsCommand cmd);
+
+
+	public void calculateSocialSecurityReports(CalculateSocialSecurityReportsCommand cmd);
+
+
+	public ListSocialSecurityReportsResponse listSocialSecurityReports(ListSocialSecurityReportsCommand cmd);
+
+
+	public void exportSocialSecurityReports(ExportSocialSecurityReportsCommand cmd);
+
+
+	public ListSocialSecurityDepartmentSummarysResponse listSocialSecurityDepartmentSummarys(ListSocialSecurityDepartmentSummarysCommand cmd);
+
+
+	public void exportSocialSecurityDepartmentSummarys(ExportSocialSecurityDepartmentSummarysCommand cmd);
+
+
+	public ListSocialSecurityInoutReportsResponse listSocialSecurityInoutReports(ListSocialSecurityInoutReportsCommand cmd);
+
+
+	public void exportSocialSecurityInoutReports(ExportSocialSecurityInoutReportsCommand cmd);
+
+
+	public void fileSocialSecurity(FileSocialSecurityCommand cmd);
+
+
+	public ListSocialSecurityHistoryFilesResponse listSocialSecurityHistoryFiles(ListSocialSecurityHistoryFilesCommand cmd);
+
+}
