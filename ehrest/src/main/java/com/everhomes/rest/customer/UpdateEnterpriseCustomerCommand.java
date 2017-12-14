@@ -74,6 +74,9 @@ import java.math.BigDecimal;
  * Created by ying.xiong on 2017/8/1.
  */
 public class UpdateEnterpriseCustomerCommand {
+    private Integer namespaceId;
+    private Long orgId;
+    private Long communityId;
     private Long id;
     private Long organizationId;
     private String customerNumber;
@@ -151,6 +154,30 @@ public class UpdateEnterpriseCustomerCommand {
     private Long entrepreneurialCharacteristicsId;
     private Long serialEntrepreneurId;
     private BigDecimal riskInvestmentAmount;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
 
     public Long getEntrepreneurialCharacteristicsId() {
         return entrepreneurialCharacteristicsId;

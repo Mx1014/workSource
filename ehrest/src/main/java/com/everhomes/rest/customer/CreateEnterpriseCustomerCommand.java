@@ -76,6 +76,7 @@ import java.sql.Timestamp;
  */
 public class CreateEnterpriseCustomerCommand {
     private Integer namespaceId;
+    private Long orgId;
     private String customerNumber;
     private String name;
     private String nickName;
@@ -152,6 +153,14 @@ public class CreateEnterpriseCustomerCommand {
     private Long entrepreneurialCharacteristicsId;
     private Long serialEntrepreneurId;
     private BigDecimal riskInvestmentAmount;
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
 
     public Long getEntrepreneurialCharacteristicsId() {
         return entrepreneurialCharacteristicsId;
