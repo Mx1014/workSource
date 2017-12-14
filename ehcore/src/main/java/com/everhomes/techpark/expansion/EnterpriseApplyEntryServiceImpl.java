@@ -507,9 +507,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 					}
 				}
 			}
-		}else if (request.getApplyType().equals(ApplyEntryApplyType.RENEW.getCode())){
-			//新app 续租也是sourceType，兼容老app（老app是申请类型是续租）
-			request.setSourceType(ApplyEntrySourceType.RENEW.getCode());
+		}else if (request.getSourceType().equals(ApplyEntrySourceType.RENEW.getCode())){
+
 			List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByOrganizationId(request.getEnterpriseId());
 			if (!addresses.isEmpty()) {
 				//续租时，默认取公司第一个地址
