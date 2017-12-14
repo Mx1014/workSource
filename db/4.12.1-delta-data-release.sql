@@ -180,6 +180,13 @@ UPDATE eh_lease_buildings SET category_id = 1;
 
 UPDATE eh_configurations SET `value` = '/park-entry/dist/index.html?hideNavigationBar=1#/project_intro/%s/%s/%s' WHERE `name` = 'apply.entry.lease.project.detail.url';
 
+UPDATE eh_web_menus set data_type = 'react:/working-flow/flow-list/rent-manage/40100?moduleType=lease_promotion_1' where id = 40130;
+UPDATE eh_flows SET module_type = 'lease_promotion_1' WHERE module_type = 'any-module' AND module_id = 40100;
+UPDATE eh_flows SET module_type = 'lease_promotion_1' WHERE module_type = 'any-module' AND module_id = 40100;
+UPDATE eh_flow_cases SET module_type = 'lease_promotion_1' WHERE module_type = 'any-module' AND module_id = 40100;
+UPDATE eh_flow_evaluates SET module_type = 'lease_promotion_1' WHERE module_type = 'any-module' AND module_id = 40100;
+
+
 -- dengs,20171212,服务联盟消息格式修改
 UPDATE eh_locale_templates SET TEXT = '您收到一条${categoryName}的申请；
 
@@ -500,3 +507,4 @@ INSERT INTO `eh_point_tutorial_to_point_rule_mappings` (`id`, `namespace_id`, `s
   -- by dengs,云打印连接更换20171214
 SELECT * FROM  eh_launch_pad_items  WHERE action_data LIKE "%cloud-print%" AND action_type IN (13,14);
 UPDATE eh_launch_pad_items SET action_data = '{"url":"http://core.zuolin.com/cloud-print/build/index.html#/home#sign_suffix"}' WHERE action_data LIKE "%cloud-print%" AND action_type IN (13,14);
+update eh_siyin_print_settings a,eh_siyin_print_settings b SET a.print_course = b.scan_copy_course,a.scan_copy_course=b.print_course WHERE a.setting_type = 2 AND b.setting_type = 2 AND a.id = b.id;
