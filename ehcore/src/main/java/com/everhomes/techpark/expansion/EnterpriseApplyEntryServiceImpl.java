@@ -796,41 +796,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		else
 			return variable;
 	}
-	@Override
-	public boolean applyRenew(EnterpriseApplyRenewCommand cmd) {
-		EnterpriseOpRequest request = enterpriseApplyEntryProvider.getEnterpriseOpRequestByBuildIdAndUserId(cmd.getId(), UserContext.current().getUser().getId());
-		
-		if(null == request){
-			throw errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
-					"You have not applied for admission");
-		}
-		
-		request.setApplyType(ApplyEntryApplyType.RENEW.getCode());
-		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
-		enterpriseApplyEntryProvider.createApplyEntry(request);
-        String phoneNumber = null;
-        String location = null;
-		//续租的时候给楼栋管理员发续租申请短信
-        Building building = this.communityProvider.findBuildingById(request.getSourceId());
-        if(building != null) {
-        	OrganizationMember member = organizationProvider.findOrganizationMemberById(building.getManagerUid());
-
-            if(null != member) {
-                phoneNumber = member.getContactToken();
-            }
-            location = building.getName();
-        } else {
-            if(LOGGER.isWarnEnabled()) {
-                LOGGER.warn("Building not found, builingId={}, cmd={}", request.getSourceId(), cmd);
-            }
-        } 
-
-  		SimpleDateFormat datetimeSF = new SimpleDateFormat("MM-dd HH:mm");
-  		sendApplyEntrySmsToManager(phoneNumber, request.getApplyUserName(),request.getApplyContact(), datetimeSF.format(new Date()), 
-  				location, request.getAreaSize()+"平米", request.getEnterpriseName(), request.getDescription(), request.getNamespaceId(),"续租");
-		return true;
-	}
 	
 	@Override
 	public ListBuildingForRentResponse listLeasePromotions(ListBuildingForRentCommand cmd) {
