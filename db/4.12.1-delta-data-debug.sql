@@ -40,4 +40,10 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
   VALUES((@menu_scope_id := @menu_scope_id + 1),40148,'', 'EhNamespaces', 1000000,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
   VALUES((@menu_scope_id := @menu_scope_id + 1),40149,'', 'EhNamespaces', 1000000,2);
+  
+  -- by dengs,beta执行
+select * from  eh_launch_pad_items  WHERE action_data like "%cloud-print%" AND action_type in (13,14);
+update eh_launch_pad_items SET action_data = '{"url":"http://beta.zuolin.com/cloud-print/build/index.html#/home#sign_suffix"}' WHERE action_data like "%cloud-print%" AND action_type in (13,14);
+
+
 
