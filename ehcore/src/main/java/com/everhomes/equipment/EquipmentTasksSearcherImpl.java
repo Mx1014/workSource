@@ -119,12 +119,12 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
 
 	@Override
 	public ListEquipmentTasksResponse query(SearchEquipmentTasksCommand cmd) {
-        Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_TASK_LIST, 0L);
+        /*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_TASK_LIST, 0L);
         if(cmd.getTargetId() == null) {
             userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
         } else {
             userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-        }
+        }*/
         checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.EQUIPMENT_TASK_LIST,cmd.getTargetId());
 
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
