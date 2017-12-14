@@ -214,6 +214,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
                 if (standard != null) {
                     standard.setCommunities(equipmentProvider.getModuleCommunityMapByStandardId(standard.getId()));
                     Community community = communityProvider.findCommunityById(standard.getTargetId());
+                    if(community!=null)
                     standard.setTargetName(community.getName());
                 }
             }
