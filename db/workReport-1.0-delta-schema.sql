@@ -115,8 +115,6 @@ CREATE TABLE `eh_work_report_val_comments` (
   `content_type` VARCHAR(32) COMMENT 'the type of the content',
   `content` TEXT COMMENT 'the comment',
   `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
-  `creator_avatar` VARCHAR(2048) COMMENT 'the avatar of the creator',
-  `creator_name` VARCHAR(256) COMMENT 'the name of the creator',
   `creator_user_id` BIGINT NOT NULL COMMENT 'the user id of the creator',
 
   `create_time` DATETIME COMMENT 'record create time',
