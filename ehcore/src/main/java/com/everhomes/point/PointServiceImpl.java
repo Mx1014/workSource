@@ -419,6 +419,9 @@ public class PointServiceImpl implements PointService {
     private PointTutorialDetailDTO toPointTutorialDetailDTO(PointTutorialToPointRuleMapping mapping) {
         PointTutorialDetailDTO detailDTO = ConvertHelper.convert(mapping, PointTutorialDetailDTO.class);
         PointRule pointRule = pointRuleProvider.findById(mapping.getRuleId());
+        if (detailDTO.getDescription() == null || detailDTO.getDescription().isEmpty()) {
+            detailDTO.setDescription(pointRule.getDescription());
+        }
         detailDTO.setRuleName(pointRule.getDisplayName());
         detailDTO.setPoints(pointRule.getPoints());
         return detailDTO;
