@@ -257,9 +257,9 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
             return ConvertHelper.convert(r, WebMenu.class);
         });
 
-        if(objs.size() >= count) {
+        if(objs.size() >= count && locator != null) {
             locator.setAnchor(objs.get(objs.size() - 1).getId());
-        } else {
+        } else if(locator != null && locator != null) {
             locator.setAnchor(null);
         }
 

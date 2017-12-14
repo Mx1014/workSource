@@ -44,10 +44,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowConstants;
-import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
@@ -349,7 +346,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 
 		//对于不同的类型有不同的楼栋
-		if(dto.getApplyType() == ApplyEntryApplyType.RENEW.getCode()){
+		if(ApplyEntrySourceType.RENEW.getCode().equals(dto.getSourceType())){
 
 		}else if(ApplyEntrySourceType.BUILDING.getCode().equals(dto.getSourceType())){
 			GetGeneralFormValuesCommand cmd2 = new GetGeneralFormValuesCommand();
@@ -656,22 +653,22 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		return "zl://workflow/detail?flowCaseId="+flowCaseId+"&flowUserType="+string+"&moduleId="+moduleId  ;
 	}
 
-	private int convertSourceType(String type) {
+	private String convertSourceType(String type) {
 		ApplyEntrySourceType sourceType = ApplyEntrySourceType.fromType(type);
 
 		if (null != sourceType) {
 			switch (sourceType) {
+				case LEASE_PROJECT:
+					return FlowOwnerType.LEASE_PROJECT.getCode();
 				case BUILDING:
-					return 1;
+					return FlowOwnerType.LEASE_PROJECT.getCode();
 				case FOR_RENT:
-					return 2;
+					return FlowOwnerType.LEASE_PROMOTION.getCode();
 				case RENEW:
-					return 3;
-				case MARKET_ZONE:
-					return 4;
+					return FlowOwnerType.LEASE_RENEW.getCode();
 			}
 		}
-		return 0;
+		return null;
 	}
 
     private FlowCase createFlowCase(EnterpriseOpRequest request, Long projectId, String projectType, String buildingName) {
@@ -682,14 +679,19 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			sourceType = ApplyEntrySourceType.BUILDING.getCode();
 		}
 
-		String tempOwnerId = String.valueOf(request.getCommunityId()) + convertSourceType(sourceType);
+		String ownerType = convertSourceType(sourceType);
 
-		Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ExpansionConst.MODULE_ID,
-				null, Long.valueOf(tempOwnerId), FlowOwnerType.LEASE_PROMOTION.getCode());
+		Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), request.getCategoryId(),
+				FlowModuleType.LEASE_PROMOTION.getCode(), request.getCommunityId(), FlowOwnerType.LEASE_PROMOTION.getCode());
 
 		if (null == flow) {
+			flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), request.getCategoryId(),
+					FlowModuleType.LEASE_PROMOTION.getCode(), request.getCommunityId(), FlowOwnerType.COMMUNITY.getCode());
+		}
+		//做兼容，以前没有多入口，加了多入口之后，默认老数据入口 CategoryId DEFAULT_CATEGORY_ID，为了不改变工作流使用，老数据回去查询以前老工作流
+		if (null == flow && request.getCategoryId() == DEFAULT_CATEGORY_ID.longValue()) {
 			flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ExpansionConst.MODULE_ID,
-					null, request.getCommunityId(), FlowOwnerType.COMMUNITY.getCode());
+					FlowModuleType.NO_MODULE.getCode(), request.getCommunityId(), FlowOwnerType.COMMUNITY.getCode());
 		}
 
 		if(null == flow) {
