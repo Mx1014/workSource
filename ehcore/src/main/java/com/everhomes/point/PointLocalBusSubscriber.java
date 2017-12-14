@@ -42,7 +42,7 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
     @Value("${core.server.id:}")
     private String serverId;
 
-    @Value("#{T(java.util.Arrays).asList(${core.server.list}):}")
+    @Value("#{T(java.util.Arrays).asList(${core.server.list:})}")
     private List<String> serverIdList;
 
     private final ReentrantLock lock = new ReentrantLock();
