@@ -1,19 +1,29 @@
 package com.everhomes.customer;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
@@ -67,6 +77,12 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
     @Autowired
     private FieldService fieldService;
+
+    @Autowired
+    private PortalService portalService;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 
     @Override
     public String getIndexType() {
@@ -152,8 +168,25 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         LOGGER.info("sync for customers ok");
     }
 
+    private void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
+        ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
+        cmd.setNamespaceId(namespaceId);
+        cmd.setModuleId(ServiceModuleConstants.ENTERPRISE_CUSTOMER_MODULE);
+        cmd.setActionType(ActionType.THIRDPART_URL.getCode());
+        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
+        Long appId = apps.getServiceModuleApps().get(0).getId();
+        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
+                orgId, privilegeId, appId, null, communityId)) {
+            LOGGER.error("Permission is prohibited, namespaceId={}, orgId={}, ownerType={}, ownerId={}, privilegeId={}",
+                    namespaceId, orgId, EntityType.COMMUNITY.getCode(), communityId, privilegeId);
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                    "check user privilege error");
+        }
+    }
+
     @Override
     public SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_DELETE, cmd.getOrgId(), cmd.getCommunityId());
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {

@@ -490,6 +490,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_DELETE, cmd.getOrgId(), cmd.getCommunityId());
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         checkPrivilege(customer.getNamespaceId());
         //产品功能 #20796 同步过来的不能删
