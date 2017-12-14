@@ -27,7 +27,7 @@ public enum SystemEvent {
     FORUM_POST_DELETE("forum.post_delete"),
     FORUM_POST_LIKE("forum.post_like"),
     FORUM_POST_LIKE_CANCEL("forum.post_like_cancel"),
-    // FORUM_POST_SHARE("forum.post_share"),
+    FORUM_POST_SHARE("forum.post_share"),
     FORUM_POST_VOTE("forum.post_vote"),
     FORUM_POST_REPORT("forum.post_report"),
 

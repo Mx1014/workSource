@@ -16,11 +16,7 @@ public interface PointActionProvider {
 
 	PointAction findById(Long id);
 
-    List<PointAction> listPointActionsBySystemId(Long systemId);
-
     void createPointActions(List<PointAction> pointActions);
 
-    List<PointAction> listByOwner(Integer namespaceId, Long systemId, String ownerType, Long ownerId);
-
-    void deleteBySystemId(Long systemId);
+    List<PointAction> listByOwner(Integer namespaceId, String ownerType, Long ownerId);
 }

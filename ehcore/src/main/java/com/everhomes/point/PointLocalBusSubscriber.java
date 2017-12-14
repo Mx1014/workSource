@@ -5,8 +5,6 @@ import com.everhomes.bus.LocalEvent;
 import com.everhomes.bus.LocalEventBus;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.rest.point.ListPointRulesCommand;
 import com.everhomes.rest.point.PointEventLogStatus;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateUtils;
@@ -126,13 +124,9 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
                 PointEventGroup eventGroup = new PointEventGroup(category);
                 pointEventGroupCache.put(eventGroup, new CopyOnWriteArrayList<>());
 
-                ListPointRulesCommand cmd = new ListPointRulesCommand();
-                cmd.setCategoryId(category.getId());
-                cmd.setSystemId(PointConstant.CONFIG_POINT_SYSTEM_ID);
-
-                List<PointRule> pointRules = pointRuleProvider.listPointRules(cmd, -1, new ListingLocator());
+                List<PointRule> pointRules = pointRuleProvider.listPointRuleByCategoryId(category.getId());
                 for (PointRule rule : pointRules) {
-                    List<PointRuleToEventMapping> mappings = pointRuleToEventMappingProvider.listByPointRule(PointConstant.CONFIG_POINT_SYSTEM_ID, rule.getId());
+                    List<PointRuleToEventMapping> mappings = pointRuleToEventMappingProvider.listByPointRule(rule.getId());
                     // 事件监听器
                     for (PointRuleToEventMapping mapping : mappings) {
                         eventNameToPointEventGroupMap.put(mapping.getEventName(), eventGroup);
@@ -206,6 +200,7 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
         log.setId(pointEventLogProvider.getNextEventLogId());
         log.setNamespaceId(namespaceId);
         log.setEventName(localEvent.getEventName());
+        log.setSubscriptionPath(subscriptionPath);
 
         log.setCreateTime(DateUtils.currentTimestamp());
         log.setCreatorUid(creatorUid);

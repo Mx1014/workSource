@@ -19,8 +19,6 @@ import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.jooq.UpdateQuery;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
@@ -35,7 +33,6 @@ public class PointRuleCategoryProviderImpl implements PointRuleCategoryProvider 
 	@Autowired
 	private SequenceProvider sequenceProvider;
 
-    @CacheEvict(value = "PointRuleCategory", allEntries = true)
 	@Override
 	public void createPointRuleCategory(PointRuleCategory pointRuleCategory) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointRuleCategories.class));
@@ -46,7 +43,6 @@ public class PointRuleCategoryProviderImpl implements PointRuleCategoryProvider 
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointRuleCategories.class, id);
 	}
 
-    @CacheEvict(value = "PointRuleCategory", allEntries = true)
 	@Override
 	public void updatePointRuleCategory(PointRuleCategory pointRuleCategory) {
 		// pointRuleCategory.setUpdateTime(DateUtils.currentTimestamp());
@@ -82,19 +78,16 @@ public class PointRuleCategoryProviderImpl implements PointRuleCategoryProvider 
         return list;
     }
 
-    @Cacheable(value = "PointRuleCategory")
 	@Override
 	public PointRuleCategory findById(Long id) {
 		return ConvertHelper.convert(dao().findById(id), PointRuleCategory.class);
 	}
 
-    @Cacheable(value = "PointRuleCategory")
     @Override
     public List<PointRuleCategory> listPointRuleCategories() {
         return this.query(new ListingLocator(), -1, null);
     }
 
-    @Cacheable(value = "PointRuleCategory")
     @Override
     public List<PointRuleCategory> listPointRuleCategoriesByServerId(String serverId) {
         com.everhomes.server.schema.tables.EhPointRuleCategories t = Tables.EH_POINT_RULE_CATEGORIES;
@@ -104,7 +97,6 @@ public class PointRuleCategoryProviderImpl implements PointRuleCategoryProvider 
         });
     }
 
-    @CacheEvict(value = "PointRuleCategory", allEntries = true)
     @Override
     public void registerDefaultPointRuleCategory(List<Long> ids, String serverId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());

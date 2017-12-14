@@ -5,6 +5,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.point.PointCommonStatus;
 import com.everhomes.rest.point.PointEventLogStatus;
 import com.everhomes.server.schema.tables.pojos.EhPointRules;
@@ -110,7 +111,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
     }
 
     private void doProcessAll() {
-        lock.lock();
+        lock.tryLock();
         try {
             int random = (int) (Math.random() * 10);
             long start = System.currentTimeMillis();
@@ -168,7 +169,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                             continue;
                         }
 
-                        List<PointRule> pointRules = processor.getPointRules(pointSystem, localEvent);
+                        List<PointRule> pointRules = processor.getPointRules(pointSystem, localEvent, log);
                         for (PointRule rule : pointRules) {
                             PointCommonStatus status = PointCommonStatus.fromCode(rule.getStatus());
                             if (status == PointCommonStatus.DISABLED) {
@@ -179,7 +180,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                                 continue;
                             }
 
-                            List<PointAction> pointActions = pointActionProvider.listByOwner(pointSystem.getNamespaceId(), pointSystem.getId(), EhPointRules.class.getSimpleName(), rule.getId());
+                            List<PointAction> pointActions = pointActionProvider.listByOwner(Namespace.DEFAULT_NAMESPACE, EhPointRules.class.getSimpleName(), rule.getId());
                             List<PointResultAction> resultActions = processor.getResultActions(pointActions, localEvent, rule, pointSystem, category);
                             if (resultActions != null && resultActions.size() > 0) {
                                 actions.addAll(resultActions);
