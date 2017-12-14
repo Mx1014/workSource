@@ -3058,6 +3058,21 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
 
+        //把用户 所有关联的部门放到targets里面查询
+        List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(userId);
+        for (OrganizationMember member : orgMembers) {
+            if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus())) {
+                Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+                if (null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus())) {
+                    addPathOrganizationId(org.getPath(), orgIds);
+                }
+            }
+        }
+
+        for (Long orgId : orgIds) {
+            targets.add(new Target(EntityType.ORGANIZATIONS.getCode(), orgId));
+        }
+
         //检查应用管理员+权限细化 add by lei.lv
         List<Project> projects_app = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(EntityType.SERVICE_MODULE_APP.getCode(), null, targets);
         for (Project project : projects_app) {
@@ -3074,23 +3089,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
 
-        List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(userId);
-        for (OrganizationMember member : orgMembers) {
-            if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus())) {
-                Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
-                if (null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus())) {
-                    addPathOrganizationId(org.getPath(), orgIds);
-                }
-            }
 
-        }
-
-        //把用户 所有关联的部门放到targets里面查询
-        for (Long orgId : orgIds) {
-            targets.add(new Target(EntityType.ORGANIZATIONS.getCode(), orgId));
-        }
-
-        //获取人员和人员所有机构所赋予模块的所属项目范围
+        //获取人员和人员所有机构所赋予模块的所属项目范围（旧的权限细化）
         List<String> scopes = authorizationProvider.getAuthorizationScopesByAuthAndTargets(EntityType.SERVICE_MODULE.getCode(), null, targets);
         for (String scope : scopes) {
             if (null != scope) {
