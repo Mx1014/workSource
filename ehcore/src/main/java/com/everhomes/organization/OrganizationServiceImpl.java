@@ -14238,7 +14238,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
             List<OrganizationMember> member_enterprise = organizationProvider.listOrganizationMembersByDetailId(detailId, groupTypes);
             if(member_enterprise != null && member_enterprise.size() > 0){
-               ret member_enterprise.get(0).getOrganizationId();
+               return member_enterprise.get(0).getOrganizationId();
             }
         }
         return null;
