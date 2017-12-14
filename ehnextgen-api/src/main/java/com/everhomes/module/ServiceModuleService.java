@@ -5,6 +5,7 @@ import java.util.List;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.module.*;
+import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 
 public interface ServiceModuleService {
 	List<ServiceModuleDTO> listServiceModules(ListServiceModulesCommand cmd);
@@ -20,6 +21,8 @@ public interface ServiceModuleService {
 	List<ServiceModuleAssignmentRelationDTO> listServiceModuleAssignmentRelations(ListServiceModuleAssignmentRelationsCommand cmd);
 
 	List<ServiceModuleDTO> treeServiceModules(TreeServiceModuleCommand cmd);
+
+	TreeServiceModuleAppsResponse treeServiceModuleApps(TreeServiceModuleCommand cmd);
 
 	ServiceModuleDTO getServiceModule(GetServiceModuleCommand cmd);
 
@@ -39,4 +42,8 @@ public interface ServiceModuleService {
 
 	ListServiceModulesResponse listAllServiceModules(ListServiceModulesCommand cmd);
 	List<ServiceModuleDTO> filterByScopes(int namespaceId, String ownerType, Long ownerId);
+
+	ReflectionServiceModuleApp getOrCreateReflectionServiceModuleApp(Integer namespaceId, String actionData, String instanceConfig, String itemLabel, ServiceModule serviceModule);
+
+	List<Long> listServiceModulefunctions(ListServiceModulefunctionsCommand cmd);
 }

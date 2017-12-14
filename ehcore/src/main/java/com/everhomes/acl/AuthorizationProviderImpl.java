@@ -12,21 +12,22 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.menu.Target;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.acl.IdentityType;
+import com.everhomes.rest.module.ControlTarget;
 import com.everhomes.rest.module.Project;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhAuthorizationControlConfigsDao;
 import com.everhomes.server.schema.tables.daos.EhAuthorizationRelationsDao;
 import com.everhomes.server.schema.tables.daos.EhAuthorizationsDao;
+import com.everhomes.server.schema.tables.pojos.EhAuthorizationControlConfigs;
 import com.everhomes.server.schema.tables.pojos.EhAuthorizationRelations;
 import com.everhomes.server.schema.tables.pojos.EhAuthorizations;
 import com.everhomes.server.schema.tables.records.EhAuthorizationRelationsRecord;
 import com.everhomes.server.schema.tables.records.EhAuthorizationsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
+import com.everhomes.util.Tuple;
+import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,6 @@ import org.springframework.util.StringUtils;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class AuthorizationProviderImpl implements AuthorizationProvider {
@@ -87,6 +87,62 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 	@Override
 	public List<Project> getManageAuthorizationProjectsByAuthAndTargets(String authType, Long authId, List<Target> targets){
 		return this.getAuthorizationProjectsByAuthIdAndTargets(IdentityType.MANAGE.getCode(), authType, authId, targets);
+	}
+
+    @Override
+    public Long getMaxControlIdInAuthorizations() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select(Tables.EH_AUTHORIZATIONS.CONTROL_ID.max()).from(Tables.EH_AUTHORIZATIONS).fetchOne().value1();
+    }
+
+	@Override
+	public Long createAuthorizationControlConfig(AuthorizationControlConfig authorizationControlConfig) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAuthorizationControlConfigs.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAuthorizationControlConfigs.class));
+		authorizationControlConfig.setId(id);
+		EhAuthorizationControlConfigsDao dao = new EhAuthorizationControlConfigsDao(context.configuration());
+		dao.insert(authorizationControlConfig);
+		return id;
+	}
+
+	@Override
+	public Long createAuthorizationControlConfigs(List<AuthorizationControlConfig> authorizationControlConfigs) {
+		long id = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhAuthorizationControlConfigs.class), (long)authorizationControlConfigs.size());
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAuthorizationControlConfigs.class));
+		List<EhAuthorizationControlConfigs> auths = new ArrayList<>();
+		for (AuthorizationControlConfig authorizationControlConfig: authorizationControlConfigs) {
+			id ++;
+			authorizationControlConfig.setId(id);
+			auths.add(ConvertHelper.convert(authorizationControlConfig, EhAuthorizationControlConfigs.class));
+		}
+		EhAuthorizationControlConfigsDao dao = new EhAuthorizationControlConfigsDao(context.configuration());
+		dao.insert(auths);
+		return id;
+	}
+
+	@Override
+	public void delteAuthorizationControlConfigsWithCondition(Integer namespaceId, Long userId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAuthorizationControlConfigs.class));
+		DeleteQuery query = context.deleteQuery(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS);
+		query.addConditions(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS.USER_ID.eq(userId));
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAuthorizationControlConfigs.class, null);
+	}
+
+	@Override
+	public List<ControlTarget> listAuthorizationControlConfigs(Long userId, Long controlId) {
+		List<ControlTarget> result = new ArrayList<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		context.select()
+				.from(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS)
+				.where(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS.CONTROL_ID.eq(controlId))
+				.and(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS.USER_ID.eq(userId)).fetch()
+				.map(r -> {
+					result.add(new ControlTarget(r.getValue(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS.TARGET_ID), r.getValue(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS.INCLUDE_CHILD_FLAG)));
+					return null;
+				});
+		return result;
 	}
 
 	@Override
@@ -171,6 +227,29 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		query.fetch().map((r) -> {
 			if(!result.contains(r.getAuthId()))
 				result.add(r.getAuthId());
+			return null;
+		});
+		return result;
+	}
+
+	@Override
+	public List<Tuple<Long,String>> getAuthorizationAppModuleIdsByTarget(List<Target> targets) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Tuple<Long,String>> result = new ArrayList<>();
+		SelectQuery<EhAuthorizationsRecord> query = context.selectQuery(Tables.EH_AUTHORIZATIONS);
+		Condition cond = Tables.EH_AUTHORIZATIONS.AUTH_TYPE.eq(EntityType.SERVICE_MODULE_APP.getCode());
+		Condition targetCond = null;
+		for (Target target:targets) {
+			if(null == targetCond){
+				targetCond = Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(target.getTargetType()).and(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(target.getTargetId()));
+			}else{
+				targetCond = targetCond.or(Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(target.getTargetType()).and(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(target.getTargetId())));
+			}
+		}
+		cond = cond.and(targetCond);
+		query.addConditions(cond);
+		query.fetch().map((r) -> {
+			result.add(new Tuple<Long,String>(r.getModuleAppId(), r.getModuleControlType()));
 			return null;
 		});
 		return result;
@@ -265,6 +344,90 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 	}
 
 	@Override
+	public List<Authorization> listAuthorizations(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType, Boolean targetFlag, CrossShardListingLocator locator, Integer pageSize){
+		return listAuthorizations(locator, pageSize, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+				if(!StringUtils.isEmpty(ownerType) && null != ownerId){
+					query.addConditions(Tables.EH_AUTHORIZATIONS.OWNER_TYPE.eq(ownerType));
+					query.addConditions(Tables.EH_AUTHORIZATIONS.OWNER_ID.eq(ownerId));
+				}
+
+				if(!StringUtils.isEmpty(targetType) && null != targetId){
+					query.addConditions(Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(targetType));
+					query.addConditions(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(targetId));
+				}
+
+				if(!StringUtils.isEmpty(authType)){
+					query.addConditions(Tables.EH_AUTHORIZATIONS.AUTH_TYPE.eq(authType));
+				}
+
+				if(!StringUtils.isEmpty(authType) && null != authId){
+					query.addConditions(Tables.EH_AUTHORIZATIONS.AUTH_ID.eq(authId));
+				}
+
+				if(!StringUtils.isEmpty(identityType)){
+					query.addConditions(Tables.EH_AUTHORIZATIONS.IDENTITY_TYPE.eq(identityType));
+				}
+
+				if(targetFlag){
+					query.addGroupBy(Tables.EH_AUTHORIZATIONS.TARGET_TYPE);
+					query.addGroupBy(Tables.EH_AUTHORIZATIONS.TARGET_ID);
+				}
+				return query;
+			}
+		});
+	}
+
+	@Override
+	public List<Authorization> listAuthorizations(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType, Long appId, String moduleControlType, Byte all_control_flag, Boolean targetFlag){
+		return listAuthorizations(null, null, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+				if(!StringUtils.isEmpty(ownerType) && null != ownerId){
+					query.addConditions(Tables.EH_AUTHORIZATIONS.OWNER_TYPE.eq(ownerType));
+					query.addConditions(Tables.EH_AUTHORIZATIONS.OWNER_ID.eq(ownerId));
+				}
+
+				if(!StringUtils.isEmpty(targetType) && null != targetId){
+					query.addConditions(Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(targetType));
+					query.addConditions(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(targetId));
+				}
+
+				if(!StringUtils.isEmpty(authType)){
+					query.addConditions(Tables.EH_AUTHORIZATIONS.AUTH_TYPE.eq(authType));
+				}
+
+				if(!StringUtils.isEmpty(authType) && null != authId){
+					query.addConditions(Tables.EH_AUTHORIZATIONS.AUTH_ID.eq(authId));
+				}
+
+				if(!StringUtils.isEmpty(identityType)){
+					query.addConditions(Tables.EH_AUTHORIZATIONS.IDENTITY_TYPE.eq(identityType));
+				}
+
+				if(null != appId){
+					query.addConditions(Tables.EH_AUTHORIZATIONS.MODULE_APP_ID.eq(appId));
+				}
+
+				if(!StringUtils.isEmpty(moduleControlType)){
+					query.addConditions(Tables.EH_AUTHORIZATIONS.MODULE_CONTROL_TYPE.eq(moduleControlType));
+				}
+
+				if(null != all_control_flag){
+					query.addConditions(Tables.EH_AUTHORIZATIONS.ALL_CONTROL_FLAG.eq(all_control_flag));
+				}
+
+				if(targetFlag){
+					query.addGroupBy(Tables.EH_AUTHORIZATIONS.TARGET_TYPE);
+					query.addGroupBy(Tables.EH_AUTHORIZATIONS.TARGET_ID);
+				}
+				return query;
+			}
+		});
+	}
+
+	@Override
 	public List<Authorization> listAuthorizationsByScope(String scope){
 		return listAuthorizations(null, null, new ListingQueryBuilderCallback() {
 			@Override
@@ -325,7 +488,7 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAuthorizations.class));
 		List<EhAuthorizations> auths = new ArrayList<>();
 		for (Authorization authorization: authorizations) {
-			id ++;
+			id++;
 			authorization.setId(id);
 			if(null == authorization.getCreateTime())
 				authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -355,6 +518,40 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		}
 		return authorizations;
 	}
+
+
+	@Override
+	public void deleteAuthorizationWithConditon(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType, String moduleControlType, Long appId, Long controlId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAuthorizations.class));
+		DeleteQuery query = context.deleteQuery(Tables.EH_AUTHORIZATIONS);
+		if (namespaceId != null)
+			query.addConditions(Tables.EH_AUTHORIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		if (ownerId != null)
+			query.addConditions(Tables.EH_AUTHORIZATIONS.OWNER_ID.eq(ownerId));
+		if (!StringUtils.isEmpty(ownerType))
+			query.addConditions(Tables.EH_AUTHORIZATIONS.OWNER_TYPE.eq(ownerType));
+		if (!StringUtils.isEmpty(targetType))
+			query.addConditions(Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(targetType));
+		if (targetId != null)
+			query.addConditions(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(targetId));
+		if (!StringUtils.isEmpty(authType))
+			query.addConditions(Tables.EH_AUTHORIZATIONS.AUTH_TYPE.eq(authType));
+		if (authId != null)
+			query.addConditions(Tables.EH_AUTHORIZATIONS.AUTH_ID.eq(authId));
+		if (!StringUtils.isEmpty(identityType))
+			query.addConditions(Tables.EH_AUTHORIZATIONS.IDENTITY_TYPE.eq(identityType));
+		if (!StringUtils.isEmpty(moduleControlType))
+			query.addConditions(Tables.EH_AUTHORIZATIONS.MODULE_CONTROL_TYPE.eq(moduleControlType));
+		if (appId != null)
+			query.addConditions(Tables.EH_AUTHORIZATIONS.MODULE_APP_ID.eq(appId));
+		if (controlId != null)
+			query.addConditions(Tables.EH_AUTHORIZATIONS.CONTROL_ID.eq(controlId));
+
+		query.execute();
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAuthorizations.class, null);
+	}
+
 
 	@Override
 	public void deleteAuthorizationById(Long id){

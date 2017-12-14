@@ -15,9 +15,10 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.security.MessageDigest;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -30,11 +31,11 @@ import java.util.stream.Collectors;
  * 优讯通
  */
 @Component(SmsHandler.YOU_XUN_TONG_HANDLER_NAME)
-public class YouXunTongSmsHandler implements SmsHandler {
+public class YouXunTongSmsHandler implements SmsHandler, ApplicationListener<ContextRefreshedEvent> {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(YouXunTongSmsHandler.class);
 
-    private static final String YXT_USER_NAME = "sms.YouXunTong.accountName";
+    private static final String YXT_USER_NAME = "sms.YouXunTong.acc ountName";
     private static final String YXT_PASSWORD = "sms.YouXunTong.password";
     private static final String YXT_SERVER = "sms.YouXunTong.server";
     private static final String YXT_TOKEN = "sms.YouXunTong.token";
@@ -52,12 +53,19 @@ public class YouXunTongSmsHandler implements SmsHandler {
     private String token;
     private String server;
 
-    @PostConstruct
+    /*@PostConstruct
     public void init() {
-        this.userName = configurationProvider.getValue(YXT_USER_NAME, "");
-        this.password = configurationProvider.getValue(YXT_PASSWORD, "");
-        this.server = configurationProvider.getValue(YXT_SERVER, "");
-        this.token = configurationProvider.getValue(YXT_TOKEN, "");
+
+    }*/
+
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if (event.getApplicationContext().getParent() == null) {
+            this.userName = configurationProvider.getValue(YXT_USER_NAME, "");
+            this.password = configurationProvider.getValue(YXT_PASSWORD, "");
+            this.server = configurationProvider.getValue(YXT_SERVER, "");
+            this.token = configurationProvider.getValue(YXT_TOKEN, "");
+        }
     }
 
     /*

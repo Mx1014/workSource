@@ -10,6 +10,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.*;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.*;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.archives.*;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.general_approval.*;
@@ -54,6 +55,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.everhomes.rest.acl.PrivilegeConstants.BATCH_EXPORT_PERSON;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 @Component
@@ -108,6 +110,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
+
+        //校验权限
+        organizationService.checkOrganizationpPivilege(cmd.getDepartmentIds().get(0), PrivilegeConstants.CREATE_OR_MODIFY_PERSON);
 
         ArchivesContactDTO dto = new ArchivesContactDTO();
         //  组织架构添加人员
@@ -181,6 +186,12 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void deleteArchivesContacts(DeleteArchivesContactsCommand cmd) {
+        //权限校验
+        cmd.getDetailIds().forEach(detailId ->{
+            Long departmentId = organizationService.getDepartmentByDetailId(detailId);
+            organizationService.checkOrganizationpPivilege(departmentId, PrivilegeConstants.DELETE_PERSON);
+        });
+
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         dbProvider.execute((TransactionStatus status) -> {
             if (cmd.getDetailIds() != null) {
@@ -574,6 +585,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void exportArchivesContacts(ExportArchivesContactsCommand cmd, HttpServletResponse httpResponse) {
+        organizationService.checkOrganizationpPivilege(cmd.getOrganizationId(), PrivilegeConstants.BATCH_EXPORT_PERSON);
         ListArchivesContactsCommand listCommand = new ListArchivesContactsCommand();
         listCommand.setOrganizationId(cmd.getOrganizationId());
         listCommand.setKeywords(cmd.getKeywords());

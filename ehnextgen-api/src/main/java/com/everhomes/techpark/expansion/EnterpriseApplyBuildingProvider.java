@@ -7,7 +7,7 @@ import java.util.List;
  */
 public interface EnterpriseApplyBuildingProvider {
 
-    List<LeaseBuilding> listLeaseBuildings(Integer namespaceId, Long communityId, Long pageAnchor, Integer pageSize);
+    List<LeaseBuilding> listLeaseBuildings(Integer namespaceId, Long communityId, Long categoryId, Long pageAnchor, Integer pageSize);
 
     void createLeaseBuilding(LeaseBuilding leaseBuilding);
 
@@ -25,7 +25,7 @@ public interface EnterpriseApplyBuildingProvider {
 
     void deleteLeasePromotionCommunity(Long id);
 
-    Boolean verifyBuildingName(Integer namespaceId, Long communityId, String buildingName);
+    Boolean verifyBuildingName(Integer namespaceId, Long communityId, String buildingName, Long categoryId);
 
     void createLeaseBuildings(List<LeaseBuilding> leaseBuildings);
 
@@ -33,11 +33,11 @@ public interface EnterpriseApplyBuildingProvider {
 
     void updateLeaseProject(LeaseProject leaseProject);
 
-    LeaseProject findLeaseProjectByProjectId(Long projectId);
+    LeaseProject findLeaseProjectByProjectId(Long projectId, Long categoryId);
 
     void createLeaseProjectCommunity(LeaseProjectCommunity leaseProjectCommunity);
 
     void deleteLeaseProjectCommunity(Long leaseProjectId);
 
-    List<Long> listLeaseProjectCommunities(Long leaseProjectId);
+    List<Long> listLeaseProjectCommunities(Long leaseProjectId, Long categoryId);
 }

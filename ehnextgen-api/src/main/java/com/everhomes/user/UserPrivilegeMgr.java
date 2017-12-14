@@ -20,6 +20,18 @@ public interface UserPrivilegeMgr {
      */
     boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId);
 
+    /**
+     * 新权限校验
+     * @param ownerType
+     * @param ownerId
+     * @param currentOrgId
+     * @param privilegeId
+     * @param appId
+     * @param checkOrgId
+     *@param checkCommunityId @return
+     */
+    boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId, Long appId, Long checkOrgId, Long checkCommunityId);
+
 
     /**
      * 新权限校验
@@ -155,4 +167,50 @@ public interface UserPrivilegeMgr {
      * @return
      */
     boolean checkAllModuleAdmin(String ownerType, Long ownerId, Long userId);
+
+    /**
+     * 检查应用管理员
+     * @param ownerType
+     * @param ownerId
+     * @param userId
+     * @param privilegeId
+     * @param appId
+     * @param communityId
+     * @param organizationId
+     * @return
+     */
+    boolean checkModuleAppAdmin(String ownerType, Long ownerId, Long userId, Long privilegeId, Long appId, Long communityId, Long organizationId);
+
+    /**
+     * 检查应用管理员
+     * @param ownerType
+     * @param ownerId
+     * @param userId
+     * @param moduleId
+     * @param appId  @return
+     * @param communityId
+     * @param organizationId
+     */
+    boolean checkModuleAppAdmin(Integer namespaceId, String ownerType, Long ownerId, Long userId, Long moduleId, Long appId, Long communityId, Long organizationId);
+
+
+    /**
+     * 简单检查用户是否对某个应用是管理员
+     * @param namespaceId
+     * @param userId
+     * @param appId
+     * @return
+     */
+    boolean checkModuleAppAdmin(Integer namespaceId, Long organizationId, Long userId, Long appId);
+
+
+    /**
+     * 校验权限细化
+     * @param namespaceId
+     * @param communityId
+     * @param userId
+     * @param appId
+     * @return
+     */
+    boolean checkModuleAppRelation(Integer namespaceId, Long communityId, Long userId, Long appId);
 }

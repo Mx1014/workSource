@@ -4504,6 +4504,8 @@ public class UserServiceImpl implements UserService {
 				dto.setContactToken(detail.getContactToken());
 				if (!StringUtils.isEmpty(detail.getContactShortToken()))
 					dto.setContactShortToken(detail.getContactShortToken());
+				if (!StringUtils.isEmpty(detail.getEmail()))
+					dto.setEmail(detail.getEmail());
 				if (!StringUtils.isEmpty(detail.getWorkEmail()))
 					dto.setWorkEmail(detail.getWorkEmail());
 				dto.setRegionCode(detail.getRegionCode());
@@ -5398,7 +5400,12 @@ public class UserServiceImpl implements UserService {
         }
 
         Long l = configurationProvider.getLongValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.PAY_PLATFORM, 0l);
+
         resp.setPaymentPlatform(l);
+
+		Integer mypublishFlag = configurationProvider.getIntValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.MY_PUBLISH_FLAG, 1);
+
+		resp.setMyPublishFlag(mypublishFlag.byteValue());
         
         return resp;
     }

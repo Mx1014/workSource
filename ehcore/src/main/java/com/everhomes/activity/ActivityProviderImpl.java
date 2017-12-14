@@ -1008,6 +1008,11 @@ public class ActivityProviderImpl implements ActivityProivider {
 			.orderBy(Tables.EH_ACTIVITY_ROSTER.ID.asc())
 			.limit(pageSize)
 			.fetch();
+
+
+
+
+
 		
 		if (result != null && result.isNotEmpty()) {
 			return result.map(r->RecordHelper.convert(r, ActivityRoster.class));
@@ -1243,7 +1248,7 @@ public class ActivityProviderImpl implements ActivityProivider {
 					//已确认并且已支付
 					condition = addConfirmAndPay(condition);
 					
-					List<Object[]> list = context.select(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID, DSL.count())
+					List<Object[]> list = context.select(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID, Tables.EH_ACTIVITIES.CATEGORY_ID, DSL.count())
 							.from(Tables.EH_ACTIVITY_ROSTER)
 							.join(Tables.EH_ACTIVITIES)
 							.on(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(Tables.EH_ACTIVITIES.ID))

@@ -5459,9 +5459,19 @@ public class GroupServiceImpl implements GroupService {
 			groupSetting.setId(old.getId());
 			groupSettingProvider.updateGroupSetting(groupSetting);
 		}
+
+
+		//原来的MemberCommentFlag字段在客户端是废弃的。现在将是否允许评论放到一个统一的表里，在查询帖子时从帖子层面控制是否允许评论。add by yanjun 20171206
+        Byte forumModuleType = ForumModuleType.CLUB.getCode();
+        if(ClubType.fromCode(cmd.getClubType()) == ClubType.GUILD){
+            forumModuleType = ForumModuleType.GUILD.getCode();
+        }
+        forumService.saveInteractSetting(cmd.getNamespaceId(), forumModuleType, null, cmd.getMemberCommentFlag());
 		
 		return ConvertHelper.convert(groupSetting, GroupParametersResponse.class);
 	}
+
+
 
 	@Override
 	public GroupParametersResponse getGroupParameters(GetGroupParametersCommand cmd) {

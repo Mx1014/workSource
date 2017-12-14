@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
  *<ul>
  * <li>ownerId: 所属者id</li>
  * <li>communityIdentifier: 园区识别符</li>
+ * <li>namespaceId: 域空间id</li>
  * <li>ownerType: 所属者type</li>
  * <li>addressId: 楼栋门牌id</li>
  * <li>pageSize: 显示数量</li>
@@ -33,6 +34,7 @@ public class ListBillsCommand {
     private Long ownerId;
     private String communityIdentifier;
     private Long addressId;
+    private Integer namespaceId;
     @NotNull
     private String ownerType;
     private Integer pageSize;
@@ -49,6 +51,15 @@ public class ListBillsCommand {
     private Byte status;
     private String targetType;
     private String contractNum;
+
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Long getBillGroupId() {
         return billGroupId;
