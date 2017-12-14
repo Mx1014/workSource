@@ -8,6 +8,9 @@ import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
 import com.everhomes.activity.*;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.bus.LocalEventBus;
+import com.everhomes.bus.LocalEventContext;
+import com.everhomes.bus.SystemEvent;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -82,6 +85,7 @@ import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhUsers;
+import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.*;
@@ -268,10 +272,68 @@ public class ForumServiceImpl implements ForumService {
             createTopic(cmd, UserContext.current().getUser().getId());
         }
 
+        //对接积分，论坛、活动、公告、俱乐部等  add by yanjun 20171211
+        // createPostEvent(dto);
 
+        final PostDTO tempDto = dto;
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(UserContext.currentUserId());
+            context.setNamespaceId(UserContext.getCurrentNamespaceId());
+            event.setContext(context);
+
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(tempDto.getId());
+            event.setEventName(SystemEvent.FORUM_POST_CREATE.suffix(
+                    tempDto.getContentCategory(), tempDto.getModuleType(), tempDto.getModuleCategoryId()));
+        });
 
         return dto;
     }
+
+
+
+    /*private void createPostEvent(PostDTO dto){
+        //对接积分 add by yanjun 20171211
+        String eventName = null;
+        switch (ForumModuleType.fromCode(dto.getModuleType())){
+            case FORUM:
+                eventName = SystemEvent.FORUM_POST_CREATE.suffix(dto.getModuleCategoryId());
+                break;
+            case ACTIVITY:
+                eventName = SystemEvent.ACTIVITY_ACTIVITY_CREATE.suffix(dto.getModuleCategoryId());
+                break;
+            case ANNOUNCEMENT:
+                break;
+            case CLUB:
+                break;
+            case GUILD:
+                break;
+            case FEEDBACK:
+                eventName = SystemEvent.FORUM_POST_CREATE.suffix(dto.getModuleCategoryId());
+                break;
+        }
+        if(eventName == null){
+            return;
+        }
+
+        final String finalEventName = eventName;
+
+        Long  userId = UserContext.currentUserId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(userId);
+            context.setNamespaceId(namespaceId);
+            event.setContext(context);
+
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(dto.getId());
+            event.setEventName(finalEventName);
+        });
+    }*/
+
 
 //
 //
@@ -998,7 +1060,65 @@ public class ForumServiceImpl implements ForumService {
                 LOGGER.info("The post is already deleted, userId=" + userId + ", postId=" + postId);
             }
         }
+
+        //删除帖子对接积分  add by yanjun 20171211
+        // deletePostPoints(post.getId(), post.getModuleType(), post.getModuleCategoryId());
+
+        final Post tempPost = post;
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(userId);
+            context.setNamespaceId(UserContext.getCurrentNamespaceId());
+            event.setContext(context);
+
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(tempPost.getId());
+            event.setEventName(SystemEvent.FORUM_POST_DELETE.suffix(
+                    tempPost.getContentCategory(), tempPost.getModuleType(), tempPost.getModuleCategoryId()));
+        });
+
     }
+
+    /*private void deletePostPoints(Long postId, Byte moduleType, Long moduleCategoryId){
+        String eventName = null;
+        switch (ForumModuleType.fromCode(moduleType)){
+            case FORUM:
+                eventName = SystemEvent.FORUM_POST_DELETE.suffix(moduleCategoryId);
+                break;
+            case ACTIVITY:
+                eventName = SystemEvent.ACTIVITY_ACTIVITY_DELETE.suffix(moduleCategoryId);
+                break;
+            case ANNOUNCEMENT:
+                break;
+            case CLUB:
+                break;
+            case GUILD:
+                break;
+            case FEEDBACK:
+                eventName = SystemEvent.FORUM_POST_DELETE.dft();
+                break;
+        }
+        if(eventName == null){
+            return;
+        }
+
+        final String finalEventName = eventName;
+
+        Long  userId = UserContext.currentUserId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(userId);
+            context.setNamespaceId(namespaceId);
+            event.setContext(context);
+
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(postId);
+            event.setEventName(finalEventName);
+        });
+    }*/
+
     
     private Long getFamilyId() {
         User user = UserContext.current().getUser();
@@ -2005,31 +2125,89 @@ public class ForumServiceImpl implements ForumService {
         checkPostParameter(operatorId, forumId, topicId, tag);
         
         try {
-            this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
+            Tuple<Post, Boolean> tuple = this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(() -> {
                 this.forumProvider.likePost(operatorId, topicId);
                 Post tmpPost = this.forumProvider.findPostById(topicId);
                 String creatorUid = Long.toString(tmpPost.getCreatorUid());
                 String[] hotusers = configProvider.getValue(ConfigConstants.HOT_USERS, "").split(",");
                 boolean flag = false;
-                for(String hotuser : hotusers){
-                	if(creatorUid == hotuser){
-                		flag = true;
-                	}
+                for (String hotuser : hotusers) {
+                    if (creatorUid == hotuser) {
+                        flag = true;
+                    }
                 }
-                if(Byte.valueOf(PostAssignedFlag.ASSIGNED.getCode()).equals(tmpPost.getAssignedFlag()) || flag){
-                	HotPost hotpost = new HotPost();
+                if (Byte.valueOf(PostAssignedFlag.ASSIGNED.getCode()).equals(tmpPost.getAssignedFlag()) || flag) {
+                    HotPost hotpost = new HotPost();
                     hotpost.setPostId(topicId);
                     hotpost.setTimeStamp(Calendar.getInstance().getTimeInMillis());
                     hotpost.setModifyType(HotPostModifyType.LIKE.getCode());
                     hotPostService.push(hotpost);
                 }
-               return null;
+                return tmpPost;
+            });
+
+            final Post tempPost = tuple.first();
+            LocalEventBus.publish(event -> {
+                LocalEventContext context = new LocalEventContext();
+                context.setUid(UserContext.currentUserId());
+                context.setNamespaceId(UserContext.getCurrentNamespaceId());
+                event.setContext(context);
+
+                event.setEntityType(EhForumPosts.class.getSimpleName());
+                event.setEntityId(tempPost.getId());
+                event.setEventName(SystemEvent.FORUM_POST_LIKE.suffix(
+                        tempPost.getContentCategory(), tempPost.getModuleType(), tempPost.getModuleCategoryId()));
             });
         } catch(Exception e) {
             LOGGER.error("Failed to update the like count of post, userId=" + operatorId + ", topicId=" + topicId, e);
         }
+
+        //点赞对接积分  add by yanjun 20171211
+        // likeTopicPoints(topicId);
     }
-    
+
+
+    /*private void likeTopicPoints(Long postId){
+        final Post post = this.forumProvider.findPostById(postId);
+        String eventName = null;
+        switch (ForumModuleType.fromCode(post.getModuleType())){
+            case FORUM:
+                eventName = SystemEvent.FORUM_POST_LIKE.suffix(post.getModuleCategoryId());
+                break;
+            case ACTIVITY:
+                eventName = SystemEvent.ACTIVITY_ACTIVITY_LIKE.suffix(post.getModuleCategoryId());
+                break;
+            case ANNOUNCEMENT:
+                break;
+            case CLUB:
+                break;
+            case GUILD:
+                break;
+            case FEEDBACK:
+                break;
+        }
+        if(eventName == null){
+            return;
+        }
+
+        final String finalEventName = eventName;
+
+        Long  userId = UserContext.currentUserId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(userId);
+            context.setNamespaceId(namespaceId);
+            event.setContext(context);
+
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(post.getId());
+            event.setEventName(finalEventName);
+        });
+    }*/
+
+
     @Override
     public void cancelLikeTopic(CancelLikeTopicCommand cmd) {
         User operator = UserContext.current().getUser();
@@ -2047,10 +2225,67 @@ public class ForumServiceImpl implements ForumService {
                 this.forumProvider.cancelLikePost(operatorId, topicId);
                return null;
             });
+
+            final Post tempPost = this.forumProvider.findPostById(topicId);
+            LocalEventBus.publish(event -> {
+                LocalEventContext context = new LocalEventContext();
+                context.setUid(UserContext.currentUserId());
+                context.setNamespaceId(UserContext.getCurrentNamespaceId());
+                event.setContext(context);
+
+                event.setEntityType(EhForumPosts.class.getSimpleName());
+                event.setEntityId(tempPost.getId());
+                event.setEventName(SystemEvent.FORUM_POST_LIKE_CANCEL.suffix(
+                        tempPost.getContentCategory(), tempPost.getModuleType(), tempPost.getModuleCategoryId()));
+            });
         } catch(Exception e) {
             LOGGER.error("Failed to update the dislike count of post, userId=" + operatorId + ", topicId=" + topicId, e);
         }
+        //取消点赞对接积分 add by yanjun 20171211
+        // cancelLikeTopicPoints(forumId);
     }
+
+    /*private void cancelLikeTopicPoints(Long postId){
+
+        final Post post = this.forumProvider.findPostById(postId);
+
+        String eventName = null;
+        switch (ForumModuleType.fromCode(post.getModuleType())){
+            case FORUM:
+                eventName = SystemEvent.FORUM_POST_LIKE_CANCEL.suffix(post.getModuleCategoryId());
+                break;
+            case ACTIVITY:
+                eventName = SystemEvent.ACTIVITY_ACTIVITY_LIKE_CANCEL.suffix(post.getModuleCategoryId());
+                break;
+            case ANNOUNCEMENT:
+                break;
+            case CLUB:
+                break;
+            case GUILD:
+                break;
+            case FEEDBACK:
+                break;
+        }
+        if(eventName == null){
+            return;
+        }
+
+        final String finalEventName = eventName;
+
+        Long  userId = UserContext.currentUserId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(userId);
+            context.setNamespaceId(namespaceId);
+            event.setContext(context);
+
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(post.getId());
+            event.setEventName(finalEventName);
+        });
+    }*/
 
     @Override
     public void stickPost(StickPostCommand cmd) {
@@ -2283,6 +2518,18 @@ public class ForumServiceImpl implements ForumService {
             }).collect(Collectors.toList());
             postdto.setAttachments(listAttachementdto);
         }
+
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(UserContext.currentUserId());
+            context.setNamespaceId(UserContext.getCurrentNamespaceId());
+            event.setContext(context);
+
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(postdto.getId());
+            event.setEventName(SystemEvent.FORUM_COMMENT_CREATE.suffix(
+                    ownerPost.getContentCategory(), ownerPost.getModuleType(), ownerPost.getModuleCategoryId()));
+        });
         return postdto;
 
     }

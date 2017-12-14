@@ -19,9 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * <ul>
- *     <li>用户行为统计</li>
- * </ul>
+ * 用户行为统计
  */
 @RestDoc(value = "Stat event controller")
 @RestController
