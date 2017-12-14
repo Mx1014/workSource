@@ -238,7 +238,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         List<FlowCaseEntity> entities = new ArrayList<>();
         //  姓名
         FlowCaseEntity e = new FlowCaseEntity();
-        GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+        /*GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
                 GeneralFormDataSourceType.USER_NAME.getCode());
         //  根据需求去除了默认字段的存储
         if (val != null) {
@@ -274,7 +274,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
                 e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
                 entities.add(e);
             }
-        }
+        }*/
 
         //  approval-1.6 added by R
         GeneralApprovalFlowCase gf = ConvertHelper.convert(flowCase, GeneralApprovalFlowCase.class);

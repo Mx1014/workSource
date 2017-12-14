@@ -210,6 +210,9 @@ ALTER TABLE eh_lease_issuers ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
 ALTER TABLE eh_lease_form_requests ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
 ALTER TABLE eh_lease_configs ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
 ALTER TABLE eh_lease_buildings ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
+ALTER TABLE eh_lease_buildings DROP INDEX u_eh_community_id_name;
+ALTER TABLE eh_enterprise_op_requests DROP apply_type;
+
 
 -- 用户打印机映射表，by dengs,2017/11/12
 -- DROP TABLE IF EXISTS `eh_siyin_user_printer_mappings`;
