@@ -187,7 +187,10 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void deleteArchivesContacts(DeleteArchivesContactsCommand cmd) {
         //权限校验
-        organizationService.checkOrganizationpPivilege(cmd.getOrganizationId(), PrivilegeConstants.DELETE_PERSON);
+        cmd.getDetailIds().forEach(detailId ->{
+            Long departmentId = organizationService.getDepartmentByDetailId(detailId);
+            organizationService.checkOrganizationpPivilege(departmentId, PrivilegeConstants.DELETE_PERSON);
+        });
 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         dbProvider.execute((TransactionStatus status) -> {
