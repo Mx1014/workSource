@@ -160,21 +160,21 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 
 
 -- 园区入驻多入口 add by sw 20171212
-UPDATE eh_web_menus set data_type = 'react:/project-intro/project-list/1' where id = 40103;
-UPDATE eh_web_menus set data_type = 'projects_introduce/1' where id = 40105;
-UPDATE eh_web_menus set data_type = 'rent_manage/1' where id = 40110;
-UPDATE eh_web_menus set data_type = 'enter_apply/1' where id = 40120;
+UPDATE eh_web_menus SET data_type = 'react:/project-intro/project-list/1' WHERE id = 40103;
+UPDATE eh_web_menus SET data_type = 'projects_introduce/1' WHERE id = 40105;
+UPDATE eh_web_menus SET data_type = 'rent_manage/1' WHERE id = 40110;
+UPDATE eh_web_menus SET data_type = 'enter_apply/1' WHERE id = 40120;
 
-UPDATE eh_enterprise_op_requests set category_id = 1;
-UPDATE eh_lease_promotions set category_id = 1;
-UPDATE eh_lease_projects set category_id = 1;
-UPDATE eh_lease_project_communities set category_id = 1;
-UPDATE eh_lease_issuers set category_id = 1;
-UPDATE eh_lease_form_requests set category_id = 1;
-UPDATE eh_lease_configs set category_id = 1;
-UPDATE eh_lease_buildings set category_id = 1;
+UPDATE eh_enterprise_op_requests SET category_id = 1;
+UPDATE eh_lease_promotions SET category_id = 1;
+UPDATE eh_lease_projects SET category_id = 1;
+UPDATE eh_lease_project_communities SET category_id = 1;
+UPDATE eh_lease_issuers SET category_id = 1;
+UPDATE eh_lease_form_requests SET category_id = 1;
+UPDATE eh_lease_configs SET category_id = 1;
+UPDATE eh_lease_buildings SET category_id = 1;
 
-UPDATE eh_configurations set `value` = '/park-entry/dist/index.html?hideNavigationBar=1#/project_intro/%s/%s/%s' where `name` = 'apply.entry.lease.project.detail.url';
+UPDATE eh_configurations SET `value` = '/park-entry/dist/index.html?hideNavigationBar=1#/project_intro/%s/%s/%s' WHERE `name` = 'apply.entry.lease.project.detail.url';
 
 -- dengs,20171212,服务联盟消息格式修改
 UPDATE eh_locale_templates SET TEXT = '您收到一条${categoryName}的申请；
@@ -235,11 +235,5 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50601', '打卡记录', 'EhNamespaces', '999973', '2');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50602', '考勤规则', 'EhNamespaces', '999973', '2'); 
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50601', '打卡记录', 'EhNamespaces', '999974', '2');
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50602', '考勤规则', 'EhNamespaces', '999974', '2'); 
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50601', '打卡记录', 'EhNamespaces', '999973', '2');
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50602', '考勤规则', 'EhNamespaces', '999973', '2'); 
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50601', '打卡记录', 'EhNamespaces', '999973', '2');
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50602', '考勤规则', 'EhNamespaces', '999973', '2'); 
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50601', '打卡记录', 'EhNamespaces', '999973', '2');
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50602', '考勤规则', 'EhNamespaces', '999973', '2');  
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50602', '考勤规则', 'EhNamespaces', '999974', '2');   
  
