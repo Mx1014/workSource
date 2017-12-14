@@ -3,7 +3,7 @@ package com.everhomes.workReport;
 import com.everhomes.server.schema.tables.pojos.EhWorkReportVals;
 import com.everhomes.util.StringHelper;
 
-public class WorkReportVal extends EhWorkReportVals{
+public class WorkReportVal extends EhWorkReportVals {
 
     private Byte readStatus;
 
