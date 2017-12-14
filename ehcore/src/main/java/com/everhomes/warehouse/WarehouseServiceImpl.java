@@ -9,6 +9,9 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.*;
+import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
@@ -18,12 +21,15 @@ import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.ImportFileTaskStatus;
 import com.everhomes.rest.organization.ImportFileTaskType;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.warehouse.*;
 import com.everhomes.search.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -107,8 +113,15 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Autowired
     private LocaleStringService localeStringService;
 
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+
+    @Autowired
+    private PortalService portalService;
+
     @Override
     public WarehouseDTO updateWarehouse(UpdateWarehouseCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_OPERATION,cmd.getOwnerId());
         Warehouses warehouse = ConvertHelper.convert(cmd, Warehouses.class);
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_WAREHOUSE.getCode()
                 +cmd.getOwnerType()+cmd.getOwnerId()+cmd.getCommunityId()).enter(()-> {
@@ -171,6 +184,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public void deleteWarehouse(DeleteWarehouseCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_OPERATION,cmd.getOwnerId());
         Warehouses warehouse = verifyWarehouses(cmd.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
 
         //库存不为0时不能删除
@@ -210,6 +224,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public WarehouseMaterialCategoryDTO updateWarehouseMaterialCategory(UpdateWarehouseMaterialCategoryCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(null, PrivilegeConstants.WAREHOUSE_MATERIAL_CATEGORY_ALL,cmd.getOwnerId());
         if(StringUtils.isBlank(cmd.getName())){
             LOGGER.error("warehouse material category name is null, data = {}", cmd);
             throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NAME_IS_NULL,
@@ -296,6 +311,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public void deleteWarehouseMaterialCategory(DeleteWarehouseMaterialCategoryCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(null, PrivilegeConstants.WAREHOUSE_MATERIAL_CATEGORY_ALL,cmd.getOwnerId());
         WarehouseMaterialCategories category = verifyWarehouseMaterialCategories(cmd.getCategoryId(), cmd.getOwnerType(), cmd.getOwnerId());
 
         //该分类下有关联任何物品时，该分类不可删除
@@ -369,6 +385,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public WarehouseMaterialDTO updateWarehouseMaterial(UpdateWarehouseMaterialCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_MATERIAL_INFO_ALL,cmd.getOwnerId());
         WarehouseMaterials material = ConvertHelper.convert(cmd, WarehouseMaterials.class);
 
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_WAREHOUSE_MATERIAL.getCode()
@@ -452,6 +469,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public void deleteWarehouseMaterial(DeleteWarehouseMaterialCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_MATERIAL_INFO_ALL,cmd.getOwnerId());
         WarehouseMaterials material = verifyWarehouseMaterials(cmd.getMaterialId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
 
         //物品有库存引用时，该物品不可删除
@@ -501,6 +519,11 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public void updateWarehouseStock(UpdateWarehouseStockCommand cmd) {
+        if(cmd.getRequestType().byteValue() == WarehouseStockRequestType.STOCK_IN.getCode()){
+            checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_INSTOCK,cmd.getOwnerId());
+        }else if (cmd.getRequestType().byteValue() == WarehouseStockRequestType.STOCK_OUT.getCode()){
+            checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_OUTSTOCK,cmd.getOwnerId());
+        }
         if(cmd.getStocks() != null && cmd.getStocks().size() > 0) {
             cmd.getStocks().forEach(stock -> {
                 if(stock.getAmount() <= 0) {
@@ -658,6 +681,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public void updateWarehouseMaterialUnit(UpdateWarehouseMaterialUnitCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(null,PrivilegeConstants.WAREHOUSE_PARAMETER_CONFIG,cmd.getOwnerId());
         Long uid = UserContext.current().getUser().getId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
@@ -713,6 +737,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public HttpServletResponse exportWarehouseStockLogs(SearchWarehouseStockLogsCommand cmd, HttpServletResponse response) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_LOG_EXPORT,cmd.getOwnerId());
         Integer pageSize = Integer.MAX_VALUE;
         cmd.setPageSize(pageSize);
 
@@ -853,6 +878,8 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public ImportFileTaskDTO importWarehouseMaterialCategories(ImportOwnerCommand cmd, MultipartFile mfile, Long userId) {
+        //不到community
+        checkAssetPriviledgeForPropertyOrg(null, PrivilegeConstants.WAREHOUSE_MATERIAL_CATEGORY_ALL,cmd.getOwnerId());
         ImportFileTask task = new ImportFileTask();
         try {
             //解析excel
@@ -897,6 +924,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public ImportFileTaskDTO importWarehouseMaterials(ImportOwnerCommand cmd, MultipartFile mfile, Long userId) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_MATERIAL_INFO_ALL,cmd.getOwnerId());
         ImportFileTask task = new ImportFileTask();
         try {
             //解析excel
@@ -1287,6 +1315,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public void createRequest(CreateRequestCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.WAREHOUSE_CLAIM_MANAGEMENT_APPLICATION,cmd.getOwnerId());
         if(WarehouseStockRequestType.STOCK_OUT.equals(WarehouseStockRequestType.fromCode(cmd.getRequestType()))) {
             if(cmd.getStocks() != null && cmd.getStocks().size() > 0) {
                 cmd.getStocks().forEach(stock -> {
@@ -1465,6 +1494,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public SearchRequestsResponse searchRequests(SearchRequestsCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.WAREHOUSE_CLAIM_MANAGEMENT_SEARCH,cmd.getOwnerId());
         QueryRequestCommand command = ConvertHelper.convert(cmd , QueryRequestCommand.class);
         List<Long> ids = warehouseRequestMaterialSearcher.query(command);
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -1525,4 +1555,16 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     }
 
+    private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId, Long OrganizationId) {
+        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
+        cmd1.setActionType((byte)13);
+        cmd1.setModuleId(PrivilegeConstants.WAREHOUSE_MODULE_ID);
+        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
+        Long appId = res.getServiceModuleApps().get(0).getId();
+        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), OrganizationId, OrganizationId,priviledgeId , appId, null,communityId )){
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                    "check app privilege error");
+        }
+    }
 }

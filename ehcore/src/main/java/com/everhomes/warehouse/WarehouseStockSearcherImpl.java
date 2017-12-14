@@ -1,7 +1,13 @@
 package com.everhomes.warehouse;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.warehouse.SearchWarehouseStocksCommand;
 import com.everhomes.rest.warehouse.SearchWarehouseStocksResponse;
 import com.everhomes.rest.warehouse.Status;
@@ -11,7 +17,9 @@ import com.everhomes.search.SearchUtils;
 import com.everhomes.search.WarehouseStockSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -46,6 +54,11 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
 
     @Autowired
     private ConfigurationProvider configProvider;
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+
+    @Autowired
+    private PortalService portalService;
 
     @Override
     public void deleteById(Long id) {
@@ -103,6 +116,7 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
 
     @Override
     public SearchWarehouseStocksResponse query(SearchWarehouseStocksCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_SEARCH,cmd.getOwnerId());
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
         if(cmd.getName() == null || cmd.getName().isEmpty()) {
@@ -246,5 +260,18 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
     @Override
     public String getIndexType() {
         return SearchUtils.WAREHOUSE_STOCK;
+    }
+
+    private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId, Long OrganizationId) {
+        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
+        cmd1.setActionType((byte)13);
+        cmd1.setModuleId(PrivilegeConstants.WAREHOUSE_MODULE_ID);
+        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
+        Long appId = res.getServiceModuleApps().get(0).getId();
+        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), OrganizationId, OrganizationId,priviledgeId , appId, null,communityId )){
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                    "check app privilege error");
+        }
     }
 }

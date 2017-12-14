@@ -1096,7 +1096,6 @@ public class AssetController extends ControllerBase {
     @RequestMapping(value = "listPaymentBill")
     @RestReturn(ListPaymentBillResp.class)
     public RestResponse listPaymentBill(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
-        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.ASSET_DEAL_VIEW);
 //        UserInfo user = (UserInfo) request.getSession().getAttribute(SessionConstants.MC_LOGIN_USER);
         ListPaymentBillResp result = paymentService.listPaymentBill(cmd);
         RestResponse response = new RestResponse(result);
@@ -1206,19 +1205,6 @@ public class AssetController extends ControllerBase {
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         restResponse.setErrorDescription("OK");
         return restResponse;
-    }
-
-    private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId) {
-        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
-        cmd1.setActionType((byte)13);
-        cmd1.setModuleId(20400l);
-        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
-        ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
-        Long appId = res.getServiceModuleApps().get(0).getId();
-        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), 1000001L, 1000001L,priviledgeId , appId, null,communityId )){
-            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
-                    "check app privilege error");
-        }
     }
 
 }
