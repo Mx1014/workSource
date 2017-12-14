@@ -34,7 +34,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PointEventLogScheduler.class);
 
-    @Value("${core.server.id}")
+    @Value("${core.server.id:}")
     private String serverId;
 
     private final transient ReentrantLock lock = new ReentrantLock();
@@ -73,7 +73,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (event.getApplicationContext().getParent() == null) {
+        if (event.getApplicationContext().getParent() == null && serverId != null) {
             initEventProcessor();
             initScheduledTask();
             initVMShutdownHook();
