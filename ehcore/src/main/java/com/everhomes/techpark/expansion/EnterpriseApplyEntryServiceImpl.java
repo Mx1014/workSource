@@ -681,12 +681,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		String ownerType = convertSourceType(sourceType);
 
-		Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), request.getCategoryId(),
-				FlowModuleType.LEASE_PROMOTION.getCode(), request.getCommunityId(), FlowOwnerType.LEASE_PROMOTION.getCode());
+		Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ExpansionConst.MODULE_ID,
+				FlowModuleType.LEASE_PROMOTION.getCode() + "_" + request.getCategoryId(), request.getCommunityId(), ownerType);
 
 		if (null == flow) {
-			flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), request.getCategoryId(),
-					FlowModuleType.LEASE_PROMOTION.getCode(), request.getCommunityId(), FlowOwnerType.COMMUNITY.getCode());
+			flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ExpansionConst.MODULE_ID,
+					FlowModuleType.LEASE_PROMOTION.getCode() + "_" + request.getCategoryId(), request.getCommunityId(), FlowOwnerType.COMMUNITY.getCode());
 		}
 		//做兼容，以前没有多入口，加了多入口之后，默认老数据入口 CategoryId DEFAULT_CATEGORY_ID，为了不改变工作流使用，老数据回去查询以前老工作流
 		if (null == flow && request.getCategoryId() == DEFAULT_CATEGORY_ID.longValue()) {
