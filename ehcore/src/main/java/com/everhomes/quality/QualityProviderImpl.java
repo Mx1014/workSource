@@ -2691,10 +2691,11 @@ public class QualityProviderImpl implements QualityProvider {
 
 	@Override
 	public void createQualityModelCommunityMap(QualityInspectionModleCommunityMap map) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQualityInspectionModleCommunityMap.class));
 		map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		map.setId(id);
-		EhQualityInspectionModleCommunityMapDao dao = new EhQualityInspectionModleCommunityMapDao();
+		EhQualityInspectionModleCommunityMapDao dao = new EhQualityInspectionModleCommunityMapDao(context.configuration());
 		dao.insert(map);
 	}
 

@@ -2667,26 +2667,6 @@ public class QualityServiceImpl implements QualityService {
 		}
 
 		qualityProvider.createQualitySpecification(specification);
-		//在全部中创建的时候 增加应用范围表
-		if (cmd.getCommunities() != null && cmd.getCommunities().size() > 0
-				&& cmd.getScopeId() == 0 && cmd.getScopeCode() == 0) {
-
-			for (Long communityId:cmd.getCommunities()) {
-				QualityInspectionModleCommunityMap communityMap = new QualityInspectionModleCommunityMap();
-				communityMap.setTargetId(communityId);
-				communityMap.setTargetType("community");
-				if(SpecificationInspectionType.CATEGORY.equals(SpecificationInspectionType.fromStatus(cmd.getInspectionType()))) {
-					//类型应用关系表
-					communityMap.setCategoryId(specification.getId());
-					communityMap.setModelType(QualityModelType.CATEGORY.getCode());
-				}else if(SpecificationInspectionType.SPECIFICATION.equals(SpecificationInspectionType.fromStatus(cmd.getInspectionType()))) {
-					//规范应用关系表
-					communityMap.setSpecificationId(specification.getId());
-					communityMap.setModelType(QualityModelType.SPECIFICATION.getCode());
-				}
-				qualityProvider.createQualityModelCommunityMap(communityMap);
-			}
-		}
 
 	}
 
@@ -2709,12 +2689,17 @@ public class QualityServiceImpl implements QualityService {
 			}
 		}
 
-		//上一版在所有中看不到项目中的自定义 所以使用如下判断 现在改成在项目中修改全部的则新建副本 referId为修改对象id
-		if (specification.getScopeCode()==0
-				&& SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
+		if(specification.getScopeId().equals(cmd.getScopeId())) {
 
-//			if (SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))
-//					&& !specification.getScopeId().equals(cmd.getScopeId())) {
+			specification.setName(cmd.getName());
+			specification.setDescription(cmd.getDescription());
+			specification.setScore(cmd.getScore());
+			specification.setWeight(cmd.getWeight());
+
+			qualityProvider.updateQualitySpecification(specification);
+		} else {
+			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))
+					&& !specification.getScopeId().equals(cmd.getScopeId())) {
 				QualityInspectionSpecifications newSpecification = ConvertHelper.convert(cmd, QualityInspectionSpecifications.class);
 				newSpecification.setNamespaceId(UserContext.getCurrentNamespaceId());
 				newSpecification.setApplyPolicy(SpecificationApplyPolicy.MODIFY.getCode());
@@ -2722,42 +2707,14 @@ public class QualityServiceImpl implements QualityService {
 				newSpecification.setCreatorUid(UserContext.current().getUser().getId());
 				newSpecification.setInspectionType(specification.getInspectionType());
 
-				if (cmd.getParentId() != null) {
+				if(cmd.getParentId() != null) {
 					QualityInspectionSpecifications parent = verifiedSpecificationById(cmd.getParentId(), cmd.getOwnerType(), cmd.getOwnerId());
 					newSpecification.setParentId(cmd.getParentId());
-					newSpecification.setPath(parent.getPath() + "/");
+					newSpecification.setPath(parent.getPath()+"/");
 				} else {
 					newSpecification.setPath("/");
 				}
 				qualityProvider.createQualitySpecification(newSpecification);
-
-		} else {
-			specification.setName(cmd.getName());
-			specification.setDescription(cmd.getDescription());
-			specification.setScore(cmd.getScore());
-			specification.setWeight(cmd.getWeight());
-			qualityProvider.updateQualitySpecification(specification);
-			//在全部中修改公共的
-			if (cmd.getCommunities() != null && cmd.getCommunities().size() > 0 &&
-					SpecificationScopeCode.ALL.equals(SpecificationScopeCode.fromCode(specification.getScopeCode()))) {
-				//删除关系
-				qualityProvider.deleteQualityModelCommunityMapBySpecificationId(specification.getId(), specification.getInspectionType());
-				//重新创建关系
-				for (Long communityId : cmd.getCommunities()) {
-					QualityInspectionModleCommunityMap communityMap = new QualityInspectionModleCommunityMap();
-					communityMap.setTargetId(communityId);
-					communityMap.setTargetType("community");
-					if (SpecificationInspectionType.CATEGORY.equals(SpecificationInspectionType.fromStatus(specification.getInspectionType()))) {
-						//类型应用关系表
-						communityMap.setCategoryId(specification.getId());
-						communityMap.setModelType(QualityModelType.CATEGORY.getCode());
-					} else if (SpecificationInspectionType.SPECIFICATION.equals(SpecificationInspectionType.fromStatus(specification.getInspectionType()))) {
-						//规范应用关系表
-						communityMap.setSpecificationId(specification.getId());
-						communityMap.setModelType(QualityModelType.SPECIFICATION.getCode());
-					}
-					qualityProvider.createQualityModelCommunityMap(communityMap);
-				}
 
 			}
 		}
@@ -2781,7 +2738,6 @@ public class QualityServiceImpl implements QualityService {
 				userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 			}
 		}
-		//按原代码  删除scopeType自定义的 两种情况
 		if(SpecificationScopeCode.fromCode(specification.getScopeCode()).equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))
 				&& specification.getScopeId().equals(cmd.getScopeId())) {
 			specification.setStatus(QualityStandardStatus.INACTIVE.getCode());
@@ -2789,31 +2745,15 @@ public class QualityServiceImpl implements QualityService {
 
 			qualityProvider.inactiveQualityInspectionStandardSpecificationMapBySpecificationId(specification.getId());
 		} else {
-			//在scopeType中删除其他的  两种情况
-			//项目中删除全部的
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))
 					&& !specification.getScopeId().equals(cmd.getScopeId())) {
-				/*QualityInspectionSpecifications newSpecification = ConvertHelper.convert(cmd, QualityInspectionSpecifications.class);
+				QualityInspectionSpecifications newSpecification = ConvertHelper.convert(cmd, QualityInspectionSpecifications.class);
 				newSpecification.setApplyPolicy(SpecificationApplyPolicy.DELETE.getCode());
 				newSpecification.setReferId(specification.getId());
 				newSpecification.setCreatorUid(UserContext.current().getUser().getId());
-				qualityProvider.createQualitySpecification(newSpecification);*/
-				//add delete community and specification relations
-				if (specification.getScopeId() == 0 && SpecificationScopeCode.ALL
-						.equals(SpecificationScopeCode.fromCode(specification.getScopeCode()))) {
+				qualityProvider.createQualitySpecification(newSpecification);
 
-					qualityProvider.deleteQualityModelCommunityMapByCommunityAndSpecificationId(specification.getId(),
-							cmd.getScopeId(), specification.getInspectionType());
-				}
-				// fix change newSpecification to specification
-				qualityProvider.inactiveQualityInspectionStandardSpecificationMapBySpecificationId(specification.getId());
-
-			}else {
-				//全部中删除项目中的  按常规删除
-				specification.setStatus(QualityStandardStatus.INACTIVE.getCode());
-				qualityProvider.updateQualitySpecification(specification);
-
-				qualityProvider.inactiveQualityInspectionStandardSpecificationMapBySpecificationId(specification.getId());
+				qualityProvider.inactiveQualityInspectionStandardSpecificationMapBySpecificationId(newSpecification.getId());
 			}
 		}
 	}
@@ -2848,34 +2788,16 @@ public class QualityServiceImpl implements QualityService {
 		if(cmd.getParentId() == null || cmd.getParentId() == 0) {
 			parent.setId(0L);
 			parent.setReferId(0L);
-			specifications = qualityProvider.listAllChildrenSpecifications("/%", cmd.getOwnerType(),
-					cmd.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, cmd.getInspectionType());
-
-			if (SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
-				//remove掉不在关联关系中的 scope ALL
-				removeNoApplySpecifications(specifications, cmd.getScopeId(), cmd.getInspectionType());
-				scopeSpecifications = qualityProvider.listAllChildrenSpecifications("/%",
-						cmd.getOwnerType(), cmd.getOwnerId(), cmd.getScopeCode(), cmd.getScopeId(), cmd.getInspectionType());
-			} else {
-				//取出所有项目中的
-				specifications.addAll(qualityProvider.listAllCommunitiesChildrenSpecifications("/%",
-						cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionType()));
+			specifications = qualityProvider.listAllChildrenSpecifications("/%", cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, cmd.getInspectionType());
+			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
+				scopeSpecifications = qualityProvider.listAllChildrenSpecifications("/%", cmd.getOwnerType(), cmd.getOwnerId(), cmd.getScopeCode(), cmd.getScopeId(), cmd.getInspectionType());
 			}
 
 		} else {
 			parent = verifiedSpecificationById(cmd.getParentId(), cmd.getOwnerType(), cmd.getOwnerId());
-			specifications = qualityProvider.listAllChildrenSpecifications(parent.getPath() + "/%",
-					cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, cmd.getInspectionType());
-
-			if (SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
-				//remove掉不在关联关系中的 scope ALL
-				removeNoApplySpecifications(specifications, cmd.getScopeId(), cmd.getInspectionType());
-				scopeSpecifications = qualityProvider.listAllChildrenSpecifications(parent.getPath() + "/%",
-						cmd.getOwnerType(), cmd.getOwnerId(), cmd.getScopeCode(), cmd.getScopeId(), cmd.getInspectionType());
-			} else {
-				//取出所有项目中的
-				specifications.addAll(qualityProvider.listAllCommunitiesChildrenSpecifications("/%",
-						cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionType()));
+			specifications = qualityProvider.listAllChildrenSpecifications(parent.getPath() + "/%", cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, cmd.getInspectionType());
+			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
+				scopeSpecifications = qualityProvider.listAllChildrenSpecifications(parent.getPath() + "/%", cmd.getOwnerType(), cmd.getOwnerId(), cmd.getScopeCode(), cmd.getScopeId(), cmd.getInspectionType());
 			}
 		}
 
@@ -2887,21 +2809,6 @@ public class QualityServiceImpl implements QualityService {
 
 		response.setSpecifications(dtos);
 		return response;
-	}
-
-	private void removeNoApplySpecifications(List<QualityInspectionSpecifications> specifications, Long scopeId, Byte inspectionType) {
-		List<QualityInspectionModleCommunityMap> communityMaps = qualityProvider.getQualityModelCommunityMapByTargetId(scopeId);
-		//用于存生效的关联表
-		if (communityMaps!=null && communityMaps.size()>0) {
-			List<Long> mapIds = new ArrayList<>();
-			if (inspectionType.equals(SpecificationInspectionType.SPECIFICATION.getCode())) {
-                communityMaps.forEach(m -> mapIds.add(m.getStandardId()));
-            } else {
-                communityMaps.forEach(m -> mapIds.add(m.getCategoryId()));
-            }
-			//从ALL中的specifications 中去除无效的关联
-			specifications.removeIf(s -> !mapIds.contains(s.getId()));
-		}
 	}
 
 	private List<QualityInspectionSpecificationDTO> dealWithScopeSpecifications(List<QualityInspectionSpecifications> specifications, List<QualityInspectionSpecifications> scopeSpecifications) {
