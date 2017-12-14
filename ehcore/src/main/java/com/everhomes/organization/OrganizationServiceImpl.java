@@ -95,7 +95,6 @@ import com.everhomes.rest.launchpad.ItemKind;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.module.Project;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
-import com.everhomes.rest.openapi.techpark.AllFlag;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
@@ -5964,7 +5963,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         if(cmd.getTag().equals(OrganizationGroupType.JOB_POSITION.getCode())){
             cmd.getIds().forEach(r->{
-                checkOrganizationpPivilege(r, PrivilegeConstants.BATCH_EXPORT_PERSON);
+                checkOrganizationpPivilege(r, PrivilegeConstants.DELETE_JOB_POSITION);
             });
         }
 
@@ -14224,6 +14223,25 @@ public class OrganizationServiceImpl implements OrganizationService {
         }else{
             LOGGER.error("no appId. rgId = {}, userId = {}", orgId, UserContext.currentUserId());
         }
+    }
+
+    @Override
+    public Long getDepartmentByDetailId(Long detailId){
+        List<String> groupTypes = new ArrayList<>();
+        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByDetailId(detailId, groupTypes);
+        if(members != null && members.size() > 0){
+            return members.get(0).getOrganizationId();
+        }else{
+            groupTypes.clear();
+            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+            List<OrganizationMember> member_enterprise = organizationProvider.listOrganizationMembersByDetailId(detailId, groupTypes);
+            if(member_enterprise != null && member_enterprise.size() > 0){
+               return member_enterprise.get(0).getOrganizationId();
+            }
+        }
+        return null;
     }
 }
 
