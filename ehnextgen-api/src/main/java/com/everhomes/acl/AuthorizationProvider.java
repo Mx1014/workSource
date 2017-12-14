@@ -49,7 +49,7 @@ public interface AuthorizationProvider {
     List<Authorization> listAuthorizationsByScope(String scope);
     List<AuthorizationRelation> listAuthorizationRelations(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 
-    List<AuthorizationRelation> listAuthorizationRelations(CrossShardListingLocator locator, Integer pageSize, String ownerType, Long ownerId, Long moduleId);
+    List<AuthorizationRelation> listAuthorizationRelations(CrossShardListingLocator locator, Integer pageSize, String ownerType, Long ownerId, Long moduleId, Long appId);
 
     List<AuthorizationRelation> listAuthorizationRelations(String ownerType, Long ownerId, Long moduleId);
 

@@ -13,6 +13,7 @@ import java.util.List;
  * <li>ownerType：范围类型，固定EhOrganizations，如果是左邻运营后台的域名可以定义一个类型  参考{@link com.everhomes.rest.common.EntityType}</li>
  * <li>ownerId：范围具体Id，域名对应的机构id，后面需要讨论是否直接通过域名来获取当前公司</li>
  * <li>moduleId:模块Id，不传查询全部</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class ListAuthorizationRelationsCommand {
@@ -26,6 +27,8 @@ public class ListAuthorizationRelationsCommand {
 	private Long ownerId;
 
 	private Long moduleId;
+
+	private Long appId;
 
 	public Long getPageAnchor() {
 		return pageAnchor;
@@ -72,5 +75,12 @@ public class ListAuthorizationRelationsCommand {
         return StringHelper.toJsonString(this);
     }
 
-    
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 }
