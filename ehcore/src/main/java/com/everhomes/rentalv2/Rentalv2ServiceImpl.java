@@ -29,6 +29,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
+import com.everhomes.bus.LocalEventBus;
+import com.everhomes.bus.LocalEventContext;
+import com.everhomes.bus.SystemEvent;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.flow.action.FlowTimeoutJob;
 import com.everhomes.order.OrderUtil;
@@ -46,7 +49,8 @@ import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.rest.rentalv2.admin.AttachmentType;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.user.*; 
+import com.everhomes.server.schema.tables.EhRentalv2Orders;
+import com.everhomes.user.*;
 import net.greghaines.jesque.Job;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
@@ -1871,6 +1875,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						rs.getAclinkId(), rs.getCreatorUid());
 				rentalv2Provider.setAuthDoorId(order.getId(), doorAuthId);
 			}
+			//用户积分
+			LocalEventBus.publish(event -> {
+				LocalEventContext context = new LocalEventContext();
+				context.setUid(order.getRentalUid());
+				context.setNamespaceId(order.getNamespaceId());
+				event.setContext(context);
+				event.setEntityType(EhRentalv2Orders.class.getSimpleName());
+				event.setEntityId(order.getId());
+				event.setEventName(SystemEvent.RENTAL_RESOURCE_APPLY.dft());
+			});
 		}
 
 
@@ -3109,16 +3123,26 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					order.setStatus(SiteBillStatus.FAIL.getCode());
 				
 				}
-				//更新bill状态
-				//只要退款就给管理员发消息,不管是退款中还是已退款
-				
-				rentalv2Provider.updateRentalBill(order); 
-				onOrderCancel(order);
-				if (order.getDoorAuthId()!=null) //解除门禁授权
-					doorAccessService.deleteDoorAuth(order.getDoorAuthId());
-					rentalv2Provider.setAuthDoorId(order.getId(),null);
-				return null;
+			//更新bill状态
+			//只要退款就给管理员发消息,不管是退款中还是已退款
+
+			rentalv2Provider.updateRentalBill(order);
+			onOrderCancel(order);
+			if (order.getDoorAuthId() != null) //解除门禁授权
+				doorAccessService.deleteDoorAuth(order.getDoorAuthId());
+			rentalv2Provider.setAuthDoorId(order.getId(), null);
+			//用户积分
+			LocalEventBus.publish(event -> {
+				LocalEventContext context = new LocalEventContext();
+				context.setUid(order.getRentalUid());
+				context.setNamespaceId(order.getNamespaceId());
+				event.setContext(context);
+				event.setEntityType(EhRentalv2Orders.class.getSimpleName());
+				event.setEntityId(order.getId());
+				event.setEventName(SystemEvent.RENTAL_RESOURCE_APPLY_CANCEL.dft());
 			});
+			return null;
+		});
 		}
 	}
 

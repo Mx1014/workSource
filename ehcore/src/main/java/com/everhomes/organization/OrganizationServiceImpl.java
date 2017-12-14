@@ -9,6 +9,9 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.archives.ArchivesProvider;
 import com.everhomes.archives.ArchivesService;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.bus.LocalEventBus;
+import com.everhomes.bus.LocalEventContext;
+import com.everhomes.bus.SystemEvent;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Building;
@@ -72,11 +75,7 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.category.CategoryConstants;
-import com.everhomes.rest.common.ActivationFlag;
-import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.common.IncludeChildFlagType;
-import com.everhomes.rest.common.QuestionMetaActionData;
-import com.everhomes.rest.common.Router;
+import com.everhomes.rest.common.*;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.customer.DeleteEnterpriseCustomerCommand;
@@ -135,7 +134,6 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.*;
 import org.jooq.Condition;
@@ -152,7 +150,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.*;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -5473,6 +5470,18 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
         this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), cmd.getEnterpriseId(), cmd.getUserId());
+
+        // 用户通过认证事件
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(cmd.getUserId());
+            context.setNamespaceId(UserContext.getCurrentNamespaceId());
+            event.setContext(context);
+
+            event.setEntityType(EntityType.USER.getCode());
+            event.setEntityId(cmd.getUserId());
+            event.setEventName(SystemEvent.ACCOUNT_AUTH_SUCCESS.dft());
+        });
     }
 
     /**

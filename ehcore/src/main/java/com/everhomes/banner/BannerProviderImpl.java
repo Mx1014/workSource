@@ -115,8 +115,10 @@ public class BannerProviderImpl implements BannerProvider {
             condition = condition.and(Tables.EH_BANNERS.BANNER_GROUP.eq(bannerGroup));
         }
         condition = condition.and(Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId));
-        condition = condition.and(Tables.EH_BANNERS.SCENE_TYPE.eq(sceneType));
-        
+        if (sceneType != null) {
+            condition = condition.and(Tables.EH_BANNERS.SCENE_TYPE.eq(sceneType));
+        }
+
         condition = condition.and(Tables.EH_BANNERS.SCOPE_CODE.eq(scopeCode));
         condition = condition.and(Tables.EH_BANNERS.SCOPE_ID.eq(scopeId));
         if(condition != null) {
