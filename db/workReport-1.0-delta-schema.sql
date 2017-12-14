@@ -64,7 +64,7 @@ CREATE TABLE `eh_work_report_scope_map` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 工作汇报值表
+-- 工作汇报单表
 CREATE TABLE `eh_work_report_vals` (
   `id` BIGINT NOT NULL COMMENT 'id of the report val',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -88,7 +88,7 @@ CREATE TABLE `eh_work_report_vals` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 工作汇报值接收人映射表
+-- 工作汇报单接收人映射表
 CREATE TABLE `eh_work_report_val_receiver_map` (
   `id` BIGINT NOT NULL COMMENT 'the id of the report val map',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -103,4 +103,41 @@ CREATE TABLE `eh_work_report_val_receiver_map` (
   `create_time` DATETIME COMMENT 'record create time',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 工作汇报单评论表
+CREATE TABLE `eh_work_report_val_comments` (
+  `id` BIGINT NOT NULL COMMENT 'the id of the report val map',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+
+  `owner_id` BIGINT,
+  `owner_type` VARCHAR(64),
+  `report_val_id` BIGINT NOT NULL COMMENT 'the id of the report val',
+  `content_type` VARCHAR(32) COMMENT 'the type of the content',
+  `content` TEXT COMMENT 'the comment',
+  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
+  `creator_avatar` VARCHAR(2048) COMMENT 'the avatar of the creator',
+  `creator_name` VARCHAR(256) COMMENT 'the name of the creator',
+  `creator_user_id` BIGINT NOT NULL COMMENT 'the user id of the creator',
+
+  `create_time` DATETIME COMMENT 'record create time',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 工作汇报单评论附件表
+CREATE TABLE `eh_work_report_val_comment_attachments` (
+  `id` BIGINT NOT NULL COMMENT 'the id of the report val map',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+
+  `owner_id` BIGINT,
+  `owner_type` VARCHAR(64),
+  `comment_id` BIGINT NOT NULL COMMENT 'the id of the comment',
+  `content_type` VARCHAR(32) COMMENT 'the type of the content',
+  `content_uri` VARCHAR(2048) COMMENT 'attachment object link info on storage',
+  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
+  `creator_user_id` BIGINT NOT NULL COMMENT 'the user id of the creator',
+
+  `create_time` DATETIME COMMENT 'record create time',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- end by nan.rong
