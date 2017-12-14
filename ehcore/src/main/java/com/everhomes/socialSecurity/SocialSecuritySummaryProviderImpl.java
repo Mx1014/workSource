@@ -36,8 +36,8 @@ public class SocialSecuritySummaryProviderImpl implements SocialSecuritySummaryP
 		socialSecuritySummary.setId(id);
 		socialSecuritySummary.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		socialSecuritySummary.setCreatorUid(UserContext.current().getUser().getId());
-		socialSecuritySummary.setUpdateTime(socialSecuritySummary.getCreateTime());
-		socialSecuritySummary.setOperatorUid(socialSecuritySummary.getCreatorUid());
+//		socialSecuritySummary.setUpdateTime(socialSecuritySummary.getCreateTime());
+//		socialSecuritySummary.setOperatorUid(socialSecuritySummary.getCreatorUid());
 		getReadWriteDao().insert(socialSecuritySummary);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSocialSecuritySummary.class, null);
 	}
@@ -45,8 +45,8 @@ public class SocialSecuritySummaryProviderImpl implements SocialSecuritySummaryP
 	@Override
 	public void updateSocialSecuritySummary(SocialSecuritySummary socialSecuritySummary) {
 		assert (socialSecuritySummary.getId() != null);
-		socialSecuritySummary.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		socialSecuritySummary.setOperatorUid(UserContext.current().getUser().getId());
+//		socialSecuritySummary.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		socialSecuritySummary.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(socialSecuritySummary);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSocialSecuritySummary.class, socialSecuritySummary.getId());
 	}
