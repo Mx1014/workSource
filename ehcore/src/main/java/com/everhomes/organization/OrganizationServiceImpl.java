@@ -5874,8 +5874,11 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public void sortOrganizationsAtSameLevel(SortOrganizationsAtSameLevelCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        // 权限校验
-        checkOrganizationpPivilege(cmd.getChildIds().get(0),PrivilegeConstants.CHANGE_DEPARTMENT_ORDER);
+        Organization org = this.organizationProvider.findOrganizationById(cmd.getChildIds().get(0));
+        if(org != null){
+            // 权限校验
+            checkOrganizationpPivilege(org.getParentId(),PrivilegeConstants.CHANGE_DEPARTMENT_ORDER);
+        }
 
         this.coordinationProvider.getNamedLock(CoordinationLocks.ORGANIZATION_ORDER_LOCK.getCode()).enter(() -> {
             if(cmd.getChildIds() != null && cmd.getChildIds().size() > 0){
