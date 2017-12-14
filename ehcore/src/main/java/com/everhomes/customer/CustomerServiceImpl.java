@@ -799,6 +799,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void createCustomerTax(CreateCustomerTaxCommand cmd) {
+        
         CustomerTax tax = ConvertHelper.convert(cmd, CustomerTax.class);
         enterpriseCustomerProvider.createCustomerTax(tax);
     }
