@@ -1,5 +1,7 @@
 package com.everhomes.equipment;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.entity.EntityType;
@@ -60,6 +62,10 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 
     @Autowired
     private PortalService portalService;
+
+    @Autowired
+    private CommunityProvider communityProvider;
+
 	@Override
 	public void deleteById(Long id) {
 		deleteById(id.toString());
@@ -207,6 +213,8 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
                 //全部里面
                 if (standard != null) {
                     standard.setCommunities(equipmentProvider.getModuleCommunityMapByStandardId(standard.getId()));
+                    Community community = communityProvider.findCommunityById(standard.getTargetId());
+                    standard.setTargetName(community.getName());
                 }
             }
             if(standard != null) {

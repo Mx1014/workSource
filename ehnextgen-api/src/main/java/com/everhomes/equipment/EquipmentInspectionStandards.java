@@ -18,6 +18,8 @@ public class EquipmentInspectionStandards extends EhEquipmentInspectionStandards
 
 	@ItemType(Long.class)
 	private List<Long> communities;
+
+	private  String  targetName;
 	
 	@ItemType(EquipmentInspectionStandardGroupMap.class)
 	private List<EquipmentInspectionStandardGroupMap> executiveGroup;
@@ -64,6 +66,14 @@ public class EquipmentInspectionStandards extends EhEquipmentInspectionStandards
 
 	public void setCommunities(List<Long> communities) {
 		this.communities = communities;
+	}
+
+	public String getTargetName() {
+		return targetName;
+	}
+
+	public void setTargetName(String targetName) {
+		this.targetName = targetName;
 	}
 
 	@Override
