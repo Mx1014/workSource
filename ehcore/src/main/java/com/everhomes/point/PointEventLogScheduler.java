@@ -34,7 +34,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PointEventLogScheduler.class);
 
-    @Value("${core.serverId}")
+    @Value("${core.server.id}")
     private String serverId;
 
     private final transient ReentrantLock lock = new ReentrantLock();
