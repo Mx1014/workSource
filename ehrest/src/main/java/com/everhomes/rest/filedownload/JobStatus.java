@@ -9,24 +9,24 @@ package com.everhomes.rest.filedownload;
  *     <li>FAIL((byte) 4): FAIL</li>
  * </ul>
  */
-public enum FileDownloadStatus {
+public enum JobStatus {
 
     WAITING((byte) 0), RUNNING((byte) 1), SUCCESS((byte) 2), CANCEL((byte) 3), FAIL((byte) 4);
 
     private Byte core;
 
-    private FileDownloadStatus(Byte core) {
+    private JobStatus(Byte core) {
         this.core = core;
     }
 
-    public Byte getCore() {
+    public Byte getCode() {
         return core;
     }
 
-    public static FileDownloadStatus fromName(Byte core) {
+    public static JobStatus fromName(Byte core) {
         if (core != null) {
-            FileDownloadStatus[] values = FileDownloadStatus.values();
-            for (FileDownloadStatus value : values) {
+            JobStatus[] values = JobStatus.values();
+            for (JobStatus value : values) {
                 if (value.equals(core)) {
                     return value;
                 }

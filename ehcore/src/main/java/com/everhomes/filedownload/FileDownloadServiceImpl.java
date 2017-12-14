@@ -35,34 +35,32 @@ public class FileDownloadServiceImpl implements FileDownloadService {
     private ConfigurationProvider configProvider;
 
     @Override
-    public Long createJob(String fileName, Class jobClass, Map<String, Object> jobParams) {
+    public Long createJob(Class jobClass, Map<String, Object> jobParams, Byte repeatFlag, Date startTime) {
 
-        FileDownloadJob job = saveJob(fileName, jobClass.getName(), jobParams);
-        runJob(job);
+        String fileName = (String) jobParams.get("fileName");
 
-        return null;
+        FileDownloadJob job = saveNewJob(fileName, jobClass.getName(), jobParams, repeatFlag);
+        scheduleJob(job);
+        return job.getId();
     }
 
 
     @Override
-    public void updateJobProgressRate(Long jobId, Float rate) {
+    public void updateJobRate(Long jobId, Integer rate) {
         FileDownloadJob job = fileDownloadProvider.findById(jobId);
-        job.setRate(rate.doubleValue());
-        if(rate == 1){
-            job.setStatus(FileDownloadStatus.SUCCESS.getCore());
-        }
+        job.setRate(rate);
         fileDownloadProvider.updateFileDownloadJob(job);
 
     }
 
 
     @Override
-    public void cancelJob(CancelJobCommand cmd) {
+    public void cancelJob(Long jobId) {
 
         //TODO 判断权限
         //TODO cancel
 
-        updateJobStatus(cmd.getJobId(), FileDownloadStatus.CANCEL);
+        updateJobStatus(jobId, JobStatus.CANCEL.getCode(),  null);
     }
 
     @Override
@@ -94,32 +92,55 @@ public class FileDownloadServiceImpl implements FileDownloadService {
     }
 
 
-    private void updateJobStatus(Long jobId, FileDownloadStatus status) {
+    @Override
+    public void updateJobStatus(Long jobId, Byte status, String errorDesc) {
         FileDownloadJob job = fileDownloadProvider.findById(jobId);
-        job.setStatus(status.getCore());
+        job.setStatus(status);
+        if(JobStatus.fromName(status) == JobStatus.SUCCESS){
+            job.setRate(100);
+        }
+        //job.setUri(uri);
+        job.setErrorDescription(errorDesc);
         fileDownloadProvider.updateFileDownloadJob(job);
     }
 
 
-    private FileDownloadJob saveJob(String fileName, String jobClassName, Map<String, Object> jobParams){
+    private FileDownloadJob saveNewJob(String fileName, String jobClassName, Map<String, Object> jobParams, Byte repeatFlag){
         FileDownloadJob job = new FileDownloadJob();
         Long ownerId = UserContext.currentUserId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         job.setOwnerId(ownerId);
         job.setFileName(fileName);
         job.setJobClassName(jobClassName);
         job.setJobParams(JSONObject.toJSONString(jobParams));
-        job.setStatus(FileDownloadStatus.WAITING.getCore());
+        job.setRepeatFlag(repeatFlag);
+        job.setStatus(JobStatus.WAITING.getCode());
         job.setCreateTime(new Timestamp(System.currentTimeMillis()));
-
+        fileDownloadProvider.createFileDownloadJob(job);
         return job;
     }
 
-    private void runJob(FileDownloadJob job){
+    private void scheduleJob(FileDownloadJob job){
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("jobId", job.getId());
+        parameters.put("fileName", job.getFileName());
         parameters.put("jobClassName", job.getJobClassName());
         parameters.put("jobParams", job.getJobParams());
-        String jobName = "FileDownload " + System.currentTimeMillis();
+        parameters.put("jobClassName", job.getJobClassName());
+        parameters.put("jobParams", job.getJobParams());
+        String jobName = "fileDownload_" + job.getId() + "_" + System.currentTimeMillis();
         scheduleProvider.scheduleSimpleJob(jobName,jobName, new Date(), FileDownloadScheduleJob.class,parameters);
     }
+
+
+
+
+
+
+
+
+
+
+
+
 }

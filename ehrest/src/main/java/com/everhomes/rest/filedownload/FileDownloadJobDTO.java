@@ -16,7 +16,7 @@ import java.sql.Timestamp;
  *     <li>uri: uri</li>
  *     <li>url: url</li>
  *     <li>rate: rate</li>
- *     <li>status: 状态 参考{@link FileDownloadStatus}</li>
+ *     <li>status: 状态 参考{@link JobStatus}</li>
  *     <li>createTime: createTime</li>
  *     <li>finishTime: finishTime</li>
  *     <li>updateTime: updateTime</li>
