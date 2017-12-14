@@ -74,12 +74,17 @@ public class EhForumPostsRecordMapper implements RecordMapper<Record, EhForumPos
         post.setOfficialFlag(r.getValue((Field<Byte>)r.field("official_flag")));
         post.setMediaDisplayFlag(r.getValue((Field<Byte>)r.field("media_display_flag")));
         post.setTag(r.getValue((Field<String>)r.field("tag")));
+        post.setActivityCategoryId(r.getValue((Field<Long>)r.field("activity_category_id")));
+        post.setCloneFlag(r.getValue((Field<Byte>)r.field("clone_flag")));
+        post.setParentCommentId(r.getValue((Field<Long>)r.field("parent_comment_id")));
+        post.setRealPostId(r.getValue((Field<Long>)r.field("real_post_id")));
         post.setStickFlag(r.getValue((Field<Byte>)r.field("stick_flag")));
         post.setStickTime(r.getValue((Field<Timestamp>)r.field("stick_time")));
 		post.setForumEntryId(r.getValue((Field<Long>)r.field("forum_entry_id")));
         post.setInteractFlag(r.getValue((Field<Byte>)r.field("interact_flag")));
         post.setModuleType(r.getValue((Field<Byte>)r.field("module_type")));
         post.setModuleCategoryId(r.getValue((Field<Long>)r.field("module_category_id")));
+
         return post;
     }
 }
