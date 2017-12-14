@@ -19,7 +19,6 @@ public class PmtaskParser implements PortalUrlParser {
         JSONObject json = JSONObject.parseObject(actionData);
         String url = json.getString("url");
         String[] arrs = url.split("&");
-
 //        for (String s: arrs) {
 //            int spe = s.indexOf("=");
 //            String key = s.substring(0, spe);

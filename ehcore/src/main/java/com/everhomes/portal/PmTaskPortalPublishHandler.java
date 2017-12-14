@@ -91,7 +91,7 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
     @Override
     public String getCustomTag(Integer namespaceId, Long moudleId, String actionData, String instanceConfig){
 
-        if(moudleId == FlowConstants.PM_TASK_MODULE){
+        if(Long.valueOf(moudleId) == Long.valueOf(FlowConstants.PM_TASK_MODULE)){
             JSONObject json = JSONObject.parseObject(actionData);
             String url = json.getString("url");
             String[] arrs = url.split("&");
@@ -109,7 +109,7 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
     }
 
     public Long getWebMenuId(Integer namespaceId, Long moudleId, String actionData, String instanceConfig){
-        if(moudleId == FlowConstants.PM_TASK_MODULE){
+        if(Long.valueOf(moudleId) == Long.valueOf(FlowConstants.PM_TASK_MODULE)){
             String taskCategoryId = getCustomTag(namespaceId, moudleId, actionData, instanceConfig);
             if (Long.valueOf(taskCategoryId) == PmTaskAppType.REPAIR_ID) {
                 return 20100L;
