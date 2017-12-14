@@ -11126,13 +11126,15 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public Boolean deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd) {
+    public Boolean  deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd) {
 
-        // 权限
-        checkOrganizationpPivilege(cmd.getId(),PrivilegeConstants.DELETE_JOB_POSITION);
         checkId(cmd.getId());
 
         OrganizationJobPosition organizationJobPosition = checkOrganizationJobPositionIsNull(cmd.getId());
+
+        // 权限
+        checkOrganizationpPivilege(organizationJobPosition.getOwnerId(),PrivilegeConstants.DELETE_JOB_POSITION);
+
 
         if(cmd.getEnterpriseId() != null){
             //:todo 删除时置空判断
