@@ -24,6 +24,12 @@ import com.everhomes.server.schema.tables.EhQuestionnaireRanges;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class SequenceServiceImpl implements SequenceService {
@@ -2029,6 +2035,42 @@ public class SequenceServiceImpl implements SequenceService {
 		
 		syncTableSequence(null, EhPaymentWithdrawOrders.class, Tables.EH_PAYMENT_WITHDRAW_ORDERS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PAYMENT_WITHDRAW_ORDERS.ID.max()).from(Tables.EH_PAYMENT_WITHDRAW_ORDERS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPointSystems.class, Tables.EH_POINT_SYSTEMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_SYSTEMS.ID.max()).from(Tables.EH_POINT_SYSTEMS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPointRuleCategories.class, Tables.EH_POINT_RULE_CATEGORIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_RULE_CATEGORIES.ID.max()).from(Tables.EH_POINT_RULE_CATEGORIES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPointScores.class, Tables.EH_POINT_SCORES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_SCORES.ID.max()).from(Tables.EH_POINT_SCORES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPointRules.class, Tables.EH_POINT_RULES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_RULES.ID.max()).from(Tables.EH_POINT_RULES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPointLogs.class, Tables.EH_POINT_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_LOGS.ID.max()).from(Tables.EH_POINT_LOGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPointGoods.class, Tables.EH_POINT_GOODS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_GOODS.ID.max()).from(Tables.EH_POINT_GOODS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPointTutorials.class, Tables.EH_POINT_TUTORIALS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_TUTORIALS.ID.max()).from(Tables.EH_POINT_TUTORIALS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPointTutorialToPointRuleMappings.class, Tables.EH_POINT_TUTORIAL_TO_POINT_RULE_MAPPINGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_TUTORIAL_TO_POINT_RULE_MAPPINGS.ID.max()).from(Tables.EH_POINT_TUTORIAL_TO_POINT_RULE_MAPPINGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPointEventLogs.class, Tables.EH_POINT_EVENT_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_EVENT_LOGS.ID.max()).from(Tables.EH_POINT_EVENT_LOGS).fetchOne().value1();
+        });
+        /*syncTableSequence(null, EhSystemEvents.class, Tables.EH_SYSTEM_EVENTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SYSTEM_EVENTS.ID.max()).from(Tables.EH_SYSTEM_EVENTS).fetchOne().value1();
+        });*/
+        syncTableSequence(null, EhPointActions.class, Tables.EH_POINT_ACTIONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_ACTIONS.ID.max()).from(Tables.EH_POINT_ACTIONS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPointRuleToEventMappings.class, Tables.EH_POINT_RULE_TO_EVENT_MAPPINGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_RULE_TO_EVENT_MAPPINGS.ID.max()).from(Tables.EH_POINT_RULE_TO_EVENT_MAPPINGS).fetchOne().value1();
         });
 
         syncTableSequence(null, EhMeWebMenus.class, Tables.EH_ME_WEB_MENUS.getName(), (dbContext) -> {

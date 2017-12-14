@@ -1,5 +1,7 @@
 package com.everhomes.listing;
 
+import com.everhomes.util.StringHelper;
+
 import java.io.Serializable;
 
 public class ListingLocator implements Serializable {
@@ -29,5 +31,10 @@ public class ListingLocator implements Serializable {
 
     public void setEntityId(long entityId) {
         this.entityId = entityId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
