@@ -241,15 +241,13 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
             if(authorization_target != null ){
                 switch (ModuleManagementType.fromCode(authorization_target.getModuleControlType())){
                     case COMMUNITY_CONTROL:
-                        if(communityId != 0L){
-                            if(controlOption == ControlTargetOption.ALL_COMMUNITY.getCode()){//配置为全园区时，返回true
-                                return true;
-                            }
-                            if(communityId != null){
-                                for (ControlTarget controlTarget : controlTargets) {
-                                    if(controlTarget.getId().equals(communityId)){
-                                        return true;
-                                    }
+                        if(controlOption == ControlTargetOption.ALL_COMMUNITY.getCode()){//配置为全园区时，返回true
+                            return true;
+                        }
+                        if(communityId != null && communityId != 0L){
+                            for (ControlTarget controlTarget : controlTargets) {
+                                if(controlTarget.getId().equals(communityId)){
+                                    return true;
                                 }
                             }
                         }
@@ -269,14 +267,17 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
                             }
 
                             List orgs = this.organizationProvider.checkOrgExistInOrgOrPaths(namespaceId, organizationId, orgIds, orgPaths);
-                            if(orgs != null && orgs.size() > 0)
+                            if(orgs != null && orgs.size() > 0){
                                 return true;
+                            }else{
+                                return false;
+                            }
                         }
                     case UNLIMIT_CONTROL:
                         return true;
-
                 }
             }
+            return false;
         }
         return false;
     }

@@ -121,16 +121,16 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
 
     @Override
     public List<GeneralApprovalTemplate> listGeneralApprovalTemplateByModuleId(Long moduleId) {
+        List<GeneralApprovalTemplate> results = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         SelectQuery<EhGeneralApprovalTemplatesRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVAL_TEMPLATES);
         query.addConditions(Tables.EH_GENERAL_APPROVAL_TEMPLATES.MODULE_ID.eq(moduleId));
-        List<GeneralApprovalTemplate> results = query.fetch().map(r -> {
-            return ConvertHelper.convert(r, GeneralApprovalTemplate.class);
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, GeneralApprovalTemplate.class));
+            return null;
         });
-        if (results != null && results.size() > 0)
-            return results;
-        return null;
+        return results;
     }
 
     @Override
