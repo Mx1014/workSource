@@ -11108,10 +11108,12 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public Long updateOrganizationJobPosition(UpdateOrganizationJobPositionCommand cmd) {
         // 权限
-        checkOrganizationpPivilege(cmd.getId(),PrivilegeConstants.MODIFY_JOB_POSITION);
         checkId(cmd.getId());
 
         OrganizationJobPosition organizationJobPosition = checkOrganizationJobPositionIsNull(cmd.getId());
+
+        checkOrganizationpPivilege(organizationJobPosition.getOwnerId(),PrivilegeConstants.MODIFY_JOB_POSITION);
+
 
         OrganizationJobPosition organizationJobPosition_sameName = organizationProvider.findOrganizationJobPositionByName(
                 organizationJobPosition.getOwnerType(), organizationJobPosition.getOwnerId(), cmd.getName());
@@ -11126,13 +11128,15 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public Boolean deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd) {
+    public Boolean  deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd) {
 
-        // 权限
-        checkOrganizationpPivilege(cmd.getId(),PrivilegeConstants.DELETE_JOB_POSITION);
         checkId(cmd.getId());
 
         OrganizationJobPosition organizationJobPosition = checkOrganizationJobPositionIsNull(cmd.getId());
+
+        // 权限
+        checkOrganizationpPivilege(organizationJobPosition.getOwnerId(),PrivilegeConstants.DELETE_JOB_POSITION);
+
 
         if(cmd.getEnterpriseId() != null){
             //:todo 删除时置空判断

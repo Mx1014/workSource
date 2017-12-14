@@ -668,8 +668,10 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         if(checkModuleManage(userId, cmd.getOrganizationId(), cmd.getModuleId())){
             return 1;
         }
-        if(userPrivilegeMgr.checkModuleAppAdmin(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), cmd.getUserId(), cmd.getAppId())){
-            return 1;
+        if(cmd.getAppId() != null){
+            if(userPrivilegeMgr.checkModuleAppAdmin(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), cmd.getUserId(), cmd.getAppId())){
+                return 1;
+            }
         }
         return 0;
     }
