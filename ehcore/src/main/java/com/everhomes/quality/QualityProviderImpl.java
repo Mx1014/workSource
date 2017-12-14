@@ -2744,4 +2744,32 @@ public class QualityProviderImpl implements QualityProvider {
 		}
 		query.execute();
 	}
+
+	@Override
+	public List<QualityInspectionSpecifications> listAllCommunitiesChildrenSpecifications(String superiorPath, String ownerType, Long ownerId, Byte inspectionType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<QualityInspectionSpecifications> result  = new ArrayList<QualityInspectionSpecifications>();
+		SelectQuery<EhQualityInspectionSpecificationsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS);
+
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.PATH.like(superiorPath));
+
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_CODE.eq(SpecificationScopeCode.COMMUNITY.getCode()));
+
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_ID.ne(0L));
+
+		if(inspectionType != null)
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.INSPECTION_TYPE.eq(inspectionType));
+
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
+
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionSpecifications.class));
+			return null;
+		});
+
+		return result;
+	}
 }

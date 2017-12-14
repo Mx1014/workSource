@@ -180,4 +180,6 @@ public interface QualityProvider {
     void deleteQualityModelCommunityMapByCommunityAndSpecificationId(Long id, Long scopeId, Byte inspectionType);
 
 	void deleteQualityModelCommunityMapBySpecificationId(Long id, Byte inspectionType);
+
+	List<QualityInspectionSpecifications> listAllCommunitiesChildrenSpecifications(String s, String ownerType, Long ownerId, Byte inspectionType);
 }

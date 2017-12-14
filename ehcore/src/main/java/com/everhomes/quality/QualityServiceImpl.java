@@ -425,6 +425,7 @@ public class QualityServiceImpl implements QualityService {
 			//首先查出标准和项目之间关联表
 			List<QualityInspectionModleCommunityMap> modleCommunityMaps = qualityProvider.getQualityModelCommunityMapByTargetId(cmd.getTargetId());
 			List<Long> containIds = new ArrayList<>();
+			if(modleCommunityMaps!=null && modleCommunityMaps.size()>0)
 			modleCommunityMaps.forEach(m -> containIds.add(m.getStandardId()));
 
 			standards = qualityProvider.listQualityInspectionStandards(locator, pageSize + 1,
@@ -2852,12 +2853,13 @@ public class QualityServiceImpl implements QualityService {
 
 			if (SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
 				//remove掉不在关联关系中的 scope ALL
-				specifications = removeNoApplySpecifications(specifications, cmd.getScopeId(), cmd.getInspectionType());
+				removeNoApplySpecifications(specifications, cmd.getScopeId(), cmd.getInspectionType());
 				scopeSpecifications = qualityProvider.listAllChildrenSpecifications("/%",
 						cmd.getOwnerType(), cmd.getOwnerId(), cmd.getScopeCode(), cmd.getScopeId(), cmd.getInspectionType());
 			} else {
-				specifications.addAll(qualityProvider.listAllChildrenSpecifications("/%",
-						cmd.getOwnerType(), cmd.getOwnerId(), cmd.getScopeCode(), cmd.getScopeId(), cmd.getInspectionType()));
+				//取出所有项目中的
+				specifications.addAll(qualityProvider.listAllCommunitiesChildrenSpecifications("/%",
+						cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionType()));
 			}
 
 		} else {
@@ -2867,12 +2869,13 @@ public class QualityServiceImpl implements QualityService {
 
 			if (SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
 				//remove掉不在关联关系中的 scope ALL
-				specifications = removeNoApplySpecifications(specifications, cmd.getScopeId(), cmd.getInspectionType());
+				removeNoApplySpecifications(specifications, cmd.getScopeId(), cmd.getInspectionType());
 				scopeSpecifications = qualityProvider.listAllChildrenSpecifications(parent.getPath() + "/%",
 						cmd.getOwnerType(), cmd.getOwnerId(), cmd.getScopeCode(), cmd.getScopeId(), cmd.getInspectionType());
 			} else {
-				specifications.addAll(qualityProvider.listAllChildrenSpecifications("/%",
-						cmd.getOwnerType(), cmd.getOwnerId(), cmd.getScopeCode(), cmd.getScopeId(), cmd.getInspectionType()));
+				//取出所有项目中的
+				specifications.addAll(qualityProvider.listAllCommunitiesChildrenSpecifications("/%",
+						cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionType()));
 			}
 		}
 
@@ -2886,18 +2889,19 @@ public class QualityServiceImpl implements QualityService {
 		return response;
 	}
 
-	private List<QualityInspectionSpecifications> removeNoApplySpecifications(List<QualityInspectionSpecifications> specifications, Long scopeId, Byte inspectionType) {
+	private void removeNoApplySpecifications(List<QualityInspectionSpecifications> specifications, Long scopeId, Byte inspectionType) {
 		List<QualityInspectionModleCommunityMap> communityMaps = qualityProvider.getQualityModelCommunityMapByTargetId(scopeId);
 		//用于存生效的关联表
-		List<Long> mapIds = new ArrayList<>();
-		if (inspectionType.equals(SpecificationInspectionType.SPECIFICATION.getCode())) {
-			communityMaps.forEach(m -> mapIds.add(m.getStandardId()));
-		} else {
-			communityMaps.forEach(m -> mapIds.add(m.getCategoryId()));
+		if (communityMaps!=null && communityMaps.size()>0) {
+			List<Long> mapIds = new ArrayList<>();
+			if (inspectionType.equals(SpecificationInspectionType.SPECIFICATION.getCode())) {
+                communityMaps.forEach(m -> mapIds.add(m.getStandardId()));
+            } else {
+                communityMaps.forEach(m -> mapIds.add(m.getCategoryId()));
+            }
+			//从ALL中的specifications 中去除无效的关联
+			specifications.removeIf(s -> !mapIds.contains(s.getId()));
 		}
-		//从ALL中的specifications 中去除无效的关联
-		specifications.removeIf(s -> !mapIds.contains(s.getId()));
-		return specifications;
 	}
 
 	private List<QualityInspectionSpecificationDTO> dealWithScopeSpecifications(List<QualityInspectionSpecifications> specifications, List<QualityInspectionSpecifications> scopeSpecifications) {
