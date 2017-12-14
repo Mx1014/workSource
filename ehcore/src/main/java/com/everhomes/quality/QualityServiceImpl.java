@@ -2472,8 +2472,15 @@ public class QualityServiceImpl implements QualityService {
 
         	if(QualityInspectionLogType.STANDARD.getCode().equals(r.getTargetType()) && r.getTargetId() != null) {
         		QualityInspectionStandards standard = qualityProvider.findStandardById(r.getTargetId());
-        		if(standard != null && standard.getTargetId().equals(cmd.getScopeId())) {
-        			dto.setTargetName(standard.getName());
+        		if(standard != null) {
+        			if(cmd.getScopeId()==null){
+        				//全部中查看
+						dto.setTargetName(standard.getName());
+					}else {
+        				//项目中查看
+        				if(standard.getTargetId().equals(cmd.getScopeId()))
+						dto.setTargetName(standard.getName());
+					}
         		}
         	}
         	return dto;
