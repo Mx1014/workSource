@@ -143,4 +143,4 @@ schedule.running.flag: 1
 # core server list
 core.serverIdList: 1,2
 # current core id
-core.serverId: 2
+core.server.id: 2
