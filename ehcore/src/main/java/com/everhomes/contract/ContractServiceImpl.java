@@ -1377,7 +1377,7 @@ public class ContractServiceImpl implements ContractService {
 //			return response;
 //		}
 
-		List<Contract> contracts = contractProvider.listContractByCustomerId(cmd.getCommunityId(), cmd.getEnterpriseCustomerId(), CustomerType.ENTERPRISE.getCode());
+		List<Contract> contracts = contractProvider.listContractByCustomerId(cmd.getCommunityId(), cmd.getEnterpriseCustomerId(), CustomerType.ENTERPRISE.getCode(), cmd.getStatus());
 		if(contracts != null && contracts.size() > 0) {
 			return contracts.stream().map(contract -> {
 				ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);

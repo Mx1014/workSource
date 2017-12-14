@@ -62,14 +62,14 @@ INSERT INTO eh_service_module_exclude_functions (id, namespace_id, module_id, fu
     VALUES(1, 999983, 20400, 96);
 INSERT INTO eh_service_module_exclude_functions (id, namespace_id, module_id, function_id)
     VALUES(2, 999971, 20400, 96);
-    
+
 DROP PROCEDURE if exists create_exclude_function;
 delimiter //
 CREATE PROCEDURE `create_exclude_function` ()
-BEGIN  
+BEGIN
   DECLARE ns INTEGER;
   DECLARE done INT DEFAULT FALSE;
-  DECLARE cur CURSOR FOR select id from eh_namespaces; 
+  DECLARE cur CURSOR FOR select id from eh_namespaces;
   DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
   OPEN cur;
   read_loop: LOOP
@@ -130,18 +130,18 @@ INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field
 
 INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'enterprise_customer', @field_id, '个人', '1', '2', '1', NOW(), NULL, NULL, NULL);
 INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'enterprise_customer', @field_id, '公司', '2', '2', '1', NOW(), NULL, NULL, NULL);
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'enterprise_customer', 'contractId', '关联合同', 'Long', '3', '/3/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"select\", \"length\": 32}');
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'enterprise_customer', 'memo', '备注', 'String', '3', '/3/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 1024}');
 
 -- merge from customer1129 by xiongying20171212 end
 
 -- 物品搬迁 add by sw 20171212
-INSERT INTO `eh_web_menus` (`name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
-	VALUES ('41800', '物品搬迁', '40000', NULL, NULL, '1', '2', '/40000/41800', 'park', '470', '41800', '2', NULL, 'module');
-INSERT INTO `eh_web_menus` (`name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
-	VALUES ('41802', '申请列表', '41800', NULL, 'react:/goods-move/apply-list', '0', '2', '/40000/41800/41802', 'park', '471', '41800', '3', NULL, 'module');
-INSERT INTO `eh_web_menus` (`name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
-	VALUES ('41804', '工作流设置', '41800', NULL, 'react:/working-flow/flow-list/goods-move/41800', '0', '2', '/40000/41800/41804', 'park', '475', '41800', '3', NULL, 'module');
-
+INSERT INTO `eh_web_menus` (id, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('49200', '物品搬迁', '40000', NULL, NULL, '1', '2', '/40000/49200', 'park', '470', '49200', '2', NULL, 'module');
+INSERT INTO `eh_web_menus` (id, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('49202', '申请列表', '49200', NULL, 'react:/goods-move/apply-list', '0', '2', '/40000/49200/49202', 'park', '471', '49200', '3', NULL, 'module');
+INSERT INTO `eh_web_menus` (id, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('49204', '工作流设置', '49200', NULL, 'react:/working-flow/flow-list/goods-move/49200', '0', '2', '/40000/49200/49204', 'park', '475', '49200', '3', NULL, 'module');
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 	VALUES ('relocation', '1', 'zh_CN', '物品搬迁', '物品搬迁', '0');
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
@@ -150,9 +150,14 @@ INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `te
 	VALUES ('relocation', '3', 'zh_CN', '物品搬迁工作流处理人显示内容', '申请人：${requestorName}  企业名称：${requestorEnterpriseName}\r\n搬迁物品：${items}共${totalNum}件\r\n搬迁时间：${relocationDate}', '0');
 
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`)
-	VALUES (41800, '物品搬迁', 40000, '/40000/41800', 1, 2, 2, 0, UTC_TIME(), NULL, NULL, UTC_TIME(), 0, 0, 0, 0);
+	VALUES (49200, '物品搬迁', 40000, '/40000/49200', 1, 2, 2, 0, UTC_TIME(), NULL, NULL, UTC_TIME(), 0, 0, 0, 0);
 
 -- 园区入驻多入口 add by sw 20171212
+UPDATE eh_web_menus set data_type = 'react:/project-intro/project-list/1' where id = 40103;
+UPDATE eh_web_menus set data_type = 'projects_introduce/1' where id = 40105;
+UPDATE eh_web_menus set data_type = 'rent_manage/1' where id = 40110;
+UPDATE eh_web_menus set data_type = 'enter_apply/1' where id = 40120;
+
 UPDATE eh_enterprise_op_requests set category_id = 1;
 UPDATE eh_lease_promotions set category_id = 1;
 UPDATE eh_lease_projects set category_id = 1;
@@ -162,8 +167,33 @@ UPDATE eh_lease_form_requests set category_id = 1;
 UPDATE eh_lease_configs set category_id = 1;
 UPDATE eh_lease_buildings set category_id = 1;
 
+UPDATE eh_configurations set `value` = '/park-entry/dist/index.html?hideNavigationBar=1#/project_intro/%s/%s/%s' where `name` = 'apply.entry.lease.project.detail.url';
+
+-- dengs,20171212,服务联盟消息格式修改
+update eh_locale_templates SET text = '您收到一条${categoryName}的申请；
+
+服务名称：${serviceAllianceName}
+提交者信息：
+预订人：${creatorName}
+手机号：${creatorMobile}
+公司名称：${creatorOrganization}
+
+提交的信息：
+${notemessage}
+您可以登录管理后台查看详情
+' WHERE scope = 'serviceAlliance.request.notification' AND `code` in (1,2);
+
+-- 新增错误提示 by wentian
+SET @local_id = (SELECT MAX(`id`) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@local_id:=@local_id+1, 'assetv2', '10007', 'zh_CN', '存在已支付的账单，请刷新后再尝试支付');
 
 
 
-                                                                                                                                                                                                                                                                                                           
-                                                                                                                                                                                                                                                                                                           
+
+
+
+
+-- update address mappings, add building_id and building_name added by Janson 2017-12-12
+update eh_organization_address_mappings gg INNER JOIN eh_addresses as t1 on t1.id = gg.address_id set gg.building_name = t1.building_name where gg.building_name is null;
+update eh_organization_address_mappings gg INNER JOIN eh_buildings as t1 on (t1.community_id = gg.community_id and t1.`name` = gg.building_name) set gg.building_id = t1.id where gg.building_id = 0;
+

@@ -244,7 +244,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			.from(Tables.EH_ORGANIZATION_MEMBERS)
 			.where(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
 			.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
-			.and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId)).and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
 			.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(groupType))
 			.fetchAny();
 
@@ -5915,7 +5915,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}else if(cond2 != null){
 			query.addConditions(cond2);
 		}
-		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(organizationId));
 		return query.fetch();
     }
 }

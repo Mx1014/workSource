@@ -31,6 +31,7 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.*;
 import com.everhomes.rest.general_approval.GeneralApprovalRecordDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -319,8 +320,8 @@ public class PunchServiceImpl implements PunchService {
 		LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
 				" privilege={},check org id = {}", UserContext.getCurrentNamespaceId(), "", orgId, EntityType.COMMUNITY.getCode(),
 				orgId, privilege,checkOrgId);
-		throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_FORBIDDEN_PERMISSIONS,
-			"Permission is prohibited");
+		throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+				"check app privilege error");
 	} 
 	
 	private boolean checkBooleanAppPrivilege(Long orgId,Long checkOrgId, Long privilege){
@@ -7170,11 +7171,11 @@ public class PunchServiceImpl implements PunchService {
         Long creatorUid= null;
         if (!checkBooleanAppPrivilege(cmd.getOwnerId(), cmd.getDeptId() == null ? cmd.getOwnerId() : cmd.getDeptId(), PrivilegeConstants.PUNCH_RULE_QUERY_ALL)) {
             //没通过全部校验的就要进行creator校验
-            if ((!checkBooleanAppPrivilege(cmd.getOwnerId(), cmd.getDeptId() == null ? cmd.getOwnerId() : cmd.getDeptId(), PrivilegeConstants.PUNCH_RULE_QUERY_CREATOR))) {
+            if ((checkBooleanAppPrivilege(cmd.getOwnerId(), cmd.getDeptId() == null ? cmd.getOwnerId() : cmd.getDeptId(), PrivilegeConstants.PUNCH_RULE_QUERY_CREATOR))) {
                 creatorUid = UserContext.current().getUser().getId();
             }else{
-                throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_FORBIDDEN_PERMISSIONS,
-                        "Permission is prohibited");
+				throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+						"check app privilege error");
             }
         }
 //=======

@@ -29,6 +29,7 @@ import com.everhomes.namespace.*;
 import com.everhomes.organization.*;
 import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.blacklist.BlacklistErrorCode;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.ListBuildingCommand;
@@ -172,8 +173,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 			LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
 							" privilege={}", namespaceId, cmd.getTaskCategoryId(), cmd.getCurrentOrgId(), EntityType.COMMUNITY.getCode(),
 					cmd.getOwnerId(), PrivilegeConstants.PMTASK_LIST);
-			throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_FORBIDDEN_PERMISSIONS,
-					"Permission is prohibited");
+			throw  RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+					"check app privilege error");
 		}
 
 		//检查权限细化
@@ -614,8 +615,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 				LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
 								" privilege={}", namespaceId, cmd.getTaskCategoryId(), cmd.getOrganizationId(), EntityType.COMMUNITY.getCode(),
 						cmd.getOwnerId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE);
-				throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_FORBIDDEN_PERMISSIONS,
-						"Permission is prohibited");
+				throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+						"check app privilege error");
 			}
 
 			String requestorPhone = cmd.getRequestorPhone();
@@ -685,8 +686,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 			LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
 							" privilege={}", namespaceId, cmd.getTaskCategoryId(), cmd.getOrganizationId(), EntityType.COMMUNITY.getCode(),
 					cmd.getOwnerId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE);
-			throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_FORBIDDEN_PERMISSIONS,
-					"Permission is prohibited");
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+					"check app privilege error");
 		}
 //		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 //		User user = UserContext.current().getUser();
@@ -991,8 +992,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 			LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
 					" privilege={}", namespaceId, cmd.getTaskCategoryId(), cmd.getCurrentOrgId(), EntityType.COMMUNITY.getCode(),
 					cmd.getCommunityId(), PrivilegeConstants.PMTASK_TASK_STATISTICS_LIST);
-			throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_FORBIDDEN_PERMISSIONS,
-					"Permission is prohibited");
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+					"check app privilege error");
 		}
 
 		SearchTaskStatisticsResponse response = new SearchTaskStatisticsResponse();
@@ -1674,7 +1675,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public SearchTaskCategoryStatisticsResponse searchTaskCategoryStatistics(SearchTaskStatisticsCommand cmd) {
-		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_TASK_STATISTICS_LIST);
+//		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_TASK_STATISTICS_LIST);
 		SearchTaskCategoryStatisticsResponse response = new SearchTaskCategoryStatisticsResponse();
 
 		List<TaskCategoryStatisticsDTO> list = queryTaskCategoryStatistics(cmd);

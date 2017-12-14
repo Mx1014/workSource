@@ -15,5 +15,6 @@ public class AssetErrorCodes {
     static final int UNIQUE_BILL_ITEM_CHECK = 10004;
     static final int CHANGE_SAFE_CHECK = 10005;
     static final int HTTP_EBEI_ERROR = 10006;
+    static final int HAS_PAID_BILLS = 10007;
 
 }

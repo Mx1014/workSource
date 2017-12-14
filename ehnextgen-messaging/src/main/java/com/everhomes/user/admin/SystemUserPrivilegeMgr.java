@@ -75,7 +75,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         List<Long> roles = resolver.determineRoleInResource(userId, null, EntityType.USER.getCode(), null);
         if(!this.aclProvider.checkAccess("system", null, EntityType.USER.getCode(),
                 userId, Privilege.All, roles))
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, 
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                     "Insufficient privilege");
     }
 
@@ -241,12 +241,12 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
             if(authorization_target != null ){
                 switch (ModuleManagementType.fromCode(authorization_target.getModuleControlType())){
                     case COMMUNITY_CONTROL:
+                        if(controlOption == ControlTargetOption.ALL_COMMUNITY.getCode()){//配置为全园区时，返回true
+                            return true;
+                        }
                         if(communityId != null && communityId != 0L){
-                            if(controlOption == ControlTargetOption.ALL_COMMUNITY.getCode()){//配置为全园区时，返回true
-                                return true;
-                            }
                             for (ControlTarget controlTarget : controlTargets) {
-                                if(controlTarget.getId() == communityId){
+                                if(controlTarget.getId().equals(communityId)){
                                     return true;
                                 }
                             }
@@ -267,14 +267,17 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
                             }
 
                             List orgs = this.organizationProvider.checkOrgExistInOrgOrPaths(namespaceId, organizationId, orgIds, orgPaths);
-                            if(orgs != null && orgs.size() > 0)
+                            if(orgs != null && orgs.size() > 0){
                                 return true;
+                            }else{
+                                return false;
+                            }
                         }
                     case UNLIMIT_CONTROL:
                         return true;
-
                 }
             }
+            return false;
         }
         return false;
     }

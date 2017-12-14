@@ -16,6 +16,7 @@ import java.math.BigDecimal;
  * <li>payStatus:清账状态</li>
  * <li>dateStrBegin:计费开始时间</li>
  * <li>dateStrEnd:计费结束时间</li>
+ * <li>chargeStatus:1.欠费；0：不欠费</li>
  *</ul>
  */
 public class BillDetailDTO {
@@ -28,6 +29,15 @@ public class BillDetailDTO {
     private String dateStrBegin;
     private String dateStrEnd;
     private String deadline;
+    private Byte chargeStatus;
+
+    public Byte getChargeStatus() {
+        return chargeStatus;
+    }
+
+    public void setChargeStatus(Byte chargeStatus) {
+        this.chargeStatus = chargeStatus;
+    }
 
     public String getDeadline() {
         return deadline;

@@ -5,6 +5,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.menu.Target;
 import com.everhomes.rest.module.Project;
+import com.everhomes.util.Tuple;
 
 import java.util.List;
 
@@ -34,7 +35,7 @@ public interface AuthorizationProvider {
 
     List<Long> getAuthorizationModuleIdsByTarget(List<Target> targets);
 
-    List<Long> getAuthorizationAppModuleIdsByTarget(List<Target> targets);
+    List<Tuple<Long,String>> getAuthorizationAppModuleIdsByTarget(List<Target> targets);
 
     List<Authorization> listTargetAuthorizations(String ownerType, Long ownerId, String authType, Long authId, String identityType);
 

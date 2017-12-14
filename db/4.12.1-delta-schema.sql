@@ -110,10 +110,11 @@ CREATE TABLE `eh_customer_accounts` (
   `branch_name` VARCHAR(128) COMMENT '开户网点',
   `account_holder` VARCHAR(128) COMMENT '开户人',
   `account_number`  VARCHAR(128) COMMENT '账号',
-  `account_number_type` VARCHAR(128) COMMENT '账号类型',
+  `account_number_type_id` BIGINT COMMENT '账号类型',
   `branch_province` VARCHAR(128) COMMENT '开户行所在省',
   `branch_city` VARCHAR(128) COMMENT '开户行所在市',
   `account_type_id` BIGINT COMMENT '账户类型 refer to the id of eh_var_field_items',
+  `contract_id` BIGINT COMMENT '合同 refer to the id of eh_contracts',
   `memo` VARCHAR(128) COMMENT '备注',
   `status` TINYINT NOT NULL DEFAULT 2,
   `create_uid` BIGINT NOT NULL DEFAULT 0,
@@ -209,3 +210,23 @@ ALTER TABLE eh_lease_issuers ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
 ALTER TABLE eh_lease_form_requests ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
 ALTER TABLE eh_lease_configs ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
 ALTER TABLE eh_lease_buildings ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
+ALTER TABLE eh_lease_buildings DROP INDEX u_eh_community_id_name;
+
+
+-- 用户打印机映射表，by dengs,2017/11/12
+-- DROP TABLE IF EXISTS `eh_siyin_user_printer_mappings`;
+CREATE TABLE `eh_siyin_user_printer_mappings` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
+  `user_id` BIGINT,
+  `reader_name` VARCHAR(128) COMMENT 'printer reader name',
+  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0:INACTIVE,2:ACTIVE',
+  `unlock_times` BIGINT,
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+

@@ -131,13 +131,16 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public List<ListBillsDTO> listBills(String contractNum, Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName, String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Long pageAnchor, Integer pageSize, String targetName, Byte status, String targetType, ListBillsResponse response) {
+        List<ListBillsDTO> list = new ArrayList<>();
+        if(targetType!=null && targetType.equals(AssetPaymentStrings.EH_USER)) {
+            return list;
+        }
         if(pageAnchor==null || pageAnchor == 0l){
             pageAnchor = 1l;
         }
         if(pageSize == null){
             pageSize = 20;
         }
-        List<ListBillsDTO> list = new ArrayList<>();
         String fiProperty = null;
         if(billGroupId != null){
             PaymentBillGroup group = assetProvider.getBillGroupById(billGroupId);
@@ -459,7 +462,9 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
                 bill.setAmountOwed(value.getActualMoney());
                 overallOwedAmount = overallOwedAmount.add(new BigDecimal(value.getActualMoney()));
                 bill.setAmountReceivable(value.getShouldMoney());
-                bill.setBillDuration(value.getDateStrBegin()+"至"+value.getDateStrEnd());
+//                bill.setBillDuration(value.getDateStrBegin()+"至"+value.getDateStrEnd());
+                //改为账期
+                bill.setBillDuration(value.getChargePeriod());
                 addresses.add(value.getBuildingRename());
                 bills.add(bill);
             }
@@ -490,8 +495,10 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
             GetLeaseContractBillOnFiPropertyData source = data.get(i);
             ListAllBillsForClientDTO dto = new ListAllBillsForClientDTO();
             dto.setBillGroupName(getFiPropertyName(source.getFiProperty()));
-            dto.setDateStrEnd(source.getDateStrEnd());
-            dto.setDateStrBegin(source.getDateStrBegin());
+//            dto.setDateStrEnd(source.getDateStrEnd());
+//            dto.setDateStrBegin(source.getDateStrBegin());
+            //改为账期
+            dto.setDateStrBegin(source.getChargePeriod());
             dto.setAmountReceivable(source.getShouldMoney());
             dto.setAmountOwed(source.getActualMoney());
             dto.setBillId(source.getBillId());

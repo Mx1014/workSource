@@ -2044,6 +2044,16 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhForumServiceTypes.class, Tables.EH_FORUM_SERVICE_TYPES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_FORUM_SERVICE_TYPES.ID.max()).from(Tables.EH_FORUM_SERVICE_TYPES).fetchOne().value1();
         });
+
+        syncTableSequence(null, EhAuthorizationThirdPartyRecords.class, Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.ID.max()).from(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhAuthorizationThirdPartyForms.class, Tables.EH_AUTHORIZATION_THIRD_PARTY_FORMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_AUTHORIZATION_THIRD_PARTY_FORMS.ID.max()).from(Tables.EH_AUTHORIZATION_THIRD_PARTY_FORMS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhAuthorizationThirdPartyButtons.class, Tables.EH_AUTHORIZATION_THIRD_PARTY_BUTTONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_AUTHORIZATION_THIRD_PARTY_BUTTONS.ID.max()).from(Tables.EH_AUTHORIZATION_THIRD_PARTY_BUTTONS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
