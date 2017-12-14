@@ -481,6 +481,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		//TODO : 根据情况保存地址
 		if(null != request.getContractId()){
+			//兼容老app, 带合同一定是续租,此处set 来源类型
+			request.setSourceType(ApplyEntrySourceType.RENEW.getCode());
 			//1.保存合同带的地址
 			Contract contract = contractProvider.findContractById(request.getContractId());
 			if(null == contract )
