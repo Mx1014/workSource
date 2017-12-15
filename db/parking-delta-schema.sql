@@ -99,7 +99,7 @@ CREATE TABLE `eh_parking_space_logs` (
   `contact_name` varchar(64) DEFAULT NULL,
   `contact_enterprise_name` varchar(128) DEFAULT NULL,
   `operate_type` tinyint(4) NOT NULL COMMENT '1: raise, 2: down',
-  `user_type` tinyint(4) NOT NULL COMMENT '1: raise, 2: down',
+  `user_type` tinyint(4) NOT NULL COMMENT '1: reserve, 2: plate owner',
   `operate_uid` bigint(20) NOT NULL DEFAULT '0',
   `operate_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -111,19 +111,30 @@ CREATE TABLE `eh_reserve_orders` (
   `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
   `owner_id` bigint(20) NOT NULL DEFAULT '0',
   `order_no` varchar(20) NOT NULL COMMENT '订单编号',
+
+  `resource_type` tinyint(4) DEFAULT NULL,
   `reserve_resource_id` bigint(20) NOT NULL COMMENT 'resource id',
+  `resource_json` text COMMENT '资源json数据',
+
 --  `reserve_date` date DEFAULT NULL COMMENT '使用日期',
-  `start_time` datetime DEFAULT NULL COMMENT '使用开始时间',
-  `end_time` datetime DEFAULT NULL COMMENT '使用结束时间',
+  `reserve_start_time` datetime DEFAULT NULL COMMENT '预订开始时间',
+  `reserve_end_time` datetime DEFAULT NULL COMMENT '预订结束时间',
   `reserve_cell_count` double DEFAULT NULL COMMENT '预约单元格数',
+  `actual_start_time` datetime DEFAULT NULL COMMENT '实际开始时间',
+  `actual_end_time` datetime DEFAULT NULL COMMENT '实际结束时间',
 
-  `applicant_organization_id` bigint(20) DEFAULT NULL COMMENT 'id of the applicant organization',
-  `applicant_contact_phone` varchar(255) DEFAULT NULL COMMENT '支付方式,10001-支付宝，10002-微信',
+  `applicant_enterprise_id` bigint(20) DEFAULT NULL COMMENT '申请人公司ID',
+  `applicant_enterprise_name` varchar(64) DEFAULT NULL COMMENT '申请人公司名称',
+  `applicant_phone` varchar(20) DEFAULT NULL COMMENT '申请人手机',
+  `applicant_name` varchar(20) DEFAULT NULL COMMENT '申请人姓名',
+  `address_id` bigint(20) DEFAULT NULL COMMENT '楼栋门牌ID',
 
-
+  `over_time` bigint(20) DEFAULT NULL COMMENT '超时时间，存时间戳',
   `pay_time` datetime DEFAULT NULL,
+  `pay_type` varchar(20) DEFAULT NULL COMMENT '支付方式,10001-支付宝，10002-微信',
+  `paid_amount` decimal(10,2) DEFAULT NULL COMMENT '已支付金额',
+  `owing_amount` decimal(10,2) DEFAULT NULL COMMENT '欠费金额',
   `total_amount` decimal(10,2) DEFAULT NULL COMMENT '总金额',
-  `vendor_type` varchar(255) DEFAULT NULL COMMENT '支付方式,10001-支付宝，10002-微信',
   `status` tinyint(4) DEFAULT NULL,
 
   `creator_uid` bigint(20) DEFAULT NULL COMMENT '预约人',
@@ -133,16 +144,6 @@ CREATE TABLE `eh_reserve_orders` (
   `cancel_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'cancel user id',
   `cancel_time` datetime DEFAULT NULL,
 
-  `resource_type` tinyint(4) DEFAULT NULL,
-  `resource_json` text COMMENT '名称',
-  `organization_id` bigint(20) DEFAULT NULL COMMENT '所属公司的ID',
-  `spec` varchar(255) DEFAULT NULL COMMENT '规格',
-  `address` varchar(192) DEFAULT NULL COMMENT '地址',
-  `longitude` double DEFAULT NULL COMMENT '地址经度',
-  `latitude` double DEFAULT NULL COMMENT '地址纬度',
-  `reminder_time` datetime DEFAULT NULL COMMENT '消息提醒时间',
-  `reminder_end_time` datetime DEFAULT NULL,
-
   `flow_mode` tinyint(4) DEFAULT '0' COMMENT 'flow mode, 1:online pay 2:approve offline 3: approve online',
   `flow_case_id` bigint(20) DEFAULT NULL COMMENT 'id of the flow_case',
   `paid_version` tinyint(4) DEFAULT NULL,
@@ -150,79 +151,3 @@ CREATE TABLE `eh_reserve_orders` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-CREATE TABLE `eh_relocation_requests` (
-  `id` bigint(20) NOT NULL COMMENT 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `owner_type` varchar(32) DEFAULT NULL COMMENT 'attachment object owner type',
-  `owner_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'owner id',
-  `request_no` varchar(128) NOT NULL,
-  `requestor_enterprise_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'the id of organization where the requestor is in',
-  `requestor_enterprise_name` varchar(64) DEFAULT NULL COMMENT 'the enterprise name of requestor',
-  `requestor_enterprise_address` varchar(256) DEFAULT NULL COMMENT 'the enterprise address of requestor',
-  `requestor_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'requestor id',
-  `requestor_name` varchar(64) DEFAULT NULL COMMENT 'the name of requestor',
-  `contact_phone` varchar(64) DEFAULT NULL COMMENT 'the phone of requestor',
-  `relocation_date` datetime NOT NULL,
-  `status` tinyint(4) DEFAULT NULL COMMENT '0: inactive, 1: processing, 2: completed',
-  `creator_uid` bigint(20) NOT NULL DEFAULT '0',
-  `create_time` datetime DEFAULT NULL,
-  `flow_case_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'flow case id',
-  `cancel_time` datetime DEFAULT NULL,
-  `cancel_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'cancel user id',
-  `qr_code_url` varchar(256) DEFAULT NULL COMMENT 'url of the qr record',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE `eh_relocation_request_items` (
-  `id` bigint(20) NOT NULL COMMENT 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `owner_type` varchar(32) DEFAULT NULL COMMENT 'attachment object owner type',
-  `owner_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'owner id',
-  `request_id` bigint(20) NOT NULL COMMENT 'id of the relocation request record',
-  `item_name` varchar(64) DEFAULT NULL COMMENT 'the name of item',
-  `item_quantity` int(11) DEFAULT 0 COMMENT 'the quantity of item',
-  `status` tinyint(4) DEFAULT NULL COMMENT '0: inactive, 1: , 2: active',
-  `creator_uid` bigint(20) NOT NULL DEFAULT '0',
-  `create_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE `eh_relocation_request_attachments` (
-  `id` bigint(20) NOT NULL COMMENT 'id of the record',
-  `owner_type` varchar(32) DEFAULT NULL COMMENT 'attachment object owner type',
-  `owner_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'owner id',
-  `content_type` varchar(32) DEFAULT NULL COMMENT 'attachment object content type',
-  `content_uri` varchar(1024) DEFAULT NULL COMMENT 'attachment object link info on storage',
-  `status` tinyint(4) DEFAULT NULL COMMENT '0: inactive, 1: , 2: active',
-  `creator_uid` bigint(20) NOT NULL DEFAULT '0',
-  `create_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-
-ALTER TABLE eh_enterprise_op_requests ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
-ALTER TABLE eh_lease_promotions ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
-ALTER TABLE eh_lease_projects ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
-ALTER TABLE eh_lease_project_communities ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
-ALTER TABLE eh_lease_issuers ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
-ALTER TABLE eh_lease_form_requests ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
-ALTER TABLE eh_lease_configs ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
-ALTER TABLE eh_lease_buildings ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
