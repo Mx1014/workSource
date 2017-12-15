@@ -583,16 +583,19 @@ public class UserActivityServiceImpl implements UserActivityService {
 			 Post post = forumProvider.findPostById(feedback.getTargetId());
 			 if(post != null){
 				 forumService.deletePost(post.getForumId(), post.getId(), null, null, null);
-			 }
-		}
+             }
+        }
 
-		//举报管理事件 add by yanjun 20171211
+        //举报管理事件 add by yanjun 20171211
         feedbackEvent(feedback);
-	}
+    }
 
     private void feedbackEvent(Feedback feedback){
         //此处只对接帖子的举报
-        if(feedback.getTargetType() != FeedbackTargetType.POST.getCode()){
+        if (feedback.getTargetType() != FeedbackTargetType.POST.getCode()) {
+            return;
+        }
+        if (FeedbackVerifyType.fromStatus(feedback.getVerifyType()) == FeedbackVerifyType.FALSE) {
             return;
         }
         Post post = forumProvider.findPostById(feedback.getTargetId());
