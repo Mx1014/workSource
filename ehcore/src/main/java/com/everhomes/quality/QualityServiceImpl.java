@@ -2754,6 +2754,10 @@ public class QualityServiceImpl implements QualityService {
 				qualityProvider.createQualitySpecification(newSpecification);
 
 				qualityProvider.inactiveQualityInspectionStandardSpecificationMapBySpecificationId(newSpecification.getId());
+			}else{
+				qualityProvider.updateQualitySpecification(specification);
+
+				qualityProvider.inactiveQualityInspectionStandardSpecificationMapBySpecificationId(specification.getId());
 			}
 		}
 	}
@@ -2791,6 +2795,8 @@ public class QualityServiceImpl implements QualityService {
 			specifications = qualityProvider.listAllChildrenSpecifications("/%", cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, cmd.getInspectionType());
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
 				scopeSpecifications = qualityProvider.listAllChildrenSpecifications("/%", cmd.getOwnerType(), cmd.getOwnerId(), cmd.getScopeCode(), cmd.getScopeId(), cmd.getInspectionType());
+			}else {
+				scopeSpecifications.addAll(qualityProvider.listAllCommunitiesChildrenSpecifications("/%", cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionType()));
 			}
 
 		} else {
@@ -2798,6 +2804,8 @@ public class QualityServiceImpl implements QualityService {
 			specifications = qualityProvider.listAllChildrenSpecifications(parent.getPath() + "/%", cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, cmd.getInspectionType());
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
 				scopeSpecifications = qualityProvider.listAllChildrenSpecifications(parent.getPath() + "/%", cmd.getOwnerType(), cmd.getOwnerId(), cmd.getScopeCode(), cmd.getScopeId(), cmd.getInspectionType());
+			}else {
+				scopeSpecifications.addAll(qualityProvider.listAllCommunitiesChildrenSpecifications(parent.getPath() +"/%", cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionType()));
 			}
 		}
 
