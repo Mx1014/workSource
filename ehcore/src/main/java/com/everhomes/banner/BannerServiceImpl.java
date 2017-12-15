@@ -929,10 +929,10 @@ public class BannerServiceImpl implements BannerService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id paramter.");
         }
-		if(cmd.getScope() == null || cmd.getScope().getScopeCode() == null || cmd.getScope().getScopeId() == null) {
-         	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scope parameter.");
-        }
+//		if(cmd.getScope() == null || cmd.getScope().getScopeCode() == null || cmd.getScope().getScopeId() == null) {
+//         	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+//                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scope parameter.");
+//        }
         Banner banner = bannerProvider.findBannerById(cmd.getId());
         if(banner == null) {
             throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
