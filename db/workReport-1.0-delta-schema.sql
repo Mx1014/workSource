@@ -114,7 +114,7 @@ CREATE TABLE `eh_work_report_val_comments` (
   `report_val_id` BIGINT NOT NULL COMMENT 'the id of the report val',
   `content_type` VARCHAR(32) COMMENT 'the type of the content',
   `content` TEXT COMMENT 'the comment',
-  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: invalid, 1: valid',
   `creator_user_id` BIGINT NOT NULL COMMENT 'the user id of the creator',
 
   `create_time` DATETIME COMMENT 'record create time',
@@ -131,7 +131,7 @@ CREATE TABLE `eh_work_report_val_comment_attachments` (
   `comment_id` BIGINT NOT NULL COMMENT 'the id of the comment',
   `content_type` VARCHAR(32) COMMENT 'the type of the content',
   `content_uri` VARCHAR(2048) COMMENT 'attachment object link info on storage',
-  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: invalid, 1: valid',
   `creator_user_id` BIGINT NOT NULL COMMENT 'the user id of the creator',
 
   `create_time` DATETIME COMMENT 'record create time',
