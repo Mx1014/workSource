@@ -1067,7 +1067,7 @@ public class ForumServiceImpl implements ForumService {
         final Post tempPost = post;
         LocalEventBus.publish(event -> {
             LocalEventContext context = new LocalEventContext();
-            context.setUid(userId);
+            context.setUid(tempPost.getCreatorUid());
             context.setNamespaceId(UserContext.getCurrentNamespaceId());
             event.setContext(context);
 
