@@ -21,6 +21,7 @@ import com.everhomes.organization.*;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.organization.*;
+import com.everhomes.user.UserProvider;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.tomcat.jni.Time;
@@ -152,6 +153,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private FieldService fieldService;
+
+    @Autowired
+    private UserProvider userProvider;
 
     private void checkPrivilege(Integer ns) {
         Integer namespaceId = UserContext.getCurrentNamespaceId(ns);
@@ -2410,13 +2414,14 @@ public class CustomerServiceImpl implements CustomerService {
 	private CustomerEventDTO convertCustomerEventDTO(CustomerEvent event) {
 		CustomerEventDTO dto = ConvertHelper.convert(event, CustomerEventDTO.class);
         if(dto.getCreatorUid() != null) {
+            //用户可能不在组织架构中 所以用nickname
 //        	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getCreatorUid());
 //            if(null != detail && null != detail.getContactName()){
 //        		dto.setCreatorName(detail.getContactName());
 //        	}
-            List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(dto.getCreatorUid());
-            if(members != null && members.size() > 0) {
-                dto.setCreatorName(members.get(0).getContactName());
+            User user = userProvider.findUserById(dto.getCreatorUid());
+            if(user != null) {
+                dto.setCreatorName(user.getNickName());
             }
         }
         return dto;
