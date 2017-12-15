@@ -311,10 +311,14 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 	@Override
 	public void syncLeaseBuildings(ListLeaseBuildingsCommand cmd) {
 
+		if (null == cmd.getCategoryId()) {
+			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
+		}
+
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 
 		List<LeaseBuilding> existLeaseBuildings = enterpriseApplyBuildingProvider.listLeaseBuildings(cmd.getNamespaceId(),
-				cmd.getCommunityId(), null, null, null);
+				cmd.getCommunityId(), cmd.getCategoryId(), null, null);
 
 		List<Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, Integer.MAX_VALUE,
 				cmd.getCommunityId(), cmd.getNamespaceId(), null);

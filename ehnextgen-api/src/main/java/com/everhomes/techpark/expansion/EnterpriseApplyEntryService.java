@@ -17,9 +17,7 @@ public interface EnterpriseApplyEntryService {
 	ListEnterpriseApplyEntryResponse listApplyEntrys(ListEnterpriseApplyEntryCommand cmd);
 	
 	ApplyEntryResponse applyEntry(EnterpriseApplyEntryCommand cmd);
-	
-	boolean applyRenew(EnterpriseApplyRenewCommand cmd);
-	
+
 	ListBuildingForRentResponse listLeasePromotions(ListBuildingForRentCommand cmd);
 
 	BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd, Byte adminFlag);

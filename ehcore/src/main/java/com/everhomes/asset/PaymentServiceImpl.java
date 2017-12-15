@@ -10,6 +10,7 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pay.order.TransactionType;
 import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.order.OrderType;
@@ -55,12 +56,12 @@ public class PaymentServiceImpl implements PaymentService {
     public ListPaymentBillResp listPaymentBill(ListPaymentBillCmd cmd) throws Exception {
         ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
         cmd1.setActionType((byte)13);
-        cmd1.setModuleId(20400l);
+        cmd1.setModuleId(PrivilegeConstants.ASSET_MODULE_ID);
         cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
         ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
         Long appId = res.getServiceModuleApps().get(0).getId();
         OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), UserContext.currentUserId(), OrganizationType.ENTERPRISE.getCode());
-        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), member.getOrganizationId(), member.getOrganizationId(), 40078L, appId, null,  cmd.getCommunityId())){
+        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), member.getOrganizationId(), member.getOrganizationId(), PrivilegeConstants.ASSET_DEAL_VIEW, appId, null,  cmd.getCommunityId())){
             throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
                     "check app privilege error");
         }
