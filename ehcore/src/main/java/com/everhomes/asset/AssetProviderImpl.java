@@ -3754,6 +3754,76 @@ public class AssetProviderImpl implements AssetProvider {
 
     }
 
+    @Override
+    public SettledBillRes getSettledBills(int pageSize, long pageAnchor) {
+        Long pageOffset = (pageAnchor - 1 ) * pageSize;
+        SettledBillRes res = new SettledBillRes();
+        List<PaymentBills> paymentBills = getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte) 1))
+                .and(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte) 0))
+                .limit(pageOffset.intValue(), pageSize+1)
+                .fetchInto(PaymentBills.class);
+        if(paymentBills.size() > pageSize){
+            res.setNextPageAnchor(pageAnchor+1);
+            paymentBills.remove(paymentBills.size()-1);
+        }else{
+            res.setNextPageAnchor(null);
+        }
+        res.setBills(paymentBills);
+        return res;
+    }
+
+    @Override
+    public void changeBillToDue(Long id) {
+        getReadWriteContext().update(Tables.EH_PAYMENT_BILLS)
+                .set(Tables.EH_PAYMENT_BILLS.CHARGE_STATUS,(byte)1)
+                .where(Tables.EH_PAYMENT_BILLS.ID.eq(id))
+                .execute();
+    }
+
+    @Override
+    public List<PaymentBillItems> getBillItemsByBillIds(List<Long> overdueBillIds) {
+        return getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILL_ITEMS)
+                .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.in(overdueBillIds))
+                .fetchInto(PaymentBillItems.class);
+    }
+
+    @Override
+    public void updatePaymentItem(PaymentBillItems item) {
+        DSLContext con = getReadWriteContext();
+        EhPaymentBillItemsDao dao = new EhPaymentBillItemsDao(con.configuration());
+        dao.update(item);
+    }
+
+    @Override
+    public BigDecimal getLateFineAmountByItemId(Long id) {
+        final BigDecimal[] res = {new BigDecimal("0")};
+        getReadOnlyContext().select(Tables.EH_PAYMENT_LATE_FINE.AMOUNT)
+                .from(Tables.EH_PAYMENT_LATE_FINE)
+                .where(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID.eq(id))
+                .fetch()
+                .forEach(r -> {
+                    res[0] = res[0].add(r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT));
+                });
+        return res[0];
+    }
+
+    @Override
+    public void createLateFine(PaymentLateFine fine) {
+        DSLContext con = getReadWriteContext();
+        EhPaymentLateFineDao dao = new EhPaymentLateFineDao(con.configuration());
+        dao.update(fine);
+    }
+
+    @Override
+    public void updateBillAmountOwedDueToFine(BigDecimal fineAmount, Long billId) {
+        DSLContext context = getReadWriteContext();
+        context.update(Tables.EH_PAYMENT_BILLS)
+                .set(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED,Tables.EH_PAYMENT_BILLS.AMOUNT_OWED.add(fineAmount))
+                .set(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE.add(fineAmount))
+                .execute();
+    }
+
     private Map<Long,String> getGroupNames(ArrayList<Long> groupIds) {
         Map<Long,String> map = new HashMap<>();
         EhPaymentBillGroups group = Tables.EH_PAYMENT_BILL_GROUPS.as("group");

@@ -2546,13 +2546,13 @@ public class AssetServiceImpl implements AssetService {
          */
         //获得账单,分页一次最多10000个，防止内存不够
         int pageSize = 10000;
-        long pageAnchor = 0l;
+        long pageAnchor = 1l;
         Long nextPageAnchor = 0l;
         SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
         Date today = new Date();
         while(nextPageAnchor != null){
             List<Long> overdueBillIds = new ArrayList<>();
-            SettledBillRes res = getSettledBills(pageSize,pageAnchor);
+            SettledBillRes res = assetProvider.getSettledBills(pageSize,pageAnchor);
             List<PaymentBills> bills = res.getBills();
             //更新账单
             for(PaymentBills bill : bills){
@@ -2569,7 +2569,7 @@ public class AssetServiceImpl implements AssetService {
             }
             nextPageAnchor = res.getNextPageAnchor();
             //这10000个账单中欠费的billItem
-            List<PaymentBillItems> billItems = getBillItemsByBillIds(overdueBillIds);
+            List<PaymentBillItems> billItems = assetProvider.getBillItemsByBillIds(overdueBillIds);
             for(int i = 0; i < billItems.size(); i++){
                 PaymentBillItems item = billItems.get(i);
                 //没有关联滞纳金标准的不计算，剔除出更新队列
@@ -2586,7 +2586,7 @@ public class AssetServiceImpl implements AssetService {
                     item.setAmountOwed(new BigDecimal("0"));
                     assetProvider.updatePaymentItem(item);
                 }
-                amountOwed = amountOwed.add(getLateFineAmountByItemId(item.getId()));
+                amountOwed = amountOwed.add(assetProvider.getLateFineAmountByItemId(item.getId()));
                 List<PaymentFormula> formulas = assetProvider.getFormulas(item.getLateFineStandardId());
                 if(formulas.size() != 1) {
                     LOGGER.error("late fine cal error, the corresponding formula is more than one or less than one, the bill item id is "+item.getId());
@@ -2608,7 +2608,7 @@ public class AssetServiceImpl implements AssetService {
                 this.dbProvider.execute((TransactionStatus status) -> {
                     assetProvider.createLateFine(fine);
                     //更新这个bill
-                    assetProvider.updateBillAmountOwed(fineAmount,item.getBillId());
+                    assetProvider.updateBillAmountOwedDueToFine(fineAmount,item.getBillId());
                     return status;
                 });
             }
