@@ -258,7 +258,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
         BigDecimal amountReceivable = new BigDecimal("0");
         BigDecimal amountOwed = new BigDecimal("0");
-        TreeSet<Date> dateSet = new TreeSet<>();
+//        TreeSet<Date> dateSet = new TreeSet<>();
         SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
         List<ShowBillDetailForClientDTO> list = new ArrayList<>();
 
@@ -280,10 +280,10 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
             GetLeaseContractReceivableData source = allData.get(i);
             ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
 
-            try {
-                dateSet.add(yyyyMMdd.parse(source.getDateStrBegin()));
-                dateSet.add(yyyyMMdd.parse(source.getDateStrEnd()));
-            } catch (ParseException e) {}
+//            try {
+//                dateSet.add(yyyyMMdd.parse(source.getDateStrBegin()));
+//                dateSet.add(yyyyMMdd.parse(source.getDateStrEnd()));
+//            } catch (ParseException e) {}
             dto.setDateStrBegin(source.getDateStrBegin());
             dto.setDateStrEnd(source.getDateStrEnd());
             dto.setDateStr(source.getChargePeriod());
@@ -299,7 +299,11 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         }
         response.setShowBillDetailForClientDTOList(list);
         response.setAmountReceivable(amountReceivable);
-        response.setDatestr(yyyyMMdd.format(dateSet.pollFirst())+"~"+ yyyyMMdd.format(dateSet.pollLast()));
+        //正中会要的是账期
+//        response.setDatestr(yyyyMMdd.format(dateSet.pollFirst())+"~"+ yyyyMMdd.format(dateSet.pollLast()));
+        if(list.size()>0){
+            response.setDatestr(list.get(0).getDateStr());
+        }
         response.setAmountOwed(amountOwed);
         return response;
     }
