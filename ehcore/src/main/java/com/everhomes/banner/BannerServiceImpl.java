@@ -938,29 +938,29 @@ public class BannerServiceImpl implements BannerService {
             throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
                     BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Banner is not exists.");
         }
-        if(ApplyPolicy.fromCode(banner.getApplyPolicy()) == ApplyPolicy.DEFAULT) {// 如果当前要删除的banner为默认的banner，则需要复制并设置删除状态
-        	List<BannerDTO> defaultBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
-                    null, null, null, null, ApplyPolicy.DEFAULT);
-        	dbProvider.execute(status -> {
-        		for(BannerDTO dto : defaultBanners) {
-     				Banner b = ConvertHelper.convert(dto, Banner.class);
-     				if(Objects.equals(b.getId(), cmd.getId())) {
-     					b.setStatus(BannerStatus.DELETE.getCode());
-     					createDeleteOperLog(b.getId());
-     				}
-     				b.setId(null);
-     				b.setScopeCode(cmd.getScope().getScopeCode());
-     				b.setScopeId(cmd.getScope().getScopeId());
-                	b.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
-     				bannerProvider.createBanner(b);
-     			}
-        		return status;
-        	});
-        } else {// 直接设置为删除状态
+//        if(ApplyPolicy.fromCode(banner.getApplyPolicy()) == ApplyPolicy.DEFAULT) {// 如果当前要删除的banner为默认的banner，则需要复制并设置删除状态
+//        	List<BannerDTO> defaultBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
+//                    null, null, null, null, ApplyPolicy.DEFAULT);
+//        	dbProvider.execute(status -> {
+//        		for(BannerDTO dto : defaultBanners) {
+//     				Banner b = ConvertHelper.convert(dto, Banner.class);
+//     				if(Objects.equals(b.getId(), cmd.getId())) {
+//     					b.setStatus(BannerStatus.DELETE.getCode());
+//     					createDeleteOperLog(b.getId());
+//     				}
+//     				b.setId(null);
+//     				b.setScopeCode(cmd.getScope().getScopeCode());
+//     				b.setScopeId(cmd.getScope().getScopeId());
+//                	b.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
+//     				bannerProvider.createBanner(b);
+//     			}
+//        		return status;
+//        	});
+//        } else {// 直接设置为删除状态
         	banner.setStatus(BannerStatus.DELETE.getCode());
             bannerProvider.updateBanner(banner);
             createDeleteOperLog(banner.getId());
-        }
+//        }
 	}
 	
 	private void createDeleteOperLog(Long bannerId) {
