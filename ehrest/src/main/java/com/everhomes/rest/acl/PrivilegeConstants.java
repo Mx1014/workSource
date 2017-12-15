@@ -206,7 +206,7 @@ public interface PrivilegeConstants {
     long CREATE_DEPARTMENT = 41001L;//新增部门
     long MODIFY_DEPARTMENT = 41002L;//修改部门
     long DELETE_DEPARTMENT = 41003L;//删除部门
-    long CHANGE_DEPARTMENT_ORDER = 41004L;//修改部门殊勋
+    long CHANGE_DEPARTMENT_ORDER = 41004L;//修改部门顺序
 
     //岗位
     long CREATE_JOB_POSITION = 41005L;//创建岗位
