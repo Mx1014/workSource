@@ -1,10 +1,12 @@
--- 账单关联滞纳金
-ALTER TABLE `eh_payment_bills` ADD COLUMN `late_fine_standard_id` BIGINT DEFAULT NULL COMMENT '滞纳金标准id';
+-- 账单item关联滞纳金
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `late_fine_standard_id` BIGINT DEFAULT NULL COMMENT '滞纳金标准id';
 -- 滞纳金表
+DROP TABLE IF EXISTS `eh_payment_late_fine`;
 CREATE TABLE `eh_payment_late_fine`(
   `id` BIGINT NOT NULL COMMENT 'primary key',
   `amount` DECIMAL DEFAULT 0 COMMENT 'amount of overdue payment',
   `bill_id` BIGINT NOT NULL COMMENT 'the id of the corresponding bill, one to one',
+  `bill_item_id` BIGINT NOT NULL COMMENT 'the id of the corresponding bill item id, one to one',
   `create_time` DATETIME DEFAULT NOW(),
   `upate_time` DATETIME DEFAULT NOW(),
   `update_uid` BIGINT DEFAULT NULL,

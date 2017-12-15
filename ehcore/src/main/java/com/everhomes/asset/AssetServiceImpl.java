@@ -2486,6 +2486,50 @@ public class AssetServiceImpl implements AssetService {
     }
 
     /**
+     * 更新欠费状态，并计算滞纳金
+     */
+    @Scheduled(cron = "0 0 0 * * ?")
+    private void lateFineCal(){
+        /**
+         * 1. 遍历所有的账单（所有维度），更新账单的欠费状态
+         * 2. 遍历所有的账单（所有维度），拿到所有欠费的账单，拿到所有的billItem的itemd
+         * 3. 遍历所有的billItem和他们对应的滞纳规则，计算，然后新增滞纳的数据
+         * 4. 锁住itemId和id，更新billItem，然后 更新指定id的账单
+         */
+        //获得账单,分页一次最多10000个，防止内存不够
+        int pageSize = 10000;
+        long pageAnchor = 0l;
+        Long nextPageAnchor = 0l;
+        SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+        Date today = new Date();
+        while(nextPageAnchor != null){
+            List<Long> overdueBillIds = new ArrayList<>();
+            SettledBillRes res = getSettledBills(pageSize,pageAnchor);
+            List<PaymentBills> bills = res.getBills();
+            //更新账单
+            for(PaymentBills bill : bills){
+                String dueDayDeadline = bill.getDueDayDeadline();
+                try{
+                    Date deadline = yyyyMMdd.parse(dueDayDeadline);
+//                    if(bill.getChargeStatus().byteValue() == 0 && deadline.compareTo(today) != 1) {  兼容以前的没有正常欠费状态的账单
+                    if(deadline.compareTo(today) != 1) {
+                        assetProvider.changeBillToDue(bill.getId());
+                        bill.setChargeStatus((byte)1);
+                    }
+                    if(bill.getChargeStatus().byteValue() == (byte)1) overdueBillIds.add(bill.getId());
+                } catch (ParseException e){ continue; };
+            }
+            nextPageAnchor = res.getNextPageAnchor();
+            //这10000个账单中欠费的billItem
+            List<PaymentBillItems> billItems = getBillItemsByBillIds(overdueBillIds);
+            for(int i = 0; i < billItems.size(); i++){
+                PaymentBillItems item = billItems.get(i);
+                if(item.get)
+            }
+        }
+    }
+
+    /**
      * 从eh_payment_notice_config表中查询设置，每个园区数个设置，置于map中 <communityIden><configs>
      * 查询所有有设置的园区的账单，拿到最晚交付日，根据map中拿到configs，判断是否符合发送要求，符合则催缴
      */
