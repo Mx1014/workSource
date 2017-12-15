@@ -2494,7 +2494,7 @@ public class AssetServiceImpl implements AssetService {
          * 1. 遍历所有的账单（所有维度），更新账单的欠费状态
          * 2. 遍历所有的账单（所有维度），拿到所有欠费的账单，拿到所有的billItem的itemd
          * 3. 遍历所有的billItem和他们对应的滞纳规则，计算，然后新增滞纳的数据
-         * 4. 锁住itemId和id，更新billItem，然后 更新指定id的账单
+         * 4. 锁住itemId和id， 更新指定id的账单
          */
         //获得账单,分页一次最多10000个，防止内存不够
         int pageSize = 10000;
@@ -2524,7 +2524,30 @@ public class AssetServiceImpl implements AssetService {
             List<PaymentBillItems> billItems = getBillItemsByBillIds(overdueBillIds);
             for(int i = 0; i < billItems.size(); i++){
                 PaymentBillItems item = billItems.get(i);
-                if(item.get)
+                //没有关联滞纳金标准的不计算，剔除出更新队列
+                if(item.getLateFineStandardId() == null){
+                    billItems.remove(i--);
+                    continue;
+                }
+                //计算滞纳金金额
+                //获得欠费的钱
+                BigDecimal amountOwed = new BigDecimal("0");
+                if(item.getAmountOwed() !=null){
+                    amountOwed = amountOwed.add(item.getAmountOwed());
+                }else{
+                    item.setAmountOwed(new BigDecimal("0"));
+                    assetProvider.updatePaymentItem(item);
+                }
+                amountOwed = amountOwed.add(getLateFineAmountByItemId(item.getId()));
+                List<PaymentFormula> formulas = assetProvider.getFormulas(item.getLateFineStandardId());
+                if(formulas.size() != 1) {
+                    LOGGER.error("late fine cal error, the corresponding formula is more than one or less than one, the bill item id is "+item.getId());
+                }
+                String formulaJson = formulas.get(0).getFormulaJson();
+                formulaJson = formulaJson.replace("gdje",amountOwed.toString());
+                BigDecimal fine = CalculatorUtil.arithmetic(formulaJson);
+                //开始构造一条滞纳金记录
+
             }
         }
     }
