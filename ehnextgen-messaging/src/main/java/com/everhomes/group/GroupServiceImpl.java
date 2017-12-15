@@ -1816,7 +1816,7 @@ public class GroupServiceImpl implements GroupService {
             LocalEventBus.publish(event -> {
                 LocalEventContext context = new LocalEventContext();
                 context.setNamespaceId(group.getNamespaceId());
-                context.setUid(userId);
+                context.setUid(member.getMemberId());
                 event.setContext(context);
 
                 event.setEntityType(EhGroupMembers.class.getSimpleName());
@@ -4762,7 +4762,7 @@ public class GroupServiceImpl implements GroupService {
         LocalEventBus.publish(event -> {
             LocalEventContext context = new LocalEventContext();
             context.setNamespaceId(group.getNamespaceId());
-            context.setUid(user.getId());
+            context.setUid(group.getCreatorUid());
             event.setContext(context);
 
             event.setEntityType(EntityType.GROUP.getCode());
