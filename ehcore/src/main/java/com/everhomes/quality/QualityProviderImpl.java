@@ -2747,6 +2747,15 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
+	public void deleteQualityModelCommunityMapByStandardId(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteQuery query = context.deleteQuery(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(QualityModelType.STANDARD.getCode()));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP.STANDARD_ID.eq(id));
+		query.execute();
+	}
+
+	@Override
 	public List<QualityInspectionSpecifications> listAllCommunitiesChildrenSpecifications(String superiorPath, String ownerType, Long ownerId, Byte inspectionType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 

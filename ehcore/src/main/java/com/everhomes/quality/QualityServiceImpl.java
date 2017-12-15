@@ -254,6 +254,7 @@ public class QualityServiceImpl implements QualityService {
 			qualityProvider.updateQualityInspectionStandards(standard);
 			if (cmd.getCommunities() != null && cmd.getCommunities().size() > 0 && cmd.getTargetId() == null) {
 				//在全部中修改 公共标准
+				qualityProvider.deleteQualityModelCommunityMapByStandardId(standard.getId());
 				for (Long communityId : cmd.getCommunities()) {
 					//standard.setTargetId(communityId);
 					//standard.setTargetType(OwnerType.COMMUNITY.getCode());
@@ -398,6 +399,9 @@ public class QualityServiceImpl implements QualityService {
 		}else {
 			//其他情况按照正常删除方法
 			qualityProvider.updateQualityInspectionStandards(standard);
+			if(cmd.getTargetId() == null){
+				qualityProvider.deleteQualityModelCommunityMapByStandardId(standard.getId());
+			}
 		}
 
 		createQualityInspectionStandardLogs(standard, QualityInspectionLogProcessType.DELETE.getCode(), user.getId());
@@ -1170,8 +1174,10 @@ public class QualityServiceImpl implements QualityService {
 					QualityInspectionStandardSpecificationMap map = qualityProvider.getMapByStandardId(standard.getId());
 					if(map != null) {
 						QualityInspectionSpecifications specification = qualityProvider.getSpecificationById(map.getSpecificationId());
-						dto.setCategoryName(getSpecificationNamePath(specification.getPath(), specification.getOwnerType(), specification.getOwnerId()));
-						dto.setCategoryId(specification.getId());
+						if (specification != null) {
+							dto.setCategoryName(getSpecificationNamePath(specification.getPath(), specification.getOwnerType(), specification.getOwnerId()));
+							dto.setCategoryId(specification.getId());
+						}
 					}
 
 				}
@@ -2808,8 +2814,10 @@ public class QualityServiceImpl implements QualityService {
 				scopeSpecifications.addAll(qualityProvider.listAllCommunitiesChildrenSpecifications(parent.getPath() +"/%", cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionType()));
 			}
 		}
-
-		List<QualityInspectionSpecificationDTO> dtos = dealWithScopeSpecifications(specifications, scopeSpecifications);
+		List<QualityInspectionSpecificationDTO> dtos = new ArrayList<>();
+		//只有在项目中才会处理ALL和SCOPE
+		if (SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode())))
+			dtos = dealWithScopeSpecifications(specifications, scopeSpecifications);
 
 		QualityInspectionSpecificationDTO parentDto = ConvertHelper.convert(parent, QualityInspectionSpecificationDTO.class);
 		parentDto = processQualitySpecificationTree(dtos, parentDto);

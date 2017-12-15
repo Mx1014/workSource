@@ -182,4 +182,6 @@ public interface QualityProvider {
 	void deleteQualityModelCommunityMapBySpecificationId(Long id, Byte inspectionType);
 
 	List<QualityInspectionSpecifications> listAllCommunitiesChildrenSpecifications(String superiorPath, String ownerType, Long ownerId, Byte inspectionType);
+
+    void deleteQualityModelCommunityMapByStandardId(Long standardId);
 }
