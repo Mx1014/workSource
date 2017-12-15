@@ -857,9 +857,14 @@ public class NewsServiceImpl implements NewsService {
 		final Long userId = UserContext.current().getUser().getId();
 		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
+		final News news = findNewsById(userId, newsId);
+		if(NewsStatus.fromCode(news.getStatus())==NewsStatus.DRAFT){
+			LOGGER.error("News status is 1 draft, cat be top, operatorId=" + userId + ", newsId=" + newsId);
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_NEWS_OWNER_ID_INVALID, "News status is 1 draft, cat be top");
+		}
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_NEWS.getCode()).enter(() -> {
 
-			News news = findNewsById(userId, newsId);
 			if (NewsTopFlag.fromCode(news.getTopFlag()) == NewsTopFlag.NONE) {
 				news.setTopFlag(NewsTopFlag.TOP.getCode());
 				news.setTopIndex(newsProvider.getMaxTopIndex(namespaceId).longValue() + 1L);
