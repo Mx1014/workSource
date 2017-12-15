@@ -167,7 +167,8 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
 
-    private void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
+    @Override
+    public void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
         ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
         cmd.setNamespaceId(namespaceId);
         cmd.setModuleId(ServiceModuleConstants.ENTERPRISE_CUSTOMER_MODULE);

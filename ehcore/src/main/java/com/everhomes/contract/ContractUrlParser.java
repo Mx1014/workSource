@@ -3,6 +3,7 @@ package com.everhomes.contract;
 import com.everhomes.portal.PortalUrlParser;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +11,7 @@ import java.util.Map;
 /**
  * Created by ying.xiong on 2017/12/14.
  */
+@Component
 public class ContractUrlParser implements PortalUrlParser {
     @Override
     public Long getModuleId(Integer namespaceId, String actionData, Byte actionType, String itemLabel) {

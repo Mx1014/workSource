@@ -3,13 +3,22 @@ package com.everhomes.varField;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
+import com.everhomes.entity.EntityType;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.asset.ImportFieldsExcelResponse;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.varField.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
@@ -63,6 +72,12 @@ public class FieldServiceImpl implements FieldService {
 
     @Autowired
     private SequenceProvider sequenceProvider;
+
+    @Autowired
+    private PortalService portalService;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 
 
     @Override
@@ -239,6 +254,9 @@ public class FieldServiceImpl implements FieldService {
 
     @Override
     public void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response){
+        if(ModuleName.ENTERPRISE_CUSTOMER.equals(ModuleName.fromName(cmd.getModuleName()))) {
+            customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
+        }
         List<FieldGroupDTO> groups = listFieldGroups(cmd);
         //设备巡检中字段 暂时单sheet
         if (cmd.getEquipmentCategoryName() != null) {
