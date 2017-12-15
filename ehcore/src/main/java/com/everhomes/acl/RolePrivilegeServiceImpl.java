@@ -3019,7 +3019,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		manageCommand.setOwnerType(cmd.getOwnerType());
 		manageCommand.setUserId(UserContext.currentUserId());
 		Byte manageFlag = serviceModuleService.checkModuleManage(manageCommand);
-		if(manageFlag.equals(0) || manageFlag == 0){
+		if(manageFlag == 0 || manageFlag.equals(0)){
 			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
 					"check privilege error");
 		}
