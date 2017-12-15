@@ -81,12 +81,9 @@ public class PointRuleToEventMappingProviderImpl implements PointRuleToEventMapp
 	}
 
     @Override
-    public List<PointRuleToEventMapping> listByPointRule(Long systemId, Long pointRuleId) {
+    public List<PointRuleToEventMapping> listByPointRule(Long pointRuleId) {
         com.everhomes.server.schema.tables.EhPointRuleToEventMappings t = Tables.EH_POINT_RULE_TO_EVENT_MAPPINGS;
         return this.query(new ListingLocator(), -1, (locator, query) -> {
-            if (systemId != null) {
-                query.addConditions(t.SYSTEM_ID.eq(systemId));
-            }
             if (pointRuleId != null) {
                 query.addConditions(t.RULE_ID.eq(pointRuleId));
             }
@@ -104,27 +101,14 @@ public class PointRuleToEventMappingProviderImpl implements PointRuleToEventMapp
     }
 
     @Override
-    public List<PointRuleToEventMapping> listByEventName(Integer namespaceId, Long systemId, String eventName) {
+    public List<PointRuleToEventMapping> listByEventName(String eventName) {
         com.everhomes.server.schema.tables.EhPointRuleToEventMappings t = Tables.EH_POINT_RULE_TO_EVENT_MAPPINGS;
         return this.query(new ListingLocator(), -1, (locator, query) -> {
-            query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
-            if (systemId != null) {
-                query.addConditions(t.SYSTEM_ID.eq(systemId));
-            }
             if (eventName != null) {
                 query.addConditions(t.EVENT_NAME.eq(eventName));
             }
             return query;
         });
-    }
-
-    @Override
-    public void deleteBySystemId(Long systemId) {
-        com.everhomes.server.schema.tables.EhPointRuleToEventMappings t = Tables.EH_POINT_RULE_TO_EVENT_MAPPINGS;
-
-        rwContext().delete(t)
-                .where(t.SYSTEM_ID.eq(systemId))
-                .execute();
     }
 
     private EhPointRuleToEventMappingsDao rwDao() {
