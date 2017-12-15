@@ -172,7 +172,10 @@ public class WebMenuServiceImpl implements WebMenuService {
 							break;
 					}
 					if(appDtos != null && appDtos.size() > 0){
-						appIds.addAll(appDtos.stream().map(a-> a.getId()).collect(Collectors.toList()));
+						List<Long> moduleIds_namespace = serviceModuleService.filterByScopes(UserContext.getCurrentNamespaceId(), null, null).stream().map(module ->{
+							return module.getId();
+						}).collect(Collectors.toList());
+						appIds.addAll(appDtos.stream().filter(a-> moduleIds_namespace.contains(a.getModuleId())).map(a-> a.getId()).collect(Collectors.toList()));
 					}
 				}else {
 					appIds.add(r.first());
