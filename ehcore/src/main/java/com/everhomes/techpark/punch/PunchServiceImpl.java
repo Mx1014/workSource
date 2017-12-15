@@ -329,10 +329,14 @@ public class PunchServiceImpl implements PunchService {
 		cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		cmd.setModuleId(PunchConstants.PUNCH_MODULE_ID);
 		cmd.setActionType(ActionType.PUNCH.getCode());
-		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd ); 
-		if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
+		Long appId = null;
+		if(null != apps && apps.getServiceModuleApps().size() > 0){
+			appId = apps.getServiceModuleApps().get(0).getId();
+		}
+		if (null != apps) {
 			if(userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
-					orgId, privilege, apps.getServiceModuleApps().get(0).getId(), checkOrgId, null)){
+					orgId, privilege, appId, checkOrgId, null)){
 				return true;
 			}
 		}

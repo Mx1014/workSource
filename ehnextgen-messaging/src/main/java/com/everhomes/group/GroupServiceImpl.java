@@ -74,8 +74,8 @@ import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.pojos.EhGroupMembers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.version.VersionService;
 import com.google.gson.Gson;
 import org.jooq.Condition;
@@ -231,7 +231,7 @@ public class GroupServiceImpl implements GroupService {
         ownerType = StringUtils.isEmpty(ownerType) ? "" : ownerType;
         ownerId = null == ownerId ? 0L : ownerId;
         Long userId = UserContext.current().getUser().getId();
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserBlacklistAuthority(userId, ownerType, ownerId, PrivilegeConstants.BLACKLIST_CLUP);
     }
 
@@ -2827,7 +2827,7 @@ public class GroupServiceImpl implements GroupService {
            return;
         }
 
-        SystemUserPrivilegeMgr sysResolver = PlatformContext.getComponent("SystemUser");
+        UserPrivilegeMgr sysResolver = PlatformContext.getComponent("SystemUser");
         boolean result = sysResolver.checkSuperAdmin(uid, organizationId);
         if (!result) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,

@@ -15,18 +15,15 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.group.GroupService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
 import com.everhomes.rest.group.GetGroupCommand;
 import com.everhomes.rest.group.ListGroupCommand;
 import com.everhomes.rest.group.ListGroupCommandResponse;
-import com.everhomes.rest.group.ListNearbyGroupCommandResponse;
-import com.everhomes.rest.group.SearchGroupCommand;
 import com.everhomes.rest.group.SearchGroupTopicAdminCommand;
 import com.everhomes.search.SearchSyncManager;
 import com.everhomes.search.SearchSyncType;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.user.UserPrivilegeMgr;
 
 @RestDoc(value="Group admin controller", site="core")
 @RestController
@@ -47,7 +44,7 @@ public class GroupAdminController extends ControllerBase {
     @RequestMapping("syncGroupIndex")
     @RestReturn(value=String.class)
     public RestResponse syncGroupSearchIndexes() {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         searchSyncManager.SyncDb(SearchSyncType.GROUP);
@@ -67,7 +64,7 @@ public class GroupAdminController extends ControllerBase {
     @RequestMapping("searchGroup")
     @RestReturn(value=ListGroupCommandResponse.class)
     public RestResponse searchGroup(ListGroupCommand cmd){
-    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+    	UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         ListGroupCommandResponse cmdResponse = groupService.listGroups(cmd);
@@ -86,7 +83,7 @@ public class GroupAdminController extends ControllerBase {
     @RequestMapping("deleteGroup")
     @RestReturn(value=String.class)
     public RestResponse deleteGroup(GetGroupCommand cmd){
-//    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//    	UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 //        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         this.groupService.deleteGroup(cmd.getGroupId());
@@ -107,7 +104,7 @@ public class GroupAdminController extends ControllerBase {
     @RequestMapping("searchGroupTopics")
     @RestReturn(value=SearchTopicAdminCommandResponse.class)
     public RestResponse searchGroupTopics(SearchGroupTopicAdminCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         SearchTopicAdminCommandResponse cmdResponse = groupService.searchGroupTopics(cmd);

@@ -148,7 +148,7 @@ public class PortalServiceImpl implements PortalService {
 //		}
 //		return null;
 		List<ServiceModuleAppDTO> moduleApps = serviceModuleProvider.listReflectionServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getActionType(), cmd.getCustomTag(), cmd.getCustomPath(), null);
-		LOGGER.debug("list apps size:" + moduleApps.size());
+//		LOGGER.debug("list apps size:" + moduleApps.size());
 		if(moduleApps != null && moduleApps.size() > 0){
 			List dtos = Collections.singletonList(moduleApps.get(0));
 			return new ListServiceModuleAppsResponse(dtos);
@@ -1783,12 +1783,34 @@ public class PortalServiceImpl implements PortalService {
 			list.add(new Tuple<>(cmd.getLocation(), cmd.getName()));
 		}
 
-		dbProvider.execute((status) -> {
-			for (Tuple<String, String> t: list) {
-				syncLayout(cmd.getNamespaceId(), t.first(), t.second());
+
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		User user = userProvider.findUserById(UserContext.currentUserId());
+		//执行太慢，开一个线程来做
+		ExecutorUtil.submit(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					UserContext.setCurrentNamespaceId(namespaceId);
+					UserContext.setCurrentUser(user);
+
+					for (Tuple<String, String> t: list) {
+						dbProvider.execute(status -> {
+							syncLayout(cmd.getNamespaceId(), t.first(), t.second());
+							return null;
+						});
+					}
+
+					//设置完成之后要清空
+					UserContext.setCurrentNamespaceId(null);
+					UserContext.setCurrentUser(null);
+				} catch (Exception e) {
+					LOGGER.error("syncLaunchPadData error", e);
+				}
 			}
-			return null;
 		});
+
+
 
 	}
 

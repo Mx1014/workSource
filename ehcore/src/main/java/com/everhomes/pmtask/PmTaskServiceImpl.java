@@ -664,9 +664,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 			listServiceModuleAppsCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
 			listServiceModuleAppsCommand.setCustomTag(String.valueOf(taskCategoryId));
 			ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
-			if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+			Long appId = null;
+			if(null != apps && apps.getServiceModuleApps().size() > 0){
+				appId = apps.getServiceModuleApps().get(0).getId();
+			}
+			if (null != apps) {
 				return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
-						orgId, privilege, apps.getServiceModuleApps().get(0).getId(), null, ownerId);
+						orgId, privilege, appId, null, ownerId);
 			}
 		}
 		return false;
