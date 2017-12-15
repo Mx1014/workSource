@@ -148,7 +148,7 @@ public class PortalServiceImpl implements PortalService {
 //		}
 //		return null;
 		List<ServiceModuleAppDTO> moduleApps = serviceModuleProvider.listReflectionServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getActionType(), cmd.getCustomTag(), cmd.getCustomPath(), null);
-		LOGGER.debug("list apps size:" + moduleApps.size());
+//		LOGGER.debug("list apps size:" + moduleApps.size());
 		if(moduleApps != null && moduleApps.size() > 0){
 			List dtos = Collections.singletonList(moduleApps.get(0));
 			return new ListServiceModuleAppsResponse(dtos);
@@ -1795,7 +1795,10 @@ public class PortalServiceImpl implements PortalService {
 					UserContext.setCurrentUser(user);
 
 					for (Tuple<String, String> t: list) {
-						syncLayout(cmd.getNamespaceId(), t.first(), t.second());
+						dbProvider.execute(status -> {
+							syncLayout(cmd.getNamespaceId(), t.first(), t.second());
+							return null;
+						});
 					}
 
 					//设置完成之后要清空
