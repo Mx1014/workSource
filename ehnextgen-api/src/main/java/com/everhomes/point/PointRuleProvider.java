@@ -4,6 +4,7 @@ package com.everhomes.point;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.point.ListPointRulesCommand;
+import com.everhomes.rest.point.PointRuleDTO;
 
 import java.util.List;
 
@@ -17,15 +18,13 @@ public interface PointRuleProvider {
 
 	PointRule findById(Long id);
 
-    List<PointRule> listPointRuleBySystemId(Long systemId, Integer pageSize, ListingLocator locator);
-
     void createPointRules(List<PointRule> pointRules);
 
-    List<PointRule> listPointRules(ListPointRulesCommand cmd, int pageSize, ListingLocator locator);
+    List<PointRuleDTO> listPointRules(ListPointRulesCommand cmd, int pageSize, ListingLocator locator);
 
     // List<PointRule> listPointRuleByEventName(Integer namespaceId, Long systemId, String eventName);
 
     List<PointRule> listPointRuleByIds(List<Long> ruleIds);
 
-    void deleteBySystemId(Long systemId);
+    List<PointRule> listPointRuleByCategoryId(Long categoryId);
 }

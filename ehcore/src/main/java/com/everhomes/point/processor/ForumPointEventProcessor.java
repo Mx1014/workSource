@@ -2,20 +2,23 @@ package com.everhomes.point.processor;
 
 import com.everhomes.bus.LocalEvent;
 import com.everhomes.bus.SystemEvent;
+import com.everhomes.forum.ForumProvider;
+import com.everhomes.forum.Post;
 import com.everhomes.point.*;
+import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 完善用户信息事件处理器
  * Created by xq.tian on 2017/12/7.
  */
-@Component
-public class AccountCompleteInfoPointEventProcessor implements PointEventProcessor {
+// @Component
+public class ForumPointEventProcessor implements PointEventProcessor {
 
     @Autowired
     private UserProvider userProvider;
@@ -23,9 +26,23 @@ public class AccountCompleteInfoPointEventProcessor implements PointEventProcess
     @Autowired
     private GeneralPointEventProcessor generalProcessor;
 
+    @Autowired
+    private ForumProvider forumProvider;
+
     @Override
     public String[] init() {
-        return new String[]{SystemEvent.ACCOUNT_COMPLETE_INFO.dft()};
+        long[] categories = {
+                CategoryConstants.CATEGORY_ID_TOPIC,
+                CategoryConstants.CATEGORY_ID_TOPIC_COMMON,
+                CategoryConstants.CATEGORY_ID_NOTICE,
+                CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY,
+                CategoryConstants.CATEGORY_ID_TOPIC_POLLING,
+        };
+        String[] events = new String[categories.length];
+        for (int i = 0; i < categories.length; i++) {
+            events[i] = SystemEvent.FORUM_POST_CREATE.suffix(categories[i]);
+        }
+        return events;
     }
 
     @Override
@@ -53,6 +70,18 @@ public class AccountCompleteInfoPointEventProcessor implements PointEventProcess
 
     @Override
     public List<PointRule> getPointRules(PointSystem pointSystem, LocalEvent localEvent, PointEventLog log) {
+        Post post = forumProvider.findPostById(localEvent.getEntityId());
+
+        Long cateId = post.getContentCategory();
+
+        if (cateId == null) {
+            return new ArrayList<>();
+        }
+
+        Long appId = post.getEmbeddedAppId();
+        if (appId == null) {
+            appId = 0L;
+        }
         return generalProcessor.getPointRules(pointSystem, localEvent, log);
     }
 }

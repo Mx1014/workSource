@@ -59,7 +59,10 @@ public class PaymentServiceImpl implements PaymentService {
         cmd1.setModuleId(PrivilegeConstants.ASSET_MODULE_ID);
         cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
         ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
-        Long appId = res.getServiceModuleApps().get(0).getId();
+        Long appId = null;
+        if(null != res.getServiceModuleApps() && res.getServiceModuleApps().size() > 0){
+            appId = res.getServiceModuleApps().get(0).getId();
+        }
         OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), UserContext.currentUserId(), OrganizationType.ENTERPRISE.getCode());
         if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), member.getOrganizationId(), member.getOrganizationId(), PrivilegeConstants.ASSET_DEAL_VIEW, appId, null,  cmd.getCommunityId())){
             throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,

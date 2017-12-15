@@ -286,7 +286,6 @@ CREATE TABLE `eh_point_rule_categories` (
 CREATE TABLE `eh_point_rules` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `system_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_systems id',
   `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rule_categories id',
   `module_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_service_modules id',
   `display_name` VARCHAR(64) NOT NULL,
@@ -305,16 +304,34 @@ CREATE TABLE `eh_point_rules` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
--- 积分规则
--- DROP TABLE IF EXISTS `eh_point_rule_to_event_mappings`;
-CREATE TABLE `eh_point_rule_to_event_mappings` (
+-- 积分规则配置表
+DROP TABLE IF EXISTS `eh_point_rule_configs`;
+CREATE TABLE `eh_point_rule_configs` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `system_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_systems id',
   `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rule_categories id',
   `rule_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rules id',
+  `description` VARCHAR(64) NOT NULL,
+  `points` BIGINT NOT NULL DEFAULT 0,
+  `limit_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: times per day, 2: times',
+  `limit_data` TEXT,
+  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: disabled, 2: enabled',
+  `create_time` DATETIME(3),
+  `creator_uid` BIGINT,
+  `update_time` DATETIME(3),
+  `update_uid` BIGINT,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 积分规则
+-- DROP TABLE IF EXISTS `eh_point_rule_to_event_mappings`;
+CREATE TABLE `eh_point_rule_to_event_mappings` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rule_categories id',
+  `rule_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rules id',
   `event_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'event name',
-  #   `binding_event_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'binding event name',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -323,7 +340,6 @@ CREATE TABLE `eh_point_rule_to_event_mappings` (
 CREATE TABLE `eh_point_actions` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `system_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_systems id',
   `action_type` VARCHAR(64),
   `owner_type` VARCHAR(64),
   `owner_id` BIGINT NOT NULL DEFAULT 0,
@@ -428,6 +444,7 @@ CREATE TABLE `eh_point_event_logs` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rule_categories id',
   `event_name` VARCHAR(128),
+  `subscription_path` VARCHAR(128),
   `event_json` TEXT,
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: waiting for process, 2: processing, 3: processed',
   `create_time` DATETIME(3),
