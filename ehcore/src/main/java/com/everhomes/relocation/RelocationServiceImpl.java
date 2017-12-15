@@ -287,11 +287,23 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 		//获取搬迁日期后一天,当作过期时间
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(request.getRelocationDate().getTime());
-		calendar.add(Calendar.DAY_OF_MONTH, 1);
+
+		//TODO:方便测试  5分钟后过期
+		if (configProvider.getBooleanValue("relocation.test", false)) {
+			int hour = configProvider.getIntValue("relocation.hour", 0);
+			int minute = configProvider.getIntValue("relocation.minute", 0);
+
+			if (hour != 0) {
+				calendar.set(Calendar.HOUR_OF_DAY, hour);
+			}
+			if (minute != 0) {
+				calendar.set(Calendar.MINUTE, minute);
+			}
+		}else {
+			calendar.add(Calendar.DAY_OF_MONTH, 1);
+		}
 
 		pushToQueque(String.valueOf(request.getId()), calendar.getTimeInMillis());
-		//TODO:方便测试  5分钟后过期
-//		pushToQueque(String.valueOf(request.getId()), request.getCreateTime().getTime() + 1000 * 5 * 60);
 
 		RelocationRequestDTO dto = ConvertHelper.convert(request, RelocationRequestDTO.class);
 		populateRequestDTO(request, dto);

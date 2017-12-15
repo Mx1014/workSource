@@ -1,28 +1,10 @@
 package com.everhomes.point;
 
-import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.List;
-import java.util.TimeZone;
-import java.util.stream.Collectors;
-
-import org.jooq.Operator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.point.AddUserPointCommand;
-import com.everhomes.rest.point.GetUserPointCommand;
-import com.everhomes.rest.point.GetUserPointResponse;
-import com.everhomes.rest.point.GetUserTreasureCommand;
-import com.everhomes.rest.point.GetUserTreasureResponse;
-import com.everhomes.rest.point.PointType;
-import com.everhomes.rest.point.UserScoreDTO;
+import com.everhomes.rest.point.*;
 import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
@@ -31,6 +13,17 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.jooq.Operator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.List;
+import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 @Component
 public class UserPointServiceImpl implements UserPointService {
@@ -94,7 +87,7 @@ public class UserPointServiceImpl implements UserPointService {
     @Override
     public GetUserPointResponse getUserPoint(GetUserPointCommand cmd) {
         ListingLocator locator = new ListingLocator();
-        locator.setAnchor(cmd.getAnchor());
+        // locator.setAnchor(cmd.getAnchor());
         int pageSize = configrationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
         List<UserScore> result = userPointProvider.listUserScore(locator, pageSize + 1, Operator.AND,
                 Tables.EH_USER_SCORES.OWNER_UID.eq(cmd.getUid()));

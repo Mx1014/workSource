@@ -45,9 +45,7 @@ public class EnterpriseApplyEntryDTO {
 	private Long applyUserId;
 	
 	private String applyUserName;
-	
-	private Byte applyType;
-	
+
 	private Byte sizeUnit;
 	
 	private Byte status;
@@ -212,14 +210,6 @@ public class EnterpriseApplyEntryDTO {
 
 	public void setApplyUserName(String applyUserName) {
 		this.applyUserName = applyUserName;
-	}
-
-	public Byte getApplyType() {
-		return applyType;
-	}
-
-	public void setApplyType(Byte applyType) {
-		this.applyType = applyType;
 	}
 
 	public Byte getSizeUnit() {

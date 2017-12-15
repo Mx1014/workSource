@@ -16,7 +16,6 @@ import java.util.List;
  * <li>enterpriseName：申请公司名</li>
  * <li>enterpriseId：申请公司ID</li>
  * <li>applyUserName：申请人 </li>
- * <li>applyType：申请类型  APPLY(1):申请 EXPANSION(2): 扩租 RENEW(3):续租 参考{@link com.everhomes.rest.techpark.expansion.ApplyEntryApplyType}}</li>
  * <li>sizeUnit：size的单位：SINGLETON(1)一整个？  SQUARE_METERS(2)平方米 参考{@link com.everhomes.rest.techpark.expansion.ApplyEntrySizeUnit}}</li>
  * <li>areaSize：地点大小，选择平方米估计就有的选</li>
  * <li>communityId：园区ID</li>
@@ -44,9 +43,6 @@ public class EnterpriseApplyEntryCommand {
 	private String applyUserName;
 	
 	private String contactPhone;
-	
-	@NotNull
-	private Byte applyType;
 	 
 	private Byte sizeUnit;
 	
@@ -110,20 +106,6 @@ public class EnterpriseApplyEntryCommand {
 	public void setSourceType(String sourceType) {
 		this.sourceType = sourceType;
 	}
-
-
-
-	public Byte getApplyType() {
-		return applyType;
-	}
-
-
-
-	public void setApplyType(Byte applyType) {
-		this.applyType = applyType;
-	}
-
-
 
 	public Long getCommunityId() {
 		return communityId;

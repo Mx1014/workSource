@@ -288,13 +288,16 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 
 
 	@Override
-	public List<AuthorizationRelation> listAuthorizationRelations(CrossShardListingLocator locator, Integer pageSize, String ownerType, Long ownerId, Long moduleId){
+	public List<AuthorizationRelation> listAuthorizationRelations(CrossShardListingLocator locator, Integer pageSize, String ownerType, Long ownerId, Long moduleId, Long appId){
 		return listAuthorizationRelations(locator, pageSize, new ListingQueryBuilderCallback() {
 			@Override
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
 				query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.OWNER_TYPE.eq(ownerType));
 				query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.OWNER_ID.eq(ownerId));
 				query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.MODULE_ID.eq(moduleId));
+				if(appId != null){
+					query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.APP_ID.eq(appId));
+				}
 				return query;
 			}
 		});
@@ -303,7 +306,7 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 
 	@Override
 	public List<AuthorizationRelation> listAuthorizationRelations(String ownerType, Long ownerId, Long moduleId){
-		return listAuthorizationRelations(null, null, ownerType, ownerId, moduleId);
+		return listAuthorizationRelations(null, null, ownerType, ownerId, moduleId,  null);
 	}
 
 
