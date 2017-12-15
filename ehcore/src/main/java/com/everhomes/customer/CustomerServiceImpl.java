@@ -2410,10 +2410,14 @@ public class CustomerServiceImpl implements CustomerService {
 	private CustomerEventDTO convertCustomerEventDTO(CustomerEvent event) {
 		CustomerEventDTO dto = ConvertHelper.convert(event, CustomerEventDTO.class);
         if(dto.getCreatorUid() != null) {
-        	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getCreatorUid());
-        	if(null != detail && null != detail.getContactName()){
-        		dto.setCreatorName(detail.getContactName());
-        	}        	
+//        	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getCreatorUid());
+//            if(null != detail && null != detail.getContactName()){
+//        		dto.setCreatorName(detail.getContactName());
+//        	}
+            List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(dto.getCreatorUid());
+            if(members != null && members.size() > 0) {
+                dto.setCreatorName(members.get(0).getContactName());
+            }
         }
         return dto;
 	}
