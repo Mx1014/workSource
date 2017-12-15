@@ -2493,8 +2493,7 @@ public class AssetServiceImpl implements AssetService {
         /**
          * 1. 遍历所有的账单（所有维度），更新账单的欠费状态
          * 2. 遍历所有的账单（所有维度），拿到所有欠费的账单，拿到所有的billItem的itemd
-         * 3. 遍历所有的billItem和他们对应的滞纳规则，计算，然后新增滞纳的数据
-         * 4. 锁住itemId和id， 更新指定id的账单
+         * 3. 遍历所有的billItem和他们对应的滞纳规则，计算，然后新增滞纳的数据,update bill, 不用锁，一条一条走
          */
         //获得账单,分页一次最多10000个，防止内存不够
         int pageSize = 10000;
@@ -2545,9 +2544,24 @@ public class AssetServiceImpl implements AssetService {
                 }
                 String formulaJson = formulas.get(0).getFormulaJson();
                 formulaJson = formulaJson.replace("gdje",amountOwed.toString());
-                BigDecimal fine = CalculatorUtil.arithmetic(formulaJson);
+                BigDecimal fineAmount = CalculatorUtil.arithmetic(formulaJson);
                 //开始构造一条滞纳金记录
-
+                PaymentLateFine fine = new PaymentLateFine();
+                long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentLateFine.class));
+                fine.setId(nextPageAnchor);
+                fine.setAmount(fineAmount);
+                fine.setBillId(item.getBillId());
+                fine.setBillItemId(item.getId());
+                fine.setCommunityId(item.getOwnerId());
+                fine.setNamespaceId(item.getNamespaceId());
+                fine.setCustomerId(item.getTargetId());
+                fine.setCustomerType(item.getTargetType());
+                this.dbProvider.execute((TransactionStatus status) -> {
+                    assetProvider.createLateFine(fine);
+                    //更新这个bill
+                    assetProvider.updateBillAmountOwed(fineAmount,item.getBillId());
+                    return status;
+                });
             }
         }
     }
