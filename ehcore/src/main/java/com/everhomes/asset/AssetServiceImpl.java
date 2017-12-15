@@ -1212,7 +1212,7 @@ public class AssetServiceImpl implements AssetService {
                     nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
                 }
                 newBill.setId(nextBillId);
-
+                newBill.setLateFineStandardId(exp.getLateFineStandardId());
                 PaymentBillGroup group = exp.getGroup();
                 //资产,账单对应多个地址，所以不包裹
 //                newBill.setAddressId(property.getAddressId());
@@ -1804,7 +1804,7 @@ public class AssetServiceImpl implements AssetService {
             obj.setGroup(group);
             obj.setStandard(standard);
             obj.setItemScope(itemScope);
-
+            obj.setLateFineStandardId(rule.getLateFineStandardId());
             obj.setDateStrBegin(a.getTime());
             obj.setDateStrEnd(d2.getTime());
 
