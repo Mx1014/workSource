@@ -27,10 +27,7 @@ import com.everhomes.rest.common.IncludeChildFlagType;
 import com.everhomes.rest.community.ListChildProjectCommand;
 import com.everhomes.rest.community.ResourceCategoryType;
 import com.everhomes.rest.messaging.*;
-import com.everhomes.rest.module.AssignmentTarget;
-import com.everhomes.rest.module.ControlTarget;
-import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
-import com.everhomes.rest.module.Project;
+import com.everhomes.rest.module.*;
 import com.everhomes.rest.oauth2.ControlTargetOption;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.rest.organization.*;
@@ -45,6 +42,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -125,6 +123,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
     @Autowired
     private CommunityService communityService;
+
+    @Autowired
+	private SystemUserPrivilegeMgr systemUserPrivilegeMgr;
 
 	@Override
 	public ListWebMenuResponse listWebMenu(ListWebMenuCommand cmd) {
@@ -3011,6 +3012,17 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public void createAuthorizationRelation(CreateAuthorizationRelationCommand cmd) {
 		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+		CheckModuleManageCommand manageCommand = new CheckModuleManageCommand();
+		manageCommand.setAppId(cmd.getAppId());
+		manageCommand.setModuleId(cmd.getModuleId());
+		manageCommand.setOrganizationId(cmd.getOwnerId());
+		manageCommand.setOwnerType(cmd.getOwnerType());
+		manageCommand.setUserId(UserContext.currentUserId());
+		Byte manageFlag = serviceModuleService.checkModuleManage(manageCommand);
+		if(manageFlag == 0 || manageFlag.equals(0)){
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+					"check privilege error");
+		}
 
 		if(null == cmd.getTargets() || cmd.getTargets().size() == 0){
 			LOGGER.error("params targets is null");

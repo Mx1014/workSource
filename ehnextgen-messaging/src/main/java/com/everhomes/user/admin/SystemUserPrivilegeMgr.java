@@ -5,18 +5,20 @@ import java.util.List;
 
 import com.everhomes.acl.*;
 import com.everhomes.domain.Domain;
-import com.everhomes.menu.Target;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModulePrivilege;
 import com.everhomes.module.ServiceModulePrivilegeType;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.portal.PortalService;
 import com.everhomes.portal.ServiceModuleApp;
 import com.everhomes.portal.ServiceModuleAppProvider;
 import com.everhomes.rest.acl.IdentityType;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.blacklist.BlacklistErrorCode;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.IncludeChildFlagType;
@@ -25,6 +27,8 @@ import com.everhomes.rest.oauth2.ControlTargetOption;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.user.*;
 
 import org.slf4j.Logger;
@@ -66,6 +70,9 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
 
     @Autowired
     private AuthorizationProvider authorizationProvider;
+
+    @Autowired
+    private PortalService portalService;
 
 
     @Override
@@ -313,6 +320,32 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
 //
 //        List<Authorization> listAuthorizations(EntityType.COMMUNITY, communityId, String targetType, Long targetId, null, Long authId, String identityType, Boolean targetFlag)
 //        listAuthorizations(EntityType.COMMUNITY, communityId, String targetType, Long targetId, null, null, ServiceModulePrivilegeType.ORDINARY.getCode(), appId, null, null, false)
+        return false;
+    }
+
+    @Override
+    public boolean checkUserPrivilege(Long userId, Long currentOrgId, Long privilegeId, Long moduleId, Byte actionType, String customTag, Long checkOrgId, Long checkCommunityId) {
+        ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
+        cmd.setActionType(actionType);
+        cmd.setModuleId(moduleId);
+        cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        cmd.setCustomTag(customTag);
+        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
+        Long appId = null;
+        if(null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0){
+            appId = apps.getServiceModuleApps().get(0).getId();
+        }
+        LOGGER.debug("checkUserPrivilege get appId = {}", appId);
+        if(currentOrgId != null){
+            OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), userId, OrganizationType.ENTERPRISE.getCode());
+            if(member != null){
+                currentOrgId = member.getOrganizationId();
+            }
+        }
+        if(!checkUserPrivilege(userId, EntityType.ORGANIZATIONS.getCode(), currentOrgId, currentOrgId, privilegeId, appId, checkOrgId,  checkCommunityId)){
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                    "check app privilege error");
+        }
         return false;
     }
 
