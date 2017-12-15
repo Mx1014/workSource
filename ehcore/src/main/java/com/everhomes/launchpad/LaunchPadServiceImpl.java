@@ -2651,7 +2651,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		List<LaunchPadItem> launchPadItems= this.launchPadProvider.searchLaunchPadItemsByKeyword(namespaceId, sceneType, scopeMap, defaultScopeMap, cmd.getKeyword(), offset, pageSize + 1);
 
 		//如果没有PM_ADMIN定制的，同样的范围查询PARK_TOURIST
-		if(launchPadItems == null && launchPadItems.size() == 0 && SceneType.fromCode(sceneType) == PM_ADMIN){
+		if((launchPadItems == null || launchPadItems.size() == 0) && SceneType.fromCode(sceneType) == PM_ADMIN){
 			launchPadItems= this.launchPadProvider.searchLaunchPadItemsByKeyword(namespaceId, PARK_TOURIST.getCode(), scopeMap, defaultScopeMap, cmd.getKeyword(), offset, pageSize + 1);
 		}
 
