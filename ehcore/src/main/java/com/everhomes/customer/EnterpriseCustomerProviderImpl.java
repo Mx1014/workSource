@@ -1469,7 +1469,6 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 		command.setGroupPath(CustomerTrackingTemplateCode.GROUP_PATH);
 		command.setCommunityId(customer.getCommunityId());
 		List<FieldDTO> fields = fieldService.listFields(command);
-        LOGGER.debug("compareEnterpriseCustomer FIELDS: {}", StringHelper.toJsonString(fields));
 		String  getPrefix = "get";
 		StringBuffer buffer = new StringBuffer();
 		if(null != fields && fields.size() > 0){
@@ -1493,6 +1492,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 						String  content = "";
 						String  newData = objNew == null ? "\" \"" : objNew.toString();
 						String  oldData = objOld == null ? "\" \"" : objOld.toString();
+                        LOGGER.debug("compareEnterpriseCustomer FieldName: {}; newData: {}; oldData: {}",
+                                field.getFieldName(), newData, oldData);
 						if(field.getFieldName().lastIndexOf("ItemId") > -1){
 							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
 					        if(levelItemNew != null) {
