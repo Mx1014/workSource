@@ -108,12 +108,18 @@ CREATE TABLE `eh_parking_space_logs` (
 CREATE TABLE `eh_reserve_orders` (
   `id` bigint(20) NOT NULL COMMENT 'id',
   `namespace_id` int(11) DEFAULT NULL COMMENT '域空间',
+  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0',
   `order_no` varchar(20) NOT NULL COMMENT '订单编号',
   `reserve_resource_id` bigint(20) NOT NULL COMMENT 'resource id',
---  `rental_date` date DEFAULT NULL COMMENT '使用日期',
+--  `reserve_date` date DEFAULT NULL COMMENT '使用日期',
   `start_time` datetime DEFAULT NULL COMMENT '使用开始时间',
   `end_time` datetime DEFAULT NULL COMMENT '使用结束时间',
-  `reserve_cell_count` double DEFAULT NULL COMMENT '预约数',
+  `reserve_cell_count` double DEFAULT NULL COMMENT '预约单元格数',
+
+  `applicant_organization_id` bigint(20) DEFAULT NULL COMMENT 'id of the applicant organization',
+  `applicant_contact_phone` varchar(255) DEFAULT NULL COMMENT '支付方式,10001-支付宝，10002-微信',
+
 
   `pay_time` datetime DEFAULT NULL,
   `total_amount` decimal(10,2) DEFAULT NULL COMMENT '总金额',
@@ -127,35 +133,20 @@ CREATE TABLE `eh_reserve_orders` (
   `cancel_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'cancel user id',
   `cancel_time` datetime DEFAULT NULL,
 
-  `resource_name` varchar(255) DEFAULT NULL COMMENT '名称',
-  `use_detail` varchar(255) DEFAULT NULL COMMENT '使用时间',
-  `resource_type_id` bigint(20) DEFAULT NULL COMMENT 'resource type id',
+  `resource_type` tinyint(4) DEFAULT NULL,
+  `resource_json` text COMMENT '名称',
   `organization_id` bigint(20) DEFAULT NULL COMMENT '所属公司的ID',
   `spec` varchar(255) DEFAULT NULL COMMENT '规格',
   `address` varchar(192) DEFAULT NULL COMMENT '地址',
   `longitude` double DEFAULT NULL COMMENT '地址经度',
   `latitude` double DEFAULT NULL COMMENT '地址纬度',
-  `contact_phonenum` varchar(20) DEFAULT NULL COMMENT '咨询电话',
-  `introduction` text COMMENT '详情',
-  `notice` text,
-  `community_id` bigint(20) DEFAULT NULL COMMENT '资源所属园区的ID',
-  `refund_flag` tinyint(4) DEFAULT NULL COMMENT '是否支持退款 1是 0否',
-  `refund_ratio` int(11) DEFAULT NULL COMMENT '退款比例',
-  `cancel_flag` tinyint(4) DEFAULT NULL COMMENT '是否允许取消 1是 0否',
   `reminder_time` datetime DEFAULT NULL COMMENT '消息提醒时间',
   `reminder_end_time` datetime DEFAULT NULL,
-  `auth_start_time` datetime DEFAULT NULL,
-  `auth_end_time` datetime DEFAULT NULL,
-  `door_auth_id` bigint(20) DEFAULT NULL,
-  `package_name` varchar(45) DEFAULT NULL,
-  `pay_mode` tinyint(4) DEFAULT '0' COMMENT 'pay mode :0-online pay 1-offline',
-  `offline_cashier_address` varchar(200) DEFAULT NULL,
-  `offline_payee_uid` bigint(20) DEFAULT NULL,
+
+  `flow_mode` tinyint(4) DEFAULT '0' COMMENT 'flow mode, 1:online pay 2:approve offline 3: approve online',
   `flow_case_id` bigint(20) DEFAULT NULL COMMENT 'id of the flow_case',
-  `requestor_organization_id` bigint(20) DEFAULT NULL COMMENT 'id of the requestor organization',
   `paid_version` tinyint(4) DEFAULT NULL,
-  `resource_type2` tinyint(4) DEFAULT NULL,
-  `rental_type` tinyint(4) DEFAULT NULL,
+
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
