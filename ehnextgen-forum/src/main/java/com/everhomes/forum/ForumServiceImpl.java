@@ -2152,7 +2152,8 @@ public class ForumServiceImpl implements ForumService {
                 event.setEntityType(EhForumPosts.class.getSimpleName());
                 event.setEntityId(tempPost.getId());
                 event.setEventName(SystemEvent.FORUM_POST_LIKE.suffix(
-                        tempPost.getContentCategory(), tempPost.getModuleType(), tempPost.getModuleCategoryId()));
+                        tempPost.getContentCategory(), tempPost.getEmbeddedAppId(),
+                        tempPost.getModuleType(), tempPost.getModuleCategoryId()));
             });
         } catch(Exception e) {
             LOGGER.error("Failed to update the like count of post, userId=" + operatorId + ", topicId=" + topicId, e);

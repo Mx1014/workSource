@@ -91,13 +91,12 @@ public class GeneralPointEventProcessor implements PointEventProcessor {
         if (rule.getBindingRuleId() != null && rule.getBindingRuleId() != 0) {
             PointLog bindingPointLog = pointLogProvider.findByRuleIdAndEntity(namespaceId, uid, rule.getBindingRuleId(),
                     localEvent.getEntityType(), localEvent.getEntityId());
-            if (bindingPointLog != null) {
-                if (PointArithmeticType.fromCode(rule.getArithmeticType()) == PointArithmeticType.SUBTRACT) {
-                    points = -rule.getPoints();
-                }
-            } else {
+            if (bindingPointLog == null) {
                 return null;
             }
+        }
+        if (PointArithmeticType.fromCode(rule.getArithmeticType()) == PointArithmeticType.SUBTRACT) {
+            points = -rule.getPoints();
         }
         return new PointEventProcessResult(points, pointLog);
     }
