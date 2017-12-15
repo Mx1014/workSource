@@ -4247,8 +4247,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 					if (communities != null && communities.size() > 0) {
 						dto.setCommunities(communities);
 					}
-					dto.setTargetId(template.getTargetId);
-					dto.setTargetName(communityProvider.findCommunityById(template.getTargetId));
+					dto.setTargetId(template.getTargetId());
+					dto.setTargetName(communityProvider.findCommunityById(template.getTargetId()).getName());
 				}
 				dtos.add(dto);
 			}
