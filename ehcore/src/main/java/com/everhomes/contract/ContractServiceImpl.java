@@ -1086,6 +1086,7 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public void denunciationContract(DenunciationContractCommand cmd) {
+		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_DENUNCIATION, cmd.getOrgId(), cmd.getCommunityId());
 		Contract contract = checkContract(cmd.getId());
 		contract.setStatus(ContractStatus.DENUNCIATION.getCode());
 		contract.setDenunciationReason(cmd.getDenunciationReason());

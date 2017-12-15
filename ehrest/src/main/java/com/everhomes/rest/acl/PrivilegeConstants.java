@@ -278,5 +278,6 @@ public interface PrivilegeConstants {
     long CONTRACT_PARAM_UPDATE = 21211L;//合同参数修改
     long CONTRACT_FLOW = 21212L;//合同工作流
     long CONTRACT_SYNC = 21213L;//从第三方同步合同
+    long CONTRACT_DENUNCIATION = 21214L;//退约
 
 }
