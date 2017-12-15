@@ -9,13 +9,11 @@ import com.everhomes.util.StringHelper;
  *     <li>approveStatus: 审批状态，0-待审批，1-拒绝，2-通过 参考 {@link ApproveStatus}</li>
  *     <li>needReject: 是否需要查询拒绝的数据 0-否，1-是，默认为1查询，此参数是为了适应页面需求（审核中以及通过的）</li>
  *     <li>keyWord: keyWord</li>
- *     <li>pageOffset: 页码</li>
- *     <li>pageSize: 数量</li>
  *     <li>orderBy: 排序方式，0-创建时间，1-审核时间</li>
  *     <li>applyType: 申请类型 0-入孵，1-加速，2-入园，不传则不限{@link ApplyType}</li>
  * </ul>
  */
-public class ListIncubatorApplyCommand {
+public class ExportIncubatorApplyCommand {
 
 
 	private Integer namespaceId;
@@ -23,10 +21,8 @@ public class ListIncubatorApplyCommand {
 	private Byte approveStatus;
 	private Byte needReject;
 	private String keyWord;
-	private Integer pageOffset;
-	private Integer pageSize;
 	private Byte orderBy;
-	Byte applyType;
+	private Byte applyType;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -58,22 +54,6 @@ public class ListIncubatorApplyCommand {
 
 	public void setNeedReject(Byte needReject) {
 		this.needReject = needReject;
-	}
-
-	public Integer getPageOffset() {
-		return pageOffset;
-	}
-
-	public void setPageOffset(Integer pageOffset) {
-		this.pageOffset = pageOffset;
-	}
-
-	public Integer getPageSize() {
-		return pageSize;
-	}
-
-	public void setPageSize(Integer pageSize) {
-		this.pageSize = pageSize;
 	}
 
 	public Byte getOrderBy() {

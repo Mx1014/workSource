@@ -21,7 +21,6 @@ import java.util.List;
  *     <li>chargerName: chargerName</li>
  *     <li>chargerPhone: chargerPhone</li>
  *     <li>chargerEmail: chargerEmail</li>
- *     <li>chargerWechat: chargerWechat</li>
  *     <li>approveUserId: approveUserId</li>
  *     <li>approveUserName: approveUserName</li>
  *     <li>approveStatus: 审批状态，0-待审批，1-拒绝，2-通过 参考 {@link ApproveStatus}</li>
@@ -29,6 +28,7 @@ import java.util.List;
  *     <li>approveOpinion: approveOpinion</li>
  *     <li>createTime: createTime</li>
  *     <li>reApplyId: 如果该记录被拒绝后又重新申请，此字段为新申请记录的Id</li>
+ *     <li>applyType: 申请类型 0-入孵，1-加速，2-入园{@link ApplyType}</li>
  * </ul>
  */
 public class IncubatorApplyDTO {
@@ -48,7 +48,6 @@ public class IncubatorApplyDTO {
 	String chargerName;
 	String chargerPhone;
 	String chargerEmail;
-	String chargerWechat;
 	Long approveUserId;
 	String approveUserName;
 	Byte approveStatus;
@@ -56,6 +55,7 @@ public class IncubatorApplyDTO {
 	String approveOpinion;
 	Timestamp createTime;
 	Long reApplyId;
+	Byte applyType;
 
 
 	public Long getId() {
@@ -162,14 +162,6 @@ public class IncubatorApplyDTO {
 		this.chargerEmail = chargerEmail;
 	}
 
-	public String getChargerWechat() {
-		return chargerWechat;
-	}
-
-	public void setChargerWechat(String chargerWechat) {
-		this.chargerWechat = chargerWechat;
-	}
-
 	public Long getApproveUserId() {
 		return approveUserId;
 	}
@@ -224,6 +216,14 @@ public class IncubatorApplyDTO {
 
 	public void setReApplyId(Long reApplyId) {
 		this.reApplyId = reApplyId;
+	}
+
+	public Byte getApplyType() {
+		return applyType;
+	}
+
+	public void setApplyType(Byte applyType) {
+		this.applyType = applyType;
 	}
 
 	@Override

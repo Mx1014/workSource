@@ -37,6 +37,20 @@ public class IncubatorController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /incubator/exportIncubatorApply</b>
+     * <p>导出入孵申请的记录</p>
+     */
+    @RequestMapping("exportIncubatorApply")
+    @RestReturn(value=String.class)
+    public RestResponse exportIncubatorApply(ExportIncubatorApplyCommand cmd) {
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /incubator/listIncubatorProjectType</b>
      * <p>获取入孵申请的项目类型</p>
      */
