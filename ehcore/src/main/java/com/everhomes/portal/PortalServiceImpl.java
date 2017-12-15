@@ -1783,23 +1783,18 @@ public class PortalServiceImpl implements PortalService {
 			list.add(new Tuple<>(cmd.getLocation(), cmd.getName()));
 		}
 
+
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		//执行太慢，开一个线程来做
 		ExecutorUtil.submit(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					// 发消息等等操作
-					//设置上下文对象 Added by Jannson
 					UserContext.setCurrentNamespaceId(namespaceId);
-//					UserContext.setCurrentUser(user);
 
-					dbProvider.execute((status) -> {
-						for (Tuple<String, String> t: list) {
-							syncLayout(cmd.getNamespaceId(), t.first(), t.second());
-						}
-						return null;
-					});
+					for (Tuple<String, String> t: list) {
+						syncLayout(cmd.getNamespaceId(), t.first(), t.second());
+					}
 
 					//设置完成之后要清空
 					UserContext.setCurrentNamespaceId(null);
