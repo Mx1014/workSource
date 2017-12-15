@@ -5,7 +5,7 @@ set @app_id = (select MAX(`active_app_id`) from `eh_reflection_service_module_ap
 INSERT INTO `eh_reflection_service_module_apps`
 (`id`, `active_app_id`, `namespace_id`, `name`, `module_id`, `instance_config`, `status`, `action_type`, `action_data`, `update_time`, `module_control_type`, `multiple_flag`, `custom_tag`, `custom_path`, `menu_id`)
 VALUES
-(@reflect_id:=@reflect_id+1, @app_id:=@app_id+1, '999992', '仓库管理', '21000', NULL, '2', NULL, NULL, NOW(), 'community-control', '0', '', '', '21000');
+(@reflect_id:=@reflect_id+1, @app_id:=@app_id+1, '999992', '仓库管理', '21000', NULL, '2', 13, NULL, NOW(), 'community-control', '0', '', '', '21000');
 
 -- privilege
 set @module_id = 21010;
