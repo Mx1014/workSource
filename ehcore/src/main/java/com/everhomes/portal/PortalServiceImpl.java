@@ -1785,12 +1785,14 @@ public class PortalServiceImpl implements PortalService {
 
 
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		User user = userProvider.findUserById(UserContext.currentUserId());
 		//执行太慢，开一个线程来做
 		ExecutorUtil.submit(new Runnable() {
 			@Override
 			public void run() {
 				try {
 					UserContext.setCurrentNamespaceId(namespaceId);
+					UserContext.setCurrentUser(user);
 
 					for (Tuple<String, String> t: list) {
 						syncLayout(cmd.getNamespaceId(), t.first(), t.second());
@@ -1798,6 +1800,7 @@ public class PortalServiceImpl implements PortalService {
 
 					//设置完成之后要清空
 					UserContext.setCurrentNamespaceId(null);
+					UserContext.setCurrentUser(null);
 				} catch (Exception e) {
 					LOGGER.error("syncLaunchPadData error", e);
 				}
