@@ -2710,13 +2710,22 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public List<QualityInspectionModleCommunityMap> getQualityModelCommunityMapByTargetId(Long targetId) {
+	public List<QualityInspectionModleCommunityMap> listQualityModelCommunityMapByTargetId(Long targetId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		context.selectFrom(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP)
+		return  context.selectFrom(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP)
 				.where(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP.TARGET_ID.eq(targetId))
 				.and(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(QualityModelType.STANDARD.getCode()))
 				.fetchInto(QualityInspectionModleCommunityMap.class);
-		return null;
+	}
+
+	@Override
+	public List<Long> listQualityModelCommunityIdsMapByStandardId(Long standard) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return  context.select(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP.TARGET_ID)
+				.from(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP)
+				.where(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP.TARGET_ID.eq(standard))
+				.and(Tables.EH_QUALITY_INSPECTION_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(QualityModelType.STANDARD.getCode()))
+				.fetchInto(Long.class);
 	}
 
 	@Override

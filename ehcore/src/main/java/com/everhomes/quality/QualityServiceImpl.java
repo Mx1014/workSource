@@ -15,9 +15,11 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.*;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rentalv2.Rentalv2ServiceImpl;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.equipment.ReviewResult;
@@ -28,6 +30,8 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.quality.*;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
@@ -122,14 +126,19 @@ public class QualityServiceImpl implements QualityService {
 	@Autowired
 	private ConfigurationProvider configProvider;
 
+	@Autowired
+	private PortalService portalService;
+
 	@Override
 	public QualityStandardsDTO creatQualityStandard(CreatQualityStandardCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARD_CREATE, 0L);
+		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARD_CREATE, 0L);
 		if(cmd.getTargetId() != null && cmd.getTargetType() != null) {
 			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-		}
+		}*/
+
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_CREATE,cmd.getTargetId());
 
 		User user = UserContext.current().getUser();
 		RepeatSettings repeat = null;
@@ -226,8 +235,9 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public QualityStandardsDTO updateQualityStandard(UpdateQualityStandardCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARD_UPDATE, 0L);
-		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
+		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARD_UPDATE, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);*/
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_UPDATE,cmd.getTargetId());
 
 		User user = UserContext.current().getUser();
 
@@ -385,8 +395,9 @@ public class QualityServiceImpl implements QualityService {
 		User user = UserContext.current().getUser();
 		QualityInspectionStandards standard = verifiedStandardById(cmd.getStandardId());
 
-		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARD_DELETE, 0L);
-		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), standard.getTargetId(), standard.getOwnerId(), privilegeId);
+		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARD_DELETE, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), standard.getTargetId(), standard.getOwnerId(), privilegeId);*/
+		checkUserPrivilege(standard.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_DELETE, standard.getTargetId());
 
 		standard.setStatus(QualityStandardStatus.INACTIVE.getCode());
 		standard.setOperatorUid(user.getId());
@@ -410,12 +421,13 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public ListQualityStandardsResponse listQualityStandards(ListQualityStandardsCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARD_LIST, 0L);
-		if(0L == cmd.getTargetId()) {
+		//Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARD_LIST, 0L);
+		/*if(0L == cmd.getTargetId()) {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-		}
+		}*/
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_LIST,cmd.getTargetId());
 
 
 		Long ownerId = cmd.getOwnerId();
@@ -427,7 +439,7 @@ public class QualityServiceImpl implements QualityService {
 		List<QualityInspectionStandards> standards = new ArrayList<>();
 		if (cmd.getTargetId() != null) {
 			//首先查出标准和项目之间关联表
-			List<QualityInspectionModleCommunityMap> modleCommunityMaps = qualityProvider.getQualityModelCommunityMapByTargetId(cmd.getTargetId());
+			List<QualityInspectionModleCommunityMap> modleCommunityMaps = qualityProvider.listQualityModelCommunityMapByTargetId(cmd.getTargetId());
 			List<Long> containIds = new ArrayList<>();
 			if(modleCommunityMaps!=null && modleCommunityMaps.size()>0)
 			modleCommunityMaps.forEach(m -> containIds.add(m.getStandardId()));
@@ -465,7 +477,10 @@ public class QualityServiceImpl implements QualityService {
 
         List<QualityStandardsDTO> qaStandards = standards.stream().map((r) -> {
 
-        	QualityStandardsDTO dto = converStandardToDto(r);
+			QualityStandardsDTO dto = converStandardToDto(r);
+			if (r.getTargetId() == 0) {
+				dto.setCommunities(qualityProvider.listQualityModelCommunityIdsMapByStandardId(r.getId()));
+			}
 
         	return dto;
         }).collect(Collectors.toList());
@@ -476,8 +491,11 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public void updateQualityCategory(UpdateQualityCategoryCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_UPDATE, 0L);
-		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
+		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_UPDATE, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);*/
+
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_CATEGORY_UPDATE, null);
+
 		User user = UserContext.current().getUser();
 
 		if(cmd.getId() == null) {
@@ -532,8 +550,9 @@ public class QualityServiceImpl implements QualityService {
 	public void deleteQualityCategory(DeleteQualityCategoryCommand cmd) {
 		QualityInspectionCategories category = verifiedCategoryById(cmd.getCategoryId());
 
-		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_DELETE, 0L);
-		userPrivilegeMgr.checkCurrentUserAuthority(null, null, category.getOwnerId(), privilegeId);
+		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_DELETE, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, category.getOwnerId(), privilegeId);*/
+		checkUserPrivilege(category.getOwnerId(), PrivilegeConstants.QUALITY_CATEGORY_DELETE, null);
 
 		List<QualityInspectionStandards> standards = qualityProvider.findStandardsByCategoryId(cmd.getCategoryId());
 		if(standards != null && standards.size() > 0) {
@@ -820,12 +839,13 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public QualityInspectionTaskDTO findQualityInspectionTask(FindQualityInspectionTaskCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_TASK_LIST, 0L);
+		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_TASK_LIST, 0L);
 		if(cmd.getTargetId() == 0L) {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-		}
+		}*/
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_TASK_LIST,cmd.getTargetId());
 
 		QualityInspectionTasks task = qualityProvider.findVerificationTaskById(cmd.getTaskId());
 		if(task != null)
@@ -845,12 +865,13 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public ListQualityInspectionTasksResponse listQualityInspectionTasks(
 			ListQualityInspectionTasksCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_TASK_LIST, 0L);
+		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_TASK_LIST, 0L);
 		if(cmd.getTargetId() == 0L) {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-		}
+		}*/
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_TASK_LIST,cmd.getTargetId());
 
 		User user = UserContext.current().getUser();
 		Long ownerId = cmd.getOwnerId();
@@ -1894,8 +1915,10 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public ListQualityCategoriesResponse listQualityCategories(
 			ListQualityCategoriesCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_LIST, 0L);
-		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
+		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_LIST, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);*/
+
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_CATEGORY_LIST,cmd.getTargetId());
 
 		Long ownerId = cmd.getOwnerId();
 		String ownerType = cmd.getOwnerType();
@@ -2182,11 +2205,12 @@ public class QualityServiceImpl implements QualityService {
 	public HttpServletResponse exportInspectionTasks(
 			ListQualityInspectionTasksCommand cmd, HttpServletResponse response) {
 		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_TASK_LIST, 0L);
-		if(cmd.getTargetId() == 0L) {
+		/*if(cmd.getTargetId() == 0L) {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-		}
+		}*/
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_TASK_LIST,cmd.getTargetId());
 
 		User user = UserContext.current().getUser();
 		Long ownerId = cmd.getOwnerId();
@@ -2448,8 +2472,9 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public ListQualityInspectionLogsResponse listQualityInspectionLogs(
 			ListQualityInspectionLogsCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_UPDATELOG_LIST, 0L);
-		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
+		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_UPDATELOG_LIST, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);*/
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_TASK_LIST,null);
 
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -2622,12 +2647,14 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public void reviewQualityStandard(ReviewReviewQualityStandardCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARDREVIEW_REVIEW, 0L);
-		if(cmd.getTargetId() == 0L) {
+		//Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARDREVIEW_REVIEW, 0L);
+		/*if(cmd.getTargetId() == 0L) {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-		}
+		}*/
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARDREVIEW_REVIEW, cmd.getTargetId());
+
 		QualityInspectionStandards standard = qualityProvider.findStandardById(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId());
 		standard.setReviewResult(cmd.getReviewResult());
 		standard.setReviewerUid(UserContext.current().getUser().getId());
@@ -2645,19 +2672,21 @@ public class QualityServiceImpl implements QualityService {
 	public void createQualitySpecification(CreateQualitySpecificationCommand cmd) {
 		//ScopeCode： 0 表示全部  1表示项目
 		if(SpecificationInspectionType.CATEGORY.equals(SpecificationInspectionType.fromStatus(cmd.getInspectionType()))) {
-			Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_CREATE, 0L);
+			/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_CREATE, 0L);
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
 				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getScopeId(), cmd.getOwnerId(), privilegeId);
 			} else {
 				userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-			}
+			}*/
+			checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_CATEGORY_CREATE, cmd.getScopeId());
 		} else {
-			Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_SPECIFICATION_CREATE, 0L);
+			/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_SPECIFICATION_CREATE, 0L);
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
 				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getScopeId(), cmd.getOwnerId(), privilegeId);
 			} else {
 				userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-			}
+			}*/
+			checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_SPECIFICATION_CREATE, cmd.getScopeId());
 		}
 
 		QualityInspectionSpecifications specification = ConvertHelper.convert(cmd, QualityInspectionSpecifications.class);
@@ -2680,19 +2709,21 @@ public class QualityServiceImpl implements QualityService {
 	public void updateQualitySpecification(UpdateQualitySpecificationCommand cmd) {
 		QualityInspectionSpecifications specification = verifiedSpecificationById(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 		if(SpecificationInspectionType.CATEGORY.equals(SpecificationInspectionType.fromStatus(specification.getInspectionType()))) {
-			Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_UPDATE, 0L);
+			/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_UPDATE, 0L);
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
 				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getScopeId(), cmd.getOwnerId(), privilegeId);
 			} else {
 				userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-			}
+			}*/
+			checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_CATEGORY_UPDATE,cmd.getScopeId());
 		} else {
-			Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_SPECIFICATION_UPDATE, 0L);
+			/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_SPECIFICATION_UPDATE, 0L);
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
 				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getScopeId(), cmd.getOwnerId(), privilegeId);
 			} else {
 				userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-			}
+			}*/
+			checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_SPECIFICATION_UPDATE,cmd.getScopeId());
 		}
 
 		if(specification.getScopeId().equals(cmd.getScopeId())) {
@@ -2730,19 +2761,21 @@ public class QualityServiceImpl implements QualityService {
 	public void deleteQualitySpecification(DeleteQualitySpecificationCommand cmd) {
 		QualityInspectionSpecifications specification = verifiedSpecificationById(cmd.getSpecificationId(), cmd.getOwnerType(), cmd.getOwnerId());
 		if(SpecificationInspectionType.CATEGORY.equals(SpecificationInspectionType.fromStatus(specification.getInspectionType()))) {
-			Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_DELETE, 0L);
-			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
+//			Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_DELETE, 0L);
+			/*if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
 				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getScopeId(), cmd.getOwnerId(), privilegeId);
 			} else {
 				userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-			}
+			}*/
+			checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_CATEGORY_DELETE,cmd.getScopeId());
 		} else {
-			Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_SPECIFICATION_DELETE, 0L);
+			/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_SPECIFICATION_DELETE, 0L);
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
 				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getScopeId(), cmd.getOwnerId(), privilegeId);
 			} else {
 				userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-			}
+			}*/
+			checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_SPECIFICATION_DELETE,cmd.getScopeId());
 		}
 		if(SpecificationScopeCode.fromCode(specification.getScopeCode()).equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))
 				&& specification.getScopeId().equals(cmd.getScopeId())) {
@@ -2772,19 +2805,21 @@ public class QualityServiceImpl implements QualityService {
 	public ListQualitySpecificationsResponse listQualitySpecifications(
 			ListQualitySpecificationsCommand cmd) {
 		if(SpecificationInspectionType.SPECIFICATION.equals(SpecificationInspectionType.fromStatus(cmd.getInspectionType()))){
-			Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_SPECIFICATION_LIST, 0L);
+			/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_SPECIFICATION_LIST, 0L);
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
 				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getScopeId(), cmd.getOwnerId(), privilegeId);
 			} else {
 				userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-			}
+			}*/
+			checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_SPECIFICATION_LIST,cmd.getScopeId());
 		} else {
-			Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_LIST, 0L);
+			/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_LIST, 0L);
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
 				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getScopeId(), cmd.getOwnerId(), privilegeId);
 			} else {
 				userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-			}
+			}*/
+			checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_CATEGORY_LIST,cmd.getScopeId());
 		}
 		ListQualitySpecificationsResponse response = new ListQualitySpecificationsResponse();
 
@@ -2949,12 +2984,13 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public CountScoresResponse countScores(CountScoresCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STAT_SCORE, 0L);
+		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STAT_SCORE, 0L);
 		if(cmd.getTargetIds() != null && cmd.getTargetIds().size() == 1) {
 			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetIds().get(0), cmd.getOwnerId(), privilegeId);
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-		}
+		}*/
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_STAT_SCORE,cmd.getTargetIds().get(0));
 
 		CountScoresResponse response = new CountScoresResponse();
 		//查列 add by xiongying 20170425
@@ -3042,12 +3078,13 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public CountTasksResponse countTasks(CountTasksCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STAT_TASK, 0L);
+		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STAT_TASK, 0L);
 		if(cmd.getTargetId() != null) {
 			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-		}
+		}*/
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_STAT_TASK,cmd.getTargetId());
 
 
 		CountTasksResponse response = new CountTasksResponse();
@@ -4248,5 +4285,22 @@ public class QualityServiceImpl implements QualityService {
 
 		response.setItemScores(itemScores);
 		return response;
+	}
+	private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) {
+		ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+		listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+		listServiceModuleAppsCommand.setModuleId(QualityConstant.QUALITY_MODULE);
+		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+		boolean flag = false;
+		if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+			flag = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(),
+					orgId, orgId, privilegeId, apps.getServiceModuleApps().get(0).getId(), null, communityId);
+		}
+		if (!flag) {
+			LOGGER.error("Permission is denied, namespaceId={}, orgId={}, communityId={}," +
+					" privilege={}", UserContext.getCurrentNamespaceId(), orgId, communityId, privilegeId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+					"Insufficient privilege");
+		}
 	}
 }
