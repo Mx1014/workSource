@@ -48,7 +48,7 @@ public class FileDownloadController extends ControllerBase {
     @RequestMapping("cancelJob")
     @RestReturn(value=String.class)
     public RestResponse cancelJob(CancelJobCommand cmd) {
-        fileDownloadService.cancelJob(cmd);
+        fileDownloadService.cancelJob(cmd.getJobId());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

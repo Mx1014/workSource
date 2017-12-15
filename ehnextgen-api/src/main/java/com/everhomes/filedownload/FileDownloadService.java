@@ -1,10 +1,12 @@
 package com.everhomes.filedownload;
 
+import com.everhomes.rest.filedownload.JobStatus;
 import com.everhomes.rest.filedownload.ListFileDownloadJobsCommand;
 import com.everhomes.rest.filedownload.ListFileDownloadJobsResponse;
 
-public interface FileDownloadService extends JobService{
+import java.io.OutputStream;
 
+public interface FileDownloadService extends JobService{
 
     /**
      * 管理后台查询下载任务记录
@@ -14,10 +16,10 @@ public interface FileDownloadService extends JobService{
     ListFileDownloadJobsResponse listFileDownloadJobs(ListFileDownloadJobsCommand cmd);
 
     /**
-     * 更新任务进度比例
-     * @param jobId 任务id
-     * @param rate 任务进度百分数
+     * 上传文件到contenServer
+     * @param fileName
+     * @param ops
+     * @return
      */
-    void updateJobRate(Long jobId, Integer rate);
-
+    String uploadToContenServer(String fileName, OutputStream ops);
 }

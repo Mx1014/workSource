@@ -17,7 +17,7 @@ public interface JobHandler {
 
     /**
      * 任务的具体业务逻辑
-     * 由于服务器重启等原因，失败的任务可能会被再次执行（），具体业务需要根据当前状态status（失败）和当前执行进度rate进行判断后续业务改怎么处理
+     * 由于服务器重启等原因，失败的任务可能会被再次执行，具体业务需要根据当前状态status（失败）和当前执行进度rate进行判断后续业务改怎么处理
      * @param params  创建任务时的业务参数 + jobId + status + rate
      */
     void run(Map<String, Object> params);
@@ -34,6 +34,4 @@ public interface JobHandler {
      */
     void afterRun(Map<String, Object> params);
 
-
-    
 }

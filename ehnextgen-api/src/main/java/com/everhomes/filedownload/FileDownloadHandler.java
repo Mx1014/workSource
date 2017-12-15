@@ -1,7 +1,5 @@
 package com.everhomes.filedownload;
 
-import java.io.OutputStream;
-import java.util.Map;
 
 public interface FileDownloadHandler extends JobHandler{
 

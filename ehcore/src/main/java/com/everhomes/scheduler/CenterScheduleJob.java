@@ -1,10 +1,7 @@
 package com.everhomes.scheduler;
 
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.filedownload.FileDownloadHandler;
-import com.everhomes.filedownload.FileDownloadService;
-import com.everhomes.filedownload.JobHandler;
-import com.everhomes.filedownload.JobService;
+import com.everhomes.filedownload.*;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.filedownload.JobStatus;
 import com.everhomes.user.UserContext;
@@ -35,9 +32,6 @@ public class CenterScheduleJob extends QuartzJobBean {
 
     @Autowired
     JobService jobService;
-
-    @Autowired
-    private ContentServerService contentServerService;
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
@@ -133,7 +127,6 @@ public class CenterScheduleJob extends QuartzJobBean {
             @Override
             public void run() {
                 while (true){
-
                     //每五秒更新一次进度
                     try {
                         Thread.sleep(5000L);
@@ -149,26 +142,5 @@ public class CenterScheduleJob extends QuartzJobBean {
         };
         return rateThread;
     }
-
-
-//    private String uploadToContenServer(String fileName, InputStream ins){
-//
-//        String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
-//        //String name = "importErrorLog_" + String.valueOf(System.currentTimeMillis()) + ".xls";
-//        UploadCsFileResponse re = contentServerService.uploadFileToContentServer(ins, fileName, token);
-//        if(re.getErrorCode() == 0 && re.getResponse() != null){
-//            return re.getResponse().getUri();
-//        }
-//
-//        return null;
-//    }
-//
-//
-//    private String uploadToContenServer(String fileName, OutputStream ops){
-//
-//        ByteArrayOutputStream os = (ByteArrayOutputStream)ops;
-//        InputStream ins = new ByteArrayInputStream(os.toByteArray());
-//        return uploadToContenServer(fileName, ins);
-//    }
 
 }
