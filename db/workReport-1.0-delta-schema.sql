@@ -126,8 +126,6 @@ CREATE TABLE `eh_work_report_val_comment_attachments` (
   `id` BIGINT NOT NULL COMMENT 'the id of the report val map',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
 
-  `owner_id` BIGINT,
-  `owner_type` VARCHAR(64),
   `comment_id` BIGINT NOT NULL COMMENT 'the id of the comment',
   `content_type` VARCHAR(32) COMMENT 'the type of the content',
   `content_uri` VARCHAR(2048) COMMENT 'attachment object link info on storage',

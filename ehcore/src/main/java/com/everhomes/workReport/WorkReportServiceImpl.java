@@ -72,7 +72,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         report.setReportName(cmd.getReportName());
         report.setModuleId(cmd.getModuleId());
         report.setOperatorUserId(userId);
-        report.setOperatorName(fixUpUserName(report.getOrganizationId(), userId));
+        report.setOperatorName(fixUpUserName(userId));
 
         //  add it with the initial scope.
         dbProvider.execute((TransactionStatus status) -> {
@@ -121,7 +121,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             report.setFormOriginId(cmd.getFormOriginId());
             report.setFormVersion(cmd.getFormVersion());
             report.setOperatorUserId(userId);
-            report.setOperatorName(fixUpUserName(report.getOrganizationId(), userId));
+            report.setOperatorName(fixUpUserName(userId));
             dbProvider.execute((TransactionStatus status) -> {
                 workReportProvider.updateWorkReport(report);
                 updateWorkReportScopeMap(report.getId(), cmd.getScopes());
@@ -286,7 +286,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             report.setReportName(template.getReportName());
             report.setReportType(template.getReportType());
             report.setOperatorUserId(userId);
-            report.setOperatorName(fixUpUserName(report.getOrganizationId(), userId));
+            report.setOperatorName(fixUpUserName(userId));
             if (formOriginId != null)
                 report.setFormOriginId(formOriginId);
             workReportProvider.updateWorkReport(report);
@@ -299,7 +299,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             report.setOrganizationId(cmd.getOrganizationId());
             report.setStatus(WorkReportStatus.RUNNING.getCode());
             report.setOperatorUserId(userId);
-            report.setOperatorName(fixUpUserName(report.getOrganizationId(), userId));
+            report.setOperatorName(fixUpUserName(userId));
             if (formOriginId != null)
                 report.setFormOriginId(formOriginId);
             report.setReportTemplateId(template.getId());
@@ -355,13 +355,15 @@ public class WorkReportServiceImpl implements WorkReportService {
         return false;
     }
 
-    public String fixUpUserName(Long organizationId, Long userId) {
-        OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
-        if (om != null && om.getContactName() != null && !om.getContactName().isEmpty())
-            return om.getContactName();
+    @Override
+    public String fixUpUserName(Long userId) {
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(userId);
+        if (members != null && members.size() > 0)
+            return members.get(0).getContactName();
         return "";
     }
 
+    @Override
     public OrganizationMember getUserDepPath(Long userId) {
         List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(userId).stream().filter(r ->
                 r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())
@@ -371,19 +373,21 @@ public class WorkReportServiceImpl implements WorkReportService {
         return null;
     }
 
-    public SceneContactDTO getUserRealInfo(Long userId){
-        SceneContactDTO dto = new SceneContactDTO();
-
+    @Override
+    public Long getUserDetailId(Long userId) {
         List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(userId);
         if (members != null && members.size() > 0)
-            dto.setDetailId(members.get(0).getDetailId());
+            return members.get(0).getDetailId();
+        return null;
+    }
 
+    @Override
+    public String getUserAvatar(Long userId) {
         User user = userProvider.findUserById(userId);
         if (null != user) {
-            dto.setContactAvatar(contentServerService.parserUri(user.getAvatar()));
+            return contentServerService.parserUri(user.getAvatar());
         }
-
-        return null;
+        return "";
     }
 
     @Override
@@ -412,7 +416,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         val.setReportId(cmd.getReportId());
         val.setReportTime(cmd.getReportTime());
         val.setApplierUserId(user.getId());
-        val.setApplierName(fixUpUserName(cmd.getOrganizationId(), user.getId()));
+        val.setApplierName(fixUpUserName(user.getId()));
         val.setReportType(cmd.getReportType());
 
         PostGeneralFormCommand formCommand = new PostGeneralFormCommand();
@@ -432,7 +436,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 receiver.setNamespaceId(namespaceId);
                 receiver.setReportValId(valId);
                 receiver.setReceiverUserId(receiverId);
-                receiver.setReceiverName(fixUpUserName(cmd.getOrganizationId(), receiverId));
+                receiver.setReceiverName(fixUpUserName(receiverId));
                 receiver.setReceiverAvatar(user.getAvatar());
                 receiver.setReadStatus(WorkReportReadStatus.UNREAD.getCode());
                 workReportValProvider.createWorkReportValReceiverMap(receiver);
@@ -676,8 +680,10 @@ public class WorkReportServiceImpl implements WorkReportService {
 
         WorkReportVal reportVal = workReportValProvider.getWorkReportValById(cmd.getReportValId());
         if (reportVal != null) {
+            WorkReport report = workReportProvider.getWorkReportById(reportVal.getReportId());
+
             /** update the status **/
-            WorkReportValReceiverMap receiverMap = workReportValProvider.findWorkReportValReceiverByReceiverId(
+            WorkReportValReceiverMap receiverMap = workReportValProvider.getWorkReportValReceiverByReceiverId(
                     namespaceId, reportVal.getId(), currentUserId);
             receiverMap.setReadStatus(WorkReportReadStatus.READ.getCode());
             workReportValProvider.updateWorkReportValReceiverMap(receiverMap);
@@ -685,27 +691,26 @@ public class WorkReportServiceImpl implements WorkReportService {
             /** get the result **/
             //  1) get receivers.
             List<SceneContactDTO> receivers = listWorkReportValReceivers(cmd.getReportValId());
-            //  2) get the applier's avatar and detailId
-            SceneContactDTO user = getUserRealInfo(reportVal.getApplierUserId());
-            //  3) get the field values which has been post by the user.
+            //  2) get the field values which has been post by the user.
             GetGeneralFormValuesCommand valuesCommand = new GetGeneralFormValuesCommand();
             valuesCommand.setSourceId(reportVal.getApplierUserId());
             valuesCommand.setSourceType(WORK_REPORT_VAL);
             List<PostApprovalFormItem> values = generalFormService.getGeneralFormValues(valuesCommand);
             List<GeneralFormFieldDTO> fields = values.stream().map(r ->
-                ConvertHelper.convert(r, GeneralFormFieldDTO.class)
+                    ConvertHelper.convert(r, GeneralFormFieldDTO.class)
             ).collect(Collectors.toList());
 
-            //  4) convert the result and return back.
+            //  3) convert the result and return back.
             //todo: 可能少了 title 需要定义
             dto.setReportValId(reportVal.getId());
             dto.setReportId(reportVal.getReportId());
             dto.setReportType(reportVal.getReportType());
             dto.setReportTime(reportVal.getReportTime());
+            dto.setTitle(report.getReportName());
             dto.setApplierUserId(reportVal.getApplierUserId());
             dto.setApplierName(reportVal.getApplierName());
-            dto.setApplierDetailId(user.getDetailId());
-            dto.setApplierUserAvatar(user.getContactAvatar());
+            dto.setApplierDetailId(getUserDetailId(reportVal.getApplierUserId()));
+            dto.setApplierUserAvatar(getUserAvatar(reportVal.getApplierUserId()));
             dto.setCreateTime(reportVal.getCreateTime());
             dto.setReceivers(receivers);
             dto.setUpdateTime(reportVal.getUpdateTime());

@@ -23,11 +23,25 @@ public interface WorkReportValProvider {
 
     void deleteReportValReceiverByValId(Long valId);
 
-    WorkReportValReceiverMap findWorkReportValReceiverByReceiverId(Integer namespaceId, Long reportValId, Long receiverId);
+    WorkReportValReceiverMap getWorkReportValReceiverByReceiverId(Integer namespaceId, Long reportValId, Long receiverId);
 
     List<WorkReportValReceiverMap> listReportValReceiversByValId(Long reportValId);
 
     Integer countUnReadWorkReportsVal(Integer namespaceId, Long receiverId);
 
     void markWorkReportsValReading(Integer namespaceId, Long receiverId);
+
+    Long createWorkReportValComment(WorkReportValComment comment);
+
+    void deleteWorkReportValComment(WorkReportValComment comment);
+
+    WorkReportValComment getWorkReportValCommentById(Long commentId);
+
+    List<WorkReportValComment> listWorkReportValComments(Integer namespaceId, Long reportValId, Long pageAnchor,Integer pageSize);
+
+    void createWorkReportValCommentAttachment(WorkReportValCommentAttachment attachment);
+
+    void deleteCommentAttachmentsByCommentId(Integer namespaceId, Long commentId);
+
+    List<WorkReportValCommentAttachment> listWorkReportValCommentAttachments(Integer namespaceId, List<Long> commentIds);
 }

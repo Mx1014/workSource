@@ -9,11 +9,11 @@ import com.everhomes.rest.workReport.WorkReportReadStatus;
 import com.everhomes.rest.workReport.WorkReportStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhWorkReportValCommentAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhWorkReportValCommentsDao;
 import com.everhomes.server.schema.tables.daos.EhWorkReportValReceiverMapDao;
 import com.everhomes.server.schema.tables.daos.EhWorkReportValsDao;
-import com.everhomes.server.schema.tables.pojos.EhWorkReportScopeMap;
-import com.everhomes.server.schema.tables.pojos.EhWorkReportValReceiverMap;
-import com.everhomes.server.schema.tables.pojos.EhWorkReportVals;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -119,7 +119,7 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         query.addOrderBy(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.CREATE_TIME.desc());
 
         //  return back
-        query.fetch().map(r ->{
+        query.fetch().map(r -> {
             WorkReportVal reportVal = new WorkReportVal();
             reportVal.setId(r.getValue(Tables.EH_WORK_REPORT_VALS.ID));
             reportVal.setReportId(r.getValue(Tables.EH_WORK_REPORT_VALS.REPORT_ID));
@@ -148,7 +148,7 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
 
     @Caching(evict = {@CacheEvict(value = "listReportValReceiversByValId", key = "#receiver.reportValId")})
     @Override
-    public void updateWorkReportValReceiverMap(WorkReportValReceiverMap receiver){
+    public void updateWorkReportValReceiverMap(WorkReportValReceiverMap receiver) {
         receiver.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhWorkReportValReceiverMapDao dao = new EhWorkReportValReceiverMapDao(context.configuration());
@@ -167,7 +167,7 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
     }
 
     @Override
-    public WorkReportValReceiverMap findWorkReportValReceiverByReceiverId(Integer namespaceId, Long reportValId, Long receiverId){
+    public WorkReportValReceiverMap getWorkReportValReceiverByReceiverId(Integer namespaceId, Long reportValId, Long receiverId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWorkReportValReceiverMapRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP);
         query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.NAMESPACE_ID.eq(namespaceId));
@@ -191,7 +191,7 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
     }
 
     @Override
-    public Integer countUnReadWorkReportsVal(Integer namespaceId, Long receiverId){
+    public Integer countUnReadWorkReportsVal(Integer namespaceId, Long receiverId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWorkReportValReceiverMapRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP);
         query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.NAMESPACE_ID.eq(namespaceId));
@@ -200,7 +200,7 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
     }
 
     @Override
-    public void markWorkReportsValReading(Integer namespaceId, Long receiverId){
+    public void markWorkReportsValReading(Integer namespaceId, Long receiverId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         UpdateQuery<EhWorkReportValReceiverMapRecord> query = context.updateQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP);
         query.addValue(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.READ_STATUS, WorkReportReadStatus.READ.getCode());
@@ -209,4 +209,91 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.RECEIVER_USER_ID.eq(receiverId));
         query.execute();
     }
+
+    @Override
+    public Long createWorkReportValComment(WorkReportValComment comment) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWorkReportValComments.class));
+        comment.setId(id);
+        comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWorkReportValCommentsDao dao = new EhWorkReportValCommentsDao(context.configuration());
+        dao.insert(comment);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhWorkReportValComments.class, null);
+        return id;
+    }
+
+    @Override
+    public void deleteWorkReportValComment(WorkReportValComment comment) {
+        comment.setStatus(WorkReportStatus.INVALID.getCode());
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWorkReportValCommentsDao dao = new EhWorkReportValCommentsDao(context.configuration());
+        dao.update(comment);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWorkReportValComments.class, comment.getId());
+
+    }
+
+    @Override
+    public WorkReportValComment getWorkReportValCommentById(Long commentId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhWorkReportValCommentsDao dao = new EhWorkReportValCommentsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(commentId), WorkReportValComment.class);
+    }
+
+    @Override
+    public List<WorkReportValComment> listWorkReportValComments(Integer namespaceId, Long reportValId, Long pageAnchor, Integer pageSize) {
+        List<WorkReportValComment> results = new ArrayList<>();
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportValCommentsRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VAL_COMMENTS);
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENTS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENTS.REPORT_VAL_ID.eq(reportValId));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENTS.STATUS.eq(WorkReportStatus.VALID.getCode()));
+        if (pageAnchor != null)
+            query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENTS.ID.gt(pageAnchor));
+        query.addOrderBy(Tables.EH_WORK_REPORT_VAL_COMMENTS.ID.asc());
+        query.addLimit(pageSize + 1);
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, WorkReportValComment.class));
+            return null;
+        });
+        return results;
+    }
+
+    @Override
+    public void createWorkReportValCommentAttachment(WorkReportValCommentAttachment attachment) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWorkReportValCommentAttachments.class));
+        attachment.setId(id);
+        attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWorkReportValCommentAttachmentsDao dao = new EhWorkReportValCommentAttachmentsDao(context.configuration());
+        dao.insert(attachment);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhWorkReportValCommentAttachments.class, null);
+    }
+
+    @Override
+    public void deleteCommentAttachmentsByCommentId(Integer namespaceId, Long commentId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        UpdateQuery<EhWorkReportValCommentAttachmentsRecord> query = context.updateQuery(Tables.EH_WORK_REPORT_VAL_COMMENT_ATTACHMENTS);
+        query.addValue(Tables.EH_WORK_REPORT_VAL_COMMENT_ATTACHMENTS.STATUS, WorkReportStatus.INVALID.getCode());
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENT_ATTACHMENTS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENT_ATTACHMENTS.COMMENT_ID.eq(commentId));
+        query.execute();
+    }
+
+    @Override
+    public List<WorkReportValCommentAttachment> listWorkReportValCommentAttachments(Integer namespaceId, List<Long> commentIds) {
+        List<WorkReportValCommentAttachment> results = new ArrayList<>();
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<EhWorkReportValCommentAttachmentsRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VAL_COMMENT_ATTACHMENTS);
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENT_ATTACHMENTS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENT_ATTACHMENTS.COMMENT_ID.in(commentIds));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENT_ATTACHMENTS.STATUS.eq(WorkReportStatus.VALID.getCode()));
+        query.fetch().map(r ->{
+            results.add(ConvertHelper.convert(r, WorkReportValCommentAttachment.class));
+            return null;
+        });
+        return results;
+    }
+
 }

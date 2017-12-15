@@ -1,5 +1,6 @@
 package com.everhomes.workReport;
 
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.workReport.*;
 
 public interface WorkReportService {
@@ -41,4 +42,12 @@ public interface WorkReportService {
     void markWorkReportsValReading();
 
     WorkReportValDTO getWorkReportValDetail(WorkReportValIdCommand cmd);
+
+    String fixUpUserName(Long userId);
+
+    OrganizationMember getUserDepPath(Long userId);
+
+    Long getUserDetailId(Long userId);
+
+    String getUserAvatar(Long userId);
 }
