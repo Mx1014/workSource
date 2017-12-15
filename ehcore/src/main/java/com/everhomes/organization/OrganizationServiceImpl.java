@@ -14230,8 +14230,12 @@ public class OrganizationServiceImpl implements OrganizationService {
         listServiceModuleAppsCommand.setModuleId(FlowConstants.ORGANIZATION_MODULE);
         ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
         Long organizaitonId = getTopEnterpriserIdOfOrganization(orgId);
-        if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
-            if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), organizaitonId, organizaitonId, pivilegeId, apps.getServiceModuleApps().get(0).getId(), orgId, null)){
+        Long appId = null;
+        if(null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0){
+            appId = apps.getServiceModuleApps().get(0).getId();
+        }
+        if (null != apps) {
+            if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), organizaitonId, organizaitonId, pivilegeId, appId, orgId, null)){
                 LOGGER.error("error_no_privileged. orgId = {}, userId = {}, pivilegeId={}", orgId, UserContext.currentUserId(), pivilegeId);
                 throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
                         "check app privilege error");

@@ -1190,7 +1190,10 @@ public class AssetController extends ControllerBase {
         cmd1.setModuleId(20400l);
         cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
         ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
-        Long appId = res.getServiceModuleApps().get(0).getId();
+        Long appId = null;
+        if(null != res.getServiceModuleApps() && res.getServiceModuleApps().size() > 0){
+            appId = res.getServiceModuleApps().get(0).getId();
+        }
         if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), 1000001L, 1000001L,priviledgeId , appId, null,communityId )){
             throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
                     "check app privilege error");
