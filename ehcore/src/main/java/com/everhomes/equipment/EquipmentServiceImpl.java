@@ -521,6 +521,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 			standard.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
 			equipmentProvider.updateEquipmentStandard(standard);
 			equipmentStandardSearcher.feedDoc(standard);
+			if(cmd.getTargetId() == null){
+				equipmentProvider.deleteStandardModleCommunityMapBystandardId(standard.getId());
+			}
 
 			List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
 			if (maps != null && maps.size() > 0) {
@@ -4149,6 +4152,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 			template.setDeleteUid(UserContext.current().getUser().getId());
 			template.setDeleteTime(new Timestamp(System.currentTimeMillis()));
 			equipmentProvider.updateEquipmentInspectionTemplates(template);
+			if (cmd.getTargetId() == null) {
+				equipmentProvider.deleteTemplateModleCommunityMapByTemplateId(template.getId());
+			}
 
 			List<EquipmentInspectionStandards> standards = equipmentProvider.listEquipmentInspectionStandardsByTemplateId(template.getId());
 			if(standards != null && standards.size() > 0) {
