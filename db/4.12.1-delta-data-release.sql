@@ -599,6 +599,9 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES 
 (@mp_id:=@mp_id+1, '50100', '0', 41012, '批量导出人员', '0', NOW());
 
+-- 给control_id一个初始值
+update eh_authorizations set control_id = 1 where id = 33;
+
 
 -- 更新action_type
 update eh_service_modules set action_type = 46 WHERE id = 50100 and name = '组织架构';
