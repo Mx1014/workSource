@@ -353,16 +353,17 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.ISSUER_TYPE.eq(request.getIssuerType()));
 		}
 
-		if(null != request.getApplyType()){
-			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.APPLY_TYPE.eq(request.getApplyType()));
-		}
-
 		if(!StringUtils.isEmpty(request.getStatus())){
 			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.STATUS.eq(request.getStatus()));
 		}
 
 		if(!StringUtils.isEmpty(request.getSourceType())){
-			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.SOURCE_TYPE.eq(request.getSourceType()));
+			if (request.getSourceType().equals(ApplyEntrySourceType.LEASE_PROJECT.getCode())) {
+				cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.SOURCE_TYPE.eq(ApplyEntrySourceType.LEASE_PROJECT.getCode())
+					.or(Tables.EH_ENTERPRISE_OP_REQUESTS.SOURCE_TYPE.eq(ApplyEntrySourceType.BUILDING.getCode())));
+			}else {
+				cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.SOURCE_TYPE.eq(request.getSourceType()));
+			}
 		}
 
 		if(null != idList && idList.size()>0){

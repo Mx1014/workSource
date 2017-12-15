@@ -148,6 +148,7 @@ public class PortalServiceImpl implements PortalService {
 //		}
 //		return null;
 		List<ServiceModuleAppDTO> moduleApps = serviceModuleProvider.listReflectionServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getActionType(), cmd.getCustomTag(), cmd.getCustomPath(), null);
+		LOGGER.debug("list apps size:" + moduleApps.size());
 		if(moduleApps != null && moduleApps.size() > 0){
 			List dtos = Collections.singletonList(moduleApps.get(0));
 			return new ListServiceModuleAppsResponse(dtos);
@@ -1782,12 +1783,31 @@ public class PortalServiceImpl implements PortalService {
 			list.add(new Tuple<>(cmd.getLocation(), cmd.getName()));
 		}
 
-		dbProvider.execute((status) -> {
-			for (Tuple<String, String> t: list) {
-				syncLayout(cmd.getNamespaceId(), t.first(), t.second());
+
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		User user = userProvider.findUserById(UserContext.currentUserId());
+		//执行太慢，开一个线程来做
+		ExecutorUtil.submit(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					UserContext.setCurrentNamespaceId(namespaceId);
+					UserContext.setCurrentUser(user);
+
+					for (Tuple<String, String> t: list) {
+						syncLayout(cmd.getNamespaceId(), t.first(), t.second());
+					}
+
+					//设置完成之后要清空
+					UserContext.setCurrentNamespaceId(null);
+					UserContext.setCurrentUser(null);
+				} catch (Exception e) {
+					LOGGER.error("syncLaunchPadData error", e);
+				}
 			}
-			return null;
 		});
+
+
 
 	}
 
@@ -2068,7 +2088,7 @@ public class PortalServiceImpl implements PortalService {
 		moduleApp.setOperatorUid(user.getId());
 
 		ServiceModule serviceModule = null;
-		if(ActionType.fromCode(actionType) == ActionType.OFFICIAL_URL){
+		if(ActionType.fromCode(actionType) == ActionType.OFFICIAL_URL || ActionType.ROUTER == ActionType.fromCode(actionType)){
 			Set<String> beans = PortalUrlParserBeanUtil.getkeys();
 			Long moduleId = 0L;
 			for (String bean : beans) {
@@ -2083,7 +2103,7 @@ public class PortalServiceImpl implements PortalService {
 					}
 				}
 			}
-		}else if(ActionType.OFFLINE_WEBAPP  == ActionType.fromCode(actionType) || ActionType.THIRDPART_URL  == ActionType.fromCode(actionType)){
+		}else if(ActionType.OFFLINE_WEBAPP  == ActionType.fromCode(actionType) || ActionType.THIRDPART_URL  == ActionType.fromCode(actionType) ){
 			return moduleApp;
 		}else{
 			List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModule(actionType);

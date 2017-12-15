@@ -1,8 +1,6 @@
 // @formatter:off
 package com.everhomes.coordinator;
 
-import com.everhomes.organization.Organization;
-
 public enum CoordinationLocks {
     CREATE_FAMILY("family.create"),
     LEAVE_FAMILY("family.leave"),
@@ -107,12 +105,19 @@ public enum CoordinationLocks {
     CLEANWRONGSTATUS_ORGANIZATIONMEMBERS("cleanwrongstatus.organizationmembers"),
     CREATE_ENERGY_TASK("energy.task.create"),
     SCHEDULE_ENERGY_TASK("energy.task.schedule"),
+
 	ADD_ORGANIZATION_PERSONEL("add.organization.personel"),
+
+	POINT_UPDATE_RULE_CATEGORY_SERVER_ID("point.update.ruleCategory.serverId"),
+	POINT_UPDATE_POINT_SCORE("point.update.pointScore"),
+
     SYNC_CONTRACT("sync.contract"),
     FORUM_SETTING("forum.setting")
     ;
+
     private String code;
-    private CoordinationLocks(String code) {
+
+    CoordinationLocks(String code) {
         this.code = code;
     }
     

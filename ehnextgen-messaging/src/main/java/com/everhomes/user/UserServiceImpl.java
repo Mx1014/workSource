@@ -16,10 +16,7 @@ import com.everhomes.border.Border;
 import com.everhomes.border.BorderConnection;
 import com.everhomes.border.BorderConnectionProvider;
 import com.everhomes.border.BorderProvider;
-import com.everhomes.bus.LocalBus;
-import com.everhomes.bus.LocalBusMessageDispatcher;
-import com.everhomes.bus.LocalBusMessageHandler;
-import com.everhomes.bus.LocalBusSubscriber;
+import com.everhomes.bus.*;
 import com.everhomes.business.BusinessService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -73,7 +70,6 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberFullDTO;
@@ -103,13 +99,10 @@ import com.everhomes.server.schema.tables.EhGroupMemberLogs;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.*;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
-
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.geo.GeoHashUtils;
-
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.slf4j.Logger;
@@ -133,7 +126,6 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -768,6 +760,17 @@ public class UserServiceImpl implements UserService {
 			//刷新地址信息
 			propertyMgrService.processUserForOwner(identifier);
 
+			// 注册成功事件
+            LocalEventBus.publish(event -> {
+                LocalEventContext context = new LocalEventContext();
+                context.setUid(rLogin.getUserId());
+                context.setNamespaceId(namespaceId);
+                event.setContext(context);
+
+                event.setEntityType(EntityType.USER.getCode());
+                event.setEntityId(rLogin.getUserId());
+                event.setEventName(SystemEvent.ACCOUNT_REGISTER_SUCCESS.dft());
+            });
 			return rLogin;
 		}
 
@@ -1359,6 +1362,18 @@ public class UserServiceImpl implements UserService {
 			// 发布用户切换App到前台事件   add by xq.tian 2017/07/13
             applicationEventPublisher.publishEvent(new BorderRegisterEvent(login));
 
+            // 打开App事件
+            LocalEventBus.publish(event -> {
+                LocalEventContext context = new LocalEventContext();
+                context.setNamespaceId(login.getNamespaceId());
+                context.setUid(login.getUserId());
+                event.setContext(context);
+
+                event.setEntityType(EntityType.USER.getCode());
+                event.setEntityId(login.getUserId());
+                event.setEventName(SystemEvent.ACCOUNT_OPEN_APP.dft());
+            });
+
 			registerBorderTracker(borderId, loginToken.getUserId(), loginToken.getLoginId());
 			return login;
 		} else {
@@ -1642,6 +1657,18 @@ public class UserServiceImpl implements UserService {
 		user.setOccupation(cmd.getOccupation());
 
 		this.userProvider.updateUser(user);
+
+        // 完善个人信息事件
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(user.getId());
+            context.setNamespaceId(user.getNamespaceId());
+            event.setContext(context);
+
+            event.setEntityType(EntityType.USER.getCode());
+            event.setEntityId(user.getId());
+            event.setEventName(SystemEvent.ACCOUNT_COMPLETE_INFO.dft());
+        });
 	}
 
 	@Override

@@ -25,7 +25,7 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
   VALUES ('40148', '申请记录', '40140', NULL, 'enter_apply/2', '0', '2', '/40000/40140/40148', 'park', '414', '40100', '3', NULL, 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
-  VALUES ('40149', '工作流设置', '40140', NULL, 'react:/working-flow/flow-list/rent-manage/40100', '0', '2', '/40000/40140/40149', 'park', '419', '40100', '3', NULL, 'module');
+  VALUES ('40149', '工作流设置', '40140', NULL, 'react:/working-flow/flow-list/rent-manage/40100?moduleType=lease_promotion_2', '0', '2', '/40000/40140/40149', 'park', '419', '40100', '3', NULL, 'module');
 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
