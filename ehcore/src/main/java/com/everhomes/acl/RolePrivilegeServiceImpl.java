@@ -21,6 +21,7 @@ import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.ActivationFlag;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.IncludeChildFlagType;
@@ -35,6 +36,7 @@ import com.everhomes.rest.organization.pm.PmMemberTargetType;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -126,6 +128,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
     @Autowired
 	private SystemUserPrivilegeMgr systemUserPrivilegeMgr;
+
+	@Autowired
+	private OrganizationSearcher organizationSearcher;
 
 	@Override
 	public ListWebMenuResponse listWebMenu(ListWebMenuCommand cmd) {
@@ -1449,7 +1454,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	public OrganizationContactDTO createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId){
         OrganizationContactDTO contactDTO = dbProvider.execute(
                 r -> createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_ADMIN, RoleConstants.ENTERPRISE_SUPER_ADMIN));
-        if(contactDTO != null) {
+		if(contactDTO != null) {
             sendMessageAfterChangeOrganizationAdmin(
                     contactDTO,
                     OrganizationNotificationTemplateCode.CREATE_ORGANIZATION_ADMIN_MESSAGE_TO_TARGET_TEMPLATE,
@@ -1569,6 +1574,15 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			UserIdentifier userIdentifier = this.userProvider.findUserIdentifiersOfUser(member.getTargetId(), member.getNamespaceId());
 			//添加角色 同时删除角色
 			assignmentAclRole(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), member.getTargetId(), userIdentifier.getNamespaceId(), userIdentifier.getOwnerUid(), roleId);
+		}
+
+		//fix 13633 by xiongying
+		//添加人员是管理员的时候,需要变更公司的flag
+		Organization o = organizationProvider.findOrganizationById(organizationId);
+		if(null != o){
+			o.setSetAdminFlag(TrueOrFalseFlag.TRUE.getCode());
+			organizationProvider.updateOrganization(o);
+			organizationSearcher.feedDoc(o);
 		}
 
 		return processOrganizationContactDTO(member);
@@ -1833,6 +1847,17 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			deleteAcls(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), member.getTargetId(), privilegeIds);
 		}
 
+		List<OrganizationMember> managers = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(organizationId, OrganizationMemberGroupType.MANAGER.getCode(), null);
+
+		// fix 13633 by xiongying20171215 添加人员是管理员的时候 需要检查公司是否还有管理员，没有的话需要变更公司的flag
+		if(managers == null || managers.size() == 0){
+			Organization o = organizationProvider.findOrganizationById(organizationId);
+			if(null != o){
+				o.setSetAdminFlag(TrueOrFalseFlag.FALSE.getCode());
+				organizationProvider.updateOrganization(o);
+				organizationSearcher.feedDoc(o);
+			}
+		}
         sendMessageAfterChangeOrganizationAdmin(
                 ConvertHelper.convert(member, OrganizationContactDTO.class),
                 OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_TARGET_TEMPLATE,
