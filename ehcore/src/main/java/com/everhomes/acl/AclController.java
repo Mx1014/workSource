@@ -386,7 +386,7 @@ public class AclController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse createAuthorizationRelation(@Valid CreateAuthorizationRelationCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.AUTH_RELATION_CREATE);
+//        resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.AUTH_RELATION_CREATE);
         rolePrivilegeService.createAuthorizationRelation(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

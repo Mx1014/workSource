@@ -45,6 +45,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -125,6 +126,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
     @Autowired
     private CommunityService communityService;
+
+    @Autowired
+	private SystemUserPrivilegeMgr systemUserPrivilegeMgr;
 
 	@Override
 	public ListWebMenuResponse listWebMenu(ListWebMenuCommand cmd) {
@@ -3011,6 +3015,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public void createAuthorizationRelation(CreateAuthorizationRelationCommand cmd) {
 		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+		if(!systemUserPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOwnerId(), PrivilegeConstants.AUTH_RELATION_CREATE)){
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+					"check privilege error");
+		}
 
 		if(null == cmd.getTargets() || cmd.getTargets().size() == 0){
 			LOGGER.error("params targets is null");

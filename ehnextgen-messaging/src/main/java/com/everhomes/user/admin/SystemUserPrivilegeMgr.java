@@ -335,6 +335,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         if(null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0){
             appId = apps.getServiceModuleApps().get(0).getId();
         }
+        LOGGER.debug("checkUserPrivilege get appId = {}", appId);
         if(currentOrgId != null){
             OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), userId, OrganizationType.ENTERPRISE.getCode());
             if(member != null){
