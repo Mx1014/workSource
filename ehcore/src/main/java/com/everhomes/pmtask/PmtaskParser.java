@@ -3,10 +3,12 @@ package com.everhomes.pmtask;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.portal.PortalUrlParser;
 import com.everhomes.rest.flow.FlowConstants;
+import org.springframework.stereotype.Component;
 
 /**
  * @author sw on 2017/12/14.
  */
+@Component
 public class PmtaskParser implements PortalUrlParser {
 
     @Override

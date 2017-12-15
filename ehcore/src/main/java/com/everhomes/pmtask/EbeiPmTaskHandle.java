@@ -453,10 +453,10 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
             task.setRequestorName(requestorName);
             task.setRequestorPhone(requestorPhone);
             task.setOrganizationName(cmd.getOrganizationName());
-            Long time  = System.currentTimeMillis();
+
             pmTaskProvider.createTask(task);
             createFlowCase(task);
-
+            Long time  = System.currentTimeMillis();
             EbeiTaskResult createTaskResultDTO = createTask(task, cmd.getAttachments(),cmd.getFlowOrganizationId());
             LOGGER.info("--------------------------------------timecost:"+(System.currentTimeMillis()-time));
             if(null != createTaskResultDTO) {
