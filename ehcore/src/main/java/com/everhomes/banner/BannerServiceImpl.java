@@ -1007,7 +1007,7 @@ public class BannerServiceImpl implements BannerService {
         long userId = user.getId();
         
         dbProvider.execute(status -> {
-        	 copyDefaultToCustomized(cmd.getScope());
+        	 //copyDefaultToCustomized(cmd.getScope());
              
              for(String sceneStr : cmd.getSceneTypes()) {
                  SceneType sceneType = SceneType.fromCode(sceneStr);
