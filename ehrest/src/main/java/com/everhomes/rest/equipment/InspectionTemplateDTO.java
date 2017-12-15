@@ -16,6 +16,8 @@ import java.util.List;
  *  <li>createTime: 添加时间</li>
  *  <li>items: 巡检项信息 参考{@link com.everhomes.rest.equipment.InspectionItemDTO}</li>
  *  <li>communities: 关联的项目</li>
+ *  <li>targetId: 项目</li>
+ *  <li>targetName: 项目name</li>
  * </ul>
  */
 public class InspectionTemplateDTO {
@@ -30,6 +32,10 @@ public class InspectionTemplateDTO {
 	private String name;
 	
 	private Timestamp createTime;
+
+	private String targetName;
+
+	private Long targetId;
 
 	@ItemType(Long.class)
 	private List<Long> communities;
@@ -91,6 +97,22 @@ public class InspectionTemplateDTO {
 
 	public void setCommunities(List<Long> communities) {
 		this.communities = communities;
+	}
+
+	public String getTargetName() {
+		return targetName;
+	}
+
+	public void setTargetName(String targetName) {
+		this.targetName = targetName;
+	}
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
 	}
 
 	@Override

@@ -4243,7 +4243,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 			for(EquipmentInspectionTemplates template : templates) {
 				InspectionTemplateDTO dto = ConvertHelper.convert(template, InspectionTemplateDTO.class);
                 if (template.getTargetId() == 0L) {
-                    dto.setCommunities(equipmentProvider.getModuleCommunityMapByTemplateId(template.getId()));
+					List<Long> communities = equipmentProvider.getModuleCommunityMapByTemplateId(template.getId());
+					if (communities != null && communities.size() > 0) {
+						dto.setCommunities(communities);
+					}
+					dto.setTargetId(template.getTargetId);
+					dto.setTargetName(communityProvider.findCommunityById(template.getTargetId));
 				}
 				dtos.add(dto);
 			}
