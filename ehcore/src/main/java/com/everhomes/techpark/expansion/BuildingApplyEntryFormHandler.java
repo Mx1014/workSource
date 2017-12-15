@@ -44,8 +44,12 @@ public class BuildingApplyEntryFormHandler implements GeneralFormModuleHandler {
     @Override
     public PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd) {
 
+        if (null == cmd.getSourceId()) {
+            cmd.setSourceId(EnterpriseApplyEntryServiceImpl.DEFAULT_CATEGORY_ID);
+        }
+
         LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-                cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.BUILDING.getCode());
+                cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.BUILDING.getCode(), cmd.getSourceId());
 
         BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
                 GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
@@ -138,8 +142,12 @@ public class BuildingApplyEntryFormHandler implements GeneralFormModuleHandler {
     @Override
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
 
+        if (null == cmd.getSourceId()) {
+            cmd.setSourceId(EnterpriseApplyEntryServiceImpl.DEFAULT_CATEGORY_ID);
+        }
+
         LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-                null, null, cmd.getSourceType());
+                null, null, cmd.getSourceType(), cmd.getSourceId());
 
         GeneralFormDTO dto;
 

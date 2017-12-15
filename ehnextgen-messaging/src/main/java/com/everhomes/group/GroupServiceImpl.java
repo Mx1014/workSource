@@ -8,6 +8,9 @@ import com.everhomes.auditlog.AuditLogProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.broadcast.Broadcast;
 import com.everhomes.broadcast.BroadcastProvider;
+import com.everhomes.bus.LocalEventBus;
+import com.everhomes.bus.LocalEventContext;
+import com.everhomes.bus.SystemEvent;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -44,12 +47,12 @@ import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.common.QuestionMetaActionData;
+import com.everhomes.rest.common.Router;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.forum.admin.PostAdminDTO;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
 import com.everhomes.rest.group.*;
-import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.region.RegionDescriptor;
@@ -68,13 +71,13 @@ import com.everhomes.search.PostSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhForumPosts;
 import com.everhomes.server.schema.tables.EhUsers;
+import com.everhomes.server.schema.tables.pojos.EhGroupMembers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.version.VersionService;
 import com.google.gson.Gson;
-import org.hibernate.loader.custom.Return;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -85,7 +88,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -229,7 +231,7 @@ public class GroupServiceImpl implements GroupService {
         ownerType = StringUtils.isEmpty(ownerType) ? "" : ownerType;
         ownerId = null == ownerId ? 0L : ownerId;
         Long userId = UserContext.current().getUser().getId();
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserBlacklistAuthority(userId, ownerType, ownerId, PrivilegeConstants.BLACKLIST_CLUP);
     }
 
@@ -419,8 +421,20 @@ public class GroupServiceImpl implements GroupService {
             }
 
             // 如果创建俱乐部需要审核的话，审核后再发帖子
-            if (null != groupSetting && groupSetting.getVerifyFlag() == TrueOrFalseFlag.FALSE.getCode()) {
+            if (null != groupSetting && Objects.equals(groupSetting.getVerifyFlag(), TrueOrFalseFlag.FALSE.getCode())) {
                 recommandGroup(groupDto, regionType, regionId);
+
+                // 创建俱乐部成功事件
+                LocalEventBus.publish(event -> {
+                    LocalEventContext context = new LocalEventContext();
+                    context.setNamespaceId(namespaceId);
+                    context.setUid(groupDto.getCreatorUid());
+                    event.setContext(context);
+
+                    event.setEntityType(EntityType.GROUP.getCode());
+                    event.setEntityId(groupDto.getId());
+                    event.setEventName(SystemEvent.CLUB_CLUB_CREATE.suffix(groupDto.getClubType()));
+                });
             }
 
         	try {
@@ -1214,6 +1228,19 @@ public class GroupServiceImpl implements GroupService {
                 member.setOperatorUid(member.getMemberId());
                 
                 createActiveGroupMember(member, scope);
+
+                // 加入俱乐部事件
+                Long tmpId = member.getId();
+                LocalEventBus.publish(event -> {
+                    LocalEventContext context = new LocalEventContext();
+                    context.setNamespaceId(group.getNamespaceId());
+                    context.setUid(userId);
+                    event.setContext(context);
+
+                    event.setEntityType(EhGroupMembers.class.getSimpleName());
+                    event.setEntityId(tmpId);
+                    event.setEventName(SystemEvent.CLUB_CLUB_JOIN.suffix(group.getClubType()));
+                });
             } else {
                 member.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
                 createPendingGroupMember(member, scope);
@@ -1674,6 +1701,18 @@ public class GroupServiceImpl implements GroupService {
             member.setOperatorUid(operatorUid);
             
             updatePendingGroupMemberToActive(member);
+
+            // 加入俱乐部事件
+            LocalEventBus.publish(event -> {
+                LocalEventContext context = new LocalEventContext();
+                context.setNamespaceId(group.getNamespaceId());
+                context.setUid(userId);
+                event.setContext(context);
+
+                event.setEntityType(EhGroupMembers.class.getSimpleName());
+                event.setEntityId(member.getId());
+                event.setEventName(SystemEvent.CLUB_CLUB_JOIN.suffix(group.getClubType()));
+            });
             
             GroupMember approver = this.groupProvider.findGroupMemberByMemberInfo(groupId, 
                 EntityType.USER.getCode(), operatorUid);
@@ -1772,6 +1811,18 @@ public class GroupServiceImpl implements GroupService {
             if (GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
             	sendGroupNotificationForMemberLeaveGroup(group, member);
 			}
+
+            // 退出俱乐部事件
+            LocalEventBus.publish(event -> {
+                LocalEventContext context = new LocalEventContext();
+                context.setNamespaceId(group.getNamespaceId());
+                context.setUid(member.getMemberId());
+                event.setContext(context);
+
+                event.setEntityType(EhGroupMembers.class.getSimpleName());
+                event.setEntityId(member.getId());
+                event.setEventName(SystemEvent.CLUB_CLUB_LEAVE.suffix(group.getClubType()));
+            });
             break;
         default:
             LOGGER.error("Target user is not an active group member, operatorUid=" + userId + ", groupId=" + groupId 
@@ -2776,7 +2827,7 @@ public class GroupServiceImpl implements GroupService {
            return;
         }
 
-        SystemUserPrivilegeMgr sysResolver = PlatformContext.getComponent("SystemUser");
+        UserPrivilegeMgr sysResolver = PlatformContext.getComponent("SystemUser");
         boolean result = sysResolver.checkSuperAdmin(uid, organizationId);
         if (!result) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
@@ -4706,6 +4757,18 @@ public class GroupServiceImpl implements GroupService {
 //        sendNotificationToCreator(user.getId(), nickName, group, locale);
         
         sendNotifactionToMembers(members, alias, group, locale);
+
+        // 解散俱乐部
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setNamespaceId(group.getNamespaceId());
+            context.setUid(group.getCreatorUid());
+            event.setContext(context);
+
+            event.setEntityType(EntityType.GROUP.getCode());
+            event.setEntityId(groupId);
+            event.setEventName(SystemEvent.CLUB_CLUB_RELEASE.suffix(group.getClubType()));
+        });
     }
 
     /**
@@ -5459,9 +5522,19 @@ public class GroupServiceImpl implements GroupService {
 			groupSetting.setId(old.getId());
 			groupSettingProvider.updateGroupSetting(groupSetting);
 		}
+
+
+		//原来的MemberCommentFlag字段在客户端是废弃的。现在将是否允许评论放到一个统一的表里，在查询帖子时从帖子层面控制是否允许评论。add by yanjun 20171206
+        Byte forumModuleType = ForumModuleType.CLUB.getCode();
+        if(ClubType.fromCode(cmd.getClubType()) == ClubType.GUILD){
+            forumModuleType = ForumModuleType.GUILD.getCode();
+        }
+        forumService.saveInteractSetting(cmd.getNamespaceId(), forumModuleType, null, cmd.getMemberCommentFlag());
 		
 		return ConvertHelper.convert(groupSetting, GroupParametersResponse.class);
 	}
+
+
 
 	@Override
 	public GroupParametersResponse getGroupParameters(GetGroupParametersCommand cmd) {
@@ -5670,6 +5743,18 @@ public class GroupServiceImpl implements GroupService {
 
 		// 发送推荐帖
         recommandGroup(toGroupDTO(group.getCreatorUid() ,group), VisibleRegionType.fromCode(group.getVisibleRegionType()), group.getVisibleRegionId());
+
+        // 创建俱乐部成功事件
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setNamespaceId(group.getNamespaceId());
+            context.setUid(group.getCreatorUid());
+            event.setContext(context);
+
+            event.setEntityType(EntityType.GROUP.getCode());
+            event.setEntityId(group.getId());
+            event.setEventName(SystemEvent.CLUB_CLUB_CREATE.suffix(group.getClubType()));
+        });
 	}
 	
 	private void sendNotificationToCreatorWhenApproval(Group group, String locale, int code) {

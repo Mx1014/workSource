@@ -5,11 +5,13 @@ import com.everhomes.rest.portal.*;
 
 import java.util.List;
 
-interface PortalService {
+public interface PortalService {
 
 
+	//todo
 	ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd);
 
+	ListServiceModuleAppsResponse listServiceModuleAppsWithConditon(ListServiceModuleAppsCommand cmd);
 
 	ServiceModuleAppDTO createServiceModuleApp(CreateServiceModuleAppCommand cmd);
 

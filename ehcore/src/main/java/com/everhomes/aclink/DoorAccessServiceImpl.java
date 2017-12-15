@@ -52,6 +52,7 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
+import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.GetCommunityByIdCommand;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
@@ -447,8 +448,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }else if(null != cmd.getOrganizationId()){
             users = doorAuthProvider.listDoorAuthByOrganizationId(cmd.getOrganizationId(), cmd.getIsOpenAuth(), cmd.getDoorId(), locator, pageSize);
         } else if(null != cmd.getCommunityId() && !StringUtils.isEmpty(cmd.getBuildingName())) {
-            users = doorAuthProvider.listDoorAuthByBuildingName(cmd.getCommunityId(), cmd.getBuildingName(), locator, pageSize);
-        }else{
+            CommunityType communityType = CommunityType.RESIDENTIAL;
+            if(cmd.getCommunityType() != null) {
+                communityType = CommunityType.fromCode(cmd.getCommunityType());
+            }
+         users = listDoorAuthByBuildingName(communityType, cmd.getIsOpenAuth(), cmd.getDoorId(), cmd.getCommunityId(), cmd.getBuildingName(), locator, pageSize, namespaceId);    
+        } else {
             users = doorAuthProvider.listDoorAuthByIsAuth(cmd.getIsAuth(), cmd.getIsOpenAuth(), cmd.getDoorId(), locator, pageSize, namespaceId);
         }
 
@@ -491,6 +496,20 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setUsers(userDTOs);
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
+    }
+    
+    private List<User> listDoorAuthByBuildingName(CommunityType communityType, Byte isOpenAuth, Long doorId, Long communityId, String buildingName, CrossShardListingLocator locator, int pageSize, Integer namespaceId) {
+        List<Long> userIds = null;
+        if(communityType == CommunityType.COMMERCIAL) {
+            userIds = doorAuthProvider.listDoorAuthByBuildingName2(isOpenAuth, doorId, communityId, buildingName, locator, pageSize, namespaceId);    
+        } else {
+            userIds = doorAuthProvider.listDoorAuthByBuildingName(isOpenAuth, doorId, communityId, buildingName, locator, pageSize, namespaceId);
+        }
+        
+        return userIds.stream().map(u -> {
+            User user = userProvider.findUserById(u);
+            return user;
+        }).collect(Collectors.toList());
     }
 
     @Override
@@ -3774,6 +3793,18 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     @Override
     public void test() {
+        Long doorId = 231l;
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<Long> userIds = doorAuthProvider.listDoorAuthByBuildingName2((byte)1, doorId, 240111044331051300l, "A1", locator, 20, 999992);
+        for(Long userId : userIds) {
+            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(userId); 
+            DoorAuth auth = doorAuthProvider.queryValidDoorAuthByDoorIdAndUserId(doorId, userId);
+            LOGGER.info("auth=" + auth + " detail=" + detail);
+        }
+        
+    }
+    
+    private void testEncrypt() {
         try {
             String aesServerKey = "s87SHk+R/IOw6dV7QkX/pA==";
             String aesUserKey = "mf8eLAiV+bbmo6egNjsCzw==";
@@ -3799,8 +3830,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             
         } catch(Exception ex) {
             
-        }
-
+        }        
     }
 
 	@Override

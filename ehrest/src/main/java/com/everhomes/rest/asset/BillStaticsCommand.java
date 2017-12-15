@@ -21,6 +21,15 @@ public class BillStaticsCommand {
     private String endLimit;
     private String ownerType;
     private Long ownerId;
+    private Long organizationId;
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
     @Override
     public String toString() {

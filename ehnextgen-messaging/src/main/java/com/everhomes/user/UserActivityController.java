@@ -1,17 +1,5 @@
 package com.everhomes.user;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.List;
-
-import javax.validation.Valid;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -25,46 +13,21 @@ import com.everhomes.rest.local.AppVersionCommand;
 import com.everhomes.rest.local.GetAppVersion;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.rest.ui.user.SceneDTO;
-import com.everhomes.rest.user.AddAnyDayActiveCommand;
-import com.everhomes.rest.user.AddRequestCommand;
-import com.everhomes.rest.user.AddUserFavoriteCommand;
-import com.everhomes.rest.user.CancelUserFavoriteCommand;
-import com.everhomes.rest.user.CommunityStatusResponse;
-import com.everhomes.rest.user.Contact;
-import com.everhomes.rest.user.ContactDTO;
-import com.everhomes.rest.user.CreateInvitationCommand;
-import com.everhomes.rest.user.FeedbackCommand;
-import com.everhomes.rest.user.GetCustomRequestTemplateCommand;
-import com.everhomes.rest.user.GetRequestInfoCommand;
-import com.everhomes.rest.user.InvitationCommandResponse;
-import com.everhomes.rest.user.ListActiveStatCommand;
-import com.everhomes.rest.user.ListBusinessTreasureResponse;
-import com.everhomes.rest.user.ListContactRespose;
-import com.everhomes.rest.user.ListContactsCommand;
-import com.everhomes.rest.user.ListFeedbacksCommand;
-import com.everhomes.rest.user.ListFeedbacksResponse;
-import com.everhomes.rest.user.ListPostResponse;
-import com.everhomes.rest.user.ListPostedActivityByOwnerIdCommand;
-import com.everhomes.rest.user.ListPostedTopicByOwnerIdCommand;
-import com.everhomes.rest.user.ListRecipientCommand;
-import com.everhomes.rest.user.ListSignupActivitiesCommand;
-import com.everhomes.rest.user.ListTreasureResponse;
-import com.everhomes.rest.user.ListUserFavoriteActivityCommand;
-import com.everhomes.rest.user.ListUserFavoriteTopicCommand;
-import com.everhomes.rest.user.RequestFieldDTO;
-import com.everhomes.rest.user.RequestTemplateDTO;
-import com.everhomes.rest.user.SyncActivityCommand;
-import com.everhomes.rest.user.SyncBehaviorCommand;
-import com.everhomes.rest.user.SyncInsAppsCommand;
-import com.everhomes.rest.user.SyncLocationCommand;
-import com.everhomes.rest.user.SyncUserContactCommand;
-import com.everhomes.rest.user.UpdateFeedbackCommand;
-import com.everhomes.rest.user.UpdateShakeOpenDoorCommand;
-import com.everhomes.rest.user.UserInvitationsDTO;
+import com.everhomes.rest.user.*;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.List;
 
 /**
  * controller
@@ -308,10 +271,20 @@ public class UserActivityController extends ControllerBase {
     @RequestMapping("listTreasure")
     @RestReturn(ListTreasureResponse.class)
     @RequireAuthentication(false)
-    public RestResponse listTreasure(){
+    public RestResponse listTreasure() {
         return new RestResponse(userActivityService.getUserTreasure());
     }
-    
+
+    /**
+     * 用户财富：<b>url:/user/getUserTreasure</b>
+     */
+    @RequestMapping("getUserTreasure")
+    @RestReturn(GetUserTreasureResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse getUserTreasure() {
+        return new RestResponse(userActivityService.getUserTreasureV2());
+    }
+
     /**
      * 电商用户财富：<b>url:/user/listBusinessTreasure</b>
      */
