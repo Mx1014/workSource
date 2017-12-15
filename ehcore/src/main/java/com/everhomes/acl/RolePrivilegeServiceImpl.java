@@ -2922,7 +2922,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
 
-		List<AuthorizationRelation> authorizationRelations = authorizationProvider.listAuthorizationRelations(locator, pageSize, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getModuleId());
+		List<AuthorizationRelation> authorizationRelations = authorizationProvider.listAuthorizationRelations(locator, pageSize, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getModuleId(), cmd.getAppId());
 
 		List<AuthorizationRelationDTO> dtos =  authorizationRelations.stream().map((r) ->{
 
