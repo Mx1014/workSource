@@ -665,7 +665,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			listServiceModuleAppsCommand.setCustomTag(String.valueOf(taskCategoryId));
 			ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
 			Long appId = null;
-			if(null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0){
+			if(null != apps && apps.getServiceModuleApps().size() > 0){
 				appId = apps.getServiceModuleApps().get(0).getId();
 			}
 			if (null != apps) {

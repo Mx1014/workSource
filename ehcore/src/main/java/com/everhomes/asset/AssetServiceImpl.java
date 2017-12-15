@@ -271,7 +271,7 @@ public class AssetServiceImpl implements AssetService {
         cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
         ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
         Long appId = null;
-        if(null != res.getServiceModuleApps() && res.getServiceModuleApps().size() > 0){
+        if(null != res && res.getServiceModuleApps().size() > 0){
             appId = res.getServiceModuleApps().get(0).getId();
         }
         OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), UserContext.currentUserId(), OrganizationType.ENTERPRISE.getCode());

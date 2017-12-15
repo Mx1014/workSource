@@ -332,7 +332,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         cmd.setCustomTag(customTag);
         ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
         Long appId = null;
-        if(null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0){
+        if(null != apps && apps.getServiceModuleApps().size() > 0){
             appId = apps.getServiceModuleApps().get(0).getId();
         }
         LOGGER.debug("checkUserPrivilege get appId = {}", appId);

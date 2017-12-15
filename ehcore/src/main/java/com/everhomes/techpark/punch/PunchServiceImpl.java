@@ -331,7 +331,7 @@ public class PunchServiceImpl implements PunchService {
 		cmd.setActionType(ActionType.PUNCH.getCode());
 		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
 		Long appId = null;
-		if(null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0){
+		if(null != apps && apps.getServiceModuleApps().size() > 0){
 			appId = apps.getServiceModuleApps().get(0).getId();
 		}
 		if (null != apps) {

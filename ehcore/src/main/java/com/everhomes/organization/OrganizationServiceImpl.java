@@ -14231,7 +14231,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
         Long organizaitonId = getTopEnterpriserIdOfOrganization(orgId);
         Long appId = null;
-        if(null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0){
+        if(null != apps && apps.getServiceModuleApps().size() > 0){
             appId = apps.getServiceModuleApps().get(0).getId();
         }
         if (null != apps) {
