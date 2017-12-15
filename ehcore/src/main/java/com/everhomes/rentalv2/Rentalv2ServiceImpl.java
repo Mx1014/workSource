@@ -1375,6 +1375,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			List<Long> siteRuleIds = new ArrayList<>();
 			List<Rentalv2PricePackage> resourcePackages = rentalv2PricePackageProvider.listPricePackageByOwner(PriceRuleType.RESOURCE.getCode()
 					,rs.getId(),cmd.getRentalType(),cmd.getPackageName());
+			boolean initiateFlag = false;
 			for (RentalBillRuleDTO siteRule : cmd.getRules()) {
 
 				if (null == siteRule)
@@ -1396,7 +1397,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					rentalSiteRule.setOrgMemberPrice(pricePackage.getOrgMemberPrice());
 					rentalSiteRule.setApprovingUserPrice(pricePackage.getApprovingUserPrice());
 					rentalSiteRule.setApprovingUserOriginalPrice(pricePackage.getApprovingUserOriginalPrice());
+					//设置起步后价格
+					if (pricePackage.getPriceType().equals(RentalPriceType.INITIATE.getCode()) && initiateFlag){
+						rentalSiteRule.setPrice(pricePackage.getInitiatePrice());
+						rentalSiteRule.setOrgMemberOriginalPrice(pricePackage.getOrgMemberInitiatePrice());
+						rentalSiteRule.setApprovingUserPrice(pricePackage.getApprovingUserInitiatePrice());
+					}
+
 				}
+
+				initiateFlag = true;
 
 				siteRuleIds.add(siteRule.getRuleId());
 				if(siteRule.getRentalCount()==null||siteRule.getRuleId() == null )
@@ -3047,6 +3057,22 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			cellList.get().add(ConvertHelper.convert(rsr, RentalCell.class));
 		  
 		}
+	}
+
+	@Override
+	public void changeRentalBillPayInfo(ChangeRentalBillPayInfoCommand cmd) {
+		RentalOrder order = rentalv2Provider.findRentalBillById(cmd.getId());
+		order.setPayTotalMoney(payService.changePayAmount(cmd.getAmount()));
+		rentalv2Provider.updateRentalBill(order);
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("resourceName", order.getResourceName());
+		map.put("startTime", order.getUseDetail());
+		map.put("amount",order.getPayTotalMoney().toString());
+		String notifyTextForOther = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
+				RentalNotificationTemplateCode.RENTAL_CHANGE_AMOUNT, RentalNotificationTemplateCode.locale, map, "");
+
+		//发送消息
+		sendMessageToUser(order.getRentalUid(),notifyTextForOther);
 	}
 
 	@Override

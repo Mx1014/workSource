@@ -343,6 +343,22 @@ public class Rentalv2Controller extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /rental/changeRentalBillPayInfo</b>
+	 * <p>
+	 * 修改订单信息
+	 * </p>
+	 */
+	@RequestMapping("changeRentalBillPayInfo")
+	@RestReturn(value = String.class)
+	public RestResponse changeRentalBillPayInfo(ChangeRentalBillPayInfoCommand cmd) {
+		rentalService.changeRentalBillPayInfo(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /rental/cancelRentalBill</b>
 	 * <p>
 	 * 取消订单

@@ -26,6 +26,8 @@ public interface Rentalv2Service {
 
 	void addRentalSiteSimpleRules(AddRentalSiteRulesAdminCommand cmd);
 
+	void changeRentalBillPayInfo(ChangeRentalBillPayInfoCommand cmd);
+
 	void cancelRentalBill(CancelRentalBillCommand cmd);
 
 	void deleteRentalSiteItem(DeleteItemAdminCommand cmd);
