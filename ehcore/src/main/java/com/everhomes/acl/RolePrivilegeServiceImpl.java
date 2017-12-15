@@ -27,10 +27,7 @@ import com.everhomes.rest.common.IncludeChildFlagType;
 import com.everhomes.rest.community.ListChildProjectCommand;
 import com.everhomes.rest.community.ResourceCategoryType;
 import com.everhomes.rest.messaging.*;
-import com.everhomes.rest.module.AssignmentTarget;
-import com.everhomes.rest.module.ControlTarget;
-import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
-import com.everhomes.rest.module.Project;
+import com.everhomes.rest.module.*;
 import com.everhomes.rest.oauth2.ControlTargetOption;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.rest.organization.*;
@@ -3015,7 +3012,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public void createAuthorizationRelation(CreateAuthorizationRelationCommand cmd) {
 		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
-		if(!systemUserPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOwnerId(), PrivilegeConstants.AUTH_RELATION_CREATE)){
+		CheckModuleManageCommand manageCommand = new CheckModuleManageCommand();
+		manageCommand.setAppId(cmd.getAppId());
+		manageCommand.setModuleId(cmd.getModuleId());
+		manageCommand.setOrganizationId(cmd.getOwnerId());
+		manageCommand.setOwnerType(cmd.getOwnerType());
+		manageCommand.setUserId(UserContext.currentUserId());
+		Byte manageFlag = serviceModuleService.checkModuleManage(manageCommand);
+		if(manageFlag.equals(0) || manageFlag == 0){
 			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
 					"check privilege error");
 		}
