@@ -334,6 +334,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 			leaseBuilding.setManagerContact(r.getContact());
 			leaseBuilding.setDeleteFlag((byte)0);
 			leaseBuilding.setDefaultOrder(id);
+			leaseBuilding.setCategoryId(cmd.getCategoryId());
 			return leaseBuilding;
 		}).collect(Collectors.toList());
 
