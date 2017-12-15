@@ -712,3 +712,15 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 -- 更新应用名
 update eh_reflection_service_module_apps set name = '考勤管理' where name like '%打卡%';
 update eh_reflection_service_module_apps set name = '组织架构' where name like '%通讯录%';
+
+-- 车辆放行功能菜单位置迁移 add by sw 20171215
+delete from eh_web_menus where id in (20900, 20910, 20920, 20930);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('20900', '车辆放行', '40000', NULL, 'parking_clearance', '1', '2', '/40000/20900', 'park', '300', '20900', '2', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('20910', '权限设置', '20900', NULL, 'vehicle_setting', '0', '2', '/40000/20900/20910', 'park', '301', '20900', '3', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('20920', '放行记录', '20900', NULL, 'release_record', '0', '2', '/40000/20900/20920', 'park', '302', '20900', '3', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('20930', '工作流设置', '20900', NULL, 'react:/working-flow/flow-list/vehicle-release/20900', '0', '2', '/40000/20900/20930', 'park', '303', '20900', '3', NULL, 'module');
+
