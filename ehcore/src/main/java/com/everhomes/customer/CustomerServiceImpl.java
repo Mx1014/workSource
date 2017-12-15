@@ -1001,6 +1001,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public List<CustomerTalentDTO> listCustomerTalents(ListCustomerTalentsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerTalent> talents = enterpriseCustomerProvider.listCustomerTalentsByCustomerId(cmd.getCustomerId());
         if(talents != null && talents.size() > 0) {
             return talents.stream().map(talent -> {
@@ -1896,6 +1897,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerIndustryStatisticsResponse listCustomerIndustryStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_STAT, cmd.getOrgId(), cmd.getCommunityId());
         CustomerIndustryStatisticsResponse response = new CustomerIndustryStatisticsResponse();
         List<CustomerIndustryStatisticsDTO> dtos = new ArrayList<>();
         Map<Long, Long> industries = enterpriseCustomerProvider.listEnterpriseCustomerIndustryByCommunityId(cmd.getCommunityId());
@@ -1918,6 +1920,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerIntellectualPropertyStatisticsResponse listCustomerIntellectualPropertyStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_STAT, cmd.getOrgId(), cmd.getCommunityId());
         List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByCommunity(cmd.getCommunityId());
         List<Long> customerIds = new ArrayList<>();
         customers.forEach(customer -> {
@@ -1964,6 +1967,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerProjectStatisticsResponse listCustomerProjectStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_STAT, cmd.getOrgId(), cmd.getCommunityId());
         List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByCommunity(cmd.getCommunityId());
         List<Long> customerIds = new ArrayList<>();
         customers.forEach(customer -> {
@@ -1997,6 +2001,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerSourceStatisticsResponse listCustomerSourceStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_STAT, cmd.getOrgId(), cmd.getCommunityId());
         CustomerSourceStatisticsResponse response = new CustomerSourceStatisticsResponse();
         List<CustomerSourceStatisticsDTO> dtos = new ArrayList<>();
         Map<Long, Long> sources = enterpriseCustomerProvider.listEnterpriseCustomerSourceByCommunityId(cmd.getCommunityId());
@@ -2019,6 +2024,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerTalentStatisticsResponse listCustomerTalentStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_STAT, cmd.getOrgId(), cmd.getCommunityId());
         List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByCommunity(cmd.getCommunityId());
         List<Long> customerIds = new ArrayList<>();
         customers.forEach(customer -> {
@@ -2047,6 +2053,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public EnterpriseCustomerStatisticsDTO listEnterpriseCustomerStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_STAT, cmd.getOrgId(), cmd.getCommunityId());
         EnterpriseCustomerStatisticsDTO dto = new EnterpriseCustomerStatisticsDTO();
         List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByCommunity(cmd.getCommunityId());
         dto.setCustomerCount(customers.size() & 0xFFFFFFFFL);
@@ -2074,6 +2081,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public ListCustomerAnnualStatisticsResponse listCustomerAnnualStatistics(ListCustomerAnnualStatisticsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_STAT, cmd.getOrgId(), cmd.getCommunityId());
         Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
         ListCustomerAnnualStatisticsResponse response = new ListCustomerAnnualStatisticsResponse();
         CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -2207,6 +2215,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void syncEnterpriseCustomers(SyncCustomersCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_SYNC, cmd.getOrgId(), cmd.getCommunityId());
         if(cmd.getNamespaceId() == 999971) {
             this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
                 ExecutorUtil.submit(new Runnable() {
