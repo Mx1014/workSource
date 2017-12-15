@@ -1469,6 +1469,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 		command.setGroupPath(CustomerTrackingTemplateCode.GROUP_PATH);
 		command.setCommunityId(customer.getCommunityId());
 		List<FieldDTO> fields = fieldService.listFields(command);
+        LOGGER.debug("compareEnterpriseCustomer FIELDS: {}", StringHelper.toJsonString(fields));
 		String  getPrefix = "get";
 		StringBuffer buffer = new StringBuffer();
 		if(null != fields && fields.size() > 0){
