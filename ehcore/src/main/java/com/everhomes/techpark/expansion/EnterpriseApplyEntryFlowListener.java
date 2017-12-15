@@ -183,7 +183,7 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
     private String processBuildingName(EnterpriseOpRequest applyEntry) {
         String buildingName = "";
-        if (ApplyEntryApplyType.fromType(applyEntry.getApplyType()).equals(ApplyEntryApplyType.RENEW)) {
+        if (ApplyEntrySourceType.RENEW.getCode().equals(applyEntry.getSourceType())) {
             //续租的
             if (null != applyEntry.getContractId()) {
                 Contract contract = contractProvider.findContractById(applyEntry.getContractId());

@@ -21,53 +21,58 @@ DELETE FROM eh_acl_privileges WHERE id IN (SELECT privilege_id FROM eh_service_m
 DELETE FROM eh_service_module_privileges WHERE module_id IN (SELECT id FROM eh_service_modules WHERE path LIKE '/20000/20400%' AND id != 20422);
 DELETE FROM eh_service_modules WHERE path LIKE '/20000/20400%' AND id != 20422;
 -- 物业缴费，模块和权限配置
-INSERT INTO `ehcore`.`eh_service_modules`
+INSERT INTO `eh_service_modules`
 (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`,`module_control_type`)
 VALUES
 (20400, '物业缴费', '20000', '/20000/20400', '1', '2', '2', '0', NOW(),NULL, '13', NOW(), '0', '0', '0', '0','community_control');
 -- 三级菜单，没有action_type
-INSERT INTO `ehcore`.`eh_service_modules`
+INSERT INTO `eh_service_modules`
 (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`,`module_control_type`)
 VALUES
 (204011, '账单管理', '20400', '/20000/20400/204011', '1', '3', '2', '0', NOW(),NULL, NULL, NOW(), '0', '0', '0', '0','community_control');
-INSERT INTO `ehcore`.`eh_service_modules`
+INSERT INTO `eh_service_modules`
 (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`,`module_control_type`)
 VALUES
 (204021, '账单统计', '20400', '/20000/20400/204021', '1', '3', '2', '0', NOW(),NULL, NULL, NOW(), '0', '0', '0', '0','community_control');
-INSERT INTO `ehcore`.`eh_service_modules`
+INSERT INTO `eh_service_modules`
 (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`,`module_control_type`)
 VALUES
 (20430, '交易明细', '20400', '/20000/20400/20430', '1', '3', '2', '0', NOW(),NULL, NULL, NOW(), '0', '0', '0', '0','community_control');
 
-SET @p_id = 40073;
+-- SET @p_id = 40073;
+SET @p_id = 204001001;
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '账单查看、筛选', '账单管理 账单查看、筛选', NULL);
 SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES
 (@mp_id:=@mp_id+1, '204011', '0', @p_id, '账单查看、筛选', '0', NOW());
 
-SET @p_id = 40074;
+-- SET @p_id = 40074;
+SET @p_id = 204001002;
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '新增账单', '账单管理 新增账单', NULL);
 SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES
 (@mp_id:=@mp_id+1, '204011', '0', @p_id, '新增账单', '0', NOW());
 
-SET @p_id = 40075;
+-- SET @p_id = 40075;
+SET @p_id = 204001003;
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '催缴', '账单管理 催缴', NULL);
 SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES
 (@mp_id:=@mp_id+1, '204011', '0', @p_id, '账单管理 催缴', '0', NOW());
 
-SET @p_id = 40076;
+-- SET @p_id = 40076;
+SET @p_id = 204001004;
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '修改缴费状态', '账单管理 修改缴费状态', NULL);
 SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES
 (@mp_id:=@mp_id+1, '204011', '0', @p_id, '账单管理 修改缴费状态', '0', NOW());
 
-SET @p_id = 40077;
+-- SET @p_id = 40077;
+SET @p_id = 204001005;
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '查看', '账单统计 查看', NULL);
 SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
@@ -75,7 +80,8 @@ VALUES
 (@mp_id:=@mp_id+1, '204021', '0', @p_id, '账单统计 查看', '0', NOW());
 
 
-SET @p_id = 40078;
+-- SET @p_id = 40078;
+SET @p_id = 204001006;
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '查看', '交易明细 查看', NULL);
 SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
@@ -190,4 +196,4 @@ update eh_service_modules set action_type = null where id = 50400 and name = '�
 
 -- 更新提示
 SET @sid = (SELECT MAX(id) FROM `eh_locale_strings`);
-INSERT INTO `ehcore`.`eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@sid:=@sid+1), 'privilege', '100055', 'zh_CN', '校验应用权限失败');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@sid:=@sid+1), 'privilege', '100055', 'zh_CN', '校验应用权限失败');
