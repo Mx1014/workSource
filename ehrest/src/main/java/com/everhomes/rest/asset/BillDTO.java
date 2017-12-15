@@ -41,6 +41,17 @@ public class BillDTO {
     private Long billGroupRuleId;
     private String dateStrBegin;
     private String dateStrEnd;
+    //浅克隆
+    @Override
+    public Object clone() {
+        BillDTO dto = null;
+        try{
+            dto = (BillDTO)super.clone();
+        }catch (CloneNotSupportedException e){
+            e.printStackTrace();
+        }
+        return dto;
+    }
 
     public String getDateStrBegin() {
         return dateStrBegin;

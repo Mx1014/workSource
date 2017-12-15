@@ -34,6 +34,7 @@ import com.everhomes.server.schema.tables.EhPaymentChargingStandards;
 import com.everhomes.server.schema.tables.EhPaymentChargingStandardsScopes;
 import com.everhomes.server.schema.tables.EhPaymentContractReceiver;
 import com.everhomes.server.schema.tables.EhPaymentExemptionItems;
+import com.everhomes.server.schema.tables.EhPaymentLateFine;
 import com.everhomes.server.schema.tables.EhPaymentNoticeConfig;
 import com.everhomes.server.schema.tables.EhPaymentUsers;
 import com.everhomes.server.schema.tables.EhPaymentVariables;
@@ -594,6 +595,21 @@ public class AssetProviderImpl implements AssetProvider {
                         .fetchOne(itemScope.PROJECT_LEVEL_NAME);
                 dto.setBillItemName(projectLevelName);
             }
+            //查询billItem的滞纳金
+            BillDTO billDTO = dtos.get(i);
+            getReadOnlyContext().select(Tables.EH_PAYMENT_LATE_FINE.AMOUNT)
+                    .from(Tables.EH_PAYMENT_LATE_FINE)
+                    .leftOuterJoin(Tables.EH_PAYMENT_BILL_ITEMS)
+                    .on(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID.eq(Tables.EH_PAYMENT_BILL_ITEMS.ID))
+                    .where(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID.eq(billDTO.getBillItemId()))
+                    .fetch()
+                    .forEach(r -> {
+                        BillDTO fineDTO = (BillDTO)billDTO.clone();
+                        fineDTO.setAmountReceivable(r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT));
+                        fineDTO.setAmountReceived(new BigDecimal("0"));
+                        fineDTO.setAmountOwed(r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT));
+                        dtos.add(fineDTO);
+                    });
         }
         return dtos;
     }
@@ -738,6 +754,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<ShowBillDetailForClientDTO> dtos = new ArrayList<>();
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
+        EhPaymentLateFine fine = Tables.EH_PAYMENT_LATE_FINE.as("fine");
 
         dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE,t.DATE_STR_BEGIN,t.DATE_STR_END)
                 .from(t)
@@ -747,6 +764,25 @@ public class AssetProviderImpl implements AssetProvider {
                     ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
                     dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
                     dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
+                    dto.setAddressName(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
+                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
+                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+                    dtos.add(dto);
+                    dateStr[0] = r.getValue(t.DATE_STR);
+                    amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
+                    amountReceivable[0] = amountReceivable[0].add(r.getValue(t.AMOUNT_RECEIVABLE));
+                    return null;
+                });
+        dslContext.select(fine.AMOUNT,fine.NAME,t.DATE_STR,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE,t.DATE_STR_BEGIN,t.DATE_STR_END)
+                .from(fine,t)
+                .where(fine.BILL_ITEM_ID.eq(t.ID))
+                .and(fine.BILL_ID.eq(billId))
+                .fetch()
+                .map(r -> {
+                    ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
+                    dto.setAmountOwed(r.getValue(fine.AMOUNT));
+                    dto.setBillItemName(r.getValue(fine.NAME));
                     dto.setAddressName(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
                     dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
@@ -3697,6 +3733,14 @@ public class AssetProviderImpl implements AssetProvider {
                     }else if (r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT).compareTo(zero) == -1){
                         amountExempled[0] = amountExempled[0].subtract(r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT));
                     }
+                });
+        //包括滞纳金
+        getReadOnlyContext().select(Tables.EH_PAYMENT_LATE_FINE.AMOUNT)
+                .from(Tables.EH_PAYMENT_LATE_FINE)
+                .where(Tables.EH_PAYMENT_LATE_FINE.BILL_ID.eq(billId))
+                .fetch()
+                .forEach(r ->{
+                    amountOwed[0] = amountOwed[0].add(r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT));
                 });
         getReadWriteContext().update(Tables.EH_PAYMENT_BILLS)
                     .set(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE, amountReceivable[0])
