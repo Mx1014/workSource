@@ -80,8 +80,6 @@ public class WorkReportCommentHandler implements CommentHandler {
             for (AttachmentDescriptor des : cmd.getAttachments()) {
                 WorkReportValCommentAttachment attachment = new WorkReportValCommentAttachment();
                 attachment.setNamespaceId(user.getNamespaceId());
-                attachment.setOwnerId(comment.getOwnerId());
-                attachment.setOwnerType(comment.getOwnerType());
                 attachment.setCommentId(commentId);
                 attachment.setContentType(des.getContentType());
                 attachment.setContentUri(des.getContentUri());
