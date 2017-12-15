@@ -367,8 +367,8 @@ public class AclController extends ControllerBase {
     @RequestMapping("listAuthorizationRelations")
     @RestReturn(value=ListAuthorizationRelationsResponse.class)
     public RestResponse listAuthorizationRelations(@Valid ListAuthorizationRelationsCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.AUTH_RELATION_LIST);
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.AUTH_RELATION_LIST);
         RestResponse response = new RestResponse(rolePrivilegeService.listAuthorizationRelations(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

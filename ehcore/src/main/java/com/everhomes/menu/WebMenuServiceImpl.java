@@ -20,11 +20,13 @@ import com.everhomes.rest.acl.WebMenuSelectedFlag;
 import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.acl.admin.ListWebMenuResponse;
 import com.everhomes.rest.menu.*;
+import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -36,6 +38,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import scala.collection.parallel.ParIterableLike;
 
+import javax.validation.constraints.Null;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -152,7 +155,31 @@ public class WebMenuServiceImpl implements WebMenuService {
 			}
 
 			//获取人员和人员所有机构所赋予的应用模块权限(应用管理员 + 权限细化) 应用管理员拥有应用对应的菜单
-			List<Long> appIds = authorizationProvider.getAuthorizationAppModuleIdsByTarget(targets);
+			List<Tuple<Long,String>> appTuples = authorizationProvider.getAuthorizationAppModuleIdsByTarget(targets);
+			List<Long> appIds = new ArrayList<>();
+			appTuples.stream().map(r->{
+				if(Long.valueOf(r.first()) == 0L){
+					List<ServiceModuleAppDTO> appDtos = null;
+					switch (ModuleManagementType.fromCode(r.second())){
+						case COMMUNITY_CONTROL:
+							appDtos =serviceModuleProvider.listReflectionServiceModuleApp(UserContext.getCurrentNamespaceId(), null, null, null, null, ModuleManagementType.COMMUNITY_CONTROL.getCode());
+							break;
+						case ORG_CONTROL:
+							appDtos = serviceModuleProvider.listReflectionServiceModuleApp(UserContext.getCurrentNamespaceId(), null, null, null, null, ModuleManagementType.ORG_CONTROL.getCode());
+							break;
+						case UNLIMIT_CONTROL:
+							 appDtos = serviceModuleProvider.listReflectionServiceModuleApp(UserContext.getCurrentNamespaceId(), null, null, null, null, ModuleManagementType.UNLIMIT_CONTROL.getCode());
+							break;
+					}
+					if(appDtos != null && appDtos.size() > 0){
+						appIds.addAll(appDtos.stream().map(a-> a.getId()).collect(Collectors.toList()));
+					}
+				}else {
+					appIds.add(r.first());
+				}
+				return null;
+			}).collect(Collectors.toList());
+
 			//根据应用拿菜单
 			List<ServiceModuleAppDTO> dtos = serviceModuleProvider.listReflectionServiceModuleAppByActiveAppIds(UserContext.getCurrentNamespaceId(), appIds);
 			List<WebMenu> menus_app_iter = new ArrayList<>();

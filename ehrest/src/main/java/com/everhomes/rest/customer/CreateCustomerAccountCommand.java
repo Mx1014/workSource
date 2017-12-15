@@ -27,10 +27,11 @@ public class CreateCustomerAccountCommand {
     private String branchName;
     private String accountHolder;
     private String accountNumber;
-    private String accountNumberType;
+    private Long accountNumberTypeId;
     private String branchProvince;
     private String branchCity;
     private Long accountTypeId;
+    private Long contractId;
     private String memo;
     private Long orgId;
     private Long communityId;
@@ -51,6 +52,14 @@ public class CreateCustomerAccountCommand {
         this.orgId = orgId;
     }
 
+    public Long getContractId() {
+        return contractId;
+    }
+
+    public void setContractId(Long contractId) {
+        this.contractId = contractId;
+    }
+
     public String getAccountHolder() {
         return accountHolder;
     }
@@ -67,12 +76,12 @@ public class CreateCustomerAccountCommand {
         this.accountNumber = accountNumber;
     }
 
-    public String getAccountNumberType() {
-        return accountNumberType;
+    public Long getAccountNumberTypeId() {
+        return accountNumberTypeId;
     }
 
-    public void setAccountNumberType(String accountNumberType) {
-        this.accountNumberType = accountNumberType;
+    public void setAccountNumberTypeId(Long accountNumberTypeId) {
+        this.accountNumberTypeId = accountNumberTypeId;
     }
 
     public Long getAccountTypeId() {

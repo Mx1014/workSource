@@ -26,6 +26,7 @@ import com.everhomes.server.schema.tables.records.EhAuthorizationRelationsRecord
 import com.everhomes.server.schema.tables.records.EhAuthorizationsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.Tuple;
 import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -232,9 +233,9 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 	}
 
 	@Override
-	public List<Long> getAuthorizationAppModuleIdsByTarget(List<Target> targets) {
+	public List<Tuple<Long,String>> getAuthorizationAppModuleIdsByTarget(List<Target> targets) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		List<Long> result  = new ArrayList<>();
+		List<Tuple<Long,String>> result = new ArrayList<>();
 		SelectQuery<EhAuthorizationsRecord> query = context.selectQuery(Tables.EH_AUTHORIZATIONS);
 		Condition cond = Tables.EH_AUTHORIZATIONS.AUTH_TYPE.eq(EntityType.SERVICE_MODULE_APP.getCode());
 		Condition targetCond = null;
@@ -248,8 +249,7 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		cond = cond.and(targetCond);
 		query.addConditions(cond);
 		query.fetch().map((r) -> {
-			if(!result.contains(r.getModuleAppId()))
-				result.add(r.getModuleAppId());
+			result.add(new Tuple<Long,String>(r.getModuleAppId(), r.getModuleControlType()));
 			return null;
 		});
 		return result;
@@ -288,13 +288,16 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 
 
 	@Override
-	public List<AuthorizationRelation> listAuthorizationRelations(CrossShardListingLocator locator, Integer pageSize, String ownerType, Long ownerId, Long moduleId){
+	public List<AuthorizationRelation> listAuthorizationRelations(CrossShardListingLocator locator, Integer pageSize, String ownerType, Long ownerId, Long moduleId, Long appId){
 		return listAuthorizationRelations(locator, pageSize, new ListingQueryBuilderCallback() {
 			@Override
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
 				query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.OWNER_TYPE.eq(ownerType));
 				query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.OWNER_ID.eq(ownerId));
 				query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.MODULE_ID.eq(moduleId));
+				if(appId != null){
+					query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.APP_ID.eq(appId));
+				}
 				return query;
 			}
 		});
@@ -303,7 +306,7 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 
 	@Override
 	public List<AuthorizationRelation> listAuthorizationRelations(String ownerType, Long ownerId, Long moduleId){
-		return listAuthorizationRelations(null, null, ownerType, ownerId, moduleId);
+		return listAuthorizationRelations(null, null, ownerType, ownerId, moduleId,  null);
 	}
 
 
@@ -485,19 +488,18 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 	@Override
 	public long createAuthorizations(List<Authorization> authorizations) {
 		long id = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhAuthorizations.class), (long)authorizations.size());
-		long nextId =  id - authorizations.size() + 1;
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAuthorizations.class));
 		List<EhAuthorizations> auths = new ArrayList<>();
 		for (Authorization authorization: authorizations) {
-			authorization.setId(nextId);
+			id++;
+			authorization.setId(id);
 			if(null == authorization.getCreateTime())
 				authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			auths.add(ConvertHelper.convert(authorization, EhAuthorizations.class));
 		}
 		EhAuthorizationsDao dao = new EhAuthorizationsDao(context.configuration());
 		dao.insert(auths);
-		nextId++;
-		return nextId;
+		return id;
 	}
 
 	@Override

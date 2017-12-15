@@ -28,6 +28,7 @@ import com.everhomes.util.StringHelper;
  * <li>newsWebShareUrl: 给web化提供的新闻链接-供分享</li>
  * <li>coverUri: 封面</li>
  * <li>tags: 标签值</li>
+ * <li>contentAbstract: 摘要</li>
  * </ul>
  */
 public class GetNewsDetailInfoResponse {
@@ -51,6 +52,7 @@ public class GetNewsDetailInfoResponse {
 	private String phone;
 	@ItemType(NewsTagValsDTO.class)
 	private List<NewsTagValsDTO> tags;
+	private String contentAbstract;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -207,5 +209,13 @@ public class GetNewsDetailInfoResponse {
 
 	public void setPhone(String phone) {
 		this.phone = phone;
+	}
+
+	public String getContentAbstract() {
+		return contentAbstract;
+	}
+
+	public void setContentAbstract(String contentAbstract) {
+		this.contentAbstract = contentAbstract;
 	}
 }

@@ -5915,7 +5915,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}else if(cond2 != null){
 			query.addConditions(cond2);
 		}
-		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(organizationId));
 		return query.fetch();
     }
 }

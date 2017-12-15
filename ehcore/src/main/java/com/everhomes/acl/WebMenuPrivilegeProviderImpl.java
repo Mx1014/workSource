@@ -248,18 +248,18 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
 
-        if(locator.getAnchor() != null) {
+        if(locator != null && locator.getAnchor() != null) {
             query.addConditions(Tables.EH_WEB_MENUS.ID.gt(locator.getAnchor()));
-            }
+		}
 
         query.addLimit(count);
         List<WebMenu> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, WebMenu.class);
         });
 
-        if(objs.size() >= count) {
+        if(objs.size() >= count && locator != null) {
             locator.setAnchor(objs.get(objs.size() - 1).getId());
-        } else {
+        } else if(locator != null && locator != null) {
             locator.setAnchor(null);
         }
 

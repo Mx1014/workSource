@@ -91,7 +91,7 @@ public interface ServiceModuleProvider {
 
     List<ServiceModuleAppDTO> listReflectionServiceModuleAppsByModuleIds(Integer namespaceId, List<Long> moduleIds);
 
-    List<ServiceModuleAppDTO> listReflectionServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String customPath);
+    List<ServiceModuleAppDTO> listReflectionServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String customPath, String controlOption);
 
     ServiceModuleApp findReflectionServiceModuleAppByActiveAppId(Long id);
 

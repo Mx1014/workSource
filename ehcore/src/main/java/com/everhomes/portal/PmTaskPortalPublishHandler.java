@@ -6,6 +6,7 @@ import com.everhomes.acl.WebMenuPrivilegeProvider;
 import com.everhomes.pmtask.PmTaskProvider;
 import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.pmtask.PmTaskAppType;
 import com.everhomes.rest.portal.PmTaskInstanceConfig;
 import com.everhomes.util.StringHelper;
@@ -90,17 +91,17 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
     @Override
     public String getCustomTag(Integer namespaceId, Long moudleId, String actionData, String instanceConfig){
 
-        //{"url":"zl://propertyrepair/create?type=user&taskCategoryId=203531&displayName=物业报修"}
-
-        JSONObject json = JSONObject.parseObject(actionData);
-        String url = json.getString("url");
-        String[] arrs = url.split("&");
-        for (String s: arrs) {
-            int spe = s.indexOf("=");
-            String key = s.substring(0, spe);
-            String value = s.substring(spe + 1);
-            if ("taskCategoryId".equals(key)) {
-                return value;
+        if(moudleId.equals(FlowConstants.PM_TASK_MODULE)){
+            JSONObject json = JSONObject.parseObject(actionData);
+            String url = json.getString("url");
+            String[] arrs = url.split("&");
+            for (String s: arrs) {
+                int spe = s.indexOf("=");
+                String key = s.substring(0, spe);
+                String value = s.substring(spe + 1);
+                if ("taskCategoryId".equals(key)) {
+                    return value;
+                }
             }
         }
 
@@ -108,13 +109,13 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
     }
 
     public Long getWebMenuId(Integer namespaceId, Long moudleId, String actionData, String instanceConfig){
-
-        String taskCategoryId = getCustomTag(namespaceId, moudleId, actionData, instanceConfig);
-
-        if (Long.valueOf(taskCategoryId) == PmTaskAppType.REPAIR_ID) {
-            return 20100L;
-        }else if (Long.valueOf(taskCategoryId) == PmTaskAppType.SUGGESTION_ID) {
-            return 20230L;
+        if(moudleId.equals(FlowConstants.PM_TASK_MODULE)){
+            String taskCategoryId = getCustomTag(namespaceId, moudleId, actionData, instanceConfig);
+            if (Long.valueOf(taskCategoryId) == PmTaskAppType.REPAIR_ID) {
+                return 20100L;
+            }else if (Long.valueOf(taskCategoryId) == PmTaskAppType.SUGGESTION_ID) {
+                return 20230L;
+            }
         }
 
         return null;

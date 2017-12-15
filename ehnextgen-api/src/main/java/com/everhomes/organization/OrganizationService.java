@@ -587,4 +587,7 @@ public interface OrganizationService {
 	Byte getOrganizationDetailFlag(GetOrganizationDetailFlagCommand cmd);
 
 	void checkOrganizationpPivilege(Long orgId, Long pivilegeId);
+
+	// 根据detailId获取部门
+	Long getDepartmentByDetailId(Long detailId);
 }
