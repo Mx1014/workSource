@@ -616,6 +616,9 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 update eh_reflection_service_module_apps set name = '考勤管理' where name like '%打卡%';
 update eh_reflection_service_module_apps set name = '组织架构' where name like '%通讯录%';
 
+-- 更新多应用标志
+UPDATE `eh_service_modules` SET `multiple_flag`='1' WHERE (`id`='20100');
+
 -- 车辆放行功能菜单位置迁移 add by sw 20171215
 delete from eh_web_menus where id in (20900, 20910, 20920, 20930);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
