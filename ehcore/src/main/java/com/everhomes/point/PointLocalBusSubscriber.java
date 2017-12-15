@@ -18,10 +18,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -37,10 +34,14 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PointLocalBusSubscriber.class);
 
-    @Value("${core.serverId}")
+    private static final int SCHEDULE_INTERVAL_SECONDS = 10;
+
+    private final static Random random = new Random();
+
+    @Value("${core.server.id}")
     private String serverId;
 
-    @Value("#{T(java.util.Arrays).asList(${core.serverIdList})}")
+    @Value("#{T(java.util.Arrays).asList(${core.server.list})}")
     private List<String> serverIdList;
 
     private final ReentrantLock lock = new ReentrantLock();
@@ -66,6 +67,9 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
     @Autowired
     private PointRuleToEventMappingProvider pointRuleToEventMappingProvider;
 
+    @Autowired
+    private PointEventLogScheduler pointEventLogScheduler;
+
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if (event.getApplicationContext().getParent() == null) {
@@ -76,7 +80,7 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
     }
 
     private void initScheduledExecutorService() {
-        scheduledExecutorService.schedule(this::persistAllEventLog, 60, TimeUnit.SECONDS);
+        scheduledExecutorService.schedule(this::persistAllEventLog, SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
     }
 
     private void persistAllEventLog() {
@@ -87,14 +91,14 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
             LOGGER.error("Point persist group event log error", e);
         } finally {
             lock.unlock();
-            scheduledExecutorService.schedule(this::persistAllEventLog, 60, TimeUnit.SECONDS);
+            scheduledExecutorService.schedule(this::persistAllEventLog, SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
         }
     }
 
     private void persistGroupEventLog(PointEventGroup eventGroup) {
         if (eventGroup.tryLock()) {
-            int random = (int) (Math.random() * 5);
-            if (random == 4) {
+            int i = random.nextInt(100);
+            if (i == 1) {
                 LOGGER.info("Start to persist point event log");
             }
 
@@ -108,7 +112,7 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
             } finally {
                 eventGroup.unlock();
             }
-            if (random == 4) {
+            if (i == 1) {
                 LOGGER.info("Persist point event log size {}", removeLogs.size());
             }
             pointEventLogProvider.createPointEventLogsWithId(removeLogs);
@@ -183,10 +187,18 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
 
     @Override
     public Action onLocalBusMessage(Object sender, String subject, Object args, String subscriptionPath) {
+        LocalEvent localEvent = (LocalEvent) args;
+
+        BasePointEventProcessor processor1 = pointEventLogScheduler.getPointEventProcessor(localEvent.getEventName());
+        BasePointEventProcessor processor2 = pointEventLogScheduler.getPointEventProcessor(subscriptionPath);
+
+        // 是否允许树形调用
+        if (!processor2.isContinue(processor1)) {
+            return Action.none;
+        }
+
         Integer currentNamespaceId = UserContext.getCurrentNamespaceId();
         Long currentUserId = UserContext.currentUserId();
-
-        LocalEvent localEvent = (LocalEvent) args;
 
         Integer namespaceId = localEvent.getContext() != null
                 && localEvent.getContext().getNamespaceId() != null
@@ -207,7 +219,7 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
         log.setStatus(PointEventLogStatus.WAITING_FOR_PROCESS.getCode());
         log.setEventJson(StringHelper.toJsonString(localEvent));
 
-        PointEventGroup eventGroup = eventNameToPointEventGroupMap.get(subscriptionPath);
+        PointEventGroup eventGroup = processor1.getEventGroup(eventNameToPointEventGroupMap, localEvent, subscriptionPath);
         pointEventGroupCache.computeIfPresent(eventGroup, (group, pointEventLogs) -> {
             log.setCategoryId(eventGroup.getCategory().getId());
             pointEventLogs.add(log);
@@ -218,14 +230,7 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
             return pointEventLogs;
         });
 
-        // 同步事件
-        // boolean sync = TrueOrFalseFlag.fromCode(localEvent.getSyncFlag()) == TrueOrFalseFlag.TRUE;
-        // if (sync) {
-        //     this.persistGroupEventLog(eventGroup);
-        //     // List<PointRuleCategory> categories = new ArrayList<>();
-        //     // categories.add(eventGroup.getCategory());
-        //     // eventLogProcessor.doProcessGroup(categories);
-        // }
+        processor2.hook(localEvent, subscriptionPath, eventGroup);
         return Action.none;
     }
 }

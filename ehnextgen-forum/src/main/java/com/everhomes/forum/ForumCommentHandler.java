@@ -1,15 +1,10 @@
 // @formatter:off
 package com.everhomes.forum;
-import com.everhomes.bus.LocalEventBus;
-import com.everhomes.bus.LocalEventContext;
-import com.everhomes.bus.SystemEvent;
 import com.everhomes.comment.CommentHandler;
 import com.everhomes.rest.comment.*;
 import com.everhomes.rest.comment.AttachmentDTO;
-import com.everhomes.rest.comment.DeleteCommonCommentCommand;
-import com.everhomes.rest.forum.*;
 import com.everhomes.rest.forum.AttachmentDescriptor;
-import com.everhomes.server.schema.tables.pojos.EhForumPosts;
+import com.everhomes.rest.forum.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -144,7 +139,7 @@ public class ForumCommentHandler implements CommentHandler {
 		//删除评论对接积分 add by yanjun 20171211
 		// deletePostCommentPoints(cmd.getId());
 
-        Post commentPost = forumProvider.findPostById(cmd.getId());
+        /*Post commentPost = forumProvider.findPostById(cmd.getId());
         Post parentPost = forumProvider.findPostById(commentPost.getParentPostId());
         LocalEventBus.publish(event -> {
             LocalEventContext context = new LocalEventContext();
@@ -154,9 +149,13 @@ public class ForumCommentHandler implements CommentHandler {
 
             event.setEntityType(EhForumPosts.class.getSimpleName());
             event.setEntityId(commentPost.getId());
+            Long embeddedAppId = parentPost.getEmbeddedAppId() != null ? parentPost.getEmbeddedAppId() : 0;
             event.setEventName(SystemEvent.FORUM_COMMENT_DELETE.suffix(
-                    parentPost.getContentCategory(), parentPost.getModuleType(), parentPost.getModuleCategoryId()));
-        });
+                    parentPost.getModuleType(), parentPost.getModuleCategoryId(), embeddedAppId));
+
+            event.addParam("embeddedAppId", String.valueOf(embeddedAppId));
+            event.addParam("post", StringHelper.toJsonString(parentPost));
+        });*/
 	}
 
 

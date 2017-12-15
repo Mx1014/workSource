@@ -1,6 +1,7 @@
 package com.everhomes.point;
 
 import com.everhomes.bus.LocalEvent;
+import com.everhomes.bus.LocalEventBus;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
@@ -35,7 +36,11 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PointEventLogScheduler.class);
 
-    @Value("${core.serverId}")
+    private static final int SCHEDULE_INTERVAL_SECONDS = 10;
+
+    private final static Random random = new Random();
+
+    @Value("${core.server.id}")
     private String serverId;
 
     private final transient ReentrantLock lock = new ReentrantLock();
@@ -44,9 +49,12 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
             4, new CustomizableThreadFactory("PointEventLogSchedule-"));
 
     @Autowired(required = false)
-    private List<PointEventProcessor> eventProcessors;
+    private List<IPointEventProcessor> eventProcessors;
 
-    private final Map<String, PointEventProcessor> processorMap = new HashMap<>();
+    @Autowired(required = false)
+    private List<IGeneralPointEventProcessor> generalProcessors;
+
+    private final Map<String, BasePointEventProcessor> processorMap = new HashMap<>();
 
     @Autowired
     private PointEventLogProvider pointEventLogProvider;
@@ -72,6 +80,9 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
     @Autowired
     private DbProvider dbProvider;
 
+    @Autowired
+    private PointLocalBusSubscriber pointLocalBusSubscriber;
+
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if (event.getApplicationContext().getParent() == null) {
@@ -82,8 +93,23 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
     }
 
     private void initEventProcessor() {
+        // 通用处理器
+        if (generalProcessors != null) {
+            for (IGeneralPointEventProcessor processor : generalProcessors) {
+                try {
+                    String[] events = processor.init();
+                    for (String event : events) {
+                        processorMap.put(event, processor);
+                        LocalEventBus.subscribe(event, pointLocalBusSubscriber);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        // 具体处理器
         if (eventProcessors != null) {
-            for (PointEventProcessor processor : eventProcessors) {
+            for (IPointEventProcessor processor : eventProcessors) {
                 try {
                     String[] events = processor.init();
                     for (String event : events) {
@@ -99,7 +125,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
     }
 
     void initScheduledTask() {
-        scheduledExecutorService.schedule(this::doProcessAll, 60, TimeUnit.SECONDS);
+        scheduledExecutorService.schedule(this::doProcessAll, SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
     }
 
     private void initVMShutdownHook() {
@@ -113,16 +139,16 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
     private void doProcessAll() {
         lock.tryLock();
         try {
-            int random = (int) (Math.random() * 10);
+            int i = random.nextInt(100);
             long start = System.currentTimeMillis();
-            if (random == 5) {
+            if (i == 1) {
                 LOGGER.info("Start to process point event log");
             }
 
             doProcessGroups();
-            scheduledExecutorService.schedule(this::doProcessAll, 60, TimeUnit.SECONDS);
+            scheduledExecutorService.schedule(this::doProcessAll, SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
 
-            if (random == 5) {
+            if (i == 1) {
                 long end = System.currentTimeMillis();
                 LOGGER.info("End process point event log, elapsed {}s", (end - start) / 1000);
             }
@@ -157,14 +183,14 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                 List<Long> idList = pointEventLogs.stream().map(PointEventLog::getId).collect(Collectors.toList());
 
                 final List<PointResultAction> actions = new ArrayList<>();
-                dbProvider.execute(s -> {
+                Boolean success = dbProvider.execute(s -> {
                     pointEventLogProvider.updatePointEventLogStatus(idList, PointEventLogStatus.PROCESSING.getCode());
 
                     for (PointEventLog log : pointEventLogs) {
                         LocalEvent localEvent = (LocalEvent) StringHelper.fromJsonString(
                                 log.getEventJson(), LocalEvent.class);
 
-                        PointEventProcessor processor = getPointEventProcessor(log.getEventName());
+                        BasePointEventProcessor processor = getPointEventProcessor(log.getEventName());
                         if (processor == null) {
                             continue;
                         }
@@ -203,25 +229,27 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                     return true;
                 });
 
-                actions.stream().filter(Objects::nonNull).forEach(r -> {
-                    try {
-                        r.doAction();
-                    } catch (Exception e) {
-                        LOGGER.error("Point action doAction error, action = " + r.toString(), e);
-                    }
-                });
+                if (success) {
+                    actions.stream().filter(Objects::nonNull).forEach(r -> {
+                        try {
+                            r.doAction();
+                        } catch (Exception e) {
+                            LOGGER.error("Point action doAction error, action = " + r.toString(), e);
+                        }
+                    });
+                }
             } while (locator.getAnchor() != null);
         }
     }
 
-    private PointEventProcessor getPointEventProcessor(String eventName) {
+    public BasePointEventProcessor getPointEventProcessor(String eventName) {
         String[] split = eventName.split("\\.");
         for (int i = split.length; i >= 0; i--) {
             String[] tokens = new String[i];
             System.arraycopy(split, 0, tokens, 0, i);
             String name = StringUtils.join(tokens, ".");
 
-            PointEventProcessor processor = processorMap.get(name);
+            BasePointEventProcessor processor = processorMap.get(name);
             if (processor != null) {
                 return processor;
             }

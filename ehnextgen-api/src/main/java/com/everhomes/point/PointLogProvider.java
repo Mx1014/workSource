@@ -23,5 +23,5 @@ public interface PointLogProvider {
 
     Integer countPointLog(Integer namespaceId, Long systemId, Long uid, Long ruleId, Long createTime);
 
-    PointLog findByRuleIdAndEntity(Integer namespaceId, Long uid, Long ruleId, String entityType, Long entityId);
+    PointLog findByRuleIdAndEntity(Integer namespaceId, Long systemId, Long targetUid, Long ruleId, String entityType, Long entityId);
 }

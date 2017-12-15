@@ -131,6 +131,7 @@ CREATE TABLE `eh_point_logs` (
   `rule_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rules id',
   `rule_name` VARCHAR(32) NOT NULL DEFAULT '',
   `event_name` VARCHAR(128) NOT NULL DEFAULT '',
+  `event_happen_time` BIGINT NOT NULL DEFAULT 0,
   `entity_type` VARCHAR(64) NOT NULL DEFAULT '',
   `entity_id` BIGINT NOT NULL DEFAULT 0,
   `arithmetic_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: plus, 2: minus',

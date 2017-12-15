@@ -16,10 +16,7 @@ import com.everhomes.rest.poll.*;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StatusChecker;
+import com.everhomes.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -239,8 +236,12 @@ public class PollServiceImpl implements PollService {
 
             event.setEntityType(EhForumPosts.class.getSimpleName());
             event.setEntityId(post.getId());
+            Long embeddedAppId = post.getEmbeddedAppId() != null ? post.getEmbeddedAppId() : 0;
             event.setEventName(SystemEvent.FORUM_POST_VOTE.suffix(
-                    post.getContentCategory(), post.getModuleType(), post.getModuleCategoryId()));
+                    post.getModuleType(), post.getModuleCategoryId(), embeddedAppId));
+
+            event.addParam("embeddedAppId", String.valueOf(embeddedAppId));
+            event.addParam("post", StringHelper.toJsonString(post));
         });
     }
 

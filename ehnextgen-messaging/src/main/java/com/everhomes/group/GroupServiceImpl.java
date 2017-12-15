@@ -423,18 +423,6 @@ public class GroupServiceImpl implements GroupService {
             // 如果创建俱乐部需要审核的话，审核后再发帖子
             if (null != groupSetting && Objects.equals(groupSetting.getVerifyFlag(), TrueOrFalseFlag.FALSE.getCode())) {
                 recommandGroup(groupDto, regionType, regionId);
-
-                // 创建俱乐部成功事件
-                LocalEventBus.publish(event -> {
-                    LocalEventContext context = new LocalEventContext();
-                    context.setNamespaceId(namespaceId);
-                    context.setUid(groupDto.getCreatorUid());
-                    event.setContext(context);
-
-                    event.setEntityType(EntityType.GROUP.getCode());
-                    event.setEntityId(groupDto.getId());
-                    event.setEventName(SystemEvent.CLUB_CLUB_CREATE.suffix(groupDto.getClubType()));
-                });
             }
 
         	try {
@@ -451,7 +439,20 @@ public class GroupServiceImpl implements GroupService {
             LOGGER.info("Create a new group, userId=" + userId + ", groupId=" + groupDto.getId() 
                 + ", elapse=" + (endTime - startTime));
         }
-        
+
+        // 创建group事件
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setNamespaceId(namespaceId);
+            context.setUid(groupDto.getCreatorUid());
+            event.setContext(context);
+
+            event.setEntityType(EntityType.GROUP.getCode());
+            event.setEntityId(groupDto.getId());
+            event.setEventName(SystemEvent.GROUP_GROUP_CREATE.dft());
+
+            event.addParam("groupDto", StringHelper.toJsonString(groupDto));
+        });
         return groupDto;
     }
     
@@ -1228,19 +1229,6 @@ public class GroupServiceImpl implements GroupService {
                 member.setOperatorUid(member.getMemberId());
                 
                 createActiveGroupMember(member, scope);
-
-                // 加入俱乐部事件
-                Long tmpId = member.getId();
-                LocalEventBus.publish(event -> {
-                    LocalEventContext context = new LocalEventContext();
-                    context.setNamespaceId(group.getNamespaceId());
-                    context.setUid(userId);
-                    event.setContext(context);
-
-                    event.setEntityType(EhGroupMembers.class.getSimpleName());
-                    event.setEntityId(tmpId);
-                    event.setEventName(SystemEvent.CLUB_CLUB_JOIN.suffix(group.getClubType()));
-                });
             } else {
                 member.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
                 createPendingGroupMember(member, scope);
@@ -1302,7 +1290,21 @@ public class GroupServiceImpl implements GroupService {
             
         }
 
+        // 加入group事件
+        GroupMember tmpMember = member;
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setNamespaceId(group.getNamespaceId());
+            context.setUid(userId);
+            event.setContext(context);
 
+            event.setEntityType(EhGroupMembers.class.getSimpleName());
+            event.setEntityId(tmpMember.getId());
+            event.setEventName(SystemEvent.GROUP_GROUP_JOIN.dft());
+
+            event.addParam("group", StringHelper.toJsonString(group));
+            event.addParam("member", StringHelper.toJsonString(tmpMember));
+        });
     }
 
     //行业协会需要增加额外表单
@@ -1702,7 +1704,7 @@ public class GroupServiceImpl implements GroupService {
             
             updatePendingGroupMemberToActive(member);
 
-            // 加入俱乐部事件
+            // 加入group事件
             LocalEventBus.publish(event -> {
                 LocalEventContext context = new LocalEventContext();
                 context.setNamespaceId(group.getNamespaceId());
@@ -1711,7 +1713,10 @@ public class GroupServiceImpl implements GroupService {
 
                 event.setEntityType(EhGroupMembers.class.getSimpleName());
                 event.setEntityId(member.getId());
-                event.setEventName(SystemEvent.CLUB_CLUB_JOIN.suffix(group.getClubType()));
+                event.setEventName(SystemEvent.GROUP_GROUP_JOIN_APPROVAL.dft());
+
+                event.addParam("group", StringHelper.toJsonString(group));
+                event.addParam("member", StringHelper.toJsonString(member));
             });
             
             GroupMember approver = this.groupProvider.findGroupMemberByMemberInfo(groupId, 
@@ -1812,7 +1817,7 @@ public class GroupServiceImpl implements GroupService {
             	sendGroupNotificationForMemberLeaveGroup(group, member);
 			}
 
-            // 退出俱乐部事件
+            // 退出group事件
             LocalEventBus.publish(event -> {
                 LocalEventContext context = new LocalEventContext();
                 context.setNamespaceId(group.getNamespaceId());
@@ -1821,7 +1826,10 @@ public class GroupServiceImpl implements GroupService {
 
                 event.setEntityType(EhGroupMembers.class.getSimpleName());
                 event.setEntityId(member.getId());
-                event.setEventName(SystemEvent.CLUB_CLUB_LEAVE.suffix(group.getClubType()));
+                event.setEventName(SystemEvent.GROUP_GROUP_LEAVE.dft());
+
+                event.addParam("group", StringHelper.toJsonString(group));
+                event.addParam("member", StringHelper.toJsonString(member));
             });
             break;
         default:
@@ -4758,7 +4766,7 @@ public class GroupServiceImpl implements GroupService {
         
         sendNotifactionToMembers(members, alias, group, locale);
 
-        // 解散俱乐部
+        // 删除group
         LocalEventBus.publish(event -> {
             LocalEventContext context = new LocalEventContext();
             context.setNamespaceId(group.getNamespaceId());
@@ -4767,7 +4775,9 @@ public class GroupServiceImpl implements GroupService {
 
             event.setEntityType(EntityType.GROUP.getCode());
             event.setEntityId(groupId);
-            event.setEventName(SystemEvent.CLUB_CLUB_RELEASE.suffix(group.getClubType()));
+            event.setEventName(SystemEvent.GROUP_GROUP_DELETE.dft());
+
+            event.addParam("group", StringHelper.toJsonString(group));
         });
     }
 
@@ -4839,11 +4849,25 @@ public class GroupServiceImpl implements GroupService {
 //        	forumProvider.updatePost(r);
 //        	return null;
 //        });
-        
+
         if(LOGGER.isInfoEnabled()) {
         	LOGGER.info("delete a group, userId=" + operatorUid + ", groupId=" + group.getId());
         }
-	}
+
+        // 删除group
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setNamespaceId(group.getNamespaceId());
+            context.setUid(operatorUid);
+            event.setContext(context);
+
+            event.setEntityType(EntityType.GROUP.getCode());
+            event.setEntityId(groupId);
+            event.setEventName(SystemEvent.GROUP_GROUP_DELETE.dft());
+
+            event.addParam("group", StringHelper.toJsonString(group));
+        });
+    }
 
 	@Override
 	public SearchTopicAdminCommandResponse searchGroupTopics(
@@ -5744,16 +5768,18 @@ public class GroupServiceImpl implements GroupService {
 		// 发送推荐帖
         recommandGroup(toGroupDTO(group.getCreatorUid() ,group), VisibleRegionType.fromCode(group.getVisibleRegionType()), group.getVisibleRegionId());
 
-        // 创建俱乐部成功事件
+        // 审核group成功事件
         LocalEventBus.publish(event -> {
             LocalEventContext context = new LocalEventContext();
             context.setNamespaceId(group.getNamespaceId());
-            context.setUid(group.getCreatorUid());
+            context.setUid(userId);
             event.setContext(context);
 
             event.setEntityType(EntityType.GROUP.getCode());
             event.setEntityId(group.getId());
-            event.setEventName(SystemEvent.CLUB_CLUB_CREATE.suffix(group.getClubType()));
+            event.setEventName(SystemEvent.GROUP_GROUP_APPROVAL.dft());
+
+            event.addParam("group", StringHelper.toJsonString(group));
         });
 	}
 	
