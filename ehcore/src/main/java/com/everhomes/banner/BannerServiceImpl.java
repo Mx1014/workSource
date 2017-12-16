@@ -819,7 +819,7 @@ public class BannerServiceImpl implements BannerService {
         	    if(community != null){
         	        dto.setScopeName(community.getName());
                 }
-            }else if(dto.getScopeId() != 0){
+            }else if(dto.getScopeId() == 0){
                 dto.setScopeName("全部");
             }
         }
