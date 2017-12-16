@@ -812,16 +812,15 @@ public class BannerServiceImpl implements BannerService {
             }
         }
 
-
         for(BannerDTO dto : bannerList) {
         	dto.setPosterUrl(parserUri(dto.getPosterPath(), cmd.getOwnerType(), cmd.getOwnerId()));
-        	if(dto.getScopeId() != null){
+        	if(dto.getScopeId() != null && dto.getScopeId() != 0){
         	    Community community = communityProvider.findCommunityById(dto.getScopeId());
         	    if(community != null){
         	        dto.setScopeName(community.getName());
-                }else {
-        	        dto.setScopeName("全部");
                 }
+            }else if(dto.getScopeId() != 0){
+                dto.setScopeName("全部");
             }
         }
         
