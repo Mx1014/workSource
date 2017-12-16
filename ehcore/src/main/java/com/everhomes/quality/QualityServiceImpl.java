@@ -2790,9 +2790,11 @@ public class QualityServiceImpl implements QualityService {
 				newSpecification.setApplyPolicy(SpecificationApplyPolicy.DELETE.getCode());
 				newSpecification.setReferId(specification.getId());
 				newSpecification.setCreatorUid(UserContext.current().getUser().getId());
+				// add path for del action
+				newSpecification .setPath("/");
 				qualityProvider.createQualitySpecification(newSpecification);
-
-				qualityProvider.inactiveQualityInspectionStandardSpecificationMapBySpecificationId(newSpecification.getId());
+				// change newSpecification to sepcification
+				qualityProvider.inactiveQualityInspectionStandardSpecificationMapBySpecificationId(specification.getId());
 			}else{
 				qualityProvider.updateQualitySpecification(specification);
 
@@ -2851,8 +2853,12 @@ public class QualityServiceImpl implements QualityService {
 		}
 		List<QualityInspectionSpecificationDTO> dtos = new ArrayList<>();
 		//只有在项目中才会处理ALL和SCOPE
-		if (SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode())))
+		if (SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))){
 			dtos = dealWithScopeSpecifications(specifications, scopeSpecifications);
+		}else {
+			//在全部中查看需要去除 SpecificationApplyPolicy.DELETE 因为只是记录optionType
+			dtos.removeIf(s -> SpecificationApplyPolicy.DELETE.equals(SpecificationApplyPolicy.fromCode(s.getApplyPolicy())));
+		}
 
 		QualityInspectionSpecificationDTO parentDto = ConvertHelper.convert(parent, QualityInspectionSpecificationDTO.class);
 		parentDto = processQualitySpecificationTree(dtos, parentDto);
