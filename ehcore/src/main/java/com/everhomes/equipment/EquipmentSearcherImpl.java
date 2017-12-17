@@ -216,13 +216,14 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
             flag = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(),
                     orgId, orgId, privilegeId, apps.getServiceModuleApps().get(0).getId(), null, communityId);
+            if (!flag) {
+                LOGGER.error("Permission is denied, namespaceId={}, orgId={}, communityId={}," +
+                        " privilege={}", UserContext.getCurrentNamespaceId(), orgId, communityId, privilegeId);
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                        "Insufficient privilege");
+            }
         }
-        if (!flag) {
-            LOGGER.error("Permission is denied, namespaceId={}, orgId={}, communityId={}," +
-                    " privilege={}", UserContext.getCurrentNamespaceId(), orgId, communityId, privilegeId);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                    "Insufficient privilege");
-        }
+
     }
 
 	@Override
