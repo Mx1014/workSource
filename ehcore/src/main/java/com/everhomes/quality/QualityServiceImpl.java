@@ -2475,8 +2475,8 @@ public class QualityServiceImpl implements QualityService {
 			ListQualityInspectionLogsCommand cmd) {
 		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_UPDATELOG_LIST, 0L);
 		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);*/
-		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_TASK_LIST,null);
-
+		//checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_TASK_LIST,null);
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_TASK_LIST,cmd.getScopeId());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
@@ -4302,12 +4302,13 @@ public class QualityServiceImpl implements QualityService {
 		if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
 			flag = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(),
 					orgId, orgId, privilegeId, apps.getServiceModuleApps().get(0).getId(), null, communityId);
+			if (!flag) {
+				LOGGER.error("Permission is denied, namespaceId={}, orgId={}, communityId={}," +
+						" privilege={}", UserContext.getCurrentNamespaceId(), orgId, communityId, privilegeId);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+						"Insufficient privilege");
+			}
 		}
-		if (!flag) {
-			LOGGER.error("Permission is denied, namespaceId={}, orgId={}, communityId={}," +
-					" privilege={}", UserContext.getCurrentNamespaceId(), orgId, communityId, privilegeId);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-					"Insufficient privilege");
-		}
+
 	}
 }
