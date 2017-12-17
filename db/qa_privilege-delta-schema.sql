@@ -1,8 +1,7 @@
 -- 品质核查权限细化start by jiarui  20171215
-CREATE TABLE `eh_quality_inspection_modle_community_map` (
+CREATE TABLE `eh_quality_inspection_model_community_map` (
   `id`          BIGINT(20) NOT NULL,
-  `standard_id` BIGINT(20) DEFAULT 0 NOT NULL,
-  `specification_id` BIGINT(20) DEFAULT 0 NOT NULL,
+  `model_id` BIGINT(20) DEFAULT 0 NOT NULL,
   `category_id` BIGINT(20) DEFAULT 0 NOT NULL,
   `model_type`  tinyint(4) NOT NULL DEFAULT 0 COMMENT '0:standard',
   `target_type` VARCHAR(255) DEFAULT NULL,

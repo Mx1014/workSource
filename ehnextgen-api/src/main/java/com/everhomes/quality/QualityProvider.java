@@ -173,17 +173,13 @@ public interface QualityProvider {
 
     void createQualityModelCommunityMap(QualityInspectionModleCommunityMap map);
 
-	void deleteQualityModelCommunityMapByCommunityAndStandardId(Long id, Long targetId);
+	void deleteQualityModelCommunityMapByCommunityIdAndModelId(Long modelId, Long targetId ,byte modelType);
 
 	List<QualityInspectionModleCommunityMap> listQualityModelCommunityMapByTargetId(Long targetId);
 
-	List<Long> listQualityModelCommunityIdsMapByStandardId(Long standard);
-
-    void deleteQualityModelCommunityMapByCommunityAndSpecificationId(Long id, Long scopeId, Byte inspectionType);
-
-	void deleteQualityModelCommunityMapBySpecificationId(Long id, Byte inspectionType);
+	List<Long> listQualityModelCommunityIdsMapByModelId(Long standard ,byte modelType);
 
 	List<QualityInspectionSpecifications> listAllCommunitiesChildrenSpecifications(String superiorPath, String ownerType, Long ownerId, Byte inspectionType);
 
-    void deleteQualityModelCommunityMapByStandardId(Long standardId);
+    void deleteQualityModelCommunityMapByModelId(Long modelId , byte modelType);
 }

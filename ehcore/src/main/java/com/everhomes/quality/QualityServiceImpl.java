@@ -197,7 +197,7 @@ public class QualityServiceImpl implements QualityService {
 					map.setModelType(QualityModelType.STANDARD.getCode());
 					map.setTargetId(communityId);
 					map.setTargetType(cmd.getTargetType());
-					map.setStandardId(standard.getId());
+					map.setModelId(standard.getId());
 					//创建标准项目关联表
 					qualityProvider.createQualityModelCommunityMap(map);
 				}
@@ -264,7 +264,7 @@ public class QualityServiceImpl implements QualityService {
 			qualityProvider.updateQualityInspectionStandards(standard);
 			if (cmd.getCommunities() != null && cmd.getCommunities().size() > 0 && cmd.getTargetId() == null) {
 				//在全部中修改 公共标准
-				qualityProvider.deleteQualityModelCommunityMapByStandardId(standard.getId());
+				qualityProvider.deleteQualityModelCommunityMapByModelId(standard.getId(), QualityModelType.STANDARD.getCode());
 				for (Long communityId : cmd.getCommunities()) {
 					//standard.setTargetId(communityId);
 					//standard.setTargetType(OwnerType.COMMUNITY.getCode());
@@ -274,7 +274,7 @@ public class QualityServiceImpl implements QualityService {
 					map.setModelType(QualityModelType.STANDARD.getCode());
 					map.setTargetId(communityId);
 					map.setTargetType(cmd.getTargetType());
-					map.setStandardId(standard.getId());
+					map.setModelId(standard.getId());
 					//创建标准项目关联表
 					qualityProvider.createQualityModelCommunityMap(map);
 				}
@@ -344,8 +344,8 @@ public class QualityServiceImpl implements QualityService {
         this.qualityProvider.deleteQualityInspectionStandardGroupMapByStandardId(standard.getId());
 
         if(groupList != null && groupList.size() >0) {
-        	executiveGroup = new ArrayList<QualityInspectionStandardGroupMap>();
-    		reviewGroup = new ArrayList<QualityInspectionStandardGroupMap>();
+        	executiveGroup = new ArrayList<>();
+    		reviewGroup = new ArrayList<>();
 
 			for(StandardGroupDTO group : groupList) {
 				QualityInspectionStandardGroupMap map = new QualityInspectionStandardGroupMap();
@@ -356,10 +356,10 @@ public class QualityServiceImpl implements QualityService {
 				 if(group.getInspectorUid() != null)
 					 map.setInspectorUid(group.getInspectorUid());
 				 qualityProvider.createQualityInspectionStandardGroupMap(map);
-				 if(QualityGroupType.EXECUTIVE_GROUP.equals(map.getGroupType())) {
+				 if(QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
 					 executiveGroup.add(map);
 				 }
-				 if(QualityGroupType.REVIEW_GROUP.equals(map.getGroupType())) {
+				 if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
 					 reviewGroup.add(map);
 				 }
 			}
@@ -405,13 +405,14 @@ public class QualityServiceImpl implements QualityService {
 		standard.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		if (standard.getTargetId() == 0L && cmd.getTargetId() != null) {
 			//这里是在项目中删除公共标准的情况 删除关联表即可
-			qualityProvider.deleteQualityModelCommunityMapByCommunityAndStandardId(standard.getId(), cmd.getTargetId());
+			qualityProvider.deleteQualityModelCommunityMapByCommunityIdAndModelId(standard.getId(), cmd.getTargetId(),
+					QualityModelType.STANDARD.getCode());
 
 		}else {
 			//其他情况按照正常删除方法
 			qualityProvider.updateQualityInspectionStandards(standard);
 			if(cmd.getTargetId() == null){
-				qualityProvider.deleteQualityModelCommunityMapByStandardId(standard.getId());
+				qualityProvider.deleteQualityModelCommunityMapByModelId(standard.getId(), QualityModelType.STANDARD.getCode());
 			}
 		}
 
@@ -441,8 +442,8 @@ public class QualityServiceImpl implements QualityService {
 			//首先查出标准和项目之间关联表
 			List<QualityInspectionModleCommunityMap> modleCommunityMaps = qualityProvider.listQualityModelCommunityMapByTargetId(cmd.getTargetId());
 			List<Long> containIds = new ArrayList<>();
-			if(modleCommunityMaps!=null && modleCommunityMaps.size()>0)
-			modleCommunityMaps.forEach(m -> containIds.add(m.getStandardId()));
+			if (modleCommunityMaps != null && modleCommunityMaps.size() > 0)
+				modleCommunityMaps.forEach(m -> containIds.add(m.getStandardId()));
 
 			standards = qualityProvider.listQualityInspectionStandards(locator, pageSize + 1,
 					ownerId, ownerType, cmd.getTargetType(), cmd.getTargetId(), cmd.getReviewResult());
@@ -479,7 +480,7 @@ public class QualityServiceImpl implements QualityService {
 
 			QualityStandardsDTO dto = converStandardToDto(r);
 			if (r.getTargetId() == 0) {
-				dto.setCommunities(qualityProvider.listQualityModelCommunityIdsMapByStandardId(r.getId()));
+				dto.setCommunities(qualityProvider.listQualityModelCommunityIdsMapByModelId(r.getId(),QualityModelType.STANDARD.getCode()));
 			}
 
         	return dto;
