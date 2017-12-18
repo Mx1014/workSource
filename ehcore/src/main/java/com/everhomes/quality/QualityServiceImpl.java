@@ -440,10 +440,11 @@ public class QualityServiceImpl implements QualityService {
 		List<QualityInspectionStandards> standards = new ArrayList<>();
 		if (cmd.getTargetId() != null) {
 			//首先查出标准和项目之间关联表
-			List<QualityInspectionModelCommunityMap> modleCommunityMaps = qualityProvider.listQualityModelCommunityMapByTargetId(cmd.getTargetId());
+			List<QualityInspectionModelCommunityMap> modleCommunityMaps = qualityProvider.
+					listQualityModelCommunityMapByTargetId(cmd.getTargetId(),QualityModelType.STANDARD.getCode());
 			List<Long> containIds = new ArrayList<>();
 			if (modleCommunityMaps != null && modleCommunityMaps.size() > 0)
-				modleCommunityMaps.forEach(m -> containIds.add(m.getStandardId()));
+				modleCommunityMaps.forEach(m -> containIds.add(m.getModelId()));
 
 			standards = qualityProvider.listQualityInspectionStandards(locator, pageSize + 1,
 					ownerId, ownerType, cmd.getTargetType(), cmd.getTargetId(), cmd.getReviewResult());

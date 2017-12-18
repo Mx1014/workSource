@@ -1,18 +1,11 @@
 // @formatter:off
 package com.everhomes.sequence;
 
-import java.util.List;
-
 import com.everhomes.acl.AuthorizationProvider;
-import com.everhomes.module.ServiceModuleProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.admin.GetSequenceCommand;
 import com.everhomes.rest.admin.GetSequenceDTO;
@@ -1246,6 +1239,9 @@ public class SequenceServiceImpl implements SequenceService {
         });
         syncTableSequence(null, EhQualityInspectionStandardSpecificationMap.class, Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.ID.max()).from(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP).fetchOne().value1();
+        });
+        syncTableSequence(null, EhQualityInspectionModelCommunityMap.class, Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.ID.max()).from(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP).fetchOne().value1();
         });
         syncTableSequence(null, EhBusinessPromotions.class, Tables.EH_BUSINESS_PROMOTIONS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_BUSINESS_PROMOTIONS.ID.max()).from(Tables.EH_BUSINESS_PROMOTIONS).fetchOne().value1();
