@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * @author jerry.R
  */
 
-public class EquipmentModleCommunityMap  extends EhEquipmentModleCommunityMap {
+public class EquipmentModelCommunityMap  extends EhEquipmentModelCommunityMap {
     private static final long serialVersionUID = -3393181671186124334L;
 
     @Override
