@@ -658,21 +658,36 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 
 	private boolean checkAppPrivilege(Integer namespaceId, Long taskCategoryId, Long orgId, String ownerType, Long ownerId, Long privilege) {
-		if (null != taskCategoryId && Arrays.asList(PmTaskAppType.TYPES).contains(taskCategoryId)) {
-			ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
-			listServiceModuleAppsCommand.setNamespaceId(namespaceId);
-			listServiceModuleAppsCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
-			listServiceModuleAppsCommand.setCustomTag(String.valueOf(taskCategoryId));
-			ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
-			Long appId = null;
-			if(null != apps && apps.getServiceModuleApps().size() > 0){
-				appId = apps.getServiceModuleApps().get(0).getId();
+
+		if (null != taskCategoryId ) {
+			//找到根节点, 多入口应用id是根节点id
+			boolean flag = true;
+			while (flag) {
+				Category category = categoryProvider.findCategoryById(taskCategoryId);
+				if (null != category && category.getParentId() != 0L) {
+					taskCategoryId = category.getParentId();
+				}else {
+					flag = false;
+				}
 			}
-			if (null != apps) {
-				return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
-						orgId, privilege, appId, null, ownerId);
+
+			if (Arrays.asList(PmTaskAppType.TYPES).contains(taskCategoryId)) {
+				ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+				listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+				listServiceModuleAppsCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
+				listServiceModuleAppsCommand.setCustomTag(String.valueOf(taskCategoryId));
+				ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+				Long appId = null;
+				if(null != apps && apps.getServiceModuleApps().size() > 0){
+					appId = apps.getServiceModuleApps().get(0).getId();
+				}
+				if (null != apps) {
+					return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
+							orgId, privilege, appId, null, ownerId);
+				}
 			}
 		}
+
 		return false;
 	}
 
@@ -684,8 +699,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
 		//检查多入口应用权限
-		Category category = categoryProvider.findCategoryById(cmd.getTaskCategoryId());
-		if(!checkAppPrivilege(namespaceId, category.getParentId(), cmd.getOrganizationId(), EntityType.COMMUNITY.getCode(),
+		if(!checkAppPrivilege(namespaceId, cmd.getTaskCategoryId(), cmd.getOrganizationId(), EntityType.COMMUNITY.getCode(),
 				cmd.getOwnerId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE)){
 			LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
 							" privilege={}", namespaceId, cmd.getTaskCategoryId(), cmd.getOrganizationId(), EntityType.COMMUNITY.getCode(),
@@ -989,9 +1003,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Integer namespaceId = cmd.getNamespaceId();
 		checkNamespaceId(namespaceId);
 
-		Category category = categoryProvider.findCategoryById(cmd.getTaskCategoryId());
 		//检查多入口应用权限
-		if(!checkAppPrivilege(namespaceId, category.getParentId(), cmd.getCurrentOrgId(), EntityType.COMMUNITY.getCode(),
+		if(!checkAppPrivilege(namespaceId, cmd.getTaskCategoryId(), cmd.getCurrentOrgId(), EntityType.COMMUNITY.getCode(),
 				cmd.getCommunityId(), PrivilegeConstants.PMTASK_TASK_STATISTICS_LIST)){
 			LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
 					" privilege={}", namespaceId, cmd.getTaskCategoryId(), cmd.getCurrentOrgId(), EntityType.COMMUNITY.getCode(),
