@@ -1,18 +1,11 @@
 // @formatter:off
 package com.everhomes.sequence;
 
-import java.util.List;
-
 import com.everhomes.acl.AuthorizationProvider;
-import com.everhomes.module.ServiceModuleProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.admin.GetSequenceCommand;
 import com.everhomes.rest.admin.GetSequenceDTO;
@@ -1001,10 +994,10 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhServiceModuleAssignments.class, Tables.EH_SERVICE_MODULE_ASSIGNMENTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ID.max()).from(Tables.EH_SERVICE_MODULE_ASSIGNMENTS).fetchOne().value1();
         });
-        syncTableSequence(null, EhEquipmentInspectionEquipmentStandardMap.class, Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.ID.max()).from(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP).fetchOne().value1();
+        syncTableSequence(null, EhEquipmentModelCommunityMap.class, Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP.ID.max()).from(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP).fetchOne().value1();
         });
-        syncTableSequence(null, EhEquipmentModelCommunityMap.class, Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.getName(), (dbContext) -> {
+        syncTableSequence(null, EhEquipmentInspectionEquipmentStandardMap.class, Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP).fetchOne().value1();
         });
         syncTableSequence(null, EhEquipmentInspectionTemplates.class, Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.getName(), (dbContext) -> {
