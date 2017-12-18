@@ -171,11 +171,11 @@ public interface QualityProvider {
 	Map<Long, QualityInspectionSpecifications> listSpecificationByIds(List<Long> ids);
 	Map<Long, QualityInspectionTaskRecords> listLastRecordByTaskIds(Set<Long> taskIds);
 
-    void createQualityModelCommunityMap(QualityInspectionModleCommunityMap map);
+    void createQualityModelCommunityMap(QualityInspectionModelCommunityMap map);
 
 	void deleteQualityModelCommunityMapByCommunityIdAndModelId(Long modelId, Long targetId ,byte modelType);
 
-	List<QualityInspectionModleCommunityMap> listQualityModelCommunityMapByTargetId(Long targetId);
+	List<QualityInspectionModelCommunityMap> listQualityModelCommunityMapByTargetId(Long targetId);
 
 	List<Long> listQualityModelCommunityIdsMapByModelId(Long standard ,byte modelType);
 

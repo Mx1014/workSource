@@ -1,6 +1,6 @@
 package com.everhomes.quality;
 
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionModleCommunityMap;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionModelCommunityMap;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * @author jerry.R
  */
 
-public class QualityInspectionModleCommunityMap extends EhQualityInspectionModleCommunityMap {
+public class QualityInspectionModelCommunityMap extends EhQualityInspectionModelCommunityMap {
 
     private static final long serialVersionUID = -2402582732512747491L;
 

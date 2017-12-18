@@ -193,7 +193,7 @@ public class QualityServiceImpl implements QualityService {
 					//standard.setTargetType(OwnerType.COMMUNITY.getCode());
 					//qualityProvider.createQualityInspectionStandards(standard);
 					//上一版是在全部中创建的标准  全部在所有项目中创建一遍  现在改成关系表的方式
-					QualityInspectionModleCommunityMap map = new QualityInspectionModleCommunityMap();
+					QualityInspectionModelCommunityMap map = new QualityInspectionModelCommunityMap();
 					map.setModelType(QualityModelType.STANDARD.getCode());
 					map.setTargetId(communityId);
 					map.setTargetType(cmd.getTargetType());
@@ -270,7 +270,7 @@ public class QualityServiceImpl implements QualityService {
 					//standard.setTargetType(OwnerType.COMMUNITY.getCode());
 					//qualityProvider.createQualityInspectionStandards(standard);
 					//上一版是在全部中创建的标准  全部在所有项目中创建一遍  现在改成关系表的方式
-					QualityInspectionModleCommunityMap map = new QualityInspectionModleCommunityMap();
+					QualityInspectionModelCommunityMap map = new QualityInspectionModelCommunityMap();
 					map.setModelType(QualityModelType.STANDARD.getCode());
 					map.setTargetId(communityId);
 					map.setTargetType(cmd.getTargetType());
@@ -440,7 +440,7 @@ public class QualityServiceImpl implements QualityService {
 		List<QualityInspectionStandards> standards = new ArrayList<>();
 		if (cmd.getTargetId() != null) {
 			//首先查出标准和项目之间关联表
-			List<QualityInspectionModleCommunityMap> modleCommunityMaps = qualityProvider.listQualityModelCommunityMapByTargetId(cmd.getTargetId());
+			List<QualityInspectionModelCommunityMap> modleCommunityMaps = qualityProvider.listQualityModelCommunityMapByTargetId(cmd.getTargetId());
 			List<Long> containIds = new ArrayList<>();
 			if (modleCommunityMaps != null && modleCommunityMaps.size() > 0)
 				modleCommunityMaps.forEach(m -> containIds.add(m.getStandardId()));
