@@ -272,7 +272,7 @@ public class HotlineServiceImpl implements HotlineService {
 						return query;
 					}
 				});
-		tmp = tmp.stream().filter(p->p.getId()!=cmd.getId()).collect(Collectors.toList());//排除自己
+		tmp = tmp.stream().filter(p->!p.getId().equals(cmd.getId())).collect(Collectors.toList());//排除自己
 		if (tmp!=null && tmp.size()>0)
 			throw RuntimeErrorException
 					.errorWith(HotlineErrorCode.SCOPE,
