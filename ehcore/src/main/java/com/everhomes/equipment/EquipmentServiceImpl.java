@@ -253,7 +253,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if (cmd.getCommunities() != null && cmd.getCommunities().size() > 0){
 				//此处创建公共标准关联表 targetId为null为公共标准
 				for (Long communityId: cmd.getCommunities()) {
-					EquipmentModleCommunityMap map = new EquipmentModleCommunityMap();
+					EquipmentModelCommunityMap map = new EquipmentModelCommunityMap();
 					map.setModelId(standard.getId());
 					map.setTargetType(standard.getTargetType());
 					map.setTargetId(communityId);
@@ -306,7 +306,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 					equipmentProvider.deleteModelCommunityMapByModelId(standard.getId(),EquipmentModelType.STANDARD.getCode());
 					if(cmd.getCommunities() != null && cmd.getCommunities().size()>0) {
 						for (Long communityId : cmd.getCommunities()) {
-							EquipmentModleCommunityMap map = new EquipmentModleCommunityMap();
+							EquipmentModelCommunityMap map = new EquipmentModelCommunityMap();
 							map.setModelId(standard.getId());
 							map.setTargetType(standard.getTargetType());
 							map.setTargetId(communityId);
@@ -4030,7 +4030,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if(cmd.getCommunities() != null && cmd.getCommunities().size()>0){
 				//此处创建公共标准关联表 targetId为null为公共标准
 				for (Long communityId: cmd.getCommunities()) {
-					EquipmentModleCommunityMap communityMap = new EquipmentModleCommunityMap();
+					EquipmentModelCommunityMap communityMap = new EquipmentModelCommunityMap();
 					communityMap.setModelId(template.getId());
 					communityMap.setTargetType(template.getTargetType());
 					communityMap.setTargetId(communityId);
@@ -4081,7 +4081,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipmentProvider.deleteModelCommunityMapByModelId(template.getId(),EquipmentModelType.TEMPLATE.getCode());
 				if (cmd.getCommunities() != null && cmd.getCommunities().size() > 0) {
 					for (Long communityId : cmd.getCommunities()) {
-						EquipmentModleCommunityMap communityMap = new EquipmentModleCommunityMap();
+						EquipmentModelCommunityMap communityMap = new EquipmentModelCommunityMap();
 						communityMap.setModelId(template.getId());
 						communityMap.setTargetType(template.getTargetType());
 						communityMap.setTargetId(communityId);
@@ -4233,9 +4233,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 
 			//referId的公共模板去掉
-			List<EquipmentModleCommunityMap> templatesMap = equipmentProvider.listModelCommunityMapByCommunityId(cmd.getTargetId(), EquipmentModelType.TEMPLATE.getCode());
+			List<EquipmentModelCommunityMap> templatesMap = equipmentProvider.listModelCommunityMapByCommunityId(cmd.getTargetId(), EquipmentModelType.TEMPLATE.getCode());
 			if (templatesMap.size() > 0) {
-				for (EquipmentModleCommunityMap map : templatesMap) {
+				for (EquipmentModelCommunityMap map : templatesMap) {
 					if (!removeIds.contains(map.getModelId())) {
 						EquipmentInspectionTemplates modelTemplates = equipmentProvider.findEquipmentInspectionTemplate(map.getModelId(), cmd.getOwnerId(), cmd.getOwnerType());
 						if (templates == null) {
@@ -5010,7 +5010,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			List<EquipmentInspectionTemplates> templates = equipmentProvider.listInspectionTemplates(namespaceId,null,null);
 			for (EquipmentInspectionTemplates template : templates) {
 				for (Community community : communities) {
-					EquipmentModleCommunityMap map = new EquipmentModleCommunityMap();
+					EquipmentModelCommunityMap map = new EquipmentModelCommunityMap();
 					map.setModelId(template.getId());
 					map.setTargetId(community.getId());
 					map.setTargetType("community");

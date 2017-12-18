@@ -200,7 +200,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         }
 
         List<EquipmentStandardsDTO> eqStandards = new ArrayList<EquipmentStandardsDTO>();
-        List <EquipmentModleCommunityMap> maps = equipmentProvider.listModelCommunityMapByCommunityId(cmd.getTargetId(),EquipmentModelType.STANDARD.getCode());
+        List <EquipmentModelCommunityMap> maps = equipmentProvider.listModelCommunityMapByCommunityId(cmd.getTargetId(),EquipmentModelType.STANDARD.getCode());
         for(Long id : ids) {
             EquipmentInspectionStandards standard = equipmentProvider.findStandardById(id);
             if (cmd.getTargetId() != null) {
@@ -233,7 +233,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         }
         //过滤剩下的maps 增加到项目中
         if (maps != null && maps.size() > 0) {
-            for (EquipmentModleCommunityMap map : maps) {
+            for (EquipmentModelCommunityMap map : maps) {
                 EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getModelId());
                 if (standard != null) {
                     processRepeatSetting(standard);

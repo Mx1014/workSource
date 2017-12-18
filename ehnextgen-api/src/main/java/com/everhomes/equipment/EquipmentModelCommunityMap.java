@@ -1,6 +1,6 @@
 package com.everhomes.equipment;
 
-import com.everhomes.server.schema.tables.pojos.EhEquipmentModleCommunityMap;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentModelCommunityMap;
 import com.everhomes.util.StringHelper;
 
 /**

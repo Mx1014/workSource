@@ -2464,22 +2464,22 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
-	public void createEquipmentModelCommunityMap(EquipmentModleCommunityMap map) {
+	public void createEquipmentModelCommunityMap(EquipmentModelCommunityMap map) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentModleCommunityMap.class));
-		EhEquipmentModleCommunityMapDao dao = new EhEquipmentModleCommunityMapDao(context.configuration());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentModelCommunityMap.class));
+		EhEquipmentModelCommunityMapDao dao = new EhEquipmentModelCommunityMapDao(context.configuration());
 		map.setId(id);
 		map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		dao.insert(map);
 	}
 
 	@Override
-	public List<EquipmentModleCommunityMap> listModelCommunityMapByCommunityId(Long targetId, byte modelType) {
+	public List<EquipmentModelCommunityMap> listModelCommunityMapByCommunityId(Long targetId, byte modelType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		return context.selectFrom(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP)
 				.where(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP.TARGET_ID.eq(targetId))
 				.and(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP.MODEL_TYPE.eq(modelType))
-				.fetchInto(EquipmentModleCommunityMap.class);
+				.fetchInto(EquipmentModelCommunityMap.class);
 	}
 
 	@Override
