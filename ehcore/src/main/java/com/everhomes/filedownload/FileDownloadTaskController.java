@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/fileDownload")
+@RequestMapping("/fileDownloadTask")
 public class FileDownloadTaskController extends ControllerBase {
 
     @Autowired
     FileDownloadTaskService fileDownloadTaskService;
 
     /**
-     * <b>URL: /fileDownload/listFileDownloadTasks</b>
+     * <b>URL: /fileDownloadTask/listFileDownloadTasks</b>
      * <p>获取任务列表</p>
      */
     @RequestMapping("listFileDownloadTasks")
@@ -33,7 +33,7 @@ public class FileDownloadTaskController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /fileDownload/cancelTask</b>
+     * <b>URL: /fileDownloadTask/cancelTask</b>
      * <p>取消任务</p>
      */
     @RequestMapping("cancelTask")
