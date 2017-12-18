@@ -79,10 +79,10 @@ CREATE TABLE `eh_parking_spaces` (
   `namespace_id` int(11) NOT NULL DEFAULT '0',
   `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
   `owner_id` bigint(20) NOT NULL DEFAULT '0',
-  `space_no` varchar(64) NOT NULL DEFAULT '' COMMENT 'used to display',
-  `space_address` varchar(64) NOT NULL DEFAULT '' COMMENT 'reference to name of eh_parking_vendors',
-  `lock_id` varchar(128) DEFAULT NULL COMMENT 'parking lot id from vendor',
-  `lock_status` varchar(128) DEFAULT NULL COMMENT 'parking lot id from vendor',
+  `space_no` varchar(64) NOT NULL DEFAULT '',
+  `space_address` varchar(64) NOT NULL DEFAULT '',
+  `lock_id` varchar(128) DEFAULT NULL,
+  `lock_status` varchar(128) DEFAULT NULL,
   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: waitingForApproval, 2: active',
   `creator_uid` bigint(20) NOT NULL DEFAULT '0',
   `create_time` datetime DEFAULT NULL,
@@ -93,14 +93,13 @@ CREATE TABLE `eh_parking_spaces` (
 
 CREATE TABLE `eh_parking_space_logs` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
-  `namespace_id` int(11) NOT NULL DEFAULT '0',
-  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
-  `owner_id` bigint(20) NOT NULL DEFAULT '0',
+  `space_no` varchar(64) NOT NULL,
+  `lock_id` varchar(128) DEFAULT NULL,
   `contact_phone` varchar(64) DEFAULT NULL,
   `contact_name` varchar(64) DEFAULT NULL,
   `contact_enterprise_name` varchar(128) DEFAULT NULL,
-  `operate_type` tinyint(4) NOT NULL COMMENT '1: raise, 2: down',
-  `user_type` tinyint(4) NOT NULL COMMENT '1: reserve, 2: plate owner',
+  `operate_type` tinyint(4) NOT NULL COMMENT '1: up, 2: down',
+  `user_type` tinyint(4) NOT NULL COMMENT '1: booking person, 2: plate owner',
   `operate_uid` bigint(20) NOT NULL DEFAULT '0',
   `operate_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -145,9 +144,11 @@ CREATE TABLE `eh_reserve_orders` (
   `cancel_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'cancel user id',
   `cancel_time` datetime DEFAULT NULL,
 
-  `flow_mode` tinyint(4) DEFAULT '0' COMMENT 'flow mode, 1:online pay 2:approve offline 3: approve online',
-  `flow_case_id` bigint(20) DEFAULT NULL COMMENT 'id of the flow_case',
-  `paid_version` tinyint(4) DEFAULT NULL,
+  `string_tag1` varchar(128) DEFAULT NULL,
+  `string_tag2` varchar(128) DEFAULT NULL,
+  `string_tag3` varchar(128) DEFAULT NULL,
+  `string_tag4` varchar(128) DEFAULT NULL,
+  `string_tag5` varchar(128) DEFAULT NULL,
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
