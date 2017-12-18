@@ -786,7 +786,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
             //获取人员和人员所有机构所赋予模块的所属项目范围(权限细化)
             List<Project> project_relation = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(IdentityType.ORDINARY.getCode(), com.everhomes.entity.EntityType.SERVICE_MODULE_APP.getCode(), moduleId, targets);
-            for (Project project: projects) {
+            for (Project project: project_relation) {
                 //在模块下拥有全部项目权限
                 if(EntityType.ALL == EntityType.fromCode(project.getProjectType())){
                     allProjectFlag = true;
@@ -809,7 +809,18 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 dtos.add(dto);
             }
         }
-        return dtos;
+
+        //去重
+        List<Long> ids = new ArrayList<>();
+        List<ProjectDTO> projectDtos = new ArrayList<>();
+        dtos.stream().map(r->{
+            if (!ids.contains(r.getProjectId())){
+                ids.add(r.getProjectId());
+                projectDtos.add(r);
+            }
+            return null;
+        }).collect(Collectors.toList());
+        return projectDtos;
     }
 
 
