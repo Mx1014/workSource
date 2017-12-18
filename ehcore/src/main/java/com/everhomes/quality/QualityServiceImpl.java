@@ -2841,7 +2841,7 @@ public class QualityServiceImpl implements QualityService {
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
 				scopeSpecifications = qualityProvider.listAllChildrenSpecifications("/%", cmd.getOwnerType(), cmd.getOwnerId(), cmd.getScopeCode(), cmd.getScopeId(), cmd.getInspectionType());
 			}else {
-				scopeSpecifications.addAll(qualityProvider.listAllCommunitiesChildrenSpecifications("/%", cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionType()));
+				specifications.addAll(qualityProvider.listAllCommunitiesChildrenSpecifications("/%", cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionType()));
 			}
 
 		} else {
@@ -2850,7 +2850,7 @@ public class QualityServiceImpl implements QualityService {
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
 				scopeSpecifications = qualityProvider.listAllChildrenSpecifications(parent.getPath() + "/%", cmd.getOwnerType(), cmd.getOwnerId(), cmd.getScopeCode(), cmd.getScopeId(), cmd.getInspectionType());
 			}else {
-				scopeSpecifications.addAll(qualityProvider.listAllCommunitiesChildrenSpecifications(parent.getPath() +"/%", cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionType()));
+				specifications.addAll(qualityProvider.listAllCommunitiesChildrenSpecifications(parent.getPath() +"/%", cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionType()));
 			}
 		}
 		List<QualityInspectionSpecificationDTO> dtos = new ArrayList<>();
@@ -2859,7 +2859,8 @@ public class QualityServiceImpl implements QualityService {
 			dtos = dealWithScopeSpecifications(specifications, scopeSpecifications);
 		}else {
 			//在全部中查看需要去除 SpecificationApplyPolicy.DELETE 因为只是记录optionType
-			dtos.removeIf(s -> SpecificationApplyPolicy.DELETE.equals(SpecificationApplyPolicy.fromCode(s.getApplyPolicy())));
+			specifications.removeIf(s -> SpecificationApplyPolicy.DELETE.equals(SpecificationApplyPolicy.fromCode(s.getApplyPolicy())));
+			dtos = dealWithScopeSpecifications(specifications, scopeSpecifications);
 		}
 
 		QualityInspectionSpecificationDTO parentDto = ConvertHelper.convert(parent, QualityInspectionSpecificationDTO.class);

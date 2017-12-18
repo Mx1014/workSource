@@ -2723,7 +2723,7 @@ public class QualityProviderImpl implements QualityProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		return  context.select(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.TARGET_ID)
 				.from(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP)
-				.where(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.TARGET_ID.eq(modelId))
+				.where(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.MODEL_ID.eq(modelId))
 				.and(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.MODEL_TYPE.eq(modelType))
 				.fetchInto(Long.class);
 	}
