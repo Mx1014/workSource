@@ -331,7 +331,7 @@ public class PunchServiceImpl implements PunchService {
 		cmd.setActionType(ActionType.PUNCH.getCode());
 		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
 		Long appId = null;
-		if(null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0){
+		if(null != apps && apps.getServiceModuleApps().size() > 0){
 			appId = apps.getServiceModuleApps().get(0).getId();
 		}
 		if (null != apps) {
@@ -3097,6 +3097,8 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue("迟到次数");
 		row.createCell(++i).setCellValue("早退次数");
 		row.createCell(++i).setCellValue("迟到且早退次数");
+		row.createCell(++i).setCellValue("加班时长");
+		row.createCell(++i).setCellValue("请假总时长");
 		if (null != results && results.size() > 0) {
 			if (null != results.get(0).getExts()) {
 				for (ExtDTO ext : results.get(0).getExts()) {
@@ -3128,12 +3130,18 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue(statistic.getBelateCount());
 		row.createCell(++i).setCellValue(statistic.getLeaveEarlyCount());
 		row.createCell(++i).setCellValue(statistic.getBlandleCount());
+		row.createCell(++i).setCellValue(statistic.getOverTimeSum()==null?"":statistic.getOverTimeSum()+"");
+		int cellNum = ++i;
+		BigDecimal cellValue = new BigDecimal("0");
 		if (null != statistic.getExts()) {
 			for (ExtDTO ext : statistic.getExts()) {
 				row.createCell(++i).setCellValue(ext.getTimeCount());
-
+				BigDecimal extCount = new BigDecimal(ext.getTimeCount()==null?"0":ext.getTimeCount());
+				cellValue=cellValue.add(extCount);
+				
 			}
 		}
+		row.createCell(cellNum).setCellValue(cellValue.toString());
 //		row.createCell(++i).setCellValue(statistic.getAbsenceCount());
 //		row.createCell(++i).setCellValue(statistic.getSickCount());
 //		row.createCell(++i).setCellValue(statistic.getExchangeCount());
@@ -3151,7 +3159,7 @@ public class PunchServiceImpl implements PunchService {
 	public Workbook createPunchStatisticsBook(List<PunchCountDTO> results, ListPunchCountCommand cmd) {
 		if (null == results || results.size() == 0)
 			return null;
-		int columnNo = 11;
+		int columnNo = 13;
 
 		if (null != results && results.size() > 0) {
 			if (null != results.get(0).getExts()) {

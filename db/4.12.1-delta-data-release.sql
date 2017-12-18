@@ -162,6 +162,20 @@ INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owne
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
 	VALUES ('relocation.flowCase.url', 'zl://workflow/detail?flowCaseId=%s&flowUserType=%s&moduleId=49200', NULL, '0', NULL);
 
+SET @id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`)
+	VALUES ((@id := @id + 1), '999983', '0', '0', '0', '/home', 'Bizs', '物品搬迁', '物品搬迁', 'cs://1/image/aW1hZ2UvTVRveVl6RTFOREF4WTJKbU56ZG1ZMlkyTkdVMk1EUTRaREUwWlRFeU1URXdaUQ', '1', '1', '13', '{\"url\":\"https://core.zuolin.com/goods-move/build/index.html?ns=1000000&hideNavigationBar=1&ehnavigatorstyle=0#home#sign_suffix\"}', '3', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '1', NULL, NULL, '0', NULL, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`)
+	VALUES ((@id := @id + 1), '999983', '0', '0', '0', '/home', 'Bizs', '物品搬迁', '物品搬迁', 'cs://1/image/aW1hZ2UvTVRveVl6RTFOREF4WTJKbU56ZG1ZMlkyTkdVMk1EUTRaREUwWlRFeU1URXdaUQ', '1', '1', '13', '{\"url\":\"https://core.zuolin.com/goods-move/build/index.html?ns=1000000&hideNavigationBar=1&ehnavigatorstyle=0#home#sign_suffix\"}', '3', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '1', NULL, NULL, '0', NULL, NULL);
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),49200,'', 'EhNamespaces', 999983,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),49202,'', 'EhNamespaces', 999983,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),49204,'', 'EhNamespaces', 999983,2);
+
 
 -- 园区入驻多入口 add by sw 20171212
 UPDATE eh_web_menus SET data_type = 'react:/project-intro/project-list/1' WHERE id = 40103;
@@ -291,7 +305,7 @@ INSERT INTO `eh_point_rules` (`id`, `namespace_id`,`category_id`, `module_id`, `
 INSERT INTO `eh_point_rules` (`id`, `namespace_id`,`category_id`, `module_id`, `display_name`, `description`, `arithmetic_type`, `points`, `limit_type`, `limit_data`, `binding_rule_id`, `status`, `display_flag`, `create_time`, `creator_uid`, `update_time`, `update_uid`) VALUES (21, 0, 8, 0, '园区资源预约成功', '园区资源预约成功', 1, 2, 1, '{"times":5}', 0, 2, 1, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_point_rules` (`id`, `namespace_id`,`category_id`, `module_id`, `display_name`, `description`, `arithmetic_type`, `points`, `limit_type`, `limit_data`, `binding_rule_id`, `status`, `display_flag`, `create_time`, `creator_uid`, `update_time`, `update_uid`) VALUES (22, 0, 2, 0, '论坛帖子/评论被举报且管理员核实', '论坛帖子/评论被举报', 2, 10, 1, '{"times":2}', 0, 2, 1, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_point_rules` (`id`, `namespace_id`,`category_id`, `module_id`, `display_name`, `description`, `arithmetic_type`, `points`, `limit_type`, `limit_data`, `binding_rule_id`, `status`, `display_flag`, `create_time`, `creator_uid`, `update_time`, `update_uid`) VALUES (23, 0, 2, 0, '论坛评论被举报且管理员核实', '论坛评论被举报', 2, 5, 1, '{"times":2}', 0, 2, 0, NULL, NULL, NULL, NULL);
-INSERT INTO `eh_point_rules` (`id`, `namespace_id`,`category_id`, `module_id`, `display_name`, `description`, `arithmetic_type`, `points`, `limit_type`, `limit_data`, `binding_rule_id`, `status`, `display_flag`, `create_time`, `creator_uid`, `update_time`, `update_uid`) VALUES (24, 0, 2, 0, '删除帖子', '删除论坛帖子', 2, 5, 1, '{"times":5}', 4, 2, 1, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_point_rules` (`id`, `namespace_id`,`category_id`, `module_id`, `display_name`, `description`, `arithmetic_type`, `points`, `limit_type`, `limit_data`, `binding_rule_id`, `status`, `display_flag`, `create_time`, `creator_uid`, `update_time`, `update_uid`) VALUES (24, 0, 2, 0, '删除帖子', '删除论坛帖子', 2, 3, 1, '{"times":5}', 4, 2, 1, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_point_rules` (`id`, `namespace_id`,`category_id`, `module_id`, `display_name`, `description`, `arithmetic_type`, `points`, `limit_type`, `limit_data`, `binding_rule_id`, `status`, `display_flag`, `create_time`, `creator_uid`, `update_time`, `update_uid`) VALUES (25, 0, 2, 0, '删除评论', '删除论坛评论', 2, 2, 1, '{"times":5}', 5, 2, 1, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_point_rules` (`id`, `namespace_id`,`category_id`, `module_id`, `display_name`, `description`, `arithmetic_type`, `points`, `limit_type`, `limit_data`, `binding_rule_id`, `status`, `display_flag`, `create_time`, `creator_uid`, `update_time`, `update_uid`) VALUES (26, 0, 2, 0, '取消论坛点赞', '取消论坛点赞', 2, 1, 1, '{"times":5}', 6, 2, 1, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_point_rules` (`id`, `namespace_id`,`category_id`, `module_id`, `display_name`, `description`, `arithmetic_type`, `points`, `limit_type`, `limit_data`, `binding_rule_id`, `status`, `display_flag`, `create_time`, `creator_uid`, `update_time`, `update_uid`) VALUES (27, 0, 3, 0, '活动/评论被举报且管理员核实', '活动/评论被举报', 2, 10, 1, '{"times":2}', 0, 2, 1, NULL, NULL, NULL, NULL);
@@ -390,9 +404,9 @@ INSERT INTO `eh_point_tutorials` (`id`, `namespace_id`, `system_id`, `display_na
 INSERT INTO `eh_point_tutorials` (`id`, `namespace_id`, `system_id`, `display_name`, `description`, `poster_uri`, `status`, `create_time`, `creator_uid`, `update_time`, `update_uid`) VALUES (2, 999991, 84, '购物消费', '园区消费攒积分', 'cs://1/image/aW1hZ2UvTVRvNU5HTXdaREJoTTJZNVpHUXhZVGMwTTJRNE5XSTBZVEZsTkdWa1ptVXlOQQ', 2, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_point_tutorials` (`id`, `namespace_id`, `system_id`, `display_name`, `description`, `poster_uri`, `status`, `create_time`, `creator_uid`, `update_time`, `update_uid`) VALUES (3, 999991, 84, '园区服务', '使用公共服务送积分', 'cs://1/image/aW1hZ2UvTVRvM09HRTJZbU5sWXpFek9UUmtaREF5TkRNek1tVTRORFUzT1dJeE5ESXpNdw', 2, NULL, NULL, NULL, NULL);
 
-INSERT INTO `eh_point_goods` (`id`, `namespace_id`, `number`, `display_name`, `poster_uri`, `poster_url`, `detail_url`, `points`, `sold_amount`, `original_price`, `discount_price`, `point_rule`, `status`, `top_status`, `top_time`, `create_time`, `creator_uid`, `update_time`, `update_uid`) VALUES (1, 999991, '1', '黑巧克力甜甜圈(白巧克力条纹)', 'cs://1/image/aW1hZ2UvTVRvMU1EUTFNR1U0Wm1SbU5Ea3lOR1EyTjJVNE1HUmpORGMxTVdNd1l6azRaUQ', '', 'http://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fapp%2fuser%2findex.html%3fmallId%3d1999990%26originId%3d1%26fromclient%3d1%23%2fgood%2fdetails%2f14622779991551986272%2f09529987701%2f1#sign_suffix', 15, 0, 8.00, 6.50, '', 2, 2, '2017-12-14 21:15:01.000', NULL, NULL, NULL, NULL);
-INSERT INTO `eh_point_goods` (`id`, `namespace_id`, `number`, `display_name`, `poster_uri`, `poster_url`, `detail_url`, `points`, `sold_amount`, `original_price`, `discount_price`, `point_rule`, `status`, `top_status`, `top_time`, `create_time`, `creator_uid`, `update_time`, `update_uid`) VALUES (3, 999991, '1', '家常小炒鸡', 'cs://1/image/aW1hZ2UvTVRvNFlXWTRNamM1WXpRMk1UTTVPRFkwTnpVd1l6WTNaVGd3T1RFeE1EazRZdw', '', 'http://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fapp%2fuser%2findex.html%3fmallId%3d1999990%26originId%3d1%26fromclient%3d1%23%2fgood%2fdetails%2f14622779991551986272%2f08522184413%2f1#sign_suffix', 30, 41, 19.00, 16.00, '', 2, 2, '2017-12-12 21:15:05.000', NULL, NULL, NULL, NULL);
-INSERT INTO `eh_point_goods` (`id`, `namespace_id`, `number`, `display_name`, `poster_uri`, `poster_url`, `detail_url`, `points`, `sold_amount`, `original_price`, `discount_price`, `point_rule`, `status`, `top_status`, `top_time`, `create_time`, `creator_uid`, `update_time`, `update_uid`) VALUES (2, 999991, '1', '抹茶红豆瑞士卷', 'cs://1/image/aW1hZ2UvTVRwak1UazJNREE0TmpreVl6a3lOakprTnpsaVlUWTBOV1EwTXpkak1EY3haQQ', '', 'http://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fapp%2fuser%2findex.html%3fmallId%3d1999990%26originId%3d1%26fromclient%3d1%23%2fgood%2fdetails%2f14622779991551986272%2f09805545175%2f1#sign_suffix', 10, 0, 8.00, 7.00, '', 2, 2, '2017-12-13 21:15:03.000', NULL, NULL, NULL, NULL);
+INSERT INTO `eh_point_goods` (`id`, `namespace_id`, `number`, `display_name`, `poster_uri`, `poster_url`, `detail_url`, `points`, `sold_amount`, `original_price`, `discount_price`, `point_rule`, `status`, `top_status`, `top_time`, `create_time`, `creator_uid`, `update_time`, `update_uid`) VALUES (1, 999991, '1', '好丽友.派', 'cs://1/image/aW1hZ2UvTVRvM01ESTNabVF4WWpRMVlqZGxOVFZrTW1ObFpERTJOR00wTVRnM01qZ3hPQQ', '', 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fapp%2fuser%2findex.html%3ffromclient%3d1%23%2fgood%2fdetails%2f15133062972693658555%2f02555862652%2f1%3f_k%3dzlbiz#sign_suffix', 5, 0, 8.00, 1, '', 2, 2, '2017-12-14 21:15:01.000', NULL, NULL, NULL, NULL);
+INSERT INTO `eh_point_goods` (`id`, `namespace_id`, `number`, `display_name`, `poster_uri`, `poster_url`, `detail_url`, `points`, `sold_amount`, `original_price`, `discount_price`, `point_rule`, `status`, `top_status`, `top_time`, `create_time`, `creator_uid`, `update_time`, `update_uid`) VALUES (3, 999991, '1', '丹麦蓝罐曲奇饼90g', 'cs://1/image/aW1hZ2UvTVRveU9XUTVOV1E1TXpCaE9ERmhNbUpsTW1JelpUaGpZamRrTUdVMllUZ3hOdw', '', 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fapp%2fuser%2findex.html%3ffromclient%3d1%23%2fgood%2fdetails%2f15133062972693658555%2f11336905126%2f1%3f_k%3dzlbiz#sign_suffix', 20, 0, 9.50, 7.50, '', 2, 2, '2017-12-12 21:15:05.000', NULL, NULL, NULL, NULL);
+INSERT INTO `eh_point_goods` (`id`, `namespace_id`, `number`, `display_name`, `poster_uri`, `poster_url`, `detail_url`, `points`, `sold_amount`, `original_price`, `discount_price`, `point_rule`, `status`, `top_status`, `top_time`, `create_time`, `creator_uid`, `update_time`, `update_uid`) VALUES (2, 999991, '1', '迪乐司马来西亚芝麻酥100g', 'cs://1/image/aW1hZ2UvTVRvNE16UmxOalJqWldVek4yVTRNekJpTlRBNFl6Um1Zak13WXpreVpqUTNOdw', '', 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fapp%2fuser%2findex.html%3ffromclient%3d1%23%2fgood%2fdetails%2f15133062972693658555%2f11807220144%2f1%3f_k%3dzlbiz#sign_suffix', 10, 0, 7.00, 6.00, '', 2, 2, '2017-12-13 21:15:03.000', NULL, NULL, NULL, NULL);
 
 INSERT INTO `eh_point_tutorial_to_point_rule_mappings` (`id`, `namespace_id`, `system_id`, `tutorial_id`, `rule_id`, `description`, `create_time`) VALUES (1, 999991, 84, 1, 4, '', NULL);
 INSERT INTO `eh_point_tutorial_to_point_rule_mappings` (`id`, `namespace_id`, `system_id`, `tutorial_id`, `rule_id`, `description`, `create_time`) VALUES (2, 999991, 84, 1, 9, '', NULL);
@@ -599,6 +613,9 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES 
 (@mp_id:=@mp_id+1, '50100', '0', 41012, '批量导出人员', '0', NOW());
 
+-- 给control_id一个初始值
+update eh_authorizations set control_id = 1 where id = 33;
+
 
 -- 更新action_type
 update eh_service_modules set action_type = 46 WHERE id = 50100 and name = '组织架构';
@@ -613,6 +630,9 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 update eh_reflection_service_module_apps set name = '考勤管理' where name like '%打卡%';
 update eh_reflection_service_module_apps set name = '组织架构' where name like '%通讯录%';
 
+-- 更新多应用标志
+UPDATE `eh_service_modules` SET `multiple_flag`='1' WHERE (`id`='20100');
+
 -- 车辆放行功能菜单位置迁移 add by sw 20171215
 delete from eh_web_menus where id in (20900, 20910, 20920, 20930);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
@@ -624,3 +644,7 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
 	VALUES ('20930', '工作流设置', '20900', NULL, 'react:/working-flow/flow-list/vehicle-release/20900', '0', '2', '/40000/20900/20930', 'park', '303', '20900', '3', NULL, 'module');
 
+-- 物业报修数据清理 add by sw 20171218
+DELETE from eh_pm_tasks where task_category_id not in (SELECT id from eh_categories where parent_id in (6, 9));
+DELETE from eh_pm_task_statistics where task_category_id not in (SELECT id from eh_categories where parent_id in (6, 9));
+DELETE from eh_pm_task_target_statistics where task_category_id not in (SELECT id from eh_categories where parent_id in (6, 9));

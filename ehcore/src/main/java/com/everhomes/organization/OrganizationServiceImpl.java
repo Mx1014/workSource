@@ -6064,6 +6064,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public void deleteOrganizationJobPositionsByPositionIdAndDetails(DeleteOrganizationJobPositionsByPositionIdAndDetailsCommand cmd) {
+        //权限校验
+        cmd.getDetailIds().forEach(detailId ->{
+            Long departmentId = getDepartmentByDetailId(detailId);
+            checkOrganizationpPivilege(departmentId, PrivilegeConstants.DELETE_PERSON);
+        });
 //        1. 删除通用岗位+detailIds所确认的部门岗位条目
         List<OrganizationJobPositionMap> jobPositionMaps = organizationProvider.listOrganizationJobPositionMapsByJobPositionId(cmd.getJobPositionId());
         if (jobPositionMaps != null && jobPositionMaps.size() > 0) {
@@ -14231,7 +14236,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
         Long organizaitonId = getTopEnterpriserIdOfOrganization(orgId);
         Long appId = null;
-        if(null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0){
+        if(null != apps && apps.getServiceModuleApps().size() > 0){
             appId = apps.getServiceModuleApps().get(0).getId();
         }
         if (null != apps) {
