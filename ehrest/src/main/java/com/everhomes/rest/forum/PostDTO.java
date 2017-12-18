@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.user.UserLikeType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -47,7 +48,7 @@ import com.everhomes.util.StringHelper;
  *     <li>attachments: 帖子或评论的附件信息，参见{@link com.everhomes.rest.forum.AttachmentDTO}</li>
  *     <li>assignedFlag: 是否推荐帖，参见{@link com.everhomes.rest.forum.PostAssignedFlag}</li>
  *     <li>forumName: forumName</li>
- *     <li>likeFlag: 是否推荐帖，参见{@link com.everhomes.rest.forum.PostLikeFlag}</li>
+ *     <li>likeFlag: 是否点赞，参见{@link UserLikeType}</li>
  *     <li>favoriteFlag: 是否收藏标记，参见{@link com.everhomes.rest.forum.PostFavoriteFlag}</li>
  *     <li>shareUrl: 分享链接</li>
  *     <li>privateFlag: 帖子是否公开标记，应用场景：发给物业、政府相关部门的帖子默认不公开，由物业、政府相关部门决定是否公开；参考{@link com.everhomes.rest.forum.PostPrivacy}</li>

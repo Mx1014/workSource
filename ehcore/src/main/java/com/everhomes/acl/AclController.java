@@ -383,7 +383,7 @@ public class AclController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse createAuthorizationRelation(@Valid CreateAuthorizationRelationCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.AUTH_RELATION_CREATE);
+//        resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.AUTH_RELATION_CREATE);
         rolePrivilegeService.createAuthorizationRelation(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -399,7 +399,6 @@ public class AclController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse updateAuthorizationRelation(@Valid UpdateAuthorizationRelationCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.AUTH_RELATION_UPDATE);
         rolePrivilegeService.updateAuthorizationRelation(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -415,7 +414,6 @@ public class AclController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse deleteAuthorizationRelation(@Valid DeleteAuthorizationRelationCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.AUTH_RELATION_DELETE);
         rolePrivilegeService.deleteAuthorizationRelation(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

@@ -128,6 +128,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 		targets.add(new Target(EntityType.USER.getCode(), userId));
 
 		//物业超级管理员拿所有菜单
+		// todo 这里要按照域空间配置的模块去拿，下个版本改
 		if(resolver.checkSuperAdmin(userId, organizationId) || null != path){
 			menus = webMenuProvider.listWebMenuByType(WebMenuType.PARK.getCode(), categories, path, null);
 			if(null != menu && menus.size() > 0){
@@ -172,7 +173,10 @@ public class WebMenuServiceImpl implements WebMenuService {
 							break;
 					}
 					if(appDtos != null && appDtos.size() > 0){
-						appIds.addAll(appDtos.stream().map(a-> a.getId()).collect(Collectors.toList()));
+						List<Long> moduleIds_namespace = serviceModuleService.filterByScopes(UserContext.getCurrentNamespaceId(), null, null).stream().map(module ->{
+							return module.getId();
+						}).collect(Collectors.toList());
+						appIds.addAll(appDtos.stream().filter(a-> moduleIds_namespace.contains(a.getModuleId())).map(a-> a.getId()).collect(Collectors.toList()));
 					}
 				}else {
 					appIds.add(r.first());

@@ -13,5 +13,5 @@ public interface PointEventProcessor {
 
     List<PointResultAction> getResultActions(List<PointAction> pointActions, LocalEvent localEvent, PointRule rule, PointSystem pointSystem, PointRuleCategory category);
 
-    List<PointRule> getPointRules(PointSystem pointSystem, LocalEvent localEvent);
+    List<PointRule> getPointRules(PointSystem pointSystem, LocalEvent localEvent, PointEventLog log);
 }

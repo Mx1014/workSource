@@ -148,7 +148,7 @@ public class ForumCommentHandler implements CommentHandler {
         Post parentPost = forumProvider.findPostById(commentPost.getParentPostId());
         LocalEventBus.publish(event -> {
             LocalEventContext context = new LocalEventContext();
-            context.setUid(UserContext.currentUserId());
+            context.setUid(commentPost.getCreatorUid());
             context.setNamespaceId(UserContext.getCurrentNamespaceId());
             event.setContext(context);
 

@@ -593,7 +593,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void exportArchivesContacts(ExportArchivesContactsCommand cmd, HttpServletResponse httpResponse) {
-        organizationService.checkOrganizationpPivilege(cmd.getOrganizationId(), PrivilegeConstants.BATCH_EXPORT_PERSON);
+//        organizationService.checkOrganizationpPivilege(cmd.getOrganizationId(), PrivilegeConstants.BATCH_EXPORT_PERSON);
         ListArchivesContactsCommand listCommand = new ListArchivesContactsCommand();
         listCommand.setOrganizationId(cmd.getOrganizationId());
         listCommand.setKeywords(cmd.getKeywords());
