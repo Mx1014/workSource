@@ -11,9 +11,7 @@ import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.parking.*;
-import com.everhomes.rest.reserve.GetReserveOpenDayAndPriceCommand;
-import com.everhomes.rest.reserve.ReserveOpenDayAndPriceDTO;
-import com.everhomes.rest.reserve.SetReserveOpenDayAndPriceCommand;
+import com.everhomes.rest.reserve.*;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -59,4 +57,59 @@ public class ReserveController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /reserve/getReserveOrderStrategy</b>
+     * <p>获取预订订单策略</p>
+     */
+    @RequestMapping("getReserveOrderStrategy")
+    @RestReturn(value=ReserveOrderStrategyDTO.class)
+    public RestResponse getReserveOrderStrategy(GetReserveOrderStrategyCommand cmd) {
+        //TODO:
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /reserve/setReserveOrderStrategy</b>
+     * <p>设置预订订单策略</p>
+     */
+    @RequestMapping("setReserveOrderStrategy")
+    @RestReturn(value=ReserveOrderStrategyDTO.class)
+    public RestResponse setReserveOrderStrategy(SetReserveOrderStrategyCommand cmd) {
+        //TODO:
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /reserve/getReserveDiscountStrategy</b>
+     * <p>获取内部优惠策略</p>
+     */
+    @RequestMapping("getReserveDiscountStrategy")
+    @RestReturn(value=ReserveDiscountStrategyDTO.class, collection = true)
+    public RestResponse getReserveDiscountStrategy(GetReserveDiscountStrategyCommand cmd) {
+        //TODO:
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /reserve/setReserveDiscountStrategy</b>
+     * <p>设置内部优惠策略</p>
+     */
+    @RequestMapping("setReserveDiscountStrategy")
+    @RestReturn(value=String.class)
+    public RestResponse setReserveDiscountStrategy(SetReserveDiscountStrategyCommand cmd) {
+        //TODO:
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

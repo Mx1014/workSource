@@ -2,6 +2,8 @@ package com.everhomes.rest.reserve;
 
 import com.everhomes.util.StringHelper;
 
+import java.math.BigDecimal;
+
 /**
  * @author sw on 2017/12/18.
  */
@@ -12,6 +14,125 @@ public class SetReserveOpenDayAndPriceCommand {
     private Long ownerId;
     private String resourceType;
     private Long resourceId;
+
+    private Long resourceTypeId;
+    private Long atMostAdvanceTime;
+    private Long atLeastAdvanceTime;
+    private Double dayOpenStartTime;
+    private Double dayOpenEndTime;
+    private Byte holidayOpenFlag;
+    private Byte holidayType;
+    private Byte timeType;
+    private Integer timeUnit;
+    private BigDecimal workdayPrice;
+    private BigDecimal holidayPrice;
+
+    private Byte autoAssign;
+    private Byte multiFlag;
+
+    public Long getResourceTypeId() {
+        return resourceTypeId;
+    }
+
+    public void setResourceTypeId(Long resourceTypeId) {
+        this.resourceTypeId = resourceTypeId;
+    }
+
+    public Long getAtMostAdvanceTime() {
+        return atMostAdvanceTime;
+    }
+
+    public void setAtMostAdvanceTime(Long atMostAdvanceTime) {
+        this.atMostAdvanceTime = atMostAdvanceTime;
+    }
+
+    public Long getAtLeastAdvanceTime() {
+        return atLeastAdvanceTime;
+    }
+
+    public void setAtLeastAdvanceTime(Long atLeastAdvanceTime) {
+        this.atLeastAdvanceTime = atLeastAdvanceTime;
+    }
+
+    public Double getDayOpenStartTime() {
+        return dayOpenStartTime;
+    }
+
+    public void setDayOpenStartTime(Double dayOpenStartTime) {
+        this.dayOpenStartTime = dayOpenStartTime;
+    }
+
+    public Double getDayOpenEndTime() {
+        return dayOpenEndTime;
+    }
+
+    public void setDayOpenEndTime(Double dayOpenEndTime) {
+        this.dayOpenEndTime = dayOpenEndTime;
+    }
+
+    public Byte getHolidayOpenFlag() {
+        return holidayOpenFlag;
+    }
+
+    public void setHolidayOpenFlag(Byte holidayOpenFlag) {
+        this.holidayOpenFlag = holidayOpenFlag;
+    }
+
+    public Byte getHolidayType() {
+        return holidayType;
+    }
+
+    public void setHolidayType(Byte holidayType) {
+        this.holidayType = holidayType;
+    }
+
+    public Byte getTimeType() {
+        return timeType;
+    }
+
+    public void setTimeType(Byte timeType) {
+        this.timeType = timeType;
+    }
+
+    public Integer getTimeUnit() {
+        return timeUnit;
+    }
+
+    public void setTimeUnit(Integer timeUnit) {
+        this.timeUnit = timeUnit;
+    }
+
+    public BigDecimal getWorkdayPrice() {
+        return workdayPrice;
+    }
+
+    public void setWorkdayPrice(BigDecimal workdayPrice) {
+        this.workdayPrice = workdayPrice;
+    }
+
+    public BigDecimal getHolidayPrice() {
+        return holidayPrice;
+    }
+
+    public void setHolidayPrice(BigDecimal holidayPrice) {
+        this.holidayPrice = holidayPrice;
+    }
+
+    public Byte getAutoAssign() {
+        return autoAssign;
+    }
+
+    public void setAutoAssign(Byte autoAssign) {
+        this.autoAssign = autoAssign;
+    }
+
+    public Byte getMultiFlag() {
+        return multiFlag;
+    }
+
+    public void setMultiFlag(Byte multiFlag) {
+        this.multiFlag = multiFlag;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;

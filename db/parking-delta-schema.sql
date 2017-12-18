@@ -5,10 +5,10 @@ CREATE TABLE `eh_reserve_rules` (
   `owner_type` varchar(255) DEFAULT NULL COMMENT 'owner type: community, organization',
   `owner_id` bigint(20) DEFAULT NULL DEFAULT 0 COMMENT 'community id or organization id',
   `resource_type` varchar(255) DEFAULT NULL,
-  `resource_id` bigint(20) NOT NULL DEFAULT 0 COMMENT 'resource id',
+  `resource_type_id` bigint(20) NOT NULL DEFAULT 0 COMMENT 'resource type id',
 
-  `at_most_advance_time` bigint(20) DEFAULT NULL COMMENT '最多提前多少时间预定,存的提前时间的时间戳',
-  `at_least_advance_time` bigint(20) DEFAULT NULL COMMENT '最少提前多少时间预定,存的提前时间的时间戳',
+  `at_most_advance_time` bigint(20) DEFAULT NULL COMMENT '最多提前多少时间预定,存的毫秒',
+  `at_least_advance_time` bigint(20) DEFAULT NULL COMMENT '最少提前多少时间预定,存的毫秒',
 
   `day_open_start_time` double DEFAULT NULL COMMENT '每天开放开始时间',
   `day_open_end_time` double DEFAULT NULL COMMENT '每天开放结束时间',
@@ -30,8 +30,6 @@ CREATE TABLE `eh_reserve_rules` (
 
   `auto_assign` tinyint(4) DEFAULT NULL COMMENT '是否动态分配: 1-是, 0-否',
   `multi_flag` tinyint(4) DEFAULT NULL COMMENT '是否允许预约多个场所: 1-是, 0-否',
-
-  `open_weekday` varchar(7) DEFAULT NULL COMMENT '7位二进制，0000000每一位表示星期7123456',
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -114,7 +112,7 @@ CREATE TABLE `eh_reserve_orders` (
   `owner_type` varchar(255) NOT NULL COMMENT 'owner type: community, organization',
   `owner_id` bigint(20) NOT NULL DEFAULT 0 COMMENT 'community id or organization id',
   `resource_type` varchar(255) DEFAULT NULL,
-  `resource_id` bigint(20) NOT NULL DEFAULT 0 COMMENT 'resource id',
+  `resource_type_id` bigint(20) NOT NULL DEFAULT 0 COMMENT 'resource type id',
   `resource_json` text COMMENT '资源json数据',
 
   `order_no` varchar(20) NOT NULL COMMENT '订单编号',
