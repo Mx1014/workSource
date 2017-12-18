@@ -80,7 +80,7 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 			ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
 			listServiceModuleAppsCommand.setNamespaceId(namespaceId);
 			listServiceModuleAppsCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
-			listServiceModuleAppsCommand.setCustomTag(String.valueOf(task.getTaskCategoryId()));
+			listServiceModuleAppsCommand.setCustomTag(String.valueOf(parentTaskId));
 			ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
 
 			if (apps!=null && apps.getServiceModuleApps().size()>0)

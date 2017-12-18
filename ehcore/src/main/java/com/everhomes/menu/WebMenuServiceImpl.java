@@ -128,6 +128,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 		targets.add(new Target(EntityType.USER.getCode(), userId));
 
 		//物业超级管理员拿所有菜单
+		// todo 这里要按照域空间配置的模块去拿，下个版本改
 		if(resolver.checkSuperAdmin(userId, organizationId) || null != path){
 			menus = webMenuProvider.listWebMenuByType(WebMenuType.PARK.getCode(), categories, path, null);
 			if(null != menu && menus.size() > 0){
