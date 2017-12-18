@@ -38,10 +38,10 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
 
     private final static Random random = new Random();
 
-    @Value("${core.server.id}")
+    @Value("${core.server.id:}")
     private String serverId;
 
-    @Value("#{T(java.util.Arrays).asList(${core.server.list})}")
+    @Value("#{T(java.util.Arrays).asList(${core.server.list:})}")
     private List<String> serverIdList;
 
     private final ReentrantLock lock = new ReentrantLock();
@@ -72,7 +72,9 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (event.getApplicationContext().getParent() == null) {
+        if (event.getApplicationContext().getParent() == null
+                && serverId != null && serverId.trim().length() > 0
+                && serverIdList != null && serverIdList.size() > 0) {
             registerPointRuleCategory();
             initPointRuleCategoryQueue();
             initScheduledExecutorService();

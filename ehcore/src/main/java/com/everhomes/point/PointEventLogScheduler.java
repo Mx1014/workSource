@@ -1,11 +1,15 @@
 package com.everhomes.point;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.bus.LocalEvent;
 import com.everhomes.bus.LocalEventBus;
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.mail.MailHandler;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.point.PointCommonStatus;
 import com.everhomes.rest.point.PointEventLogStatus;
@@ -21,6 +25,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -40,7 +46,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
 
     private final static Random random = new Random();
 
-    @Value("${core.server.id}")
+    @Value("${core.server.id:}")
     private String serverId;
 
     private final transient ReentrantLock lock = new ReentrantLock();
@@ -55,6 +61,9 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
     private List<IGeneralPointEventProcessor> generalProcessors;
 
     private final Map<String, BasePointEventProcessor> processorMap = new HashMap<>();
+
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
     @Autowired
     private PointEventLogProvider pointEventLogProvider;
@@ -85,7 +94,8 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (event.getApplicationContext().getParent() == null) {
+        if (event.getApplicationContext().getParent() == null
+                && serverId != null && serverId.trim().length() > 0) {
             initEventProcessor();
             initScheduledTask();
             initVMShutdownHook();
@@ -154,9 +164,28 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
             }
         } catch (Exception e) {
             LOGGER.error("Process point event log error.", e);
+            sendExceptionMail(e);
         } finally {
             lock.unlock();
         }
+    }
+
+    private void sendExceptionMail(Exception e) {
+        // ------------------------------------------------------------------------
+        String xqt = "xq.tian@zuolin.com";
+        String home = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
+        String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+        MailHandler handler = PlatformContext.getComponent(handlerName);
+        String account = configurationProvider.getValue(0,"mail.smtp.account", "zuolin@zuolin.com");
+
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream();
+             PrintStream stream = new PrintStream(out))
+        {
+            e.printStackTrace(stream);
+            String message = out.toString("UTF-8");
+            handler.sendMail(0, account, xqt, "PointEventLogSchedule error (" + home + ")", message);
+        } catch (Exception ignored) { }
+        // ------------------------------------------------------------------------
     }
 
     private void doProcessGroups() {
