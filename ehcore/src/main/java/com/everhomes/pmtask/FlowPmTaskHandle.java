@@ -83,7 +83,7 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 			listServiceModuleAppsCommand.setCustomTag(String.valueOf(task.getTaskCategoryId()));
 			ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
 
-			if (apps.getServiceModuleApps()!=null && apps.getServiceModuleApps().size()>0)
+			if (apps!=null && apps.getServiceModuleApps()!=null && apps.getServiceModuleApps().size()>0)
 				createFlowCaseCommand.setTitle(apps.getServiceModuleApps().get(0).getName());
 			else
 				createFlowCaseCommand.setTitle(taskCategory.getName());
