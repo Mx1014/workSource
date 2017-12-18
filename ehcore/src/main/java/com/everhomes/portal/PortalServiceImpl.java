@@ -2068,7 +2068,7 @@ public class PortalServiceImpl implements PortalService {
 		moduleApp.setOperatorUid(user.getId());
 
 		ServiceModule serviceModule = null;
-		if(ActionType.fromCode(actionType) == ActionType.OFFICIAL_URL || ActionType.ROUTER == ActionType.fromCode(actionType)){
+		if(ActionType.fromCode(actionType) == ActionType.OFFICIAL_URL || ActionType.ROUTER == ActionType.fromCode(actionType) || ActionType.OFFLINE_WEBAPP  == ActionType.fromCode(actionType)){
 			Set<String> beans = PortalUrlParserBeanUtil.getkeys();
 			Long moduleId = 0L;
 			for (String bean : beans) {
@@ -2083,7 +2083,7 @@ public class PortalServiceImpl implements PortalService {
 					}
 				}
 			}
-		}else if(ActionType.OFFLINE_WEBAPP  == ActionType.fromCode(actionType) || ActionType.THIRDPART_URL  == ActionType.fromCode(actionType) ){
+		}else if(ActionType.THIRDPART_URL  == ActionType.fromCode(actionType) ){
 			return moduleApp;
 		}else{
 			List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModule(actionType);
