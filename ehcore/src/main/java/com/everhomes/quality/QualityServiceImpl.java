@@ -2522,8 +2522,9 @@ public class QualityServiceImpl implements QualityService {
 
         //现在要求有项目分类 去掉dto中targetName为空的 也就是上一步中根据qualityProvider.findStandardById(r.getTargetId());
 		dtos.removeIf((r) -> r.getTargetName() == null);
-
-        ListQualityInspectionLogsResponse response = new ListQualityInspectionLogsResponse();
+		if (dtos.size() < pageSize)
+			nextPageAnchor = null;
+		ListQualityInspectionLogsResponse response = new ListQualityInspectionLogsResponse();
         response.setNextPageAnchor(nextPageAnchor);
         response.setDtos(dtos);
 
@@ -2793,7 +2794,9 @@ public class QualityServiceImpl implements QualityService {
 				newSpecification.setReferId(specification.getId());
 				newSpecification.setCreatorUid(UserContext.current().getUser().getId());
 				// add path for del action
-				newSpecification .setPath("/");
+				newSpecification .setPath(specification.getPath()+"/");
+				newSpecification.setParentId(specification.getParentId());
+				newSpecification.setInspectionType(specification.getInspectionType());
 				qualityProvider.createQualitySpecification(newSpecification);
 				// change newSpecification to sepcification
 				qualityProvider.inactiveQualityInspectionStandardSpecificationMapBySpecificationId(specification.getId());
