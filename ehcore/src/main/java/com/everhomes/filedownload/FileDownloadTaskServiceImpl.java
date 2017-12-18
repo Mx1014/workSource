@@ -62,6 +62,10 @@ public class FileDownloadTaskServiceImpl implements FileDownloadTaskService {
         return response;
     }
 
+    @Override
+    public void cancelTask(CancelTaskCommand cmd) {
+        taskService.cancelTask(cmd.getTaskId());
+    }
 
     @Override
     public String uploadToContenServer(String fileName, OutputStream ops){

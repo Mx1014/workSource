@@ -39,7 +39,7 @@ public class FileDownloadTaskController extends ControllerBase {
     @RequestMapping("cancelTask")
     @RestReturn(value=String.class)
     public RestResponse cancelTask(CancelTaskCommand cmd) {
-        fileDownloadTaskService.cancelTask(cmd.getTaskId());
+        fileDownloadTaskService.cancelTask(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

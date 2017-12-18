@@ -1,5 +1,6 @@
 package com.everhomes.filedownload;
 
+import com.everhomes.rest.filedownload.CancelTaskCommand;
 import com.everhomes.rest.filedownload.ListFileDownloadTasksCommand;
 import com.everhomes.rest.filedownload.ListFileDownloadTasksResponse;
 
@@ -13,6 +14,12 @@ public interface FileDownloadTaskService{
      * @return
      */
     ListFileDownloadTasksResponse listFileDownloadTasks(ListFileDownloadTasksCommand cmd);
+
+    /**
+     * 取消任务
+     * @param cmd 任务进度
+     */
+    void cancelTask(CancelTaskCommand cmd);
 
     /**
      * 上传文件到contenServer
