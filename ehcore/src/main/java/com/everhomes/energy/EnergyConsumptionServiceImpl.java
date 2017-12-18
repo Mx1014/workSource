@@ -1101,14 +1101,15 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         formula.setDisplayExpression(cmd.getExpression());
         meterFormulaProvider.createEnergyMeterFormula(formula);
         if(cmd.getCommunityId() == null) {
-            List<OrganizationCommunity> communities = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
-            if(communities != null && communities.size() > 0) {
+            List<CommunityDTO> communitydtos = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOwnerId());
+//            List<OrganizationCommunity> communities = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+            if(communitydtos != null && communitydtos.size() > 0) {
                 Long uId = UserContext.currentUserId();
-                communities.forEach(community -> {
+                communitydtos.forEach(community -> {
                     EnergyMeterFormulaMap map = new EnergyMeterFormulaMap();
                     map.setOwnerId(cmd.getOwnerId());
                     map.setNamespaceId(cmd.getNamespaceId());
-                    map.setCommunityId(community.getCommunityId());
+                    map.setCommunityId(community.getId());
                     map.setFomularId(formula.getId());
                     map.setCreatorUid(uId);
                     energyMeterFormulaMapProvider.createEnergyMeterFormulaMap(map);
@@ -1174,14 +1175,15 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         meterCategoryProvider.createEnergyMeterCategory(category);
         //全部里面建的自动关联各个项目 energy3.2
         if(cmd.getCommunityId() == null) {
-            List<OrganizationCommunity> communities = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
-            if(communities != null && communities.size() > 0) {
+            List<CommunityDTO> communitydtos = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOwnerId());
+//            List<OrganizationCommunity> communities = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+            if(communitydtos != null && communitydtos.size() > 0) {
                 Long uId = UserContext.currentUserId();
-                communities.forEach(community -> {
+                communitydtos.forEach(community -> {
                     EnergyMeterCategoryMap map = new EnergyMeterCategoryMap();
                     map.setOwnerId(cmd.getOwnerId());
                     map.setNamespaceId(cmd.getNamespaceId());
-                    map.setCommunityId(community.getCommunityId());
+                    map.setCommunityId(community.getId());
                     map.setCategoryId(category.getId());
                     map.setCreatorUid(uId);
                     energyMeterCategoryMapProvider.createEnergyMeterCategoryMap(map);
