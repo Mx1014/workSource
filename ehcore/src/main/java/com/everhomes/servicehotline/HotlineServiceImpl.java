@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import com.everhomes.community.Community;
 import com.everhomes.region.Region;
+import com.everhomes.rest.servicehotline.*;
 import com.everhomes.rest.user.GetUserInfoByIdCommand;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.*;
@@ -28,19 +29,6 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.rest.servicehotline.AddHotlineCommand;
-import com.everhomes.rest.servicehotline.DeleteHotlineCommand;
-import com.everhomes.rest.servicehotline.GetHotlineListCommand;
-import com.everhomes.rest.servicehotline.GetHotlineListResponse;
-import com.everhomes.rest.servicehotline.GetHotlineSubjectCommand;
-import com.everhomes.rest.servicehotline.GetHotlineSubjectResponse;
-import com.everhomes.rest.servicehotline.HotlineDTO;
-import com.everhomes.rest.servicehotline.HotlineSubject;
-import com.everhomes.rest.servicehotline.LayoutType;
-import com.everhomes.rest.servicehotline.ServiceType;
-import com.everhomes.rest.servicehotline.SetHotlineSubjectCommand;
-import com.everhomes.rest.servicehotline.UpdateHotlineCommand;
-import com.everhomes.rest.servicehotline.UpdateHotlinesCommand;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.techpark.servicehotline.HotlineService;
@@ -224,8 +212,8 @@ public class HotlineServiceImpl implements HotlineService {
 				});
 		if (tmp!=null && tmp.size()>0)
 			throw RuntimeErrorException
-					.errorWith(ErrorCodes.SCOPE_GENERAL,
-							ErrorCodes.ERROR_INVALID_PARAMETER,
+					.errorWith(HotlineErrorCode.SCOPE,
+							HotlineErrorCode.ERROR_DUPLICATE_PHONE,
 							"hotline already exists");
 
 		hotline.setCreateTime(new Timestamp( DateHelper.currentGMTTime().getTime()));
@@ -262,6 +250,35 @@ public class HotlineServiceImpl implements HotlineService {
 							ErrorCodes.ERROR_INVALID_PARAMETER,
 							"Invalid paramter id can not be null or hotline can not found");
 		}
+
+		//查询是否有重复的
+		List<ServiceHotline> tmp = this.serviceHotlinesProvider.queryServiceHotlines(null,
+				Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
+
+					@Override
+					public SelectQuery<? extends Record> buildCondition(
+							ListingLocator locator,
+							SelectQuery<? extends Record> query) {
+						query.addConditions(Tables.EH_SERVICE_HOTLINES.OWNER_TYPE
+								.eq(cmd.getOwnerType()));
+						query.addConditions(Tables.EH_SERVICE_HOTLINES.OWNER_ID
+								.eq(cmd.getOwnerId()));
+						query.addConditions(Tables.EH_SERVICE_HOTLINES.NAMESPACE_ID
+								.eq(UserContext.getCurrentNamespaceId()));
+						query.addConditions(Tables.EH_SERVICE_HOTLINES.SERVICE_TYPE
+								.eq(cmd.getServiceType().intValue()));
+						query.addConditions(Tables.EH_SERVICE_HOTLINES.CONTACT
+								.eq(cmd.getContact()));
+						return query;
+					}
+				});
+		tmp = tmp.stream().filter(p->p.getId()!=cmd.getId()).collect(Collectors.toList());//排除自己
+		if (tmp!=null && tmp.size()>0)
+			throw RuntimeErrorException
+					.errorWith(HotlineErrorCode.SCOPE,
+							HotlineErrorCode.ERROR_DUPLICATE_PHONE,
+							"hotline already exists");
+
 		ServiceHotline hotline = ConvertHelper.convert(cmd,
 				ServiceHotline.class);
 		hotline.setNamespaceId(UserContext.getCurrentNamespaceId());
