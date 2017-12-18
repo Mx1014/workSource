@@ -205,7 +205,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
             EquipmentInspectionStandards standard = equipmentProvider.findStandardById(id);
             if (cmd.getTargetId() != null) {
                 //权限细化增加   项目的增加上公共标准  过滤已经修改过的模板
-                if (standard.getReferId() != null && standard.getReferId != 0L) {
+                if (standard.getReferId() != null && standard.getReferId() != 0L) {
                     if (maps != null && maps.size() > 0)
                         maps.removeIf((s) -> Objects.equals(s.getModelId(), standard.getReferId()));
                 }
