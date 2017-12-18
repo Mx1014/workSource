@@ -11,8 +11,9 @@ UPDATE eh_forum_posts SET module_type = 3 WHERE category_id = 1003;
 SET @id = (SELECT MAX(id) FROM eh_configurations);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@id := @id + 1), 'my.publish.flag', 0, 'my.publish.flag 0-hide, 1-display', '999973', NULL);
 
--- 更新banner的覆盖策略 add by yanjun 20171211
-UPDATE eh_banners SET apply_policy = 0 WHERE apply_policy = 3;
+-- 回滚banner
+-- -- 更新banner的覆盖策略 add by yanjun 20171211
+-- UPDATE eh_banners SET apply_policy = 0 WHERE apply_policy = 3;
 
 -- merge from forum2.6 by yanjun 201712121010 end
 
