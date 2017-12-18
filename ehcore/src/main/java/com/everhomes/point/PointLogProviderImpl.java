@@ -138,13 +138,13 @@ public class PointLogProviderImpl implements PointLogProvider {
     }
 
     @Override
-    public Integer countPointLog(Integer namespaceId, Long systemId, Long uid, String eventName, Long createTime) {
+    public Integer countPointLog(Integer namespaceId, Long systemId, Long uid, Long ruleId, Long createTime) {
         com.everhomes.server.schema.tables.EhPointLogs t = Tables.EH_POINT_LOGS;
         SelectQuery<EhPointLogsRecord> query = context().selectFrom(t).getQuery();
         query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(t.SYSTEM_ID.eq(systemId));
         query.addConditions(t.TARGET_UID.eq(uid));
-        query.addConditions(t.EVENT_NAME.startsWith(eventName));
+        query.addConditions(t.RULE_ID.eq(ruleId));
         if (createTime != null) {
             query.addConditions(t.CREATE_TIME.gt(new Timestamp(createTime)));
         }

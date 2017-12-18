@@ -16,11 +16,9 @@ public interface PointRuleToEventMappingProvider {
 
 	PointRuleToEventMapping findById(Long id);
 
-    List<PointRuleToEventMapping> listByPointRule(Long systemId, Long pointRuleId);
+    List<PointRuleToEventMapping> listByPointRule(Long pointRuleId);
 
     void createPointRuleToEventMappings(List<PointRuleToEventMapping> mappings);
 
-    List<PointRuleToEventMapping> listByEventName(Integer namespaceId, Long systemId, String eventName);
-
-    void deleteBySystemId(Long systemId);
+    List<PointRuleToEventMapping> listByEventName(String eventName);
 }
