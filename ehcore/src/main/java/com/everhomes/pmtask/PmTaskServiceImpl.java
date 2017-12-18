@@ -770,9 +770,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 					"Current User have no legal power");
 		}
 		
-//		category.setStatus(CategoryAdminStatus.INACTIVE.getCode());
-//		categoryProvider.updateCategory(category);
-		categoryProvider.deleteCategory(category);
+		category.setStatus(CategoryAdminStatus.INACTIVE.getCode());
+		categoryProvider.updateCategory(category);
 	}
 
 	@Override
@@ -1695,6 +1694,18 @@ public class PmTaskServiceImpl implements PmTaskService {
 //		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_TASK_STATISTICS_LIST);
 		SearchTaskCategoryStatisticsResponse response = new SearchTaskCategoryStatisticsResponse();
 
+		Integer namespaceId = cmd.getNamespaceId();
+
+		//检查多入口应用权限
+		if(!checkAppPrivilege(namespaceId, cmd.getTaskCategoryId(), cmd.getCurrentOrgId(), EntityType.COMMUNITY.getCode(),
+				cmd.getCommunityId(), PrivilegeConstants.PMTASK_TASK_STATISTICS_LIST)){
+			LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
+							" privilege={}", namespaceId, cmd.getTaskCategoryId(), cmd.getCurrentOrgId(), EntityType.COMMUNITY.getCode(),
+					cmd.getCommunityId(), PrivilegeConstants.PMTASK_TASK_STATISTICS_LIST);
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+					"check app privilege error");
+		}
+
 		List<TaskCategoryStatisticsDTO> list = queryTaskCategoryStatistics(cmd);
 		if(list.size() > 0){
     		response.setRequests(list);
@@ -1798,11 +1809,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public TaskCategoryStatisticsDTO getTaskCategoryStatistics(SearchTaskStatisticsCommand cmd) {
-		if(cmd.getCommunityId() == null) {
-			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_ALL_TASK_STATISTICS_LIST);
-		} else {
-			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_TASK_STATISTICS_LIST);
-		}
+		//TODO:此处 目前统计所有服务类型，没有区分多入口，校验权限暂时屏蔽，后面需要根据多入口来统计，在校验权限
+//		if(cmd.getCommunityId() == null) {
+//			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_ALL_TASK_STATISTICS_LIST);
+//		} else {
+//			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_TASK_STATISTICS_LIST);
+//		}
 		TaskCategoryStatisticsDTO dto = new TaskCategoryStatisticsDTO();
 
 		Integer namespaceId = cmd.getNamespaceId();
