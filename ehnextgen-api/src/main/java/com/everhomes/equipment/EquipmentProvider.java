@@ -143,21 +143,16 @@ public interface EquipmentProvider {
 
 	List<EquipmentInspectionTasks> listDelayTasks(Long inspectionCategoryId, List<Long> standards, String targetType, Long targetId, Integer offset, Integer pageSize, Byte adminFlag, Timestamp startTime);
 
-    void createEquipmentModleCommunityMap(EquipmentModleCommunityMap map);
+	void createEquipmentModelCommunityMap(EquipmentModleCommunityMap map);
 
-    List<EquipmentModleCommunityMap> getModuleCommunityMap(Long targetId, byte modelType);
+	List<EquipmentModleCommunityMap> listModelCommunityMapByCommunityId(Long targetId, byte modelType);
 
-    void deleteStandardModleCommunityMap(Long standardId ,Long targetId);
+	void deleteModelCommunityMapByModelIdAndCommunityId(Long modelId, Long targetId, byte modelType);
 
-    void deleteTemplateModleCommunityMap(Long templateId , Long targetId);
+	List<Integer> listDistinctNameSpace();
 
-	List<Integer> getDistinctNameSpace();
+	List<Long> listModelCommunityMapByModelId(Long modelId, byte modelType);
 
-	List<Long> getModuleCommunityMapByStandardId(Long standardId);
+	void deleteModelCommunityMapByModelId(Long modelId, byte modelType);
 
-	List<Long> getModuleCommunityMapByTemplateId(Long id);
-
-	void deleteStandardModleCommunityMapBystandardId(Long id);
-
-	void deleteTemplateModleCommunityMapByTemplateId(Long id);
 }

@@ -1,8 +1,7 @@
 -- 物业巡检权限细化 start  by jiarui
-CREATE TABLE `eh_equipment_modle_community_map` (
+CREATE TABLE `eh_equipment_model_community_map` (
   `id`          BIGINT(20) NOT NULL,
-  `standard_id` BIGINT(20) DEFAULT 0 NOT NULL,
-  `template_id` BIGINT(20) DEFAULT 0 NOT NULL,
+  `model_id` BIGINT(20) DEFAULT 0 NOT NULL,
   `model_type`  tinyint(4) NOT NULL DEFAULT 0 COMMENT '0:standard 1:template',
   `target_type` VARCHAR(255) DEFAULT NULL,
   `target_id`   BIGINT(20)   DEFAULT NULL COMMENT 'community id ',

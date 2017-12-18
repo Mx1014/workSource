@@ -200,19 +200,20 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         }
 
         List<EquipmentStandardsDTO> eqStandards = new ArrayList<EquipmentStandardsDTO>();
-        List <EquipmentModleCommunityMap> maps = equipmentProvider.getModuleCommunityMap(cmd.getTargetId(),EquipmentModelType.STANDARD.getCode());
+        List <EquipmentModleCommunityMap> maps = equipmentProvider.listModelCommunityMapByCommunityId(cmd.getTargetId(),EquipmentModelType.STANDARD.getCode());
         for(Long id : ids) {
             EquipmentInspectionStandards standard = equipmentProvider.findStandardById(id);
             if (cmd.getTargetId() != null) {
                 //权限细化增加   项目的增加上公共标准  过滤已经修改过的模板
-                if (standard.getReferId() != null) {
-                    if (maps!=null && maps.size()>0)
-                        maps.removeIf((s) -> Objects.equals(s.getStandardId(), standard.getReferId()));
+                if (standard.getReferId() != null && standard.getReferId != 0L) {
+                    if (maps != null && maps.size() > 0)
+                        maps.removeIf((s) -> Objects.equals(s.getModelId(), standard.getReferId()));
                 }
             } else {
                 //全部里面
                 if (standard != null) {
-                    standard.setCommunities(equipmentProvider.getModuleCommunityMapByStandardId(standard.getId()));
+                    if(standard.getTargetId() == 0L)
+                    standard.setCommunities(equipmentProvider.listModelCommunityMapByModelId(standard.getId(),EquipmentModelType.STANDARD.getCode()));
                     Community community = communityProvider.findCommunityById(standard.getTargetId());
                     if(community!=null)
                     standard.setTargetName(community.getName());
@@ -233,7 +234,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         //过滤剩下的maps 增加到项目中
         if (maps != null && maps.size() > 0) {
             for (EquipmentModleCommunityMap map : maps) {
-                EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
+                EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getModelId());
                 if (standard != null) {
                     processRepeatSetting(standard);
                     EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
@@ -259,13 +260,14 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
             flag = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(),
                     orgId, orgId, privilegeId, apps.getServiceModuleApps().get(0).getId(), null, communityId);
+            if (!flag) {
+                LOGGER.error("Permission is denied, namespaceId={}, orgId={}, communityId={}," +
+                        " privilege={}", UserContext.getCurrentNamespaceId(), orgId, communityId, privilegeId);
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                        "Insufficient privilege");
+            }
         }
-        if (!flag) {
-            LOGGER.error("Permission is denied, namespaceId={}, orgId={}, communityId={}," +
-                    " privilege={}", UserContext.getCurrentNamespaceId(), orgId, communityId, privilegeId);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                    "Insufficient privilege");
-        }
+
     }
 
 	private void processRepeatSetting(EquipmentInspectionStandards standard) {
