@@ -20,11 +20,6 @@ ALTER TABLE `eh_equipment_inspection_templates`
 -- 物业巡检权限细化 start  by jiarui
 
 
-ALTER TABLE `eh_equipment_inspection_templates`
-  ADD COLUMN `target_type` VARCHAR(32) NOT NULL DEFAULT '',
-  ADD COLUMN `target_id` BIGINT(20) NOT NULL DEFAULT 0 ;
--- 物业巡检权限细化 end  by  jiarui
-
 -- merge from forum2.6 by yanjun 201712121010 start
 
 -- added by janson
@@ -137,10 +132,11 @@ CREATE TABLE `eh_customer_accounts` (
   `branch_name` VARCHAR(128) COMMENT '开户网点',
   `account_holder` VARCHAR(128) COMMENT '开户人',
   `account_number`  VARCHAR(128) COMMENT '账号',
-  `account_number_type` VARCHAR(128) COMMENT '账号类型',
+  `account_number_type_id` BIGINT COMMENT '账号类型',
   `branch_province` VARCHAR(128) COMMENT '开户行所在省',
   `branch_city` VARCHAR(128) COMMENT '开户行所在市',
   `account_type_id` BIGINT COMMENT '账户类型 refer to the id of eh_var_field_items',
+  `contract_id` BIGINT COMMENT '合同 refer to the id of eh_contracts',
   `memo` VARCHAR(128) COMMENT '备注',
   `status` TINYINT NOT NULL DEFAULT 2,
   `create_uid` BIGINT NOT NULL DEFAULT 0,
@@ -236,6 +232,9 @@ ALTER TABLE eh_lease_issuers ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
 ALTER TABLE eh_lease_form_requests ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
 ALTER TABLE eh_lease_configs ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
 ALTER TABLE eh_lease_buildings ADD COLUMN `category_id` bigint(20) DEFAULT NULL;
+ALTER TABLE eh_lease_buildings DROP INDEX u_eh_community_id_name;
+ALTER TABLE eh_enterprise_op_requests DROP apply_type;
+
 
 -- 用户打印机映射表，by dengs,2017/11/12
 -- DROP TABLE IF EXISTS `eh_siyin_user_printer_mappings`;
@@ -253,6 +252,8 @@ CREATE TABLE `eh_siyin_user_printer_mappings` (
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 积分 add by xq.tian  2017/12/14
 
 -- 积分系统
 -- DROP TABLE IF EXISTS `eh_point_systems`;
@@ -307,7 +308,6 @@ CREATE TABLE `eh_point_rule_categories` (
 CREATE TABLE `eh_point_rules` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `system_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_systems id',
   `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rule_categories id',
   `module_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_service_modules id',
   `display_name` VARCHAR(64) NOT NULL,
@@ -326,16 +326,34 @@ CREATE TABLE `eh_point_rules` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
--- 积分规则
--- DROP TABLE IF EXISTS `eh_point_rule_to_event_mappings`;
-CREATE TABLE `eh_point_rule_to_event_mappings` (
+-- 积分规则配置表
+DROP TABLE IF EXISTS `eh_point_rule_configs`;
+CREATE TABLE `eh_point_rule_configs` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `system_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_systems id',
   `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rule_categories id',
   `rule_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rules id',
+  `description` VARCHAR(64) NOT NULL,
+  `points` BIGINT NOT NULL DEFAULT 0,
+  `limit_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: times per day, 2: times',
+  `limit_data` TEXT,
+  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: disabled, 2: enabled',
+  `create_time` DATETIME(3),
+  `creator_uid` BIGINT,
+  `update_time` DATETIME(3),
+  `update_uid` BIGINT,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 积分规则
+-- DROP TABLE IF EXISTS `eh_point_rule_to_event_mappings`;
+CREATE TABLE `eh_point_rule_to_event_mappings` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rule_categories id',
+  `rule_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rules id',
   `event_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'event name',
-  #   `binding_event_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'binding event name',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -344,7 +362,6 @@ CREATE TABLE `eh_point_rule_to_event_mappings` (
 CREATE TABLE `eh_point_actions` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `system_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_systems id',
   `action_type` VARCHAR(64),
   `owner_type` VARCHAR(64),
   `owner_id` BIGINT NOT NULL DEFAULT 0,
@@ -449,6 +466,7 @@ CREATE TABLE `eh_point_event_logs` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rule_categories id',
   `event_name` VARCHAR(128),
+  `subscription_path` VARCHAR(128),
   `event_json` TEXT,
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: waiting for process, 2: processing, 3: processed',
   `create_time` DATETIME(3),
