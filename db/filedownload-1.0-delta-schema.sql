@@ -1,5 +1,5 @@
 -- 文件下载任务 add by yanjun 20171207
-CREATE TABLE `eh_jobs` (
+CREATE TABLE `eh_tasks` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) DEFAULT NULL,
   `community_id` bigint(20) DEFAULT NULL,
