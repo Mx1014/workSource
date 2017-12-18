@@ -1,10 +1,12 @@
 
 CREATE TABLE `eh_reserve_rules` (
   `id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'id',
-  `namespace_id` int(11) DEFAULT NULL COMMENT '域空间',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
   `owner_type` varchar(255) DEFAULT NULL COMMENT 'owner type: community, organization',
-  `owner_id` bigint(20) DEFAULT NULL COMMENT 'community id or organization id',
-  `resource_type_id` bigint(20) DEFAULT NULL COMMENT 'resource type id',
+  `owner_id` bigint(20) DEFAULT NULL DEFAULT 0 COMMENT 'community id or organization id',
+  `resource_type` varchar(255) DEFAULT NULL,
+  `resource_id` bigint(20) NOT NULL DEFAULT 0 COMMENT 'resource id',
+
   `at_most_advance_time` bigint(20) DEFAULT NULL COMMENT '最多提前多少时间预定,存的提前时间的时间戳',
   `at_least_advance_time` bigint(20) DEFAULT NULL COMMENT '最少提前多少时间预定,存的提前时间的时间戳',
 
@@ -38,6 +40,7 @@ CREATE TABLE `eh_reserve_discount_users` (
   `id` bigint(20) NOT NULL DEFAULT '0',
   `owner_type` varchar(255) DEFAULT NULL COMMENT '"default_rule","resource_rule"',
   `owner_id` bigint(20) DEFAULT NULL,
+  `user_type` tinyint(4) DEFAULT NULL,
   `user_str` text COMMENT '存取用户信息，以逗号隔开 域空间-手机号',
   `discount` double DEFAULT NULL COMMENT '折扣',
   `creator_uid` bigint(20) NOT NULL DEFAULT '0',
@@ -107,14 +110,14 @@ CREATE TABLE `eh_parking_space_logs` (
 
 CREATE TABLE `eh_reserve_orders` (
   `id` bigint(20) NOT NULL COMMENT 'id',
-  `namespace_id` int(11) DEFAULT NULL COMMENT '域空间',
-  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
-  `owner_id` bigint(20) NOT NULL DEFAULT '0',
-  `order_no` varchar(20) NOT NULL COMMENT '订单编号',
-
-  `resource_type` tinyint(4) DEFAULT NULL,
-  `reserve_resource_id` bigint(20) NOT NULL COMMENT 'resource id',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_type` varchar(255) NOT NULL COMMENT 'owner type: community, organization',
+  `owner_id` bigint(20) NOT NULL DEFAULT 0 COMMENT 'community id or organization id',
+  `resource_type` varchar(255) DEFAULT NULL,
+  `resource_id` bigint(20) NOT NULL DEFAULT 0 COMMENT 'resource id',
   `resource_json` text COMMENT '资源json数据',
+
+  `order_no` varchar(20) NOT NULL COMMENT '订单编号',
 
 --  `reserve_date` date DEFAULT NULL COMMENT '使用日期',
   `reserve_start_time` datetime DEFAULT NULL COMMENT '预订开始时间',
