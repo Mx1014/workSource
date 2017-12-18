@@ -8,9 +8,9 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhJobsDao;
-import com.everhomes.server.schema.tables.pojos.EhJobs;
-import com.everhomes.server.schema.tables.records.EhJobsRecord;
+import com.everhomes.server.schema.tables.daos.EhTasksDao;
+import com.everhomes.server.schema.tables.pojos.EhTasks;
+import com.everhomes.server.schema.tables.records.EhTasksRecord;
 import com.everhomes.util.ConvertHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 @Component
-public class JobProviderImpl implements JobProvider {
+public class TaskProviderImpl implements TaskProvider {
 
     @Autowired
     private SequenceProvider sequenceProvider;
@@ -29,72 +29,72 @@ public class JobProviderImpl implements JobProvider {
     private DbProvider dbProvider;
 
     @Override
-    public void createJob(Job job) {
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhJobs.class));
+    public void createTask(Task job) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhTasks.class));
         job.setId(id);
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        EhJobsDao dao = new EhJobsDao(context.configuration());
+        EhTasksDao dao = new EhTasksDao(context.configuration());
         dao.insert(job);
     }
 
     @Override
-    public void updateJob(Job job) {
+    public void updateTask(Task job) {
         assert(job.getId() != null);
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        EhJobsDao dao = new EhJobsDao(context.configuration());
+        EhTasksDao dao = new EhTasksDao(context.configuration());
         dao.update(job);
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhJobs.class, job.getId());
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhTasks.class, job.getId());
     }
 
 
     @Override
-    public Job findById(Long id) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhJobs.class, id));
-        EhJobsDao dao = new EhJobsDao(context.configuration());
-        EhJobs result = dao.findById(id);
+    public Task findById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhTasks.class, id));
+        EhTasksDao dao = new EhTasksDao(context.configuration());
+        EhTasks result = dao.findById(id);
         if (result == null) {
             return null;
         }
-        return ConvertHelper.convert(result, Job.class);
+        return ConvertHelper.convert(result, Task.class);
     }
 
     @Override
-    public List<Job> listJobs(Integer namespaceId, Long communityId, Long orgId, Long userId, Byte type, Byte status, Long pageAnchor, int pageSize) {
+    public List<Task> listTask(Integer namespaceId, Long communityId, Long orgId, Long userId, Byte type, Byte status, Long pageAnchor, int pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhJobsRecord> query = context.selectQuery(Tables.EH_JOBS);
+        SelectQuery<EhTasksRecord> query = context.selectQuery(Tables.EH_TASKS);
 
         if(namespaceId != null){
-            query.addConditions(Tables.EH_JOBS.NAMESPACE_ID.eq(namespaceId));
+            query.addConditions(Tables.EH_TASKS.NAMESPACE_ID.eq(namespaceId));
         }
 
         if(communityId != null){
-            query.addConditions(Tables.EH_JOBS.COMMUNITY_ID.eq(communityId));
+            query.addConditions(Tables.EH_TASKS.COMMUNITY_ID.eq(communityId));
         }
 
         if(orgId != null){
-            query.addConditions(Tables.EH_JOBS.ORG_ID.eq(orgId));
+            query.addConditions(Tables.EH_TASKS.ORG_ID.eq(orgId));
         }
 
         if(userId != null){
-            query.addConditions(Tables.EH_JOBS.USER_ID.eq(userId));
+            query.addConditions(Tables.EH_TASKS.USER_ID.eq(userId));
         }
 
         if(type != null){
-            query.addConditions(Tables.EH_JOBS.TYPE.eq(type));
+            query.addConditions(Tables.EH_TASKS.TYPE.eq(type));
         }
 
         if(status != null){
-            query.addConditions(Tables.EH_JOBS.STATUS.eq(status));
+            query.addConditions(Tables.EH_TASKS.STATUS.eq(status));
         }
 
-        query.addConditions(Tables.EH_JOBS.ID.le(pageAnchor));
-        query.addOrderBy(Tables.EH_JOBS.ID.desc());
+        query.addConditions(Tables.EH_TASKS.ID.le(pageAnchor));
+        query.addOrderBy(Tables.EH_TASKS.ID.desc());
         query.addLimit(pageSize);
 
-        List<Job> result = new ArrayList<>();
+        List<Task> result = new ArrayList<>();
         query.fetch().map((r) -> {
-            result.add(ConvertHelper.convert(r, Job.class));
+            result.add(ConvertHelper.convert(r, Task.class));
             return null;
         });
 

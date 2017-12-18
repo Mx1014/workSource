@@ -11,13 +11,13 @@ import javax.validation.constraints.NotNull;
  *     <li>pageSize: 每页的数量</li>
  * </ul>
  */
-public class ListFileDownloadJobsCommand {
+public class ListFileDownloadTasksCommand {
 
     private Long pageAnchor;
 
     private Integer pageSize;
 
-    public ListFileDownloadJobsCommand() {
+    public ListFileDownloadTasksCommand() {
     }
 
     public Long getPageAnchor() {

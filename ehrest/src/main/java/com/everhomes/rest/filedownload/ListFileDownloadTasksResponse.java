@@ -9,15 +9,15 @@ import java.util.List;
 /**
  * <ul>
  *     <li>nextPageAnchor: nextPageAnchor</li>
- *     <li>dtos: dtos {@link com.everhomes.rest.filedownload.FileDownloadJobDTO}</li>
+ *     <li>dtos: dtos {@link FileDownloadTaskDTO}</li>
  * </ul>
  */
-public class ListFileDownloadJobsResponse {
+public class ListFileDownloadTasksResponse {
 
     private Long nextPageAnchor;
 
-    @ItemType(FileDownloadJobDTO.class)
-    private List<FileDownloadJobDTO> dtos;
+    @ItemType(FileDownloadTaskDTO.class)
+    private List<FileDownloadTaskDTO> dtos;
 
     public Long getNextPageAnchor() {
         return nextPageAnchor;
@@ -27,11 +27,11 @@ public class ListFileDownloadJobsResponse {
         this.nextPageAnchor = nextPageAnchor;
     }
 
-    public List<FileDownloadJobDTO> getDtos() {
+    public List<FileDownloadTaskDTO> getDtos() {
         return dtos;
     }
 
-    public void setDtos(List<FileDownloadJobDTO> dtos) {
+    public void setDtos(List<FileDownloadTaskDTO> dtos) {
         this.dtos = dtos;
     }
 

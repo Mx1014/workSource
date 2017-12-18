@@ -5,19 +5,19 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>jobId: jobId</li>
+ *     <li>taskId: taskId</li>
  * </ul>
  */
-public class CancelJobCommand {
+public class CancelTaskCommand {
 
-    private Long jobId;
+    private Long taskId;
 
-    public Long getJobId() {
-        return jobId;
+    public Long getTaskId() {
+        return taskId;
     }
 
-    public void setJobId(Long jobId) {
-        this.jobId = jobId;
+    public void setTaskId(Long taskId) {
+        this.taskId = taskId;
     }
 
     @Override

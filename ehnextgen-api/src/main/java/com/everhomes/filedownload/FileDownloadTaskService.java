@@ -1,19 +1,18 @@
 package com.everhomes.filedownload;
 
-import com.everhomes.rest.filedownload.JobStatus;
-import com.everhomes.rest.filedownload.ListFileDownloadJobsCommand;
-import com.everhomes.rest.filedownload.ListFileDownloadJobsResponse;
+import com.everhomes.rest.filedownload.ListFileDownloadTasksCommand;
+import com.everhomes.rest.filedownload.ListFileDownloadTasksResponse;
 
 import java.io.OutputStream;
 
-public interface FileDownloadService extends JobService{
+public interface FileDownloadTaskService extends TaskService {
 
     /**
      * 管理后台查询下载任务记录
      * @param cmd
      * @return
      */
-    ListFileDownloadJobsResponse listFileDownloadJobs(ListFileDownloadJobsCommand cmd);
+    ListFileDownloadTasksResponse listFileDownloadTasks(ListFileDownloadTasksCommand cmd);
 
     /**
      * 上传文件到contenServer

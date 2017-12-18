@@ -7,13 +7,13 @@ package com.everhomes.rest.filedownload;
  *     <li>repeat((byte) 2): 可重复执行</li>
  * </ul>
  */
-public enum JobRepeatFlag {
+public enum TaskRepeatFlag {
 
     NO((byte) 0), rate_repeat((byte) 1), repeat((byte) 2);
 
     private Byte core;
 
-    private JobRepeatFlag(Byte core) {
+    private TaskRepeatFlag(Byte core) {
         this.core = core;
     }
 
@@ -21,10 +21,10 @@ public enum JobRepeatFlag {
         return core;
     }
 
-    public static JobRepeatFlag fromName(Byte core) {
+    public static TaskRepeatFlag fromName(Byte core) {
         if (core != null) {
-            JobRepeatFlag[] values = JobRepeatFlag.values();
-            for (JobRepeatFlag value : values) {
+            TaskRepeatFlag[] values = TaskRepeatFlag.values();
+            for (TaskRepeatFlag value : values) {
                 if (value.equals(core)) {
                     return value;
                 }

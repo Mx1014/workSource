@@ -1,11 +1,7 @@
 package com.everhomes.scheduler;
 
-import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.filedownload.*;
-import com.everhomes.rest.contentserver.UploadCsFileResponse;
-import com.everhomes.rest.filedownload.JobStatus;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.rest.filedownload.TaskStatus;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.quartz.JobDataMap;
@@ -17,21 +13,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Map;
 
 import static java.lang.Class.forName;
 
 
 @Component
-public class CenterScheduleJob extends QuartzJobBean {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CenterScheduleJob.class);
+public class TaskScheduleJob extends QuartzJobBean {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskScheduleJob.class);
 
     @Autowired
-    JobService jobService;
+    TaskService taskService;
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
@@ -45,102 +37,64 @@ public class CenterScheduleJob extends QuartzJobBean {
         try {
 
             //1、获取业务实现类
-            JobHandler handler = null;
+            TaskHandler handler = null;
             try {
                 Class c1 = forName(jobClass);
-                handler = (FileDownloadHandler) c1.newInstance();
+                handler = (FileDownloadTaskHandler) c1.newInstance();
             }catch (Exception ex){
-                jobService.updateJobStatus(jobId, JobStatus.FAIL.getCode(),"get JobHandler implements class fail.");
+                taskService.updateTaskStatus(jobId, TaskStatus.FAIL.getCode(),"get TaskHandler implements class fail.");
                 ex.printStackTrace();
                 throw ex;
             }
 
             //2、更新任务为执行状态
-            jobService.updateJobStatus(jobId, JobStatus.RUNNING.getCode(), null);
+            taskService.updateTaskStatus(jobId, TaskStatus.RUNNING.getCode(), null);
 
-            //3、启动更新进度进程
-            Thread rateThread = null;
-            try {
-                rateThread = getUpdateRateThread(handler, jobId);
-                rateThread.start();
-            }catch (Exception ex){
-                ex.printStackTrace();
-            }
-
-            //4、执行前置方法
+            //3、执行前置方法
             try{
-                handler.beforeRun(params);
+                handler.beforeExecute(params);
             }catch (Exception ex){
-                jobService.updateJobStatus(jobId, JobStatus.FAIL.getCode(),"excute beforeRun method fail.");
+                taskService.updateTaskStatus(jobId, TaskStatus.FAIL.getCode(),"excute beforeExecute method fail.");
                 ex.printStackTrace();
                 throw ex;
             }
 
-            //5、执行业务方法
+            //4、执行业务方法
             try {
-                handler.run(params);
+                handler.execute(params);
             }catch (Exception ex){
-                jobService.updateJobStatus(jobId, JobStatus.FAIL.getCode(), "excute run method fail.");
+                taskService.updateTaskStatus(jobId, TaskStatus.FAIL.getCode(), "excute execute method fail.");
                 ex.printStackTrace();
                 throw ex;
             }
 
-            //6、执行commit方法
+            //5、执行commit方法
             try{
                 handler.commit(params);
             }catch (Exception ex){
-                jobService.updateJobStatus(jobId, JobStatus.FAIL.getCode(),"excute commit method fail.");
+                taskService.updateTaskStatus(jobId, TaskStatus.FAIL.getCode(),"excute commit method fail.");
                 ex.printStackTrace();
                 throw ex;
             }
 
-            //7、执行后置方法
+            //6、执行后置方法
             try{
-                handler.afterRun(params);
+                handler.afterExecute(params);
             }catch (Exception ex){
-                jobService.updateJobStatus(jobId, JobStatus.FAIL.getCode(),"excute afterRun method fail.");
+                taskService.updateTaskStatus(jobId, TaskStatus.FAIL.getCode(),"excute afterExecute method fail.");
                 ex.printStackTrace();
                 throw ex;
             }
 
-            //8、终止更新进度进程
-            try {
-                rateThread.interrupt();
-            }catch (Exception ex){
-                ex.printStackTrace();
-            }
-
-            //9、更新任务状态为完成
-            jobService.updateJobStatus(jobId, JobStatus.SUCCESS.getCode(),null);
+            //7、更新任务状态为完成
+            taskService.updateTaskStatus(jobId, TaskStatus.SUCCESS.getCode(),null);
 
 
         } catch (Exception e) {
             //1、更新任务状态为失败
-            jobService.updateJobStatus(jobId, JobStatus.FAIL.getCode(),  "unexpected exception.");
+            taskService.updateTaskStatus(jobId, TaskStatus.FAIL.getCode(),  "unexpected exception.");
             e.printStackTrace();
         }
-    }
-
-    private Thread getUpdateRateThread(JobHandler handler, Long jobId){
-
-        Thread rateThread = new Thread(){
-            @Override
-            public void run() {
-                while (true){
-                    //每五秒更新一次进度
-                    try {
-                        Thread.sleep(5000L);
-                        Integer rate = handler.getRate();
-                        jobService.updateJobRate(jobId, rate);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-
-            }
-        };
-        return rateThread;
     }
 
 }

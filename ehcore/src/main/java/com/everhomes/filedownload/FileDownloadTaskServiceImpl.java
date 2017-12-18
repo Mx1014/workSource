@@ -3,16 +3,11 @@ package com.everhomes.filedownload;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.entity.EntityType;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.filedownload.*;
-import com.everhomes.scheduler.CenterScheduleJob;
-import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.WebTokenGenerator;
-import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +20,8 @@ import java.io.OutputStream;
 import java.util.*;
 
 @Component
-public class FileDownloadServiceImpl extends JobServiceImpl implements FileDownloadService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileDownloadServiceImpl.class);
+public class FileDownloadTaskServiceImpl extends TaskServiceImpl implements FileDownloadTaskService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileDownloadTaskServiceImpl.class);
 
     @Autowired
     private ContentServerService contentServerService;
@@ -36,15 +31,15 @@ public class FileDownloadServiceImpl extends JobServiceImpl implements FileDownl
 
 
     @Override
-    public ListFileDownloadJobsResponse listFileDownloadJobs(ListFileDownloadJobsCommand cmd) {
+    public ListFileDownloadTasksResponse listFileDownloadTasks(ListFileDownloadTasksCommand cmd) {
 
-        Long ownerId = UserContext.currentUserId();
+        Long userId = UserContext.currentUserId();
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        List<Job> fileDownloadJobs = this.listJobs(null, null, null, ownerId, null, null, cmd.getPageAnchor(), pageSize + 1);
-        ListFileDownloadJobsResponse response = new ListFileDownloadJobsResponse();
-        List<FileDownloadJobDTO> dtos = new ArrayList<FileDownloadJobDTO>();
-        if(fileDownloadJobs != null){
+        List<Task> fileDownloadTasks = this.listTasks(null, null, null, userId, null, null, cmd.getPageAnchor(), pageSize + 1);
+        ListFileDownloadTasksResponse response = new ListFileDownloadTasksResponse();
+        List<FileDownloadTaskDTO> dtos = new ArrayList<FileDownloadTaskDTO>();
+        if(fileDownloadTasks != null){
 
             //TODO
 //            if(fileDownloadJobs.size() == pageSize){
@@ -53,7 +48,7 @@ public class FileDownloadServiceImpl extends JobServiceImpl implements FileDownl
 //            }
 //
 //            fileDownloadJobs.forEach(r -> {
-//                FileDownloadJobDTO dto = ConvertHelper.convert(r, FileDownloadJobDTO.class);
+//                FileDownloadTaskDTO dto = ConvertHelper.convert(r, FileDownloadTaskDTO.class);
 //                String url = contentServerService.parserUri(dto.getUri(), EntityType.USER.getCode(), dto.getOwnerId());
 //                dto.setUrl(url);
 //                dtos.add(dto);

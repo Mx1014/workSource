@@ -2,12 +2,12 @@ package com.everhomes.filedownload;
 
 import java.util.List;
 
-public interface JobProvider {
-    void createJob(Job job);
+public interface TaskProvider {
+    void createTask(Task task);
 
-    void updateJob(Job job);
+    void updateTask(Task task);
 
-    Job findById(Long id);
+    Task findById(Long id);
 
-    List<Job> listJobs(Integer namespaceId, Long communityId, Long orgId, Long userId, Byte type, Byte status, Long pageAnchor, int count);
+    List<Task> listTask(Integer namespaceId, Long communityId, Long orgId, Long userId, Byte type, Byte status, Long pageAnchor, int count);
 }

@@ -6,13 +6,13 @@ package com.everhomes.rest.filedownload;
  *     <li>FILEDOWNLOAD((byte) 1): FILEDOWNLOAD</li>
  * </ul>
  */
-public enum JobType {
+public enum TaskType {
 
     DEFAULT((byte) 0), FILEDOWNLOAD((byte) 1);
 
     private Byte core;
 
-    private JobType(Byte core) {
+    private TaskType(Byte core) {
         this.core = core;
     }
 
@@ -20,10 +20,10 @@ public enum JobType {
         return core;
     }
 
-    public static JobType fromName(Byte core) {
+    public static TaskType fromName(Byte core) {
         if (core != null) {
-            JobType[] values = JobType.values();
-            for (JobType value : values) {
+            TaskType[] values = TaskType.values();
+            for (TaskType value : values) {
                 if (value.equals(core)) {
                     return value;
                 }

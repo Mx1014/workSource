@@ -2,8 +2,8 @@
 package com.everhomes.filedownload;
 
 
-import com.everhomes.rest.filedownload.JobStatus;
-import com.everhomes.scheduler.CenterScheduleJob;
+import com.everhomes.rest.filedownload.TaskStatus;
+import com.everhomes.scheduler.TaskScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.user.UserContext;
 import org.json.simple.JSONObject;
@@ -19,13 +19,13 @@ import java.util.*;
 
 @Component
 @DependsOn("platformContext")
-public class JobServiceImpl implements JobService, ApplicationListener<ContextRefreshedEvent> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JobServiceImpl.class);
+public class TaskServiceImpl implements TaskService, ApplicationListener<ContextRefreshedEvent> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskServiceImpl.class);
     @Autowired
     private ScheduleProvider scheduleProvider;
 
     @Autowired
-    private JobProvider jobProvider;
+    private TaskProvider taskProvider;
 
 
     @Override
@@ -35,39 +35,39 @@ public class JobServiceImpl implements JobService, ApplicationListener<ContextRe
 
 
     @Override
-    public Long createJob(String name, Byte type, Class jobClass, Map<String, Object> jobParams, Byte repeatFlag, Date startTime) {
+    public Long createTask(String name, Byte type, Class taskClass, Map<String, Object> params, Byte repeatFlag, Date startTime) {
 
-        Job job = saveNewJob(name, jobClass.getName(), jobParams, repeatFlag);
+        Task job = saveNewJob(name, taskClass.getName(), params, repeatFlag);
         scheduleJob(job);
         return null;
     }
 
 
     @Override
-    public void updateJobRate(Long jobId, Integer rate) {
+    public void updateTaskProcess(Long taskId, Integer rate) {
 
         //TODO  保存Redis 百分百则再保存一份到数据库
 
 
 
-        Job job = jobProvider.findById(jobId);
-        job.setRate(rate);
-        jobProvider.updateJob(job);
+        Task task = taskProvider.findById(taskId);
+        task.setRate(rate);
+        taskProvider.updateTask(task);
     }
 
 
     @Override
-    public void cancelJob(Long jobId) {
+    public void cancelTask(Long taskId) {
 
-        Job job = jobProvider.findById(jobId);
-        if(job == null){
+        Task task = taskProvider.findById(taskId);
+        if(task == null){
             //TODO 任务不存在
             throw null;
         }
 
         Long userId = UserContext.currentUserId();
 
-        if(userId ==null || !userId.equals(job.getUserId())){
+        if(userId ==null || !userId.equals(task.getUserId())){
             //TODO 权限不足
             throw null;
         }
@@ -76,52 +76,52 @@ public class JobServiceImpl implements JobService, ApplicationListener<ContextRe
         scheduleProvider.listScheduleJobs();
 
         //
-        updateJobStatus(jobId, JobStatus.CANCEL.getCode(),  null);
+        updateTaskStatus(taskId, TaskStatus.CANCEL.getCode(),  null);
     }
 
 
     @Override
-    public void updateJobStatus(Long jobId, Byte status, String errorDesc) {
-        Job job = jobProvider.findById(jobId);
-        job.setStatus(status);
-        if(JobStatus.fromName(status) == JobStatus.SUCCESS){
-            job.setRate(100);
+    public void updateTaskStatus(Long taskId, Byte status, String errorDesc) {
+        Task task = taskProvider.findById(taskId);
+        task.setStatus(status);
+        if(TaskStatus.fromName(status) == TaskStatus.SUCCESS){
+            task.setRate(100);
         }
-        job.setErrorDescription(errorDesc);
-        jobProvider.updateJob(job);
+        task.setErrorDescription(errorDesc);
+        taskProvider.updateTask(task);
     }
 
 
-    private Job saveNewJob(String name, String jobClassName, Map<String, Object> jobParams, Byte repeatFlag){
-        Job job = new Job();
+    private Task saveNewJob(String name, String taskClassName, Map<String, Object> params, Byte repeatFlag){
+        Task job = new Task();
         Long ownerId = UserContext.currentUserId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         job.setNamespaceId(namespaceId);
         job.setUserId(ownerId);
         job.setName(name);
-        job.setClassName(jobClassName);
-        job.setParams(JSONObject.toJSONString(jobParams));
+        job.setClassName(taskClassName);
+        job.setParams(JSONObject.toJSONString(params));
         job.setRepeatFlag(repeatFlag);
-        job.setStatus(JobStatus.WAITING.getCode());
+        job.setStatus(TaskStatus.WAITING.getCode());
         job.setCreateTime(new Timestamp(System.currentTimeMillis()));
-        jobProvider.createJob(job);
+        taskProvider.createTask(job);
         return job;
     }
 
-    private void scheduleJob(Job job){
+    private void scheduleJob(Task task){
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("jobId", job.getId());
-        parameters.put("fileName", job.getName());
-        parameters.put("jobClassName", job.getClassName());
-        parameters.put("jobParams", job.getParams());
-        parameters.put("jobClassName", job.getClassName());
-        parameters.put("jobParams", job.getParams());
-        String jobName = "fileDownload_" + job.getId() + "_" + System.currentTimeMillis();
-        scheduleProvider.scheduleSimpleJob(jobName,jobName, new Date(), CenterScheduleJob.class,parameters);
+        parameters.put("jobId", task.getId());
+        parameters.put("fileName", task.getName());
+        parameters.put("jobClassName", task.getClassName());
+        parameters.put("jobParams", task.getParams());
+        parameters.put("jobClassName", task.getClassName());
+        parameters.put("jobParams", task.getParams());
+        String taskName = "fileDownload_" + task.getId() + "_" + System.currentTimeMillis();
+        scheduleProvider.scheduleSimpleJob(taskName,taskName, new Date(), TaskScheduleJob.class,parameters);
     }
 
     @Override
-    public List<Job> listJobs(Integer namespaceId, Long communityId, Long orgId, Long userId, Byte type, Byte status, Long pageAnchor, int count) {
-        return jobProvider.listJobs(namespaceId, communityId, orgId, userId, type, status, pageAnchor, count);
+    public List<Task> listTasks(Integer namespaceId, Long communityId, Long orgId, Long userId, Byte type, Byte status, Long pageAnchor, int count) {
+        return taskProvider.listTask(namespaceId, communityId, orgId, userId, type, status, pageAnchor, count);
     }
 }

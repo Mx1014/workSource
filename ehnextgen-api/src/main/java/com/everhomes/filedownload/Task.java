@@ -1,12 +1,12 @@
 // @formatter:off
 package com.everhomes.filedownload;
 
-import com.everhomes.server.schema.tables.pojos.EhJobs;
+import com.everhomes.server.schema.tables.pojos.EhTasks;
 import com.everhomes.util.StringHelper;
 
-public class Job extends EhJobs {
+public class Task extends EhTasks {
 
-    private static final long serialVersionUID = -833820685215747920L;
+    private static final long serialVersionUID = -2614415176151224956L;
 
     @Override
     public String toString() {
