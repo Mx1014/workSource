@@ -770,9 +770,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 					"Current User have no legal power");
 		}
 		
-//		category.setStatus(CategoryAdminStatus.INACTIVE.getCode());
-//		categoryProvider.updateCategory(category);
-		categoryProvider.deleteCategory(category);
+		category.setStatus(CategoryAdminStatus.INACTIVE.getCode());
+		categoryProvider.updateCategory(category);
 	}
 
 	@Override
