@@ -3130,13 +3130,13 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue(statistic.getBelateCount());
 		row.createCell(++i).setCellValue(statistic.getLeaveEarlyCount());
 		row.createCell(++i).setCellValue(statistic.getBlandleCount());
-		row.createCell(++i).setCellValue(statistic.getOverTimeSum());
+		row.createCell(++i).setCellValue(statistic.getOverTimeSum()==null?"":statistic.getOverTimeSum()+"");
 		int cellNum = ++i;
 		BigDecimal cellValue = new BigDecimal("0");
 		if (null != statistic.getExts()) {
 			for (ExtDTO ext : statistic.getExts()) {
 				row.createCell(++i).setCellValue(ext.getTimeCount());
-				BigDecimal extCount = new BigDecimal(ext.getTimeCount());
+				BigDecimal extCount = new BigDecimal(ext.getTimeCount()==null?"0":ext.getTimeCount());
 				cellValue=cellValue.add(extCount);
 				
 			}
