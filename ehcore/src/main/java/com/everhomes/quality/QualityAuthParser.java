@@ -16,7 +16,7 @@ public class QualityAuthParser implements PortalUrlParser {
     @Override
     public Long getModuleId(Integer namespaceId, String actionData, Byte actionType, String itemLabel) {
         Long moduleId = null;
-        if (actionType == 44) {
+        if (actionType == 44 || actionType == 14) {
             Map<String, String> data = new Gson().fromJson(actionData, new TypeToken<HashMap<String, String>>() {
             }.getType());
             if (data != null && data.size() > 0 && data.get("entryUrl") != null) {
