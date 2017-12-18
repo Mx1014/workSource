@@ -15,8 +15,8 @@ CREATE TABLE `eh_reserve_rules` (
   `holiday_open_flag` tinyint(4) DEFAULT NULL COMMENT '节假日是否开放预约: 1-是, 0-否',
   `holiday_type` tinyint(4) DEFAULT NULL COMMENT '1-普通双休, 0-同步中国节假日',
 
-  `reserve_type` tinyint(4) DEFAULT NULL COMMENT '1: 时, 2: 半天, 3: 天',
-  `reserve_unit` int(11) DEFAULT NULL COMMENT '预约时间单元，例如当在小时模式时，半个小时，一个小时,（半小时是0.5）',
+  `time_type` tinyint(4) DEFAULT NULL COMMENT '1: 时, 2: 半天, 3: 天',
+  `time_unit` int(11) DEFAULT NULL COMMENT '预约时间单元，例如当在小时模式时，半个小时，一个小时,（半小时是0.5）',
   `workday_price` decimal(10,2) DEFAULT NULL COMMENT '工作日价格',
   `holiday_price` decimal(10,2) DEFAULT NULL COMMENT '节假日价格',
 
