@@ -107,6 +107,7 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 SET @app_id = (SELECT MAX(id) FROM `eh_reflection_service_module_apps`);   
 INSERT INTO `eh_reflection_service_module_apps` (`id`, `active_app_id`, `namespace_id`, `name`, `module_id`, `instance_config`, `status`, `action_type`, `action_data`, `update_time`, `module_control_type`, `multiple_flag`, `custom_tag`, `custom_path`, `menu_id`) VALUES ((@app_id := @app_id + 1), @app_id, '999992', '客户管理', '21100', NULL, '2', '13', 'customer', NOW(), 'community_control', '0', '', NULL, '21100');
 INSERT INTO `eh_reflection_service_module_apps` (`id`, `active_app_id`, `namespace_id`, `name`, `module_id`, `instance_config`, `status`, `action_type`, `action_data`, `update_time`, `module_control_type`, `multiple_flag`, `custom_tag`, `custom_path`, `menu_id`) VALUES ((@app_id := @app_id + 1), @app_id, '999992', '合同管理', '21200', NULL, '2', '13', 'contract', NOW(), 'community_control', '0', '', NULL, '21200');
+INSERT INTO `eh_reflection_service_module_apps` (`id`, `active_app_id`, `namespace_id`, `name`, `module_id`, `instance_config`, `status`, `action_type`, `action_data`, `update_time`, `module_control_type`, `multiple_flag`, `custom_tag`, `custom_path`, `menu_id`) VALUES ((@app_id := @app_id + 1), @app_id, '999992', '能耗管理', '49100', NULL, '2', '13', '{"url":"http://xiongying.lab.everhomes.com/energy-management/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}', NOW(), 'community_control', '0', '', NULL, '49100');
     
     
     
