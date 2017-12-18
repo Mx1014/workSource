@@ -812,11 +812,16 @@ public class BannerServiceImpl implements BannerService {
             }
         }
 
-
-
-
         for(BannerDTO dto : bannerList) {
         	dto.setPosterUrl(parserUri(dto.getPosterPath(), cmd.getOwnerType(), cmd.getOwnerId()));
+        	if(dto.getScopeId() != null && dto.getScopeId() != 0){
+        	    Community community = communityProvider.findCommunityById(dto.getScopeId());
+        	    if(community != null){
+        	        dto.setScopeName(community.getName());
+                }
+            }else if(dto.getScopeId() == 0){
+                dto.setScopeName("全部");
+            }
         }
         
 		bannerDTOSort(bannerList);
@@ -929,38 +934,38 @@ public class BannerServiceImpl implements BannerService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id paramter.");
         }
-		if(cmd.getScope() == null || cmd.getScope().getScopeCode() == null || cmd.getScope().getScopeId() == null) {
-         	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scope parameter.");
-        }
+//		if(cmd.getScope() == null || cmd.getScope().getScopeCode() == null || cmd.getScope().getScopeId() == null) {
+//         	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+//                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scope parameter.");
+//        }
         Banner banner = bannerProvider.findBannerById(cmd.getId());
         if(banner == null) {
             throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
                     BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Banner is not exists.");
         }
-        if(ApplyPolicy.fromCode(banner.getApplyPolicy()) == ApplyPolicy.DEFAULT) {// 如果当前要删除的banner为默认的banner，则需要复制并设置删除状态
-        	List<BannerDTO> defaultBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
-                    null, null, null, null, ApplyPolicy.DEFAULT);
-        	dbProvider.execute(status -> {
-        		for(BannerDTO dto : defaultBanners) {
-     				Banner b = ConvertHelper.convert(dto, Banner.class);
-     				if(Objects.equals(b.getId(), cmd.getId())) {
-     					b.setStatus(BannerStatus.DELETE.getCode());
-     					createDeleteOperLog(b.getId());
-     				}
-     				b.setId(null);
-     				b.setScopeCode(cmd.getScope().getScopeCode());
-     				b.setScopeId(cmd.getScope().getScopeId());
-                	b.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
-     				bannerProvider.createBanner(b);
-     			}
-        		return status;
-        	});
-        } else {// 直接设置为删除状态
+//        if(ApplyPolicy.fromCode(banner.getApplyPolicy()) == ApplyPolicy.DEFAULT) {// 如果当前要删除的banner为默认的banner，则需要复制并设置删除状态
+//        	List<BannerDTO> defaultBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
+//                    null, null, null, null, ApplyPolicy.DEFAULT);
+//        	dbProvider.execute(status -> {
+//        		for(BannerDTO dto : defaultBanners) {
+//     				Banner b = ConvertHelper.convert(dto, Banner.class);
+//     				if(Objects.equals(b.getId(), cmd.getId())) {
+//     					b.setStatus(BannerStatus.DELETE.getCode());
+//     					createDeleteOperLog(b.getId());
+//     				}
+//     				b.setId(null);
+//     				b.setScopeCode(cmd.getScope().getScopeCode());
+//     				b.setScopeId(cmd.getScope().getScopeId());
+//                	b.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
+//     				bannerProvider.createBanner(b);
+//     			}
+//        		return status;
+//        	});
+//        } else {// 直接设置为删除状态
         	banner.setStatus(BannerStatus.DELETE.getCode());
             bannerProvider.updateBanner(banner);
             createDeleteOperLog(banner.getId());
-        }
+//        }
 	}
 	
 	private void createDeleteOperLog(Long bannerId) {
@@ -1007,7 +1012,7 @@ public class BannerServiceImpl implements BannerService {
         long userId = user.getId();
         
         dbProvider.execute(status -> {
-        	 copyDefaultToCustomized(cmd.getScope());
+        	 //copyDefaultToCustomized(cmd.getScope());
              
              for(String sceneStr : cmd.getSceneTypes()) {
                  SceneType sceneType = SceneType.fromCode(sceneStr);
