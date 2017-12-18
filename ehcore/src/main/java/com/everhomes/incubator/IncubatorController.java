@@ -81,6 +81,22 @@ public class IncubatorController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /incubator/cancelIncubatorApply</b>
+     * <p>入孵申请</p>
+     */
+    @RequestMapping("cancelIncubatorApply")
+    @RestReturn(value=String.class)
+    public RestResponse cancelIncubatorApply(CancelIncubatorApplyCommand cmd) {
+
+        incubatorService.cancelIncubatorApply(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: /incubator/approveIncubatorApply</b>

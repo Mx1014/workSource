@@ -5,7 +5,7 @@ import com.everhomes.rest.filedownload.ListFileDownloadTasksResponse;
 
 import java.io.OutputStream;
 
-public interface FileDownloadTaskService extends TaskService {
+public interface FileDownloadTaskService{
 
     /**
      * 管理后台查询下载任务记录

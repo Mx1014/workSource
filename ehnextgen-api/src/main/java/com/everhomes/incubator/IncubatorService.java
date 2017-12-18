@@ -10,6 +10,8 @@ public interface IncubatorService {
 
 	IncubatorApplyDTO addIncubatorApply(AddIncubatorApplyCommand cmd);
 
+	void cancelIncubatorApply(CancelIncubatorApplyCommand cmd);
+
 	void approveIncubatorApply(ApproveIncubatorApplyCommand cmd);
 
 	IncubatorApplyDTO findIncubatorApply(FindIncubatorApplyCommand cmd);

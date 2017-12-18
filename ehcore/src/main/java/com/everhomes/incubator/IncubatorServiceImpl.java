@@ -165,6 +165,11 @@ public class IncubatorServiceImpl implements IncubatorService {
 	}
 
 	@Override
+	public void cancelIncubatorApply(CancelIncubatorApplyCommand cmd) {
+
+	}
+
+	@Override
 	public void approveIncubatorApply(ApproveIncubatorApplyCommand cmd) {
 		IncubatorApply incubatorApply = incubatorProvider.findIncubatorApplyById(cmd.getApplyId());
 		User applyUser = userProvider.findUserById(incubatorApply.getApplyUserId());

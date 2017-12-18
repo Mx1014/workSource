@@ -20,7 +20,7 @@ import java.io.OutputStream;
 import java.util.*;
 
 @Component
-public class FileDownloadTaskServiceImpl extends TaskServiceImpl implements FileDownloadTaskService {
+public class FileDownloadTaskServiceImpl implements FileDownloadTaskService {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileDownloadTaskServiceImpl.class);
 
     @Autowired
@@ -29,6 +29,9 @@ public class FileDownloadTaskServiceImpl extends TaskServiceImpl implements File
     @Autowired
     private ConfigurationProvider configProvider;
 
+    @Autowired
+    private TaskService taskService;
+
 
     @Override
     public ListFileDownloadTasksResponse listFileDownloadTasks(ListFileDownloadTasksCommand cmd) {
@@ -36,7 +39,7 @@ public class FileDownloadTaskServiceImpl extends TaskServiceImpl implements File
         Long userId = UserContext.currentUserId();
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        List<Task> fileDownloadTasks = this.listTasks(null, null, null, userId, null, null, cmd.getPageAnchor(), pageSize + 1);
+        List<Task> fileDownloadTasks = taskService.listTasks(null, null, null, userId, null, null, cmd.getPageAnchor(), pageSize + 1);
         ListFileDownloadTasksResponse response = new ListFileDownloadTasksResponse();
         List<FileDownloadTaskDTO> dtos = new ArrayList<FileDownloadTaskDTO>();
         if(fileDownloadTasks != null){
