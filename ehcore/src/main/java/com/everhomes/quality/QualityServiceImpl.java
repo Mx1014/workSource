@@ -2869,9 +2869,20 @@ public class QualityServiceImpl implements QualityService {
 		QualityInspectionSpecificationDTO parentDto = ConvertHelper.convert(parent, QualityInspectionSpecificationDTO.class);
 		parentDto = processQualitySpecificationTree(dtos, parentDto);
 		dtos = parentDto.getChildrens();
-
+		//返回数据中添加所属项目
+		processSepcificationScopeName(dtos);
 		response.setSpecifications(dtos);
 		return response;
+	}
+
+	private void processSepcificationScopeName(List<QualityInspectionSpecificationDTO> dtos) {
+		for (QualityInspectionSpecificationDTO specification : dtos) {
+			if (specification.getScopeId() != 0L) {
+				Community community = communityProvider.findCommunityById(specification.getScopeId());
+				if (community != null)
+					specification.setScopeName(community.getName());
+			}
+		}
 	}
 
 	private List<QualityInspectionSpecificationDTO> dealWithScopeSpecifications(List<QualityInspectionSpecifications> specifications, List<QualityInspectionSpecifications> scopeSpecifications) {
