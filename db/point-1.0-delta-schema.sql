@@ -235,3 +235,22 @@ CREATE TABLE `eh_system_events` (
   `update_uid` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 积分banner
+DROP TABLE IF EXISTS `eh_point_banners`;
+CREATE TABLE `eh_point_banners` (
+  `id` BIGINT,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `system_id` BIGINT,
+  `name` VARCHAR(128),
+  `poster_path` VARCHAR(128),
+  `action_type` TINYINT NOT NULL DEFAULT '0' COMMENT 'according to document',
+  `action_data` TEXT COMMENT 'the parameters depend on item_type, json format',
+  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: disabled, 2: enabled',
+  `default_order` INTEGER NOT NULL DEFAULT 0,
+  `creator_uid` BIGINT,
+  `create_time` DATETIME(3),
+  `update_uid` BIGINT,
+  `update_time` DATETIME(3),
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;

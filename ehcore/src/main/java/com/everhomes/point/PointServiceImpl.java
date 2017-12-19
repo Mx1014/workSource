@@ -32,7 +32,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
@@ -82,22 +85,19 @@ public class PointServiceImpl implements PointService {
     private PointRuleCategoryProvider pointRuleCategoryProvider;
 
     @Autowired
-    private PointActionProvider pointActionProvider;
-
-    @Autowired
     private UserService userService;
 
     @Autowired
     private PointEventLogScheduler pointEventLogScheduler;
 
     @Autowired
-    private PointRuleToEventMappingProvider pointRuleToEventMappingProvider;
-
-    @Autowired
     private PointLocalBusSubscriber pointLocalBusSubscriber;
 
     @Autowired
     private PointRuleConfigProvider pointRuleConfigProvider;
+
+    @Autowired
+    private PointBannerProvider pointBannerProvider;
 
     @Override
     public ListPointSystemsResponse listPointSystems(ListPointSystemsCommand cmd) {
@@ -773,6 +773,113 @@ public class PointServiceImpl implements PointService {
                 pointTutorialToPointRuleMappingProvider.createPointTutorialToPointRuleMapping(mapping);
             }
         }
+    }
+
+    @Override
+    public ListPointLogsResponse listManuallyPointLogs(ListPointLogsCommand cmd) {
+        cmd.setOperatorType(PointOperatorType.MANUALLY.getCode());
+        return this.listPointLogs(cmd);
+    }
+
+    @Override
+    public PointBannerDTO createPointBanner(CreatePointBannerCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        PointSystem pointSystem = pointSystemProvider.findById(cmd.getSystemId());
+        if (pointSystem == null) {
+            throw errorWith(PointServiceErrorCode.SCOPE, PointServiceErrorCode.ERROR_POINT_SYSTEM_NOT_EXIST_CODE,
+                    "Point system not exist");
+        }
+
+        PointBanner banner = ConvertHelper.convert(cmd, PointBanner.class);
+        banner.setStatus(PointCommonStatus.ENABLED.getCode());
+        banner.setNamespaceId(pointSystem.getNamespaceId());
+
+        pointBannerProvider.createPointBanner(banner);
+
+        return toPointBannerDTO(banner);
+    }
+
+    private PointBannerDTO toPointBannerDTO(PointBanner banner) {
+        return ConvertHelper.convert(banner, PointBannerDTO.class);
+    }
+
+    @Override
+    public PointBannerDTO updatePointBanner(UpdatePointBannerCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        PointBanner banner = pointBannerProvider.findById(cmd.getId());
+        if (banner == null) {
+            throw errorWith(PointServiceErrorCode.SCOPE, PointServiceErrorCode.ERROR_POINT_BANNER_NOT_EXIST_CODE,
+                    "Point banner not exist");
+        }
+
+        banner.setName(cmd.getName());
+        banner.setActionType(cmd.getActionType());
+        banner.setActionData(cmd.getActionData());
+        banner.setPosterPath(cmd.getPosterPath());
+
+        pointBannerProvider.updatePointBanner(banner);
+        return toPointBannerDTO(banner);
+    }
+
+    @Override
+    public ListPointBannersResponse listPointBanners(ListPointBannersCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+
+        List<PointBanner> banners = pointBannerProvider.listPointBannersBySystemId(cmd.getSystemId(), pageSize, locator);
+        List<PointBannerDTO> dtoList = banners.stream().map(this::toPointBannerDTO).collect(Collectors.toList());
+
+        ListPointBannersResponse response = new ListPointBannersResponse();
+        response.setBanners(dtoList);
+        response.setNextPageAnchor(locator.getAnchor());
+        return response;
+    }
+
+    @Override
+    public void deletePointBanner(DeletePointBannerCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        PointBanner banner = pointBannerProvider.findById(cmd.getId());
+        if (banner == null) {
+            throw errorWith(PointServiceErrorCode.SCOPE, PointServiceErrorCode.ERROR_POINT_BANNER_NOT_EXIST_CODE,
+                    "Point banner not exist");
+        }
+        pointBannerProvider.deletePointBanner(banner);
+    }
+
+    @Override
+    public void reorderPointBanners(ReorderPointBannersCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        Map<Long, Integer> idToOrderMap = cmd.getOrders().stream().collect(Collectors.toMap(PointBannerOrder::getId, PointBannerOrder::getDefaultOrder));
+
+        List<PointBanner> pointBanners = pointBannerProvider.listByIds(idToOrderMap.keySet());
+        for (PointBanner banner : pointBanners) {
+            banner.setDefaultOrder(idToOrderMap.get(banner.getId()));
+            pointBannerProvider.updatePointBanner(banner);
+        }
+    }
+
+    @Override
+    public PointBannerDTO updatePointBannerStatus(UpdatePointBannerStatusCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        PointBanner banner = pointBannerProvider.findById(cmd.getId());
+        if (banner == null) {
+            throw errorWith(PointServiceErrorCode.SCOPE, PointServiceErrorCode.ERROR_POINT_BANNER_NOT_EXIST_CODE,
+                    "Point banner not exist");
+        }
+        if (!Objects.equals(banner.getStatus(), cmd.getStatus())) {
+            banner.setStatus(cmd.getStatus());
+            pointBannerProvider.updatePointBanner(banner);
+        }
+        return toPointBannerDTO(banner);
     }
 
     private PointRuleDTO toPointRuleDTO(PointRule pointRule) {

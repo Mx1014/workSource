@@ -85,6 +85,9 @@ public class PointLogProviderImpl implements PointLogProvider {
             if (cmd.getSystemId() != null) {
                 query.addConditions(t.SYSTEM_ID.eq(cmd.getSystemId()));
             }
+            if (cmd.getOperatorType() != null) {
+                query.addConditions(t.OPERATOR_TYPE.eq(cmd.getOperatorType()));
+            }
             if (cmd.getUserId() != null) {
                 query.addConditions(t.TARGET_UID.eq(cmd.getUserId()));
             }
