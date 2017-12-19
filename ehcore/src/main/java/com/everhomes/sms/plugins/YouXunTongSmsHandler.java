@@ -35,7 +35,7 @@ public class YouXunTongSmsHandler implements SmsHandler, ApplicationListener<Con
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(YouXunTongSmsHandler.class);
 
-    private static final String YXT_USER_NAME = "sms.YouXunTong.acc ountName";
+    private static final String YXT_USER_NAME = "sms.YouXunTong.accountName";
     private static final String YXT_PASSWORD = "sms.YouXunTong.password";
     private static final String YXT_SERVER = "sms.YouXunTong.server";
     private static final String YXT_TOKEN = "sms.YouXunTong.token";
@@ -60,12 +60,7 @@ public class YouXunTongSmsHandler implements SmsHandler, ApplicationListener<Con
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (event.getApplicationContext().getParent() == null) {
-            this.userName = configurationProvider.getValue(YXT_USER_NAME, "");
-            this.password = configurationProvider.getValue(YXT_PASSWORD, "");
-            this.server = configurationProvider.getValue(YXT_SERVER, "");
-            this.token = configurationProvider.getValue(YXT_TOKEN, "");
-        }
+        initAccount();
     }
 
     /*
@@ -108,6 +103,8 @@ public class YouXunTongSmsHandler implements SmsHandler, ApplicationListener<Con
     @Override
     public List<SmsLog> doSend(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId,
                                String templateLocale, List<Tuple<String, Object>> variables) {
+        initAccount();
+
         List<SmsLog> smsLogList = new ArrayList<>();
 
         Map<String, Object> model = new HashMap<>();
@@ -159,6 +156,15 @@ public class YouXunTongSmsHandler implements SmsHandler, ApplicationListener<Con
             LOGGER.error("can not found sms content by YouXunTong handler, namespaceId = {}, templateId = {}", namespaceId, templateId);
         }
         return smsLogList;
+    }
+
+    private void initAccount() {
+        try {
+            this.userName = configurationProvider.getValue(YXT_USER_NAME, "");
+            this.password = configurationProvider.getValue(YXT_PASSWORD, "");
+            this.server = configurationProvider.getValue(YXT_SERVER, "");
+            this.token = configurationProvider.getValue(YXT_TOKEN, "");
+        } catch (Exception e) { }
     }
 
     private SmsLog getSmsErrorLog(Integer namespaceId, String phoneNumber, String templateScope, int templateId, String templateLocale, String error) {
