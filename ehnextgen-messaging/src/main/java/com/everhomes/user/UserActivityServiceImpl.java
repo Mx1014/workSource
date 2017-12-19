@@ -590,44 +590,18 @@ public class UserActivityServiceImpl implements UserActivityService {
         feedbackEvent(feedback);
     }
 
-    private void feedbackEvent(Feedback feedback){
-        //此处只对接帖子的举报
-        if (feedback.getTargetType() != FeedbackTargetType.POST.getCode()) {
-            return;
-        }
-        if (FeedbackVerifyType.fromStatus(feedback.getVerifyType()) == FeedbackVerifyType.FALSE) {
-            return;
-        }
+    private void feedbackEvent(Feedback feedback) {
         Post post = forumProvider.findPostById(feedback.getTargetId());
-        if(post == null){
+        if(post == null) {
             return;
         }
-
-        /*String eventName = null;
-        switch (ForumModuleType.fromCode(post.getModuleType())){
-            case FORUM:
-                eventName = SystemEvent.FORUM_POST_REPORT.suffix(post.getModuleCategoryId());
-                break;
-            case ACTIVITY:
-                eventName = SystemEvent.ACTIVITY_ACTIVITY_REPORT.suffix(post.getModuleCategoryId());
-                break;
-            case ANNOUNCEMENT:
-                break;
-            case CLUB:
-                break;
-            case GUILD:
-                break;
-            case FEEDBACK:
-                break;
+        Post parentPost = null;
+        if (post.getParentPostId() != null && post.getParentPostId() != 0) {
+            parentPost = forumProvider.findPostById(post.getParentPostId());
         }
-        if(eventName == null){
-            return;
-        }
-
-        final String finalEventName = eventName;*/
-
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
+        Post tempParentPost = parentPost;
         LocalEventBus.publish(event -> {
             LocalEventContext context = new LocalEventContext();
             context.setUid(post.getCreatorUid());
@@ -636,8 +610,16 @@ public class UserActivityServiceImpl implements UserActivityService {
 
             event.setEntityType(EhForumPosts.class.getSimpleName());
             event.setEntityId(post.getId());
+            Long embeddedAppId = post.getEmbeddedAppId() != null ? post.getEmbeddedAppId() : 0;
             event.setEventName(SystemEvent.FORUM_POST_REPORT.suffix(
-                    post.getContentCategory(), post.getModuleType(), post.getModuleCategoryId()));
+                    post.getModuleType(), post.getModuleCategoryId(), embeddedAppId));
+
+            event.addParam("embeddedAppId", String.valueOf(embeddedAppId));
+            event.addParam("feedback", StringHelper.toJsonString(feedback));
+            event.addParam("post", StringHelper.toJsonString(post));
+            if (tempParentPost != null) {
+                event.addParam("parentPost", StringHelper.toJsonString(tempParentPost));
+            }
         });
     }
 	

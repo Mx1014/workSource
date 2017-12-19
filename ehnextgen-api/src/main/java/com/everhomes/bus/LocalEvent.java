@@ -29,6 +29,8 @@ public class LocalEvent {
 
     public LocalEvent() {
         syncFlag = TrueOrFalseFlag.FALSE.getCode();
+        params = new HashMap<>();
+        context = new LocalEventContext();
     }
 
     public LocalEvent(String eventName, String entityType, Long entityId) {
@@ -108,6 +110,17 @@ public class LocalEvent {
 
     public void setParams(Map<String, String> params) {
         this.params = params;
+    }
+
+    public String getParam(String key) {
+        if (params == null) {
+            return null;
+        }
+        return params.get(key);
+    }
+
+    public void setTargetUid(Long targetUid) {
+        this.context.setUid(targetUid);
     }
 
     @Override

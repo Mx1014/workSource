@@ -71,4 +71,18 @@ public interface PointService {
     PointRuleDTO createPointRule(CreatePointRuleCommand cmd);
 
     void createPointRuleToEventMapping(CreatePointRuleToEventMappingCommand cmd);
+
+    ListPointLogsResponse listManuallyPointLogs(ListPointLogsCommand cmd);
+
+    PointBannerDTO createPointBanner(CreatePointBannerCommand cmd);
+
+    PointBannerDTO updatePointBanner(UpdatePointBannerCommand cmd);
+
+    ListPointBannersResponse listPointBanners(ListPointBannersCommand cmd);
+
+    void deletePointBanner(DeletePointBannerCommand cmd);
+
+    void reorderPointBanners(ReorderPointBannersCommand cmd);
+
+    PointBannerDTO updatePointBannerStatus(UpdatePointBannerStatusCommand cmd);
 }

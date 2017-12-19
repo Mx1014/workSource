@@ -85,6 +85,9 @@ public class PointLogProviderImpl implements PointLogProvider {
             if (cmd.getSystemId() != null) {
                 query.addConditions(t.SYSTEM_ID.eq(cmd.getSystemId()));
             }
+            if (cmd.getOperatorType() != null) {
+                query.addConditions(t.OPERATOR_TYPE.eq(cmd.getOperatorType()));
+            }
             if (cmd.getUserId() != null) {
                 query.addConditions(t.TARGET_UID.eq(cmd.getUserId()));
             }
@@ -152,14 +155,17 @@ public class PointLogProviderImpl implements PointLogProvider {
     }
 
     @Override
-    public PointLog findByRuleIdAndEntity(Integer namespaceId, Long uid, Long ruleId, String entityType, Long entityId) {
+    public PointLog findByRuleIdAndEntity(Integer namespaceId, Long systemId, Long targetUid, Long ruleId, String entityType, Long entityId) {
         com.everhomes.server.schema.tables.EhPointLogs t = Tables.EH_POINT_LOGS;
         List<PointLog> logList = this.query(new ListingLocator(), 1, (locator1, query) -> {
             if (namespaceId != null) {
                 query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
             }
-            if (uid != null) {
-                query.addConditions(t.TARGET_UID.eq(uid));
+            if (systemId != null) {
+                query.addConditions(t.SYSTEM_ID.eq(systemId));
+            }
+            if (targetUid != null) {
+                query.addConditions(t.TARGET_UID.eq(targetUid));
             }
             if (ruleId != null) {
                 query.addConditions(t.RULE_ID.eq(ruleId));

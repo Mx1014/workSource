@@ -166,6 +166,17 @@ public class PointAdminController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /admin/point/listManuallyPointLogs</b>
+     * <p>获取手工积分记录列表</p>
+     */
+    @RestReturn(ListPointLogsResponse.class)
+    @RequestMapping("listManuallyPointLogs")
+    public RestResponse listManuallyPointLogs(ListPointLogsCommand cmd) {
+        ListPointLogsResponse response = pointService.listManuallyPointLogs(cmd);
+        return success(response);
+    }
+
+    /**
      * <b>URL: /admin/point/exportPointLogs</b>
      * <p>导出积分记录</p>
      */
@@ -272,6 +283,72 @@ public class PointAdminController extends ControllerBase {
     @RequestMapping("createPointRuleToEventMapping")
     public RestResponse createPointRuleToEventMapping(CreatePointRuleToEventMappingCommand cmd) {
         pointService.createPointRuleToEventMapping(cmd);
+        return SUCCESS;
+    }
+
+    /**
+     * <b>URL: /admin/point/createPointBanner</b>
+     * <p>创建积分商城的banner</p>
+     */
+    @RestReturn(PointBannerDTO.class)
+    @RequestMapping("createPointBanner")
+    public RestResponse createPointBanner(CreatePointBannerCommand cmd) {
+        PointBannerDTO dto = pointService.createPointBanner(cmd);
+        return success(dto);
+    }
+
+    /**
+     * <b>URL: /admin/point/updatePointBanner</b>
+     * <p>修改积分商城的banner</p>
+     */
+    @RestReturn(PointBannerDTO.class)
+    @RequestMapping("updatePointBanner")
+    public RestResponse updatePointBanner(UpdatePointBannerCommand cmd) {
+        PointBannerDTO dto = pointService.updatePointBanner(cmd);
+        return success(dto);
+    }
+
+    /**
+     * <b>URL: /admin/point/updatePointBannerStatus</b>
+     * <p>修改积分商城的banner开关</p>
+     */
+    @RestReturn(PointBannerDTO.class)
+    @RequestMapping("updatePointBannerStatus")
+    public RestResponse updatePointBannerStatus(UpdatePointBannerStatusCommand cmd) {
+        PointBannerDTO dto = pointService.updatePointBannerStatus(cmd);
+        return success(dto);
+    }
+
+    /**
+     * <b>URL: /admin/point/listPointBannersBySystemId</b>
+     * <p>积分商城的banner列表</p>
+     */
+    @RestReturn(ListPointBannersResponse.class)
+    @RequestMapping("listPointBannersBySystemId")
+    public RestResponse listPointBanners(ListPointBannersCommand cmd) {
+        ListPointBannersResponse response = pointService.listPointBanners(cmd);
+        return success(response);
+    }
+
+    /**
+     * <b>URL: /admin/point/deletePointBanner</b>
+     * <p>删除积分商城的banner</p>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("deletePointBanner")
+    public RestResponse deletePointBanner(DeletePointBannerCommand cmd) {
+        pointService.deletePointBanner(cmd);
+        return SUCCESS;
+    }
+
+    /**
+     * <b>URL: /admin/point/reorderPointBanners</b>
+     * <p>积分商城的banner重排序</p>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("reorderPointBanners")
+    public RestResponse reorderPointBanners(ReorderPointBannersCommand cmd) {
+        pointService.reorderPointBanners(cmd);
         return SUCCESS;
     }
 

@@ -36,18 +36,38 @@ public enum SystemEvent {
     // FORUM_COMMENT_REPORT("forum.comment_report"),
 
     // 活动
-    // ACTIVITY_ACTIVITY_CREATE("activity.activity_create"),
+    ACTIVITY_ACTIVITY_CREATE("activity.activity_create"),
     ACTIVITY_ACTIVITY_ENTER("activity.activity_enter"),
-    // ACTIVITY_ACTIVITY_DELETE("activity.activity_delete"),
+    ACTIVITY_ACTIVITY_DELETE("activity.activity_delete"),
     ACTIVITY_ACTIVITY_ENTER_CANCEL("activity.activity_enter_cancel"),
-    // ACTIVITY_ACTIVITY_SHARE("activity.activity_share"),
-    // ACTIVITY_ACTIVITY_LIKE("activity.activity_like"),
-    // ACTIVITY_ACTIVITY_LIKE_CANCEL("activity.activity_like_cancel"),
-    // ACTIVITY_ACTIVITY_REPORT("activity.activity_report"),
+    ACTIVITY_ACTIVITY_SHARE("activity.activity_share"),
+    ACTIVITY_ACTIVITY_LIKE("activity.activity_like"),
+    ACTIVITY_ACTIVITY_LIKE_CANCEL("activity.activity_like_cancel"),
+    ACTIVITY_ACTIVITY_REPORT("activity.activity_report"),
 
-    // ACTIVITY_COMMENT_CREATE("activity.comment_create"),
-    // ACTIVITY_COMMENT_DELETE("activity.comment_delete"),
+    ACTIVITY_COMMENT_CREATE("activity.comment_create"),
+    ACTIVITY_COMMENT_DELETE("activity.comment_delete"),
     // ACTIVITY_COMMENT_REPORT("activity.comment_report"),
+
+    // 意见反馈
+    FEEDBACK_FEEDBACK_CREATE("feedback.feedback_create"),
+    FEEDBACK_FEEDBACK_DELETE("feedback.feedback_delete"),
+    FEEDBACK_FEEDBACK_SHARE("feedback.feedback_share"),
+    FEEDBACK_FEEDBACK_LIKE("feedback.feedback_like"),
+    FEEDBACK_FEEDBACK_LIKE_CANCEL("feedback.feedback_like_cancel"),
+    FEEDBACK_FEEDBACK_REPORT("feedback.feedback_report"),
+
+    FEEDBACK_COMMENT_CREATE("feedback.comment_create"),
+    FEEDBACK_COMMENT_DELETE("feedback.comment_delete"),
+    FEEDBACK_COMMENT_REPORT("feedback.comment_report"),
+
+    // group
+    GROUP_GROUP_CREATE("group.group_create"),
+    GROUP_GROUP_APPROVAL("group.group_approval"),
+    GROUP_GROUP_DELETE("group.group_delete"),
+    GROUP_GROUP_JOIN("group.group_join"),
+    GROUP_GROUP_JOIN_APPROVAL("group.group_join_approval"),
+    GROUP_GROUP_LEAVE("group.group_leave"),
 
     // 俱乐部
     CLUB_CLUB_CREATE("club.club_create"),
