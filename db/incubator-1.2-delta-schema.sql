@@ -14,19 +14,20 @@ CREATE TABLE `eh_tasks` (
   `class_name` varchar(255) DEFAULT NULL,
   `params` text,
   `repeat_flag` tinyint(4) DEFAULT NULL,
-  `process` int(11) DEFAULT NULL COMMENT 'rate of process',
+  `process` int(11) DEFAULT NULL COMMENT 'rate of progress',
   `result_string1` varchar(255) DEFAULT NULL,
   `result_string2` varchar(255) DEFAULT NULL,
   `result_long1` bigint(20) DEFAULT NULL,
   `result_long2` bigint(20) DEFAULT NULL,
   `status` tinyint(4) DEFAULT NULL,
-  `error_code` tinyint(4) DEFAULT NULL,
   `error_description` varchar(255) DEFAULT NULL,
-  `create_time` datetime NOT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `finish_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `create_time` datetime NOT NULL,
+  `finish_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 
 
 
