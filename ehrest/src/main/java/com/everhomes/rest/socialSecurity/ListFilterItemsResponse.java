@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>返回值:
- * <li>filterItems: 筛选项</li>
+ * <li>filterItems: 筛选项 {@link com.everhomes.rest.socialSecurity.FilterItemDTO}</li>
  * </ul>
  */
 public class ListFilterItemsResponse {
