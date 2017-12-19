@@ -41,6 +41,7 @@ public interface TaskService {
      */
     void updateTaskProcess(Long taskId, Integer process);
 
-    List<Task> listTasks(Integer namespaceId, Long communityId, Long orgId, Long userId, Byte type, Byte status, Long pageAnchor, int count);
+    List<Task> listTasks(Integer namespaceId, Long communityId, Long orgId, Long userId, Byte type, Byte status, Long pageAnchor, Integer count);
 
+    List<Long> listWaitingTaskIds();
 }

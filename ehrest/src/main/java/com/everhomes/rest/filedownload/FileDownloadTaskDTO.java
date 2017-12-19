@@ -8,26 +8,26 @@ import java.sql.Timestamp;
 /**
  * <ul>
  *     <li>id: id</li>
- *     <li>namespaceId: namespaceId</li>
- *     <li>communityId: communityId</li>
- *     <li>orgId: orgId</li>
- *     <li>userId: userId</li>
- *     <li>ownerId: ownerId</li>
- *     <li>name: name</li>
- *     <li>fileName: fileName</li>
- *     <li>type: type</li>
- *     <li>params: params</li>
- *     <li>repeatFlag: repeatFlag</li>
- *     <li>process: process</li>
- *     <li>size: size</li>
- *     <li>uri: uri</li>
- *     <li>url: url</li>
- *     <li>rate: rate</li>
+ *     <li>namespaceId: 域空间id</li>
+ *     <li>communityId: 园区id</li>
+ *     <li>orgId: 公司id</li>
+ *     <li>userId: 用户id</li>
+ *     <li>name: 任务名称</li>
+ *     <li>fileName: 文件名称</li>
+ *     <li>type: 任务类型</li>
+ *     <li>params: 任务参数</li>
+ *     <li>repeatFlag: 是否可重复执行</li>
+ *     <li>process: 任务进度</li>
+ *     <li>size: 文件大小</li>
+ *     <li>uri: 文件uri</li>
+ *     <li>url: 文件url</li>
  *     <li>status: 状态 参考{@link TaskStatus}</li>
- *     <li>errorDescription: errorDescription</li>
- *     <li>createTime: createTime</li>
- *     <li>finishTime: finishTime</li>
- *     <li>updateTime: updateTime</li>
+ *     <li>queueCount: 前面排队总数</li>
+ *     <li>errorDescription: 错误描述</li>
+ *     <li>createTime: 创建时间</li>
+ *     <li>validTime: 有效期</li>
+ *     <li>finishTime: 完成时间</li>
+ *     <li>updateTime: 最后更新时间</li>
  * </ul>
  */
 public class FileDownloadTaskDTO {
@@ -36,7 +36,6 @@ public class FileDownloadTaskDTO {
     Long communityId;
     Long orgId;
     Long userId;
-    Long ownerId;
     String name;
     String fileName;
     Byte type;
@@ -46,10 +45,11 @@ public class FileDownloadTaskDTO {
     Long size;
     String uri;
     String url;
-    Float rate;
     Byte status;
+    Integer queueCount;
     String errorDescription;
     Timestamp createTime;
+    Timestamp validTime;
     Timestamp finishTime;
     Timestamp updateTime;
 
@@ -91,14 +91,6 @@ public class FileDownloadTaskDTO {
 
     public void setUserId(Long userId) {
         this.userId = userId;
-    }
-
-    public Long getOwnerId() {
-        return ownerId;
-    }
-
-    public void setOwnerId(Long ownerId) {
-        this.ownerId = ownerId;
     }
 
     public String getName() {
@@ -173,20 +165,20 @@ public class FileDownloadTaskDTO {
         this.url = url;
     }
 
-    public Float getRate() {
-        return rate;
-    }
-
-    public void setRate(Float rate) {
-        this.rate = rate;
-    }
-
     public Byte getStatus() {
         return status;
     }
 
     public void setStatus(Byte status) {
         this.status = status;
+    }
+
+    public Integer getQueueCount() {
+        return queueCount;
+    }
+
+    public void setQueueCount(Integer queueCount) {
+        this.queueCount = queueCount;
     }
 
     public String getErrorDescription() {
@@ -203,6 +195,14 @@ public class FileDownloadTaskDTO {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+
+    public Timestamp getValidTime() {
+        return validTime;
+    }
+
+    public void setValidTime(Timestamp validTime) {
+        this.validTime = validTime;
     }
 
     public Timestamp getFinishTime() {

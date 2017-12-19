@@ -9,5 +9,7 @@ public interface TaskProvider {
 
     Task findById(Long id);
 
-    List<Task> listTask(Integer namespaceId, Long communityId, Long orgId, Long userId, Byte type, Byte status, Long pageAnchor, int count);
+    List<Task> listTask(Integer namespaceId, Long communityId, Long orgId, Long userId, Byte type, Byte status, Long pageAnchor, Integer count);
+
+    List<Long> listWaitingTaskIds();
 }

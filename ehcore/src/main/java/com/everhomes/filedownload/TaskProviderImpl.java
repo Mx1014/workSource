@@ -6,6 +6,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.filedownload.TaskStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhTasksDao;
@@ -60,7 +61,7 @@ public class TaskProviderImpl implements TaskProvider {
     }
 
     @Override
-    public List<Task> listTask(Integer namespaceId, Long communityId, Long orgId, Long userId, Byte type, Byte status, Long pageAnchor, int pageSize) {
+    public List<Task> listTask(Integer namespaceId, Long communityId, Long orgId, Long userId, Byte type, Byte status, Long pageAnchor, Integer pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhTasksRecord> query = context.selectQuery(Tables.EH_TASKS);
 
@@ -88,15 +89,43 @@ public class TaskProviderImpl implements TaskProvider {
             query.addConditions(Tables.EH_TASKS.STATUS.eq(status));
         }
 
-        query.addConditions(Tables.EH_TASKS.ID.le(pageAnchor));
+        if(pageAnchor != null){
+            query.addConditions(Tables.EH_TASKS.ID.le(pageAnchor));
+        }
+
         query.addOrderBy(Tables.EH_TASKS.ID.desc());
-        query.addLimit(pageSize);
+
+        if(pageSize != null){
+            query.addLimit(pageSize);
+        }
+
 
         List<Task> result = new ArrayList<>();
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, Task.class));
             return null;
         });
+
+        return result;
+    }
+
+
+
+    @Override
+    public List<Long> listWaitingTaskIds() {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        Object[] ids = context.select(Tables.EH_TASKS.ID).from(Tables.EH_TASKS)
+                .where(Tables.EH_TASKS.STATUS.eq(TaskStatus.WAITING.getCode()))
+                .orderBy(Tables.EH_TASKS.ID.asc())
+                .fetchAnyArray();
+
+        List<Long> result = new ArrayList<>();
+        if(ids != null && ids.length > 0){
+            for(Object id: ids){
+                result.add((Long)id);
+            }
+        }
 
         return result;
     }

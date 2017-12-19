@@ -3,9 +3,11 @@ package com.everhomes.filedownload;
 
 
 import com.everhomes.rest.filedownload.TaskStatus;
+import com.everhomes.rest.scheduler.ScheduleJobInfoDTO;
 import com.everhomes.scheduler.TaskScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.RuntimeErrorException;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,10 +48,6 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
     @Override
     public void updateTaskProcess(Long taskId, Integer rate) {
 
-        //TODO  保存Redis 百分百则再保存一份到数据库
-
-
-
         Task task = taskProvider.findById(taskId);
         task.setRate(rate);
         taskProvider.updateTask(task);
@@ -61,21 +59,29 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
 
         Task task = taskProvider.findById(taskId);
         if(task == null){
-            //TODO 任务不存在
-            throw null;
+            LOGGER.error("task not exists, taskId = {}", taskId);
+            throw RuntimeErrorException.errorWith(TaskServiceErrorCode.SCOPE,
+                    TaskServiceErrorCode.TASK_NOT_FOUND, "task not exists");
         }
 
         Long userId = UserContext.currentUserId();
 
         if(userId ==null || !userId.equals(task.getUserId())){
-            //TODO 权限不足
-            throw null;
+            LOGGER.error("insufficient privileges, taskId={}, currentUserId={}, taskUserId={}", taskId, userId, task.getUserId());
+            throw RuntimeErrorException.errorWith(TaskServiceErrorCode.SCOPE,
+                    TaskServiceErrorCode.INSUFFICIENT_PRIVILEGES, "insufficient privileges");
         }
 
-        //TODO 找到任务将其取消
-        scheduleProvider.listScheduleJobs();
+        if(TaskStatus.SUCCESS == TaskStatus.fromName(task.getStatus())){
+            LOGGER.error("task already success, taskId={}", taskId);
+            throw RuntimeErrorException.errorWith(TaskServiceErrorCode.SCOPE,
+                    TaskServiceErrorCode.TASK_ALREADY_SUCCESS, "task already success");
+        }
 
-        //
+        //取消任务
+        String taskName = "fileDownload_" + task.getId();
+        scheduleProvider.unscheduleJob(taskName);;
+
         updateTaskStatus(taskId, TaskStatus.CANCEL.getCode(),  null);
     }
 
@@ -116,12 +122,18 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
         parameters.put("jobParams", task.getParams());
         parameters.put("jobClassName", task.getClassName());
         parameters.put("jobParams", task.getParams());
-        String taskName = "fileDownload_" + task.getId() + "_" + System.currentTimeMillis();
+        String taskName = "fileDownload_" + task.getId();
         scheduleProvider.scheduleSimpleJob(taskName,taskName, new Date(), TaskScheduleJob.class,parameters);
     }
 
     @Override
-    public List<Task> listTasks(Integer namespaceId, Long communityId, Long orgId, Long userId, Byte type, Byte status, Long pageAnchor, int count) {
+    public List<Task> listTasks(Integer namespaceId, Long communityId, Long orgId, Long userId, Byte type, Byte status, Long pageAnchor, Integer count) {
         return taskProvider.listTask(namespaceId, communityId, orgId, userId, type, status, pageAnchor, count);
     }
+
+    @Override
+    public List<Long> listWaitingTaskIds() {
+        return taskProvider.listWaitingTaskIds();
+    }
+
 }
