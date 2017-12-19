@@ -229,7 +229,7 @@ public class WorkReportController extends ControllerBase{
     @RestReturn(value=ListWorkReportsValResponse.class)
     public RestResponse listSubmittedWorkReportsVal(ListWorkReportsValCommand cmd) {
         ListWorkReportsValResponse res = workReportService.listSubmittedWorkReportsVal(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -243,7 +243,7 @@ public class WorkReportController extends ControllerBase{
     @RestReturn(value=ListWorkReportsValResponse.class)
     public RestResponse listReceivedWorkReportsVal(ListWorkReportsValCommand cmd) {
         ListWorkReportsValResponse res = workReportService.listReceivedWorkReportsVal(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

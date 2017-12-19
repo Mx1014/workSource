@@ -98,15 +98,10 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         List<WorkReportVal> results = new ArrayList<>();
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhWorkReportValReceiverMapRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP);
-        query.addJoin(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP, JoinType.JOIN,
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP);
+        query.addJoin(Tables.EH_WORK_REPORT_VALS, JoinType.JOIN,
                 Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.REPORT_VAL_ID.eq(Tables.EH_WORK_REPORT_VALS.ID));
-/*        query.addSelect(Tables.EH_WORK_REPORT_VALS.ID.as("reportValId"));
-        query.addSelect(Tables.EH_WORK_REPORT_VALS.REPORT_ID.as("reportId"));
-        query.addSelect(Tables.EH_WORK_REPORT_VALS.REPORT_TIME);
-        query.addSelect(Tables.EH_WORK_REPORT_VALS.UPDATE_TIME);
-        query.addSelect(Tables.EH_WORK_REPORT_VALS.APPLIER_NAME);*/
-//        query.addSelect(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.READ_STATUS);
         query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.RECEIVER_USER_ID.eq(receiverId));
         if (readStatus != null)
