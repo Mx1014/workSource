@@ -6,21 +6,24 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 /**
- * @author sw on 2017/12/18.
+ * <ul>
+ * <li>orgMemberDTOS: 折扣人员</li>
+ * <li>discount: 折扣</li>
+ * </ul>
  */
 public class ReserveDiscountStrategyDTO {
 
-    @ItemType(ReserveOrgmemberDTO.class)
-    private List<ReserveOrgmemberDTO> orgmemberDTOS;
+    @ItemType(ReserveOrgMemberDTO.class)
+    private List<ReserveOrgMemberDTO> orgMemberDTOS;
 
     private Double discount;
 
-    public List<ReserveOrgmemberDTO> getOrgmemberDTOS() {
-        return orgmemberDTOS;
+    public List<ReserveOrgMemberDTO> getOrgMemberDTOS() {
+        return orgMemberDTOS;
     }
 
-    public void setOrgmemberDTOS(List<ReserveOrgmemberDTO> orgmemberDTOS) {
-        this.orgmemberDTOS = orgmemberDTOS;
+    public void setOrgMemberDTOS(List<ReserveOrgMemberDTO> orgMemberDTOS) {
+        this.orgMemberDTOS = orgMemberDTOS;
     }
 
     public Double getDiscount() {

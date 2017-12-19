@@ -5,7 +5,10 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 /**
- * @author sw on 2017/12/18.
+ * <ul>
+ * <li>nextPageAnchor: 下一页瞄</li>
+ * <li>orderDTOS: 订单列表 {@link com.everhomes.rest.reserve.ReserveOrderDTO}</li>
+ * </ul>
  */
 public class SearchReserveOrdersResponse {
     private Long nextPageAnchor;

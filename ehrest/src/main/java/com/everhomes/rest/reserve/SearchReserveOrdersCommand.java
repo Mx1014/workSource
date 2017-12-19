@@ -3,7 +3,16 @@ package com.everhomes.rest.reserve;
 import com.everhomes.util.StringHelper;
 
 /**
- * @author sw on 2017/12/18.
+ * <ul>
+ * <li>startTime: 开始时间</li>
+ * <li>endTime: 结束时间</li>
+ * <li>spaceNo: 车位编号</li>
+ * <li>status: 订单状态 {@link com.everhomes.rest.reserve.ReserveOrderStatus}</li>
+ * <li>applicantEnterpriseName: 公司名称</li>
+ * <li>keyword: 关键字 </li>
+ * <li>pageAnchor: 分页瞄</li>
+ * <li>pageSize: 每页条数</li>
+ * </ul>
  */
 public class SearchReserveOrdersCommand {
     private Long startTime;

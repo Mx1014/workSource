@@ -6,7 +6,17 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 /**
- * @author sw on 2017/12/18.
+ * <ul>
+ * <li>namespaceId: 域空间</li>
+ * <li>ownerType: 归属的类型，{@link com.everhomes.rest.reserve.ReserveOwnerType}</li>
+ * <li>ownerId: 归属的ID，如小区ID</li>
+ * <li>resourceType: 资源类型</li>
+ * <li>resourceTypeId: 资源类型id</li>
+ * <li>refundStrategy: 退款策略 1:自定义 2：原价{@link com.everhomes.rest.reserve.ReserveOrderStrategyType}</li>
+ * <li>overtimeStrategy: 加收策略 1:自定义 2：原价 {@link com.everhomes.rest.reserve.ReserveOrderStrategyType}</li>
+ * <li>refundStrategies: 自定义策略列表 {@link com.everhomes.rest.reserve.ReserveRuleStrategyDTO}</li>
+ * <li>overtimeStrategies: 自定义策略列表 {@link com.everhomes.rest.reserve.ReserveRuleStrategyDTO}</li>
+ * </ul>
  */
 public class SetReserveOrderStrategyCommand {
 

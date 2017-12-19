@@ -3,13 +3,17 @@ package com.everhomes.rest.reserve;
 import com.everhomes.util.StringHelper;
 
 /**
- * @author sw on 2017/12/18.
+ * <ul>
+ * <li>namespaceId: 域空间</li>
+ * <li>contactPhone: 手机号</li>
+ * <li>contactName: 姓名</li>
+ * </ul>
  */
-public class ReserveOrgmemberDTO {
+public class ReserveOrgMemberDTO {
 
     private Integer namespaceId;
     private String contactPhone;
-    private String userName;
+    private String contactName;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -27,12 +31,12 @@ public class ReserveOrgmemberDTO {
         this.contactPhone = contactPhone;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getContactName() {
+        return contactName;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
     }
 
     @Override

@@ -5,7 +5,25 @@ import com.everhomes.util.StringHelper;
 import java.math.BigDecimal;
 
 /**
- * @author sw on 2017/12/18.
+ * <ul>
+ * <li>namespaceId: 域空间</li>
+ * <li>ownerType: 归属的类型，{@link com.everhomes.rest.reserve.ReserveOwnerType}</li>
+ * <li>ownerId: 归属的ID，如小区ID</li>
+ * <li>resourceType: 资源类型</li>
+ * <li>resourceTypeId: 资源类型id</li>
+ * <li>atMostAdvanceTime: 最多提前多少时间预定，返回毫秒</li>
+ * <li>atLeastAdvanceTime: 最少提前多少时间预定，返回毫秒</li>
+ * <li>dayOpenStartTime: 每天开放开始时间</li>
+ * <li>dayOpenEndTime: 每天开放结束时间</li>
+ * <li>holidayOpenFlag: 节假日开放预约  {@link com.everhomes.rest.reserve.ReserveCommonFlag}</li>
+ * <li>holidayType: 节假日类型 {@link com.everhomes.rest.reserve.ReserveHolidayType}</li>
+ * <li>timeType: 时间类型</li>
+ * <li>timeUnit: 时间单元</li>
+ * <li>workdayPrice: 工作日价格</li>
+ * <li>holidayPrice: 节假日价格</li>
+ * <li>autoAssign: 是否自动分配</li>
+ * <li>multiFlag: 是否支持多选 {@link com.everhomes.rest.reserve.ReserveCommonFlag}</li>
+ * </ul>
  */
 public class SetReserveOpenDayAndPriceCommand {
 
