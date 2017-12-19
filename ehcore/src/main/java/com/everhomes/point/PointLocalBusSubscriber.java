@@ -5,6 +5,7 @@ import com.everhomes.bus.LocalEvent;
 import com.everhomes.bus.LocalEventBus;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.point.PointEventLogStatus;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateUtils;
@@ -78,6 +79,7 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
             registerPointRuleCategory();
             initPointRuleCategoryQueue();
             initScheduledExecutorService();
+            initVMShutdownHook();
         }
     }
 
@@ -85,14 +87,20 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
         scheduledExecutorService.schedule(this::persistAllEventLog, SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
     }
 
+    private void initVMShutdownHook() {
+        // 系统终止hook
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            LOGGER.info("Point event log persist VM shutdown hook are triggered.");
+            persistAllEventLog();
+        }, "PointEventLogShutdownHookThread"));
+    }
+
     private void persistAllEventLog() {
         try {
-            lock.lock();
             pointEventGroupCache.keySet().forEach(this::persistGroupEventLog);
         } catch (Exception e) {
             LOGGER.error("Point persist group event log error", e);
         } finally {
-            lock.unlock();
             scheduledExecutorService.schedule(this::persistAllEventLog, SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
         }
     }
@@ -104,9 +112,9 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
                 LOGGER.info("Start to persist point event log");
             }
 
-            CopyOnWriteArrayList<PointEventLog> eventList = pointEventGroupCache.get(eventGroup);
             List<PointEventLog> removeLogs = new ArrayList<>();
             try {
+                CopyOnWriteArrayList<PointEventLog> eventList = pointEventGroupCache.get(eventGroup);
                 if (eventList.size() > 0) {
                     removeLogs.addAll(eventList);
                     eventList.removeAll(removeLogs);
@@ -221,6 +229,12 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
         log.setStatus(PointEventLogStatus.WAITING_FOR_PROCESS.getCode());
         log.setEventJson(StringHelper.toJsonString(localEvent));
 
+        // 同步事件
+        if (Objects.equals(localEvent.getSyncFlag(), TrueOrFalseFlag.TRUE.getCode())) {
+            doSyncEvent(processor1, log);
+            return Action.none;
+        }
+
         PointEventGroup eventGroup = processor1.getEventGroup(eventNameToPointEventGroupMap, localEvent, subscriptionPath);
         pointEventGroupCache.computeIfPresent(eventGroup, (group, pointEventLogs) -> {
             log.setCategoryId(eventGroup.getCategory().getId());
@@ -232,7 +246,17 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
             return pointEventLogs;
         });
 
-        processor2.hook(localEvent, subscriptionPath, eventGroup);
         return Action.none;
+    }
+
+    private void doSyncEvent(BasePointEventProcessor processor1, PointEventLog log) {
+        pointEventLogProvider.createPointEventLogsWithId(Collections.singletonList(log));
+
+        List<PointRule> pointRules = processor1.getPointRules(log.getEventName());
+        List<Long> cateIds = pointRules.stream().map(PointRule::getCategoryId).distinct().collect(Collectors.toList());
+        for (Long cateId : cateIds) {
+            PointRuleCategory category = pointRuleCategoryProvider.findById(cateId);
+            pointEventLogScheduler.doProcessGroup(category);
+        }
     }
 }

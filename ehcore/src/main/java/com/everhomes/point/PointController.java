@@ -86,7 +86,7 @@ public class PointController extends ControllerBase {
     @RequestMapping("listPointGoods")
     public RestResponse listPointGoods(ListPointGoodsCommand cmd) {
         cmd.setStatus(PointCommonStatus.ENABLED.getCode());
-        ListPointGoodsResponse response = pointService.listPointGoods(cmd);
+        ListPointGoodsResponse response = pointService.listEnabledPointGoods(cmd);
         return success(response);
     }
 

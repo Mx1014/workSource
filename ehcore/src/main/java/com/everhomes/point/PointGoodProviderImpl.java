@@ -8,7 +8,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.point.ListPointGoodsCommand;
 import com.everhomes.rest.point.PointCommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -85,13 +84,23 @@ public class PointGoodProviderImpl implements PointGoodProvider {
 	}
 
     @Override
-    public List<PointGood> listPointGood(Integer namespaceId, ListPointGoodsCommand cmd, int pageSize, ListingLocator locator) {
+    public List<PointGood> listPointGood(Integer namespaceId, Byte status, int pageSize, ListingLocator locator) {
         com.everhomes.server.schema.tables.EhPointGoods t = Tables.EH_POINT_GOODS;
         return this.query(locator, pageSize, (locator1, query) -> {
             query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
-            if (cmd.getStatus() != null) {
-                query.addConditions(t.STATUS.eq(cmd.getStatus()));
+            if (status != null) {
+                query.addConditions(t.STATUS.eq(status));
             }
+            return query;
+        });
+    }
+
+    @Override
+    public List<PointGood> listEnabledPointGoods(Integer namespaceId, int pageSize, ListingLocator locator) {
+        com.everhomes.server.schema.tables.EhPointGoods t = Tables.EH_POINT_GOODS;
+        return this.query(locator, pageSize, (locator1, query) -> {
+            query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+            query.addConditions(t.STATUS.eq(PointCommonStatus.ENABLED.getCode()));
             query.addOrderBy(t.TOP_TIME.desc());
             return query;
         });

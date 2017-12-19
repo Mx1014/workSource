@@ -7,7 +7,6 @@ import com.everhomes.point.processor.GeneralPointEventProcessor;
 import com.everhomes.rest.app.AppConstants;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -29,12 +28,6 @@ public class ForumPostLikePointEventProcessor extends GeneralPointEventProcessor
             return null;
         }
         return super.execute(localEvent, rule, pointSystem, pointRuleCategory);
-    }
-
-    @Override
-    public List<PointRule> getPointRules(PointSystem pointSystem, LocalEvent localEvent, PointEventLog log) {
-        String eventName = getEventName(localEvent, null);
-        return super.getPointRules(eventName);
     }
 
     @Override

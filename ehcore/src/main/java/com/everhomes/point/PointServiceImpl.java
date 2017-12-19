@@ -3,12 +3,15 @@ package com.everhomes.point;
 
 import com.everhomes.banner.Banner;
 import com.everhomes.banner.BannerProvider;
+import com.everhomes.bus.LocalEvent;
+import com.everhomes.bus.LocalEventBus;
 import com.everhomes.bus.SystemEvent;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.promotion.BizHttpRestCallProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.banner.BannerDTO;
 import com.everhomes.rest.point.*;
@@ -16,26 +19,25 @@ import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserTreasureDTO;
 import com.everhomes.server.schema.tables.pojos.EhBanners;
-import com.everhomes.server.schema.tables.pojos.EhPointGoods;
+import com.everhomes.server.schema.tables.pojos.EhPointBanners;
 import com.everhomes.server.schema.tables.pojos.EhPointTutorials;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateUtils;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.ValidatorUtil;
+import com.everhomes.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.io.UnsupportedEncodingException;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
@@ -98,6 +100,9 @@ public class PointServiceImpl implements PointService {
 
     @Autowired
     private PointBannerProvider pointBannerProvider;
+
+    @Autowired
+    private BizHttpRestCallProvider bizHttpRestCallProvider;
 
     @Override
     public ListPointSystemsResponse listPointSystems(ListPointSystemsCommand cmd) {
@@ -234,12 +239,6 @@ public class PointServiceImpl implements PointService {
 
         if (pointSystemResponse == null || pointSystemResponse.getSystems() == null || pointSystemResponse.getSystems().size() == 0) {
             point.setStatus(TrueOrFalseFlag.FALSE.getCode());
-
-            // point.setUrl(String.format("http://10.1.10.79/integral-management/build/index.html?systemId=%s&ehnavigatorstyle=2#/home#sign_suffix", 1));
-            // point.setStatus(TrueOrFalseFlag.TRUE.getCode());
-            // point.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
-            // point.setCount(UserContext.currentUserId());
-
             return;
         }
 
@@ -332,10 +331,6 @@ public class PointServiceImpl implements PointService {
             scoreDTO.setScore(0L);
         }
         return scoreDTO;
-
-        // PointScoreDTO dto = new PointScoreDTO();
-        // dto.setScore(UserContext.currentUserId());
-        // return dto;
     }
 
     @Override
@@ -373,24 +368,84 @@ public class PointServiceImpl implements PointService {
         ValidatorUtil.validate(cmd);
 
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        cmd.setPageSize(pageSize);
+        long pageNo = cmd.getPageAnchor() != null ? cmd.getPageAnchor() : 1;
+        Integer namespaceId = cmd.getNamespaceId() != null ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId();
 
-        ListingLocator locator = new ListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
-
-        List<PointGood> goods = pointGoodProvider.listPointGood(UserContext.getCurrentNamespaceId(), cmd, pageSize, locator);
-        List<PointGoodDTO> goodDTOS = goods.stream().map(this::toPointGoodDTO).collect(Collectors.toList());
-
-        ListPointGoodsResponse response = new ListPointGoodsResponse();
-        response.setGoods(goodDTOS);
-        response.setNextPageAnchor(locator.getAnchor());
-        return response;
+        List<PointGood> goods = pointGoodProvider.listPointGood(namespaceId, null, -1, new ListingLocator());
+        return fetchPointGoodsFromBiz(namespaceId, pageNo, pageSize, goods, new HashMap<>());
     }
 
-    private PointGoodDTO toPointGoodDTO(PointGood pointGood) {
-        PointGoodDTO dto = ConvertHelper.convert(pointGood, PointGoodDTO.class);
-        dto.setPosterUrl(parseURI(pointGood.getPosterUri(), EhPointGoods.class.getSimpleName(), pointGood.getId()));
+    private PointGoodDTO commodityToGoodDTO(PointCommodity commodity) {
+        PointGoodDTO dto = new PointGoodDTO();
+        dto.setId(0L);
+        dto.setDetailUrl(commodity.getDetailUrl());
+        dto.setPosterUrl(commodity.getDefaultPic());
+        dto.setNumber(commodity.getCommoNo());
+        dto.setDisplayName(commodity.getCommoName());
+        dto.setSoldAmount(commodity.getSellNum());
+        dto.setOriginalPrice(commodity.getPrice());
+        dto.setDiscountPrice(commodity.getDeductionMoney());
+        dto.setStatus(PointCommonStatus.DISABLED.getCode());
+        dto.setPoints(commodity.getDeductionIntegral());
         return dto;
+    }
+
+    @Override
+    public ListPointGoodsResponse listEnabledPointGoods(ListPointGoodsCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        long pageNo = cmd.getPageAnchor() != null ? cmd.getPageAnchor() : 1;
+        Integer namespaceId = cmd.getNamespaceId() != null ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId();
+
+        List<PointGood> goods = pointGoodProvider.listEnabledPointGoods(namespaceId, pageSize, new ListingLocator());
+
+        Map<String, Object> params = new HashMap<>();
+        List<ShopCommodityCmd> shopCommodityCmds = new ArrayList<>();
+        for (PointGood good : goods) {
+            ShopCommodityCmd shopCmd = new ShopCommodityCmd();
+            shopCmd.setCommoNo(good.getShopNo());
+            shopCmd.setShopNo(good.getShopNo());
+            shopCommodityCmds.add(shopCmd);
+        }
+        params.put("shopCommoditys", shopCommodityCmds);
+
+        return fetchPointGoodsFromBiz(namespaceId, pageNo, pageSize, goods, params);
+    }
+
+    private ListPointGoodsResponse fetchPointGoodsFromBiz(Integer namespaceId, Long pageNo, int pageSize, List<PointGood> goods, Map<String, Object> params) {
+        params.put("namespaceId", namespaceId);
+        params.put("pageSize", pageSize);
+        params.put("pageNo", pageNo);
+        try {
+            Map<String, PointGood> shopNoAndCommNoToCommMap = goods.stream().collect(Collectors.toMap(r -> r.getShopNo() + r.getCommodityNo(), r -> r));
+
+            ResponseEntity<String> entity = bizHttpRestCallProvider.syncRestCall("/openapi/commodity/queryEnabledPointCommodityByPage", StringHelper.toJsonString(params));
+            List<PointGoodDTO> dtoList = new ArrayList<>();
+            QueryEnabledPointCommodityByPageResponse response = (QueryEnabledPointCommodityByPageResponse) StringHelper.fromJsonString(entity.getBody(), QueryEnabledPointCommodityByPageResponse.class);
+            for (PointCommodity commodity : response.getResponseObject().getRows()) {
+                PointGoodDTO dto = commodityToGoodDTO(commodity);
+                PointGood good = shopNoAndCommNoToCommMap.get(commodity.getShopNo() + commodity.getCommoNo());
+                if (good != null) {
+                    dto.setId(good.getId());
+                    dto.setStatus(good.getStatus());
+                    dto.setTopStatus(good.getTopStatus());
+                    dto.setTopTime(good.getTopTime());
+                }
+                dtoList.add(dto);
+            }
+
+            ListPointGoodsResponse resp = new ListPointGoodsResponse();
+            resp.setGoods(dtoList);
+            if (response.getHasNext()) {
+                resp.setNextPageAnchor(pageNo + 1);
+            }
+            return resp;
+        } catch (InterruptedException | ExecutionException | UnsupportedEncodingException | TimeoutException e) {
+            LOGGER.error("Point biz call error", e);
+            throw RuntimeErrorException.errorWith(e, PointServiceErrorCode.SCOPE, PointServiceErrorCode.ERROR_POINT_BIZ_CALL_ERROR_CODE,
+                    "Point biz call error");
+        }
     }
 
     @Override
@@ -516,7 +571,6 @@ public class PointServiceImpl implements PointService {
 
         dbProvider.execute(status -> {
             pointSystemProvider.createPointSystem(pointSystem);
-            // doSnapshotPointRule(pointSystem);
             return true;
         });
         return toPointSystemDTO(pointSystem);
@@ -545,9 +599,6 @@ public class PointServiceImpl implements PointService {
             pointSystem.setExchangeCash(cmd.getExchangeCash());
         }
         if (cmd.getPointExchangeFlag() != null) {
-            if (!Objects.equals(cmd.getPointExchangeFlag(), pointSystem.getPointExchangeFlag())) {
-                // TODO notify biz server
-            }
             pointSystem.setPointExchangeFlag(cmd.getPointExchangeFlag());
         }
         if (cmd.getUserAgreement() != null) {
@@ -657,7 +708,7 @@ public class PointServiceImpl implements PointService {
             good.setTopTime(DateUtils.currentTimestamp());
         }
         pointGoodProvider.updatePointGood(good);
-        return toPointGoodDTO(good);
+        return new PointGoodDTO();
     }
 
     @Override
@@ -760,14 +811,15 @@ public class PointServiceImpl implements PointService {
 
     private void createTutorialToPointRuleMapping(List<PointTutorialMappingCommand> cmds, PointSystem pointSystem, PointTutorial tutorial) {
         if (cmds != null) {
-            for (PointTutorialMappingCommand map : cmds) {
-                PointTutorialToPointRuleMapping mapping = ConvertHelper.convert(map, PointTutorialToPointRuleMapping.class);
+            for (PointTutorialMappingCommand mappingCmd : cmds) {
+                PointTutorialToPointRuleMapping mapping = new PointTutorialToPointRuleMapping();
+                mapping.setRuleId(mappingCmd.getRuleId());
                 mapping.setSystemId(pointSystem.getId());
                 mapping.setTutorialId(tutorial.getId());
                 mapping.setNamespaceId(pointSystem.getNamespaceId());
-                mapping.setDescription(map.getDescription());
-                if (map.getDescription() == null || map.getDescription().trim().length() == 0) {
-                    PointRule rule = pointRuleProvider.findById(map.getRuleId());
+                mapping.setDescription(mapping.getDescription());
+                if (mapping.getDescription() == null || mapping.getDescription().trim().length() == 0) {
+                    PointRule rule = pointRuleProvider.findById(mapping.getRuleId());
                     mapping.setDescription(rule.getDisplayName());
                 }
                 pointTutorialToPointRuleMappingProvider.createPointTutorialToPointRuleMapping(mapping);
@@ -801,7 +853,9 @@ public class PointServiceImpl implements PointService {
     }
 
     private PointBannerDTO toPointBannerDTO(PointBanner banner) {
-        return ConvertHelper.convert(banner, PointBannerDTO.class);
+        PointBannerDTO dto = ConvertHelper.convert(banner, PointBannerDTO.class);
+        dto.setPosterUrl(parseURI(banner.getPosterUri(), EhPointBanners.class.getSimpleName(), banner.getId()));
+        return dto;
     }
 
     @Override
@@ -817,7 +871,7 @@ public class PointServiceImpl implements PointService {
         banner.setName(cmd.getName());
         banner.setActionType(cmd.getActionType());
         banner.setActionData(cmd.getActionData());
-        banner.setPosterPath(cmd.getPosterPath());
+        banner.setPosterUri(cmd.getPosterUri());
 
         pointBannerProvider.updatePointBanner(banner);
         return toPointBannerDTO(banner);
@@ -882,6 +936,14 @@ public class PointServiceImpl implements PointService {
         return toPointBannerDTO(banner);
     }
 
+    @Override
+    public PublishEventResultDTO publishEvent(PublishEventCommand cmd) {
+        ValidatorUtil.validate(cmd);
+        LocalEvent localEvent = (LocalEvent) StringHelper.fromJsonString(cmd.getEventJson(), LocalEvent.class);
+        LocalEventBus.publish(localEvent);
+        return null;
+    }
+
     private PointRuleDTO toPointRuleDTO(PointRule pointRule) {
         PointRuleDTO dto = ConvertHelper.convert(pointRule, PointRuleDTO.class);
         PointRuleCategory category = pointRuleCategoryProvider.findById(pointRule.getCategoryId());
@@ -896,13 +958,13 @@ public class PointServiceImpl implements PointService {
     }
 
     // 一年执行一次发送积分清零消息
-    // @Scheduled(cron = "0 0 18 24 12 ? ?")
+    @Scheduled(cron = "0 0 18 24 12 ?")
     public void everyYearEndSendMessageSchedule() {
         List<PointSystem> systemList = pointSystemProvider.getEnabledPointSystems(null);
     }
 
     // 一年执行一次积分清零操作
-    // @Scheduled(cron = "0 0 0 31 12 ? ?")
+    @Scheduled(cron = "0 0 0 31 12 ?")
     public void everyYearEndClearPointSchedule() {
         List<PointSystem> systemList = pointSystemProvider.getEnabledPointSystems(null);
     }

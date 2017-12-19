@@ -148,14 +148,15 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
         return subscriptionPath;
     }
 
-    @Override
+    /*@Override
     public List<PointRule> getPointRules(PointSystem pointSystem, LocalEvent localEvent, PointEventLog log) {
         List<PointRule> pointRules = getPointRules(localEvent.getEventName());
         if (pointRules != null) return pointRules;
         return new ArrayList<>();
-    }
+    }*/
 
-    protected List<PointRule> getPointRules(String eventName) {
+    @Override
+    public List<PointRule> getPointRules(String eventName) {
         String[] split = eventName.split("\\.");
         for (int i = split.length; i >= 0; i--) {
             String[] tokens = new String[i];
@@ -168,7 +169,7 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
                 return pointRuleProvider.listPointRuleByIds(ruleIds);
             }
         }
-        return null;
+        return new ArrayList<>();
     }
 
     protected boolean isValidEvent(LocalEvent localEvent) {

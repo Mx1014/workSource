@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
  * <ul>
  *     <li>id: id</li>
  *     <li>name: name</li>
- *     <li>posterPath: posterPath</li>
+ *     <li>posterUri: posterUri</li>
  *     <li>actionType: actionType</li>
  *     <li>actionData: actionData</li>
  * </ul>
@@ -18,7 +18,7 @@ public class UpdatePointBannerCommand {
     @NotNull
     private Long id;
     private String name;
-    private String posterPath;
+    private String posterUri;
     private Byte actionType;
     private String actionData;
 
@@ -38,12 +38,12 @@ public class UpdatePointBannerCommand {
         this.name = name;
     }
 
-    public String getPosterPath() {
-        return posterPath;
+    public String getPosterUri() {
+        return posterUri;
     }
 
-    public void setPosterPath(String posterPath) {
-        this.posterPath = posterPath;
+    public void setPosterUri(String posterUri) {
+        this.posterUri = posterUri;
     }
 
     public Byte getActionType() {

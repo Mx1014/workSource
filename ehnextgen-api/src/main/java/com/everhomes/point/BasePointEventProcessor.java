@@ -16,7 +16,7 @@ public interface BasePointEventProcessor {
 
     List<PointResultAction> getResultActions(List<PointAction> pointActions, LocalEvent localEvent, PointRule rule, PointSystem pointSystem, PointRuleCategory category);
 
-    List<PointRule> getPointRules(PointSystem pointSystem, LocalEvent localEvent, PointEventLog log);
+    List<PointRule> getPointRules(String eventName);
 
     void hook(LocalEvent localEvent, String subscriptionPath, PointEventGroup eventGroup);
 

@@ -20,6 +20,7 @@ import java.sql.Timestamp;
  *     <li>discountPrice: 折扣价格</li>
  *     <li>pointRuleDescription: 积分使用规则描述</li>
  *     <li>status: status</li>
+ *     <li>topStatus: topStatus</li>
  *     <li>topTime: topTime</li>
  *     <li>createTime: createTime</li>
  *     <li>updateTime: updateTime</li>
@@ -33,12 +34,13 @@ public class PointGoodDTO {
     private String posterUri;
     private String posterUrl;
     private String detailUrl;
-    private Long points;
-    private Long soldAmount;
+    private Integer points;
+    private Integer soldAmount;
     private BigDecimal originalPrice;
     private BigDecimal discountPrice;
     private String pointRuleDescription;
     private Byte status;
+    private Byte topStatus;
     private Timestamp topTime;
     private Timestamp createTime;
     private Timestamp updateTime;
@@ -99,19 +101,19 @@ public class PointGoodDTO {
         this.detailUrl = detailUrl;
     }
 
-    public Long getPoints() {
+    public Integer getPoints() {
         return points;
     }
 
-    public void setPoints(Long points) {
+    public void setPoints(Integer points) {
         this.points = points;
     }
 
-    public Long getSoldAmount() {
+    public Integer getSoldAmount() {
         return soldAmount;
     }
 
-    public void setSoldAmount(Long soldAmount) {
+    public void setSoldAmount(Integer soldAmount) {
         this.soldAmount = soldAmount;
     }
 
@@ -169,6 +171,14 @@ public class PointGoodDTO {
 
     public void setPointRuleDescription(String pointRuleDescription) {
         this.pointRuleDescription = pointRuleDescription;
+    }
+
+    public Byte getTopStatus() {
+        return topStatus;
+    }
+
+    public void setTopStatus(Byte topStatus) {
+        this.topStatus = topStatus;
     }
 
     @Override

@@ -4,16 +4,12 @@ import com.everhomes.bus.LocalEvent;
 import com.everhomes.bus.SystemEvent;
 import com.everhomes.group.Group;
 import com.everhomes.point.IPointEventProcessor;
-import com.everhomes.point.PointEventLog;
-import com.everhomes.point.PointRule;
-import com.everhomes.point.PointSystem;
 import com.everhomes.point.processor.GeneralPointEventProcessor;
 import com.everhomes.rest.group.ClubType;
 import com.everhomes.rest.group.GroupDTO;
 import com.everhomes.util.StringHelper;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -29,12 +25,6 @@ public class ClubCreatePointEventProcessor extends GeneralPointEventProcessor im
                 SystemEvent.GROUP_GROUP_CREATE.getCode(),
                 SystemEvent.GROUP_GROUP_APPROVAL.getCode()
         };
-    }
-
-    @Override
-    public List<PointRule> getPointRules(PointSystem pointSystem, LocalEvent localEvent, PointEventLog log) {
-        String eventName = getEventName(localEvent, null);
-        return super.getPointRules(eventName);
     }
 
     @Override

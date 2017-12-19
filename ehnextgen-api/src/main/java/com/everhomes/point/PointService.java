@@ -85,4 +85,8 @@ public interface PointService {
     void reorderPointBanners(ReorderPointBannersCommand cmd);
 
     PointBannerDTO updatePointBannerStatus(UpdatePointBannerStatusCommand cmd);
+
+    PublishEventResultDTO publishEvent(PublishEventCommand cmd);
+
+    ListPointGoodsResponse listEnabledPointGoods(ListPointGoodsCommand cmd);
 }

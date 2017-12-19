@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
  * 积分
  * Created by xq.tian on 2017/11/23.
  */
-@RestDoc(value="Point admin controller", site="core")
+@RestDoc(value = "Point admin controller", site = "core")
 @RestController
 @RequestMapping("/admin/point")
 public class PointAdminController extends ControllerBase {
@@ -350,63 +350,6 @@ public class PointAdminController extends ControllerBase {
     public RestResponse reorderPointBanners(ReorderPointBannersCommand cmd) {
         pointService.reorderPointBanners(cmd);
         return SUCCESS;
-    }
-
-    // 给电商提供的接口
-
-    /**
-     * <b>URL: /admin/point/notifySyncPointGoods</b>
-     * <p>通知积分系统去读取电商的数据</p>
-     */
-    @RestReturn(String.class)
-    @RequestMapping("notifySyncPointGoods")
-    public RestResponse notifySyncPointGoods() {
-
-        return SUCCESS;
-    }
-
-    /**
-     * <b>URL: /admin/point/publishEvent</b>
-     * <p>发布事件</p>
-     */
-    @RestReturn(PublishEventResultDTO.class)
-    @RequestMapping("publishEvent")
-    public RestResponse publishEvent(PublishEventCommand cmd) {
-
-        return SUCCESS;
-    }
-
-    /**
-     * <b>URL: /admin/point/getUserPoint</b>
-     * <p>获取用户积分</p>
-     */
-    @RestReturn(PointScoreDTO.class)
-    @RequestMapping("getUserPoint")
-    public RestResponse getUserPoint(GetUserPointCommand cmd) {
-        PointScoreDTO dto = pointService.getUserPoint(cmd);
-        return success(dto);
-    }
-
-    /**
-     * <b>URL: /admin/point/getPointRule</b>
-     * <p>获取积分规则</p>
-     */
-    @RestReturn(PointRuleDTO.class)
-    @RequestMapping("getPointRule")
-    public RestResponse getPointRule(GetPointRuleCommand cmd) {
-        PointRuleDTO dto = pointService.getPointRule(cmd);
-        return success(dto);
-    }
-
-    /**
-     * <b>URL: /admin/point/getEnabledPointSystem</b>
-     * <p>获取启用的积分系统</p>
-     */
-    @RestReturn(GetEnabledPointSystemResponse.class)
-    @RequestMapping("getEnabledPointSystem")
-    public RestResponse getEnabledPointSystem(GetEnabledPointSystemCommand cmd) {
-        GetEnabledPointSystemResponse response = pointService.getEnabledPointSystem(cmd);
-        return success(response);
     }
 
     private RestResponse success(Object o) {

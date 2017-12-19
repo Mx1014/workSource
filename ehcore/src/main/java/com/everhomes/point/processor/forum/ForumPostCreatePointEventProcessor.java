@@ -4,9 +4,6 @@ import com.everhomes.bus.LocalEvent;
 import com.everhomes.bus.SystemEvent;
 import com.everhomes.forum.Post;
 import com.everhomes.point.IPointEventProcessor;
-import com.everhomes.point.PointEventLog;
-import com.everhomes.point.PointRule;
-import com.everhomes.point.PointSystem;
 import com.everhomes.point.processor.GeneralPointEventProcessor;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.forum.ForumModuleType;
@@ -14,7 +11,6 @@ import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.util.StringHelper;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -28,12 +24,6 @@ public class ForumPostCreatePointEventProcessor extends GeneralPointEventProcess
     @Override
     public String[] init() {
         return new String[]{SystemEvent.FORUM_POST_CREATE.getCode()};
-    }
-
-    @Override
-    public List<PointRule> getPointRules(PointSystem pointSystem, LocalEvent localEvent, PointEventLog log) {
-        String eventName = getEventName(localEvent, "");
-        return super.getPointRules(eventName);
     }
 
     @Override
