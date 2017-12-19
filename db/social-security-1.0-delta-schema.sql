@@ -108,7 +108,7 @@ CREATE TABLE `eh_social_security_payments` (
   `user_id` BIGINT,
   `detail_id` BIGINT,
   `pay_month` VARCHAR (8) DEFAULT NULL COMMENT 'yyyymm',
-  `after_pay_flag` TINYINT COMMENT '补缴标记',
+  `after_pay_flag` TINYINT DEFAULT 0 COMMENT '补缴标记',
   `household_type` VARCHAR (32) COMMENT '户籍类型',
   `pay_item` VARCHAR (32) COMMENT '缴费项:医疗/养老/失业/工伤/生育/大病/残障金/补充医疗',
   `company_radix` DECIMAL (10, 2) COMMENT '企业基数',
@@ -137,7 +137,7 @@ CREATE TABLE `eh_accumulation_fund_payments` (
   `user_id` BIGINT,
   `detail_id` BIGINT,
   `pay_month` VARCHAR (8) DEFAULT NULL COMMENT 'yyyymm',
-  `after_pay_flag` TINYINT COMMENT '补缴标记',
+  `after_pay_flag` TINYINT  DEFAULT 0 COMMENT '补缴标记',
   `household_type` VARCHAR (32) COMMENT '户籍类型',
   `company_radix` DECIMAL (10, 2) COMMENT '企业基数',
   `company_ratio` INT COMMENT '企业比例万分之 eq:100=1%;1=0.01%',
@@ -154,7 +154,7 @@ CREATE TABLE `eh_accumulation_fund_payments` (
   KEY `i_eh_organization_id` (`organization_id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
--- 社保缴费表
+-- 社保缴费历史表
 CREATE TABLE `eh_social_security_payment_logs` (
   `id` BIGINT,
   `city_id` BIGINT DEFAULT '0',
@@ -163,7 +163,7 @@ CREATE TABLE `eh_social_security_payment_logs` (
   `user_id` BIGINT,
   `detail_id` BIGINT,
   `pay_month` VARCHAR (8) DEFAULT NULL COMMENT 'yyyymm',
-  `after_pay_flag` TINYINT COMMENT '补缴标记',
+  `after_pay_flag` TINYINT DEFAULT 0 COMMENT '补缴标记',
   `household_type` VARCHAR (32) COMMENT '户籍类型',
   `pay_item` VARCHAR (32) COMMENT '缴费项:医疗/养老/失业/工伤/生育/大病/残障金/补充医疗',
   `company_radix` DECIMAL (10, 2) COMMENT '企业基数',
