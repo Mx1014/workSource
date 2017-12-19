@@ -14,6 +14,14 @@ public class DoorAccess extends EhDoorAccess {
         return StringHelper.toJsonString(this);
     }
     
+    public String getDisplayNameNotEmpty() {
+        if(this.getDisplayName() == null) {
+            return this.getName();
+        }
+        
+        return this.getDisplayName();
+    }
+    
     public boolean isVip() {
         if(this.getName() != null && this.getName().toLowerCase().indexOf("vip") >= 0) {
             return true;

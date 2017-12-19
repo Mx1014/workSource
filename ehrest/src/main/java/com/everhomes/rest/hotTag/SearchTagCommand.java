@@ -14,18 +14,19 @@ import com.everhomes.util.StringHelper;
  */
 public class SearchTagCommand {
 
-	private String keyword;
+	private Integer namespaceId;
+
+	private Byte moduleType;
+
+	private Long categoryId;
 
 	private String serviceType;
+
+	private String keyword;
 
 	private Long pageAnchor;
 
 	private Integer pageSize;
-
-	private Integer namespaceId;
-
-	private Long categoryId;
-
 	public String getKeyword() {
 		return keyword;
 	}
@@ -72,6 +73,14 @@ public class SearchTagCommand {
 
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
+	}
+
+	public Byte getModuleType() {
+		return moduleType;
+	}
+
+	public void setModuleType(Byte moduleType) {
+		this.moduleType = moduleType;
 	}
 
 	@Override

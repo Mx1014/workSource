@@ -359,6 +359,14 @@ public class WXAuthController {// extends ControllerBase
 	    } else {
 	        baseUrl = url;
 	    }
+
+        // 如果hash有"?"，则hash可能带有参数，并且确定base不会有参数，如果base还有参数的话本身就是错误的（不考虑这种情况）。
+        pos = hashUrl.indexOf('?');
+        if(pos != -1) {
+            String sourceParam = hashUrl.substring(pos);
+            baseUrl = baseUrl + sourceParam;
+            hashUrl = hashUrl.substring(0, pos);
+        }
 	    
 	    // 若有问号，代表着有参数
 	    pos = baseUrl.indexOf('?');

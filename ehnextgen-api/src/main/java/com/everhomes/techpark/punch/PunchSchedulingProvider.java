@@ -52,4 +52,6 @@ public interface PunchSchedulingProvider {
 	List<PunchScheduling> queryPunchSchedulings(Long id, Byte status);
 
 	void deletePunchSchedulingByOwnerAndTarget(String ownerType, Long ownerId, String targetType, Long targetId, java.sql.Date ruleDate, Byte status);
+
+	void updatePunchSchedulingsStatusByDate(Byte status, Long ruleId, java.sql.Date date);
 }

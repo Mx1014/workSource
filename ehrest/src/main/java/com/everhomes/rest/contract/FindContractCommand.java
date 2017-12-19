@@ -22,6 +22,17 @@ public class FindContractCommand {
 
     private Long partyAId;
 
+    public FindContractCommand() {
+    }
+
+    public FindContractCommand(Long id, String contractNumber, Integer namespaceId, Long communityId, Long partyAId) {
+        this.id = id;
+        this.contractNumber = contractNumber;
+        this.namespaceId = namespaceId;
+        this.communityId = communityId;
+        this.partyAId = partyAId;
+    }
+
     public Long getId() {
         return id;
     }

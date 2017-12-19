@@ -7,7 +7,22 @@ public class EquipmentInspectionEquipments extends EhEquipmentInspectionEquipmen
 
 	private static final long serialVersionUID = -8471061039276564577L;
 
-	@Override
+	//invoke 赋值时候防止异常
+	private  String attachments;
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    public String getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(String attachments) {
+        this.attachments = attachments;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

@@ -10,6 +10,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -2287,5 +2288,32 @@ public class FamilyServiceImpl implements FamilyService {
 			this.rejectMember(member);
 		}
         
+	}
+	
+	/**
+	 * 用于测试锁的获取
+	 * @param expression  格式：锁的key + 逗号 + 时间(毫秒) + 锁获取的编号
+	 *                                    其中锁的key必填，参考：{@link com.everhomes.coordinator.CoordinationLocks}
+	 *                                    时间以毫秒为单位，不填是默认为5秒；锁的编号用于在日志中识别是第几个锁，不填则默认为时间戳；
+	 *                                    这几项信息使用逗号分隔
+	 */
+	public void testLockAquiring(TestLockAquiringCommand cmd) {
+	    String lockCode = cmd.getLockCode(); // 锁对应的key，如 CoordinationLocks.CREATE_RESOURCE.getCode()
+	    long millis = (cmd.getLockTimeout() == null) ? 5000L : cmd.getLockTimeout();  // 持有锁的时间
+	    long number = (cmd.getNumber() == null) ? System.currentTimeMillis() : cmd.getNumber(); // 锁的编号
+	    
+	    if(lockCode != null) {
+	        long startTime = System.currentTimeMillis();
+	        final long tmpMillis = millis;
+    	    coordinationProvider.getNamedLock(lockCode).enter(() -> {
+                Thread.sleep(tmpMillis);
+                return null;
+            });
+    	    long endTime = System.currentTimeMillis();
+    	    if(LOGGER.isDebugEnabled()) {
+    	        LOGGER.debug("Test aquiring lock(release), lockCode={}, millis={}, number={}, elapse={}", 
+    	                lockCode, millis, number, (endTime - startTime));
+    	    }
+	    }
 	}
 }

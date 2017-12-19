@@ -170,6 +170,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("createCustomerTax")
     @RestReturn(value = String.class)
     public RestResponse createCustomerTax(@Valid CreateCustomerTaxCommand cmd) {
+        customerService.createCustomerTax(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -183,6 +184,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("updateCustomerTax")
     @RestReturn(value = String.class)
     public RestResponse updateCustomerTax(@Valid UpdateCustomerTaxCommand cmd) {
+        customerService.updateCustomerTax(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -196,6 +198,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("deleteCustomerTax")
     @RestReturn(value = String.class)
     public RestResponse deleteCustomerTax(@Valid DeleteCustomerTaxCommand cmd) {
+        customerService.deleteCustomerTax(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -203,13 +206,13 @@ public class CustomerController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /customer/findCustomerTax</b>
+     * <b>URL: /customer/getCustomerTax</b>
      * <p>查看企业客户税务信息</p>
      */
-    @RequestMapping("findCustomerTax")
+    @RequestMapping("getCustomerTax")
     @RestReturn(value = CustomerTaxDTO.class)
-    public RestResponse findCustomerTax(@Valid GetCustomerTaxCommand cmd) {
-        RestResponse response = new RestResponse();
+    public RestResponse getCustomerTax(@Valid GetCustomerTaxCommand cmd) {
+        RestResponse response = new RestResponse(customerService.getCustomerTax(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -222,7 +225,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("listCustomerTaxes")
     @RestReturn(value = CustomerTaxDTO.class, collection = true)
     public RestResponse listCustomerTaxes(@Valid ListCustomerTaxesCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(customerService.listCustomerTaxes(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -236,6 +239,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("createCustomerAccount")
     @RestReturn(value = String.class)
     public RestResponse createCustomerAccount(@Valid CreateCustomerAccountCommand cmd) {
+        customerService.createCustomerAccount(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -249,6 +253,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("updateCustomerAccount")
     @RestReturn(value = String.class)
     public RestResponse updateCustomerAccount(@Valid UpdateCustomerAccountCommand cmd) {
+        customerService.updateCustomerAccount(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -262,6 +267,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("deleteCustomerAccount")
     @RestReturn(value = String.class)
     public RestResponse deleteCustomerAccount(@Valid DeleteCustomerAccountCommand cmd) {
+        customerService.deleteCustomerAccount(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -269,13 +275,13 @@ public class CustomerController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /customer/findCustomerAccount</b>
+     * <b>URL: /customer/getCustomerAccount</b>
      * <p>查看企业客户银行账号</p>
      */
-    @RequestMapping("findCustomerAccount")
+    @RequestMapping("getCustomerAccount")
     @RestReturn(value = CustomerAccountDTO.class)
-    public RestResponse findCustomerAccount(@Valid GetCustomerAccountCommand cmd) {
-        RestResponse response = new RestResponse();
+    public RestResponse getCustomerAccount(@Valid GetCustomerAccountCommand cmd) {
+        RestResponse response = new RestResponse(customerService.getCustomerAccount(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -288,7 +294,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("listCustomerAccounts")
     @RestReturn(value = CustomerAccountDTO.class, collection = true)
     public RestResponse listCustomerAccounts(@Valid ListCustomerAccountsCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(customerService.listCustomerAccounts(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1185,4 +1191,142 @@ public class CustomerController extends ControllerBase {
         return response;
     }
 
+
+    //入驻信息
+    /**
+     * <b>URL: /customer/createCustomerEntryInfo</b>
+     * <p>新建入驻信息</p>
+     */
+    @RequestMapping("createCustomerEntryInfo")
+    @RestReturn(value = String.class)
+    public RestResponse createCustomerEntryInfo(@Valid CreateCustomerEntryInfoCommand cmd) {
+        customerService.createCustomerEntryInfo(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/updateCustomerEntryInfo</b>
+     * <p>修改入驻信息</p>
+     */
+    @RequestMapping("updateCustomerEntryInfo")
+    @RestReturn(value = String.class)
+    public RestResponse updateCustomerEntryInfo(@Valid UpdateCustomerEntryInfoCommand cmd) {
+        customerService.updateCustomerEntryInfo(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/deleteCustomerEntryInfo</b>
+     * <p>删除入驻信息</p>
+     */
+    @RequestMapping("deleteCustomerEntryInfo")
+    @RestReturn(value = String.class)
+    public RestResponse deleteCustomerEntryInfo(@Valid DeleteCustomerEntryInfoCommand cmd) {
+        customerService.deleteCustomerEntryInfo(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/getCustomerEntryInfo</b>
+     * <p>查看入驻信息</p>
+     */
+    @RequestMapping("getCustomerEntryInfo")
+    @RestReturn(value = CustomerEntryInfoDTO.class)
+    public RestResponse getCustomerEntryInfo(@Valid GetCustomerEntryInfoCommand cmd) {
+        RestResponse response = new RestResponse(customerService.getCustomerEntryInfo(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listCustomerEntryInfos</b>
+     * <p>列出入驻信息</p>
+     */
+    @RequestMapping("listCustomerEntryInfos")
+    @RestReturn(value = CustomerEntryInfoDTO.class, collection = true)
+    public RestResponse listCustomerEntryInfos(@Valid ListCustomerEntryInfosCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCustomerEntryInfos(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    //离场信息
+    /**
+     * <b>URL: /customer/createCustomerDepartureInfo</b>
+     * <p>新建离场信息</p>
+     */
+    @RequestMapping("createCustomerDepartureInfo")
+    @RestReturn(value = String.class)
+    public RestResponse createCustomerDepartureInfo(@Valid CreateCustomerDepartureInfoCommand cmd) {
+        customerService.createCustomerDepartureInfo(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/updateCustomerDepartureInfo</b>
+     * <p>修改离场信息</p>
+     */
+    @RequestMapping("updateCustomerDepartureInfo")
+    @RestReturn(value = String.class)
+    public RestResponse updateCustomerDepartureInfo(@Valid UpdateCustomerDepartureInfoCommand cmd) {
+        customerService.updateCustomerDepartureInfo(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/deleteCustomerDepartureInfo</b>
+     * <p>删除离场信息</p>
+     */
+    @RequestMapping("deleteCustomerDepartureInfo")
+    @RestReturn(value = String.class)
+    public RestResponse deleteCustomerDepartureInfo(@Valid DeleteCustomerDepartureInfoCommand cmd) {
+        customerService.deleteCustomerDepartureInfo(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/getCustomerDepartureInfo</b>
+     * <p>查看离场信息</p>
+     */
+    @RequestMapping("getCustomerDepartureInfo")
+    @RestReturn(value = CustomerDepartureInfoDTO.class)
+    public RestResponse getCustomerDepartureInfo(@Valid GetCustomerDepartureInfoCommand cmd) {
+        RestResponse response = new RestResponse(customerService.getCustomerDepartureInfo(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listCustomerDepartureInfos</b>
+     * <p>列出离场信息</p>
+     */
+    @RequestMapping("listCustomerDepartureInfos")
+    @RestReturn(value = CustomerDepartureInfoDTO.class, collection = true)
+    public RestResponse listCustomerDepartureInfos(@Valid ListCustomerDepartureInfosCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCustomerDepartureInfos(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

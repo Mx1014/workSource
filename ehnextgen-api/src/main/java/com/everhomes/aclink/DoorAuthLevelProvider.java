@@ -26,4 +26,8 @@ public interface DoorAuthLevelProvider {
 
     DoorAuthLevel findAuthLevel(Long levelId, Byte levelType, Long doorId);
 
+    ListDoorAuthLevelResponse findAuthLevelsWithOrg(ListDoorAuthLevelCommand cmd);
+
+    ListDoorAuthLevelResponse findAuthLevelsWithBuilding(ListDoorAuthLevelCommand cmd);
+
 }

@@ -20,16 +20,17 @@ public enum HotTagServiceType {
     public String getCode() {
         return this.code;
     }
-    
-    public static HotTagServiceType fromCode(String code) {
-    	if(code == null) {
-    		return null;
-    	}
 
-        if(code.equalsIgnoreCase(ACTIVITY.getCode())) {
-        	return ACTIVITY;
+    public static HotTagServiceType fromCode(String code) {
+
+        if(code == null){
+            return null;
         }
-        
+
+        for(HotTagServiceType v : HotTagServiceType.values()) {
+            if(v.getCode() == code)
+                return v;
+        }
         return null;
     }
 

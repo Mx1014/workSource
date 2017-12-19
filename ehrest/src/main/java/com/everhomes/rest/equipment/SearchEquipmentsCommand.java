@@ -6,16 +6,21 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
- *  <li>ownerId: 设备所属组织的id</li>
+ *  <li>ownerId: 设备所属组织等的id</li>
  *  <li>ownerType: 设备所属组织类型，参考{@link com.everhomes.rest.quality.OwnerType}</li>
  *  <li>targetId: 设备所属管理处id</li>
  *  <li>targetType: 设备所属管理处类型</li>
  *  <li>categoryId: 设备类型id</li>
  *  <li>status: 设备状态 参考{@link com.everhomes.rest.equipment.EquipmentStatus}</li>
+ *  <li>reviewStatus: 设备-标准关联状态，参考{@link com.everhomes.rest.equipment.EquipmentReviewStatus}</li>
  *  <li>keyword: 查询关键字</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
+ *  <li>namespaceId: 域空间id</li>
+ *  <li>communityId: 项目id</li>
+ *  <li>moduleName: 模块名</li>
+ *  <li>groupPath: 所属字段组在系统中的path</li>
  * </ul>
  */
 public class SearchEquipmentsCommand {
@@ -29,11 +34,9 @@ public class SearchEquipmentsCommand {
 	private Long targetId;
 	
 	private String targetType;
-
-	@Deprecated
+	
 	private Byte reviewStatus;
-
-	@Deprecated
+	
 	private Byte reviewResult;
 	
 	private Byte status;
@@ -48,7 +51,14 @@ public class SearchEquipmentsCommand {
 	
 	private Long inspectionCategoryId;
 
-	
+	private Integer namespaceId;
+
+	private Long communityId;
+
+	private String moduleName;
+
+	private String groupPath;
+
 	public Long getInspectionCategoryId() {
 		return inspectionCategoryId;
 	}
@@ -143,6 +153,38 @@ public class SearchEquipmentsCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public String getModuleName() {
+		return moduleName;
+	}
+
+	public void setModuleName(String moduleName) {
+		this.moduleName = moduleName;
+	}
+
+	public String getGroupPath() {
+		return groupPath;
+	}
+
+	public void setGroupPath(String groupPath) {
+		this.groupPath = groupPath;
 	}
 
 	@Override

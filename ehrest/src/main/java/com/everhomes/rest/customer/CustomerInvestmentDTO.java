@@ -1,6 +1,7 @@
 package com.everhomes.rest.customer;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 
 /**
  * <ul>
@@ -22,6 +23,24 @@ public class CustomerInvestmentDTO {
     private String governmentProject;
     private BigDecimal bankLoans;
     private BigDecimal equityFinancing;
+    private Timestamp investmentTime;
+    private String investmentRound;
+
+    public String getInvestmentRound() {
+        return investmentRound;
+    }
+
+    public void setInvestmentRound(String investmentRound) {
+        this.investmentRound = investmentRound;
+    }
+
+    public Timestamp getInvestmentTime() {
+        return investmentTime;
+    }
+
+    public void setInvestmentTime(Timestamp investmentTime) {
+        this.investmentTime = investmentTime;
+    }
 
     public BigDecimal getBankLoans() {
         return bankLoans;

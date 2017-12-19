@@ -39,6 +39,7 @@ import java.sql.Timestamp;
  *     <li>currentLane: 当前泳道</li>
  *     <li>evaluateBtn: 评价按钮，替代原来的needEvaluate字段，统一使用fireButton接口提交评价 {@link com.everhomes.rest.flow.FlowButtonDTO}</li>
  *     <li>concurrentFlag: 是否是并发执行标记</li>
+ *     <li>routeUri: 路由跳转</li>
  * </ul>
  */
 public class FlowCaseDTO {
@@ -78,6 +79,8 @@ public class FlowCaseDTO {
     private FlowButtonDTO evaluateBtn;
     private Byte concurrentFlag;
 
+    private String routeUri;
+
     public Long getId() {
         return id;
     }
@@ -116,6 +119,14 @@ public class FlowCaseDTO {
 
     public void setApplierPhone(String applierPhone) {
         this.applierPhone = applierPhone;
+    }
+
+    public String getRouteUri() {
+        return routeUri;
+    }
+
+    public void setRouteUri(String routeUri) {
+        this.routeUri = routeUri;
     }
 
     public Long getFlowMainId() {

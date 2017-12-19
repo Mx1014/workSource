@@ -11,6 +11,7 @@ public interface ZjSyncdataBackupProvider {
     void updateZjSyncdataBackup(ZjSyncdataBackup backup);
 
     List<ZjSyncdataBackup> listZjSyncdataBackupByParam(Integer namespaceId, Byte dataType);
+    List<ZjSyncdataBackup> listZjSyncdataBackupByParam(Integer namespaceId, String communityIdentifier, Byte dataType);
 
     void updateZjSyncdataBackupInactive(List<ZjSyncdataBackup> backupList);
 }

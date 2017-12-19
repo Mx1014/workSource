@@ -36,5 +36,9 @@ public interface UserAdminProvider {
     List<Address> getAddressByApartments(String buildingName, String apartment_name);
     
     Address createAddress(Address address);
+
+    List<UserIdentifier> listAllVerifyCodeByPhone(
+            CrossShardListingLocator locator, String phone, int count,
+            ListingQueryBuilderCallback callback);
     
 }

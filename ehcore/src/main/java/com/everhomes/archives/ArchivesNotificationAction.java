@@ -28,7 +28,7 @@ public class ArchivesNotificationAction implements Runnable {
 
     private List<ArchivesNotifications> notifyLists;
 
-    private Integer hour;
+//    private Integer hour;
 
     @Override
     public void run() {

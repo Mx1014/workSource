@@ -26,9 +26,9 @@ public interface ContractProvider {
 
 	List<Contract> listContractByNamespaceId(Integer namespaceId, int from, int pageSize);
 
-	List<Contract> listContractsByEndDateRange(Timestamp minValue, Timestamp maxValue);
+	List<Contract> listContractsByEndDateRange(Timestamp minValue, Timestamp maxValue, Integer namespaceId);
 
-	List<Contract> listContractsByCreateDateRange(Timestamp minValue, Timestamp maxValue);
+	List<Contract> listContractsByCreateDateRange(Timestamp minValue, Timestamp maxValue, Integer namespaceId);
 
 	void deleteContract(Contract contract);
 
@@ -36,12 +36,15 @@ public interface ContractProvider {
 
 	List<Contract> listContractByOrganizationId(Long organizationId);
 	List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType);
+	List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType, Byte status);
 
 	Map<Long, Contract> listContractsByIds(List<Long> ids);
 	List<Contract> listContracts(CrossShardListingLocator locator, Integer pageSize);
 
 	Contract findActiveContractByContractNumber(Integer namespaceId, String contractNumber);
 
+	List<Contract> listContractByAddressId(Long addressId);
+	List<Contract> listContractByBuildingName(String buildingName, Long communityId);
 
     List<Object> findCustomerByContractNum(String contractNum);
 
@@ -49,5 +52,8 @@ public interface ContractProvider {
 	void updateContractParam(ContractParam param);
 	ContractParam findContractParamByCommunityId(Long communityId);
 	Map<Long, List<Contract>> listContractGroupByCommunity();
+	String findLastContractVersionByCommunity(Integer namespaceId, Long communityId);
 
+	List<Contract> listContractByNamespaceType(Integer namespaceId, String namespaceType, Long communityId);
+	List<Contract> listContractsByAddressId(Long addressId);
 }

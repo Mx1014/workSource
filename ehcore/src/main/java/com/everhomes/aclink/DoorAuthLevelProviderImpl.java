@@ -7,11 +7,15 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Field;
 import org.jooq.Record;
+import org.jooq.SelectOffsetStep;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,6 +27,7 @@ import com.everhomes.rest.aclink.ListDoorAuthLevelResponse;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhDoorAuthLevelDao;
+import com.everhomes.server.schema.tables.pojos.EhDoorAuth;
 import com.everhomes.server.schema.tables.pojos.EhDoorAuthLevel;
 import com.everhomes.server.schema.tables.records.EhDoorAuthLevelRecord;
 import com.everhomes.sharding.ShardingProvider;
@@ -192,5 +197,128 @@ public class DoorAuthLevelProviderImpl implements DoorAuthLevelProvider {
         obj.setStatus(DoorAuthStatus.VALID.getCode());
         Long l2 = DateHelper.currentGMTTime().getTime();
         obj.setCreateTime(new Timestamp(l2));
+    }
+
+    @Override
+    public ListDoorAuthLevelResponse findAuthLevelsWithOrg(ListDoorAuthLevelCommand cmd) {
+        ListDoorAuthLevelResponse resp = new ListDoorAuthLevelResponse();
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<DoorAuthLevelDTO> dtos = new ArrayList<DoorAuthLevelDTO>();
+        resp.setDtos(dtos);
+        
+        Condition cond = Tables.EH_ORGANIZATIONS.NAME.like(cmd.getKeyword() + "%")
+                .and(Tables.EH_DOOR_AUTH_LEVEL.LEVEL_TYPE.eq(cmd.getLevelType()))
+                .and(Tables.EH_DOOR_AUTH_LEVEL.DOOR_ID.eq(cmd.getDoorId()))
+                .and(Tables.EH_DOOR_AUTH_LEVEL.STATUS.eq(DoorAuthStatus.VALID.getCode()))
+                ;
+        
+        if(cmd.getLevelId() != null) {
+            cond = cond.and(Tables.EH_DOOR_AUTH_LEVEL.LEVEL_ID.eq(cmd.getLevelId()));
+        }
+        if(locator.getAnchor() != null) {
+            cond = cond.and(Tables.EH_DOOR_AUTH_LEVEL.ID.lt(locator.getAnchor()));
+        }
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAuthLevel.class));
+        SelectOffsetStep<Record> step = context.select().from(Tables.EH_DOOR_AUTH_LEVEL).join(Tables.EH_ORGANIZATIONS)
+        .on(Tables.EH_DOOR_AUTH_LEVEL.LEVEL_ID.eq(Tables.EH_ORGANIZATIONS.ID)).where(cond)
+        .orderBy(Tables.EH_DOOR_AUTH_LEVEL.ID.desc()).limit(cmd.getPageSize());
+        
+        step.fetch().map(r ->{
+            
+            DoorAuthLevelDTO o = new DoorAuthLevelDTO();
+            o.setStatus(r.getValue((Field<Byte>)r.field(Tables.EH_DOOR_AUTH_LEVEL.STATUS)));
+            o.setRightRemote(r.getValue((Field<Byte>)r.field(Tables.EH_DOOR_AUTH_LEVEL.RIGHT_REMOTE)));
+            o.setOperatorId(r.getValue((Field<Long>)r.field(Tables.EH_DOOR_AUTH_LEVEL.OPERATOR_ID)));
+            o.setRightVisitor(r.getValue((Field<Byte>)r.field(Tables.EH_DOOR_AUTH_LEVEL.RIGHT_VISITOR)));
+            o.setCreateTime(r.getValue((Field<Timestamp>)r.field(Tables.EH_DOOR_AUTH_LEVEL.CREATE_TIME)));
+            o.setRightOpen(r.getValue((Field<Byte>)r.field(Tables.EH_DOOR_AUTH_LEVEL.RIGHT_OPEN)));
+            o.setOwnerType(r.getValue((Field<Byte>)r.field(Tables.EH_DOOR_AUTH_LEVEL.OWNER_TYPE)));
+            o.setLevelId(r.getValue((Field<Long>)r.field(Tables.EH_DOOR_AUTH_LEVEL.LEVEL_ID)));
+            o.setNamespaceId(r.getValue((Field<Integer>)r.field(Tables.EH_DOOR_AUTH_LEVEL.NAMESPACE_ID)));
+            o.setOwnerId(r.getValue((Field<Long>)r.field(Tables.EH_DOOR_AUTH_LEVEL.OWNER_ID)));
+            o.setDoorId(r.getValue((Field<Long>)r.field(Tables.EH_DOOR_AUTH_LEVEL.DOOR_ID)));
+            o.setLevelType(r.getValue((Field<Byte>)r.field(Tables.EH_DOOR_AUTH_LEVEL.LEVEL_TYPE)));
+            o.setId(r.getValue((Field<Long>)r.field(Tables.EH_DOOR_AUTH_LEVEL.ID)));
+            o.setDescription(r.getValue((Field<String>)r.field(Tables.EH_DOOR_AUTH_LEVEL.DESCRIPTION)));
+            o.setOrgName(r.getValue((Field<String>)r.field(Tables.EH_ORGANIZATIONS.NAME)));
+
+            dtos.add(o);
+            
+           return null; 
+        });
+        
+        if(dtos.size() >= cmd.getPageSize()) {
+            locator.setAnchor(dtos.get(dtos.size() - 1).getId());
+        } else {
+            locator.setAnchor(null);
+        }
+        
+        return resp;
+    }
+    
+    @Override
+    public ListDoorAuthLevelResponse findAuthLevelsWithBuilding(ListDoorAuthLevelCommand cmd) {
+        ListDoorAuthLevelResponse resp = new ListDoorAuthLevelResponse();
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<DoorAuthLevelDTO> dtos = new ArrayList<DoorAuthLevelDTO>();
+        resp.setDtos(dtos);
+        
+        Condition cond = Tables.EH_DOOR_AUTH_LEVEL.LEVEL_TYPE.eq(cmd.getLevelType())
+                .and(Tables.EH_DOOR_AUTH_LEVEL.DOOR_ID.eq(cmd.getDoorId()))
+                .and(Tables.EH_DOOR_AUTH_LEVEL.STATUS.eq(DoorAuthStatus.VALID.getCode()))
+                ;
+        
+        if(cmd.getLevelId() != null) {
+            cond = cond.and(Tables.EH_DOOR_AUTH_LEVEL.LEVEL_ID.eq(cmd.getLevelId()));
+        }
+        if(locator.getAnchor() != null) {
+            cond = cond.and(Tables.EH_DOOR_AUTH_LEVEL.ID.lt(locator.getAnchor()));
+        }
+        if(cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
+            cond = cond.and(Tables.EH_BUILDINGS.ALIAS_NAME.like(cmd.getKeyword() + "%").or(Tables.EH_BUILDINGS.NAME.like(cmd.getKeyword() + "%")));
+        }
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAuthLevel.class));
+        SelectOffsetStep<Record> step = context.select().from(Tables.EH_DOOR_AUTH_LEVEL).join(Tables.EH_BUILDINGS)
+        .on(Tables.EH_DOOR_AUTH_LEVEL.LEVEL_ID.eq(Tables.EH_BUILDINGS.ID)).where(cond)
+        .orderBy(Tables.EH_DOOR_AUTH_LEVEL.ID.desc()).limit(cmd.getPageSize());
+        
+        step.fetch().map(r ->{
+            
+            DoorAuthLevelDTO o = new DoorAuthLevelDTO();
+            o.setStatus(r.getValue((Field<Byte>)r.field(Tables.EH_DOOR_AUTH_LEVEL.STATUS)));
+            o.setRightRemote(r.getValue((Field<Byte>)r.field(Tables.EH_DOOR_AUTH_LEVEL.RIGHT_REMOTE)));
+            o.setOperatorId(r.getValue((Field<Long>)r.field(Tables.EH_DOOR_AUTH_LEVEL.OPERATOR_ID)));
+            o.setRightVisitor(r.getValue((Field<Byte>)r.field(Tables.EH_DOOR_AUTH_LEVEL.RIGHT_VISITOR)));
+            o.setCreateTime(r.getValue((Field<Timestamp>)r.field(Tables.EH_DOOR_AUTH_LEVEL.CREATE_TIME)));
+            o.setRightOpen(r.getValue((Field<Byte>)r.field(Tables.EH_DOOR_AUTH_LEVEL.RIGHT_OPEN)));
+            o.setOwnerType(r.getValue((Field<Byte>)r.field(Tables.EH_DOOR_AUTH_LEVEL.OWNER_TYPE)));
+            o.setLevelId(r.getValue((Field<Long>)r.field(Tables.EH_DOOR_AUTH_LEVEL.LEVEL_ID)));
+            o.setNamespaceId(r.getValue((Field<Integer>)r.field(Tables.EH_DOOR_AUTH_LEVEL.NAMESPACE_ID)));
+            o.setOwnerId(r.getValue((Field<Long>)r.field(Tables.EH_DOOR_AUTH_LEVEL.OWNER_ID)));
+            o.setDoorId(r.getValue((Field<Long>)r.field(Tables.EH_DOOR_AUTH_LEVEL.DOOR_ID)));
+            o.setLevelType(r.getValue((Field<Byte>)r.field(Tables.EH_DOOR_AUTH_LEVEL.LEVEL_TYPE)));
+            o.setId(r.getValue((Field<Long>)r.field(Tables.EH_DOOR_AUTH_LEVEL.ID)));
+            o.setDescription(r.getValue((Field<String>)r.field(Tables.EH_DOOR_AUTH_LEVEL.DESCRIPTION)));
+            o.setBuildingName(r.getValue((Field<String>)r.field(Tables.EH_BUILDINGS.ALIAS_NAME)));
+            if(o.getBuildingName() == null) {
+                o.setBuildingName(r.getValue((Field<String>)r.field(Tables.EH_BUILDINGS.NAME)));
+            }
+
+            dtos.add(o);
+            
+           return null; 
+        });
+        
+        if(dtos.size() >= cmd.getPageSize()) {
+            locator.setAnchor(dtos.get(dtos.size() - 1).getId());
+        } else {
+            locator.setAnchor(null);
+        }
+        
+        return resp;
     }
 }

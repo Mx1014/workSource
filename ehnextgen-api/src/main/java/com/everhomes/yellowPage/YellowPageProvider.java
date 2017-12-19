@@ -74,7 +74,7 @@ public interface YellowPageProvider {
 	void deleteNotifyTarget(Long id);
 	ServiceAllianceNotifyTargets findNotifyTarget(String ownerType, Long ownerId, Long id);
 	ServiceAllianceNotifyTargets findNotifyTarget(String ownerType, Long ownerId, Long categoryId, Byte contactType, String contactToken);
-	List<ServiceAllianceNotifyTargets> listNotifyTargets(String ownerType, Long ownerId, Byte contactType, 
+	List<ServiceAllianceNotifyTargets> listNotifyTargets(Integer namespaceId, Byte contactType, 
 			Long categoryId, CrossShardListingLocator locator, int pageSize);
 	
 	Long createServiceAllianceRequests(ServiceAllianceRequests request);
@@ -143,4 +143,10 @@ public interface YellowPageProvider {
 	void deleteServiceAllianceSkipRule(Long id);
 
 	ServiceAllianceSkipRule getCateorySkipRule(Long categoryId, Integer namespaceId);
+
+
+	List<Integer> listAscEntryIds(int namespaceId);
+
+
+	void updateEntryIdNullByNamespaceId(Integer namespaceId);
 }

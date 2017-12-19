@@ -18,6 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>areaId: 小区所在城市区县Id</li>
  * <li>areaSize: 面积</li>
  * <li>geoPointList: 小区经纬度列表,参考{@link com.everhomes.rest.community.CommunityGeoPointDTO}</li>
+ * <li>communityNumber: 园区编号</li>
  * </ul>
  */
 public class UpdateCommunityAdminCommand {
@@ -34,8 +35,20 @@ public class UpdateCommunityAdminCommand {
     
     @ItemType(CommunityGeoPointDTO.class)
     private List<CommunityGeoPointDTO> geoPointList;
+
+    private String communityNumber;
+
+    private String aliasName;
     
     public UpdateCommunityAdminCommand() {
+    }
+
+    public String getAliasName() {
+        return aliasName;
+    }
+
+    public void setAliasName(String aliasName) {
+        this.aliasName = aliasName;
     }
 
     public Long getCommunityId() {
@@ -89,7 +102,15 @@ public class UpdateCommunityAdminCommand {
 		this.areaSize = areaSize;
 	}
 
-	@Override
+    public String getCommunityNumber() {
+        return communityNumber;
+    }
+
+    public void setCommunityNumber(String communityNumber) {
+        this.communityNumber = communityNumber;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

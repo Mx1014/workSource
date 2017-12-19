@@ -2,21 +2,15 @@ package com.everhomes.parking.handler;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.*;
 import com.everhomes.parking.xiaomao.XiaomaoCard;
 import com.everhomes.parking.xiaomao.XiaomaoJsonEntity;
 import com.everhomes.rest.parking.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.MD5Utils;
-import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -36,6 +30,8 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
     private static final String GET_CARD = "/park/getMonthCard";
     //办理月卡，续费
     private static final String OPEN_CARD = "/park/openMonthCard";
+
+    private static final int SUCCESS = 1;
 
     @Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
@@ -82,7 +78,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         String jsonString = post(param,GET_CARD);
 
         XiaomaoCard card = JSONObject.parseObject(jsonString, XiaomaoCard.class);
-        if (card.getFlag() == 1){
+        if (card.getFlag() == SUCCESS){
             return card;
         }
         return null;
@@ -118,8 +114,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
             order.setEndPeriod(timestampEnd);
 
             XiaomaoJsonEntity entity = JSONObject.parseObject(json, XiaomaoJsonEntity.class);
-            if (entity.getFlag() == 1){
-                updateFlowStatus(order);
+            if (entity.getFlag() == SUCCESS){
                 return true;
             }
         }
@@ -212,12 +207,26 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 
     private boolean addMonthCard(ParkingRechargeOrder order){
 
+        ParkingCardRequest request;
+        if (null != order.getCardRequestId()) {
+            request = parkingProvider.findParkingCardRequestById(order.getCardRequestId());
+        }else {
+            request = getParkingCardRequestByOrder(order);
+        }
+
+        if (request == null) {
+            return false;
+        }
+
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
-        long tempTime = calendar.getTimeInMillis();
+        //精确到秒,毫秒记为0
+        calendar.set(Calendar.MILLISECOND, 0);
+        //获取到当前时间减一秒，计算有效期 开始时间在这个时间上加一秒，结束时间一般是在某一天的23:59:59
+        long tempTime = calendar.getTimeInMillis() - 1000L;
 
         Timestamp timestampStart = Utils.addSecond(tempTime, 1);
         Timestamp timestampEnd = Utils.getTimestampByAddNatureMonth(tempTime, order.getMonthCount().intValue());
@@ -228,12 +237,19 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 
         JSONObject param = new JSONObject();
         param.put("parkId", parkId);
-        param.put("memberType", "11");
+        param.put("memberType", request.getCardTypeId());
         param.put("licenseNumber", order.getPlateNumber());
         param.put("beginTime", validStart);
         param.put("endTime", validEnd);
 
-        String json = post(param, OPEN_CARD);
+        //TODO:测试
+        boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+        String json;
+        if (flag) {
+            json = "{\"flag\":1, \"message\":\"hhh\"}";
+        }else {
+            json = post(param, OPEN_CARD);
+        }
 
         //将充值信息存入订单
         order.setErrorDescriptionJson(json);
@@ -241,10 +257,10 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         order.setEndPeriod(timestampEnd);
 
         XiaomaoJsonEntity entity = JSONObject.parseObject(json, XiaomaoJsonEntity.class);
-        if (entity.getFlag() == 1){
+        if (entity.getFlag() == SUCCESS){
+            updateFlowStatus(request);
             return true;
         }
-
         return false;
     }
 
@@ -261,7 +277,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 
     private List<ParkingCardType> getCardTypes(Long parkingId) {
         List<ParkingCardType> cardTypes = new ArrayList<>();
-
+        //初始化的停车场id eh_parking_lots表 10011  10012
         if (parkingId == 10011L) {
             String json = configProvider.getValue("parking.xiaomao.types." + parkingId, "");
             List<ParkingCardType> types = JSONArray.parseArray(json, ParkingCardType.class);

@@ -95,7 +95,7 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_ENERGY_METER_TASKS)
                 .where(Tables.EH_ENERGY_METER_TASKS.EXECUTIVE_EXPIRE_TIME.le(new Timestamp(DateHelper.currentGMTTime().getTime())))
-                .and(Tables.EH_ENERGY_METER_TASKS.STATUS.ne(EnergyTaskStatus.INACTIVE.getCode()))
+                .and(Tables.EH_ENERGY_METER_TASKS.STATUS.in(EnergyTaskStatus.NON_READ.getCode(), EnergyTaskStatus.READ.getCode()))
                 .and(Tables.EH_ENERGY_METER_TASKS.GENERATE_PAYMENT_FLAG.eq(TaskGeneratePaymentFlag.NON_GENERATE.getCode()))
                 .fetchInto(EnergyMeterTask.class);
     }

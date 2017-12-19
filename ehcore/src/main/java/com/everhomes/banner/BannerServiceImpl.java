@@ -41,7 +41,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -536,8 +535,10 @@ public class BannerServiceImpl implements BannerService {
     }
     private String parserUri(String uri,String ownerType, long ownerId){
         try {
-            if(!org.apache.commons.lang.StringUtils.isEmpty(uri))
-                return contentServerService.parserUri(uri,ownerType,ownerId);
+            if(!org.apache.commons.lang.StringUtils.isEmpty(uri)) {
+                String url = contentServerService.parserUri(uri, ownerType, ownerId);
+                return url + "&w=750&h=450";
+            }
             
         } catch (Exception e) {
             LOGGER.error("Parser uri is error." + e.getMessage());
@@ -713,23 +714,26 @@ public class BannerServiceImpl implements BannerService {
     }
     
     @Override
-    public ListBannersAdminCommandResponse listBanners(ListBannersAdminCommand cmd){
+    public ListBannersAdminCommandResponse listBanners(ListBannersAdminCommand cmd) {
         User user = UserContext.current().getUser();
         long userId = user.getId();
-        if(cmd.getKeyword() == null)
-            cmd.setKeyword("");
-        final long pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
+        final Integer pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size",
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
-        long pageOffset = cmd.getPageOffset() == null ? 1L : cmd.getPageOffset();
-        long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
-        List<BannerDTO> result = bannerProvider.listBanners(cmd.getKeyword(), offset,pageSize).stream().map((Banner r) ->{
-            BannerDTO dto = ConvertHelper.convert(r, BannerDTO.class); 
-            dto.setPosterPath(parserUri(dto.getPosterPath(),EntityType.USER.getCode(),userId));
-            return dto;
-         }).collect(Collectors.toList());
+
+        Integer namespaceId = cmd.getNamespaceId() != null ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId();
+
+        List<BannerDTO> result = bannerProvider.listBannersByOwner(
+                namespaceId, cmd.getScope(), cmd.getSceneType(), cmd.getPageAnchor(),
+                pageSize + 1, null);
+
+        for (BannerDTO dto : result) {
+            dto.setPosterPath(parserUri(dto.getPosterPath(), EntityType.USER.getCode(), userId));
+        }
+
         ListBannersAdminCommandResponse response = new ListBannersAdminCommandResponse();
-        if(result != null && result.size() >= pageSize){
-            response.setNextPageOffset((int)pageOffset + 1);
+        if(result.size() >= pageSize) {
+            response.setNextPageAnchor(result.get(result.size() - 1).getCreateTime().getTime());
+            result.remove(result.size() - 1);
         }
         response.setRequests(result);
         return response;

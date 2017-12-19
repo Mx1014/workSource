@@ -3,9 +3,13 @@ package com.everhomes.pmtask;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
+import com.everhomes.rest.pmtask.PmTaskAppType;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -41,7 +45,9 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
 
     @Autowired
 	private PmTaskProvider pmTaskProvider;
-    
+    @Autowired
+    private CategoryProvider categoryProvider;
+
 	@Override
 	public String getIndexType() {
 		return SearchUtils.PMTASK;
@@ -66,7 +72,12 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             b.field("requestorPhone", task.getRequestorPhone());
             b.field("buildingName", task.getBuildingName());
 
-            
+            Category appType = categoryProvider.findCategoryById(task.getTaskCategoryId());
+            //多入口查全部数据
+            if (null != appType && Arrays.asList(PmTaskAppType.TYPES).contains(appType.getParentId())) {
+                b.field("appType", appType.getParentId());
+            }
+
             b.endObject();
             return b;
         } catch (IOException ex) {
@@ -180,8 +191,13 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         }
         
         if(null != categoryId){
-        	QueryStringQueryBuilder sb = QueryBuilders.queryString(categoryId.toString()).field("taskCategoryId");
-            qb = qb.must(sb);	
+            if (Arrays.asList(PmTaskAppType.TYPES).contains(categoryId)) {
+                QueryStringQueryBuilder sb = QueryBuilders.queryString(categoryId.toString()).field("appType");
+                qb = qb.must(sb);
+            }else {
+                QueryStringQueryBuilder sb = QueryBuilders.queryString(categoryId.toString()).field("taskCategoryId");
+                qb = qb.must(sb);
+            }
         }
         
         if(null != status){

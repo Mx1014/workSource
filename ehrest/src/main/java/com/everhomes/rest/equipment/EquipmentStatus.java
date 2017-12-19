@@ -41,6 +41,13 @@ public enum EquipmentStatus {
 		}
 		return null;
 	}
+	public  static EquipmentStatus fromName(String name){
+		for(EquipmentStatus v : EquipmentStatus.values()) {
+			if(v.getName().equals(name))
+				return v;
+		}
+		return null;
+	}
 	
 	@Override
 	public String toString() {

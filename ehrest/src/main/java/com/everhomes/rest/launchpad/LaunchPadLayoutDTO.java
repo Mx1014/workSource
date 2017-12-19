@@ -16,6 +16,8 @@ import java.sql.Timestamp;
  * <li>status: 状态</li>
  * <li>createTime: 创建时间</li>
  * <li>sceneType: 场景类型</li>
+ * <li>bgImageUri: 背景图片</li>
+ * <li>bgImageUrl: 背景图片</li>
  * </ul>
  */
 public class LaunchPadLayoutDTO {
@@ -29,6 +31,10 @@ public class LaunchPadLayoutDTO {
     private Byte     status;
     private Timestamp createTime;
     private String sceneType;
+
+    private String bgImageUri;
+
+    private String bgImageUrl;
     
     public Long getId() {
         return id;
@@ -100,6 +106,22 @@ public class LaunchPadLayoutDTO {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+
+    public String getBgImageUri() {
+        return bgImageUri;
+    }
+
+    public void setBgImageUri(String bgImageUri) {
+        this.bgImageUri = bgImageUri;
+    }
+
+    public String getBgImageUrl() {
+        return bgImageUrl;
+    }
+
+    public void setBgImageUrl(String bgImageUrl) {
+        this.bgImageUrl = bgImageUrl;
     }
 
     @Override

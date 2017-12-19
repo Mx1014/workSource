@@ -1657,6 +1657,20 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /pm/listApartmentOrganizationOwnerBehaviors</b>
+	 * <p>查询门牌下的业主活动记录</p>
+	 */
+	@RequestMapping("listApartmentOrganizationOwnerBehaviors")
+	@RestReturn(value=OrganizationOwnerBehaviorDTO.class, collection = true)
+	public RestResponse listApartmentOrganizationOwnerBehaviors(@Valid ListApartmentOrganizationOwnerBehaviorsCommand cmd) {
+		List<OrganizationOwnerBehaviorDTO> dtos = propertyMgrService.listApartmentOrganizationOwnerBehaviors(cmd);
+		RestResponse response = new RestResponse(dtos);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /pm/listOrganizationOwnerAddresses</b>
 	 * <p>查询业主的所关联的楼栋门牌</p>
 	 */

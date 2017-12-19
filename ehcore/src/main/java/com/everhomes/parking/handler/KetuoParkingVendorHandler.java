@@ -15,7 +15,6 @@ import com.everhomes.rest.parking.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
@@ -144,7 +143,7 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 		dto.setCardTypeId(rate.getCarType());
 		dto.setCardType(rate.getTypeName());
 		dto.setMonthCount(new BigDecimal(rate.getRuleAmount()));
-		dto.setPrice(new BigDecimal(rate.getRuleMoney()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
+		dto.setPrice(new BigDecimal(rate.getRuleMoney()).divide(new BigDecimal(100), CARD_RATE_RETAIN_DECIMAL, RoundingMode.HALF_UP));
 		dto.setVendorName(ParkingLotVendor.KETUO2.getCode());
 		return dto;
 	}
@@ -354,7 +353,7 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 		}
 		order.setRateName(ketuoCardRate.getRuleName());
 
-		BigDecimal ratePrice = new BigDecimal(ketuoCardRate.getRuleMoney()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
+		BigDecimal ratePrice = new BigDecimal(ketuoCardRate.getRuleMoney()).divide(new BigDecimal(100), CARD_RATE_RETAIN_DECIMAL, RoundingMode.HALF_UP);
 
 		checkAndSetOrderPrice(parkingLot, order, ratePrice);
 
@@ -390,7 +389,7 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 		dto.setPayTime(strToLong(tempFee.getPayTime()));
 		dto.setParkingTime(tempFee.getElapsedTime());
 		dto.setDelayTime(tempFee.getDelayTime());
-		dto.setPrice(new BigDecimal(tempFee.getPayable()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
+		dto.setPrice(new BigDecimal(tempFee.getPayable()).divide(new BigDecimal(100), TEMP_FEE_RETAIN_DECIMAL, RoundingMode.HALF_UP));
 
 		dto.setOrderToken(tempFee.getOrderNo());
 		return dto;
@@ -461,7 +460,7 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 			dto.setRateName(rateName);
 			dto.setCardType(typeName);
 			dto.setMonthCount(new BigDecimal(rate.getRuleAmount()));
-			dto.setPrice(new BigDecimal(rate.getRuleMoney()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
+			dto.setPrice(new BigDecimal(rate.getRuleMoney()).divide(new BigDecimal(100), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
 
 			dto.setPlateNumber(cmd.getPlateNumber());
 			long now = System.currentTimeMillis();
@@ -477,7 +476,7 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 
 				BigDecimal price = dto.getPrice().multiply(new BigDecimal(requestMonthCount-1))
 						.add(dto.getPrice().multiply(new BigDecimal(maxDay-today+1))
-								.divide(new BigDecimal(DAY_COUNT), 2, RoundingMode.HALF_UP));
+								.divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
 				dto.setPayMoney(price);
 			}
 

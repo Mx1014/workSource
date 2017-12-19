@@ -12,6 +12,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.EhForumServiceTypesRecord;
 import com.everhomes.server.schema.tables.records.EhInteractSettingsRecord;
 import org.jooq.*;
 import org.slf4j.Logger;
@@ -48,15 +51,6 @@ import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.rest.user.UserLikeType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhForumAssignedScopesDao;
-import com.everhomes.server.schema.tables.daos.EhForumAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhForumPostsDao;
-import com.everhomes.server.schema.tables.daos.EhForumsDao;
-import com.everhomes.server.schema.tables.pojos.EhForumAssignedScopes;
-import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
-import com.everhomes.server.schema.tables.pojos.EhForumPosts;
-import com.everhomes.server.schema.tables.pojos.EhForums;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.records.EhForumAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhForumPostsRecord;
 import com.everhomes.sharding.ShardIterator;
@@ -1106,19 +1100,84 @@ public class ForumProviderImpl implements ForumProvider {
                 .fetchOneInto(ForumCategory.class);
     }
 
-    @Cacheable(value="findInteractSetting", key="{#namespaceId, #forumId, #type, #entryId}", unless="#result == null")
+    @Cacheable(value="findInteractSetting", key="{#namespaceId, #moduleType, #categoryId}", unless="#result == null")
     @Override
-    public InteractSetting findInteractSetting(Integer namespaceId, Long forumId, String type, Long entryId) {
+    public InteractSetting findInteractSetting(Integer namespaceId, Byte moduleType, Long categoryId) {
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhInteractSettingsRecord> query = context.selectQuery(Tables.EH_INTERACT_SETTINGS);
         query.addConditions(Tables.EH_INTERACT_SETTINGS.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_INTERACT_SETTINGS.FORUM_ID.eq(forumId));
-        query.addConditions(Tables.EH_INTERACT_SETTINGS.TYPE.eq(type));
-        if(entryId != null){
-            query.addConditions(Tables.EH_INTERACT_SETTINGS.ENTRY_ID.eq(entryId));
+        query.addConditions(Tables.EH_INTERACT_SETTINGS.MODULE_TYPE.eq(moduleType));
+        if(categoryId != null){
+            query.addConditions(Tables.EH_INTERACT_SETTINGS.CATEGORY_ID.eq(categoryId));
         }
         return query.fetchAnyInto(InteractSetting.class);
     }
-	
+
+    @Override
+    public void createInteractSetting(InteractSetting setting) {
+
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhInteractSettings.class));
+        setting.setId(id);
+        setting.setUuid(UUID.randomUUID().toString());
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhInteractSettingsDao dao = new EhInteractSettingsDao(context.configuration());
+        dao.insert(setting);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhInteractSettings.class, null);
+    }
+
+    @Caching(evict = { @CacheEvict(value="findInteractSetting", key="{#setting.namespaceId, #setting.moduleType, #setting.categoryId}")})
+    @Override
+    public void updateInteractSetting(InteractSetting setting) {
+
+        assert(setting.getId() == null);
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhInteractSettingsDao dao = new EhInteractSettingsDao(context.configuration());
+        dao.update(setting);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY,EhInteractSettings.class, setting.getId());
+    }
+
+    @Override
+    public void createForumServiceTypes(List<ForumServiceType> list) {
+        for(ForumServiceType s: list){
+            if(s.getId() == null){
+                long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhForumServiceTypes.class));
+                s.setId(id);
+            }
+        }
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhForumServiceTypesDao dao = new EhForumServiceTypesDao(context.configuration());
+        dao.insert(list.toArray(new ForumServiceType[list.size()]));
+    }
+
+    @Override
+    public List<ForumServiceType> listForumServiceTypes(Integer namespaceId, Byte moduleType, Long categoryId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhForumServiceTypesRecord> query = context.selectQuery(Tables.EH_FORUM_SERVICE_TYPES);
+        query.addConditions(Tables.EH_FORUM_SERVICE_TYPES.NAMESPACE_ID.eq(namespaceId));
+        if(moduleType != null){
+            query.addConditions(Tables.EH_FORUM_SERVICE_TYPES.MODULE_TYPE.eq(moduleType));
+        }
+
+        if(categoryId != null){
+            query.addConditions(Tables.EH_FORUM_SERVICE_TYPES.CATEGORY_ID.eq(categoryId));
+        }
+
+        query.addOrderBy(Tables.EH_FORUM_SERVICE_TYPES.SORT_NUM.asc());
+
+        List<ForumServiceType> res = query.fetch().map(record -> ConvertHelper.convert(record, ForumServiceType.class));
+        return res;
+    }
+
+    @Override
+    public void deleteForumServiceTypes(List<Long> ids) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhForumServiceTypesDao dao = new EhForumServiceTypesDao(context.configuration());
+        dao.deleteById(ids);
+
+    }
+
  }

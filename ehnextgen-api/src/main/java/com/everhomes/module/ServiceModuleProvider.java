@@ -2,9 +2,12 @@
 package com.everhomes.module;
 
 import java.util.List;
+import java.util.Map;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.portal.ServiceModuleApp;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import org.jooq.Condition;
 
 public interface ServiceModuleProvider {
@@ -74,4 +77,30 @@ public interface ServiceModuleProvider {
 
     List<ServiceModule> listServiceModule(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 
+    void createReflectionServiceModuleApp(ReflectionServiceModuleApp reflectionServiceModuleApp);
+
+    void updateReflectionServiceModuleApp(ReflectionServiceModuleApp reflectionServiceModuleApp);
+
+    ReflectionServiceModuleApp findReflectionServiceModuleAppById(Long id);
+
+    ReflectionServiceModuleApp findReflectionServiceModuleAppByParam(Integer namespaceId, Long moduleId, String custom_tag);
+
+    Long getMaxActiveAppId();
+
+    void lapseReflectionServiceModuleAppByNamespaceId(Integer namespaceId);
+
+    List<ServiceModuleAppDTO> listReflectionServiceModuleAppsByModuleIds(Integer namespaceId, List<Long> moduleIds);
+
+    List<ServiceModuleAppDTO> listReflectionServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String customPath, String controlOption);
+
+    ServiceModuleApp findReflectionServiceModuleAppByActiveAppId(Long id);
+
+    ServiceModuleApp findReflectionServiceModuleAppByMenuId(Long id);
+
+    List<ServiceModuleAppDTO> listReflectionServiceModuleAppByActiveAppIds(Integer namespaceId, List<Long> appIds);
+
+    Map<Long, ServiceModuleApp> listReflectionAcitveAppIdByNamespaceId(Integer namespaceId);
+
+    List<ServiceModuleFunction> listFunctions(Long moduleId, List<Long> privilegeIds);
+    List<ServiceModuleExcludeFunction> listExcludeFunctions(Integer namespaceId, Long comunityId, Long moduleId);
 }

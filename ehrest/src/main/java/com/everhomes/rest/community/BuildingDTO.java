@@ -36,6 +36,7 @@ import com.everhomes.discover.ItemType;
  *  <li>creatorAvatarUrl:创建楼栋地址用户头像URL</li>
  *  <li>createTime:创建楼栋地址时间</li>
  *  <li>attachments:楼栋附件信息</li>
+ *  <li>buildingNumber:楼栋编号</li>
  * </ul>
  *
  */
@@ -52,6 +53,8 @@ public class BuildingDTO {
 	private String buildingName;
 	
 	private String aliasName;
+
+	private String buildingNumber;
 	
 	private Long managerUid;
 
@@ -378,5 +381,13 @@ public class BuildingDTO {
 
 	public void setManagerName(String managerName) {
 		this.managerName = managerName;
+	}
+
+	public String getBuildingNumber() {
+		return buildingNumber;
+	}
+
+	public void setBuildingNumber(String buildingNumber) {
+		this.buildingNumber = buildingNumber;
 	}
 }

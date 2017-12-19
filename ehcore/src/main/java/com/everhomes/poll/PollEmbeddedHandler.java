@@ -3,7 +3,7 @@ package com.everhomes.poll;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.everhomes.hotTag.HotTags;
+import com.everhomes.hotTag.HotTag;
 import com.everhomes.rest.hotTag.HotFlag;
 import com.everhomes.rest.hotTag.HotTagServiceType;
 import com.everhomes.search.HotTagSearcher;
@@ -100,12 +100,14 @@ public class PollEmbeddedHandler implements ForumEmbeddedHandler {
         // 将tag保存到搜索引擎  add by yanjun 20170613
         if(StringUtils.isNotEmpty(cmd.getTag())){
             try{
-                HotTags tag = new HotTags();
-                tag.setName(cmd.getTag());
-                tag.setHotFlag(HotFlag.NORMAL.getCode());
+                HotTag tag = new HotTag();
+                Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+                //TODO 业务类型、入口ID
                 tag.setServiceType(HotTagServiceType.POLL.getCode());
 
-                Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+                tag.setName(cmd.getTag());
+                tag.setHotFlag(HotFlag.NORMAL.getCode());
+
                 tag.setNamespaceId(namespaceId);
 
                 hotTagSearcher.feedDoc(tag);

@@ -26,6 +26,9 @@ public class ScoreGroupByTargetDTO {
 
 	//fix order
 	private  Double totalScore;
+
+	//产品确认得分一致的情况按照建筑面积排序
+	private  Double buildArea;
 	
 	public List<ScoreDTO> getScores() {
 		return scores;
@@ -65,6 +68,14 @@ public class ScoreGroupByTargetDTO {
 
 	public void setTotalScore(Double totalScore) {
 		this.totalScore = totalScore;
+	}
+
+	public Double getBuildArea() {
+		return buildArea;
+	}
+
+	public void setBuildArea(Double buildArea) {
+		this.buildArea = buildArea;
 	}
 
 	@Override

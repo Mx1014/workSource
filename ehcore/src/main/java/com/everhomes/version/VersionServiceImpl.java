@@ -185,6 +185,7 @@ public class VersionServiceImpl implements VersionService {
         params.put("homeurl", this.configurationProvider.getValue(ConfigConstants.HOME_URL, ""));
         response.setDownloadUrl(StringHelper.interpolate(versionUrl.getDownloadUrl(), params));
         response.setInfoUrl(StringHelper.interpolate(versionUrl.getInfoUrl(), params));
+        response.setUpgradeDescription(versionUrl.getUpgradeDescription());
         return response;
         	
 	}
@@ -382,13 +383,14 @@ public class VersionServiceImpl implements VersionService {
 		if (StringUtils.isBlank(url)) {
 			return "";
 		}
-		if (url.startsWith("http:") || url.startsWith("${")) {
+		if (url.startsWith("https://") || url.startsWith("http://") || url.startsWith("${")) {
 			return url;
 		}
 		return "${homeurl}"+url;
 	}
 
 	@Override
+
 	public GetUpgradeContentResponse getUpgradeContent(GetUpgradeContentCommand cmd) {
 		if (cmd.getId() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,

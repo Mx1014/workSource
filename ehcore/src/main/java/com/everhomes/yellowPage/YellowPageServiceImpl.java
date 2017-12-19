@@ -837,7 +837,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 			// 服务联盟跳转到审批，审批模块可控制在app端是否显示
 			if((ServiceAllianceSourceRequestType.CLIENT == sourceRequestType || sourceRequestType == null)
-					&& dto.getJumpType() == JumpType.MODULE.getCode() && dto.getModuleUrl()!=null){
+					&& dto.getJumpType() == JumpType.MODULE.getCode() && dto.getModuleUrl()!=null && dto.getModuleUrl().contains("zl://approval/create")){
 				int start = dto.getModuleUrl().indexOf('?');
 				String s[] = dto.getModuleUrl().substring(start).split("&");
 				s = s[0].split("=");
@@ -1315,7 +1315,7 @@ public class YellowPageServiceImpl implements YellowPageService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         
-		List<ServiceAllianceNotifyTargets> targets = this.yellowPageProvider.listNotifyTargets(cmd.getOwnerType(), cmd.getOwnerId(), 
+		List<ServiceAllianceNotifyTargets> targets = this.yellowPageProvider.listNotifyTargets(UserContext.getCurrentNamespaceId(), 
 				cmd.getContactType(), cmd.getCategoryId(), locator, pageSize+1);
 		
 		if(targets != null && targets.size() > 0) {

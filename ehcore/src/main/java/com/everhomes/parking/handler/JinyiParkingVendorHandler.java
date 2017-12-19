@@ -3,8 +3,6 @@ package com.everhomes.parking.handler;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.*;
 import com.everhomes.parking.clearance.ParkingClearanceLog;
 import com.everhomes.parking.jinyi.JinyiCard;
@@ -18,7 +16,6 @@ import com.everhomes.util.MD5Utils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;

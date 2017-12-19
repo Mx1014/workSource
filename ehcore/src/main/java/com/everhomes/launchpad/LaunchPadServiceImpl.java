@@ -82,6 +82,9 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.everhomes.rest.ui.user.SceneType.PARK_TOURIST;
+import static com.everhomes.rest.ui.user.SceneType.PM_ADMIN;
+
 @Component
 public class LaunchPadServiceImpl implements LaunchPadService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LaunchPadServiceImpl.class);
@@ -230,7 +233,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				if(null != organizationId){
 					ScopeType orgScopeType = ScopeType.ORGANIZATION;
 
-					if(SceneType.fromCode(sceneType) == SceneType.PM_ADMIN){
+					if(SceneType.fromCode(sceneType) == PM_ADMIN){
 						orgScopeType = ScopeType.PM;
 					}
 
@@ -897,7 +900,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 		ScopeType orgScopeType = ScopeType.ORGANIZATION;
 
-		if(SceneType.fromCode(sceneType) == SceneType.PM_ADMIN){
+		if(SceneType.fromCode(sceneType) == PM_ADMIN){
 			orgScopeType = ScopeType.PM;
 		}
 
@@ -1005,7 +1008,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				if(null != organizationId){
 					ScopeType orgScopeType = ScopeType.ORGANIZATION;
 
-					if(SceneType.fromCode(sceneType) == SceneType.PM_ADMIN){
+					if(SceneType.fromCode(sceneType) == PM_ADMIN){
 						orgScopeType = ScopeType.PM;
 					}
 
@@ -1776,11 +1779,22 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		List<LaunchPadLayoutDTO> results = getLaunchPadLayoutByVersionCode(cmd, scopeType,scopeId);
 		if(results != null && !results.isEmpty()){
 			LaunchPadLayoutDTO dto =  results.get(0);
+			populateLaunchPadLayoutDTO(dto);
 			return dto;
 		}
 		return null;
 	}
-	
+
+	private void populateLaunchPadLayoutDTO(LaunchPadLayoutDTO dto){
+		if(dto == null || StringUtils.isEmpty(dto.getBgImageUri()) || dto.getId() == null){
+			return;
+		}
+
+		String url = contentServerService.parserUri(dto.getBgImageUri(), LaunchPadLayoutDTO.class.getSimpleName(), dto.getId());
+
+		dto.setBgImageUrl(url);
+	}
+
 	@Override
     public LaunchPadLayoutDTO getLastLaunchPadLayoutByScene(@Valid GetLaunchPadLayoutBySceneCommand cmd) {
 	    User user = UserContext.current().getUser();
@@ -2635,6 +2649,12 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
 		Integer offset = pageSize * Integer.valueOf(pageAnchor.intValue());
 		List<LaunchPadItem> launchPadItems= this.launchPadProvider.searchLaunchPadItemsByKeyword(namespaceId, sceneType, scopeMap, defaultScopeMap, cmd.getKeyword(), offset, pageSize + 1);
+
+		//如果没有PM_ADMIN定制的，同样的范围查询PARK_TOURIST
+		if((launchPadItems == null || launchPadItems.size() == 0) && SceneType.fromCode(sceneType) == PM_ADMIN){
+			launchPadItems= this.launchPadProvider.searchLaunchPadItemsByKeyword(namespaceId, PARK_TOURIST.getCode(), scopeMap, defaultScopeMap, cmd.getKeyword(), offset, pageSize + 1);
+		}
+
 		// 处理分页
 		Long nextPageAnchor = null;
 		if (launchPadItems.size() > pageSize) {

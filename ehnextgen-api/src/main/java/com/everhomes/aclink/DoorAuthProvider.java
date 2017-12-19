@@ -63,5 +63,28 @@ public interface DoorAuthProvider {
 
     List<DoorAuth> searchVisitorDoorAuthByAdmin(Long doorId, String keyword, Byte status, int pageSize, Long startTime, Long endTime);
 
-    public List<User> listDoorAuthByBuildingName(Long communityId, String buildingName, CrossShardListingLocator locator, int pageSize);
+    /**
+     * 获取小区的楼栋用户
+     * @param communityId
+     * @param buildingName
+     * @param locator
+     * @param pageSize
+     * @return
+     */
+    public List<Long> listDoorAuthByBuildingName(Byte isOpenAuth, Long doorId, Long communityId, String buildingName, CrossShardListingLocator locator, int pageSize, Integer namespaceId);
+
+    /**
+     * 获取办公区的楼栋用户
+     * @param isOpenAuth
+     * @param doorId
+     * @param communityId
+     * @param buildingName
+     * @param locator
+     * @param pageSize
+     * @param namespaceId
+     * @return
+     */
+    List<Long> listDoorAuthByBuildingName2(Byte isOpenAuth, Long doorId,
+            Long communityId, String buildingName,
+            CrossShardListingLocator locator, int pageSize, Integer namespaceId);
 }

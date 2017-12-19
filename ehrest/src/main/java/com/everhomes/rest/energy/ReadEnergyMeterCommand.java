@@ -24,7 +24,16 @@ public class ReadEnergyMeterCommand {
     private Byte resetMeterFlag;
     private BigDecimal lastReading;
     @NotNull private BigDecimal currReading;
-    private Integer namespaceId; 
+    private Integer namespaceId;
+    private Long taskId;
+
+    public Long getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(Long taskId) {
+        this.taskId = taskId;
+    }
 
     public Long getOrganizationId() {
         return organizationId;

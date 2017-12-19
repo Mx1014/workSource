@@ -2,7 +2,6 @@ package com.everhomes.contract;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -17,7 +16,6 @@ import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.openapi.shenzhou.ShenzhouJsonEntity;
 import com.everhomes.rest.openapi.shenzhou.ZJContract;
 import com.everhomes.rest.openapi.shenzhou.ZJContractDetail;
-import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
@@ -28,21 +26,13 @@ import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -117,17 +107,31 @@ public class ZJContractHandler implements ContractService{
             if(cmd.getCustomerType() == null || CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(cmd.getCustomerType()))) {
                 sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
             }
-        } else {
-            if(cmd.getCustomerType() == null) {
-                sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
-                sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
-            } else if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(cmd.getCustomerType()))){
-                sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
-            } else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(cmd.getCustomerType()))){
-                sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
-            }
-
         }
+//        else {
+//            if(cmd.getCustomerType() == null) {
+//                sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
+//                sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
+//                if(StringUtils.isNotBlank(cmd.getKeywords())) {
+//                    params = generateParams(params, cmd.getKeywords());
+//                    sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
+//                    sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
+//                }
+//            } else if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(cmd.getCustomerType()))){
+//                sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
+//                if(StringUtils.isNotBlank(cmd.getKeywords())) {
+//                    params = generateParams(params, cmd.getKeywords());
+//                    sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
+//                }
+//            } else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(cmd.getCustomerType()))){
+//                sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
+//                if(StringUtils.isNotBlank(cmd.getKeywords())) {
+//                    params = generateParams(params, cmd.getKeywords());
+//                    sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
+//                }
+//            }
+//
+//        }
         ListContractsResponse response = new ListContractsResponse();
         String enterprises = sb.toString();
         LOGGER.debug("zjgk listContracts enterprise: {}",enterprises);
@@ -135,6 +139,30 @@ public class ZJContractHandler implements ContractService{
             return response;
         }
         ShenzhouJsonEntity<List<ZJContract>> entity = JSONObject.parseObject(enterprises, new TypeReference<ShenzhouJsonEntity<List<ZJContract>>>(){});
+        if(entity.getResponse() == null || entity.getResponse().size() == 0) {
+            if(StringUtils.isNotBlank(cmd.getKeywords())) {
+                params = generateParams(params, cmd.getKeywords());
+                if(community != null && CommunityType.COMMERCIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
+                    if(cmd.getCustomerType() == null || CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(cmd.getCustomerType()))) {
+                        String contract = postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null);
+                        if(StringUtils.isBlank(enterprises)) {
+                            return response;
+                        }
+                        entity = JSONObject.parseObject(contract, new TypeReference<ShenzhouJsonEntity<List<ZJContract>>>(){});
+                    }
+                } else if(community != null && CommunityType.RESIDENTIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
+                    if(cmd.getCustomerType() == null || CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(cmd.getCustomerType()))) {
+                        String contract = postToShenzhou(params, LIST_USER_CONTRACTS, null);
+                        if(StringUtils.isBlank(enterprises)) {
+                            return response;
+                        }
+                        entity = JSONObject.parseObject(contract, new TypeReference<ShenzhouJsonEntity<List<ZJContract>>>(){});
+                    }
+                }
+
+            }
+        }
+
         if(entity.getNextPageOffset() != null && !"".equals(entity.getNextPageOffset())) {
             response.setNextPageAnchor(entity.getNextPageOffset().longValue());
         }
@@ -184,7 +212,7 @@ public class ZJContractHandler implements ContractService{
 
     @Override
     public ContractDetailDTO updateContract(UpdateContractCommand cmd) {
-        LOGGER.error("Insufficient privilege, zjgkhandler createContract");
+        LOGGER.error("Insufficient privilege, zjgkhandler updateContract");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
@@ -238,7 +266,7 @@ public class ZJContractHandler implements ContractService{
 
     @Override
     public void deleteContract(DeleteContractCommand cmd) {
-        LOGGER.error("Insufficient privilege, zjgkhandler createContract");
+        LOGGER.error("Insufficient privilege, zjgkhandler deleteContract");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
@@ -435,29 +463,43 @@ public class ZJContractHandler implements ContractService{
     }
 
     @Override
+    public List<ContractDTO> listApartmentContracts(ListApartmentContractsCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler entryContract");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
     public void entryContract(EntryContractCommand cmd) {
-        LOGGER.error("Insufficient privilege, zjgkhandler createContract");
+        LOGGER.error("Insufficient privilege, zjgkhandler entryContract");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
 
     @Override
     public void reviewContract(ReviewContractCommand cmd) {
-        LOGGER.error("Insufficient privilege, zjgkhandler createContract");
+        LOGGER.error("Insufficient privilege, zjgkhandler reviewContract");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
 
     @Override
     public void setContractParam(SetContractParamCommand cmd) {
-        LOGGER.error("Insufficient privilege, zjgkhandler createContract");
+        LOGGER.error("Insufficient privilege, zjgkhandler setContractParam");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
 
     @Override
     public ContractParamDTO getContractParam(GetContractParamCommand cmd) {
-        LOGGER.error("Insufficient privilege, zjgkhandler createContract");
+        LOGGER.error("Insufficient privilege, zjgkhandler getContractParam");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public void syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler syncContractsFromThirdPart");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
@@ -465,6 +507,16 @@ public class ZJContractHandler implements ContractService{
     @Override
     public String generateContractNumber() {
         return null;
+    }
+
+    private Map<String, String> generateParams(Map<String, String> params, String contractNum) {
+        params.put("contractNum", contractNum);
+        params.put("customerName", "");
+        String secretKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.secret.key", "");
+        params.remove("signature");
+        String signature = SignatureHelper.computeSignature(params, secretKey);
+        params.put("signature", signature);
+        return params;
     }
 
     private Map<String, String> generateParams(String communityIdentifier, String contractStatus, String contractAttribute,

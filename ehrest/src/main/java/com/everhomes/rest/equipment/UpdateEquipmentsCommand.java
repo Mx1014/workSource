@@ -4,6 +4,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -24,30 +25,30 @@ import java.util.List;
  *  <li>latitude: 设备纬度</li>
  *  <li>status: 设备状态</li>
  *  <li>installationTime: 安装时间</li>
- *  <li>repairTime: 保修时间</li>
+ *  <li>repairTime: 免保时间</li>
  *  <li>initialAssetValue: 资产原值</li>
- *  <li>customNumber: 自编号</li>
- *  <li>parameter: 参数</li>
+ *  <li>customNumber: 设备编号</li>
+ *  <li>parameter: 设备参数</li>
  *  <li>quantity: 数量</li>
- *  <li>sequenceNo: 编号</li>
+ *  <li>sequenceNo: 出厂编号</li>
  *  <li>versionNo: 版号</li>
- *  <li>manager: 责任人编号</li>
+ *  <li>manager: 联系人编号</li>
  *  <li>attachments: 操作图示&说明书 参考{@link com.everhomes.rest.equipment.EquipmentAttachmentDTO}</li>
  *  <li>remarks: 备注</li>
  *  <li>eqAccessoryMap: 设备备品配件 参考{@link com.everhomes.rest.equipment.EquipmentAccessoryMapDTO}</li>
+ *  <li>eqStandardMap: 设备-标准关联 参考{@link com.everhomes.rest.equipment.EquipmentStandardMapDTO}</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
  *  <li>pictureFlag: 是否需要拍照 0：否 1：是</li>
- *  <li>brandName 品牌
- *  <li>constructionParty :施工方</li>
- *  <li>discardTime :废弃时间</li>
- *  <li>managerContact :联系方式</li>
- *  <li>detail:设备详情</li>
+ *  <li>brandName: 品牌名称</li>
+ *  <li>constructionParty: 施工方</li>
+ *  <li>discardTime: 报废日期</li>
+ *  <li>managerContact: 联系人电话</li>
+ *  <li>detail: 设备详情</li>
  *  <li>factoryTime: 出厂时间</li>
- *  <li>price: 采购价格</li>
- *  <li>buyTime: 采购时间</li>
- *  <li>depreciationYears: 折旧年限</li>
  *  <li>provenance: 产地</li>
-
+ *  <li>price: 购买价格</li>
+ *  <li>buyTime: 购买日期</li>
+ *  <li>depreciationYears: 折旧年限</li>
  * </ul>
  */
 public class UpdateEquipmentsCommand {
@@ -101,34 +102,11 @@ public class UpdateEquipmentsCommand {
     private String versionNo;
     
     private String manager;
-
-	private  String brandName ;
-
-	private  String constructionParty ;
-
-	private  Long discardTime ;
-
-	private  String managerContact ;
-
-	private  String detail ;
-
-	private  Long  factoryTime;
-
-	private  String price ;
-
-	private  Long buyTime;
-
-	private  Integer depreciationYears;
-
-	private  String  provenance;
-
-
-	@ItemType(EquipmentAttachmentDTO.class)
+    
+    @ItemType(EquipmentAttachmentDTO.class)
     private List<EquipmentAttachmentDTO> attachments;
     @ItemType(EquipmentAccessoryMapDTO.class)
     private List<EquipmentAccessoryMapDTO> eqAccessoryMap;
-
-    @Deprecated
     @ItemType(EquipmentStandardMapDTO.class)
     private List<EquipmentStandardMapDTO> eqStandardMap;
     
@@ -137,6 +115,29 @@ public class UpdateEquipmentsCommand {
     private Long inspectionCategoryId;
 
 	private Byte pictureFlag;
+
+	//add in PM V3.0.1
+
+	private String brandName;
+
+	private String constructionParty;
+
+	private Long discardTime;
+
+	private String managerContact;
+
+	private String detail;
+
+	private Long factoryTime;
+
+	private String provenance;
+
+	private BigDecimal price;
+
+	private Long buyTime;
+
+	private Long depreciationYear;
+
 
 	public Byte getPictureFlag() {
 		return pictureFlag;
@@ -427,11 +428,19 @@ public class UpdateEquipmentsCommand {
 		this.factoryTime = factoryTime;
 	}
 
-	public String getPrice() {
+	public String getProvenance() {
+		return provenance;
+	}
+
+	public void setProvenance(String provenance) {
+		this.provenance = provenance;
+	}
+
+	public BigDecimal getPrice() {
 		return price;
 	}
 
-	public void setPrice(String price) {
+	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
 
@@ -443,20 +452,12 @@ public class UpdateEquipmentsCommand {
 		this.buyTime = buyTime;
 	}
 
-	public Integer getDepreciationYears() {
-		return depreciationYears;
+	public Long getDepreciationYear() {
+		return depreciationYear;
 	}
 
-	public void setDepreciationYears(Integer depreciationYears) {
-		this.depreciationYears = depreciationYears;
-	}
-
-	public String getProvenance() {
-		return provenance;
-	}
-
-	public void setProvenance(String provenance) {
-		this.provenance = provenance;
+	public void setDepreciationYear(Long depreciationYear) {
+		this.depreciationYear = depreciationYear;
 	}
 
 	@Override

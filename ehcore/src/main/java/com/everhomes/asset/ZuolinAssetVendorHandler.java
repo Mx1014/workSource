@@ -9,6 +9,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contract.ContractService;
+import com.everhomes.contract.ContractServiceImpl;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.order.PayService;
@@ -24,6 +25,7 @@ import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.GroupQueryResult;
+import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -31,6 +33,8 @@ import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.ExcelUtils;
+import com.sun.xml.bind.AnyTypeAdapter;
+import freemarker.core.ArithmeticEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +85,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     private DbProvider dbProvider;
 
     @Autowired
-    private UserService userService;
+    private ContractServiceImpl contractService;
 
     @Autowired
     private PayService payService;
@@ -291,14 +295,39 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public List<ListBillsDTO> listBills(String communityIdentifier,String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Integer pageOffSet, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse response) {
+    public List<ListBillsDTO> listBills(String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Long pageAnchor, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse response) {
+        if (pageAnchor == null || pageAnchor < 1l) {
+            pageAnchor = 0l;
+        }
+        if(pageSize == null){
+            pageSize = 20;
+        }
+        Integer pageOffSet = pageAnchor.intValue();
         List<ListBillsDTO> list = assetProvider.listBills(contractNum,currentNamespaceId,ownerId,ownerType, billGroupName,billGroupId,billStatus,dateStrBegin,dateStrEnd,pageOffSet,pageSize,targetName,status,targetType);
+        if(list.size() <= pageSize){
+            response.setNextPageAnchor(null);
+        }else {
+                response.setNextPageAnchor(pageAnchor+pageSize.longValue());
+            list.remove(list.size()-1);
+        }
         return list;
     }
 
     @Override
-    public List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageOffSet, Integer pageSize) {
+    public List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageOffSet, Integer pageSize,Long ownerId, ListBillItemsResponse response) {
+        if (pageOffSet == null) {
+            pageOffSet = 0;
+        }
+        if(pageSize == null){
+            pageSize = 20;
+        }
         List<BillDTO> list = assetProvider.listBillItems(Long.parseLong(billId),targetName,pageOffSet,pageSize);
+        if(list.size() <= pageSize) {
+            response.setNextPageAnchor(null);
+        }else {
+            response.setNextPageAnchor(((Integer)(pageOffSet+pageSize)).longValue());
+            list.remove(list.size()-1);
+        }
         return list;
     }
 
@@ -311,13 +340,16 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         }
         return assetProvider.listNoticeInfoByBillId(billIds);
     }
-
+    //这个UI页面希望有合同筛选
     @Override
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractId) {
         ShowBillForClientDTO response = new ShowBillForClientDTO();
+        checkCustomerParameter(targetType, targetId);
+        //获得必要条件 客户
         if(targetType.equals("eh_user")) {
             targetId = UserContext.current().getUser().getId();
         }
+        //获得筛选条件 contractId和contractNum
         String contractNum = null;
         Long cid = null;
         try{
@@ -352,30 +384,42 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         return response;
     }
 
+    private void checkCustomerParameter(String targetType, Long targetId) {
+        if(!targetType.equals(AssetPaymentStrings.EH_USER) && !targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+            LOGGER.error("target type is neither eh_user nor eh_organization");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"target type is neither eh_user nor eh_organization");
+        }
+        if(targetId == null){
+            LOGGER.error("customer id cannot be null!");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"customer id cannot be null!");
+        }
+    }
+
     @Override
     public FindUserInfoForPaymentResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
         FindUserInfoForPaymentResponse res = new FindUserInfoForPaymentResponse();
         List<FindUserInfoForPaymentDTO> list = new ArrayList<>();
-        String targeType = cmd.getTargetType();
-        ListCustomerContractsCommand cmd1 = new ListCustomerContractsCommand();
-        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
-        cmd1.setCommunityId(cmd.getCommunityId());
-        if(targeType.equals(AssetPaymentStrings.EH_USER)){
-            cmd1.setTargetId(UserContext.currentUserId());
-            cmd1.setTargetType(CustomerType.INDIVIDUAL.getCode());
-            res.setCustomerName(UserContext.current().getUser().getNickName());
-        }else if(targeType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
-            cmd1.setTargetId(cmd.getTargetId());
-            cmd1.setTargetType(CustomerType.ENTERPRISE.getCode());
-            OrganizationDTO organizationById = organizationService.getOrganizationById(cmd.getTargetId());
-            res.setCustomerName(organizationById.getName());
-        }else{
-            throw new RuntimeException("用户类型错误");
-        }
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        String handler = configurationProvider.getValue(namespaceId, "contractService", "");
-        ContractService contractService = PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
-        List<ContractDTO> dtos = contractService.listCustomerContracts(cmd1);
+//        String targeType = cmd.getTargetType();
+//        ListCustomerContractsCommand cmd1 = new ListCustomerContractsCommand();
+//        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+//        cmd1.setCommunityId(cmd.getCommunityId());
+//        if(targeType.equals(AssetPaymentStrings.EH_USER)){
+//            cmd1.setTargetId(UserContext.currentUserId());
+//            cmd1.setTargetType(CustomerType.INDIVIDUAL.getCode());
+//            res.setCustomerName(UserContext.current().getUser().getNickName());
+//        }else if(targeType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+//            cmd1.setTargetId(cmd.getTargetId());
+//            cmd1.setTargetType(CustomerType.ENTERPRISE.getCode());
+//            OrganizationDTO organizationById = organizationService.getOrganizationById(cmd.getTargetId());
+//            res.setCustomerName(organizationById.getName());
+//        }else{
+//            throw new RuntimeException("用户类型错误");
+//        }
+//        Integer namespaceId = UserContext.getCurrentNamespaceId();
+//        String handler = configurationProvider.getValue(namespaceId, "contractService", "");
+//        ContractService contractService = PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
+//        List<ContractDTO> dtos = contractService.listCustomerContracts(cmd1);
+        List<ContractDTO> dtos = listCustomerContracts(cmd.getTargetType(),cmd.getTargetId(),UserContext.getCurrentNamespaceId(),cmd.getCommunityId());
         for(int i = 0; i < dtos.size(); i++){
             FindUserInfoForPaymentDTO dto = new FindUserInfoForPaymentDTO();
             dto.setContractNum(dtos.get(i).getContractNumber());
@@ -401,6 +445,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
             GetAreaAndAddressByContractDTO areaAndAddressByContract = assetService.getAreaAndAddressByContract(cmd3);
             res.setAddressNames(areaAndAddressByContract.getAddressNames());
             res.setAreaSizesSum(areaAndAddressByContract.getAreaSizesSum());
+            res.setCustomerName(contractDTO.getCustomerName());
         }
         return res;
     }
@@ -603,7 +648,6 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
-        //先进行检查是否重复下单,查询此传来bills是否有对应的order，如果有，那么检查订单的状态，如果订单已经完毕，则返回
         List<BillIdAndAmount> bills = cmd.getBills();
         List<String> billIds = new ArrayList<>();
         Long amountsInCents = 0l;
@@ -613,6 +657,8 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
             Float amountOwedInCents = Float.parseFloat(amountOwed)*100f;
             amountsInCents += amountOwedInCents.longValue();
         }
+        //对左邻的用户，直接检查bill的状态即可
+        checkHasPaidBills(billIds);
         //这种检查的逻辑是不对的
 //        Long checkedOrderId = assetProvider.findAssetOrderByBillIds(billIds);
 //        if(checkedOrderId !=null){
@@ -637,6 +683,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         //组装command ， 请求支付模块的下预付单
         PreOrderCommand cmd2pay = new PreOrderCommand();
 //        cmd2pay.setAmount(amountsInCents);
+        cmd2pay.setCommunityId(cmd.getCommunityId());
         cmd2pay.setAmount(1l);
         cmd2pay.setClientAppName(cmd.getClientAppName());
         cmd2pay.setExpiration(ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);
@@ -668,9 +715,132 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         return preOrder;
     }
 
+    private void checkHasPaidBills(List<String> billIds) {
+        List<PaymentBills> paidBills = assetProvider.findPaidBillsByIds(billIds);
+        if( paidBills.size() >0 ) throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.HAS_PAID_BILLS,"this is bills have been paid,please refresh");
+    }
+
+
+    /**
+     * @deprecated method implementation:
+     * in this method, contracts will be found for the customer. And divided into groups by contractId and billGroupId
+     * being the key , while having the bills to be values.
+     *
+     * @active mehtod implementation:
+     * 寻找用户，这里不关心合同
+     */
+    @Override
+    public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
+        checkCustomerParameter(cmd.getTargetType(), cmd.getTargetId());
+        List<ShowBillForClientV2DTO> tabBills = new ArrayList<>();
+//        //查询合同，用来聚类
+//        List<ContractDTO> contracts = listCustomerContracts(cmd.getTargetType(), cmd.getTargetId(), cmd.getNamespaceId(), cmd.getOwnerId());
+//        if(contracts == null || contracts.size() < 1){
+//            return null;
+//        }
+//        List<Long> contractIds = new ArrayList<>();
+//        Map<Long,ContractDTO> contractMap = new HashMap<>();
+//        contracts.stream().forEach(r -> contractMap.put(r.getId(),r));
+//        contracts.stream().forEach(r -> contractIds.add(r.getId()));
+//        List<PaymentBills> bills = assetProvider.findSettledBillsByContractIds(contractIds);
+        //获得此用户的所有账单
+        List<PaymentBills> paymentBills = assetProvider.findSettledBillsByCustomer(cmd.getTargetType(),cmd.getTargetId());
+        //进行分类，冗杂代码，用空间换时间， 字符串操作+类型转换  vs  新建对象; 对象隐式指定最大寿命
+        List<Map<?,?>> maps = new ArrayList<>();
+        tryMakeCategory:{
+            //同样contract和billGroup一样的在一起，没有contract视为同样的contract。 首先，比较contractid+billGroup先拿人得到n个tab，contract+billgroup继续
+            //剩下的按照billGroup再分tab
+            Map<ContractIdBillGroup, List<PaymentBills>> idMap = new HashMap<>();
+            Map<ContractNumBillGroup, List<PaymentBills>> numMap = new HashMap<>();
+            Map<Long, List<PaymentBills>> groupMap = new HashMap<>();
+            for (int i = 0; i < paymentBills.size(); i++) {
+                PaymentBills bill = paymentBills.get(i);
+                if (bill.getContractId() != null) {
+                    ContractIdBillGroup idIden = new ContractIdBillGroup();
+                    idIden.setBillGroupId(bill.getBillGroupId());
+                    idIden.setContractId(bill.getContractId());
+                    if (idMap.containsKey(idIden)) {
+                        idMap.get(idIden).add(bill);
+                    } else {
+                        List<PaymentBills> idList = new ArrayList<>();
+                        idList.add(bill);
+                        idMap.put(idIden, idList);
+                    }
+                    continue;
+                }
+                if (bill.getContractNum() != null) {
+                    ContractNumBillGroup numIden = new ContractNumBillGroup();
+                    numIden.setBillGroupId(bill.getBillGroupId());
+                    numIden.setContractNum(bill.getContractNum());
+                    if (numMap.containsKey(numIden)) {
+                        numMap.get(numIden).add(bill);
+                    } else {
+                        List<PaymentBills> idList = new ArrayList<>();
+                        idList.add(bill);
+                        numMap.put(numIden, idList);
+                    }
+                    continue;
+                }
+                if (groupMap.containsKey(bill.getBillGroupId())) {
+                    groupMap.get(bill.getBillGroupId()).add(bill);
+                } else {
+                    List<PaymentBills> idList = new ArrayList<>();
+                    idList.add(bill);
+                    groupMap.put(bill.getBillGroupId(), idList);
+                }
+            }
+            maps.add(idMap);
+            maps.add(numMap);
+            maps.add(groupMap);
+        }
+
+        assemble:
+        {
+            for (int j = 0; j < maps.size(); j++) {
+                Map<?, ?> map = maps.get(j);
+                if (map.size() < 1) continue;
+                for (HashMap.Entry<?, ?> entry : map.entrySet()) {
+                    ShowBillForClientV2DTO dto = new ShowBillForClientV2DTO();
+                    List<PaymentBills> enclosedBills = (List<PaymentBills>) entry.getValue();
+                    if (enclosedBills.size() > 0)
+                        dto.setBillGroupName(assetProvider.getbillGroupNameById(enclosedBills.get(0).getBillGroupId()));
+                    //组装
+                    List<BillForClientV2> list = new ArrayList<>();
+                    Set<Long> addressIds = new HashSet<>();
+                    BigDecimal owedMoney = new BigDecimal("0");
+                    for (int i = 0; i < enclosedBills.size(); i++) {
+                        PaymentBills bill = enclosedBills.get(i);
+                        BillForClientV2 v2 = new BillForClientV2();
+                        owedMoney = owedMoney.add(enclosedBills.get(i).getAmountOwed());
+                        addressIds.addAll(assetProvider.getAddressIdByBillId(bill.getId()));
+
+                        v2.setAmountOwed(bill.getAmountOwed().toString());
+                        v2.setAmountReceivable(bill.getAmountReceivable().toString());
+                        v2.setBillDuration(bill.getDateStrBegin() + "至" + bill.getDateStrEnd());
+                        v2.setBillId(String.valueOf(bill.getId()));
+                        list.add(v2);
+                    }
+                    dto.setAddressStr(assetProvider.getAddressStrByIds(addressIds.stream().collect(Collectors.toList())));
+                    if (dto.getAddressStr().lastIndexOf(",") != -1) {
+                        dto.setAddressStr(dto.getAddressStr().substring(0, dto.getAddressStr().length() - 1));
+                    }
+                    dto.setBills(list);
+                    dto.setOverAllAmountOwed(owedMoney.toString());
+                    tabBills.add(dto);
+                }
+            }
+        }
+        return tabBills;
+    }
 
     @Override
-    public ShowBillDetailForClientResponse getBillDetailForClient(String billId,String targetType) {
+    public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
+        return assetProvider.listAllBillsForClient(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getOwnerType().equals(AssetPaymentStrings.EH_USER)?UserContext.currentUserId():cmd.getTargetId());
+    }
+
+
+    @Override
+    public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId,String targetType) {
         ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
         response =  assetProvider.getBillDetailForClient(Long.parseLong(billId));
         return response;
@@ -741,5 +911,18 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         int monthCompare = c.get(Calendar.MONTH);
 
         return (monthNow-monthCompare);
+    }
+    private List<ContractDTO> listCustomerContracts(String targetType,Long targetId,Integer namespaceId,Long communityId){
+        ListCustomerContractsCommand cmd = new ListCustomerContractsCommand();
+        if(targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+            cmd.setTargetType(CustomerType.ENTERPRISE.getCode());
+            cmd.setTargetId(targetId);
+        }else if(targetType.equals(AssetPaymentStrings.EH_USER)){
+            cmd.setTargetType(CustomerType.INDIVIDUAL.getCode());
+            cmd.setTargetId(UserContext.currentUserId());
+        }
+        cmd.setNamespaceId(namespaceId);
+        cmd.setCommunityId(communityId);
+        return contractService.listCustomerContracts(cmd);
     }
 }

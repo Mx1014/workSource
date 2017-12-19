@@ -12,7 +12,7 @@ public interface HotTagService {
 	
 	TagDTO setHotTag(SetHotTagCommand cmd);
 
-	void resetHotTag(resetHotTagCommand cmd);
+	void resetHotTag(ResetHotTagCommand cmd);
 	
 	void deleteHotTag(DeleteHotTagCommand cmd);
 

@@ -8,10 +8,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RuntimeErrorException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class FlowGraphAutoStepEvent extends AbstractFlowGraphEvent {
 
@@ -109,12 +106,68 @@ public class FlowGraphAutoStepEvent extends AbstractFlowGraphEvent {
             // 条件节点
             if (isConditionNode) {
                 next.stepEnter(ctx, currentNode);
-                flowCase.setCurrentNodeId(next.getFlowNode().getId());
-                flowCase.setCurrentLaneId(next.getFlowNode().getFlowLaneId());
             } else {
-                ctx.setNextNode(next);
+                final FlowGraphNode tempNext = next;
+                FlowGraphBranch thisBranch = flowGraph.getBranchByOriginalAndConvNode(flowCase.getStartNodeId(), next.getFlowNode().getId());
+                // 先把当前分支判断是否完成
+                if (thisBranch != null) {
+                    flowCase.setCurrentNodeId(next.getFlowNode().getId());
+                    List<FlowCase> siblingFlowCase = ctx.getSiblingFlowCase();
+                    boolean allFinish = siblingFlowCase.stream().allMatch(
+                            r -> Objects.equals(r.getCurrentNodeId(), tempNext.getFlowNode().getId()));
+                    if (allFinish) {
+                        // 如果父的flowCase的结束节点也是当前节点，则一起处理掉
+                        stepParentState(ctx, next);
+                    }
+                }
+
+                // 再判断是否有其他的分支,这里的分支包含上面的当前分支
+                List<FlowGraphBranch> branches = flowGraph.getBranchByConvergenceNode(next.getFlowNode().getId());
+                if (branches != null && branches.size() > 0 && ctx.getParentState() != null) {
+                    // 再判断其他所有分支是否都已经完成
+                    int finishedBranch = 0;
+                    for (FlowGraphBranch branch : branches) {
+                        List<FlowCase> flowCaseList = ctx.getFlowCaseByBranch(branch.getFlowBranch());
+                        boolean allFinish = flowCaseList.stream().allMatch(
+                                r -> Objects.equals(r.getCurrentNodeId(), tempNext.getFlowNode().getId()));
+                        if (allFinish) {
+                            finishedBranch++;
+                            // 如果父的flowCase的结束节点也是当前节点，则一起处理掉
+                            stepParentState(ctx, next);
+                        }
+                    }
+
+                    // 当前节点的所有分支并没有全部完成，不能进入当前节点
+                    if (finishedBranch < branches.size()) {
+                        log = flowEventLogProvider.getValidEnterStep(ctx.getOperator().getId(), ctx.getFlowCase());
+                        if (null != log) {
+                            log.setStepCount(-1L); // mark as invalid
+                            ctx.getUpdateLogs().add(log);
+                            log = null;
+                        }
+                    } else {
+                        // 全部分支完成，进入汇总节点
+                        // flowCase.setCurrentLaneId(next.getFlowNode().getFlowLaneId());
+                        List<FlowCase> siblingFlowCase = ctx.getSiblingFlowCase();
+                        for (FlowCase aCase : siblingFlowCase) {
+                            aCase.setCurrentLaneId(next.getFlowNode().getFlowLaneId());
+                        }
+                        ctx.getParentState().incrStepCount();
+                        ctx.getParentState().setNextNode(next);
+                        ctx.getParentState().setStepType(stepType);
+                    }
+                } else {
+                    // 下个节点不是分支汇总节点，正常进入
+                    ctx.setNextNode(next);
+                }
             }
-			
+
+            if (next.getExpectStatus() == FlowCaseStatus.FINISHED && subject == null) {
+                //显示任务跟踪语句
+                subject = new FlowSubject();
+            }
+            flowCase.incrStepCount();
+
 			tracker = new FlowEventLog();
 			tracker.setLogContent(flowService.getStepMessageTemplate(stepType, next.getExpectStatus(), ctx.getCurrentEvent(), templateMap));
 			tracker.setStepCount(ctx.getFlowCase().getStepCount());
@@ -123,7 +176,7 @@ public class FlowGraphAutoStepEvent extends AbstractFlowGraphEvent {
 				subject = new FlowSubject();
 			}
 			
-			flowCase.setStepCount(flowCase.getStepCount() + 1L);
+			// flowCase.setStepCount(flowCase.getStepCount() + 1L);
 			break;
 		case REJECT_STEP:
 			if(currentNode.getFlowNode().getNodeLevel() < 1) {
@@ -231,6 +284,15 @@ public class FlowGraphAutoStepEvent extends AbstractFlowGraphEvent {
 		log.setButtonFiredFromNode(currentNode.getFlowNode().getId());
 		ctx.getLogs().add(log);	//added but not save to database now.
 	}
+
+    private void stepParentState(FlowCaseState ctx, FlowGraphNode nextNode) {
+        FlowCaseState parentState = ctx.getParentState();
+        if (parentState != null && parentState.getFlowCase().getEndNodeId().equals(nextNode.getFlowNode().getId())) {
+            parentState.getFlowCase().setCurrentNodeId(nextNode.getFlowNode().getId());
+            parentState.getFlowCase().setCurrentLaneId(nextNode.getFlowNode().getFlowLaneId());
+            stepParentState(parentState, nextNode);
+        }
+    }
 
 	@Override
 	public FlowSubject getSubject() {

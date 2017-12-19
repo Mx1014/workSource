@@ -30,6 +30,7 @@ import com.everhomes.rest.contract.PeriodUnit;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.energy.*;
 import com.everhomes.rest.organization.pm.DefaultChargingItemPropertyType;
+import com.everhomes.search.EnergyMeterTaskSearcher;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
@@ -132,6 +133,8 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
     @Autowired
     private EnterpriseCustomerProvider enterpriseCustomerProvider;
 
+    @Autowired
+    private EnergyMeterTaskSearcher energyMeterTaskSearcher;
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         if(LOGGER.isInfoEnabled()) {
@@ -166,6 +169,12 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         List<EnergyMeterTask> tasks = taskProvider.listNotGeneratePaymentEnergyMeterTasks();
         if(tasks != null && tasks.size() > 0) {
             tasks.forEach(task -> {
+                if(EnergyTaskStatus.NON_READ.equals(task.getStatus())) {
+                    task.setStatus(EnergyTaskStatus.NON_READ_DELAY.getCode());
+                    taskProvider.updateEnergyMeterTask(task);
+                    energyMeterTaskSearcher.feedDoc(task);
+                    return ;
+                }
                 generateTaskPaymentExpectancies(task);
             });
         }

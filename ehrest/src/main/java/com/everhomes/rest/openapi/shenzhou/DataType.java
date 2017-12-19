@@ -5,7 +5,7 @@ package com.everhomes.rest.openapi.shenzhou;
  */
 public enum DataType {
     COMMUNITY((byte)1),BUILDING((byte)2),APARTMENT((byte)3),ENTERPRISE((byte)4),INDIVIDUAL((byte)5),
-    APARTMENT_LIVING_STATUS((byte)6);
+    APARTMENT_LIVING_STATUS((byte)6), CONTRACT((byte)7);
 
     private Byte code;
 

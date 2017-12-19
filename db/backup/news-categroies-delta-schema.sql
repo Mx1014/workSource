@@ -1,1 +1,0 @@
-ALTER TABLE eh_news_tag ADD COLUMN `category_id` BIGINT default 0;

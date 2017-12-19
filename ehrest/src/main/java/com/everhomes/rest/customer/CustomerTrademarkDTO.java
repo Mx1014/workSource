@@ -25,6 +25,42 @@ public class CustomerTrademarkDTO {
     private Long trademarkTypeItemId;
     private String trademarkTypeItemName;
     private Integer trademarkAmount;
+    private Integer applications;
+    private Integer patentApplications;
+    private Integer authorizations;
+    private Integer patentAuthorizations;
+
+    public Integer getApplications() {
+        return applications;
+    }
+
+    public void setApplications(Integer applications) {
+        this.applications = applications;
+    }
+
+    public Integer getAuthorizations() {
+        return authorizations;
+    }
+
+    public void setAuthorizations(Integer authorizations) {
+        this.authorizations = authorizations;
+    }
+
+    public Integer getPatentApplications() {
+        return patentApplications;
+    }
+
+    public void setPatentApplications(Integer patentApplications) {
+        this.patentApplications = patentApplications;
+    }
+
+    public Integer getPatentAuthorizations() {
+        return patentAuthorizations;
+    }
+
+    public void setPatentAuthorizations(Integer patentAuthorizations) {
+        this.patentAuthorizations = patentAuthorizations;
+    }
 
     public Long getId() {
         return id;

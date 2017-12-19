@@ -10,6 +10,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.*;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.*;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.archives.*;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.general_approval.*;
@@ -54,6 +55,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.everhomes.rest.acl.PrivilegeConstants.BATCH_EXPORT_PERSON;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 @Component
@@ -109,6 +111,12 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
 
+        //校验权限
+        if(cmd.getDetailId() != null){
+            Long departmentId = organizationService.getDepartmentByDetailId(cmd.getDetailId());
+            organizationService.checkOrganizationpPivilege(departmentId, PrivilegeConstants.CREATE_OR_MODIFY_PERSON);
+        }
+
         ArchivesContactDTO dto = new ArchivesContactDTO();
         //  组织架构添加人员
         AddOrganizationPersonnelCommand addCommand = new AddOrganizationPersonnelCommand();
@@ -157,6 +165,11 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void transferArchivesContacts(TransferArchivesContactsCommand cmd) {
+        //权限校验
+        cmd.getDetailIds().forEach(detailId ->{
+            Long departmentId = organizationService.getDepartmentByDetailId(detailId);
+            organizationService.checkOrganizationpPivilege(departmentId, PrivilegeConstants.MODIFY_DEPARTMENT_JOB_POSITION);
+        });
         dbProvider.execute((TransactionStatus status) -> {
             if (cmd.getDetailIds() != null) {
                 TransferArchivesEmployeesCommand transferCommand = new TransferArchivesEmployeesCommand();
@@ -181,6 +194,12 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void deleteArchivesContacts(DeleteArchivesContactsCommand cmd) {
+        //权限校验
+        cmd.getDetailIds().forEach(detailId ->{
+            Long departmentId = organizationService.getDepartmentByDetailId(detailId);
+            organizationService.checkOrganizationpPivilege(departmentId, PrivilegeConstants.DELETE_PERSON);
+        });
+
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         dbProvider.execute((TransactionStatus status) -> {
             if (cmd.getDetailIds() != null) {
@@ -574,6 +593,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void exportArchivesContacts(ExportArchivesContactsCommand cmd, HttpServletResponse httpResponse) {
+//        organizationService.checkOrganizationpPivilege(cmd.getOrganizationId(), PrivilegeConstants.BATCH_EXPORT_PERSON);
         ListArchivesContactsCommand listCommand = new ListArchivesContactsCommand();
         listCommand.setOrganizationId(cmd.getOrganizationId());
         listCommand.setKeywords(cmd.getKeywords());
@@ -2390,7 +2410,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     //    @Scheduled(cron = "0 0 * * * ?")
-    public void executeArchivesNotification() {
+    private void sendArchivesNotification() {
         //  1.读取当天 week
         Calendar c = Calendar.getInstance();
         int weekDay = c.get(Calendar.DAY_OF_WEEK);
@@ -2399,9 +2419,13 @@ public class ArchivesServiceImpl implements ArchivesService {
         //  2.按照时间归类，来启动对应时间点的定时器
             Map<Integer, List<ArchivesNotifications>> notifyMap = results.stream().collect(Collectors.groupingBy
                     (ArchivesNotifications::getNotifyHour));
-            for (Integer key : notifyMap.keySet()) {
-                archivesConfigurationService.sendingMailJob(key, notifyMap.get(key));
+            for (Integer hour : notifyMap.keySet()) {
+                archivesConfigurationService.sendingMailJob(hour, notifyMap.get(hour));
             }
         }
+    }
+
+    private void sendEmails(List<ArchivesNotifications> notifyLists){
+
     }
 }

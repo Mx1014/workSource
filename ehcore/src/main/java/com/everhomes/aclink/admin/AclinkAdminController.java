@@ -279,7 +279,7 @@ public class AclinkAdminController extends ControllerBase {
      */
     @RequestMapping("getCurrentFirmware")
     @RestReturn(value=ListDoorAccessResponse.class)
-    public RestResponse listDoorAccessGroup(@Valid GetCurrentFirmwareCommand cmd) {
+    public RestResponse getCurrentFirmware(@Valid GetCurrentFirmwareCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.getCurrentFirmware(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

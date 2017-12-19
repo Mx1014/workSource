@@ -3,6 +3,7 @@ package com.everhomes.sms;
 import com.everhomes.rest.sms.ListReportLogCommand;
 import com.everhomes.rest.sms.ListSmsLogsResponse;
 import com.everhomes.rest.sms.SendTestSmsCommand;
+import com.everhomes.rest.sms.SmsHandlerResponse;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,4 +21,6 @@ public interface SmsService {
     ListSmsLogsResponse listReportLogs(ListReportLogCommand cmd);
 
     void sendTestSms(SendTestSmsCommand cmd);
+
+    SmsHandlerResponse listSmsHandlers();
 }

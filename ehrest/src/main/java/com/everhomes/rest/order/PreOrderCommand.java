@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 /**
  * <ul>
  *     <li>namespaceId: 域空间</li>
+ *     <li>communityId: 园区id</li>
  *     <li>clientAppName: 客户端realm值</li>
  *     <li>orderType: orderType {@link com.everhomes.rest.order.OrderType}</li>
  *     <li>orderId: 订单Id</li>
@@ -27,6 +28,7 @@ public class PreOrderCommand {
 
     @NotNull
     private Integer namespaceId;
+    private Long communityId;
     @NotNull
     private String clientAppName;
     @NotNull
@@ -86,6 +88,14 @@ public class PreOrderCommand {
 
     public Long getPayerId() {
         return payerId;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public void setPayerId(Long payerId) {

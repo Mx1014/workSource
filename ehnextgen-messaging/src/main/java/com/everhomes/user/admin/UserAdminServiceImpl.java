@@ -185,7 +185,7 @@ public class UserAdminServiceImpl implements UserAdminService {
         if (userIdentifiers.size() > pageNum) {
 //            values = userIdentifiers.subList(0, userIdentifiers.size()-1);
         	locator.setAnchor(cmd.getAnchor());
-            values = userAdminProvider.listAllVerifyCode(locator, pageNum, null);
+            values = userAdminProvider.listAllVerifyCodeByPhone(locator, cmd.getPhone(), pageNum, null);
             nextAnchor = locator.getAnchor();
         }
         return new Tuple<Long, List<UserIdentifier>>(nextAnchor, values);

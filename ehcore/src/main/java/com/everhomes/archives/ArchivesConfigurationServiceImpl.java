@@ -3,6 +3,7 @@ package com.everhomes.archives;
 
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.util.StringHelper;
 import net.greghaines.jesque.Job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -34,7 +35,7 @@ public class ArchivesConfigurationServiceImpl implements ArchivesConfigurationSe
 
     @Override
     public void sendingMailJob(Integer hour, List<ArchivesNotifications> notifyLists) {
-        final Job job = new Job(ArchivesNotificationAction.class.getName(), new Object[]{notifyLists});
+        final Job job = new Job(ArchivesNotificationAction.class.getName(), new Object[]{StringHelper.toJsonString(notifyLists)});
         jesqueClientFactory.getClientPool().delayedEnqueue(ARCHIVES_NOTIFICATION, job, System.currentTimeMillis() + hour * 60 * 60 * 1000);
     }
 }

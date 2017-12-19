@@ -10,9 +10,12 @@ import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.flow.*;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +48,8 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 	private CommunityProvider communityProvider;
 	@Autowired
 	private FlowButtonProvider flowButtonProvider;
+	@Autowired
+	private PortalService portalService;
 
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone){
@@ -53,8 +58,17 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 			PmTask task = pmTaskCommonService.createTask(cmd, requestorUid, requestorName, requestorPhone);
 			//新建flowcase
 			Integer namespaceId = UserContext.getCurrentNamespaceId();
-			Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
-					FlowModuleType.NO_MODULE.getCode(), cmd.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+			Flow flow = null;
+
+            Long parentTaskId = categoryProvider.findCategoryById(cmd.getTaskCategoryId()).getParentId();
+            if (parentTaskId == PmTaskAppType.SUGGESTION_ID)
+                flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+                        FlowModuleType.SUGGESTION_MODULE.getCode(), cmd.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+            else
+               // if (cmd.getTaskCategoryId()==PmTaskAppType.REPAIR_ID)
+                    flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+                        FlowModuleType.NO_MODULE.getCode(), cmd.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+
 			if(null == flow) {
 				LOGGER.error("Enable pmtask flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
 				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
@@ -63,14 +77,25 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 			CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
 			Category taskCategory = categoryProvider.findCategoryById(task.getTaskCategoryId());
 
-			createFlowCaseCommand.setTitle(taskCategory.getName());
+			ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+			listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+			listServiceModuleAppsCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
+			listServiceModuleAppsCommand.setCustomTag(String.valueOf(parentTaskId));
+			ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+
+			if (apps!=null && apps.getServiceModuleApps().size()>0)
+				createFlowCaseCommand.setTitle(apps.getServiceModuleApps().get(0).getName());
+			else
+				createFlowCaseCommand.setTitle(taskCategory.getName());
 			createFlowCaseCommand.setServiceType(taskCategory.getName());
 			createFlowCaseCommand.setApplyUserId(task.getCreatorUid());
 			createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
 			createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
 			createFlowCaseCommand.setReferId(task.getId());
 			createFlowCaseCommand.setReferType(EntityType.PM_TASK.getCode());
-			createFlowCaseCommand.setContent(task.getContent());
+			String content = "服务内容:"+task.getContent()+"\n";
+			content += "服务地点:"+task.getAddress();
+			createFlowCaseCommand.setContent(content);
 			createFlowCaseCommand.setCurrentOrganizationId(cmd.getFlowOrganizationId());
 
 			createFlowCaseCommand.setProjectId(task.getOwnerId());
@@ -93,16 +118,16 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 
 			String params = flowNode.getParams();
 
-			if(StringUtils.isBlank(params)) {
-				LOGGER.error("Invalid flowNode param.");
-				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
-						"Invalid flowNode param.");
-			}
+//			if(StringUtils.isBlank(params)) {
+//				LOGGER.error("Invalid flowNode param.");
+//				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+//						"Invalid flowNode param.");
+//			}
 
-			JSONObject paramJson = JSONObject.parseObject(params);
-			String nodeType = paramJson.getString("nodeType");
+//			JSONObject paramJson = JSONObject.parseObject(params);
+//			String nodeType = paramJson.getString("nodeType");
 
-			task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
+			task.setStatus(PmTaskFlowStatus.ACCEPTING.getCode());
 			task.setFlowCaseId(flowCase.getId());
 			pmTaskProvider.updateTask(task);
 			return task;

@@ -23,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
-import com.everhomes.activity.Activity;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -40,7 +39,6 @@ import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sharding.ShardIterator;
-import com.everhomes.sms.DateUtil;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -108,6 +106,25 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
         dao.delete(customer);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
+    }
+
+    @Override
+    public EnterpriseCustomer findByNamespaceToken(String namespaceType, String namespaceCustomerToken) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_CUSTOMER_TYPE.eq(namespaceType));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_CUSTOMER_TOKEN.eq(namespaceCustomerToken));
+
+        List<EnterpriseCustomer> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, EnterpriseCustomer.class));
+            return null;
+        });
+
+        if(result.size() == 0) {
+            return null;
+        }
+        return result.get(0);
     }
 
     @Override
@@ -188,6 +205,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         }
         return result.get(0);
     }
+
 
     @Override
     public List<EnterpriseCustomer> listEnterpriseCustomers(CrossShardListingLocator locator, Integer pageSize) {
@@ -308,14 +326,128 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
+    public void createCustomerAccount(CustomerAccount account) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerAccounts.class));
+        account.setId(id);
+        account.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        account.setCreateUid(UserContext.current().getUser().getId());
+        account.setStatus(CommonStatus.ACTIVE.getCode());
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerAccounts.class, id));
+        EhCustomerAccountsDao dao = new EhCustomerAccountsDao(context.configuration());
+        dao.insert(account);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerAccounts.class, null);
+    }
+
+    @Override
+    public void createCustomerTax(CustomerTax tax) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerTaxes.class));
+        tax.setId(id);
+        tax.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        tax.setCreateUid(UserContext.current().getUser().getId());
+        tax.setStatus(CommonStatus.ACTIVE.getCode());
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTaxes.class, id));
+        EhCustomerTaxesDao dao = new EhCustomerTaxesDao(context.configuration());
+        dao.insert(tax);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerTaxes.class, null);
+    }
+
+    @Override
+    public void deleteCustomerAccount(CustomerAccount account) {
+        assert(account.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerAccounts.class, account.getId()));
+        EhCustomerAccountsDao dao = new EhCustomerAccountsDao(context.configuration());
+        dao.delete(account);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerAccounts.class, account.getId());
+    }
+
+    @Override
+    public void deleteCustomerTax(CustomerTax tax) {
+        assert(tax.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTaxes.class, tax.getId()));
+        EhCustomerTaxesDao dao = new EhCustomerTaxesDao(context.configuration());
+        dao.delete(tax);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerTaxes.class, tax.getId());
+    }
+
+    @Override
+    public CustomerAccount findCustomerAccountById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerAccountsDao dao = new EhCustomerAccountsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerAccount.class);
+    }
+
+    @Override
+    public CustomerTax findCustomerTaxById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerTaxesDao dao = new EhCustomerTaxesDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerTax.class);
+    }
+
+    @Override
+    public List<CustomerAccount> listCustomerAccountsByCustomerId(Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerAccountsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ACCOUNTS);
+        query.addConditions(Tables.EH_CUSTOMER_ACCOUNTS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_ACCOUNTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerAccount> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerAccount.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public List<CustomerTax> listCustomerTaxesByCustomerId(Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerTaxesRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TAXES);
+        query.addConditions(Tables.EH_CUSTOMER_TAXES.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_TAXES.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerTax> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerTax.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public void updateCustomerAccount(CustomerAccount account) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerAccounts.class, account.getId()));
+        EhCustomerAccountsDao dao = new EhCustomerAccountsDao(context.configuration());
+
+        account.setOperatorUid(UserContext.current().getUser().getId());
+        account.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(account);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerAccounts.class, account.getId());
+    }
+
+    @Override
+    public void updateCustomerTax(CustomerTax tax) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTaxes.class, tax.getId()));
+        EhCustomerTaxesDao dao = new EhCustomerTaxesDao(context.configuration());
+
+        tax.setOperatorUid(UserContext.current().getUser().getId());
+        tax.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(tax);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerTaxes.class, tax.getId());
+    }
+
+    @Override
     public void createCustomerTalent(CustomerTalent talent) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerTalents.class));
         talent.setId(id);
         talent.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         talent.setCreatorUid(UserContext.current().getUser().getId());
         talent.setStatus(CommonStatus.ACTIVE.getCode());
-
-        LOGGER.info("createCustomerTalent: " + talent);
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTalents.class, id));
         EhCustomerTalentsDao dao = new EhCustomerTalentsDao(context.configuration());
@@ -491,6 +623,120 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
             return null;
         }
         return result.get(0);
+    }
+
+    @Override
+    public void createCustomerDepartureInfo(CustomerDepartureInfo departureInfo) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerDepartureInfos.class));
+        departureInfo.setId(id);
+        departureInfo.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        departureInfo.setCreateUid(UserContext.current().getUser().getId());
+        departureInfo.setStatus(CommonStatus.ACTIVE.getCode());
+
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerDepartureInfos.class));
+        EhCustomerDepartureInfosDao dao = new EhCustomerDepartureInfosDao(context.configuration());
+        dao.insert(departureInfo);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerDepartureInfos.class, id);
+    }
+
+    @Override
+    public void createCustomerEntryInfo(CustomerEntryInfo entryInfo) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerEntryInfos.class));
+        entryInfo.setId(id);
+        entryInfo.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        entryInfo.setCreateUid(UserContext.current().getUser().getId());
+        entryInfo.setStatus(CommonStatus.ACTIVE.getCode());
+
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEntryInfos.class));
+        EhCustomerEntryInfosDao dao = new EhCustomerEntryInfosDao(context.configuration());
+        dao.insert(entryInfo);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerEntryInfos.class, id);
+    }
+
+    @Override
+    public void deleteCustomerDepartureInfo(CustomerDepartureInfo departureInfo) {
+        assert(departureInfo.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerDepartureInfos.class, departureInfo.getId()));
+        EhCustomerDepartureInfosDao dao = new EhCustomerDepartureInfosDao(context.configuration());
+        dao.delete(departureInfo);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerDepartureInfos.class, departureInfo.getId());
+    }
+
+    @Override
+    public void deleteCustomerEntryInfo(CustomerEntryInfo entryInfo) {
+        assert(entryInfo.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEntryInfos.class, entryInfo.getId()));
+        EhCustomerEntryInfosDao dao = new EhCustomerEntryInfosDao(context.configuration());
+        dao.delete(entryInfo);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerEntryInfos.class, entryInfo.getId());
+    }
+
+    @Override
+    public CustomerDepartureInfo findCustomerDepartureInfoById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerDepartureInfosDao dao = new EhCustomerDepartureInfosDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerDepartureInfo.class);
+    }
+
+    @Override
+    public CustomerEntryInfo findCustomerEntryInfoById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerEntryInfosDao dao = new EhCustomerEntryInfosDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerEntryInfo.class);
+    }
+
+    @Override
+    public List<CustomerDepartureInfo> listCustomerDepartureInfos(Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerDepartureInfosRecord> query = context.selectQuery(Tables.EH_CUSTOMER_DEPARTURE_INFOS);
+        query.addConditions(Tables.EH_CUSTOMER_DEPARTURE_INFOS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_DEPARTURE_INFOS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerDepartureInfo> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerDepartureInfo.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public List<CustomerEntryInfo> listCustomerEntryInfos(Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerEntryInfosRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ENTRY_INFOS);
+        query.addConditions(Tables.EH_CUSTOMER_ENTRY_INFOS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_ENTRY_INFOS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerEntryInfo> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerEntryInfo.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public void updateCustomerDepartureInfo(CustomerDepartureInfo departureInfo) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerDepartureInfos.class));
+        EhCustomerDepartureInfosDao dao = new EhCustomerDepartureInfosDao(context.configuration());
+
+        dao.update(departureInfo);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerDepartureInfos.class, departureInfo.getId());
+    }
+
+    @Override
+    public void updateCustomerEntryInfo(CustomerEntryInfo entryInfo) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEntryInfos.class));
+        EhCustomerEntryInfosDao dao = new EhCustomerEntryInfosDao(context.configuration());
+
+        dao.update(entryInfo);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerEntryInfos.class, entryInfo.getId());
     }
 
     @Override
@@ -1244,8 +1490,10 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 				if(null != objNew || null != objOld){
 					if(!(objNew == null ? "" : objNew).equals((objOld == null ? "" : objOld))){
 						String  content = "";
-						String  newData = objNew == null ? "null" : objNew.toString();
-						String  oldData = objOld == null ? "null" : objOld.toString();
+						String  newData = objNew == null ? "\" \"" : objNew.toString();
+						String  oldData = objOld == null ? "\" \"" : objOld.toString();
+                        LOGGER.debug("compareEnterpriseCustomer FieldName: {}; newData: {}; oldData: {}",
+                                field.getFieldName(), newData, oldData);
 						if(field.getFieldName().lastIndexOf("ItemId") > -1){
 							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
 					        if(levelItemNew != null) {
@@ -1471,5 +1719,25 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         	   .execute();
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
 	}
-	
+
+    @Override
+    public String findLastEnterpriseCustomerVersionByCommunity(Integer namespaceId, Long communityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+        query.addOrderBy(Tables.EH_ENTERPRISE_CUSTOMERS.VERSION.desc());
+        query.addLimit(1);
+        List<EnterpriseCustomer> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, EnterpriseCustomer.class));
+            return null;
+        });
+        if(result == null || result.size() == 0) {
+            return null;
+        }
+
+        return result.get(0).getVersion();
+    }
 }

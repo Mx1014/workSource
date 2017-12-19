@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  *     <li>itemId: 在系统里的字段选项id</li>
  *     <li>itemDisplayName: 字段选项名</li>
  *     <li>defaultOrder: 顺序</li>
+ *     <li>businessValue: 在业务模块中定义的值，没有则为空</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -29,6 +30,16 @@ public class ScopeFieldItemInfo {
     private String itemDisplayName;
 
     private Integer defaultOrder;
+
+    private Byte businessValue;
+
+    public Byte getBusinessValue() {
+        return businessValue;
+    }
+
+    public void setBusinessValue(Byte businessValue) {
+        this.businessValue = businessValue;
+    }
 
     public Integer getDefaultOrder() {
         return defaultOrder;

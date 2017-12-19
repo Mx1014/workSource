@@ -8,7 +8,6 @@ import com.everhomes.parking.bosigao2.rest.Bosigao2CardInfo;
 import com.everhomes.parking.bosigao2.rest.Bosigao2GetCardCommand;
 import com.everhomes.parking.bosigao2.rest.Bosigao2RechargeCommand;
 import com.everhomes.parking.bosigao2.rest.Bosigao2ResultEntity;
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.parking.*;
@@ -20,11 +19,9 @@ import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -166,8 +163,7 @@ public class Bosigao2ParkingVendorHandler extends DefaultParkingVendorHandler {
 			dto.setRateToken(r.getId().toString());
 			dto.setVendorName(ParkingLotVendor.BOSIGAO2.getCode());
 			return dto;
-		}
-		).collect(Collectors.toList());
+		}).collect(Collectors.toList());
 		
 		return result;
     }

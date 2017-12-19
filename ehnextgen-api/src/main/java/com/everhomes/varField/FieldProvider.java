@@ -26,6 +26,7 @@ public interface FieldProvider {
     Map<Long, ScopeFieldItem> listScopeFieldsItems(List<Long> fieldIds, Integer namespaceId, Long communityId);
     ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long communityId, Long itemId);
     ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, String displayName);
+    ScopeFieldItem findScopeFieldItemByBusinessValue(Integer namespaceId, Long communityId, String moduleName, Long fieldId, Byte businessValue);
     ScopeField findScopeField(Integer namespaceId, Long communityId, Long fieldId);
 
     List<FieldItem> listFieldItems(List<Long> fieldIds);
@@ -41,5 +42,7 @@ public interface FieldProvider {
     void createScopeFieldItem(ScopeFieldItem scopeFieldItem);
     void updateScopeFieldItem(ScopeFieldItem scopeFieldItem);
     ScopeFieldItem findScopeFieldItem(Long id, Integer namespaceId, Long communityId);
+
+    void createFieldItem(FieldItem item);
 
 }

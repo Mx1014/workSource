@@ -1,9 +1,16 @@
 package com.everhomes.rest.equipment;
 
+import java.sql.Timestamp;
+import java.util.List;
+
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.forum.AttachmentDTO;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -38,15 +45,17 @@ import java.util.List;
  *  <li>attachments: 操作图示&说明书 参考{@link com.everhomes.rest.equipment.EquipmentAttachmentDTO}</li>
  *  <li>remarks: 备注</li>
  *  <li>eqAccessoryMap: 设备备品配件 参考{@link com.everhomes.rest.equipment.EquipmentAccessoryMapDTO}</li>
+ *  <li>eqStandardMap: 设备-标准关联 参考{@link com.everhomes.rest.equipment.EquipmentStandardMapDTO}</li>
  *  <li>pictureFlag: 是否需要拍照 0：否 1：是</li>
- *  <li>brandName 品牌
- *  <li>construction_party :施工方</li>
- *  <li>discardTime :废弃时间</li>
- *  <li>managerContact :联系方式</li>
- *  <li>detail:设备详情</li>
+ *  <li>brandName: 品牌名称</li>
+ *  <li>constructionParty: 施工方</li>
+ *  <li>discardTime: 报废日期</li>
+ *  <li>managerContact: 联系人电话</li>
+ *  <li>detail: 设备详情</li>
  *  <li>factoryTime: 出厂时间</li>
- *  <li>price: 采购价格</li>
- *  <li>buyTime: 采购时间</li>
+ *  <li>provenance: 产地</li>
+ *  <li>price: 购买价格</li>
+ *  <li>buyTime: 购买日期</li>
  *  <li>depreciationYears: 折旧年限</li>
  * </ul>
  */
@@ -108,39 +117,40 @@ public class EquipmentsDTO {
     private String versionNo;
     
     private String manager;
-
-	private  String brandName ;
-
-	private  String constructionParty ;
-
-	private  Long discardTime ;
-
-	private  String managerContact ;
-
-	private  String detail ;
-
-	private  String price ;
-
-	private  Long buyTime;
-
-	private  Integer depreciationYears;
-
-	private  String  provenance;
     
     @ItemType(EquipmentAttachmentDTO.class)
     private List<EquipmentAttachmentDTO> attachments;
     @ItemType(EquipmentAccessoryMapDTO.class)
     private List<EquipmentAccessoryMapDTO> eqAccessoryMap;
-
-    @Deprecated
     @ItemType(EquipmentStandardMapDTO.class)
     private List<EquipmentStandardMapDTO> eqStandardMap;
     
     private String remarks;
 
 	private Byte pictureFlag;
-    
-    public Long getId() {
+
+	private String brandName;
+
+	private String constructionParty;
+
+	private Timestamp discardTime;
+
+	private String managerContact;
+
+	private String detail;
+
+	private Timestamp factoryTime;
+
+	private String provenance;
+
+	private BigDecimal price;
+
+	private Timestamp buyTime;
+
+	private Long depreciationYear;
+
+
+	public Long getId() {
 		return id;
 	}
 
@@ -412,11 +422,11 @@ public class EquipmentsDTO {
 		this.constructionParty = constructionParty;
 	}
 
-	public Long getDiscardTime() {
+	public Timestamp getDiscardTime() {
 		return discardTime;
 	}
 
-	public void setDiscardTime(Long discardTime) {
+	public void setDiscardTime(Timestamp discardTime) {
 		this.discardTime = discardTime;
 	}
 
@@ -436,28 +446,12 @@ public class EquipmentsDTO {
 		this.detail = detail;
 	}
 
-	public String getPrice() {
-		return price;
+	public Timestamp getFactoryTime() {
+		return factoryTime;
 	}
 
-	public void setPrice(String price) {
-		this.price = price;
-	}
-
-	public Long getBuyTime() {
-		return buyTime;
-	}
-
-	public void setBuyTime(Long buyTime) {
-		this.buyTime = buyTime;
-	}
-
-	public Integer getDepreciationYears() {
-		return depreciationYears;
-	}
-
-	public void setDepreciationYears(Integer depreciationYears) {
-		this.depreciationYears = depreciationYears;
+	public void setFactoryTime(Timestamp factoryTime) {
+		this.factoryTime = factoryTime;
 	}
 
 	public String getProvenance() {
@@ -466,6 +460,30 @@ public class EquipmentsDTO {
 
 	public void setProvenance(String provenance) {
 		this.provenance = provenance;
+	}
+
+	public BigDecimal getPrice() {
+		return price;
+	}
+
+	public void setPrice(BigDecimal price) {
+		this.price = price;
+	}
+
+	public Timestamp getBuyTime() {
+		return buyTime;
+	}
+
+	public void setBuyTime(Timestamp buyTime) {
+		this.buyTime = buyTime;
+	}
+
+	public Long getDepreciationYear() {
+		return depreciationYear;
+	}
+
+	public void setDepreciationYear(Long depreciationYear) {
+		this.depreciationYear = depreciationYear;
 	}
 
 	@Override

@@ -68,19 +68,4 @@ public class GeneralFormController extends ControllerBase {
     	return response;
     }
 
-//	/**
-//	 * <b>URL: /general_form/postApprovalForm</b>
-//	 * <p> 提交数据，并获取表单的信息 </p>
-//	 * @return GetTemplateByApprovalIdResponse 表单的数据信息
-//	 */
-//	@RequestMapping("postApprovalForm")
-//	@RestReturn(value=GetTemplateByApprovalIdResponse.class)
-//	public RestResponse postApprovalForm(@Valid PostApprovalFormCommand cmd) {
-//		GetTemplateByApprovalIdResponse result = generalApprovalService.postApprovalForm(cmd);
-//		RestResponse response = new RestResponse(result);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//
-//		return response;
-//	}
 }

@@ -16,10 +16,7 @@ import com.everhomes.border.Border;
 import com.everhomes.border.BorderConnection;
 import com.everhomes.border.BorderConnectionProvider;
 import com.everhomes.border.BorderProvider;
-import com.everhomes.bus.LocalBus;
-import com.everhomes.bus.LocalBusMessageDispatcher;
-import com.everhomes.bus.LocalBusMessageHandler;
-import com.everhomes.bus.LocalBusSubscriber;
+import com.everhomes.bus.*;
 import com.everhomes.business.BusinessService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -73,7 +70,6 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberFullDTO;
@@ -103,13 +99,10 @@ import com.everhomes.server.schema.tables.EhGroupMemberLogs;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.*;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
-
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.geo.GeoHashUtils;
-
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.slf4j.Logger;
@@ -133,7 +126,6 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -768,6 +760,17 @@ public class UserServiceImpl implements UserService {
 			//刷新地址信息
 			propertyMgrService.processUserForOwner(identifier);
 
+			// 注册成功事件
+            LocalEventBus.publish(event -> {
+                LocalEventContext context = new LocalEventContext();
+                context.setUid(rLogin.getUserId());
+                context.setNamespaceId(namespaceId);
+                event.setContext(context);
+
+                event.setEntityType(EntityType.USER.getCode());
+                event.setEntityId(rLogin.getUserId());
+                event.setEventName(SystemEvent.ACCOUNT_REGISTER_SUCCESS.dft());
+            });
 			return rLogin;
 		}
 
@@ -1359,6 +1362,18 @@ public class UserServiceImpl implements UserService {
 			// 发布用户切换App到前台事件   add by xq.tian 2017/07/13
             applicationEventPublisher.publishEvent(new BorderRegisterEvent(login));
 
+            // 打开App事件
+            LocalEventBus.publish(event -> {
+                LocalEventContext context = new LocalEventContext();
+                context.setNamespaceId(login.getNamespaceId());
+                context.setUid(login.getUserId());
+                event.setContext(context);
+
+                event.setEntityType(EntityType.USER.getCode());
+                event.setEntityId(login.getUserId());
+                event.setEventName(SystemEvent.ACCOUNT_OPEN_APP.dft());
+            });
+
 			registerBorderTracker(borderId, loginToken.getUserId(), loginToken.getLoginId());
 			return login;
 		} else {
@@ -1642,6 +1657,18 @@ public class UserServiceImpl implements UserService {
 		user.setOccupation(cmd.getOccupation());
 
 		this.userProvider.updateUser(user);
+
+        // 完善个人信息事件
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(user.getId());
+            context.setNamespaceId(user.getNamespaceId());
+            event.setContext(context);
+
+            event.setEntityType(EntityType.USER.getCode());
+            event.setEntityId(user.getId());
+            event.setEventName(SystemEvent.ACCOUNT_COMPLETE_INFO.dft());
+        });
 	}
 
 	@Override
@@ -2973,6 +3000,16 @@ public class UserServiceImpl implements UserService {
 			communityName = organizationDto.getCommunityAliasName();
 		}else{
 			communityName = organizationDto.getCommunityName();
+		}
+
+		//加上province
+		Region city = regionProvider.findRegionById(organizationDto.getCityId());
+		if(city != null) {
+			Region province = regionProvider.findRegionById(city.getParentId());
+			if(province != null) {
+				organizationDto.setProvinceId(province.getId());
+				organizationDto.setProvinceName(province.getName());
+			}
 		}
 
 		String organizaitonName = "";
@@ -4467,7 +4504,7 @@ public class UserServiceImpl implements UserService {
             }
         }
     }
-		//added by R 20170713, 通讯录2.4增加
+		//added by nan.rong 20170713, 通讯录2.4增加
 	@Override
 	public SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd) {
 		if (org.springframework.util.StringUtils.isEmpty(cmd.getDetailId())) {
@@ -4492,8 +4529,12 @@ public class UserServiceImpl implements UserService {
 					dto.setContactEnglishName(detail.getEnName());
 				dto.setGender(detail.getGender());
 				dto.setContactToken(detail.getContactToken());
+				if (!StringUtils.isEmpty(detail.getContactShortToken()))
+					dto.setContactShortToken(detail.getContactShortToken());
 				if (!StringUtils.isEmpty(detail.getEmail()))
 					dto.setEmail(detail.getEmail());
+				if (!StringUtils.isEmpty(detail.getWorkEmail()))
+					dto.setWorkEmail(detail.getWorkEmail());
 				dto.setRegionCode(detail.getRegionCode());
 				getRelevantContactMoreInfo(dto, detail.getOrganizationId());
 				return dto;
@@ -4522,9 +4563,9 @@ public class UserServiceImpl implements UserService {
 
     private void getRelevantContactMoreInfo(SceneContactV2DTO dto, Long organizationId) {
 
-        List<String> groupTypes = new ArrayList<>();
+/*        List<String> groupTypes = new ArrayList<>();
         groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
-        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+//        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
 
         //  设置公司
@@ -4537,17 +4578,31 @@ public class UserServiceImpl implements UserService {
 
         //  设置部门
         List<OrganizationDTO> departments = this.organizationService.getOrganizationMemberGroups(groupTypes, dto.getContactToken(), directlyEnterprise.getPath());
-        //  设置父部门名称
-        if (departments != null && departments.size() > 0) {
-            for (int i = 0; i < departments.size(); i++) {
-                if (departments.get(i).getParentId().equals(0))
-                    continue;
-                departments.get(i).setParentName(this.organizationProvider.findOrganizationById(departments.get(i).getParentId()).getName());
-            }
-        }
-        dto.setDepartments(departments);
+        if(departments == null || departments.size() < 1){
+			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+			departments = this.organizationService.getOrganizationMemberGroups(groupTypes, dto.getContactToken(), directlyEnterprise.getPath());
+		}
 
-        //  设置岗位
+        dto.setDepartments(departments);*/
+		//	设置查询条件
+		Organization directlyEnterprise = this.organizationProvider.findOrganizationById(organizationId);
+		List<String> groupTypes = new ArrayList<>();
+		groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+
+		//	查询部门
+		List<OrganizationDTO> departments = getContactDepartments(directlyEnterprise.getPath(), groupTypes, dto.getContactToken());
+
+		//	对于 belongTo 的数据再做处理, add by lei.lv 2017/11/30
+		if(departments == null || departments.size() < 1){
+			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+			departments = getContactDepartments(directlyEnterprise.getPath(), groupTypes, dto.getContactToken());
+		}
+
+		//	设置部门
+		dto.setDepartments(departments);
+
+		//  设置岗位
         dto.setJobPosition(this.organizationService.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, dto.getContactToken(), directlyEnterprise.getPath()));
 
 
@@ -4562,7 +4617,35 @@ public class UserServiceImpl implements UserService {
         //	设置隐私保护值
         OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(dto.getContactToken(),dto.getOrganizationId());
         dto.setVisibleFlag(member.getVisibleFlag());
-    }
+	}
+
+
+	/*
+	查询部门的方法
+	 */
+	private List<OrganizationDTO> getContactDepartments(String path, List<String> groupTypes, String contactToken) {
+		List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(path, groupTypes, contactToken);
+		List<OrganizationDTO> departments = new ArrayList<OrganizationDTO>();
+		if (members != null && members.size() > 0) {
+			for (OrganizationMember member : members) {
+				Organization group = organizationProvider.findOrganizationById(member.getOrganizationId());
+				if (null != group && OrganizationStatus.fromCode(group.getStatus()) == OrganizationStatus.ACTIVE) {
+					departments.add(ConvertHelper.convert(group, OrganizationDTO.class));
+				}
+			}
+			//  设置父部门名称
+			if (departments != null && departments.size() > 0) {
+				for (int i = 0; i < departments.size(); i++) {
+					if (departments.get(i).getParentId().equals(0L)) {
+						departments.get(i).setParentName(departments.get(i).getName());
+						continue;
+					}
+					departments.get(i).setParentName(this.organizationProvider.findOrganizationById(departments.get(i).getParentId()).getName());
+				}
+			}
+		}
+		return departments;
+	}
 
     @Override
     public SceneContactV2DTO getContactInfoByUserId(GetContactInfoByUserIdCommand cmd) {
@@ -4823,6 +4906,9 @@ public class UserServiceImpl implements UserService {
 			listNearbyMixCommunitiesCommand.setPageAnchor(0L);
 
 			List<Community> communities = this.addressService.listMixCommunitiesByDistanceWithNamespaceId(listNearbyMixCommunitiesCommand, locator, pageSize);
+			//如果查询不出结果
+			if(communities == null)
+				return this.listTouristRelatedScenes();
 
 			List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
 
@@ -5341,7 +5427,12 @@ public class UserServiceImpl implements UserService {
         }
 
         Long l = configurationProvider.getLongValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.PAY_PLATFORM, 0l);
+
         resp.setPaymentPlatform(l);
+
+		Integer mypublishFlag = configurationProvider.getIntValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.MY_PUBLISH_FLAG, 1);
+
+		resp.setMyPublishFlag(mypublishFlag.byteValue());
         
         return resp;
     }

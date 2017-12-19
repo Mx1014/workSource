@@ -1,19 +1,37 @@
 //@formatter:off
 package com.everhomes.asset;
 
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.entity.EntityType;
 import com.everhomes.order.PaymentAccount;
+import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pay.order.TransactionType;
-import com.everhomes.rest.asset.ListPaymentBillCmd;
-import com.everhomes.rest.asset.ListPaymentBillResp;
-import com.everhomes.rest.asset.PaymentAccountResp;
-import com.everhomes.rest.asset.ReSortCmd;
+import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+import com.everhomes.rest.asset.*;
+import com.everhomes.rest.order.OrderType;
+
+import com.everhomes.rest.organization.OrganizationMemberGroupType;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
+
+import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +45,46 @@ public class PaymentServiceImpl implements PaymentService {
     private AssetProvider assetProvider;
     @Autowired
     private RemoteAccessService remoteAccessService;
+    @Autowired
+    private PortalService portalService;
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+    @Autowired
+    private OrganizationProvider organizationProvider;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentServiceImpl.class);
     @Override
     public ListPaymentBillResp listPaymentBill(ListPaymentBillCmd cmd) throws Exception {
+        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
+        cmd1.setActionType((byte)13);
+        cmd1.setModuleId(PrivilegeConstants.ASSET_MODULE_ID);
+        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
+        Long appId = null;
+        if(null != res && res.getServiceModuleApps().size() > 0){
+            appId = res.getServiceModuleApps().get(0).getId();
+        }
+        OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), UserContext.currentUserId(), OrganizationType.ENTERPRISE.getCode());
+        if(member != null && !StringUtils.isEmpty(member.getGroupPath())){
+            Long organizaitonId = Long.valueOf(member.getGroupPath().split("/")[1]);
+            member.setOrganizationId(organizaitonId);
+        }
+        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), member.getOrganizationId(), member.getOrganizationId(), PrivilegeConstants.ASSET_DEAL_VIEW, appId, null,  cmd.getCommunityId())){
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                    "check app privilege error");
+        }
+
+        if(cmd.getNamespaceId() == null){
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        }
+        //没有拿到orderType，直接返回
+        if(cmd.getOrderType() == null ) return new ListPaymentBillResp(cmd.getPageAnchor(), cmd.getPageSize());
+        //如果是物业缴费这方面，由于是多个orderType，用域空间筛选下，如果该域空间下没有配置新支付，则直接返回
+        if(cmd.getOrderType()!=null && (cmd.getOrderType().equals(OrderType.OrderTypeEnum.WUYE_CODE.getPycode()) || cmd.getOrderType().equals(OrderType.OrderTypeEnum.ZJGK_RENTAL_CODE.getPycode())))
+        {
+            cmd.setOrderType(getRealOrderType(cmd.getNamespaceId()));
+            if(cmd.getOrderType()==null) return new ListPaymentBillResp(cmd.getPageAnchor(), cmd.getPageSize());
+        }
         if (cmd.getPageSize() == null) {
             cmd.setPageSize(21l);
         }else{
@@ -62,6 +117,11 @@ public class PaymentServiceImpl implements PaymentService {
         return remoteAccessService.listOrderPayment(cmd);
     }
 
+    private String getRealOrderType(Integer namespaceId) {
+        PaymentServiceConfig config = assetProvider.findServiceConfig(namespaceId);
+        return config.getOrderType();
+    }
+
     @Override
     public PaymentAccountResp findPaymentAccount(){
         PaymentAccount entity = this.assetProvider.findPaymentAccount();
@@ -70,4 +130,5 @@ public class PaymentServiceImpl implements PaymentService {
         }
         return null;
     }
+
 }

@@ -167,7 +167,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 		code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ADMIN;
 		String notifyTextForAdmin = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
 		CrossShardListingLocator locator = new CrossShardListingLocator();
-		List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(request.getOwnerType(), request.getOwnerId(), ContactType.MOBILE.getCode(),
+		List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(UserContext.getCurrentNamespaceId(), ContactType.MOBILE.getCode(),
 				request.getType(), locator, Integer.MAX_VALUE);
 		if(targets != null && targets.size() > 0) {
 			for(ServiceAllianceNotifyTargets target : targets) {
@@ -181,7 +181,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 		}
 
 		//发邮件给服务联盟机构管理员
-		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(request.getOwnerType(), request.getOwnerId(), ContactType.EMAIL.getCode(),
+		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(UserContext.getCurrentNamespaceId(), ContactType.EMAIL.getCode(),
 				request.getType(), locator, Integer.MAX_VALUE);
 		if(emails != null && emails.size() > 0) {
 			for(ServiceAllianceNotifyTargets email : emails) {
@@ -204,7 +204,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 			for(RequestFieldDTO field : fieldList) {
 				String fieldValue = (field.getFieldValue() == null) ? "" : field.getFieldValue();
 				String fieldName = field.getFieldName()==null?"":field.getFieldName();
-				sb.append(" ").append(fieldName.trim()).append("：").append(fieldValue).append("\n");
+				sb.append(fieldName.trim()).append("：").append(fieldValue).append("\n");
 			}
 
 			return sb.toString();

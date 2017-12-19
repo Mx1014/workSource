@@ -127,12 +127,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     
     @Override
     public void onFlowCaseCreating(FlowCase flowCase) {
-/*        // 服务联盟的审批拼接工作流 content字符串
-        flowCase.setContent(null);*/
         PostApprovalFormCommand cmd = JSON.parseObject(flowCase.getContent(), PostApprovalFormCommand.class);
-/*        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(flowCase.getApplyUserId());
-        if (detail != null)
-            flowCase.setApplierName(detail.getContactName());*/
         String content = localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "申请人") + " : " + flowCase.getApplierName() + "\n";
         List<FlowCaseEntity> entities = processEntities(cmd.getValues());
         for (int i = 0; i < entities.size(); i++) {
@@ -205,23 +200,20 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 
     @Override
     public void onFlowCaseStateChanged(FlowCaseState ctx) {
-//    	FlowGraphNode graphNode = ctx.getPrefixNode();
-//		if (null != graphNode) {
-//			ctx.getCurrentEvent().getFiredButtonId();
-//			String stepType = ctx.getStepType().getCode();
-//			if (FlowStepType.APPROVE_STEP.getCode().equals(stepType)) { 
-//				
-//			}
-//		}
     }
 
     @Override
     public void onFlowCaseEnd(FlowCaseState ctx) {
-        // 审批通过 -- 如果stepType不是驳回 就是正常结束,进入处理
+        // 审批通过 ( 如果 stepType 不是驳回 就是正常结束,进入处理 )
         if (!(ctx.getStepType() == FlowStepType.ABSORT_STEP)){
             FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
-            LOGGER.debug("审批终止(通过),handler 执行 onFlowCaseEnd  step type:"+ctx.getStepType());
-            GeneralApprovalHandler handler = getGeneralApprovalHandler(flowCase.getReferId());
+            LOGGER.debug("审批终止(通过),handler 执行 onFlowCaseEnd  step type:" + ctx.getStepType());
+            GeneralApprovalHandler handler;
+            //  兼容以前的版本，老版本未使用上 refer_id 故其值为0
+            if (flowCase.getReferId().longValue() == 0L)
+                handler = getGeneralApprovalHandler(flowCase.getOwnerId());
+            else
+                handler = getGeneralApprovalHandler(flowCase.getReferId());
             handler.onFlowCaseEnd(flowCase);
         }
     }
@@ -246,7 +238,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         List<FlowCaseEntity> entities = new ArrayList<>();
         //  姓名
         FlowCaseEntity e = new FlowCaseEntity();
-        GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+        /*GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
                 GeneralFormDataSourceType.USER_NAME.getCode());
         //  根据需求去除了默认字段的存储
         if (val != null) {
@@ -282,7 +274,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
                 e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
                 entities.add(e);
             }
-        }
+        }*/
 
         //  approval-1.6 added by R
         GeneralApprovalFlowCase gf = ConvertHelper.convert(flowCase, GeneralApprovalFlowCase.class);

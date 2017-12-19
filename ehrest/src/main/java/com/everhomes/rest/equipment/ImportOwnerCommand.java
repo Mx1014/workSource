@@ -1,8 +1,8 @@
 package com.everhomes.rest.equipment;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
@@ -11,6 +11,10 @@ import com.everhomes.util.StringHelper;
  *  <li>targetId: 所属管理处id</li>
  *  <li>targetType: 所属管理处类型</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
+ *  <li>namespaceId: 域空间id</li>
+ *  <li>communityId: 项目id</li>
+ *  <li>moduleName: 模块名</li>
+ *  <li>groupPath: 所属字段组在系统中的path</li>
  * </ul>
  */
 public class ImportOwnerCommand {
@@ -25,6 +29,14 @@ public class ImportOwnerCommand {
 	private String targetType;
 	
 	private Long inspectionCategoryId;
+
+	private Integer namespaceId;
+
+	private Long communityId;
+
+	private String moduleName;
+
+	private String groupPath;
 	
 	public Long getInspectionCategoryId() {
 		return inspectionCategoryId;
@@ -64,6 +76,38 @@ public class ImportOwnerCommand {
 
 	public void setTargetType(String targetType) {
 		this.targetType = targetType;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public String getModuleName() {
+		return moduleName;
+	}
+
+	public void setModuleName(String moduleName) {
+		this.moduleName = moduleName;
+	}
+
+	public String getGroupPath() {
+		return groupPath;
+	}
+
+	public void setGroupPath(String groupPath) {
+		this.groupPath = groupPath;
 	}
 
 	@Override

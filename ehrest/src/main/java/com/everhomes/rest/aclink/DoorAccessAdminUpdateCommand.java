@@ -10,7 +10,8 @@ public class DoorAccessAdminUpdateCommand {
     
     private String     address;
     private String     description;
-    private String     name;
+    private String     displayName;
+    private String name;
     private Double   longitude;
     private Double   latitude;
     
@@ -32,11 +33,11 @@ public class DoorAccessAdminUpdateCommand {
     public void setDescription(String description) {
         this.description = description;
     }
-    public String getName() {
-        return name;
+    public String getDisplayName() {
+        return displayName;
     }
-    public void setName(String name) {
-        this.name = name;
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
     public Double getLongitude() {
         return longitude;
@@ -49,6 +50,12 @@ public class DoorAccessAdminUpdateCommand {
     }
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
+    }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
     }
     @Override
     public String toString() {

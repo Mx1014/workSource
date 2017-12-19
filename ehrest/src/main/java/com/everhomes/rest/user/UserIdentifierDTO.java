@@ -1,5 +1,7 @@
 package com.everhomes.rest.user;
 
+import java.sql.Timestamp;
+
 import com.everhomes.util.StringHelper;
 /**
  * 用户标识
@@ -18,6 +20,7 @@ public class UserIdentifierDTO {
     private java.lang.Byte     claimStatus;
     //just for management
     private String verifyCode;
+    private Long createTimeMs;
 
     public UserIdentifierDTO() {
     }
@@ -61,6 +64,14 @@ public class UserIdentifierDTO {
 
     public void setVerifyCode(String verifyCode) {
         this.verifyCode = verifyCode;
+    }
+
+    public Long getCreateTimeMs() {
+        return createTimeMs;
+    }
+
+    public void setCreateTimeMs(Long createTimeMs) {
+        this.createTimeMs = createTimeMs;
     }
 
     @Override

@@ -10,6 +10,7 @@ import java.util.List;
  * <li>ownerType: 范围类型 EhOrganizations，EhCommunities..</li>
  * <li>ownerId: 范围id</li>
  * <li>userId: 用户id</li>
+ * <li>phone: 如果此用户不存在，则使用此接口创建 UserBlackList </li>
  * <li>privilegeIds: 权限集</li>
  * </ul>
  */
@@ -20,6 +21,8 @@ public class AddUserBlacklistCommand {
     private Long ownerId;
 
     private Long userId;
+    
+    private String phone;
 
     @ItemType(Long.class)
     private List<Long> privilegeIds;
@@ -54,6 +57,14 @@ public class AddUserBlacklistCommand {
 
     public void setPrivilegeIds(List<Long> privilegeIds) {
         this.privilegeIds = privilegeIds;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     @Override

@@ -1,7 +1,9 @@
 package com.everhomes.parking.wanke;
 
 public class WankeJsonEntity<T> {
-	
+
+	private static final String SUCCESS = "0";
+
 	private String errorCode;
 	private String errorMsg;
 	private T data;
@@ -27,7 +29,7 @@ public class WankeJsonEntity<T> {
 	}
 	
 	public Boolean isSuccess(){
-		return errorCode.equals("0");
+		return errorCode.equals(SUCCESS);
 	}
 	
 }	

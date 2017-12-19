@@ -40,4 +40,6 @@ public interface EnergyConsumptionServiceErrorCode {
     int ERR_METER_NOT_EXIST_TASK = 10027;//表记没有任务
     int ERROR_METER_NAME_IS_NULL = 10028;//表计名称为空
     int ERROR_METER_NUMBER_IS_NULL = 10029;//表计号码为空
+    int ERROR_READING_IS_NULL = 10030;//读数为空
+    int ERROR_READING_IS_NOT_NUMBER = 10031;//读数不为小数
 }

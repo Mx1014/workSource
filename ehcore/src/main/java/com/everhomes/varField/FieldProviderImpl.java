@@ -29,6 +29,7 @@ import com.everhomes.server.schema.tables.daos.EhVarFieldItemScopesDao;
 import com.everhomes.server.schema.tables.daos.EhVarFieldScopesDao;
 import com.everhomes.server.schema.tables.pojos.EhVarFieldGroupScopes;
 import com.everhomes.server.schema.tables.pojos.EhVarFieldItemScopes;
+import com.everhomes.server.schema.tables.pojos.EhVarFieldItems;
 import com.everhomes.server.schema.tables.pojos.EhVarFieldScopes;
 import com.everhomes.server.schema.tables.records.EhVarFieldGroupScopesRecord;
 
@@ -89,6 +90,18 @@ public class FieldProviderImpl implements FieldProvider {
         EhVarFieldGroupScopesDao dao = new EhVarFieldGroupScopesDao(context.configuration());
         dao.insert(scopeGroup);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhVarFieldGroupScopes.class, null);
+    }
+
+    @Override
+    public void createFieldItem(FieldItem item) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhVarFieldItems.class));
+        item.setId(id);
+        item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhVarFieldItemsDao dao = new EhVarFieldItemsDao(context.configuration());
+        dao.insert(item);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhVarFieldItems.class, item.getId());
     }
 
     @Override
@@ -446,7 +459,7 @@ public class FieldProviderImpl implements FieldProvider {
 
         List<Field> fields = context.select().from(Tables.EH_VAR_FIELDS)
                 .where(Tables.EH_VAR_FIELDS.MODULE_NAME.eq(moduleName))
-                .and(Tables.EH_VAR_FIELDS.GROUP_PATH.like(groupPath+"%"))
+                .and(Tables.EH_VAR_FIELDS.GROUP_PATH.like(groupPath+"/%"))
                 .fetch().map((record)-> {
                     return ConvertHelper.convert(record, Field.class);
                 });
@@ -460,6 +473,7 @@ public class FieldProviderImpl implements FieldProvider {
 
         List<FieldItem> items = context.select().from(Tables.EH_VAR_FIELD_ITEMS)
                 .where(Tables.EH_VAR_FIELD_ITEMS.FIELD_ID.in(fieldIds))
+                .and(Tables.EH_VAR_FIELD_ITEMS.STATUS.eq(VarFieldStatus.ACTIVE.getCode()))
                 .fetch().map((record)-> {
                     return ConvertHelper.convert(record, FieldItem.class);
                 });
@@ -473,6 +487,7 @@ public class FieldProviderImpl implements FieldProvider {
 
         List<FieldItem> items = context.select().from(Tables.EH_VAR_FIELD_ITEMS)
                 .where(Tables.EH_VAR_FIELD_ITEMS.FIELD_ID.eq(fieldId))
+                .and(Tables.EH_VAR_FIELD_ITEMS.STATUS.eq(VarFieldStatus.ACTIVE.getCode()))
                 .fetch().map((record)-> {
                     return ConvertHelper.convert(record, FieldItem.class);
                 });
@@ -566,6 +581,36 @@ public class FieldProviderImpl implements FieldProvider {
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.MODULE_NAME.eq(moduleName));
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.ITEM_DISPLAY_NAME.eq(displayName));
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
+
+        if(communityId != null) {
+            query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.COMMUNITY_ID.eq(communityId));
+        }
+
+        if(communityId == null) {
+            query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.COMMUNITY_ID.isNull());
+        }
+
+        query.fetch().map((r) -> {
+            item.add(ConvertHelper.convert(r, ScopeFieldItem.class));
+            return null;
+        });
+
+        if(item.size()==0)
+            return null;
+
+        return item.get(0);
+    }
+
+    @Override
+    public ScopeFieldItem findScopeFieldItemByBusinessValue(Integer namespaceId, Long communityId, String moduleName, Long fieldId, Byte businessValue) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<ScopeFieldItem> item = new ArrayList<>();
+        SelectQuery<EhVarFieldItemScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_ITEM_SCOPES);
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.MODULE_NAME.eq(moduleName));
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.FIELD_ID.eq(fieldId));
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.BUSINESS_VALUE.eq(businessValue));
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
 
         if(communityId != null) {

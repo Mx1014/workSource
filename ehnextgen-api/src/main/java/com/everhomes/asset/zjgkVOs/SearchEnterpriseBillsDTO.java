@@ -25,6 +25,33 @@ public class SearchEnterpriseBillsDTO {
     private String amountOwed;
     private String amountReceived;
     private String contractNum;
+    private String dateStrBegin;
+    private String dateStrEnd;
+    private String status;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getDateStrBegin() {
+        return dateStrBegin;
+    }
+
+    public void setDateStrBegin(String dateStrBegin) {
+        this.dateStrBegin = dateStrBegin;
+    }
+
+    public String getDateStrEnd() {
+        return dateStrEnd;
+    }
+
+    public void setDateStrEnd(String dateStrEnd) {
+        this.dateStrEnd = dateStrEnd;
+    }
 
     @Override
     public String toString() {

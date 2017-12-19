@@ -31,6 +31,7 @@ public class DoorAuthLevelDTO {
     private Long     id;
     private String     description;
     private String orgName;
+    private String buildingName;
 
     public Byte getStatus() {
         return status;
@@ -150,6 +151,14 @@ public class DoorAuthLevelDTO {
 
     public void setOrgName(String orgName) {
         this.orgName = orgName;
+    }
+
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
     }
 
     @Override

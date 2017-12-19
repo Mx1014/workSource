@@ -911,7 +911,7 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/ listUserRelatexdEnterprises</b>
+     * <b>URL: /org/listUserRelatedEnterprises</b>
      * <p>列出个人相关的企业</p>
      *
      * @return {@link OrganizationDetailDTO}
@@ -1134,7 +1134,8 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/deleteOrganizationJobPosition</b>
+     * <b>URL:
+     * /org/deleteOrganizationJobPosition</b>
      * <p>删除通用岗位</p>
      */
     @RequestMapping("deleteOrganizationJobPosition")
@@ -1852,7 +1853,8 @@ public class OrganizationController extends ControllerBase {
 
 
     /**
-     * <b>URL: /org/deleteOrganizationJobPositionsByPositionIdAndDetails</b>
+     * <b>URL:
+     * /org/deleteOrganizationJobPositionsByPositionIdAndDetails</b>
      * <p>批量撤销通用岗位下的人员</p>
      */
     @RequestMapping("deleteOrganizationJobPositionsByPositionIdAndDetails")
@@ -1887,6 +1889,32 @@ public class OrganizationController extends ControllerBase {
     @RestReturn(value = Long.class)
     public RestResponse modifyPhoneNumberByDetailId(@Valid UpdateArchivesEmployeeCommand cmd) {
         RestResponse response = new RestResponse(organizationService.modifyPhoneNumberByDetailId(cmd.getDetailId(), cmd.getContactToken()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/setOrganizationDetailFlag</b>
+     * <p>设置是否开启查看园区企业详情开关</p>
+     */
+    @RequestMapping("setOrganizationDetailFlag")
+    @RestReturn(value = Byte.class)
+    public RestResponse setOrganizationDetailFlag(@Valid SetOrganizationDetailFlagCommand cmd) {
+        RestResponse response = new RestResponse(organizationService.setOrganizationDetailFlag(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/getOrganizationDetailFlag</b>
+     * <p>查看是否开启查看园区企业详情</p>
+     */
+    @RequestMapping("getOrganizationDetailFlag")
+    @RestReturn(value = Byte.class)
+    public RestResponse getOrganizationDetailFlag(@Valid GetOrganizationDetailFlagCommand cmd) {
+        RestResponse response = new RestResponse(organizationService.getOrganizationDetailFlag(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

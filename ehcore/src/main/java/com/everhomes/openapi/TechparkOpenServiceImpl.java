@@ -15,6 +15,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.everhomes.rest.customer.CustomerType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.formula.functions.Count;
 import org.slf4j.Logger;
@@ -1248,13 +1249,14 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		contract.setNamespaceId(organization.getNamespaceId());
 //		contract.setOrganizationId(organization.getId());
 //		contract.setOrganizationName(organization.getName());
-		contract.setCustomerType((byte) 0);
+		contract.setCustomerType(CustomerType.ORGANIZATION.getCode());
 		contract.setCustomerId(organization.getId());
 		contract.setCustomerName(organization.getName());
 		contract.setContractNumber(customerContract.getContractNumber());
 		contract.setContractEndDate(getTimestampDate(customerContract.getContractEndDate()));
 		contract.setStatus(CommonStatus.ACTIVE.getCode());
 		contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		contract.setCreateUid(UserContext.currentUserId());
 		contractProvider.createContract(contract);
 		return contract;
 	}

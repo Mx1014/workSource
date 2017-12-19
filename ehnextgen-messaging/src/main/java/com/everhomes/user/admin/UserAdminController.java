@@ -58,6 +58,7 @@ public class UserAdminController extends ControllerBase {
         object.setValues(result.second().stream().map(r -> {
             UserIdentifierDTO userIdentfier = ConvertHelper.convert(r, UserIdentifierDTO.class);
             userIdentfier.setVerifyCode(r.getVerificationCode());
+            userIdentfier.setCreateTimeMs(r.getCreateTime().getTime());
             return userIdentfier;
         }).collect(Collectors.toList()));
         object.setNextPageAnchor(result.first());

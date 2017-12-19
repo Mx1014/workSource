@@ -162,6 +162,16 @@ public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogP
     }
 
     @Override
+    public EnergyMeterReadingLog findLastReadingLogByTaskId(Long taskId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_ENERGY_METER_READING_LOGS)
+                .where(Tables.EH_ENERGY_METER_READING_LOGS.TASK_ID.eq(taskId))
+                .and(Tables.EH_ENERGY_METER_READING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
+                .orderBy(Tables.EH_ENERGY_METER_READING_LOGS.CREATE_TIME.desc())
+                .fetchAnyInto(EnergyMeterReadingLog.class);
+    }
+
+    @Override
     public List<EnergyMeterReadingLog> listMeterReadingLogsByMeterId(Integer namespaceId, Long meterId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_ENERGY_METER_READING_LOGS)

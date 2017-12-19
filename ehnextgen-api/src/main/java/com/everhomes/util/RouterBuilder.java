@@ -7,6 +7,9 @@ import com.everhomes.rest.common.Router;
 import com.everhomes.rest.launchpad.ActionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.*;
+import org.springframework.beans.BeanUtils;
+import org.springframework.util.Assert;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -14,6 +17,8 @@ import java.beans.PropertyDescriptor;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * ActionType-ActionData mapping router.
@@ -41,6 +46,24 @@ public class RouterBuilder {
     public static String build(ActionType actionType, Object actionData, String displayName) {
         Router router = Router.fromActionType(actionType);
         return build(router, actionData, displayName);
+    }
+
+    public static <T> T parse(String uri, Router router, Class<T> actionData) {
+        Assert.notNull(uri, "RouterBuilder parse uri argument is required; it must not be null");
+        String param = uri.substring(router.getRouter().length() + 1);
+
+        String[] pairs = param.split("&");
+
+        Map<String, Object> paramMap = new HashMap<>();
+        for (String pair : pairs) {
+            String[] kv = pair.split("=");
+            paramMap.put(kv[0], kv[1]);
+        }
+
+        T obj = BeanUtils.instantiateClass(actionData);
+        BeanWrapper beanWrapper = new BeanWrapperImpl(obj);
+        beanWrapper.setPropertyValues(paramMap);
+        return obj;
     }
 
     private static String mapping(Router router, Object actionData, String displayName) {

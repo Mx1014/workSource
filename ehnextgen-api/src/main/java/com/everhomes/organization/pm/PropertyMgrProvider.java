@@ -201,6 +201,8 @@ public interface PropertyMgrProvider {
      */
     List<OrganizationOwnerBehavior> listOrganizationOwnerBehaviors(Integer namespaceId, Long ownerId);
 
+    List<OrganizationOwnerBehavior> listApartmentOrganizationOwnerBehaviors(Long addressId);
+
     /**
      * 创建地址与业主对应记录
      * @param ownerAddress

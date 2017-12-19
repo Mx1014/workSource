@@ -45,6 +45,7 @@ import java.util.List;
  * <li>emailDomain: 邮箱域名 </li>
  * <li>order:排序</li>
  * <li>errorCode:错误码</li>
+ * <li>managerFlag: 地址列表需要的默认是否是这个公司的管理员字段</li>
  * </ul>
  */
 public class OrganizationDTO {
@@ -78,6 +79,14 @@ public class OrganizationDTO {
     private Byte communityType;
     private Long defaultForumId;
     private Long feedbackForumId;
+
+	//fix 14844 电商需要企业的provinceName，cityName,areaName
+	private Long provinceId;
+	private String provinceName;
+	private Long cityId;
+	private String cityName;
+	private Long areaId;
+	private String areaName;
 	
 	private Long groupId;
 	
@@ -103,7 +112,59 @@ public class OrganizationDTO {
     private Integer order;
 
     private Integer errorCode;
-	
+
+
+    //地址列表需要的默认是否是这个公司的管理员字段
+	private Byte managerFlag;
+
+	public Long getAreaId() {
+		return areaId;
+	}
+
+	public void setAreaId(Long areaId) {
+		this.areaId = areaId;
+	}
+
+	public String getAreaName() {
+		return areaName;
+	}
+
+	public void setAreaName(String areaName) {
+		this.areaName = areaName;
+	}
+
+	public Long getCityId() {
+		return cityId;
+	}
+
+	public void setCityId(Long cityId) {
+		this.cityId = cityId;
+	}
+
+	public String getCityName() {
+		return cityName;
+	}
+
+	public void setCityName(String cityName) {
+		this.cityName = cityName;
+	}
+
+	public Long getProvinceId() {
+		return provinceId;
+	}
+
+	public void setProvinceId(Long provinceId) {
+		this.provinceId = provinceId;
+	}
+
+	public String getProvinceName() {
+		return provinceName;
+	}
+
+	public void setProvinceName(String provinceName) {
+		this.provinceName = provinceName;
+	}
+
 	public String getEnterpriseContactor() {
 		return enterpriseContactor;
 	}
@@ -406,5 +467,13 @@ public class OrganizationDTO {
 
 	public void setErrorCode(Integer errorCode) {
 		this.errorCode = errorCode;
+	}
+
+	public Byte getManagerFlag() {
+		return managerFlag;
+	}
+
+	public void setManagerFlag(Byte managerFlag) {
+		this.managerFlag = managerFlag;
 	}
 }

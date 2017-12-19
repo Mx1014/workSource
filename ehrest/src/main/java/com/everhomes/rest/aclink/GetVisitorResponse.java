@@ -33,6 +33,7 @@ public class GetVisitorResponse {
     Byte permissionDeny;
     Long validEndMs;
     String namespaceName;
+    String qrIntro;
     
     public String getUserName() {
         return userName;
@@ -125,6 +126,13 @@ public class GetVisitorResponse {
     }
     public void setNamespaceName(String namespaceName) {
         this.namespaceName = namespaceName;
+    }
+
+    public String getQrIntro() {
+        return qrIntro;
+    }
+    public void setQrIntro(String qrIntro) {
+        this.qrIntro = qrIntro;
     }
     @Override
     public String toString() {

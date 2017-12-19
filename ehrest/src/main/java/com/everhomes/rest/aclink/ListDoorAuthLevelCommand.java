@@ -23,6 +23,8 @@ public class ListDoorAuthLevelCommand {
     @NotNull
     private Long     doorId;
     
+    private String keyword;
+    
     private Long pageAnchor;
     
     private Integer pageSize;
@@ -65,6 +67,14 @@ public class ListDoorAuthLevelCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public String getKeyword() {
+        return keyword;
+    }
+
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
     }
 
     @Override

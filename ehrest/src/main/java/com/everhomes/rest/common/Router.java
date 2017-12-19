@@ -289,7 +289,7 @@ public enum Router {
         return router;
     }
 
-    public Class<?> getClz() {
+    public Class getClz() {
         return clz;
     }
 }

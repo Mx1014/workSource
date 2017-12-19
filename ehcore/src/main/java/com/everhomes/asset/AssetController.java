@@ -6,17 +6,25 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.entity.EntityType;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.RestResponseBase;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +50,10 @@ public class AssetController extends ControllerBase {
     private ConfigurationProvider configurationProvider;
     @Autowired
     private PaymentService paymentService;
+    @Autowired
+    private PortalService portalService;
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 
 //    根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
     /**
@@ -571,8 +583,10 @@ public class AssetController extends ControllerBase {
     @RequestMapping("addOrModifyRuleForBillGroup")
     @RestReturn(value = AddOrModifyRuleForBillGroupResponse.class)
     public RestResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
-        AddOrModifyRuleForBillGroupResponse res = assetService.addOrModifyRuleForBillGroup(cmd);
-        RestResponse response = new RestResponse(res);
+//        AddOrModifyRuleForBillGroupResponse res = assetService.addOrModifyRuleForBillGroup(cmd);
+//        RestResponse response = new RestResponse(res);
+        assetService.addOrModifyRuleForBillGroup(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
@@ -875,6 +889,39 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
+    // this is for 显示一个用户的物业账单          4
+    /**
+     * <p>显示一个用户的物业账单</p>
+     * <b>URL: /asset/showBillForClientV2</b>
+     */
+    @RequestMapping("showBillForClientV2")
+    @RestReturn(value = ShowBillForClientV2DTO.class,collection = true)
+    public RestResponse showBillForClientV2(ShowBillForClientV2Command cmd) {
+        if(cmd.getNamespaceId()!=UserContext.getCurrentNamespaceId()){
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        }
+        List<ShowBillForClientV2DTO> dtos = assetService.showBillForClientV2(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 显示一个用户的物业账单          4
+    /**
+     * <p>显示一个用户的物业账单</p>
+     * <b>URL: /asset/listAllBillsForClient</b>
+     */
+    @RequestMapping("listAllBillsForClient")
+    @RestReturn(value = ListAllBillsForClientDTO.class,collection = true)
+    public RestResponse listAllBillsForClient(ListAllBillsForClientCommand cmd) {
+        List<ListAllBillsForClientDTO> dtos = assetService.listAllBillsForClient(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
     //this is for 查看缴费详情
     /**
      * <p>查看缴费详情</p>
@@ -896,6 +943,7 @@ public class AssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
+
 
     //this is for app选择切换月份查看账单      4
     /**
@@ -1024,6 +1072,7 @@ public class AssetController extends ControllerBase {
     @RequestMapping(value = "listPaymentBill")
     @RestReturn(ListPaymentBillResp.class)
     public RestResponse listPaymentBill(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
+//        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.ASSET_DEAL_VIEW);
 //        UserInfo user = (UserInfo) request.getSession().getAttribute(SessionConstants.MC_LOGIN_USER);
         ListPaymentBillResp result = paymentService.listPaymentBill(cmd);
         RestResponse response = new RestResponse(result);
@@ -1054,7 +1103,7 @@ public class AssetController extends ControllerBase {
     }
     /**
      * <b>URL: /asset/autoNoticeConfig</b>
-     * <p></p>
+     * <p>自动缴费配置</p>
      */
     @RequestMapping("autoNoticeConfig")
     @RestReturn(String.class)
@@ -1068,7 +1117,7 @@ public class AssetController extends ControllerBase {
 
     /**
      * <b>URL: /asset/listAutoNoticeConfig</b>
-     * <p></p>
+     * <p>设置自动催缴</p>
      */
     @RequestMapping("listAutoNoticeConfig")
     @RestReturn(ListAutoNoticeConfigResponse.class)
@@ -1082,7 +1131,7 @@ public class AssetController extends ControllerBase {
 
     /**
      * <b>URL: /asset/activeAutoBillNotice</b>
-     * <p></p>
+     * <p>主动调用定期催缴的功能</p>
      */
     @RequestMapping("activeAutoBillNotice")
     @RestReturn(String.class)
@@ -1104,6 +1153,34 @@ public class AssetController extends ControllerBase {
         RestResponse restResponse = new RestResponse(res);
         restResponse.setErrorDescription("OK");
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /asset/functionDisableList</b>
+     * <p>功能失效列表</p>
+     */
+    @RequestMapping("functionDisableList")
+    @RestReturn(value = FunctionDisableListDto.class)
+    public RestResponse functionDisableList(FunctionDisableListCommand cmd){
+        FunctionDisableListDto dto = assetService.functionDisableList(cmd);
+        RestResponse restResponse = new RestResponse(dto);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /asset/sc</b>
+     * <p></p>
+     */
+    @RequestMapping("sc")
+    @RequireAuthentication(value = false)
+    public RestResponse syncCustomer(SyncCustomerCommand cmd){
+        RestResponse restResponse = new RestResponse();
+        assetService.syncCustomer(cmd.getNamespaceId());
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
         return restResponse;
     }
 

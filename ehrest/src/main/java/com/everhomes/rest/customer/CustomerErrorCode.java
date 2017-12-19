@@ -24,4 +24,6 @@ public interface CustomerErrorCode {
     int ERROR_CUSTOMER_NUMBER_IS_EXIST = 10016;  //客户编号已存在
     int ERROR_CUSTOMER_TRACKING_NOT_EXIST = 10017;  //更近信息不存在
     int ERROR_CUSTOMER_HAS_CONTRACT = 10018;  //客户存在合同
+    int ERROR_CUSTOMER_ACCOUNT_NOT_EXIST = 10019;  //客户银行账号不存在
+    int ERROR_CUSTOMER_TAX_NOT_EXIST = 10020;  //客户税务信息不存在
 }

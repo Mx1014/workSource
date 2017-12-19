@@ -23,7 +23,9 @@ import java.util.Map;
  * <li>departments: 联系人部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>regionCode: 区号</li>
  * <li>contactToken: 联系人号码</li>
- * <li>email: 联系人邮箱</li>
+ * <li>contactShortToken: 联系人短号</li>
+ * <li>email: 个人邮箱</li>
+ * <li>workEmail: 工作邮箱</li>
  * <li>visibleFlag: 隐私保护: 0-显示(不受保护) 1-隐藏(保护) 参考{@link com.everhomes.rest.organization.VisibleFlag} </li>
  * </ul>
  */
@@ -57,7 +59,11 @@ public class SceneContactV2DTO {
 
     private String contactToken;
 
+    private String contactShortToken;
+
     private String email;
+
+    private String workEmail;
 
     private Byte visibleFlag;
 
@@ -168,12 +174,28 @@ public class SceneContactV2DTO {
         this.contactToken = contactToken;
     }
 
+    public String getContactShortToken() {
+        return contactShortToken;
+    }
+
+    public void setContactShortToken(String contactShortToken) {
+        this.contactShortToken = contactShortToken;
+    }
+
     public String getEmail() {
         return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getWorkEmail() {
+        return workEmail;
+    }
+
+    public void setWorkEmail(String workEmail) {
+        this.workEmail = workEmail;
     }
 
     public Byte getVisibleFlag() {
