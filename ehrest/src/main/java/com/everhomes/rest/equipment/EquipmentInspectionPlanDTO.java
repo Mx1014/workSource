@@ -41,9 +41,13 @@ public class EquipmentInspectionPlanDTO {
 
     private Byte planType;
 
+    private String stringPlanType;
+
     private String name;
 
     private Byte status;
+
+    private  String stringStatus;
 
     private Byte reviewResult;
 
@@ -187,6 +191,22 @@ public class EquipmentInspectionPlanDTO {
 
     public void setLimitTime(String limitTime) {
         this.limitTime = limitTime;
+    }
+
+    public String getStringPlanType() {
+        return stringPlanType;
+    }
+
+    public void setStringPlanType(String stringPlanType) {
+        this.stringPlanType = stringPlanType;
+    }
+
+    public String getStringStatus() {
+        return stringStatus;
+    }
+
+    public void setStringStatus(String stringStatus) {
+        this.stringStatus = stringStatus;
     }
 
     @Override

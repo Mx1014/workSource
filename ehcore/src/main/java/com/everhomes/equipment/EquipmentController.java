@@ -1,24 +1,6 @@
 package com.everhomes.equipment;
 
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import com.everhomes.rest.equipment.*;
-import com.everhomes.rest.pmNotify.DeletePmNotifyParamsCommand;
-import com.everhomes.rest.pmNotify.ListPmNotifyParamsCommand;
-import com.everhomes.rest.pmNotify.PmNotifyParamDTO;
-import com.everhomes.rest.pmNotify.SetPmNotifyParamsCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -50,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestDoc(value = "Equipment Controller", site = "core")
@@ -300,23 +283,7 @@ public class EquipmentController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
-//    /**
-//	 * <b>URL: /equipment/creatEquipmentAccessories</b>
-//	 * <p>创建备品备件</p>
-//	 */
-//	@RequestMapping("creatEquipmentAccessories")
-//	@RestReturn(value = EquipmentAccessoriesDTO.class)
-//	public RestResponse creatEquipmentAccessories(UpdateEquipmentAccessoriesCommand cmd) {
-//		
-//		EquipmentAccessoriesDTO accessories = equipmentService.creatEquipmentAccessories(cmd);
-//		
-//		RestResponse response = new RestResponse(accessories);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-	
+
 	/**
 	 * <b>URL: /equipment/updateEquipmentAccessories</b>
 	 * <p>创建或修改备品备件</p>
@@ -387,10 +354,8 @@ public class EquipmentController extends ControllerBase {
 	 */
 	@RequestMapping("exportEquipmentAccessories")
 	public HttpServletResponse exportEquipmentAccessories(@Valid SearchEquipmentAccessoriesCommand cmd,HttpServletResponse response) {
-		
-		HttpServletResponse commandResponse = equipmentService.exportEquipmentAccessories(cmd, response);
-		
-		return commandResponse;
+
+		  return  equipmentService.exportEquipmentAccessories(cmd, response);
 	}
 	
 	/**
@@ -480,14 +445,10 @@ public class EquipmentController extends ControllerBase {
      * <p>导出计划表</p>
      */
     @RequestMapping("exportEquipmentInspectionPlans")
-    public HttpServletResponse exportEquipmentInspectionPlans(searchEquipmentInspectionPlansCommand cmd, HttpServletResponse response) {
+    public RestResponse exportEquipmentInspectionPlans(searchEquipmentInspectionPlansCommand cmd, HttpServletResponse response) {
 
-        HttpServletResponse commandResponse = null;
-        /**
-         * TODO:
-         */
-
-        return commandResponse;
+        equipmentService.exportInspectionPlans(cmd, response);
+        return getSuccessResponse();
     }
 
 
@@ -498,9 +459,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("exportEquipmentTasks")
     public HttpServletResponse exportEquipmentTasks(@Valid SearchEquipmentTasksCommand cmd, HttpServletResponse response) {
 
-        HttpServletResponse commandResponse = equipmentService.exportEquipmentTasks(cmd, response);
-
-        return commandResponse;
+       return  equipmentService.exportEquipmentTasks(cmd, response);
     }
 
     /**
@@ -536,8 +495,8 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("listEquipmentTasksDetails")
     @RestReturn(value = EquipmentTaskOffLineDTO.class,collection = true)
     public RestResponse listEquipmentTasksDetails(ListEquipmentTasksCommand cmd) {
-
-        List<EquipmentTaskOffLineDTO> tasksDetail = null;
+        //TODO:按照前端要求 根据参数将应用中所有需要的表数据传回
+        List<EquipmentTaskOffLineDTO> tasksDetail = new ArrayList<>();
 
         return getRestResponse(tasksDetail);
     }

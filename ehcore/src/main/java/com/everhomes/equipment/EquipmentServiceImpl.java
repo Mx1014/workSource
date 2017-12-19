@@ -203,6 +203,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Autowired
 	private FieldProvider fieldProvider;
 
+	@Autowired
+	private EquipmentPlanSearcher equipmentPlanSearcher;
+
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(UpdateEquipmentStandardCommand cmd) {
 		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_UPDATE, 0L);
@@ -3798,8 +3801,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	@Override
-	public ListEquipmentTasksResponse listTasksByEquipmentId(
-			ListTasksByEquipmentIdCommand cmd) {
+	public ListEquipmentTasksResponse listTasksByEquipmentId(ListTasksByEquipmentIdCommand cmd) {
 		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -3820,7 +3822,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 			endTime = new Timestamp(cmd.getExpireTime());
 		}
 
-		//List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(cmd.getEquipmentId(), standardIds, startTime, endTime, locator, pageSize+1, null);
+		//List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(cmd.getEquipmentId(),
+		// standardIds, startTime, endTime, locator, pageSize+1, null);
 		//之前任务表中有设备id  V3.0.2中改为根据planId关联任务的巡检对象
 		List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.listPlanMapByEquipmentId(cmd.getEquipmentId());
 		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTaskByPlanMaps(planMaps, startTime, endTime, locator, pageSize + 1);
@@ -3834,7 +3837,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
 			EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
 			return dto;
-		}).filter(r -> r != null).collect(Collectors.toList());
+		}).filter(Objects::nonNull).collect(Collectors.toList());
 
 		response.setTasks(dtos);
 
@@ -3842,8 +3845,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	@Override
-	public EquipmentAccessoriesDTO findEquipmentAccessoriesById(
-			DeleteEquipmentAccessoriesCommand cmd) {
+	public EquipmentAccessoriesDTO findEquipmentAccessoriesById(DeleteEquipmentAccessoriesCommand cmd) {
 
 		EquipmentInspectionAccessories accessory = verifyEquipmentAccessories(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 		if(accessory.getStatus() == 0) {
@@ -4121,8 +4123,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	@Override
-	public ListEquipmentTasksResponse listTasksByToken(
-			ListTasksByTokenCommand cmd) {
+	public ListEquipmentTasksResponse listTasksByToken(ListTasksByTokenCommand cmd) {
 
 		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentByQrCodeToken(cmd.getQrCodeToken());
 		
@@ -5133,5 +5134,31 @@ public class EquipmentServiceImpl implements EquipmentService {
 		//process  EquipmentStandardRelation to plan
 		equipmentInspectionPlan.setEquipmentStandardRelations(relationDTOS);
 
+	}
+
+	@Override
+	public void exportInspectionPlans(searchEquipmentInspectionPlansCommand cmd, HttpServletResponse response) {
+		List<EquipmentInspectionPlanDTO> dtos = equipmentPlanSearcher.query(cmd).getEquipmentInspectionPlans();
+		List<EquipmentInspectionPlanDTO> plans = dtos.stream().map(this::toExportPlans).collect(Collectors.toList());
+		if (plans != null && plans.size() > 0) {
+			String fileName = String.format("巡检计划%s", DateUtil.dateToStr(new java.util.Date(), DateUtil.DATE_TIME_NO_SLASH));
+			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "巡检计划列表");
+
+			List<String> propertyNames = Arrays.asList("targetName", "planNumber", "planType", "name", "status");
+			List<String> titleNames = Arrays.asList("项目名称", "计划编号", "计划类型", "状态");
+			List<Integer> titleSizes = Arrays.asList(20, 20, 20, 20);
+			excelUtils.setNeedSequenceColumn(true);
+
+			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, plans);
+		} else {
+			throw RuntimeErrorException.errorWith(ParkingLocalStringCode.SCOPE_STRING,
+					Integer.parseInt(ParkingLocalStringCode.NO_DATA), "no data");
+		}
+	}
+
+	private EquipmentInspectionPlanDTO toExportPlans(EquipmentInspectionPlanDTO plan) {
+		plan.setStringPlanType(StandardType.fromStatus(plan.getPlanType()).getName());
+		plan.setStringPlanType(EquipmentPlanStatus.fromStatus(plan.getStatus()).getName());
+		return plan;
 	}
 }

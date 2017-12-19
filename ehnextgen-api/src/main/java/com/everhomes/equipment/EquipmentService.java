@@ -2,6 +2,7 @@ package com.everhomes.equipment;
 
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.pmNotify.DeletePmNotifyParamsCommand;
 import com.everhomes.rest.pmNotify.ListPmNotifyParamsCommand;
 import com.everhomes.rest.pmNotify.PmNotifyParamDTO;
@@ -95,4 +96,6 @@ public interface EquipmentService {
     void deleteEquipmentInspectionPlan(DeleteEquipmentPlanCommand cmd);
 
     void createEquipmentTaskByPlan(EquipmentInspectionPlans plan);
+
+	void exportInspectionPlans(searchEquipmentInspectionPlansCommand cmd, HttpServletResponse response);
 }
