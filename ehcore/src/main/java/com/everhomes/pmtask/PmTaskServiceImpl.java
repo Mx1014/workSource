@@ -167,16 +167,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
 
-		//检查多入口应用权限
-		if(!checkAppPrivilege(namespaceId, cmd.getTaskCategoryId(), cmd.getCurrentOrgId(), EntityType.COMMUNITY.getCode(),
-				cmd.getOwnerId(), PrivilegeConstants.PMTASK_LIST)){
-			LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
-							" privilege={}", namespaceId, cmd.getTaskCategoryId(), cmd.getCurrentOrgId(), EntityType.COMMUNITY.getCode(),
-					cmd.getOwnerId(), PrivilegeConstants.PMTASK_LIST);
-			throw  RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
-					"check app privilege error");
-		}
-
 		//检查权限细化
 //		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST);
 
@@ -188,7 +178,19 @@ public class PmTaskServiceImpl implements PmTaskService {
 				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
 			handle = PmTaskHandle.EBEI;
 		}
-		
+
+		//检查多入口应用权限
+		if (!handle.equals(PmTaskHandle.EBEI)) {
+			if(!checkAppPrivilege(namespaceId, cmd.getTaskCategoryId(), cmd.getCurrentOrgId(), EntityType.COMMUNITY.getCode(),
+					cmd.getOwnerId(), PrivilegeConstants.PMTASK_LIST)){
+				LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
+								" privilege={}", namespaceId, cmd.getTaskCategoryId(), cmd.getCurrentOrgId(), EntityType.COMMUNITY.getCode(),
+						cmd.getOwnerId(), PrivilegeConstants.PMTASK_LIST);
+				throw  RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+						"check app privilege error");
+			}
+		}
+
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
 		return handler.searchTasks(cmd);
@@ -610,15 +612,16 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}else {
 
 			//检查多入口应用权限
-			if(!checkAppPrivilege(namespaceId, cmd.getTaskCategoryId(), cmd.getOrganizationId(), EntityType.COMMUNITY.getCode(),
-					cmd.getOwnerId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE)){
-				LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
-								" privilege={}", namespaceId, cmd.getTaskCategoryId(), cmd.getOrganizationId(), EntityType.COMMUNITY.getCode(),
-						cmd.getOwnerId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE);
-				throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
-						"check app privilege error");
+			if (!handle.equals(PmTaskHandle.EBEI)) {
+				if (!checkAppPrivilege(namespaceId, cmd.getTaskCategoryId(), cmd.getOrganizationId(), EntityType.COMMUNITY.getCode(),
+						cmd.getOwnerId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE)) {
+					LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
+									" privilege={}", namespaceId, cmd.getTaskCategoryId(), cmd.getOrganizationId(), EntityType.COMMUNITY.getCode(),
+							cmd.getOwnerId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE);
+					throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+							"check app privilege error");
+				}
 			}
-
 			String requestorPhone = cmd.getRequestorPhone();
 			String requestorName = cmd.getRequestorName();
 			if(StringUtils.isBlank(requestorPhone)){
@@ -698,15 +701,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if (null == namespaceId) {
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
-		//检查多入口应用权限
-		if(!checkAppPrivilege(namespaceId, cmd.getTaskCategoryId(), cmd.getOrganizationId(), EntityType.COMMUNITY.getCode(),
-				cmd.getOwnerId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE)){
-			LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
-							" privilege={}", namespaceId, cmd.getTaskCategoryId(), cmd.getOrganizationId(), EntityType.COMMUNITY.getCode(),
-					cmd.getOwnerId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE);
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
-					"check app privilege error");
-		}
+
 //		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 //		User user = UserContext.current().getUser();
 //		if(!resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE)) {
@@ -739,6 +734,19 @@ public class PmTaskServiceImpl implements PmTaskService {
 				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
 			handle = PmTaskHandle.EBEI;
 		}
+
+		//检查多入口应用权限
+		if (!handle.equals(PmTaskHandle.EBEI)) {
+			if (!checkAppPrivilege(namespaceId, cmd.getTaskCategoryId(), cmd.getOrganizationId(), EntityType.COMMUNITY.getCode(),
+					cmd.getOwnerId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE)) {
+				LOGGER.error("Permission is prohibited, namespaceId={}, taskCategoryId={}, orgId={}, ownerType={}, ownerId={}," +
+								" privilege={}", namespaceId, cmd.getTaskCategoryId(), cmd.getOrganizationId(), EntityType.COMMUNITY.getCode(),
+						cmd.getOwnerId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE);
+				throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+						"check app privilege error");
+			}
+		}
+
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
 		return handler.createTask(cmd, null, requestorName, requestorPhone);
