@@ -730,7 +730,8 @@ public class AclinkController extends ControllerBase {
     @RequireAuthentication(false)
     @RequestMapping("faceTest")
     public String faceTest(HttpServletRequest request) {
-        return doorAccessService.faceTest();
+        doorAccessService.test();
+        return "";
     }
     
     /**

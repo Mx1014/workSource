@@ -4,14 +4,13 @@ package com.everhomes.acl;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 
 import com.everhomes.module.ServiceModulePrivilegeType;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -172,8 +171,15 @@ public interface RolePrivilegeService {
 	 * 业务模块管理员列表
 	 * @param cmd
 	 * @return
-     */
+	 */
 	List<ServiceModuleAuthorizationsDTO> listServiceModuleAdministrators(ListServiceModuleAdministratorsCommand cmd);
+
+	/**
+	 * 业务模块管理员列表(应用)
+	 * @param cmd
+	 * @return
+	 */
+	ListServiceModuleAppsAdministratorResponse listServiceModuleAppsAdministrators(ListServiceModuleAdministratorsCommand cmd);
 
 	/**
 	 * 超级管理员列表
@@ -206,6 +212,12 @@ public interface RolePrivilegeService {
 	 * @param cmd
      */
 	void deleteServiceModuleAdministrators(DeleteServiceModuleAdministratorsCommand cmd);
+
+	/**
+	 * 删除业务模块应用管理员
+	 * @param cmd
+	 */
+	void deleteServiceModuleAppsAdministrators(DeleteServiceModuleAdministratorsCommand cmd);
 
 	/**
 	 * 业务模块授权
@@ -362,7 +374,7 @@ public interface RolePrivilegeService {
 
 	List<Long> listUserRelatedPrivilegeByModuleId(ListUserRelatedPrivilegeByModuleIdCommand cmd);
 
-	List<Long> listUserPrivilegeByModuleId(String ownerType, Long ownerId, Long organizationId, Long userId, Long moduleId);
+	List<Long> listUserPrivilegeByModuleId(Integer namespaceId, String ownerType, Long ownerId, Long organizationId, Long userId, Long moduleId);
 
 	List<Long> getPrivilegeIdsByRoleId(ListPrivilegesByRoleIdCommand cmd);
 
@@ -408,4 +420,10 @@ public interface RolePrivilegeService {
 	void createOrganizationSuperAdmins(CreateOrganizationAdminsCommand cmd);
 	//	移交管理员权限 added by R 20170912.
     void transferOrganizationSuperAdmin(TransferOrganizationSuperAdminCommand cmd);
+
+    // 新版设置模块管理员 added by lei.lv 20171101
+	void resetServiceModuleAdministrators(ResetServiceModuleAdministratorsCommand cmd);
+
+	// 获取所有应用管理员的targetIds
+	List<Long> listServiceModuleAppsAdministratorTargetIds(ListServiceModuleAdministratorsCommand cmd);
 }

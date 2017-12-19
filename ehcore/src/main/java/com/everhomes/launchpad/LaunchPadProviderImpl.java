@@ -332,11 +332,10 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		}
 //		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_LOCATION.eq("/home");
 
-		Condition scopeConditionAll = null;
 		//多加一个范围参数，因此将代码段抽取成一个方法
-		addScopeCondition(scopeConditionAll, scopeMap);
+		Condition scopeConditionAll = addScopeCondition(null, scopeMap);
 		//多加一个范围参数，因此将代码段抽取成一个方法
-		addScopeCondition(scopeConditionAll, defalutScopeMap);
+		scopeConditionAll = addScopeCondition(scopeConditionAll, defalutScopeMap);
 
 		if(scopeConditionAll != null){
 			condition = condition.and(scopeConditionAll);
@@ -369,9 +368,9 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 	}
 
 
-	private void addScopeCondition(Condition scopeConditionAll, Map<Byte, Long> scopeMap){
+	private Condition addScopeCondition(Condition scopeConditionAll, Map<Byte, Long> scopeMap){
 		if(scopeMap == null  || scopeMap.size() == 0){
-			return;
+			return null;
 		}
 		for(Map.Entry<Byte, Long> entry: scopeMap.entrySet()){
 			if(entry.getValue() == null){
@@ -385,6 +384,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 				scopeConditionAll = scopeConditionAll.or(scopeCondition);
 			}
 		}
+		return scopeConditionAll;
 	}
 	
 	@Override

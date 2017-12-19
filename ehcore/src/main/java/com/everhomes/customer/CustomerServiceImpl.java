@@ -21,6 +21,7 @@ import com.everhomes.organization.*;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.organization.*;
+import com.everhomes.user.UserProvider;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.tomcat.jni.Time;
@@ -152,6 +153,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private FieldService fieldService;
+
+    @Autowired
+    private UserProvider userProvider;
 
     private void checkPrivilege(Integer ns) {
         Integer namespaceId = UserContext.getCurrentNamespaceId(ns);
@@ -320,6 +324,10 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
 
+        //21002 企业管理1.4（来源于第三方数据，企业名称栏为灰色不可修改） add by xiongying20171219
+        if(!StringUtils.isEmpty(customer.getNamespaceCustomerType())) {
+            dto.setThirdPartFlag(true);
+        }
         return dto;
     }
 
@@ -395,7 +403,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         if(cmd.getFoundingTime() != null) {
-            customer.setFoundingTime(new Timestamp(cmd.getFoundingTime()));
+            updateCustomer.setFoundingTime(new Timestamp(cmd.getFoundingTime()));
         }
         updateCustomer.setStatus(CommonStatus.ACTIVE.getCode());
         //保存经纬度
@@ -758,6 +766,144 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public void createCustomerAccount(CreateCustomerAccountCommand cmd) {
+        CustomerAccount account = ConvertHelper.convert(cmd, CustomerAccount.class);
+        enterpriseCustomerProvider.createCustomerAccount(account);
+    }
+
+    @Override
+    public void createCustomerTax(CreateCustomerTaxCommand cmd) {
+        CustomerTax tax = ConvertHelper.convert(cmd, CustomerTax.class);
+        enterpriseCustomerProvider.createCustomerTax(tax);
+    }
+
+    @Override
+    public void deleteCustomerAccount(DeleteCustomerAccountCommand cmd) {
+        CustomerAccount account = checkCustomerAccount(cmd.getId(), cmd.getCustomerId());
+        enterpriseCustomerProvider.deleteCustomerAccount(account);
+    }
+
+    @Override
+    public void deleteCustomerTax(DeleteCustomerTaxCommand cmd) {
+        CustomerTax tax = checkCustomerTax(cmd.getId(), cmd.getCustomerId());
+        enterpriseCustomerProvider.deleteCustomerTax(tax);
+    }
+
+    @Override
+    public CustomerAccountDTO getCustomerAccount(GetCustomerAccountCommand cmd) {
+        CustomerAccount account = checkCustomerAccount(cmd.getId(), cmd.getCustomerId());
+        return convertCustomerAccountDTO(account, cmd.getCommunityId());
+    }
+
+    @Override
+    public CustomerTaxDTO getCustomerTax(GetCustomerTaxCommand cmd) {
+        CustomerTax tax = checkCustomerTax(cmd.getId(), cmd.getCustomerId());
+        return convertCustomerTaxDTO(tax, cmd.getCommunityId());
+    }
+
+    private CustomerAccount checkCustomerAccount(Long id, Long customerId) {
+        CustomerAccount account = enterpriseCustomerProvider.findCustomerAccountById(id);
+        if(account == null || !account.getCustomerId().equals(customerId)
+                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(account.getStatus()))) {
+            LOGGER.error("enterprise customer account is not exist or active. id: {}, account: {}", id, account);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_ACCOUNT_NOT_EXIST,
+                    "customer account is not exist or active");
+        }
+        return account;
+    }
+
+    private CustomerTax checkCustomerTax(Long id, Long customerId) {
+        CustomerTax tax = enterpriseCustomerProvider.findCustomerTaxById(id);
+        if(tax == null || !tax.getCustomerId().equals(customerId)
+                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(tax.getStatus()))) {
+            LOGGER.error("enterprise customer tax is not exist or active. id: {}, tax: {}", id, tax);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_TAX_NOT_EXIST,
+                    "customer tax is not exist or active");
+        }
+        return tax;
+    }
+
+    private CustomerAccountDTO convertCustomerAccountDTO(CustomerAccount account, Long communityId) {
+        CustomerAccountDTO dto = ConvertHelper.convert(account, CustomerAccountDTO.class);
+
+        if(dto.getAccountTypeId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(account.getNamespaceId(), communityId, dto.getAccountTypeId());
+            if(scopeFieldItem != null) {
+                dto.setAccountTypeName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+
+        if(dto.getAccountNumberTypeId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(account.getNamespaceId(), communityId, dto.getAccountNumberTypeId());
+            if(scopeFieldItem != null) {
+                dto.setAccountNumberTypeName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+
+        if(dto.getContractId() != null) {
+            Contract contract = contractProvider.findContractById(dto.getContractId());
+            if(contract != null) {
+                dto.setContractName(contract.getName());
+            }
+        }
+
+        return dto;
+    }
+
+    private CustomerTaxDTO convertCustomerTaxDTO(CustomerTax tax, Long communityId) {
+        CustomerTaxDTO dto = ConvertHelper.convert(tax, CustomerTaxDTO.class);
+
+        if(dto.getTaxPayerTypeId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(tax.getNamespaceId(), communityId, dto.getTaxPayerTypeId());
+            if(scopeFieldItem != null) {
+                dto.setTaxPayerTypeName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+
+        return dto;
+    }
+
+    @Override
+    public List<CustomerAccountDTO> listCustomerAccounts(ListCustomerAccountsCommand cmd) {
+        List<CustomerAccount> accounts = enterpriseCustomerProvider.listCustomerAccountsByCustomerId(cmd.getCustomerId());
+        if(accounts != null && accounts.size() > 0) {
+            return accounts.stream().map(account -> {
+                return convertCustomerAccountDTO(account, cmd.getCommunityId());
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
+    public List<CustomerTaxDTO> listCustomerTaxes(ListCustomerTaxesCommand cmd) {
+        List<CustomerTax> taxes = enterpriseCustomerProvider.listCustomerTaxesByCustomerId(cmd.getCustomerId());
+        if(taxes != null && taxes.size() > 0) {
+            return taxes.stream().map(tax -> {
+                return convertCustomerTaxDTO(tax, cmd.getCommunityId());
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
+    public void updateCustomerAccount(UpdateCustomerAccountCommand cmd) {
+        CustomerAccount exist = checkCustomerAccount(cmd.getId(), cmd.getCustomerId());
+        CustomerAccount account = ConvertHelper.convert(cmd, CustomerAccount.class);
+        account.setCreateTime(exist.getCreateTime());
+        account.setCreateUid(exist.getCreateUid());
+        enterpriseCustomerProvider.updateCustomerAccount(account);
+    }
+
+    @Override
+    public void updateCustomerTax(UpdateCustomerTaxCommand cmd) {
+        CustomerTax exist = checkCustomerTax(cmd.getId(), cmd.getCustomerId());
+        CustomerTax tax = ConvertHelper.convert(cmd, CustomerTax.class);
+        tax.setCreateTime(exist.getCreateTime());
+        tax.setCreateUid(exist.getCreateUid());
+        enterpriseCustomerProvider.updateCustomerTax(tax);
+    }
+
+    @Override
     public void createCustomerTalent(CreateCustomerTalentCommand cmd) {
         CustomerTalent talent = ConvertHelper.convert(cmd, CustomerTalent.class);
         enterpriseCustomerProvider.createCustomerTalent(talent);
@@ -900,6 +1046,9 @@ public class CustomerServiceImpl implements CustomerService {
         }
         if(cmd.getLiquidationCommitteeRecoredDate() != null) {
             commercial.setLiquidationCommitteeRecoredDate(new Timestamp(cmd.getLiquidationCommitteeRecoredDate()));
+        }
+        if(cmd.getBranchRegisteredDate() != null) {
+            commercial.setBranchRegisteredDate(new Timestamp(cmd.getBranchRegisteredDate()));
         }
 
         enterpriseCustomerProvider.createCustomerCommercial(commercial);
@@ -1194,6 +1343,9 @@ public class CustomerServiceImpl implements CustomerService {
         }
         if(cmd.getLiquidationCommitteeRecoredDate() != null) {
             commercial.setLiquidationCommitteeRecoredDate(new Timestamp(cmd.getLiquidationCommitteeRecoredDate()));
+        }
+        if(cmd.getBranchRegisteredDate() != null) {
+            commercial.setBranchRegisteredDate(new Timestamp(cmd.getBranchRegisteredDate()));
         }
         commercial.setCreateTime(exist.getCreateTime());
         commercial.setCreateUid(exist.getCreateUid());
@@ -2266,10 +2418,15 @@ public class CustomerServiceImpl implements CustomerService {
 	private CustomerEventDTO convertCustomerEventDTO(CustomerEvent event) {
 		CustomerEventDTO dto = ConvertHelper.convert(event, CustomerEventDTO.class);
         if(dto.getCreatorUid() != null) {
-        	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getCreatorUid());
-        	if(null != detail && null != detail.getContactName()){
-        		dto.setCreatorName(detail.getContactName());
-        	}        	
+            //用户可能不在组织架构中 所以用nickname
+//        	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getCreatorUid());
+//            if(null != detail && null != detail.getContactName()){
+//        		dto.setCreatorName(detail.getContactName());
+//        	}
+            User user = userProvider.findUserById(dto.getCreatorUid());
+            if(user != null) {
+                dto.setCreatorName(user.getNickName());
+            }
         }
         return dto;
 	}

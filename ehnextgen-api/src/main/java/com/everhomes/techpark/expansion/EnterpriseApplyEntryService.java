@@ -3,6 +3,7 @@ package com.everhomes.techpark.expansion;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.techpark.expansion.*;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -16,9 +17,7 @@ public interface EnterpriseApplyEntryService {
 	ListEnterpriseApplyEntryResponse listApplyEntrys(ListEnterpriseApplyEntryCommand cmd);
 	
 	ApplyEntryResponse applyEntry(EnterpriseApplyEntryCommand cmd);
-	
-	boolean applyRenew(EnterpriseApplyRenewCommand cmd);
-	
+
 	ListBuildingForRentResponse listLeasePromotions(ListBuildingForRentCommand cmd);
 
 	BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd, Byte adminFlag);
@@ -58,5 +57,7 @@ public interface EnterpriseApplyEntryService {
 	void updateLeasePromotionOrder(@Valid UpdateLeasePromotionOrderCommand cmd);
 
 	String getSourceTypeName(String type);
+
+	void exportApplyEntrys(ListEnterpriseApplyEntryCommand cmd, HttpServletResponse resp);
 	
 }

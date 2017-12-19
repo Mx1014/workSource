@@ -1,5 +1,6 @@
 package com.everhomes.rest.point;
 
+@Deprecated
 public enum PointType {
     //add point for each item,so you can do anything easy
     ADDRESS_APPROVAL("point.address.approval"), CREATE_TOPIC("point.post.created"), CREATE_COMMENT("point.comment.created"), APP_OPENED("point.app.opened"), AVATAR("point.avatar.approval"), INVITED_USER("point.user.invited"), OTHER("point.other");

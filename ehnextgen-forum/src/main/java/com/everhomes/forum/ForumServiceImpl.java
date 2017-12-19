@@ -8,6 +8,9 @@ import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
 import com.everhomes.activity.*;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.bus.LocalEventBus;
+import com.everhomes.bus.LocalEventContext;
+import com.everhomes.bus.SystemEvent;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -49,6 +52,7 @@ import com.everhomes.rest.activity.*;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.comment.OwnerTokenDTO;
 import com.everhomes.rest.comment.OwnerType;
@@ -81,6 +85,7 @@ import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhUsers;
+import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.*;
@@ -205,6 +210,9 @@ public class ForumServiceImpl implements ForumService {
 
     @Autowired
     private HotTagService hotTagService;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
     
     @Override
     public boolean isSystemForum(long forumId, Long communityId) {
@@ -264,10 +272,68 @@ public class ForumServiceImpl implements ForumService {
             createTopic(cmd, UserContext.current().getUser().getId());
         }
 
+        //对接积分，论坛、活动、公告、俱乐部等  add by yanjun 20171211
+        // createPostEvent(dto);
 
+        final PostDTO tempDto = dto;
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(UserContext.currentUserId());
+            context.setNamespaceId(UserContext.getCurrentNamespaceId());
+            event.setContext(context);
+
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(tempDto.getId());
+            event.setEventName(SystemEvent.FORUM_POST_CREATE.suffix(
+                    tempDto.getContentCategory(), tempDto.getModuleType(), tempDto.getModuleCategoryId()));
+        });
 
         return dto;
     }
+
+
+
+    /*private void createPostEvent(PostDTO dto){
+        //对接积分 add by yanjun 20171211
+        String eventName = null;
+        switch (ForumModuleType.fromCode(dto.getModuleType())){
+            case FORUM:
+                eventName = SystemEvent.FORUM_POST_CREATE.suffix(dto.getModuleCategoryId());
+                break;
+            case ACTIVITY:
+                eventName = SystemEvent.ACTIVITY_ACTIVITY_CREATE.suffix(dto.getModuleCategoryId());
+                break;
+            case ANNOUNCEMENT:
+                break;
+            case CLUB:
+                break;
+            case GUILD:
+                break;
+            case FEEDBACK:
+                eventName = SystemEvent.FORUM_POST_CREATE.suffix(dto.getModuleCategoryId());
+                break;
+        }
+        if(eventName == null){
+            return;
+        }
+
+        final String finalEventName = eventName;
+
+        Long  userId = UserContext.currentUserId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(userId);
+            context.setNamespaceId(namespaceId);
+            event.setContext(context);
+
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(dto.getId());
+            event.setEventName(finalEventName);
+        });
+    }*/
+
 
 //
 //
@@ -994,7 +1060,65 @@ public class ForumServiceImpl implements ForumService {
                 LOGGER.info("The post is already deleted, userId=" + userId + ", postId=" + postId);
             }
         }
+
+        //删除帖子对接积分  add by yanjun 20171211
+        // deletePostPoints(post.getId(), post.getModuleType(), post.getModuleCategoryId());
+
+        final Post tempPost = post;
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(tempPost.getCreatorUid());
+            context.setNamespaceId(UserContext.getCurrentNamespaceId());
+            event.setContext(context);
+
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(tempPost.getId());
+            event.setEventName(SystemEvent.FORUM_POST_DELETE.suffix(
+                    tempPost.getContentCategory(), tempPost.getModuleType(), tempPost.getModuleCategoryId()));
+        });
+
     }
+
+    /*private void deletePostPoints(Long postId, Byte moduleType, Long moduleCategoryId){
+        String eventName = null;
+        switch (ForumModuleType.fromCode(moduleType)){
+            case FORUM:
+                eventName = SystemEvent.FORUM_POST_DELETE.suffix(moduleCategoryId);
+                break;
+            case ACTIVITY:
+                eventName = SystemEvent.ACTIVITY_ACTIVITY_DELETE.suffix(moduleCategoryId);
+                break;
+            case ANNOUNCEMENT:
+                break;
+            case CLUB:
+                break;
+            case GUILD:
+                break;
+            case FEEDBACK:
+                eventName = SystemEvent.FORUM_POST_DELETE.dft();
+                break;
+        }
+        if(eventName == null){
+            return;
+        }
+
+        final String finalEventName = eventName;
+
+        Long  userId = UserContext.currentUserId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(userId);
+            context.setNamespaceId(namespaceId);
+            event.setContext(context);
+
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(postId);
+            event.setEventName(finalEventName);
+        });
+    }*/
+
     
     private Long getFamilyId() {
         User user = UserContext.current().getUser();
@@ -2001,31 +2125,90 @@ public class ForumServiceImpl implements ForumService {
         checkPostParameter(operatorId, forumId, topicId, tag);
         
         try {
-            this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
+            Tuple<Post, Boolean> tuple = this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(() -> {
                 this.forumProvider.likePost(operatorId, topicId);
                 Post tmpPost = this.forumProvider.findPostById(topicId);
                 String creatorUid = Long.toString(tmpPost.getCreatorUid());
                 String[] hotusers = configProvider.getValue(ConfigConstants.HOT_USERS, "").split(",");
                 boolean flag = false;
-                for(String hotuser : hotusers){
-                	if(creatorUid == hotuser){
-                		flag = true;
-                	}
+                for (String hotuser : hotusers) {
+                    if (creatorUid == hotuser) {
+                        flag = true;
+                    }
                 }
-                if(Byte.valueOf(PostAssignedFlag.ASSIGNED.getCode()).equals(tmpPost.getAssignedFlag()) || flag){
-                	HotPost hotpost = new HotPost();
+                if (Byte.valueOf(PostAssignedFlag.ASSIGNED.getCode()).equals(tmpPost.getAssignedFlag()) || flag) {
+                    HotPost hotpost = new HotPost();
                     hotpost.setPostId(topicId);
                     hotpost.setTimeStamp(Calendar.getInstance().getTimeInMillis());
                     hotpost.setModifyType(HotPostModifyType.LIKE.getCode());
                     hotPostService.push(hotpost);
                 }
-               return null;
+                return tmpPost;
+            });
+
+            final Post tempPost = tuple.first();
+            LocalEventBus.publish(event -> {
+                LocalEventContext context = new LocalEventContext();
+                context.setUid(UserContext.currentUserId());
+                context.setNamespaceId(UserContext.getCurrentNamespaceId());
+                event.setContext(context);
+
+                event.setEntityType(EhForumPosts.class.getSimpleName());
+                event.setEntityId(tempPost.getId());
+                event.setEventName(SystemEvent.FORUM_POST_LIKE.suffix(
+                        tempPost.getContentCategory(), tempPost.getEmbeddedAppId(),
+                        tempPost.getModuleType(), tempPost.getModuleCategoryId()));
             });
         } catch(Exception e) {
             LOGGER.error("Failed to update the like count of post, userId=" + operatorId + ", topicId=" + topicId, e);
         }
+
+        //点赞对接积分  add by yanjun 20171211
+        // likeTopicEvent(topicId);
     }
-    
+
+
+    /*private void likeTopicEvent(Long postId) {
+        final Post post = this.forumProvider.findPostById(postId);
+        String eventName = null;
+        switch (ForumModuleType.fromCode(post.getModuleType())) {
+            case FORUM:
+                eventName = SystemEvent.FORUM_POST_LIKE.suffix(post.getModuleCategoryId());
+                break;
+            case ACTIVITY:
+                eventName = SystemEvent.ACTIVITY_ACTIVITY_LIKE.suffix(post.getModuleCategoryId());
+                break;
+            case ANNOUNCEMENT:
+                break;
+            case CLUB:
+                break;
+            case GUILD:
+                break;
+            case FEEDBACK:
+                break;
+        }
+        if(eventName == null){
+            return;
+        }
+
+        final String finalEventName = eventName;
+
+        Long  userId = UserContext.currentUserId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(userId);
+            context.setNamespaceId(namespaceId);
+            event.setContext(context);
+
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(post.getId());
+            event.setEventName(finalEventName);
+        });
+    }*/
+
+
     @Override
     public void cancelLikeTopic(CancelLikeTopicCommand cmd) {
         User operator = UserContext.current().getUser();
@@ -2043,10 +2226,67 @@ public class ForumServiceImpl implements ForumService {
                 this.forumProvider.cancelLikePost(operatorId, topicId);
                return null;
             });
+
+            final Post tempPost = this.forumProvider.findPostById(topicId);
+            LocalEventBus.publish(event -> {
+                LocalEventContext context = new LocalEventContext();
+                context.setUid(UserContext.currentUserId());
+                context.setNamespaceId(UserContext.getCurrentNamespaceId());
+                event.setContext(context);
+
+                event.setEntityType(EhForumPosts.class.getSimpleName());
+                event.setEntityId(tempPost.getId());
+                event.setEventName(SystemEvent.FORUM_POST_LIKE_CANCEL.suffix(
+                        tempPost.getContentCategory(), tempPost.getModuleType(), tempPost.getModuleCategoryId()));
+            });
         } catch(Exception e) {
             LOGGER.error("Failed to update the dislike count of post, userId=" + operatorId + ", topicId=" + topicId, e);
         }
+        //取消点赞对接积分 add by yanjun 20171211
+        // cancelLikeTopicPoints(forumId);
     }
+
+    /*private void cancelLikeTopicPoints(Long postId){
+
+        final Post post = this.forumProvider.findPostById(postId);
+
+        String eventName = null;
+        switch (ForumModuleType.fromCode(post.getModuleType())){
+            case FORUM:
+                eventName = SystemEvent.FORUM_POST_LIKE_CANCEL.suffix(post.getModuleCategoryId());
+                break;
+            case ACTIVITY:
+                eventName = SystemEvent.ACTIVITY_ACTIVITY_LIKE_CANCEL.suffix(post.getModuleCategoryId());
+                break;
+            case ANNOUNCEMENT:
+                break;
+            case CLUB:
+                break;
+            case GUILD:
+                break;
+            case FEEDBACK:
+                break;
+        }
+        if(eventName == null){
+            return;
+        }
+
+        final String finalEventName = eventName;
+
+        Long  userId = UserContext.currentUserId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(userId);
+            context.setNamespaceId(namespaceId);
+            event.setContext(context);
+
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(post.getId());
+            event.setEventName(finalEventName);
+        });
+    }*/
 
     @Override
     public void stickPost(StickPostCommand cmd) {
@@ -2279,6 +2519,18 @@ public class ForumServiceImpl implements ForumService {
             }).collect(Collectors.toList());
             postdto.setAttachments(listAttachementdto);
         }
+
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(UserContext.currentUserId());
+            context.setNamespaceId(UserContext.getCurrentNamespaceId());
+            event.setContext(context);
+
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(postdto.getId());
+            event.setEventName(SystemEvent.FORUM_COMMENT_CREATE.suffix(
+                    ownerPost.getContentCategory(), ownerPost.getModuleType(), ownerPost.getModuleCategoryId()));
+        });
         return postdto;
 
     }
@@ -3335,6 +3587,9 @@ public class ForumServiceImpl implements ForumService {
         post.setInteractFlag(InteractFlag.SUPPORT.getCode());
         post.setStickFlag(StickFlag.DEFAULT.getCode());
 
+        post.setModuleType(cmd.getModuleType());
+        post.setModuleCategoryId(cmd.getModuleCategoryId());
+
         return post;
     }
     
@@ -4095,7 +4350,7 @@ public class ForumServiceImpl implements ForumService {
                 populateOwnerToken(post);
 
                 //添加是否支持评论字段 add by yanjun 20171025
-                Byte flag = getInteractFlag(post);
+                Byte flag = getInteractFlagByPost(post);
                 post.setInteractFlag(flag);
                 
                 String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
@@ -4142,7 +4397,7 @@ public class ForumServiceImpl implements ForumService {
      * @param post
      */
     @Override
-    public Byte getInteractFlag(Post post){
+    public Byte getInteractFlagByPost(Post post){
         //如果帖子时关闭评论的，直接是关闭
         if(post.getInteractFlag() != null && InteractFlag.fromCode(post.getInteractFlag()) == InteractFlag.UNSUPPORT){
             return InteractFlag.UNSUPPORT.getCode();
@@ -4160,24 +4415,32 @@ public class ForumServiceImpl implements ForumService {
 
     @Override
     public InteractSetting findInteractSettingByPost(Post post){
-        InteractSetting setting = null;
+//        InteractSetting setting = null;
+
+        if(post.getModuleType() == null){
+            return null;
+        }
 
         Integer namespaceId = post.getNamespaceId();
         if(namespaceId == null){
             namespaceId = UserContext.getCurrentNamespaceId();
         }
 
-        //非常不靠谱的判断，可是真的没有其他办法，急需在创建帖子的时候从来源处传来是哪个应用的  add by yanjun 20171109
-        if(post.getActivityCategoryId() != null && post.getActivityCategoryId().longValue() != 0){
-            //活动应用的帖子
-            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.ACTIVITY.getCode(), post.getActivityCategoryId());
-        }else if(post.getForumEntryId() != null && (post.getCategoryId() == null || post.getCategoryId() != 1003)){
-            //论坛应用的帖子
-            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.FORUM.getCode(), post.getForumEntryId());
-        }else if(post.getCategoryId() != null && post.getCategoryId() == 1003){
-            //公告应用的帖子
-            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.ANNOUNCEMENT.getCode(), null);
-        }
+
+        InteractSetting setting = forumProvider.findInteractSetting(namespaceId, post.getModuleType(), post.getModuleCategoryId());
+
+
+//        //非常不靠谱的判断，可是真的没有其他办法，急需在创建帖子的时候从来源处传来是哪个应用的  add by yanjun 20171109
+//        if(post.getActivityCategoryId() != null && post.getActivityCategoryId().longValue() != 0){
+//            //活动应用的帖子
+//            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.ACTIVITY.getCode(), post.getActivityCategoryId());
+//        }else if(post.getForumEntryId() != null && (post.getCategoryId() == null || post.getCategoryId() != 1003)){
+//            //论坛应用的帖子
+//            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.FORUM.getCode(), post.getForumEntryId());
+//        }else if(post.getCategoryId() != null && post.getCategoryId() == 1003){
+//            //公告应用的帖子
+//            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.ANNOUNCEMENT.getCode(), null);
+//        }
 
         return setting;
     }
@@ -4696,9 +4959,10 @@ public class ForumServiceImpl implements ForumService {
 //        if(null == EntityType.fromCode(ownerType) && null == ownerId && null == currentOrgId){
 //            return;
 //        }
-        if(categoryId != null && CategoryConstants.CATEGORY_ID_NOTICE == categoryId){
-            resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.PUBLISH_NOTICE_TOPIC);
-        }
+        // 对接权限，先去掉权限校验 -- by yanjun
+//        if(categoryId != null && CategoryConstants.CATEGORY_ID_NOTICE == categoryId){
+//            resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.PUBLISH_NOTICE_TOPIC);
+//        }
     }
 
     private void checkBlacklist(String ownerType, Long ownerId, Long categoryId, Long forumId){
@@ -4802,7 +5066,11 @@ public class ForumServiceImpl implements ForumService {
                 visibleRegionType = VisibleRegionType.fromCode(cmd.getVisibleRegionType());
                 visibleRegionType = (visibleRegionType == null) ? VisibleRegionType.REGION : visibleRegionType;
                 visibleRegionId = cmd.getVisibleRegionId();
-                visibleRegionId = (visibleRegionId == null) ? org.getId() : visibleRegionId;
+
+                if(cmd.getVisibleRegionIds() == null || cmd.getVisibleRegionIds().size() == 0){
+                    visibleRegionId = (visibleRegionId == null) ? org.getId() : visibleRegionId;
+                }
+
                 if(OrganizationType.isGovAgencyOrganization(orgType)) {
 //                    if(VisibleRegionType.fromCode(cmd.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
 //                    	creatorTag = PostEntityTag.fromCode(orgType);
@@ -6392,8 +6660,14 @@ public class ForumServiceImpl implements ForumService {
         tagDTOS = hotTagService.listHotTag(tagCommand);
         response.setPollTags(tagDTOS);
 
-        //暂时不对评论做处理。
-        response.setInteractFlag(InteractFlag.SUPPORT.getCode());
+        //评论配置
+        InteractSetting interactSetting = forumProvider.findInteractSetting(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId());
+        if(interactSetting == null){
+            response.setInteractFlag(InteractFlag.SUPPORT.getCode());
+        }else {
+            response.setInteractFlag(interactSetting.getInteractFlag());
+        }
+
 
         return response;
     }
@@ -6456,7 +6730,8 @@ public class ForumServiceImpl implements ForumService {
                 resetHotTagCommand.setNames(cmd.getPollTags().stream().map(r -> r.getName()).collect(Collectors.toList()));
                 hotTagService.resetHotTag(resetHotTagCommand);
 
-                //暂时不对评论做处理。
+                //更新评论开关
+                saveInteractSetting(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId(), cmd.getInteractFlag());
 
                 return null;
 
@@ -6464,6 +6739,44 @@ public class ForumServiceImpl implements ForumService {
             return null;
         });
 
+    }
+
+    @Override
+    public InteractSettingDTO getInteractSetting(GetInteractSettingCommand cmd) {
+        InteractSetting interactSetting = forumProvider.findInteractSetting(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId());
+        InteractSettingDTO dto = null;
+        if(interactSetting != null){
+            dto =  ConvertHelper.convert(interactSetting, InteractSettingDTO.class);
+        }else {
+            dto = ConvertHelper.convert(cmd, InteractSettingDTO.class);
+            dto.setInteractFlag(InteractFlag.SUPPORT.getCode());
+        }
+        return dto;
+    }
+
+    @Override
+    public void updateInteractSetting(UpdateInteractSettingCommand cmd) {
+        saveInteractSetting(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getCategoryId(), cmd.getInteractFlag());
+    }
+
+    @Override
+    public void saveInteractSetting(Integer namespaceId, Byte moduleType, Long categoryId, Byte interactFlag){
+
+        //更新评论开关
+        InteractSetting interactSetting = forumProvider.findInteractSetting(namespaceId, moduleType, categoryId);
+        if(interactSetting != null){
+            interactSetting.setInteractFlag(interactFlag);
+            interactSetting.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            forumProvider.updateInteractSetting(interactSetting);
+        }else {
+            interactSetting = new InteractSetting();
+            interactSetting.setNamespaceId(namespaceId);
+            interactSetting.setModuleType(moduleType);
+            interactSetting.setCategoryId(categoryId);
+            interactSetting.setInteractFlag(interactFlag);
+            interactSetting.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            forumProvider.createInteractSetting(interactSetting);
+        }
     }
 
     @Override
@@ -6484,5 +6797,37 @@ public class ForumServiceImpl implements ForumService {
         return response;
 
     }
-    
+
+    @Override
+    public CheckModuleAppAdminResponse checkForumModuleAppAdmin(CheckModuleAppAdminCommand cmd) {
+        CheckModuleAppAdminResponse res = new CheckModuleAppAdminResponse();
+
+        Long userId = UserContext.currentUserId();
+        if(userId == null){
+            res.setFlag(TrueOrFalseFlag.FALSE.getCode());
+            return res;
+        }
+
+        if(userPrivilegeMgr.checkSuperAdmin(userId, cmd.getCurrentOrgId())){
+            LOGGER.debug("check super admin privilege success.userId={}, organizationId={}" , userId, cmd.getCurrentOrgId());
+            res.setFlag(TrueOrFalseFlag.TRUE.getCode());
+            return res;
+        }
+
+        Long moduleId = ForumModuleType.fromCode(cmd.getModuleType()).getModuleId();
+        if(moduleId == null){
+            LOGGER.debug("check moduleApp admin privilege fail, moduleId dest not exists. userId={}, forumModuleType={}, organizationId={}" , userId, cmd.getModuleType(), cmd.getCurrentOrgId());
+            res.setFlag(TrueOrFalseFlag.FALSE.getCode());
+            return res;
+        }
+
+        if(userPrivilegeMgr.checkModuleAdmin(EntityType.ORGANIZATIONS.getCode(), cmd.getCurrentOrgId(), userId, moduleId)){
+            LOGGER.debug("check moduleApp admin privilege success. ownerType={}, ownerId={}, userId={}, moduleId={}" , EntityType.ORGANIZATIONS.getCode(), cmd.getCurrentOrgId(), userId, moduleId);
+            res.setFlag(TrueOrFalseFlag.TRUE.getCode());
+            return res;
+        }
+
+        res.setFlag(TrueOrFalseFlag.FALSE.getCode());
+        return res;
+    }
 }

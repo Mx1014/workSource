@@ -169,6 +169,15 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private Long serialEntrepreneurId;
     private String serialEntrepreneurName;
     private BigDecimal riskInvestmentAmount;
+    private Boolean thirdPartFlag = false;
+
+    public Boolean getThirdPartFlag() {
+        return thirdPartFlag;
+    }
+
+    public void setThirdPartFlag(Boolean thirdPartFlag) {
+        this.thirdPartFlag = thirdPartFlag;
+    }
 
     public Long getEntrepreneurialCharacteristicsId() {
         return entrepreneurialCharacteristicsId;

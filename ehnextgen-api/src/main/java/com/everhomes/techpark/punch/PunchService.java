@@ -14,6 +14,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.rest.techpark.punch.admin.*;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
@@ -251,4 +252,6 @@ public interface PunchService {
 	void punchGroupAddNewEmployee(Long groupId);
 
 	ListPunchLogsResponse listPunchLogs(ListPunchLogsCommand cmd);
+
+	void checkAppPrivilege(Long orgId, Long checkOrgId, Long privilege);
 }

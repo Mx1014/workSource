@@ -49,6 +49,16 @@ public class ListBuildingForRentCommand {
 	private Long organizationId;
 	private String issuerType;
 
+	private Long categoryId;
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
 	public Long getLeaseBuildingId() {
 		return leaseBuildingId;
 	}
