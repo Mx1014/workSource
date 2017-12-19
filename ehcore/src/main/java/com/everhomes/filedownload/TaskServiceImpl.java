@@ -46,10 +46,10 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
 
 
     @Override
-    public void updateTaskProcess(Long taskId, Integer rate) {
+    public void updateTaskProcess(Long taskId, Integer process) {
 
         Task task = taskProvider.findById(taskId);
-        task.setRate(rate);
+        task.setProcess(process);
         taskProvider.updateTask(task);
     }
 
@@ -91,7 +91,7 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
         Task task = taskProvider.findById(taskId);
         task.setStatus(status);
         if(TaskStatus.fromName(status) == TaskStatus.SUCCESS){
-            task.setRate(100);
+            task.setProcess(100);
         }
         task.setErrorDescription(errorDesc);
         taskProvider.updateTask(task);
