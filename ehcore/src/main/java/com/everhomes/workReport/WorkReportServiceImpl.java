@@ -417,7 +417,7 @@ public class WorkReportServiceImpl implements WorkReportService {
 
         }*/
         val.setReportId(cmd.getReportId());
-        val.setReportTime(cmd.getReportTime());
+        val.setReportTime(new Timestamp(cmd.getReportTime()));
         val.setApplierUserId(user.getId());
         val.setApplierName(fixUpUserName(user.getId()));
         val.setReportType(cmd.getReportType());

@@ -28,7 +28,7 @@ public class PostWorkReportValCommand {
 
     private Byte reportType;
 
-    private Timestamp reportTime;
+    private Long reportTime;
 
     @ItemType(PostApprovalFormItem.class)
     private List<PostApprovalFormItem> values;
@@ -71,11 +71,11 @@ public class PostWorkReportValCommand {
         this.reportType = reportType;
     }
 
-    public Timestamp getReportTime() {
+    public Long getReportTime() {
         return reportTime;
     }
 
-    public void setReportTime(Timestamp reportTime) {
+    public void setReportTime(Long reportTime) {
         this.reportTime = reportTime;
     }
 
