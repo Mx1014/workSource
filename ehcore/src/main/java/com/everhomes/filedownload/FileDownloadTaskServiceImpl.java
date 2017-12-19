@@ -48,9 +48,9 @@ public class FileDownloadTaskServiceImpl implements FileDownloadTaskService {
         List<FileDownloadTaskDTO> dtos = new ArrayList<FileDownloadTaskDTO>();
         if(fileDownloadTasks != null){
 
-            if(fileDownloadTasks.size() == pageSize){
-                fileDownloadTasks.remove(pageSize -1);
-                response.setNextPageAnchor(fileDownloadTasks.get(pageSize - 2).getId());
+            if(fileDownloadTasks.size() > pageSize){
+                response.setNextPageAnchor(fileDownloadTasks.get(pageSize).getId());
+                fileDownloadTasks.remove(pageSize);
             }
 
             //有效期
