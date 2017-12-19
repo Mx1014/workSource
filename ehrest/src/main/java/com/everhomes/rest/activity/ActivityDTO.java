@@ -54,6 +54,7 @@ import com.everhomes.util.StringHelper;
  * <li>stickFlag: 置顶标志，0-否，1-是，参考{@link StickFlag}</li>
  * <li>stickTime: 置顶时间</li>
  * <li>interactFlag: 是否支持评论 0-no, 1-yes 参考{@link InteractFlag}</li>
+ * <li>status: 活动状态 参考{@link com.everhomes.rest.forum.PostStatus}</li>
  *</ul>
  */
 public class ActivityDTO {
@@ -137,6 +138,8 @@ public class ActivityDTO {
     private Byte interactFlag;
 
     private Timestamp stickTime;
+
+    private Byte status;
     
     public String getSignupEndTime() {
 		return signupEndTime;
@@ -646,6 +649,14 @@ public class ActivityDTO {
 
     public void setStickTime(Timestamp stickTime) {
         this.stickTime = stickTime;
+    }
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 
     public String toString() {

@@ -51,6 +51,10 @@ public class LianXinTongSmsHandler implements SmsHandler, ApplicationListener<Co
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
+        initAccount();
+    }
+
+    private void initAccount() {
         this.spId = configurationProvider.getValue(LXT_SP_ID, "");
         this.authCode = configurationProvider.getValue(LXT_AUTH_CODE, "");
         this.srcId = configurationProvider.getValue(LXT_SRC_ID, "");
@@ -58,6 +62,7 @@ public class LianXinTongSmsHandler implements SmsHandler, ApplicationListener<Co
     }
 
     private RspMessage createAndSend(Map<String, Object> message) {
+        initAccount();
         SmsChannel channel = SmsBuilder.create(false);
         message.put("authCode", authCode);
         message.put("spId", spId);

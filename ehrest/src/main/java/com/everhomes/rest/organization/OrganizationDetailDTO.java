@@ -118,8 +118,18 @@ public class OrganizationDetailDTO {
 
 	private String organizationMemberName;
 
+	private Boolean thirdPartFlag = false;
+
 	public String getUnifiedSocialCreditCode() {
 		return unifiedSocialCreditCode;
+	}
+
+	public Boolean getThirdPartFlag() {
+		return thirdPartFlag;
+	}
+
+	public void setThirdPartFlag(Boolean thirdPartFlag) {
+		this.thirdPartFlag = thirdPartFlag;
 	}
 
 	public void setUnifiedSocialCreditCode(String unifiedSocialCreditCode) {

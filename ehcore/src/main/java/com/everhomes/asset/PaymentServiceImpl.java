@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,8 +60,15 @@ public class PaymentServiceImpl implements PaymentService {
         cmd1.setModuleId(PrivilegeConstants.ASSET_MODULE_ID);
         cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
         ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
-        Long appId = res.getServiceModuleApps().get(0).getId();
+        Long appId = null;
+        if(null != res && res.getServiceModuleApps().size() > 0){
+            appId = res.getServiceModuleApps().get(0).getId();
+        }
         OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), UserContext.currentUserId(), OrganizationType.ENTERPRISE.getCode());
+        if(member != null && !StringUtils.isEmpty(member.getGroupPath())){
+            Long organizaitonId = Long.valueOf(member.getGroupPath().split("/")[1]);
+            member.setOrganizationId(organizaitonId);
+        }
         if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), member.getOrganizationId(), member.getOrganizationId(), PrivilegeConstants.ASSET_DEAL_VIEW, appId, null,  cmd.getCommunityId())){
             throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
                     "check app privilege error");

@@ -9,7 +9,6 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.banner.BannerDTO;
 import com.everhomes.rest.point.*;
@@ -18,7 +17,6 @@ import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserTreasureDTO;
 import com.everhomes.server.schema.tables.pojos.EhBanners;
 import com.everhomes.server.schema.tables.pojos.EhPointGoods;
-import com.everhomes.server.schema.tables.pojos.EhPointRules;
 import com.everhomes.server.schema.tables.pojos.EhPointTutorials;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -97,6 +95,9 @@ public class PointServiceImpl implements PointService {
 
     @Autowired
     private PointLocalBusSubscriber pointLocalBusSubscriber;
+
+    @Autowired
+    private PointRuleConfigProvider pointRuleConfigProvider;
 
     @Override
     public ListPointSystemsResponse listPointSystems(ListPointSystemsCommand cmd) {
@@ -177,12 +178,13 @@ public class PointServiceImpl implements PointService {
 
             dbProvider.execute(s -> {
                 pointSystemProvider.updatePointSystem(pointSystem);
+                pointRuleConfigProvider.deleteBySystemId(pointSystem.getId());
 
-                pointRuleProvider.deleteBySystemId(pointSystem.getId());
-                pointRuleToEventMappingProvider.deleteBySystemId(pointSystem.getId());
-                pointTutorialProvider.deleteBySystemId(pointSystem.getId());
-                pointTutorialToPointRuleMappingProvider.deleteBySystemId(pointSystem.getId());
-                pointActionProvider.deleteBySystemId(pointSystem.getId());
+                // pointRuleProvider.deleteBySystemId(pointSystem.getId());
+                // pointRuleToEventMappingProvider.deleteBySystemId(pointSystem.getId());
+                // pointTutorialProvider.deleteBySystemId(pointSystem.getId());
+                // pointTutorialToPointRuleMappingProvider.deleteBySystemId(pointSystem.getId());
+                // pointActionProvider.deleteBySystemId(pointSystem.getId());
                 return true;
             });
         }
@@ -265,22 +267,41 @@ public class PointServiceImpl implements PointService {
     public PointRuleDTO updatePointRule(UpdatePointRuleCommand cmd) {
         ValidatorUtil.validate(cmd);
 
-        PointRule pointRule = pointRuleProvider.findById(cmd.getId());
-        if (pointRule == null) {
-            throw errorWith(PointServiceErrorCode.SCOPE, PointServiceErrorCode.ERROR_POINT_RULE_NOT_EXIST_CODE,
-                    "Point rule not exist");
+        PointRuleConfig ruleConfig = pointRuleConfigProvider.findByRuleIdAndSystemId(cmd.getSystemId(), cmd.getId());
+        if (ruleConfig == null) {
+            PointRule rule = pointRuleProvider.findById(cmd.getId());
+            ruleConfig = ConvertHelper.convert(rule, PointRuleConfig.class);
+            if (cmd.getDescription() != null) {
+                ruleConfig.setDescription(cmd.getDescription().trim());
+            }
+            ruleConfig.setLimitType(cmd.getLimitType());
+            ruleConfig.setLimitData(cmd.getLimitData());
+            ruleConfig.setStatus(cmd.getStatus());
+            ruleConfig.setPoints(cmd.getPoints());
+        } else {
+            if (cmd.getDescription() != null) {
+                ruleConfig.setDescription(cmd.getDescription().trim());
+            }
+            ruleConfig.setLimitType(cmd.getLimitType());
+            ruleConfig.setLimitData(cmd.getLimitData());
+            ruleConfig.setStatus(cmd.getStatus());
+            ruleConfig.setPoints(cmd.getPoints());
+            pointRuleConfigProvider.updatePointRuleConfig(ruleConfig);
         }
+        return toPointRuleDTO(ruleConfig);
+    }
 
-        if (cmd.getDescription() != null) {
-            pointRule.setDescription(cmd.getDescription().trim());
+    private PointRuleDTO toPointRuleDTO(PointRuleConfig ruleConfig) {
+        PointRule rule = pointRuleProvider.findById(ruleConfig.getRuleId());
+        PointRuleDTO ruleDTO = ConvertHelper.convert(rule, PointRuleDTO.class);
+        if (ruleConfig.getDescription() != null) {
+            ruleDTO.setDescription(ruleConfig.getDescription().trim());
         }
-        pointRule.setLimitType(cmd.getLimitType());
-        pointRule.setLimitData(cmd.getLimitData());
-        pointRule.setStatus(cmd.getStatus());
-        pointRule.setPoints(cmd.getPoints());
-
-        pointRuleProvider.updatePointRule(pointRule);
-        return toPointRuleDTO(pointRule);
+        ruleDTO.setLimitType(ruleConfig.getLimitType());
+        ruleDTO.setLimitData(ruleConfig.getLimitData());
+        ruleDTO.setStatus(ruleConfig.getStatus());
+        ruleDTO.setPoints(ruleConfig.getPoints());
+        return ruleDTO;
     }
 
     @Override
@@ -333,10 +354,6 @@ public class PointServiceImpl implements PointService {
 
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-
-        // --------
-        // cmd.setUserId(null);
-        // -------
 
         List<PointLog> logs = pointLogProvider.listPointLogs(cmd, locator);
         List<PointLogDTO> logDTOS = logs.stream().map(this::toPointLogDTO).collect(Collectors.toList());
@@ -419,7 +436,7 @@ public class PointServiceImpl implements PointService {
     private PointTutorialDetailDTO toPointTutorialDetailDTO(PointTutorialToPointRuleMapping mapping) {
         PointTutorialDetailDTO detailDTO = ConvertHelper.convert(mapping, PointTutorialDetailDTO.class);
         PointRule pointRule = pointRuleProvider.findById(mapping.getRuleId());
-        if (detailDTO.getDescription() == null || detailDTO.getDescription().isEmpty()) {
+        if (detailDTO.getDescription() == null || detailDTO.getDescription().trim().isEmpty()) {
             detailDTO.setDescription(pointRule.getDescription());
         }
         detailDTO.setRuleName(pointRule.getDisplayName());
@@ -499,7 +516,7 @@ public class PointServiceImpl implements PointService {
 
         dbProvider.execute(status -> {
             pointSystemProvider.createPointSystem(pointSystem);
-            doSnapshotPointRule(pointSystem);
+            // doSnapshotPointRule(pointSystem);
             return true;
         });
         return toPointSystemDTO(pointSystem);
@@ -612,11 +629,9 @@ public class PointServiceImpl implements PointService {
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
 
-        List<PointRule> pointRules = pointRuleProvider.listPointRules(cmd, pageSize, locator);
-        List<PointRuleDTO> pointRuleDTOS = pointRules.stream().map(this::toPointRuleDTO).collect(Collectors.toList());
-
+        List<PointRuleDTO> pointRules = pointRuleProvider.listPointRules(cmd, pageSize, locator);
         ListPointRulesResponse response = new ListPointRulesResponse();
-        response.setRules(pointRuleDTOS);
+        response.setRules(pointRules);
         response.setNextPageAnchor(locator.getAnchor());
         return response;
     }
@@ -771,51 +786,6 @@ public class PointServiceImpl implements PointService {
 
     private PointRuleCategoryDTO toPointRuleCategoryDTO(PointRuleCategory pointRuleCategory) {
         return ConvertHelper.convert(pointRuleCategory, PointRuleCategoryDTO.class);
-    }
-
-    private void doSnapshotPointRule(PointSystem pointSystem) {
-        List<PointRule> pointRules = pointRuleProvider.listPointRuleBySystemId(
-                PointConstant.CONFIG_POINT_SYSTEM_ID, -1, new ListingLocator());
-
-        Map<Long, Long> oldRuleIdToNewRuleIdMap = new HashMap<>();
-        for (PointRule pointRule : pointRules) {
-            Long oldId = pointRule.getId();
-            pointRule.setSystemId(pointSystem.getId());
-            pointRule.setNamespaceId(pointSystem.getNamespaceId());
-            pointRule.setId(null);
-            pointRuleProvider.createPointRule(pointRule);
-
-            Long newId = pointRule.getId();
-            oldRuleIdToNewRuleIdMap.put(oldId, newId);
-        }
-
-        // bindingRuleId改成复本id
-        pointRules = pointRuleProvider.listPointRuleBySystemId( pointSystem.getId(), -1, new ListingLocator());
-        for (PointRule pointRule : pointRules) {
-            pointRule.setBindingRuleId(oldRuleIdToNewRuleIdMap.get(pointRule.getBindingRuleId()));
-            pointRuleProvider.updatePointRule(pointRule);
-        }
-
-        oldRuleIdToNewRuleIdMap.forEach((oldId, newId) -> {
-            List<PointAction> pointActions = pointActionProvider.listByOwner(Namespace.DEFAULT_NAMESPACE,
-                    PointConstant.CONFIG_POINT_SYSTEM_ID, EhPointRules.class.getSimpleName(), oldId);
-            for (PointAction action : pointActions) {
-                action.setSystemId(pointSystem.getId());
-                action.setNamespaceId(pointSystem.getNamespaceId());
-                action.setOwnerId(newId);
-                action.setId(null);
-            }
-            pointActionProvider.createPointActions(pointActions);
-
-            List<PointRuleToEventMapping> mappings = pointRuleToEventMappingProvider.listByPointRule(PointConstant.CONFIG_POINT_SYSTEM_ID, oldId);
-            for (PointRuleToEventMapping mapping : mappings) {
-                mapping.setId(null);
-                mapping.setNamespaceId(pointSystem.getNamespaceId());
-                mapping.setRuleId(newId);
-                mapping.setSystemId(pointSystem.getId());
-            }
-            pointRuleToEventMappingProvider.createPointRuleToEventMappings(mappings);
-        });
     }
 
     // 一年执行一次发送积分清零消息
