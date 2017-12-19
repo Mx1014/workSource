@@ -399,7 +399,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         if(cmd.getFoundingTime() != null) {
-            customer.setFoundingTime(new Timestamp(cmd.getFoundingTime()));
+            updateCustomer.setFoundingTime(new Timestamp(cmd.getFoundingTime()));
         }
         updateCustomer.setStatus(CommonStatus.ACTIVE.getCode());
         //保存经纬度
