@@ -3069,3 +3069,13 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
   VALUES((@menu_scope_id := @menu_scope_id + 1),20290,'', 'EhNamespaces', 999984,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
   VALUES((@menu_scope_id := @menu_scope_id + 1),20291,'', 'EhNamespaces', 999984,2);
+
+UPDATE eh_categories set parent_id = 9 where id = 205201;
+UPDATE eh_categories SET path = REPLACE(path, '物业报修', '投诉建议') WHERE parent_id = 9;
+UPDATE eh_categories SET path = REPLACE(path, '物业报修', '投诉建议') WHERE parent_id = 205201;
+
+DELETE from eh_categories where parent_id = 205312;
+DELETE from eh_categories where parent_id = 205313;
+DELETE from eh_categories where id = 5;
+
+UPDATE eh_categories set parent_id = 6 where parent_id = 5;
