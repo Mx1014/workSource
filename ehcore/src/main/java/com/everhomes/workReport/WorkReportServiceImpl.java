@@ -7,6 +7,8 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.comment.OwnerTokenDTO;
+import com.everhomes.rest.comment.OwnerType;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.ui.user.SceneContactDTO;
@@ -17,6 +19,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.WebTokenGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -700,7 +703,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                     ConvertHelper.convert(r, GeneralFormFieldDTO.class)
             ).collect(Collectors.toList());
 
-            //  3) convert the result and return back.
+            //  3) convert the result
             //todo: 可能少了 title 需要定义
             dto.setReportValId(reportVal.getId());
             dto.setReportId(reportVal.getReportId());
@@ -715,7 +718,17 @@ public class WorkReportServiceImpl implements WorkReportService {
             dto.setReceivers(receivers);
             dto.setUpdateTime(reportVal.getUpdateTime());
             dto.setValues(fields);
+
+            //  4) get the comment
+            dto.setOwnerToken(populateOwnerToken(reportVal.getId()));
         }
         return dto;
+    }
+
+    private String populateOwnerToken(Long reportValId){
+        OwnerTokenDTO ownerTokenDto = new OwnerTokenDTO();
+        ownerTokenDto.setId(reportValId);
+        ownerTokenDto.setType(OwnerType.WORK_REPORT.getCode());
+        return WebTokenGenerator.getInstance().toWebToken(ownerTokenDto);
     }
 }
