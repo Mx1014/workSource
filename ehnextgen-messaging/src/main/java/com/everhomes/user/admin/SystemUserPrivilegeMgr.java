@@ -42,6 +42,7 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.entity.EntityType;
 import com.everhomes.util.RuntimeErrorException;
+import org.springframework.util.StringUtils;
 
 @Component("SystemUser")
 public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
@@ -338,8 +339,8 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         LOGGER.debug("checkUserPrivilege get appId = {}", appId);
         if(currentOrgId != null){
             OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), userId, OrganizationType.ENTERPRISE.getCode());
-            if(member != null){
-                currentOrgId = member.getOrganizationId();
+            if(member != null  && !StringUtils.isEmpty(member.getGroupPath())){
+                currentOrgId = Long.valueOf(member.getGroupPath().split("/")[1]);
             }
         }
         if(!checkUserPrivilege(userId, EntityType.ORGANIZATIONS.getCode(), currentOrgId, currentOrgId, privilegeId, appId, checkOrgId,  checkCommunityId)){

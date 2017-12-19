@@ -275,6 +275,10 @@ public class AssetServiceImpl implements AssetService {
             appId = res.getServiceModuleApps().get(0).getId();
         }
         OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), UserContext.currentUserId(), OrganizationType.ENTERPRISE.getCode());
+        if(member != null && !org.springframework.util.StringUtils.isEmpty(member.getGroupPath())){
+            Long organizaitonId = Long.valueOf(member.getGroupPath().split("/")[1]);
+            member.setOrganizationId(organizaitonId);
+        }
         if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), member.getOrganizationId(), member.getOrganizationId(),priviledgeId , appId, null,communityId )){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                     "Insufficient privilege");
