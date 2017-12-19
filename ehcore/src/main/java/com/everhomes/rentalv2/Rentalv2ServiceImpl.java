@@ -1211,7 +1211,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	private String getPriceStr(BigDecimal maxPrice, BigDecimal minPrice, Byte rentalType, Byte priceType,Double timeStep) {
-		if (priceType.equals(RentalPriceType.LINEARITY.getCode()))
+		if (RentalPriceType.LINEARITY.getCode()==priceType)
 			if( minPrice.compareTo(maxPrice) == 0){
 				return priceToString(minPrice,rentalType,timeStep);
 			}else{
