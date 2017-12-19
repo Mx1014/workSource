@@ -14,7 +14,7 @@ CREATE TABLE `eh_tasks` (
   `class_name` varchar(255) DEFAULT NULL,
   `params` text,
   `repeat_flag` tinyint(4) DEFAULT NULL,
-  `rate` int(11) DEFAULT NULL COMMENT 'rate of progress',
+  `process` int(11) DEFAULT NULL COMMENT 'rate of process',
   `result_string1` varchar(255) DEFAULT NULL,
   `result_string2` varchar(255) DEFAULT NULL,
   `result_long1` bigint(20) DEFAULT NULL,
