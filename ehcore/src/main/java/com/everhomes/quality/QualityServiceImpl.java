@@ -29,6 +29,7 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.parking.ParkingLocalStringCode;
 import com.everhomes.rest.quality.*;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
@@ -36,6 +37,7 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.search.QualityInspectionSampleSearcher;
 import com.everhomes.search.QualityTaskSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
@@ -43,6 +45,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.excel.ExcelUtils;
 import com.mysql.jdbc.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -4163,5 +4166,36 @@ public class QualityServiceImpl implements QualityService {
 
 		response.setItemScores(itemScores);
 		return response;
+	}
+
+	@Override
+	public void exportSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd, HttpServletResponse httpResponse) {
+		CountScoresResponse dataResponse = countSampleTaskCommunityScores(cmd);
+		String fileName = String.format("绩效考核%s", DateUtil.dateToStr(new java.util.Date(), DateUtil.DATE_TIME_NO_SLASH));
+		ExcelUtils excelUtils = new ExcelUtils(httpResponse, fileName, "绩效考核");
+		if (dataResponse.getScores() != null && dataResponse.getScores().size() > 0) {
+			List<String> propertyNames = new ArrayList<>();
+			List<String> titleNames = new ArrayList<>();
+			List<Integer> titleSizes = Arrays.asList(20, 20, 20);
+			excelUtils.setNeedSequenceColumn(true);
+
+			//dataResponse.getSpecifications().forEach(s->titleNames.add(s.getSpecificationName()));
+			//List data = new ArrayList();
+			propertyNames.add("排名");
+			propertyNames.add("项目名称");
+			propertyNames.add("项目总得分");
+
+			//List<ScoreGroupByTargetDTO> scoreGroupByTarget = dataResponse.getScores();
+			titleNames.add("orderId");
+			titleNames.add("targetName");
+			titleNames.add("totalScore");
+
+
+			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, dataResponse.getScores());
+		} else {
+			throw RuntimeErrorException.errorWith(ParkingLocalStringCode.SCOPE_STRING,
+					Integer.parseInt(ParkingLocalStringCode.NO_DATA), "no data");
+		}
+
 	}
 }

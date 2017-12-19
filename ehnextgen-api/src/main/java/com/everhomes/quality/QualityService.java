@@ -72,4 +72,6 @@ public interface QualityService {
 	QualityInspectionTaskDTO findQualityInspectionTask(FindQualityInspectionTaskCommand cmd);
 
 	CurrentUserInfoDTO getCurrentUserInfo();
+
+    void exportSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd, HttpServletResponse httpResponse);
 }
