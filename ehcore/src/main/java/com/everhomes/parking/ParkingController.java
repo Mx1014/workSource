@@ -722,4 +722,75 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /*------------------------车位管理-------------------------- */
+    /**
+     * <b>URL: /parking/searchParkingSpaces</b>
+     * <p>搜索停车位</p>
+     */
+    @RequestMapping("searchParkingSpaces")
+    @RestReturn(value=SearchParkingSpacesResponse.class)
+    public RestResponse searchParkingSpaces(SearchParkingSpacesCommand cmd) {
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/addParkingSpace</b>
+     * <p>新增停车位</p>
+     */
+    @RequestMapping("addParkingSpace")
+    @RestReturn(value=ParkingSpaceDTO.class)
+    public RestResponse addParkingSpace(AddParkingSpaceCommand cmd) {
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/updateParkingSpace</b>
+     * <p>编辑停车位</p>
+     */
+    @RequestMapping("updateParkingSpace")
+    @RestReturn(value=ParkingSpaceDTO.class)
+    public RestResponse updateParkingSpace(UpdateParkingSpaceCommand cmd) {
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/updateParkingSpace</b>
+     * <p>开放/关闭 停车位</p>
+     */
+    @RequestMapping("updateParkingSpace")
+    @RestReturn(value=String.class)
+    public RestResponse updateParkingSpaceStatus(UpdateParkingSpaceStatusCommand cmd) {
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/listParkingSpaceLogs</b>
+     * <p>获取停车位操作日志</p>
+     */
+    @RequestMapping("listParkingSpaceLogs")
+    @RestReturn(value=ListParkingSpaceLogsResponse.class)
+    public RestResponse listParkingSpaceLogs(ListParkingSpaceLogsCommand cmd) {
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
