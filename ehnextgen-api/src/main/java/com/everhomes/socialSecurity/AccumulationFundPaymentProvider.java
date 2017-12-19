@@ -13,4 +13,5 @@ public interface AccumulationFundPaymentProvider {
 
 	List<AccumulationFundPayment> listAccumulationFundPayment();
 
+	List<AccumulationFundPayment> listAccumulationFundPayment(Long detailId, byte code);
 }

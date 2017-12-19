@@ -10,17 +10,17 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 所属id 公司id</li>
  * </ul>
  */
-public class ListAccumulationFundCitysCommand {
+public class ListAccumulationFundCitiesCommand {
 
 	private String ownerType;
 
 	private Long ownerId;
 
-	public ListAccumulationFundCitysCommand() {
+	public ListAccumulationFundCitiesCommand() {
 
 	}
 
-	public ListAccumulationFundCitysCommand(String ownerType, Long ownerId) {
+	public ListAccumulationFundCitiesCommand(String ownerType, Long ownerId) {
 		super();
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;

@@ -1,6 +1,10 @@
 // @formatter:off
 package com.everhomes.socialSecurity;
 
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.socialSecurity.SocialSecurityPaymentDTO;
+import com.everhomes.rest.socialSecurity.SsorAfPay;
+
 import java.util.List;
 
 public interface SocialSecuritySettingProvider {
@@ -11,6 +15,9 @@ public interface SocialSecuritySettingProvider {
 
 	SocialSecuritySetting findSocialSecuritySettingById(Long id);
 
-	List<SocialSecuritySetting> listSocialSecuritySetting();
+	List<SocialSecurityPaymentDTO> listSocialSecuritySetting(Long socialSecurityCityId, Long accumulationFundCityId, Long deptId, String keywords, SsorAfPay payFlag, List<Long> detailIds, CrossShardListingLocator locator);
 
+	List<SocialSecuritySetting> listSocialSecuritySetting(Long socialSecurityCityId, Long accumulationFundCityId, Long deptId, String keywords, SsorAfPay payFlag, List<Long> detailIds);
+
+	List<SocialSecuritySetting> listSocialSecuritySetting();
 }

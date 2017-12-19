@@ -12,16 +12,16 @@ import com.everhomes.util.StringHelper;
  * <li>socialSecurityCitys: 社保城市列表</li>
  * </ul>
  */
-public class ListSocialSecurityCitysResponse {
+public class ListSocialSecurityCitiesResponse {
 
 	@ItemType(SocialSecurityCityDTO.class)
 	private List<SocialSecurityCityDTO> socialSecurityCitys;
 
-	public ListSocialSecurityCitysResponse() {
+	public ListSocialSecurityCitiesResponse() {
 
 	}
 
-	public ListSocialSecurityCitysResponse(List<SocialSecurityCityDTO> socialSecurityCitys) {
+	public ListSocialSecurityCitiesResponse(List<SocialSecurityCityDTO> socialSecurityCitys) {
 		super();
 		this.socialSecurityCitys = socialSecurityCitys;
 	}

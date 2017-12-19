@@ -63,7 +63,12 @@ public class AccumulationFundPaymentProviderImpl implements AccumulationFundPaym
 				.orderBy(Tables.EH_ACCUMULATION_FUND_PAYMENTS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, AccumulationFundPayment.class));
 	}
-	
+
+	@Override
+	public List<AccumulationFundPayment> listAccumulationFundPayment(Long detailId, byte code) {
+		return null;
+	}
+
 	private EhAccumulationFundPaymentsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

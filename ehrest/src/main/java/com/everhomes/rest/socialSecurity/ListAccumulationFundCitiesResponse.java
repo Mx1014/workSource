@@ -12,16 +12,16 @@ import com.everhomes.util.StringHelper;
  * <li>accumulationFundCitys: 社保城市列表 参考{@link com.everhomes.rest.socialSecurity.SocialSecurityCityDTO}</li>
  * </ul>
  */
-public class ListAccumulationFundCitysResponse {
+public class ListAccumulationFundCitiesResponse {
 
 	@ItemType(SocialSecurityCityDTO.class)
 	private List<SocialSecurityCityDTO> accumulationFundCitys;
 
-	public ListAccumulationFundCitysResponse() {
+	public ListAccumulationFundCitiesResponse() {
 
 	}
 
-	public ListAccumulationFundCitysResponse(List<SocialSecurityCityDTO> accumulationFundCitys) {
+	public ListAccumulationFundCitiesResponse(List<SocialSecurityCityDTO> accumulationFundCitys) {
 		super();
 		this.accumulationFundCitys = accumulationFundCitys;
 	}

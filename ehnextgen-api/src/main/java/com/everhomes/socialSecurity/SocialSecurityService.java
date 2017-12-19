@@ -10,12 +10,12 @@ import com.everhomes.rest.socialSecurity.FileSocialSecurityCommand;
 import com.everhomes.rest.socialSecurity.GetSocialSecurityPaymentDetailsCommand;
 import com.everhomes.rest.socialSecurity.GetSocialSecurityPaymentDetailsResponse;
 import com.everhomes.rest.socialSecurity.ImportSocialSecurityPaymentsCommand;
-import com.everhomes.rest.socialSecurity.ListAccumulationFundCitysCommand;
-import com.everhomes.rest.socialSecurity.ListAccumulationFundCitysResponse;
+import com.everhomes.rest.socialSecurity.ListAccumulationFundCitiesCommand;
+import com.everhomes.rest.socialSecurity.ListAccumulationFundCitiesResponse;
 import com.everhomes.rest.socialSecurity.ListFilterItemsCommand;
 import com.everhomes.rest.socialSecurity.ListFilterItemsResponse;
-import com.everhomes.rest.socialSecurity.ListSocialSecurityCitysCommand;
-import com.everhomes.rest.socialSecurity.ListSocialSecurityCitysResponse;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityCitiesCommand;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityCitiesResponse;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityDepartmentSummarysCommand;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityDepartmentSummarysResponse;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityEmployeeStatusCommand;
@@ -36,10 +36,10 @@ public interface SocialSecurityService {
 	public void addSocialSecurity(AddSocialSecurityCommand cmd);
 
 
-	public ListSocialSecurityCitysResponse listSocialSecurityCitys(ListSocialSecurityCitysCommand cmd);
+	public ListSocialSecurityCitiesResponse listSocialSecurityCities(ListSocialSecurityCitiesCommand cmd);
 
 
-	public ListAccumulationFundCitysResponse listAccumulationFundCitys(ListAccumulationFundCitysCommand cmd);
+	public ListAccumulationFundCitiesResponse listAccumulationFundCities(ListAccumulationFundCitiesCommand cmd);
 
 
 	public ListFilterItemsResponse listFilterItems(ListFilterItemsCommand cmd);

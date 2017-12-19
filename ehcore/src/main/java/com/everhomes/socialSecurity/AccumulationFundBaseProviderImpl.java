@@ -63,7 +63,12 @@ public class AccumulationFundBaseProviderImpl implements AccumulationFundBasePro
 				.orderBy(Tables.EH_ACCUMULATION_FUND_BASES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, AccumulationFundBase.class));
 	}
-	
+
+	@Override
+	public List<Long> listCities() {
+		return null;
+	}
+
 	private EhAccumulationFundBasesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

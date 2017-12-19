@@ -4,6 +4,9 @@ package com.everhomes.socialSecurity;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.socialSecurity.SocialSecurityPaymentDTO;
+import com.everhomes.rest.socialSecurity.SsorAfPay;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -56,7 +59,17 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), SocialSecuritySetting.class);
 	}
-	
+
+	@Override
+	public List<SocialSecurityPaymentDTO> listSocialSecuritySetting(Long socialSecurityCityId, Long accumulationFundCityId, Long deptId, String keywords, SsorAfPay payFlag, List<Long> detailIds, CrossShardListingLocator locator) {
+		return null;
+	}
+
+	@Override
+	public List<SocialSecuritySetting> listSocialSecuritySetting(Long socialSecurityCityId, Long accumulationFundCityId, Long deptId, String keywords, SsorAfPay payFlag, List<Long> detailIds) {
+		return null;
+	}
+
 	@Override
 	public List<SocialSecuritySetting> listSocialSecuritySetting() {
 		return getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_SETTINGS)

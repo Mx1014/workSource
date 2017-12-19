@@ -17,12 +17,12 @@ import com.everhomes.rest.socialSecurity.FileSocialSecurityCommand;
 import com.everhomes.rest.socialSecurity.GetSocialSecurityPaymentDetailsCommand;
 import com.everhomes.rest.socialSecurity.GetSocialSecurityPaymentDetailsResponse;
 import com.everhomes.rest.socialSecurity.ImportSocialSecurityPaymentsCommand;
-import com.everhomes.rest.socialSecurity.ListAccumulationFundCitysCommand;
-import com.everhomes.rest.socialSecurity.ListAccumulationFundCitysResponse;
+import com.everhomes.rest.socialSecurity.ListAccumulationFundCitiesCommand;
+import com.everhomes.rest.socialSecurity.ListAccumulationFundCitiesResponse;
 import com.everhomes.rest.socialSecurity.ListFilterItemsCommand;
 import com.everhomes.rest.socialSecurity.ListFilterItemsResponse;
-import com.everhomes.rest.socialSecurity.ListSocialSecurityCitysCommand;
-import com.everhomes.rest.socialSecurity.ListSocialSecurityCitysResponse;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityCitiesCommand;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityCitiesResponse;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityDepartmentSummarysCommand;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityDepartmentSummarysResponse;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityEmployeeStatusCommand;
@@ -58,22 +58,22 @@ public class SocialSecurityController extends ControllerBase {
 
 	/**
 	 * <p>2.查询社保的城市列表</p>
-	 * <b>URL: /socialSecurity/listSocialSecurityCitys</b>
+	 * <b>URL: /socialSecurity/listSocialSecurityCities</b>
 	 */
 	@RequestMapping("listSocialSecurityCitys")
-	@RestReturn(ListSocialSecurityCitysResponse.class)
-	public RestResponse listSocialSecurityCitys(ListSocialSecurityCitysCommand cmd){
-		return new RestResponse(socialSecurityService.listSocialSecurityCitys(cmd));
+	@RestReturn(ListSocialSecurityCitiesResponse.class)
+	public RestResponse listSocialSecurityCitys(ListSocialSecurityCitiesCommand cmd){
+		return new RestResponse(socialSecurityService.listSocialSecurityCities(cmd));
 	}
 
 	/**
 	 * <p>3.查询公积金的城市列表</p>
-	 * <b>URL: /socialSecurity/listAccumulationFundCitys</b>
+	 * <b>URL: /socialSecurity/listAccumulationFundCities</b>
 	 */
 	@RequestMapping("listAccumulationFundCitys")
-	@RestReturn(ListAccumulationFundCitysResponse.class)
-	public RestResponse listAccumulationFundCitys(ListAccumulationFundCitysCommand cmd){
-		return new RestResponse(socialSecurityService.listAccumulationFundCitys(cmd));
+	@RestReturn(ListAccumulationFundCitiesResponse.class)
+	public RestResponse listAccumulationFundCitys(ListAccumulationFundCitiesCommand cmd){
+		return new RestResponse(socialSecurityService.listAccumulationFundCities(cmd));
 	}
 
 	/**

@@ -13,4 +13,5 @@ public interface AccumulationFundBaseProvider {
 
 	List<AccumulationFundBase> listAccumulationFundBase();
 
+	List<Long> listCities();
 }

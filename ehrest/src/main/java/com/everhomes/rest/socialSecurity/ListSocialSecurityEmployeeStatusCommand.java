@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>ownerType: 所属类型 organization</li>
  * <li>ownerId: 所属id 公司id</li>
+ * <li>detailId: detail id </li>
  * </ul>
  */
 public class ListSocialSecurityEmployeeStatusCommand {
@@ -15,6 +16,8 @@ public class ListSocialSecurityEmployeeStatusCommand {
 	private String ownerType;
 
 	private Long ownerId;
+
+	private Long detialId;
 
 	public ListSocialSecurityEmployeeStatusCommand() {
 
@@ -47,4 +50,11 @@ public class ListSocialSecurityEmployeeStatusCommand {
 		return StringHelper.toJsonString(this);
 	}
 
+	public Long getDetialId() {
+		return detialId;
+	}
+
+	public void setDetialId(Long detialId) {
+		this.detialId = detialId;
+	}
 }

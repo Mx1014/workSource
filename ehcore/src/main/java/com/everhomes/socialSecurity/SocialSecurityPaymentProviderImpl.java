@@ -63,7 +63,17 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
 				.orderBy(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SocialSecurityPayment.class));
 	}
-	
+
+	@Override
+	public String getPaymentMonth(Long ownerId) {
+		return null;
+	}
+
+	@Override
+	public List<SocialSecurityPayment> listSocialSecurityPayment(Long detailId, byte code) {
+		return null;
+	}
+
 	private EhSocialSecurityPaymentsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
