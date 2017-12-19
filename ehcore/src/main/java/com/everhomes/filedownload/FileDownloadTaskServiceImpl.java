@@ -74,10 +74,10 @@ public class FileDownloadTaskServiceImpl implements FileDownloadTaskService {
 
     private FileDownloadTaskDTO taskToFileDownloadTaskDto(Task task, List<Long> ids, Long intervalTime){
         FileDownloadTaskDTO dto = ConvertHelper.convert(task, FileDownloadTaskDTO.class);
-        dto.setUri(task.getResultString1());
+        dto.setFileName(task.getResultString1());
+        dto.setUri(task.getResultString2());
         String url = contentServerService.parserUri(dto.getUri(), EntityType.USER.getCode(), dto.getUserId());
         dto.setUrl(url);
-        dto.setFileName(task.getResultString2());
         dto.setSize(task.getResultLong1());
 
         //有效期
