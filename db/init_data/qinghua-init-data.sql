@@ -3030,6 +3030,10 @@ INSERT INTO `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `na
 UPDATE eh_launch_pad_items SET action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=9&displayName=投诉建议"}' WHERE namespace_id = 999984 AND item_label = '投诉建议';
 UPDATE eh_launch_pad_items SET action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=6&displayName=物业报修"}' WHERE namespace_id = 999984 AND item_label = '物业报修';
 
+DELETE from eh_web_menus where id >= 20392 and id <=20399;
+DELETE from eh_web_menus where id >= 20492 and id <=20499;
+DELETE from eh_web_menu_scopes where  menu_id >= 20392 and menu_id <=20399 and owner_id = 999984;
+DELETE from eh_web_menu_scopes where  menu_id >= 20492 and menu_id <=20499 and owner_id = 999984;
 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
