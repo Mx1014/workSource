@@ -646,9 +646,9 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 	VALUES ('20930', '工作流设置', '20900', NULL, 'react:/working-flow/flow-list/vehicle-release/20900', '0', '2', '/40000/20900/20930', 'park', '303', '20900', '3', NULL, 'module');
 
 -- 物业报修数据清理 add by sw 20171218
-DELETE from eh_pm_tasks where task_category_id not in (SELECT id from eh_categories where parent_id in (6, 9));
-DELETE from eh_pm_task_statistics where task_category_id not in (SELECT id from eh_categories where parent_id in (6, 9));
-DELETE from eh_pm_task_target_statistics where task_category_id not in (SELECT id from eh_categories where parent_id in (6, 9));
+DELETE from eh_pm_tasks where task_category_id not in (SELECT id from eh_categories where parent_id in (6, 9)) and task_category_id != 1;
+DELETE from eh_pm_task_statistics where task_category_id not in (SELECT id from eh_categories where parent_id in (6, 9)) and task_category_id != 1;
+DELETE from eh_pm_task_target_statistics where task_category_id not in (SELECT id from eh_categories where parent_id in (6, 9)) and task_category_id != 1;
 
 
 -- added by janon building_id
