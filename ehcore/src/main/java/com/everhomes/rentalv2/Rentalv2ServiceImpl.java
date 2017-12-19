@@ -3026,11 +3026,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		temp.set(Calendar.MILLISECOND, 0);
 	}
 	private void initToWeekFirstDay(Calendar temp){
-		temp.set(Calendar.DAY_OF_WEEK,1);
+		if (temp.get(Calendar.DAY_OF_WEEK)==1)//默认周日是一周第一天
+			temp.add(Calendar.DATE,-1);
+		temp.set(Calendar.DAY_OF_WEEK,2);
 		temp.set(Calendar.HOUR_OF_DAY, 0);
 		temp.set(Calendar.MINUTE, 0);
 		temp.set(Calendar.SECOND, 0);
 		temp.set(Calendar.MILLISECOND, 0);
+
 	}
 
 	private void createRSR(RentalCell rsr, AddRentalSiteSingleSimpleRule cmd){
@@ -3883,11 +3886,31 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Calendar end = Calendar.getInstance();
 		start.setTime(new Date(cmd.getRuleDate()));
 		end.setTime(new Date(cmd.getRuleDate()));
-		//start 这个月第一周第一天
-		start.set(Calendar.DAY_OF_WEEK_IN_MONTH,1);
-		//end 下个月的第一周第一天
+		//start 这个月第一天
+		start.set(Calendar.DAY_OF_MONTH,1);
+
+		//end 下个月的第一天
 		end.add(Calendar.MONTH, 1);
-		end.set(Calendar.DAY_OF_WEEK_IN_MONTH,1);
+		end.set(Calendar.DAY_OF_MONTH,1);
+
+		//默认周日是第一天
+		if (start.get(Calendar.DAY_OF_WEEK)!=2) {
+			start.set(Calendar.DAY_OF_WEEK,2);
+			start.add(Calendar.DATE, 7);
+		}
+		start.set(Calendar.HOUR_OF_DAY, 0);
+		start.set(Calendar.SECOND, 0);
+		start.set(Calendar.MINUTE, 0);
+		start.set(Calendar.MILLISECOND, 0);
+		if (end.get(Calendar.DAY_OF_WEEK)!=2) {
+			end.set(Calendar.DAY_OF_WEEK,2);
+			end.add(Calendar.DATE, 7);
+		}
+		end.set(Calendar.HOUR_OF_DAY, 0);
+		end.set(Calendar.SECOND, 0);
+		end.set(Calendar.MINUTE, 0);
+		end.set(Calendar.MILLISECOND, 0);
+
 		response.setSiteDays(new ArrayList<>());
 
 		processWeekRuleDTOs(start, end, response.getSiteDays(), cmd.getSiteId(), rs, response.getAnchorTime(), cmd.getSceneToken(), cmd.getRentalType(),cmd.getPackageName());
@@ -3902,6 +3925,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		cellList.get().clear();
 		return response;
 	}
+
+
 
 	@Override
 	public FindRentalSiteWeekStatusCommandResponse findRentalSiteWeekStatus(FindRentalSiteWeekStatusCommand cmd) {
