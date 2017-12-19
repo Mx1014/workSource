@@ -236,7 +236,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             GeneralApprovalFlowCaseAdditionalFieldDTO fieldDTO = new GeneralApprovalFlowCaseAdditionalFieldDTO();
             List<OrganizationMember> member = organizationProvider.listOrganizationMembersByUId(user.getId());
             member = member.stream().filter(r -> {
-                return r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode());
+                return OrganizationGroupType.DEPARTMENT.getCode().equals(r.getGroupType());
             }).collect(Collectors.toList());
             if (member != null && member.size() > 0) {
                 Organization department = organizationProvider.findOrganizationById(member.get(0).getOrganizationId());
