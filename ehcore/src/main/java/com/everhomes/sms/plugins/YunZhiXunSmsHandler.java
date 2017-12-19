@@ -64,6 +64,10 @@ public class YunZhiXunSmsHandler implements SmsHandler, ApplicationListener<Cont
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
+        initAccount();
+    }
+
+    private void initAccount() {
         this.accountSid = configurationProvider.getValue(YZX_ACCOUNT_SID, "");
         this.token = configurationProvider.getValue(YZX_TOKEN, "");
         this.appId = configurationProvider.getValue(YZX_APP_ID, "");
@@ -79,6 +83,9 @@ public class YunZhiXunSmsHandler implements SmsHandler, ApplicationListener<Cont
     }
 
     private RspMessage createAndSend(String[] phoneNumbers, String text, String templateId) {
+
+        initAccount();
+
         SmsChannel channel = SmsBuilder.create(false);
         String timestamp = DateUtil.dateToStr(new Date(),
                 DateUtil.DATE_TIME_NO_SLASH);// 时间戳
