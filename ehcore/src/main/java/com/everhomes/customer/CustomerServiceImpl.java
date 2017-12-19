@@ -324,6 +324,10 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
 
+        //21002 企业管理1.4（来源于第三方数据，企业名称栏为灰色不可修改） add by xiongying20171219
+        if(!StringUtils.isEmpty(customer.getNamespaceCustomerType())) {
+            dto.setThirdPartFlag(true);
+        }
         return dto;
     }
 
