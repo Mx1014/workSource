@@ -366,7 +366,7 @@ public class WorkReportServiceImpl implements WorkReportService {
     @Override
     public OrganizationMember getUserDepPath(Long userId) {
         List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(userId).stream().filter(r ->
-                r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())
+                r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()) || r.getGroupType().equals(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode())
         ).collect(Collectors.toList());
         if (members != null && members.size() > 0)
             return members.get(0);
