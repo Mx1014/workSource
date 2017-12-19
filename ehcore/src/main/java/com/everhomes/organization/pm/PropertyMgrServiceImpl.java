@@ -4772,14 +4772,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                     ownerAddress.setNamespaceId(currentUser.getNamespaceId());
                     ownerAddress.setOrganizationOwnerId(ownerId);
                     ownerAddress.setLivingStatus(addressCmd.getLivingStatus());
-					ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.INACTIVE.getCode());
+					ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
                     if (addressCmd.getCheckInDate() != null) {
                         createOrganizationOwnerBehavior(ownerId, address.getId(), addressCmd.getCheckInDate(), OrganizationOwnerBehaviorType.IMMIGRATION);
                     }
                     // 如果小区里有该手机号的用户, 则自动审核当前客户
-                    autoApprovalOrganizationOwnerAddress(cmd.getCommunityId(), cmd.getContactToken(), ownerAddress);
+					//只有在申请了才会自动通过，现要改为只要是注册用户不管申没申请都自动同步给客户 19558 by xiongying20171219
+//                    autoApprovalOrganizationOwnerAddress(cmd.getCommunityId(), cmd.getContactToken(), ownerAddress);
                     propertyMgrProvider.createOrganizationOwnerAddress(ownerAddress);
-                    // getIntoFamily(address, cmd.getContactToken(), currentUser.getNamespaceId());
+					getIntoFamily(address, cmd.getContactToken(), currentUser.getNamespaceId());
                 } else {
                     LOGGER.error("CreateOrganizationOwner: address id is wrong! addressId = {}", addressCmd.getAddressId());
                 }
@@ -4991,9 +4992,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				identifier.getNamespaceId(), identifier.getIdentifierToken());
 		if(null != owners && owners.size() > 0) {
 			for(CommunityPmOwner owner : owners) {
-				Address address = addressProvider.findAddressById(owner.getAddressId());
-				//jiarujiating
-				getIntoFamily(address, identifier.getIdentifierToken(), identifier.getNamespaceId());
+				List<OrganizationOwnerAddress> ownerAddressList = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(identifier.getNamespaceId(), owner.getId());
+//				Address address = addressProvider.findAddressById(owner.getAddressId());
+				if(ownerAddressList != null && ownerAddressList.size() > 0) {
+					for(OrganizationOwnerAddress ownerAddress : ownerAddressList) {
+						Address address = addressProvider.findAddressById(ownerAddress.getAddressId());
+						if(address != null) {
+							//jiarujiating
+							getIntoFamily(address, identifier.getIdentifierToken(), identifier.getNamespaceId());
+						}
+					}
+				}
+
 			}
 		}
 	}
@@ -5626,11 +5636,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                     "The organization owner %s already in address %s.", cmd.getOrgOwnerId(), cmd.getAddressId());
         }
         ownerAddress = createOrganizationOwnerAddress(address.getId(), cmd.getLivingStatus(), currentNamespaceId(),
-                cmd.getOrgOwnerId(), OrganizationOwnerAddressAuthType.INACTIVE);
+                cmd.getOrgOwnerId(), OrganizationOwnerAddressAuthType.ACTIVE);
         // 自动审核用户与客户
+		//只有在申请了才会自动通过，现要改为只要是注册用户不管申没申请都自动同步给客户 19558 by xiongying20171219
         CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(cmd.getOrgOwnerId());
         if (pmOwner != null) {
-            autoApprovalOrganizationOwnerAddress(address.getCommunityId(), pmOwner.getContactToken(), ownerAddress);
+			getIntoFamily(address, pmOwner.getContactToken(), pmOwner.getNamespaceId());
+//            autoApprovalOrganizationOwnerAddress(address.getCommunityId(), pmOwner.getContactToken(), ownerAddress);
         }
         return buildOrganizationOwnerAddressDTO(cmd, address, ownerAddress);
     }
