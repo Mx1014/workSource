@@ -834,6 +834,12 @@ public class OrganizationServiceImpl implements OrganizationService {
             dto.setMember(ConvertHelper.convert(m, OrganizationMemberDTO.class));
         }
 
+        //21002 企业管理1.4（来源于第三方数据，企业名称栏为灰色不可修改） add by xiongying20171219
+        EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(dto.getOrganizationId());
+        if(customer != null && !StringUtils.isEmpty(customer.getNamespaceCustomerType())) {
+            dto.setThirdPartFlag(true);
+        }
+
         return dto;
     }
 
@@ -3098,7 +3104,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 if (scopeStrs.length == 2) {
                     if (EntityType.AUTHORIZATION_RELATION == EntityType.fromCode(scopeStrs[0])) {
                         AuthorizationRelation authorizationRelation = authorizationProvider.findAuthorizationRelationById(Long.valueOf(scopeStrs[1]));
-                        if (EntityType.fromCode(authorizationRelation.getOwnerType()) == EntityType.ORGANIZATIONS) {
+                        if (authorizationRelation != null && EntityType.fromCode(authorizationRelation.getOwnerType()) == EntityType.ORGANIZATIONS) {
                             organizationIds.add(authorizationRelation.getOwnerId());
                         }
                     }

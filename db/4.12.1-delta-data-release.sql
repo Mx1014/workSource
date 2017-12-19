@@ -194,7 +194,7 @@ UPDATE eh_lease_buildings SET category_id = 1;
 
 UPDATE eh_configurations SET `value` = '/park-entry/dist/index.html?hideNavigationBar=1#/project_intro/%s/%s/%s' WHERE `name` = 'apply.entry.lease.project.detail.url';
 
-UPDATE eh_web_menus set data_type = 'react:/working-flow/flow-list/rent-manage/40100?moduleType=lease_promotion_1' where id = 40130;
+UPDATE eh_web_menus SET data_type = 'react:/working-flow/flow-list/rent-manage/40100?moduleType=lease_promotion_1' WHERE id = 40130;
 UPDATE eh_flows SET module_type = 'lease_promotion_1' WHERE module_type = 'any-module' AND module_id = 40100;
 UPDATE eh_flows SET module_type = 'lease_promotion_1' WHERE module_type = 'any-module' AND module_id = 40100;
 UPDATE eh_flow_cases SET module_type = 'lease_promotion_1' WHERE module_type = 'any-module' AND module_id = 40100;
@@ -421,7 +421,7 @@ INSERT INTO `eh_point_tutorial_to_point_rule_mappings` (`id`, `namespace_id`, `s
   -- by dengs,云打印连接更换20171214
 SELECT * FROM  eh_launch_pad_items  WHERE action_data LIKE "%cloud-print%" AND action_type IN (13,14);
 UPDATE eh_launch_pad_items SET action_data = '{"url":"http://core.zuolin.com/cloud-print/build/index.html#/home#sign_suffix"}' WHERE action_data LIKE "%cloud-print%" AND action_type IN (13,14);
-update eh_siyin_print_settings a,eh_siyin_print_settings b SET a.print_course = b.scan_copy_course,a.scan_copy_course=b.print_course WHERE a.setting_type = 2 AND b.setting_type = 2 AND a.id = b.id;
+UPDATE eh_siyin_print_settings a,eh_siyin_print_settings b SET a.print_course = b.scan_copy_course,a.scan_copy_course=b.print_course WHERE a.setting_type = 2 AND b.setting_type = 2 AND a.id = b.id;
 
 -- 更新园区控制的模块
 UPDATE eh_service_modules SET module_control_type = 'community_control' WHERE id IN (10100,10200,10400,10600,10700,10800,10850,11000,12200,20100,20400,20600,20800,20900,21100,21200,30500,31000,32000,32500,33000,37000,40100,40200,40300,40400,40500,40600,40700,40800,40900,41000,41100,41200,41400,41500,41600,41700,49100);
@@ -572,22 +572,22 @@ VALUES
 
 
 -- lei.lv
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41001, null, '新增部门', '新增部门', NULL);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41002, null, '修改部门', '修改部门', NULL);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41003, null, '删除部门', '删除部门', NULL);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41004, null, '调整部门顺序', '调整部门顺序', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41001, NULL, '新增部门', '新增部门', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41002, NULL, '修改部门', '修改部门', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41003, NULL, '删除部门', '删除部门', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41004, NULL, '调整部门顺序', '调整部门顺序', NULL);
 
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41005, null, '新增通用岗位', '新增通用岗位', NULL);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41006, null, '编辑通用岗位', '编辑通用岗位', NULL);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41007, null, '删除通用岗位', '删除通用岗位', NULL);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41008, null, '编辑部门岗位', '编辑部门岗位', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41005, NULL, '新增通用岗位', '新增通用岗位', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41006, NULL, '编辑通用岗位', '编辑通用岗位', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41007, NULL, '删除通用岗位', '删除通用岗位', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41008, NULL, '编辑部门岗位', '编辑部门岗位', NULL);
 
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41009, null, '新增/修改人员', '新增/修改人员', NULL);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41010, null, '删除人员', '删除人员', NULL);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41011, null, '批量导入人员', '批量导入人员', NULL);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41012, null, '批量导出人员', '批量导出人员', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41009, NULL, '新增/修改人员', '新增/修改人员', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41010, NULL, '删除人员', '删除人员', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41011, NULL, '批量导入人员', '批量导入人员', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (41012, NULL, '批量导出人员', '批量导出人员', NULL);
 
-set @mp_id = (select MAX(id) from eh_service_module_privileges);
+SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES 
 (@mp_id:=@mp_id+1, '50100', '0', 41001, '新增部门', '0', NOW());
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES 
@@ -614,27 +614,27 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 (@mp_id:=@mp_id+1, '50100', '0', 41012, '批量导出人员', '0', NOW());
 
 -- 给control_id一个初始值
-update eh_authorizations set control_id = 1 where id = 33;
+UPDATE eh_authorizations SET control_id = 1 WHERE id = 33;
 
 
 -- 更新action_type
-update eh_service_modules set action_type = 46 WHERE id = 50100 and name = '组织架构';
+UPDATE eh_service_modules SET action_type = 46 WHERE id = 50100 AND NAME = '组织架构';
 
-update eh_service_modules set action_type = null where id = 50400 and name = '人事档案';
+UPDATE eh_service_modules SET action_type = NULL WHERE id = 50400 AND NAME = '人事档案';
 
 -- 更新提示
 SET @sid = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@sid:=@sid+1), 'privilege', '100055', 'zh_CN', '校验应用权限失败');
 
 -- 更新应用名
-update eh_reflection_service_module_apps set name = '考勤管理' where name like '%打卡%';
-update eh_reflection_service_module_apps set name = '组织架构' where name like '%通讯录%';
+UPDATE eh_reflection_service_module_apps SET NAME = '考勤管理' WHERE NAME LIKE '%打卡%';
+UPDATE eh_reflection_service_module_apps SET NAME = '组织架构' WHERE NAME LIKE '%通讯录%';
 
 -- 更新多应用标志
 UPDATE `eh_service_modules` SET `multiple_flag`='1' WHERE (`id`='20100');
 
 -- 车辆放行功能菜单位置迁移 add by sw 20171215
-delete from eh_web_menus where id in (20900, 20910, 20920, 20930);
+DELETE FROM eh_web_menus WHERE id IN (20900, 20910, 20920, 20930);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
 	VALUES ('20900', '车辆放行', '40000', NULL, 'parking_clearance', '1', '2', '/40000/20900', 'park', '300', '20900', '2', NULL, 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
@@ -645,6 +645,47 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 	VALUES ('20930', '工作流设置', '20900', NULL, 'react:/working-flow/flow-list/vehicle-release/20900', '0', '2', '/40000/20900/20930', 'park', '303', '20900', '3', NULL, 'module');
 
 -- 物业报修数据清理 add by sw 20171218
-DELETE from eh_pm_tasks where task_category_id not in (SELECT id from eh_categories where parent_id in (6, 9));
-DELETE from eh_pm_task_statistics where task_category_id not in (SELECT id from eh_categories where parent_id in (6, 9));
-DELETE from eh_pm_task_target_statistics where task_category_id not in (SELECT id from eh_categories where parent_id in (6, 9));
+DELETE FROM eh_pm_tasks WHERE task_category_id NOT IN (SELECT id FROM eh_categories WHERE parent_id IN (6, 9));
+DELETE FROM eh_pm_task_statistics WHERE task_category_id NOT IN (SELECT id FROM eh_categories WHERE parent_id IN (6, 9));
+DELETE FROM eh_pm_task_target_statistics WHERE task_category_id NOT IN (SELECT id FROM eh_categories WHERE parent_id IN (6, 9));
+
+
+
+-- add by wh 考勤菜单分二级
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) 
+VALUES('506001','打卡记录','50600',NULL,'react:/attendance-management/attendance-record/1','1','2','/500000/506000/506001','park','543','506000','3',NULL,'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) 
+VALUES('506002','考勤规则','50600',NULL,'react:/attendance-management/attendance-record/2','1','2','/500000/506000/506002','park','544','506000','3',NULL,'module');
+
+SET @scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506001', '打卡记录', 'EhNamespaces', '999971', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506002', '考勤规则', 'EhNamespaces', '999971', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506001', '打卡记录', 'EhNamespaces', '999975', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506002', '考勤规则', 'EhNamespaces', '999975', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506001', '打卡记录', 'EhNamespaces', '999970', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506002', '考勤规则', 'EhNamespaces', '999970', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506001', '打卡记录', 'EhNamespaces', '999981', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506002', '考勤规则', 'EhNamespaces', '999981', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506001', '打卡记录', 'EhNamespaces', '999985', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506002', '考勤规则', 'EhNamespaces', '999985', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506001', '打卡记录', 'EhNamespaces', '999992', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506002', '考勤规则', 'EhNamespaces', '999992', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506001', '打卡记录', 'EhNamespaces', '1', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506002', '考勤规则', 'EhNamespaces', '1', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506001', '打卡记录', 'EhNamespaces', '999978', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506002', '考勤规则', 'EhNamespaces', '999978', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506001', '打卡记录', 'EhNamespaces', '1000000', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506002', '考勤规则', 'EhNamespaces', '1000000', '2'); 
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506001', '打卡记录', 'EhNamespaces', '999958', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506002', '考勤规则', 'EhNamespaces', '999958', '2'); 
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506001', '打卡记录', 'EhNamespaces', '999965', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506002', '考勤规则', 'EhNamespaces', '999965', '2'); 
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506001', '打卡记录', 'EhNamespaces', '999972', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506002', '考勤规则', 'EhNamespaces', '999972', '2'); 
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506001', '打卡记录', 'EhNamespaces', '999969', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506002', '考勤规则', 'EhNamespaces', '999969', '2'); 
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506001', '打卡记录', 'EhNamespaces', '999973', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506002', '考勤规则', 'EhNamespaces', '999973', '2'); 
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506001', '打卡记录', 'EhNamespaces', '999974', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506002', '考勤规则', 'EhNamespaces', '999974', '2');
