@@ -23,11 +23,11 @@ public enum TaskStatus {
         return core;
     }
 
-    public static TaskStatus fromName(Byte core) {
+    public static TaskStatus fromCode(Byte core) {
         if (core != null) {
             TaskStatus[] values = TaskStatus.values();
             for (TaskStatus value : values) {
-                if (value.equals(core)) {
+                if (value.getCode().equals(core)) {
                     return value;
                 }
             }

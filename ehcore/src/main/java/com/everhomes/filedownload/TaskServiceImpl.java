@@ -72,7 +72,7 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
                     TaskServiceErrorCode.INSUFFICIENT_PRIVILEGES, "insufficient privileges");
         }
 
-        if(TaskStatus.SUCCESS == TaskStatus.fromName(task.getStatus())){
+        if(TaskStatus.SUCCESS == TaskStatus.fromCode(task.getStatus())){
             LOGGER.error("task already success, taskId={}", taskId);
             throw RuntimeErrorException.errorWith(TaskServiceErrorCode.SCOPE,
                     TaskServiceErrorCode.TASK_ALREADY_SUCCESS, "task already success");
@@ -90,7 +90,7 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
     public void updateTaskStatus(Long taskId, Byte status, String errorDesc) {
         Task task = taskProvider.findById(taskId);
         task.setStatus(status);
-        if(TaskStatus.fromName(status) == TaskStatus.SUCCESS){
+        if(TaskStatus.fromCode(status) == TaskStatus.SUCCESS){
             task.setProcess(100);
         }
         task.setErrorDescription(errorDesc);

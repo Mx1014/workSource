@@ -84,10 +84,10 @@ public class FileDownloadTaskServiceImpl implements FileDownloadTaskService {
         dto.setValidTime(new Timestamp(dto.getCreateTime().getTime() + intervalTime));
 
         //排队数，id比它小的在等待中任务数 = 排队数
-        if(TaskStatus.WAITING == TaskStatus.fromName(task.getStatus())){
+        if(TaskStatus.WAITING == TaskStatus.fromCode(task.getStatus())){
             Integer queueCount = 0;
             for (Long id: ids){
-                if(id > task.getId().longValue()){
+                if(id >= task.getId().longValue()){
                    break;
                 }
                 queueCount ++;

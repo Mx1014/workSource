@@ -115,16 +115,12 @@ public class TaskProviderImpl implements TaskProvider {
     public List<Long> listWaitingTaskIds() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
-        Object[] ids = context.select(Tables.EH_TASKS.ID).from(Tables.EH_TASKS)
+        List<Long> result = context.select(Tables.EH_TASKS.ID).from(Tables.EH_TASKS)
                 .where(Tables.EH_TASKS.STATUS.eq(TaskStatus.WAITING.getCode()))
                 .orderBy(Tables.EH_TASKS.ID.asc())
-                .fetchAnyArray();
-
-        List<Long> result = new ArrayList<>();
-        if(ids != null && ids.length > 0){
-            for(Object id: ids){
-                result.add((Long)id);
-            }
+                .fetchInto(Long.class);
+        if(result == null){
+            result = new ArrayList<>();
         }
 
         return result;
