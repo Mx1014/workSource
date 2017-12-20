@@ -1,14 +1,10 @@
 
+
 CREATE TABLE `eh_reserve_rules` (
   `id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'id',
   `namespace_id` int(11) NOT NULL DEFAULT '0',
-  `owner_type` varchar(255) DEFAULT NULL COMMENT 'owner type: community, organization',
-  `owner_id` bigint(20) DEFAULT NULL DEFAULT 0 COMMENT 'community id or organization id',
-  `resource_type` varchar(255) DEFAULT NULL,
-  `resource_type_id` bigint(20) NOT NULL DEFAULT 0 COMMENT 'resource type id',
-
-  `at_most_advance_time` bigint(20) DEFAULT NULL COMMENT '最多提前多少时间预定,存的毫秒',
-  `at_least_advance_time` bigint(20) DEFAULT NULL COMMENT '最少提前多少时间预定,存的毫秒',
+  `resource_type` varchar(255) DEFAULT NULL COMMENT 'resource type , default, vip_parking',
+  `resource_id` bigint(20) DEFAULT NULL DEFAULT 0 COMMENT 'resource id or default',
 
   `day_open_start_time` double DEFAULT NULL COMMENT '每天开放开始时间',
   `day_open_end_time` double DEFAULT NULL COMMENT '每天开放结束时间',
@@ -28,6 +24,8 @@ CREATE TABLE `eh_reserve_rules` (
   `update_uid` bigint(20) DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
 
+  `at_most_advance_time` bigint(20) DEFAULT NULL COMMENT '最多提前多少时间预定,存的毫秒',
+  `at_least_advance_time` bigint(20) DEFAULT NULL COMMENT '最少提前多少时间预定,存的毫秒',
   `auto_assign` tinyint(4) DEFAULT NULL COMMENT '是否动态分配: 1-是, 0-否',
   `multi_flag` tinyint(4) DEFAULT NULL COMMENT '是否允许预约多个场所: 1-是, 0-否',
 
@@ -36,11 +34,14 @@ CREATE TABLE `eh_reserve_rules` (
 
 CREATE TABLE `eh_reserve_discount_users` (
   `id` bigint(20) NOT NULL DEFAULT '0',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
   `owner_type` varchar(255) DEFAULT NULL COMMENT '"default_rule","resource_rule"',
   `owner_id` bigint(20) DEFAULT NULL,
-  `user_type` tinyint(4) DEFAULT NULL,
-  `user_str` text COMMENT '存取用户信息，以逗号隔开 域空间-手机号',
+  `user_phone` varchar(20) DEFAULT NULL COMMENT '折扣人手机',
+  `user_name` varchar(20) DEFAULT NULL COMMENT '折扣人姓名',
   `discount` double DEFAULT NULL COMMENT '折扣',
+
+  `status` tinyint(4) DEFAULT NULL,
   `creator_uid` bigint(20) NOT NULL DEFAULT '0',
   `create_time` datetime DEFAULT NULL,
   `update_uid` bigint(20) DEFAULT NULL,
@@ -48,15 +49,17 @@ CREATE TABLE `eh_reserve_discount_users` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `eh_reserve_rule_strategies` (
+CREATE TABLE `eh_reserve_order_rules` (
   `id` bigint(20) NOT NULL DEFAULT '0',
   `owner_type` varchar(255) DEFAULT NULL COMMENT '"default_rule","resource_rule"',
   `owner_id` bigint(20) DEFAULT NULL,
-  `strategy_type` tinyint(4) DEFAULT NULL COMMENT '1: 退款, 2: 加收',
+  `handle_type` tinyint(4) DEFAULT NULL COMMENT '1: 退款, 2: 加收',
   `duration_type` tinyint(4) DEFAULT NULL COMMENT '1: 时长内, 2: 时长外',
   `duration_unit` varchar(20) DEFAULT NULL COMMENT '时长单位，比如 天，小时',
   `duration` double DEFAULT NULL COMMENT '时长',
   `factor` double DEFAULT NULL COMMENT '价格系数',
+
+  `status` tinyint(4) DEFAULT NULL,
   `creator_uid` bigint(20) NOT NULL DEFAULT '0',
   `create_time` datetime DEFAULT NULL,
   `update_uid` bigint(20) DEFAULT NULL,
@@ -110,9 +113,8 @@ CREATE TABLE `eh_reserve_orders` (
   `namespace_id` int(11) NOT NULL DEFAULT '0',
   `owner_type` varchar(255) NOT NULL COMMENT 'owner type: community, organization',
   `owner_id` bigint(20) NOT NULL DEFAULT 0 COMMENT 'community id or organization id',
-  `resource_type` varchar(255) DEFAULT NULL,
-  `resource_type_id` bigint(20) NOT NULL DEFAULT 0 COMMENT 'resource type id',
-  `resource_id` bigint(20) NOT NULL DEFAULT 0 COMMENT 'resource type id',
+  `resource_type` varchar(255) DEFAULT NULL COMMENT 'resource type , default, vip_parking',
+  `resource_id` bigint(20) DEFAULT NULL DEFAULT 0 COMMENT 'resource id or default',
   `resource_json` text COMMENT '资源json数据',
 
   `order_no` varchar(20) NOT NULL COMMENT '订单编号',

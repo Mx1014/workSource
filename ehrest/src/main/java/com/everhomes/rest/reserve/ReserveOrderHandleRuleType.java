@@ -7,12 +7,12 @@ package com.everhomes.rest.reserve;
  * <li>FULL(2): 原价,全额</li>
  * </ul>
  */
-public enum ReserveOrderStrategyType {
+public enum ReserveOrderHandleType {
 	CUSTOM((byte)1), FULL((byte)2);
 
     private byte code;
 
-    private ReserveOrderStrategyType(byte code) {
+    private ReserveOrderHandleType(byte code) {
         this.code = code;
     }
     
@@ -20,10 +20,10 @@ public enum ReserveOrderStrategyType {
         return this.code;
     }
     
-    public static ReserveOrderStrategyType fromCode(Byte code) {
+    public static ReserveOrderHandleType fromCode(Byte code) {
         if(code != null) {
-            ReserveOrderStrategyType[] values = ReserveOrderStrategyType.values();
-            for(ReserveOrderStrategyType value : values) {
+            ReserveOrderHandleType[] values = ReserveOrderHandleType.values();
+            for(ReserveOrderHandleType value : values) {
                 if(value.code == code.byteValue()) {
                     return value;
                 }
