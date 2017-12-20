@@ -1043,15 +1043,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					collect(Collectors.toList()), rentalSite, resourceType, sceneTokenDTO);
 			if (rule != null) {//删掉普通定价
 				removeSitePriceRules(rentalSiteDTO.getSitePriceRules(), RentalType.THREETIMEADAY.getCode());
-				sitePriceRules.add(rule);
-			}
-			rule = convertToSitePackageDTO(pricePackages.stream().filter(p -> p.getRentalType().equals(RentalType.MONTH.getCode())).
-					collect(Collectors.toList()), rentalSite, resourceType, sceneTokenDTO);
-			if (rule != null) {//删掉普通定价
-				removeSitePriceRules(rentalSiteDTO.getSitePriceRules(), RentalType.MONTH.getCode());
-				sitePriceRules.add(rule);
-			}
-			rentalSiteDTO.getSitePriceRules().addAll(sitePriceRules);
+                sitePriceRules.add(rule);
+            }
+            rule = convertToSitePackageDTO(pricePackages.stream().filter(p -> p.getRentalType().equals(RentalType.MONTH.getCode())).
+                    collect(Collectors.toList()), rentalSite, resourceType, sceneTokenDTO);
+            if (rule != null) {//删掉普通定价
+                removeSitePriceRules(rentalSiteDTO.getSitePriceRules(), RentalType.MONTH.getCode());
+                sitePriceRules.add(rule);
+            }
+            rule = convertToSitePackageDTO(pricePackages.stream().filter(p -> p.getRentalType().equals(RentalType.WEEK.getCode())).
+                    collect(Collectors.toList()), rentalSite, resourceType, sceneTokenDTO);
+            if (rule != null) {//删掉普通定价
+                removeSitePriceRules(rentalSiteDTO.getSitePriceRules(), RentalType.WEEK.getCode());
+                sitePriceRules.add(rule);
+            }
+            rentalSiteDTO.getSitePriceRules().addAll(sitePriceRules);
 
 			return rentalSiteDTO;
 
@@ -4407,10 +4413,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			dto.setRentalSiteId(pricePackage.getOwnerId());
 			dto.setRentalType(pricePackage.getRentalType());
 			dto.setOrgMemberPrice(pricePackage.getOrgMemberPrice()==null?new BigDecimal(0) :pricePackage.getOrgMemberPrice());
+			dto.setOrgMemberInitiatePrice(pricePackage.getOrgMemberInitiatePrice());
 			dto.setOrgMemberOriginalPrice(pricePackage.getOrgMemberOriginalPrice());
 			dto.setApprovingUserPrice((pricePackage.getApprovingUserPrice()==null?new BigDecimal(0) :pricePackage.getApprovingUserPrice()));
+			dto.setApprovingUserInitiatePrice(pricePackage.getApprovingUserInitiatePrice());
 			dto.setApprovingUserOriginalPrice(pricePackage.getApprovingUserOriginalPrice());
 			dto.setPrice(pricePackage.getPrice()==null?new BigDecimal(0) :pricePackage.getPrice());
+			dto.setInitiatePrice(pricePackage.getInitiatePrice());
 			dto.setOriginalPrice(pricePackage.getOriginalPrice());
 			packageDtos.add(dto);
 		}
