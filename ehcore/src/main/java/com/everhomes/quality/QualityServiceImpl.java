@@ -21,7 +21,6 @@ import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.equipment.EquipmentServiceErrorCode;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.Status;
 import com.everhomes.rest.forum.AttachmentDescriptor;
@@ -3675,33 +3674,36 @@ public class QualityServiceImpl implements QualityService {
 		List<ScoreGroupByTargetDTO> sortedScoresByTarget = new ArrayList<>();
 		if (scoresByTarget.size() > 0) {
 			//sort  scoreByTarget
-			sortedScoresByTarget = scoresByTarget.stream()
-                    .sorted(Comparator.comparing(ScoreGroupByTargetDTO::getTotalScore).reversed())
-                    .collect(Collectors.toList());
-			//add orderId for  ScoresByTarget
-			Integer previousOrder = 0;
-			Double total = 0D;
-			for (int i = 0; i < sortedScoresByTarget.size(); i++) {
-				if (total.doubleValue() == sortedScoresByTarget.get(i).getTotalScore().doubleValue() && sortedScoresByTarget.get(i).getTotalScore() != 0) {
-					Double preBuildArea = (sortedScoresByTarget.get(i - 1).getBuildArea() == null) ? 0D : sortedScoresByTarget.get(i - 1).getBuildArea();
-					Double currBuildArea = (sortedScoresByTarget.get(i).getBuildArea() == null) ? 0D : sortedScoresByTarget.get(i).getBuildArea();
-					if (preBuildArea < currBuildArea) {
-						sortedScoresByTarget.get(i).setOrderId(previousOrder);
-						sortedScoresByTarget.get(i - 1).setOrderId(++previousOrder);
-					} else if (preBuildArea.doubleValue() == currBuildArea.doubleValue()) {
-						sortedScoresByTarget.get(i).setOrderId(previousOrder);
-					} else if (preBuildArea > currBuildArea) {
-						sortedScoresByTarget.get(i).setOrderId(++previousOrder);
-					}
+			/*sortedScoresByTarget = scoresByTarget.stream()
+					.sorted(Comparator.comparing(ScoreGroupByTargetDTO::getTotalScore).reversed())
+                    .collect(Collectors.toList());*/
+
+			scoresByTarget.sort((o1, o2) -> {
+				if (!o1.getTotalScore().equals(o2.getTotalScore())) {
+					return o2.getTotalScore().compareTo(o1.getTotalScore());
 				} else {
-					previousOrder++;
-					sortedScoresByTarget.get(i).setOrderId(previousOrder);
-					total = sortedScoresByTarget.get(i).getTotalScore();
+					return o2.getBuildArea().compareTo(o1.getBuildArea());
+				}
+			});
+			//add orderId for  ScoresByTarget
+			Integer previousOrder = 1;
+			for (int i = 0; i < scoresByTarget.size(); i++) {
+				if (i == 0) {
+					scoresByTarget.get(i).setOrderId(previousOrder);
+				} else {
+					if (scoresByTarget.get(i).getBuildArea().equals(scoresByTarget.get(i - 1).getBuildArea()) &&
+							scoresByTarget.get(i).getTotalScore().equals(scoresByTarget.get(i - 1).getTotalScore())) {
+						scoresByTarget.get(i).setOrderId(previousOrder);
+					} else {
+						scoresByTarget.get(i).setOrderId(++previousOrder);
+					}
+
 				}
 			}
+
 		}
-		//再次按照order排序
-		sortedScoresByTarget.sort(Comparator.comparing(ScoreGroupByTargetDTO::getOrderId));
+//		//再次按照order排序
+//		sortedScoresByTarget.sort(Comparator.comparing(ScoreGroupByTargetDTO::getOrderId));
 
 		response.setScores(sortedScoresByTarget);
 		return response;
@@ -4195,15 +4197,13 @@ public class QualityServiceImpl implements QualityService {
 
 		try {
 			FileOutputStream out = new FileOutputStream(path);
-
 			wb.write(out);
 			wb.close();
 			out.close();
-
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
-			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
-					EquipmentServiceErrorCode.ERROR_CREATE_EXCEL,
+			throw RuntimeErrorException.errorWith(QualityServiceErrorCode.SCOPE,
+					QualityServiceErrorCode.ERROR_CREATE_EXCEL,
 					e.getLocalizedMessage());
 		}
 
@@ -4229,10 +4229,10 @@ public class QualityServiceImpl implements QualityService {
 		row.createCell(++i).setCellValue(dto.getOrderId());
 		row.createCell(++i).setCellValue(dto.getTargetName());
 		row.createCell(++i).setCellValue(dto.getBuildArea());
+
 		List<ScoreDTO> scores = dto.getScores();
 		for (ScoreDTO score : scores) {
 			row.createCell(++i).setCellValue(score.getScore());
-
 		}
 		row.createCell(++i).setCellValue(dto.getTotalScore());
 
