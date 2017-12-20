@@ -3572,6 +3572,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         ReadEnergyMeterCommand command = ConvertHelper.convert(cmd, ReadEnergyMeterCommand.class);
         command.setMeterId(task.getMeterId());
         command.setTaskId(task.getId());
+        command.setNamespaceId(task.getNamespaceId());
+        command.setCommunityId(cmd.getCommunityId());
+        command.setOrganizationId(cmd.getOrganizationId());
         readEnergyMeter(command);
     }
 
