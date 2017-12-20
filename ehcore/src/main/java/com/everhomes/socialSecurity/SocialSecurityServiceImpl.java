@@ -286,4 +286,28 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 	}
   
 
+	@Override
+	public ListUserInoutHistoryResponse listUserInoutHistory(ListUserInoutHistoryCommand cmd) {
+	
+		return new ListUserInoutHistoryResponse();
+	}
+
+	@Override
+	public ListSocialSecurityHouseholdTypesResponse listSocialSecurityHouseholdTypes(ListSocialSecurityHouseholdTypesCommand cmd) {
+	
+		return new ListSocialSecurityHouseholdTypesResponse();
+	}
+
+	@Override
+	public ListAccumulationFundHouseholdTypesResponse listAccumulationFundHouseholdTypes(ListAccumulationFundHouseholdTypesCommand cmd) {
+	
+		return new ListAccumulationFundHouseholdTypesResponse();
+	}
+
+	@Override
+	public GetSocialSecurityReportStatusResponse getSocialSecurityReportStatus(GetSocialSecurityReportStatusCommand cmd) {
+	
+		return new GetSocialSecurityReportStatusResponse();
+	}
+
 }

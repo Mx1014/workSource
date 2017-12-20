@@ -16,9 +16,13 @@ import com.everhomes.rest.socialSecurity.ExportSocialSecurityReportsCommand;
 import com.everhomes.rest.socialSecurity.FileSocialSecurityCommand;
 import com.everhomes.rest.socialSecurity.GetSocialSecurityPaymentDetailsCommand;
 import com.everhomes.rest.socialSecurity.GetSocialSecurityPaymentDetailsResponse;
+import com.everhomes.rest.socialSecurity.GetSocialSecurityReportStatusCommand;
+import com.everhomes.rest.socialSecurity.GetSocialSecurityReportStatusResponse;
 import com.everhomes.rest.socialSecurity.ImportSocialSecurityPaymentsCommand;
 import com.everhomes.rest.socialSecurity.ListAccumulationFundCitiesCommand;
 import com.everhomes.rest.socialSecurity.ListAccumulationFundCitiesResponse;
+import com.everhomes.rest.socialSecurity.ListAccumulationFundHouseholdTypesCommand;
+import com.everhomes.rest.socialSecurity.ListAccumulationFundHouseholdTypesResponse;
 import com.everhomes.rest.socialSecurity.ListFilterItemsCommand;
 import com.everhomes.rest.socialSecurity.ListFilterItemsResponse;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityCitiesCommand;
@@ -29,12 +33,16 @@ import com.everhomes.rest.socialSecurity.ListSocialSecurityEmployeeStatusCommand
 import com.everhomes.rest.socialSecurity.ListSocialSecurityEmployeeStatusResponse;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityHistoryFilesCommand;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityHistoryFilesResponse;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityHouseholdTypesCommand;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityHouseholdTypesResponse;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityInoutReportsCommand;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityInoutReportsResponse;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityPaymentsCommand;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityPaymentsResponse;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityReportsCommand;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityReportsResponse;
+import com.everhomes.rest.socialSecurity.ListUserInoutHistoryCommand;
+import com.everhomes.rest.socialSecurity.ListUserInoutHistoryResponse;
 import com.everhomes.rest.socialSecurity.UpdateSocialSecurityPaymentCommand;
 
 @RestController
@@ -224,13 +232,53 @@ public class SocialSecurityController extends ControllerBase {
 	}
 
 	/**
-	 * <p>16.导出社保增减表</p>
+	 * <p>18.查看历史归档</p>
 	 * <b>URL: /socialSecurity/listSocialSecurityHistoryFiles</b>
 	 */
 	@RequestMapping("listSocialSecurityHistoryFiles")
 	@RestReturn(ListSocialSecurityHistoryFilesResponse.class)
 	public RestResponse listSocialSecurityHistoryFiles(ListSocialSecurityHistoryFilesCommand cmd){
 		return new RestResponse(socialSecurityService.listSocialSecurityHistoryFiles(cmd));
+	}
+
+	/**
+	 * <p>19.查询查询增减员记录项</p>
+	 * <b>URL: /socialSecurity/listUserInoutHistory</b>
+	 */
+	@RequestMapping("listUserInoutHistory")
+	@RestReturn(ListUserInoutHistoryResponse.class)
+	public RestResponse listUserInoutHistory(ListUserInoutHistoryCommand cmd){
+		return new RestResponse(socialSecurityService.listUserInoutHistory(cmd));
+	}
+
+	/**
+	 * <p>20.查询社保户籍档次</p>
+	 * <b>URL: /socialSecurity/listSocialSecurityHouseholdTypes</b>
+	 */
+	@RequestMapping("listSocialSecurityHouseholdTypes")
+	@RestReturn(ListSocialSecurityHouseholdTypesResponse.class)
+	public RestResponse listSocialSecurityHouseholdTypes(ListSocialSecurityHouseholdTypesCommand cmd){
+		return new RestResponse(socialSecurityService.listSocialSecurityHouseholdTypes(cmd));
+	}
+
+	/**
+	 * <p>21.查询公积金户籍档次</p>
+	 * <b>URL: /socialSecurity/listAccumulationFundHouseholdTypes</b>
+	 */
+	@RequestMapping("listAccumulationFundHouseholdTypes")
+	@RestReturn(ListAccumulationFundHouseholdTypesResponse.class)
+	public RestResponse listAccumulationFundHouseholdTypes(ListAccumulationFundHouseholdTypesCommand cmd){
+		return new RestResponse(socialSecurityService.listAccumulationFundHouseholdTypes(cmd));
+	}
+
+	/**
+	 * <p>22.得到汇总计算结果</p>
+	 * <b>URL: /socialSecurity/getSocialSecurityReportStatus</b>
+	 */
+	@RequestMapping("getSocialSecurityReportStatus")
+	@RestReturn(GetSocialSecurityReportStatusResponse.class)
+	public RestResponse getSocialSecurityReportStatus(GetSocialSecurityReportStatusCommand cmd){
+		return new RestResponse(socialSecurityService.getSocialSecurityReportStatus(cmd));
 	}
 
 }

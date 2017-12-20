@@ -9,9 +9,13 @@ import com.everhomes.rest.socialSecurity.ExportSocialSecurityReportsCommand;
 import com.everhomes.rest.socialSecurity.FileSocialSecurityCommand;
 import com.everhomes.rest.socialSecurity.GetSocialSecurityPaymentDetailsCommand;
 import com.everhomes.rest.socialSecurity.GetSocialSecurityPaymentDetailsResponse;
+import com.everhomes.rest.socialSecurity.GetSocialSecurityReportStatusCommand;
+import com.everhomes.rest.socialSecurity.GetSocialSecurityReportStatusResponse;
 import com.everhomes.rest.socialSecurity.ImportSocialSecurityPaymentsCommand;
 import com.everhomes.rest.socialSecurity.ListAccumulationFundCitiesCommand;
 import com.everhomes.rest.socialSecurity.ListAccumulationFundCitiesResponse;
+import com.everhomes.rest.socialSecurity.ListAccumulationFundHouseholdTypesCommand;
+import com.everhomes.rest.socialSecurity.ListAccumulationFundHouseholdTypesResponse;
 import com.everhomes.rest.socialSecurity.ListFilterItemsCommand;
 import com.everhomes.rest.socialSecurity.ListFilterItemsResponse;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityCitiesCommand;
@@ -22,12 +26,16 @@ import com.everhomes.rest.socialSecurity.ListSocialSecurityEmployeeStatusCommand
 import com.everhomes.rest.socialSecurity.ListSocialSecurityEmployeeStatusResponse;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityHistoryFilesCommand;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityHistoryFilesResponse;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityHouseholdTypesCommand;
+import com.everhomes.rest.socialSecurity.ListSocialSecurityHouseholdTypesResponse;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityInoutReportsCommand;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityInoutReportsResponse;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityPaymentsCommand;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityPaymentsResponse;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityReportsCommand;
 import com.everhomes.rest.socialSecurity.ListSocialSecurityReportsResponse;
+import com.everhomes.rest.socialSecurity.ListUserInoutHistoryCommand;
+import com.everhomes.rest.socialSecurity.ListUserInoutHistoryResponse;
 import com.everhomes.rest.socialSecurity.UpdateSocialSecurityPaymentCommand;
 
 public interface SocialSecurityService {
@@ -85,5 +93,17 @@ public interface SocialSecurityService {
 
 
 	public ListSocialSecurityHistoryFilesResponse listSocialSecurityHistoryFiles(ListSocialSecurityHistoryFilesCommand cmd);
+
+
+	public ListUserInoutHistoryResponse listUserInoutHistory(ListUserInoutHistoryCommand cmd);
+
+
+	public ListSocialSecurityHouseholdTypesResponse listSocialSecurityHouseholdTypes(ListSocialSecurityHouseholdTypesCommand cmd);
+
+
+	public ListAccumulationFundHouseholdTypesResponse listAccumulationFundHouseholdTypes(ListAccumulationFundHouseholdTypesCommand cmd);
+
+
+	public GetSocialSecurityReportStatusResponse getSocialSecurityReportStatus(GetSocialSecurityReportStatusCommand cmd);
 
 }
