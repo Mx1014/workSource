@@ -40,6 +40,8 @@ import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.rest.address.AddressLivingStatus;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.contract.*;
@@ -49,7 +51,9 @@ import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
+import com.everhomes.rest.organization.pm.AddOrganizationOwnerAddressCommand;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
+import com.everhomes.rest.organization.pm.OrganizationOwnerAddressDTO;
 import com.everhomes.rest.repeat.RangeDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.search.ContractSearcher;
@@ -173,6 +177,9 @@ public class ContractServiceImpl implements ContractService {
 	private ContractChargingChangeProvider contractChargingChangeProvider;
 	@Autowired
 	private ContractChargingChangeAddressProvider contractChargingChangeAddressProvider;
+
+	@Autowired
+	private PropertyMgrService propertyMgrService;
 
 	@PostConstruct
 	public void setup(){
@@ -1079,10 +1086,15 @@ public class ContractServiceImpl implements ContractService {
 			//作废合同关联资产释放
 			List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 			if(contractApartments != null && contractApartments.size() > 0) {
+				boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType())) ? true : false;
 				contractApartments.forEach(contractApartment -> {
 					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(contractApartment.getAddressId());
 					addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
 					propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+
+					if(individualFlag) {
+						propertyMgrService.deleteAddressToOrgOwner(contract.getNamespaceId(), contractApartment.getAddressId(), contract.getCustomerId());
+					}
 				});
 			}
 
@@ -1156,12 +1168,17 @@ public class ContractServiceImpl implements ContractService {
 		List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 		List<Long> contractAddressIds = new ArrayList<>();
 		if(contractApartments != null && contractApartments.size() > 0) {
+			boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType())) ? true : false;
 			contractAddressIds = contractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
 			List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(contractAddressIds);
 			if(mappings != null && mappings.size() > 0) {
 				mappings.forEach(mapping -> {
 					mapping.setLivingStatus(AddressMappingStatus.RENT.getCode());
 					propertyMgrProvider.updateOrganizationAddressMapping(mapping);
+
+					if(individualFlag) {
+						propertyMgrService.addAddressToOrganizationOwner(contract.getNamespaceId(), mapping.getAddressId(), contract.getCustomerId());
+					}
 				});
 			}
 		}
@@ -1183,9 +1200,14 @@ public class ContractServiceImpl implements ContractService {
 					});
 					List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(addressIds);
 					if(mappings != null && mappings.size() > 0) {
+						boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(parentContract.getCustomerType())) ? true : false;
 						mappings.forEach(mapping -> {
 							mapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
 							propertyMgrProvider.updateOrganizationAddressMapping(mapping);
+
+							if(individualFlag) {
+								propertyMgrService.deleteAddressToOrgOwner(parentContract.getNamespaceId(), mapping.getAddressId(), parentContract.getCustomerId());
+							}
 						});
 					}
 				}
@@ -1237,11 +1259,16 @@ public class ContractServiceImpl implements ContractService {
 		if(flag) {
 			List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 			if(contractApartments != null && contractApartments.size() > 0) {
+				boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType())) ? true : false;
 				contractApartments.forEach(contractApartment -> {
 					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(contractApartment.getAddressId());
 					if(addressMapping != null) {
 						addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
 						propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+
+						if(individualFlag) {
+							propertyMgrService.addAddressToOrganizationOwner(contract.getNamespaceId(), contractApartment.getAddressId(), contract.getCustomerId());
+						}
 					}
 				});
 			}

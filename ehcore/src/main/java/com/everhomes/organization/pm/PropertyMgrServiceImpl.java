@@ -5661,6 +5661,28 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         return buildOrganizationOwnerAddressDTO(cmd, address, ownerAddress);
     }
 
+	@Override
+	public void addAddressToOrganizationOwner(Integer namespaceId, Long addressId, Long orgOwnerId) {
+		Address address = addressProvider.findAddressById(addressId);
+		if (address == null) {
+			LOGGER.error("The address is not exist, addressId = {}.", addressId);
+			return ;
+		}
+		OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(
+				namespaceId, orgOwnerId, addressId);
+		if (ownerAddress != null) {
+			LOGGER.error("The organization owner {} already in address {}.", orgOwnerId, addressId);
+			return ;
+		}
+		createOrganizationOwnerAddress(address.getId(), AddressLivingStatus.ACTIVE.getCode(), namespaceId,
+				orgOwnerId, OrganizationOwnerAddressAuthType.ACTIVE);
+
+		CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(orgOwnerId);
+		if (pmOwner != null) {
+			getIntoFamily(address, pmOwner.getContactToken(), pmOwner.getNamespaceId());
+		}
+	}
+
     @Override
     public OrganizationOwnerAddress createOrganizationOwnerAddress(Long addressId, Byte livingStatus, Integer namespaceId,
                                                                    Long ownerId, OrganizationOwnerAddressAuthType authType) {
@@ -5705,6 +5727,33 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
         createAuditLog(ownerAddress.getId(), ownerAddress.getClass());
     }
+
+	@Override
+	private void deleteAddressToOrgOwner(Integer namespaceId, Long addressId, Long orgOwnerId) {
+		Address address = addressProvider.findAddressById(addressId);
+		if (address == null) {
+			LOGGER.error("The address is not exist, addressId = {}.", addressId);
+			return ;
+		}
+		OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(
+				namespaceId, orgOwnerId, address.getId());
+		if (ownerAddress == null) {
+			LOGGER.error("The ownerAddress is not exist.");
+			return ;
+		}
+		propertyMgrProvider.deleteOrganizationOwnerAddress(ownerAddress);
+		// 创建删除行为记录
+		createOrganizationOwnerBehavior(ownerAddress.getOrganizationOwnerId(), ownerAddress.getAddressId(),
+				System.currentTimeMillis(), OrganizationOwnerBehaviorType.DELETE);
+
+		// 如果当前用户在该地址下认证过,则移除认证状态
+		Family family = this.familyProvider.findFamilyByAddressId(addressId);
+		if (family != null) {
+			leaveFamilyByOwnerId(orgOwnerId, family.getId());
+		}
+
+		createAuditLog(ownerAddress.getId(), ownerAddress.getClass());
+	}
 
     private void createAuditLog(Long resourceId, Class<?> resourceType){
         AuditLog log = new AuditLog();
