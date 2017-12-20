@@ -7,14 +7,14 @@ import com.everhomes.util.StringHelper;
  * <li>id: id</li>
  * <li>ownerType: 规则类型 default：默认，resource：某一个资源的使用规则  {@link com.everhomes.rest.reserve.ReserveRuleOwnerType}</li>
  * <li>ownerId: 对应ownerType的id</li>
- * <li>strategyType: 1: 退款, 2: 加收  {@link com.everhomes.rest.reserve.ReserveRuleStrategyType}</li>
+ * <li>strategyType: 1: 退款, 2: 加收  {@link ReserveOrderHandleType}</li>
  * <li>durationType: 1: 时长内, 2: 时长外 {@link com.everhomes.rest.reserve.ReserveRuleDurationType}</li>
  * <li>durationUnit: 时长单位，1:小时 2:天 {@link com.everhomes.rest.reserve.ReserveRuleDurationUnit}</li>
  * <li>duration: 时长</li>
  * <li>factor: 价格系数</li>
  * </ul>
  */
-public class ReserveRuleStrategyDTO {
+public class ReserveOrderRuleDTO {
 
     private Long id;
     private String ownerType;

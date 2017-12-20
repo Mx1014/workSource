@@ -1,6 +1,9 @@
 package com.everhomes.rest.reserve;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
@@ -9,15 +12,27 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>resourceType: 资源类型  {@link com.everhomes.rest.reserve.ReserveResourceType}</li>
  * <li>resourceId: 具体资源id, 例如vip车位预约根据停车场做区分</li>
+ * <li>discountRuleDTO: 折扣人员策略列表 {@link com.everhomes.rest.reserve.ReserveDiscountRuleDTO}</li>
  * </ul>
  */
-public class GetReserveOrderHandleRuleCommand {
+public class SetReserveDiscountRuleCommand {
 
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
     private String resourceType;
     private Long resourceId;
+
+    @ItemType(ReserveDiscountRuleDTO.class)
+    private List<ReserveDiscountRuleDTO> discountRuleDTO;
+
+    public List<ReserveDiscountRuleDTO> getDiscountRuleDTO() {
+        return discountRuleDTO;
+    }
+
+    public void setDiscountRuleDTO(List<ReserveDiscountRuleDTO> discountRuleDTO) {
+        this.discountRuleDTO = discountRuleDTO;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;

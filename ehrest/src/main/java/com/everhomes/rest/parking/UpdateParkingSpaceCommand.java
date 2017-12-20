@@ -3,7 +3,11 @@ package com.everhomes.rest.parking;
 import com.everhomes.util.StringHelper;
 
 /**
- * @author sw on 2017/12/18.
+ * <ul>
+ * <li>id: ID</li>
+ * <li>spaceAddress: 车位地址</li>
+ * <li>lockId: 锁id</li>
+ * </ul>
  */
 public class UpdateParkingSpaceCommand {
     private Long id;

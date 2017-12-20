@@ -11,15 +11,15 @@ import java.util.List;
  * <li>namespaceId: 域空间</li>
  * <li>ownerType: 归属的类型，{@link com.everhomes.rest.reserve.ReserveOwnerType}</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
- * <li>resourceType: 资源类型</li>
- * <li>resourceTypeId: 资源类型id</li>
- * <li>refundStrategy: 退款策略 1:自定义 2：原价{@link com.everhomes.rest.reserve.ReserveOrderStrategyType}</li>
- * <li>overtimeStrategy: 加收策略 1:自定义 2：原价 {@link com.everhomes.rest.reserve.ReserveOrderStrategyType}</li>
- * <li>refundStrategies: 自定义策略列表 {@link com.everhomes.rest.reserve.ReserveRuleStrategyDTO}</li>
- * <li>overtimeStrategies: 自定义策略列表 {@link com.everhomes.rest.reserve.ReserveRuleStrategyDTO}</li>
+ * <li>resourceType: 资源类型  {@link com.everhomes.rest.reserve.ReserveResourceType}</li>
+ * <li>resourceId: 具体资源id, 例如vip车位预约根据停车场做区分</li>
+ * <li>refundStrategy: 退款策略 1:自定义 2：原价{@link ReserveOrderHandleRuleType}</li>
+ * <li>overtimeStrategy: 加收策略 1:自定义 2：原价 {@link ReserveOrderHandleRuleType}</li>
+ * <li>refundStrategies: 自定义策略列表 {@link ReserveOrderRuleDTO}</li>
+ * <li>overtimeStrategies: 自定义策略列表 {@link ReserveOrderRuleDTO}</li>
  * </ul>
  */
-public class ReserveOrderStrategyDTO {
+public class ReserveOrderHandleRuleDTO {
     private Long id;
     private Integer namespaceId;
     private String ownerType;
@@ -30,10 +30,10 @@ public class ReserveOrderStrategyDTO {
     private Byte refundStrategy;
     private Byte overtimeStrategy;
 
-    @ItemType(ReserveRuleStrategyDTO.class)
-    private List<ReserveRuleStrategyDTO> refundStrategies;
-    @ItemType(ReserveRuleStrategyDTO.class)
-    private List<ReserveRuleStrategyDTO> overtimeStrategies;
+    @ItemType(ReserveOrderRuleDTO.class)
+    private List<ReserveOrderRuleDTO> refundStrategies;
+    @ItemType(ReserveOrderRuleDTO.class)
+    private List<ReserveOrderRuleDTO> overtimeStrategies;
 
     public Long getId() {
         return id;
@@ -99,19 +99,19 @@ public class ReserveOrderStrategyDTO {
         this.overtimeStrategy = overtimeStrategy;
     }
 
-    public List<ReserveRuleStrategyDTO> getRefundStrategies() {
+    public List<ReserveOrderRuleDTO> getRefundStrategies() {
         return refundStrategies;
     }
 
-    public void setRefundStrategies(List<ReserveRuleStrategyDTO> refundStrategies) {
+    public void setRefundStrategies(List<ReserveOrderRuleDTO> refundStrategies) {
         this.refundStrategies = refundStrategies;
     }
 
-    public List<ReserveRuleStrategyDTO> getOvertimeStrategies() {
+    public List<ReserveOrderRuleDTO> getOvertimeStrategies() {
         return overtimeStrategies;
     }
 
-    public void setOvertimeStrategies(List<ReserveRuleStrategyDTO> overtimeStrategies) {
+    public void setOvertimeStrategies(List<ReserveOrderRuleDTO> overtimeStrategies) {
         this.overtimeStrategies = overtimeStrategies;
     }
 

@@ -3,7 +3,15 @@ package com.everhomes.rest.parking;
 import com.everhomes.util.StringHelper;
 
 /**
- * @author sw on 2017/12/18.
+ * <ul>
+ * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
+ * <li>ownerId: 归属的ID，如小区ID</li>
+ * <li>parkingLotId: 停车场ID</li>
+ * <li>lockStatus: 所状态</li>
+ * <li>keyword: 关键字</li>
+ * <li>pageAnchor: 本页开始的锚点</li>
+ * <li>pageSize: 每页的数量</li>
+ * </ul>
  */
 public class SearchParkingSpacesCommand {
 

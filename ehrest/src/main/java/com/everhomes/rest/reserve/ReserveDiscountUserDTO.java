@@ -7,17 +7,24 @@ import com.everhomes.util.StringHelper;
  * <li>namespaceId: 域空间</li>
  * <li>ownerType: 归属的类型，{@link com.everhomes.rest.reserve.ReserveOwnerType}</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
- * <li>resourceType: 资源类型  {@link com.everhomes.rest.reserve.ReserveResourceType}</li>
- * <li>resourceId: 具体资源id, 例如vip车位预约根据停车场做区分</li>
+ * <li>userPhone: 手机号</li>
+ * <li>userName: 姓名</li>
+ * <li>discount: 折扣</li>
  * </ul>
  */
-public class GetReserveOrderHandleRuleCommand {
+public class ReserveDiscountUserDTO {
 
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
-    private String resourceType;
-    private Long resourceId;
+    private String userPhone;
+    private String userName;
+    private Double discount;
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -43,24 +50,27 @@ public class GetReserveOrderHandleRuleCommand {
         this.ownerId = ownerId;
     }
 
-    public String getResourceType() {
-        return resourceType;
+    public String getUserPhone() {
+        return userPhone;
     }
 
-    public void setResourceType(String resourceType) {
-        this.resourceType = resourceType;
+    public void setUserPhone(String userPhone) {
+        this.userPhone = userPhone;
     }
 
-    public Long getResourceId() {
-        return resourceId;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setResourceId(Long resourceId) {
-        this.resourceId = resourceId;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
+    public Double getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(Double discount) {
+        this.discount = discount;
     }
 }

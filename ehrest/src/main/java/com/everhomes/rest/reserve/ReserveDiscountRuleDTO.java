@@ -7,23 +7,23 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>orgMemberDTOS: 折扣人员</li>
+ * <li>discountUserDTO: 折扣人员</li>
  * <li>discount: 折扣</li>
  * </ul>
  */
-public class ReserveDiscountStrategyDTO {
+public class ReserveDiscountRuleDTO {
 
-    @ItemType(ReserveOrgMemberDTO.class)
-    private List<ReserveOrgMemberDTO> orgMemberDTOS;
+    @ItemType(ReserveDiscountUserDTO.class)
+    private List<ReserveDiscountUserDTO> discountUserDTO;
 
     private Double discount;
 
-    public List<ReserveOrgMemberDTO> getOrgMemberDTOS() {
-        return orgMemberDTOS;
+    public List<ReserveDiscountUserDTO> getDiscountUserDTO() {
+        return discountUserDTO;
     }
 
-    public void setOrgMemberDTOS(List<ReserveOrgMemberDTO> orgMemberDTOS) {
-        this.orgMemberDTOS = orgMemberDTOS;
+    public void setDiscountUserDTO(List<ReserveDiscountUserDTO> discountUserDTO) {
+        this.discountUserDTO = discountUserDTO;
     }
 
     public Double getDiscount() {

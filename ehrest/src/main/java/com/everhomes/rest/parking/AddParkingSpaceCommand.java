@@ -2,14 +2,24 @@ package com.everhomes.rest.parking;
 
 import com.everhomes.util.StringHelper;
 
+
 /**
- * @author sw on 2017/12/18.
+ * <ul>
+ * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
+ * <li>ownerId: 归属的ID，如小区ID</li>
+ * <li>parkingLotId: 停车场ID</li>
+ * <li>spaceNo: 车位编号</li>
+ * <li>spaceAddress: 车位地址</li>
+ * <li>lockId: 锁id</li>
+ * <li>status: 是否开放 1：开放，0：关闭 {@link com.everhomes.rest.parking.ParkingSpaceStatus}</li>
+ * </ul>
  */
 public class AddParkingSpaceCommand {
 
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
+    private Long parkingLotId;
     private String spaceNo;
     private String spaceAddress;
     private String lockId;
@@ -18,6 +28,14 @@ public class AddParkingSpaceCommand {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Long getParkingLotId() {
+        return parkingLotId;
+    }
+
+    public void setParkingLotId(Long parkingLotId) {
+        this.parkingLotId = parkingLotId;
     }
 
     public Integer getNamespaceId() {

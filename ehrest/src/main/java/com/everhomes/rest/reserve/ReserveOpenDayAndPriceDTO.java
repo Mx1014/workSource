@@ -1,6 +1,9 @@
 package com.everhomes.rest.reserve;
 
+import com.everhomes.discover.ItemType;
+
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <ul>
@@ -15,12 +18,13 @@ import java.math.BigDecimal;
  * <li>dayOpenEndTime: 每天开放结束时间</li>
  * <li>holidayOpenFlag: 节假日开放预约  {@link com.everhomes.rest.reserve.ReserveCommonFlag}</li>
  * <li>holidayType: 节假日类型 {@link com.everhomes.rest.reserve.ReserveHolidayType}</li>
- * <li>timeType: 时间类型</li>
+ * <li>timeType: 时间类型 {@link com.everhomes.rest.reserve.ReserveTimeType}</li>
  * <li>timeUnit: 时间单元</li>
  * <li>workdayPrice: 工作日价格</li>
  * <li>holidayPrice: 节假日价格</li>
  * <li>autoAssign: 是否自动分配</li>
  * <li>multiFlag: 是否支持多选 {@link com.everhomes.rest.reserve.ReserveCommonFlag}</li>
+ * <li>closeDates: 关闭的日期</li>
  * </ul>
  */
 public class ReserveOpenDayAndPriceDTO {
@@ -30,8 +34,7 @@ public class ReserveOpenDayAndPriceDTO {
     private Long ownerId;
     private String resourceType;
     private Long resourceTypeId;
-    private Long atMostAdvanceTime;
-    private Long atLeastAdvanceTime;
+
     private Double dayOpenStartTime;
     private Double dayOpenEndTime;
     private Byte holidayOpenFlag;
@@ -41,8 +44,22 @@ public class ReserveOpenDayAndPriceDTO {
     private BigDecimal workdayPrice;
     private BigDecimal holidayPrice;
 
+    private Long atMostAdvanceTime;
+    private Long atLeastAdvanceTime;
+
     private Byte autoAssign;
     private Byte multiFlag;
+
+    @ItemType(Long.class)
+    private List<Long> closeDates;
+
+    public List<Long> getCloseDates() {
+        return closeDates;
+    }
+
+    public void setCloseDates(List<Long> closeDates) {
+        this.closeDates = closeDates;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;

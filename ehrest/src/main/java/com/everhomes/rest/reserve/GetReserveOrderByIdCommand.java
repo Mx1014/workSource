@@ -3,7 +3,9 @@ package com.everhomes.rest.reserve;
 import com.everhomes.util.StringHelper;
 
 /**
- * @author sw on 2017/12/18.
+ * <ul>
+ * <li>id: 订单id</li>
+ * </ul>
  */
 public class GetReserveOrderByIdCommand {
     private Long id;

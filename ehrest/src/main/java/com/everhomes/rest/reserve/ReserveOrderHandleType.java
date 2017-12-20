@@ -7,12 +7,12 @@ package com.everhomes.rest.reserve;
  * <li>OVERTIME(2): 超时加收</li>
  * </ul>
  */
-public enum ReserveRuleStrategyType {
+public enum ReserveOrderHandleType {
 	REFUND((byte)1), OVERTIME((byte)2);
 
     private byte code;
 
-    private ReserveRuleStrategyType(byte code) {
+    private ReserveOrderHandleType(byte code) {
         this.code = code;
     }
     
@@ -20,10 +20,10 @@ public enum ReserveRuleStrategyType {
         return this.code;
     }
     
-    public static ReserveRuleStrategyType fromCode(Byte code) {
+    public static ReserveOrderHandleType fromCode(Byte code) {
         if(code != null) {
-            ReserveRuleStrategyType[] values = ReserveRuleStrategyType.values();
-            for(ReserveRuleStrategyType value : values) {
+            ReserveOrderHandleType[] values = ReserveOrderHandleType.values();
+            for(ReserveOrderHandleType value : values) {
                 if(value.code == code.byteValue()) {
                     return value;
                 }

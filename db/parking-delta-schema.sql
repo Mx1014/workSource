@@ -85,6 +85,7 @@ CREATE TABLE `eh_parking_spaces` (
   `namespace_id` int(11) NOT NULL DEFAULT '0',
   `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
   `owner_id` bigint(20) NOT NULL DEFAULT '0',
+  `parking_lot_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'reference to id of eh_parking_lots',
   `space_no` varchar(64) NOT NULL DEFAULT '',
   `space_address` varchar(64) NOT NULL DEFAULT '',
   `lock_id` varchar(128) DEFAULT NULL,
@@ -122,7 +123,6 @@ CREATE TABLE `eh_reserve_orders` (
 
   `order_no` varchar(20) NOT NULL COMMENT '订单编号',
 
---  `reserve_date` date DEFAULT NULL COMMENT '使用日期',
   `reserve_start_time` datetime DEFAULT NULL COMMENT '预订开始时间',
   `reserve_end_time` datetime DEFAULT NULL COMMENT '预订结束时间',
   `reserve_cell_count` double DEFAULT NULL COMMENT '预约单元格数',

@@ -793,4 +793,32 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /parking/raiseParkingSpaceLock</b>
+     * <p>升起车锁</p>
+     */
+    @RequestMapping("raiseParkingSpaceLock")
+    @RestReturn(value=String.class)
+    public RestResponse raiseParkingSpaceLock(RaiseParkingSpaceLockCommand cmd) {
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/downParkingSpaceLock</b>
+     * <p>降下车锁</p>
+     */
+    @RequestMapping("downParkingSpaceLock")
+    @RestReturn(value=String.class)
+    public RestResponse downParkingSpaceLock(DownParkingSpaceLockCommand cmd) {
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

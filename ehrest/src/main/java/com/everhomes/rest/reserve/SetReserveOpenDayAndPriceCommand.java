@@ -1,16 +1,18 @@
 package com.everhomes.rest.reserve;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <ul>
  * <li>namespaceId: 域空间</li>
  * <li>ownerType: 归属的类型，{@link com.everhomes.rest.reserve.ReserveOwnerType}</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
- * <li>resourceType: 资源类型</li>
- * <li>resourceTypeId: 资源类型id</li>
+ * <li>resourceType: 资源类型  {@link com.everhomes.rest.reserve.ReserveResourceType}</li>
+ * <li>resourceId: 具体资源id, 例如vip车位预约根据停车场做区分</li>
  * <li>atMostAdvanceTime: 最多提前多少时间预定，返回毫秒</li>
  * <li>atLeastAdvanceTime: 最少提前多少时间预定，返回毫秒</li>
  * <li>dayOpenStartTime: 每天开放开始时间</li>
@@ -23,6 +25,7 @@ import java.math.BigDecimal;
  * <li>holidayPrice: 节假日价格</li>
  * <li>autoAssign: 是否自动分配</li>
  * <li>multiFlag: 是否支持多选 {@link com.everhomes.rest.reserve.ReserveCommonFlag}</li>
+ * <li>closeDates: 关闭的日期</li>
  * </ul>
  */
 public class SetReserveOpenDayAndPriceCommand {
@@ -33,7 +36,6 @@ public class SetReserveOpenDayAndPriceCommand {
     private String resourceType;
     private Long resourceId;
 
-    private Long resourceTypeId;
     private Long atMostAdvanceTime;
     private Long atLeastAdvanceTime;
     private Double dayOpenStartTime;
@@ -48,12 +50,15 @@ public class SetReserveOpenDayAndPriceCommand {
     private Byte autoAssign;
     private Byte multiFlag;
 
-    public Long getResourceTypeId() {
-        return resourceTypeId;
+    @ItemType(Long.class)
+    private List<Long> closeDates;
+
+    public List<Long> getCloseDates() {
+        return closeDates;
     }
 
-    public void setResourceTypeId(Long resourceTypeId) {
-        this.resourceTypeId = resourceTypeId;
+    public void setCloseDates(List<Long> closeDates) {
+        this.closeDates = closeDates;
     }
 
     public Long getAtMostAdvanceTime() {

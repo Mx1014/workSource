@@ -9,15 +9,21 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>resourceType: 资源类型  {@link com.everhomes.rest.reserve.ReserveResourceType}</li>
  * <li>resourceId: 具体资源id, 例如vip车位预约根据停车场做区分</li>
+ * <li>resourceName: 资源名称,根据资源类型来获取</li>
  * </ul>
  */
-public class GetReserveOrderHandleRuleCommand {
-
+public class ReserveResourceDTO {
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
     private String resourceType;
     private Long resourceId;
+    private String resourceName;
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -59,8 +65,11 @@ public class GetReserveOrderHandleRuleCommand {
         this.resourceId = resourceId;
     }
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
+    public String getResourceName() {
+        return resourceName;
+    }
+
+    public void setResourceName(String resourceName) {
+        this.resourceName = resourceName;
     }
 }

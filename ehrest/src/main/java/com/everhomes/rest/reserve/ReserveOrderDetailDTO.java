@@ -1,9 +1,11 @@
 package com.everhomes.rest.reserve;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -40,11 +42,10 @@ import java.sql.Timestamp;
  * <li>cancelUid: 取消人id</li>
  * <li>cancelTime: 取消时间</li>
  * <li>remainPayTime: 剩余支付时间</li>
- * <li>timeType: 时间类型 {@link com.everhomes.rest.reserve.ReserveTimeType}</li>
- * <li>timeUnit: 时间单元</li>
+ * <li>blockEntities: 订单详情块列表 {@link com.everhomes.rest.reserve.ReserveOrderBlockEntity}</li>
  * </ul>
  */
-public class ReserveOrderDTO {
+public class ReserveOrderDetailDTO {
 
     private Long id;
     private Integer namespaceId;
@@ -80,37 +81,9 @@ public class ReserveOrderDTO {
     private Timestamp cancelTime;
 
     private Integer remainPayTime;
-    private Byte timeType;
-    private Integer timeUnit;
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
-    public Byte getTimeType() {
-        return timeType;
-    }
-
-    public void setTimeType(Byte timeType) {
-        this.timeType = timeType;
-    }
-
-    public Integer getTimeUnit() {
-        return timeUnit;
-    }
-
-    public void setTimeUnit(Integer timeUnit) {
-        this.timeUnit = timeUnit;
-    }
-
-    public Long getResourceId() {
-        return resourceId;
-    }
-
-    public void setResourceId(Long resourceId) {
-        this.resourceId = resourceId;
-    }
+    @ItemType(ReserveOrderBlockEntity.class)
+    private List<ReserveOrderBlockEntity> blockEntities;
 
     public Long getId() {
         return id;
@@ -367,4 +340,18 @@ public class ReserveOrderDTO {
     public void setRemainPayTime(Integer remainPayTime) {
         this.remainPayTime = remainPayTime;
     }
+
+    public List<ReserveOrderBlockEntity> getBlockEntities() {
+        return blockEntities;
+    }
+
+    public void setBlockEntities(List<ReserveOrderBlockEntity> blockEntities) {
+        this.blockEntities = blockEntities;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+
 }

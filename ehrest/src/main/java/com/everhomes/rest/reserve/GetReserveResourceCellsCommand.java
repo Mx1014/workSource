@@ -1,7 +1,5 @@
 package com.everhomes.rest.reserve;
 
-import com.everhomes.util.StringHelper;
-
 /**
  * <ul>
  * <li>namespaceId: 域空间</li>
@@ -9,15 +7,25 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>resourceType: 资源类型  {@link com.everhomes.rest.reserve.ReserveResourceType}</li>
  * <li>resourceId: 具体资源id, 例如vip车位预约根据停车场做区分</li>
+ * <li>timeType: 时间类型 {@link com.everhomes.rest.reserve.ReserveTimeType}</li>
  * </ul>
  */
-public class GetReserveOrderHandleRuleCommand {
+public class GetReserveResourceCellsCommand {
 
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
     private String resourceType;
     private Long resourceId;
+    private Byte timeType;
+
+    public Byte getTimeType() {
+        return timeType;
+    }
+
+    public void setTimeType(Byte timeType) {
+        this.timeType = timeType;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -57,10 +65,5 @@ public class GetReserveOrderHandleRuleCommand {
 
     public void setResourceId(Long resourceId) {
         this.resourceId = resourceId;
-    }
-
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
     }
 }

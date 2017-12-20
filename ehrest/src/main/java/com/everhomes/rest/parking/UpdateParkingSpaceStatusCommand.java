@@ -3,7 +3,10 @@ package com.everhomes.rest.parking;
 import com.everhomes.util.StringHelper;
 
 /**
- * @author sw on 2017/12/18.
+ * <ul>
+ * <li>id: ID</li>
+ * <li>status: 是否开放 1：开放，0：关闭 {@link com.everhomes.rest.parking.ParkingSpaceStatus}</li>
+ * </ul>
  */
 public class UpdateParkingSpaceStatusCommand {
 

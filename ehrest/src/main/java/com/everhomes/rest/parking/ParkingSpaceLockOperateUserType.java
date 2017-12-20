@@ -2,10 +2,10 @@
 package com.everhomes.rest.parking;
 
 /**
- * <p>vip车位 锁操作类型</p>
+ * <p>vip车位 操作用户类型</p>
  * <ul>
- * <li>UP("up"): 升起车锁</li>
- * <li>DOWN("down"): 降下车锁</li>
+ * <li>RESERVE_PERSON(1): 预约人</li>
+ * <li>PLATE_OWNER(2): 车主</li>
  * </ul>
  */
 public enum ParkingSpaceLockOperateUserType {
