@@ -854,4 +854,15 @@ public class QualityController extends ControllerBase {
 		res.setErrorDescription("OK");
 		return res;
 	}
+	/**
+	 * <b>URL: /equipment/exportSampleTaskCommunityScores</b>
+	 * <p>导出绩效考核列表</p>
+	 */
+	@RequestMapping("exportEquipments")
+	public HttpServletResponse export(CountSampleTaskCommunityScoresCommand cmd, HttpServletResponse httpResponse) {
+
+		HttpServletResponse response = qualityService.exportSampleTaskCommunityScores(cmd, httpResponse);
+		return response;
+
+	}
 }
