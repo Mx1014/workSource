@@ -62,7 +62,7 @@ public interface UserActivityService {
 
     void addFeedback(FeedbackCommand cmd);
     
-    ListFeedbacksResponse ListFeedbacks(ListFeedbacksCommand cmd);
+    ListFeedbacksResponse listFeedbacks(ListFeedbacksCommand cmd);
     
     void updateFeedback(UpdateFeedbackCommand cmd);
     

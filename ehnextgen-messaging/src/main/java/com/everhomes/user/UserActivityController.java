@@ -228,7 +228,7 @@ public class UserActivityController extends ControllerBase {
     @RequestMapping("listFeedbacks")
     @RestReturn(ListFeedbacksResponse.class)
     public RestResponse listFeedbacks(@Valid ListFeedbacksCommand cmd) {
-    	ListFeedbacksResponse result = userActivityService.ListFeedbacks(cmd);
+    	ListFeedbacksResponse result = userActivityService.listFeedbacks(cmd);
 
     	RestResponse response = new RestResponse(result);
     	response.setErrorCode(ErrorCodes.SUCCESS);

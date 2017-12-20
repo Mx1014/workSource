@@ -15,9 +15,10 @@ import com.everhomes.util.StringHelper;
  *   <li>content: 反馈内容</li>
  *   <li>createTime: 创建时间</li>
  *   <li>feedbackType:1-举报、2-投诉、3-纠正</li>
- *   <li>targetType:0-无具体目标、1-帖子内容、2-地址、3-圈子</li>
+ *   <li>targetType:0-无具体目标、1-帖子内容、2-地址、3-圈子 参考{@link com.everhomes.rest.user.FeedbackTargetType}</li>
  *   <li>targetId:所针对的目标对应的ID（如地址对应address id、帖子内容则是post id)</li>
  *   <li>targetSubject: 目标的标题名称</li>
+ *   <li>targetParam: 目标业务的一些自定义参数</li>
  *   <li>forumId: 如果举报类型是post的话，返回post对应的forumId</li>
  *   <li>targetStatus: 目标的状态， 0-已删除、1-待确认、2-正常。参考{@link com.everhomes.rest.forum.PostStatus}</li>
  *   <li>proofResourceUri:图片链接</li>
@@ -41,6 +42,7 @@ public class FeedbackDTO {
     private Byte targetType;
     private Long targetId;
     private String targetSubject;
+	private String targetParam;
     private Long forumId;
     private Byte targetStatus;
     private String proofResourceUri;
@@ -137,6 +139,14 @@ public class FeedbackDTO {
 
 	public void setTargetSubject(String targetSubject) {
 		this.targetSubject = targetSubject;
+	}
+
+	public String getTargetParam() {
+		return targetParam;
+	}
+
+	public void setTargetParam(String targetParam) {
+		this.targetParam = targetParam;
 	}
 
 	public Long getForumId() {

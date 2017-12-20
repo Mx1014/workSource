@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  *  <li>feedbackType:1-举报、2-投诉、3-纠正</li>
  *  <li>targetType:0-无具体目标、1-帖子内容、2-地址、3-圈子</li>
  *  <li>targetId:所针对的目标对应的ID（如地址对应address id、帖子内容则是post id)</li>
+ *  <li>targetParam: 目标业务的一些自定义参数</li>
  *  <li>contentCategory: 参考{@link com.everhomes.rest.user.FeedbackContentCategoryType}</li>
  *  <li>contact:联系方式</li>
  *  <li>subject:反馈标题</li>
@@ -18,6 +19,7 @@ public class FeedbackCommand {
     private Byte feedbackType;
     private Byte targetType;
     private Long targetId;
+    private String targetParam;
     private Long contentCategory;
     private String contact;
     private String subject;
@@ -47,6 +49,14 @@ public class FeedbackCommand {
 
     public void setTargetId(Long targetId) {
         this.targetId = targetId;
+    }
+
+    public String getTargetParam() {
+        return targetParam;
+    }
+
+    public void setTargetParam(String targetParam) {
+        this.targetParam = targetParam;
     }
 
     public Long getContentCategory() {
