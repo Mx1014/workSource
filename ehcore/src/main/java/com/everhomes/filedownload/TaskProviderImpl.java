@@ -18,6 +18,7 @@ import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.util.*;
 
 @Component
@@ -87,6 +88,55 @@ public class TaskProviderImpl implements TaskProvider {
 
         if(status != null){
             query.addConditions(Tables.EH_TASKS.STATUS.eq(status));
+        }
+
+        if(pageAnchor != null){
+            query.addConditions(Tables.EH_TASKS.ID.le(pageAnchor));
+        }
+
+        query.addOrderBy(Tables.EH_TASKS.ID.desc());
+
+        if(pageSize != null){
+            query.addLimit(pageSize);
+        }
+
+
+        List<Task> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, Task.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public List<Task> searchTask(Long userId, Byte type, Byte status, String keyword, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhTasksRecord> query = context.selectQuery(Tables.EH_TASKS);
+
+        if(userId != null){
+            query.addConditions(Tables.EH_TASKS.USER_ID.eq(userId));
+        }
+
+        if(type != null){
+            query.addConditions(Tables.EH_TASKS.TYPE.eq(type));
+        }
+
+        if(status != null){
+            query.addConditions(Tables.EH_TASKS.STATUS.eq(status));
+        }
+
+        if(startTime != null){
+            query.addConditions(Tables.EH_TASKS.CREATE_TIME.ge(new Timestamp(startTime)));
+        }
+
+        if(endTime != null){
+            query.addConditions(Tables.EH_TASKS.CREATE_TIME.le(new Timestamp(endTime)));
+        }
+
+        if(keyword != null){
+            query.addConditions(Tables.EH_TASKS.RESULT_STRING1.like("%" + keyword + "%"));
         }
 
         if(pageAnchor != null){

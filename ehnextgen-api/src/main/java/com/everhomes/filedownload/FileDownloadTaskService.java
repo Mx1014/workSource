@@ -1,10 +1,9 @@
 package com.everhomes.filedownload;
 
-import com.everhomes.rest.filedownload.CancelTaskCommand;
-import com.everhomes.rest.filedownload.ListFileDownloadTasksCommand;
-import com.everhomes.rest.filedownload.ListFileDownloadTasksResponse;
+import com.everhomes.rest.filedownload.*;
 
 import java.io.OutputStream;
+import java.util.List;
 
 public interface FileDownloadTaskService{
 
@@ -14,6 +13,13 @@ public interface FileDownloadTaskService{
      * @return
      */
     ListFileDownloadTasksResponse listFileDownloadTasks(ListFileDownloadTasksCommand cmd);
+
+    /**
+     * 管理后台搜索下载任务记录
+     * @param cmd
+     * @return
+     */
+    List<FileDownloadTaskDTO> searchFileDownloadTasks(SearchFileDownloadTasksCommand cmd);
 
     /**
      * 取消任务

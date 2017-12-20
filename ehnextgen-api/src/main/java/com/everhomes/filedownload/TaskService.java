@@ -43,5 +43,7 @@ public interface TaskService {
 
     List<Task> listTasks(Integer namespaceId, Long communityId, Long orgId, Long userId, Byte type, Byte status, Long pageAnchor, Integer count);
 
+    List<Task> searchTask(Long userId, Byte type, Byte status, String keyword, Long startTime, Long endTime, Long pageAnchor, Integer pageSize);
+
     List<Long> listWaitingTaskIds();
 }

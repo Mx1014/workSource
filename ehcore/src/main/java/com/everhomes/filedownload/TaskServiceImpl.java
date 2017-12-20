@@ -131,6 +131,12 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
         return taskProvider.listTask(namespaceId, communityId, orgId, userId, type, status, pageAnchor, count);
     }
 
+
+    @Override
+    public List<Task> searchTask(Long userId, Byte type, Byte status, String keyword, Long startTime, Long endTime, Long pageAnchor, Integer pageSize){
+        return taskProvider.searchTask(userId, type, status, keyword, startTime, endTime, pageAnchor, pageSize);
+    }
+
     @Override
     public List<Long> listWaitingTaskIds() {
         return taskProvider.listWaitingTaskIds();

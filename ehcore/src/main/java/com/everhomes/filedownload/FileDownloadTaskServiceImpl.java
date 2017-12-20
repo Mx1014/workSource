@@ -53,50 +53,74 @@ public class FileDownloadTaskServiceImpl implements FileDownloadTaskService {
                 fileDownloadTasks.remove(pageSize);
             }
 
-            //有效期
-            int interval = configProvider.getIntValue(UserContext.getCurrentNamespaceId(), "filedownload.valid.interval", 10);
-            Long intervalTime = interval * 24 * 60 * 60 * 1000L;
-
-            //排队中的任务列表
-            List<Long> ids = taskService.listWaitingTaskIds();
-
-            fileDownloadTasks.forEach(r -> {
-                FileDownloadTaskDTO dto = taskToFileDownloadTaskDto(r, ids, intervalTime);
-
-                dtos.add(dto);
-            });
+            dtos = toFileDownloadTaskDtos(fileDownloadTasks);
         }
 
         response.setDtos(dtos);
         return response;
     }
 
+    @Override
+    public List<FileDownloadTaskDTO> searchFileDownloadTasks(SearchFileDownloadTasksCommand cmd) {
 
-    private FileDownloadTaskDTO taskToFileDownloadTaskDto(Task task, List<Long> ids, Long intervalTime){
-        FileDownloadTaskDTO dto = ConvertHelper.convert(task, FileDownloadTaskDTO.class);
-        dto.setFileName(task.getResultString1());
-        dto.setUri(task.getResultString2());
-        String url = contentServerService.parserUri(dto.getUri(), EntityType.USER.getCode(), dto.getUserId());
-        dto.setUrl(url);
-        dto.setSize(task.getResultLong1());
+        Long userId = UserContext.currentUserId();
 
-        //有效期
-        dto.setValidTime(new Timestamp(dto.getCreateTime().getTime() + intervalTime));
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        List<Task> fileDownloadTasks = taskService.searchTask(userId, TaskType.FILEDOWNLOAD.getCode(), null, cmd.getKeyword(), cmd.getStartTime(),cmd.getEndTime(),cmd.getPageAnchor(), pageSize + 1);
+        ListFileDownloadTasksResponse response = new ListFileDownloadTasksResponse();
+        List<FileDownloadTaskDTO> dtos = new ArrayList<FileDownloadTaskDTO>();
 
-        //排队数，id比它小的在等待中任务数 = 排队数
-        if(TaskStatus.WAITING == TaskStatus.fromCode(task.getStatus())){
-            Integer queueCount = 0;
-            for (Long id: ids){
-                if(id >= task.getId().longValue()){
-                   break;
-                }
-                queueCount ++;
+        if(fileDownloadTasks != null) {
+
+            if (fileDownloadTasks.size() > pageSize) {
+                response.setNextPageAnchor(fileDownloadTasks.get(pageSize).getId());
+                fileDownloadTasks.remove(pageSize);
             }
 
-            dto.setQueueCount(queueCount);
+            dtos = toFileDownloadTaskDtos(fileDownloadTasks);
         }
 
-        return dto;
+        return dtos;
+    }
+
+    private List<FileDownloadTaskDTO> toFileDownloadTaskDtos(List<Task> tasks){
+
+        List<FileDownloadTaskDTO> dtos = new ArrayList<FileDownloadTaskDTO>();
+        //有效期
+        int interval = configProvider.getIntValue(UserContext.getCurrentNamespaceId(), "filedownload.valid.interval", 10);
+        Long intervalTime = interval * 24 * 60 * 60 * 1000L;
+
+        //排队中的任务列表
+        List<Long> ids = taskService.listWaitingTaskIds();
+
+        tasks.forEach(task -> {
+            FileDownloadTaskDTO dto = ConvertHelper.convert(task, FileDownloadTaskDTO.class);
+            dto.setFileName(task.getResultString1());
+            dto.setUri(task.getResultString2());
+            String url = contentServerService.parserUri(dto.getUri(), EntityType.USER.getCode(), dto.getUserId());
+            dto.setUrl(url);
+            dto.setSize(task.getResultLong1());
+
+            //有效期
+            dto.setValidTime(new Timestamp(dto.getCreateTime().getTime() + intervalTime));
+
+            //排队数，id比它小的在等待中任务数 = 排队数
+            if(TaskStatus.WAITING == TaskStatus.fromCode(task.getStatus())){
+                Integer queueCount = 0;
+                for (Long id: ids){
+                    if(id >= task.getId().longValue()){
+                        break;
+                    }
+                    queueCount ++;
+                }
+
+                dto.setQueueCount(queueCount);
+            }
+
+            dtos.add(dto);
+        });
+
+        return dtos;
     }
 
     @Override

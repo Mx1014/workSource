@@ -4,12 +4,12 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.filedownload.CancelTaskCommand;
-import com.everhomes.rest.filedownload.ListFileDownloadTasksCommand;
-import com.everhomes.rest.filedownload.ListFileDownloadTasksResponse;
+import com.everhomes.rest.filedownload.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/fileDownloadTask")
@@ -41,6 +41,20 @@ public class FileDownloadTaskController extends ControllerBase {
     public RestResponse cancelTask(CancelTaskCommand cmd) {
         fileDownloadTaskService.cancelTask(cmd);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /fileDownloadTask/searchFileDownloadTasks</b>
+     * <p>获取任务列表</p>
+     */
+    @RequestMapping("searchFileDownloadTasks")
+    @RestReturn(value=FileDownloadTaskDTO.class, collection = true)
+    public RestResponse searchFileDownloadTasks(SearchFileDownloadTasksCommand cmd) {
+        List<FileDownloadTaskDTO> dtos = fileDownloadTaskService.searchFileDownloadTasks(cmd);
+        RestResponse response = new RestResponse(dtos);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
