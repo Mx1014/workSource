@@ -1338,7 +1338,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 //		Rentalv2PriceRule priceRule = correctRetalResource(rs, cmd.getRentalType());
 		RentalBillDTO billDTO = ConvertHelper.convert(rs , RentalBillDTO.class);
-		proccessCells(rs, cmd.getRentalType(),cmd.getPriceType());
+		proccessCells(rs, cmd.getRentalType());
 
 		RentalResourceType rsType = this.rentalv2Provider.getRentalResourceTypeById(rs.getResourceTypeId());
 			java.util.Date reserveTime = new java.util.Date();
@@ -1896,7 +1896,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		// 注意： valiRentalBill 方法校验时，会查出当前资源状态：已预约，此时验证会不通过
 		if (SiteBillStatus.COMPLETE.getCode() != status && SiteBillStatus.FAIL.getCode() != status) {
 			RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
-			proccessCells(rs, order.getRentalType(),null);
+			proccessCells(rs, order.getRentalType());
 			List<RentalResourceOrder> rsbs = rentalv2Provider
 					.findRentalResourceOrderByOrderId(order.getId());
 			for(RentalResourceOrder rsb : rsbs){
@@ -2771,7 +2771,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	/**
 	 * 生成某个资源的单元格
 	 * */
-	private void proccessCells(RentalResource rs, byte rentalType,Byte priceType){
+	private void proccessCells(RentalResource rs, byte rentalType){
 
 		Rentalv2PriceRule priceRule = rentalv2PriceRuleProvider.findRentalv2PriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rs.getId(), rentalType);
 
@@ -2788,7 +2788,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		singleCmd.setSiteCounts(rs.getResourceCounts());
 		singleCmd.setOpenWeekday(resolveOpenWeekday(rs.getOpenWeekday()));
 		singleCmd.setRentalType(rentalType);
-		singleCmd.setPriceType(priceType);
+		singleCmd.setPriceType(priceRule.getPriceType());
 
 		QueryDefaultRuleAdminResponse tempResponse = new QueryDefaultRuleAdminResponse();
 		populateRentalRule(tempResponse, EhRentalv2Resources.class.getSimpleName(), rs.getId());
@@ -3371,7 +3371,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		RentalResource rs =this.rentalv2Provider.getRentalSiteById(bill.getRentalResourceId());
 //		correctRetalResource(rs, cmd.getRentalType());
-		proccessCells(rs, bill.getRentalType(),null);
+		proccessCells(rs, bill.getRentalType());
 		// 循环存物品订单
 		AddRentalBillItemCommandResponse response = new AddRentalBillItemCommandResponse();
 		this.dbProvider.execute((TransactionStatus status) -> {
@@ -3854,7 +3854,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			FindRentalSiteMonthStatusCommand cmd) {
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
 //		correctRetalResource(rs, cmd.getRentalType());
-		proccessCells(rs, cmd.getRentalType(),cmd.getPriceType());
+		proccessCells(rs, cmd.getRentalType());
 		FindRentalSiteMonthStatusCommandResponse response = ConvertHelper.convert(rs, FindRentalSiteMonthStatusCommandResponse.class);
 		response.setRentalSiteId(rs.getId());
 		List<RentalResourcePic> pics = this.rentalv2Provider.findRentalSitePicsByOwnerTypeAndId(EhRentalv2Resources.class.getSimpleName(), rs.getId());
@@ -3895,7 +3895,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Override
 	public FindRentalSiteMonthStatusByWeekCommandResponse findRentalSiteMonthStatusByWeek(FindRentalSiteMonthStatusByWeekCommand cmd) {
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
-		proccessCells(rs, cmd.getRentalType(),cmd.getPriceType());
+		proccessCells(rs, cmd.getRentalType());
 		FindRentalSiteMonthStatusByWeekCommandResponse response = ConvertHelper.convert(rs,FindRentalSiteMonthStatusByWeekCommandResponse.class);
 		response.setRentalSiteId(rs.getId());
 		List<RentalResourcePic> pics = this.rentalv2Provider.findRentalSitePicsByOwnerTypeAndId(EhRentalv2Resources.class.getSimpleName(), rs.getId());
@@ -3943,7 +3943,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
 //		correctRetalResource(rs, cmd.getRentalType());
-		proccessCells(rs, cmd.getRentalType(),cmd.getPriceType());
+		proccessCells(rs, cmd.getRentalType());
 		FindRentalSiteWeekStatusCommandResponse response = ConvertHelper.convert(rs, FindRentalSiteWeekStatusCommandResponse.class);
 		response.setRentalSiteId(rs.getId());
 		List<RentalResourcePic> pics = this.rentalv2Provider.findRentalSitePicsByOwnerTypeAndId(EhRentalv2Resources.class.getSimpleName(), rs.getId());
@@ -4055,7 +4055,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	public FindRentalSiteYearStatusCommandResponse findRentalSiteYearStatus(FindRentalSiteYearStatusCommand cmd) {
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
 //		correctRetalResource(rs, cmd.getRentalType());
-		proccessCells(rs, cmd.getRentalType(),cmd.getPriceType());
+		proccessCells(rs, cmd.getRentalType());
 		FindRentalSiteYearStatusCommandResponse response = ConvertHelper.convert(rs, FindRentalSiteYearStatusCommandResponse.class);
 		response.setRentalSiteId(rs.getId());
 		List<RentalResourcePic> pics = this.rentalv2Provider.findRentalSitePicsByOwnerTypeAndId(EhRentalv2Resources.class.getSimpleName(), rs.getId());
@@ -4470,7 +4470,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
 //		correctRetalResource(rs, cmd.getRentalType());
-		proccessCells(rs, cmd.getRentalType(),cmd.getPriceType());
+		proccessCells(rs, cmd.getRentalType());
 		FindAutoAssignRentalSiteWeekStatusResponse response = ConvertHelper.convert(rs, FindAutoAssignRentalSiteWeekStatusResponse.class);
 		//场所数量和编号
 		response.setSiteCounts(rs.getResourceCounts());
@@ -4624,7 +4624,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
 //		correctRetalResource(rs, cmd.getRentalType());
-		proccessCells(rs, cmd.getRentalType(),cmd.getPriceType());
+		proccessCells(rs, cmd.getRentalType());
 		FindAutoAssignRentalSiteMonthStatusResponse response = ConvertHelper.convert(rs, FindAutoAssignRentalSiteMonthStatusResponse.class);
 		//场所数量和编号
 		response.setSiteCounts(rs.getResourceCounts());
@@ -4788,7 +4788,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		java.util.Date reserveTime = new java.util.Date();
 
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
-		proccessCells(rs, cmd.getRentalType(),cmd.getPriceType());
+		proccessCells(rs, cmd.getRentalType());
 		FindAutoAssignRentalSiteMonthStatusByWeekResponse response = ConvertHelper.convert(rs, FindAutoAssignRentalSiteMonthStatusByWeekResponse.class);
 
 		//场所数量和编号
@@ -4922,7 +4922,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
 //		correctRetalResource(rs, cmd.getRentalType());
-		proccessCells(rs, cmd.getRentalType(),cmd.getPriceType());
+		proccessCells(rs, cmd.getRentalType());
 		FindAutoAssignRentalSiteYearStatusResponse response = ConvertHelper.convert(rs, FindAutoAssignRentalSiteYearStatusResponse.class);
 		//场所数量和编号
 		response.setSiteCounts(rs.getResourceCounts());
@@ -5075,7 +5075,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
 //		correctRetalResource(rs, cmd.getRentalType());
-		proccessCells(rs, cmd.getRentalType(),cmd.getPriceType());
+		proccessCells(rs, cmd.getRentalType());
 		FindAutoAssignRentalSiteDayStatusResponse response = ConvertHelper.convert(rs, FindAutoAssignRentalSiteDayStatusResponse.class);
 		response.setRentalSiteId(rs.getId());
 		List<RentalResourcePic> pics = this.rentalv2Provider.findRentalSitePicsByOwnerTypeAndId(EhRentalv2Resources.class.getSimpleName(), rs.getId());
@@ -5880,7 +5880,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					"rental resource (site) cannot found ");
 //		correctRetalResource(rs, cmd.getRentalType());
 		
-		proccessCells(rs, cmd.getRentalType(),null);
+		proccessCells(rs, cmd.getRentalType());
 		if(null==cmd.getRuleId())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
