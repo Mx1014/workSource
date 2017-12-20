@@ -413,10 +413,6 @@ public class WorkReportServiceImpl implements WorkReportService {
         val.setModuleType(report.getModuleType());
         val.setStatus(WorkReportStatus.VALID.getCode());
         //  set the content.
-/*        switch (WorkReportType.fromCode(cmd.getReportType())){
-            case DAY:
-
-        }*/
         val.setReportId(cmd.getReportId());
         val.setReportTime(new Timestamp(cmd.getReportTime()));
         val.setApplierUserId(user.getId());

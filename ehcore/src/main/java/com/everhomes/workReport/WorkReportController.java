@@ -171,7 +171,7 @@ public class WorkReportController extends ControllerBase{
     @RestReturn(value=WorkReportValDTO.class)
     public RestResponse postWorkReportVal(PostWorkReportValCommand cmd) {
         WorkReportValDTO res = workReportService.postWorkReportVal(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
