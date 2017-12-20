@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>detailId: detailid</li>
  * <li>userName: 用户姓名</li>
  * <li>socialSecurityNo: 社保/公积金号</li>
+ * <li>cityId: 城市id</li>
  * <li>cityName: 城市名</li>
  * <li>radix: 基数</li>
  * <li>householdType: 户籍类型</li>
