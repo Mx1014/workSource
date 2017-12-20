@@ -5215,6 +5215,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				dto.setAddress(address.getAddress());
 				dto.setAddressId(address.getId());
 				dto.setApartment(address.getApartmentName());
+				dto.setChargeArea(address.getChargeArea());
+				dto.setOrientation(address.getOrientation());
+				if (address.getLivingStatus() == null) {
+					CommunityAddressMapping mapping =  propertyMgrProvider.findAddressMappingByAddressId(address.getId());
+					if(mapping != null){
+						address.setLivingStatus(mapping.getLivingStatus());
+					}
+					else{
+						address.setLivingStatus(AddressMappingStatus.LIVING.getCode());
+					}
+				}
+				dto.setApartmentLivingStatus(address.getLivingStatus());
+
+
 			}
 
             LocaleString addressStatusLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.AUTH_TYPE_SCOPE,
