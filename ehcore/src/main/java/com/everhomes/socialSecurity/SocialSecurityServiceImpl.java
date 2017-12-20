@@ -17,12 +17,6 @@ import java.util.stream.Collectors;
 @Component
 public class SocialSecurityServiceImpl implements SocialSecurityService {
 	@Autowired
-	private AccumulationFundBaseProvider accumulationFundBaseProvider;
-	@Autowired
-	private AccumulationFundPaymentProvider accumulationFundPaymentProvider;
-	@Autowired
-	private AccumulationFundSettingProvider accumulationFundSettingProvider;
-	@Autowired
 	private SocialSecurityBaseProvider socialSecurityBaseProvider;
 	@Autowired
 	private SocialSecurityPaymentProvider socialSecurityPaymentProvider;
@@ -50,7 +44,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 	public ListSocialSecurityCitiesResponse listSocialSecurityCities(
 			ListSocialSecurityCitiesCommand cmd) {
 		ListSocialSecurityCitiesResponse resp = new ListSocialSecurityCitiesResponse();
-		List<Long> cityIds = accumulationFundBaseProvider.listCities();
+		List<Long> cityIds = socialSecurityBaseProvider.listCities();
 		resp.setSocialSecurityCitys(processCities(cityIds));
 		return resp;
 	}
@@ -76,7 +70,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 	public ListAccumulationFundCitiesResponse listAccumulationFundCities(
 			ListAccumulationFundCitiesCommand cmd) {
 		ListAccumulationFundCitiesResponse resp = new ListAccumulationFundCitiesResponse();
-		List<Long> cityIds = accumulationFundBaseProvider.listCities();
+		List<Long> cityIds = socialSecurityBaseProvider.listCities();
 		resp.setAccumulationFundCitys(processCities(cityIds));
 		return resp;
 	}
@@ -158,47 +152,37 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 		GetSocialSecurityPaymentDetailsResponse response = new GetSocialSecurityPaymentDetailsResponse();
 		response.setPaymentMonth(socialSecurityPaymentProvider.getPaymentMonth(cmd.getOwnerId()));
 		//社保本月缴费
-		List<SocialSecurityPayment> ssPayments = socialSecurityPaymentProvider.listSocialSecurityPayment(
-				cmd.getDetailId(), NormalFlag.NO.getCode());
+		List<SocialSecurityPayment> allPayments = socialSecurityPaymentProvider.listSocialSecurityPayment(cmd.getDetailId() );
+		List<SocialSecurityPayment> ssPayments = new ArrayList<>();
+		List<SocialSecurityPayment> ssfaterPayments = new ArrayList<>();
+		List<SocialSecurityPayment> afPayments = new ArrayList<>();
+		List<SocialSecurityPayment> afafterPayments = new ArrayList<>();
 		if (null == ssPayments) {
 			response.setPayCurrentSocialSecurityFlag(NormalFlag.NO.getCode());
 		}else{
 			response.setPayCurrentSocialSecurityFlag(NormalFlag.YES.getCode());
-			SocialSecurityPaymentDetailDTO dto =
-			response.setSocialSecurityPayments(ssPayments.stream().map(r->{
-				return processSocialSecurityPaymentDetailDTO(r);
-			}).collect(Collectors.toList()));
+			response.setSocialSecurityPayment(processSocialSecurityPaymentDetailDTO(ssPayments));
 		}
 		//社保补缴
-		List<SocialSecurityPayment> ssfaterPayments = socialSecurityPaymentProvider.listSocialSecurityPayment(
-				cmd.getDetailId(), NormalFlag.YES.getCode());
 		if (null == ssfaterPayments) {
 			response.setAfterPaySocialSecurityFlag(NormalFlag.NO.getCode());
 		}else{
 			response.setAfterPaySocialSecurityFlag(NormalFlag.YES.getCode());
-			response.setAfterSocialSecurityPayments(processSocialSecurityPaymentDetailDTO(ssfaterPayments));
+			response.setAfterSocialSecurityPayment(processSocialSecurityPaymentDetailDTO(ssfaterPayments));
 		}
 		//公积金本月缴费
-		List<AccumulationFundPayment> afPayments = accumulationFundPaymentProvider.listAccumulationFundPayment(
-				cmd.getDetailId(), NormalFlag.NO.getCode());
 		if (null == afPayments) {
 			response.setPayCurrentAccumulationFundFlag(NormalFlag.NO.getCode());
 		}else{
 			response.setPayCurrentAccumulationFundFlag(NormalFlag.YES.getCode());
-			response.setAccumulationFundPayments(afPayments.stream().map(r->{
-				return processSocialSecurityPaymentDetailDTO(r);
-			}).collect(Collectors.toList()));
+			response.setAccumulationFundPayment(processSocialSecurityPaymentDetailDTO(afPayments));
 		}
 		//公积金补缴
-		List<AccumulationFundPayment> afafterPayments = accumulationFundPaymentProvider.listAccumulationFundPayment(
-				cmd.getDetailId(), NormalFlag.YES.getCode());
 		if (null == afafterPayments) {
 			response.setAfterPayAccumulationFundFlag(NormalFlag.NO.getCode());
 		}else{
 			response.setAfterPayAccumulationFundFlag(NormalFlag.YES.getCode());
-			response.setAfterAccumulationFundPayments(afafterPayments.stream().map(r->{
-				return processSocialSecurityPaymentDetailDTO(r);
-			}).collect(Collectors.toList()));
+			response.setAfterAccumulationFundPayment(processSocialSecurityPaymentDetailDTO(afafterPayments));
 		}
 		return response;
 	}
@@ -208,15 +192,16 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //		return dto;
 //	}
 
-	private SocialSecurityPaymentDetailDTO processSocialSecurityPaymentDetailDTO(List payments) {
-		SocialSecurityPaymentDetailDTO dto = ConvertHelper.convert(r,SocialSecurityPaymentDetailDTO.class);
+	private SocialSecurityPaymentDetailDTO processSocialSecurityPaymentDetailDTO(List<SocialSecurityPayment> payments) {
+		SocialSecurityPaymentDetailDTO dto = new SocialSecurityPaymentDetailDTO();
 		dto.setItems(payments.stream().map(r->{
 			return processSocialSecurityItemDTO(r);
 		}).collect(Collectors.toList()));
 		return dto;
 	}
 
-	private Object processSocialSecurityItemDTO(Object r) {
+	private SocialSecurityItemDTO processSocialSecurityItemDTO(SocialSecurityPayment r) {
+		return ConvertHelper.convert(r, SocialSecurityItemDTO.class);
 	}
 
 	@Override
