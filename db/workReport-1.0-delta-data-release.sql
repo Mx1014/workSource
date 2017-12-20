@@ -20,3 +20,6 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('540100', '汇报设置', '540100', NULL, 'react:/work-report/report-setting', '0', '2', '/500000/540000/540100', 'organization', '601', '54000', '3', NULL, 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('540200', '表单管理', '540200', NULL, 'react:/work-report/report-setting', '0', '2', '/500000/540000/540200', 'organization', '602', '54000', '3', NULL, 'module');
 
+-- local Template
+SET @tem_ip = (SELECT MAX(id) FROM eh_locale_templates);
+INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@tem_ip := @tem_ip + 1, 'work.report.notification', 1, 'zh_CN', '提交工作汇报给接收人发信息', '${applierName}给你提交了${reportName}', 0);

@@ -4,14 +4,17 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.comment.OwnerTokenDTO;
 import com.everhomes.rest.comment.OwnerType;
 import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.ui.user.SceneContactDTO;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
@@ -29,10 +32,7 @@ import org.springframework.transaction.TransactionStatus;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -61,6 +61,9 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Autowired
     private LocaleTemplateService localeTemplateService;
+
+    @Autowired
+    private MessagingService messagingService;
 
     private SimpleDateFormat reportFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -446,7 +449,10 @@ public class WorkReportServiceImpl implements WorkReportService {
                 receiver.setReceiverName(fixUpUserName(receiverId));
                 receiver.setReceiverAvatar(user.getAvatar());
                 receiver.setReadStatus(WorkReportReadStatus.UNREAD.getCode());
+                //  create the receiver.
                 workReportValProvider.createWorkReportValReceiverMap(receiver);
+                //  send message to the receiver.
+                sendMessageAfterEditWorkReportVal(user, val.getApplierName(), report.getReportName(), receiverId);
             }
             return valId;
         });
@@ -478,29 +484,44 @@ public class WorkReportServiceImpl implements WorkReportService {
         return null;
     }
 
-/*    private void sendMessageAfterEditWorkReportVal(){
+    private void sendMessageAfterEditWorkReportVal(User user, String applierName, String reportName, Long receiverId) {
 
-        User user = uesrS
+        String locale = Locale.SIMPLIFIED_CHINESE.toString();
+        if (user != null) {
+            locale = user.getLocale();
+        }
 
-        String locale = currentLocale();
+        Map<String, String> model = new HashMap<>();
+        model.put("applierName", applierName);
+        model.put("reportName", reportName);
+
 
         String toTargetTemplate = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
-                OrganizationNotificationTemplateCode.SCOPE,
-                toTargetTemplateCode,
+                WorkReportNotificationTemplateCode.SCOPE,
+                WorkReportNotificationTemplateCode.POST_WORK_REPORT_FOR_RECEIVER,
                 locale,
                 model,
                 "Template Not Found"
         );
-    }*/
+        // 给目标用户发送消息
+        MessageDTO message = new MessageDTO();
+        message.setAppId(AppConstants.APPID_MESSAGING);
+        message.setSenderUid(User.SYSTEM_UID);
+        message.setBodyType(MessageBodyType.TEXT.getCode());
 
-    private String currentLocale() {
-        String locale = Locale.SIMPLIFIED_CHINESE.toString();
-        User user = UserContext.current().getUser();
-        if (user != null) {
-            locale = user.getLocale();
-        }
-        return locale;
+        message.setBody(toTargetTemplate);
+        message.setMetaAppId(AppConstants.APPID_DEFAULT);
+        message.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(receiverId)));
+
+        messagingService.routeMessage(
+                User.SYSTEM_USER_LOGIN,
+                AppConstants.APPID_MESSAGING,
+                ChannelType.USER.getCode(),
+                String.valueOf(receiverId),
+                message,
+                MessagingConstants.MSG_FLAG_STORED.getCode()
+        );
     }
 
     @Override
