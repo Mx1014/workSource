@@ -73,5 +73,5 @@ public interface QualityService {
 
 	CurrentUserInfoDTO getCurrentUserInfo();
 
-    void exportSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd, HttpServletResponse httpResponse);
+	HttpServletResponse exportSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd, HttpServletResponse httpResponse);
 }

@@ -21,6 +21,7 @@ import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.equipment.EquipmentServiceErrorCode;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.Status;
 import com.everhomes.rest.forum.AttachmentDescriptor;
@@ -29,7 +30,6 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.*;
-import com.everhomes.rest.parking.ParkingLocalStringCode;
 import com.everhomes.rest.quality.*;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
@@ -37,7 +37,6 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.search.QualityInspectionSampleSearcher;
 import com.everhomes.search.QualityTaskSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
@@ -45,7 +44,6 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.excel.ExcelUtils;
 import com.mysql.jdbc.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -4169,33 +4167,77 @@ public class QualityServiceImpl implements QualityService {
 	}
 
 	@Override
-	public void exportSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd, HttpServletResponse httpResponse) {
+	public HttpServletResponse exportSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd, HttpServletResponse httpResponse) {
 		CountScoresResponse dataResponse = countSampleTaskCommunityScores(cmd);
-		String fileName = String.format("绩效考核%s", DateUtil.dateToStr(new java.util.Date(), DateUtil.DATE_TIME_NO_SLASH));
-		ExcelUtils excelUtils = new ExcelUtils(httpResponse, fileName, "绩效考核");
-		if (dataResponse.getScores() != null && dataResponse.getScores().size() > 0) {
-			List<String> propertyNames = new ArrayList<>();
-			List<String> titleNames = new ArrayList<>();
-			List<Integer> titleSizes = Arrays.asList(20, 20, 20);
-			excelUtils.setNeedSequenceColumn(true);
+		URL rootPath = QualityServiceImpl.class.getResource("/");
+		String filePath = rootPath.getPath() + this.downloadDir;
+		File file = new File(filePath);
+		if (!file.exists())
+			file.mkdirs();
+		filePath = filePath + "qualityScores" + System.currentTimeMillis() + ".xlsx";
+		//新建了一个文件
+		this.createQualityScoreBook(filePath, dataResponse);
 
-			//dataResponse.getSpecifications().forEach(s->titleNames.add(s.getSpecificationName()));
-			//List data = new ArrayList();
-			propertyNames.add("排名");
-			propertyNames.add("项目名称");
-			propertyNames.add("项目总得分");
+		return download(filePath, httpResponse);
 
-			//List<ScoreGroupByTargetDTO> scoreGroupByTarget = dataResponse.getScores();
-			titleNames.add("orderId");
-			titleNames.add("targetName");
-			titleNames.add("totalScore");
+	}
 
 
-			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, dataResponse.getScores());
-		} else {
-			throw RuntimeErrorException.errorWith(ParkingLocalStringCode.SCOPE_STRING,
-					Integer.parseInt(ParkingLocalStringCode.NO_DATA), "no data");
+	private void createQualityScoreBook(String path, CountScoresResponse dataResponse) {
+		Workbook wb = new XSSFWorkbook();
+		Sheet sheet = wb.createSheet("qualityScores");
+
+		this.createQualityScoreBookSheetHead(sheet, dataResponse.getSpecifications());
+		List<ScoreGroupByTargetDTO> scores = dataResponse.getScores();
+		for (ScoreGroupByTargetDTO dto : scores) {
+			this.setNewQualityScoreBookRow(sheet, dto);
 		}
+
+		try {
+			FileOutputStream out = new FileOutputStream(path);
+
+			wb.write(out);
+			wb.close();
+			out.close();
+
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_CREATE_EXCEL,
+					e.getLocalizedMessage());
+		}
+
+	}
+
+	private void createQualityScoreBookSheetHead(Sheet sheet, List<CountScoresSpecificationDTO> specifications) {
+
+		Row row = sheet.createRow(sheet.getLastRowNum());
+		int i = -1;
+		for (CountScoresSpecificationDTO scoresSpecification : specifications) {
+			row.createCell(++i).setCellValue(scoresSpecification.getSpecificationName());
+		}
+		row.createCell(++i).setCellValue("排名");
+		row.createCell(++i).setCellValue("项目名称");
+		row.createCell(++i).setCellValue("项目面积");
+		for (CountScoresSpecificationDTO score : specifications) {
+			row.createCell(++i).setCellValue(score.getSpecificationName()+score.getSpecificationWeight()*100+"%");
+		}
+		row.createCell(++i).setCellValue("加权得分");
+
+	}
+
+	private void setNewQualityScoreBookRow(Sheet sheet, ScoreGroupByTargetDTO dto) {
+		Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+		int i = -1;
+		List<ScoreDTO> scores = dto.getScores();
+		row.createCell(++i).setCellValue(dto.getOrderId());
+		row.createCell(++i).setCellValue(dto.getTargetName());
+		row.createCell(++i).setCellValue(dto.getBuildArea());
+		for (ScoreDTO score : scores) {
+			row.createCell(++i).setCellValue(score.getScore());
+
+		}
+		row.createCell(++i).setCellValue(dto.getTotalScore());
 
 	}
 }

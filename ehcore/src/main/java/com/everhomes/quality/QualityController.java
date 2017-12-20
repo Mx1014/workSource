@@ -860,12 +860,9 @@ public class QualityController extends ControllerBase {
 	 */
 	@RequestMapping("exportEquipments")
 	@RestReturn(String.class)
-	public RestResponse export(CountSampleTaskCommunityScoresCommand cmd, HttpServletResponse httpResponse) {
+	public HttpServletResponse export(CountSampleTaskCommunityScoresCommand cmd, HttpServletResponse httpResponse) {
 
-		qualityService.exportSampleTaskCommunityScores(cmd, httpResponse);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
+		HttpServletResponse response = qualityService.exportSampleTaskCommunityScores(cmd, httpResponse);
 		return response;
 
 	}
