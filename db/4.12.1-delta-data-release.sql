@@ -651,12 +651,13 @@ DELETE FROM eh_pm_task_target_statistics WHERE task_category_id NOT IN (SELECT i
 
 
 
+
 -- add by wh 考勤菜单分二级
 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) 
-VALUES('506001','打卡记录','50600',NULL,'react:/attendance-management/attendance-record/1','1','2','/500000/506000/506001','park','543','506000','3',NULL,'module');
+VALUES('506001','打卡记录','506000',NULL,'react:/attendance-management/attendance-record/1','1','2','/500000/506000/506001','organization','543','506000','3',NULL,'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) 
-VALUES('506002','考勤规则','50600',NULL,'react:/attendance-management/attendance-record/2','1','2','/500000/506000/506002','park','544','506000','3',NULL,'module');
+VALUES('506002','考勤规则','506000',NULL,'react:/attendance-management/attendance-record/2','1','2','/500000/506000/506002','organization','544','506000','3',NULL,'module');
 
 SET @scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '506001', '打卡记录', 'EhNamespaces', '999971', '2');
