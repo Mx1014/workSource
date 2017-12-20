@@ -14,6 +14,8 @@ public interface WorkReportValProvider {
 
     WorkReportVal getWorkReportValById(Long id);
 
+    WorkReportVal getValidWorkReportValById(Long id);
+
     List<WorkReportVal> listWorkReportValsByApplierIds(Integer namespaceId, Integer pageOffset, Integer pageSize, Long ownerId, String ownerType, List<Long> applierIds);
 
     List<WorkReportVal> listWorkReportValsByReceiverId(Integer namespaceId, Integer pageOffset, Long receiverId, ListWorkReportsValCommand cmd);

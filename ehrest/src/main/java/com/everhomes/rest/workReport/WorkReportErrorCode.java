@@ -1,8 +1,8 @@
-package com.everhomes.workReport;
+package com.everhomes.rest.workReport;
 
 public interface WorkReportErrorCode {
 
-    String WORK_REPORT = "WORK_REPORT";
+    String SCOPE = "WORK_REPORT";
 
     int ERROR_WORK_REPORT_ABNORMAL = 10001; //  工作汇报异常
 

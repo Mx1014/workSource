@@ -69,6 +69,15 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
     }
 
     @Override
+    public WorkReportVal getValidWorkReportValById(Long id){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportValsRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VALS);
+        query.addConditions(Tables.EH_WORK_REPORT_VALS.ID.eq(id));
+        query.addConditions(Tables.EH_WORK_REPORT_VALS.STATUS.eq(WorkReportStatus.VALID.getCode()));
+        return query.fetchOneInto(WorkReportVal.class);
+    }
+
+    @Override
     public List<WorkReportVal> listWorkReportValsByApplierIds(
             Integer namespaceId, Integer pageOffset, Integer pageSize, Long ownerId, String ownerType, List<Long> applierIds) {
         List<WorkReportVal> results = new ArrayList<>();

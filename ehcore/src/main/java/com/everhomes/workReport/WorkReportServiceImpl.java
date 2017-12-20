@@ -19,6 +19,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -677,48 +678,55 @@ public class WorkReportServiceImpl implements WorkReportService {
         Long currentUserId = UserContext.currentUserId();
 
 
-        WorkReportVal reportVal = workReportValProvider.getWorkReportValById(cmd.getReportValId());
-        if (reportVal != null) {
-            WorkReport report = workReportProvider.getWorkReportById(reportVal.getReportId());
+        WorkReportVal reportVal = workReportValProvider.getValidWorkReportValById(cmd.getReportValId());
+        //  check the reportVal
+        if (reportVal == null)
+            throw RuntimeErrorException.errorWith(WorkReportErrorCode.SCOPE, WorkReportErrorCode.ERROR_REPORT_VAL_NOT_FOUND,
+                    "work report val has been deleted.");
 
-            /** update the status **/
-            WorkReportValReceiverMap receiverMap = workReportValProvider.getWorkReportValReceiverByReceiverId(
-                    namespaceId, reportVal.getId(), currentUserId);
-            if (receiverMap != null) {
-                receiverMap.setReadStatus(WorkReportReadStatus.READ.getCode());
-                workReportValProvider.updateWorkReportValReceiverMap(receiverMap);
-            }
+        WorkReport report = workReportProvider.getWorkReportById(reportVal.getReportId());
 
-            /** get the result **/
-            //  1) get receivers.
-            List<SceneContactDTO> receivers = listWorkReportValReceivers(cmd.getReportValId());
-            //  2) get the field values which has been post by the user.
-            GetGeneralFormValuesCommand valuesCommand = new GetGeneralFormValuesCommand();
-            valuesCommand.setSourceId(reportVal.getId());
-            valuesCommand.setSourceType(WORK_REPORT_VAL);
-            List<PostApprovalFormItem> values = generalFormService.getGeneralFormValues(valuesCommand);
-            List<GeneralFormFieldDTO> fields = values.stream().map(r ->
-                    ConvertHelper.convert(r, GeneralFormFieldDTO.class)
-            ).collect(Collectors.toList());
+        /** update the status **/
+        WorkReportValReceiverMap receiverMap = workReportValProvider.getWorkReportValReceiverByReceiverId(
+                namespaceId, reportVal.getId(), currentUserId);
+        //  check the userId
+        if (receiverMap == null)
+            throw RuntimeErrorException.errorWith(WorkReportErrorCode.SCOPE, WorkReportErrorCode.ERROR_NO_READ_PERMISSIONS,
+                    "no read permissions.");
 
-            //  3) convert the result
-            dto.setReportValId(reportVal.getId());
-            dto.setReportId(reportVal.getReportId());
-            dto.setReportType(reportVal.getReportType());
-            dto.setReportTime(reportVal.getReportTime());
-            dto.setTitle(report.getReportName());
-            dto.setApplierUserId(reportVal.getApplierUserId());
-            dto.setApplierName(reportVal.getApplierName());
-            dto.setApplierDetailId(getUserDetailId(reportVal.getApplierUserId()));
-            dto.setApplierUserAvatar(getUserAvatar(reportVal.getApplierUserId()));
-            dto.setCreateTime(reportVal.getCreateTime());
-            dto.setReceivers(receivers);
-            dto.setUpdateTime(reportVal.getUpdateTime());
-            dto.setValues(fields);
+        receiverMap.setReadStatus(WorkReportReadStatus.READ.getCode());
+        workReportValProvider.updateWorkReportValReceiverMap(receiverMap);
 
-            //  4) get the comment
-            dto.setOwnerToken(populateOwnerToken(reportVal.getId()));
-        }
+
+        /** get the result **/
+        //  1) get receivers.
+        List<SceneContactDTO> receivers = listWorkReportValReceivers(cmd.getReportValId());
+        //  2) get the field values which has been post by the user.
+        GetGeneralFormValuesCommand valuesCommand = new GetGeneralFormValuesCommand();
+        valuesCommand.setSourceId(reportVal.getId());
+        valuesCommand.setSourceType(WORK_REPORT_VAL);
+        List<PostApprovalFormItem> values = generalFormService.getGeneralFormValues(valuesCommand);
+        List<GeneralFormFieldDTO> fields = values.stream().map(r ->
+                ConvertHelper.convert(r, GeneralFormFieldDTO.class)
+        ).collect(Collectors.toList());
+
+        //  3) convert the result
+        dto.setReportValId(reportVal.getId());
+        dto.setReportId(reportVal.getReportId());
+        dto.setReportType(reportVal.getReportType());
+        dto.setReportTime(reportVal.getReportTime());
+        dto.setTitle(report.getReportName());
+        dto.setApplierUserId(reportVal.getApplierUserId());
+        dto.setApplierName(reportVal.getApplierName());
+        dto.setApplierDetailId(getUserDetailId(reportVal.getApplierUserId()));
+        dto.setApplierUserAvatar(getUserAvatar(reportVal.getApplierUserId()));
+        dto.setCreateTime(reportVal.getCreateTime());
+        dto.setReceivers(receivers);
+        dto.setUpdateTime(reportVal.getUpdateTime());
+        dto.setValues(fields);
+
+        //  4) get the comment
+        dto.setOwnerToken(populateOwnerToken(reportVal.getId()));
         return dto;
     }
 
