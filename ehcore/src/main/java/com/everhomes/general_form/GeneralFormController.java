@@ -54,18 +54,33 @@ public class GeneralFormController extends ControllerBase {
 	}
 
     /**
-     * <b>URL: /general_form/postGeneralForm</b>
-     * <p> 提交数据，并获取表单的信息 </p>
-     */
-    @RequestMapping("postGeneralForm")
-    @RestReturn(value=PostGeneralFormDTO.class)
-    public RestResponse postGeneralForm(PostGeneralFormCommand cmd) {
+	 * <b>URL: /general_form/postGeneralForm</b>
+	 * <p> 提交表单值 </p>
+	 */
+	@RequestMapping("postGeneralForm")
+	@RestReturn(value=PostGeneralFormDTO.class)
+	public RestResponse postGeneralForm(PostGeneralFormCommand cmd) {
 		PostGeneralFormDTO dto = generalFormService.postGeneralForm(cmd);
-    	RestResponse response = new RestResponse(dto);
-    	response.setErrorCode(ErrorCodes.SUCCESS);
-    	response.setErrorDescription("OK");
-    	
-    	return response;
-    }
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
+
+	/**
+	 * <b>URL: /general_form/updateGeneralFormVal</b>
+	 * <p> 编辑表单值 </p>
+	 */
+	@RequestMapping("updateGeneralFormVal")
+	@RestReturn(value=PostGeneralFormDTO.class)
+	public RestResponse updateGeneralFormVal(PostGeneralFormCommand cmd) {
+		PostGeneralFormDTO dto = generalFormService.updateGeneralFormVal(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
 
 }

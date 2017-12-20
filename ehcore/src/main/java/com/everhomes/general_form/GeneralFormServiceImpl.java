@@ -666,5 +666,10 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         gf.setOrganizationId(cmd.getOrganizationId());
         return gf;
     }
+
+    @Override
+    public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormCommand cmd) {
+        return null;
+    }
 }
 
