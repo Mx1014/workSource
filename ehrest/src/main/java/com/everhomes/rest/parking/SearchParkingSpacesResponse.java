@@ -5,7 +5,10 @@ import com.everhomes.discover.ItemType;
 import java.util.List;
 
 /**
- * @author sw on 2017/12/18.
+ * <ul>
+ * <li>spaceDTOS: 车位列表，{@link com.everhomes.rest.parking.ParkingSpaceDTO}</li>
+ * <li>nextPageAnchor: 下一页瞄</li>
+ * </ul>
  */
 public class SearchParkingSpacesResponse {
     private Long nextPageAnchor;
