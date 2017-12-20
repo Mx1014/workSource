@@ -481,7 +481,11 @@ public class WorkReportServiceImpl implements WorkReportService {
         Long userId = UserContext.currentUserId();
 
         if (cmd.getReportValId() != null) {
-            WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
+            WorkReport report = workReportProvider.getValidWorkReportById(cmd.getReportId());
+            if (report == null)
+                throw RuntimeErrorException.errorWith(WorkReportErrorCode.SCOPE, WorkReportErrorCode.ERROR_WORK_REPORT_ABNORMAL,
+                        "work report status is abnormal.");
+
             List<GeneralFormFieldDTO> fields = new ArrayList<>();
 
             //  get the new form fields.

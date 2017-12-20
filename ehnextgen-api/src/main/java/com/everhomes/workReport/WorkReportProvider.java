@@ -12,6 +12,8 @@ public interface WorkReportProvider {
 
     WorkReport getWorkReportById(Long id);
 
+    WorkReport getValidWorkReportById(Long id);
+
     WorkReport getWorkReportByTemplateId(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long templateId);
 
     List<WorkReport> listWorkReports(Long pageAnchor, Integer pageSize, Long organizationId, String ownerType, Long moduleId, Byte status);

@@ -70,6 +70,15 @@ public class WorkReportProviderImpl implements WorkReportProvider {
     }
 
     @Override
+    public WorkReport getValidWorkReportById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportsRecord> query = context.selectQuery(Tables.EH_WORK_REPORTS);
+        query.addConditions(Tables.EH_WORK_REPORTS.ID.eq(id));
+        query.addConditions(Tables.EH_WORK_REPORTS.STATUS.eq(WorkReportStatus.VALID.getCode()));
+        return query.fetchOneInto(WorkReport.class);
+    }
+
+    @Override
     public WorkReport getWorkReportByTemplateId(
             Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long templateId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
