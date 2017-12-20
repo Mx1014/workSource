@@ -3,6 +3,9 @@
 CREATE TABLE `eh_reserve_rules` (
   `id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'id',
   `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_type` varchar(255) NOT NULL COMMENT 'owner type: community, organization',
+  `owner_id` bigint(20) NOT NULL DEFAULT 0 COMMENT 'community id or organization id',
+
   `resource_type` varchar(255) DEFAULT NULL COMMENT 'resource type , default, vip_parking',
   `resource_id` bigint(20) DEFAULT NULL DEFAULT 0 COMMENT 'resource id or default',
 
