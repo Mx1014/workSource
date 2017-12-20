@@ -112,6 +112,7 @@ CREATE TABLE `eh_reserve_orders` (
   `owner_id` bigint(20) NOT NULL DEFAULT 0 COMMENT 'community id or organization id',
   `resource_type` varchar(255) DEFAULT NULL,
   `resource_type_id` bigint(20) NOT NULL DEFAULT 0 COMMENT 'resource type id',
+  `resource_id` bigint(20) NOT NULL DEFAULT 0 COMMENT 'resource type id',
   `resource_json` text COMMENT '资源json数据',
 
   `order_no` varchar(20) NOT NULL COMMENT '订单编号',
@@ -144,11 +145,8 @@ CREATE TABLE `eh_reserve_orders` (
   `cancel_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'cancel user id',
   `cancel_time` datetime DEFAULT NULL,
 
-  `string_tag1` varchar(128) DEFAULT NULL,
-  `string_tag2` varchar(128) DEFAULT NULL,
-  `string_tag3` varchar(128) DEFAULT NULL,
-  `string_tag4` varchar(128) DEFAULT NULL,
-  `string_tag5` varchar(128) DEFAULT NULL,
+  `string_tag1` varchar(256) DEFAULT '',
+  `string_tag2` varchar(256) DEFAULT '',
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
