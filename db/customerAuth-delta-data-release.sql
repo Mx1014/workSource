@@ -109,8 +109,35 @@ INSERT INTO `eh_reflection_service_module_apps` (`id`, `active_app_id`, `namespa
 INSERT INTO `eh_reflection_service_module_apps` (`id`, `active_app_id`, `namespace_id`, `name`, `module_id`, `instance_config`, `status`, `action_type`, `action_data`, `update_time`, `module_control_type`, `multiple_flag`, `custom_tag`, `custom_path`, `menu_id`) VALUES ((@app_id := @app_id + 1), @app_id, '999992', '合同管理', '21200', NULL, '2', '13', 'contract', NOW(), 'community_control', '0', '', NULL, '21200');
 INSERT INTO `eh_reflection_service_module_apps` (`id`, `active_app_id`, `namespace_id`, `name`, `module_id`, `instance_config`, `status`, `action_type`, `action_data`, `update_time`, `module_control_type`, `multiple_flag`, `custom_tag`, `custom_path`, `menu_id`) VALUES ((@app_id := @app_id + 1), @app_id, '999992', '能耗管理', '49100', NULL, '2', '13', '{"url":"http://xiongying.lab.everhomes.com/energy-management/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}', NOW(), 'community_control', '0', '', NULL, '49100');
     
+DROP PROCEDURE IF EXISTS create_app;
+DELIMITER //
+CREATE PROCEDURE `create_app` ()
+BEGIN
+  DECLARE ns INTEGER;
+  DECLARE moduleId LONG;
+  DECLARE done INT DEFAULT FALSE;
+  DECLARE cur CURSOR FOR SELECT module_id, namespace_id FROM eh_service_module_scopes where module_id in (21100, 21200, 49100) and apply_policy = 2;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+  OPEN cur;
+  read_loop: LOOP
+                FETCH cur INTO moduleId, ns;
+                IF done THEN
+                    LEAVE read_loop;
+                END IF;
+
+        SET @app_id = (SELECT MAX(id) FROM `eh_reflection_service_module_apps`);   
+        INSERT INTO `eh_reflection_service_module_apps` (`id`, `active_app_id`, `namespace_id`, `name`, `module_id`, `instance_config`, `status`, `action_type`, `action_data`, `update_time`, `module_control_type`, `multiple_flag`, `custom_tag`, `custom_path`, `menu_id`) VALUES ((@app_id := @app_id + 1), @app_id, ns, '', moduleId, NULL, '2', '13', '', NOW(), 'community_control', '0', '', NULL, moduleId);
+
+  END LOOP;
+  CLOSE cur;
+END
+//
+DELIMITER ;
+CALL create_app;
+DROP PROCEDURE IF EXISTS create_app;    
     
-    
-    
+update eh_reflection_service_module_apps set name = '客户管理', action_data = 'customer' where module_id = 21100;      
+update eh_reflection_service_module_apps set name = '合同管理', action_data = 'contract' where module_id = 21200;      
+update eh_reflection_service_module_apps set name = '能耗管理', action_data = '{"url":"http://xiongying.lab.everhomes.com/energy-management/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' where module_id = 49100;      
     
     
