@@ -9,6 +9,9 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>返回值:
+ * <li>detailId: detailid</li>
+ * <li>userName: 用户姓名</li>
+ * <li>socialSecurityNo: 社保/公积金号</li>
  * <li>payCurrentSocialSecurityFlag: 当月缴社保标识</li>
  * <li>afterPaySocialSecurityFlag: 补缴社保标识</li>
  * <li>payCurrentAccumulationFundFlag: 当月缴公积金标识</li>
@@ -22,6 +25,10 @@ import com.everhomes.util.StringHelper;
  */
 public class GetSocialSecurityPaymentDetailsResponse {
 
+	private Long detailId;
+	private String userName;
+	private String socialSecurityNo;
+	
 	private Byte payCurrentSocialSecurityFlag;
 
 	private Byte afterPaySocialSecurityFlag;
@@ -31,36 +38,15 @@ public class GetSocialSecurityPaymentDetailsResponse {
 	private Byte afterPayAccumulationFundFlag;
 
 	private String paymentMonth;
-
-	@ItemType(SocialSecurityPaymentDetailDTO.class)
-	private List<SocialSecurityPaymentDetailDTO> socialSecurityPayments;
-
-	@ItemType(SocialSecurityPaymentDetailDTO.class)
-	private List<SocialSecurityPaymentDetailDTO> afterSocialSecurityPayments;
-
-	@ItemType(SocialSecurityPaymentDetailDTO.class)
-	private List<SocialSecurityPaymentDetailDTO> accumulationFundPayments;
-
-	@ItemType(SocialSecurityPaymentDetailDTO.class)
-	private List<SocialSecurityPaymentDetailDTO> afterAccumulationFundPayments;
-
-	public GetSocialSecurityPaymentDetailsResponse() {
-
-	}
-
-	public GetSocialSecurityPaymentDetailsResponse(Byte payCurrentSocialSecurityFlag, Byte afterPaySocialSecurityFlag, Byte payCurrentAccumulationFundFlag, Byte afterPayAccumulationFundFlag, String paymentMonth, List<SocialSecurityPaymentDetailDTO> socialSecurityPayments, List<SocialSecurityPaymentDetailDTO> afterSocialSecurityPayments, List<SocialSecurityPaymentDetailDTO> accumulationFundPayments, List<SocialSecurityPaymentDetailDTO> afterAccumulationFundPayments) {
-		super();
-		this.payCurrentSocialSecurityFlag = payCurrentSocialSecurityFlag;
-		this.afterPaySocialSecurityFlag = afterPaySocialSecurityFlag;
-		this.payCurrentAccumulationFundFlag = payCurrentAccumulationFundFlag;
-		this.afterPayAccumulationFundFlag = afterPayAccumulationFundFlag;
-		this.paymentMonth = paymentMonth;
-		this.socialSecurityPayments = socialSecurityPayments;
-		this.afterSocialSecurityPayments = afterSocialSecurityPayments;
-		this.accumulationFundPayments = accumulationFundPayments;
-		this.afterAccumulationFundPayments = afterAccumulationFundPayments;
-	}
-
+ 
+	private SocialSecurityPaymentDetailDTO socialSecurityPayments;
+ 
+	private SocialSecurityPaymentDetailDTO afterSocialSecurityPayments;
+ 
+	private SocialSecurityPaymentDetailDTO accumulationFundPayments;
+ 
+	private SocialSecurityPaymentDetailDTO afterAccumulationFundPayments;
+ 
 	public Byte getPayCurrentSocialSecurityFlag() {
 		return payCurrentSocialSecurityFlag;
 	}
@@ -100,42 +86,69 @@ public class GetSocialSecurityPaymentDetailsResponse {
 	public void setPaymentMonth(String paymentMonth) {
 		this.paymentMonth = paymentMonth;
 	}
+ 
 
-	public List<SocialSecurityPaymentDetailDTO> getSocialSecurityPayments() {
+	public SocialSecurityPaymentDetailDTO getSocialSecurityPayments() {
 		return socialSecurityPayments;
 	}
 
-	public void setSocialSecurityPayments(List<SocialSecurityPaymentDetailDTO> socialSecurityPayments) {
+	public void setSocialSecurityPayments(SocialSecurityPaymentDetailDTO socialSecurityPayments) {
 		this.socialSecurityPayments = socialSecurityPayments;
 	}
 
-	public List<SocialSecurityPaymentDetailDTO> getAfterSocialSecurityPayments() {
+	public SocialSecurityPaymentDetailDTO getAfterSocialSecurityPayments() {
 		return afterSocialSecurityPayments;
 	}
 
-	public void setAfterSocialSecurityPayments(List<SocialSecurityPaymentDetailDTO> afterSocialSecurityPayments) {
+	public void setAfterSocialSecurityPayments(
+			SocialSecurityPaymentDetailDTO afterSocialSecurityPayments) {
 		this.afterSocialSecurityPayments = afterSocialSecurityPayments;
 	}
 
-	public List<SocialSecurityPaymentDetailDTO> getAccumulationFundPayments() {
+	public SocialSecurityPaymentDetailDTO getAccumulationFundPayments() {
 		return accumulationFundPayments;
 	}
 
-	public void setAccumulationFundPayments(List<SocialSecurityPaymentDetailDTO> accumulationFundPayments) {
+	public void setAccumulationFundPayments(SocialSecurityPaymentDetailDTO accumulationFundPayments) {
 		this.accumulationFundPayments = accumulationFundPayments;
 	}
 
-	public List<SocialSecurityPaymentDetailDTO> getAfterAccumulationFundPayments() {
+	public SocialSecurityPaymentDetailDTO getAfterAccumulationFundPayments() {
 		return afterAccumulationFundPayments;
 	}
 
-	public void setAfterAccumulationFundPayments(List<SocialSecurityPaymentDetailDTO> afterAccumulationFundPayments) {
+	public void setAfterAccumulationFundPayments(
+			SocialSecurityPaymentDetailDTO afterAccumulationFundPayments) {
 		this.afterAccumulationFundPayments = afterAccumulationFundPayments;
 	}
 
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public Long getDetailId() {
+		return detailId;
+	}
+
+	public void setDetailId(Long detailId) {
+		this.detailId = detailId;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public String getSocialSecurityNo() {
+		return socialSecurityNo;
+	}
+
+	public void setSocialSecurityNo(String socialSecurityNo) {
+		this.socialSecurityNo = socialSecurityNo;
 	}
 
 }

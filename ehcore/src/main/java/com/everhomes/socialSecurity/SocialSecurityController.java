@@ -260,16 +260,7 @@ public class SocialSecurityController extends ControllerBase {
 	public RestResponse listSocialSecurityHouseholdTypes(ListSocialSecurityHouseholdTypesCommand cmd){
 		return new RestResponse(socialSecurityService.listSocialSecurityHouseholdTypes(cmd));
 	}
-
-	/**
-	 * <p>21.查询公积金户籍档次</p>
-	 * <b>URL: /socialSecurity/listAccumulationFundHouseholdTypes</b>
-	 */
-	@RequestMapping("listAccumulationFundHouseholdTypes")
-	@RestReturn(ListAccumulationFundHouseholdTypesResponse.class)
-	public RestResponse listAccumulationFundHouseholdTypes(ListAccumulationFundHouseholdTypesCommand cmd){
-		return new RestResponse(socialSecurityService.listAccumulationFundHouseholdTypes(cmd));
-	}
+ 
 
 	/**
 	 * <p>22.得到汇总计算结果</p>
