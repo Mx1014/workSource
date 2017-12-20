@@ -2801,6 +2801,7 @@ public class QualityServiceImpl implements QualityService {
 				// change newSpecification to sepcification
 				qualityProvider.inactiveQualityInspectionStandardSpecificationMapBySpecificationId(specification.getId());
 			}else{
+				specification.setStatus(QualityStandardStatus.INACTIVE.getCode());
 				qualityProvider.updateQualitySpecification(specification);
 
 				qualityProvider.inactiveQualityInspectionStandardSpecificationMapBySpecificationId(specification.getId());
