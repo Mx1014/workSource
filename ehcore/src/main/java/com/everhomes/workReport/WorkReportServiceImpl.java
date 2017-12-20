@@ -465,7 +465,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             reportVal.setStatus(WorkReportStatus.INVALID.getCode());
             dbProvider.execute((TransactionStatus status) -> {
                 //  1.delete the report value.
-                workReportValProvider.deleteWorkReportVal(reportVal);
+                workReportValProvider.updateWorkReportVal(reportVal);
                 //  2.delete the report receivers.
                 workReportValProvider.deleteReportValReceiverByValId(reportVal.getId());
                 return null;
@@ -478,8 +478,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         return null;
     }
 
-/*
-    private void sendMessageAfterEditWorkReportVal(){
+/*    private void sendMessageAfterEditWorkReportVal(){
 
         User user = uesrS
 
@@ -493,8 +492,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 model,
                 "Template Not Found"
         );
-    }
-*/
+    }*/
 
     private String currentLocale() {
         String locale = Locale.SIMPLIFIED_CHINESE.toString();
@@ -726,14 +724,15 @@ public class WorkReportServiceImpl implements WorkReportService {
         /** update the status **/
         WorkReportValReceiverMap receiverMap = workReportValProvider.getWorkReportValReceiverByReceiverId(
                 namespaceId, reportVal.getId(), currentUserId);
-        //  check the userId
-        if (receiverMap == null)
-            throw RuntimeErrorException.errorWith(WorkReportErrorCode.SCOPE, WorkReportErrorCode.ERROR_NO_READ_PERMISSIONS,
-                    "no read permissions.");
+        //  check the receiver except applier.
+        if (reportVal.getApplierUserId().longValue() != currentUserId.longValue()) {
+            if (receiverMap == null)
+                throw RuntimeErrorException.errorWith(WorkReportErrorCode.SCOPE, WorkReportErrorCode.ERROR_NO_READ_PERMISSIONS,
+                        "no read permissions.");
 
-        receiverMap.setReadStatus(WorkReportReadStatus.READ.getCode());
-        workReportValProvider.updateWorkReportValReceiverMap(receiverMap);
-
+            receiverMap.setReadStatus(WorkReportReadStatus.READ.getCode());
+            workReportValProvider.updateWorkReportValReceiverMap(receiverMap);
+        }
 
         /** get the result **/
         //  1) get receivers.

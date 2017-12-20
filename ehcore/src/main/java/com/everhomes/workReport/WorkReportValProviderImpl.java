@@ -52,15 +52,6 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
     }
 
     @Override
-    public void deleteWorkReportVal(WorkReportVal val) {
-        val.setStatus(WorkReportStatus.INVALID.getCode());
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhWorkReportValsDao dao = new EhWorkReportValsDao(context.configuration());
-        dao.update(val);
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWorkReportVals.class, val.getId());
-    }
-
-    @Override
     public void updateWorkReportVal(WorkReportVal val) {
         val.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
