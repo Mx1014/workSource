@@ -127,14 +127,8 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
     }
 
     @Override
-    public List<Task> listTasks(Integer namespaceId, Long communityId, Long orgId, Long userId, Byte type, Byte status, Long pageAnchor, Integer count) {
-        return taskProvider.listTask(namespaceId, communityId, orgId, userId, type, status, pageAnchor, count);
-    }
-
-
-    @Override
-    public List<Task> searchTask(Long userId, Byte type, Byte status, String keyword, Long startTime, Long endTime, Long pageAnchor, Integer pageSize){
-        return taskProvider.searchTask(userId, type, status, keyword, startTime, endTime, pageAnchor, pageSize);
+    public List<Task> listTasks(Integer namespaceId, Long communityId, Long orgId, Long userId, Byte type, Byte status, String keyword, Long startTime, Long endTime,  Long pageAnchor, Integer count) {
+        return taskProvider.listTask(namespaceId, communityId, orgId, userId, type, status, keyword, startTime, endTime, pageAnchor, count);
     }
 
     @Override

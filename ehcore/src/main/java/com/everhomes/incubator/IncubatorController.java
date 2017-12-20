@@ -43,7 +43,7 @@ public class IncubatorController extends ControllerBase {
     @RequestMapping("exportIncubatorApply")
     @RestReturn(value=String.class)
     public RestResponse exportIncubatorApply(ExportIncubatorApplyCommand cmd) {
-
+        incubatorService.exportIncubatorApply(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

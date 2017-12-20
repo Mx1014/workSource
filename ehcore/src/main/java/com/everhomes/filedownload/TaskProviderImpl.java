@@ -62,7 +62,7 @@ public class TaskProviderImpl implements TaskProvider {
     }
 
     @Override
-    public List<Task> listTask(Integer namespaceId, Long communityId, Long orgId, Long userId, Byte type, Byte status, Long pageAnchor, Integer pageSize) {
+    public List<Task> listTask(Integer namespaceId, Long communityId, Long orgId, Long userId, Byte type, Byte status, String keyword, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhTasksRecord> query = context.selectQuery(Tables.EH_TASKS);
 
@@ -77,43 +77,6 @@ public class TaskProviderImpl implements TaskProvider {
         if(orgId != null){
             query.addConditions(Tables.EH_TASKS.ORG_ID.eq(orgId));
         }
-
-        if(userId != null){
-            query.addConditions(Tables.EH_TASKS.USER_ID.eq(userId));
-        }
-
-        if(type != null){
-            query.addConditions(Tables.EH_TASKS.TYPE.eq(type));
-        }
-
-        if(status != null){
-            query.addConditions(Tables.EH_TASKS.STATUS.eq(status));
-        }
-
-        if(pageAnchor != null){
-            query.addConditions(Tables.EH_TASKS.ID.le(pageAnchor));
-        }
-
-        query.addOrderBy(Tables.EH_TASKS.ID.desc());
-
-        if(pageSize != null){
-            query.addLimit(pageSize);
-        }
-
-
-        List<Task> result = new ArrayList<>();
-        query.fetch().map((r) -> {
-            result.add(ConvertHelper.convert(r, Task.class));
-            return null;
-        });
-
-        return result;
-    }
-
-    @Override
-    public List<Task> searchTask(Long userId, Byte type, Byte status, String keyword, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhTasksRecord> query = context.selectQuery(Tables.EH_TASKS);
 
         if(userId != null){
             query.addConditions(Tables.EH_TASKS.USER_ID.eq(userId));
@@ -158,7 +121,6 @@ public class TaskProviderImpl implements TaskProvider {
 
         return result;
     }
-
 
 
     @Override

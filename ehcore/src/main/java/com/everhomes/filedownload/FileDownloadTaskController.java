@@ -46,17 +46,17 @@ public class FileDownloadTaskController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <b>URL: /fileDownloadTask/searchFileDownloadTasks</b>
-     * <p>获取任务列表</p>
-     */
-    @RequestMapping("searchFileDownloadTasks")
-    @RestReturn(value=FileDownloadTaskDTO.class, collection = true)
-    public RestResponse searchFileDownloadTasks(SearchFileDownloadTasksCommand cmd) {
-        List<FileDownloadTaskDTO> dtos = fileDownloadTaskService.searchFileDownloadTasks(cmd);
-        RestResponse response = new RestResponse(dtos);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+//    /**
+//     * <b>URL: /fileDownloadTask/searchFileDownloadTasks</b>
+//     * <p>获取任务列表</p>
+//     */
+//    @RequestMapping("searchFileDownloadTasks")
+//    @RestReturn(value=FileDownloadTaskDTO.class, collection = true)
+//    public RestResponse searchFileDownloadTasks(SearchFileDownloadTasksCommand cmd) {
+//        List<FileDownloadTaskDTO> dtos = fileDownloadTaskService.searchFileDownloadTasks(cmd);
+//        RestResponse response = new RestResponse(dtos);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
 }

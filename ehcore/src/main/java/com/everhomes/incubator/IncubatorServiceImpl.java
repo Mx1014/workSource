@@ -99,6 +99,11 @@ public class IncubatorServiceImpl implements IncubatorService {
 	}
 
 	@Override
+	public void exportIncubatorApply(ExportIncubatorApplyCommand cmd) {
+
+	}
+
+	@Override
 	public ListIncubatorProjectTypeResponse listIncubatorProjectType() {
 		List<IncubatorProjectType> list = incubatorProvider.listIncubatorProjectType();
 		List<IncubatorProjectTypeDTO> dtos = new ArrayList<>();

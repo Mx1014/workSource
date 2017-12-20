@@ -43,7 +43,7 @@ public class FileDownloadTaskServiceImpl implements FileDownloadTaskService {
         Long userId = UserContext.currentUserId();
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        List<Task> fileDownloadTasks = taskService.listTasks(null, null, null, userId, TaskType.FILEDOWNLOAD.getCode(), null, cmd.getPageAnchor(), pageSize + 1);
+        List<Task> fileDownloadTasks = taskService.listTasks(null, null, null, userId, TaskType.FILEDOWNLOAD.getCode(), null,cmd.getKeyword(), cmd.getStartTime(), cmd.getEndTime(), cmd.getPageAnchor(), pageSize + 1);
         ListFileDownloadTasksResponse response = new ListFileDownloadTasksResponse();
         List<FileDownloadTaskDTO> dtos = new ArrayList<FileDownloadTaskDTO>();
         if(fileDownloadTasks != null){
@@ -58,29 +58,6 @@ public class FileDownloadTaskServiceImpl implements FileDownloadTaskService {
 
         response.setDtos(dtos);
         return response;
-    }
-
-    @Override
-    public List<FileDownloadTaskDTO> searchFileDownloadTasks(SearchFileDownloadTasksCommand cmd) {
-
-        Long userId = UserContext.currentUserId();
-
-        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        List<Task> fileDownloadTasks = taskService.searchTask(userId, TaskType.FILEDOWNLOAD.getCode(), null, cmd.getKeyword(), cmd.getStartTime(),cmd.getEndTime(),cmd.getPageAnchor(), pageSize + 1);
-        ListFileDownloadTasksResponse response = new ListFileDownloadTasksResponse();
-        List<FileDownloadTaskDTO> dtos = new ArrayList<FileDownloadTaskDTO>();
-
-        if(fileDownloadTasks != null) {
-
-            if (fileDownloadTasks.size() > pageSize) {
-                response.setNextPageAnchor(fileDownloadTasks.get(pageSize).getId());
-                fileDownloadTasks.remove(pageSize);
-            }
-
-            dtos = toFileDownloadTaskDtos(fileDownloadTasks);
-        }
-
-        return dtos;
     }
 
     private List<FileDownloadTaskDTO> toFileDownloadTaskDtos(List<Task> tasks){

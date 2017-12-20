@@ -13,6 +13,12 @@ import javax.validation.constraints.NotNull;
  */
 public class ListFileDownloadTasksCommand {
 
+    private String keyword;
+
+    private Long startTime;
+
+    private Long endTime;
+
     private Long pageAnchor;
 
     private Integer pageSize;
@@ -34,6 +40,30 @@ public class ListFileDownloadTasksCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public String getKeyword() {
+        return keyword;
+    }
+
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
+    }
+
+    public Long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Long startTime) {
+        this.startTime = startTime;
+    }
+
+    public Long getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Long endTime) {
+        this.endTime = endTime;
     }
 
     @Override

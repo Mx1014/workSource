@@ -15,13 +15,6 @@ public interface FileDownloadTaskService{
     ListFileDownloadTasksResponse listFileDownloadTasks(ListFileDownloadTasksCommand cmd);
 
     /**
-     * 管理后台搜索下载任务记录
-     * @param cmd
-     * @return
-     */
-    List<FileDownloadTaskDTO> searchFileDownloadTasks(SearchFileDownloadTasksCommand cmd);
-
-    /**
      * 取消任务
      * @param cmd 任务进度
      */
