@@ -328,6 +328,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 WorkReportDTO dto = new WorkReportDTO();
                 dto.setReportName(r.getReportName());
                 dto.setReportId(r.getId());
+                dto.setReportType(r.getReportType());
                 //  check the scope.
                 if (checkTheScope(r.getId(), userId))
                     reports.add(dto);
