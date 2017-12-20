@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>rentalSiteId：场所id</li>
  * <li>rentalType：类型</li>
+ * <li>priceType: 0 按时长定价 1 起步价模式</li>
  * <li>rentalDate：预定日期</li>
  * <li>startTime：开始时间</li>
  * <li>endTime：结束时间</li>
@@ -23,6 +24,7 @@ public class AddRentalBillCommand {
 	@NotNull
 	private Long rentalSiteId;   
 	private Byte rentalType;
+	private Byte priceType;
 	private Long rentalDate;
 //	@NotNull
 //	private Long startTime;
@@ -80,6 +82,14 @@ public class AddRentalBillCommand {
 
 	public void setPackageName(String packageName) {
 		this.packageName = packageName;
+	}
+
+	public Byte getPriceType() {
+		return priceType;
+	}
+
+	public void setPriceType(Byte priceType) {
+		this.priceType = priceType;
 	}
 
 	//	public Long getStartTime() {
