@@ -922,6 +922,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             return true;
         });
         readingLogSearcher.feedDoc(log);
+        meterSearcher.feedDoc(meter);
         return toEnergyMeterReadingLogDTO(log);
     }
 
