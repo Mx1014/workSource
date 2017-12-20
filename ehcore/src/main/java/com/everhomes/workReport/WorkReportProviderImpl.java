@@ -102,7 +102,7 @@ public class WorkReportProviderImpl implements WorkReportProvider {
             query.addConditions(Tables.EH_WORK_REPORTS.STATUS.eq(status));
         //  find by the pageAnchor
         if (pageAnchor != null)
-            query.addConditions(Tables.EH_WORK_REPORTS.ID.lt(pageAnchor));
+            query.addConditions(Tables.EH_WORK_REPORTS.ID.gt(pageAnchor));
         query.addLimit(pageSize + 1);
         query.addOrderBy(Tables.EH_WORK_REPORTS.ID.asc());
 

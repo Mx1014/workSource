@@ -629,9 +629,7 @@ public class WorkReportServiceImpl implements WorkReportService {
 
         //  calculate the pageOffset.
         Integer pageOffset = (cmd.getPageOffset() - 1) * cmd.getPageSize();
-        List<WorkReportVal> results = workReportValProvider.listWorkReportValsByReceiverId(
-                user.getNamespaceId(), pageOffset, cmd.getPageSize(), cmd.getOwnerId(),
-                cmd.getOwnerType(), user.getId(), cmd.getReadStatus());
+        List<WorkReportVal> results = workReportValProvider.listWorkReportValsByReceiverId(user.getNamespaceId(), pageOffset, user.getId(), cmd);
 
         if (results != null && results.size() > 0) {
             //  pageOffset.
@@ -707,7 +705,6 @@ public class WorkReportServiceImpl implements WorkReportService {
             ).collect(Collectors.toList());
 
             //  3) convert the result
-            //todo: 可能少了 title 需要定义
             dto.setReportValId(reportVal.getId());
             dto.setReportId(reportVal.getReportId());
             dto.setReportType(reportVal.getReportType());
@@ -728,7 +725,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         return dto;
     }
 
-    private String populateOwnerToken(Long reportValId){
+    private String populateOwnerToken(Long reportValId) {
         OwnerTokenDTO ownerTokenDto = new OwnerTokenDTO();
         ownerTokenDto.setId(reportValId);
         ownerTokenDto.setType(OwnerType.WORK_REPORT.getCode());

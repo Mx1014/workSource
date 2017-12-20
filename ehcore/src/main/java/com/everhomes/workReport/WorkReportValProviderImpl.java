@@ -5,6 +5,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.workReport.ListWorkReportsValCommand;
 import com.everhomes.rest.workReport.WorkReportReadStatus;
 import com.everhomes.rest.workReport.WorkReportStatus;
 import com.everhomes.sequence.SequenceProvider;
@@ -94,7 +95,7 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
 
     @Override
     public List<WorkReportVal> listWorkReportValsByReceiverId(
-            Integer namespaceId, Integer pageOffset, Integer pageSize, Long ownerId, String ownerType, Long receiverId, Byte readStatus) {
+            Integer namespaceId, Integer pageOffset, Long receiverId, ListWorkReportsValCommand cmd) {
         List<WorkReportVal> results = new ArrayList<>();
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -102,15 +103,23 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         query.addFrom(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP);
         query.addJoin(Tables.EH_WORK_REPORT_VALS, JoinType.JOIN,
                 Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.REPORT_VAL_ID.eq(Tables.EH_WORK_REPORT_VALS.ID));
+
+        //  EH_WORK_REPORT_VALS conditions.
+        query.addConditions(Tables.EH_WORK_REPORT_VALS.OWNER_ID.eq(cmd.getOwnerId()));
+        query.addConditions(Tables.EH_WORK_REPORT_VALS.OWNER_TYPE.eq(cmd.getOwnerType()));
+        if (cmd.getReportId() != null)
+            query.addConditions(Tables.EH_WORK_REPORT_VALS.REPORT_ID.eq(cmd.getReportId()));
+        if (cmd.getStartTime() != null && cmd.getEndTime() != null) {
+            query.addConditions(Tables.EH_WORK_REPORT_VALS.REPORT_TIME.ge(new Timestamp(cmd.getStartTime())));
+            query.addConditions(Tables.EH_WORK_REPORT_VALS.REPORT_TIME.le(new Timestamp(cmd.getEndTime())));
+        }
+
+        //  EH_WORK_REPORT_VAL_RECEIVER_MAP conditions.
         query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.RECEIVER_USER_ID.eq(receiverId));
-        if (readStatus != null)
-            query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.READ_STATUS.eq(readStatus));
-        query.addConditions(Tables.EH_WORK_REPORT_VALS.OWNER_ID.eq(ownerId));
-        query.addConditions(Tables.EH_WORK_REPORT_VALS.OWNER_TYPE.eq(ownerType));
-
-        //  set the pageOffset condition
-        query.addLimit(pageOffset, pageSize + 1);
+        if (cmd.getReadStatus() != null)
+            query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.READ_STATUS.eq(cmd.getReadStatus()));
+        query.addLimit(pageOffset, cmd.getPageSize() + 1);
         query.addOrderBy(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.CREATE_TIME.desc());
 
         //  return back
@@ -267,7 +276,7 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
     }
 
     @Override
-    public void deleteCommentAttachmentsByCommentId(Integer namespaceId, Long commentId){
+    public void deleteCommentAttachmentsByCommentId(Integer namespaceId, Long commentId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         UpdateQuery<EhWorkReportValCommentAttachmentsRecord> query = context.updateQuery(Tables.EH_WORK_REPORT_VAL_COMMENT_ATTACHMENTS);
         query.addValue(Tables.EH_WORK_REPORT_VAL_COMMENT_ATTACHMENTS.STATUS, WorkReportStatus.INVALID.getCode());
@@ -285,7 +294,7 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENT_ATTACHMENTS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENT_ATTACHMENTS.COMMENT_ID.in(commentIds));
         query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENT_ATTACHMENTS.STATUS.eq(WorkReportStatus.VALID.getCode()));
-        query.fetch().map(r ->{
+        query.fetch().map(r -> {
             results.add(ConvertHelper.convert(r, WorkReportValCommentAttachment.class));
             return null;
         });

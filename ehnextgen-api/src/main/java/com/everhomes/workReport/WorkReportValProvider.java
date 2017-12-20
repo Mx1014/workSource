@@ -1,5 +1,6 @@
 package com.everhomes.workReport;
 
+import com.everhomes.rest.workReport.ListWorkReportsValCommand;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 
@@ -15,7 +16,7 @@ public interface WorkReportValProvider {
 
     List<WorkReportVal> listWorkReportValsByApplierIds(Integer namespaceId, Integer pageOffset, Integer pageSize, Long ownerId, String ownerType, List<Long> applierIds);
 
-    List<WorkReportVal> listWorkReportValsByReceiverId(Integer namespaceId, Integer pageOffset, Integer pageSize, Long ownerId, String ownerType, Long receiverId, Byte readStatus);
+    List<WorkReportVal> listWorkReportValsByReceiverId(Integer namespaceId, Integer pageOffset, Long receiverId, ListWorkReportsValCommand cmd);
 
     void createWorkReportValReceiverMap(WorkReportValReceiverMap receiver);
 

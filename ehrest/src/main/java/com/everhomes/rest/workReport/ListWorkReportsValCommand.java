@@ -34,9 +34,9 @@ public class ListWorkReportsValCommand {
 
     private Long reportId;
 
-    private Timestamp startTime;
+    private Long startTime;
 
-    private Timestamp endTime;
+    private Long endTime;
 
     private Byte readStatus;
 
@@ -87,19 +87,19 @@ public class ListWorkReportsValCommand {
         this.reportId = reportId;
     }
 
-    public Timestamp getStartTime() {
+    public Long getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Timestamp startTime) {
+    public void setStartTime(Long startTime) {
         this.startTime = startTime;
     }
 
-    public Timestamp getEndTime() {
+    public Long getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Timestamp endTime) {
+    public void setEndTime(Long endTime) {
         this.endTime = endTime;
     }
 
