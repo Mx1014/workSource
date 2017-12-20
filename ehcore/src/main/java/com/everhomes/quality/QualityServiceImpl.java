@@ -4213,9 +4213,6 @@ public class QualityServiceImpl implements QualityService {
 
 		Row row = sheet.createRow(sheet.getLastRowNum());
 		int i = -1;
-		for (CountScoresSpecificationDTO scoresSpecification : specifications) {
-			row.createCell(++i).setCellValue(scoresSpecification.getSpecificationName());
-		}
 		row.createCell(++i).setCellValue("排名");
 		row.createCell(++i).setCellValue("项目名称");
 		row.createCell(++i).setCellValue("项目面积");
@@ -4229,10 +4226,10 @@ public class QualityServiceImpl implements QualityService {
 	private void setNewQualityScoreBookRow(Sheet sheet, ScoreGroupByTargetDTO dto) {
 		Row row = sheet.createRow(sheet.getLastRowNum() + 1);
 		int i = -1;
-		List<ScoreDTO> scores = dto.getScores();
 		row.createCell(++i).setCellValue(dto.getOrderId());
 		row.createCell(++i).setCellValue(dto.getTargetName());
 		row.createCell(++i).setCellValue(dto.getBuildArea());
+		List<ScoreDTO> scores = dto.getScores();
 		for (ScoreDTO score : scores) {
 			row.createCell(++i).setCellValue(score.getScore());
 
