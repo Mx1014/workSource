@@ -14236,24 +14236,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public void checkOrganizationpPivilege(Long orgId, Long pivilegeId){
-        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
-        listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
-        listServiceModuleAppsCommand.setModuleId(FlowConstants.ORGANIZATION_MODULE);
-        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
         Long organizaitonId = getTopEnterpriserIdOfOrganization(orgId);
-        Long appId = null;
-        if(null != apps && apps.getServiceModuleApps().size() > 0){
-            appId = apps.getServiceModuleApps().get(0).getId();
-        }
-        if (null != apps) {
-            if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), organizaitonId, organizaitonId, pivilegeId, appId, orgId, null)){
-                LOGGER.error("error_no_privileged. orgId = {}, userId = {}, pivilegeId={}", orgId, UserContext.currentUserId(), pivilegeId);
-                throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
-                        "check app privilege error");
-            }
-        }else{
-            LOGGER.error("no appId. rgId = {}, userId = {}", orgId, UserContext.currentUserId());
-        }
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), organizaitonId, pivilegeId, FlowConstants.ORGANIZATION_MODULE, null, null, orgId, null);
     }
 
     @Override

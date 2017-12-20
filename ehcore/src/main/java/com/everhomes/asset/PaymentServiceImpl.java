@@ -55,24 +55,9 @@ public class PaymentServiceImpl implements PaymentService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentServiceImpl.class);
     @Override
     public ListPaymentBillResp listPaymentBill(ListPaymentBillCmd cmd) throws Exception {
-        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
-        cmd1.setActionType((byte)13);
-        cmd1.setModuleId(PrivilegeConstants.ASSET_MODULE_ID);
-        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
-        ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
-        Long appId = null;
-        if(null != res && res.getServiceModuleApps().size() > 0){
-            appId = res.getServiceModuleApps().get(0).getId();
-        }
-        OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), UserContext.currentUserId(), OrganizationType.ENTERPRISE.getCode());
-        if(member != null && !StringUtils.isEmpty(member.getGroupPath())){
-            Long organizaitonId = Long.valueOf(member.getGroupPath().split("/")[1]);
-            member.setOrganizationId(organizaitonId);
-        }
-        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), member.getOrganizationId(), member.getOrganizationId(), PrivilegeConstants.ASSET_DEAL_VIEW, appId, null,  cmd.getCommunityId())){
-            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
-                    "check app privilege error");
-        }
+
+        //权限校验
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), null, PrivilegeConstants.ASSET_DEAL_VIEW, PrivilegeConstants.ASSET_MODULE_ID, (byte)13, null, null, cmd.getCommunityId());
 
         if(cmd.getNamespaceId() == null){
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());

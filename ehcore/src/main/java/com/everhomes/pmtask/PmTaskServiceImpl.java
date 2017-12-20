@@ -675,19 +675,20 @@ public class PmTaskServiceImpl implements PmTaskService {
 			}
 
 			if (Arrays.asList(PmTaskAppType.TYPES).contains(taskCategoryId)) {
-				ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
-				listServiceModuleAppsCommand.setNamespaceId(namespaceId);
-				listServiceModuleAppsCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
-				listServiceModuleAppsCommand.setCustomTag(String.valueOf(taskCategoryId));
-				ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
-				Long appId = null;
-				if(null != apps && apps.getServiceModuleApps().size() > 0){
-					appId = apps.getServiceModuleApps().get(0).getId();
-				}
-				if (null != apps) {
-					return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
-							orgId, privilege, appId, null, ownerId);
-				}
+//				ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+//				listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+//				listServiceModuleAppsCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
+//				listServiceModuleAppsCommand.setCustomTag(String.valueOf(taskCategoryId));
+//				ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+//				Long appId = null;
+//				if(null != apps && apps.getServiceModuleApps().size() > 0){
+//					appId = apps.getServiceModuleApps().get(0).getId();
+//				}
+//				if (null != apps) {
+//					return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
+//							orgId, privilege, appId, null, ownerId);
+//				}
+				userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilege, FlowConstants.PM_TASK_MODULE, null, String.valueOf(taskCategoryId), null, ownerId);
 			}
 		}
 
