@@ -164,6 +164,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 			response.setPayCurrentSocialSecurityFlag(NormalFlag.NO.getCode());
 		}else{
 			response.setPayCurrentSocialSecurityFlag(NormalFlag.YES.getCode());
+			SocialSecurityPaymentDetailDTO dto =
 			response.setSocialSecurityPayments(ssPayments.stream().map(r->{
 				return processSocialSecurityPaymentDetailDTO(r);
 			}).collect(Collectors.toList()));
@@ -175,9 +176,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 			response.setAfterPaySocialSecurityFlag(NormalFlag.NO.getCode());
 		}else{
 			response.setAfterPaySocialSecurityFlag(NormalFlag.YES.getCode());
-			response.setAfterSocialSecurityPayments(ssfaterPayments.stream().map(r->{
-				return processSocialSecurityPaymentDetailDTO(r);
-			}).collect(Collectors.toList()));
+			response.setAfterSocialSecurityPayments(processSocialSecurityPaymentDetailDTO(ssfaterPayments));
 		}
 		//公积金本月缴费
 		List<AccumulationFundPayment> afPayments = accumulationFundPaymentProvider.listAccumulationFundPayment(
@@ -204,14 +203,20 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 		return response;
 	}
 
-	private SocialSecurityPaymentDetailDTO processSocialSecurityPaymentDetailDTO(AccumulationFundPayment r) {
+//	private SocialSecurityPaymentDetailDTO processSocialSecurityPaymentDetailDTO(List<AccumulationFundPayment> r) {
+//		SocialSecurityPaymentDetailDTO dto = ConvertHelper.convert(r,SocialSecurityPaymentDetailDTO.class);
+//		return dto;
+//	}
+
+	private SocialSecurityPaymentDetailDTO processSocialSecurityPaymentDetailDTO(List payments) {
 		SocialSecurityPaymentDetailDTO dto = ConvertHelper.convert(r,SocialSecurityPaymentDetailDTO.class);
+		dto.setItems(payments.stream().map(r->{
+			return processSocialSecurityItemDTO(r);
+		}).collect(Collectors.toList()));
 		return dto;
 	}
 
-	private SocialSecurityPaymentDetailDTO processSocialSecurityPaymentDetailDTO(SocialSecurityPayment r) {
-		SocialSecurityPaymentDetailDTO dto = ConvertHelper.convert(r,SocialSecurityPaymentDetailDTO.class);
-		return dto;
+	private Object processSocialSecurityItemDTO(Object r) {
 	}
 
 	@Override
