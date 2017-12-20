@@ -9,6 +9,7 @@ import java.util.List;
 /**
  * <ul>
  *     <li>id: 标签ID</li>
+ *     <li>parentId: 父ID</li>
  *     <li>namespaceId: namespaceId</li>
  *     <li>communityId: communityId</li>
  *     <li>applyUserId: applyUserId</li>
@@ -27,13 +28,14 @@ import java.util.List;
  *     <li>approveTime: approveTime</li>
  *     <li>approveOpinion: approveOpinion</li>
  *     <li>createTime: createTime</li>
- *     <li>reApplyId: 如果该记录被拒绝后又重新申请，此字段为新申请记录的Id</li>
+ *     <li>reApplyFlag: 是否允许重新申请 0-否，1-是 参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>applyType: 申请类型 0-入孵，1-加速，2-入园{@link ApplyType}</li>
  * </ul>
  */
 public class IncubatorApplyDTO {
 
 	Long id;
+	Long parentId;
 	Integer namespaceId;
 	Long communityId;
 	Long applyUserId;
@@ -54,7 +56,7 @@ public class IncubatorApplyDTO {
 	Timestamp approveTime;
 	String approveOpinion;
 	Timestamp createTime;
-	Long reApplyId;
+	Byte reApplyFlag;
 	Byte applyType;
 
 
@@ -64,6 +66,14 @@ public class IncubatorApplyDTO {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
 	}
 
 	public Integer getNamespaceId() {
@@ -210,20 +220,20 @@ public class IncubatorApplyDTO {
 		this.createTime = createTime;
 	}
 
-	public Long getReApplyId() {
-		return reApplyId;
-	}
-
-	public void setReApplyId(Long reApplyId) {
-		this.reApplyId = reApplyId;
-	}
-
 	public Byte getApplyType() {
 		return applyType;
 	}
 
 	public void setApplyType(Byte applyType) {
 		this.applyType = applyType;
+	}
+
+	public Byte getReApplyFlag() {
+		return reApplyFlag;
+	}
+
+	public void setReApplyFlag(Byte reApplyFlag) {
+		this.reApplyFlag = reApplyFlag;
 	}
 
 	@Override

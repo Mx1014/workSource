@@ -13,6 +13,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.incubator.*;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -75,7 +76,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 			pageOffset = cmd.getPageOffset();
 		}
 
-		List<IncubatorApply>  list = incubatorProvider.listIncubatorApplies(namespaceId, applyUserId, keyWord, approveStatus, needReject, pageOffset, pageSize + 1, orderBy);
+		List<IncubatorApply>  list = incubatorProvider.listIncubatorApplies(namespaceId, applyUserId, keyWord, approveStatus, needReject, pageOffset, pageSize + 1, orderBy, cmd.getApplyType());
 
 		ListIncubatorApplyResponse response = new ListIncubatorApplyResponse();
 		if (list != null && list.size() > pageSize) {
@@ -88,8 +89,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 			List<IncubatorApplyDTO> dtos = new ArrayList<>();
 			list.forEach(r ->{
 				IncubatorApplyDTO dto = ConvertHelper.convert(r, IncubatorApplyDTO.class);
-				populateApproveUserName(dto);
-				populateAttachments(dto);
+				populateDto(dto);
 				dtos.add(dto);
 			});
 			response.setDtos(dtos);
@@ -101,6 +101,20 @@ public class IncubatorServiceImpl implements IncubatorService {
 	@Override
 	public void exportIncubatorApply(ExportIncubatorApplyCommand cmd) {
 
+	}
+
+	@Override
+	public IncubatorApplyDTO findIncubatorAppling() {
+		Long userId = UserContext.currentUserId();
+		IncubatorApply incubatorAppling = incubatorProvider.findIncubatorAppling(userId);
+
+		if(incubatorAppling == null){
+			return null;
+		}
+
+		IncubatorApplyDTO dto = ConvertHelper.convert(incubatorAppling, IncubatorApplyDTO.class);
+		populateDto(dto);
+		return dto;
 	}
 
 	@Override
@@ -134,15 +148,15 @@ public class IncubatorServiceImpl implements IncubatorService {
 		incubatorApply.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		dbProvider.execute((status)->{
 			incubatorProvider.createIncubatorApply(incubatorApply);
-			//如果是重新申请，更新父记录。此处的关系放在父记录维护是为了查询方便，不用每条记录都遍历查询子记录
-			if(cmd.getParentId() != null){
-				IncubatorApply parentIncubatorApply = incubatorProvider.findIncubatorApplyById(cmd.getParentId());
-				if(parentIncubatorApply != null){
-					parentIncubatorApply.setReApplyId(incubatorApply.getId());
-					incubatorProvider.updateIncubatorApply(parentIncubatorApply);
-				}
-
-			}
+//			//如果是重新申请，更新父记录。此处的关系放在父记录维护是为了查询方便，不用每条记录都遍历查询子记录
+//			if(cmd.getParentId() != null){
+//				IncubatorApply parentIncubatorApply = incubatorProvider.findIncubatorApplyById(cmd.getParentId());
+//				if(parentIncubatorApply != null){
+//					parentIncubatorApply.setReApplyId(incubatorApply.getId());
+//					incubatorProvider.updateIncubatorApply(parentIncubatorApply);
+//				}
+//
+//			}
 
 			//保存附件
 			saveAttachment(cmd.getBusinessLicenceAttachments(), incubatorApply.getId(), user.getId(), IncubatorApplyAttachmentType.BUSINESS_LICENCE.getCode());
@@ -152,8 +166,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 		});
 
 		IncubatorApplyDTO dto = ConvertHelper.convert(incubatorApply, IncubatorApplyDTO.class);
-		populateApproveUserName(dto);
-		populateAttachments(dto);
+		populateDto(dto);
 		return dto;
 	}
 
@@ -171,7 +184,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 
 	@Override
 	public void cancelIncubatorApply(CancelIncubatorApplyCommand cmd) {
-
+		incubatorProvider.deleteIncubatorApplyById(cmd.getId());
 	}
 
 	@Override
@@ -220,9 +233,25 @@ public class IncubatorServiceImpl implements IncubatorService {
 		Assert.notNull(cmd.getId());
 		IncubatorApply incubatorApply = incubatorProvider.findIncubatorApplyById(cmd.getId());
 		IncubatorApplyDTO dto = ConvertHelper.convert(incubatorApply, IncubatorApplyDTO.class);
+		populateDto(dto);
+		return dto;
+	}
+
+	private void populateDto(IncubatorApplyDTO dto){
 		populateApproveUserName(dto);
 		populateAttachments(dto);
-		return dto;
+		populateReApplyFlag(dto);
+	}
+
+	private void populateReApplyFlag(IncubatorApplyDTO dto){
+		if(dto.getApproveUserId() != null){
+			IncubatorApply incubatorAppling = incubatorProvider.findIncubatorAppling(dto.getApplyUserId());
+			if(incubatorAppling != null){
+				dto.setReApplyFlag(TrueOrFalseFlag.FALSE.getCode());
+			}else {
+				dto.setReApplyFlag(TrueOrFalseFlag.TRUE.getCode());
+			}
+		}
 	}
 
 	private void populateApproveUserName(IncubatorApplyDTO dto){

@@ -7,6 +7,9 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
+ *     <li>keyword: keyword</li>
+ *     <li>startTime: startTime</li>
+ *     <li>endTime: endTime</li>
  *     <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  *     <li>pageSize: 每页的数量</li>
  * </ul>

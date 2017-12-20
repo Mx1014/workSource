@@ -126,5 +126,19 @@ public class IncubatorController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /incubator/findIncubatorAppling</b>
+     * <p>获取申请中的一条记录</p>
+     */
+    @RequestMapping("findIncubatorAppling")
+    @RestReturn(value=IncubatorApplyDTO.class)
+    public RestResponse findIncubatorAppling(){
+        IncubatorApplyDTO dto = incubatorService.findIncubatorAppling();
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
 }

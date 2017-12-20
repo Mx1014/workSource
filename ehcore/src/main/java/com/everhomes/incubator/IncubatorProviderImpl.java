@@ -5,6 +5,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.incubator.ApproveStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhIncubatorAppliesDao;
@@ -59,7 +60,7 @@ public class IncubatorProviderImpl implements IncubatorProvider {
     }
 
     @Override
-    public List<IncubatorApply> listIncubatorApplies(Integer namespaceId, Long applyUserId, String keyWord, Byte approveStatus, Byte needReject, Integer pageOffset, Integer pageSize, Byte orderBy) {
+    public List<IncubatorApply> listIncubatorApplies(Integer namespaceId, Long applyUserId, String keyWord, Byte approveStatus, Byte needReject, Integer pageOffset, Integer pageSize, Byte orderBy, Byte applyType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhIncubatorAppliesRecord> query = context.selectQuery(Tables.EH_INCUBATOR_APPLIES);
 
@@ -86,6 +87,10 @@ public class IncubatorProviderImpl implements IncubatorProvider {
             query.addConditions(Tables.EH_INCUBATOR_APPLIES.APPROVE_STATUS.ne((byte)1));
         }
 
+        if(applyType != null){
+            query.addConditions(Tables.EH_INCUBATOR_APPLIES.APPLY_TYPE.eq(applyType));
+        }
+
         //排序 默认、0-创建时间，1-审核时间
         if(orderBy == null || orderBy == 0){
             query.addOrderBy(Tables.EH_INCUBATOR_APPLIES.CREATE_TIME.desc());
@@ -104,6 +109,19 @@ public class IncubatorProviderImpl implements IncubatorProvider {
 
         return result;
     }
+
+    @Override
+    public IncubatorApply findIncubatorAppling(Long applyUserId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhIncubatorAppliesRecord> query = context.selectQuery(Tables.EH_INCUBATOR_APPLIES);
+        query.addConditions(Tables.EH_INCUBATOR_APPLIES.APPLY_USER_ID.eq(applyUserId));
+        query.addConditions(Tables.EH_INCUBATOR_APPLIES.APPROVE_STATUS.eq(ApproveStatus.WAIT.getCode()));
+
+        query.addLimit(1);
+        return query.fetchAnyInto(IncubatorApply.class);
+    }
+
+
 
     @Override
     public List<IncubatorProjectType> listIncubatorProjectType() {
@@ -125,6 +143,15 @@ public class IncubatorProviderImpl implements IncubatorProvider {
         return ConvertHelper.convert(dao.findById(id), IncubatorApply.class);
     }
 
+    @Override
+    public void deleteIncubatorApplyById(Long id) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhIncubatorAppliesDao dao = new EhIncubatorAppliesDao(context.configuration());
+        dao.deleteById(id);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY,EhIncubatorApplies.class, id);
+    }
 
     @Override
     public void createAttachment(IncubatorApplyAttachment attachment) {
