@@ -1,5 +1,6 @@
 -- 增加入孵申请类型  add by yanjun 20171215
 ALTER TABLE `eh_incubator_applies` ADD COLUMN `apply_type`  tinyint(4) NOT NULL DEFAULT 0 ;
+ALTER TABLE `eh_incubator_applies` ADD COLUMN `parent_id`  bigint(22) NULL AFTER `uuid`;
 
 
 -- 文件下载任务 add by yanjun 20171207
