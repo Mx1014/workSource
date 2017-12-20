@@ -18,7 +18,7 @@ CREATE TABLE `eh_social_security_bases` (
   `effect_time_begin` DATETIME COMMENT '生效起始日期',
   `effect_time_end` DATETIME COMMENT '生效结束日期',
   `ratio_options` TEXT COMMENT '比例可选项,如果为null就是手动填写:eq:[120,230,380,480,520]',
-  `accum_or_socail` TINYINT COMMENT '社保/公积金标识 : 1-社保 2-公积金'
+  `accum_or_socail` TINYINT COMMENT '社保/公积金标识 : 1-社保 2-公积金',
   `creator_uid` BIGINT  DEFAULT '0',
   `create_time` DATETIME,
   `operator_uid` BIGINT,
@@ -44,7 +44,7 @@ CREATE TABLE `eh_social_security_settings` (
   `employee_ratio` INT COMMENT '个人比例 万分之 eq:100=1%;1=0.01%',
   `editable_flag` TINYINT COMMENT '是否可编辑',
   `is_default` TINYINT COMMENT '是否是默认选项(1-是:普通社保;0-否:补充保险)',
-  `accum_or_socail` TINYINT COMMENT '社保/公积金标识 : 1-社保 2-公积金'
+  `accum_or_socail` TINYINT COMMENT '社保/公积金标识 : 1-社保 2-公积金',
   `creator_uid` BIGINT  DEFAULT '0',
   `create_time` DATETIME,
   `operator_uid` BIGINT,
@@ -72,7 +72,7 @@ CREATE TABLE `eh_social_security_payments` (
   `employee_ratio` INT COMMENT '个人比例 万分之 eq:100=1%;1=0.01%',
   `editable_flag` TINYINT COMMENT '是否可编辑',
   `is_default` TINYINT COMMENT '是否是默认选项(1-是:普通社保;0-否:补充保险)',
-  `accum_or_socail` TINYINT COMMENT '社保/公积金标识 : 1-社保 2-公积金'
+  `accum_or_socail` TINYINT COMMENT '社保/公积金标识 : 1-社保 2-公积金',
   `is_new` TINYINT COMMENT '增减员:0正常,1增员,-1减员',
   `is_work` TINYINT COMMENT '入职离职:0正常,1入职,-1离职',
   `creator_uid` BIGINT  DEFAULT '0',
@@ -102,7 +102,7 @@ CREATE TABLE `eh_social_security_payment_logs` (
   `employee_ratio` INT COMMENT '个人比例 万分之 eq:100=1%;1=0.01%',
   `editable_flag` TINYINT COMMENT '是否可编辑',
   `is_default` TINYINT COMMENT '是否是默认选项(1-是:普通社保;0-否:补充保险)',
-  `accum_or_socail` TINYINT COMMENT '社保/公积金标识 : 1-社保 2-公积金'
+  `accum_or_socail` TINYINT COMMENT '社保/公积金标识 : 1-社保 2-公积金',
   `is_new` TINYINT COMMENT '增减员:0正常,1增员,-1减员',
   `is_work` TINYINT COMMENT '入职离职:0正常,1入职,-1离职',
   `file_flag` TINYINT COMMENT '是否归档',
