@@ -10,6 +10,7 @@ import java.sql.Timestamp;
  *     <li>id: id</li>
  *     <li>namespaceId: namespaceId</li>
  *     <li>number: 商品编号</li>
+ *     <li>shopNumber: shopNumber</li>
  *     <li>displayName: 名称</li>
  *     <li>posterUri: 封面uri</li>
  *     <li>posterUrl: 封面url</li>
@@ -30,6 +31,7 @@ public class PointGoodDTO {
     private Long id;
     private Integer namespaceId;
     private String number;
+    private String shopNumber;
     private String displayName;
     private String posterUri;
     private String posterUrl;
@@ -67,6 +69,14 @@ public class PointGoodDTO {
 
     public void setNumber(String number) {
         this.number = number;
+    }
+
+    public String getShopNumber() {
+        return shopNumber;
+    }
+
+    public void setShopNumber(String shopNumber) {
+        this.shopNumber = shopNumber;
     }
 
     public String getDisplayName() {

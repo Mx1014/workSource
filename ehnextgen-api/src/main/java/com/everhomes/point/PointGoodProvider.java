@@ -19,4 +19,6 @@ public interface PointGoodProvider {
     List<PointGood> listPointGood(Integer namespaceId, Byte status, int pageSize, ListingLocator locator);
 
     List<PointGood> listEnabledPointGoods(Integer namespaceId, int pageSize, ListingLocator locator);
+
+    PointGood findBySystemAndGood(Long systemId, String number, String shopNumber);
 }

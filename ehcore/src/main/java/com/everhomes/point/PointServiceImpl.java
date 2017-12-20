@@ -390,12 +390,17 @@ public class PointServiceImpl implements PointService {
     public ListPointGoodsResponse listPointGoods(ListPointGoodsCommand cmd) {
         ValidatorUtil.validate(cmd);
 
+        PointSystem pointSystem = pointSystemProvider.findById(cmd.getSystemId());
+        if (pointSystem == null) {
+            throw RuntimeErrorException.errorWith(PointServiceErrorCode.SCOPE, PointServiceErrorCode.ERROR_POINT_SYSTEM_NOT_EXIST_CODE,
+                    "Point system not exist");
+        }
+
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         long pageNo = cmd.getPageAnchor() != null ? cmd.getPageAnchor() : 1;
-        Integer namespaceId = cmd.getNamespaceId() != null ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId();
 
-        List<PointGood> goods = pointGoodProvider.listPointGood(namespaceId, null, -1, new ListingLocator());
-        return fetchPointGoodsFromBiz(namespaceId, pageNo, pageSize, goods, new HashMap<>());
+        List<PointGood> goods = pointGoodProvider.listPointGood(pointSystem.getNamespaceId(), null, -1, new ListingLocator());
+        return fetchPointGoodsFromBiz(pointSystem.getNamespaceId(), pageNo, pageSize, goods, new HashMap<>());
     }
 
     private PointGoodDTO commodityToGoodDTO(PointCommodity commodity) {
@@ -410,6 +415,7 @@ public class PointServiceImpl implements PointService {
         dto.setDiscountPrice(commodity.getDeductionMoney());
         dto.setStatus(PointCommonStatus.DISABLED.getCode());
         dto.setPoints(commodity.getDeductionIntegral());
+        dto.setShopNumber(commodity.getShopNo());
         return dto;
     }
 
@@ -427,7 +433,7 @@ public class PointServiceImpl implements PointService {
         List<ShopCommodityCmd> shopCommodityCmds = new ArrayList<>();
         for (PointGood good : goods) {
             ShopCommodityCmd shopCmd = new ShopCommodityCmd();
-            shopCmd.setCommoNo(good.getShopNo());
+            shopCmd.setCommoNo(good.getCommodityNo());
             shopCmd.setShopNo(good.getShopNo());
             shopCommodityCmds.add(shopCmd);
         }
@@ -444,7 +450,8 @@ public class PointServiceImpl implements PointService {
 
         User user = userService.findUserByIndentifier(namespaceId, cmd.getPhone());
         if (user == null) {
-            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "cannot find user information");
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST,
+                    "cannot find user information");
         }
 
         UserInfo userInfo = ConvertHelper.convert(user, UserInfo.class);
@@ -456,17 +463,25 @@ public class PointServiceImpl implements PointService {
         return response;
     }
 
-    private ListPointGoodsResponse fetchPointGoodsFromBiz(Integer namespaceId, Long pageNo, int pageSize, List<PointGood> goods, Map<String, Object> params) {
+    private ListPointGoodsResponse fetchPointGoodsFromBiz(
+            Integer namespaceId, Long pageNo, int pageSize, List<PointGood> goods, Map<String, Object> params) {
+        Map<String, Object> bodyMap = new HashMap<>();
         params.put("namespaceId", namespaceId);
         params.put("pageSize", pageSize);
         params.put("pageNo", pageNo);
-        try {
-            Map<String, PointGood> shopNoAndCommNoToCommMap = goods.stream().collect(Collectors.toMap(r -> r.getShopNo() + r.getCommodityNo(), r -> r));
 
-            ResponseEntity<String> entity = bizHttpRestCallProvider.syncRestCall("/openapi/commodity/queryEnabledPointCommodityByPage", StringHelper.toJsonString(params));
+        bodyMap.put("body", params);
+        try {
+            Map<String, PointGood> shopNoAndCommNoToCommMap =
+                    goods.stream().collect(Collectors.toMap(r -> r.getShopNo() + r.getCommodityNo(), r -> r));
+
+            ResponseEntity<String> entity = bizHttpRestCallProvider.syncRestCall(
+                "/rest/openapi/commodity/queryEnabledPointCommodityByPage", StringHelper.toJsonString(bodyMap));
             List<PointGoodDTO> dtoList = new ArrayList<>();
-            QueryEnabledPointCommodityByPageResponse response = (QueryEnabledPointCommodityByPageResponse) StringHelper.fromJsonString(entity.getBody(), QueryEnabledPointCommodityByPageResponse.class);
-            for (PointCommodity commodity : response.getResponseObject().getRows()) {
+            QueryEnabledPointCommodityByPageResponse response = (QueryEnabledPointCommodityByPageResponse)
+                    StringHelper.fromJsonString(entity.getBody(), QueryEnabledPointCommodityByPageResponse.class);
+
+            for (PointCommodity commodity : response.getBody().getRows()) {
                 PointGoodDTO dto = commodityToGoodDTO(commodity);
                 PointGood good = shopNoAndCommNoToCommMap.get(commodity.getShopNo() + commodity.getCommoNo());
                 if (good != null) {
@@ -480,7 +495,7 @@ public class PointServiceImpl implements PointService {
 
             ListPointGoodsResponse resp = new ListPointGoodsResponse();
             resp.setGoods(dtoList);
-            if (response.getHasNext()) {
+            if (response.getBody().getHasNext()) {
                 resp.setNextPageAnchor(pageNo + 1);
             }
             return resp;
@@ -645,7 +660,7 @@ public class PointServiceImpl implements PointService {
             pointSystem.setPointExchangeFlag(cmd.getPointExchangeFlag());
         }
         if (cmd.getUserAgreement() != null) {
-            cmd.setUserAgreement(cmd.getDisplayName());
+            pointSystem.setUserAgreement(cmd.getUserAgreement());
         }
         pointSystemProvider.updatePointSystem(pointSystem);
         return toPointSystemDTO(pointSystem);
@@ -740,23 +755,42 @@ public class PointServiceImpl implements PointService {
     public PointGoodDTO updatePointGood(UpdatePointGoodCommand cmd) {
         ValidatorUtil.validate(cmd);
 
-        PointGood good = pointGoodProvider.findById(cmd.getId());
-        if (good == null) {
-            throw errorWith(PointServiceErrorCode.SCOPE, PointServiceErrorCode.ERROR_POINT_GOOD_NOT_EXIST_CODE,
-                    "Point good not exist");
+        PointSystem pointSystem = pointSystemProvider.findById(cmd.getSystemId());
+        if (pointSystem == null) {
+            throw errorWith(PointServiceErrorCode.SCOPE, PointServiceErrorCode.ERROR_POINT_SYSTEM_NOT_EXIST_CODE,
+                    "Point system not exist");
         }
+
+        boolean createFlag = false;
+        PointGood good = pointGoodProvider.findBySystemAndGood(cmd.getSystemId(), cmd.getNumber(), cmd.getShopNumber());
+        if (good == null) {
+            good = new PointGood();
+            good.setStatus(PointCommonStatus.DISABLED.getCode());
+            good.setTopStatus(PointCommonStatus.DISABLED.getCode());
+            good.setNamespaceId(pointSystem.getNamespaceId());
+
+            createFlag = true;
+        }
+
+        good.setShopNo(cmd.getShopNumber());
+        good.setCommodityNo(cmd.getNumber());
 
         PointCommonStatus status = PointCommonStatus.fromCode(cmd.getStatus());
         if (status != null) {
             good.setStatus(status.getCode());
         }
 
-        TrueOrFalseFlag topStatus = TrueOrFalseFlag.fromCode(cmd.getTopStatus());
+        PointCommonStatus topStatus = PointCommonStatus.fromCode(cmd.getTopStatus());
         if (topStatus != null) {
             good.setTopStatus(topStatus.getCode());
             good.setTopTime(DateUtils.currentTimestamp());
         }
-        pointGoodProvider.updatePointGood(good);
+
+        if (createFlag) {
+            pointGoodProvider.createPointGood(good);
+        } else {
+            pointGoodProvider.updatePointGood(good);
+        }
         return new PointGoodDTO();
     }
 

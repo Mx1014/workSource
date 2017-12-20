@@ -41,7 +41,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PointEventLogScheduler.class);
 
-    private static final int SCHEDULE_INTERVAL_SECONDS = 10;
+    private static final int SCHEDULE_INTERVAL_SECONDS = 60;
 
     private final static Random random = new Random();
 

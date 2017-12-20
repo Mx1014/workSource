@@ -106,6 +106,21 @@ public class PointGoodProviderImpl implements PointGoodProvider {
         });
     }
 
+    @Override
+    public PointGood findBySystemAndGood(Long systemId, String number, String shopNumber) {
+        com.everhomes.server.schema.tables.EhPointGoods t = Tables.EH_POINT_GOODS;
+        List<PointGood> list = this.query(new ListingLocator(), 1, (locator1, query) -> {
+            // query.addConditions(t.SYSTEM_ID.eq(systemId));
+            query.addConditions(t.COMMODITY_NO.eq(number));
+            query.addConditions(t.SHOP_NO.eq(shopNumber));
+            return query;
+        });
+        if (list != null && list.size() > 0) {
+            return list.get(0);
+        }
+        return null;
+    }
+
     private EhPointGoodsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhPointGoodsDao(context.configuration());

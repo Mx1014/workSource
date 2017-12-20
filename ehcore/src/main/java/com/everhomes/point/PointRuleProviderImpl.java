@@ -17,6 +17,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhPointRuleCategories;
 import com.everhomes.server.schema.tables.daos.EhPointRulesDao;
 import com.everhomes.server.schema.tables.pojos.EhPointRules;
+import com.everhomes.server.schema.tables.records.EhPointRuleConfigsRecord;
 import com.everhomes.server.schema.tables.records.EhPointRulesRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -31,6 +32,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class PointRuleProviderImpl implements PointRuleProvider {
@@ -114,8 +116,12 @@ public class PointRuleProviderImpl implements PointRuleProvider {
         com.everhomes.server.schema.tables.EhPointRuleConfigs config = Tables.EH_POINT_RULE_CONFIGS;
         EhPointRuleCategories category = Tables.EH_POINT_RULE_CATEGORIES;
 
+        SelectQuery<EhPointRuleConfigsRecord> configQuery = context().selectFrom(config).getQuery();
+
+        Table<EhPointRuleConfigsRecord> subT = configQuery.asTable("subT");
+
         Field<?>[] ruleFields = rule.fields();
-        Field<?>[] configFields = config.fields();
+        Field<?>[] configFields = subT.fields();
 
         List<Field<?>> fieldList = new ArrayList<>();
         fieldList.addAll(Arrays.asList(ruleFields));
@@ -124,21 +130,26 @@ public class PointRuleProviderImpl implements PointRuleProvider {
 
         SelectQuery<Record> query = context().select(fieldList.toArray(new Field[fieldList.size()])).getQuery();
         query.addFrom(rule);
-        query.addJoin(config, JoinType.LEFT_OUTER_JOIN, rule.ID.eq(config.RULE_ID));
-        query.addJoin(category, JoinType.LEFT_OUTER_JOIN, rule.CATEGORY_ID.eq(category.ID));
 
         if (cmd.getSystemId() != null) {
-            query.addConditions(config.SYSTEM_ID.eq(cmd.getSystemId()));
+            configQuery.addConditions(config.SYSTEM_ID.eq(cmd.getSystemId()));
         }
+
+        JoinType joinType = JoinType.LEFT_OUTER_JOIN;
+        if (Objects.equals(cmd.getStatus(), PointCommonStatus.DISABLED.getCode())) {
+            joinType = JoinType.JOIN;
+        }
+
+        query.addJoin(subT, joinType, rule.ID.eq(subT.field(config.RULE_ID)));
+        query.addJoin(category, JoinType.LEFT_OUTER_JOIN, rule.CATEGORY_ID.eq(category.ID));
+
         if (cmd.getCategoryId() != null) {
             query.addConditions(rule.CATEGORY_ID.eq(cmd.getCategoryId()));
         }
         if (cmd.getArithmeticType() != null) {
             query.addConditions(rule.ARITHMETIC_TYPE.eq(cmd.getArithmeticType()));
         }
-        if (cmd.getStatus() != null) {
-            query.addConditions(config.STATUS.eq(cmd.getStatus()));
-        }
+
         query.addConditions(rule.STATUS.ne(PointCommonStatus.INACTIVE.getCode()));
         query.addConditions(rule.DISPLAY_FLAG.eq(TrueOrFalseFlag.TRUE.getCode()));
 
@@ -150,7 +161,35 @@ public class PointRuleProviderImpl implements PointRuleProvider {
         }
         query.addOrderBy(rule.ID.desc());
 
-        List<PointRuleDTO> list = query.fetch().map(pointRuleMapper());
+        query.addHaving(subT.field(config.STATUS).eq(cmd.getStatus()).or(subT.field(config.STATUS).isNull()));
+
+        List<PointRuleDTO> list = query.fetch().map(r -> {
+            PointRuleDTO pointRule = new PointRuleDTO();
+            pointRule.setId(r.getValue(rule.ID));
+            pointRule.setNamespaceId(r.getValue(config.NAMESPACE_ID));
+            pointRule.setCategoryId(r.getValue(rule.CATEGORY_ID));
+            pointRule.setCategoryName(r.getValue(category.DISPLAY_NAME));
+            pointRule.setArithmeticType(r.getValue(rule.ARITHMETIC_TYPE));
+            pointRule.setDisplayName(r.getValue(rule.DISPLAY_NAME));
+            pointRule.setModuleId(r.getValue(rule.MODULE_ID));
+
+            Long systemId = r.getValue(subT.field(config.SYSTEM_ID));
+            if (systemId != null) {
+                pointRule.setSystemId(systemId);
+                pointRule.setDescription(r.getValue(subT.field(config.DESCRIPTION)));
+                pointRule.setLimitType(r.getValue(subT.field(config.LIMIT_TYPE)));
+                pointRule.setLimitData(r.getValue(subT.field(config.LIMIT_DATA)));
+                pointRule.setStatus(r.getValue(subT.field(config.STATUS)));
+                pointRule.setPoints(r.getValue(subT.field(config.POINTS)));
+            } else {
+                pointRule.setDescription(r.getValue(rule.DESCRIPTION));
+                pointRule.setLimitType(r.getValue(rule.LIMIT_TYPE));
+                pointRule.setLimitData(r.getValue(rule.LIMIT_DATA));
+                pointRule.setStatus(r.getValue(rule.STATUS));
+                pointRule.setPoints(r.getValue(rule.POINTS));
+            }
+            return pointRule;
+        });
         if (list.size() > pageSize && pageSize > 0) {
             locator.setAnchor(list.get(list.size() - 1).getId());
             list.remove(list.size() - 1);
