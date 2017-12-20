@@ -44,7 +44,7 @@ public class WorkReportFormHandler implements GeneralFormModuleHandler {
                 obj.setOwnerType(cmd.getOwnerType());
                 obj.setModuleId(report.getModuleId());
                 obj.setModuleType(report.getModuleType());
-                obj.setSourceId(reportVal.getId());
+                obj.setSourceId(UserContext.currentUserId());
                 obj.setSourceType(WORK_REPORT_VAL);
                 obj.setFormOriginId(form.getFormOriginId());
                 obj.setFormVersion(form.getFormVersion());

@@ -689,8 +689,10 @@ public class WorkReportServiceImpl implements WorkReportService {
             /** update the status **/
             WorkReportValReceiverMap receiverMap = workReportValProvider.getWorkReportValReceiverByReceiverId(
                     namespaceId, reportVal.getId(), currentUserId);
-            receiverMap.setReadStatus(WorkReportReadStatus.READ.getCode());
-            workReportValProvider.updateWorkReportValReceiverMap(receiverMap);
+            if (receiverMap != null) {
+                receiverMap.setReadStatus(WorkReportReadStatus.READ.getCode());
+                workReportValProvider.updateWorkReportValReceiverMap(receiverMap);
+            }
 
             /** get the result **/
             //  1) get receivers.
