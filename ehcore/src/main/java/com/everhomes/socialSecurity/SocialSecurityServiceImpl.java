@@ -2,6 +2,8 @@
 package com.everhomes.socialSecurity;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 
@@ -34,6 +36,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 	private SocialSecurityPaymentLogProvider socialSecurityPaymentLogProvider;
 	@Autowired
 	private RegionProvider regionProvider;
+	@Autowired
+	private OrganizationProvider organizationProvider;
 	@Override
 	public void addSocialSecurity(AddSocialSecurityCommand cmd) {
 		// TODO Auto-generated method stub
@@ -151,34 +155,56 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 			GetSocialSecurityPaymentDetailsCommand cmd) {
 		GetSocialSecurityPaymentDetailsResponse response = new GetSocialSecurityPaymentDetailsResponse();
 		response.setPaymentMonth(socialSecurityPaymentProvider.getPaymentMonth(cmd.getOwnerId()));
+		OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+		if (null == memberDetail) {
+			return response;
+		}
+		response.setDetailId(memberDetail.getId());
+		response.setUserName(memberDetail.getContactName());
+		response.setSocialSecurityNo(memberDetail.getSocialSecurityNumber());
 		//社保本月缴费
 		List<SocialSecurityPayment> allPayments = socialSecurityPaymentProvider.listSocialSecurityPayment(cmd.getDetailId() );
 		List<SocialSecurityPayment> ssPayments = new ArrayList<>();
-		List<SocialSecurityPayment> ssfaterPayments = new ArrayList<>();
+		List<SocialSecurityPayment> ssafterPayments = new ArrayList<>();
 		List<SocialSecurityPayment> afPayments = new ArrayList<>();
 		List<SocialSecurityPayment> afafterPayments = new ArrayList<>();
-		if (null == ssPayments) {
+		for (SocialSecurityPayment payment : allPayments) {
+			if (AccumOrSocail.fromCode(payment.getAccumOrSocail()) == AccumOrSocail.ACCUM) {
+				if (NormalFlag.fromCode(payment.getAfterPayFlag()) == NormalFlag.NO) {
+					afPayments.add(payment);
+				}else{
+					afafterPayments.add(payment);
+				}
+			}else{
+				if (NormalFlag.fromCode(payment.getAfterPayFlag()) == NormalFlag.NO) {
+					ssPayments.add(payment);
+				}else{
+					ssafterPayments.add(payment);
+				}
+			}
+		}
+		if ( ssPayments.size()==0) {
 			response.setPayCurrentSocialSecurityFlag(NormalFlag.NO.getCode());
 		}else{
 			response.setPayCurrentSocialSecurityFlag(NormalFlag.YES.getCode());
 			response.setSocialSecurityPayment(processSocialSecurityPaymentDetailDTO(ssPayments));
 		}
 		//社保补缴
-		if (null == ssfaterPayments) {
+		if (ssafterPayments.size()==0) {
 			response.setAfterPaySocialSecurityFlag(NormalFlag.NO.getCode());
 		}else{
 			response.setAfterPaySocialSecurityFlag(NormalFlag.YES.getCode());
-			response.setAfterSocialSecurityPayment(processSocialSecurityPaymentDetailDTO(ssfaterPayments));
+			response.setAfterSocialSecurityPayment(processSocialSecurityPaymentDetailDTO(ssafterPayments));
 		}
 		//公积金本月缴费
-		if (null == afPayments) {
+		if (afPayments.size()==0) {
 			response.setPayCurrentAccumulationFundFlag(NormalFlag.NO.getCode());
 		}else{
 			response.setPayCurrentAccumulationFundFlag(NormalFlag.YES.getCode());
 			response.setAccumulationFundPayment(processSocialSecurityPaymentDetailDTO(afPayments));
 		}
 		//公积金补缴
-		if (null == afafterPayments) {
+		if (afafterPayments.size()==0) {
 			response.setAfterPayAccumulationFundFlag(NormalFlag.NO.getCode());
 		}else{
 			response.setAfterPayAccumulationFundFlag(NormalFlag.YES.getCode());
@@ -194,6 +220,10 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
 	private SocialSecurityPaymentDetailDTO processSocialSecurityPaymentDetailDTO(List<SocialSecurityPayment> payments) {
 		SocialSecurityPaymentDetailDTO dto = new SocialSecurityPaymentDetailDTO();
+		dto.setCityId(dto.getCityId());
+		Region city = regionProvider.findRegionById(dto.getCityId());
+		if (null != city) dto.setCityName(city.getName());
+		dto.setHouseholdType(payments.get(0).getHouseholdType());
 		dto.setItems(payments.stream().map(r->{
 			return processSocialSecurityItemDTO(r);
 		}).collect(Collectors.toList()));

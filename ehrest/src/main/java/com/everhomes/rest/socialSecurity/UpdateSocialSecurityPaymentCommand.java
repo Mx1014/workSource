@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>payCurrentAccumulationFundFlag: 当月缴公积金标识</li>
  * <li>afterPayAccumulationFundFlag: 补缴公积金标识</li>
  * <li>paymentMonth: 月份如201702</li>
+ * <li>householdType: 户籍类型</li>
  * <li>socialSecurityPayments: 社保缴纳项列表 参考{@link com.everhomes.rest.socialSecurity.SocialSecurityPaymentDetailDTO}</li>
  * <li>afterSocialSecurityPayments: 社保补缴缴纳项列表 参考{@link com.everhomes.rest.socialSecurity.SocialSecurityPaymentDetailDTO}</li>
  * <li>accumulationFundPayments: 公积金缴纳项列表 参考{@link com.everhomes.rest.socialSecurity.SocialSecurityPaymentDetailDTO}</li>
@@ -29,6 +30,8 @@ public class UpdateSocialSecurityPaymentCommand {
 	private Long ownerId;
 
 	private Long detailId;
+
+	private String householdType;
 
 	private Byte afterPaySocialSecurityFlag;
 
@@ -162,4 +165,11 @@ public class UpdateSocialSecurityPaymentCommand {
 		return StringHelper.toJsonString(this);
 	}
 
+	public String getHouseholdType() {
+		return householdType;
+	}
+
+	public void setHouseholdType(String householdType) {
+		this.householdType = householdType;
+	}
 }
