@@ -45,7 +45,7 @@ public interface WorkReportService {
 
     String fixUpUserName(Long userId);
 
-    OrganizationMember getUserDepPath(Long userId);
+    OrganizationMember getMemberByUserId(Long userId);
 
     Long getUserDetailId(Long userId);
 

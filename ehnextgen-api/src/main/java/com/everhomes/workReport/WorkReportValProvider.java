@@ -10,6 +10,8 @@ public interface WorkReportValProvider {
 
     Long createWorkReportVal(WorkReportVal val);
 
+    void deleteWorkReportVal(WorkReportVal val);
+
     void updateWorkReportVal(WorkReportVal val);
 
     WorkReportVal getWorkReportValById(Long id);

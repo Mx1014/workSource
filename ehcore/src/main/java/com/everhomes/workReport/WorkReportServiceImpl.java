@@ -3,6 +3,8 @@ package com.everhomes.workReport;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.GeneralFormService;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
@@ -30,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Component
@@ -55,6 +58,9 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Autowired
     private ContentServerService contentServerService;
+
+    @Autowired
+    private LocaleTemplateService localeTemplateService;
 
     private SimpleDateFormat reportFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -344,7 +350,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         //  1.check the user id list.
         //  2.check the user's department.
         List<WorkReportScopeMapDTO> scopes = listWorkReportScopes(reportId);
-        OrganizationMember user = getUserDepPath(userId);
+        OrganizationMember user = getMemberByUserId(userId);
         List<Long> scopeUserIds = scopes.stream()
                 .filter(p1 -> p1.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))
                 .map(p2 -> p2.getSourceId()).collect(Collectors.toList());
@@ -369,7 +375,7 @@ public class WorkReportServiceImpl implements WorkReportService {
     }
 
     @Override
-    public OrganizationMember getUserDepPath(Long userId) {
+    public OrganizationMember getMemberByUserId(Long userId) {
         List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(userId).stream().filter(r ->
                 r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()) || r.getGroupType().equals(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode())
         ).collect(Collectors.toList());
@@ -459,7 +465,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             reportVal.setStatus(WorkReportStatus.INVALID.getCode());
             dbProvider.execute((TransactionStatus status) -> {
                 //  1.delete the report value.
-                workReportValProvider.updateWorkReportVal(reportVal);
+                workReportValProvider.deleteWorkReportVal(reportVal);
                 //  2.delete the report receivers.
                 workReportValProvider.deleteReportValReceiverByValId(reportVal.getId());
                 return null;
@@ -470,6 +476,33 @@ public class WorkReportServiceImpl implements WorkReportService {
     @Override
     public WorkReportValDTO updateWorkReportVal(PostWorkReportValCommand cmd) {
         return null;
+    }
+
+/*
+    private void sendMessageAfterEditWorkReportVal(){
+
+        User user = uesrS
+
+        String locale = currentLocale();
+
+        String toTargetTemplate = localeTemplateService.getLocaleTemplateString(
+                Namespace.DEFAULT_NAMESPACE,
+                OrganizationNotificationTemplateCode.SCOPE,
+                toTargetTemplateCode,
+                locale,
+                model,
+                "Template Not Found"
+        );
+    }
+*/
+
+    private String currentLocale() {
+        String locale = Locale.SIMPLIFIED_CHINESE.toString();
+        User user = UserContext.current().getUser();
+        if (user != null) {
+            locale = user.getLocale();
+        }
+        return locale;
     }
 
     @Override
