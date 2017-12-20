@@ -134,12 +134,11 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 	@Override
 	public List<PostApprovalFormItem> getGeneralFormValues(GetGeneralFormValuesCommand cmd) {
 		List<PostApprovalFormItem> result = new ArrayList<>();
-		List<GeneralFormVal> vals = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId());
+		List<GeneralFormVal> values = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId());
 
-		if (null != vals && vals.size() != 0) {
+		if (null != values && values.size() != 0) {
 			GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
-					vals.get(0).getFormOriginId(), vals.get(0).getFormVersion());
-			LOGGER.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!, form={}, id={}, version={}", form, vals.get(0).getFormOriginId(), vals.get(0).getFormVersion());
+					values.get(0).getFormOriginId(), values.get(0).getFormVersion());
 			List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(),
 					GeneralFormFieldDTO.class);
 
@@ -147,12 +146,12 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 				cmd.setOriginFieldFlag(NormalFlag.NONEED.getCode());
 			}
 
-			for (GeneralFormVal val : vals) {
+			for (GeneralFormVal val : values) {
 				try{
 
 					GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(),fieldDTOs);
 					if(null == dto ){
-						LOGGER.error("+++++++++++++++++++error! cannot fand this field  name :["+val.getFieldName()+"] \n form   "+JSON.toJSONString(fieldDTOs));
+//						LOGGER.error("+++++++++++++++++++error! cannot fand this field  name :["+val.getFieldName()+"] \n form   "+JSON.toJSONString(fieldDTOs));
 						continue;
 					}
 					if (StringUtils.isEmpty(val.getFieldValue())) {

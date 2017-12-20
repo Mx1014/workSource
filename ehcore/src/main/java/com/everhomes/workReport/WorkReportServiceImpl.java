@@ -699,7 +699,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             List<SceneContactDTO> receivers = listWorkReportValReceivers(cmd.getReportValId());
             //  2) get the field values which has been post by the user.
             GetGeneralFormValuesCommand valuesCommand = new GetGeneralFormValuesCommand();
-            valuesCommand.setSourceId(reportVal.getApplierUserId());
+            valuesCommand.setSourceId(reportVal.getId());
             valuesCommand.setSourceType(WORK_REPORT_VAL);
             List<PostApprovalFormItem> values = generalFormService.getGeneralFormValues(valuesCommand);
             List<GeneralFormFieldDTO> fields = values.stream().map(r ->
