@@ -11,7 +11,8 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>ownerType: 所属类型 organization</li>
  * <li>ownerId: 所属id 公司id</li>
- * <li>detailId: 人员的detailId)payCurrentSocialSecurityFlag(Byte|当月缴社保标识</li>
+ * <li>detailId: 人员的detailId)</li>
+ * <li>payCurrentSocialSecurityFlag(Byte|当月缴社保标识</li>
  * <li>afterPaySocialSecurityFlag: 补缴社保标识</li>
  * <li>payCurrentAccumulationFundFlag: 当月缴公积金标识</li>
  * <li>afterPayAccumulationFundFlag: 补缴公积金标识</li>
@@ -32,6 +33,8 @@ public class UpdateSocialSecurityPaymentCommand {
 	private Long detailId;
 
 	private String householdType;
+
+	private Byte payCurrentSocialSecurityFlag;
 
 	private Byte afterPaySocialSecurityFlag;
 
@@ -171,5 +174,13 @@ public class UpdateSocialSecurityPaymentCommand {
 
 	public void setHouseholdType(String householdType) {
 		this.householdType = householdType;
+	}
+
+	public Byte getPayCurrentSocialSecurityFlag() {
+		return payCurrentSocialSecurityFlag;
+	}
+
+	public void setPayCurrentSocialSecurityFlag(Byte payCurrentSocialSecurityFlag) {
+		this.payCurrentSocialSecurityFlag = payCurrentSocialSecurityFlag;
 	}
 }

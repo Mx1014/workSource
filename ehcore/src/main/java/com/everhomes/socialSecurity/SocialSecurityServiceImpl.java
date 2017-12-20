@@ -236,6 +236,10 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
 	@Override
 	public void updateSocialSecurityPayment(UpdateSocialSecurityPaymentCommand cmd) {
+		if (cmd.getSocialSecurityPayments() != null) {
+
+		}
+		List<SocialSecurityBase> bases = socialSecurityBaseProvider.listSocialSecurityBase(cmd.getOwnerId(), cmd.getHouseholdType());
 		// 查询设置的城市户籍档次的数据规则
 		// 校验数据是否合法
 		// 保存setting表数据
