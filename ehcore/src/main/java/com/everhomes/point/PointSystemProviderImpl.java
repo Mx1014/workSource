@@ -105,6 +105,11 @@ public class PointSystemProviderImpl implements PointSystemProvider {
         });
     }
 
+    @Override
+    public List<PointSystem> listPointSystems() {
+        return this.query(new ListingLocator(), -1, (locator1, query) -> query);
+    }
+
     private EhPointSystemsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhPointSystemsDao(context.configuration());

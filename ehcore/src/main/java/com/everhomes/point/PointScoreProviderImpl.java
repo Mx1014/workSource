@@ -16,6 +16,8 @@ import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public class PointScoreProviderImpl implements PointScoreProvider {
 
@@ -57,6 +59,14 @@ public class PointScoreProviderImpl implements PointScoreProvider {
                 .and(t.USER_ID.eq(uid))
                 .orderBy(t.ID.desc())
                 .fetchAnyInto(clazz);
+    }
+
+    @Override
+    public List<PointScore> listPointScoreBySystem(Long systemId) {
+        com.everhomes.server.schema.tables.EhPointScores t = Tables.EH_POINT_SCORES;
+        return context().selectFrom(t)
+                .where(t.SYSTEM_ID.eq(systemId))
+                .fetchInto(PointScore.class);
     }
 
     private EhPointScoresDao rwDao() {

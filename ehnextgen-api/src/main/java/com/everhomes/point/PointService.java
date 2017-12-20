@@ -40,6 +40,8 @@ public interface PointService {
 
     ListPointRulesResponse listPointRules(ListPointRulesCommand cmd);
 
+    PointGeneralTemplate getGeneralTemplate();
+
     void exportPointLog(ExportPointLogsCommand cmd, HttpServletResponse response);
 
     PointGoodDTO updatePointGood(UpdatePointGoodCommand cmd);

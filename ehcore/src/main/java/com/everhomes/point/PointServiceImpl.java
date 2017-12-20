@@ -9,17 +9,28 @@ import com.everhomes.bus.SystemEvent;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessagingService;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.promotion.BizHttpRestCallProvider;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.banner.BannerDTO;
+import com.everhomes.rest.common.OfficialActionData;
+import com.everhomes.rest.common.Router;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.point.*;
+import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserTreasureDTO;
 import com.everhomes.server.schema.tables.pojos.EhBanners;
 import com.everhomes.server.schema.tables.pojos.EhPointBanners;
+import com.everhomes.server.schema.tables.pojos.EhPointScores;
 import com.everhomes.server.schema.tables.pojos.EhPointTutorials;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -103,6 +114,15 @@ public class PointServiceImpl implements PointService {
 
     @Autowired
     private BizHttpRestCallProvider bizHttpRestCallProvider;
+
+    @Autowired
+    private MessagingService messagingService;
+
+    @Autowired
+    private LocaleTemplateService localeTemplateService;
+
+    @Autowired
+    private CoordinationProvider coordinationProvider;
 
     @Override
     public ListPointSystemsResponse listPointSystems(ListPointSystemsCommand cmd) {
@@ -961,12 +981,144 @@ public class PointServiceImpl implements PointService {
     @Scheduled(cron = "0 0 18 24 12 ?")
     public void everyYearEndSendMessageSchedule() {
         List<PointSystem> systemList = pointSystemProvider.getEnabledPointSystems(null);
+
+        for (PointSystem system : systemList) {
+            TrueOrFalseFlag flag = TrueOrFalseFlag.fromCode(system.getPointExchangeFlag());
+            if (flag == TrueOrFalseFlag.FALSE) {
+                continue;
+            }
+
+            List<PointScore> pointScores = pointScoreProvider.listPointScoreBySystem(system.getId());
+            for (PointScore score : pointScores) {
+                if (score.getScore() <= 0) {
+                    continue;
+                }
+
+                try {
+                    // Map<String, String> model = new HashMap<>();
+                    // model.put("points", defaultIfNull(score.getScore(), "0"));
+
+                    String template = localeTemplateService.getLocaleTemplateString(
+                            PointTemplateCode.SCOPE,
+                            PointTemplateCode.POINT_WILL_EXPIRED_CODE,
+                            currentLocale(),
+                            null,
+                            "Template Not Found"
+                    );
+
+                    PointGeneralTemplate genTpl = getGeneralTemplate();
+
+                    MessageDTO messageDto = new MessageDTO();
+                    messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+                    messageDto.setBody(template);
+                    messageDto.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(score.getUserId())));
+                    // 组装路由
+                    OfficialActionData actionData = new OfficialActionData();
+                    actionData.setUrl(getPointSystemUrl(system.getId()));
+                    // 拼装路由参数
+                    String url = RouterBuilder.build(Router.BROWSER_I, actionData);
+                    RouterMetaObject metaObject = new RouterMetaObject();
+                    metaObject.setUrl(url);
+                    // 组装消息 meta
+                    Map<String, String> meta = new HashMap<>();
+                    meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+                    meta.put(MessageMetaConstant.MESSAGE_SUBJECT, genTpl.getMessageTitle());
+                    meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
+                    messageDto.setMeta(meta);
+
+                    messagingService.routeMessage(
+                            User.SYSTEM_USER_LOGIN,
+                            AppConstants.APPID_MESSAGING,
+                            MessageChannelType.USER.getCode(),
+                            String.valueOf(score.getUserId()),
+                            messageDto,
+                            MessagingConstants.MSG_FLAG_STORED.getCode()
+                    );
+                } catch (Exception e) {
+                    LOGGER.error("Point message error, score = " + score.toString(), e);
+                }
+            }
+        }
+    }
+
+    @Override
+    public PointGeneralTemplate getGeneralTemplate() {
+        String generalTemplate = localeTemplateService.getLocaleTemplateString(
+                PointTemplateCode.SCOPE,
+                PointTemplateCode.POINT_GENERAL_TEMPLATE_CODE,
+                currentLocale(),
+                null,
+                ""
+        );
+        return (PointGeneralTemplate) StringHelper.fromJsonString(generalTemplate, PointGeneralTemplate.class);
+    }
+
+    private String currentLocale() {
+        String locale = Locale.SIMPLIFIED_CHINESE.toString();
+        User user = UserContext.current().getUser();
+        if (user != null) {
+            locale = user.getLocale();
+        }
+        return locale;
     }
 
     // 一年执行一次积分清零操作
     @Scheduled(cron = "0 0 0 31 12 ?")
     public void everyYearEndClearPointSchedule() {
-        List<PointSystem> systemList = pointSystemProvider.getEnabledPointSystems(null);
+        List<PointSystem> systemList = pointSystemProvider.listPointSystems();
+        for (PointSystem system : systemList) {
+            List<PointScore> pointScores = pointScoreProvider.listPointScoreBySystem(system.getId());
+            for (PointScore tempScore : pointScores) {
+                try {
+                    if (tempScore.getScore() == 0) {
+                        continue;
+                    }
+
+                    PointScoreLockAndCacheKey lockKey = new PointScoreLockAndCacheKey(system.getNamespaceId(), system.getId(), tempScore.getUserId());
+                    coordinationProvider.getNamedLock(
+                            CoordinationLocks.POINT_UPDATE_POINT_SCORE.getCode() + lockKey.toString()).enter(() -> {
+
+                        PointScore score = pointScoreProvider.findUserPointScore(system.getNamespaceId(), system.getId(), tempScore.getUserId(), PointScore.class);
+
+                        PointLog pointLog = new PointLog();
+                        if (score.getScore() > 0) {
+                            pointLog.setArithmeticType(PointArithmeticType.SUBTRACT.getCode());
+                            pointLog.setPoints(score.getScore());
+                        } else {
+                            pointLog.setArithmeticType(PointArithmeticType.ADD.getCode());
+                            pointLog.setPoints(-score.getScore());
+                        }
+
+                        PointGeneralTemplate genTpl = getGeneralTemplate();
+                        pointLog.setOperatorType(PointOperatorType.SYSTEM.getCode());
+                        pointLog.setTargetUid(score.getUserId());
+                        pointLog.setNamespaceId(score.getNamespaceId());
+                        pointLog.setSystemId(system.getId());
+                        pointLog.setEventName("point.reset_point_score");
+                        pointLog.setEntityType(EhPointScores.class.getSimpleName());
+                        pointLog.setEntityId(score.getId());
+                        pointLog.setDescription(genTpl.getResetPointDesc());
+
+                        UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(score.getUserId());
+                        pointLog.setTargetPhone(userInfo.getPhones().get(0));
+                        pointLog.setTargetName(userInfo.getNickName());
+                        pointLog.setRuleId(0L);
+                        pointLog.setRuleName(genTpl.getResetPointDesc());
+                        pointLog.setCategoryId(0L);
+                        pointLog.setCategoryName(genTpl.getResetPointCate());
+                        pointLog.setEventHappenTime(System.currentTimeMillis());
+
+                        pointLogProvider.createPointLog(pointLog);
+
+                        score.setScore(0L);
+                        pointScoreProvider.updatePointScore(score);
+                        return true;
+                    });
+                } catch (Exception e) {
+                    LOGGER.error("Point reset error, score = " + tempScore.toString(), e);
+                }
+            }
+        }
     }
 
     @Override
