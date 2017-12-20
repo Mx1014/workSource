@@ -376,20 +376,20 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         //校验全部范围下是否拥有权限
         if(aclProvider.checkAccessEx(EntityType.ALL.getCode(), 0L, privilegeId, descriptors)){
             return true;
+}
+
+//校验全部范围下是auth_warehouse_wentian-delta-data-release.sql否拥有模块的全部权限
+        return checkModuleAllPrivileges(EntityType.ALL.getCode(), 0L, descriptors, privilegeId);
+                }
+
+
+
+@Override
+public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId){
+        return  checkUserPrivilege(userId, ownerType, ownerId, currentOrgId, privilegeId, null, null, null);
         }
 
-        //校验全部范围下是否拥有模块的全部权限
-        return checkModuleAllPrivileges(EntityType.ALL.getCode(), 0L, descriptors, privilegeId);
-    }
-
-
-
-    @Override
-    public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId){
-        return  checkUserPrivilege(userId, ownerType, ownerId, currentOrgId, privilegeId, null, null, null);
-    }
-
-    @Override
+@Override
     public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId, Long appId, Long checkOrgId, Long checkCommunityId){
         LOGGER.debug("checkUserPrivilege start.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}, appId={}, checkOrgId={}, checkCommunityId= {}" , userId, ownerType, ownerId, currentOrgId, privilegeId, appId, checkOrgId, checkCommunityId);
 

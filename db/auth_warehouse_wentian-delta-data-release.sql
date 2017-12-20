@@ -1,4 +1,8 @@
 -- 仓库管理 权限细化脚の本 by wentian
+
+-- 需要把service—module中改为园区control
+
+
 -- imitate service since we don't have an entry at app side
 set @reflect_id = (select MAX(`id`) from `eh_reflection_service_module_apps`);
 set @app_id = (select MAX(`active_app_id`) from `eh_reflection_service_module_apps`);
