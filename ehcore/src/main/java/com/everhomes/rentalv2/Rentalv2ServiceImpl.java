@@ -3893,23 +3893,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		end.add(Calendar.MONTH, 1);
 		end.set(Calendar.DAY_OF_MONTH,1);
 
-		//默认周日是第一天
-		if (start.get(Calendar.DAY_OF_WEEK)!=2) {
-			start.set(Calendar.DAY_OF_WEEK,2);
-			start.add(Calendar.DATE, 7);
-		}
-		start.set(Calendar.HOUR_OF_DAY, 0);
-		start.set(Calendar.SECOND, 0);
-		start.set(Calendar.MINUTE, 0);
-		start.set(Calendar.MILLISECOND, 0);
-		if (end.get(Calendar.DAY_OF_WEEK)!=2) {
-			end.set(Calendar.DAY_OF_WEEK,2);
-			end.add(Calendar.DATE, 7);
-		}
-		end.set(Calendar.HOUR_OF_DAY, 0);
-		end.set(Calendar.SECOND, 0);
-		end.set(Calendar.MINUTE, 0);
-		end.set(Calendar.MILLISECOND, 0);
+		initFirstWeekMonday(start);
+		initFirstWeekMonday(end);
 
 		response.setSiteDays(new ArrayList<>());
 
@@ -4756,6 +4741,20 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return response;
 	}
 
+	private void initFirstWeekMonday(Calendar date){
+		if (date.get(Calendar.DAY_OF_WEEK)==1){
+			date.add(Calendar.DATE, -1);
+		}
+		if (date.get(Calendar.DAY_OF_WEEK)!=2) {
+			date.set(Calendar.DAY_OF_WEEK,2);
+			date.add(Calendar.DATE, 7);
+		}
+		date.set(Calendar.HOUR_OF_DAY, 0);
+		date.set(Calendar.SECOND, 0);
+		date.set(Calendar.MINUTE, 0);
+		date.set(Calendar.MILLISECOND, 0);
+	}
+
 	@Override
 	public FindAutoAssignRentalSiteMonthStatusByWeekResponse findAutoAssignRentalSiteMonthStatusByWeek(FindAutoAssignRentalSiteMonthStatusByWeekCommand cmd) {
 		java.util.Date reserveTime = new java.util.Date();
@@ -4790,20 +4789,25 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		response.setDiscountType(ruleDto.getDiscountType());
 		response.setDiscountRatio(ruleDto.getDiscountRatio());
 
-		// 查rules
+
 		java.util.Date nowTime = new java.util.Date();
 //		response.setContactNum(rs.getContactPhonenum());
 		Timestamp beginTime = new Timestamp(nowTime.getTime()
 				+ rs.getRentalStartTime());
+		// 查rules
 		Calendar start = Calendar.getInstance();
 		Calendar end = Calendar.getInstance();
 		start.setTime(new Date(cmd.getRuleDate()));
 		end.setTime(new Date(cmd.getRuleDate()));
-		//start 这个月第一周第一天
-		start.set(Calendar.DAY_OF_WEEK_IN_MONTH,1);
-		//end 下个月的第一周第一天
+		//start 这个月第一天
+		start.set(Calendar.DAY_OF_MONTH,1);
+
+		//end 下个月的第一天
 		end.add(Calendar.MONTH, 1);
-		end.set(Calendar.DAY_OF_WEEK_IN_MONTH,1);
+		end.set(Calendar.DAY_OF_MONTH,1);
+
+		initFirstWeekMonday(start);
+		initFirstWeekMonday(end);
 		response.setSiteDays(new ArrayList<>());
 
 		//解析场景信息
