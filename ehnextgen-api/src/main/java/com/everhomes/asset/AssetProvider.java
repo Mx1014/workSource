@@ -286,4 +286,6 @@ public interface AssetProvider {
     void createLateFine(PaymentLateFine fine);
 
     void updateBillAmountOwedDueToFine(BigDecimal fineAmount, Long billId);
+
+    List<ListLateFineStandardsDTO> listLateFineStandards(Long ownerId, String ownerType, Integer namespaceId);
 }

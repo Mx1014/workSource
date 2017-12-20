@@ -344,6 +344,21 @@ public class AssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
+
+    // this is for 获取园区下的所有滞纳金标准   4
+    /**
+     * <p>获取园区下的所有滞纳金标准</p>
+     * <b>URL: /asset/listLateFineStandards</b>
+     */
+    @RequestMapping("listLateFineStandards")
+    @RestReturn(value = ListLateFineStandardsDTO.class, collection = true)
+    public RestResponse listLateFineStandards(OwnerIdentityCommand cmd) {
+        List<ListLateFineStandardsDTO> list = assetService.listLateFineStandards(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
     //左邻管理员可以进入，点击收费项目，传递所在园区，点击保存，其园区可以看到此收费项目          ---   4
     // 查看时，全部情况是查看域空间为namespaceid的，(接口为listAllChargingItems
     // )
@@ -1130,19 +1145,6 @@ public class AssetController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /asset/activeAutoBillNotice</b>
-     * <p>主动调用定期催缴的功能</p>
-     */
-    @RequestMapping("activeAutoBillNotice")
-    @RestReturn(String.class)
-    public RestResponse listAutoNoticeConfig(){
-        assetService.activeAutoBillNotice();
-        RestResponse restResponse = new RestResponse();
-        restResponse.setErrorCode(ErrorCodes.SUCCESS);
-        restResponse.setErrorDescription("OK");
-        return restResponse;
-    }
-    /**
      * <b>URL: /asset/checkEnterpriseHasArrearage</b>
      * <p>检查企业是否有欠费的账单</p>
      */
@@ -1153,6 +1155,19 @@ public class AssetController extends ControllerBase {
         RestResponse restResponse = new RestResponse(res);
         restResponse.setErrorDescription("OK");
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return restResponse;
+    }
+    /**
+     * <b>URL: /asset/activeLateFine</b>
+     * <p>主动调用定期催缴的功能</p>
+     */
+    @RequestMapping("activeLateFine")
+    @RestReturn(String.class)
+    public RestResponse activeLateFine(){
+        assetService.activeLateFine();
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
         return restResponse;
     }
 
