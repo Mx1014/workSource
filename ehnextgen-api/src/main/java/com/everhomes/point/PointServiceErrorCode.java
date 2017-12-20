@@ -14,4 +14,6 @@ public interface PointServiceErrorCode {
     int ERROR_POINT_BANNER_NOT_EXIST_CODE = 10004;
     int ERROR_POINT_BIZ_CALL_ERROR_CODE = 10005;
 
+    int ERROR_POINT_CAPTCHA_VERIFY_FAILURE_CODE = 10006;
+
 }

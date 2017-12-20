@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.point;
 
+import com.everhomes.PictureValidate.PictureValidateService;
 import com.everhomes.banner.Banner;
 import com.everhomes.banner.BannerProvider;
 import com.everhomes.bus.LocalEvent;
@@ -15,7 +16,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.namespace.Namespace;
 import com.everhomes.promotion.BizHttpRestCallProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -123,6 +123,9 @@ public class PointServiceImpl implements PointService {
 
     @Autowired
     private CoordinationProvider coordinationProvider;
+
+    @Autowired
+    private PictureValidateService pictureValidateService;
 
     @Override
     public ListPointSystemsResponse listPointSystems(ListPointSystemsCommand cmd) {
@@ -433,6 +436,26 @@ public class PointServiceImpl implements PointService {
         return fetchPointGoodsFromBiz(namespaceId, pageNo, pageSize, goods, params);
     }
 
+    @Override
+    public CheckUserInfoResponse checkUserInfo(CheckUserInfoCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        Integer namespaceId = cmd.getNamespaceId() != null ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId();
+
+        User user = userService.findUserByIndentifier(namespaceId, cmd.getPhone());
+        if (user == null) {
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "cannot find user information");
+        }
+
+        UserInfo userInfo = ConvertHelper.convert(user, UserInfo.class);
+        userInfo.setPhones(Collections.singletonList(cmd.getPhone()));
+
+        CheckUserInfoResponse response = new CheckUserInfoResponse();
+        response.setUserInfo(userInfo);
+        response.setCaptchaImg(pictureValidateService.newPicture(cmd.getSessionId()));
+        return response;
+    }
+
     private ListPointGoodsResponse fetchPointGoodsFromBiz(Integer namespaceId, Long pageNo, int pageSize, List<PointGood> goods, Map<String, Object> params) {
         params.put("namespaceId", namespaceId);
         params.put("pageSize", pageSize);
@@ -640,6 +663,12 @@ public class PointServiceImpl implements PointService {
     @Override
     public PointLogDTO createPointLog(CreatePointLogCommand cmd) {
         ValidatorUtil.validate(cmd);
+
+        Boolean pass = pictureValidateService.validateCode(cmd.getSessionId(), cmd.getCaptcha());
+        if (!pass) {
+            throw RuntimeErrorException.errorWith(PointServiceErrorCode.SCOPE, PointServiceErrorCode.ERROR_POINT_CAPTCHA_VERIFY_FAILURE_CODE,
+                    "Captcha verify failure");
+        }
 
         PointSystem pointSystem = pointSystemProvider.findById(cmd.getSystemId());
         if (pointSystem == null) {

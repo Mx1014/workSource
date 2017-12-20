@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -350,6 +351,18 @@ public class PointAdminController extends ControllerBase {
     public RestResponse reorderPointBanners(ReorderPointBannersCommand cmd) {
         pointService.reorderPointBanners(cmd);
         return SUCCESS;
+    }
+
+    /**
+     * <b>URL: /admin/point/checkUserInfo</b>
+     * <p>检查用户</p>
+     */
+    @RestReturn(CheckUserInfoResponse.class)
+    @RequestMapping("checkUserInfo")
+    public RestResponse checkUserInfo(CheckUserInfoCommand cmd, HttpServletRequest request) {
+        cmd.setSessionId(request.getSession().getId());
+        CheckUserInfoResponse response = pointService.checkUserInfo(cmd);
+        return success(response);
     }
 
     private RestResponse success(Object o) {

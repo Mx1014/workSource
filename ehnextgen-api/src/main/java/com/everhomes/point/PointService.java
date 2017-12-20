@@ -91,4 +91,6 @@ public interface PointService {
     PublishEventResultDTO publishEvent(PublishEventCommand cmd);
 
     ListPointGoodsResponse listEnabledPointGoods(ListPointGoodsCommand cmd);
+
+    CheckUserInfoResponse checkUserInfo(CheckUserInfoCommand cmd);
 }
