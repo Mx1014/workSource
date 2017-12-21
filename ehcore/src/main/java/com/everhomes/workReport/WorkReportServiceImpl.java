@@ -615,7 +615,6 @@ public class WorkReportServiceImpl implements WorkReportService {
         //  2.the reportValId is not null means updating the report val.
         WorkReportValDTO dto = new WorkReportValDTO();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        Long userId = UserContext.currentUserId();
 
         if (cmd.getReportValId() != null) {
             WorkReport report = workReportProvider.getValidWorkReportById(cmd.getReportId());
@@ -644,10 +643,10 @@ public class WorkReportServiceImpl implements WorkReportService {
                 for (PostApprovalFormItem value : values) {
                     if (field.getFieldName().equals(value.getFieldName())) {
                         field.setFieldValue(value.getFieldValue());
-                        continue;
+                        break;
                     }
-                    fields.add(field);
                 }
+                fields.add(field);
             }
 
             //  get the reportVal and receivers.

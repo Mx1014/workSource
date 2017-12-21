@@ -8,8 +8,7 @@ import com.everhomes.util.ConvertHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "WORK_REPORT")
 public class WorkReportFormHandler implements GeneralFormModuleHandler {
@@ -18,7 +17,7 @@ public class WorkReportFormHandler implements GeneralFormModuleHandler {
     private WorkReportProvider workReportProvider;
 
     @Autowired
-    private WorkReportValProvider workReportValProviderl;
+    private WorkReportValProvider workReportValProvider;
 
     @Autowired
     private GeneralFormProvider generalFormProvider;
@@ -31,7 +30,7 @@ public class WorkReportFormHandler implements GeneralFormModuleHandler {
     @Override
     public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
         //  find the corresponding report and the form
-        WorkReportVal reportVal = workReportValProviderl.getWorkReportValById(cmd.getSourceId());
+        WorkReportVal reportVal = workReportValProvider.getWorkReportValById(cmd.getSourceId());
         WorkReport report = workReportProvider.getWorkReportById(reportVal.getReportId());
         GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(report.getFormOriginId());
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -81,7 +80,7 @@ public class WorkReportFormHandler implements GeneralFormModuleHandler {
     @Override
     public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd) {
         //  find the corresponding report and the form
-        WorkReportVal reportVal = workReportValProviderl.getWorkReportValById(cmd.getSourceId());
+        WorkReportVal reportVal = workReportValProvider.getWorkReportValById(cmd.getSourceId());
         WorkReport report = workReportProvider.getWorkReportById(reportVal.getReportId());
         GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(report.getFormOriginId());
         Integer namespaceId = UserContext.getCurrentNamespaceId();
