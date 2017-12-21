@@ -13,4 +13,5 @@ public interface SocialSecurityBaseProvider {
 
 	List<SocialSecurityBase> listSocialSecurityBase();
 
+	List<Long> listCities();
 }

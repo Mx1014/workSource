@@ -15,5 +15,5 @@ public interface SocialSecurityPaymentProvider {
 
 	String getPaymentMonth(Long ownerId);
 
-	List<SocialSecurityPayment> listSocialSecurityPayment(Long detailId, byte code);
+	List<SocialSecurityPayment> listSocialSecurityPayment(Long detailId);
 }

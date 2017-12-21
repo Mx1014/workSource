@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>社保/公积金 详细信息:
+ * <li>cityId: 城市id</li>
  * <li>cityName: 城市名</li>
  * <li>radix: 基数</li>
  * <li>householdType: 户籍类型</li>

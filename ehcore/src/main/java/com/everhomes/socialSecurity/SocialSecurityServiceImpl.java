@@ -2,6 +2,8 @@
 package com.everhomes.socialSecurity;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 
@@ -16,12 +18,6 @@ import java.util.stream.Collectors;
 
 @Component
 public class SocialSecurityServiceImpl implements SocialSecurityService {
-	@Autowired
-	private AccumulationFundBaseProvider accumulationFundBaseProvider;
-	@Autowired
-	private AccumulationFundPaymentProvider accumulationFundPaymentProvider;
-	@Autowired
-	private AccumulationFundSettingProvider accumulationFundSettingProvider;
 	@Autowired
 	private SocialSecurityBaseProvider socialSecurityBaseProvider;
 	@Autowired
@@ -40,6 +36,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 	private SocialSecurityPaymentLogProvider socialSecurityPaymentLogProvider;
 	@Autowired
 	private RegionProvider regionProvider;
+	@Autowired
+	private OrganizationProvider organizationProvider;
 	@Override
 	public void addSocialSecurity(AddSocialSecurityCommand cmd) {
 		// TODO Auto-generated method stub
@@ -50,7 +48,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 	public ListSocialSecurityCitiesResponse listSocialSecurityCities(
 			ListSocialSecurityCitiesCommand cmd) {
 		ListSocialSecurityCitiesResponse resp = new ListSocialSecurityCitiesResponse();
-		List<Long> cityIds = accumulationFundBaseProvider.listCities();
+		List<Long> cityIds = socialSecurityBaseProvider.listCities();
 		resp.setSocialSecurityCitys(processCities(cityIds));
 		return resp;
 	}
@@ -76,7 +74,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 	public ListAccumulationFundCitiesResponse listAccumulationFundCities(
 			ListAccumulationFundCitiesCommand cmd) {
 		ListAccumulationFundCitiesResponse resp = new ListAccumulationFundCitiesResponse();
-		List<Long> cityIds = accumulationFundBaseProvider.listCities();
+		List<Long> cityIds = socialSecurityBaseProvider.listCities();
 		resp.setAccumulationFundCitys(processCities(cityIds));
 		return resp;
 	}
@@ -157,67 +155,96 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 			GetSocialSecurityPaymentDetailsCommand cmd) {
 		GetSocialSecurityPaymentDetailsResponse response = new GetSocialSecurityPaymentDetailsResponse();
 		response.setPaymentMonth(socialSecurityPaymentProvider.getPaymentMonth(cmd.getOwnerId()));
+		OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+		if (null == memberDetail) {
+			return response;
+		}
+		response.setDetailId(memberDetail.getId());
+		response.setUserName(memberDetail.getContactName());
+		response.setSocialSecurityNo(memberDetail.getSocialSecurityNumber());
 		//社保本月缴费
-		List<SocialSecurityPayment> ssPayments = socialSecurityPaymentProvider.listSocialSecurityPayment(
-				cmd.getDetailId(), NormalFlag.NO.getCode());
-		if (null == ssPayments) {
+		List<SocialSecurityPayment> allPayments = socialSecurityPaymentProvider.listSocialSecurityPayment(cmd.getDetailId() );
+		List<SocialSecurityPayment> ssPayments = new ArrayList<>();
+		List<SocialSecurityPayment> ssafterPayments = new ArrayList<>();
+		List<SocialSecurityPayment> afPayments = new ArrayList<>();
+		List<SocialSecurityPayment> afafterPayments = new ArrayList<>();
+		for (SocialSecurityPayment payment : allPayments) {
+			if (AccumOrSocail.fromCode(payment.getAccumOrSocail()) == AccumOrSocail.ACCUM) {
+				if (NormalFlag.fromCode(payment.getAfterPayFlag()) == NormalFlag.NO) {
+					afPayments.add(payment);
+				}else{
+					afafterPayments.add(payment);
+				}
+			}else{
+				if (NormalFlag.fromCode(payment.getAfterPayFlag()) == NormalFlag.NO) {
+					ssPayments.add(payment);
+				}else{
+					ssafterPayments.add(payment);
+				}
+			}
+		}
+		if ( ssPayments.size()==0) {
 			response.setPayCurrentSocialSecurityFlag(NormalFlag.NO.getCode());
 		}else{
 			response.setPayCurrentSocialSecurityFlag(NormalFlag.YES.getCode());
-			response.setSocialSecurityPayments(ssPayments.stream().map(r->{
-				return processSocialSecurityPaymentDetailDTO(r);
-			}).collect(Collectors.toList()));
+			response.setSocialSecurityPayment(processSocialSecurityPaymentDetailDTO(ssPayments));
 		}
 		//社保补缴
-		List<SocialSecurityPayment> ssfaterPayments = socialSecurityPaymentProvider.listSocialSecurityPayment(
-				cmd.getDetailId(), NormalFlag.YES.getCode());
-		if (null == ssfaterPayments) {
+		if (ssafterPayments.size()==0) {
 			response.setAfterPaySocialSecurityFlag(NormalFlag.NO.getCode());
 		}else{
 			response.setAfterPaySocialSecurityFlag(NormalFlag.YES.getCode());
-			response.setAfterSocialSecurityPayments(ssfaterPayments.stream().map(r->{
-				return processSocialSecurityPaymentDetailDTO(r);
-			}).collect(Collectors.toList()));
+			response.setAfterSocialSecurityPayment(processSocialSecurityPaymentDetailDTO(ssafterPayments));
 		}
 		//公积金本月缴费
-		List<AccumulationFundPayment> afPayments = accumulationFundPaymentProvider.listAccumulationFundPayment(
-				cmd.getDetailId(), NormalFlag.NO.getCode());
-		if (null == afPayments) {
+		if (afPayments.size()==0) {
 			response.setPayCurrentAccumulationFundFlag(NormalFlag.NO.getCode());
 		}else{
 			response.setPayCurrentAccumulationFundFlag(NormalFlag.YES.getCode());
-			response.setAccumulationFundPayments(afPayments.stream().map(r->{
-				return processSocialSecurityPaymentDetailDTO(r);
-			}).collect(Collectors.toList()));
+			response.setAccumulationFundPayment(processSocialSecurityPaymentDetailDTO(afPayments));
 		}
 		//公积金补缴
-		List<AccumulationFundPayment> afafterPayments = accumulationFundPaymentProvider.listAccumulationFundPayment(
-				cmd.getDetailId(), NormalFlag.YES.getCode());
-		if (null == afafterPayments) {
+		if (afafterPayments.size()==0) {
 			response.setAfterPayAccumulationFundFlag(NormalFlag.NO.getCode());
 		}else{
 			response.setAfterPayAccumulationFundFlag(NormalFlag.YES.getCode());
-			response.setAfterAccumulationFundPayments(afafterPayments.stream().map(r->{
-				return processSocialSecurityPaymentDetailDTO(r);
-			}).collect(Collectors.toList()));
+			response.setAfterAccumulationFundPayment(processSocialSecurityPaymentDetailDTO(afafterPayments));
 		}
 		return response;
 	}
 
-	private SocialSecurityPaymentDetailDTO processSocialSecurityPaymentDetailDTO(AccumulationFundPayment r) {
-		SocialSecurityPaymentDetailDTO dto = ConvertHelper.convert(r,SocialSecurityPaymentDetailDTO.class);
+//	private SocialSecurityPaymentDetailDTO processSocialSecurityPaymentDetailDTO(List<AccumulationFundPayment> r) {
+//		SocialSecurityPaymentDetailDTO dto = ConvertHelper.convert(r,SocialSecurityPaymentDetailDTO.class);
+//		return dto;
+//	}
+
+	private SocialSecurityPaymentDetailDTO processSocialSecurityPaymentDetailDTO(List<SocialSecurityPayment> payments) {
+		SocialSecurityPaymentDetailDTO dto = new SocialSecurityPaymentDetailDTO();
+		dto.setCityId(dto.getCityId());
+		Region city = regionProvider.findRegionById(dto.getCityId());
+		if (null != city) dto.setCityName(city.getName());
+		dto.setHouseholdType(payments.get(0).getHouseholdType());
+		dto.setItems(payments.stream().map(r->{
+			return processSocialSecurityItemDTO(r);
+		}).collect(Collectors.toList()));
 		return dto;
 	}
 
-	private SocialSecurityPaymentDetailDTO processSocialSecurityPaymentDetailDTO(SocialSecurityPayment r) {
-		SocialSecurityPaymentDetailDTO dto = ConvertHelper.convert(r,SocialSecurityPaymentDetailDTO.class);
-		return dto;
+	private SocialSecurityItemDTO processSocialSecurityItemDTO(SocialSecurityPayment r) {
+		return ConvertHelper.convert(r, SocialSecurityItemDTO.class);
 	}
 
 	@Override
 	public void updateSocialSecurityPayment(UpdateSocialSecurityPaymentCommand cmd) {
-		// TODO Auto-generated method stub
-		
+		if (cmd.getSocialSecurityPayments() != null) {
+
+		}
+		List<SocialSecurityBase> bases = socialSecurityBaseProvider.listSocialSecurityBase(cmd.getOwnerId(), cmd.getHouseholdType());
+		// 查询设置的城市户籍档次的数据规则
+		// 校验数据是否合法
+		// 保存setting表数据
+		// 保存当月payments数据
+
 	}
 
 	@Override

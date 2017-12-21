@@ -11,11 +11,13 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>ownerType: 所属类型 organization</li>
  * <li>ownerId: 所属id 公司id</li>
- * <li>detailId: 人员的detailId)payCurrentSocialSecurityFlag(Byte|当月缴社保标识</li>
+ * <li>detailId: 人员的detailId)</li>
+ * <li>payCurrentSocialSecurityFlag(Byte|当月缴社保标识</li>
  * <li>afterPaySocialSecurityFlag: 补缴社保标识</li>
  * <li>payCurrentAccumulationFundFlag: 当月缴公积金标识</li>
  * <li>afterPayAccumulationFundFlag: 补缴公积金标识</li>
  * <li>paymentMonth: 月份如201702</li>
+ * <li>householdType: 户籍类型</li>
  * <li>socialSecurityPayments: 社保缴纳项列表 参考{@link com.everhomes.rest.socialSecurity.SocialSecurityPaymentDetailDTO}</li>
  * <li>afterSocialSecurityPayments: 社保补缴缴纳项列表 参考{@link com.everhomes.rest.socialSecurity.SocialSecurityPaymentDetailDTO}</li>
  * <li>accumulationFundPayments: 公积金缴纳项列表 参考{@link com.everhomes.rest.socialSecurity.SocialSecurityPaymentDetailDTO}</li>
@@ -29,6 +31,10 @@ public class UpdateSocialSecurityPaymentCommand {
 	private Long ownerId;
 
 	private Long detailId;
+
+	private String householdType;
+
+	private Byte payCurrentSocialSecurityFlag;
 
 	private Byte afterPaySocialSecurityFlag;
 
@@ -162,4 +168,19 @@ public class UpdateSocialSecurityPaymentCommand {
 		return StringHelper.toJsonString(this);
 	}
 
+	public String getHouseholdType() {
+		return householdType;
+	}
+
+	public void setHouseholdType(String householdType) {
+		this.householdType = householdType;
+	}
+
+	public Byte getPayCurrentSocialSecurityFlag() {
+		return payCurrentSocialSecurityFlag;
+	}
+
+	public void setPayCurrentSocialSecurityFlag(Byte payCurrentSocialSecurityFlag) {
+		this.payCurrentSocialSecurityFlag = payCurrentSocialSecurityFlag;
+	}
 }
