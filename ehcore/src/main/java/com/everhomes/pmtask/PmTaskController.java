@@ -6,9 +6,17 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.entity.EntityType;
+import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
+import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.pmtask.*;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,6 +37,26 @@ public class PmTaskController extends ControllerBase {
 	private PmTaskService pmTaskService;
 	@Autowired
 	private PmTaskSearch pmTaskSearch;
+
+	@Autowired
+    private PortalService portalService;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+
+//	/**
+//     * <b>URL: /pmtask/getPrivileges</b>
+//     * <p>获取权限列表</p>
+//     */
+//    @RequestMapping("getPrivileges")
+//    @RestReturn(value=GetPrivilegesDTO.class)
+//    public RestResponse getPrivileges(GetPrivilegesCommand cmd) {
+//  	    GetPrivilegesDTO res = pmTaskService.getPrivileges(cmd);
+//        RestResponse response = new RestResponse(res);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
 	
       /**
        * <b>URL: /pmtask/listTaskCategories</b>
@@ -563,5 +591,29 @@ public class PmTaskController extends ControllerBase {
 
         return res;
     }
-    /*---------------------------- end 以上接口是为了给客户端打rest包，已经废弃----------------------------------*/
+    /**
+     * <b>URL: /pmtask/testcheck</b>
+     * <p>提供给一碑的回调接口</p>
+     */
+    @RequestMapping("testcheck")
+    @RestReturn(value = String.class)
+    public RestResponse testcheck(SearchTasksCommand cmd){
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Boolean flag =false;
+        if (null != cmd.getTaskCategoryId()) {
+            ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+            listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+            listServiceModuleAppsCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
+            listServiceModuleAppsCommand.setCustomTag(String.valueOf(cmd.getTaskCategoryId()));
+            ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+            if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+                flag = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST, apps.getServiceModuleApps().get(0).getId(), null,cmd.getCurrentCommunityId());
+                System.out.print(flag) ;
+            }
+        }
+        RestResponse resp = new RestResponse(flag);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
 }

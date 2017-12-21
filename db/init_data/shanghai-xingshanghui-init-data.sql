@@ -885,5 +885,5 @@ INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `
 
 
 -- 【星商汇园区】电子屏预订已设置并启用工作流，但是服务广场应用中，右上角的预订记录还是显示未启用工作流之前的样子
-UPDATE eh_launch_pad_items SET action_data = '{"resourceTypeId":10829,"pageType":0,"payMode":1}'  WHERE item_label = '电子屏预约' AND namespace_id =999981;
+UPDATE eh_launch_pad_items SET action_data = '{"resourceTypeId":10829,"pageType":0,"payMode":2}'  WHERE item_label = '电子屏预约' AND namespace_id =999981;
  

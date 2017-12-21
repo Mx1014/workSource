@@ -3020,3 +3020,8 @@ INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, 
 	VALUES ((@id := @id + 1), '999984', NULL, NULL, 'areaSearchFlag', '1', NULL, NULL);
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
 	VALUES ((@id := @id + 1), '999984', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
+
+-- 新的App add by xq.tian
+SET @eh_version_realm_id = IFNULL((SELECT MAX(id) FROM `eh_version_realm`), 1);
+INSERT INTO `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) VALUES ((@eh_version_realm_id := @eh_version_realm_id + 1), 'IOS_Xinweilai', NULL, NOW(), 999984);
+INSERT INTO `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) VALUES ((@eh_version_realm_id := @eh_version_realm_id + 1), 'Android_Xinweilai', NULL, NOW(), 999984);

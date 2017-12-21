@@ -58,6 +58,15 @@ public class LeaseProjectDTO {
     private List<LeaseBuildingDTO> buildings;
 
     private Byte consultFlag;
+    private Long categoryId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     public Byte getConsultFlag() {
         return consultFlag;

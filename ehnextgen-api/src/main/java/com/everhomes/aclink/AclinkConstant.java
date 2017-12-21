@@ -18,5 +18,5 @@ public interface AclinkConstant {
     public static final String ACLINK_QR_IMAGE_TIMEOUTS = "aclink.qr_image_timeout";
     public static final String ACLINK_QR_IMAGE_INTRO = "aclink.qr_image_intro";
     
-    public static final String QR_INTRO_URL = "http://aclinktest.lab.everhomes.com/entrance-guard/build/index.html?hideNavigationBar=1#/instructions";
+    public static final String QR_INTRO_URL = "http://core.zuolin.com/entrance-guard/build/index.html?hideNavigationBar=1#/instructions";
 }

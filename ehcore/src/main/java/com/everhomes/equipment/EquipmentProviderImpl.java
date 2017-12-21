@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -43,6 +44,7 @@ import java.sql.Timestamp;
 import java.util.*;
 
 @Component
+@DependsOn("platformContext")
 public class EquipmentProviderImpl implements EquipmentProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentProviderImpl.class);
 	
@@ -1746,6 +1748,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhEquipmentInspectionStandardGroupMap.class), null, 
 				(DSLContext context, Object reducingContext) -> {
 					SelectQuery<EhEquipmentInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP);
+					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.STANDARD_ID.eq(standardId));
 		            query.fetch().map((EhEquipmentInspectionStandardGroupMapRecord record) -> {
 		            	deleteEquipmentInspectionStandardGroupMap(record.getId());
 		            	return null;

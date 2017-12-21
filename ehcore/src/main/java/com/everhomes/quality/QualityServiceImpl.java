@@ -3620,7 +3620,9 @@ public class QualityServiceImpl implements QualityService {
 				if(community != null) {
 					scoreGroupDto.setTargetName(community.getName());
 					//add for order
-					scoreGroupDto.setBuildArea(community.getBuildArea());
+					//PM换成areaSize字段 20171208
+					//scoreGroupDto.setBuildArea(community.getBuildArea());
+					scoreGroupDto.setBuildArea(community.getAreaSize());
 				}
 
 				if(specificationTree != null && specificationTree.size() > 0) {
@@ -3683,13 +3685,12 @@ public class QualityServiceImpl implements QualityService {
 					Double preBuildArea = (sortedScoresByTarget.get(i - 1).getBuildArea() == null) ? 0D : sortedScoresByTarget.get(i - 1).getBuildArea();
 					Double currBuildArea = (sortedScoresByTarget.get(i).getBuildArea() == null) ? 0D : sortedScoresByTarget.get(i).getBuildArea();
 					if (preBuildArea < currBuildArea) {
-						sortedScoresByTarget.get(i).setOrderId(++previousOrder);
-					} else if (preBuildArea.doubleValue() == currBuildArea.doubleValue()) {
-						sortedScoresByTarget.get(i).setOrderId(previousOrder);
-
-					} else if (preBuildArea > currBuildArea) {
 						sortedScoresByTarget.get(i).setOrderId(previousOrder);
 						sortedScoresByTarget.get(i - 1).setOrderId(++previousOrder);
+					} else if (preBuildArea.doubleValue() == currBuildArea.doubleValue()) {
+						sortedScoresByTarget.get(i).setOrderId(previousOrder);
+					} else if (preBuildArea > currBuildArea) {
+						sortedScoresByTarget.get(i).setOrderId(++previousOrder);
 					}
 				} else {
 					previousOrder++;
@@ -3698,6 +3699,8 @@ public class QualityServiceImpl implements QualityService {
 				}
 			}
 		}
+		//再次按照order排序
+		sortedScoresByTarget.sort(Comparator.comparing(ScoreGroupByTargetDTO::getOrderId));
 
 		response.setScores(sortedScoresByTarget);
 		return response;

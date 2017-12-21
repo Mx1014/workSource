@@ -31,6 +31,14 @@ import java.sql.Timestamp;
  *     <li>businessLicenceDate：出营业执照日期</li>
  *     <li>liquidationCommitteeRecoredDate：清算组备案日期</li>
  *     <li>cancelDate：注销日期</li>
+ *     <li>mainBusiness：主营业务</li>
+ *     <li>branchCompanyName：分公司名称</li>
+ *     <li>branchRegisteredDate：分公司登记日期</li>
+ *     <li>legalRepresentativeName：法人代表名称</li>
+ *     <li>legalRepresentativeContact：法人联系方式</li>
+ *     <li>shareholderName：股东姓名</li>
+ *     <li>actualCapitalInjectionSituation：实际注资情况</li>
+ *     <li>shareholdingSituation：股权占比情况</li>
  * </ul>
  * Created by ying.xiong on 2017/8/19.
  */
@@ -59,6 +67,79 @@ public class CustomerCommercialDTO {
     private Timestamp businessLicenceDate;
     private Timestamp liquidationCommitteeRecoredDate;
     private Timestamp cancelDate;
+
+    private String mainBusiness;
+    private String branchCompanyName;
+    private Timestamp branchRegisteredDate;
+    private String legalRepresentativeName;
+    private String legalRepresentativeContact;
+    private String shareholderName;
+    private String actualCapitalInjectionSituation;
+    private String shareholdingSituation;
+
+    public String getActualCapitalInjectionSituation() {
+        return actualCapitalInjectionSituation;
+    }
+
+    public void setActualCapitalInjectionSituation(String actualCapitalInjectionSituation) {
+        this.actualCapitalInjectionSituation = actualCapitalInjectionSituation;
+    }
+
+    public String getBranchCompanyName() {
+        return branchCompanyName;
+    }
+
+    public void setBranchCompanyName(String branchCompanyName) {
+        this.branchCompanyName = branchCompanyName;
+    }
+
+    public Timestamp getBranchRegisteredDate() {
+        return branchRegisteredDate;
+    }
+
+    public void setBranchRegisteredDate(Timestamp branchRegisteredDate) {
+        this.branchRegisteredDate = branchRegisteredDate;
+    }
+
+    public String getLegalRepresentativeContact() {
+        return legalRepresentativeContact;
+    }
+
+    public void setLegalRepresentativeContact(String legalRepresentativeContact) {
+        this.legalRepresentativeContact = legalRepresentativeContact;
+    }
+
+    public String getLegalRepresentativeName() {
+        return legalRepresentativeName;
+    }
+
+    public void setLegalRepresentativeName(String legalRepresentativeName) {
+        this.legalRepresentativeName = legalRepresentativeName;
+    }
+
+    public String getMainBusiness() {
+        return mainBusiness;
+    }
+
+    public void setMainBusiness(String mainBusiness) {
+        this.mainBusiness = mainBusiness;
+    }
+
+    public String getShareholderName() {
+        return shareholderName;
+    }
+
+    public void setShareholderName(String shareholderName) {
+        this.shareholderName = shareholderName;
+    }
+
+    public String getShareholdingSituation() {
+        return shareholdingSituation;
+    }
+
+    public void setShareholdingSituation(String shareholdingSituation) {
+        this.shareholdingSituation = shareholdingSituation;
+    }
 
     public Timestamp getBusinessLicenceDate() {
         return businessLicenceDate;

@@ -37,8 +37,18 @@ public class UpdateCommunityAdminCommand {
     private List<CommunityGeoPointDTO> geoPointList;
 
     private String communityNumber;
+
+    private String aliasName;
     
     public UpdateCommunityAdminCommand() {
+    }
+
+    public String getAliasName() {
+        return aliasName;
+    }
+
+    public void setAliasName(String aliasName) {
+        this.aliasName = aliasName;
     }
 
     public Long getCommunityId() {

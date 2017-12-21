@@ -15,10 +15,10 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.security.MessageDigest;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -31,8 +31,7 @@ import java.util.stream.Collectors;
  * 优讯通
  */
 @Component(SmsHandler.YOU_XUN_TONG_HANDLER_NAME)
-@DependsOn("platformContext")
-public class YouXunTongSmsHandler implements SmsHandler {
+public class YouXunTongSmsHandler implements SmsHandler, ApplicationListener<ContextRefreshedEvent> {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(YouXunTongSmsHandler.class);
 
@@ -54,12 +53,14 @@ public class YouXunTongSmsHandler implements SmsHandler {
     private String token;
     private String server;
 
-    @PostConstruct
+    /*@PostConstruct
     public void init() {
-        this.userName = configurationProvider.getValue(YXT_USER_NAME, "");
-        this.password = configurationProvider.getValue(YXT_PASSWORD, "");
-        this.server = configurationProvider.getValue(YXT_SERVER, "");
-        this.token = configurationProvider.getValue(YXT_TOKEN, "");
+
+    }*/
+
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        initAccount();
     }
 
     /*
@@ -102,6 +103,8 @@ public class YouXunTongSmsHandler implements SmsHandler {
     @Override
     public List<SmsLog> doSend(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId,
                                String templateLocale, List<Tuple<String, Object>> variables) {
+        initAccount();
+
         List<SmsLog> smsLogList = new ArrayList<>();
 
         Map<String, Object> model = new HashMap<>();
@@ -153,6 +156,15 @@ public class YouXunTongSmsHandler implements SmsHandler {
             LOGGER.error("can not found sms content by YouXunTong handler, namespaceId = {}, templateId = {}", namespaceId, templateId);
         }
         return smsLogList;
+    }
+
+    private void initAccount() {
+        try {
+            this.userName = configurationProvider.getValue(YXT_USER_NAME, "");
+            this.password = configurationProvider.getValue(YXT_PASSWORD, "");
+            this.server = configurationProvider.getValue(YXT_SERVER, "");
+            this.token = configurationProvider.getValue(YXT_TOKEN, "");
+        } catch (Exception e) { }
     }
 
     private SmsLog getSmsErrorLog(Integer namespaceId, String phoneNumber, String templateScope, int templateId, String templateLocale, String error) {

@@ -9,6 +9,16 @@ public class ListLeaseBuildingsCommand {
     private Long pageAnchor;
     private Integer pageSize;
 
+    private Long categoryId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
     public Integer getNamespaceId() {
         return namespaceId;
     }

@@ -51,6 +51,7 @@ public class HotTagProviderImpl implements HotTagProvider {
 		query.addConditions(Tables.EH_HOT_TAGS.SERVICE_TYPE.eq(serviceType));
 		query.addConditions(Tables.EH_HOT_TAGS.STATUS.eq(HotTagStatus.ACTIVE.getCode()));
 		query.addOrderBy(Tables.EH_HOT_TAGS.DEFAULT_ORDER.desc());
+		query.addOrderBy(Tables.EH_HOT_TAGS.ID.asc());
 
 		if(pageSize != null){
 			query.addLimit(pageSize);

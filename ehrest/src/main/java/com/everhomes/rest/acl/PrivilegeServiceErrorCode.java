@@ -17,4 +17,7 @@ public interface PrivilegeServiceErrorCode {
 
     //管理员列表不存在
     static final int ERROR_PERMISSIONS_LIST_NONEXISTS = 100054;
+
+    //校验应用权限失败
+    static final int ERROR_CHECK_APP_PRIVILEGE = 100055;
 }

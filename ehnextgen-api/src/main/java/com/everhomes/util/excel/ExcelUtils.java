@@ -526,6 +526,10 @@ public class ExcelUtils {
                 break;
             case "计划信息":
                 break;
+            case "离场信息":
+                break;
+            case "入驻信息":
+                break;
             //物业巡检中添加 备注信息 暂时在注意事项中协商select的byte值  列出
             default:
                 instruction =

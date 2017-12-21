@@ -280,6 +280,7 @@ public class ContractProviderImpl implements ContractProvider {
         return list;
     }
 
+	@Override
 	public List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
@@ -289,6 +290,30 @@ public class ContractProviderImpl implements ContractProvider {
 		}
 		query.addConditions(Tables.EH_CONTRACTS.CUSTOMER_TYPE.eq(customerType));
 		query.addConditions(Tables.EH_CONTRACTS.STATUS.ne(ContractStatus.INACTIVE.getCode()));
+
+		List<Contract> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, Contract.class));
+			return null;
+		});
+		return result;
+	}
+
+	@Override
+	public List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType, Byte status) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
+		query.addConditions(Tables.EH_CONTRACTS.CUSTOMER_ID.eq(customerId));
+		if(communityId != null) {
+			query.addConditions(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId));
+		}
+		query.addConditions(Tables.EH_CONTRACTS.CUSTOMER_TYPE.eq(customerType));
+
+		if(status != null) {
+			query.addConditions(Tables.EH_CONTRACTS.STATUS.eq(status));
+		} else {
+			query.addConditions(Tables.EH_CONTRACTS.STATUS.ne(ContractStatus.INACTIVE.getCode()));
+		}
 
 		List<Contract> result = new ArrayList<>();
 		query.fetch().map((r) -> {
@@ -325,12 +350,13 @@ public class ContractProviderImpl implements ContractProvider {
 
 
 	@Override
-	public List<Contract> listContractsByEndDateRange(Timestamp minValue, Timestamp maxValue) {
+	public List<Contract> listContractsByEndDateRange(Timestamp minValue, Timestamp maxValue, Integer namespaceId) {
 		Result<Record> result = getReadOnlyContext().select()
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.and(Tables.EH_CONTRACTS.CONTRACT_END_DATE.gt(minValue))
 				.and(Tables.EH_CONTRACTS.CONTRACT_END_DATE.le(maxValue))
+				.and(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
 				.fetch();
 			
 		if (result != null) {
@@ -341,12 +367,13 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public List<Contract> listContractsByCreateDateRange(Timestamp minValue, Timestamp maxValue) {
+	public List<Contract> listContractsByCreateDateRange(Timestamp minValue, Timestamp maxValue, Integer namespaceId) {
 		Result<Record> result = getReadOnlyContext().select()
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.and(Tables.EH_CONTRACTS.CREATE_TIME.gt(minValue))
 				.and(Tables.EH_CONTRACTS.CREATE_TIME.le(maxValue))
+				.and(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
 				.fetch();
 			
 		if (result != null) {

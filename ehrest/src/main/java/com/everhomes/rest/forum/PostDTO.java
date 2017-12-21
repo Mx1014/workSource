@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.user.UserLikeType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -47,7 +48,7 @@ import com.everhomes.util.StringHelper;
  *     <li>attachments: 帖子或评论的附件信息，参见{@link com.everhomes.rest.forum.AttachmentDTO}</li>
  *     <li>assignedFlag: 是否推荐帖，参见{@link com.everhomes.rest.forum.PostAssignedFlag}</li>
  *     <li>forumName: forumName</li>
- *     <li>likeFlag: 是否推荐帖，参见{@link com.everhomes.rest.forum.PostLikeFlag}</li>
+ *     <li>likeFlag: 是否点赞，参见{@link UserLikeType}</li>
  *     <li>favoriteFlag: 是否收藏标记，参见{@link com.everhomes.rest.forum.PostFavoriteFlag}</li>
  *     <li>shareUrl: 分享链接</li>
  *     <li>privateFlag: 帖子是否公开标记，应用场景：发给物业、政府相关部门的帖子默认不公开，由物业、政府相关部门决定是否公开；参考{@link com.everhomes.rest.forum.PostPrivacy}</li>
@@ -68,6 +69,8 @@ import com.everhomes.util.StringHelper;
  *     <li>interactFlag: 是否支持评论 0-no, 1-yes 参考{@link InteractFlag}</li>
  *	   <li>stickFlag: 置顶标志，0-否，1-是，参考{@link StickFlag}</li>
  *	   <li>stickTime: 置顶时间</li>
+ *	   <li>moduleType: 模块类型，现在所有的帖子都要往帖子表里写，通过判断条件已经很难区分是哪里来的帖子了，现在由创建帖子的时候带来。 参考{@link ForumModuleType}</li>
+ *     <li>moduleCategoryId: 业务模块的入口id</li>
  * </ul>
  */
 public class PostDTO {
@@ -191,6 +194,10 @@ public class PostDTO {
 	private Byte stickFlag;
 
     private Timestamp stickTime;
+
+    private Byte moduleType;
+
+    private Long moduleCategoryId;
 
     public Long getGroupId() {
         return groupId;
@@ -661,6 +668,22 @@ public class PostDTO {
 
     public void setStickTime(Timestamp stickTime) {
         this.stickTime = stickTime;
+    }
+
+    public Byte getModuleType() {
+        return moduleType;
+    }
+
+    public void setModuleType(Byte moduleType) {
+        this.moduleType = moduleType;
+    }
+
+    public Long getModuleCategoryId() {
+        return moduleCategoryId;
+    }
+
+    public void setModuleCategoryId(Long moduleCategoryId) {
+        this.moduleCategoryId = moduleCategoryId;
     }
 
     @Override

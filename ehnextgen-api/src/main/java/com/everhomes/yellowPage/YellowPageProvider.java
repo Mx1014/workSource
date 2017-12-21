@@ -143,4 +143,10 @@ public interface YellowPageProvider {
 	void deleteServiceAllianceSkipRule(Long id);
 
 	ServiceAllianceSkipRule getCateorySkipRule(Long categoryId, Integer namespaceId);
+
+
+	List<Integer> listAscEntryIds(int namespaceId);
+
+
+	void updateEntryIdNullByNamespaceId(Integer namespaceId);
 }

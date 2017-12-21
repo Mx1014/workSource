@@ -1,29 +1,21 @@
 package com.everhomes.portal;
 
-import com.everhomes.community.Community;
+import com.everhomes.acl.WebMenu;
+import com.everhomes.acl.WebMenuPrivilegeProvider;
 import com.everhomes.rentalv2.RentalResourceType;
 import com.everhomes.rentalv2.Rentalv2Provider;
+import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.common.RentalActionData;
-import com.everhomes.rest.common.ServiceAllianceActionData;
 import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.portal.DetailFlag;
 import com.everhomes.rest.portal.RentalInstanceConfig;
-import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
-import com.everhomes.rest.rentalv2.RentalSiteStatus;
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
-import com.everhomes.rest.yellowPage.DisplayFlagType;
-import com.everhomes.rest.yellowPage.YellowPageStatus;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.StringHelper;
-import com.everhomes.yellowPage.ServiceAllianceCategories;
-import com.everhomes.yellowPage.ServiceAllianceSkipRule;
-import com.everhomes.yellowPage.ServiceAlliances;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -37,6 +29,8 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
 
     @Autowired
     private Rentalv2Provider rentalv2Provider;
+    @Autowired
+    private WebMenuPrivilegeProvider webMenuProvider;
 
 
     @Override
@@ -92,5 +86,22 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
     @Override
     public String processInstanceConfig(String instanceConfig) {
         return instanceConfig;
+    }
+
+    @Override
+    public String getCustomTag(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
+        RentalActionData actionDataObject = (RentalActionData)StringHelper.fromJsonString(actionData,RentalActionData.class);
+        if (actionDataObject!=null && actionDataObject.getResourceTypeId()!=null)
+            return String.valueOf(actionDataObject.getResourceTypeId());
+        return null;
+    }
+
+    @Override
+    public Long getWebMenuId(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
+        List<WebMenu> menus = webMenuProvider.listWebMenuByType(WebMenuType.PARK.getCode(), null, "/40000%", Collections.singletonList(40400L));
+        if (menus!=null && menus.size()>0)
+            return menus.get(0).getId();
+
+        return null;
     }
 }

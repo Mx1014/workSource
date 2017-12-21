@@ -176,7 +176,7 @@ public class PunchProviderImpl implements PunchProvider {
 		step.where(condition);
 		List<PunchLog> result = step.orderBy(Tables.EH_PUNCH_LOGS.USER_ID.asc(),
 				Tables.EH_PUNCH_LOGS.PUNCH_DATE.asc(),Tables.EH_PUNCH_LOGS.PUNCH_INTERVAL_NO.asc(),
-				Tables.EH_PUNCH_LOGS.PUNCH_TYPE.asc())
+				Tables.EH_PUNCH_LOGS.PUNCH_TYPE.asc(),Tables.EH_PUNCH_LOGS.PUNCH_TIME.asc())
 				.fetch().map((r) -> {
 					return ConvertHelper.convert(r, PunchLog.class);
 				});
@@ -2821,19 +2821,25 @@ long id = sequenceProvider.getNextSequence(key);
 					.select(Tables.EH_APPROVAL_CATEGORIES.CATEGORY_NAME,Tables.EH_PUNCH_EXCEPTION_REQUESTS.DURATION.sum().round(3))
 					.from(Tables.EH_APPROVAL_CATEGORIES).leftOuterJoin(Tables.EH_PUNCH_EXCEPTION_REQUESTS)
 					.on(Tables.EH_APPROVAL_CATEGORIES.ID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.CATEGORY_ID))
-					.where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.CREATOR_UID.eq(userId))
+					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.CREATOR_UID.eq(userId))
 					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(ownerId))
 					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(beginDate))
 					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lt(endDate))
 					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.ASK_FOR_LEAVE.getCode()))
 					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(ApprovalStatus.AGREEMENT.getCode()))
+					.where(Tables.EH_APPROVAL_CATEGORIES.NAMESPACE_ID.eq(0))
+					.and(Tables.EH_APPROVAL_CATEGORIES.OWNER_ID.eq(0L))
 					.groupBy(Tables.EH_APPROVAL_CATEGORIES.ID)
 					;
 //			LOGGER.debug(step.toString());
 			result = step.orderBy(Tables.EH_APPROVAL_CATEGORIES.ID).fetch().map((r) -> {
 				ExtDTO dto = new ExtDTO();
 				dto.setName(r.value1());
-				dto.setTimeCount(r.value2().toString());
+				if (r.value2() == null)
+					dto.setTimeCount("0");
+				else
+					dto.setTimeCount(r.value2().toString());
+
 				return dto;
 			});
 			if (null == result || result.size() == 0) {

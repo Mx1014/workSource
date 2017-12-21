@@ -37,4 +37,22 @@ public enum ForumModuleType {
         return null;
     }
 
+    public Long getModuleId(){
+        switch (this){
+            case FORUM:
+            case ANNOUNCEMENT:
+                return 10100L;
+            case ACTIVITY:
+                return 10600L;
+            case CLUB:
+                return 10750L;
+            case GUILD:
+                return 10760L;
+            case FEEDBACK:
+                return null;
+            default:
+                return null;
+        }
+    }
+
 }

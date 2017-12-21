@@ -96,7 +96,8 @@ public class Utils {
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
-        calendar.set(Calendar.MILLISECOND, 999);
+        //精确到秒,毫秒记为0
+        calendar.set(Calendar.MILLISECOND, 0);
 
         int currentDay = calendar.get(Calendar.DAY_OF_MONTH);
         //如果当前天数是当前月的最后一天，直接往上加月数
@@ -119,8 +120,8 @@ public class Utils {
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
-        //不要计算毫秒，mysql不能存储毫秒，会自动转成秒，999ms 会转成 1S
-//        calendar.set(Calendar.MILLISECOND, 999);
+        //精确到秒,毫秒记为0，mysql不能存储毫秒，会自动转成秒，999ms 会转成 1S
+        calendar.set(Calendar.MILLISECOND, 0);
 
         if(isLastDayOfMonth(calendar)){
             calendar.add(Calendar.MONTH, month);
@@ -142,18 +143,20 @@ public class Utils {
         tempCalendar.set(Calendar.HOUR_OF_DAY, 0);
         tempCalendar.set(Calendar.MINUTE, 0);
         tempCalendar.set(Calendar.SECOND, 0);
+        //精确到秒,毫秒记为0
         tempCalendar.set(Calendar.MILLISECOND, 0);
         return tempCalendar.getTimeInMillis();
     }
 
-    static Long getlastDayOfMonth(Long time) {
+    static Long getLastDayOfMonth(Long time) {
         Calendar tempCalendar = Calendar.getInstance();
         tempCalendar.setTimeInMillis(time);
         tempCalendar.set(Calendar.DAY_OF_MONTH, tempCalendar.getActualMaximum(Calendar.DAY_OF_MONTH));
         tempCalendar.set(Calendar.HOUR_OF_DAY, 23);
         tempCalendar.set(Calendar.MINUTE, 59);
         tempCalendar.set(Calendar.SECOND, 59);
-        tempCalendar.set(Calendar.MILLISECOND, 999);
+        //精确到秒,毫秒记为0
+        tempCalendar.set(Calendar.MILLISECOND, 0);
         return tempCalendar.getTimeInMillis();
     }
 
