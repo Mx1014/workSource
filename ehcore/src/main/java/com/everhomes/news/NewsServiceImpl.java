@@ -879,7 +879,7 @@ public class NewsServiceImpl implements NewsService {
 		syncNews(newsId);
 	}
 
-	private News findNewsById(Long userId, Long newsId) {
+	public News findNewsById(Long userId, Long newsId) {
 		News news = newsProvider.findNewsById(newsId);
 		if (news == null) {
 			LOGGER.error("News not found, operatorId=" + userId + ", newsId=" + newsId);
@@ -1491,7 +1491,7 @@ public class NewsServiceImpl implements NewsService {
 		}
 	}
 
-	private void syncNewsWhenDelete(Long id) {
+	public void syncNewsWhenDelete(Long id) {
 		searchProvider.deleteById(SearchUtils.NEWS, id.toString());
 	} 
 	
