@@ -17,3 +17,5 @@ WHERE id = 20841;
 -- 删除旧的里面的  privilege_id 为管理员
 DELETE  from eh_acls
 where privilege_id = 10011;
+
+

@@ -23,3 +23,4 @@ ALTER TABLE `eh_equipment_inspection_templates`
 -- 物业巡检权限细化 end  by  jiarui
 
 -- merge from forum2.6 by yanjun 201712121010 start
+
