@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.customer.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
@@ -1514,6 +1515,10 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 					        	oldData = levelItemOld.getItemDisplayName();
 					        }
 						}
+                        if("trackingUid".equals(field.getFieldName())) {
+                            oldData = exist.getTrackingName();
+                            newData = customer.getTrackingName();
+                        }
 						Map<String,Object> map = new HashMap<String,Object>();
 						map.put("display", field.getFieldDisplayName());
 						map.put("oldData", oldData);
