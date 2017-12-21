@@ -687,7 +687,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 SceneContactDTO dto = new SceneContactDTO();
                 dto.setUserId(r.getReceiverUserId());
                 dto.setContactName(r.getReceiverName());
-                dto.setContactAvatar(r.getReceiverAvatar());
+                dto.setContactAvatar(contentServerService.parserUri(r.getReceiverAvatar()));
                 return dto;
             }).collect(Collectors.toList());
         }
