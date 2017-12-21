@@ -138,6 +138,6 @@ DROP PROCEDURE IF EXISTS create_app;
     
 update eh_reflection_service_module_apps set name = '客户管理', action_data = 'customer' where module_id = 21100;      
 update eh_reflection_service_module_apps set name = '合同管理', action_data = 'contract' where module_id = 21200;      
-update eh_reflection_service_module_apps set name = '能耗管理', action_data = '{"url":"http://xiongying.lab.everhomes.com/energy-management/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' where module_id = 49100;      
+update eh_reflection_service_module_apps set name = '能耗管理', action_data = '{"url":"http://core.zuolin.com/energy-management/build/index/energy-management/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' where module_id = 49100;      
     
     
