@@ -47,8 +47,7 @@ public class NewsFeedbackHandler implements FeedbackHandler {
 
 	@Override
 	public void populateFeedbackDTO(FeedbackDTO dto) {
-		// TODO Auto-generated method stub
-
+		dto.setTargetSubject(dto.getSubject());
 	}
 
 	@Override
