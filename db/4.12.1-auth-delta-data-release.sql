@@ -119,6 +119,7 @@ VALUES
 
 -- end of wentian's script, farewell
 
+
 -- custoemrAuth xiongying
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `creator_uid`, `operator_uid`) VALUES(21110,'客户列表',21100,'/20000/21100/21110','1','3','2','0',NOW(),1,1);
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `creator_uid`, `operator_uid`) VALUES(21120,'统计分析',21100,'/20000/21100/21120','1','3','2','0',NOW(),1,1);
@@ -263,3 +264,28 @@ update eh_reflection_service_module_apps set name = '合同管理', action_data 
 update eh_reflection_service_module_apps set name = '能耗管理', action_data = '{"url":"http://core.zuolin.com/energy-management/build/index/energy-management/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' where module_id = 49100;      
 -- custoemrAuth xiongying end    
     
+
+-- 物业巡检菜单显示不全  by jiarui
+UPDATE eh_service_module_privileges
+SET module_id = 20810
+WHERE module_id = 20811;
+
+UPDATE eh_service_modules
+SET STATUS =2
+WHERE id = 20840;
+UPDATE eh_service_modules
+SET LEVEL =4
+WHERE id = 20841;
+
+UPDATE eh_service_modules
+SET STATUS =2
+WHERE id = 20841;
+
+-- 删除旧的里面的  privilege_id 为管理员
+DELETE  from eh_acls
+where privilege_id = 10011;
+
+-- 删除旧数据 管理员权限 by jiarui 20171220
+delete from  eh_acls
+where privilege_id = 10011;
+
