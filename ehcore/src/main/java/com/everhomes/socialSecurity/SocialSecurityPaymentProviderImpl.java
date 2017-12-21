@@ -70,9 +70,30 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
 	}
 
 	@Override
-	public List<SocialSecurityPayment> listSocialSecurityPayment(Long detailId, byte code) {
+	public List<SocialSecurityPayment> listSocialSecurityPayment(Long detailId) {
 		return null;
 	}
+
+	@Override
+	public void setUserCityAndHTByAccumOrSocial(Long detailId, Byte accumOrSocial, Long cityId, String householdType) {
+
+	}
+
+	@Override
+	public SocialSecurityPayment findSocialSecurityPayment(Long detailId, String payItem, Byte accumOrSocial) {
+		return null;
+	}
+
+	@Override
+	public String findPaymentMonth(Long detailId) {
+		return null;
+	}
+
+	@Override
+	public Integer countUnFieldUsers(Long ownerId) {
+		return null;
+	}
+
 
 	private EhSocialSecurityPaymentsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());

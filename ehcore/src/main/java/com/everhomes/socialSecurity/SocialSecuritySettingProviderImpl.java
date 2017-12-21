@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.socialSecurity.SocialSecurityItemDTO;
 import com.everhomes.rest.socialSecurity.SocialSecurityPaymentDTO;
 import com.everhomes.rest.socialSecurity.SsorAfPay;
 import org.jooq.DSLContext;
@@ -76,7 +77,27 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
 				.orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SocialSecuritySetting.class));
 	}
-	
+
+	@Override
+	public void setUserCityAndHTByAccumOrSocial(Long detailId, Byte accumOrSocial, Long cityId, String householdType) {
+
+	}
+
+	@Override
+	public SocialSecuritySetting findSocialSecuritySettingByDetailIdAndItem(Long detailId, SocialSecurityItemDTO itemDTO, Byte accumOrSocial) {
+		return null;
+	}
+
+	@Override
+	public List<SocialSecuritySetting> listSocialSecuritySetting(Long ownerId) {
+		return null;
+	}
+
+	@Override
+	public List<SocialSecuritySetting> listSocialSecuritySetting(List<Long> detailIds) {
+		return null;
+	}
+
 	private EhSocialSecuritySettingsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

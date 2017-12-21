@@ -277,6 +277,24 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 	}
 
 	@Override
+	public SocialSecurityPaymentDetailDTO getSocialSecurityRule(GetSocialSecurityRuleCommand cmd) {
+		SocialSecurityPaymentDetailDTO response = new SocialSecurityPaymentDetailDTO();
+		if (AccumOrSocail.fromCode(cmd.getAccumOrsocial()) == AccumOrSocail.SOCAIL && cmd.getHouseholdType() == null) {
+			List<HouseholdTypesDTO> result = socialSecurityBaseProvider.listHouseholdTypesByCity(cmd.getCityId());
+			cmd.setHouseholdType(result.get(0).getHouseholdTypeName());
+		}
+		List<SocialSecurityBase> bases = socialSecurityBaseProvider.listSocialSecurityBase(cmd.getCityId(), cmd.getHouseholdType(), cmd.getAccumOrsocial());
+		if (null == bases) {
+			return response;
+		}
+		response.setItems(bases.stream().map(r->{
+			SocialSecurityItemDTO dto = new SocialSecurityItemDTO();
+			copyRadixAndRatio(dto, r);
+			return dto;
+		}).collect(Collectors.toList()));
+		return response;
+	}
+	@Override
 	public GetSocialSecurityPaymentDetailsResponse getSocialSecurityPaymentDetails(
 			GetSocialSecurityPaymentDetailsCommand cmd) {
 		GetSocialSecurityPaymentDetailsResponse response = new GetSocialSecurityPaymentDetailsResponse();
@@ -357,7 +375,24 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 	}
 
 	private SocialSecurityItemDTO processSocialSecurityItemDTO(SocialSecurityPayment r) {
-		return ConvertHelper.convert(r, SocialSecurityItemDTO.class);
+		SocialSecurityItemDTO dto = ConvertHelper.convert(r, SocialSecurityItemDTO.class);
+		SocialSecurityBase base = socialSecurityBaseProvider.findSocialSecurityBaseByCondition(r.getCityId(), r.getHouseholdType(), r.getAccumOrSocail(), r.getPayItem());
+		copyRadixAndRatio(dto, base);
+		return dto;
+	}
+	/**把基础规则数据赋值给itemDTO*/
+	private void copyRadixAndRatio(SocialSecurityItemDTO dto, SocialSecurityBase base) {
+		dto.setEditableFlag(base.getEditableFlag());
+		dto.setPayItem(base.getPayItem());
+		dto.setIsDefault(base.getIsDefault());
+		dto.setCompanyRadixMax(base.getCompanyRadixMax());
+		dto.setCompanyRadixMin(base.getCompanyRadixMin());
+		dto.setCompanyRatioMax(base.getCompanyRatioMax());
+		dto.setCompanyRatioMin(base.getCompanyRatioMin());
+		dto.setEmployeeRadixMax(base.getEmployeeRadixMax());
+		dto.setEmployeeRadixMin(base.getEmployeeRadixMin());
+		dto.setEmployeeRatioMax(base.getEmployeeRatioMax());
+		dto.setEmployeeRatioMin(base.getEmployeeRatioMin());
 	}
 
 	@Override

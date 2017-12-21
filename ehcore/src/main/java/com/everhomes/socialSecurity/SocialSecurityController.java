@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.socialSecurity;
 
+import com.everhomes.rest.socialSecurity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,42 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.socialSecurity.AddSocialSecurityCommand;
-import com.everhomes.rest.socialSecurity.CalculateSocialSecurityReportsCommand;
-import com.everhomes.rest.socialSecurity.ExportSocialSecurityDepartmentSummarysCommand;
-import com.everhomes.rest.socialSecurity.ExportSocialSecurityInoutReportsCommand;
-import com.everhomes.rest.socialSecurity.ExportSocialSecurityReportsCommand;
-import com.everhomes.rest.socialSecurity.FileSocialSecurityCommand;
-import com.everhomes.rest.socialSecurity.GetSocialSecurityPaymentDetailsCommand;
-import com.everhomes.rest.socialSecurity.GetSocialSecurityPaymentDetailsResponse;
-import com.everhomes.rest.socialSecurity.GetSocialSecurityReportStatusCommand;
-import com.everhomes.rest.socialSecurity.GetSocialSecurityReportStatusResponse;
-import com.everhomes.rest.socialSecurity.ImportSocialSecurityPaymentsCommand;
-import com.everhomes.rest.socialSecurity.ListAccumulationFundCitiesCommand;
-import com.everhomes.rest.socialSecurity.ListAccumulationFundCitiesResponse;
-import com.everhomes.rest.socialSecurity.ListAccumulationFundHouseholdTypesCommand;
-import com.everhomes.rest.socialSecurity.ListAccumulationFundHouseholdTypesResponse;
-import com.everhomes.rest.socialSecurity.ListFilterItemsCommand;
-import com.everhomes.rest.socialSecurity.ListFilterItemsResponse;
-import com.everhomes.rest.socialSecurity.ListSocialSecurityCitiesCommand;
-import com.everhomes.rest.socialSecurity.ListSocialSecurityCitiesResponse;
-import com.everhomes.rest.socialSecurity.ListSocialSecurityDepartmentSummarysCommand;
-import com.everhomes.rest.socialSecurity.ListSocialSecurityDepartmentSummarysResponse;
-import com.everhomes.rest.socialSecurity.ListSocialSecurityEmployeeStatusCommand;
-import com.everhomes.rest.socialSecurity.ListSocialSecurityEmployeeStatusResponse;
-import com.everhomes.rest.socialSecurity.ListSocialSecurityHistoryFilesCommand;
-import com.everhomes.rest.socialSecurity.ListSocialSecurityHistoryFilesResponse;
-import com.everhomes.rest.socialSecurity.ListSocialSecurityHouseholdTypesCommand;
-import com.everhomes.rest.socialSecurity.ListSocialSecurityHouseholdTypesResponse;
-import com.everhomes.rest.socialSecurity.ListSocialSecurityInoutReportsCommand;
-import com.everhomes.rest.socialSecurity.ListSocialSecurityInoutReportsResponse;
-import com.everhomes.rest.socialSecurity.ListSocialSecurityPaymentsCommand;
-import com.everhomes.rest.socialSecurity.ListSocialSecurityPaymentsResponse;
-import com.everhomes.rest.socialSecurity.ListSocialSecurityReportsCommand;
-import com.everhomes.rest.socialSecurity.ListSocialSecurityReportsResponse;
-import com.everhomes.rest.socialSecurity.ListUserInoutHistoryCommand;
-import com.everhomes.rest.socialSecurity.ListUserInoutHistoryResponse;
-import com.everhomes.rest.socialSecurity.UpdateSocialSecurityPaymentCommand;
 
 @RestController
 @RequestMapping("/socialSecurity")
@@ -122,6 +87,16 @@ public class SocialSecurityController extends ControllerBase {
 	@RestReturn(GetSocialSecurityPaymentDetailsResponse.class)
 	public RestResponse getSocialSecurityPaymentDetails(GetSocialSecurityPaymentDetailsCommand cmd){
 		return new RestResponse(socialSecurityService.getSocialSecurityPaymentDetails(cmd));
+	}
+
+	/**
+	 * <p>7-1.查某个城市[某户籍]的社保/公积金 规则(只返回基数最大值最小值,比例最大值最小值)</p>
+	 * <b>URL: /socialSecurity/getSocialSecurityRule</b>
+	 */
+	@RequestMapping("getSocialSecurityRule")
+	@RestReturn(SocialSecurityPaymentDetailDTO.class)
+	public RestResponse getSocialSecurityRule(GetSocialSecurityRuleCommand cmd){
+		return new RestResponse(socialSecurityService.getSocialSecurityRule(cmd));
 	}
 
 	/**

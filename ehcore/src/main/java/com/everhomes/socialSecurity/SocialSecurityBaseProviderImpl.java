@@ -4,6 +4,7 @@ package com.everhomes.socialSecurity;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.rest.socialSecurity.HouseholdTypesDTO;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -63,7 +64,37 @@ public class SocialSecurityBaseProviderImpl implements SocialSecurityBaseProvide
 				.orderBy(Tables.EH_SOCIAL_SECURITY_BASES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SocialSecurityBase.class));
 	}
-	
+
+	@Override
+	public List<Long> listCities() {
+		return null;
+	}
+
+	@Override
+	public List<SocialSecurityBase> listSocialSecurityBase(Long ownerId, String householdType) {
+		return null;
+	}
+
+	@Override
+	public List<SocialSecurityBase> listSocialSecurityBase(Long ownerId, Byte accumOrSocial) {
+		return null;
+	}
+
+	@Override
+	public SocialSecurityBase findSocialSecurityBaseByCondition(Long cityId, String householdType, Byte accumOrSocial, String payItem) {
+		return null;
+	}
+
+	@Override
+	public List<HouseholdTypesDTO> listHouseholdTypesByCity(Long cityId) {
+		return null;
+	}
+
+	@Override
+	public List<SocialSecurityBase> listSocialSecurityBase(Long cityId, String householdTypeName, byte code) {
+		return null;
+	}
+
 	private EhSocialSecurityBasesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
