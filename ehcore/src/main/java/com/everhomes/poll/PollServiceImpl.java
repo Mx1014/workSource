@@ -338,13 +338,19 @@ public class PollServiceImpl implements PollService {
                 pollItem.setCreateTime(r.getCreateTime().toString());
                 return pollItem;
                 }).collect(Collectors.toList()));
+
+
+        User user=UserContext.current().getUser();
+        //对选项进行遍历，填充选项是否被选择
+        populateItemVoteStatus(poll, response.getItems(), user.getId());
+
         PollDTO dto=new PollDTO();
         try{
             BeanUtils.copyProperties(poll, dto);
         }catch(Exception e){
             LOGGER.error("convert bean failed.error={}",e.getMessage());
         }
-        User user=UserContext.current().getUser();
+
         PollVote votes = pollProvider.findPollVoteByUidAndPollId(user.getId(), poll.getId());
         dto.setStartTime(poll.getStartTime().toString());
         dto.setPollId(poll.getId());
@@ -399,7 +405,7 @@ public class PollServiceImpl implements PollService {
         if(haveValidFlag){
             dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
             //对选项进行遍历，填充选项是否被选择
-            populateItemVoteStatus(poll, response.getItems());
+            populateItemVoteStatus(poll, response.getItems(), user.getId());
 
         }else {
             dto.setPollVoterStatus(VotedStatus.UNVOTED.getCode());
@@ -410,8 +416,9 @@ public class PollServiceImpl implements PollService {
         return response;
     }
 
-    private void populateItemVoteStatus(Poll poll, List<PollItemDTO> items){
-        List<PollVote> pollVotes = pollProvider.listPollVoteByPollId(poll.getId());
+    private void populateItemVoteStatus(Poll poll, List<PollItemDTO> items, Long userId){
+
+        List<PollVote> pollVotes = pollProvider.listPollVoteByUidAndPollId(userId, poll.getId());
 
         //对选项进行遍历，找到对应的不过期的投票则将该选项改成“已选择”
         if(pollVotes != null){
