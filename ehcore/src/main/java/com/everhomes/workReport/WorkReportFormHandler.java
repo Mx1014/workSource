@@ -8,6 +8,7 @@ import com.everhomes.util.ConvertHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "WORK_REPORT")
@@ -25,36 +26,45 @@ public class WorkReportFormHandler implements GeneralFormModuleHandler {
     @Autowired
     private GeneralFormValProvider generalFormValProvider;
 
-    private final String WORK_REPORT_VAL = "work_report_val";
+    private final String workReportSourceType = "work_report_val";
 
     @Override
     public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
-
         //  find the corresponding report and the form
         WorkReportVal reportVal = workReportValProviderl.getWorkReportValById(cmd.getSourceId());
         WorkReport report = workReportProvider.getWorkReportById(reportVal.getReportId());
         GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(report.getFormOriginId());
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
         if (cmd.getValues() != null && cmd.getValues().size() > 0) {
-            for (PostApprovalFormItem val :  cmd.getValues()) {
-                GeneralFormVal obj = new GeneralFormVal();
-                obj.setNamespaceId(UserContext.getCurrentNamespaceId());
-                obj.setOrganizationId(cmd.getCurrentOrganizationId());
-                obj.setOwnerId(cmd.getOwnerId());
-                obj.setOwnerType(cmd.getOwnerType());
-                obj.setModuleId(report.getModuleId());
-                obj.setModuleType(report.getModuleType());
-                obj.setSourceId(reportVal.getId());
-                obj.setSourceType(WORK_REPORT_VAL);
-                obj.setFormOriginId(form.getFormOriginId());
-                obj.setFormVersion(form.getFormVersion());
-                obj.setFieldName(val.getFieldName());
-                obj.setFieldType(val.getFieldType());
-                obj.setFieldValue(val.getFieldValue());
+            for (PostApprovalFormItem value : cmd.getValues()) {
+                GeneralFormVal obj = packageGeneralFormVal(namespaceId, cmd.getCurrentOrganizationId(),
+                        report.getOwnerId(), report.getOwnerType(), report, reportVal, form, value);
                 generalFormValProvider.createGeneralFormVal(obj);
             }
         }
         PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
         return dto;
+    }
+
+    private GeneralFormVal packageGeneralFormVal(
+            Integer namespaceId, Long organizationId, Long ownerId, String ownerType, WorkReport report,
+            WorkReportVal reportVal, GeneralForm form, PostApprovalFormItem value) {
+        GeneralFormVal obj = new GeneralFormVal();
+        obj.setNamespaceId(namespaceId);
+        obj.setOrganizationId(organizationId);
+        obj.setOwnerId(ownerId);
+        obj.setOwnerType(ownerType);
+        obj.setModuleId(report.getModuleId());
+        obj.setModuleType(report.getModuleType());
+        obj.setSourceId(reportVal.getId());
+        obj.setSourceType(workReportSourceType);
+        obj.setFormOriginId(form.getFormOriginId());
+        obj.setFormVersion(form.getFormVersion());
+        obj.setFieldName(value.getFieldName());
+        obj.setFieldType(value.getFieldType());
+        obj.setFieldValue(value.getFieldValue());
+        return obj;
     }
 
     @Override
@@ -70,6 +80,34 @@ public class WorkReportFormHandler implements GeneralFormModuleHandler {
 
     @Override
     public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd) {
-        return null;
+        //  find the corresponding report and the form
+        WorkReportVal reportVal = workReportValProviderl.getWorkReportValById(cmd.getSourceId());
+        WorkReport report = workReportProvider.getWorkReportById(reportVal.getReportId());
+        GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(report.getFormOriginId());
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        //  record those fields.
+        if (cmd.getValues() != null && cmd.getValues().size() > 0) {
+            List<String> fieldNameScope = new ArrayList<>();
+            for (PostApprovalFormItem value : cmd.getValues()) {
+                GeneralFormVal obj = generalFormValProvider.getGeneralFormValBySourceIdAndName(cmd.getSourceId(), workReportSourceType, value.getFieldName());
+                if (obj == null) {
+                    //  1.create new fields
+                    obj = packageGeneralFormVal(namespaceId, cmd.getCurrentOrganizationId(),
+                            report.getOwnerId(), report.getOwnerType(), report, reportVal, form, value);
+                    generalFormValProvider.createGeneralFormVal(obj);
+                } else {
+                    //  2.update old fields
+                    obj.setFieldValue(value.getFieldValue());
+                    generalFormValProvider.updateGeneralFormVal(obj);
+                }
+                fieldNameScope.add(value.getFieldName());
+            }
+
+            //  3.delete fields which not contain in the scope
+            generalFormValProvider.deleteGeneralFormValNotInFieldNameScope(reportVal.getId(), workReportSourceType, fieldNameScope);
+        }
+        PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
+        return dto;
     }
 }
