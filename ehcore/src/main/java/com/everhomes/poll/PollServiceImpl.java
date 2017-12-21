@@ -395,8 +395,8 @@ public class PollServiceImpl implements PollService {
         dto.setPollId(poll.getId());
 
         //检查是否重复投票  edit by yanjun 20170825
-        boolean repeat = checkValidPoll(poll, user.getId());
-        if(repeat){
+        boolean haveValidFlag = checkValidPoll(poll, user.getId());
+        if(haveValidFlag){
             dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
             //对选项进行遍历，填充选项是否被选择
             populateItemVoteStatus(poll, response.getItems());
@@ -417,7 +417,7 @@ public class PollServiceImpl implements PollService {
         if(pollVotes != null){
             for(PollItemDTO itemDTO: items){
                 for (PollVote vo: pollVotes){
-                    if(itemDTO.getItemId().longValue() == vo.getItemId()){
+                    if(itemDTO.getId().longValue() == vo.getItemId()){
                         //已经投过票，检查投票是否超过重复投票间隔
                         boolean flag = checkVoteExpirePeriod(poll, vo);
                         //未超过时间间隔

@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ *     <li>id: 选项ID</li>
  *     <li>itemId: 选项ID</li>
  *     <li>subject: 主题</li>
  *     <li>coverUrl: 选项路径</li>
@@ -14,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class PollItemDTO {
+    private Long id;
     private Long itemId;
     private String subject;
     private String coverUrl;
@@ -23,6 +25,14 @@ public class PollItemDTO {
 
 
     public PollItemDTO() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getItemId() {
