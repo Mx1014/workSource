@@ -87,6 +87,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         report.setOrganizationId(cmd.getOrganizationId());
         report.setReportName(cmd.getReportName());
         report.setModuleId(cmd.getModuleId());
+        report.setModuleType(cmd.getModuleType());
         report.setOperatorUserId(userId);
         report.setOperatorName(fixUpUserName(userId));
 
@@ -490,6 +491,8 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Override
     public WorkReportValDTO updateWorkReportVal(PostWorkReportValCommand cmd) {
+        //  1.update form values.
+
         return null;
     }
 
@@ -817,10 +820,4 @@ public class WorkReportServiceImpl implements WorkReportService {
         ownerTokenDto.setType(OwnerType.WORK_REPORT.getCode());
         return WebTokenGenerator.getInstance().toWebToken(ownerTokenDto);
     }
-
-    public String getWorkReportValDetailUrl(Long reportId, Long reportValId){
-        String url = configurationProvider.getValue(Namespace.DEFAULT_NAMESPACE, ConfigConstants.WORK_REPORT_VAL_DETAIL_URL, "");
-        return String.format(url, reportId, reportValId);
-    }
-
 }
