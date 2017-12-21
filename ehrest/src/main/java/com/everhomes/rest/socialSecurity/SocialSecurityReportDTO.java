@@ -38,6 +38,7 @@ import com.everhomes.util.StringHelper;
  * <li>accumulationFundSum:公积金合计</li>
  * <li>accumulationFundCompanySum:公积金企业合计</li>
  * <li>accumulationFundEmployeeSum:公积金个人合计</li>
+ * <li>accumulationFundTax:公积金需纳税额</li>
  * <li>pensionCompanyRadix:养老保险企业基数</li>
  * <li>pensionCompanyRatio:养老保险企业比例万分之eq:100=1%:1=0.01%</li>
  * <li>pensionEmployeeRadix:养老保险个人基数</li>
@@ -129,6 +130,7 @@ public class SocialSecurityReportDTO {
 	private BigDecimal accumulationFundSum;
 	private BigDecimal accumulationFundCompanySum;
 	private BigDecimal accumulationFundEmployeeSum;
+	private BigDecimal accumulationFundTax;
 	private BigDecimal pensionCompanyRadix;
 	private Integer pensionCompanyRatio;
 	private BigDecimal pensionEmployeeRadix;
@@ -891,6 +893,14 @@ public class SocialSecurityReportDTO {
 
 	public void setFileTime(Long fileTime) {
 		this.fileTime = fileTime;
+	}
+
+	public BigDecimal getAccumulationFundTax() {
+		return accumulationFundTax;
+	}
+
+	public void setAccumulationFundTax(BigDecimal accumulationFundTax) {
+		this.accumulationFundTax = accumulationFundTax;
 	}
 
 }
