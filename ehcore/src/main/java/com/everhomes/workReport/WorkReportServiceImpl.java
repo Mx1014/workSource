@@ -363,7 +363,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         List<Long> scopeDepartmentIds = scopes.stream()
                 .filter(p1 -> p1.getSourceType().equals(UniongroupTargetType.ORGANIZATION.getCode()))
                 .map(p2 -> p2.getSourceId()).collect(Collectors.toList());
-        if (scopeUserIds.contains(userId))
+        if (scopeUserIds.contains(user.getDetailId()))
             return true;
         if (user != null)
             for (Long departmentId : scopeDepartmentIds)
