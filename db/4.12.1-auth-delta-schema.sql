@@ -24,6 +24,9 @@ ALTER TABLE `eh_equipment_inspection_standards`
   ADD COLUMN `refer_id` BIGINT(20) NULL;
 
 ALTER TABLE `eh_equipment_inspection_templates`
+  ADD COLUMN `refer_id`  bigint(20) NULL;
+
+ALTER TABLE `eh_equipment_inspection_templates`
   ADD COLUMN `target_type` VARCHAR(32) NOT NULL DEFAULT '',
   ADD COLUMN `target_id` BIGINT(20) NOT NULL DEFAULT 0 ;
 -- 物业巡检权限细化 end  by  jiarui
