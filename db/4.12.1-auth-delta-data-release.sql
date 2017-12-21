@@ -289,3 +289,6 @@ where privilege_id = 10011;
 delete from  eh_acls
 where privilege_id = 10011;
 
+
+-- 删除EhAll的权限细化记录
+DELETE from eh_acls where owner_type = 'EhAll' and comment_tag1 like '%EhAuthorizationRelations.%';
