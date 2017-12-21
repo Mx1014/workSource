@@ -2694,12 +2694,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	public ImportDataResponse importEquipmentStandards(ImportOwnerCommand cmd, MultipartFile mfile,
 			Long userId) {
-		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_UPDATE, 0L);
+		/*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_UPDATE, 0L);
 		if(cmd.getTargetId() != null) {
 			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-		}
+		}*/
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_STANDARD_UPDATE,cmd.getTargetId());
 		ImportDataResponse importDataResponse = importData(cmd, mfile, userId, ImportDataType.EQUIPMENT_STANDARDS.getCode());
 		return importDataResponse;
 	}

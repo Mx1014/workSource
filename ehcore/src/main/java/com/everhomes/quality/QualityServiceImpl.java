@@ -30,8 +30,6 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.*;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.quality.*;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
@@ -4311,7 +4309,7 @@ public class QualityServiceImpl implements QualityService {
 		return response;
 	}
 	private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) {
-		ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+		/*ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
 		listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
 		listServiceModuleAppsCommand.setModuleId(QualityConstant.QUALITY_MODULE);
 		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
@@ -4325,7 +4323,9 @@ public class QualityServiceImpl implements QualityService {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
 						"Insufficient privilege");
 			}
-		}
+		}*/
+		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, QualityConstant.QUALITY_MODULE, null, null, null,communityId);
+
 
 	}
 }
