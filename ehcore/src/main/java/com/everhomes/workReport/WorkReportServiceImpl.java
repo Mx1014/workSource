@@ -445,7 +445,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             formCommand.setSourceId(valId);
             generalFormService.postGeneralForm(formCommand);
             for (Long receiverId : cmd.getReceiverIds()) {
-                WorkReportValReceiverMap receiver = packageWorkReportValReceiverMap(namespaceId, valId, receiverId, user);
+                WorkReportValReceiverMap receiver = packageWorkReportValReceiverMap(namespaceId, valId, receiverId);
                 //  create the receiver.
                 workReportValProvider.createWorkReportValReceiverMap(receiver);
                 //  send message to the receiver.
@@ -468,13 +468,13 @@ public class WorkReportServiceImpl implements WorkReportService {
         return dto;
     }
 
-    private WorkReportValReceiverMap packageWorkReportValReceiverMap(Integer namespaceId, Long reportValId, Long receiverId, User user){
+    private WorkReportValReceiverMap packageWorkReportValReceiverMap(Integer namespaceId, Long reportValId, Long receiverId){
         WorkReportValReceiverMap receiver = new WorkReportValReceiverMap();
         receiver.setNamespaceId(namespaceId);
         receiver.setReportValId(reportValId);
         receiver.setReceiverUserId(receiverId);
         receiver.setReceiverName(fixUpUserName(receiverId));
-        receiver.setReceiverAvatar(user.getAvatar());
+        receiver.setReceiverAvatar(getUserAvatar(receiverId));
         receiver.setReadStatus(WorkReportReadStatus.UNREAD.getCode());
         return receiver;
     }
@@ -521,7 +521,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             //  3.update receivers.
             workReportValProvider.deleteReportValReceiverByValId(reportVal.getId());
             for (Long receiverId : cmd.getReceiverIds()) {
-                WorkReportValReceiverMap receiver = packageWorkReportValReceiverMap(namespaceId, reportVal.getId(), receiverId, user);
+                WorkReportValReceiverMap receiver = packageWorkReportValReceiverMap(namespaceId, reportVal.getId(), receiverId);
                 //  create the receiver.
                 workReportValProvider.createWorkReportValReceiverMap(receiver);
                 //  send message to the receiver.
