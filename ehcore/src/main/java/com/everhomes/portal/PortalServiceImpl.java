@@ -1795,10 +1795,7 @@ public class PortalServiceImpl implements PortalService {
 					UserContext.setCurrentUser(user);
 
 					for (Tuple<String, String> t: list) {
-						dbProvider.execute(status -> {
-							syncLayout(cmd.getNamespaceId(), t.first(), t.second());
-							return null;
-						});
+						syncLayout(cmd.getNamespaceId(), t.first(), t.second());
 					}
 
 					//设置完成之后要清空

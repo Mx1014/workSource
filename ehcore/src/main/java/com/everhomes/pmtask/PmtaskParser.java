@@ -18,7 +18,7 @@ public class PmtaskParser implements PortalUrlParser {
         //{"url":"zl://propertyrepair/create?type=user&taskCategoryId=203531&displayName=物业报修"}
 
         JSONObject json = JSONObject.parseObject(actionData);
-        if(json != null){
+        if(json != null && json.size() > 0){
             String url = json.getString("url");
             String[] arrs = url.split("&");
             if (arrs[0].contains("propertyrepair")) {
