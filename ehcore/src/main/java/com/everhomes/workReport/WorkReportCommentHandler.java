@@ -35,6 +35,9 @@ public class WorkReportCommentHandler implements CommentHandler {
     WorkReportValProvider workReportValProvider;
 
     @Autowired
+    WorkReportProvider workReportProvider;
+
+    @Autowired
     ContentServerService contentServerService;
 
     @Autowired
@@ -49,15 +52,63 @@ public class WorkReportCommentHandler implements CommentHandler {
     @Override
     public CommentDTO addComment(AddCommentCommand cmd) {
         OwnerTokenDTO ownerTokenDTO = WebTokenGenerator.getInstance().fromWebToken(cmd.getOwnerToken(), OwnerTokenDTO.class);
+        User user = UserContext.current().getUser();
+
 
         WorkReportVal reportVal = workReportValProvider.getWorkReportValById(ownerTokenDTO.getId());
         if (reportVal != null) {
+            WorkReport report = workReportProvider.getWorkReportById(reportVal.getReportId());
             CommentDTO commentDTO = this.dbProvider.execute((TransactionStatus status) -> {
-                WorkReportValComment comment = processComment(cmd, reportVal);
+                WorkReportValComment comment = processComment(cmd, reportVal, user);
                 Long commentId = workReportValProvider.createWorkReportValComment(comment);
                 List<WorkReportValCommentAttachment> attachments = processCommentAttachments(cmd, commentId, comment);
                 for (WorkReportValCommentAttachment attachment : attachments)
                     workReportValProvider.createWorkReportValCommentAttachment(attachment);
+
+                //  send message to the corresponding receiver.
+                //  1) creator is applier and parentCommentId is null -> all receivers.
+                //  2) creator is applier and parentCommentId not null -> parentComment.creator
+                //  3) creator isn't applier and parentCommentId is null -> author
+                //  2) creator isn't applier and parentCommentId not null -> parentComment.creator && author
+                String content = "";
+                String subject = "";
+                if (user.getId().longValue() == reportVal.getApplierUserId().longValue()) {
+                    if (cmd.getParentCommentId() == null) {
+                        //  1) all receivers.
+                        content = getMessageContent(WorkReportNotificationTemplateCode.AUTHOR_COMMENT_WORK_REPORT_VAL,
+                                null, workReportService.fixUpUserName(user.getId()), report.getReportName());
+                        subject = getMetaSubject(WorkReportNotificationTemplateCode.AUTHOR_COMMENT_WORK_REPORT_VAL);
+                        List<WorkReportValReceiverMap> receivers = workReportValProvider.listReportValReceiversByValId(reportVal.getId());
+                        for (WorkReportValReceiverMap receiver : receivers)
+                            sendMessageAfterCommentWorkReportVal(content, subject, receiver.getReceiverUserId(), reportVal.getReportId(), reportVal.getId());
+                    } else {
+                        //  2) parentComment.creator
+                        //todo: 查找上一条的评论人id
+                        content = getMessageContent(WorkReportNotificationTemplateCode.AUTHOR_REPLY_WORK_REPORT_VAL,
+                                null, workReportService.fixUpUserName(user.getId()), report.getReportName());
+                        subject = getMetaSubject(WorkReportNotificationTemplateCode.AUTHOR_REPLY_WORK_REPORT_VAL);
+//                        sendMessageAfterCommentWorkReportVal(content, subject, parentComment.getCreatorUserId(), reportVal.getReportId(), reportVal.getId());
+                    }
+                } else {
+                    if (cmd.getParentCommentId() == null) {
+                        //  3) author
+                        content = getMessageContent(WorkReportNotificationTemplateCode.READER_COMMENT_WORK_REPORT_VAL,
+                                workReportService.fixUpUserName(user.getId()),null, report.getReportName());
+                        subject = getMetaSubject(WorkReportNotificationTemplateCode.READER_COMMENT_WORK_REPORT_VAL);
+                        sendMessageAfterCommentWorkReportVal(content, subject, reportVal.getApplierUserId(), reportVal.getReportId(), reportVal.getId());
+                    } else {
+                        //  4) parentComment.creator && author
+                        content = getMessageContent(WorkReportNotificationTemplateCode.READER_WORK_REPORT_VAL_FOR_READER,
+                                workReportService.fixUpUserName(user.getId()), workReportService.fixUpUserName(reportVal.getApplierUserId()), report.getReportName());
+                        subject = getMetaSubject(WorkReportNotificationTemplateCode.READER_WORK_REPORT_VAL_FOR_READER);
+//                        sendMessageAfterCommentWorkReportVal(content, subject, parentComment.getCreatorUserId(), reportVal.getReportId(), reportVal.getId()));
+
+                        content = getMessageContent(WorkReportNotificationTemplateCode.READER_COMMENT_WORK_REPORT_VAL,
+                                workReportService.fixUpUserName(user.getId()), null, report.getReportName());
+                        subject = getMetaSubject(WorkReportNotificationTemplateCode.READER_COMMENT_WORK_REPORT_VAL);
+                        sendMessageAfterCommentWorkReportVal(content, subject, reportVal.getApplierUserId(), reportVal.getReportId(), reportVal.getId());
+                    }
+                }
 
                 //  return the comment back.
                 CommentDTO dto = new CommentDTO();
@@ -68,14 +119,12 @@ public class WorkReportCommentHandler implements CommentHandler {
                 dto.setContentType(comment.getContentType());
                 return dto;
             });
-            //  send message to the corresponding receiver.
             return commentDTO;
         }
         return null;
     }
 
-    private WorkReportValComment processComment(AddCommentCommand cmd, WorkReportVal reportVal) {
-        User user = UserContext.current().getUser();
+    private WorkReportValComment processComment(AddCommentCommand cmd, WorkReportVal reportVal, User user) {
         WorkReportValComment comment = new WorkReportValComment();
         comment.setNamespaceId(user.getNamespaceId());
         comment.setOwnerId(reportVal.getOwnerId());
@@ -167,7 +216,7 @@ public class WorkReportCommentHandler implements CommentHandler {
         });
     }
 
-    /*private String getMessageContent(){
+    private String getMessageContent(Integer templateCode, String creatorName, String applierName, String reportName) {
         User user = UserContext.current().getUser();
 
         String locale = Locale.SIMPLIFIED_CHINESE.toString();
@@ -177,39 +226,42 @@ public class WorkReportCommentHandler implements CommentHandler {
 
         // set the message
         Map<String, String> model = new HashMap<>();
-        model.put("commentName", commentName);
+        model.put("creatorName", creatorName);
+        model.put("applierName", applierName);
         model.put("reportName", reportName);
-        String content = "";
-        if (messageType.equals("post")) {
-            content = localeTemplateService.getLocaleTemplateString(
-                    Namespace.DEFAULT_NAMESPACE,
-                    WorkReportNotificationTemplateCode.SCOPE,
-                    WorkReportNotificationTemplateCode.POST_WORK_REPORT_VAL,
-                    locale,
-                    model,
-                    "Template Not Found"
-            );
-        } else if (messageType.equals("update")) {
-            content = localeTemplateService.getLocaleTemplateString(
-                    Namespace.DEFAULT_NAMESPACE,
-                    WorkReportNotificationTemplateCode.SCOPE,
-                    WorkReportNotificationTemplateCode.UPDATE_WORK_REPORT_VAL,
-                    locale,
-                    model,
-                    "Template Not Found"
-            );
+        String content = localeTemplateService.getLocaleTemplateString(
+                Namespace.DEFAULT_NAMESPACE,
+                WorkReportNotificationTemplateCode.SCOPE,
+                templateCode,
+                locale,
+                model,
+                "Template Not Found"
+        );
+        return content;
+    }
+
+    private String getMetaSubject(Integer templateCode) {
+        String subject = "";
+        switch (templateCode) {
+            case WorkReportNotificationTemplateCode.READER_COMMENT_WORK_REPORT_VAL:
+            case WorkReportNotificationTemplateCode.AUTHOR_COMMENT_WORK_REPORT_VAL:
+                subject = "汇报评论";
+                break;
+            case WorkReportNotificationTemplateCode.AUTHOR_REPLY_WORK_REPORT_VAL:
+            case WorkReportNotificationTemplateCode.READER_WORK_REPORT_VAL_FOR_READER:
+                subject = "汇报回复";
+                break;
         }
+        return subject;
     }
 
     private void sendMessageAfterCommentWorkReportVal(
-            String messageType, String commentName, String reportName, Long receiverId, Long reportId, Long reportValId) {
+            String content, String subject, Long receiverId, Long reportId, Long reportValId) {
 
-
-
-
+        //  set the message
         MessageDTO message = new MessageDTO();
         message.setBodyType(MessageBodyType.TEXT.getCode());
-        message.setBody(getMessageContent());
+        message.setBody(content);
         message.setMetaAppId(AppConstants.APPID_DEFAULT);
         message.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(receiverId)));
 
@@ -222,10 +274,7 @@ public class WorkReportCommentHandler implements CommentHandler {
         metaObject.setUrl(url);
         Map<String, String> meta = new HashMap<>();
         meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
-        if (messageType.equals("post"))
-            meta.put(MessageMetaConstant.MESSAGE_SUBJECT, "新的汇报");
-        else if (messageType.equals("update"))
-            meta.put(MessageMetaConstant.MESSAGE_SUBJECT, "汇报更新");
+        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, subject);
         meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
         message.setMeta(meta);
 
@@ -238,5 +287,5 @@ public class WorkReportCommentHandler implements CommentHandler {
                 message,
                 MessagingConstants.MSG_FLAG_STORED.getCode()
         );
-    }*/
+    }
 }
