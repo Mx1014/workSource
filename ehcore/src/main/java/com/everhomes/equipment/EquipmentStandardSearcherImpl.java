@@ -252,7 +252,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         return new SearchEquipmentStandardsResponse(nextPageAnchor, eqStandards);
     }
     private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) {
-        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+        /*ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
         listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
         listServiceModuleAppsCommand.setModuleId(EquipmentConstant.EQUIPMENT_MODULE);
         ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
@@ -266,7 +266,9 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                         "Insufficient privilege");
             }
-        }
+        }*/
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, EquipmentConstant.EQUIPMENT_MODULE, null, null, null,communityId);
+
 
     }
 

@@ -1,8 +1,6 @@
 package com.everhomes.equipment;
 
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
@@ -12,8 +10,6 @@ import com.everhomes.rest.equipment.EquipmentTaskDTO;
 import com.everhomes.rest.equipment.ListEquipmentTasksResponse;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EquipmentTasksSearcher;
@@ -22,7 +18,6 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
 import com.mysql.jdbc.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -254,7 +249,7 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         return response;
 	}
     private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) {
-        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+        /*ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
         listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
         listServiceModuleAppsCommand.setModuleId(EquipmentConstant.EQUIPMENT_MODULE);
         ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
@@ -268,7 +263,9 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                         "Insufficient privilege");
             }
-        }
+        }*/
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, EquipmentConstant.EQUIPMENT_MODULE, null, null, null,communityId);
+
 
     }
 
