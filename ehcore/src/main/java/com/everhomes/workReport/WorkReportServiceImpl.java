@@ -1,5 +1,7 @@
 package com.everhomes.workReport;
 
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.GeneralFormService;
@@ -13,6 +15,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.comment.OwnerTokenDTO;
 import com.everhomes.rest.comment.OwnerType;
+import com.everhomes.rest.common.Router;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.OrganizationGroupType;
@@ -22,10 +25,7 @@ import com.everhomes.rest.workReport.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -58,6 +58,9 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Autowired
     private ContentServerService contentServerService;
+
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
     @Autowired
     private LocaleTemplateService localeTemplateService;
@@ -452,7 +455,13 @@ public class WorkReportServiceImpl implements WorkReportService {
                 //  create the receiver.
                 workReportValProvider.createWorkReportValReceiverMap(receiver);
                 //  send message to the receiver.
-                sendMessageAfterEditWorkReportVal(user, val.getApplierName(), report.getReportName(), receiverId);
+                sendMessageAfterEditWorkReportVal(
+                        val.getApplierName(),
+                        report.getReportName(),
+                        receiverId,
+                        val.getReportId(),
+                        valId,
+                        user);
             }
             return valId;
         });
@@ -484,7 +493,9 @@ public class WorkReportServiceImpl implements WorkReportService {
         return null;
     }
 
-    private void sendMessageAfterEditWorkReportVal(User user, String applierName, String reportName, Long receiverId) {
+
+    private void sendMessageAfterEditWorkReportVal(
+            String applierName, String reportName, Long receiverId, Long reportId, Long reportValId, User user) {
 
         String locale = Locale.SIMPLIFIED_CHINESE.toString();
         if (user != null) {
@@ -504,16 +515,29 @@ public class WorkReportServiceImpl implements WorkReportService {
                 model,
                 "Template Not Found"
         );
-        // 给目标用户发送消息
+        // set the message
         MessageDTO message = new MessageDTO();
-        message.setAppId(AppConstants.APPID_MESSAGING);
-        message.setSenderUid(User.SYSTEM_UID);
+//        message.setAppId(AppConstants.APPID_MESSAGING);
+//        message.setSenderUid(User.SYSTEM_UID);
         message.setBodyType(MessageBodyType.TEXT.getCode());
 
         message.setBody(toTargetTemplate);
         message.setMetaAppId(AppConstants.APPID_DEFAULT);
         message.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(receiverId)));
 
+        //  set the route
+        WorkReportDetailsActionData actionData = new WorkReportDetailsActionData();
+        actionData.setReportId(reportId);
+        actionData.setReportValId(reportValId);
+        String url = RouterBuilder.build(Router.WORK_REPORT_DETAILS, actionData);
+        RouterMetaObject metaObject = new RouterMetaObject();
+        metaObject.setUrl(url);
+        Map<String, String> meta = new HashMap<>();
+        meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+        meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
+        message.setMeta(meta);
+
+        //  send the message
         messagingService.routeMessage(
                 User.SYSTEM_USER_LOGIN,
                 AppConstants.APPID_MESSAGING,
@@ -793,4 +817,10 @@ public class WorkReportServiceImpl implements WorkReportService {
         ownerTokenDto.setType(OwnerType.WORK_REPORT.getCode());
         return WebTokenGenerator.getInstance().toWebToken(ownerTokenDto);
     }
+
+    public String getWorkReportValDetailUrl(Long reportId, Long reportValId){
+        String url = configurationProvider.getValue(Namespace.DEFAULT_NAMESPACE, ConfigConstants.WORK_REPORT_VAL_DETAIL_URL, "");
+        return String.format(url, reportId, reportValId);
+    }
+
 }
