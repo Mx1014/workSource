@@ -1,7 +1,13 @@
 package com.everhomes.warehouse;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.warehouse.SearchWarehousesCommand;
 import com.everhomes.rest.warehouse.SearchWarehousesResponse;
 import com.everhomes.rest.warehouse.WarehouseDTO;
@@ -10,7 +16,9 @@ import com.everhomes.search.SearchUtils;
 import com.everhomes.search.WarehouseSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -43,6 +51,12 @@ public class WarehouseSearcherImpl extends AbstractElasticSearch implements Ware
 
     @Autowired
     private ConfigurationProvider configProvider;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+
+    @Autowired
+    private PortalService portalService;
 
     @Override
     public void deleteById(Long id) {
@@ -105,6 +119,7 @@ public class WarehouseSearcherImpl extends AbstractElasticSearch implements Ware
 
     @Override
     public SearchWarehousesResponse query(SearchWarehousesCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.WAREHOUSE_REPO_VIEW,cmd.getOwnerId());
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
         if(cmd.getName() == null || cmd.getName().isEmpty()) {
@@ -123,6 +138,8 @@ public class WarehouseSearcherImpl extends AbstractElasticSearch implements Ware
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType().toLowerCase()));
+        //增加园区id的筛选 by wentian
+        fb = FilterBuilders.andFilter(fb,FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
 
         if(cmd.getStatus() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
@@ -155,7 +172,7 @@ public class WarehouseSearcherImpl extends AbstractElasticSearch implements Ware
 
         List<WarehouseDTO> warehouseDTOs = new ArrayList<WarehouseDTO>();
         for(Long id : ids) {
-            Warehouses warehouse = warehouseProvider.findWarehouse(id, cmd.getOwnerType(), cmd.getOwnerId());
+            Warehouses warehouse = warehouseProvider.findWarehouse(id, cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
             WarehouseDTO dto = ConvertHelper.convert(warehouse, WarehouseDTO.class);
             warehouseDTOs.add(dto);
         }
@@ -172,6 +189,7 @@ public class WarehouseSearcherImpl extends AbstractElasticSearch implements Ware
             b.field("ownerType", warehouse.getOwnerType());
             b.field("status", warehouse.getStatus());
             b.field("name", warehouse.getName());
+            b.field("communityId",warehouse.getCommunityId());
 
 
             b.endObject();
@@ -179,6 +197,18 @@ public class WarehouseSearcherImpl extends AbstractElasticSearch implements Ware
         } catch (IOException ex) {
             LOGGER.error("Create warehouse " + warehouse.getId() + " error");
             return null;
+        }
+    }
+    private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId, Long OrganizationId) {
+        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
+        cmd1.setActionType((byte)13);
+        cmd1.setModuleId(PrivilegeConstants.WAREHOUSE_MODULE_ID);
+        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
+        Long appId = res.getServiceModuleApps().get(0).getId();
+        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), OrganizationId, OrganizationId,priviledgeId , appId, null,communityId )){
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                    "check app privilege error");
         }
     }
 }
