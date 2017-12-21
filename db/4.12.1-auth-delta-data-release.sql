@@ -282,15 +282,23 @@ UPDATE eh_service_modules
 SET STATUS =2
 WHERE id = 20841;
 
+UPDATE eh_service_modules
+SET `status` = 2
+WHERE id = 20655;
+
+UPDATE eh_service_modules
+SET `status` = 2
+WHERE id = 20670;
+
 -- 物业巡检菜单显示不全 end  by jiarui 20171220
 
 -- 删除旧数据 管理员权限start by jiarui 20171220
 
-delete from  eh_acls
-where privilege_id = 10011;
+DELETE FROM  eh_acls
+WHERE privilege_id = 10011;
 
-DELETE  from eh_acls
-where privilege_id = 10010;
+DELETE  FROM eh_acls
+WHERE privilege_id = 10010;
 
 -- 删除旧数据 管理员权限 end by jiarui 20171220
 
