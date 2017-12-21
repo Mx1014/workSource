@@ -345,21 +345,22 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) {
-		ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
-		listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
-		listServiceModuleAppsCommand.setModuleId(EquipmentConstant.EQUIPMENT_MODULE);
-		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
-		boolean flag = false;
-		if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
-			flag = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(),
-					orgId, orgId, privilegeId, apps.getServiceModuleApps().get(0).getId(), null, communityId);
-		}
-		if (!flag) {
-			LOGGER.error("Permission is denied, namespaceId={}, orgId={}, communityId={}," +
-					" privilege={}", UserContext.getCurrentNamespaceId(), orgId, communityId, privilegeId);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-					"Insufficient privilege");
-		}
+//		ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+//		listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+//		listServiceModuleAppsCommand.setModuleId(EquipmentConstant.EQUIPMENT_MODULE);
+//		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+//		boolean flag = false;
+//		if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+//			flag = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(),
+//					orgId, orgId, privilegeId, apps.getServiceModuleApps().get(0).getId(), null, communityId);
+//		}
+//		if (!flag) {
+//			LOGGER.error("Permission is denied, namespaceId={}, orgId={}, communityId={}," +
+//					" privilege={}", UserContext.getCurrentNamespaceId(), orgId, communityId, privilegeId);
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+//					"Insufficient privilege");
+//		}
+		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, EquipmentConstant.EQUIPMENT_MODULE, null, null, null,communityId);
 	}
 
 	private void unReviewEquipmentStandardRelations(EquipmentStandardMap map) {
