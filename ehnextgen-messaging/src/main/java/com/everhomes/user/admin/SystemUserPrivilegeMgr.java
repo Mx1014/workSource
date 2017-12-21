@@ -350,6 +350,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         return false;
     }
 
+
     @Override
     public boolean checkSuperAdmin(Long userId, Long currentOrgId){
         if(null == currentOrgId){
