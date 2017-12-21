@@ -514,9 +514,11 @@ public class WorkReportServiceImpl implements WorkReportService {
         formCommand.setValues(cmd.getValues());
 
         dbProvider.execute((TransactionStatus status) ->{
-            //  1.update form values.
+            //  1.update the reportVal's updateTime
+            reportVal.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            //  2.update form values.
             generalFormService.updateGeneralFormVal(formCommand);
-            //  2.update receivers.
+            //  3.update receivers.
             workReportValProvider.deleteReportValReceiverByValId(reportVal.getId());
             for (Long receiverId : cmd.getReceiverIds()) {
                 WorkReportValReceiverMap receiver = packageWorkReportValReceiverMap(namespaceId, reportVal.getId(), receiverId, user);
