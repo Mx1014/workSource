@@ -894,91 +894,6 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		return result;
 	}
 
-	@Override
-	public void createEquipmentModleCommunityMap(EquipmentModleCommunityMap  map) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentModleCommunityMap.class));
-		EhEquipmentModleCommunityMapDao dao = new EhEquipmentModleCommunityMapDao(context.configuration());
-		map.setId(id);
-		map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		dao.insert(map);
-	}
-
-	@Override
-	public List<EquipmentModleCommunityMap> getModuleCommunityMap(Long targetId, byte modelType) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		return context.selectFrom(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
-				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TARGET_ID.eq(targetId))
-				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(modelType))
-				.fetchInto(EquipmentModleCommunityMap.class);
-	}
-
-	@Override
-	public void deleteStandardModleCommunityMap(Long standardId,Long targetId) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-		context.delete(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
-				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.STANDARD_ID.eq(standardId))
-				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TARGET_ID.eq(targetId))
-				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(EquipmentModelType.STANDARD.getCode()))
-				.execute();
-	}
-
-	@Override
-	public void deleteTemplateModleCommunityMap(Long templateId,Long targetId) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-		context.delete(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
-				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TEMPLATE_ID.eq(templateId))
-				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TARGET_ID.eq(targetId))
-				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(EquipmentModelType.TEMPLATE.getCode()))
-				.execute();
-	}
-
-	@Override
-	public List<Integer> getDistinctNameSpace() {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		return context.selectDistinct(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.NAMESPACE_ID)
-				.from(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES)
-				.fetchInto(Integer.class);
-	}
-
-	@Override
-	public List<Long> getModuleCommunityMapByStandardId(Long standardId) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-		return context.select(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TARGET_ID)
-				.from(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
-				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.STANDARD_ID.eq(standardId))
-				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(EquipmentModelType.STANDARD.getCode()))
-				.fetchInto(Long.class);
-	}
-
-	@Override
-	public List<Long> getModuleCommunityMapByTemplateId(Long templateId) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-		return context.select(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TARGET_ID)
-				.from(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
-				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TEMPLATE_ID.eq(templateId))
-				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(EquipmentModelType.TEMPLATE.getCode()))
-				.fetchInto(Long.class);
-	}
-
-	@Override
-	public void deleteStandardModleCommunityMapBystandardId(Long standardId) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-		context.delete(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
-				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.STANDARD_ID.eq(standardId))
-				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(EquipmentModelType.STANDARD.getCode()))
-				.execute();
-	}
-
-	@Override
-	public void deleteTemplateModleCommunityMapByTemplateId(Long templateId) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-		context.delete(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP)
-				.where(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.TEMPLATE_ID.eq(templateId))
-				.and(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.MODEL_TYPE.eq(EquipmentModelType.TEMPLATE.getCode()))
-				.execute();
-	}
-
 	@Cacheable(value="listQualifiedEquipmentStandardEquipments", key="'AllEquipments'", unless="#result.size() == 0")
 	@Override
 	public List<EquipmentInspectionEquipments> listQualifiedEquipmentStandardEquipments() {
@@ -2546,5 +2461,63 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		});
 
 		return results;
+	}
+
+	@Override
+	public void createEquipmentModelCommunityMap(EquipmentModelCommunityMap map) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentModelCommunityMap.class));
+		EhEquipmentModelCommunityMapDao dao = new EhEquipmentModelCommunityMapDao(context.configuration());
+		map.setId(id);
+		map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		dao.insert(map);
+	}
+
+	@Override
+	public List<EquipmentModelCommunityMap> listModelCommunityMapByCommunityId(Long targetId, byte modelType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.selectFrom(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP)
+				.where(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP.TARGET_ID.eq(targetId))
+				.and(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP.MODEL_TYPE.eq(modelType))
+				.fetchInto(EquipmentModelCommunityMap.class);
+	}
+
+	@Override
+	public void deleteModelCommunityMapByModelIdAndCommunityId(Long modelId,Long targetId,byte modelType) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP)
+				.where(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP.MODEL_ID.eq(modelId))
+				.and(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP.TARGET_ID.eq(targetId))
+				.and(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP.MODEL_TYPE.eq(modelType))
+				.execute();
+	}
+
+	@Override
+	public List<Integer> listDistinctNameSpace() {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.selectDistinct(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.NAMESPACE_ID)
+				.from(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES)
+				.fetchInto(Integer.class);
+	}
+
+	@Override
+	public List<Long> listModelCommunityMapByModelId(Long modelId , byte modelType) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		return context.select(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP.TARGET_ID)
+				.from(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP)
+				.where(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP.MODEL_ID.eq(modelId))
+				.and(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP.MODEL_TYPE.eq(modelType))
+				.fetchInto(Long.class);
+	}
+
+
+
+	@Override
+	public void deleteModelCommunityMapByModelId(Long modelId,byte modelType) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP)
+				.where(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP.MODEL_ID.eq(modelId))
+				.and(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP.MODEL_TYPE.eq(modelType))
+				.execute();
 	}
 }
