@@ -75,6 +75,7 @@ CREATE TABLE `eh_social_security_payments` (
   `accum_or_socail` TINYINT COMMENT '社保/公积金标识 : 1-社保 2-公积金',
   `is_new` TINYINT COMMENT '增减员:0正常,1增员,-1减员',
   `is_work` TINYINT COMMENT '入职离职:0正常,1入职,-1离职',
+  `is_filed` TINYINT DEFAULT 0 COMMENT '是否归档 0-否 1是',
   `creator_uid` BIGINT  DEFAULT '0',
   `create_time` DATETIME,
   `operator_uid` BIGINT,
