@@ -265,6 +265,8 @@ CREATE TABLE `eh_social_security_report` (
   `critical_illness_employee_sum` DECIMAL (10, 2) COMMENT '大病保险个人合计',
   `after_social_security_company_sum` DECIMAL (10, 2) COMMENT '补缴社保企业合计',
   `after_social_security_employee_sum` DECIMAL (10, 2) COMMENT '补缴社保个人合计',
+  `after_accumulation_fund_company_sum` DECIMAL (10, 2) COMMENT '补缴公积金企业合计',
+  `after_accumulation_fund_employee_sum` DECIMAL (10, 2) COMMENT '补缴公积金个人合计',
   `after_pension_company_sum` DECIMAL (10, 2) COMMENT '补缴养老企业合计',
   `after_pension_employee_sum` DECIMAL (10, 2) COMMENT '补缴养老个人合计',
   `after_medical_company_sum` DECIMAL (10, 2) COMMENT '补缴医疗企业合计',
