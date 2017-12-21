@@ -1706,7 +1706,13 @@ public class ForumServiceImpl implements ForumService {
 
              //支持按话题、活动、投票来查询数据   add by yanjun 20170612
              if(cmd.getCategoryId() != null){
-                 condition = condition.and(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+	             //1和1001都是话题，老客户端传的1web传的1001，新客户端会改成1001，很久很久以后可以刷一遍数据改掉这里的代码  add by yanjun 20171221
+	             if(CategoryConstants.CATEGORY_ID_TOPIC == cmd.getCategoryId().longValue() || CategoryConstants.CATEGORY_ID_TOPIC_COMMON == cmd.getCategoryId().longValue()){
+                     condition = condition.and(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(CategoryConstants.CATEGORY_ID_TOPIC)
+                             .or(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(CategoryConstants.CATEGORY_ID_TOPIC_COMMON)));
+                 }else {
+                     condition = condition.and(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+                 }
              }
 
              //支持标签搜索  add by yanjun 20170712
@@ -3260,7 +3266,13 @@ public class ForumServiceImpl implements ForumService {
 
             //支持按话题、活动、投票来查询数据   add by yanjun 20170612
             if(cmd.getCategoryId() != null){
-                query.addConditions(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+                //1和1001都是话题，老客户端传的1web传的1001，新客户端会改成1001，很久很久以后可以刷一遍数据改掉这里的代码  add by yanjun 20171221
+                if(CategoryConstants.CATEGORY_ID_TOPIC == cmd.getCategoryId().longValue() || CategoryConstants.CATEGORY_ID_TOPIC_COMMON == cmd.getCategoryId().longValue()){
+                    query.addConditions(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(CategoryConstants.CATEGORY_ID_TOPIC)
+                            .or(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(CategoryConstants.CATEGORY_ID_TOPIC_COMMON)));
+                }else {
+                    query.addConditions(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+                }
             }
 
             //支持标签搜索  add by yanjun 20170712
@@ -3456,7 +3468,13 @@ public class ForumServiceImpl implements ForumService {
 
             //支持按话题、活动、投票来查询数据   add by yanjun 20170612
             if(cmd.getCategoryId() != null){
-                query.addConditions(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+                //1和1001都是话题，老客户端传的1web传的1001，新客户端会改成1001，很久很久以后可以刷一遍数据改掉这里的代码  add by yanjun 20171221
+                if(CategoryConstants.CATEGORY_ID_TOPIC == cmd.getCategoryId().longValue() || CategoryConstants.CATEGORY_ID_TOPIC_COMMON == cmd.getCategoryId().longValue()){
+                    query.addConditions(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(CategoryConstants.CATEGORY_ID_TOPIC)
+                            .or(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(CategoryConstants.CATEGORY_ID_TOPIC_COMMON)));
+                }else {
+                    query.addConditions(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+                }
             }
             //支持标签搜索  add by yanjun 20170712
             if(!StringUtils.isEmpty(cmd.getTag())){
@@ -6102,7 +6120,13 @@ public class ForumServiceImpl implements ForumService {
 
                 //支持按话题、活动、投票来查询数据   add by yanjun 20170612
                 if(cmd.getCategoryId() != null){
-                    query.addConditions(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+                    //1和1001都是话题，老客户端传的1web传的1001，新客户端会改成1001，很久很久以后可以刷一遍数据改掉这里的代码  add by yanjun 20171221
+                    if(CategoryConstants.CATEGORY_ID_TOPIC == cmd.getCategoryId().longValue() || CategoryConstants.CATEGORY_ID_TOPIC_COMMON == cmd.getCategoryId().longValue()){
+                        query.addConditions(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(CategoryConstants.CATEGORY_ID_TOPIC)
+                                .or(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(CategoryConstants.CATEGORY_ID_TOPIC_COMMON)));
+                    }else {
+                        query.addConditions(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+                    }
                 }
 
                 //支持标签搜索  add by yanjun 20170712
