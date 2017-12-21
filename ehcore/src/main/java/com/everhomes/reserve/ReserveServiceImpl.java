@@ -79,7 +79,7 @@ import java.util.stream.Collectors;
 
 
 @Component
-public class ReserveServiceImpl implements ParkingService {
+public class ReserveServiceImpl implements ReserveService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ReserveServiceImpl.class);
 
 	private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
