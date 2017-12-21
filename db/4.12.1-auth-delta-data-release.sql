@@ -118,3 +118,29 @@ VALUES
 (@mp_id:=@mp_id+1, @module_id, '0', @p_id, '入库', '0', NOW());
 
 -- end of wentian's script, farewell
+
+-- 物业巡检菜单显示不全  by jiarui
+UPDATE eh_service_module_privileges
+SET module_id = 20810
+WHERE module_id = 20811;
+
+UPDATE eh_service_modules
+SET STATUS =2
+WHERE id = 20840;
+UPDATE eh_service_modules
+SET LEVEL =4
+WHERE id = 20841;
+
+UPDATE eh_service_modules
+SET STATUS =2
+WHERE id = 20841;
+
+-- 删除旧的里面的  privilege_id 为管理员
+DELETE  from eh_acls
+where privilege_id = 10011;
+
+-- 删除旧数据 管理员权限 by jiarui 20171220
+delete from  eh_acls
+where privilege_id = 10011;
+
+
