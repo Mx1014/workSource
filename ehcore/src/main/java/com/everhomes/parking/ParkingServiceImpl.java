@@ -87,8 +87,6 @@ import org.springframework.web.context.request.async.DeferredResult;
 public class ParkingServiceImpl implements ParkingService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ParkingServiceImpl.class);
 
-	private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
 	@Autowired
 	private ParkingProvider parkingProvider;
 	@Autowired
@@ -835,7 +833,7 @@ public class ParkingServiceImpl implements ParkingService {
 		Flow flow = flowProvider.getFlowById(cmd.getFlowId());
 		SortField order = null;
 		//排序
-		if (null != flow) {
+		if (null != flow && null != cmd.getStatus()) {
 			Integer flowMode = Integer.valueOf(flow.getStringTag1());
 			if (ParkingCardRequestStatus.AUDITING.getCode() == cmd.getStatus()) {
 				order = Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.asc();
@@ -884,6 +882,83 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 		}
 		return response;
+	}
+
+	@Override
+	public void exportParkingCardRequests(SearchParkingCardRequestsCommand cmd, HttpServletResponse response) {
+		ListParkingCardRequestResponse resp =  searchParkingCardRequests(cmd);
+
+		List<ParkingCardRequestDTO> requests = resp.getRequests();
+
+		Workbook wb = new XSSFWorkbook();
+
+		Font font = wb.createFont();
+		font.setFontName("黑体");
+		font.setFontHeightInPoints((short) 16);
+		CellStyle style = wb.createCellStyle();
+		style.setFont(font);
+
+		Sheet sheet = wb.createSheet("parkingCardRequests");
+		sheet.setDefaultColumnWidth(20);
+		sheet.setDefaultRowHeightInPoints(20);
+		Row row = sheet.createRow(0);
+		row.createCell(0).setCellValue("月卡类型");
+		row.createCell(1).setCellValue("公司名称");
+		row.createCell(2).setCellValue("姓名");
+		row.createCell(3).setCellValue("手机号");
+		row.createCell(4).setCellValue("车牌号");
+		row.createCell(5).setCellValue("品牌");
+		row.createCell(6).setCellValue("车系");
+		row.createCell(7).setCellValue("车身颜色");
+		row.createCell(8).setCellValue("申请时间");
+		row.createCell(9).setCellValue("当前状态");
+
+		SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		if (null != requests) {
+			for(int i = 0, size = requests.size(); i < size; i++){
+				Row tempRow = sheet.createRow(i + 1);
+				ParkingCardRequestDTO request = requests.get(i);
+				tempRow.createCell(0).setCellValue(null == request.getCardTypeName()?"":request.getCardTypeName());
+				tempRow.createCell(1).setCellValue(request.getPlateOwnerEntperiseName());
+				tempRow.createCell(2).setCellValue(request.getPlateOwnerName());
+				tempRow.createCell(3).setCellValue(request.getPlateOwnerPhone());
+				tempRow.createCell(4).setCellValue(request.getPlateNumber());
+				tempRow.createCell(5).setCellValue(null == request.getCarBrand()?"":request.getCarBrand());
+				tempRow.createCell(6).setCellValue(null == request.getCarSerieName()?"":request.getCarSerieName());
+				tempRow.createCell(7).setCellValue(null == request.getCarColor()?"":request.getCarColor());
+				tempRow.createCell(8).setCellValue(request.getCreateTime()==null?"":datetimeSF.format(request.getCreateTime()));
+				tempRow.createCell(9).setCellValue(convertParkingCardRequestStatus(request.getStatus()));
+			}
+		}
+
+		ByteArrayOutputStream out = null;
+		try {
+			out = new ByteArrayOutputStream();
+			wb.write(out);
+			DownloadUtils.download(out, response);
+		} catch (IOException e) {
+			LOGGER.error("exportParkingCardRequests is fail. {}",e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"exportParkingCardRequests is fail.");
+		}
+
+	}
+
+	private String convertParkingCardRequestStatus(Byte status) {
+		if (null == status) {
+			return "";
+		}
+		ParkingCardRequestStatus e = ParkingCardRequestStatus.fromCode(status);
+
+		switch (e) {
+			case INACTIVE: return "已取消";
+			case AUDITING: return "待审核";
+			case QUEUEING: return "排队中";
+			case PROCESSING: return "待办理";
+			case SUCCEED: return "办理中";
+			case OPENED: return "已开通";
+			default:return "";
+		}
 	}
 
 	@Override
@@ -1237,7 +1312,9 @@ public class ParkingServiceImpl implements ParkingService {
 		row.createCell(6).setCellValue("金额");
 		row.createCell(7).setCellValue("支付方式");
 		row.createCell(8).setCellValue("缴费类型");
-		for(int i=0;i<list.size();i++){
+
+		SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		for(int i=0, size = list.size();i<size;i++){
 			Row tempRow = sheet.createRow(i + 1);
 			ParkingRechargeOrder order = list.get(i);
 			tempRow.createCell(0).setCellValue(String.valueOf(order.getOrderNo()));
