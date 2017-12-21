@@ -253,12 +253,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if (cmd.getCommunities() != null && cmd.getCommunities().size() > 0){
 				//此处创建公共标准关联表 targetId为null为公共标准
 				for (Long communityId: cmd.getCommunities()) {
-					EquipmentModleCommunityMap map = new EquipmentModleCommunityMap();
-					map.setStandardId(standard.getId());
+					EquipmentModelCommunityMap map = new EquipmentModelCommunityMap();
+					map.setModelId(standard.getId());
 					map.setTargetType(standard.getTargetType());
 					map.setTargetId(communityId);
 					map.setModelType(EquipmentModelType.STANDARD.getCode());
-					equipmentProvider.createEquipmentModleCommunityMap(map);
+					equipmentProvider.createEquipmentModelCommunityMap(map);
 				}
 			}
 
@@ -303,15 +303,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}else {
 				if (cmd.getTargetId() == null) {
 					//如果项目应用列表不为空 且项目id等于null 表示在全部中修改标准 需要额外创建关系表
-					equipmentProvider.deleteStandardModleCommunityMapBystandardId(standard.getId());
+					equipmentProvider.deleteModelCommunityMapByModelId(standard.getId(),EquipmentModelType.STANDARD.getCode());
 					if(cmd.getCommunities() != null && cmd.getCommunities().size()>0) {
 						for (Long communityId : cmd.getCommunities()) {
-							EquipmentModleCommunityMap map = new EquipmentModleCommunityMap();
-							map.setStandardId(standard.getId());
+							EquipmentModelCommunityMap map = new EquipmentModelCommunityMap();
+							map.setModelId(standard.getId());
 							map.setTargetType(standard.getTargetType());
 							map.setTargetId(communityId);
 							map.setModelType(EquipmentModelType.STANDARD.getCode());
-							equipmentProvider.createEquipmentModleCommunityMap(map);
+							equipmentProvider.createEquipmentModelCommunityMap(map);
 						}
 					}
 
@@ -326,7 +326,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 					if(EquipmentReviewStatus.REVIEWED.equals(EquipmentReviewStatus.fromStatus(map.getReviewStatus()))) {
 						unReviewEquipmentStandardRelations(map);
 					}
-				}
 			}
 
 			inactiveTasksByStandardId(standard.getId());*/
@@ -511,9 +510,10 @@ public class EquipmentServiceImpl implements EquipmentService {
  				"设备标准已删除");
 		}
 		//判断删除情况
-		if(cmd.getTargetId()!=null && standard.getTargetId()==0L){
+		if (cmd.getTargetId() != null && standard.getTargetId() == 0L) {
 			//在项目上删除公共标准的情况  其余情况按照原来模式
-			equipmentProvider.deleteStandardModleCommunityMap(standard.getId(),cmd.getTargetId());
+			equipmentProvider.deleteModelCommunityMapByModelIdAndCommunityId(standard.getId(),cmd.getTargetId(),
+			EquipmentModelType.STANDARD.getCode());
 		}else {
 
 			standard.setDeleterUid(user.getId());
@@ -522,6 +522,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 			standard.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
 			equipmentProvider.updateEquipmentStandard(standard);
 			equipmentStandardSearcher.feedDoc(standard);
+			if (cmd.getTargetId() == null && standard.getTargetId() == 0L) {
+				equipmentProvider.deleteModelCommunityMapByModelId(standard.getId(),EquipmentModelType.STANDARD.getCode());
+			}
 
 			List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
 			if (maps != null && maps.size() > 0) {
@@ -687,7 +690,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		EquipmentStandardsDTO dto = converStandardToDto(standard);
 
 		if(standard.getTargetId()==0L){
-			dto.setCommunities(equipmentProvider.getModuleCommunityMapByStandardId(standard.getId()));
+			dto.setCommunities(equipmentProvider.listModelCommunityMapByModelId(standard.getId(),EquipmentModelType.STANDARD.getCode()));
 		}
 
 		return dto;
@@ -4027,12 +4030,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if(cmd.getCommunities() != null && cmd.getCommunities().size()>0){
 				//此处创建公共标准关联表 targetId为null为公共标准
 				for (Long communityId: cmd.getCommunities()) {
-					EquipmentModleCommunityMap communityMap = new EquipmentModleCommunityMap();
-					communityMap.setTemplateId(template.getId());
+					EquipmentModelCommunityMap communityMap = new EquipmentModelCommunityMap();
+					communityMap.setModelId(template.getId());
 					communityMap.setTargetType(template.getTargetType());
 					communityMap.setTargetId(communityId);
 					communityMap.setModelType(EquipmentModelType.TEMPLATE.getCode());
-					equipmentProvider.createEquipmentModleCommunityMap(communityMap);
+					equipmentProvider.createEquipmentModelCommunityMap(communityMap);
 				}
 			}
 		}
@@ -4075,15 +4078,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 			//增加应用项目列表修改 getCommunities不为空 getTargetId 为空则是在全部中修改template
 			if (cmd.getTargetId() == null) {
-				equipmentProvider.deleteTemplateModleCommunityMapByTemplateId(template.getId());
+				equipmentProvider.deleteModelCommunityMapByModelId(template.getId(),EquipmentModelType.TEMPLATE.getCode());
 				if (cmd.getCommunities() != null && cmd.getCommunities().size() > 0) {
 					for (Long communityId : cmd.getCommunities()) {
-						EquipmentModleCommunityMap communityMap = new EquipmentModleCommunityMap();
-						communityMap.setTemplateId(template.getId());
+						EquipmentModelCommunityMap communityMap = new EquipmentModelCommunityMap();
+						communityMap.setModelId(template.getId());
 						communityMap.setTargetType(template.getTargetType());
 						communityMap.setTargetId(communityId);
 						communityMap.setModelType(EquipmentModelType.TEMPLATE.getCode());
-						equipmentProvider.createEquipmentModleCommunityMap(communityMap);
+						equipmentProvider.createEquipmentModelCommunityMap(communityMap);
 					}
 				}
 			}
@@ -4144,12 +4147,16 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 		//增加判断template删除情况判断   以下为在项目上删除公共模板
 		if(template.getTargetId()==0L && cmd.getTargetId()!=null){
-			equipmentProvider.deleteTemplateModleCommunityMap(cmd.getId(),cmd.getTargetId());
+			equipmentProvider.deleteModelCommunityMapByModelIdAndCommunityId(cmd.getId(),cmd.getTargetId(),
+					EquipmentModelType.TEMPLATE.getCode());
 		}else {
 			template.setStatus(Status.INACTIVE.getCode());
 			template.setDeleteUid(UserContext.current().getUser().getId());
 			template.setDeleteTime(new Timestamp(System.currentTimeMillis()));
 			equipmentProvider.updateEquipmentInspectionTemplates(template);
+			if (cmd.getTargetId() == null) {
+				equipmentProvider.deleteModelCommunityMapByModelId(template.getId(), EquipmentModelType.TEMPLATE.getCode());
+			}
 
 			List<EquipmentInspectionStandards> standards = equipmentProvider.listEquipmentInspectionStandardsByTemplateId(template.getId());
 			if(standards != null && standards.size() > 0) {
@@ -4176,8 +4183,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(items != null && items.size() > 0) {
 			dto.setItems(items);
 		}
-		if(template.getTargetId()==0L){
-			dto.setCommunities(equipmentProvider.getModuleCommunityMapByTemplateId(template.getId()));
+		if (template.getTargetId() == 0L) {
+			dto.setCommunities(equipmentProvider.listModelCommunityMapByModelId(template.getId(),EquipmentModelType.TEMPLATE.getCode()));
 		}
 
 		return dto;
@@ -4226,11 +4233,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 
 			//referId的公共模板去掉
-			List<EquipmentModleCommunityMap> templatesMap = equipmentProvider.getModuleCommunityMap(cmd.getTargetId(), EquipmentModelType.TEMPLATE.getCode());
+			List<EquipmentModelCommunityMap> templatesMap = equipmentProvider.listModelCommunityMapByCommunityId(cmd.getTargetId(), EquipmentModelType.TEMPLATE.getCode());
 			if (templatesMap.size() > 0) {
-				for (EquipmentModleCommunityMap map : templatesMap) {
-					if (!removeIds.contains(map.getTemplateId())) {
-						EquipmentInspectionTemplates modelTemplates = equipmentProvider.findEquipmentInspectionTemplate(map.getTemplateId(), cmd.getOwnerId(), cmd.getOwnerType());
+				for (EquipmentModelCommunityMap map : templatesMap) {
+					if (!removeIds.contains(map.getModelId())) {
+						EquipmentInspectionTemplates modelTemplates = equipmentProvider.findEquipmentInspectionTemplate(map.getModelId(), cmd.getOwnerId(), cmd.getOwnerType());
 						if (templates == null) {
 							templates = new ArrayList<>();
 						}
@@ -4244,7 +4251,16 @@ public class EquipmentServiceImpl implements EquipmentService {
 			for(EquipmentInspectionTemplates template : templates) {
 				InspectionTemplateDTO dto = ConvertHelper.convert(template, InspectionTemplateDTO.class);
                 if (template.getTargetId() == 0L) {
-                    dto.setCommunities(equipmentProvider.getModuleCommunityMapByTemplateId(template.getId()));
+					List<Long> communities = equipmentProvider.listModelCommunityMapByModelId(template.getId(),EquipmentModelType.TEMPLATE.getCode());
+					if (communities != null && communities.size() > 0) {
+						dto.setCommunities(communities);
+					}
+					dto.setTargetId(template.getTargetId());
+				}
+				if(cmd.getTargetId() == null || cmd.getTargetId() == 0){
+					Community community = communityProvider.findCommunityById(template.getTargetId());
+					if (community != null)
+						dto.setTargetName(community.getName());
 				}
 				dtos.add(dto);
 			}
@@ -4986,7 +5002,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	public void distributeTemplates() {
 		//对于模板新增项目类型  需要把之前不同域空间模板默认分发到所有的项目
-		List<Integer> allNameSpaces = equipmentProvider.getDistinctNameSpace();
+		List<Integer> allNameSpaces = equipmentProvider.listDistinctNameSpace();
 		for (Integer namespaceId : allNameSpaces) {
 			//获取当前域空间所有的项目
 			List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
@@ -4994,12 +5010,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 			List<EquipmentInspectionTemplates> templates = equipmentProvider.listInspectionTemplates(namespaceId,null,null);
 			for (EquipmentInspectionTemplates template : templates) {
 				for (Community community : communities) {
-					EquipmentModleCommunityMap map = new EquipmentModleCommunityMap();
-					map.setTemplateId(template.getId());
-					map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					EquipmentModelCommunityMap map = new EquipmentModelCommunityMap();
+					map.setModelId(template.getId());
 					map.setTargetId(community.getId());
 					map.setTargetType("community");
-					equipmentProvider.createEquipmentModleCommunityMap(map);
+					equipmentProvider.createEquipmentModelCommunityMap(map);
 				}
 			}
 		}

@@ -33,6 +33,7 @@ import java.util.List;
  *  <li>templateName: 巡检项模板名称</li>
  *  <li>reviewExpiredDays: 审批过期时间限制（天）</li>
  *  <li>communities: 标准关联的项目</li>
+ *  <li>targetName: 标准所属项目名称  权限细化在全部中显示</li>
  * </ul>
  */
 public class EquipmentStandardsDTO {
@@ -83,6 +84,8 @@ public class EquipmentStandardsDTO {
 	private String templateName;
 	
 	private Integer reviewExpiredDays;
+
+	private  String targetName;
 	
 	@ItemType(StandardGroupDTO.class)
 	private List<StandardGroupDTO> executiveGroup;
@@ -299,6 +302,14 @@ public class EquipmentStandardsDTO {
 
 	public void setCommunities(List<Long> communities) {
 		this.communities = communities;
+	}
+
+	public String getTargetName() {
+		return targetName;
+	}
+
+	public void setTargetName(String targetName) {
+		this.targetName = targetName;
 	}
 
 	@Override
