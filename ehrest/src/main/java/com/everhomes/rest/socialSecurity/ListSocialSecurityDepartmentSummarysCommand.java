@@ -19,6 +19,10 @@ public class ListSocialSecurityDepartmentSummarysCommand {
 
 	private String paymentMonth;
 
+	private Long pageAnchor;
+
+	private Integer pageSize;
+
 	public ListSocialSecurityDepartmentSummarysCommand() {
 
 	}
@@ -56,5 +60,21 @@ public class ListSocialSecurityDepartmentSummarysCommand {
 
 	public void setPaymentMonth(String paymentMonth) {
 		this.paymentMonth = paymentMonth;
+	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
 	}
 }

@@ -12,15 +12,11 @@ import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.organization.*;
- 
-import com.everhomes.rest.user.InvitationRoster;
-import com.everhomes.server.schema.tables.pojos.EhOrganizations;
-import com.everhomes.uniongroup.UniongroupMemberDetail; 
+
 import com.everhomes.userOrganization.UserOrganizations;
 
 import org.jooq.Condition;
 
-import javax.validation.constraints.Null;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
@@ -540,4 +536,6 @@ public interface OrganizationProvider {
 	CommunityOrganizationDetailDisplay findOrganizationDetailFlag(Integer namespaceId, Long communityId);
 	void createCommunityOrganizationDetailDisplay(CommunityOrganizationDetailDisplay detailDisplay);
 	void updateCommunityOrganizationDetailDisplay(CommunityOrganizationDetailDisplay detailDisplay);
+
+	List<OrganizationMemberDetails> listOrganizationMemberDetails(Long ownerId);
 }

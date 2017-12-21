@@ -2,6 +2,7 @@
 package com.everhomes.socialSecurity;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.socialSecurity.SocialSecurityItemDTO;
 import com.everhomes.rest.socialSecurity.SocialSecurityPaymentDTO;
 import com.everhomes.rest.socialSecurity.SsorAfPay;
 
@@ -20,4 +21,12 @@ public interface SocialSecuritySettingProvider {
 	List<SocialSecuritySetting> listSocialSecuritySetting(Long socialSecurityCityId, Long accumulationFundCityId, Long deptId, String keywords, SsorAfPay payFlag, List<Long> detailIds);
 
 	List<SocialSecuritySetting> listSocialSecuritySetting();
+
+	void setUserCityAndHTByAccumOrSocial(Long detailId, Byte accumOrSocial, Long cityId, String householdType);
+
+	SocialSecuritySetting findSocialSecuritySettingByDetailIdAndItem(Long detailId, SocialSecurityItemDTO itemDTO, Byte accumOrSocial);
+
+	List<SocialSecuritySetting> listSocialSecuritySetting(Long ownerId);
+
+	List<SocialSecuritySetting> listSocialSecuritySetting(List<Long> detailIds);
 }

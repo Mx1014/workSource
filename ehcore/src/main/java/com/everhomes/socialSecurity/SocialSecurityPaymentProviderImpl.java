@@ -65,7 +65,7 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
 	}
 
 	@Override
-	public String getPaymentMonth(Long ownerId) {
+	public String findPaymentMonthByOwnerId(Long ownerId) {
 		return null;
 	}
 

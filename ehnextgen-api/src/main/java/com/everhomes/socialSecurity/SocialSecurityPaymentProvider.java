@@ -13,7 +13,16 @@ public interface SocialSecurityPaymentProvider {
 
 	List<SocialSecurityPayment> listSocialSecurityPayment();
 
-	String getPaymentMonth(Long ownerId);
+	String findPaymentMonthByOwnerId(Long ownerId);
 
 	List<SocialSecurityPayment> listSocialSecurityPayment(Long detailId);
+
+	void setUserCityAndHTByAccumOrSocial(Long detailId, Byte accumOrSocial, Long cityId, String householdType);
+
+
+	SocialSecurityPayment findSocialSecurityPayment(Long detailId, String payItem, Byte accumOrSocial);
+
+	String findPaymentMonth(Long detailId);
+
+	Integer countUnFieldUsers(Long ownerId);
 }

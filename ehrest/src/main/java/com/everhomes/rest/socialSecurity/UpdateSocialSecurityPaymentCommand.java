@@ -18,10 +18,10 @@ import com.everhomes.util.StringHelper;
  * <li>afterPayAccumulationFundFlag: 补缴公积金标识</li>
  * <li>paymentMonth: 月份如201702</li>
  * <li>householdType: 户籍类型</li>
- * <li>socialSecurityPayments: 社保缴纳项列表 参考{@link com.everhomes.rest.socialSecurity.SocialSecurityPaymentDetailDTO}</li>
- * <li>afterSocialSecurityPayments: 社保补缴缴纳项列表 参考{@link com.everhomes.rest.socialSecurity.SocialSecurityPaymentDetailDTO}</li>
- * <li>accumulationFundPayments: 公积金缴纳项列表 参考{@link com.everhomes.rest.socialSecurity.SocialSecurityPaymentDetailDTO}</li>
- * <li>afterAccumulationFundPayments: 公积金补缴缴纳项列表 参考{@link com.everhomes.rest.socialSecurity.SocialSecurityPaymentDetailDTO}</li>
+ * <li>socialSecurityPayment: 社保缴纳项 参考{@link com.everhomes.rest.socialSecurity.SocialSecurityPaymentDetailDTO}</li>
+ * <li>afterSocialSecurityPayment: 社保补缴缴纳项 参考{@link com.everhomes.rest.socialSecurity.SocialSecurityPaymentDetailDTO}</li>
+ * <li>accumulationFundPayment: 公积金缴纳项 参考{@link com.everhomes.rest.socialSecurity.SocialSecurityPaymentDetailDTO}</li>
+ * <li>afterAccumulationFundPayment: 公积金补缴缴纳项 参考{@link com.everhomes.rest.socialSecurity.SocialSecurityPaymentDetailDTO}</li>
  * </ul>
  */
 public class UpdateSocialSecurityPaymentCommand {
@@ -44,36 +44,14 @@ public class UpdateSocialSecurityPaymentCommand {
 
 	private String paymentMonth;
 
-	@ItemType(SocialSecurityPaymentDetailDTO.class)
-	private List<SocialSecurityPaymentDetailDTO> socialSecurityPayments;
+	private SocialSecurityPaymentDetailDTO socialSecurityPayment;
 
-	@ItemType(SocialSecurityPaymentDetailDTO.class)
-	private List<SocialSecurityPaymentDetailDTO> afterSocialSecurityPayments;
+	private SocialSecurityPaymentDetailDTO afterSocialSecurityPayment;
 
-	@ItemType(SocialSecurityPaymentDetailDTO.class)
-	private List<SocialSecurityPaymentDetailDTO> accumulationFundPayments;
+	private SocialSecurityPaymentDetailDTO accumulationFundPayment;
 
-	@ItemType(SocialSecurityPaymentDetailDTO.class)
-	private List<SocialSecurityPaymentDetailDTO> afterAccumulationFundPayments;
+	private SocialSecurityPaymentDetailDTO afterAccumulationFundPayment;
 
-	public UpdateSocialSecurityPaymentCommand() {
-
-	}
-
-	public UpdateSocialSecurityPaymentCommand(String ownerType, Long ownerId, Long detailId, Byte afterPaySocialSecurityFlag, Byte payCurrentAccumulationFundFlag, Byte afterPayAccumulationFundFlag, String paymentMonth, List<SocialSecurityPaymentDetailDTO> socialSecurityPayments, List<SocialSecurityPaymentDetailDTO> afterSocialSecurityPayments, List<SocialSecurityPaymentDetailDTO> accumulationFundPayments, List<SocialSecurityPaymentDetailDTO> afterAccumulationFundPayments) {
-		super();
-		this.ownerType = ownerType;
-		this.ownerId = ownerId;
-		this.detailId = detailId;
-		this.afterPaySocialSecurityFlag = afterPaySocialSecurityFlag;
-		this.payCurrentAccumulationFundFlag = payCurrentAccumulationFundFlag;
-		this.afterPayAccumulationFundFlag = afterPayAccumulationFundFlag;
-		this.paymentMonth = paymentMonth;
-		this.socialSecurityPayments = socialSecurityPayments;
-		this.afterSocialSecurityPayments = afterSocialSecurityPayments;
-		this.accumulationFundPayments = accumulationFundPayments;
-		this.afterAccumulationFundPayments = afterAccumulationFundPayments;
-	}
 
 	public String getOwnerType() {
 		return ownerType;
@@ -131,36 +109,36 @@ public class UpdateSocialSecurityPaymentCommand {
 		this.paymentMonth = paymentMonth;
 	}
 
-	public List<SocialSecurityPaymentDetailDTO> getSocialSecurityPayments() {
-		return socialSecurityPayments;
+	public SocialSecurityPaymentDetailDTO getAccumulationFundPayment() {
+		return accumulationFundPayment;
 	}
 
-	public void setSocialSecurityPayments(List<SocialSecurityPaymentDetailDTO> socialSecurityPayments) {
-		this.socialSecurityPayments = socialSecurityPayments;
+	public void setAccumulationFundPayment(SocialSecurityPaymentDetailDTO accumulationFundPayment) {
+		this.accumulationFundPayment = accumulationFundPayment;
 	}
 
-	public List<SocialSecurityPaymentDetailDTO> getAfterSocialSecurityPayments() {
-		return afterSocialSecurityPayments;
+	public SocialSecurityPaymentDetailDTO getAfterAccumulationFundPayment() {
+		return afterAccumulationFundPayment;
 	}
 
-	public void setAfterSocialSecurityPayments(List<SocialSecurityPaymentDetailDTO> afterSocialSecurityPayments) {
-		this.afterSocialSecurityPayments = afterSocialSecurityPayments;
+	public void setAfterAccumulationFundPayment(SocialSecurityPaymentDetailDTO afterAccumulationFundPayment) {
+		this.afterAccumulationFundPayment = afterAccumulationFundPayment;
 	}
 
-	public List<SocialSecurityPaymentDetailDTO> getAccumulationFundPayments() {
-		return accumulationFundPayments;
+	public SocialSecurityPaymentDetailDTO getAfterSocialSecurityPayment() {
+		return afterSocialSecurityPayment;
 	}
 
-	public void setAccumulationFundPayments(List<SocialSecurityPaymentDetailDTO> accumulationFundPayments) {
-		this.accumulationFundPayments = accumulationFundPayments;
+	public void setAfterSocialSecurityPayment(SocialSecurityPaymentDetailDTO afterSocialSecurityPayment) {
+		this.afterSocialSecurityPayment = afterSocialSecurityPayment;
 	}
 
-	public List<SocialSecurityPaymentDetailDTO> getAfterAccumulationFundPayments() {
-		return afterAccumulationFundPayments;
+	public SocialSecurityPaymentDetailDTO getSocialSecurityPayment() {
+		return socialSecurityPayment;
 	}
 
-	public void setAfterAccumulationFundPayments(List<SocialSecurityPaymentDetailDTO> afterAccumulationFundPayments) {
-		this.afterAccumulationFundPayments = afterAccumulationFundPayments;
+	public void setSocialSecurityPayment(SocialSecurityPaymentDetailDTO socialSecurityPayment) {
+		this.socialSecurityPayment = socialSecurityPayment;
 	}
 
 	@Override
