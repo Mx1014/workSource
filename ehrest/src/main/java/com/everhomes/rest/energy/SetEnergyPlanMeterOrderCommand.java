@@ -11,10 +11,19 @@ import java.util.List;
  * Created by ying.xiong on 2017/10/20.
  */
 public class SetEnergyPlanMeterOrderCommand {
+    private Integer namespaceId;
     private Long communityId;
     private Long organizationId;
     @ItemType(EnergyPlanMeterDTO.class)
     private List<EnergyPlanMeterDTO> meters;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Long getCommunityId() {
         return communityId;

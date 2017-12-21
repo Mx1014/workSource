@@ -1001,7 +1001,10 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhServiceModuleAssignments.class, Tables.EH_SERVICE_MODULE_ASSIGNMENTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ID.max()).from(Tables.EH_SERVICE_MODULE_ASSIGNMENTS).fetchOne().value1();
         });
-        syncTableSequence(null, EhEquipmentInspectionEquipmentStandardMap.class, Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.getName(), (dbContext) -> {
+        syncTableSequence(null, EhEquipmentInspectionEquipmentStandardMap.class, Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP.ID.max()).from(Tables.EH_EQUIPMENT_MODLE_COMMUNITY_MAP).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEquipmentModleCommunityMap.class, Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP).fetchOne().value1();
         });
         syncTableSequence(null, EhEquipmentInspectionTemplates.class, Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.getName(), (dbContext) -> {

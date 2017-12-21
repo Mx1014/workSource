@@ -83,7 +83,7 @@
             eh_namespace_details | eh_wifi_settings | eh_user_launch_pad_items | eh_hot_tags | eh_app_urls |
             eh_news | eh_news_attachments | eh_news_comment |
             eh_stat_orders | eh_stat_transactions | eh_stat_refunds | eh_stat_settlements | eh_stat_service_settlement_results | eh_stat_task_logs | eh_stat_service |
-            eh_wifi_settings | eh_equipment_inspection_standards | eh_equipment_inspection_equipments | eh_equipment_inspection_accessories |
+            eh_wifi_settings | eh_equipment_inspection_standards | eh_equipment_modle_community_map | eh_equipment_inspection_equipments | eh_equipment_inspection_accessories |
             eh_equipment_inspection_accessory_map | eh_equipment_inspection_equipment_parameters | eh_equipment_inspection_equipment_attachments |
             eh_equipment_inspection_tasks | eh_equipment_inspection_task_attachments | eh_equipment_inspection_task_logs |
             eh_rentalv2_default_rules | eh_rentalv2_time_interval | eh_rentalv2_close_dates | eh_rentalv2_resources | eh_rentalv2_resource_ranges | eh_rentalv2_resource_pics |
@@ -207,6 +207,7 @@
             eh_me_web_menus | eh_customer_entry_infos | eh_customer_departure_infos |
             eh_point_systems | eh_point_rule_categories | eh_point_scores | eh_point_rules | eh_point_logs | eh_point_goods | eh_point_rule_configs |
             eh_point_tutorials | eh_point_tutorial_to_point_rule_mappings | eh_point_event_logs | eh_system_events | eh_point_actions | eh_point_rule_to_event_mappings |
+            eh_energy_meter_category_map | eh_energy_meter_fomular_map |
         </includes>
 
             <!-- All elements that are excluded from your schema

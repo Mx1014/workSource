@@ -1,17 +1,13 @@
 package com.everhomes.equipment;
 
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.rest.equipment.*;
+
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-
-
-
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.quality.QualityInspectionStandards;
-import com.everhomes.rest.equipment.*;
 
 
 public interface EquipmentProvider {
@@ -89,7 +85,7 @@ public interface EquipmentProvider {
 	EquipmentInspectionTemplateItemMap findEquipmentInspectionTemplateItemMap(Long id);
 	List<EquipmentInspectionTemplateItemMap> listEquipmentInspectionTemplateItemMap(Long templateId);
 	List<EquipmentInspectionTemplates> listInspectionTemplates(Long ownerId, String ownerType, String name);
-	List<EquipmentInspectionTemplates> listInspectionTemplates(Integer namespaceId, String name);
+	List<EquipmentInspectionTemplates> listInspectionTemplates(Integer namespaceId, String name ,Long  targetId);
 	List<EquipmentInspectionStandards> listEquipmentInspectionStandardsByTemplateId(Long templateId);
 	
 	void createEquipmentStandardMap(EquipmentStandardMap map);
@@ -146,4 +142,22 @@ public interface EquipmentProvider {
 	List<ItemResultStat> statItemResults(Long equipmentId, Long standardId, Timestamp startTime, Timestamp endTime);
 
 	List<EquipmentInspectionTasks> listDelayTasks(Long inspectionCategoryId, List<Long> standards, String targetType, Long targetId, Integer offset, Integer pageSize, Byte adminFlag, Timestamp startTime);
+
+    void createEquipmentModleCommunityMap(EquipmentModleCommunityMap map);
+
+    List<EquipmentModleCommunityMap> getModuleCommunityMap(Long targetId, byte modelType);
+
+    void deleteStandardModleCommunityMap(Long standardId ,Long targetId);
+
+    void deleteTemplateModleCommunityMap(Long templateId , Long targetId);
+
+	List<Integer> getDistinctNameSpace();
+
+	List<Long> getModuleCommunityMapByStandardId(Long standardId);
+
+	List<Long> getModuleCommunityMapByTemplateId(Long id);
+
+	void deleteStandardModleCommunityMapBystandardId(Long id);
+
+	void deleteTemplateModleCommunityMapByTemplateId(Long id);
 }

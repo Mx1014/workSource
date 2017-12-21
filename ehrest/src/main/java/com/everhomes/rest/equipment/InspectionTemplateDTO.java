@@ -1,12 +1,11 @@
 package com.everhomes.rest.equipment;
 
-import java.sql.Timestamp;
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -16,6 +15,7 @@ import com.everhomes.util.StringHelper;
  *  <li>name: 模板名称</li>
  *  <li>createTime: 添加时间</li>
  *  <li>items: 巡检项信息 参考{@link com.everhomes.rest.equipment.InspectionItemDTO}</li>
+ *  <li>communities: 关联的项目</li>
  * </ul>
  */
 public class InspectionTemplateDTO {
@@ -30,6 +30,9 @@ public class InspectionTemplateDTO {
 	private String name;
 	
 	private Timestamp createTime;
+
+	@ItemType(Long.class)
+	private List<Long> communities;
 	
 	@ItemType(InspectionItemDTO.class)
 	private List<InspectionItemDTO> items;
@@ -80,6 +83,14 @@ public class InspectionTemplateDTO {
 
 	public void setItems(List<InspectionItemDTO> items) {
 		this.items = items;
+	}
+
+	public List<Long> getCommunities() {
+		return communities;
+	}
+
+	public void setCommunities(List<Long> communities) {
+		this.communities = communities;
 	}
 
 	@Override

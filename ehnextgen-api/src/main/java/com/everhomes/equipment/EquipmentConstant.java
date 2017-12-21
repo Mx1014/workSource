@@ -22,4 +22,9 @@ public interface EquipmentConstant {
     public static final String EQUIPMENT_STAT_ALLTASK = "equipment.stat.alltask";//设备巡检 统计查看所有任务权限
     public static final String EQUIPMENT_MANAGE = "equipment.manage";//设备巡检 设备巡检管理权限
     public static final String EQUIPMENT_ALL = "equipment.all";//设备巡检 设备巡检全部权限
+
+
+    //物业巡检模块id
+    Long EQUIPMENT_MODULE = 20800L;
+
 }

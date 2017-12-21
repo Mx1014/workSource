@@ -228,4 +228,56 @@ public interface PrivilegeConstants {
     long PUNCH_RULE_DELETE = 42004L;//    删除打卡规则 
     long PUNCH_STATISTIC_QUERY = 42005L;//    查看打卡记录 （细化权限，下同）
     long PUNCH_STATISTIC_EXPORT = 42006L;//    导出打卡记录
+
+    //设备巡检权限
+    long EQUIPMENT_STANDARD_UPDATE = 30067L;  //	设备巡检 标准新增修改权限
+    long EQUIPMENT_STANDARD_LIST = 30068L;   //设备巡检 标准查看权限
+    long EQUIPMENT_STANDARD_DELETE = 30069L;  //设备巡检 标准删除权限
+    long EQUIPMENT_RELATION_LIST = 30070L;    //设备巡检 巡检关联审批查看权限
+    long EQUIPMENT_RELATION_REVIEW = 30071L;  //设备巡检 巡检关联审批审核权限
+    long EQUIPMENT_RELATION_DELETE = 30072L;  //设备巡检 巡检关联审批删除失效关联权限
+    long EQUIPMENT_LIST = 30073L;            //设备巡检 巡检对象查看权限
+    long EQUIPMENT_UPDATE = 30074L;        //设备巡检 巡检对象新增修改权限
+    long EQUIPMENT_DELETE = 30075L;          //设备巡检 巡检对象删除权限
+    long EQUIPMENT_TASK_LIST = 30076L;       //设备巡检 任务查询权限
+    long EQUIPMENT_ITEM_LIST = 30077L;        //设备巡检 巡检项查看权限
+    long EQUIPMENT_ITEM_CREATE = 30078L;      //设备巡检 巡检项新增权限
+    long EQUIPMENT_ITEM_DELETE = 30079L;       //设备巡检 巡检项删除权限
+    long EQUIPMENT_ITEM_UPDATE = 30080L;       //设备巡检 巡检项修改权限
+    long EQUIPMENT_STAT_PANDECT = 30081L;      //设备巡检 统计总览权限
+    long EQUIPMENT_STAT_ALLTASK = 30082L;     //设备巡检 统计查看所有任务权限
+
+
+
+
+    //客户和合同的权限
+    long ENTERPRISE_CUSTOMER_CREATE = 21101L;//客户的增加
+    long ENTERPRISE_CUSTOMER_UPDATE = 21102L;//客户的修改
+    long ENTERPRISE_CUSTOMER_IMPORT = 21103L;//客户的导入
+    long ENTERPRISE_CUSTOMER_SYNC = 21104L;//客户的同步
+    long ENTERPRISE_CUSTOMER_DELETE = 21105L;//客户的删
+    long ENTERPRISE_CUSTOMER_LIST = 21106L;//客户的查
+    long ENTERPRISE_CUSTOMER_MANAGE_LIST = 21107L;//管理的查
+    long ENTERPRISE_CUSTOMER_MANAGE_CREATE = 21108L;//管理的新增
+    long ENTERPRISE_CUSTOMER_MANAGE_UPDATE = 21109L;//管理的修改
+    long ENTERPRISE_CUSTOMER_MANAGE_DELETE = 21110L;//管理的删
+    long ENTERPRISE_CUSTOMER_MANAGE_IMPORT = 21111L;//管理的导入
+    long ENTERPRISE_CUSTOMER_MANAGE_EXPORT = 21112L;//管理的导出
+    long ENTERPRISE_CUSTOMER_STAT = 21113L;//客户的统计分析查看
+
+    long CONTRACT_CREATE = 21201L;//新增合同
+    long CONTRACT_LAUNCH = 21202L;//签约 发起审批
+    long CONTRACT_UPDATE = 21203L;//修改
+    long CONTRACT_DELETE = 21204L;//删除
+    long CONTRACT_INVALID = 21205L;//作废
+    long CONTRACT_ENTRY = 21206L;//入场
+    long CONTRACT_LIST = 21207L;//查看
+    long CONTRACT_RENEW = 21208L;//续约
+    long CONTRACT_CHANGE = 21209L;//变更
+    long CONTRACT_PARAM_LIST = 21210L;//合同参数查看
+    long CONTRACT_PARAM_UPDATE = 21211L;//合同参数修改
+    long CONTRACT_FLOW = 21212L;//合同工作流
+    long CONTRACT_SYNC = 21213L;//从第三方同步合同
+    long CONTRACT_DENUNCIATION = 21214L;//退约
+
 }

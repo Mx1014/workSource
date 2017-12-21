@@ -1,11 +1,11 @@
 package com.everhomes.equipment;
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandards;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 public class EquipmentInspectionStandards extends EhEquipmentInspectionStandards{
 	
@@ -15,6 +15,9 @@ public class EquipmentInspectionStandards extends EhEquipmentInspectionStandards
 	private RepeatSettings repeat;
 	
 	private Integer equipmentsCount;
+
+	@ItemType(Long.class)
+	private List<Long> communities;
 	
 	@ItemType(EquipmentInspectionStandardGroupMap.class)
 	private List<EquipmentInspectionStandardGroupMap> executiveGroup;
@@ -53,6 +56,14 @@ public class EquipmentInspectionStandards extends EhEquipmentInspectionStandards
 
 	public void setReviewGroup(List<EquipmentInspectionStandardGroupMap> reviewGroup) {
 		this.reviewGroup = reviewGroup;
+	}
+
+	public List<Long> getCommunities() {
+		return communities;
+	}
+
+	public void setCommunities(List<Long> communities) {
+		this.communities = communities;
 	}
 
 	@Override

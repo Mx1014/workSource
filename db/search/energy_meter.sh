@@ -15,7 +15,8 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/energyMeter" -d '
             "status":{"type":"byte"},
             "meterType":{"type":"byte"},
             "assignFlag":{"type":"byte"},
-            "assignPlan":{"type":"string", "index":"not_analyzed"}
+            "assignPlan":{"type":"string", "index":"not_analyzed"},
+            "operatorName":{"type":"string", "index":"not_analyzed"}
         }
     }
 }
