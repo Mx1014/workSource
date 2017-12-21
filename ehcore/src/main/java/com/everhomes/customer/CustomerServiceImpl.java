@@ -2316,6 +2316,7 @@ public class CustomerServiceImpl implements CustomerService {
     
 	@Override
 	public List<CustomerTrackingDTO> listCustomerTrackings(ListCustomerTrackingsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
 		List<CustomerTracking> trackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(cmd.getCustomerId());
         if(trackings != null && trackings.size() > 0) {
             return trackings.stream().map(tracking -> {
@@ -2327,6 +2328,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public CustomerTrackingDTO getCustomerTracking(GetCustomerTrackingCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
 		CustomerTracking tracking = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
         return convertCustomerTrackingDTO(tracking);
 	}
@@ -2365,6 +2367,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public CustomerTrackingDTO updateCustomerTracking(UpdateCustomerTrackingCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
 		CustomerTracking exist = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
 		CustomerTracking tracking = ConvertHelper.convert(cmd, CustomerTracking.class);
 		if(cmd.getTrackingTime() != null){
@@ -2386,13 +2389,14 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public void deleteCustomerTracking(DeleteCustomerTrackingCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
 		CustomerTracking tracking = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
 	    enterpriseCustomerProvider.deleteCustomerTracking(tracking);
 	}
 
 	@Override
 	public void createCustomerTracking(CreateCustomerTrackingCommand cmd) {
-		
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
 		EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getCustomerId());
 		CustomerTracking tracking = ConvertHelper.convert(cmd, CustomerTracking.class);
 		if(cmd.getTrackingTime() != null){
@@ -2418,6 +2422,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public List<CustomerTrackingPlanDTO> listCustomerTrackingPlans(ListCustomerTrackingPlansCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
 		List<CustomerTrackingPlan> plans = enterpriseCustomerProvider.listCustomerTrackingPlans(cmd.getCustomerId());
         if(plans != null && plans.size() > 0) {
             return plans.stream().map(plan -> {
