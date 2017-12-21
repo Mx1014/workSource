@@ -26,8 +26,6 @@ public interface PointService {
 
     ListPointTutorialDetailResponse listPointTutorialDetail(ListPointTutorialDetailCommand cmd);
 
-    ListPointMallBannersResponse listPointMallBanners(ListPointMallBannersCommand cmd);
-
     ListPointLogsResponse listPointLogsForMall(ListPointLogsForMallCommand cmd);
 
     PointSystemDTO createPointSystem(CreatePointSystemCommand cmd);
@@ -39,6 +37,10 @@ public interface PointService {
     PointLogDTO createPointLog(CreatePointLogCommand cmd);
 
     ListPointRulesResponse listPointRules(ListPointRulesCommand cmd);
+
+    void everyYearEndSendMessageSchedule();
+
+    void everyYearEndClearPointSchedule();
 
     PointGeneralTemplate getGeneralTemplate();
 
@@ -64,7 +66,7 @@ public interface PointService {
 
     void restartEventLogScheduler();
 
-    void processUserPoint(UserTreasureDTO point);
+    UserTreasureDTO getPointTreasure();
 
     PointRuleDTO updatePointRule(UpdatePointRuleCommand cmd);
 

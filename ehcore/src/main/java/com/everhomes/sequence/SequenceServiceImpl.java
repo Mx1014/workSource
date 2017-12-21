@@ -29,6 +29,7 @@ import java.util.Set;
 
 @Component
 public class SequenceServiceImpl implements SequenceService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SequenceServiceImpl.class);
 
     @Autowired
@@ -46,6 +47,11 @@ public class SequenceServiceImpl implements SequenceService {
     @Autowired
     private ServiceModuleProvider serviceModuleProvider;
 
+    private final Schema[] schemas = new Schema[] {
+            com.everhomes.schema.Ehcore.EHCORE,
+            com.everhomes.server.schema.Ehcore.EHCORE
+    };
+
     private final Set<Table<?>> excludeTables = new HashSet<>();
     private final Set<String> excludeTableNames = new HashSet<>();
 
@@ -56,24 +62,30 @@ public class SequenceServiceImpl implements SequenceService {
 
     @Override
     public void syncSequence() {
-        syncSequence0();
+        try {
+            syncSequence0();
+        } catch (Exception e) {
+            LOGGER.error("Sync sequence0 error.", e);
+        }
         syncSequence1();
     }
 
     private void syncSequence1() {
-        Schema[] schemas = {
-                com.everhomes.schema.Ehcore.EHCORE,
-                com.everhomes.server.schema.Ehcore.EHCORE
-        };
-        for (Schema schema : schemas) {
-            schema.getTables().forEach(this::doSync);
+        for (Schema schema : this.schemas) {
+            for (Table<?> table : schema.getTables()) {
+                if (excludeTables.contains(table) || excludeTableNames.contains(table.getName())) {
+                    continue;
+                }
+                try {
+                    this.doSync(table);
+                } catch (Exception e) {
+                    LOGGER.error("Table " + table.getName() + " doSync error.", e);
+                }
+            }
         }
     }
 
     private void doSync(Table<?> table) {
-        if (excludeTables.contains(table) || excludeTableNames.contains(table.getName())) {
-            return;
-        }
         doSyncTableSequence(null, table.getClass(), table.getName(), (dbContext) -> {
             Field<Long> id = DSL.fieldByName(DSL.getDataType(Long.class), "id");
             return dbContext.select(id.max()).from(table).fetchOne().value1();
@@ -1537,12 +1549,6 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhCommunityApproveRequests.class, Tables.EH_COMMUNITY_APPROVE_REQUESTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_COMMUNITY_APPROVE_REQUESTS.ID.max()).from(Tables.EH_COMMUNITY_APPROVE_REQUESTS).fetchOne().value1();
         });
-        syncTableSequence(null, EhSmsLogs.class, Tables.EH_USER_IDENTIFIER_LOGS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_USER_IDENTIFIER_LOGS.ID.max()).from(Tables.EH_USER_IDENTIFIER_LOGS).fetchOne().value1();
-        });
-        syncTableSequence(null, EhSmsLogs.class, Tables.EH_USER_APPEAL_LOGS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_USER_APPEAL_LOGS.ID.max()).from(Tables.EH_USER_APPEAL_LOGS).fetchOne().value1();
-        });
         syncTableSequence(null, EhTalentMessageSenders.class, Tables.EH_TALENT_MESSAGE_SENDERS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_TALENT_MESSAGE_SENDERS.ID.max()).from(Tables.EH_TALENT_MESSAGE_SENDERS).fetchOne().value1();
         });
@@ -2078,6 +2084,10 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhAuthorizationThirdPartyButtons.class, Tables.EH_AUTHORIZATION_THIRD_PARTY_BUTTONS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_AUTHORIZATION_THIRD_PARTY_BUTTONS.ID.max()).from(Tables.EH_AUTHORIZATION_THIRD_PARTY_BUTTONS).fetchOne().value1();
         });
+
+        //
+        // 以后不用在这里加重复的代码了，已经做成自动获取所有表去同步id了，如果有特殊的表，可以写在这里.
+        //
     }
 
     private void syncTableSequence(Class keytableCls, Class pojoClass, String tableName, SequenceQueryCallback callback) {

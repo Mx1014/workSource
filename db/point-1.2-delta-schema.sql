@@ -1,7 +1,8 @@
 ALTER TABLE `eh_point_logs` ADD COLUMN `event_happen_time` BIGINT;
+ALTER TABLE `eh_point_logs` ADD COLUMN `extra` TEXT;
 
 -- 积分banner
-DROP TABLE IF EXISTS `eh_point_banners`;
+-- DROP TABLE IF EXISTS `eh_point_banners`;
 CREATE TABLE `eh_point_banners` (
   `id` BIGINT,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -18,7 +19,6 @@ CREATE TABLE `eh_point_banners` (
   `update_time` DATETIME(3),
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
 
 -- 积分商品
 -- DROP TABLE IF EXISTS `eh_point_goods`;
@@ -45,10 +45,9 @@ CREATE TABLE `eh_point_banners` (
 --   PRIMARY KEY (`id`)
 -- ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE `eh_point_goods` ADD COLUMN shop_no VARCHAR(128);
-ALTER TABLE `eh_point_goods` ADD COLUMN commodity_no VARCHAR(128);
+ALTER TABLE `eh_point_goods` ADD COLUMN shop_number VARCHAR(128);
+ALTER TABLE `eh_point_goods` ADD COLUMN system_id BIGINT NOT NULL DEFAULT 0;
 
-ALTER TABLE `eh_point_goods` DROP COLUMN number;
 ALTER TABLE `eh_point_goods` DROP COLUMN poster_uri;
 ALTER TABLE `eh_point_goods` DROP COLUMN poster_url;
 ALTER TABLE `eh_point_goods` DROP COLUMN detail_url;
@@ -58,3 +57,10 @@ ALTER TABLE `eh_point_goods` DROP COLUMN original_price;
 ALTER TABLE `eh_point_goods` DROP COLUMN discount_price;
 ALTER TABLE `eh_point_goods` DROP COLUMN point_rule;
 ALTER TABLE `eh_point_goods` DROP COLUMN display_name;
+
+ALTER TABLE `eh_point_rules` ADD COLUMN extra TEXT;
+ALTER TABLE `eh_point_rules` MODIFY COLUMN `limit_type` TEXT;
+ALTER TABLE `eh_point_rule_configs` MODIFY COLUMN `limit_type` TEXT;
+
+
+ALTER TABLE `eh_point_tutorial_to_point_rule_mappings` MODIFY COLUMN description VARCHAR(128);

@@ -840,10 +840,6 @@ public class UserActivityServiceImpl implements UserActivityService {
     @Override
     public GetUserTreasureResponse getUserTreasureV2() {
         GetUserTreasureResponse rsp = new GetUserTreasureResponse();
-        UserTreasureDTO point = new UserTreasureDTO();
-        point.setCount(0L);
-        point.setStatus(TrueOrFalseFlag.TRUE.getCode());
-        point.setUrlStatus(TrueOrFalseFlag.FALSE.getCode());
 
         UserTreasureDTO coupon = new UserTreasureDTO();
         coupon.setCount(0L);
@@ -856,8 +852,10 @@ public class UserActivityServiceImpl implements UserActivityService {
         order.setUrlStatus(TrueOrFalseFlag.FALSE.getCode());
 
         rsp.setCoupon(coupon);
-        rsp.setPoint(point);
         rsp.setOrder(order);
+
+        UserTreasureDTO point = pointService.getPointTreasure();
+        rsp.setPoint(point);
 
         if(!userService.isLogon()) {
             return rsp;
@@ -865,14 +863,18 @@ public class UserActivityServiceImpl implements UserActivityService {
 
         User user = UserContext.current().getUser();
 
-        UserProfile couponCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.RECEIVED_COUPON_COUNT);
-        UserProfile orderCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.RECEIVED_ORDER_COUNT);
+        BizMyUserCenterCountResponse response = fetchBizMyUserCenterCount(user);
 
-        if(couponCount != null) {
-            coupon.setCount(NumberUtils.toLong(couponCount.getItemValue(), 0));
-        }
-        if(orderCount != null) {
-            order.setCount(NumberUtils.toLong(orderCount.getItemValue(), 0));
+        // UserProfile couponCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.RECEIVED_COUPON_COUNT);
+        // UserProfile orderCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.RECEIVED_ORDER_COUNT);
+
+        if (response != null && response.getResponse() != null) {
+            long promotionCount = response.getResponse().promotionCount;
+            long shoppingCardCount = response.getResponse().shoppingCardCount;
+            long orderCount = response.getResponse().orderCount;
+
+            coupon.setCount(promotionCount + shoppingCardCount);
+            order.setCount(orderCount);
         }
 
         coupon.setUrl(getMyCoupon());
@@ -881,9 +883,36 @@ public class UserActivityServiceImpl implements UserActivityService {
         order.setUrl(getMyOrderUrl());
         order.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
 
-        pointService.processUserPoint(point);
-
         return rsp;
+    }
+
+    private BizMyUserCenterCountResponse fetchBizMyUserCenterCount(User user) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("namespaceId", user.getNamespaceId());
+        param.put("userId", user.getId());
+
+        Map<String, Object> bodyMap = new HashMap<>();
+        bodyMap.put("body", param);
+
+        String paramJson = StringHelper.toJsonString(bodyMap);
+
+        BizMyUserCenterCountResponse response = null;
+        try {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Fetch user treasure from biz, param = {}", paramJson);
+            }
+            ResponseEntity<String> responseEntity = bizHttpRestCallProvider.syncRestCall(
+                    "/rest/openapi/myCenter/myUserCenterCount", paramJson);
+
+            String body = responseEntity.getBody();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Fetch user treasure from biz, response = {}", body);
+            }
+            response = (BizMyUserCenterCountResponse) StringHelper.fromJsonString(body, BizMyUserCenterCountResponse.class);
+        } catch (Exception e) {
+            LOGGER.error("User treasure biz call error", e);
+        }
+        return response;
     }
 
     @Override

@@ -24,15 +24,15 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/admin/point")
 public class PointAdminController extends ControllerBase {
 
-    @Autowired
-    private PointService pointService;
-
     private static final RestResponse SUCCESS = new RestResponse() {
         {
             this.setErrorDescription("OK");
             this.setErrorCode(ErrorCodes.SUCCESS);
         }
     };
+
+    @Autowired
+    private PointService pointService;
 
     /**
      * <b>URL: /admin/point/getPointSystem</b>
@@ -128,7 +128,8 @@ public class PointAdminController extends ControllerBase {
      */
     @RestReturn(PointLogDTO.class)
     @RequestMapping("createPointLog")
-    public RestResponse createPointLog(CreatePointLogCommand cmd) {
+    public RestResponse createPointLog(CreatePointLogCommand cmd, HttpServletRequest request) {
+        cmd.setSessionId(request.getSession().getId());
         PointLogDTO dto = pointService.createPointLog(cmd);
         return success(dto);
     }

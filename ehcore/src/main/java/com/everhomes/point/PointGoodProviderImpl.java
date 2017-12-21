@@ -26,29 +26,29 @@ import java.util.List;
 @Repository
 public class PointGoodProviderImpl implements PointGoodProvider {
 
-	@Autowired
-	private DbProvider dbProvider;
+    @Autowired
+    private DbProvider dbProvider;
 
-	@Autowired
-	private SequenceProvider sequenceProvider;
+    @Autowired
+    private SequenceProvider sequenceProvider;
 
-	@Override
-	public void createPointGood(PointGood pointGood) {
-		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointGoods.class));
-		pointGood.setId(id);
-		pointGood.setCreateTime(DateUtils.currentTimestamp());
-		// pointGood.setCreatorUid(UserContext.currentUserId());
-		rwDao().insert(pointGood);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointGoods.class, id);
-	}
+    @Override
+    public void createPointGood(PointGood pointGood) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointGoods.class));
+        pointGood.setId(id);
+        pointGood.setCreateTime(DateUtils.currentTimestamp());
+        // pointGood.setCreatorUid(UserContext.currentUserId());
+        rwDao().insert(pointGood);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointGoods.class, id);
+    }
 
-	@Override
-	public void updatePointGood(PointGood pointGood) {
-		// pointGood.setUpdateTime(DateUtils.currentTimestamp());
-		// pointGood.setUpdateUid(UserContext.currentUserId());
+    @Override
+    public void updatePointGood(PointGood pointGood) {
+        // pointGood.setUpdateTime(DateUtils.currentTimestamp());
+        // pointGood.setUpdateUid(UserContext.currentUserId());
         rwDao().update(pointGood);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointGoods.class, pointGood.getId());
-	}
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointGoods.class, pointGood.getId());
+    }
 
     @Override
     public List<PointGood> query(ListingLocator locator, int count, ListingQueryBuilderCallback callback) {
@@ -59,7 +59,7 @@ public class PointGoodProviderImpl implements PointGoodProvider {
             callback.buildCondition(locator, query);
         }
         if (locator.getAnchor() != null) {
-            query.addConditions(t.ID.lt(locator.getAnchor()));
+            query.addConditions(t.ID.le(locator.getAnchor()));
         }
         query.addConditions(t.STATUS.ne(PointCommonStatus.INACTIVE.getCode()));
 
@@ -78,16 +78,17 @@ public class PointGoodProviderImpl implements PointGoodProvider {
         return list;
     }
 
-	@Override
-	public PointGood findById(Long id) {
-		return ConvertHelper.convert(dao().findById(id), PointGood.class);
-	}
+    @Override
+    public PointGood findById(Long id) {
+        return ConvertHelper.convert(dao().findById(id), PointGood.class);
+    }
 
     @Override
-    public List<PointGood> listPointGood(Integer namespaceId, Byte status, int pageSize, ListingLocator locator) {
+    public List<PointGood> listPointGood(Integer namespaceId, Long systemId, Byte status, int pageSize, ListingLocator locator) {
         com.everhomes.server.schema.tables.EhPointGoods t = Tables.EH_POINT_GOODS;
         return this.query(locator, pageSize, (locator1, query) -> {
             query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+            query.addConditions(t.SYSTEM_ID.eq(systemId));
             if (status != null) {
                 query.addConditions(t.STATUS.eq(status));
             }
@@ -96,10 +97,11 @@ public class PointGoodProviderImpl implements PointGoodProvider {
     }
 
     @Override
-    public List<PointGood> listEnabledPointGoods(Integer namespaceId, int pageSize, ListingLocator locator) {
+    public List<PointGood> listEnabledPointGoods(Integer namespaceId, Long systemId, int pageSize, ListingLocator locator) {
         com.everhomes.server.schema.tables.EhPointGoods t = Tables.EH_POINT_GOODS;
         return this.query(locator, pageSize, (locator1, query) -> {
             query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+            query.addConditions(t.SYSTEM_ID.eq(systemId));
             query.addConditions(t.STATUS.eq(PointCommonStatus.ENABLED.getCode()));
             query.addOrderBy(t.TOP_TIME.desc());
             return query;
@@ -110,9 +112,9 @@ public class PointGoodProviderImpl implements PointGoodProvider {
     public PointGood findBySystemAndGood(Long systemId, String number, String shopNumber) {
         com.everhomes.server.schema.tables.EhPointGoods t = Tables.EH_POINT_GOODS;
         List<PointGood> list = this.query(new ListingLocator(), 1, (locator1, query) -> {
-            // query.addConditions(t.SYSTEM_ID.eq(systemId));
-            query.addConditions(t.COMMODITY_NO.eq(number));
-            query.addConditions(t.SHOP_NO.eq(shopNumber));
+            query.addConditions(t.SYSTEM_ID.eq(systemId));
+            query.addConditions(t.NUMBER.eq(number));
+            query.addConditions(t.SHOP_NUMBER.eq(shopNumber));
             return query;
         });
         if (list != null && list.size() > 0) {
@@ -121,15 +123,20 @@ public class PointGoodProviderImpl implements PointGoodProvider {
         return null;
     }
 
+    @Override
+    public void deletePointGoods(List<PointGood> goods) {
+        rwDao().delete(goods.toArray(new EhPointGoods[goods.size()]));
+    }
+
     private EhPointGoodsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhPointGoodsDao(context.configuration());
-	}
+    }
 
-	private EhPointGoodsDao dao() {
+    private EhPointGoodsDao dao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return new EhPointGoodsDao(context.configuration());
-	}
+    }
 
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());

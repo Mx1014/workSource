@@ -31,14 +31,13 @@ public class ForumPostCreatePointEventProcessor extends GeneralPointEventProcess
         Long appId = null;
         Byte moduleType = null;
 
-        Map<String, String> params = localEvent.getParams();
-        String postJson = params.get("post");
+        String postJson = localEvent.getStringParam("post");
         if (postJson != null) {
             Post post = (Post) StringHelper.fromJsonString(postJson, Post.class);
             appId = post.getEmbeddedAppId();
             moduleType = post.getModuleType();
         } else {
-            String postDTOJson = params.get("postDTO");
+            String postDTOJson = localEvent.getStringParam("postDTO");
             if (postDTOJson != null) {
                 PostDTO post = (PostDTO) StringHelper.fromJsonString(postDTOJson, PostDTO.class);
                 appId = post.getEmbeddedAppId();
@@ -49,7 +48,7 @@ public class ForumPostCreatePointEventProcessor extends GeneralPointEventProcess
         String eventName;
         if (Objects.equals(appId, AppConstants.APPID_ACTIVITY)) {
             eventName = SystemEvent.ACTIVITY_ACTIVITY_CREATE.dft();
-        } else if (Objects.equals(moduleType, ForumModuleType.FEEDBACK.getCode())){
+        } else if (Objects.equals(moduleType, ForumModuleType.FEEDBACK.getCode())) {
             eventName = SystemEvent.FEEDBACK_FEEDBACK_CREATE.dft();
         } else {
             eventName = SystemEvent.FORUM_POST_CREATE.dft();

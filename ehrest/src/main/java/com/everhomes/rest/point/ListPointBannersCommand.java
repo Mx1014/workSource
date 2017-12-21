@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
  *     <li>systemId: systemId</li>
  *     <li>pageAnchor: pageAnchor</li>
  *     <li>pageSize: pageSize</li>
+ *     <li>status: status {@link com.everhomes.rest.point.PointCommonStatus}</li>
  * </ul>
  */
 public class ListPointBannersCommand {
@@ -17,6 +18,7 @@ public class ListPointBannersCommand {
     private Long systemId;
     private Long pageAnchor;
     private Integer pageSize;
+    private Byte status;
 
     public Long getSystemId() {
         return systemId;
@@ -40,6 +42,14 @@ public class ListPointBannersCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 
     @Override

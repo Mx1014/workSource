@@ -21,5 +21,7 @@ public interface PointBannerProvider {
 
     List<PointBanner> listByIds(Set<Long> ids);
 
-    List<PointBanner> listPointBannersBySystemId(Long systemId, int pageSize, ListingLocator locator);
+    List<PointBanner> listPointBannersBySystemId(Long systemId, Byte status, int pageSize, ListingLocator locator);
+
+    Integer findMaxDefaultOrder(Long systemId);
 }

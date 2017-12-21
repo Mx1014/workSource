@@ -35,7 +35,7 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PointLocalBusSubscriber.class);
 
-    private static final int SCHEDULE_INTERVAL_SECONDS = 60;
+    private static final int SCHEDULE_INTERVAL_SECONDS = 30;
 
     private final static Random random = new Random();
 
@@ -231,7 +231,7 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
 
         // 同步事件
         if (Objects.equals(localEvent.getSyncFlag(), TrueOrFalseFlag.TRUE.getCode())) {
-            doSyncEvent(processor1, log);
+            doSyncEvent(processor1, localEvent, log);
             return Action.none;
         }
 
@@ -249,14 +249,18 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
         return Action.none;
     }
 
-    private void doSyncEvent(BasePointEventProcessor processor1, PointEventLog log) {
-        pointEventLogProvider.createPointEventLogsWithId(Collections.singletonList(log));
+    private void doSyncEvent(BasePointEventProcessor processor1, LocalEvent localEvent, PointEventLog log) {
+        List<PointRule> pointRules = processor1.getPointRules(localEvent);
 
-        List<PointRule> pointRules = processor1.getPointRules(log.getEventName());
-        List<Long> cateIds = pointRules.stream().map(PointRule::getCategoryId).distinct().collect(Collectors.toList());
-        for (Long cateId : cateIds) {
-            PointRuleCategory category = pointRuleCategoryProvider.findById(cateId);
-            pointEventLogScheduler.doProcessGroup(category);
+        if (pointRules.size() > 0) {
+            log.setCategoryId(pointRules.get(0).getCategoryId());
+            pointEventLogProvider.createPointEventLogsWithId(Collections.singletonList(log));
+
+            List<Long> cateIds = pointRules.stream().map(PointRule::getCategoryId).distinct().collect(Collectors.toList());
+            for (Long cateId : cateIds) {
+                PointRuleCategory category = pointRuleCategoryProvider.findById(cateId);
+                pointEventLogScheduler.doProcessGroup(category, log.getNamespaceId());
+            }
         }
     }
 }

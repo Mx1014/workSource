@@ -24,7 +24,7 @@ public class ForumCommentDeletePointEventProcessor extends GeneralPointEventProc
     protected String getEventName(LocalEvent localEvent, String subscriptionPath) {
         Long appId = null;
 
-        String embeddedAppId = localEvent.getParams().get("embeddedAppId");
+        String embeddedAppId = localEvent.getStringParam("embeddedAppId");
         if (embeddedAppId != null) {
             appId = Long.valueOf(embeddedAppId);
         }

@@ -29,8 +29,8 @@ public class ForumPostReportPointEventProcessor extends GeneralPointEventProcess
     protected String getEventName(LocalEvent localEvent, String subscriptionPath) {
         Long appId = null;
 
-        String postJson = localEvent.getParam("post");
-        String parentPostJson = localEvent.getParam("parentPost");
+        String postJson = localEvent.getStringParam("post");
+        String parentPostJson = localEvent.getStringParam("parentPost");
 
         if (parentPostJson != null) {
             Post parentJson = (Post) StringHelper.fromJsonString(parentPostJson, Post.class);
@@ -40,7 +40,7 @@ public class ForumPostReportPointEventProcessor extends GeneralPointEventProcess
             appId = post.getEmbeddedAppId();
         }
 
-        String feedbackJson = localEvent.getParam("feedback");
+        String feedbackJson = localEvent.getStringParam("feedback");
         if (feedbackJson == null) {
             return "";
         }

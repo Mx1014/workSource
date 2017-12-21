@@ -16,9 +16,7 @@ public interface BasePointEventProcessor {
 
     List<PointResultAction> getResultActions(List<PointAction> pointActions, LocalEvent localEvent, PointRule rule, PointSystem pointSystem, PointRuleCategory category);
 
-    List<PointRule> getPointRules(String eventName);
-
-    void hook(LocalEvent localEvent, String subscriptionPath, PointEventGroup eventGroup);
+    List<PointRule> getPointRules(LocalEvent localEvent);
 
     boolean isContinue(BasePointEventProcessor eventProcessor);
 

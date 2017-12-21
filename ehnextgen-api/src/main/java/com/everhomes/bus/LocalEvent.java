@@ -25,7 +25,7 @@ public class LocalEvent {
     private Long entityId;
     private Long createTime;
     private LocalEventContext context;
-    private Map<String, String> params;
+    private Map<String, Object> params;
 
     public LocalEvent() {
         syncFlag = TrueOrFalseFlag.FALSE.getCode();
@@ -40,7 +40,7 @@ public class LocalEvent {
         this.entityId = entityId;
     }
 
-    public LocalEvent(Byte syncFlag, String eventName, String entityType, Long entityId, Long createTime, LocalEventContext context, Map<String, String> params) {
+    public LocalEvent(Byte syncFlag, String eventName, String entityType, Long entityId, Long createTime, LocalEventContext context, Map<String, Object> params) {
         this(eventName, entityType, entityId);
         this.syncFlag = syncFlag;
         this.createTime = createTime;
@@ -104,19 +104,23 @@ public class LocalEvent {
         this.context = context;
     }
 
-    public Map<String, String> getParams() {
+    public Map<String, Object> getParams() {
         return params;
     }
 
-    public void setParams(Map<String, String> params) {
+    public void setParams(Map<String, Object> params) {
         this.params = params;
     }
 
-    public String getParam(String key) {
+    public String getStringParam(String key) {
         if (params == null) {
             return null;
         }
-        return params.get(key);
+        Object p = params.get(key);
+        if (p == null) {
+            return null;
+        }
+        return p.toString();
     }
 
     public void setTargetUid(Long targetUid) {

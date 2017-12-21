@@ -2,8 +2,6 @@
 package com.everhomes.point;
 
 import com.everhomes.PictureValidate.PictureValidateService;
-import com.everhomes.banner.Banner;
-import com.everhomes.banner.BannerProvider;
 import com.everhomes.bus.LocalEvent;
 import com.everhomes.bus.LocalEventBus;
 import com.everhomes.bus.SystemEvent;
@@ -19,7 +17,6 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.promotion.BizHttpRestCallProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.banner.BannerDTO;
 import com.everhomes.rest.common.OfficialActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
@@ -28,7 +25,8 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserTreasureDTO;
-import com.everhomes.server.schema.tables.pojos.EhBanners;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.tables.pojos.EhPointBanners;
 import com.everhomes.server.schema.tables.pojos.EhPointScores;
 import com.everhomes.server.schema.tables.pojos.EhPointTutorials;
@@ -37,6 +35,8 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.*;
+import com.everhomes.util.excel.ExcelUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +46,9 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -89,9 +92,6 @@ public class PointServiceImpl implements PointService {
     private PointRuleProvider pointRuleProvider;
 
     @Autowired
-    private BannerProvider bannerProvider;
-
-    @Autowired
     private DbProvider dbProvider;
 
     @Autowired
@@ -126,6 +126,9 @@ public class PointServiceImpl implements PointService {
 
     @Autowired
     private PictureValidateService pictureValidateService;
+
+    @Autowired
+    private ScheduleProvider scheduleProvider;
 
     @Override
     public ListPointSystemsResponse listPointSystems(ListPointSystemsCommand cmd) {
@@ -249,26 +252,34 @@ public class PointServiceImpl implements PointService {
     @Override
     public void createPointRuleToEventMapping(CreatePointRuleToEventMappingCommand cmd) {
         ValidatorUtil.validate(cmd);
-
-
     }
 
     @Override
-    public void processUserPoint(UserTreasureDTO point) {
+    public UserTreasureDTO getPointTreasure() {
+        UserTreasureDTO point = new UserTreasureDTO();
+        point.setCount(0L);
+        point.setStatus(TrueOrFalseFlag.FALSE.getCode());
+        point.setUrlStatus(TrueOrFalseFlag.FALSE.getCode());
+
         GetEnabledPointSystemCommand cmd = new GetEnabledPointSystemCommand();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         cmd.setNamespaceId(namespaceId);
         GetEnabledPointSystemResponse pointSystemResponse = this.getEnabledPointSystem(cmd);
 
         if (pointSystemResponse == null || pointSystemResponse.getSystems() == null || pointSystemResponse.getSystems().size() == 0) {
-            point.setStatus(TrueOrFalseFlag.FALSE.getCode());
-            return;
+            return point;
+        }
+        point.setStatus(TrueOrFalseFlag.TRUE.getCode());
+
+        Long currentUserId = UserContext.currentUserId();
+        if (currentUserId == null) {
+            return point;
         }
 
         PointSystemDTO system = pointSystemResponse.getSystems().get(0);
 
         GetUserPointCommand pointCommand = new GetUserPointCommand();
-        pointCommand.setUid(UserContext.currentUserId());
+        pointCommand.setUid(currentUserId);
         pointCommand.setSystemId(system.getId());
         PointScoreDTO userPoint = this.getUserPoint(pointCommand);
         if (userPoint != null) {
@@ -283,11 +294,18 @@ public class PointServiceImpl implements PointService {
         if (flag != null) {
             point.setUrlStatus(flag.getCode());
         }
+        return point;
     }
 
     @Override
     public PointRuleDTO updatePointRule(UpdatePointRuleCommand cmd) {
         ValidatorUtil.validate(cmd);
+
+        PointSystem pointSystem = pointSystemProvider.findById(cmd.getSystemId());
+        if (pointSystem == null) {
+            throw RuntimeErrorException.errorWith(PointServiceErrorCode.SCOPE, PointServiceErrorCode.ERROR_POINT_SYSTEM_NOT_EXIST_CODE,
+                    "Point system not exist");
+        }
 
         PointRuleConfig ruleConfig = pointRuleConfigProvider.findByRuleIdAndSystemId(cmd.getSystemId(), cmd.getId());
         if (ruleConfig == null) {
@@ -296,10 +314,15 @@ public class PointServiceImpl implements PointService {
             if (cmd.getDescription() != null) {
                 ruleConfig.setDescription(cmd.getDescription().trim());
             }
+
+            ruleConfig.setNamespaceId(pointSystem.getNamespaceId());
+            ruleConfig.setRuleId(rule.getId());
             ruleConfig.setLimitType(cmd.getLimitType());
             ruleConfig.setLimitData(cmd.getLimitData());
             ruleConfig.setStatus(cmd.getStatus());
             ruleConfig.setPoints(cmd.getPoints());
+            ruleConfig.setSystemId(cmd.getSystemId());
+            pointRuleConfigProvider.createPointRuleConfig(ruleConfig);
         } else {
             if (cmd.getDescription() != null) {
                 ruleConfig.setDescription(cmd.getDescription().trim());
@@ -345,6 +368,12 @@ public class PointServiceImpl implements PointService {
     public PointScoreDTO getUserPoint(GetUserPointCommand cmd) {
         ValidatorUtil.validate(cmd);
 
+        PointSystem pointSystem = pointSystemProvider.findById(cmd.getSystemId());
+        if (pointSystem == null) {
+            throw RuntimeErrorException.errorWith(PointServiceErrorCode.SCOPE, PointServiceErrorCode.ERROR_POINT_SYSTEM_NOT_EXIST_CODE,
+                    "Point system not exist");
+        }
+
         Integer namespaceId = cmd.getNamespaceId() != null ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId();
         Long uid = cmd.getUid() != null ? cmd.getUid() : UserContext.currentUserId();
 
@@ -353,6 +382,7 @@ public class PointServiceImpl implements PointService {
             scoreDTO = new PointScoreDTO();
             scoreDTO.setScore(0L);
         }
+        scoreDTO.setPointName(pointSystem.getPointName());
         return scoreDTO;
     }
 
@@ -383,7 +413,11 @@ public class PointServiceImpl implements PointService {
     }
 
     private PointLogDTO toPointLogDTO(PointLog pointLog) {
-        return ConvertHelper.convert(pointLog, PointLogDTO.class);
+        PointLogDTO dto = ConvertHelper.convert(pointLog, PointLogDTO.class);
+        if (StringUtils.isEmpty(dto.getRuleName())) {
+            dto.setRuleName(pointLog.getDescription());
+        }
+        return dto;
     }
 
     @Override
@@ -397,10 +431,32 @@ public class PointServiceImpl implements PointService {
         }
 
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        long pageNo = cmd.getPageAnchor() != null ? cmd.getPageAnchor() : 1;
+        long pageNo = cmd.getPageAnchor() != null ? cmd.getPageAnchor() : 0;
 
-        List<PointGood> goods = pointGoodProvider.listPointGood(pointSystem.getNamespaceId(), null, -1, new ListingLocator());
-        return fetchPointGoodsFromBiz(pointSystem.getNamespaceId(), pageNo, pageSize, goods, new HashMap<>());
+        List<PointGood> goods = pointGoodProvider.listPointGood(pointSystem.getNamespaceId(), pointSystem.getId(), null, -1, new ListingLocator());
+        ListPointGoodsResponse response = fetchPointGoodsFromBiz(pointSystem.getNamespaceId(), 1L, 999, goods, new HashMap<>());
+
+        // 把电商那边已经取消的商品删除
+        List<String> list1 = response.getGoods().parallelStream().map(r -> r.getShopNumber() + ":" + r.getNumber()).collect(Collectors.toList());
+        List<PointGood> list2 = goods.parallelStream().filter(r -> !list1.contains(r.getShopNumber() + ":" + r.getNumber())).collect(Collectors.toList());
+
+        if (list2.size() > 0) {
+            pointGoodProvider.deletePointGoods(list2);
+        }
+
+        // 自己分页
+        List<PointGoodDTO> subGoods = null;
+        if (response.getGoods().size() > (pageSize * pageNo)) {
+            int toIndex = (int) (pageSize * pageNo + pageSize);
+            toIndex = toIndex < response.getGoods().size() ? toIndex : response.getGoods().size();
+            subGoods = response.getGoods().subList((int) (pageSize * pageNo), toIndex);
+
+            if (toIndex < response.getGoods().size()) {
+                response.setNextPageAnchor(pageNo + 1);
+            }
+        }
+        response.setGoods(subGoods);
+        return response;
     }
 
     private PointGoodDTO commodityToGoodDTO(PointCommodity commodity) {
@@ -427,19 +483,44 @@ public class PointServiceImpl implements PointService {
         long pageNo = cmd.getPageAnchor() != null ? cmd.getPageAnchor() : 1;
         Integer namespaceId = cmd.getNamespaceId() != null ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId();
 
-        List<PointGood> goods = pointGoodProvider.listEnabledPointGoods(namespaceId, pageSize, new ListingLocator());
+        List<PointGood> enabledGoods = pointGoodProvider.listEnabledPointGoods(namespaceId, cmd.getSystemId(), pageSize, new ListingLocator());
+
+        if (enabledGoods.size() == 0) {
+            return new ListPointGoodsResponse();
+        }
 
         Map<String, Object> params = new HashMap<>();
         List<ShopCommodityCmd> shopCommodityCmds = new ArrayList<>();
-        for (PointGood good : goods) {
+        for (PointGood good : enabledGoods) {
             ShopCommodityCmd shopCmd = new ShopCommodityCmd();
-            shopCmd.setCommoNo(good.getCommodityNo());
-            shopCmd.setShopNo(good.getShopNo());
+            shopCmd.setCommoNo(good.getNumber());
+            shopCmd.setShopNo(good.getShopNumber());
             shopCommodityCmds.add(shopCmd);
         }
         params.put("shopCommoditys", shopCommodityCmds);
 
-        return fetchPointGoodsFromBiz(namespaceId, pageNo, pageSize, goods, params);
+        ListPointGoodsResponse response = fetchPointGoodsFromBiz(namespaceId, pageNo, pageSize, enabledGoods, params);
+        response.getGoods().sort(getPointGoodDTOComparator());
+        return response;
+    }
+
+    private Comparator<PointGoodDTO> getPointGoodDTOComparator() {
+        Comparator<PointGoodDTO> comparator = (o1, o2) -> {
+            Timestamp o1TopTime = o1.getTopTime();
+            Timestamp o2TopTime = o2.getTopTime();
+
+            if (o1TopTime != null && o2TopTime != null) {
+                return o1TopTime.compareTo(o2TopTime);
+            }
+            if (o1TopTime != null) {
+                return 1;
+            }
+            if (o2TopTime != null) {
+                return -1;
+            }
+            return 0;
+        };
+        return comparator.reversed();
     }
 
     @Override
@@ -471,39 +552,50 @@ public class PointServiceImpl implements PointService {
         params.put("pageNo", pageNo);
 
         bodyMap.put("body", params);
+
+        String paramJson = StringHelper.toJsonString(bodyMap);
+
+        ResponseEntity<String> entity = null;
         try {
-            Map<String, PointGood> shopNoAndCommNoToCommMap =
-                    goods.stream().collect(Collectors.toMap(r -> r.getShopNo() + r.getCommodityNo(), r -> r));
-
-            ResponseEntity<String> entity = bizHttpRestCallProvider.syncRestCall(
-                "/rest/openapi/commodity/queryEnabledPointCommodityByPage", StringHelper.toJsonString(bodyMap));
-            List<PointGoodDTO> dtoList = new ArrayList<>();
-            QueryEnabledPointCommodityByPageResponse response = (QueryEnabledPointCommodityByPageResponse)
-                    StringHelper.fromJsonString(entity.getBody(), QueryEnabledPointCommodityByPageResponse.class);
-
-            for (PointCommodity commodity : response.getBody().getRows()) {
-                PointGoodDTO dto = commodityToGoodDTO(commodity);
-                PointGood good = shopNoAndCommNoToCommMap.get(commodity.getShopNo() + commodity.getCommoNo());
-                if (good != null) {
-                    dto.setId(good.getId());
-                    dto.setStatus(good.getStatus());
-                    dto.setTopStatus(good.getTopStatus());
-                    dto.setTopTime(good.getTopTime());
-                }
-                dtoList.add(dto);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Fetch point goods from biz, param = {}", paramJson);
             }
-
-            ListPointGoodsResponse resp = new ListPointGoodsResponse();
-            resp.setGoods(dtoList);
-            if (response.getBody().getHasNext()) {
-                resp.setNextPageAnchor(pageNo + 1);
+            entity = bizHttpRestCallProvider.syncRestCall(
+                    "/rest/openapi/commodity/queryEnabledPointCommodityByPage", paramJson);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Fetch point goods from biz, response = {}", entity.getBody());
             }
-            return resp;
         } catch (InterruptedException | ExecutionException | UnsupportedEncodingException | TimeoutException e) {
             LOGGER.error("Point biz call error", e);
             throw RuntimeErrorException.errorWith(e, PointServiceErrorCode.SCOPE, PointServiceErrorCode.ERROR_POINT_BIZ_CALL_ERROR_CODE,
                     "Point biz call error");
         }
+
+        Map<String, PointGood> shopNoAndCommNoToCommMap =
+                goods.stream().collect(Collectors.toMap(r -> r.getShopNumber() + r.getNumber(), r -> r));
+
+        List<PointGoodDTO> dtoList = new ArrayList<>();
+        QueryEnabledPointCommodityByPageResponse response = (QueryEnabledPointCommodityByPageResponse)
+                StringHelper.fromJsonString(entity.getBody(), QueryEnabledPointCommodityByPageResponse.class);
+
+        for (PointCommodity commodity : response.getBody().getRows()) {
+            PointGoodDTO dto = commodityToGoodDTO(commodity);
+            PointGood good = shopNoAndCommNoToCommMap.get(commodity.getShopNo() + commodity.getCommoNo());
+            if (good != null) {
+                dto.setId(good.getId());
+                dto.setStatus(good.getStatus());
+                dto.setTopStatus(good.getTopStatus());
+                dto.setTopTime(good.getTopTime());
+            }
+            dtoList.add(dto);
+        }
+
+        ListPointGoodsResponse resp = new ListPointGoodsResponse();
+        resp.setGoods(dtoList);
+        if (response.getBody().getHasNext()) {
+            resp.setNextPageAnchor(pageNo + 1);
+        }
+        return resp;
     }
 
     @Override
@@ -554,34 +646,17 @@ public class PointServiceImpl implements PointService {
         }
         detailDTO.setRuleName(pointRule.getDisplayName());
         detailDTO.setPoints(pointRule.getPoints());
+
+        PointRuleConfig ruleConfig = pointRuleConfigProvider.findByRuleIdAndSystemId(mapping.getSystemId(), mapping.getRuleId());
+        if (ruleConfig != null) {
+            detailDTO.setDescription(ruleConfig.getDescription());
+            detailDTO.setPoints(ruleConfig.getPoints());
+        }
         return detailDTO;
     }
 
     private PointTutorialToPointRuleMappingDTO toPointTutorialToPointRuleMappingDTO(PointTutorialToPointRuleMapping mapping) {
         return ConvertHelper.convert(mapping, PointTutorialToPointRuleMappingDTO.class);
-    }
-
-    @Override
-    public ListPointMallBannersResponse listPointMallBanners(ListPointMallBannersCommand cmd) {
-        ValidatorUtil.validate(cmd);
-
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-
-        List<Banner> banners = bannerProvider.findBannersByTagAndScope(namespaceId, null,
-                "/PointMall", "Default", (byte) 0, 0L);
-        List<BannerDTO> dtoList = banners.stream().map(this::toBannerDTO).collect(Collectors.toList());
-
-        ListPointMallBannersResponse response = new ListPointMallBannersResponse();
-        response.setBanners(dtoList);
-        return response;
-    }
-
-    private BannerDTO toBannerDTO(Banner banner) {
-        BannerDTO dto = new BannerDTO();
-        dto.setPosterUrl(parseURI(banner.getPosterPath(), EhBanners.class.getSimpleName(), banner.getId()));
-        dto.setActionType(banner.getActionType());
-        dto.setActionData(banner.getActionData());
-        return dto;
     }
 
     private String parseURI(String uri, String ownerType, Long ownerId) {
@@ -609,17 +684,71 @@ public class PointServiceImpl implements PointService {
         List<PointLog> logs = pointLogProvider.listPointLogs(logsCmd, locator);
         List<PointLogDTO> dtoList = logs.stream().map(this::toPointLogDTO).collect(Collectors.toList());
 
+        dtoList = dtoList.parallelStream().map(r -> {
+            Map<String, Object> map = (Map) StringHelper.fromJsonString(r.getExtra(), Map.class);
+            Object scoreObj = map.get("score");
+            if (scoreObj == null) {
+                return null;
+            }
+            r.setTargetPhone(null);
+
+            PointSystem pointSystem = pointSystemProvider.findById(r.getSystemId());
+
+            BigDecimal discountPrice = new BigDecimal(scoreObj.toString());
+            BigDecimal exchangePoint = new BigDecimal(pointSystem.getExchangePoint());
+            BigDecimal exchangeCash = new BigDecimal(pointSystem.getExchangeCash());
+
+            BigDecimal discount = discountPrice.divide(exchangePoint, 2).multiply(exchangeCash);
+
+            r.setDiscountPrice(discount.floatValue());
+            r.setTargetName(maskTargetName(r.getTargetName()));
+            return r;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+
         ListPointLogsResponse response = new ListPointLogsResponse();
         response.setLogs(dtoList);
         response.setNextPageAnchor(locator.getAnchor());
         return response;
     }
 
+    private String maskTargetName(String targetName) {
+        int length = targetName.length();
+        if (length > 1) {
+            int i = length / 2;
+
+            int prefixBeginIndex = 0;
+            int prefixEndIndex = i / 2 == 0 ? 1 : i / 2;
+            int suffixBeginIndex = (length - prefixEndIndex) == 1 ? 2 : length - prefixEndIndex;
+
+            targetName = targetName.substring(prefixBeginIndex, prefixEndIndex) + "**" + targetName.substring(suffixBeginIndex, length);
+        }
+        return targetName;
+    }
+
+    /*public static void main(String[] args) {
+        String targetName = "12222222";
+        int length = targetName.length();
+        if (length > 1) {
+            int i = length / 2;
+
+            int prefixBeginIndex = 0;
+            int prefixEndIndex = i / 2 == 0 ? 1 : i / 2;
+            int suffixBeginIndex = (length - prefixEndIndex) == 1 ? 2 : length - prefixEndIndex;
+            int suffixEndIndex = length;
+
+            targetName = targetName.substring(prefixBeginIndex, prefixEndIndex) + "**" + targetName.substring(suffixBeginIndex, suffixEndIndex);
+        }
+        System.out.println(targetName);
+    }*/
+
     @Override
     public PointSystemDTO createPointSystem(CreatePointSystemCommand cmd) {
         ValidatorUtil.validate(cmd);
+        checkPointSystemNameAndPointName(null, cmd.getNamespaceId(), cmd.getDisplayName(), cmd.getPointName());
 
-        PointSystem pointSystem = ConvertHelper.convert(cmd, PointSystem.class);
+        PointSystem pointSystem = new PointSystem();
+        pointSystem.setDisplayName(cmd.getDisplayName().trim());
+        pointSystem.setPointName(cmd.getPointName().trim());
         pointSystem.setNamespaceId(cmd.getNamespaceId());
         pointSystem.setPointExchangeFlag(TrueOrFalseFlag.TRUE.getCode());
         pointSystem.setExchangeCash(1);
@@ -634,6 +763,21 @@ public class PointServiceImpl implements PointService {
         return toPointSystemDTO(pointSystem);
     }
 
+    private void checkPointSystemNameAndPointName(Long systemId, Integer namespaceId, String systemName, String pointName) {
+        List<PointSystem> pointSystems = pointSystemProvider.listPointSystems(namespaceId, -1, new ListingLocator());
+        Map<String, Long> displayNames = pointSystems.parallelStream().collect(Collectors.toMap(PointSystem::getDisplayName, PointSystem::getId));
+        if (systemName != null && displayNames.keySet().contains(systemName.trim()) && !Objects.equals(displayNames.get(systemName.trim()), systemId)) {
+            throw RuntimeErrorException.errorWith(PointServiceErrorCode.SCOPE, PointServiceErrorCode.ERROR_POINT_SYSTEM_NAME_EXIST_CODE,
+                    "Point system name already exist");
+        }
+
+        Map<String, Long> pointNames = pointSystems.parallelStream().collect(Collectors.toMap(PointSystem::getPointName, PointSystem::getId));
+        if (pointName != null && pointNames.keySet().contains(pointName.trim()) && !Objects.equals(pointNames.get(pointName.trim()), systemId)) {
+            throw RuntimeErrorException.errorWith(PointServiceErrorCode.SCOPE, PointServiceErrorCode.ERROR_POINT_NAME_EXIST_CODE,
+                    "Point name already exist");
+        }
+    }
+
     @Override
     public PointSystemDTO updatePointSystem(UpdatePointSystemCommand cmd) {
         ValidatorUtil.validate(cmd);
@@ -643,25 +787,15 @@ public class PointServiceImpl implements PointService {
             throw RuntimeErrorException.errorWith(PointServiceErrorCode.SCOPE, PointServiceErrorCode.ERROR_POINT_SYSTEM_NOT_EXIST_CODE,
                     "Point system not exist");
         }
+        checkPointSystemNameAndPointName(cmd.getId(), pointSystem.getNamespaceId(), cmd.getDisplayName(), cmd.getPointName());
 
-        if (cmd.getDisplayName() != null) {
-            pointSystem.setDisplayName(cmd.getDisplayName());
-        }
-        if (cmd.getPointName() != null) {
-            pointSystem.setPointName(cmd.getPointName());
-        }
-        if (cmd.getExchangePoint() != null) {
-            pointSystem.setExchangePoint(cmd.getExchangePoint());
-        }
-        if (cmd.getExchangeCash() != null) {
-            pointSystem.setExchangeCash(cmd.getExchangeCash());
-        }
-        if (cmd.getPointExchangeFlag() != null) {
-            pointSystem.setPointExchangeFlag(cmd.getPointExchangeFlag());
-        }
-        if (cmd.getUserAgreement() != null) {
-            pointSystem.setUserAgreement(cmd.getUserAgreement());
-        }
+        pointSystem.setDisplayName(cmd.getDisplayName());
+        pointSystem.setPointName(cmd.getPointName());
+        pointSystem.setExchangePoint(cmd.getExchangePoint());
+        pointSystem.setExchangeCash(cmd.getExchangeCash());
+        pointSystem.setPointExchangeFlag(cmd.getPointExchangeFlag());
+        pointSystem.setUserAgreement(cmd.getUserAgreement());
+
         pointSystemProvider.updatePointSystem(pointSystem);
         return toPointSystemDTO(pointSystem);
     }
@@ -705,6 +839,12 @@ public class PointServiceImpl implements PointService {
         pointLog.setTargetUid(user.getId());
         pointLog.setTargetPhone(cmd.getPhone());
         pointLog.setArithmeticType(PointArithmeticType.ADD.getCode());
+        pointLog.setEventHappenTime(System.currentTimeMillis());
+
+        // 手动添加的归到账号里面
+        PointRuleCategory category = pointRuleCategoryProvider.findById(1L);
+        pointLog.setCategoryId(category.getId());
+        pointLog.setCategoryName(category.getDisplayName());
 
         Long operatorUid = UserContext.currentUserId();
         UserInfo operator = userService.getUserSnapshotInfoWithPhone(operatorUid);
@@ -717,18 +857,24 @@ public class PointServiceImpl implements PointService {
         dbProvider.execute(status -> {
             pointLogProvider.createPointLog(pointLog);
 
-            PointScore pointScore = pointScoreProvider.findUserPointScore(pointSystem.getNamespaceId(),
-                    pointSystem.getId(), user.getId(), PointScore.class);
-            if (pointScore != null) {
-                pointScore.setScore(pointScore.getScore() + cmd.getPoints());
-            } else {
-                pointScore = new PointScore();
-                pointScore.setScore(pointLog.getPoints());
-                pointScore.setNamespaceId(pointSystem.getNamespaceId());
-                pointScore.setSystemId(pointSystem.getId());
-                pointScore.setUserId(user.getId());
-                pointScoreProvider.createPointScore(pointScore);
-            }
+            PointScoreLockAndCacheKey lockKey = new PointScoreLockAndCacheKey(pointSystem.getNamespaceId(), pointSystem.getId(), user.getId());
+
+            coordinationProvider.getNamedLock(CoordinationLocks.POINT_UPDATE_POINT_SCORE.getCode() + lockKey.toString()).enter(() -> {
+                PointScore pointScore = pointScoreProvider.findUserPointScore(pointSystem.getNamespaceId(),
+                        pointSystem.getId(), user.getId(), PointScore.class);
+                if (pointScore != null) {
+                    pointScore.setScore(pointScore.getScore() + cmd.getPoints());
+                    pointScoreProvider.updatePointScore(pointScore);
+                } else {
+                    pointScore = new PointScore();
+                    pointScore.setScore(pointLog.getPoints());
+                    pointScore.setNamespaceId(pointSystem.getNamespaceId());
+                    pointScore.setSystemId(pointSystem.getId());
+                    pointScore.setUserId(user.getId());
+                    pointScoreProvider.createPointScore(pointScore);
+                }
+                return true;
+            });
             return true;
         });
         return toPointLogDTO(pointLog);
@@ -768,12 +914,13 @@ public class PointServiceImpl implements PointService {
             good.setStatus(PointCommonStatus.DISABLED.getCode());
             good.setTopStatus(PointCommonStatus.DISABLED.getCode());
             good.setNamespaceId(pointSystem.getNamespaceId());
+            good.setSystemId(pointSystem.getId());
 
             createFlag = true;
         }
 
-        good.setShopNo(cmd.getShopNumber());
-        good.setCommodityNo(cmd.getNumber());
+        good.setShopNumber(cmd.getShopNumber());
+        good.setNumber(cmd.getNumber());
 
         PointCommonStatus status = PointCommonStatus.fromCode(cmd.getStatus());
         if (status != null) {
@@ -781,9 +928,12 @@ public class PointServiceImpl implements PointService {
         }
 
         PointCommonStatus topStatus = PointCommonStatus.fromCode(cmd.getTopStatus());
-        if (topStatus != null) {
+        if (topStatus == PointCommonStatus.ENABLED) {
             good.setTopStatus(topStatus.getCode());
             good.setTopTime(DateUtils.currentTimestamp());
+        } else if (topStatus == PointCommonStatus.DISABLED) {
+            good.setTopStatus(topStatus.getCode());
+            good.setTopTime(null);
         }
 
         if (createFlag) {
@@ -900,11 +1050,8 @@ public class PointServiceImpl implements PointService {
                 mapping.setSystemId(pointSystem.getId());
                 mapping.setTutorialId(tutorial.getId());
                 mapping.setNamespaceId(pointSystem.getNamespaceId());
-                mapping.setDescription(mapping.getDescription());
-                if (mapping.getDescription() == null || mapping.getDescription().trim().length() == 0) {
-                    PointRule rule = pointRuleProvider.findById(mapping.getRuleId());
-                    mapping.setDescription(rule.getDisplayName());
-                }
+                mapping.setDescription(mappingCmd.getDescription());
+
                 pointTutorialToPointRuleMappingProvider.createPointTutorialToPointRuleMapping(mapping);
             }
         }
@@ -927,8 +1074,13 @@ public class PointServiceImpl implements PointService {
         }
 
         PointBanner banner = ConvertHelper.convert(cmd, PointBanner.class);
+        Integer maxDefaultOrder = pointBannerProvider.findMaxDefaultOrder(cmd.getSystemId());
+        if (maxDefaultOrder == null) {
+            maxDefaultOrder = 0;
+        }
         banner.setStatus(PointCommonStatus.ENABLED.getCode());
         banner.setNamespaceId(pointSystem.getNamespaceId());
+        banner.setDefaultOrder(++maxDefaultOrder);
 
         pointBannerProvider.createPointBanner(banner);
 
@@ -969,7 +1121,8 @@ public class PointServiceImpl implements PointService {
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
 
-        List<PointBanner> banners = pointBannerProvider.listPointBannersBySystemId(cmd.getSystemId(), pageSize, locator);
+        List<PointBanner> banners = pointBannerProvider.listPointBannersBySystemId(
+                cmd.getSystemId(), cmd.getStatus(), pageSize, locator);
         List<PointBannerDTO> dtoList = banners.stream().map(this::toPointBannerDTO).collect(Collectors.toList());
 
         ListPointBannersResponse response = new ListPointBannersResponse();
@@ -1042,7 +1195,11 @@ public class PointServiceImpl implements PointService {
 
     // 一年执行一次发送积分清零消息
     @Scheduled(cron = "0 0 18 24 12 ?")
+    @Override
     public void everyYearEndSendMessageSchedule() {
+        if (scheduleProvider.getRunningFlag() == RunningFlag.FALSE.getCode()) {
+            return;
+        }
         List<PointSystem> systemList = pointSystemProvider.getEnabledPointSystems(null);
 
         for (PointSystem system : systemList) {
@@ -1127,7 +1284,11 @@ public class PointServiceImpl implements PointService {
 
     // 一年执行一次积分清零操作
     @Scheduled(cron = "0 0 0 31 12 ?")
+    @Override
     public void everyYearEndClearPointSchedule() {
+        if (scheduleProvider.getRunningFlag() == RunningFlag.FALSE.getCode()) {
+            return;
+        }
         List<PointSystem> systemList = pointSystemProvider.listPointSystems();
         for (PointSystem system : systemList) {
             List<PointScore> pointScores = pointScoreProvider.listPointScoreBySystem(system.getId());
@@ -1186,6 +1347,62 @@ public class PointServiceImpl implements PointService {
 
     @Override
     public void exportPointLog(ExportPointLogsCommand cmd, HttpServletResponse response) {
+        ListPointLogsCommand listCmd = ConvertHelper.convert(cmd, ListPointLogsCommand.class);
+        listCmd.setPageSize(1000);
+        ListPointLogsResponse pointLogs = this.listPointLogs(listCmd);
 
+        PointGeneralTemplate template = getGeneralTemplate();
+
+        String fileName = buildPointLogFileName(cmd, template);
+
+        ExcelUtils excelUtils = new ExcelUtils(response, fileName, "Sheet-1");
+
+        String[] propertyNames = {"targetName", "targetPhone", "categoryName", "description", "points", "createTime"};
+        String[] titleNames = template.getExportLogTitle().split(",");
+        int[] columnSizes = {20, 30, 20, 40, 20, 30};
+
+        excelUtils.writeExcel(propertyNames, titleNames, columnSizes, toExportPointLogDTOList(pointLogs.getLogs()));
+    }
+
+    private String buildPointLogFileName(ExportPointLogsCommand cmd, PointGeneralTemplate template) {
+        String fileName = template.getExportLogFileName();
+        if (cmd.getStartTime() != null) {
+            fileName += "_";
+            fileName += new Timestamp(cmd.getStartTime()).toLocalDateTime()
+                    .toLocalDate().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        }
+        if (cmd.getEndTime() != null) {
+            fileName += (cmd.getStartTime() != null ? "~" : "_");
+            fileName += new Timestamp(cmd.getEndTime()).toLocalDateTime()
+                    .toLocalDate().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        }
+        if (StringUtils.isNotEmpty(cmd.getPhone())) {
+            fileName += "_";
+            fileName += cmd.getPhone().trim();
+        }
+        return fileName;
+    }
+
+    private List<ExportPointLogVO> toExportPointLogDTOList(List<PointLogDTO> logs) {
+        List<ExportPointLogVO> vos = new ArrayList<>();
+        for (PointLogDTO log : logs) {
+            ExportPointLogVO vo = new ExportPointLogVO();
+            vo.setCategoryName(log.getCategoryName());
+            vo.setDescription(log.getDescription());
+            vo.setTargetName(log.getTargetName());
+            vo.setTargetPhone(log.getTargetPhone());
+
+            vo.setCreateTime(log.getCreateTime().toLocalDateTime().toLocalDate().toString());
+
+            String prefix = "";
+            if (Objects.equals(log.getArithmeticType(), PointArithmeticType.ADD.getCode())) {
+                prefix = "+";
+            } else if (Objects.equals(log.getArithmeticType(), PointArithmeticType.SUBTRACT.getCode())) {
+                prefix = "-";
+            }
+            vo.setPoints(prefix + log.getPoints());
+            vos.add(vo);
+        }
+        return vos;
     }
 }

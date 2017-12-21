@@ -52,11 +52,14 @@ public class PointOpenController extends ControllerBase {
      * <b>URL: /openapi/point/getEnabledPointSystem</b>
      * <p>获取启用的积分系统</p>
      */
-    @RestReturn(GetEnabledPointSystemResponse.class)
+    @RestReturn(PointSystemDTO.class)
     @RequestMapping("getEnabledPointSystem")
     public RestResponse getEnabledPointSystem(GetEnabledPointSystemCommand cmd) {
         GetEnabledPointSystemResponse response = pointService.getEnabledPointSystem(cmd);
-        return success(response);
+        if (response != null && response.getSystems() != null && response.getSystems().size() > 0) {
+            return success(response.getSystems().get(0));
+        }
+        return success(null);
     }
 
     private RestResponse success(Object o) {

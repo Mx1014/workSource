@@ -22,7 +22,7 @@ public class UpdatePointRuleCommand {
     private Long systemId;
     private String description;
     private Long points;
-    private Byte limitType;
+    private String limitType;
     private String limitData;
     private Byte status;
 
@@ -58,11 +58,11 @@ public class UpdatePointRuleCommand {
         this.points = points;
     }
 
-    public Byte getLimitType() {
+    public String getLimitType() {
         return limitType;
     }
 
-    public void setLimitType(Byte limitType) {
+    public void setLimitType(String limitType) {
         this.limitType = limitType;
     }
 

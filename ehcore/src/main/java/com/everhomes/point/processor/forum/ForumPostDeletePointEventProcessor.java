@@ -11,7 +11,6 @@ import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.util.StringHelper;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -31,9 +30,8 @@ public class ForumPostDeletePointEventProcessor extends GeneralPointEventProcess
         Byte moduleType = null;
         boolean isComment = false;
 
-        Map<String, String> params = localEvent.getParams();
-        Post parentPost = (Post) StringHelper.fromJsonString(params.get("parentPost"), Post.class);
-        String postJson = params.get("post");
+        Post parentPost = (Post) StringHelper.fromJsonString(localEvent.getStringParam("parentPost"), Post.class);
+        String postJson = localEvent.getStringParam("post");
         if (postJson != null) {
             Post post = (Post) StringHelper.fromJsonString(postJson, Post.class);
             isComment = post.getParentPostId() != null && post.getParentPostId() != 0;
@@ -46,7 +44,7 @@ public class ForumPostDeletePointEventProcessor extends GeneralPointEventProcess
             }
             localEvent.setTargetUid(post.getCreatorUid());
         } else {
-            String postDTOJson = params.get("postDTO");
+            String postDTOJson = localEvent.getStringParam("postDTO");
             if (postDTOJson != null) {
                 PostDTO post = (PostDTO) StringHelper.fromJsonString(postDTOJson, PostDTO.class);
                 isComment = post.getParentPostId() != null && post.getParentPostId() != 0;

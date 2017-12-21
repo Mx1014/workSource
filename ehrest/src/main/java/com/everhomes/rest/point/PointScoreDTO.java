@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  *     <li>systemId: systemId</li>
  *     <li>userId: userId</li>
  *     <li>score: 积分</li>
+ *     <li>pointName: pointName</li>
  * </ul>
  */
 public class PointScoreDTO {
@@ -18,6 +19,16 @@ public class PointScoreDTO {
     private Long systemId;
     private Long userId;
     private Long score;
+
+    private String pointName;
+
+    public String getPointName() {
+        return pointName;
+    }
+
+    public void setPointName(String pointName) {
+        this.pointName = pointName;
+    }
 
     public Long getId() {
         return id;

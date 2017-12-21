@@ -3,7 +3,8 @@ package com.everhomes.point.processor;
 import com.everhomes.bus.LocalEvent;
 import com.everhomes.bus.SystemEvent;
 import com.everhomes.point.*;
-import com.everhomes.point.limit.PointRuleLimitData;
+import com.everhomes.point.limit.PointRuleLimitDataVO;
+import com.everhomes.point.limit.PointRuleLimitTypeVO;
 import com.everhomes.rest.point.PointActionType;
 import com.everhomes.rest.point.PointArithmeticType;
 import com.everhomes.rest.point.PointOperatorType;
@@ -82,14 +83,15 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
         UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(targetUid);
         pointLog.setTargetPhone(userInfo.getPhones().get(0));
         pointLog.setTargetName(userInfo.getNickName());
-        pointLog.setPoints(rule.getPoints());
+
+        Long points = getPoints(localEvent, pointSystem, rule);
+        pointLog.setPoints(Math.abs(points));
+
         pointLog.setRuleId(rule.getId());
         pointLog.setRuleName(rule.getDisplayName());
         pointLog.setCategoryId(rule.getCategoryId());
         pointLog.setCategoryName(pointRuleCategory.getDisplayName());
         pointLog.setEventHappenTime(localEvent.getCreateTime());
-
-        Long points = rule.getPoints();
 
         if (rule.getBindingRuleId() != null && rule.getBindingRuleId() != 0) {
             PointLog bindingPointLog = pointLogProvider.findByRuleIdAndEntity(namespaceId, pointSystem.getId(), targetUid, rule.getBindingRuleId(),
@@ -98,10 +100,21 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
                 return null;
             }
         }
+        processPointLog(pointLog, localEvent, rule, pointSystem, pointRuleCategory);
+
+        return new PointEventProcessResult(points, pointLog);
+    }
+
+    protected void processPointLog(PointLog pointLog, LocalEvent localEvent, PointRule rule, PointSystem pointSystem, PointRuleCategory pointRuleCategory) {
+
+    }
+
+    protected Long getPoints(LocalEvent localEvent, PointSystem pointSystem, PointRule rule) {
+        Long points = rule.getPoints();
         if (PointArithmeticType.fromCode(rule.getArithmeticType()) == PointArithmeticType.SUBTRACT) {
             points = -rule.getPoints();
         }
-        return new PointEventProcessResult(points, pointLog);
+        return points;
     }
 
     @Override
@@ -116,11 +129,6 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
             }
         }
         return resultActions;
-    }
-
-    @Override
-    public void hook(LocalEvent localEvent, String subscriptionPath, PointEventGroup eventGroup) {
-
     }
 
     @Override
@@ -148,16 +156,9 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
         return subscriptionPath;
     }
 
-    /*@Override
-    public List<PointRule> getPointRules(PointSystem pointSystem, LocalEvent localEvent, PointEventLog log) {
-        List<PointRule> pointRules = getPointRules(localEvent.getEventName());
-        if (pointRules != null) return pointRules;
-        return new ArrayList<>();
-    }*/
-
     @Override
-    public List<PointRule> getPointRules(String eventName) {
-        String[] split = eventName.split("\\.");
+    public List<PointRule> getPointRules(LocalEvent localEvent) {
+        String[] split = getEventName(localEvent, localEvent.getEventName()).split("\\.");
         for (int i = split.length; i >= 0; i--) {
             String[] tokens = new String[i];
             System.arraycopy(split, 0, tokens, 0, i);
@@ -182,31 +183,34 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
         return false;
     }
 
-    private boolean doLimit(LocalEvent localEvent, PointRule rule, PointSystem pointSystem) {
-        PointRuleLimitType limitType = PointRuleLimitType.fromCode(rule.getLimitType());
+    protected boolean doLimit(LocalEvent localEvent, PointRule rule, PointSystem pointSystem) {
+        PointRuleLimitTypeVO limitTypeVO = (PointRuleLimitTypeVO) StringHelper.fromJsonString(rule.getLimitType(), PointRuleLimitTypeVO.class);
+        PointRuleLimitType limitType = PointRuleLimitType.fromCode(limitTypeVO.getType());
 
         Long targetUid = localEvent.getContext().getUid();
         Integer namespaceId = localEvent.getContext().getNamespaceId();
 
-        switch (limitType) {
-            case TIMES_PER_DAY: {
-                LocalDateTime dateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
-                Integer count = pointLogProvider.countPointLog(
-                        namespaceId, pointSystem.getId(), targetUid, rule.getId(), dateTime.toInstant(ZoneOffset.UTC).toEpochMilli());
-                PointRuleLimitData limitData = (PointRuleLimitData) StringHelper.fromJsonString(rule.getLimitData(), PointRuleLimitData.class);
-                if (count >= limitData.getTimes()) {
-                    return false;
+        if (limitType != null) {
+            switch (limitType) {
+                case TIMES_PER_DAY: {
+                    LocalDateTime dateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+                    Integer count = pointLogProvider.countPointLog(
+                            namespaceId, pointSystem.getId(), targetUid, rule.getId(), dateTime.toInstant(ZoneOffset.UTC).toEpochMilli(), null);
+                    PointRuleLimitDataVO limitData = (PointRuleLimitDataVO) StringHelper.fromJsonString(rule.getLimitData(), PointRuleLimitDataVO.class);
+                    if (count >= limitData.getTimes()) {
+                        return false;
+                    }
+                    break;
                 }
-                break;
-            }
-            case TIMES: {
-                Integer count = pointLogProvider.countPointLog(
-                        namespaceId, pointSystem.getId(), targetUid, rule.getId(), null);
-                PointRuleLimitData limitData = (PointRuleLimitData) StringHelper.fromJsonString(rule.getLimitData(), PointRuleLimitData.class);
-                if (count >= limitData.getTimes()) {
-                    return false;
+                case TIMES: {
+                    Integer count = pointLogProvider.countPointLog(
+                            namespaceId, pointSystem.getId(), targetUid, rule.getId(), null, null);
+                    PointRuleLimitDataVO limitData = (PointRuleLimitDataVO) StringHelper.fromJsonString(rule.getLimitData(), PointRuleLimitDataVO.class);
+                    if (count >= limitData.getTimes()) {
+                        return false;
+                    }
+                    break;
                 }
-                break;
             }
         }
         return true;

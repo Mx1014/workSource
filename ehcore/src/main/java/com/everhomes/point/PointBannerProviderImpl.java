@@ -30,28 +30,28 @@ public class PointBannerProviderImpl implements PointBannerProvider {
     private final com.everhomes.server.schema.tables.EhPointBanners t = Tables.EH_POINT_BANNERS;
 
     @Autowired
-	private DbProvider dbProvider;
+    private DbProvider dbProvider;
 
-	@Autowired
-	private SequenceProvider sequenceProvider;
+    @Autowired
+    private SequenceProvider sequenceProvider;
 
-	@Override
-	public void createPointBanner(PointBanner pointBanner) {
-		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointBanners.class));
-		pointBanner.setId(id);
-		pointBanner.setCreateTime(DateUtils.currentTimestamp());
-		pointBanner.setCreatorUid(UserContext.currentUserId());
-		rwDao().insert(pointBanner);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointBanners.class, id);
-	}
+    @Override
+    public void createPointBanner(PointBanner pointBanner) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointBanners.class));
+        pointBanner.setId(id);
+        pointBanner.setCreateTime(DateUtils.currentTimestamp());
+        pointBanner.setCreatorUid(UserContext.currentUserId());
+        rwDao().insert(pointBanner);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointBanners.class, id);
+    }
 
-	@Override
-	public void updatePointBanner(PointBanner pointBanner) {
-		pointBanner.setUpdateTime(DateUtils.currentTimestamp());
-		pointBanner.setUpdateUid(UserContext.currentUserId());
+    @Override
+    public void updatePointBanner(PointBanner pointBanner) {
+        pointBanner.setUpdateTime(DateUtils.currentTimestamp());
+        pointBanner.setUpdateUid(UserContext.currentUserId());
         rwDao().update(pointBanner);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointBanners.class, pointBanner.getId());
-	}
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointBanners.class, pointBanner.getId());
+    }
 
     @Override
     public List<PointBanner> query(ListingLocator locator, int count, ListingQueryBuilderCallback callback) {
@@ -60,7 +60,7 @@ public class PointBannerProviderImpl implements PointBannerProvider {
             callback.buildCondition(locator, query);
         }
         if (locator.getAnchor() != null) {
-            query.addConditions(t.ID.lt(locator.getAnchor()));
+            query.addConditions(t.ID.le(locator.getAnchor()));
         }
 
         if (count > 0) {
@@ -78,10 +78,10 @@ public class PointBannerProviderImpl implements PointBannerProvider {
         return list;
     }
 
-	@Override
-	public PointBanner findById(Long id) {
-		return ConvertHelper.convert(dao().findById(id), PointBanner.class);
-	}
+    @Override
+    public PointBanner findById(Long id) {
+        return ConvertHelper.convert(dao().findById(id), PointBanner.class);
+    }
 
     @Override
     public List<PointBanner> listByIds(Set<Long> ids) {
@@ -91,12 +91,23 @@ public class PointBannerProviderImpl implements PointBannerProvider {
     }
 
     @Override
-    public List<PointBanner> listPointBannersBySystemId(Long systemId, int pageSize, ListingLocator locator) {
+    public List<PointBanner> listPointBannersBySystemId(Long systemId, Byte status, int pageSize, ListingLocator locator) {
         return this.query(locator, pageSize, (locator1, query) -> {
             query.addConditions(t.SYSTEM_ID.eq(systemId));
+            if (status != null) {
+                query.addConditions(t.STATUS.eq(status));
+            }
             query.addOrderBy(t.DEFAULT_ORDER.asc());
             return query;
         });
+    }
+
+    @Override
+    public Integer findMaxDefaultOrder(Long systemId) {
+        return context().select(t.DEFAULT_ORDER.max())
+                .from(t)
+                .where(t.SYSTEM_ID.eq(systemId))
+                .fetchAnyInto(Integer.class);
     }
 
     @Override
@@ -108,12 +119,12 @@ public class PointBannerProviderImpl implements PointBannerProvider {
     private EhPointBannersDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhPointBannersDao(context.configuration());
-	}
+    }
 
-	private EhPointBannersDao dao() {
+    private EhPointBannersDao dao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return new EhPointBannersDao(context.configuration());
-	}
+    }
 
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());

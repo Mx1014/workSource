@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * 完善用户信息事件处理器
  * Created by xq.tian on 2017/12/7.
  */
 @Component

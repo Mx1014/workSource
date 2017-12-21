@@ -21,7 +21,7 @@ public interface PointLogProvider {
 
     PointLog findByUidAndEntity(Integer namespaceId, Long uid, String eventName, String entityType, Long entityId);
 
-    Integer countPointLog(Integer namespaceId, Long systemId, Long uid, Long ruleId, Long createTime);
+    Integer countPointLog(Integer namespaceId, Long systemId, Long uid, Long ruleId, Long startTime, Long endTime);
 
     PointLog findByRuleIdAndEntity(Integer namespaceId, Long systemId, Long targetUid, Long ruleId, String entityType, Long entityId);
 }

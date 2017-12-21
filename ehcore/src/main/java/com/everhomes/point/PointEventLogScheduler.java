@@ -31,7 +31,6 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * Created by xq.tian on 2017/12/6.
@@ -41,7 +40,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PointEventLogScheduler.class);
 
-    private static final int SCHEDULE_INTERVAL_SECONDS = 60;
+    private static final int SCHEDULE_INTERVAL_SECONDS = 30;
 
     private final static Random random = new Random();
 
@@ -171,8 +170,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
             e.printStackTrace(stream);
             String message = out.toString("UTF-8");
             handler.sendMail(0, account, xqt, "PointEventLogSchedule error (" + home + ")", message);
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) { }
         // ------------------------------------------------------------------------
     }
 
@@ -180,7 +178,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
         List<PointRuleCategory> categories = pointRuleCategoryProvider.listPointRuleCategoriesByServerId(serverId);
         for (PointRuleCategory category : categories) {
             try {
-                doProcessGroup(category);
+                doProcessGroup(category, null);
             } catch (Throwable t) {
                 LOGGER.error("Point event log scheduler do process group error, categoryId = ;" + category.getId(), t);
                 throw t;
@@ -188,24 +186,23 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
         }
     }
 
-    void doProcessGroup(PointRuleCategory category) {
+    void doProcessGroup(PointRuleCategory category, Integer namespaceId) {
         coordinationProvider.getNamedLock(CoordinationLocks.POINT_CATEGORY_SCHEDULE.getCode() + category.getId()).enter(() -> {
-            List<PointSystem> enabledPointSystems = pointSystemProvider.getEnabledPointSystems(null);
-            for (PointSystem pointSystem : enabledPointSystems) {
-                ListingLocator locator = new ListingLocator();
-                do {
-                    Map<PointScoreLockAndCacheKey, Long> userIdToPointsScoreMap = new HashMap<>();
+            ListingLocator locator = new ListingLocator();
+            do {
+                List<PointEventLog> pointEventLogs = pointEventLogProvider.listEventLog(namespaceId, category.getId(),
+                        PointEventLogStatus.WAITING_FOR_PROCESS.getCode(), 1000, locator);
 
-
-                    List<PointEventLog> pointEventLogs = pointEventLogProvider.listEventLog(category.getId(),
-                            PointEventLogStatus.WAITING_FOR_PROCESS.getCode(), 1000, locator);
-                    List<Long> idList = pointEventLogs.stream().map(PointEventLog::getId).collect(Collectors.toList());
-
+                for (PointEventLog log : pointEventLogs) {
                     final List<PointResultAction> actions = new ArrayList<>();
-                    Boolean success = dbProvider.execute(s -> {
-                        pointEventLogProvider.updatePointEventLogStatus(idList, PointEventLogStatus.PROCESSING.getCode());
+                    dbProvider.execute(s -> {
+                        Map<PointScoreLockAndCacheKey, Long> pointKeyToScoreMap = new HashMap<>();
+                        // 设置状态为处理中
+                        log.setStatus(PointEventLogStatus.PROCESSING.getCode());
+                        pointEventLogProvider.updatePointEventLog(log);
 
-                        for (PointEventLog log : pointEventLogs) {
+                        List<PointSystem> enabledPointSystems = pointSystemProvider.getEnabledPointSystems(log.getNamespaceId());
+                        for (PointSystem pointSystem : enabledPointSystems) {
                             LocalEvent localEvent = (LocalEvent) StringHelper.fromJsonString(log.getEventJson(), LocalEvent.class);
 
                             BasePointEventProcessor processor = getPointEventProcessor(log.getEventName());
@@ -213,10 +210,12 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                                 continue;
                             }
 
-                            List<PointRule> pointRules = processor.getPointRules(localEvent.getEventName());
+                            List<PointRule> pointRules = processor.getPointRules(localEvent);
                             for (PointRule rule : pointRules) {
                                 // rule config
-                                PointRuleConfig ruleConfig = pointRuleConfigProvider.findByRuleIdAndSystemId(rule.getId(), pointSystem.getId());
+                                PointRuleConfig ruleConfig = pointRuleConfigProvider.findByRuleIdAndSystemId(
+                                        pointSystem.getId(), rule.getId());
+
                                 if (ruleConfig != null) {
                                     rule.setStatus(ruleConfig.getStatus());
                                     rule.setLimitData(ruleConfig.getLimitData());
@@ -234,13 +233,16 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                                     continue;
                                 }
 
-                                List<PointAction> pointActions = pointActionProvider.listByOwner(Namespace.DEFAULT_NAMESPACE, EhPointRules.class.getSimpleName(), rule.getId());
-                                List<PointResultAction> resultActions = processor.getResultActions(pointActions, localEvent, rule, pointSystem, category);
+                                List<PointAction> pointActions = pointActionProvider.listByOwner(
+                                        Namespace.DEFAULT_NAMESPACE, EhPointRules.class.getSimpleName(), rule.getId());
+                                List<PointResultAction> resultActions = processor.getResultActions(
+                                        pointActions, localEvent, rule, pointSystem, category);
+
                                 if (resultActions != null && resultActions.size() > 0) {
                                     actions.addAll(resultActions);
                                 }
 
-                                userIdToPointsScoreMap.compute(getKey(pointSystem.getNamespaceId(), pointSystem.getId(),
+                                pointKeyToScoreMap.compute(getKey(pointSystem.getNamespaceId(), pointSystem.getId(),
                                         localEvent.getContext().getUid()), (uid, score) -> {
                                     if (score == null) {
                                         score = result.getPoints();
@@ -252,22 +254,22 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                                 pointLogProvider.createPointLog(result.getLog());
                             }
                         }
-                        persistPointScore(userIdToPointsScoreMap);
-                        pointEventLogProvider.updatePointEventLogStatus(idList, PointEventLogStatus.PROCESSED.getCode());
+
+                        // 设置状态为已完成
+                        log.setStatus(PointEventLogStatus.PROCESSED.getCode());
+                        pointEventLogProvider.updatePointEventLog(log);
+                        persistPointScore(pointKeyToScoreMap);
                         return true;
                     });
-
-                    if (success) {
-                        actions.stream().filter(Objects::nonNull).forEach(r -> {
-                            try {
-                                r.doAction();
-                            } catch (Exception e) {
-                                LOGGER.error("Point action doAction error, action = " + r.toString(), e);
-                            }
-                        });
-                    }
-                } while (locator.getAnchor() != null);
-            }
+                    actions.stream().filter(Objects::nonNull).forEach(r -> {
+                        try {
+                            r.doAction();
+                        } catch (Exception e) {
+                            LOGGER.error("Point action doAction error, action = " + r.toString(), e);
+                        }
+                    });
+                }
+            } while (locator.getAnchor() != null);
             return true;
         });
     }
@@ -287,8 +289,8 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
         return null;
     }
 
-    private void persistPointScore(Map<PointScoreLockAndCacheKey, Long> userIdToPointsScoreMap) {
-        userIdToPointsScoreMap.forEach((k, v) -> {
+    private void persistPointScore(Map<PointScoreLockAndCacheKey, Long> pointKeyToScoreMap) {
+        pointKeyToScoreMap.forEach((k, v) -> {
             coordinationProvider.getNamedLock(
                     CoordinationLocks.POINT_UPDATE_POINT_SCORE.getCode() + k.toString()).enter(() -> {
                 PointScore pointScore = pointScoreProvider.findUserPointScore(
