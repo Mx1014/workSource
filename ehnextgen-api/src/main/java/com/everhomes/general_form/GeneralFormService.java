@@ -25,7 +25,7 @@ public interface GeneralFormService {
 
 	GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd);
 
-	PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd);
+	PostGeneralFormDTO postGeneralForm(PostGeneralFormValCommand cmd);
 
 	List<FlowCaseEntity> resolveFormVal(GeneralFormFieldDTO dto, GeneralFormVal val);
 
@@ -57,5 +57,5 @@ public interface GeneralFormService {
 
 	Long createGeneralFormByTemplate(Long templateId, CreateFormTemplatesCommand cmd);
 
-	PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormCommand cmd);
+	PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd);
 }

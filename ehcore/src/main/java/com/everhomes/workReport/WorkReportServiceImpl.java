@@ -432,7 +432,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         val.setApplierName(fixUpUserName(user.getId()));
         val.setReportType(cmd.getReportType());
 
-        PostGeneralFormCommand formCommand = new PostGeneralFormCommand();
+        PostGeneralFormValCommand formCommand = new PostGeneralFormValCommand();
         formCommand.setNamespaceId(namespaceId);
         formCommand.setOwnerId(val.getOwnerId());
         formCommand.setOwnerType(val.getOwnerType());

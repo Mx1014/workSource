@@ -16,7 +16,7 @@ import java.util.List;
  * @author janson
  *
  */
-public class PostGeneralFormCommand {
+public class PostGeneralFormValCommand {
 	private Integer namespaceId;
 	private Long ownerId;
 

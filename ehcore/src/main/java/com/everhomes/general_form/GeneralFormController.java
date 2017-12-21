@@ -4,10 +4,8 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.general_approval.GeneralApprovalService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.general_approval.*;
-import com.everhomes.rest.techpark.expansion.LeaseFormRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -59,7 +57,7 @@ public class GeneralFormController extends ControllerBase {
 	 */
 	@RequestMapping("postGeneralForm")
 	@RestReturn(value=PostGeneralFormDTO.class)
-	public RestResponse postGeneralForm(PostGeneralFormCommand cmd) {
+	public RestResponse postGeneralForm(PostGeneralFormValCommand cmd) {
 		PostGeneralFormDTO dto = generalFormService.postGeneralForm(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -74,7 +72,7 @@ public class GeneralFormController extends ControllerBase {
 	 */
 	@RequestMapping("updateGeneralFormVal")
 	@RestReturn(value=PostGeneralFormDTO.class)
-	public RestResponse updateGeneralFormVal(PostGeneralFormCommand cmd) {
+	public RestResponse updateGeneralFormVal(PostGeneralFormValCommand cmd) {
 		PostGeneralFormDTO dto = generalFormService.updateGeneralFormVal(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);

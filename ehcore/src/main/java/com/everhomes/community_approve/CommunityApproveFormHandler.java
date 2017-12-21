@@ -4,8 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormModuleHandler;
 import com.everhomes.general_form.GeneralFormProvider;
-import com.everhomes.general_form.GeneralFormService;
-import com.everhomes.rest.community_approve.CommunityApproveServiceErrorCode;
 import com.everhomes.rest.community_approve.GetTemplateByCommunityApproveIdResponse;
 import com.everhomes.rest.community_approve.PostCommunityApproveFormCommand;
 import com.everhomes.rest.general_approval.*;
@@ -34,7 +32,7 @@ public class CommunityApproveFormHandler  implements GeneralFormModuleHandler {
     private CommunityApproveProvider communityApproveProvider;
 
     @Override
-    public PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd) {
+    public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
 
         //审批申请表中插入数据
 
@@ -105,5 +103,10 @@ public class CommunityApproveFormHandler  implements GeneralFormModuleHandler {
 //        dto.setCustomObject(JSONObject.toJSONString(ga));
         return dto;
 
+    }
+
+    @Override
+    public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd) {
+        return null;
     }
 }

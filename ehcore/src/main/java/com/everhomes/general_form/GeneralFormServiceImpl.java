@@ -12,9 +12,6 @@ import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.rest.flow.*;
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowCaseFileDTO;
@@ -82,9 +79,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     @Override
-    public PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd) {
+    public PostGeneralFormDTO postGeneralForm(PostGeneralFormValCommand cmd) {
         GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
-        PostGeneralFormDTO dto = handler.postGeneralForm(cmd);
+        PostGeneralFormDTO dto = handler.postGeneralFormVal(cmd);
 
         return dto;
     }
@@ -668,8 +665,11 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     @Override
-    public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormCommand cmd) {
-        return null;
+    public PostGeneralFormDTO updateGeneralFormVal (PostGeneralFormValCommand cmd) {
+        GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
+        PostGeneralFormDTO dto = handler.updateGeneralFormVal(cmd);
+
+        return dto;
     }
 }
 

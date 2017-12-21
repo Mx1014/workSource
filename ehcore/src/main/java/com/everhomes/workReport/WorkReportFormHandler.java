@@ -8,7 +8,6 @@ import com.everhomes.util.ConvertHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "WORK_REPORT")
@@ -29,7 +28,7 @@ public class WorkReportFormHandler implements GeneralFormModuleHandler {
     private final String WORK_REPORT_VAL = "work_report_val";
 
     @Override
-    public PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd) {
+    public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
 
         //  find the corresponding report and the form
         WorkReportVal reportVal = workReportValProviderl.getWorkReportValById(cmd.getSourceId());
@@ -67,5 +66,10 @@ public class WorkReportFormHandler implements GeneralFormModuleHandler {
         GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
         dto.setFormFields(fieldDTOs);
         return dto;
+    }
+
+    @Override
+    public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd) {
+        return null;
     }
 }
