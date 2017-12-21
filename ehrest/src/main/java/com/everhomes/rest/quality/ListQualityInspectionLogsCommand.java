@@ -1,8 +1,8 @@
 package com.everhomes.rest.quality;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 
 /**
@@ -11,6 +11,8 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerType: 记录所属的主体，com.everhomes.rest.quality.OwnerType</li>
  *  <li>targetType: 目标类型，标准的话为standard</li>
  *  <li>targetId: 目标id</li>
+ *  <li>scopeCode: 类型 {@link com.everhomes.rest.quality.SpecificationScopeCode}</li>
+ *  <li>scopeId: 项目id</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
  * </ul>
@@ -31,6 +33,10 @@ public class ListQualityInspectionLogsCommand {
 	private Long pageAnchor;
 	
 	private Integer pageSize;
+
+	private  Byte scopeCode;
+
+	private  Long scopeId;
 
 	public Long getOwnerId() {
 		return ownerId;
@@ -78,6 +84,22 @@ public class ListQualityInspectionLogsCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public Byte getScopeCode() {
+		return scopeCode;
+	}
+
+	public void setScopeCode(Byte scopeCode) {
+		this.scopeCode = scopeCode;
+	}
+
+	public Long getScopeId() {
+		return scopeId;
+	}
+
+	public void setScopeId(Long scopeId) {
+		this.scopeId = scopeId;
 	}
 
 	@Override

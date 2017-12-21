@@ -29,4 +29,6 @@ public interface QualityConstant {
     public static final String QUALITY_STAT_SAMPLE = "quality.stat.sample";//品质核查 检查统计查看权限
     public static final String QUALITY_MANAGE = "quality.manage";//品质核查 品质核查管理权限
     public static final String QUALITY_ALL = "quality.all";//品质核查 品质核查全部权限
+
+    Long QUALITY_MODULE= 20600L;
 }

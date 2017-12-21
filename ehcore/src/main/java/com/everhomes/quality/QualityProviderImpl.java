@@ -2688,4 +2688,107 @@ public class QualityProviderImpl implements QualityProvider {
 
 		return result;
 	}
+
+	@Override
+	public void createQualityModelCommunityMap(QualityInspectionModelCommunityMap map) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQualityInspectionModelCommunityMap.class));
+		map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		map.setId(id);
+		EhQualityInspectionModelCommunityMapDao dao = new EhQualityInspectionModelCommunityMapDao(context.configuration());
+		dao.insert(map);
+	}
+
+	@Override
+	public void deleteQualityModelCommunityMapByCommunityIdAndModelId(Long modelId, Long targetId, byte modelType) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP)
+				.where(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.MODEL_ID.eq(modelId))
+				.and(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.MODEL_TYPE.eq(modelType))
+				.and(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.TARGET_ID.eq(targetId))
+				.execute();
+	}
+
+	@Override
+	public List<QualityInspectionModelCommunityMap> listQualityModelCommunityMapByTargetId(Long targetId, byte  modelType) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return  context.selectFrom(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP)
+				.where(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.TARGET_ID.eq(targetId))
+				.and(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.MODEL_TYPE.eq(modelType))
+				.fetchInto(QualityInspectionModelCommunityMap.class);
+	}
+
+	@Override
+	public List<Long> listQualityModelCommunityIdsMapByModelId(Long modelId, byte modelType) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return  context.select(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.TARGET_ID)
+				.from(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP)
+				.where(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.MODEL_ID.eq(modelId))
+				.and(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.MODEL_TYPE.eq(modelType))
+				.fetchInto(Long.class);
+	}
+
+	/*@Override
+	public void deleteQualityModelCommunityMapByCommunityAndSpecificationId(Long id, Long scopeId, Byte inspectionType) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteQuery query = context.deleteQuery(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.MODEL_TYPE.eq(inspectionType));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.TARGET_ID.eq(scopeId));
+		if (QualityModelType.SPECIFICATION.equals(QualityModelType.fromStatu(inspectionType))) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.SPECIFICATION_ID.eq(id));
+		} else if (QualityModelType.CATEGORY.equals(QualityModelType.fromStatu(inspectionType))) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.CATEGORY_ID.eq(id));
+		}
+		query.execute();
+	}
+
+	@Override
+	public void deleteQualityModelCommunityMapBySpecificationId(Long id, Byte inspectionType) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteQuery query = context.deleteQuery(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.MODEL_TYPE.eq(inspectionType));
+		if (QualityModelType.SPECIFICATION.equals(QualityModelType.fromStatu(inspectionType))) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.SPECIFICATION_ID.eq(id));
+		} else if (QualityModelType.CATEGORY.equals(QualityModelType.fromStatu(inspectionType))) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.CATEGORY_ID.eq(id));
+		}
+		query.execute();
+	}*/
+
+	@Override
+	public void deleteQualityModelCommunityMapByModelId(Long modelId ,byte modelType) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteQuery query = context.deleteQuery(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.MODEL_TYPE.eq(modelType));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.MODEL_ID.eq(modelId));
+		query.execute();
+	}
+
+	@Override
+	public List<QualityInspectionSpecifications> listAllCommunitiesChildrenSpecifications(String superiorPath, String ownerType, Long ownerId, Byte inspectionType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<QualityInspectionSpecifications> result  = new ArrayList<QualityInspectionSpecifications>();
+		SelectQuery<EhQualityInspectionSpecificationsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS);
+
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.PATH.like(superiorPath));
+
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_CODE.eq(SpecificationScopeCode.COMMUNITY.getCode()));
+
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_ID.ne(0L));
+
+		if(inspectionType != null)
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.INSPECTION_TYPE.eq(inspectionType));
+
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
+
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionSpecifications.class));
+			return null;
+		});
+
+		return result;
+	}
 }
