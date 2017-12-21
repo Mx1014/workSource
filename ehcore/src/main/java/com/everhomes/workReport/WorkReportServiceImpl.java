@@ -509,6 +509,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         formCommand.setNamespaceId(namespaceId);
         formCommand.setOwnerId(reportVal.getOwnerId());
         formCommand.setOwnerType(reportVal.getOwnerType());
+        formCommand.setSourceId(reportVal.getId());
         formCommand.setSourceType(WORK_REPORT);
         formCommand.setCurrentOrganizationId(cmd.getOrganizationId());
         formCommand.setValues(cmd.getValues());
@@ -516,6 +517,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         dbProvider.execute((TransactionStatus status) ->{
             //  1.update the reportVal's updateTime
             reportVal.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            workReportValProvider.updateWorkReportVal(reportVal);
             //  2.update form values.
             generalFormService.updateGeneralFormVal(formCommand);
             //  3.update receivers.
