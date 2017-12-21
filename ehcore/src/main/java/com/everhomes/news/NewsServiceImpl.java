@@ -889,7 +889,7 @@ public class NewsServiceImpl implements NewsService {
 		return news;
 	}
 
-	private Long checkNewsToken(Long userId, String newsToken) {
+	public Long checkNewsToken(Long userId, String newsToken) {
 		Long newsId = WebTokenGenerator.getInstance().fromWebToken(newsToken, Long.class);
 		if (newsId == null) {
 			LOGGER.error("Invalid newsToken, operatorId=" + userId + ", newsToken=" + newsToken);

@@ -57,7 +57,7 @@ public class NewsFeedbackHandler implements FeedbackHandler {
 			return;
 		}
 		Long userId = UserContext.current().getUser().getId();
-		Long newsId = checkNewsToken(userId, feedback.getTargetParam());
+		Long newsId = newsService.checkNewsToken(userId, feedback.getTargetParam());
 		News news = newsService.findNewsById(userId, newsId);
 		if (news == null) {
 			return;
