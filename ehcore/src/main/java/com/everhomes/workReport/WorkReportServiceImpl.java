@@ -561,7 +561,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             content = localeTemplateService.getLocaleTemplateString(
                     Namespace.DEFAULT_NAMESPACE,
                     WorkReportNotificationTemplateCode.SCOPE,
-                    WorkReportNotificationTemplateCode.POST_WORK_REPORT_VAL_FOR_RECEIVER,
+                    WorkReportNotificationTemplateCode.POST_WORK_REPORT_VAL,
                     locale,
                     model,
                     "Template Not Found"
@@ -570,7 +570,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             content = localeTemplateService.getLocaleTemplateString(
                     Namespace.DEFAULT_NAMESPACE,
                     WorkReportNotificationTemplateCode.SCOPE,
-                    WorkReportNotificationTemplateCode.UPDATE_WORK_REPORT_VAL_FOR_RECEIVER,
+                    WorkReportNotificationTemplateCode.UPDATE_WORK_REPORT_VAL,
                     locale,
                     model,
                     "Template Not Found"
@@ -635,7 +635,7 @@ public class WorkReportServiceImpl implements WorkReportService {
 
             //  get the field values which has been post by the user.
             GetGeneralFormValuesCommand valuesCommand = new GetGeneralFormValuesCommand();
-            valuesCommand.setSourceId(userId);
+            valuesCommand.setSourceId(cmd.getReportValId());
             valuesCommand.setSourceType(WORK_REPORT_VAL);
             List<PostApprovalFormItem> values = generalFormService.getGeneralFormValues(valuesCommand);
 
