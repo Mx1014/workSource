@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.rest.news.NewsStatus;
 import com.everhomes.rest.user.FeedbackCommand;
@@ -17,6 +18,7 @@ import com.everhomes.user.Feedback;
 import com.everhomes.user.FeedbackHandler;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
 
 @Component(FeedbackHandler.FEEDBACKHANDLER + FeedbackHandler.NEWS)
 public class NewsFeedbackHandler implements FeedbackHandler {
@@ -30,8 +32,11 @@ public class NewsFeedbackHandler implements FeedbackHandler {
 
 	@Override
 	public void beforeAddFeedback(FeedbackCommand cmd) {
-		// TODO Auto-generated method stub
-
+		if(cmd.getTargetParam() == null){
+			LOGGER.error("Invalid parameters, cmd=" + cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters");
+		}
 	}
 
 	@Override
