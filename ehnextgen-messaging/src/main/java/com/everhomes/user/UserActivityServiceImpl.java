@@ -587,8 +587,11 @@ public class UserActivityServiceImpl implements UserActivityService {
             return null;
         });
 
-        //举报管理事件 add by yanjun 20171211
-        feedbackEvent(feedback);
+        //事件处理（比如扣积分等）
+        if(handler != null){
+            handler.feedbackEvent(feedback);
+        }
+
 	}
 
 	private FeedbackHandler getFeedBackHandler(Byte feedbackTargetType){
@@ -616,57 +619,6 @@ public class UserActivityServiceImpl implements UserActivityService {
 
        
 //    }
-
-    private void feedbackEvent(Feedback feedback){
-        //此处只对接帖子的举报
-        if (feedback.getTargetType() != FeedbackTargetType.POST.getCode()) {
-            return;
-        }
-        if (FeedbackVerifyType.fromStatus(feedback.getVerifyType()) == FeedbackVerifyType.FALSE) {
-            return;
-        }
-        Post post = forumProvider.findPostById(feedback.getTargetId());
-        if(post == null){
-            return;
-        }
-
-        /*String eventName = null;
-        switch (ForumModuleType.fromCode(post.getModuleType())){
-            case FORUM:
-                eventName = SystemEvent.FORUM_POST_REPORT.suffix(post.getModuleCategoryId());
-                break;
-            case ACTIVITY:
-                eventName = SystemEvent.ACTIVITY_ACTIVITY_REPORT.suffix(post.getModuleCategoryId());
-                break;
-            case ANNOUNCEMENT:
-                break;
-            case CLUB:
-                break;
-            case GUILD:
-                break;
-            case FEEDBACK:
-                break;
-        }
-        if(eventName == null){
-            return;
-        }
-
-        final String finalEventName = eventName;*/
-
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-
-        LocalEventBus.publish(event -> {
-            LocalEventContext context = new LocalEventContext();
-            context.setUid(post.getCreatorUid());
-            context.setNamespaceId(namespaceId);
-            event.setContext(context);
-
-            event.setEntityType(EhForumPosts.class.getSimpleName());
-            event.setEntityId(post.getId());
-            event.setEventName(SystemEvent.FORUM_POST_REPORT.suffix(
-                    post.getContentCategory(), post.getModuleType(), post.getModuleCategoryId()));
-        });
-    }
 	
     @Override
     public void addUserFavorite(AddUserFavoriteCommand cmd) {

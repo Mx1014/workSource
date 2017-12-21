@@ -74,4 +74,8 @@ public class NewsFeedbackHandler implements FeedbackHandler {
 
 	}
 
+	@Override
+	public void feedbackEvent(Feedback feedback) {
+
+	}
 }

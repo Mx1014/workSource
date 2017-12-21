@@ -1,5 +1,8 @@
 package com.everhomes.forum;
 
+import com.everhomes.bus.LocalEventBus;
+import com.everhomes.bus.LocalEventContext;
+import com.everhomes.bus.SystemEvent;
 import com.everhomes.entity.EntityType;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.search.SearchContentConstants;
@@ -7,9 +10,11 @@ import com.everhomes.rest.ui.user.ContentBriefDTO;
 import com.everhomes.rest.ui.user.TopicFootnote;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.user.Feedback;
 import com.everhomes.user.FeedbackHandler;
 import com.everhomes.user.UserActivityServiceImpl;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
@@ -85,5 +90,30 @@ public class PostFeedbackHandler implements FeedbackHandler {
 				forumService.deletePost(post.getForumId(), post.getId(), null, null, null);
 			}
 		}
+	}
+
+	@Override
+	public void feedbackEvent(Feedback feedback) {
+		if (FeedbackVerifyType.fromStatus(feedback.getVerifyType()) == FeedbackVerifyType.FALSE) {
+			return;
+		}
+		Post post = forumProvider.findPostById(feedback.getTargetId());
+		if(post == null){
+			return;
+		}
+
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		LocalEventBus.publish(event -> {
+			LocalEventContext context = new LocalEventContext();
+			context.setUid(post.getCreatorUid());
+			context.setNamespaceId(namespaceId);
+			event.setContext(context);
+
+			event.setEntityType(EhForumPosts.class.getSimpleName());
+			event.setEntityId(post.getId());
+			event.setEventName(SystemEvent.FORUM_POST_REPORT.suffix(
+					post.getContentCategory(), post.getModuleType(), post.getModuleCategoryId()));
+		});
 	}
 }
