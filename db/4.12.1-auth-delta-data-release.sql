@@ -294,3 +294,6 @@ where privilege_id = 10010;
 
 -- 删除旧数据 管理员权限 end by jiarui 20171220
 
+
+-- 删除EhAll的权限细化记录
+DELETE from eh_acls where owner_type = 'EhAll' and comment_tag1 like '%EhAuthorizationRelations.%';

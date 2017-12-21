@@ -18,3 +18,4 @@ public class QualityInspectionModelCommunityMap extends EhQualityInspectionModel
         return StringHelper.toJsonString(this);
     }
 }
+ 
