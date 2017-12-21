@@ -725,6 +725,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 WorkReport report = workReportProvider.getWorkReportById(r.getReportId());
                 dto.setReportId(r.getReportId());
                 dto.setReportValId(r.getId());
+                dto.setReportType(r.getReportType());
                 if (report != null)
                     dto.setTitle(report.getReportName());
                 dto.setReportTime(r.getReportTime());
