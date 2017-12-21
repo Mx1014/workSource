@@ -26,7 +26,7 @@ public class WorkReportFormHandler implements GeneralFormModuleHandler {
     @Autowired
     private GeneralFormValProvider generalFormValProvider;
 
-    private final String workReportSourceType = "work_report_val";
+    private final String WORK_REPORT_VAL = "work_report_val";
 
     @Override
     public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
@@ -58,7 +58,7 @@ public class WorkReportFormHandler implements GeneralFormModuleHandler {
         obj.setModuleId(report.getModuleId());
         obj.setModuleType(report.getModuleType());
         obj.setSourceId(reportVal.getId());
-        obj.setSourceType(workReportSourceType);
+        obj.setSourceType(WORK_REPORT_VAL);
         obj.setFormOriginId(form.getFormOriginId());
         obj.setFormVersion(form.getFormVersion());
         obj.setFieldName(value.getFieldName());
@@ -90,7 +90,7 @@ public class WorkReportFormHandler implements GeneralFormModuleHandler {
         if (cmd.getValues() != null && cmd.getValues().size() > 0) {
             List<String> fieldNameScope = new ArrayList<>();
             for (PostApprovalFormItem value : cmd.getValues()) {
-                GeneralFormVal obj = generalFormValProvider.getGeneralFormValBySourceIdAndName(cmd.getSourceId(), workReportSourceType, value.getFieldName());
+                GeneralFormVal obj = generalFormValProvider.getGeneralFormValBySourceIdAndName(cmd.getSourceId(), WORK_REPORT_VAL, value.getFieldName());
                 if (obj == null) {
                     //  1.create new fields
                     obj = packageGeneralFormVal(namespaceId, cmd.getCurrentOrganizationId(),
@@ -105,7 +105,7 @@ public class WorkReportFormHandler implements GeneralFormModuleHandler {
             }
 
             //  3.delete fields which not contain in the scope
-            generalFormValProvider.deleteGeneralFormValNotInFieldNameScope(reportVal.getId(), workReportSourceType, fieldNameScope);
+            generalFormValProvider.deleteGeneralFormValNotInFieldNameScope(reportVal.getId(), WORK_REPORT_VAL, fieldNameScope);
         }
         PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
         return dto;

@@ -1,6 +1,5 @@
 package com.everhomes.workReport;
 
-import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
@@ -417,50 +416,45 @@ public class WorkReportServiceImpl implements WorkReportService {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         User user = UserContext.current().getUser();
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
-        WorkReportVal val = new WorkReportVal();
+        WorkReportVal reportVal = new WorkReportVal();
 
-        val.setNamespaceId(namespaceId);
-        val.setOwnerId(report.getOwnerId());
-        val.setOwnerType(report.getOwnerType());
-        val.setOrganizationId(cmd.getOrganizationId());
-        val.setModuleId(report.getModuleId());
-        val.setModuleType(report.getModuleType());
-        val.setStatus(WorkReportStatus.VALID.getCode());
+        reportVal.setNamespaceId(namespaceId);
+        reportVal.setOwnerId(report.getOwnerId());
+        reportVal.setOwnerType(report.getOwnerType());
+        reportVal.setOrganizationId(cmd.getOrganizationId());
+        reportVal.setModuleId(report.getModuleId());
+        reportVal.setModuleType(report.getModuleType());
+        reportVal.setStatus(WorkReportStatus.VALID.getCode());
         //  set the content.
-        val.setReportId(cmd.getReportId());
-        val.setReportTime(new Timestamp(cmd.getReportTime()));
-        val.setApplierUserId(user.getId());
-        val.setApplierName(fixUpUserName(user.getId()));
-        val.setReportType(cmd.getReportType());
+        reportVal.setReportId(cmd.getReportId());
+        reportVal.setReportTime(new Timestamp(cmd.getReportTime()));
+        reportVal.setApplierUserId(user.getId());
+        reportVal.setApplierName(fixUpUserName(user.getId()));
+        reportVal.setReportType(cmd.getReportType());
 
         PostGeneralFormValCommand formCommand = new PostGeneralFormValCommand();
         formCommand.setNamespaceId(namespaceId);
-        formCommand.setOwnerId(val.getOwnerId());
-        formCommand.setOwnerType(val.getOwnerType());
+        formCommand.setOwnerId(reportVal.getOwnerId());
+        formCommand.setOwnerType(reportVal.getOwnerType());
         formCommand.setSourceType(WORK_REPORT);
         formCommand.setCurrentOrganizationId(cmd.getOrganizationId());
         formCommand.setValues(cmd.getValues());
 
         Long reportValId = dbProvider.execute((TransactionStatus status) -> {
-            Long valId = workReportValProvider.createWorkReportVal(val);
+            Long valId = workReportValProvider.createWorkReportVal(reportVal);
             formCommand.setSourceId(valId);
             generalFormService.postGeneralForm(formCommand);
             for (Long receiverId : cmd.getReceiverIds()) {
-                WorkReportValReceiverMap receiver = new WorkReportValReceiverMap();
-                receiver.setNamespaceId(namespaceId);
-                receiver.setReportValId(valId);
-                receiver.setReceiverUserId(receiverId);
-                receiver.setReceiverName(fixUpUserName(receiverId));
-                receiver.setReceiverAvatar(user.getAvatar());
-                receiver.setReadStatus(WorkReportReadStatus.UNREAD.getCode());
+                WorkReportValReceiverMap receiver = packageWorkReportValReceiverMap(namespaceId, valId, receiverId, user);
                 //  create the receiver.
                 workReportValProvider.createWorkReportValReceiverMap(receiver);
                 //  send message to the receiver.
                 sendMessageAfterEditWorkReportVal(
-                        val.getApplierName(),
+                        "post",
+                        reportVal.getApplierName(),
                         report.getReportName(),
                         receiverId,
-                        val.getReportId(),
+                        reportVal.getReportId(),
                         valId,
                         user);
             }
@@ -472,6 +466,17 @@ public class WorkReportServiceImpl implements WorkReportService {
         dto.setReportId(report.getId());
         dto.setReportValId(reportValId);
         return dto;
+    }
+
+    private WorkReportValReceiverMap packageWorkReportValReceiverMap(Integer namespaceId, Long reportValId, Long receiverId, User user){
+        WorkReportValReceiverMap receiver = new WorkReportValReceiverMap();
+        receiver.setNamespaceId(namespaceId);
+        receiver.setReportValId(reportValId);
+        receiver.setReceiverUserId(receiverId);
+        receiver.setReceiverName(fixUpUserName(receiverId));
+        receiver.setReceiverAvatar(user.getAvatar());
+        receiver.setReadStatus(WorkReportReadStatus.UNREAD.getCode());
+        return receiver;
     }
 
     @Override
@@ -491,40 +496,87 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Override
     public WorkReportValDTO updateWorkReportVal(PostWorkReportValCommand cmd) {
-        //  1.update form values.
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        User user = UserContext.current().getUser();
 
-        return null;
+        WorkReportVal reportVal = workReportValProvider.getValidWorkReportValById(cmd.getReportValId());
+        if (reportVal == null)
+            throw RuntimeErrorException.errorWith(WorkReportErrorCode.SCOPE, WorkReportErrorCode.ERROR_REPORT_VAL_NOT_FOUND,
+                    "work report val has been deleted.");
+        WorkReport report = workReportProvider.getWorkReportById(reportVal.getReportId());
+
+        PostGeneralFormValCommand formCommand = new PostGeneralFormValCommand();
+        formCommand.setNamespaceId(namespaceId);
+        formCommand.setOwnerId(reportVal.getOwnerId());
+        formCommand.setOwnerType(reportVal.getOwnerType());
+        formCommand.setSourceType(WORK_REPORT);
+        formCommand.setCurrentOrganizationId(cmd.getOrganizationId());
+        formCommand.setValues(cmd.getValues());
+
+        dbProvider.execute((TransactionStatus status) ->{
+            //  1.update form values.
+            generalFormService.updateGeneralFormVal(formCommand);
+            //  2.update receivers.
+            workReportValProvider.deleteReportValReceiverByValId(reportVal.getId());
+            for (Long receiverId : cmd.getReceiverIds()) {
+                WorkReportValReceiverMap receiver = packageWorkReportValReceiverMap(namespaceId, reportVal.getId(), receiverId, user);
+                //  create the receiver.
+                workReportValProvider.createWorkReportValReceiverMap(receiver);
+                //  send message to the receiver.
+                sendMessageAfterEditWorkReportVal(
+                        "update",
+                        reportVal.getApplierName(),
+                        report.getReportName(),
+                        receiverId,
+                        reportVal.getReportId(),
+                        reportVal.getId(),
+                        user);
+            }
+            return null;
+        });
+
+        //  return back.
+        WorkReportValDTO dto = new WorkReportValDTO();
+        dto.setReportId(reportVal.getReportId());
+        dto.setReportValId(reportVal.getId());
+        return dto;
     }
 
-
     private void sendMessageAfterEditWorkReportVal(
-            String applierName, String reportName, Long receiverId, Long reportId, Long reportValId, User user) {
+            String messageType, String applierName, String reportName, Long receiverId, Long reportId, Long reportValId, User user) {
 
         String locale = Locale.SIMPLIFIED_CHINESE.toString();
         if (user != null) {
             locale = user.getLocale();
         }
 
+        // set the message
         Map<String, String> model = new HashMap<>();
         model.put("applierName", applierName);
         model.put("reportName", reportName);
-
-
-        String toTargetTemplate = localeTemplateService.getLocaleTemplateString(
-                Namespace.DEFAULT_NAMESPACE,
-                WorkReportNotificationTemplateCode.SCOPE,
-                WorkReportNotificationTemplateCode.POST_WORK_REPORT_FOR_RECEIVER,
-                locale,
-                model,
-                "Template Not Found"
-        );
-        // set the message
+        String content ="";
+        if(messageType.equals("post")) {
+            content = localeTemplateService.getLocaleTemplateString(
+                    Namespace.DEFAULT_NAMESPACE,
+                    WorkReportNotificationTemplateCode.SCOPE,
+                    WorkReportNotificationTemplateCode.POST_WORK_REPORT_VAL_FOR_RECEIVER,
+                    locale,
+                    model,
+                    "Template Not Found"
+            );
+        }else if(messageType.equals("update")){
+            content = localeTemplateService.getLocaleTemplateString(
+                    Namespace.DEFAULT_NAMESPACE,
+                    WorkReportNotificationTemplateCode.SCOPE,
+                    WorkReportNotificationTemplateCode.UPDATE_WORK_REPORT_VAL_FOR_RECEIVER,
+                    locale,
+                    model,
+                    "Template Not Found"
+            );
+        }
         MessageDTO message = new MessageDTO();
-//        message.setAppId(AppConstants.APPID_MESSAGING);
-//        message.setSenderUid(User.SYSTEM_UID);
         message.setBodyType(MessageBodyType.TEXT.getCode());
-
-        message.setBody(toTargetTemplate);
+        message.setBody(content);
         message.setMetaAppId(AppConstants.APPID_DEFAULT);
         message.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(receiverId)));
 
@@ -537,6 +589,10 @@ public class WorkReportServiceImpl implements WorkReportService {
         metaObject.setUrl(url);
         Map<String, String> meta = new HashMap<>();
         meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+        if(messageType.equals("post"))
+            meta.put(MessageMetaConstant.MESSAGE_SUBJECT, "新的汇报");
+        else if(messageType.equals("update"))
+            meta.put(MessageMetaConstant.MESSAGE_SUBJECT, "汇报更新");
         meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
         message.setMeta(meta);
 
