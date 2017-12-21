@@ -280,4 +280,29 @@ public interface PrivilegeConstants {
     long CONTRACT_SYNC = 21213L;//从第三方同步合同
     long CONTRACT_DENUNCIATION = 21214L;//退约
 
+
+//    ----------品质核查----------
+    long QUALITY_CATEGORY_LIST = 30044L;//品质核查 类型管理查看权限
+    long QUALITY_CATEGORY_CREATE = 30045L;//品质核查 类型管理新增权限
+    long QUALITY_CATEGORY_DELETE = 30046L;//品质核查 类型管理删除权限
+    long QUALITY_CATEGORY_UPDATE = 30047L;//品质核查 类型管理修改权限
+    long QUALITY_SPECIFICATION_LIST = 30048L;//品质核查 规范管理查看权限
+    long QUALITY_SPECIFICATION_CREATE = 30049L;//品质核查 规范管理新增权限
+    long QUALITY_SPECIFICATION_DELETE = 30050L;//品质核查 规范管理删除权限
+    long QUALITY_SPECIFICATION_UPDATE = 30051L;//品质核查 规范管理修改权限
+    long QUALITY_STANDARD_LIST = 30052L;//品质核查 标准管理查看权限
+    long QUALITY_STANDARD_CREATE = 30053L;//品质核查 标准管理新增权限
+    long QUALITY_STANDARD_DELETE = 30054L;//品质核查 标准管理删除权限
+    long QUALITY_STANDARD_UPDATE = 30055L;//品质核查 标准管理修改权限
+    long QUALITY_STANDARDREVIEW_LIST = 30056L;//品质核查 标准审批查看权限
+    long QUALITY_STANDARDREVIEW_REVIEW = 30057L;//品质核查 标准审批审核权限
+    long QUALITY_TASK_LIST = 30058L;//品质核查 任务查询权限
+    long QUALITY_STAT_SCORE = 30059L;//品质核查 分数统计查看权限
+    long QUALITY_STAT_TASK = 30060L;//品质核查 任务数统计查看权限
+    long QUALITY_UPDATELOG_LIST = 30061L;//品质核查 修改记录查看权限
+    long QUALITY_SAMPLE_LIST = 30062L;//品质核查 绩效考核查看权限
+    long QUALITY_SAMPLE_CREATE = 30063L;//品质核查 绩效考核新增权限
+    long QUALITY_SAMPLE_UPDATE = 30064L;//品质核查 绩效考核修改权限
+    long QUALITY_SAMPLE_DELETE = 30065L;//品质核查 绩效考核删除权限
+    long QUALITY_STAT_SAMPLE = 30066L;//品质核查 检查统计查看权限
 }
