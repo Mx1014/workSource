@@ -74,7 +74,7 @@ public class WorkReportProviderImpl implements WorkReportProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWorkReportsRecord> query = context.selectQuery(Tables.EH_WORK_REPORTS);
         query.addConditions(Tables.EH_WORK_REPORTS.ID.eq(id));
-        query.addConditions(Tables.EH_WORK_REPORTS.STATUS.eq(WorkReportStatus.VALID.getCode()));
+        query.addConditions(Tables.EH_WORK_REPORTS.STATUS.ne(WorkReportStatus.INVALID.getCode()));
         return query.fetchOneInto(WorkReport.class);
     }
 
