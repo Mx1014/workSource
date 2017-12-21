@@ -265,7 +265,8 @@ update eh_reflection_service_module_apps set name = '能耗管理', action_data 
 -- custoemrAuth xiongying end    
     
 
--- 物业巡检菜单显示不全  by jiarui
+-- 物业巡检菜单显示不全 start  by jiarui 20171220
+
 UPDATE eh_service_module_privileges
 SET module_id = 20810
 WHERE module_id = 20811;
@@ -281,11 +282,15 @@ UPDATE eh_service_modules
 SET STATUS =2
 WHERE id = 20841;
 
--- 删除旧的里面的  privilege_id 为管理员
-DELETE  from eh_acls
-where privilege_id = 10011;
+-- 物业巡检菜单显示不全 end  by jiarui 20171220
 
--- 删除旧数据 管理员权限 by jiarui 20171220
+-- 删除旧数据 管理员权限start by jiarui 20171220
+
 delete from  eh_acls
 where privilege_id = 10011;
+
+DELETE  from eh_acls
+where privilege_id = 10010;
+
+-- 删除旧数据 管理员权限 end by jiarui 20171220
 
