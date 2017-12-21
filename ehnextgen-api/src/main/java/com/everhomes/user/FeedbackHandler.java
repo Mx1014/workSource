@@ -8,6 +8,7 @@ public interface FeedbackHandler {
 
     String FEEDBACKHANDLER = "FeedbackHandler-";
     String POST = "1";
+    String NEWS = "4";
 
     void beforeAddFeedback(FeedbackCommand cmd);
 

@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  *   <li>content: 反馈内容</li>
  *   <li>createTime: 创建时间</li>
  *   <li>feedbackType:1-举报、2-投诉、3-纠正</li>
- *   <li>targetType:0-无具体目标、1-帖子内容、2-地址、3-圈子 参考{@link com.everhomes.rest.user.FeedbackTargetType}</li>
+ *   <li>targetType:0-无具体目标、1-帖子内容、2-地址、3-圈子、4-园区快讯 参考{@link com.everhomes.rest.user.FeedbackTargetType}</li>
  *   <li>targetId:所针对的目标对应的ID（如地址对应address id、帖子内容则是post id)</li>
  *   <li>targetSubject: 目标的标题名称</li>
  *   <li>targetParam: 目标业务的一些自定义参数</li>
