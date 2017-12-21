@@ -39,6 +39,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
 
     @Override
     public void upload(MessageHandleRequest request) throws Exception {
+        long startTime = System.currentTimeMillis();
         Long[] ids=new Long[1];
         LoginToken login = null;
         try {
@@ -70,6 +71,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
             return;
         }
         // add transaction command
+        long lockStartTime = System.currentTimeMillis();
         Tuple<ContentServerResource, Boolean> resource = coordinationProvider.getNamedLock(
                 CoordinationLocks.CREATE_RESOURCE.getCode()).enter(() -> {
             ContentServerResource r = contentServerProvider.findByUidAndMD5(ids[0], request.getMd5());
@@ -79,12 +81,15 @@ public class ContentServerManagerImpl implements ContentServerMananger {
             }
             return r;
         });
+        long lockEndTime = System.currentTimeMillis();
         result = resource.first();
         request.setObjectId(Generator.createKey(server.getId(), result.getResourceId(), request.getObjectType().name()));
         request.setUrl(createUrl(server, result.getResourceId(), request.getObjectType().name(), request.getToken(), schemeInRequest));
+        long endTime = System.currentTimeMillis();
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Upload resource file successfully, userId=" + ids[0] + ", reqToken=" + request.getToken() 
-                + ", loginToken=" + login + ", objectId=" + request.getObjectId() + ", url=" + request.getUrl());
+                + ", loginToken=" + login + ", objectId=" + request.getObjectId() + ", url=" + request.getUrl() 
+                + ", lockElapse=" + (lockEndTime - lockStartTime) + ", uploadElapse=" + (endTime - startTime));
         }
     }
 

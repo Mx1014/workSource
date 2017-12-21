@@ -1100,19 +1100,44 @@ public class ForumProviderImpl implements ForumProvider {
                 .fetchOneInto(ForumCategory.class);
     }
 
-    @Cacheable(value="findInteractSetting", key="{#namespaceId, #forumId, #type, #entryId}", unless="#result == null")
+    @Cacheable(value="findInteractSetting", key="{#namespaceId, #moduleType, #categoryId}", unless="#result == null")
     @Override
-    public InteractSetting findInteractSetting(Integer namespaceId, Long forumId, String type, Long entryId) {
+    public InteractSetting findInteractSetting(Integer namespaceId, Byte moduleType, Long categoryId) {
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhInteractSettingsRecord> query = context.selectQuery(Tables.EH_INTERACT_SETTINGS);
         query.addConditions(Tables.EH_INTERACT_SETTINGS.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_INTERACT_SETTINGS.FORUM_ID.eq(forumId));
-        query.addConditions(Tables.EH_INTERACT_SETTINGS.TYPE.eq(type));
-        if(entryId != null){
-            query.addConditions(Tables.EH_INTERACT_SETTINGS.ENTRY_ID.eq(entryId));
+        query.addConditions(Tables.EH_INTERACT_SETTINGS.MODULE_TYPE.eq(moduleType));
+        if(categoryId != null){
+            query.addConditions(Tables.EH_INTERACT_SETTINGS.CATEGORY_ID.eq(categoryId));
         }
         return query.fetchAnyInto(InteractSetting.class);
+    }
+
+    @Override
+    public void createInteractSetting(InteractSetting setting) {
+
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhInteractSettings.class));
+        setting.setId(id);
+        setting.setUuid(UUID.randomUUID().toString());
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhInteractSettingsDao dao = new EhInteractSettingsDao(context.configuration());
+        dao.insert(setting);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhInteractSettings.class, null);
+    }
+
+    @Caching(evict = { @CacheEvict(value="findInteractSetting", key="{#setting.namespaceId, #setting.moduleType, #setting.categoryId}")})
+    @Override
+    public void updateInteractSetting(InteractSetting setting) {
+
+        assert(setting.getId() == null);
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhInteractSettingsDao dao = new EhInteractSettingsDao(context.configuration());
+        dao.update(setting);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY,EhInteractSettings.class, setting.getId());
     }
 
     @Override

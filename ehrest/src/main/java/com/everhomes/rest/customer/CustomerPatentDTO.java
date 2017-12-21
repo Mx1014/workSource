@@ -31,6 +31,42 @@ public class CustomerPatentDTO {
     private String patentTypeItemName;
     private String patentName;
     private String applicationNumber;
+    private Integer effectiveIntellectualProperties;
+    private Integer patents;
+    private Integer softwareCopyrights;
+    private Integer icLayout;
+
+    public Integer getEffectiveIntellectualProperties() {
+        return effectiveIntellectualProperties;
+    }
+
+    public void setEffectiveIntellectualProperties(Integer effectiveIntellectualProperties) {
+        this.effectiveIntellectualProperties = effectiveIntellectualProperties;
+    }
+
+    public Integer getIcLayout() {
+        return icLayout;
+    }
+
+    public void setIcLayout(Integer icLayout) {
+        this.icLayout = icLayout;
+    }
+
+    public Integer getPatents() {
+        return patents;
+    }
+
+    public void setPatents(Integer patents) {
+        this.patents = patents;
+    }
+
+    public Integer getSoftwareCopyrights() {
+        return softwareCopyrights;
+    }
+
+    public void setSoftwareCopyrights(Integer softwareCopyrights) {
+        this.softwareCopyrights = softwareCopyrights;
+    }
 
     public String getApplicationNumber() {
         return applicationNumber;

@@ -5,6 +5,9 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.bus.LocalEventBus;
+import com.everhomes.bus.LocalEventContext;
+import com.everhomes.bus.SystemEvent;
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
 import com.everhomes.community.Community;
@@ -26,12 +29,14 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.namespace.NamespacesService;
+import com.everhomes.point.PointService;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.promotion.BizHttpRestCallProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.business.BusinessServiceErrorCode;
 import com.everhomes.rest.common.ActivityListStyleFlag;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
@@ -50,6 +55,7 @@ import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
+import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.statistics.terminal.AppVersion;
 import com.everhomes.statistics.terminal.StatTerminalProvider;
@@ -162,6 +168,10 @@ public class UserActivityServiceImpl implements UserActivityService {
 
     @Autowired
     private YellowPageProvider yellowPageProvider;
+
+    @Autowired
+    private PointService pointService;
+
     @Override
     public CommunityStatusResponse listCurrentCommunityStatus() {
         User user = UserContext.current().getUser();
@@ -553,7 +563,6 @@ public class UserActivityServiceImpl implements UserActivityService {
 		feedback.setStatus((byte)1);
 		feedback.setVerifyType(cmd.getVerifyType());
 		feedback.setHandleType(cmd.getHandleType());
-
         FeedbackHandler handler = getFeedBackHandler(feedback.getTargetType());
 
         dbProvider.execute(status -> {
@@ -578,7 +587,8 @@ public class UserActivityServiceImpl implements UserActivityService {
             return null;
         });
 
-
+        //举报管理事件 add by yanjun 20171211
+        feedbackEvent(feedback);
 	}
 
 	private FeedbackHandler getFeedBackHandler(Byte feedbackTargetType){
@@ -587,6 +597,75 @@ public class UserActivityServiceImpl implements UserActivityService {
             handler = PlatformContext.getComponent(FeedbackHandler.FEEDBACKHANDLER + feedbackTargetType);
         }
         return handler;
+	}
+//		//更新自己的状态
+//		userActivityProvider.updateFeedback(feedback);
+//		
+//		//如果处理方式是删除，将相同目标帖子举报的核实状态更新为已处理，处理方式为无
+//		if(feedback.getHandleType() == FeedbackHandleType.DELETE.getCode()){
+//			userActivityProvider.updateOtherFeedback(feedback.getTargetId(), feedback.getId(), feedback.getVerifyType(), FeedbackHandleType.NONE.getCode());
+//		}
+//		
+//		//当前只对post类型的举报做实际处理，处理的方式只有删除
+//		if(feedback.getTargetType() == FeedbackTargetType.POST.getCode() && feedback.getHandleType() == FeedbackHandleType.DELETE.getCode()){
+//			 Post post = forumProvider.findPostById(feedback.getTargetId());
+//			 if(post != null){
+//				 forumService.deletePost(post.getForumId(), post.getId(), null, null, null);
+//             }
+//        }
+
+       
+//    }
+
+    private void feedbackEvent(Feedback feedback){
+        //此处只对接帖子的举报
+        if (feedback.getTargetType() != FeedbackTargetType.POST.getCode()) {
+            return;
+        }
+        if (FeedbackVerifyType.fromStatus(feedback.getVerifyType()) == FeedbackVerifyType.FALSE) {
+            return;
+        }
+        Post post = forumProvider.findPostById(feedback.getTargetId());
+        if(post == null){
+            return;
+        }
+
+        /*String eventName = null;
+        switch (ForumModuleType.fromCode(post.getModuleType())){
+            case FORUM:
+                eventName = SystemEvent.FORUM_POST_REPORT.suffix(post.getModuleCategoryId());
+                break;
+            case ACTIVITY:
+                eventName = SystemEvent.ACTIVITY_ACTIVITY_REPORT.suffix(post.getModuleCategoryId());
+                break;
+            case ANNOUNCEMENT:
+                break;
+            case CLUB:
+                break;
+            case GUILD:
+                break;
+            case FEEDBACK:
+                break;
+        }
+        if(eventName == null){
+            return;
+        }
+
+        final String finalEventName = eventName;*/
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(post.getCreatorUid());
+            context.setNamespaceId(namespaceId);
+            event.setContext(context);
+
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(post.getId());
+            event.setEventName(SystemEvent.FORUM_POST_REPORT.suffix(
+                    post.getContentCategory(), post.getModuleType(), post.getModuleCategoryId()));
+        });
     }
 	
     @Override
@@ -727,6 +806,8 @@ public class UserActivityServiceImpl implements UserActivityService {
             rsp.setBusinessRealm(getBusinessRealm());
             //设置活动列表的默认列表样式, add by tt, 20170116
             rsp.setActivityDefaultListStyle(getActivityDefaultListStyle());
+            rsp.setPoints(0L);
+            rsp.setPointsUrlStatus(TrueOrFalseFlag.FALSE.getCode());
             return rsp;
         }
         //2016-07-29:modify by liujinwen.get orderCount's value like couponCount
@@ -798,10 +879,58 @@ public class UserActivityServiceImpl implements UserActivityService {
         }else{
         	rsp.setShakeOpenDoorNamespace(Byte.parseByte("0"));
         }
-        
         return rsp;
     }
-    
+
+    @Override
+    public GetUserTreasureResponse getUserTreasureV2() {
+        GetUserTreasureResponse rsp = new GetUserTreasureResponse();
+        UserTreasureDTO point = new UserTreasureDTO();
+        point.setCount(0L);
+        point.setStatus(TrueOrFalseFlag.TRUE.getCode());
+        point.setUrlStatus(TrueOrFalseFlag.FALSE.getCode());
+
+        UserTreasureDTO coupon = new UserTreasureDTO();
+        coupon.setCount(0L);
+        coupon.setStatus(TrueOrFalseFlag.TRUE.getCode());
+        coupon.setUrlStatus(TrueOrFalseFlag.FALSE.getCode());
+
+        UserTreasureDTO order = new UserTreasureDTO();
+        order.setCount(0L);
+        order.setStatus(TrueOrFalseFlag.TRUE.getCode());
+        order.setUrlStatus(TrueOrFalseFlag.FALSE.getCode());
+
+        rsp.setCoupon(coupon);
+        rsp.setPoint(point);
+        rsp.setOrder(order);
+
+        if(!userService.isLogon()) {
+            return rsp;
+        }
+
+        User user = UserContext.current().getUser();
+
+        UserProfile couponCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.RECEIVED_COUPON_COUNT);
+        UserProfile orderCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.RECEIVED_ORDER_COUNT);
+
+        if(couponCount != null) {
+            coupon.setCount(NumberUtils.toLong(couponCount.getItemValue(), 0));
+        }
+        if(orderCount != null) {
+            order.setCount(NumberUtils.toLong(orderCount.getItemValue(), 0));
+        }
+
+        coupon.setUrl(getMyCoupon());
+        coupon.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
+
+        order.setUrl(getMyOrderUrl());
+        order.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
+
+        pointService.processUserPoint(point);
+
+        return rsp;
+    }
+
     @Override
 	public ListBusinessTreasureResponse getUserBusinessTreasure() {
     	// 检查是否登陆，没登陆则只返回游客访问的电商url by sfyan 20161009
@@ -1397,12 +1526,12 @@ public class UserActivityServiceImpl implements UserActivityService {
 
         ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(cmd.getServiceAllianceId(), null, null);
         if(serviceOrg != null) {
-            content += CustomRequestConstants.APPROVAL_TYPE + ":" + serviceOrg.getName() + "\n";
+            content += "服务名称 : " + serviceOrg.getName() + "\n";
             ServiceAllianceCategories category = yellowPageProvider.findCategoryById(serviceOrg.getParentId());
             cmd21.setTitle(category.getName());
         }
-        if (user.getNickName()!=null)
-            content += CustomRequestConstants.USER_NAME+":"+user.getNickName()+"\n";
+//        if (user.getNickName()!=null)
+//            content += CustomRequestConstants.USER_NAME+":"+user.getNickName()+"\n";
 
 
         cmd21.setContent(content);
@@ -1632,7 +1761,6 @@ public class UserActivityServiceImpl implements UserActivityService {
 		}
 		
 	}
-	
 
     public static void main(String[] args) {
         System.out.println(ActivityType.fromString("logon").getCode());

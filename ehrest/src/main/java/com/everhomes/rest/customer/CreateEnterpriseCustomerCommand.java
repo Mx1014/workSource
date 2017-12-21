@@ -1,6 +1,7 @@
 package com.everhomes.rest.customer;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 
 /**
  * <ul>
@@ -141,8 +142,96 @@ public class CreateEnterpriseCustomerCommand {
     private Double longitude;
     private Double latitude;
     private String contactDuty;
-    
+    private String founderIntroduce;
+    private Long foundingTime;
+    private Long registrationTypeId;
+    private Long technicalFieldId;
+    private Long taxpayerTypeId;
+    private Long relationWillingId;
+    private Long highAndNewTechId;
+    private Long entrepreneurialCharacteristicsId;
+    private Long serialEntrepreneurId;
+    private BigDecimal riskInvestmentAmount;
 
+    public Long getEntrepreneurialCharacteristicsId() {
+        return entrepreneurialCharacteristicsId;
+    }
+
+    public void setEntrepreneurialCharacteristicsId(Long entrepreneurialCharacteristicsId) {
+        this.entrepreneurialCharacteristicsId = entrepreneurialCharacteristicsId;
+    }
+
+    public String getFounderIntroduce() {
+        return founderIntroduce;
+    }
+
+    public void setFounderIntroduce(String founderIntroduce) {
+        this.founderIntroduce = founderIntroduce;
+    }
+
+    public Long getFoundingTime() {
+        return foundingTime;
+    }
+
+    public void setFoundingTime(Long foundingTime) {
+        this.foundingTime = foundingTime;
+    }
+
+    public Long getHighAndNewTechId() {
+        return highAndNewTechId;
+    }
+
+    public void setHighAndNewTechId(Long highAndNewTechId) {
+        this.highAndNewTechId = highAndNewTechId;
+    }
+
+    public Long getRegistrationTypeId() {
+        return registrationTypeId;
+    }
+
+    public void setRegistrationTypeId(Long registrationTypeId) {
+        this.registrationTypeId = registrationTypeId;
+    }
+
+    public Long getRelationWillingId() {
+        return relationWillingId;
+    }
+
+    public void setRelationWillingId(Long relationWillingId) {
+        this.relationWillingId = relationWillingId;
+    }
+
+    public BigDecimal getRiskInvestmentAmount() {
+        return riskInvestmentAmount;
+    }
+
+    public void setRiskInvestmentAmount(BigDecimal riskInvestmentAmount) {
+        this.riskInvestmentAmount = riskInvestmentAmount;
+    }
+
+    public Long getSerialEntrepreneurId() {
+        return serialEntrepreneurId;
+    }
+
+    public void setSerialEntrepreneurId(Long serialEntrepreneurId) {
+        this.serialEntrepreneurId = serialEntrepreneurId;
+    }
+
+    public Long getTaxpayerTypeId() {
+        return taxpayerTypeId;
+    }
+
+    public void setTaxpayerTypeId(Long taxpayerTypeId) {
+        this.taxpayerTypeId = taxpayerTypeId;
+    }
+
+    public Long getTechnicalFieldId() {
+        return technicalFieldId;
+    }
+
+    public void setTechnicalFieldId(Long technicalFieldId) {
+        this.technicalFieldId = technicalFieldId;
+    }
 
     public Long getCommunityId() {
         return communityId;

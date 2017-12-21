@@ -114,6 +114,7 @@ public class FieldServiceImpl implements FieldService {
             List<SystemFieldItemDTO> dtos = items.stream().map(item -> {
                 return ConvertHelper.convert(item, SystemFieldItemDTO.class);
             }).collect(Collectors.toList());
+            return dtos;
         }
         return null;
     }
@@ -518,6 +519,50 @@ public class FieldServiceImpl implements FieldService {
                 for(int j = 0; j < customerEconomicIndicatorDTOS.size(); j ++){
                     CustomerEconomicIndicatorDTO dto = customerEconomicIndicatorDTOS.get(j);
                     setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                }
+                break;
+            case "跟进信息":
+                ListCustomerTrackingsCommand cmd9  = new ListCustomerTrackingsCommand();
+                cmd9.setCustomerId(customerId);
+                cmd9.setCustomerType(customerType);
+                List<CustomerTrackingDTO> customerTrackingDTOS = customerService.listCustomerTrackings(cmd9);
+                if(customerTrackingDTOS == null) customerTrackingDTOS = new ArrayList<>();
+                for(int j = 0; j < customerTrackingDTOS.size(); j++){
+                    setMutilRowDatas(fields,data,customerTrackingDTOS.get(j),communityId,namespaceId,moduleName);
+                }
+                break;
+            case "计划信息":
+                ListCustomerTrackingPlansCommand cmd10  = new ListCustomerTrackingPlansCommand();
+                cmd10.setCustomerId(customerId);
+                cmd10.setCustomerType(customerType);
+                List<CustomerTrackingPlanDTO> customerTrackingPlanDTOS = customerService.listCustomerTrackingPlans(cmd10);
+                if(customerTrackingPlanDTOS == null) customerTrackingPlanDTOS = new ArrayList<>();
+                for(int j = 0; j < customerTrackingPlanDTOS.size(); j++){
+                    setMutilRowDatas(fields,data,customerTrackingPlanDTOS.get(j),communityId,namespaceId,moduleName);
+                }
+                break;
+            case "入驻信息":
+                ListCustomerEntryInfosCommand cmd11 = new ListCustomerEntryInfosCommand();
+                cmd11.setCustomerId(customerId);
+                cmd11.setCustomerType(customerType);
+                LOGGER.info("入驻信息 command"+cmd11);
+                List<CustomerEntryInfoDTO> customerEntryInfoDTOS = customerService.listCustomerEntryInfos(cmd11);
+                if(customerEntryInfoDTOS == null) customerEntryInfoDTOS = new ArrayList<>();
+                for(int j = 0; j < customerEntryInfoDTOS.size(); j++){
+                    LOGGER.info("入驻信息 "+j+":"+customerEntryInfoDTOS.get(j));
+                    setMutilRowDatas(fields,data,customerEntryInfoDTOS.get(j),communityId,namespaceId,moduleName);
+                }
+                break;
+            case "离场信息":
+                ListCustomerDepartureInfosCommand cmd12 = new ListCustomerDepartureInfosCommand();
+                cmd12.setCommunityId(customerId);
+                cmd12.setCustomerType(customerType);
+                LOGGER.info("入驻信息 command"+cmd12);
+                List<CustomerDepartureInfoDTO> customerDepartureInfoDTOS = customerService.listCustomerDepartureInfos(cmd12);
+                if(customerDepartureInfoDTOS == null) customerDepartureInfoDTOS = new ArrayList<>();
+                for(int j = 0; j < customerDepartureInfoDTOS.size(); j++){
+                    LOGGER.info("离场信息 "+j+":"+customerDepartureInfoDTOS.get(j));
+                    setMutilRowDatas(fields,data,customerDepartureInfoDTOS.get(j),communityId,namespaceId,moduleName);
                 }
                 break;
         }
@@ -1054,7 +1099,7 @@ public class FieldServiceImpl implements FieldService {
                 scopeField.setNamespaceId(cmd.getNamespaceId());
                 scopeField.setCommunityId(cmd.getCommunityId());
                 if (scopeField.getId() == null) {
-                    scopeField.setGroupPath(scopeField.getGroupPath() + "/");
+                    scopeField.setGroupPath(scopeField.getGroupPath());
                     scopeField.setCreatorUid(userId);
                     fieldProvider.createScopeField(scopeField);
                 } else {
@@ -1067,7 +1112,7 @@ public class FieldServiceImpl implements FieldService {
                         fieldProvider.updateScopeField(scopeField);
                         existFields.remove(exist.getId());
                     } else {
-                        scopeField.setGroupPath(scopeField.getGroupPath() + "/");
+                        scopeField.setGroupPath(scopeField.getGroupPath());
                         scopeField.setCreatorUid(userId);
                         fieldProvider.createScopeField(scopeField);
                     }
@@ -1140,6 +1185,25 @@ public class FieldServiceImpl implements FieldService {
         }
     }
 
+    /**
+     * 新增域空间模块字段选择项：
+     * 1、在系统表加一条 status置为customization
+     * 2、在相应域下增加一条 itemId为系统item表中的id
+     */
+    private void insertFieldItems(ScopeFieldItem scopeFieldItem) {
+        FieldItem item = ConvertHelper.convert(scopeFieldItem, FieldItem.class);
+        item.setDisplayName(scopeFieldItem.getItemDisplayName());
+        item.setCreatorUid(UserContext.currentUserId());
+        item.setStatus(VarFieldStatus.CUSTOMIZATION.getCode());
+        fieldProvider.createFieldItem(item);
+
+
+        scopeFieldItem.setItemId(item.getId());
+        scopeFieldItem.setStatus(VarFieldStatus.ACTIVE.getCode());
+        scopeFieldItem.setCreatorUid(UserContext.currentUserId());
+        fieldProvider.createScopeFieldItem(scopeFieldItem);
+    }
+
     @Override
     public void updateFieldItems(UpdateFieldItemsCommand cmd) {
         List<ScopeFieldItemInfo> items = cmd.getItems();
@@ -1147,24 +1211,31 @@ public class FieldServiceImpl implements FieldService {
             Long userId = UserContext.currentUserId();
             Map<Long, ScopeFieldItem> existItems = fieldProvider.listScopeFieldsItems(cmd.getFieldIds(), cmd.getNamespaceId(), cmd.getCommunityId());
             items.forEach(item -> {
-                ScopeFieldItem scopeFieldItem = ConvertHelper.convert(item, ScopeFieldItem.class);
-                scopeFieldItem.setNamespaceId(cmd.getNamespaceId());
-                scopeFieldItem.setCommunityId(cmd.getCommunityId());
-                if(scopeFieldItem.getId() == null) {
-                    scopeFieldItem.setCreatorUid(userId);
-                    fieldProvider.createScopeFieldItem(scopeFieldItem);
+                if(item.getItemId() == null) {
+                    ScopeFieldItem scopeFieldItem = ConvertHelper.convert(item, ScopeFieldItem.class);
+                    scopeFieldItem.setNamespaceId(cmd.getNamespaceId());
+                    scopeFieldItem.setCommunityId(cmd.getCommunityId());
+                    insertFieldItems(scopeFieldItem);
                 } else {
-                    ScopeFieldItem exist = fieldProvider.findScopeFieldItem(scopeFieldItem.getId(), cmd.getNamespaceId(), cmd.getCommunityId());
-                    if(exist != null) {
-                        scopeFieldItem.setCreatorUid(exist.getCreatorUid());
-                        scopeFieldItem.setCreateTime(exist.getCreateTime());
-                        scopeFieldItem.setOperatorUid(userId);
-                        scopeFieldItem.setStatus(VarFieldStatus.ACTIVE.getCode());
-                        fieldProvider.updateScopeFieldItem(scopeFieldItem);
-                        existItems.remove(exist.getId());
-                    } else {
+                    ScopeFieldItem scopeFieldItem = ConvertHelper.convert(item, ScopeFieldItem.class);
+                    scopeFieldItem.setNamespaceId(cmd.getNamespaceId());
+                    scopeFieldItem.setCommunityId(cmd.getCommunityId());
+                    if(scopeFieldItem.getId() == null) {
                         scopeFieldItem.setCreatorUid(userId);
                         fieldProvider.createScopeFieldItem(scopeFieldItem);
+                    } else {
+                        ScopeFieldItem exist = fieldProvider.findScopeFieldItem(scopeFieldItem.getId(), cmd.getNamespaceId(), cmd.getCommunityId());
+                        if(exist != null) {
+                            scopeFieldItem.setCreatorUid(exist.getCreatorUid());
+                            scopeFieldItem.setCreateTime(exist.getCreateTime());
+                            scopeFieldItem.setOperatorUid(userId);
+                            scopeFieldItem.setStatus(VarFieldStatus.ACTIVE.getCode());
+                            fieldProvider.updateScopeFieldItem(scopeFieldItem);
+                            existItems.remove(exist.getId());
+                        } else {
+                            scopeFieldItem.setCreatorUid(userId);
+                            fieldProvider.createScopeFieldItem(scopeFieldItem);
+                        }
                     }
                 }
             });

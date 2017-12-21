@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
  * Created by ying.xiong on 2017/9/20.
  */
 public enum VarFieldStatus {
-    INACTIVE((byte)0), WAITING_FOR_APPROVAL((byte)1), ACTIVE((byte)2);
+    INACTIVE((byte)0), WAITING_FOR_APPROVAL((byte)1), ACTIVE((byte)2), CUSTOMIZATION((byte)3);
 
     private byte code;
 

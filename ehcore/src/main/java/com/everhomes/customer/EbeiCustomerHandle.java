@@ -294,6 +294,7 @@ public class EbeiCustomerHandle implements CustomerHandle {
             customer.setContactPhone(ebeiCustomer.getContactPhone());
             customer.setStatus(CommonStatus.ACTIVE.getCode());
             customer.setCreatorUid(1L);
+            customer.setTrackingUid(-1L);
             customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             customer.setOperatorUid(1L);
             customer.setUpdateTime(customer.getCreateTime());
@@ -316,12 +317,14 @@ public class EbeiCustomerHandle implements CustomerHandle {
 
     // 需要把同步过来的业务人员添加为我司系统对应组织的管理员
     private void insertOrUpdateOrganizationMembers(Integer namespaceId, Organization organization, String contact, String contactPhone) {
-        //非11位手机号也跳过此步
-        if (StringUtils.isBlank(contact) || StringUtils.isBlank(contactPhone)
-                || contact.length() != 11 || !StringUtils.isNumeric(contactPhone) || organization == null) {
+
+        if (StringUtils.isBlank(contact) || StringUtils.isBlank(contactPhone) || organization == null) {
             return ;
         }
         try {
+            if(contactPhone.contains(",")) {
+                contactPhone = contactPhone.split(",")[0];
+            }
             User user = new User();
             user.setId(1L);
             UserContext.setCurrentUser(user);
@@ -338,7 +341,7 @@ public class EbeiCustomerHandle implements CustomerHandle {
     }
 
     private Organization insertOrganization(EnterpriseCustomer customer) {
-        Organization org = organizationProvider.findOrganizationByNameAndNamespaceId(customer.getName(), customer.getNamespaceId());
+        Organization org = organizationProvider.findOrganizationByName(customer.getName(), customer.getNamespaceId());
         if(org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
             return org;
         }
@@ -439,6 +442,9 @@ public class EbeiCustomerHandle implements CustomerHandle {
             customer.setOperatorUid(1L);
             customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             customer.setVersion(ebeiCustomer.getVersion());
+            if(customer.getTrackingUid() == null) {
+                customer.setTrackingUid(-1L);
+            }
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 

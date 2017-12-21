@@ -11,9 +11,12 @@ import javax.validation.constraints.NotNull;
  * <li>ownerId: 范围id</li>
  * <li>organizationId: 机构id</li>
  * <li>moduleId: 模块id</li>
+ * <li>namespaceId: 域空间id</li>
  * </ul>
  */
 public class ListUserRelatedPrivilegeByModuleIdCommand {
+
+    private Integer namespaceId;
 
     private String ownerType;
 
@@ -23,6 +26,14 @@ public class ListUserRelatedPrivilegeByModuleIdCommand {
 
     @NotNull
     private Long moduleId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public String getOwnerType() {
         return ownerType;

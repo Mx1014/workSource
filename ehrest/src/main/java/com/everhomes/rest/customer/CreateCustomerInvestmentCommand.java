@@ -20,6 +20,24 @@ public class CreateCustomerInvestmentCommand {
     private String governmentProject;
     private BigDecimal bankLoans;
     private BigDecimal equityFinancing;
+    private Long investmentTime;
+    private String investmentRound;
+
+    public String getInvestmentRound() {
+        return investmentRound;
+    }
+
+    public void setInvestmentRound(String investmentRound) {
+        this.investmentRound = investmentRound;
+    }
+
+    public Long getInvestmentTime() {
+        return investmentTime;
+    }
+
+    public void setInvestmentTime(Long investmentTime) {
+        this.investmentTime = investmentTime;
+    }
 
     public BigDecimal getBankLoans() {
         return bankLoans;

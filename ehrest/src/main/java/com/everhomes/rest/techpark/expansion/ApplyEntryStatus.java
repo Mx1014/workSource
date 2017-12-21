@@ -8,12 +8,18 @@ package com.everhomes.rest.techpark.expansion;
  * */
 public enum ApplyEntryStatus {
 
-	PROCESSING((byte)2), INVALID((byte)3), RESIDED_IN((byte)4);
+	PROCESSING((byte)2, "处理中"), INVALID((byte)3, "已取消"), RESIDED_IN((byte)4, "已完成");
 
 	private byte code;
+	private String description;
 
-	private ApplyEntryStatus(byte code){
+	public String getDescription() {
+		return description;
+	}
+
+	private ApplyEntryStatus(byte code, String description){
 		this.code = code;
+		this.description =description;
 	}
 
 	public byte getCode() {

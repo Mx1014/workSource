@@ -300,11 +300,11 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
         if (companyId!=null)
             param.put("companyName",organizationProvider.getOrganizationNameById(companyId));
 
-//        if (task.getAddressId()!=null) {
-//            Address address = addressProvider.findAddressById(task.getAddressId());
-//            if (address != null && NamespaceAddressType.EBEI.getCode().equals(address.getNamespaceAddressType()))
-//                param.put("buildingId", address.getNamespaceAddressToken());
-//        }
+        if (task.getAddressId()!=null) {
+            Address address = addressProvider.findAddressById(task.getAddressId());
+            if (address != null && NamespaceAddressType.EBEI.getCode().equals(address.getNamespaceAddressType()))
+                param.put("infoId", address.getNamespaceAddressToken());
+        }
 
         param.put("submitter","正中会");
         param.put("serviceId", getMappingIdByCategoryId(task.getCategoryId()));
@@ -453,10 +453,10 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
             task.setRequestorName(requestorName);
             task.setRequestorPhone(requestorPhone);
             task.setOrganizationName(cmd.getOrganizationName());
-            Long time  = System.currentTimeMillis();
+
             pmTaskProvider.createTask(task);
             createFlowCase(task);
-
+            Long time  = System.currentTimeMillis();
             EbeiTaskResult createTaskResultDTO = createTask(task, cmd.getAttachments(),cmd.getFlowOrganizationId());
             LOGGER.info("--------------------------------------timecost:"+(System.currentTimeMillis()-time));
             if(null != createTaskResultDTO) {

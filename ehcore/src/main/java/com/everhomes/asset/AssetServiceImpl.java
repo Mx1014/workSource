@@ -3,6 +3,7 @@ package com.everhomes.asset;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.zjgkVOs.PaymentStatus;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
@@ -29,9 +30,13 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.NamespaceResourceService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
@@ -57,6 +62,8 @@ import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
@@ -184,6 +191,9 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private SequenceProvider sequenceProvider;
 
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+
 //    @Autowired
 //    private ContractService contractService;
 
@@ -198,6 +208,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private NamespaceResourceService namespaceResourceService;
+
+    @Autowired
+    private PortalService portalService;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -239,21 +252,43 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillsResponse listBills(ListBillsCommand cmd) {
-//        Integer namespaceId = 999983;
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        //校验查看的权限
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(), PrivilegeConstants.ASSET_MANAGEMENT_VIEW);
+        ListBillsResponse response = new ListBillsResponse();
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
-        ListBillsResponse response = new ListBillsResponse();
-
         List<ListBillsDTO> list = handler.listBills(cmd.getContractNum(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),cmd.getPageAnchor(),cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus(),cmd.getTargetType(), response);
         response.setListBillsDTOS(list);
         return response;
     }
 
+    private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId) {
+        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
+        cmd1.setActionType((byte)13);
+        cmd1.setModuleId(PrivilegeConstants.ASSET_MODULE_ID);
+        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
+        Long appId = null;
+        if(null != res && res.getServiceModuleApps().size() > 0){
+            appId = res.getServiceModuleApps().get(0).getId();
+        }
+        OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), UserContext.currentUserId(), OrganizationType.ENTERPRISE.getCode());
+        if(member != null && !org.springframework.util.StringUtils.isEmpty(member.getGroupPath())){
+            Long organizaitonId = Long.valueOf(member.getGroupPath().split("/")[1]);
+            member.setOrganizationId(organizaitonId);
+        }
+        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), member.getOrganizationId(), member.getOrganizationId(),priviledgeId , appId, null,communityId )){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+
+        }
+    }
+
     @Override
     public ListBillItemsResponse listBillItems(ListBillItemsCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListBillItemsResponse response = new ListBillItemsResponse();
@@ -265,7 +300,8 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void selectNotice(SelectedNoticeCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_NOTICE);
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         List<NoticeInfo> noticeInfos = handler.listNoticeInfoByBillId(cmd.getBillIdAndTypes());
@@ -285,18 +321,12 @@ public class AssetServiceImpl implements AssetService {
                 }
                 String[] telNOs = phoneNums.split(",");
                 List<Tuple<String, Object>> variables = new ArrayList<>();
-                smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
-                //模板改了，所以这个也要改
-//                smsProvider.addToTupleList(variables, "dateStr", noticeInfo.getDateStr());
-
-                smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
-
-//            smsProvider.addToTupleList(variables,"amount2",noticeInfo.getAmountOwed());
-                smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
+                Integer nameSpaceId = UserContext.getCurrentNamespaceId();
+                injectSmsVars(noticeInfo, variables,nameSpaceId);
                 String templateLocale = UserContext.current().getUser().getLocale();
                 //phoneNums make it fake during test
-                Integer nameSpaceId = UserContext.getCurrentNamespaceId();
-                nameSpaceId = 999971;
+
+//                nameSpaceId = 999971;
                 smsProvider.sendSms(nameSpaceId, telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
             }
         } catch(Exception e){
@@ -365,6 +395,24 @@ public class AssetServiceImpl implements AssetService {
             assetProvider.increaseNoticeTime(billIds);
         }
     }
+
+    private void injectSmsVars(NoticeInfo noticeInfo, List<Tuple<String, Object>> variables,Integer namespaceId) {
+        if(namespaceId == 999971){
+            smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
+            smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
+            smsProvider.addToTupleList(variables, "amount", noticeInfo.getAmountOwed().toString());
+            smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
+        }else{
+            smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
+            //模板改了，所以这个也要改
+//                smsProvider.addToTupleList(variables, "dateStr", noticeInfo.getDateStr());
+            smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
+//            smsProvider.addToTupleList(variables,"amount2",noticeInfo.getAmountOwed());
+            smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
+
+        }
+    }
+
     private void NoticeWithTextAndMessage(List<Long> billIds, List<NoticeInfo> noticeInfos) {
         List<Long> uids = new ArrayList<>();
         try {
@@ -376,12 +424,11 @@ public class AssetServiceImpl implements AssetService {
                 }
                 String[] telNOs = phoneNums.split(",");
                 List<Tuple<String, Object>> variables = new ArrayList<>();
-                smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
-                smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
-                smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
-                String templateLocale = UserContext.current().getUser().getLocale();
                 Integer nameSpaceId = UserContext.getCurrentNamespaceId();
-                nameSpaceId = 999971;
+                injectSmsVars(noticeInfo, variables,nameSpaceId);
+                String templateLocale = UserContext.current().getUser().getLocale();
+
+//                nameSpaceId = 999971;
                 smsProvider.sendSms(nameSpaceId, telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
             }
         } catch(Exception e){
@@ -447,7 +494,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd) {
         //app用户的权限还未判断，是否可以查看账单
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
         return handler.showBillForClient(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getBillGroupId(),cmd.getIsOnlyOwedBill(),cmd.getContractId());
@@ -455,7 +502,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ShowBillDetailForClientResponse getBillDetailForClient(BillIdCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
         return handler.getBillDetailForClient(cmd.getOwnerId(),cmd.getBillId(),cmd.getTargetType());
@@ -471,7 +518,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ShowCreateBillDTO showCreateBill(BillGroupIdCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         return handler.showCreateBill(cmd.getBillGroupId());
@@ -479,7 +526,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ShowBillDetailForClientResponse listBillDetailOnDateChange(ListBillDetailOnDateChangeCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
         if(cmd.getTargetType().equals("eh_user")) {
@@ -490,7 +537,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillsDTO createBill(CreateBillCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         return handler.createBill(cmd);
@@ -498,6 +545,8 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void OneKeyNotice(OneKeyNoticeCommand cmd) {
+        //校验催缴的权限
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_NOTICE);
         ListBillsCommand convertedCmd = ConvertHelper.convert(cmd, ListBillsCommand.class);
         if(UserContext.getCurrentNamespaceId()!=999971){
             convertedCmd.setPageAnchor(0l);
@@ -553,6 +602,14 @@ public class AssetServiceImpl implements AssetService {
             if(UserContext.getCurrentNamespaceId()==999971){
                 List<NoticeInfo> list = new ArrayList<>();
                 List<ListBillsDTO> listBillsDTOS1 = convertedResponse.getListBillsDTOS();
+                //已经处理过的审核中的账单不进行催缴
+                for(int k = 0; k < listBillsDTOS1.size(); k++){
+                    ListBillsDTO dto = listBillsDTOS1.get(k);
+                    if(dto.getPayStatus().equals(PaymentStatus.IN_PROCESS.getCode())){
+                        listBillsDTOS1.remove(k);
+                        k--;
+                    }
+                }
                 for(int i = 0; i < listBillsDTOS1.size(); i++){
                     ListBillsDTO dto = listBillsDTOS1.get(i);
                     NoticeInfo info = new NoticeInfo();
@@ -588,7 +645,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         return handler.listBillDetail(cmd);
@@ -596,7 +653,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        //校验是否有查看账单统计的权限
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_STATISTICS_VIEW);
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         return handler.listBillStatics(cmd);
@@ -604,7 +663,8 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void modifyBillStatus(BillIdCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_CHANGE_STATUS);
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         handler.modifyBillStatus(cmd);
@@ -715,7 +775,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListSettledBillExemptionItemsResponse listBillExemptionItems(listBillExemtionItemsCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         return handler.listBillExemptionItems(cmd);
@@ -723,7 +783,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public String deleteBill(BillIdCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         String result = "OK";
@@ -744,7 +804,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public String deleteBillItem(BillItemIdCommand cmd) {
         String result = "OK";
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         handler.deleteBillItem(cmd);
@@ -754,7 +814,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public String deletExemptionItem(ExemptionItemIdCommand cmd) {
         String result = "OK";
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         handler.deletExemptionItem(cmd);
@@ -1370,6 +1430,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListAutoNoticeConfigResponse listAutoNoticeConfig(ListAutoNoticeConfigCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_NOTICE);
         ListAutoNoticeConfigResponse response = new ListAutoNoticeConfigResponse();
         response.setNoticeDays(assetProvider.listAutoNoticeConfig(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId()));
         return response;
@@ -1377,6 +1438,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void autoNoticeConfig(AutoNoticeConfigCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_NOTICE);
         checkNullProhibit("所属者类型",cmd.getOwnerType());
         checkNullProhibit("园区id",cmd.getOwnerId());
         checkNullProhibit("域空间",cmd.getNamespaceId());
@@ -2181,7 +2243,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public PaymentExpectanciesResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         return handler.listBillExpectanciesOnContract(cmd);
@@ -2190,7 +2252,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void exportRentalExcelTemplate(HttpServletResponse response) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         handler.exportRentalExcelTemplate(response);
@@ -2198,7 +2260,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public FindUserInfoForPaymentResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vendor = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendor);
         return handler.findUserInfoForPayment(cmd);
@@ -2207,7 +2269,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void updateBillsToSettled(UpdateBillsToSettled cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         handler.updateBillsToSettled(cmd);
@@ -2215,7 +2277,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public GetAreaAndAddressByContractDTO getAreaAndAddressByContract(GetAreaAndAddressByContractCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vendor = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendor);
         return handler.getAreaAndAddressByContract(cmd);
@@ -2483,74 +2545,76 @@ public class AssetServiceImpl implements AssetService {
     @Scheduled(cron = "0 0 12 * * ?")
     public void autoBillNotice() {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
-            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
-            Calendar today = Calendar.getInstance();
-            List<PaymentNoticeConfig> configs = assetProvider.listAllNoticeConfigs();
+            this.coordinationProvider.getNamedLock("asset_auto_notice").tryEnter(() -> {
+                SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+                Calendar today = Calendar.getInstance();
+                List<PaymentNoticeConfig> configs = assetProvider.listAllNoticeConfigs();
 //            List<PaymentNoticeConfig> configs = new ArrayList<>();
 
-            Map<Long, List<Integer>> noticeConfigs = new HashMap<>();
-            for (int i = 0; i < configs.size(); i++) {
-                PaymentNoticeConfig config = configs.get(i);
-                if (noticeConfigs.containsKey(config.getOwnerId())) {
-                    noticeConfigs.get(config.getOwnerId()).add(config.getNoticeDayBefore());
-                } else {
-                    List<Integer> days = new ArrayList<>();
-                    days.add(config.getNoticeDayBefore());
-                    noticeConfigs.put(config.getOwnerId(), days);
+                Map<Long, List<Integer>> noticeConfigs = new HashMap<>();
+                for (int i = 0; i < configs.size(); i++) {
+                    PaymentNoticeConfig config = configs.get(i);
+                    if (noticeConfigs.containsKey(config.getOwnerId())) {
+                        noticeConfigs.get(config.getOwnerId()).add(config.getNoticeDayBefore());
+                    } else {
+                        List<Integer> days = new ArrayList<>();
+                        days.add(config.getNoticeDayBefore());
+                        noticeConfigs.put(config.getOwnerId(), days);
+                    }
                 }
-            }
-            Map<Long, PaymentBills> needNoticeBills = new HashMap<>();
-            // noticeConfig map中存有communityid和notice days
-            for (Map.Entry<Long, List<Integer>> map : noticeConfigs.entrySet()) {
-                List<PaymentBills> bills = assetProvider.getAllBillsByCommunity(map.getKey());
-                for (int i = 0; i < bills.size(); i++) {
-                    PaymentBills bill = bills.get(i);
-                    if (!needNoticeBills.containsKey(bill.getId())) {
-                        //已经在提醒名单的bill不需要再提醒
-                        List<Integer> days = map.getValue();
-                        for (int j = 0; j < days.size(); j++) {
-                            Integer day = days.get(j);
-                            String dueDayDeadline = bill.getDueDayDeadline();
-                            try {
-                                Calendar deadline = Calendar.getInstance();
-                                deadline.setTime(yyyyMMdd.parse(dueDayDeadline));
-                                deadline.add(Calendar.DAY_OF_MONTH, day * (-1));
-                                if (today.compareTo(deadline) != -1) {
-                                    needNoticeBills.put(bill.getId(), bill);
+                Map<Long, PaymentBills> needNoticeBills = new HashMap<>();
+                // noticeConfig map中存有communityid和notice days
+                for (Map.Entry<Long, List<Integer>> map : noticeConfigs.entrySet()) {
+                    List<PaymentBills> bills = assetProvider.getAllBillsByCommunity(map.getKey());
+                    for (int i = 0; i < bills.size(); i++) {
+                        PaymentBills bill = bills.get(i);
+                        if (!needNoticeBills.containsKey(bill.getId())) {
+                            //已经在提醒名单的bill不需要再提醒
+                            List<Integer> days = map.getValue();
+                            for (int j = 0; j < days.size(); j++) {
+                                Integer day = days.get(j);
+                                String dueDayDeadline = bill.getDueDayDeadline();
+                                try {
+                                    Calendar deadline = Calendar.getInstance();
+                                    deadline.setTime(yyyyMMdd.parse(dueDayDeadline));
+                                    deadline.add(Calendar.DAY_OF_MONTH, day * (-1));
+                                    if (today.compareTo(deadline) != -1) {
+                                        needNoticeBills.put(bill.getId(), bill);
+                                    }
+                                } catch (Exception e) {
+                                    continue;
                                 }
-                            } catch (Exception e) {
-                                continue;
                             }
                         }
                     }
                 }
-            }
-            List<PaymentBills> targetBills = new ArrayList<>();
-            for (Map.Entry<Long, PaymentBills> b : needNoticeBills.entrySet()) {
-                targetBills.add(b.getValue());
-            }
-            //
-            List<Long> billIds = new ArrayList<>();
-            List<NoticeInfo> noticeInfoList = new ArrayList<>();
+                List<PaymentBills> targetBills = new ArrayList<>();
+                for (Map.Entry<Long, PaymentBills> b : needNoticeBills.entrySet()) {
+                    targetBills.add(b.getValue());
+                }
+                //
+                List<Long> billIds = new ArrayList<>();
+                List<NoticeInfo> noticeInfoList = new ArrayList<>();
 //            for (int k = 0; k < targetBills.size(); k++) {
-            for (int k = 0; k < targetBills.size(); k++) {
-                PaymentBills b = targetBills.get(k);
-                billIds.add(b.getId());
-                NoticeInfo info = new NoticeInfo();
-                info.setPhoneNums(b.getNoticetel());
-                info.setDateStr(b.getDateStr());
-                info.setTargetName(b.getTargetName());
-                info.setTargetType(b.getTargetType());
-                info.setAmountOwed(b.getAmountOwed());
-                info.setTargetId(b.getTargetId());
-                info.setAmountRecevable(b.getAmountReceivable());
-                info.setAppName(assetProvider.findAppName(b.getNamespaceId()));
-                info.setOwnerId(b.getOwnerId());
-                info.setOwnerType(b.getOwnerType());
-                noticeInfoList.add(info);
-                NoticeWithTextAndMessage(billIds, noticeInfoList);
-            }
-            LOGGER.info("done");
+                for (int k = 0; k < targetBills.size(); k++) {
+                    PaymentBills b = targetBills.get(k);
+                    billIds.add(b.getId());
+                    NoticeInfo info = new NoticeInfo();
+                    info.setPhoneNums(b.getNoticetel());
+                    info.setDateStr(b.getDateStr());
+                    info.setTargetName(b.getTargetName());
+                    info.setTargetType(b.getTargetType());
+                    info.setAmountOwed(b.getAmountOwed());
+                    info.setTargetId(b.getTargetId());
+                    info.setAmountRecevable(b.getAmountReceivable());
+                    info.setAppName(assetProvider.findAppName(b.getNamespaceId()));
+                    info.setOwnerId(b.getOwnerId());
+                    info.setOwnerType(b.getOwnerType());
+                    noticeInfoList.add(info);
+                    NoticeWithTextAndMessage(billIds, noticeInfoList);
+                }
+                LOGGER.info("done");
+            });
         }
     }
     @Override
@@ -2566,7 +2630,7 @@ public class AssetServiceImpl implements AssetService {
         return response;
     }
     public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
 //        AssetVendor assetVendor = checkAssetVendor(999983);
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
@@ -2575,7 +2639,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
-        AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId());
+        AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
         return handler.listAllBillsForClient(cmd);
     }
@@ -2627,7 +2691,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
-        AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId());
+        AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
         return handler.placeAnAssetOrder(cmd);
     }
@@ -3197,13 +3261,14 @@ public class AssetServiceImpl implements AssetService {
         return assetVendor;
     }
 
-    private AssetVendor checkAssetVendor(Integer namespaceId){
+    private AssetVendor checkAssetVendor(Integer namespaceId,Integer defaultNamespaceId){
         if(null == namespaceId) {
             LOGGER.error("checkAssetVendor namespaceId cannot be null.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "checkAssetVendor namespaceId cannot be null.");
         }
         AssetVendor assetVendor = assetProvider.findAssetVendorByNamespace(namespaceId);
+        if(null == assetVendor && defaultNamespaceId!=null)  assetVendor = assetProvider.findAssetVendorByNamespace(defaultNamespaceId);
         if(null == assetVendor) {
             LOGGER.error("assetVendor not found, assetVendor namespaceId={}, targetId={}", namespaceId);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -3537,6 +3602,8 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public AssetBillTemplateValueDTO creatAssetBill(CreatAssetBillCommand cmd) {
+        //校验创建账单的权限
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(), PrivilegeConstants.ASSET_MANAGEMENT_CREATE);
         AssetBill bill = ConvertHelper.convert(cmd, AssetBill.class);
         bill.setAccountPeriod(new Timestamp(cmd.getAccountPeriod()));
         bill.setSource(AssetBillSource.MANUAL.getCode());

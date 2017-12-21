@@ -67,6 +67,18 @@ public interface CustomerService {
     CustomerEconomicIndicatorDTO getCustomerEconomicIndicator(GetCustomerEconomicIndicatorCommand cmd);
     List<CustomerEconomicIndicatorDTO> listCustomerEconomicIndicators(ListCustomerEconomicIndicatorsCommand cmd);
 
+    void createCustomerEntryInfo(CreateCustomerEntryInfoCommand cmd);
+    void updateCustomerEntryInfo(UpdateCustomerEntryInfoCommand cmd);
+    void deleteCustomerEntryInfo(DeleteCustomerEntryInfoCommand cmd);
+    CustomerEntryInfoDTO getCustomerEntryInfo(GetCustomerEntryInfoCommand cmd);
+    List<CustomerEntryInfoDTO> listCustomerEntryInfos(ListCustomerEntryInfosCommand cmd);
+
+    void createCustomerDepartureInfo(CreateCustomerDepartureInfoCommand cmd);
+    void updateCustomerDepartureInfo(UpdateCustomerDepartureInfoCommand cmd);
+    void deleteCustomerDepartureInfo(DeleteCustomerDepartureInfoCommand cmd);
+    CustomerDepartureInfoDTO getCustomerDepartureInfo(GetCustomerDepartureInfoCommand cmd);
+    List<CustomerDepartureInfoDTO> listCustomerDepartureInfos(ListCustomerDepartureInfosCommand cmd);
+
     EnterpriseCustomerStatisticsDTO listEnterpriseCustomerStatistics(ListEnterpriseCustomerStatisticsCommand cmd);
     CustomerIndustryStatisticsResponse listCustomerIndustryStatistics(ListEnterpriseCustomerStatisticsCommand cmd);
     CustomerIntellectualPropertyStatisticsResponse listCustomerIntellectualPropertyStatistics(ListEnterpriseCustomerStatisticsCommand cmd);
@@ -104,5 +116,17 @@ public interface CustomerService {
 	void processTrackingPlanNotify(CustomerTrackingPlan plan);
 	
 	List<List<CustomerTrackingPlanDTO>> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd);
-	
+
+    void createCustomerTax(CreateCustomerTaxCommand cmd);
+    void updateCustomerTax(UpdateCustomerTaxCommand cmd);
+    void deleteCustomerTax(DeleteCustomerTaxCommand cmd);
+    CustomerTaxDTO getCustomerTax(GetCustomerTaxCommand cmd);
+    List<CustomerTaxDTO> listCustomerTaxes(ListCustomerTaxesCommand cmd);
+
+    void createCustomerAccount(CreateCustomerAccountCommand cmd);
+    void updateCustomerAccount(UpdateCustomerAccountCommand cmd);
+    void deleteCustomerAccount(DeleteCustomerAccountCommand cmd);
+    CustomerAccountDTO getCustomerAccount(GetCustomerAccountCommand cmd);
+    List<CustomerAccountDTO> listCustomerAccounts(ListCustomerAccountsCommand cmd);
+
 }

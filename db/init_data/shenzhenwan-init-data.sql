@@ -1418,4 +1418,11 @@ UPDATE `eh_launch_pad_items` SET `action_data` = '{"isSupportQR":1,"isSupportSma
 
 -- 【深圳湾mybay】切换到创投项目中，把首页默认显示的闸机门禁替换成通讯录
 UPDATE eh_launch_pad_items  SET display_flag = 0 WHERE  scope_id = 240111044331050371  AND  namespace_id =  999966 AND action_type =40;
-UPDATE eh_launch_pad_items  SET display_flag = 0 WHERE  scope_id = 240111044331050371  AND  namespace_id =  999966 AND item_label = '通讯录';
+
+SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+
+INSERT INTO eh_launch_pad_items(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,target_type,target_id,delete_flag,scene_type,scale_type,service_categry_id,selected_icon_uri,more_order,alias_icon_uri,categry_name)
+VALUES((@item_id := @item_id + 1),'999966','0','1','240111044331050371 ','/home','Bizs','EhPortalItems184','通讯录','cs://1/image/aW1hZ2UvTVRwak9EZ3hNelUwTnpobU1ETmpOekZsWVRZM05HTmxNVGN6WldVeE5tWmlNQQ','1','1','46',NULL,'0','0','1','1',NULL,'0',NULL,NULL,NULL,'1','park_tourist','1',NULL,NULL,'3',NULL,'个人服务');
+INSERT INTO eh_launch_pad_items(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,target_type,target_id,delete_flag,scene_type,scale_type,service_categry_id,selected_icon_uri,more_order,alias_icon_uri,categry_name)
+VALUES((@item_id := @item_id + 1),'999966','0','1','240111044331050371 ','/home/PersonalService','PersonalService','EhPortalItems287','通讯录','cs://1/image/aW1hZ2UvTVRwak9EZ3hNelUwTnpobU1ETmpOekZsWVRZM05HTmxNVGN6WldVeE5tWmlNQQ','1','1','46',NULL,'0','0','1','1',NULL,'0',NULL,NULL,NULL,'1','park_tourist','1',NULL,NULL,'0',NULL,NULL);
+

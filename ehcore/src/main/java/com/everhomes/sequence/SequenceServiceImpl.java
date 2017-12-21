@@ -3,6 +3,8 @@ package com.everhomes.sequence;
 
 import java.util.List;
 
+import com.everhomes.acl.AuthorizationProvider;
+import com.everhomes.module.ServiceModuleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,16 +16,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.admin.GetSequenceCommand;
 import com.everhomes.rest.admin.GetSequenceDTO;
-import com.everhomes.schema.tables.pojos.EhAclPrivileges;
-import com.everhomes.schema.tables.pojos.EhAclRoleAssignments;
-import com.everhomes.schema.tables.pojos.EhAclRoles;
-import com.everhomes.schema.tables.pojos.EhAcls;
-import com.everhomes.schema.tables.pojos.EhConfigurations;
-import com.everhomes.schema.tables.pojos.EhContentShardMap;
-import com.everhomes.schema.tables.pojos.EhMessageBoxs;
-import com.everhomes.schema.tables.pojos.EhMessages;
-import com.everhomes.schema.tables.pojos.EhNamespaces;
-import com.everhomes.schema.tables.pojos.EhServerShardMap;
+import com.everhomes.schema.tables.pojos.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
 import com.everhomes.server.schema.tables.EhPaymentWithdrawOrders;
@@ -31,6 +24,12 @@ import com.everhomes.server.schema.tables.EhQuestionnaireRanges;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class SequenceServiceImpl implements SequenceService {
@@ -44,6 +43,12 @@ public class SequenceServiceImpl implements SequenceService {
 
     @Autowired
     private UserProvider userProvider;
+
+    @Autowired
+    private AuthorizationProvider authorizationProvider;
+
+    @Autowired
+    private ServiceModuleProvider serviceModuleProvider;
 
     @Override
     public void syncSequence() {
@@ -88,6 +93,8 @@ public class SequenceServiceImpl implements SequenceService {
 
         // user account is a special field, it default to be number stype, but it can be changed to any character only if they are unique in db
         syncUserAccountName();
+
+        syncAuthorizationControlId();
 
         syncTableSequence(EhUniongroupConfigures.class, EhUniongroupConfigures.class, Tables.EH_UNIONGROUP_CONFIGURES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_UNIONGROUP_CONFIGURES.ID.max()).from(Tables.EH_UNIONGROUP_CONFIGURES).fetchOne().value1();
@@ -336,6 +343,9 @@ public class SequenceServiceImpl implements SequenceService {
 
         syncTableSequence(null, EhPunchSchedulings.class, Tables.EH_PUNCH_SCHEDULINGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PUNCH_SCHEDULINGS.ID.max()).from(Tables.EH_PUNCH_SCHEDULINGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhUniongroupVersion.class, Tables.EH_UNIONGROUP_VERSION.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_UNIONGROUP_VERSION.ID.max()).from(Tables.EH_UNIONGROUP_VERSION).fetchOne().value1();
         });
 
         syncTableSequence(null, EhRentalBillAttachments.class, Tables.EH_RENTAL_BILL_ATTACHMENTS.getName(), (dbContext) -> {
@@ -2007,12 +2017,57 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_RENTALV2_PRICE_PACKAGES.ID.max()).from(Tables.EH_RENTALV2_PRICE_PACKAGES).fetchOne().value1();
         });
 
+        syncTableSequence(null, EhRelocationRequests.class, Tables.EH_RELOCATION_REQUESTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_RELOCATION_REQUESTS.ID.max()).from(Tables.EH_RELOCATION_REQUESTS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhRelocationRequestItems.class, Tables.EH_RELOCATION_REQUEST_ITEMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_RELOCATION_REQUEST_ITEMS.ID.max()).from(Tables.EH_RELOCATION_REQUEST_ITEMS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhRelocationRequestAttachments.class, Tables.EH_RELOCATION_REQUEST_ATTACHMENTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_RELOCATION_REQUEST_ATTACHMENTS.ID.max()).from(Tables.EH_RELOCATION_REQUEST_ATTACHMENTS).fetchOne().value1();
+        });
         syncTableSequence(null, EhBanners.class, Tables.EH_BANNERS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_BANNERS.ID.max()).from(Tables.EH_BANNERS).fetchOne().value1();
         });
 		
 		syncTableSequence(null, EhPaymentWithdrawOrders.class, Tables.EH_PAYMENT_WITHDRAW_ORDERS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PAYMENT_WITHDRAW_ORDERS.ID.max()).from(Tables.EH_PAYMENT_WITHDRAW_ORDERS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPointSystems.class, Tables.EH_POINT_SYSTEMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_SYSTEMS.ID.max()).from(Tables.EH_POINT_SYSTEMS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPointRuleCategories.class, Tables.EH_POINT_RULE_CATEGORIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_RULE_CATEGORIES.ID.max()).from(Tables.EH_POINT_RULE_CATEGORIES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPointScores.class, Tables.EH_POINT_SCORES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_SCORES.ID.max()).from(Tables.EH_POINT_SCORES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPointRules.class, Tables.EH_POINT_RULES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_RULES.ID.max()).from(Tables.EH_POINT_RULES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPointLogs.class, Tables.EH_POINT_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_LOGS.ID.max()).from(Tables.EH_POINT_LOGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPointGoods.class, Tables.EH_POINT_GOODS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_GOODS.ID.max()).from(Tables.EH_POINT_GOODS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPointTutorials.class, Tables.EH_POINT_TUTORIALS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_TUTORIALS.ID.max()).from(Tables.EH_POINT_TUTORIALS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPointTutorialToPointRuleMappings.class, Tables.EH_POINT_TUTORIAL_TO_POINT_RULE_MAPPINGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_TUTORIAL_TO_POINT_RULE_MAPPINGS.ID.max()).from(Tables.EH_POINT_TUTORIAL_TO_POINT_RULE_MAPPINGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPointEventLogs.class, Tables.EH_POINT_EVENT_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_EVENT_LOGS.ID.max()).from(Tables.EH_POINT_EVENT_LOGS).fetchOne().value1();
+        });
+        /*syncTableSequence(null, EhSystemEvents.class, Tables.EH_SYSTEM_EVENTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SYSTEM_EVENTS.ID.max()).from(Tables.EH_SYSTEM_EVENTS).fetchOne().value1();
+        });*/
+        syncTableSequence(null, EhPointActions.class, Tables.EH_POINT_ACTIONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_ACTIONS.ID.max()).from(Tables.EH_POINT_ACTIONS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPointRuleToEventMappings.class, Tables.EH_POINT_RULE_TO_EVENT_MAPPINGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_POINT_RULE_TO_EVENT_MAPPINGS.ID.max()).from(Tables.EH_POINT_RULE_TO_EVENT_MAPPINGS).fetchOne().value1();
         });
 
         syncTableSequence(null, EhMeWebMenus.class, Tables.EH_ME_WEB_MENUS.getName(), (dbContext) -> {
@@ -2021,6 +2076,16 @@ public class SequenceServiceImpl implements SequenceService {
 
         syncTableSequence(null, EhForumServiceTypes.class, Tables.EH_FORUM_SERVICE_TYPES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_FORUM_SERVICE_TYPES.ID.max()).from(Tables.EH_FORUM_SERVICE_TYPES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhAuthorizationThirdPartyRecords.class, Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.ID.max()).from(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhAuthorizationThirdPartyForms.class, Tables.EH_AUTHORIZATION_THIRD_PARTY_FORMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_AUTHORIZATION_THIRD_PARTY_FORMS.ID.max()).from(Tables.EH_AUTHORIZATION_THIRD_PARTY_FORMS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhAuthorizationThirdPartyButtons.class, Tables.EH_AUTHORIZATION_THIRD_PARTY_BUTTONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_AUTHORIZATION_THIRD_PARTY_BUTTONS.ID.max()).from(Tables.EH_AUTHORIZATION_THIRD_PARTY_BUTTONS).fetchOne().value1();
         });
     }
 
@@ -2092,6 +2157,38 @@ public class SequenceServiceImpl implements SequenceService {
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Sync user account name sequence, key=" + key + ", newSequence=" + (maxAccountSequence + 1)
                     + ", nextSequenceBeforeReset=" + nextSequenceBeforeReset + ", nextSequenceAfterReset=" + nextSequenceAfterReset);
+            }
+        }
+    }
+
+    private void syncAuthorizationControlId() {
+        long maxAuthorizationControlId = 0;
+        maxAuthorizationControlId = this.authorizationProvider.getMaxControlIdInAuthorizations();
+
+        if (maxAuthorizationControlId > 0) {
+            String key = "authControlId";
+            long nextSequenceBeforeReset = sequenceProvider.getNextSequence(key);
+            sequenceProvider.resetSequence(key, maxAuthorizationControlId + 1);
+            long nextSequenceAfterReset = sequenceProvider.getNextSequence(key);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("maxAuthorizationControlId sequence, key=" + key + ", newSequence=" + (maxAuthorizationControlId + 1)
+                        + ", nextSequenceBeforeReset=" + nextSequenceBeforeReset + ", nextSequenceAfterReset=" + nextSequenceAfterReset);
+            }
+        }
+    }
+
+    private void syncActiveAppId() {
+        long maxSyncActiveAppId = 0;
+        maxSyncActiveAppId = this.serviceModuleProvider.getMaxActiveAppId();
+
+        if (maxSyncActiveAppId > 0) {
+            String key = "activeAppId";
+            long nextSequenceBeforeReset = sequenceProvider.getNextSequence(key);
+            sequenceProvider.resetSequence(key, maxSyncActiveAppId + 1);
+            long nextSequenceAfterReset = sequenceProvider.getNextSequence(key);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("maxSyncActiveAppId sequence, key=" + key + ", newSequence=" + (maxSyncActiveAppId + 1)
+                        + ", nextSequenceBeforeReset=" + nextSequenceBeforeReset + ", nextSequenceAfterReset=" + nextSequenceAfterReset);
             }
         }
     }
