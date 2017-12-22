@@ -3,11 +3,13 @@ package com.everhomes.incubator;
 
 import com.everhomes.filedownload.FileDownloadTaskHandler;
 import com.everhomes.filedownload.FileDownloadTaskService;
-import com.everhomes.rest.incubator.*;
+import com.everhomes.rest.incubator.ApproveStatus;
+import com.everhomes.rest.incubator.ExportIncubatorApplyCommand;
+import com.everhomes.sms.DateUtil;
+import com.everhomes.util.excel.ExcelUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class IncubatorApplyExportTaskHandler implements FileDownloadTaskHandler {
 
@@ -33,19 +35,17 @@ public class IncubatorApplyExportTaskHandler implements FileDownloadTaskHandler 
 		List<IncubatorApply> incubatorApplies = incubatorProvider.listIncubatorApplies(cmd.getNamespaceId(), null, cmd.getKeyWord(), cmd.getApproveStatus(), cmd.getNeedReject(), null, null, cmd.getOrderBy(), cmd.getApplyType());
 
 
-		List<SignupInfoDTO> signupInfoDTOs = rosters.stream().map(r->convertActivityRosterForExcel(r, activity)).collect(Collectors.toList());
-		String fileName = String.format("入驻申请企业_%s", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
-		ExcelUtils excelUtils = new ExcelUtils(response, fileName, "报名信息");
-		List<String> propertyNames = new ArrayList<String>(Arrays.asList("order", "phone", "nickName", "realName", "genderText", "organizationName", "position", "leaderFlagText", "email",
-				"signupTime", "sourceFlagText", "signupStatusText"));
-		List<String> titleNames = new ArrayList<String>(Arrays.asList("序号", "手机号", "用户昵称", "真实姓名", "性别", "公司", "职位", "是否高管", "邮箱", "报名时间", "报名来源", "报名状态"));
-		List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(10, 20, 20, 20, 10, 20, 20, 10, 20, 20, 20, 20));
 
-//			if (ConfirmStatus.fromCode(activity.getConfirmFlag()) == ConfirmStatus.CONFIRMED) {
-//				propertyNames.add("confirmFlagText");
-//				titleNames.add("报名确认");
-//				titleSizes.add(20);
-//			}
+		ApproveStatus approveStatus = ApproveStatus.fromCode(cmd.getApproveStatus());
+		String statusName = approveStatus == null ? "全部": approveStatus.getText();
+
+		String fileName = String.format("入驻申请企业_%s_%s", statusName, DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+		ExcelUtils excelUtils = new ExcelUtils(fileName, "入驻申请企业信息");
+		List<String> propertyNames = new ArrayList<String>(Arrays.asList("projectName", "projectType", "teamName", "realName", "genderText", "organizationName", "position", "leaderFlagText", "email",
+				"signupTime", "sourceFlagText", "signupStatusText"));
+		List<String> titleNames = new ArrayList<String>(Arrays.asList("项目名称", "项目分类", "申请企业/团队名称", "营业执照扫描件", "创业计划书", "法人代表/负责人姓名", "移动电话", "电子邮箱", "申请类型", "申请时间", "报名来源", "报名状态"));
+		List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(10, 10, 20, 10, 10, 10, 10, 20, 10, 10, 10, 10));
+
 
 		if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode()){
 			propertyNames.add("payAmount");
