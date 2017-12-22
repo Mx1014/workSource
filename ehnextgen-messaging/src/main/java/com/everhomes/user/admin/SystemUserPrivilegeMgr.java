@@ -350,8 +350,9 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         if(!checkUserPrivilege(userId, EntityType.ORGANIZATIONS.getCode(), currentOrgId, currentOrgId, privilegeId, appId, checkOrgId,  checkCommunityId)){
             throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
                     "check app privilege error");
+        }else{
+            return true;
         }
-        return false;
     }
 
 
