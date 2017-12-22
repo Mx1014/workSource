@@ -12,7 +12,7 @@ public interface WorkReportProvider {
 
     WorkReport getWorkReportById(Long id);
 
-    WorkReport getValidWorkReportById(Long id);
+    WorkReport getRunningWorkReportById(Long id);
 
     WorkReport getWorkReportByTemplateId(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long templateId);
 

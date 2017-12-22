@@ -619,7 +619,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         if (cmd.getReportValId() != null) {
-            WorkReport report = workReportProvider.getValidWorkReportById(cmd.getReportId());
+            WorkReport report = workReportProvider.getRunningWorkReportById(cmd.getReportId());
             if (report == null)
                 throw RuntimeErrorException.errorWith(WorkReportErrorCode.SCOPE, WorkReportErrorCode.ERROR_WORK_REPORT_ABNORMAL,
                         "work report status is abnormal.");
