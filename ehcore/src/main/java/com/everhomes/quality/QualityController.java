@@ -855,7 +855,7 @@ public class QualityController extends ControllerBase {
 		return res;
 	}
 	/**
-	 * <b>URL: /equipment/exportSampleTaskCommunityScores</b>
+	 * <b>URL: /quality/exportSampleTaskCommunityScores</b>
 	 * <p>导出绩效考核列表</p>
 	 */
 	@RequestMapping("exportEquipments")
