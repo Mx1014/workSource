@@ -445,7 +445,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             formCommand.setSourceId(valId);
             generalFormService.postGeneralForm(formCommand);
             for (Long receiverId : cmd.getReceiverIds()) {
-                WorkReportValReceiverMap receiver = packageWorkReportValReceiverMap(namespaceId, valId, receiverId);
+                WorkReportValReceiverMap receiver = packageWorkReportValReceiverMap(namespaceId, valId, receiverId, user.getId());
                 //  create the receiver.
                 workReportValProvider.createWorkReportValReceiverMap(receiver);
                 //  send message to the receiver.
@@ -468,7 +468,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         return dto;
     }
 
-    private WorkReportValReceiverMap packageWorkReportValReceiverMap(Integer namespaceId, Long reportValId, Long receiverId){
+    private WorkReportValReceiverMap packageWorkReportValReceiverMap(Integer namespaceId, Long reportValId, Long receiverId, Long applierId) {
         WorkReportValReceiverMap receiver = new WorkReportValReceiverMap();
         receiver.setNamespaceId(namespaceId);
         receiver.setReportValId(reportValId);
@@ -476,6 +476,8 @@ public class WorkReportServiceImpl implements WorkReportService {
         receiver.setReceiverName(fixUpUserName(receiverId));
         receiver.setReceiverAvatar(getUserAvatar(receiverId));
         receiver.setReadStatus(WorkReportReadStatus.UNREAD.getCode());
+        if (receiverId.longValue() == applierId.longValue())
+            receiver.setReadStatus(WorkReportReadStatus.READ.getCode());
         return receiver;
     }
 
@@ -514,7 +516,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         formCommand.setCurrentOrganizationId(cmd.getOrganizationId());
         formCommand.setValues(cmd.getValues());
 
-        dbProvider.execute((TransactionStatus status) ->{
+        dbProvider.execute((TransactionStatus status) -> {
             //  1.update the reportVal's updateTime
             reportVal.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             workReportValProvider.updateWorkReportVal(reportVal);
@@ -523,7 +525,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             //  3.update receivers.
             workReportValProvider.deleteReportValReceiverByValId(reportVal.getId());
             for (Long receiverId : cmd.getReceiverIds()) {
-                WorkReportValReceiverMap receiver = packageWorkReportValReceiverMap(namespaceId, reportVal.getId(), receiverId);
+                WorkReportValReceiverMap receiver = packageWorkReportValReceiverMap(namespaceId, reportVal.getId(), receiverId, user.getId());
                 //  create the receiver.
                 workReportValProvider.createWorkReportValReceiverMap(receiver);
                 //  send message to the receiver.
@@ -558,8 +560,8 @@ public class WorkReportServiceImpl implements WorkReportService {
         Map<String, String> model = new HashMap<>();
         model.put("applierName", applierName);
         model.put("reportName", reportName);
-        String content ="";
-        if(messageType.equals("post")) {
+        String content = "";
+        if (messageType.equals("post")) {
             content = localeTemplateService.getLocaleTemplateString(
                     Namespace.DEFAULT_NAMESPACE,
                     WorkReportNotificationTemplateCode.SCOPE,
@@ -568,7 +570,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                     model,
                     "Template Not Found"
             );
-        }else if(messageType.equals("update")){
+        } else if (messageType.equals("update")) {
             content = localeTemplateService.getLocaleTemplateString(
                     Namespace.DEFAULT_NAMESPACE,
                     WorkReportNotificationTemplateCode.SCOPE,
@@ -593,9 +595,9 @@ public class WorkReportServiceImpl implements WorkReportService {
         metaObject.setUrl(url);
         Map<String, String> meta = new HashMap<>();
         meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
-        if(messageType.equals("post"))
+        if (messageType.equals("post"))
             meta.put(MessageMetaConstant.MESSAGE_SUBJECT, "新的汇报");
-        else if(messageType.equals("update"))
+        else if (messageType.equals("update"))
             meta.put(MessageMetaConstant.MESSAGE_SUBJECT, "汇报更新");
         meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
         message.setMeta(meta);
@@ -837,7 +839,6 @@ public class WorkReportServiceImpl implements WorkReportService {
             if (receiverMap == null)
                 throw RuntimeErrorException.errorWith(WorkReportErrorCode.SCOPE, WorkReportErrorCode.ERROR_NO_READ_PERMISSIONS,
                         "no read permissions.");
-
             receiverMap.setReadStatus(WorkReportReadStatus.READ.getCode());
             workReportValProvider.updateWorkReportValReceiverMap(receiverMap);
         }
