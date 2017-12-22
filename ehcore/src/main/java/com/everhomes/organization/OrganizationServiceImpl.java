@@ -834,6 +834,12 @@ public class OrganizationServiceImpl implements OrganizationService {
             dto.setMember(ConvertHelper.convert(m, OrganizationMemberDTO.class));
         }
 
+        //21002 企业管理1.4（来源于第三方数据，企业名称栏为灰色不可修改） add by xiongying20171219
+        EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(dto.getOrganizationId());
+        if(customer != null && !StringUtils.isEmpty(customer.getNamespaceCustomerType())) {
+            dto.setThirdPartFlag(true);
+        }
+
         return dto;
     }
 
@@ -6064,6 +6070,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public void deleteOrganizationJobPositionsByPositionIdAndDetails(DeleteOrganizationJobPositionsByPositionIdAndDetailsCommand cmd) {
+        //权限校验
+        cmd.getDetailIds().forEach(detailId ->{
+            Long departmentId = getDepartmentByDetailId(detailId);
+            checkOrganizationpPivilege(departmentId, PrivilegeConstants.DELETE_PERSON);
+        });
 //        1. 删除通用岗位+detailIds所确认的部门岗位条目
         List<OrganizationJobPositionMap> jobPositionMaps = organizationProvider.listOrganizationJobPositionMapsByJobPositionId(cmd.getJobPositionId());
         if (jobPositionMaps != null && jobPositionMaps.size() > 0) {
@@ -14225,20 +14236,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public void checkOrganizationpPivilege(Long orgId, Long pivilegeId){
-        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
-        listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
-        listServiceModuleAppsCommand.setModuleId(FlowConstants.ORGANIZATION_MODULE);
-        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
         Long organizaitonId = getTopEnterpriserIdOfOrganization(orgId);
-        if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
-            if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), organizaitonId, organizaitonId, pivilegeId, apps.getServiceModuleApps().get(0).getId(), orgId, null)){
-                LOGGER.error("error_no_privileged. orgId = {}, userId = {}, pivilegeId={}", orgId, UserContext.currentUserId(), pivilegeId);
-                throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
-                        "check app privilege error");
-            }
-        }else{
-            LOGGER.error("no appId. rgId = {}, userId = {}", orgId, UserContext.currentUserId());
-        }
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), organizaitonId, pivilegeId, FlowConstants.ORGANIZATION_MODULE, null, null, orgId, null);
     }
 
     @Override

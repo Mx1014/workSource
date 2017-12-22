@@ -1067,7 +1067,7 @@ public class ForumServiceImpl implements ForumService {
         final Post tempPost = post;
         LocalEventBus.publish(event -> {
             LocalEventContext context = new LocalEventContext();
-            context.setUid(userId);
+            context.setUid(tempPost.getCreatorUid());
             context.setNamespaceId(UserContext.getCurrentNamespaceId());
             event.setContext(context);
 
@@ -2156,21 +2156,22 @@ public class ForumServiceImpl implements ForumService {
                 event.setEntityType(EhForumPosts.class.getSimpleName());
                 event.setEntityId(tempPost.getId());
                 event.setEventName(SystemEvent.FORUM_POST_LIKE.suffix(
-                        tempPost.getContentCategory(), tempPost.getModuleType(), tempPost.getModuleCategoryId()));
+                        tempPost.getContentCategory(), tempPost.getEmbeddedAppId(),
+                        tempPost.getModuleType(), tempPost.getModuleCategoryId()));
             });
         } catch(Exception e) {
             LOGGER.error("Failed to update the like count of post, userId=" + operatorId + ", topicId=" + topicId, e);
         }
 
         //点赞对接积分  add by yanjun 20171211
-        // likeTopicPoints(topicId);
+        // likeTopicEvent(topicId);
     }
 
 
-    /*private void likeTopicPoints(Long postId){
+    /*private void likeTopicEvent(Long postId) {
         final Post post = this.forumProvider.findPostById(postId);
         String eventName = null;
-        switch (ForumModuleType.fromCode(post.getModuleType())){
+        switch (ForumModuleType.fromCode(post.getModuleType())) {
             case FORUM:
                 eventName = SystemEvent.FORUM_POST_LIKE.suffix(post.getModuleCategoryId());
                 break;

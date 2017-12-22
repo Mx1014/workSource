@@ -265,18 +265,25 @@ public class AssetServiceImpl implements AssetService {
     }
 
     private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId) {
-        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
-        cmd1.setActionType((byte)13);
-        cmd1.setModuleId(PrivilegeConstants.ASSET_MODULE_ID);
-        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
-        ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
-        Long appId = res.getServiceModuleApps().get(0).getId();
-        OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), UserContext.currentUserId(), OrganizationType.ENTERPRISE.getCode());
-        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), member.getOrganizationId(), member.getOrganizationId(),priviledgeId , appId, null,communityId )){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                    "Insufficient privilege");
-
-        }
+//        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
+//        cmd1.setActionType((byte)13);
+//        cmd1.setModuleId(PrivilegeConstants.ASSET_MODULE_ID);
+//        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+//        ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
+//        Long appId = null;
+//        if(null != res && res.getServiceModuleApps().size() > 0){
+//            appId = res.getServiceModuleApps().get(0).getId();
+//        }
+//        OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), UserContext.currentUserId(), OrganizationType.ENTERPRISE.getCode());
+//        if(member != null && !org.springframework.util.StringUtils.isEmpty(member.getGroupPath())){
+//            Long organizaitonId = Long.valueOf(member.getGroupPath().split("/")[1]);
+//            member.setOrganizationId(organizaitonId);
+//        }
+//        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), member.getOrganizationId(), member.getOrganizationId(),priviledgeId , appId, null,communityId )){
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+//                    "Insufficient privilege");
+//        }
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), null, priviledgeId, PrivilegeConstants.ASSET_MODULE_ID, (byte)13, null, null, communityId);
     }
 
     @Override
@@ -2538,74 +2545,76 @@ public class AssetServiceImpl implements AssetService {
     @Scheduled(cron = "0 0 12 * * ?")
     public void autoBillNotice() {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
-            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
-            Calendar today = Calendar.getInstance();
-            List<PaymentNoticeConfig> configs = assetProvider.listAllNoticeConfigs();
+            this.coordinationProvider.getNamedLock("asset_auto_notice").tryEnter(() -> {
+                SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+                Calendar today = Calendar.getInstance();
+                List<PaymentNoticeConfig> configs = assetProvider.listAllNoticeConfigs();
 //            List<PaymentNoticeConfig> configs = new ArrayList<>();
 
-            Map<Long, List<Integer>> noticeConfigs = new HashMap<>();
-            for (int i = 0; i < configs.size(); i++) {
-                PaymentNoticeConfig config = configs.get(i);
-                if (noticeConfigs.containsKey(config.getOwnerId())) {
-                    noticeConfigs.get(config.getOwnerId()).add(config.getNoticeDayBefore());
-                } else {
-                    List<Integer> days = new ArrayList<>();
-                    days.add(config.getNoticeDayBefore());
-                    noticeConfigs.put(config.getOwnerId(), days);
+                Map<Long, List<Integer>> noticeConfigs = new HashMap<>();
+                for (int i = 0; i < configs.size(); i++) {
+                    PaymentNoticeConfig config = configs.get(i);
+                    if (noticeConfigs.containsKey(config.getOwnerId())) {
+                        noticeConfigs.get(config.getOwnerId()).add(config.getNoticeDayBefore());
+                    } else {
+                        List<Integer> days = new ArrayList<>();
+                        days.add(config.getNoticeDayBefore());
+                        noticeConfigs.put(config.getOwnerId(), days);
+                    }
                 }
-            }
-            Map<Long, PaymentBills> needNoticeBills = new HashMap<>();
-            // noticeConfig map中存有communityid和notice days
-            for (Map.Entry<Long, List<Integer>> map : noticeConfigs.entrySet()) {
-                List<PaymentBills> bills = assetProvider.getAllBillsByCommunity(map.getKey());
-                for (int i = 0; i < bills.size(); i++) {
-                    PaymentBills bill = bills.get(i);
-                    if (!needNoticeBills.containsKey(bill.getId())) {
-                        //已经在提醒名单的bill不需要再提醒
-                        List<Integer> days = map.getValue();
-                        for (int j = 0; j < days.size(); j++) {
-                            Integer day = days.get(j);
-                            String dueDayDeadline = bill.getDueDayDeadline();
-                            try {
-                                Calendar deadline = Calendar.getInstance();
-                                deadline.setTime(yyyyMMdd.parse(dueDayDeadline));
-                                deadline.add(Calendar.DAY_OF_MONTH, day * (-1));
-                                if (today.compareTo(deadline) != -1) {
-                                    needNoticeBills.put(bill.getId(), bill);
+                Map<Long, PaymentBills> needNoticeBills = new HashMap<>();
+                // noticeConfig map中存有communityid和notice days
+                for (Map.Entry<Long, List<Integer>> map : noticeConfigs.entrySet()) {
+                    List<PaymentBills> bills = assetProvider.getAllBillsByCommunity(map.getKey());
+                    for (int i = 0; i < bills.size(); i++) {
+                        PaymentBills bill = bills.get(i);
+                        if (!needNoticeBills.containsKey(bill.getId())) {
+                            //已经在提醒名单的bill不需要再提醒
+                            List<Integer> days = map.getValue();
+                            for (int j = 0; j < days.size(); j++) {
+                                Integer day = days.get(j);
+                                String dueDayDeadline = bill.getDueDayDeadline();
+                                try {
+                                    Calendar deadline = Calendar.getInstance();
+                                    deadline.setTime(yyyyMMdd.parse(dueDayDeadline));
+                                    deadline.add(Calendar.DAY_OF_MONTH, day * (-1));
+                                    if (today.compareTo(deadline) != -1) {
+                                        needNoticeBills.put(bill.getId(), bill);
+                                    }
+                                } catch (Exception e) {
+                                    continue;
                                 }
-                            } catch (Exception e) {
-                                continue;
                             }
                         }
                     }
                 }
-            }
-            List<PaymentBills> targetBills = new ArrayList<>();
-            for (Map.Entry<Long, PaymentBills> b : needNoticeBills.entrySet()) {
-                targetBills.add(b.getValue());
-            }
-            //
-            List<Long> billIds = new ArrayList<>();
-            List<NoticeInfo> noticeInfoList = new ArrayList<>();
+                List<PaymentBills> targetBills = new ArrayList<>();
+                for (Map.Entry<Long, PaymentBills> b : needNoticeBills.entrySet()) {
+                    targetBills.add(b.getValue());
+                }
+                //
+                List<Long> billIds = new ArrayList<>();
+                List<NoticeInfo> noticeInfoList = new ArrayList<>();
 //            for (int k = 0; k < targetBills.size(); k++) {
-            for (int k = 0; k < targetBills.size(); k++) {
-                PaymentBills b = targetBills.get(k);
-                billIds.add(b.getId());
-                NoticeInfo info = new NoticeInfo();
-                info.setPhoneNums(b.getNoticetel());
-                info.setDateStr(b.getDateStr());
-                info.setTargetName(b.getTargetName());
-                info.setTargetType(b.getTargetType());
-                info.setAmountOwed(b.getAmountOwed());
-                info.setTargetId(b.getTargetId());
-                info.setAmountRecevable(b.getAmountReceivable());
-                info.setAppName(assetProvider.findAppName(b.getNamespaceId()));
-                info.setOwnerId(b.getOwnerId());
-                info.setOwnerType(b.getOwnerType());
-                noticeInfoList.add(info);
-                NoticeWithTextAndMessage(billIds, noticeInfoList);
-            }
-            LOGGER.info("done");
+                for (int k = 0; k < targetBills.size(); k++) {
+                    PaymentBills b = targetBills.get(k);
+                    billIds.add(b.getId());
+                    NoticeInfo info = new NoticeInfo();
+                    info.setPhoneNums(b.getNoticetel());
+                    info.setDateStr(b.getDateStr());
+                    info.setTargetName(b.getTargetName());
+                    info.setTargetType(b.getTargetType());
+                    info.setAmountOwed(b.getAmountOwed());
+                    info.setTargetId(b.getTargetId());
+                    info.setAmountRecevable(b.getAmountReceivable());
+                    info.setAppName(assetProvider.findAppName(b.getNamespaceId()));
+                    info.setOwnerId(b.getOwnerId());
+                    info.setOwnerType(b.getOwnerType());
+                    noticeInfoList.add(info);
+                    NoticeWithTextAndMessage(billIds, noticeInfoList);
+                }
+                LOGGER.info("done");
+            });
         }
     }
     @Override

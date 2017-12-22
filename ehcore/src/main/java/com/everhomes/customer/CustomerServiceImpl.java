@@ -21,6 +21,7 @@ import com.everhomes.organization.*;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.organization.*;
+import com.everhomes.user.UserProvider;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.tomcat.jni.Time;
@@ -152,6 +153,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private FieldService fieldService;
+
+    @Autowired
+    private UserProvider userProvider;
 
     private void checkPrivilege(Integer ns) {
         Integer namespaceId = UserContext.getCurrentNamespaceId(ns);
@@ -320,6 +324,10 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
 
+        //21002 企业管理1.4（来源于第三方数据，企业名称栏为灰色不可修改） add by xiongying20171219
+        if(!StringUtils.isEmpty(customer.getNamespaceCustomerType())) {
+            dto.setThirdPartFlag(true);
+        }
         return dto;
     }
 
@@ -395,7 +403,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         if(cmd.getFoundingTime() != null) {
-            customer.setFoundingTime(new Timestamp(cmd.getFoundingTime()));
+            updateCustomer.setFoundingTime(new Timestamp(cmd.getFoundingTime()));
         }
         updateCustomer.setStatus(CommonStatus.ACTIVE.getCode());
         //保存经纬度
@@ -2410,10 +2418,15 @@ public class CustomerServiceImpl implements CustomerService {
 	private CustomerEventDTO convertCustomerEventDTO(CustomerEvent event) {
 		CustomerEventDTO dto = ConvertHelper.convert(event, CustomerEventDTO.class);
         if(dto.getCreatorUid() != null) {
-        	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getCreatorUid());
-        	if(null != detail && null != detail.getContactName()){
-        		dto.setCreatorName(detail.getContactName());
-        	}        	
+            //用户可能不在组织架构中 所以用nickname
+//        	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getCreatorUid());
+//            if(null != detail && null != detail.getContactName()){
+//        		dto.setCreatorName(detail.getContactName());
+//        	}
+            User user = userProvider.findUserById(dto.getCreatorUid());
+            if(user != null) {
+                dto.setCreatorName(user.getNickName());
+            }
         }
         return dto;
 	}

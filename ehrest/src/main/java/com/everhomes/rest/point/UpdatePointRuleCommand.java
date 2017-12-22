@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 /**
  * <ul>
  *     <li>id: id</li>
+ *     <li>systemId: systemId</li>
  *     <li>description: 描述</li>
  *     <li>points: 积分数量</li>
  *     <li>limitType: 限制类型 {@link com.everhomes.rest.point.PointRuleLimitType}</li>
@@ -18,6 +19,7 @@ public class UpdatePointRuleCommand {
 
     @NotNull
     private Long id;
+    private Long systemId;
     private String description;
     private Long points;
     private Byte limitType;
@@ -30,6 +32,14 @@ public class UpdatePointRuleCommand {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getSystemId() {
+        return systemId;
+    }
+
+    public void setSystemId(Long systemId) {
+        this.systemId = systemId;
     }
 
     public String getDescription() {
