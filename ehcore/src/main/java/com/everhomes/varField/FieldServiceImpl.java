@@ -562,6 +562,9 @@ public class FieldServiceImpl implements FieldService {
                 ListCustomerTrackingsCommand cmd9  = new ListCustomerTrackingsCommand();
                 cmd9.setCustomerId(customerId);
                 cmd9.setCustomerType(customerType);
+                cmd9.setCommunityId(communityId);
+                cmd9.setNamespaceId(namespaceId);
+                cmd9.setOrgId(orgId);
                 List<CustomerTrackingDTO> customerTrackingDTOS = customerService.listCustomerTrackings(cmd9);
                 if(customerTrackingDTOS == null) customerTrackingDTOS = new ArrayList<>();
                 for(int j = 0; j < customerTrackingDTOS.size(); j++){
@@ -572,6 +575,9 @@ public class FieldServiceImpl implements FieldService {
                 ListCustomerTrackingPlansCommand cmd10  = new ListCustomerTrackingPlansCommand();
                 cmd10.setCustomerId(customerId);
                 cmd10.setCustomerType(customerType);
+                cmd10.setCommunityId(communityId);
+                cmd10.setNamespaceId(namespaceId);
+                cmd10.setOrgId(orgId);
                 List<CustomerTrackingPlanDTO> customerTrackingPlanDTOS = customerService.listCustomerTrackingPlans(cmd10);
                 if(customerTrackingPlanDTOS == null) customerTrackingPlanDTOS = new ArrayList<>();
                 for(int j = 0; j < customerTrackingPlanDTOS.size(); j++){
@@ -778,11 +784,12 @@ public class FieldServiceImpl implements FieldService {
 
     @Override
     public void exportFieldsExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response) {
-        if(ModuleName.ENTERPRISE_CUSTOMER.equals(ModuleName.fromName(cmd.getModuleName()))) {
-            customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
+        if(ModuleName.ENTERPRISE_CUSTOMER.getName().equals(cmd.getModuleName())) {
+            customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
         }
         //将command转换为listFieldGroup的参数command
         ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
+
         //获得客户所拥有的sheet
         List<FieldGroupDTO> allGroups = listFieldGroups(cmd1);
 //        if(allGroupsf==null) allGroupsf= new ArrayList<>();

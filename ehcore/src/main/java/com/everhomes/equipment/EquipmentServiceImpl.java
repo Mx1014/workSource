@@ -48,8 +48,6 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.parking.ParkingLocalStringCode;
 import com.everhomes.rest.pmNotify.*;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityGroupType;
@@ -2707,8 +2705,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public ImportDataResponse importEquipments(ImportOwnerCommand cmd, MultipartFile mfile, Long userId) {
-		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_UPDATE, 0L);
-		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
+		/*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_UPDATE, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);*/
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_UPDATE,cmd.getTargetId());
 		ImportDataResponse response =new ImportDataResponse();
 		try {
 			//解析excel
@@ -4642,12 +4641,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public StatLastDaysEquipmentTasksResponse statLastDaysEquipmentTasks(StatLastDaysEquipmentTasksCommand cmd) {
-		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STAT_PANDECT, 0L);
+		/*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STAT_PANDECT, 0L);
 		if(cmd.getTargetId() == null) {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-		}
+		}*/
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_STAT_PANDECT,cmd.getTargetId());
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		TasksStatData statTasks = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
