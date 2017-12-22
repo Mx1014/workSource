@@ -4373,6 +4373,13 @@ public class ForumServiceImpl implements ForumService {
                 
                 String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
                 String relativeUrl = configProvider.getValue(ConfigConstants.POST_SHARE_URL, "");
+
+                Integer namespaceId = post.getNamespaceId();
+                if(namespaceId == null){
+                    namespaceId = UserContext.getCurrentNamespaceId();
+                }
+
+
                 if(homeUrl.length() == 0 || relativeUrl.length() == 0) {
                     LOGGER.error("Invalid home url or post sharing url, homeUrl=" + homeUrl 
                         + ", relativeUrl=" + relativeUrl + ", postId=" + post.getId());
@@ -4394,9 +4401,9 @@ public class ForumServiceImpl implements ForumService {
                         if(activity != null && activity.getWechatSignup() != null){
                             wechatSignup = activity.getWechatSignup();
                         }
-                        post.setShareUrl(homeUrl + relativeUrl + "?ns=" + post.getNamespaceId()+"&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup);
+                        post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup);
                 	} else {
-                		post.setShareUrl(homeUrl + relativeUrl + "?forumId=" + post.getForumId() + "&topicId=" + post.getId());
+                		post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId());
                 	}
                 }
             } catch(Exception e) {
