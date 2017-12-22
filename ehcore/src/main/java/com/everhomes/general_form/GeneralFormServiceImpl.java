@@ -188,11 +188,13 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                                 result.add(formVal);
                                 break;
                             case IMAGE:
-                                PostApprovalFormImageValue imageValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormImageValue.class);
-                                if (null == imageValue || imageValue.getUris() == null)
+                                PostApprovalFormImageValue imageObj = JSON.parseObject(val.getFieldValue(), PostApprovalFormImageValue.class);
+                                if (null == imageObj || imageObj.getUris() == null)
                                     break;
+                                GeneralFormImageValue imageValue = new GeneralFormImageValue();
+                                imageValue.setUris(imageObj.getUris());
                                 List<String> urls = new ArrayList<>();
-                                for (String uriString : imageValue.getUris()) {
+                                for (String uriString : imageObj.getUris()) {
                                     String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
                                     urls.add(url);
                                 }
@@ -201,12 +203,13 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                                 result.add(formVal);
                                 break;
                             case FILE:
-                                PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormFileValue.class);
-                                if (null == fileValue || fileValue.getFiles() == null)
+                                PostApprovalFormFileValue fileObj = JSON.parseObject(val.getFieldValue(), PostApprovalFormFileValue.class);
+                                if (null == fileObj || fileObj.getFiles() == null)
                                     break;
-                                List<FlowCaseFileDTO> files = new ArrayList<>();
-                                for (PostApprovalFormFileDTO dto2 : fileValue.getFiles()) {
-                                    FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
+
+                                List<GeneralFormFileValueDTO> files = new ArrayList<>();
+                                for (PostApprovalFormFileDTO dto2 : fileObj.getFiles()) {
+                                    GeneralFormFileValueDTO fileDTO = new GeneralFormFileValueDTO();
                                     String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
                                     ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
                                     fileDTO.setUri(dto2.getUri());
@@ -215,9 +218,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                                     fileDTO.setFileSize(resource.getResourceSize());
                                     files.add(fileDTO);
                                 }
-                                FlowCaseFileValue value = new FlowCaseFileValue();
-                                value.setFiles(files);
-                                formVal.setFieldValue(JSON.toJSONString(value));
+                                GeneralFormFileValue fileValue = new GeneralFormFileValue();
+                                fileValue.setFiles(files);
+                                formVal.setFieldValue(JSON.toJSONString(fileValue));
                                 result.add(formVal);
                                 break;
                             case INTEGER_TEXT:
