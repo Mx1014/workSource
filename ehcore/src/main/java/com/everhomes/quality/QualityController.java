@@ -858,7 +858,7 @@ public class QualityController extends ControllerBase {
 	 * <b>URL: /quality/exportSampleTaskCommunityScores</b>
 	 * <p>导出绩效考核列表</p>
 	 */
-	@RequestMapping("exportEquipments")
+	@RequestMapping("exportSampleTaskCommunityScores")
 	public HttpServletResponse export(CountSampleTaskCommunityScoresCommand cmd, HttpServletResponse httpResponse) {
 
 		HttpServletResponse response = qualityService.exportSampleTaskCommunityScores(cmd, httpResponse);
