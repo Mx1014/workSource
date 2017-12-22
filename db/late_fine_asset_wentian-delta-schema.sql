@@ -18,6 +18,10 @@ CREATE TABLE `eh_payment_late_fine`(
   PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 
+-- 滞纳金变量 by wentian
+SET @var_id = (SELECT max(`id`) from `eh_payment_variables`);
+INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@var_id:=@var_id+1, NULL, '6', '欠费', '0', '2017-10-16 09:31:00', NULL, '2017-10-16 09:31:00', 'qf');
+
 -- 4.12.1
 -- merge from forum2.6 by yanjun 201712121010 start
 

@@ -2579,7 +2579,7 @@ public class AssetServiceImpl implements AssetService {
                         LOGGER.error("late fine cal error, the corresponding formula is more than one or less than one, the bill item id is "+item.getId());
                     }
                     String formulaJson = formulas.get(0).getFormulaJson();
-                    formulaJson = formulaJson.replace("gdje",amountOwed.toString());
+                    formulaJson = formulaJson.replace("qf",amountOwed.toString());
                     BigDecimal fineAmount = CalculatorUtil.arithmetic(formulaJson);
                     //开始构造一条滞纳金记录
                     PaymentLateFine fine = new PaymentLateFine();
