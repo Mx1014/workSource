@@ -389,7 +389,7 @@ public class NewsController extends ControllerBase {
 	 */
 	@RequestMapping("getCategoryIdByEntryId")
 	@RestReturn(GetCategoryIdByEntryIdResponse.class)
-	public RestResponse syncNews(GetCategoryIdByEntryIdCommand cmd){
+	public RestResponse getCategoryIdByEntryId(GetCategoryIdByEntryIdCommand cmd){
 		RestResponse response = new RestResponse(newsService.getCategoryIdByEntryId(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

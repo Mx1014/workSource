@@ -139,7 +139,7 @@ public class NewsProviderImpl implements NewsProvider {
 	@Override
 	public List<News> findAllActiveNewsByPage(Long from, Integer pageSize){
 		return getReadOnlyContext().select().from(Tables.EH_NEWS)
-		.where(Tables.EH_NEWS.STATUS.eq(NewsStatus.ACTIVE.getCode()))
+		.where(Tables.EH_NEWS.STATUS.eq(NewsStatus.ACTIVE.getCode()).or(Tables.EH_NEWS.STATUS.eq(NewsStatus.DRAFT.getCode())))
 		.limit(from.intValue(), pageSize.intValue()).fetch().map(r -> ConvertHelper.convert(r, News.class));
 	}
 
