@@ -20,6 +20,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.module.ServiceModuleService;
+import com.everhomes.namespace.NamespacesService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
@@ -30,6 +31,7 @@ import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.launchpad.*;
+import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
@@ -129,6 +131,9 @@ public class PortalServiceImpl implements PortalService {
 
 	@Autowired
 	private ServiceModuleService serviceModuleService;
+
+	@Autowired
+	private NamespacesService namespacesService;
 
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
@@ -1783,31 +1788,31 @@ public class PortalServiceImpl implements PortalService {
 			list.add(new Tuple<>(cmd.getLocation(), cmd.getName()));
 		}
 
+		List<NamespaceInfoDTO> namespaceInfoDTOS = new ArrayList<>();
+		if(cmd.getNamespaceId() != null){
+			NamespaceInfoDTO newdto = new NamespaceInfoDTO();
+			newdto.setId(cmd.getNamespaceId());
+			namespaceInfoDTOS.add(newdto);
+		}else {
+			namespaceInfoDTOS = namespacesService.listNamespace();
+		}
 
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		User user = userProvider.findUserById(UserContext.currentUserId());
-		//执行太慢，开一个线程来做
-		ExecutorUtil.submit(new Runnable() {
-			@Override
-			public void run() {
+		for(NamespaceInfoDTO dto: namespaceInfoDTOS){
+			//一个个域空间同步
+			dbProvider.execute((status -> {
 				try {
-					UserContext.setCurrentNamespaceId(namespaceId);
-					UserContext.setCurrentUser(user);
-
+					LOGGER.info("syncLaunchPadData namespaceId={}  start", dto.getId());
 					for (Tuple<String, String> t: list) {
-						syncLayout(cmd.getNamespaceId(), t.first(), t.second());
+						syncLayout(dto.getId(), t.first(), t.second());
 					}
-
-					//设置完成之后要清空
-					UserContext.setCurrentNamespaceId(null);
-					UserContext.setCurrentUser(null);
+					LOGGER.info("syncLaunchPadData namespaceId={}  end", dto.getId());
 				} catch (Exception e) {
-					LOGGER.error("syncLaunchPadData error", e);
+					LOGGER.error("syncLaunchPadData namespaceId=" + dto.getId() + "  end", e);
 				}
-			}
-		});
+				return null;
+			}));
 
-
+		}
 
 	}
 

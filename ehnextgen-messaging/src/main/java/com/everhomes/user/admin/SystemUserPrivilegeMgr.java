@@ -339,7 +339,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         LOGGER.debug("checkUserPrivilege get appId = {}", appId);
         if(appId ==  null){
             throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
-                    "cannot find app for it, namespaceId = {},  moduleId = {}, customTag = {}", UserContext.getCurrentNamespaceId(), moduleId, customTag);
+                    "cannot find app for it, namespaceId = "+UserContext.getCurrentNamespaceId()+",  moduleId = "+moduleId+", customTag = "+customTag);
         }
         if(currentOrgId == null){
             OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), userId, OrganizationType.ENTERPRISE.getCode());
@@ -350,8 +350,9 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         if(!checkUserPrivilege(userId, EntityType.ORGANIZATIONS.getCode(), currentOrgId, currentOrgId, privilegeId, appId, checkOrgId,  checkCommunityId)){
             throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
                     "check app privilege error");
+        }else{
+            return true;
         }
-        return false;
     }
 
 
@@ -415,11 +416,11 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         //校验全部范围下是否拥有权限
         if(aclProvider.checkAccessEx(EntityType.ALL.getCode(), 0L, privilegeId, descriptors)){
             return true;
-}
+        }
 
-//校验全部范围下是auth_warehouse_wentian-delta-data-release.sql否拥有模块的全部权限
+        //校验全部范围下是auth_warehouse_wentian-delta-data-release.sql否拥有模块的全部权限
         return checkModuleAllPrivileges(EntityType.ALL.getCode(), 0L, descriptors, privilegeId);
-                }
+    }
 
 
 
