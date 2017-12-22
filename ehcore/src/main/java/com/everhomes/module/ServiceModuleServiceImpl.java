@@ -26,6 +26,7 @@ import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.module.*;
 import com.everhomes.rest.oauth2.ControlTargetOption;
 import com.everhomes.rest.oauth2.ModuleManagementType;
+import com.everhomes.rest.openapi.techpark.AllFlag;
 import com.everhomes.rest.portal.MultipleFlag;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
@@ -57,7 +58,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static com.everhomes.rest.oauth2.ControlTargetOption.ALL_COMMUNITY;
@@ -669,7 +669,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             return 1;
         }
         if(cmd.getAppId() != null){
-            if(userPrivilegeMgr.checkModuleAppAdmin(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), cmd.getUserId(), cmd.getAppId())){
+            if(userPrivilegeMgr.checkModuleAppAdmin(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), userId, cmd.getAppId())){
                 return 1;
             }
         }
@@ -1083,5 +1083,51 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         }
 
         return functionIds;
+    }
+
+    @Override
+    public Byte checkUserRelatedProjectAllFlag(ListUserRelatedProjectByModuleCommand cmd) {
+        Long userId = cmd.getUserId() != null ?  cmd.getUserId(): UserContext.current().getUser().getId();
+        if(checkModuleManage(userId, cmd.getOrganizationId(), cmd.getModuleId())){
+            return AllFlag.ALL.getCode();
+        }else{
+            List<Target> targets = new ArrayList<>();
+            targets.add(new Target(com.everhomes.entity.EntityType.USER.getCode(), userId));
+            //获取人员的所有相关机构
+            List<Long> orgIds = organizationService.getIncludeOrganizationIdsByUserId(userId, cmd.getOrganizationId());
+            for (Long orgId: orgIds) {
+                targets.add(new Target(com.everhomes.entity.EntityType.ORGANIZATIONS.getCode(), orgId));
+            }
+
+            //获取人员和人员所有机构所赋予模块的所属项目范围(模块管理)
+            List<Project> projects = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(EntityType.SERVICE_MODULE.getCode(), cmd.getModuleId(), targets);
+            for (Project project: projects) {
+                //在模块下拥有全部项目权限
+                if(EntityType.ALL == EntityType.fromCode(project.getProjectType())){
+                    return AllFlag.ALL.getCode();
+                }
+            }
+            //获取人员和人员所有机构所赋予模块的所属项目范围(应用管理员) -- add by lei.lv
+            List<Authorization> authorizations_apps =  authorizationProvider.listAuthorizations(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), userId, com.everhomes.entity.EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(), true, null, null);
+            if(authorizations_apps != null && authorizations_apps.size() > 0){
+                authorizations_apps = authorizations_apps.stream().filter(r->ModuleManagementType.fromCode(r.getModuleControlType()) == COMMUNITY_CONTROL).limit(1).collect(Collectors.toList());
+                if(authorizations_apps !=null && authorizations_apps.size() > 0) {
+                    Authorization authorization = authorizations_apps.get(0);//每一个userId+organizationId在同一个type下只有一个control_id
+                    if (ControlTargetOption.fromCode(authorization.getControlOption()) == ALL_COMMUNITY){
+                        return AllFlag.ALL.getCode();
+                    }
+                }
+            }
+            //获取人员和人员所有机构所赋予模块的所属项目范围(权限细化)
+            List<Project> project_relation = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(IdentityType.ORDINARY.getCode(), com.everhomes.entity.EntityType.SERVICE_MODULE_APP.getCode(), cmd.getModuleId(), targets);
+            for (Project project: project_relation) {
+                //在模块下拥有全部项目权限
+                if(EntityType.ALL == EntityType.fromCode(project.getProjectType())){
+                    return AllFlag.ALL.getCode();
+                }
+            }
+        }
+
+        return AllFlag.NOT_ALL.getCode();
     }
 }

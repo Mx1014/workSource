@@ -299,7 +299,18 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * <b>URL: /parking/exportParkingCardRequests</b>
+     * <p>导出指定园区/小区、停车场、车牌对应的月卡申请列表</p>
+     */
+    @RequestMapping("exportParkingCardRequests")
+    @RestReturn(value=ListParkingCardRequestResponse.class)
+    public void exportParkingCardRequests(SearchParkingCardRequestsCommand cmd, HttpServletResponse response) {
+
+        parkingService.exportParkingCardRequests(cmd, response);
+    }
+
     /**
      * <b>URL: /parking/requestParkingCard</b>
      * <p>申请月卡</p>
