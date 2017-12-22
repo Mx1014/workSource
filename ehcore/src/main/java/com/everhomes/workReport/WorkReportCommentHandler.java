@@ -87,7 +87,8 @@ public class WorkReportCommentHandler implements CommentHandler {
                         content = getMessageContent(WorkReportNotificationTemplateCode.AUTHOR_REPLY_WORK_REPORT_VAL,
                                 null, workReportService.fixUpUserName(user.getId()), report.getReportName());
                         subject = getMetaSubject(WorkReportNotificationTemplateCode.AUTHOR_REPLY_WORK_REPORT_VAL);
-//                        sendMessageAfterCommentWorkReportVal(content, subject, parentComment.getCreatorUserId(), reportVal.getReportId(), reportVal.getId());
+                        WorkReportValComment parentComment = workReportValProvider.getWorkReportValCommentById(cmd.getParentCommentId());
+                        sendMessageAfterCommentWorkReportVal(content, subject, parentComment.getCreatorUserId(), reportVal.getReportId(), reportVal.getId());
                     }
                 } else {
                     if (cmd.getParentCommentId() == null) {
@@ -101,7 +102,8 @@ public class WorkReportCommentHandler implements CommentHandler {
                         content = getMessageContent(WorkReportNotificationTemplateCode.READER_WORK_REPORT_VAL_FOR_READER,
                                 workReportService.fixUpUserName(user.getId()), workReportService.fixUpUserName(reportVal.getApplierUserId()), report.getReportName());
                         subject = getMetaSubject(WorkReportNotificationTemplateCode.READER_WORK_REPORT_VAL_FOR_READER);
-//                        sendMessageAfterCommentWorkReportVal(content, subject, parentComment.getCreatorUserId(), reportVal.getReportId(), reportVal.getId()));
+                        WorkReportValComment parentComment = workReportValProvider.getWorkReportValCommentById(cmd.getParentCommentId());
+                        sendMessageAfterCommentWorkReportVal(content, subject, parentComment.getCreatorUserId(), reportVal.getReportId(), reportVal.getId());
 
                         content = getMessageContent(WorkReportNotificationTemplateCode.READER_COMMENT_WORK_REPORT_VAL,
                                 workReportService.fixUpUserName(user.getId()), null, report.getReportName());
@@ -131,6 +133,7 @@ public class WorkReportCommentHandler implements CommentHandler {
         comment.setOwnerType(reportVal.getOwnerType());
         comment.setOwnerType(reportVal.getOwnerType());
         comment.setReportValId(reportVal.getId());
+        comment.setParentCommentId(cmd.getParentCommentId());
         comment.setContentType(cmd.getContentType());
         comment.setContent(cmd.getContent());
         comment.setCreatorUserId(user.getId());
@@ -152,68 +155,6 @@ public class WorkReportCommentHandler implements CommentHandler {
             }
         }
         return attachments;
-    }
-
-    @Override
-    public ListCommentsResponse listComments(ListCommentsCommand cmd) {
-        ListCommentsResponse response = new ListCommentsResponse();
-        List<CommentDTO> comments = new ArrayList<>();
-        Long nextPageAnchor = null;
-
-        OwnerTokenDTO ownerTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getOwnerToken(), OwnerTokenDTO.class);
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        if (cmd.getPageSize() == null)
-            cmd.setPageSize(20);
-        List<WorkReportValComment> results = workReportValProvider.listWorkReportValComments(namespaceId, ownerTokenDto.getId(), cmd.getPageAnchor(), cmd.getPageSize());
-        if (results != null && results.size() > 0) {
-
-            if (results.size() > cmd.getPageSize()) {
-                results.remove(results.size() - 1);
-                nextPageAnchor = results.get(results.size() - 1).getId();
-            }
-
-            List<Long> commentIds = results.stream().map(r -> r.getId()).collect(Collectors.toList());
-            Map<Long, List<AttachmentDTO>> attachments = listWorkReportValCommentAttachments(namespaceId, commentIds);
-            results.forEach(r -> {
-                CommentDTO dto = ConvertHelper.convert(r, CommentDTO.class);
-                dto.setCreatorUid(r.getCreatorUserId());
-                dto.setCreatorNickName(workReportService.fixUpUserName(dto.getCreatorUid()));
-                dto.setCreatorAvatarUrl(workReportService.getUserAvatar(dto.getCreatorUid()));
-                dto.setAttachments(attachments.get(dto.getId()));
-                comments.add(dto);
-            });
-        }
-
-        response.setNextPageAnchor(nextPageAnchor);
-        response.setCommentDtos(comments);
-        response.setCommentCount(Long.valueOf(comments.size()));
-        return response;
-    }
-
-    private Map<Long, List<AttachmentDTO>> listWorkReportValCommentAttachments(Integer namespaceId, List<Long> commentIds) {
-        Map<Long, List<AttachmentDTO>> res = new HashMap<>();
-        List<WorkReportValCommentAttachment> results = workReportValProvider.listWorkReportValCommentAttachments(namespaceId, commentIds);
-        if (results != null && results.size() > 0) {
-            List<AttachmentDTO> attachmentDTOS = results.stream().map(r -> {
-                AttachmentDTO dto = ConvertHelper.convert(r, AttachmentDTO.class);
-                dto.setOwnerId(r.getCommentId());
-                dto.setContentUrl(contentServerService.parserUri(r.getContentUri()));
-                return dto;
-            }).collect(Collectors.toList());
-            res = attachmentDTOS.stream().collect(Collectors.groupingBy
-                    (AttachmentDTO::getOwnerId));
-        }
-        return res;
-    }
-
-    @Override
-    public void deleteComment(DeleteCommonCommentCommand cmd) {
-        WorkReportValComment comment = workReportValProvider.getWorkReportValCommentById(cmd.getId());
-        dbProvider.execute((TransactionStatus status) -> {
-            workReportValProvider.deleteWorkReportValComment(comment);
-            workReportValProvider.deleteCommentAttachmentsByCommentId(UserContext.getCurrentNamespaceId(), comment.getId());
-            return null;
-        });
     }
 
     private String getMessageContent(Integer templateCode, String creatorName, String applierName, String reportName) {
@@ -287,5 +228,67 @@ public class WorkReportCommentHandler implements CommentHandler {
                 message,
                 MessagingConstants.MSG_FLAG_STORED.getCode()
         );
+    }
+
+    @Override
+    public ListCommentsResponse listComments(ListCommentsCommand cmd) {
+        ListCommentsResponse response = new ListCommentsResponse();
+        List<CommentDTO> comments = new ArrayList<>();
+        Long nextPageAnchor = null;
+
+        OwnerTokenDTO ownerTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getOwnerToken(), OwnerTokenDTO.class);
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        if (cmd.getPageSize() == null)
+            cmd.setPageSize(20);
+        List<WorkReportValComment> results = workReportValProvider.listWorkReportValComments(namespaceId, ownerTokenDto.getId(), cmd.getPageAnchor(), cmd.getPageSize());
+        if (results != null && results.size() > 0) {
+
+            if (results.size() > cmd.getPageSize()) {
+                results.remove(results.size() - 1);
+                nextPageAnchor = results.get(results.size() - 1).getId();
+            }
+
+            List<Long> commentIds = results.stream().map(r -> r.getId()).collect(Collectors.toList());
+            Map<Long, List<AttachmentDTO>> attachments = listWorkReportValCommentAttachments(namespaceId, commentIds);
+            results.forEach(r -> {
+                CommentDTO dto = ConvertHelper.convert(r, CommentDTO.class);
+                dto.setCreatorUid(r.getCreatorUserId());
+                dto.setCreatorNickName(workReportService.fixUpUserName(dto.getCreatorUid()));
+                dto.setCreatorAvatarUrl(workReportService.getUserAvatar(dto.getCreatorUid()));
+                dto.setAttachments(attachments.get(dto.getId()));
+                comments.add(dto);
+            });
+        }
+
+        response.setNextPageAnchor(nextPageAnchor);
+        response.setCommentDtos(comments);
+        response.setCommentCount(Long.valueOf(comments.size()));
+        return response;
+    }
+
+    private Map<Long, List<AttachmentDTO>> listWorkReportValCommentAttachments(Integer namespaceId, List<Long> commentIds) {
+        Map<Long, List<AttachmentDTO>> res = new HashMap<>();
+        List<WorkReportValCommentAttachment> results = workReportValProvider.listWorkReportValCommentAttachments(namespaceId, commentIds);
+        if (results != null && results.size() > 0) {
+            List<AttachmentDTO> attachmentDTOS = results.stream().map(r -> {
+                AttachmentDTO dto = ConvertHelper.convert(r, AttachmentDTO.class);
+                dto.setOwnerId(r.getCommentId());
+                dto.setContentUrl(contentServerService.parserUri(r.getContentUri()));
+                return dto;
+            }).collect(Collectors.toList());
+            res = attachmentDTOS.stream().collect(Collectors.groupingBy
+                    (AttachmentDTO::getOwnerId));
+        }
+        return res;
+    }
+
+    @Override
+    public void deleteComment(DeleteCommonCommentCommand cmd) {
+        WorkReportValComment comment = workReportValProvider.getWorkReportValCommentById(cmd.getId());
+        dbProvider.execute((TransactionStatus status) -> {
+            workReportValProvider.deleteWorkReportValComment(comment);
+            workReportValProvider.deleteCommentAttachmentsByCommentId(UserContext.getCurrentNamespaceId(), comment.getId());
+            return null;
+        });
     }
 }
