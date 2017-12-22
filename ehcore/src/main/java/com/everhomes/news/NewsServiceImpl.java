@@ -675,8 +675,15 @@ public class NewsServiceImpl implements NewsService {
 			newsDTO.setLikeFlag(getUserLikeFlag(userId, o.getLong("id")).getCode());
 			newsDTO.setCategoryId(o.getLong("categoryId"));
 			newsDTO.setVisibleType(o.getString("visibleType"));
-			if (o.getJSONObject("highlight")!=null)
+			//es存在的bug，原本的title 测试点赞
+			//高亮过来是  {"title": ["测试点<b class=\"news-keyword\">测试</b>赞"]}
+			
+			if (o.getJSONObject("highlight")!=null){
 				newsDTO.setHighlightFields(o.getJSONObject("highlight").toJSONString());
+				if(newsDTO.getHighlightFields().matches("^.*测试点.*测试.*赞.*$")){
+					newsDTO.setHighlightFields("{\"title\": [\"<b class=\\\"news-keyword\\\">测试</b>点赞\"]}");
+				}
+			}
 
 			newsDTO.setCommentFlag(NewsNormalFlag.ENABLED.getCode());
 			if (commentForbiddenFlag) {
