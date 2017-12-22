@@ -339,7 +339,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         LOGGER.debug("checkUserPrivilege get appId = {}", appId);
         if(appId ==  null){
             throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
-                    "cannot find app for it, namespaceId = {},  moduleId = {}, customTag = {}", UserContext.getCurrentNamespaceId(), moduleId, customTag);
+                    "cannot find app for it, namespaceId = "+UserContext.getCurrentNamespaceId()+",  moduleId = "+moduleId+", customTag = "+customTag);
         }
         if(currentOrgId == null){
             OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), userId, OrganizationType.ENTERPRISE.getCode());
