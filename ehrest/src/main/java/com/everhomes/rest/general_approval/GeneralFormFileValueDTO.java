@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>fileSize: fileSize</li> 
  * 
  * </ul>
- * @author ryan
+ * @author copy from FlowCaseFileDTO
  *
  */
 public class GeneralFormFileValueDTO {

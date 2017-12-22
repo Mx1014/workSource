@@ -5,6 +5,9 @@ import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
+
+ /* @author copy from PostApprovalFormImageValue
+  */
 public class GeneralFormImageValue {
 
     @ItemType(String.class)
