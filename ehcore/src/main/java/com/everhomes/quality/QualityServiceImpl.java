@@ -494,7 +494,7 @@ public class QualityServiceImpl implements QualityService {
 		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_UPDATE, 0L);
 		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);*/
 
-		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_CATEGORY_UPDATE, null);
+		//checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_CATEGORY_UPDATE, null);
 
 		User user = UserContext.current().getUser();
 
@@ -552,7 +552,7 @@ public class QualityServiceImpl implements QualityService {
 
 		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_DELETE, 0L);
 		userPrivilegeMgr.checkCurrentUserAuthority(null, null, category.getOwnerId(), privilegeId);*/
-		checkUserPrivilege(category.getOwnerId(), PrivilegeConstants.QUALITY_CATEGORY_DELETE, null);
+		//checkUserPrivilege(category.getOwnerId(), PrivilegeConstants.QUALITY_CATEGORY_DELETE, null);
 
 		List<QualityInspectionStandards> standards = qualityProvider.findStandardsByCategoryId(cmd.getCategoryId());
 		if(standards != null && standards.size() > 0) {
@@ -1918,7 +1918,7 @@ public class QualityServiceImpl implements QualityService {
 		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_LIST, 0L);
 		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);*/
 
-		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_CATEGORY_LIST,cmd.getTargetId());
+		//checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_CATEGORY_LIST,cmd.getTargetId());
 
 		Long ownerId = cmd.getOwnerId();
 		String ownerType = cmd.getOwnerType();
@@ -2475,7 +2475,7 @@ public class QualityServiceImpl implements QualityService {
 		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_UPDATELOG_LIST, 0L);
 		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);*/
 		//checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_TASK_LIST,null);
-		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_TASK_LIST,cmd.getScopeId());
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_UPDATELOG_LIST,cmd.getScopeId());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
