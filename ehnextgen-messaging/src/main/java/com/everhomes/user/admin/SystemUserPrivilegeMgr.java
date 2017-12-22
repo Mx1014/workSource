@@ -416,11 +416,11 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         //校验全部范围下是否拥有权限
         if(aclProvider.checkAccessEx(EntityType.ALL.getCode(), 0L, privilegeId, descriptors)){
             return true;
-}
+        }
 
-//校验全部范围下是auth_warehouse_wentian-delta-data-release.sql否拥有模块的全部权限
+        //校验全部范围下是auth_warehouse_wentian-delta-data-release.sql否拥有模块的全部权限
         return checkModuleAllPrivileges(EntityType.ALL.getCode(), 0L, descriptors, privilegeId);
-                }
+    }
 
 
 
