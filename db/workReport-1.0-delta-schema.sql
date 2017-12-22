@@ -112,6 +112,7 @@ CREATE TABLE `eh_work_report_val_comments` (
   `owner_id` BIGINT,
   `owner_type` VARCHAR(64),
   `report_val_id` BIGINT NOT NULL COMMENT 'the id of the report val',
+  `parent_comment_id` BIGINT COMMENT 'the parent id of the',
   `content_type` VARCHAR(32) COMMENT 'the type of the content',
   `content` TEXT COMMENT 'the comment',
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: invalid, 1: valid',
