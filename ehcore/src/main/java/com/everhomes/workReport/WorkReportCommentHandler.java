@@ -83,7 +83,6 @@ public class WorkReportCommentHandler implements CommentHandler {
                             sendMessageAfterCommentWorkReportVal(content, subject, receiver.getReceiverUserId(), reportVal.getReportId(), reportVal.getId());
                     } else {
                         //  2) parentComment.creator
-                        //todo: 查找上一条的评论人id
                         content = getMessageContent(WorkReportNotificationTemplateCode.AUTHOR_REPLY_WORK_REPORT_VAL,
                                 null, workReportService.fixUpUserName(user.getId()), report.getReportName());
                         subject = getMetaSubject(WorkReportNotificationTemplateCode.AUTHOR_REPLY_WORK_REPORT_VAL);
@@ -256,6 +255,7 @@ public class WorkReportCommentHandler implements CommentHandler {
                 dto.setCreatorNickName(workReportService.fixUpUserName(dto.getCreatorUid()));
                 dto.setCreatorAvatarUrl(workReportService.getUserAvatar(dto.getCreatorUid()));
                 dto.setAttachments(attachments.get(dto.getId()));
+                dto.setCreateTime(r.getCreateTime());
                 comments.add(dto);
             });
         }
