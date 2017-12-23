@@ -273,20 +273,22 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     private PostApprovalFormItem processSubFormField(PostApprovalFormItem formVal, GeneralFormFieldDTO dto, String jsonVal, Byte originFieldFlag) {
         //  取出子表单字段值
         PostApprovalFormSubformValue postSubFormValue = JSON.parseObject(jsonVal, PostApprovalFormSubformValue.class);
-        List<GeneralFormSubformDTO> subforms = new ArrayList<>();
+        List<GeneralFormSubFormValueDTO> subForms = new ArrayList<>();
         //  取出子表单字段初始内容
         GeneralFormSubformDTO subFromExtra = JSON.parseObject(dto.getFieldExtra(), GeneralFormSubformDTO.class);
         //  解析子表单的值
         for (PostApprovalFormSubformItemValue itemValue : postSubFormValue.getForms()) {
-            subforms.add(processSubFormItemField(subFromExtra, itemValue, originFieldFlag));
+            subForms.add(processSubFormItemField(subFromExtra, itemValue, originFieldFlag));
         }
-        formVal.setFieldValue(JSON.toJSONString(subforms));
+        GeneralFormSubFormValue subFormValue = new GeneralFormSubFormValue();
+        subFormValue.setSubForms(subForms);
+        formVal.setFieldValue(JSON.toJSONString(subFormValue));
         return formVal;
     }
 
-    private GeneralFormSubformDTO processSubFormItemField(GeneralFormSubformDTO extra, PostApprovalFormSubformItemValue value, Byte originFieldFlag) {
+    private GeneralFormSubFormValueDTO processSubFormItemField(GeneralFormSubformDTO extra, PostApprovalFormSubformItemValue value, Byte originFieldFlag) {
         //  目的是将子表单中的值解析，将得到的Value放入原有的Extra类中，并组装放入fieldValue中
-        GeneralFormSubformDTO subformExtra = ConvertHelper.convert(extra, GeneralFormSubformDTO.class);
+        GeneralFormSubFormValueDTO result = ConvertHelper.convert(extra, GeneralFormSubFormValueDTO.class);
         Map<String, String> fieldMap = new HashMap<>();
         for (PostApprovalFormItem formVal : value.getValues()) {
             switch (GeneralFormFieldType.fromCode(formVal.getFieldType())) {
@@ -313,11 +315,10 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             }
             fieldMap.put(formVal.getFieldName(), formVal.getFieldValue());
         }
-        for (GeneralFormFieldDTO dto : subformExtra.getFormFields())
+        for (GeneralFormFieldDTO dto : result.getFormFields())
             dto.setFieldValue(fieldMap.get(dto.getFieldName()));
-        return subformExtra;
+        return result;
     }
-
 
     /**********     form field process end      **********/
 

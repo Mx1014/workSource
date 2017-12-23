@@ -135,6 +135,8 @@ public class WorkReportServiceImpl implements WorkReportService {
             if (cmd.getReportType() != null)
                 report.setReportType(cmd.getReportType());
             report.setFormOriginId(cmd.getFormOriginId());
+            if(cmd.getFormOriginId().longValue() == 0)
+                report.setStatus(WorkReportStatus.VALID.getCode());
             report.setFormVersion(cmd.getFormVersion());
             report.setOperatorUserId(userId);
             report.setOperatorName(fixUpUserName(userId));
