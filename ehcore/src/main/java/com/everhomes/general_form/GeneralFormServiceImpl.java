@@ -36,9 +36,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -130,7 +128,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     @Override
     public List<PostApprovalFormItem> getGeneralFormValues(GetGeneralFormValuesCommand cmd) {
-        List<PostApprovalFormItem> result = new ArrayList<>();
+        List<PostApprovalFormItem> results = new ArrayList<>();
         List<GeneralFormVal> values = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId());
 
         if (null != values && values.size() != 0) {
@@ -172,106 +170,156 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                             case NUMBER_TEXT:
                             case DATE:
                             case DROP_BOX:
-                                if (NormalFlag.NEED.getCode() == cmd.getOriginFieldFlag()) {
-                                    formVal.setFieldValue(val.getFieldValue());
-                                } else {
-                                    formVal.setFieldValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
-                                }
-                                result.add(formVal);
+                                results.add(processDropBoxField(formVal, val.getFieldValue(), cmd.getOriginFieldFlag()));
                                 break;
                             case MULTI_LINE_TEXT:
-                                if (NormalFlag.NEED.getCode() == cmd.getOriginFieldFlag()) {
-                                    formVal.setFieldValue(val.getFieldValue());
-                                } else {
-                                    formVal.setFieldValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
-                                }
-                                result.add(formVal);
+                                results.add(processMultiLineTextField(formVal, val.getFieldValue(), cmd.getOriginFieldFlag()));
                                 break;
                             case IMAGE:
-                                PostApprovalFormImageValue imageObj = JSON.parseObject(val.getFieldValue(), PostApprovalFormImageValue.class);
-                                if (null == imageObj || imageObj.getUris() == null)
-                                    break;
-                                GeneralFormImageValue imageValue = new GeneralFormImageValue();
-                                imageValue.setUris(imageObj.getUris());
-                                List<String> urls = new ArrayList<>();
-                                for (String uriString : imageObj.getUris()) {
-                                    String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-                                    urls.add(url);
-                                }
-                                imageValue.setUrls(urls);
-                                formVal.setFieldValue(imageValue.toString());
-                                result.add(formVal);
+                                formVal = processImageField(formVal, val.getFieldValue());
+                                if (formVal != null)
+                                    results.add(formVal);
                                 break;
                             case FILE:
-                                PostApprovalFormFileValue fileObj = JSON.parseObject(val.getFieldValue(), PostApprovalFormFileValue.class);
-                                if (null == fileObj || fileObj.getFiles() == null)
-                                    break;
-
-                                List<GeneralFormFileValueDTO> files = new ArrayList<>();
-                                for (PostApprovalFormFileDTO dto2 : fileObj.getFiles()) {
-                                    GeneralFormFileValueDTO fileDTO = new GeneralFormFileValueDTO();
-                                    String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
-                                    ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
-                                    fileDTO.setUri(dto2.getUri());
-                                    fileDTO.setUrl(url);
-                                    fileDTO.setFileName(dto2.getFileName());
-                                    fileDTO.setFileSize(resource.getResourceSize());
-                                    files.add(fileDTO);
-                                }
-                                GeneralFormFileValue fileValue = new GeneralFormFileValue();
-                                fileValue.setFiles(files);
-                                formVal.setFieldValue(JSON.toJSONString(fileValue));
-                                result.add(formVal);
+                                formVal = processImageField(formVal, val.getFieldValue());
+                                if (formVal != null)
+                                    results.add(formVal);
+                                results.add(processFileField(formVal, val.getFieldValue()));
                                 break;
                             case INTEGER_TEXT:
-                                if (NormalFlag.NEED.getCode() == cmd.getOriginFieldFlag()) {
-                                    formVal.setFieldValue(val.getFieldValue());
-                                } else {
-                                    formVal.setFieldValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
-                                }
-                                result.add(formVal);
+                                results.add(processIntegerTextField(formVal, val.getFieldValue(), cmd.getOriginFieldFlag()));
                                 break;
                             case SUBFORM:
-
-//								PostApprovalFormSubformValue subFormValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormSubformValue.class);
-//								//取出设置的子表单fields
-//								GeneralFormSubformDTO subFromExtra = JSON.parseObject(dto.getFieldExtra(), GeneralFormSubformDTO.class) ;
-//								//给子表单计数从1开始
-//								int formCount = 1;
-//								//循环取出每一个子表单值
-//								for(PostApprovalFormSubformItemValue subForm1:subFormValue.getForms()){
-//									e = new FlowCaseEntity();
-//									e.setKey(dto.getFieldDisplayName()==null?dto.getFieldName():dto.getFieldDisplayName());
-//									e.setEntityType(FlowCaseEntityType.LIST.getCode());
-//									e.setValue(formCount++ +"");
-//									entities.add(e);
-//									List<GeneralApprovalVal> subVals = new ArrayList<>();
-//									//循环取出一个子表单的每一个字段值
-//									for(PostApprovalFormItem subFromValue1:subForm1.getValues()){
-//										GeneralApprovalVal obj =  new GeneralApprovalVal();
-//										obj.setFieldName(subFromValue1.getFieldName());
-//										obj.setFieldType(subFromValue1.getFieldType());
-//										obj.setFieldStr3(subFromValue1.getFieldValue());
-//										subVals.add(obj);
-//									}
-//									List<FlowCaseEntity> subSingleEntities = new ArrayList<>();
-//									processEntities(subSingleEntities, subVals,subFromExtra.getFormFields());
-//									entities.addAll(subSingleEntities);
-//								}
+                                results.add(processSubFormField(formVal, dto, val.getFieldValue(), cmd.getOriginFieldFlag()));
                                 break;
                         }
                     }
                 } catch (NullPointerException e) {
-                    LOGGER.error(" ********** 空指针错误  val = " + JSON.toJSONString(val), e);
+                    LOGGER.error(" ********** null pointer val = " + JSON.toJSONString(val), e);
                 } catch (Exception e) {
-                    LOGGER.error(" ********** 这是什么错误  = " + JSON.toJSONString(val), e);
-
+                    LOGGER.error(" ********** error  = " + JSON.toJSONString(val), e);
                 }
             }
         }
-
-        return result;
+        return results;
     }
+
+    /**********     form field process start      **********/
+
+    private PostApprovalFormItem processDropBoxField(PostApprovalFormItem formVal, String jsonVal, Byte originFieldFlag) {
+        if (NormalFlag.NEED.getCode() == originFieldFlag) {
+            formVal.setFieldValue(jsonVal);
+        } else {
+            formVal.setFieldValue(JSON.parseObject(jsonVal, PostApprovalFormTextValue.class).getText());
+        }
+        return formVal;
+    }
+
+    private PostApprovalFormItem processMultiLineTextField(PostApprovalFormItem formVal, String jsonVal, Byte originFieldFlag) {
+        if (NormalFlag.NEED.getCode() == originFieldFlag) {
+            formVal.setFieldValue(jsonVal);
+        } else {
+            formVal.setFieldValue(JSON.parseObject(jsonVal, PostApprovalFormTextValue.class).getText());
+        }
+        return formVal;
+    }
+
+    private PostApprovalFormItem processImageField(PostApprovalFormItem formVal, String jsonVal) {
+        PostApprovalFormImageValue imageObj = JSON.parseObject(jsonVal, PostApprovalFormImageValue.class);
+        if (null == imageObj || imageObj.getUris() == null)
+            return null;
+        GeneralFormImageValue imageValue = new GeneralFormImageValue();
+        imageValue.setUris(imageObj.getUris());
+        List<String> urls = new ArrayList<>();
+        for (String uriString : imageObj.getUris()) {
+            String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
+            urls.add(url);
+        }
+        imageValue.setUrls(urls);
+        formVal.setFieldValue(imageValue.toString());
+        return formVal;
+    }
+
+    private PostApprovalFormItem processFileField(PostApprovalFormItem formVal, String jsonVal) {
+        PostApprovalFormFileValue fileObj = JSON.parseObject(jsonVal, PostApprovalFormFileValue.class);
+        if (null == fileObj || fileObj.getFiles() == null)
+            return null;
+        List<GeneralFormFileValueDTO> files = new ArrayList<>();
+        for (PostApprovalFormFileDTO dto2 : fileObj.getFiles()) {
+            GeneralFormFileValueDTO fileDTO = new GeneralFormFileValueDTO();
+            String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+            ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
+            fileDTO.setUri(dto2.getUri());
+            fileDTO.setUrl(url);
+            fileDTO.setFileName(dto2.getFileName());
+            fileDTO.setFileSize(resource.getResourceSize());
+            files.add(fileDTO);
+        }
+        GeneralFormFileValue fileValue = new GeneralFormFileValue();
+        fileValue.setFiles(files);
+        formVal.setFieldValue(JSON.toJSONString(fileValue));
+        return formVal;
+    }
+
+    private PostApprovalFormItem processIntegerTextField(PostApprovalFormItem formVal, String jsonVal, Byte originFieldFlag) {
+        if (NormalFlag.NEED.getCode() == originFieldFlag) {
+            formVal.setFieldValue(jsonVal);
+        } else {
+            formVal.setFieldValue(JSON.parseObject(jsonVal, PostApprovalFormTextValue.class).getText());
+        }
+        return formVal;
+    }
+
+    private PostApprovalFormItem processSubFormField(PostApprovalFormItem formVal, GeneralFormFieldDTO dto, String jsonVal, Byte originFieldFlag) {
+        //  取出子表单字段值
+        PostApprovalFormSubformValue postSubFormValue = JSON.parseObject(jsonVal, PostApprovalFormSubformValue.class);
+        List<GeneralFormSubformDTO> subforms = new ArrayList<>();
+        //  取出子表单字段初始内容
+        GeneralFormSubformDTO subFromExtra = JSON.parseObject(dto.getFieldExtra(), GeneralFormSubformDTO.class);
+        //  解析子表单的值
+        for (PostApprovalFormSubformItemValue itemValue : postSubFormValue.getForms()) {
+            subforms.add(processSubFormItemField(subFromExtra, itemValue, originFieldFlag));
+        }
+        formVal.setFieldValue(JSON.toJSONString(subforms));
+        return formVal;
+    }
+
+    private GeneralFormSubformDTO processSubFormItemField(GeneralFormSubformDTO extra, PostApprovalFormSubformItemValue value, Byte originFieldFlag) {
+        //  目的是将子表单中的值解析，将得到的Value放入原有的Extra类中，并组装放入fieldValue中
+        GeneralFormSubformDTO subformExtra = ConvertHelper.convert(extra, GeneralFormSubformDTO.class);
+        Map<String, String> fieldMap = new HashMap<>();
+        for (PostApprovalFormItem formVal : value.getValues()) {
+            switch (GeneralFormFieldType.fromCode(formVal.getFieldType())) {
+                case SINGLE_LINE_TEXT:
+                case NUMBER_TEXT:
+                case DATE:
+                case DROP_BOX:
+                    processDropBoxField(formVal, formVal.getFieldValue(), originFieldFlag);
+                    break;
+                case MULTI_LINE_TEXT:
+                    processMultiLineTextField(formVal, formVal.getFieldValue(), originFieldFlag);
+                    break;
+                case IMAGE:
+                    processImageField(formVal, formVal.getFieldValue());
+                    break;
+                case FILE:
+                    processFileField(formVal, formVal.getFieldValue());
+                    break;
+                case INTEGER_TEXT:
+                    processIntegerTextField(formVal, formVal.getFieldValue(), originFieldFlag);
+                    break;
+                case SUBFORM:
+                    break;
+            }
+            fieldMap.put(formVal.getFieldName(), formVal.getFieldValue());
+        }
+        for (GeneralFormFieldDTO dto : subformExtra.getFormFields())
+            dto.setFieldValue(fieldMap.get(dto.getFieldName()));
+        return subformExtra;
+    }
+
+
+    /**********     form field process end      **********/
 
     @Override
     public List<FlowCaseEntity> getGeneralFormFlowEntities(GetGeneralFormValuesCommand cmd) {
@@ -668,7 +716,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     @Override
-    public PostGeneralFormDTO updateGeneralFormVal (PostGeneralFormValCommand cmd) {
+    public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd) {
         GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
         PostGeneralFormDTO dto = handler.updateGeneralFormVal(cmd);
 
