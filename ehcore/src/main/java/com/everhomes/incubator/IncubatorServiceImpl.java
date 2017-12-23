@@ -183,11 +183,11 @@ public class IncubatorServiceImpl implements IncubatorService {
 				IncubatorApply parent = incubatorProvider.findIncubatorApplyById(cmd.getParentId());
 				incubatorApply.setRootId(parent.getRootId());
 
+				//产品要求删除取消的，为了保证数据结构，设置新记录的parentid为grandfather的id
 				if(ApproveStatus.fromCode(parent.getApproveStatus()) == ApproveStatus.WAIT){
-					parent.setApproveStatus(ApproveStatus.CANCEL.getCode());
-					incubatorProvider.updateIncubatorApply(parent);
+					incubatorApply.setParentId(parent.getParentId());
+					incubatorProvider.deleteIncubatorApplyById(parent.getId());
 				}
-
 			}
 
 			incubatorProvider.createIncubatorApply(incubatorApply);
@@ -218,9 +218,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 
 	@Override
 	public void cancelIncubatorApply(CancelIncubatorApplyCommand cmd) {
-		IncubatorApply incubatorApply = incubatorProvider.findIncubatorApplyById(cmd.getId());
-		incubatorApply.setApproveStatus(ApproveStatus.CANCEL.getCode());
-		incubatorProvider.updateIncubatorApply(incubatorApply);
+		incubatorProvider.deleteIncubatorApplyById(cmd.getId());
 	}
 
 	@Override
