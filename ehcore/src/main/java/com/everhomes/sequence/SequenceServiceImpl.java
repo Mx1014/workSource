@@ -2022,6 +2022,10 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhForumServiceTypes.class, Tables.EH_FORUM_SERVICE_TYPES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_FORUM_SERVICE_TYPES.ID.max()).from(Tables.EH_FORUM_SERVICE_TYPES).fetchOne().value1();
         });
+        
+        syncTableSequence(null, EhTasks.class, Tables.EH_TASKS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_TASKS.ID.max()).from(Tables.EH_TASKS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
