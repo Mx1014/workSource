@@ -8,6 +8,8 @@ public interface IncubatorProvider {
     void updateIncubatorApply(IncubatorApply incubatorApply);
     List<IncubatorApply> listIncubatorApplies(Integer namespaceId, Long applyUserId, String keyWord, Byte approveStatus, Byte needReject, Integer pageOffset, Integer pageSize, Byte orderBy, Byte applyType);
 
+    List<IncubatorApply> listIncubatorAppliesByRootId(Long rootId);
+
     IncubatorApply findIncubatorAppling(Long applyUserId);
 
     List<IncubatorProjectType> listIncubatorProjectType();

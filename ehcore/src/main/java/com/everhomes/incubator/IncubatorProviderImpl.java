@@ -39,8 +39,11 @@ public class IncubatorProviderImpl implements IncubatorProvider {
 
     @Override
     public void createIncubatorApply(IncubatorApply incubatorApply) {
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhIncubatorApplies.class));
-        incubatorApply.setId(id);
+
+        if(incubatorApply.getId() == null){
+            long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhIncubatorApplies.class));
+            incubatorApply.setId(id);
+        }
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhIncubatorAppliesDao dao = new EhIncubatorAppliesDao(context.configuration());
         dao.insert(incubatorApply);
@@ -101,6 +104,23 @@ public class IncubatorProviderImpl implements IncubatorProvider {
         Integer offset = (pageOffset - 1 ) * (pageSize -1);
 
         query.addLimit(offset, pageSize);
+        List<IncubatorApply> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, IncubatorApply.class));
+            return null;
+        });
+
+        return result;
+    }
+
+
+    @Override
+    public List<IncubatorApply> listIncubatorAppliesByRootId(Long rootId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhIncubatorAppliesRecord> query = context.selectQuery(Tables.EH_INCUBATOR_APPLIES);
+
+        query.addConditions(Tables.EH_INCUBATOR_APPLIES.ROOT_ID.eq(rootId));
+
         List<IncubatorApply> result = new ArrayList<>();
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, IncubatorApply.class));

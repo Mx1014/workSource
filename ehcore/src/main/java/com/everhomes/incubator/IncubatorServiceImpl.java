@@ -11,6 +11,8 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.filedownload.TaskService;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
@@ -21,6 +23,8 @@ import com.everhomes.rest.incubator.*;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.poll.RepeatFlag;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.pojos.EhIncubatorApplies;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
@@ -65,6 +69,9 @@ public class IncubatorServiceImpl implements IncubatorService {
 
 	@Autowired
 	private TaskService taskService;
+
+	@Autowired
+	private SequenceProvider sequenceProvider;
 
 	@Override
 	public ListIncubatorApplyResponse listIncubatorApply(ListIncubatorApplyCommand cmd) {
@@ -163,8 +170,19 @@ public class IncubatorServiceImpl implements IncubatorService {
 		incubatorApply.setApplyUserId(user.getId());
 		incubatorApply.setApproveStatus(ApproveStatus.WAIT.getCode());
 		incubatorApply.setCreateTime(new Timestamp(System.currentTimeMillis()));
+
+		if(cmd.getParentId() == null){
+			long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhIncubatorApplies.class));
+			incubatorApply.setId(id);
+			incubatorApply.setRootId(id);
+		}else {
+			IncubatorApply parent = incubatorProvider.findIncubatorApplyById(cmd.getParentId());
+			incubatorApply.setRootId(parent.getRootId());
+		}
+
 		dbProvider.execute((status)->{
 			incubatorProvider.createIncubatorApply(incubatorApply);
+
 //			//如果是重新申请，更新父记录。此处的关系放在父记录维护是为了查询方便，不用每条记录都遍历查询子记录
 //			if(cmd.getParentId() != null){
 //				IncubatorApply parentIncubatorApply = incubatorProvider.findIncubatorApplyById(cmd.getParentId());
@@ -216,12 +234,16 @@ public class IncubatorServiceImpl implements IncubatorService {
 		incubatorApply.setApproveTime(new Timestamp(System.currentTimeMillis()));
 		incubatorApply.setApproveUserId(UserContext.currentUserId());
 
-		if(cmd.getApproveStatus().byteValue() == ApproveStatus.AGREE.getCode()){
-			dbProvider.execute((TransactionStatus status) -> {
-				//1、更新申请记录为成功
-				incubatorProvider.updateIncubatorApply(incubatorApply);
+		boolean haveAgreeFlag = checkExistAgreeByRootId(incubatorApply.getRootId());
 
-				//2、创建公司
+		dbProvider.execute((TransactionStatus status) -> {
+
+			//如果不同意或者之前同意过则直接更新记录，不用再重复创建公司了。
+			if(ApproveStatus.fromCode(cmd.getApproveStatus()) != ApproveStatus.AGREE || haveAgreeFlag){
+				incubatorProvider.updateIncubatorApply(incubatorApply);
+			}else {
+
+				//创建公司
 				CreateEnterpriseCommand enterpriseCmd = new CreateEnterpriseCommand();
 				enterpriseCmd.setName(incubatorApply.getTeamName());
 				enterpriseCmd.setNamespaceId(incubatorApply.getNamespaceId());
@@ -231,18 +253,20 @@ public class IncubatorServiceImpl implements IncubatorService {
 				enterpriseCmd.setLongitude(String.valueOf(communityGeoPoint.getLongitude()));
 				OrganizationDTO  organizationDTO = organizationService.createEnterprise(enterpriseCmd);
 
-				//3、添加当前用户为管理员
+				//添加当前用户为管理员
 				CreateOrganizationAdminCommand adminCommand = new CreateOrganizationAdminCommand();
 				adminCommand.setOrganizationId(organizationDTO.getId());
 				adminCommand.setContactToken(applyIdentifier.getIdentifierToken());
 				adminCommand.setContactName(applyUser.getNickName());
 				rolePrivilegeService.createOrganizationAdmin(adminCommand);
 
-				return null;
-			});
-		}else {
-			incubatorProvider.updateIncubatorApply(incubatorApply);
-		}
+				//更新申请记录为成功
+				incubatorApply.setOrganizationId(organizationDTO.getId());
+				incubatorProvider.updateIncubatorApply(incubatorApply);
+			}
+
+			return null;
+		});
 	}
 
 	@Override
@@ -253,6 +277,18 @@ public class IncubatorServiceImpl implements IncubatorService {
 		populateDto(dto);
 		return dto;
 	}
+
+
+	public boolean checkExistAgreeByRootId(Long rootId){
+		List<IncubatorApply> incubatorApplies = incubatorProvider.listIncubatorAppliesByRootId(rootId);
+		for(IncubatorApply in: incubatorApplies){
+			if(ApproveStatus.fromCode(in.getApproveStatus()) == ApproveStatus.AGREE){
+				return true;
+			}
+		}
+		return false;
+	}
+
 
 	private void populateDto(IncubatorApplyDTO dto){
 		populateApproveUserName(dto);
