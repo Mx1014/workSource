@@ -244,6 +244,12 @@ public class WorkReportServiceImpl implements WorkReportService {
         workReportProvider.updateWorkReport(report);
     }
 
+    @Override
+    public void disableWorkReportByFormOriginId(Long formOriginId, Long moduleId, String moduleType) {
+        workReportProvider.disableWorkReportByFormOriginId(formOriginId, moduleId, moduleType);
+    }
+
+
     public List<WorkReportScopeMapDTO> listWorkReportScopes(Long reportId) {
         List<WorkReportScopeMap> results = workReportProvider.listWorkReportScopesMap(reportId);
         if (results != null && results.size() > 0) {

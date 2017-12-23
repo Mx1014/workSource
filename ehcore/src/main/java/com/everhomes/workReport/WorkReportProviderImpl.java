@@ -21,6 +21,7 @@ import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
+import org.jooq.UpdateQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -123,6 +124,19 @@ public class WorkReportProviderImpl implements WorkReportProvider {
         return results;
     }
 
+    @Override
+    public void disableWorkReportByFormOriginId(Long formOriginId, Long moduleId, String moduleType) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        UpdateQuery<EhWorkReportsRecord> query = context.updateQuery(Tables.EH_WORK_REPORTS);
+        query.addValue(Tables.EH_WORK_REPORTS.FORM_ORIGIN_ID, 0L);
+        query.addValue(Tables.EH_WORK_REPORTS.STATUS, WorkReportStatus.VALID.getCode());
+        query.addConditions(Tables.EH_WORK_REPORTS.STATUS.ne(WorkReportStatus.INVALID.getCode()));
+        query.addConditions(Tables.EH_WORK_REPORTS.FORM_ORIGIN_ID.eq(formOriginId));
+        query.addConditions(Tables.EH_WORK_REPORTS.MODULE_ID.eq(moduleId));
+        query.addConditions(Tables.EH_WORK_REPORTS.MODULE_TYPE.eq(moduleType));
+        query.execute();
+    }
+
     @Caching(evict = {@CacheEvict(value = "listWorkReportScopesMap", key = "#scopeMap.reportId")})
     @Override
     public void createWorkReportScopeMap(WorkReportScopeMap scopeMap) {
@@ -203,4 +217,5 @@ public class WorkReportProviderImpl implements WorkReportProvider {
             return results;
         return null;
     }
+
 }

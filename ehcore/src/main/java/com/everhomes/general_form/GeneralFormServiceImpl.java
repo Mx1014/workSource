@@ -24,6 +24,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
+import com.everhomes.workReport.WorkReportService;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -46,15 +47,21 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     @Autowired
     private GeneralFormProvider generalFormProvider;
+
     @Autowired
     private DbProvider dbProvider;
+
     @Autowired
     private GeneralFormValProvider generalFormValProvider;
+
     @Autowired
     private ContentServerService contentServerService;
 
     @Autowired
     private GeneralApprovalValProvider generalApprovalValProvider;
+
+    @Autowired
+    private WorkReportService workReportService;
 
     @Override
     public GeneralFormDTO getTemplateByFormId(GetTemplateByFormIdCommand cmd) {
@@ -634,6 +641,10 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         this.generalFormProvider.invalidForms(cmd.getFormOriginId());
         //  删除与表单相关控件组
         this.generalFormProvider.deleteGeneralFormGroupsByFormOriginId(cmd.getFormOriginId());
+
+        /***    更改与表单相关业务的状态    ***/
+        //  工作汇报
+        workReportService.disableWorkReportByFormOriginId(cmd.getFormOriginId(), 54000L, "any-module");
     }
 
     @Override

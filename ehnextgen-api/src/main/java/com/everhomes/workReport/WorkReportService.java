@@ -19,6 +19,8 @@ public interface WorkReportService {
 
     void disableWorkReport(WorkReportIdCommand cmd);
 
+    void disableWorkReportByFormOriginId(Long formOriginId, Long moduleId, String moduleType);
+
     VerifyWorkReportResponse verifyWorkReportTemplates(CreateWorkReportTemplatesCommand cmd);
 
     void createWorkReportTemplates(CreateWorkReportTemplatesCommand cmd);

@@ -18,6 +18,8 @@ public interface WorkReportProvider {
 
     List<WorkReport> listWorkReports(Long pageAnchor, Integer pageSize, Long organizationId, String ownerType, Long moduleId, Byte status);
 
+    void disableWorkReportByFormOriginId(Long formOriginId, Long moduleId, String moduleType);
+
     void createWorkReportScopeMap(WorkReportScopeMap scopeMap);
 
     void deleteWorkReportScopeMapNotInIds(Long reportId, List<Long> sourceIds);
