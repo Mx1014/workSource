@@ -1,5 +1,6 @@
 package com.everhomes.filedownload;
 
+import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.filedownload.*;
 
 import java.io.OutputStream;
@@ -26,5 +27,5 @@ public interface FileDownloadTaskService{
      * @param ops
      * @return
      */
-    String uploadToContenServer(String fileName, OutputStream ops);
+    CsFileLocationDTO uploadToContenServer(String fileName, OutputStream ops);
 }

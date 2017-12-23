@@ -39,8 +39,8 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
     @Override
     public Long createTask(String name, Byte type, Class taskClass, Map<String, Object> params, Byte repeatFlag, Date startTime) {
 
-        Task job = saveNewJob(name, taskClass.getName(), params, repeatFlag);
-        scheduleJob(job);
+        Task task = saveNewTask(name, taskClass.getName(), params, repeatFlag);
+        scheduleTask(task);
         return null;
     }
 
@@ -51,6 +51,18 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
         Task task = taskProvider.findById(taskId);
         task.setProcess(process);
         taskProvider.updateTask(task);
+    }
+
+
+    @Override
+    public void updateTask(Task task) {
+        taskProvider.updateTask(task);
+    }
+
+
+    @Override
+    public Task findById(Long taskId) {
+       return taskProvider.findById(taskId);
     }
 
 
@@ -98,32 +110,30 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
     }
 
 
-    private Task saveNewJob(String name, String taskClassName, Map<String, Object> params, Byte repeatFlag){
-        Task job = new Task();
+    private Task saveNewTask(String name, String className, Map<String, Object> params, Byte repeatFlag){
+        Task task = new Task();
         Long ownerId = UserContext.currentUserId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        job.setNamespaceId(namespaceId);
-        job.setUserId(ownerId);
-        job.setName(name);
-        job.setClassName(taskClassName);
-        job.setParams(JSONObject.toJSONString(params));
-        job.setRepeatFlag(repeatFlag);
-        job.setStatus(TaskStatus.WAITING.getCode());
-        job.setCreateTime(new Timestamp(System.currentTimeMillis()));
-        taskProvider.createTask(job);
-        return job;
+        task.setNamespaceId(namespaceId);
+        task.setUserId(ownerId);
+        task.setName(name);
+        task.setClassName(className);
+        task.setParams(JSONObject.toJSONString(params));
+        task.setRepeatFlag(repeatFlag);
+        task.setStatus(TaskStatus.WAITING.getCode());
+        task.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        taskProvider.createTask(task);
+        return task;
     }
 
-    private void scheduleJob(Task task){
+    private void scheduleTask(Task task){
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("jobId", task.getId());
-        parameters.put("fileName", task.getName());
-        parameters.put("jobClassName", task.getClassName());
-        parameters.put("jobParams", task.getParams());
-        parameters.put("jobClassName", task.getClassName());
-        parameters.put("jobParams", task.getParams());
-        String taskName = "fileDownload_" + task.getId();
-        scheduleProvider.scheduleSimpleJob(taskName,taskName, new Date(), TaskScheduleJob.class,parameters);
+        parameters.put("taskId", task.getId());
+        parameters.put("name", task.getName());
+        parameters.put("className", task.getClassName());
+        parameters.put("params", task.getParams());
+        String taskName = "task_" + task.getType() + task.getId();
+        scheduleProvider.scheduleSimpleJob(taskName, taskName, new Date(), TaskScheduleJob.class, parameters);
     }
 
     @Override

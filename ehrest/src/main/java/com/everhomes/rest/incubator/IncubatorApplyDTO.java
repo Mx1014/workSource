@@ -30,6 +30,10 @@ import java.util.List;
  *     <li>createTime: 创建时间</li>
  *     <li>reApplyFlag: 是否允许重新申请 0-否，1-是 参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>applyType: 申请类型 0-入孵，1-加速，2-入园{@link ApplyType}</li>
+ *     <li>businessLicenceText: excel中营业执照扫描件字段的描述，用于导出</li>
+ *     <li>planBookAttachmentText: excel中创业计划书字段的描述，用于导出</li>
+ *     <li>applyTypeText: excel中申请类型字段的描述，用于导出</li>
+ *     <li>createTimeText: excel中申请时间字段的描述，用于导出</li>
  * </ul>
  */
 public class IncubatorApplyDTO {
@@ -59,6 +63,10 @@ public class IncubatorApplyDTO {
 	Byte reApplyFlag;
 	Byte applyType;
 
+	String businessLicenceText;
+	String planBookAttachmentText;
+	String applyTypeText;
+	String createTimeText;
 
 	public Long getId() {
 		return id;
@@ -234,6 +242,38 @@ public class IncubatorApplyDTO {
 
 	public void setReApplyFlag(Byte reApplyFlag) {
 		this.reApplyFlag = reApplyFlag;
+	}
+
+	public String getBusinessLicenceText() {
+		return businessLicenceText;
+	}
+
+	public void setBusinessLicenceText(String businessLicenceText) {
+		this.businessLicenceText = businessLicenceText;
+	}
+
+	public String getPlanBookAttachmentText() {
+		return planBookAttachmentText;
+	}
+
+	public void setPlanBookAttachmentText(String planBookAttachmentText) {
+		this.planBookAttachmentText = planBookAttachmentText;
+	}
+
+	public String getApplyTypeText() {
+		return applyTypeText;
+	}
+
+	public void setApplyTypeText(String applyTypeText) {
+		this.applyTypeText = applyTypeText;
+	}
+
+	public String getCreateTimeText() {
+		return createTimeText;
+	}
+
+	public void setCreateTimeText(String createTimeText) {
+		this.createTimeText = createTimeText;
 	}
 
 	@Override

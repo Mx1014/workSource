@@ -10,15 +10,19 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.incubator.*;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.poll.RepeatFlag;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -33,8 +37,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.Assert;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class IncubatorServiceImpl implements IncubatorService {
@@ -59,6 +62,9 @@ public class IncubatorServiceImpl implements IncubatorService {
 
 	@Autowired
 	private ContentServerService contentServerService;
+
+	@Autowired
+	private TaskService taskService;
 
 	@Override
 	public ListIncubatorApplyResponse listIncubatorApply(ListIncubatorApplyCommand cmd) {
@@ -100,7 +106,18 @@ public class IncubatorServiceImpl implements IncubatorService {
 
 	@Override
 	public void exportIncubatorApply(ExportIncubatorApplyCommand cmd) {
+		Map<String, Object> params = new HashMap();
+		params.put("namespaceId", cmd.getNamespaceId());
+		params.put("keyWord", cmd.getKeyWord());
+		params.put("approveStatus", cmd.getApproveStatus());
+		params.put("needReject", cmd.getNeedReject());
+		params.put("orderBy", cmd.getOrderBy());
+		params.put("applyType", cmd.getApplyType());
 
+		String statusName = ApproveStatus.fromCode(cmd.getApproveStatus()) == null ? "全部": ApproveStatus.fromCode(cmd.getApproveStatus()).getText();
+		String fileName = String.format("入驻申请企业_%s_%s", statusName, DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+
+		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), IncubatorApplyExportTaskHandler.class, params, RepeatFlag.YES.getCode(), new Date());
 	}
 
 	@Override

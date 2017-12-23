@@ -2,8 +2,10 @@
 package com.everhomes.filedownload;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
+import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.filedownload.*;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -24,7 +26,7 @@ import java.sql.Timestamp;
 import java.util.*;
 
 @Component
-public class FileDownloadTaskServiceImpl implements FileDownloadTaskService {
+public class FileDownloadTaskServiceImpl implements FileDownloadTaskService  {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileDownloadTaskServiceImpl.class);
 
     @Autowired
@@ -72,8 +74,8 @@ public class FileDownloadTaskServiceImpl implements FileDownloadTaskService {
 
         tasks.forEach(task -> {
             FileDownloadTaskDTO dto = ConvertHelper.convert(task, FileDownloadTaskDTO.class);
-            dto.setFileName(task.getResultString1());
-            dto.setUri(task.getResultString2());
+            dto.setFileName(task.getName());
+            dto.setUri(task.getResultString1());
             String url = contentServerService.parserUri(dto.getUri(), EntityType.USER.getCode(), dto.getUserId());
             dto.setUrl(url);
             dto.setSize(task.getResultLong1());
@@ -106,20 +108,25 @@ public class FileDownloadTaskServiceImpl implements FileDownloadTaskService {
     }
 
     @Override
-    public String uploadToContenServer(String fileName, OutputStream ops){
+    public CsFileLocationDTO uploadToContenServer(String fileName, OutputStream ops){
 
         ByteArrayOutputStream os = (ByteArrayOutputStream)ops;
         InputStream ins = new ByteArrayInputStream(os.toByteArray());
         return uploadToContenServer(fileName, ins);
     }
 
-    private String uploadToContenServer(String fileName, InputStream ins){
+    private CsFileLocationDTO uploadToContenServer(String fileName, InputStream ins){
 
         String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
         //String name = "importErrorLog_" + String.valueOf(System.currentTimeMillis()) + ".xls";
         UploadCsFileResponse re = contentServerService.uploadFileToContentServer(ins, fileName, token);
-        if(re.getErrorCode() == 0 && re.getResponse() != null){
-            return re.getResponse().getUri();
+        CsFileLocationDTO dto = re.getResponse();
+        if(re.getErrorCode() == 0 && dto != null){
+            ContentServerResource resourceByUri = contentServerService.findResourceByUri(dto.getUri());
+            if(resourceByUri != null){
+                dto.setSize(resourceByUri.getResourceSize());
+            }
+            return dto;
         }
 
         return null;

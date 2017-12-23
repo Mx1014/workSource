@@ -3,13 +3,23 @@ package com.everhomes.incubator;
 
 import com.everhomes.filedownload.FileDownloadTaskHandler;
 import com.everhomes.filedownload.FileDownloadTaskService;
+import com.everhomes.filedownload.Task;
+import com.everhomes.filedownload.TaskService;
+import com.everhomes.rest.contentserver.CsFileLocationDTO;
+import com.everhomes.rest.filedownload.TaskStatus;
+import com.everhomes.rest.incubator.ApplyType;
 import com.everhomes.rest.incubator.ApproveStatus;
 import com.everhomes.rest.incubator.ExportIncubatorApplyCommand;
+import com.everhomes.rest.incubator.IncubatorApplyDTO;
 import com.everhomes.sms.DateUtil;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.excel.ExcelUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class IncubatorApplyExportTaskHandler implements FileDownloadTaskHandler {
 
@@ -22,6 +32,9 @@ public class IncubatorApplyExportTaskHandler implements FileDownloadTaskHandler 
 	@Autowired
 	IncubatorProvider incubatorProvider;
 
+	@Autowired
+	private TaskService taskService;
+
 
 	@Override
 	public void beforeExecute(Map<String, Object> params) {
@@ -30,49 +43,78 @@ public class IncubatorApplyExportTaskHandler implements FileDownloadTaskHandler 
 
 	@Override
 	public void execute(Map<String, Object> params) {
+		Integer namespaceId = (Integer) params.get("namespaceId");
+		String keyWord = (String)params.get("keyWord");
+		Byte approveStatus = (Byte)params.get("approveStatus");
+		Byte needReject = (Byte)params.get("needReject");
+		Byte orderBy = (Byte) params.get("orderBy");
+		Byte applyType = (Byte)params.get("applyType");
+		String fileName = (String)params.get("name");
+		Long taskId = (Long)params.get("taskId");
 
-		ExportIncubatorApplyCommand cmd = null;
-		List<IncubatorApply> incubatorApplies = incubatorProvider.listIncubatorApplies(cmd.getNamespaceId(), null, cmd.getKeyWord(), cmd.getApproveStatus(), cmd.getNeedReject(), null, null, cmd.getOrderBy(), cmd.getApplyType());
 
+		List<IncubatorApply> incubatorApplies = incubatorProvider.listIncubatorApplies(namespaceId, null, keyWord, approveStatus, needReject, null, null, orderBy, applyType);
+		List<IncubatorApplyDTO> dtos = new ArrayList<>();
+		if(incubatorApplies != null && incubatorApplies.size() > 0){
+			incubatorApplies.forEach(r -> {
+				IncubatorApplyDTO dto = ConvertHelper.convert(r, IncubatorApplyDTO.class);
+				populateExportString(dto);
+				dtos.add(dto);
+			});
+		}
 
-
-		ApproveStatus approveStatus = ApproveStatus.fromCode(cmd.getApproveStatus());
-		String statusName = approveStatus == null ? "全部": approveStatus.getText();
-
-		String fileName = String.format("入驻申请企业_%s_%s", statusName, DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
 		ExcelUtils excelUtils = new ExcelUtils(fileName, "入驻申请企业信息");
-		List<String> propertyNames = new ArrayList<String>(Arrays.asList("projectName", "projectType", "teamName", "realName", "genderText", "organizationName", "position", "leaderFlagText", "email",
-				"signupTime", "sourceFlagText", "signupStatusText"));
-		List<String> titleNames = new ArrayList<String>(Arrays.asList("项目名称", "项目分类", "申请企业/团队名称", "营业执照扫描件", "创业计划书", "法人代表/负责人姓名", "移动电话", "电子邮箱", "申请类型", "申请时间", "报名来源", "报名状态"));
+		List<String> propertyNames = new ArrayList<String>(Arrays.asList("projectName", "projectType", "teamName", "businessLicenceText", "planBookAttachmentText", "chargerName", "chargerPhone", "chargerEmail", "applyTypeText", "createTimeText"));
+		List<String> titleNames = new ArrayList<String>(Arrays.asList("项目名称", "项目分类", "申请企业/团队名称", "营业执照扫描件", "创业计划书", "法人代表/负责人姓名", "移动电话", "电子邮箱", "申请类型", "申请时间"));
 		List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(10, 10, 20, 10, 10, 10, 10, 20, 10, 10, 10, 10));
 
+		excelUtils.setNeedSequenceColumn(true);
+		OutputStream outputStream = excelUtils.getOutputStream(propertyNames, titleNames, titleSizes, dtos);
+		CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
 
-		if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode()){
-			propertyNames.add("payAmount");
-			titleNames.add("已付金额");
-			titleSizes.add(10);
 
-			propertyNames.add("refundAmount");
-			titleNames.add("已退金额");
-			titleSizes.add(10);
+		Task task = taskService.findById(taskId);
+		if(fileLocationDTO != null && fileLocationDTO.getUri() != null){
+			task.setProcess(100);
+			task.setStatus(TaskStatus.SUCCESS.getCode());
+			task.setResultString1(fileLocationDTO.getUri());
+			if(fileLocationDTO.getSize() != null){
+				task.setResultLong1(fileLocationDTO.getSize().longValue());
+			}
+			taskService.updateTask(task);
 		}
 
+	}
 
-		if (CheckInStatus.fromCode(activity.getSignupFlag()) == CheckInStatus.CHECKIN) {
-			propertyNames.add("checkinFlagText");
-			titleNames.add("是否签到");
-			titleSizes.add(10);
+
+	private void populateExportString(IncubatorApplyDTO dto){
+		if(dto == null){
+			return;
 		}
 
-		if(signupInfoDTOs.size() > 0){
-			signupInfoDTOs.get(0).setOrder("创建者");
+		if(dto.getBusinessLicenceAttachments() != null && dto.getBusinessLicenceAttachments().size() >0){
+			dto.setBusinessLicenceText("请到后台下载");
+		}else {
+			dto.setBusinessLicenceText("无");
 		}
-		for(int i=1; i<signupInfoDTOs.size(); i++){
-			signupInfoDTOs.get(i).setOrder(String.valueOf(i));
-		}
-		excelUtils.setNeedSequenceColumn(false);
-		excelUtils.writeExcel(propertyNames, titleNames, titleSizes, signupInfoDTOs);
 
+		if(dto.getPlanBookAttachments() != null && dto.getPlanBookAttachments().size() >0){
+			dto.setPlanBookAttachmentText("请到后台下载");
+		}else {
+			dto.setPlanBookAttachmentText("无");
+		}
+
+		ApplyType applyType = ApplyType.fromCode(dto.getApplyType());
+		if(applyType != null){
+			dto.setApplyTypeText(applyType.getText());
+		}else {
+			dto.setApplyTypeText("全部");
+		}
+
+		if(dto.getCreateTime() != null){
+			SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+			dto.setCreateTimeText(f.format(dto.getCreateTime()));
+		}
 
 	}
 

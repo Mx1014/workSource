@@ -29,32 +29,35 @@ public class TaskScheduleJob extends QuartzJobBean {
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
 
         JobDataMap jobDataMap = context.getJobDetail().getJobDataMap();
-        Long jobId = (Long)jobDataMap.get("jobId");
-        String jobClass = (String)jobDataMap.get("jobClassName");
-        String jobParams = (String)jobDataMap.get("jobParams");
-        Map params = (JSONObject) JSONValue.parse(jobParams);
+        Long taskId = (Long)jobDataMap.get("taskId");
+        String name = (String)jobDataMap.get("name");
+        String className = (String)jobDataMap.get("className");
+        String paramsStr = (String)jobDataMap.get("params");
+        Map params = (JSONObject) JSONValue.parse(paramsStr);
+        params.put("taskId", taskId);
+        params.put("name", name);
 
         try {
 
             //1、获取业务实现类
             TaskHandler handler = null;
             try {
-                Class c1 = forName(jobClass);
+                Class c1 = forName(className);
                 handler = (FileDownloadTaskHandler) c1.newInstance();
             }catch (Exception ex){
-                taskService.updateTaskStatus(jobId, TaskStatus.FAIL.getCode(),"get TaskHandler implements class fail.");
+                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),"get TaskHandler implements class fail.");
                 ex.printStackTrace();
                 throw ex;
             }
 
             //2、更新任务为执行状态
-            taskService.updateTaskStatus(jobId, TaskStatus.RUNNING.getCode(), null);
+            taskService.updateTaskStatus(taskId, TaskStatus.RUNNING.getCode(), null);
 
             //3、执行前置方法
             try{
                 handler.beforeExecute(params);
             }catch (Exception ex){
-                taskService.updateTaskStatus(jobId, TaskStatus.FAIL.getCode(),"excute beforeExecute method fail.");
+                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),"excute beforeExecute method fail.");
                 ex.printStackTrace();
                 throw ex;
             }
@@ -63,7 +66,7 @@ public class TaskScheduleJob extends QuartzJobBean {
             try {
                 handler.execute(params);
             }catch (Exception ex){
-                taskService.updateTaskStatus(jobId, TaskStatus.FAIL.getCode(), "excute execute method fail.");
+                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(), "excute execute method fail.");
                 ex.printStackTrace();
                 throw ex;
             }
@@ -72,7 +75,7 @@ public class TaskScheduleJob extends QuartzJobBean {
             try{
                 handler.commit(params);
             }catch (Exception ex){
-                taskService.updateTaskStatus(jobId, TaskStatus.FAIL.getCode(),"excute commit method fail.");
+                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),"excute commit method fail.");
                 ex.printStackTrace();
                 throw ex;
             }
@@ -81,18 +84,18 @@ public class TaskScheduleJob extends QuartzJobBean {
             try{
                 handler.afterExecute(params);
             }catch (Exception ex){
-                taskService.updateTaskStatus(jobId, TaskStatus.FAIL.getCode(),"excute afterExecute method fail.");
+                taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),"excute afterExecute method fail.");
                 ex.printStackTrace();
                 throw ex;
             }
 
             //7、更新任务状态为完成
-            taskService.updateTaskStatus(jobId, TaskStatus.SUCCESS.getCode(),null);
+            taskService.updateTaskStatus(taskId, TaskStatus.SUCCESS.getCode(),null);
 
 
         } catch (Exception e) {
             //1、更新任务状态为失败
-            taskService.updateTaskStatus(jobId, TaskStatus.FAIL.getCode(),  "unexpected exception.");
+            taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),  "unexpected exception.");
             e.printStackTrace();
         }
     }

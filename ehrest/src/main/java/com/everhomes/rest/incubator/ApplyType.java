@@ -9,16 +9,22 @@ package com.everhomes.rest.incubator;
  * </ul>
  */
 public enum ApplyType {
-    INCUBATOR((byte) 0), GROWING((byte) 1), COMMUNITY((byte) 2);
+    INCUBATOR((byte) 0, "入孵申请"), GROWING((byte) 1, "加速申请"), COMMUNITY((byte) 2, "入园申请");
 
     private byte code;
+    private String text;
 
-    private ApplyType(byte code) {
+    private ApplyType(byte code, String text) {
         this.code = code;
+        this.text = text;
     }
 
     public byte getCode() {
         return this.code;
+    }
+
+    public String getText(){
+        return this.text;
     }
 
     public static ApplyType fromCode(Byte code) {

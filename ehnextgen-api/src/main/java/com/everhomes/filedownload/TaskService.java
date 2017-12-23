@@ -20,6 +20,10 @@ public interface TaskService {
      */
     Long createTask(String name, Byte type, Class taskClass, Map<String, Object> params, Byte repeatFlag, Date startTime);
 
+    void updateTask(Task task);
+
+    Task findById(Long taskId);
+
     /**
      * 取消任务
      * @param taskId 任务进度

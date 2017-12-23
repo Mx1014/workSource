@@ -20,3 +20,6 @@ VALUES ('61000', '文件中心', '60000', NULL, 'react:/file-center/file-list', 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 SELECT (@menu_scope_id := @menu_scope_id + 1), 61000, '', 'EhNamespaces', id, 2 from eh_namespaces;
+
+-- “入孵申请”菜单改成“入驻申请”  add by yanjun 20171223
+UPDATE eh_web_menus set name = '入驻申请' where id = 36000 and name = '入孵申请';
