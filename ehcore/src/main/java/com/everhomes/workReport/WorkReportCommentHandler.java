@@ -14,14 +14,12 @@ import com.everhomes.rest.workReport.WorkReportDetailsActionData;
 import com.everhomes.rest.workReport.WorkReportNotificationTemplateCode;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RouterBuilder;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -118,6 +116,7 @@ public class WorkReportCommentHandler implements CommentHandler {
                 dto.setCreatorUid(comment.getCreatorUserId());
                 dto.setContent(comment.getContent());
                 dto.setContentType(comment.getContentType());
+                dto.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                 return dto;
             });
             return commentDTO;
