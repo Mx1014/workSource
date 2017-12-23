@@ -8,6 +8,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.filedownload.*;
+import com.everhomes.rest.user.LoginToken;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -106,7 +107,7 @@ public class FileDownloadTaskServiceImpl implements FileDownloadTaskService  {
     public void cancelTask(CancelTaskCommand cmd) {
         taskService.cancelTask(cmd.getTaskId());
     }
-
+    
     @Override
     public CsFileLocationDTO uploadToContenServer(String fileName, OutputStream ops){
 
@@ -117,7 +118,9 @@ public class FileDownloadTaskServiceImpl implements FileDownloadTaskService  {
 
     private CsFileLocationDTO uploadToContenServer(String fileName, InputStream ins){
 
-        String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
+        LoginToken loginToken = new LoginToken();
+        loginToken.setUserId(1L);
+        String token = WebTokenGenerator.getInstance().toWebToken(loginToken);
         //String name = "importErrorLog_" + String.valueOf(System.currentTimeMillis()) + ".xls";
         UploadCsFileResponse re = contentServerService.uploadFileToContentServer(ins, fileName, token);
         CsFileLocationDTO dto = re.getResponse();

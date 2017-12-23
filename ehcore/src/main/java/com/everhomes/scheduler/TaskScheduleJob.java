@@ -1,5 +1,6 @@
 package com.everhomes.scheduler;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.filedownload.*;
 import com.everhomes.rest.filedownload.TaskStatus;
 import org.json.simple.JSONObject;
@@ -43,7 +44,8 @@ public class TaskScheduleJob extends QuartzJobBean {
             TaskHandler handler = null;
             try {
                 Class c1 = forName(className);
-                handler = (FileDownloadTaskHandler) c1.newInstance();
+//                handler = (FileDownloadTaskHandler) c1.newInstance();
+                handler = (TaskHandler) PlatformContext.getComponent(c1);
             }catch (Exception ex){
                 taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),"get TaskHandler implements class fail.");
                 ex.printStackTrace();

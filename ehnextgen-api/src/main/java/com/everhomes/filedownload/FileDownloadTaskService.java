@@ -22,7 +22,7 @@ public interface FileDownloadTaskService{
     void cancelTask(CancelTaskCommand cmd);
 
     /**
-     * 上传文件到contenServer
+     * 上传文件到contenServer，fileName需要带上后缀，例如.xsl
      * @param fileName
      * @param ops
      * @return

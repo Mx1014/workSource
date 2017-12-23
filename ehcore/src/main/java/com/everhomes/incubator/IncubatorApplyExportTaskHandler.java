@@ -15,16 +15,15 @@ import com.everhomes.sms.DateUtil;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.excel.ExcelUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Component
 public class IncubatorApplyExportTaskHandler implements FileDownloadTaskHandler {
-
-	@Autowired
-	IncubatorService incubatorService;
 
 	@Autowired
 	FileDownloadTaskService fileDownloadTaskService;
@@ -33,7 +32,7 @@ public class IncubatorApplyExportTaskHandler implements FileDownloadTaskHandler 
 	IncubatorProvider incubatorProvider;
 
 	@Autowired
-	private TaskService taskService;
+	TaskService taskService;
 
 
 	@Override
@@ -43,14 +42,36 @@ public class IncubatorApplyExportTaskHandler implements FileDownloadTaskHandler 
 
 	@Override
 	public void execute(Map<String, Object> params) {
-		Integer namespaceId = (Integer) params.get("namespaceId");
+
+		Integer namespaceId = null;
+		if(params.get("namespaceId") != null){
+			namespaceId = Integer.valueOf(String.valueOf(params.get("namespaceId")));
+		}
+
 		String keyWord = (String)params.get("keyWord");
-		Byte approveStatus = (Byte)params.get("approveStatus");
-		Byte needReject = (Byte)params.get("needReject");
-		Byte orderBy = (Byte) params.get("orderBy");
-		Byte applyType = (Byte)params.get("applyType");
-		String fileName = (String)params.get("name");
-		Long taskId = (Long)params.get("taskId");
+
+		Byte approveStatus = null;
+		if(params.get("approveStatus") != null){
+			approveStatus = Byte.valueOf(String.valueOf(params.get("approveStatus")));
+		}
+
+		Byte needReject = null;
+		if(params.get("needReject") != null){
+			needReject = Byte.valueOf(String.valueOf(params.get("needReject")));
+		}
+
+		Byte orderBy = null;
+		if(params.get("orderBy") != null){
+			orderBy = Byte.valueOf(String.valueOf(params.get("orderBy")));
+		}
+
+		Byte applyType = null;
+		if(params.get("applyType") != null){
+			applyType = Byte.valueOf(String.valueOf(params.get("applyType")));
+		}
+
+		String fileName = (String) params.get("name");
+		Long taskId = (Long) params.get("taskId");
 
 
 		List<IncubatorApply> incubatorApplies = incubatorProvider.listIncubatorApplies(namespaceId, null, keyWord, approveStatus, needReject, null, null, orderBy, applyType);

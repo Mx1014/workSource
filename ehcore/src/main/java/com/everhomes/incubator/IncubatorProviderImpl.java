@@ -101,9 +101,11 @@ public class IncubatorProviderImpl implements IncubatorProvider {
             query.addOrderBy(Tables.EH_INCUBATOR_APPLIES.APPROVE_TIME.desc());
         }
 
-        Integer offset = (pageOffset - 1 ) * (pageSize -1);
+        if(pageOffset != null && pageSize != null){
+            Integer offset = (pageOffset - 1 ) * (pageSize -1);
+            query.addLimit(offset, pageSize);
+        }
 
-        query.addLimit(offset, pageSize);
         List<IncubatorApply> result = new ArrayList<>();
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, IncubatorApply.class));

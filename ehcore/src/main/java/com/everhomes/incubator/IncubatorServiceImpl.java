@@ -114,15 +114,29 @@ public class IncubatorServiceImpl implements IncubatorService {
 	@Override
 	public void exportIncubatorApply(ExportIncubatorApplyCommand cmd) {
 		Map<String, Object> params = new HashMap();
-		params.put("namespaceId", cmd.getNamespaceId());
-		params.put("keyWord", cmd.getKeyWord());
-		params.put("approveStatus", cmd.getApproveStatus());
-		params.put("needReject", cmd.getNeedReject());
-		params.put("orderBy", cmd.getOrderBy());
-		params.put("applyType", cmd.getApplyType());
+
+		//如果是null的话会被传成“null”
+		if(cmd.getNamespaceId() != null){
+			params.put("namespaceId", cmd.getNamespaceId());
+		}
+		if(cmd.getKeyWord() != null){
+			params.put("keyWord", cmd.getKeyWord());
+		}
+		if(cmd.getApproveStatus() != null){
+			params.put("approveStatus", cmd.getApproveStatus());
+		}
+		if(cmd.getNeedReject() != null){
+			params.put("needReject", cmd.getNeedReject());
+		}
+		if(cmd.getOrderBy() != null){
+			params.put("orderBy", cmd.getOrderBy());
+		}
+		if(cmd.getApplyType() != null){
+			params.put("applyType", cmd.getApplyType());
+		}
 
 		String statusName = ApproveStatus.fromCode(cmd.getApproveStatus()) == null ? "全部": ApproveStatus.fromCode(cmd.getApproveStatus()).getText();
-		String fileName = String.format("入驻申请企业_%s_%s", statusName, DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+		String fileName = String.format("入驻申请企业_%s_%s.xlsx", statusName, DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
 
 		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), IncubatorApplyExportTaskHandler.class, params, RepeatFlag.YES.getCode(), new Date());
 	}
@@ -344,6 +358,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 
 	private IncubatorApplyAttachmentDTO convertIncubatorApplyAttachment(IncubatorApplyAttachment r){
 		IncubatorApplyAttachmentDTO temp = ConvertHelper.convert(r, IncubatorApplyAttachmentDTO.class);
+		temp.setCreateTime(null);
 		String contentUrl = contentServerService.parserUri(temp.getContentUri(), IncubatorApplyAttachment.class.getSimpleName(), 1L);
 		temp.setContentUrl(contentUrl);
 		return temp;
