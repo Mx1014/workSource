@@ -130,13 +130,13 @@ public class IncubatorServiceImpl implements IncubatorService {
 	@Override
 	public IncubatorApplyDTO findIncubatorAppling() {
 		Long userId = UserContext.currentUserId();
-		IncubatorApply incubatorAppling = incubatorProvider.findIncubatorAppling(userId);
+		List<IncubatorApply> incubatorApplies = incubatorProvider.listIncubatorAppling(userId);
 
-		if(incubatorAppling == null){
+		if(incubatorApplies == null || incubatorApplies.size() == 0){
 			return null;
 		}
 
-		IncubatorApplyDTO dto = ConvertHelper.convert(incubatorAppling, IncubatorApplyDTO.class);
+		IncubatorApplyDTO dto = ConvertHelper.convert(incubatorApplies.get(0), IncubatorApplyDTO.class);
 		populateDto(dto);
 		return dto;
 	}
@@ -159,8 +159,8 @@ public class IncubatorServiceImpl implements IncubatorService {
 	@Override
 	public IncubatorApplyDTO addIncubatorApply(AddIncubatorApplyCommand cmd) {
 
-		if(cmd.getNamespaceId() == null || cmd.getCommunityId() == null){
-			LOGGER.error("ERROR_INVALID_PARAMS, namespaceId or communityId is null, namespaceid={}, communityId={}", cmd.getNamespaceId(), cmd.getCommunityId());
+		if(cmd.getNamespaceId() == null || cmd.getCommunityId() == null || cmd.getApplyType() == null){
+			LOGGER.error("ERROR_INVALID_PARAMS, namespaceId or communityId or applyType is null, namespaceid={}, communityId={}, applyType", cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getApplyType());
 			throw RuntimeErrorException.errorWith(IncubatorServiceErrorCode.SCOPE, IncubatorServiceErrorCode.ERROR_INVALID_PARAMS,
 					"ERROR_INVALID_PARAMS");
 		}
@@ -171,27 +171,26 @@ public class IncubatorServiceImpl implements IncubatorService {
 		incubatorApply.setApproveStatus(ApproveStatus.WAIT.getCode());
 		incubatorApply.setCreateTime(new Timestamp(System.currentTimeMillis()));
 
-		if(cmd.getParentId() == null){
-			long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhIncubatorApplies.class));
-			incubatorApply.setId(id);
-			incubatorApply.setRootId(id);
-		}else {
-			IncubatorApply parent = incubatorProvider.findIncubatorApplyById(cmd.getParentId());
-			incubatorApply.setRootId(parent.getRootId());
-		}
 
 		dbProvider.execute((status)->{
-			incubatorProvider.createIncubatorApply(incubatorApply);
 
-//			//如果是重新申请，更新父记录。此处的关系放在父记录维护是为了查询方便，不用每条记录都遍历查询子记录
-//			if(cmd.getParentId() != null){
-//				IncubatorApply parentIncubatorApply = incubatorProvider.findIncubatorApplyById(cmd.getParentId());
-//				if(parentIncubatorApply != null){
-//					parentIncubatorApply.setReApplyId(incubatorApply.getId());
-//					incubatorProvider.updateIncubatorApply(parentIncubatorApply);
-//				}
-//
-//			}
+
+			if(cmd.getParentId() == null){
+				long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhIncubatorApplies.class));
+				incubatorApply.setId(id);
+				incubatorApply.setRootId(id);
+			}else {
+				IncubatorApply parent = incubatorProvider.findIncubatorApplyById(cmd.getParentId());
+				incubatorApply.setRootId(parent.getRootId());
+
+				if(ApproveStatus.fromCode(parent.getApproveStatus()) == ApproveStatus.WAIT){
+					parent.setApproveStatus(ApproveStatus.CANCEL.getCode());
+					incubatorProvider.updateIncubatorApply(parent);
+				}
+
+			}
+
+			incubatorProvider.createIncubatorApply(incubatorApply);
 
 			//保存附件
 			saveAttachment(cmd.getBusinessLicenceAttachments(), incubatorApply.getId(), user.getId(), IncubatorApplyAttachmentType.BUSINESS_LICENCE.getCode());
@@ -219,7 +218,9 @@ public class IncubatorServiceImpl implements IncubatorService {
 
 	@Override
 	public void cancelIncubatorApply(CancelIncubatorApplyCommand cmd) {
-		incubatorProvider.deleteIncubatorApplyById(cmd.getId());
+		IncubatorApply incubatorApply = incubatorProvider.findIncubatorApplyById(cmd.getId());
+		incubatorApply.setApproveStatus(ApproveStatus.CANCEL.getCode());
+		incubatorProvider.updateIncubatorApply(incubatorApply);
 	}
 
 	@Override
@@ -297,14 +298,21 @@ public class IncubatorServiceImpl implements IncubatorService {
 	}
 
 	private void populateReApplyFlag(IncubatorApplyDTO dto){
-		if(dto.getApproveUserId() != null){
-			IncubatorApply incubatorAppling = incubatorProvider.findIncubatorAppling(dto.getApplyUserId());
-			if(incubatorAppling != null){
-				dto.setReApplyFlag(TrueOrFalseFlag.FALSE.getCode());
-			}else {
-				dto.setReApplyFlag(TrueOrFalseFlag.TRUE.getCode());
-			}
+
+		//自己是审核中的是可以申请的
+		if(ApproveStatus.fromCode(dto.getApproveStatus()) == ApproveStatus.WAIT){
+			dto.setReApplyFlag(TrueOrFalseFlag.TRUE.getCode());
+			return;
 		}
+
+		//自己不是审核中，一个用户只允许一个审核中的，已经有的话不允许在申请
+		List<IncubatorApply> incubatorApplies = incubatorProvider.listIncubatorAppling(dto.getApplyUserId());
+		if(incubatorApplies == null && incubatorApplies.size() == 0){
+			dto.setReApplyFlag(TrueOrFalseFlag.TRUE.getCode());
+		}else {
+			dto.setReApplyFlag(TrueOrFalseFlag.FALSE.getCode());
+		}
+
 	}
 
 	private void populateApproveUserName(IncubatorApplyDTO dto){

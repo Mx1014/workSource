@@ -131,14 +131,19 @@ public class IncubatorProviderImpl implements IncubatorProvider {
     }
 
     @Override
-    public IncubatorApply findIncubatorAppling(Long applyUserId) {
+    public List<IncubatorApply> listIncubatorAppling(Long applyUserId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhIncubatorAppliesRecord> query = context.selectQuery(Tables.EH_INCUBATOR_APPLIES);
         query.addConditions(Tables.EH_INCUBATOR_APPLIES.APPLY_USER_ID.eq(applyUserId));
         query.addConditions(Tables.EH_INCUBATOR_APPLIES.APPROVE_STATUS.eq(ApproveStatus.WAIT.getCode()));
 
-        query.addLimit(1);
-        return query.fetchAnyInto(IncubatorApply.class);
+        List<IncubatorApply> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, IncubatorApply.class));
+            return null;
+        });
+
+        return result;
     }
 
 
