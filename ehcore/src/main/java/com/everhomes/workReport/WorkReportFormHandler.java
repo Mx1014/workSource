@@ -98,6 +98,8 @@ public class WorkReportFormHandler implements GeneralFormModuleHandler {
                 } else {
                     //  2.update old fields
                     obj.setFieldValue(value.getFieldValue());
+                    obj.setFormOriginId(form.getFormOriginId());
+                    obj.setFormVersion(form.getFormVersion());
                     generalFormValProvider.updateGeneralFormVal(obj);
                 }
                 fieldNameScope.add(value.getFieldName());
