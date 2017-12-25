@@ -1293,7 +1293,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private String priceToString(BigDecimal price, Byte rentalType, Double timeStep) {
 		String priceString = isInteger(price)? String.valueOf(price.intValue()): price.toString() ;
 		if(price.compareTo(new BigDecimal(0)) == 0)
-			return "免费";
+			return "最低免费";
 		if(rentalType.equals(RentalType.DAY.getCode()))
 			return "￥"+ priceString +"/天";
 		if(rentalType.equals(RentalType.MONTH.getCode()))
