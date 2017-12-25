@@ -312,7 +312,8 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public void deleteWarehouseMaterialCategory(DeleteWarehouseMaterialCategoryCommand cmd) {
-        checkAssetPriviledgeForPropertyOrg(null, PrivilegeConstants.WAREHOUSE_MATERIAL_CATEGORY_ALL,cmd.getOwnerId());
+        //不支持指定项目
+//        checkAssetPriviledgeForPropertyOrg(null, PrivilegeConstants.WAREHOUSE_MATERIAL_CATEGORY_ALL,cmd.getOwnerId());
         WarehouseMaterialCategories category = verifyWarehouseMaterialCategories(cmd.getCategoryId(), cmd.getOwnerType(), cmd.getOwnerId());
 
         //该分类下有关联任何物品时，该分类不可删除
