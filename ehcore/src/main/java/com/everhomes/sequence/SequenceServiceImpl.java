@@ -412,6 +412,7 @@ import com.everhomes.server.schema.tables.pojos.EhRentalv2CloseDates;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2ConfigAttachments;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2DefaultRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Items;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2ItemsOrders;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2OrderAttachments;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2OrderPayorderMap;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Orders;
