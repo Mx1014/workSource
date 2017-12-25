@@ -670,7 +670,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             return 1;
         }
         if(cmd.getAppId() != null){
-            if(userPrivilegeMgr.checkModuleAppAdmin(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), cmd.getUserId(), cmd.getAppId())){
+            if(userPrivilegeMgr.checkModuleAppAdmin(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), userId, cmd.getAppId())){
                 return 1;
             }
         }
