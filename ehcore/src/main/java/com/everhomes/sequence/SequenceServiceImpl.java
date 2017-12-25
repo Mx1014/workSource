@@ -489,6 +489,7 @@ import com.everhomes.server.schema.tables.pojos.EhTalentMessageSenders;
 import com.everhomes.server.schema.tables.pojos.EhTalentQueryHistories;
 import com.everhomes.server.schema.tables.pojos.EhTalentRequests;
 import com.everhomes.server.schema.tables.pojos.EhTalents;
+import com.everhomes.server.schema.tables.pojos.EhTasks;
 import com.everhomes.server.schema.tables.pojos.EhTechparkSyncdataBackup;
 import com.everhomes.server.schema.tables.pojos.EhTerminalAppVersionActives;
 import com.everhomes.server.schema.tables.pojos.EhTerminalAppVersionCumulatives;
