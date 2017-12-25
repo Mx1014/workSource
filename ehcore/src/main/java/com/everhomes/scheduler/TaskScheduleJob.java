@@ -25,18 +25,30 @@ public class TaskScheduleJob extends QuartzJobBean {
 
     @Autowired
     TaskService taskService;
+    @Autowired
+    private ScheduleProvider scheduleProvider;
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
 
+        //双机判断
+        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) != RunningFlag.TRUE) {
+            return;
+        }
+
         JobDataMap jobDataMap = context.getJobDetail().getJobDataMap();
         Long taskId = (Long)jobDataMap.get("taskId");
         String name = (String)jobDataMap.get("name");
+        Long status = (Long)jobDataMap.get("status");
+        String process = (String)jobDataMap.get("process");
+
         String className = (String)jobDataMap.get("className");
         String paramsStr = (String)jobDataMap.get("params");
         Map params = (JSONObject) JSONValue.parse(paramsStr);
         params.put("taskId", taskId);
         params.put("name", name);
+        params.put("status", status);
+        params.put("process", process);
 
         try {
 

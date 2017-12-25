@@ -2,8 +2,10 @@
 package com.everhomes.filedownload;
 
 
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskStatus;
 import com.everhomes.rest.scheduler.ScheduleJobInfoDTO;
+import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.TaskScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.user.UserContext;
@@ -32,7 +34,20 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        //TODO 检查未启动、失败任务，再次启动
+        List<Task> tasks = taskProvider.listWaitingAndRunningTask();
+
+        //等待中的直接加入任务队列，执行中的按照约定加入队列或者标识为失败
+        for(Task task: tasks){
+            if(TaskStatus.fromCode(task.getStatus()) == TaskStatus.WAITING){
+                scheduleTask(task);
+            }else {
+                if(TaskRepeatFlag.fromCode(task.getRepeatFlag()) == TaskRepeatFlag.REPEAT || TaskRepeatFlag.fromCode(task.getRepeatFlag()) == TaskRepeatFlag.RATE_REPEAT){
+                    scheduleTask(task);
+                }else {
+                    updateTaskStatus(task.getId(), TaskStatus.FAIL.getCode(), "task is running when system onApplication, and it is no support repeat execute.");
+                }
+            }
+        }
     }
 
 
@@ -41,7 +56,7 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
 
         Task task = saveNewTask(name, type, taskClass.getName(), params, repeatFlag);
         scheduleTask(task);
-        return null;
+        return task.getId();
     }
 
 
@@ -131,6 +146,8 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("taskId", task.getId());
         parameters.put("name", task.getName());
+        parameters.put("status", task.getStatus());
+        parameters.put("process", task.getProcess() == null ? 0: task.getProcess());
         parameters.put("className", task.getClassName());
         parameters.put("params", task.getParams());
         String taskName = "task_" + task.getType() + task.getId();

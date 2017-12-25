@@ -10,6 +10,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.filedownload.Task;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.Organization;
@@ -18,6 +19,7 @@ import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.incubator.*;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -138,7 +140,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 		String statusName = ApproveStatus.fromCode(cmd.getApproveStatus()) == null ? "全部": ApproveStatus.fromCode(cmd.getApproveStatus()).getText();
 		String fileName = String.format("入驻申请企业_%s_%s.xlsx", statusName, DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
 
-		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), IncubatorApplyExportTaskHandler.class, params, RepeatFlag.YES.getCode(), new Date());
+		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), IncubatorApplyExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 	}
 
 	@Override

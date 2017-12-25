@@ -122,6 +122,20 @@ public class TaskProviderImpl implements TaskProvider {
         return result;
     }
 
+    @Override
+    public List<Task> listWaitingAndRunningTask() {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhTasksRecord> query = context.selectQuery(Tables.EH_TASKS);
+        query.addConditions(Tables.EH_TASKS.STATUS.in(TaskStatus.RUNNING.getCode(), TaskStatus.WAITING.getCode()));
+        query.addOrderBy(Tables.EH_TASKS.ID.asc());
+        List<Task> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, Task.class));
+            return null;
+        });
+
+        return result;
+    }
 
     @Override
     public List<Long> listWaitingTaskIds() {
