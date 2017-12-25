@@ -35,6 +35,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.User;
 import com.everhomes.util.DateHelper;
+import com.everhomes.workReport.WorkReportService;
 import com.everhomes.yellowPage.ServiceAllianceCategories;
 import com.everhomes.yellowPage.YellowPageProvider;
 import freemarker.cache.StringTemplateLoader;
@@ -146,6 +147,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Autowired
     private PunchService punchService;
+
+    @Autowired
+    private WorkReportService workReportService;
 
     private StringTemplateLoader templateLoader;
 
@@ -545,6 +549,10 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
 		//  删除与表单相关控件组
 		this.generalFormProvider.deleteGeneralFormGroupsByFormOriginId(cmd.getFormOriginId());
+
+        /***    更改与表单相关业务的状态    ***/
+        //  工作汇报
+        workReportService.disableWorkReportByFormOriginId(cmd.getFormOriginId(), 54000L, "any-module");
 
     }
 

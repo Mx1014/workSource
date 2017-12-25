@@ -60,9 +60,6 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     @Autowired
     private GeneralApprovalValProvider generalApprovalValProvider;
 
-    @Autowired
-    private WorkReportService workReportService;
-
     @Override
     public GeneralFormDTO getTemplateByFormId(GetTemplateByFormIdCommand cmd) {
         GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd.getFormId());
@@ -641,10 +638,6 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         this.generalFormProvider.invalidForms(cmd.getFormOriginId());
         //  删除与表单相关控件组
         this.generalFormProvider.deleteGeneralFormGroupsByFormOriginId(cmd.getFormOriginId());
-
-        /***    更改与表单相关业务的状态    ***/
-        //  工作汇报
-        workReportService.disableWorkReportByFormOriginId(cmd.getFormOriginId(), 54000L, "any-module");
     }
 
     @Override
