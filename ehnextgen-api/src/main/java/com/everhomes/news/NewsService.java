@@ -68,4 +68,12 @@ public interface NewsService {
 	void setNewsLikeFlagForWeb(SetNewsLikeFlagForWebCommand cmd);
 
 	GetCategoryIdByEntryIdResponse getCategoryIdByEntryId(GetCategoryIdByEntryIdCommand cmd);
+
+	void publishNews(publishNewsCommand cmd);
+	
+	News findNewsById(Long userId, Long newsId);
+	
+	void syncNewsWhenDelete(Long id);
+	
+	Long checkNewsToken(Long userId, String newsToken);
 }
