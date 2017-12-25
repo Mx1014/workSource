@@ -116,12 +116,14 @@ public class WorkReportCommentHandler implements CommentHandler {
                 dto.setCreatorUid(comment.getCreatorUserId());
                 dto.setContent(comment.getContent());
                 dto.setContentType(comment.getContentType());
-                List<AttachmentDTO> attachmentDTOS = cmd.getAttachments().stream().map(r ->{
-                    AttachmentDTO attachmentDTO = ConvertHelper.convert(r, AttachmentDTO.class);
-                    attachmentDTO.setContentUrl(contentServerService.parserUri(r.getContentUri()));
-                    return attachmentDTO;
-                }).collect(Collectors.toList());
-                dto.setAttachments(attachmentDTOS);
+                if (cmd.getAttachments() != null && cmd.getAttachments().size() > 0) {
+                    List<AttachmentDTO> attachmentDTOS = cmd.getAttachments().stream().map(r -> {
+                        AttachmentDTO attachmentDTO = ConvertHelper.convert(r, AttachmentDTO.class);
+                        attachmentDTO.setContentUrl(contentServerService.parserUri(r.getContentUri()));
+                        return attachmentDTO;
+                    }).collect(Collectors.toList());
+                    dto.setAttachments(attachmentDTOS);
+                }
                 dto.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                 return dto;
             });
