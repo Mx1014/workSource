@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.location_reserver;
+package com.everhomes.reserver;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;

@@ -1021,4 +1021,100 @@ public class ParkingProviderImpl implements ParkingProvider {
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhParkingCarVerifications.class, null);
 
 	}
+
+	@Override
+	public ParkingSpace findParkingSpaceById(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhParkingSpacesDao dao = new EhParkingSpacesDao(context.configuration());
+
+		return ConvertHelper.convert(dao.findById(id), ParkingSpace.class);
+
+	}
+
+	@Override
+	public void updateParkingSpace(ParkingSpace parkingSpace) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhParkingSpacesDao dao = new EhParkingSpacesDao(context.configuration());
+
+		parkingSpace.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+		parkingSpace.setUpdateUid(UserContext.currentUserId());
+
+		dao.update(parkingSpace);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhParkingSpaces.class, null);
+
+	}
+
+	@Override
+	public void createParkingSpace(ParkingSpace parkingSpace) {
+
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhParkingSpaces.class));
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhParkingSpacesDao dao = new EhParkingSpacesDao(context.configuration());
+
+		parkingSpace.setId(id);
+		parkingSpace.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		parkingSpace.setCreatorUid(UserContext.currentUserId());
+
+		dao.insert(parkingSpace);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhParkingSpaces.class, null);
+
+	}
+
+	@Override
+	public List<ParkingSpace> searchParkingSpaces(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId,
+												  String keyword, String lockStatus, Long pageAnchor, Integer pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCarVerifications.class));
+		SelectQuery<EhParkingSpacesRecord> query = context.selectQuery(Tables.EH_PARKING_SPACES);
+
+		query.addConditions(Tables.EH_PARKING_SPACES.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_PARKING_SPACES.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_PARKING_SPACES.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_PARKING_SPACES.PARKING_LOT_ID.eq(parkingLotId));
+
+		if (null != pageAnchor && pageAnchor != 0L) {
+			query.addConditions(Tables.EH_PARKING_SPACES.ID.gt(pageAnchor));
+		}
+		if (StringUtils.isNotBlank(keyword)) {
+			query.addConditions(Tables.EH_PARKING_SPACES.SPACE_NO.like("%" + keyword + "%")
+			.or(Tables.EH_PARKING_SPACES.LOCK_ID.like("%" + keyword + "%")));
+		}
+		if (StringUtils.isNotBlank(lockStatus)) {
+			query.addConditions(Tables.EH_PARKING_SPACES.LOCK_STATUS.eq(lockStatus));
+		}
+
+		query.addConditions(Tables.EH_PARKING_SPACES.STATUS.ne(ParkingCarVerificationStatus.INACTIVE.getCode()));
+
+		query.addOrderBy(Tables.EH_PARKING_SPACES.ID.asc());
+		if (null != pageSize) {
+			query.addLimit(pageSize);
+		}
+		return query.fetch().map(r -> ConvertHelper.convert(r, ParkingSpace.class));
+	}
+
+	@Override
+	public List<ParkingSpaceLog> listParkingSpaceLogs(String spaceNo, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCarVerifications.class));
+		SelectQuery<EhParkingSpaceLogsRecord> query = context.selectQuery(Tables.EH_PARKING_SPACE_LOGS);
+
+		query.addConditions(Tables.EH_PARKING_SPACE_LOGS.SPACE_NO.eq(spaceNo));
+
+		if (null != pageAnchor && pageAnchor != 0L) {
+			query.addConditions(Tables.EH_PARKING_SPACE_LOGS.OPERATE_TIME.lt(new Timestamp(pageAnchor)));
+		}
+
+		if (null != startTime) {
+			query.addConditions(Tables.EH_PARKING_SPACE_LOGS.OPERATE_TIME.ge(new Timestamp(startTime)));
+		}
+		if (null != endTime) {
+			query.addConditions(Tables.EH_PARKING_SPACE_LOGS.OPERATE_TIME.le(new Timestamp(startTime)));
+		}
+		query.addOrderBy(Tables.EH_PARKING_SPACE_LOGS.OPERATE_TIME.desc());
+		if (null != pageSize) {
+			query.addLimit(pageSize);
+		}
+		return query.fetch().map(r -> ConvertHelper.convert(r, ParkingSpaceLog.class));
+	}
 }

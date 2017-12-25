@@ -743,7 +743,7 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=SearchParkingSpacesResponse.class)
     public RestResponse searchParkingSpaces(SearchParkingSpacesCommand cmd) {
 
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(parkingService.searchParkingSpaces(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -757,7 +757,7 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=ParkingSpaceDTO.class)
     public RestResponse addParkingSpace(AddParkingSpaceCommand cmd) {
 
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(parkingService.addParkingSpace(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -771,19 +771,21 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=ParkingSpaceDTO.class)
     public RestResponse updateParkingSpace(UpdateParkingSpaceCommand cmd) {
 
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(parkingService.updateParkingSpace(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
 
     /**
-     * <b>URL: /parking/updateParkingSpace</b>
+     * <b>URL: /parking/updateParkingSpaceStatus</b>
      * <p>开放/关闭 停车位</p>
      */
-    @RequestMapping("updateParkingSpace")
+    @RequestMapping("updateParkingSpaceStatus")
     @RestReturn(value=String.class)
     public RestResponse updateParkingSpaceStatus(UpdateParkingSpaceStatusCommand cmd) {
+
+        parkingService.updateParkingSpaceStatus(cmd);
 
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -799,7 +801,7 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=ListParkingSpaceLogsResponse.class)
     public RestResponse listParkingSpaceLogs(ListParkingSpaceLogsCommand cmd) {
 
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(parkingService.listParkingSpaceLogs(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

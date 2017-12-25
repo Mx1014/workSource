@@ -2325,4 +2325,111 @@ public class ParkingServiceImpl implements ParkingService {
 
 		return flowCase;
 	}
+
+	@Override
+	public ParkingSpaceDTO addParkingSpace(AddParkingSpaceCommand cmd) {
+
+		ParkingSpace parkingSpace = ConvertHelper.convert(cmd, ParkingSpace.class);
+
+		parkingProvider.createParkingSpace(parkingSpace);
+
+		return ConvertHelper.convert(parkingSpace, ParkingSpaceDTO.class);
+	}
+
+	@Override
+	public ParkingSpaceDTO updateParkingSpace(UpdateParkingSpaceCommand cmd) {
+		ParkingSpace parkingSpace = parkingProvider.findParkingSpaceById(cmd.getId());
+
+		if (null == parkingSpace) {
+			LOGGER.error("ParkingSpace not found, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"ParkingSpace not found.");
+		}
+
+		parkingSpace.setSpaceAddress(cmd.getSpaceAddress());
+		parkingSpace.setLockId(cmd.getLockId());
+
+		parkingProvider.updateParkingSpace(parkingSpace);
+
+		return ConvertHelper.convert(parkingSpace, ParkingSpaceDTO.class);
+	}
+
+	@Override
+	public void updateParkingSpaceStatus(UpdateParkingSpaceStatusCommand cmd) {
+		ParkingSpace parkingSpace = parkingProvider.findParkingSpaceById(cmd.getId());
+
+		if (null == parkingSpace) {
+			LOGGER.error("ParkingSpace not found, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"ParkingSpace not found.");
+		}
+
+		parkingSpace.setStatus(cmd.getStatus());
+
+		parkingProvider.updateParkingSpace(parkingSpace);
+
+	}
+
+	@Override
+	public SearchParkingSpacesResponse searchParkingSpaces(SearchParkingSpacesCommand cmd) {
+
+		SearchParkingSpacesResponse response = new SearchParkingSpacesResponse();
+
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		List<ParkingSpace> spaces = parkingProvider.searchParkingSpaces(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getParkingLotId(), cmd.getKeyword(), cmd.getLockStatus(), cmd.getPageAnchor(), pageSize);
+
+		int size = spaces.size();
+		if(size > 0){
+			response.setSpaceDTOS(spaces.stream().map(r -> {
+				ParkingSpaceDTO dto = ConvertHelper.convert(r, ParkingSpaceDTO.class);
+				return dto;
+			}).collect(Collectors.toList()));
+
+			if(size != pageSize){
+				response.setNextPageAnchor(null);
+			}else{
+				response.setNextPageAnchor(spaces.get(size-1).getId());
+			}
+		}
+
+		return response;
+	}
+
+	@Override
+	public ListParkingSpaceLogsResponse listParkingSpaceLogs(ListParkingSpaceLogsCommand cmd) {
+		ListParkingSpaceLogsResponse response = new ListParkingSpaceLogsResponse();
+
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		List<ParkingSpaceLog> spaceLogs = parkingProvider.listParkingSpaceLogs(cmd.getSpaceNo(), cmd.getStartTime(),
+				cmd.getEndTime(), cmd.getPageAnchor(), pageSize);
+
+		int size = spaceLogs.size();
+		if(size > 0){
+			response.setLogDTOS(spaceLogs.stream().map(r -> {
+				ParkingSpaceLogDTO dto = ConvertHelper.convert(r, ParkingSpaceLogDTO.class);
+				return dto;
+			}).collect(Collectors.toList()));
+
+			if(size != pageSize){
+				response.setNextPageAnchor(null);
+			}else{
+				response.setNextPageAnchor(spaceLogs.get(size-1).getOperateTime().getTime());
+			}
+		}
+
+		return response;
+	}
+
+	@Override
+	public void raiseParkingSpaceLock(RaiseParkingSpaceLockCommand cmd) {
+		//TODO:
+	}
+
+	@Override
+	public void downParkingSpaceLock(DownParkingSpaceLockCommand cmd) {
+		//TODO:
+	}
 }

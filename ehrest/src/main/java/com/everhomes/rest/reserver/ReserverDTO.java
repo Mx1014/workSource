@@ -1,4 +1,4 @@
-package com.everhomes.location_reserver;
+package com.everhomes.rest.reserver;
 
 import java.util.Date;
 

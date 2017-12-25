@@ -1,4 +1,4 @@
-package com.everhomes.location_reserver;
+package com.everhomes.reserver;
 
 /**
  * Created by sw on 2017/3/2.

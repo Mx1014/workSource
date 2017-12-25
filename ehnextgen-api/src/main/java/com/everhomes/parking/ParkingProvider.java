@@ -127,4 +127,16 @@ public interface ParkingProvider {
 
     ParkingRechargeOrder getParkingRechargeTempOrder(String ownerType, Long ownerId, Long parkingLotId,
                                                      String plateNumber, Timestamp startDate, Timestamp endDate);
+
+    ParkingSpace findParkingSpaceById(Long id);
+
+    void updateParkingSpace(ParkingSpace parkingSpace);
+
+    void createParkingSpace(ParkingSpace parkingSpace);
+
+    List<ParkingSpace> searchParkingSpaces(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId,
+                                           String keyword, String lockStatus, Long pageAnchor, Integer pageSize);
+
+    List<ParkingSpaceLog> listParkingSpaceLogs(String spaceNo, Long startTime, Long endTime, Long pageAnchor, Integer pageSize);
+
 }

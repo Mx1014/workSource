@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
+ * <li>namespaceId: 域空间id</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>parkingLotId: 停车场ID</li>
  * <li>lockStatus: 所状态</li>
@@ -15,6 +16,7 @@ import com.everhomes.util.StringHelper;
  */
 public class SearchParkingSpacesCommand {
 
+    private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
     private Long parkingLotId;
@@ -22,6 +24,14 @@ public class SearchParkingSpacesCommand {
     private String keyword;
     private Long pageAnchor;
     private Integer pageSize;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Long getPageAnchor() {
         return pageAnchor;
