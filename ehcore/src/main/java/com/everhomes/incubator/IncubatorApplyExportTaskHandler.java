@@ -7,10 +7,7 @@ import com.everhomes.filedownload.Task;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.filedownload.TaskStatus;
-import com.everhomes.rest.incubator.ApplyType;
-import com.everhomes.rest.incubator.ApproveStatus;
-import com.everhomes.rest.incubator.ExportIncubatorApplyCommand;
-import com.everhomes.rest.incubator.IncubatorApplyDTO;
+import com.everhomes.rest.incubator.*;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.excel.ExcelUtils;
@@ -113,13 +110,15 @@ public class IncubatorApplyExportTaskHandler implements FileDownloadTaskHandler 
 			return;
 		}
 
-		if(dto.getBusinessLicenceAttachments() != null && dto.getBusinessLicenceAttachments().size() >0){
+		List<IncubatorApplyAttachment> businessLicence = incubatorProvider.listAttachmentsByApplyId(dto.getId(), IncubatorApplyAttachmentType.BUSINESS_LICENCE.getCode());
+		if(businessLicence != null && businessLicence.size() > 0){
 			dto.setBusinessLicenceText("请到后台下载");
 		}else {
 			dto.setBusinessLicenceText("无");
 		}
 
-		if(dto.getPlanBookAttachments() != null && dto.getPlanBookAttachments().size() >0){
+		List<IncubatorApplyAttachment> planBook = incubatorProvider.listAttachmentsByApplyId(dto.getId(), IncubatorApplyAttachmentType.PLAN_BOOK.getCode());
+		if(planBook != null && planBook.size() >0){
 			dto.setPlanBookAttachmentText("请到后台下载");
 		}else {
 			dto.setPlanBookAttachmentText("无");
