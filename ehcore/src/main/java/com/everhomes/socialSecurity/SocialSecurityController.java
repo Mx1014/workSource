@@ -126,10 +126,9 @@ public class SocialSecurityController extends ControllerBase {
 	 * <b>URL: /socialSecurity/calculateSocialSecurityReports</b>
 	 */
 	@RequestMapping("calculateSocialSecurityReports")
-	@RestReturn(String.class)
+	@RestReturn(CalculateSocialSecurityReportsResponse.class)
 	public RestResponse calculateSocialSecurityReports(CalculateSocialSecurityReportsCommand cmd){
-		socialSecurityService.calculateSocialSecurityReports(cmd);
-		return new RestResponse();
+		return new RestResponse(socialSecurityService.calculateSocialSecurityReports(cmd));
 	}
 
 	/**
@@ -245,6 +244,16 @@ public class SocialSecurityController extends ControllerBase {
 	@RestReturn(GetSocialSecurityReportStatusResponse.class)
 	public RestResponse getSocialSecurityReportStatus(GetSocialSecurityReportStatusCommand cmd){
 		return new RestResponse(socialSecurityService.getSocialSecurityReportStatus(cmd));
+	}
+
+	/**
+	 * <p>23.社保报表的头部信息</p>
+	 * <b>URL: /socialSecurity/getSocialSecurityReportsHead</b>
+	 */
+	@RequestMapping("getSocialSecurityReportsHead")
+	@RestReturn(GetSocialSecurityReportsHeadResponse.class)
+	public RestResponse getSocialSecurityReportsHead(GetSocialSecurityReportsHeadCommand cmd){
+		return new RestResponse(socialSecurityService.getSocialSecurityReportsHead(cmd));
 	}
 
 }

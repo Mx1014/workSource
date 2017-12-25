@@ -3,74 +3,75 @@ package com.everhomes.socialSecurity;
 
 import com.everhomes.rest.socialSecurity.*;
 
-public interface SocialSecurityService {
+interface SocialSecurityService {
 
  
-	public void addSocialSecurity(AddSocialSecurityCommand cmd);
+	void addSocialSecurity(AddSocialSecurityCommand cmd);
 
 
-	public ListSocialSecurityCitiesResponse listSocialSecurityCities(ListSocialSecurityCitiesCommand cmd);
+	ListSocialSecurityCitiesResponse listSocialSecurityCities(ListSocialSecurityCitiesCommand cmd);
 
 
-	public ListAccumulationFundCitiesResponse listAccumulationFundCities(ListAccumulationFundCitiesCommand cmd);
+	ListAccumulationFundCitiesResponse listAccumulationFundCities(ListAccumulationFundCitiesCommand cmd);
 
 
-	public ListFilterItemsResponse listFilterItems(ListFilterItemsCommand cmd);
+	ListFilterItemsResponse listFilterItems(ListFilterItemsCommand cmd);
 
 
-	public ListSocialSecurityPaymentsResponse listSocialSecurityPayments(ListSocialSecurityPaymentsCommand cmd);
+	ListSocialSecurityPaymentsResponse listSocialSecurityPayments(ListSocialSecurityPaymentsCommand cmd);
 
 
-	public ListSocialSecurityEmployeeStatusResponse listSocialSecurityEmployeeStatus(ListSocialSecurityEmployeeStatusCommand cmd);
+	ListSocialSecurityEmployeeStatusResponse listSocialSecurityEmployeeStatus(ListSocialSecurityEmployeeStatusCommand cmd);
 
 
 	SocialSecurityPaymentDetailDTO getSocialSecurityRule(GetSocialSecurityRuleCommand cmd);
 
-	public GetSocialSecurityPaymentDetailsResponse getSocialSecurityPaymentDetails(GetSocialSecurityPaymentDetailsCommand cmd);
+	GetSocialSecurityPaymentDetailsResponse getSocialSecurityPaymentDetails(GetSocialSecurityPaymentDetailsCommand cmd);
 
 
-	public void updateSocialSecurityPayment(UpdateSocialSecurityPaymentCommand cmd);
+	void updateSocialSecurityPayment(UpdateSocialSecurityPaymentCommand cmd);
 
 
-	public void importSocialSecurityPayments(ImportSocialSecurityPaymentsCommand cmd);
+	void importSocialSecurityPayments(ImportSocialSecurityPaymentsCommand cmd);
 
 
-	public void calculateSocialSecurityReports(CalculateSocialSecurityReportsCommand cmd);
+	CalculateSocialSecurityReportsResponse calculateSocialSecurityReports(CalculateSocialSecurityReportsCommand cmd);
 
 
-	public ListSocialSecurityReportsResponse listSocialSecurityReports(ListSocialSecurityReportsCommand cmd);
+	ListSocialSecurityReportsResponse listSocialSecurityReports(ListSocialSecurityReportsCommand cmd);
 
 
-	public void exportSocialSecurityReports(ExportSocialSecurityReportsCommand cmd);
+	void exportSocialSecurityReports(ExportSocialSecurityReportsCommand cmd);
 
 
-	public ListSocialSecurityDepartmentSummarysResponse listSocialSecurityDepartmentSummarys(ListSocialSecurityDepartmentSummarysCommand cmd);
+	ListSocialSecurityDepartmentSummarysResponse listSocialSecurityDepartmentSummarys(ListSocialSecurityDepartmentSummarysCommand cmd);
 
 
-	public void exportSocialSecurityDepartmentSummarys(ExportSocialSecurityDepartmentSummarysCommand cmd);
+	void exportSocialSecurityDepartmentSummarys(ExportSocialSecurityDepartmentSummarysCommand cmd);
 
 
-	public ListSocialSecurityInoutReportsResponse listSocialSecurityInoutReports(ListSocialSecurityInoutReportsCommand cmd);
+	ListSocialSecurityInoutReportsResponse listSocialSecurityInoutReports(ListSocialSecurityInoutReportsCommand cmd);
 
 
-	public void exportSocialSecurityInoutReports(ExportSocialSecurityInoutReportsCommand cmd);
+	void exportSocialSecurityInoutReports(ExportSocialSecurityInoutReportsCommand cmd);
 
 
-	public void fileSocialSecurity(FileSocialSecurityCommand cmd);
+	void fileSocialSecurity(FileSocialSecurityCommand cmd);
 
 
-	public ListSocialSecurityHistoryFilesResponse listSocialSecurityHistoryFiles(ListSocialSecurityHistoryFilesCommand cmd);
+	ListSocialSecurityHistoryFilesResponse listSocialSecurityHistoryFiles(ListSocialSecurityHistoryFilesCommand cmd);
 
 
-	public ListUserInoutHistoryResponse listUserInoutHistory(ListUserInoutHistoryCommand cmd);
+	ListUserInoutHistoryResponse listUserInoutHistory(ListUserInoutHistoryCommand cmd);
 
 
-	public ListSocialSecurityHouseholdTypesResponse listSocialSecurityHouseholdTypes(ListSocialSecurityHouseholdTypesCommand cmd);
+	ListSocialSecurityHouseholdTypesResponse listSocialSecurityHouseholdTypes(ListSocialSecurityHouseholdTypesCommand cmd);
 
 
-	public ListAccumulationFundHouseholdTypesResponse listAccumulationFundHouseholdTypes(ListAccumulationFundHouseholdTypesCommand cmd);
+	ListAccumulationFundHouseholdTypesResponse listAccumulationFundHouseholdTypes(ListAccumulationFundHouseholdTypesCommand cmd);
 
 
-	public GetSocialSecurityReportStatusResponse getSocialSecurityReportStatus(GetSocialSecurityReportStatusCommand cmd);
+	GetSocialSecurityReportStatusResponse getSocialSecurityReportStatus(GetSocialSecurityReportStatusCommand cmd);
 
+	GetSocialSecurityReportsHeadResponse getSocialSecurityReportsHead(GetSocialSecurityReportsHeadCommand cmd);
 }

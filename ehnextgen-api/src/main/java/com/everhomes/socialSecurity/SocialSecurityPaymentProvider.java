@@ -11,11 +11,12 @@ public interface SocialSecurityPaymentProvider {
 
 	SocialSecurityPayment findSocialSecurityPaymentById(Long id);
 
-	List<SocialSecurityPayment> listSocialSecurityPayment();
+	List<SocialSecurityPayment> listSocialSecurityPayment(Long ownerId, Long detailId);
+
+	List<SocialSecurityPayment> listSocialSecurityPayment(Long ownerId);
 
 	String findPaymentMonthByOwnerId(Long ownerId);
 
-	List<SocialSecurityPayment> listSocialSecurityPayment(Long detailId);
 
 	void setUserCityAndHTByAccumOrSocial(Long detailId, Byte accumOrSocial, Long cityId, String householdType);
 
@@ -25,4 +26,10 @@ public interface SocialSecurityPaymentProvider {
 	String findPaymentMonth(Long detailId);
 
 	Integer countUnFieldUsers(Long ownerId);
+
+	void deleteSocialSecurityPayments(Long ownerId);
+
+	void updateSocialSecurityPaymentFileStatus(Long ownerId);
+
+	SocialSecuritySummary calculateSocialSecuritySummary(Long ownerId, String paymentMonth);
 }

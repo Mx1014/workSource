@@ -14,6 +14,9 @@ public class CalculateSocialSecurityReportsResponse {
 
 	private String reportToken;
 
+	public CalculateSocialSecurityReportsResponse(String reportToken) {
+		this.reportToken = reportToken;
+	}
 	public CalculateSocialSecurityReportsResponse() {
 
 	}

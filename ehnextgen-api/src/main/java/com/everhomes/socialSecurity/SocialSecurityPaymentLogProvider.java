@@ -13,4 +13,5 @@ public interface SocialSecurityPaymentLogProvider {
 
 	List<SocialSecurityPaymentLog> listSocialSecurityPaymentLog();
 
+	void deleteMonthLog(Long ownerId, String paymentMonth);
 }

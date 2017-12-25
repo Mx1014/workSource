@@ -13,8 +13,6 @@ import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 
 import com.everhomes.rest.socialSecurity.*;
-import com.everhomes.techpark.punch.PunchConstants;
-import com.everhomes.techpark.punch.PunchServiceImpl;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -30,6 +28,8 @@ import org.apache.commons.lang.StringUtils;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -61,7 +61,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 	private BigCollectionProvider bigCollectionProvider;
 	@Autowired
 	private ConfigurationProvider configurationProvider;
-
+	/**处理计算的线程池,预设最大值是5*/
+	private static ExecutorService calculateExecutorPool = Executors.newFixedThreadPool(5);
 	private static ThreadLocal<SimpleDateFormat> monthSF = new ThreadLocal<SimpleDateFormat>(){
 		protected SimpleDateFormat initialValue() {
 			return new SimpleDateFormat("yyyyMM");
@@ -96,11 +97,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 	}
 
 	private void deleteOldMonthPayments(Long ownerId) {
-		List<SocialSecurityPayment> payments = socialSecurityPaymentProvider.listSocialSecurityPayment(ownerId);
-		for (SocialSecurityPayment payment : payments) {
-			SocialSecurityPaymentLog paymentLog = ConvertHelper.convert(payment, SocialSecurityPaymentLog.class);
-			socialSecurityPaymentLogProvider.createSocialSecurityPaymentLog(paymentLog);
-		}
+		socialSecurityPaymentProvider.deleteSocialSecurityPayments(ownerId);
 	}
 
 	private void newSocialSecurityOrg(Long ownerId) {
@@ -307,7 +304,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 		response.setUserName(memberDetail.getContactName());
 		response.setSocialSecurityNo(memberDetail.getSocialSecurityNumber());
 		//社保本月缴费
-		List<SocialSecurityPayment> allPayments = socialSecurityPaymentProvider.listSocialSecurityPayment(cmd.getDetailId() );
+		List<SocialSecurityPayment> allPayments = socialSecurityPaymentProvider.listSocialSecurityPayment(cmd.getOwnerId(),cmd.getDetailId() );
 		List<SocialSecurityPayment> ssPayments = new ArrayList<>();
 		List<SocialSecurityPayment> ssafterPayments = new ArrayList<>();
 		List<SocialSecurityPayment> afPayments = new ArrayList<>();
@@ -596,16 +593,75 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 	}
 
 	@Override
-	public void calculateSocialSecurityReports(CalculateSocialSecurityReportsCommand cmd) {
-		// TODO Auto-generated method stub
-		String seed = SocialSecurityConstants.SCOPE + DateHelper.currentGMTTime().getTime();
+	public CalculateSocialSecurityReportsResponse calculateSocialSecurityReports(CalculateSocialSecurityReportsCommand cmd) {
+		String seed = SocialSecurityConstants.SCOPE + cmd.getOwnerId() + DateHelper.currentGMTTime().getTime();
 		String key = Base64.getEncoder().encodeToString(seed.getBytes());
 		ValueOperations<String, String> valueOperations = getValueOperations(key);
-		int timeout = configurationProvider.getIntValue(PunchConstants.PUNCH_QRCODE_TIMEOUT, 15);
+		int timeout = 15 ;
 		TimeUnit unit = TimeUnit.MINUTES;;
 		// 先放一个和key一样的值,表示这个人key有效
 		valueOperations.set(key, key, timeout, unit);
-		//线程池
+		//线程池中处理计算规则
+		calculateExecutorPool.execute(new Runnable() {
+			@Override
+			public void run() {
+				calculateReports(cmd.getOwnerId());
+				//处理完成删除key,表示这个key已经完成了
+				deleteValueOperations(key);
+			}
+		});
+		return new CalculateSocialSecurityReportsResponse(key);
+	}
+
+	private void calculateReports(Long ownerId) {
+		// TODO: 2017/12/21
+
+		//社保报表
+		calculateSocialSecurityReports(ownerId);
+
+		//部门汇总表
+
+		//人员增减表
+	}
+
+	private void calculateSocialSecurityReports(Long ownerId) {
+
+		List<SocialSecurityPayment> payments = socialSecurityPaymentProvider.listSocialSecurityPayment(ownerId);
+		if (null == payments) {
+			throw RuntimeErrorException.errorWith(SocialSecurityConstants.SCOPE, SocialSecurityConstants.ERROR_NO_PAYMENTS,
+					"没有找到缴费数据");
+		}
+		//删除这个公司这个月的数据
+		socialSecurityReportProvider.deleteSocialSecurityReports(ownerId, payments.get(0).getPayMonth());
+		List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
+		for (OrganizationMemberDetails detail : details) {
+			calculateUserSocialSecurityReport(detail, payments);
+		}
+	}
+
+	private void calculateUserSocialSecurityReport(OrganizationMemberDetails detail, List<SocialSecurityPayment> payments) {
+		List<SocialSecurityPayment> userPayments = findSSpaymentsByDetail(detail.getId(), payments);
+		for (SocialSecurityPayment userPayment : userPayments) {
+			if (AccumOrSocail.ACCUM == AccumOrSocail.fromCode(userPayment.getAccumOrSocail())) {
+
+			}
+			else if (NormalFlag.YES == NormalFlag.fromCode(userPayment.getIsDefault())) {
+
+			}else{
+
+			}
+		}
+
+	}
+
+	private List<SocialSecurityPayment> findSSpaymentsByDetail(Long detailId, List<SocialSecurityPayment> payments) {
+		List<SocialSecurityPayment> result = new ArrayList<>();
+		for (SocialSecurityPayment payment : payments) {
+			if (payment.getDetailId().equals(detailId)) {
+				result.add(payment);
+			}
+		}
+		return result;
 	}
 
 
@@ -673,21 +729,42 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
 	@Override
 	public void fileSocialSecurity(FileSocialSecurityCommand cmd) {
-		// TODO Auto-generated method stub
-		
+		//归档-这个时候就计算归档表了
+		List<SocialSecurityPayment> payments = socialSecurityPaymentProvider.listSocialSecurityPayment(cmd.getOwnerId());
+
+		if (null == payments) {
+			throw RuntimeErrorException.errorWith(SocialSecurityConstants.SCOPE, SocialSecurityConstants.ERROR_NO_PAYMENTS,
+					"没有当月缴费数据!");
+		}
+		String paymonth = payments.get(0).getPayMonth();
+		if (!paymonth.equals(cmd.getPaymentMonth())) {
+			throw RuntimeErrorException.errorWith(SocialSecurityConstants.SCOPE, SocialSecurityConstants.ERROR_NO_PAYMENTS,
+					"没有当月缴费数据!");
+		}
+		//删除之前当月的归档表
+		socialSecurityPaymentLogProvider.deleteMonthLog(cmd.getOwnerId(), cmd.getPaymentMonth());
+		for (SocialSecurityPayment payment : payments) {
+			SocialSecurityPaymentLog paymentLog = ConvertHelper.convert(payment, SocialSecurityPaymentLog.class);
+			socialSecurityPaymentLogProvider.createSocialSecurityPaymentLog(paymentLog);
+		}
+		//归档汇总表
+		SocialSecuritySummary summary = socialSecurityPaymentProvider.calculateSocialSecuritySummary(cmd.getOwnerId(), cmd.getPaymentMonth());
+
+		socialSecurityPaymentProvider.updateSocialSecurityPaymentFileStatus(cmd.getOwnerId());
 	}
 
 	@Override
 	public ListSocialSecurityHistoryFilesResponse listSocialSecurityHistoryFiles(
 			ListSocialSecurityHistoryFilesCommand cmd) {
 		// TODO Auto-generated method stub
+
 		return null;
 	}
   
 
 	@Override
 	public ListUserInoutHistoryResponse listUserInoutHistory(ListUserInoutHistoryCommand cmd) {
-	
+		// TODO: 2017/12/21 人事档案提供
 		return new ListUserInoutHistoryResponse();
 	}
 
@@ -704,8 +781,19 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
 	@Override
 	public GetSocialSecurityReportStatusResponse getSocialSecurityReportStatus(GetSocialSecurityReportStatusCommand cmd) {
-	
-		return new GetSocialSecurityReportStatusResponse();
+		Byte status = NormalFlag.NO.getCode();
+		String key = cmd.getReportToken().trim();
+		ValueOperations<String, String> valueOperations = getValueOperations(key);
+		String value = valueOperations.get(key);
+		if (null == value) {
+			status = NormalFlag.YES.getCode();
+		}
+		return new GetSocialSecurityReportStatusResponse(status);
+	}
+
+	@Override
+	public GetSocialSecurityReportsHeadResponse getSocialSecurityReportsHead(GetSocialSecurityReportsHeadCommand cmd) {
+		return null;
 	}
 
 }

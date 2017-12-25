@@ -13,4 +13,5 @@ public interface SocialSecurityReportProvider {
 
 	List<SocialSecurityReport> listSocialSecurityReport();
 
+void deleteSocialSecurityReports(Long ownerId, String payMonth);
 }

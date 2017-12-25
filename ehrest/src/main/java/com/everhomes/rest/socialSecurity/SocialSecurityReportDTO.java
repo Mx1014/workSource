@@ -77,6 +77,8 @@ import com.everhomes.util.StringHelper;
  * <li>criticalIllnessEmployeeSum:大病保险个人合计</li>
  * <li>afterSocialSecurityCompanySum:补缴社保企业合计</li>
  * <li>afterSocialSecurityEmployeeSum:补缴社保个人合计</li>
+ * <li>afterAccumulationFundEmployeeSum:补缴公积金个人合计</li>
+ * <li>afterAccumulationFundEmployeeSum:补缴公积金个人合计</li>
  * <li>afterPensionCompanySum:补缴养老企业合计</li>
  * <li>afterPensionEmployeeSum:补缴养老个人合计</li>
  * <li>afterMedicalCompanySum:补缴医疗企业合计</li>
@@ -169,6 +171,8 @@ public class SocialSecurityReportDTO {
 	private BigDecimal criticalIllnessEmployeeSum;
 	private BigDecimal afterSocialSecurityCompanySum;
 	private BigDecimal afterSocialSecurityEmployeeSum;
+	private BigDecimal afterAccumulationFundCompanySum;
+	private BigDecimal afterAccumulationFundEmployeeSum;
 	private BigDecimal afterPensionCompanySum;
 	private BigDecimal afterPensionEmployeeSum;
 	private BigDecimal afterMedicalCompanySum;
@@ -903,4 +907,19 @@ public class SocialSecurityReportDTO {
 		this.accumulationFundTax = accumulationFundTax;
 	}
 
+	public BigDecimal getAfterAccumulationFundCompanySum() {
+		return afterAccumulationFundCompanySum;
+	}
+
+	public void setAfterAccumulationFundCompanySum(BigDecimal afterAccumulationFundCompanySum) {
+		this.afterAccumulationFundCompanySum = afterAccumulationFundCompanySum;
+	}
+
+	public BigDecimal getAfterAccumulationFundEmployeeSum() {
+		return afterAccumulationFundEmployeeSum;
+	}
+
+	public void setAfterAccumulationFundEmployeeSum(BigDecimal afterAccumulationFundEmployeeSum) {
+		this.afterAccumulationFundEmployeeSum = afterAccumulationFundEmployeeSum;
+	}
 }

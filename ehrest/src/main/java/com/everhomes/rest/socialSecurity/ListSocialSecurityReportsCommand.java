@@ -9,6 +9,8 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 所属类型 organization</li>
  * <li>ownerId: 所属id 公司id</li>
  * <li>paymentMonth: 月份如201702</li>
+ * <li>pageAnchor: 锚点</li>
+ * <li>pageSize: 每页大小</li>
  * </ul>
  */
 public class ListSocialSecurityReportsCommand {
@@ -18,6 +20,10 @@ public class ListSocialSecurityReportsCommand {
 	private Long ownerId;
 
 	private String paymentMonth;
+
+	private Long pageAnchor;
+
+	private Integer pageSize;
 
 	public ListSocialSecurityReportsCommand() {
 
@@ -56,5 +62,21 @@ public class ListSocialSecurityReportsCommand {
 
 	public void setPaymentMonth(String paymentMonth) {
 		this.paymentMonth = paymentMonth;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
 	}
 }

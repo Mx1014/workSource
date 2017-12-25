@@ -9,10 +9,13 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>返回值:
+ * <li>nextPageAnchor: 下页锚点</li>
  * <li>socialSecuritySummarys: 社保缴费汇总列表 参考{@link com.everhomes.rest.socialSecurity.SocialSecuritySummaryDTO}</li>
  * </ul>
  */
 public class ListSocialSecurityHistoryFilesResponse {
+
+	private Long nextPageAnchor;
 
 	@ItemType(SocialSecuritySummaryDTO.class)
 	private List<SocialSecuritySummaryDTO> socialSecuritySummarys;
@@ -39,4 +42,11 @@ public class ListSocialSecurityHistoryFilesResponse {
 		return StringHelper.toJsonString(this);
 	}
 
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
+	}
+
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
+	}
 }
