@@ -224,7 +224,8 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public WarehouseMaterialCategoryDTO updateWarehouseMaterialCategory(UpdateWarehouseMaterialCategoryCommand cmd) {
-        checkAssetPriviledgeForPropertyOrg(null, PrivilegeConstants.WAREHOUSE_MATERIAL_CATEGORY_ALL,cmd.getOwnerId());
+        //没有项目指定，无法再非全部项目授权下正常使用
+//        checkAssetPriviledgeForPropertyOrg(null, PrivilegeConstants.WAREHOUSE_MATERIAL_CATEGORY_ALL,cmd.getOwnerId());
         if(StringUtils.isBlank(cmd.getName())){
             LOGGER.error("warehouse material category name is null, data = {}", cmd);
             throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NAME_IS_NULL,
@@ -681,7 +682,8 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public void updateWarehouseMaterialUnit(UpdateWarehouseMaterialUnitCommand cmd) {
-        checkAssetPriviledgeForPropertyOrg(null,PrivilegeConstants.WAREHOUSE_PARAMETER_CONFIG,cmd.getOwnerId());
+        //没有规定项目，如果没有指定全部权限，就不能通过
+//        checkAssetPriviledgeForPropertyOrg(null,PrivilegeConstants.WAREHOUSE_PARAMETER_CONFIG,cmd.getOwnerId());
         Long uid = UserContext.current().getUser().getId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
@@ -879,7 +881,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public ImportFileTaskDTO importWarehouseMaterialCategories(ImportOwnerCommand cmd, MultipartFile mfile, Long userId) {
         //不到community
-        checkAssetPriviledgeForPropertyOrg(null, PrivilegeConstants.WAREHOUSE_MATERIAL_CATEGORY_ALL,cmd.getOwnerId());
+//        checkAssetPriviledgeForPropertyOrg(null, PrivilegeConstants.WAREHOUSE_MATERIAL_CATEGORY_ALL,cmd.getOwnerId());
         ImportFileTask task = new ImportFileTask();
         try {
             //解析excel
