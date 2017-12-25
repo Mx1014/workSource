@@ -39,7 +39,7 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
     @Override
     public Long createTask(String name, Byte type, Class taskClass, Map<String, Object> params, Byte repeatFlag, Date startTime) {
 
-        Task task = saveNewTask(name, taskClass.getName(), params, repeatFlag);
+        Task task = saveNewTask(name, type, taskClass.getName(), params, repeatFlag);
         scheduleTask(task);
         return null;
     }
@@ -110,13 +110,14 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
     }
 
 
-    private Task saveNewTask(String name, String className, Map<String, Object> params, Byte repeatFlag){
+    private Task saveNewTask(String name, Byte type, String className, Map<String, Object> params, Byte repeatFlag){
         Task task = new Task();
         Long ownerId = UserContext.currentUserId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         task.setNamespaceId(namespaceId);
         task.setUserId(ownerId);
         task.setName(name);
+        task.setType(type);
         task.setClassName(className);
         task.setParams(JSONObject.toJSONString(params));
         task.setRepeatFlag(repeatFlag);
