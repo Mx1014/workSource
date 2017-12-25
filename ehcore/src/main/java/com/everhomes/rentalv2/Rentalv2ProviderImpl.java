@@ -676,7 +676,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
 				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(RentalType.WEEK.getCode()))
 				.and(resourceNumber == null?DSL.trueCondition():Tables.EH_RENTALV2_CELLS.RESOURCE_NUMBER.eq(resourceNumber))
-				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.eq(initToMonthFirstDay(resourceRentalDate)))
+				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.eq(initToWeekFirstDay(resourceRentalDate)))
 				.and(Tables.EH_RENTALV2_CELLS.STATUS.eq((byte) -1))
 				.fetchAny();
 	}

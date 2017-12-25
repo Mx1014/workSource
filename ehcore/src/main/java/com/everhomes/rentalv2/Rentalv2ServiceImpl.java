@@ -1217,7 +1217,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	private String getPriceStr(BigDecimal maxPrice, BigDecimal minPrice, Byte rentalType, Byte priceType,Double timeStep) {
-		if (RentalPriceType.LINEARITY.getCode()==priceType)
+		if (priceType==null || RentalPriceType.LINEARITY.getCode()==priceType)
 			if( minPrice.compareTo(maxPrice) == 0){
 				return priceToString(minPrice,rentalType,timeStep);
 			}else{
@@ -1412,7 +1412,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 				}else if (rentalSiteRule.getPriceType().equals(RentalPriceType.INITIATE.getCode()) && initiateFlag){
 					rentalSiteRule.setPrice(rentalSiteRule.getInitiatePrice());
-					rentalSiteRule.setOrgMemberOriginalPrice(rentalSiteRule.getOrgMemberInitiatePrice());
+					rentalSiteRule.setOrgMemberPrice(rentalSiteRule.getOrgMemberInitiatePrice());
 					rentalSiteRule.setApprovingUserPrice(rentalSiteRule.getApprovingUserInitiatePrice());
 					}
 
