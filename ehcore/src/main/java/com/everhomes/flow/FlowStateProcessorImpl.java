@@ -400,31 +400,30 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
         FlowGraphButton button = flowGraph.getGraphButton(cmd.getButtonId());
         FlowGraphButtonEvent event = new FlowGraphButtonEvent();
 
-        if ((cmd.getContent() != null /* && !cmd.getContent().isEmpty() */)
-                || (null != cmd.getImages() && cmd.getImages().size() > 0)) {
-            FlowSubject subject = new FlowSubject();
-            subject.setBelongEntity(FlowEntityType.FLOW_BUTTON.getCode());
-            subject.setBelongTo(cmd.getButtonId());
-            subject.setContent(cmd.getContent());
-            subject.setNamespaceId(button.getFlowButton().getNamespaceId());
-            subject.setStatus(FlowStatusType.VALID.getCode());
-            subject.setTitle(cmd.getTitle());
-            flowSubjectProvider.createFlowSubject(subject);
+        Integer namespaceId = button.getFlowButton().getNamespaceId();
 
-            if (null != cmd.getImages() && cmd.getImages().size() > 0) {
-                List<Attachment> attachments = new ArrayList<>();
-                for (String image : cmd.getImages()) {
-                    Attachment attach = new Attachment();
-                    attach.setContentType(NewsCommentContentType.IMAGE.getCode());
-                    attach.setContentUri(image);
-                    attach.setCreatorUid(logonUser.getId());
-                    attach.setOwnerId(subject.getId());
-                    attachments.add(attach);
-                }
-                attachmentProvider.createAttachments(EhFlowAttachments.class, attachments);
-                subject.setAttachments(attachments);
-            }
+        FlowSubject subject = null;
+        if (cmd.getContent() != null && cmd.getContent().trim().length() > 0) {
+            subject = createFlowSubject(cmd, namespaceId);
             event.setSubject(subject);
+        }
+        if (cmd.getImages()  != null && cmd.getImages().size() > 0) {
+            if (subject == null) {
+                subject = createFlowSubject(cmd, namespaceId);
+                event.setSubject(subject);
+            }
+
+            List<Attachment> attachments = new ArrayList<>();
+            for (String image : cmd.getImages()) {
+                Attachment attach = new Attachment();
+                attach.setContentType(NewsCommentContentType.IMAGE.getCode());
+                attach.setContentUri(image);
+                attach.setCreatorUid(logonUser.getId());
+                attach.setOwnerId(subject.getId());
+                attachments.add(attach);
+            }
+            attachmentProvider.createAttachments(EhFlowAttachments.class, attachments);
+            subject.setAttachments(attachments);
         }
 
         event.setUserType(FlowUserType.fromCode(button.getFlowButton().getFlowUserType()));
@@ -448,6 +447,21 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
         flowListenerManager.onFlowButtonFired(ctx);
 
         return ctx;
+    }
+
+    private FlowSubject createFlowSubject(FlowFireButtonCommand cmd, Integer namespaceId) {
+        FlowSubject subject;
+        subject = new FlowSubject();
+        subject.setBelongEntity(FlowEntityType.FLOW_BUTTON.getCode());
+        subject.setBelongTo(cmd.getButtonId());
+        if (cmd.getContent() != null && cmd.getContent().trim().length() > 0) {
+            subject.setContent(cmd.getContent());
+        }
+        subject.setNamespaceId(namespaceId);
+        subject.setStatus(FlowStatusType.VALID.getCode());
+        subject.setTitle(cmd.getTitle());
+        flowSubjectProvider.createFlowSubject(subject);
+        return subject;
     }
 
     private void prepareChildState(FlowCaseState ctx, UserInfo logonUser, FlowCase flowCase, FlowGraphEvent event) {
