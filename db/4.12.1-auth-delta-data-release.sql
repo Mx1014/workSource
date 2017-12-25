@@ -111,11 +111,11 @@ VALUES
 
 set @module_id = 21040;
 set @p_id = 210001013;
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '领用管理 入库', '领用管理 入库', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '领用管理 出库', '领用管理 出库', NULL);
 set @mp_id = (select MAX(id) from eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES
-(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '入库', '0', NOW());
+(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '出库', '0', NOW());
 
 -- end of wentian's script, farewell
 
