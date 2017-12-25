@@ -185,10 +185,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                                     results.add(formVal);
                                 break;
                             case FILE:
-                                formVal = processImageField(formVal, val.getFieldValue());
+                                formVal = processFileField(formVal, val.getFieldValue());
                                 if (formVal != null)
                                     results.add(formVal);
-                                results.add(processFileField(formVal, val.getFieldValue()));
                                 break;
                             case INTEGER_TEXT:
                                 results.add(processIntegerTextField(formVal, val.getFieldValue(), cmd.getOriginFieldFlag()));
