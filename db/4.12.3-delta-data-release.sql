@@ -43,3 +43,11 @@ set @eh_service_configurations_id = (select max(id) from eh_service_configuratio
 INSERT INTO `eh_service_configurations` (`id`, `owner_type`, `owner_id`, `name`, `value`, `namespace_id`, `display_name`) VALUES (@eh_service_configurations_id+1, 'community', '240111044331050370', 'hotline-notshow', '0', '999968', '专属客服');
 
 UPDATE `eh_web_menus` SET `data_type`='react:/service-online/management' WHERE `id`='40300';
+
+-- 初始化为按时长定价 by st.zheng
+update `eh_rentalv2_price_rules` set `price_type` = 0;
+update `eh_rentalv2_price_packages` set `price_type` = 0;
+
+set @eh_locale_templates_id = (select max(id) from eh_locale_templates);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`) VALUES (@eh_locale_templates_id+1, 'rental.notification', '12', 'zh_CN', '修改金额的推送', '您申请预订的${resourceName}，使用时间：${startTime}，订单金额调整为${amount}');
+
