@@ -53,3 +53,11 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 
 -- if_use_feelist字段初始化
 update `eh_pm_tasks` set `if_use_feelist` = 1;
+
+
+-- merge from forum-2.2 by yanjun 20171225 start
+
+-- 更新活动分享页面链接 add by yanjun 20171219
+UPDATE eh_configurations set `value` = '/activity/build/index.html#detail' where name = 'activity.share.url';
+
+-- merge from forum-2.2 by yanjun 20171225 end

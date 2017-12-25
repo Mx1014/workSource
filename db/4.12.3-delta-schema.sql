@@ -27,3 +27,9 @@ ADD COLUMN `approving_user_initiate_price` DECIMAL(10,2) NULL AFTER `approving_u
 -- 增加字段判断是否使用费用清单 by st.zheng
 ALTER TABLE `eh_pm_tasks`
 ADD COLUMN `if_use_feelist` TINYINT(4) NULL DEFAULT '0' COMMENT '是否使用费用清单 0不使用 1 使用' AFTER `organization_name`;
+
+
+-- merge from forum-2.2 by yanjun 20171225 start
+-- 是否支持投票
+ALTER TABLE `eh_polls` ADD COLUMN `wechat_poll` TINYINT(4) DEFAULT '0' NULL COMMENT 'is support wechat poll 0:no, 1:yes';
+-- merge from forum-2.2 by yanjun 20171225 end
