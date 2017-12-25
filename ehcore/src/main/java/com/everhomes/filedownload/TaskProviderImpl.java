@@ -99,7 +99,7 @@ public class TaskProviderImpl implements TaskProvider {
         }
 
         if(keyword != null){
-            query.addConditions(Tables.EH_TASKS.RESULT_STRING1.like("%" + keyword + "%"));
+            query.addConditions(Tables.EH_TASKS.NAME.like("%" + keyword + "%"));
         }
 
         if(pageAnchor != null){
