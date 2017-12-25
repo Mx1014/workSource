@@ -7,17 +7,13 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.namespace.NamespaceResourceService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
 import com.everhomes.rest.asset.*;
-import com.everhomes.rest.launchpad.ItemScope;
-import com.everhomes.rest.order.OrderType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.EhAddresses;
 import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
 import com.everhomes.server.schema.tables.EhCommunities;
@@ -34,13 +30,12 @@ import com.everhomes.server.schema.tables.EhPaymentChargingStandards;
 import com.everhomes.server.schema.tables.EhPaymentChargingStandardsScopes;
 import com.everhomes.server.schema.tables.EhPaymentContractReceiver;
 import com.everhomes.server.schema.tables.EhPaymentExemptionItems;
+import com.everhomes.server.schema.tables.EhPaymentLateFine;
 import com.everhomes.server.schema.tables.EhPaymentNoticeConfig;
 import com.everhomes.server.schema.tables.EhPaymentUsers;
 import com.everhomes.server.schema.tables.EhPaymentVariables;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
-import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.daos.*;
-import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 
@@ -48,32 +43,20 @@ import com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills;
 
 import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import com.everhomes.server.schema.tables.records.*;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.StringUtils;
-import com.sun.xml.ws.api.SOAPVersion;
-import freemarker.core.ArithmeticEngine;
-import freemarker.core.ReturnInstruction;
-import freemarker.template.SimpleDate;
-import org.apache.log4j.spi.ErrorCode;
 import org.jooq.*;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
-import org.jooq.impl.TableImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jca.cci.CciOperationNotSupportedException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-import scala.Char;
-import sun.util.resources.cldr.aa.CalendarData_aa_DJ;
 
-import java.io.StringBufferInputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -593,6 +576,21 @@ public class AssetProviderImpl implements AssetProvider {
                         .fetchOne(itemScope.PROJECT_LEVEL_NAME);
                 dto.setBillItemName(projectLevelName);
             }
+            //查询billItem的滞纳金
+            BillDTO billDTO = dtos.get(i);
+            getReadOnlyContext().select(Tables.EH_PAYMENT_LATE_FINE.AMOUNT)
+                    .from(Tables.EH_PAYMENT_LATE_FINE)
+                    .leftOuterJoin(Tables.EH_PAYMENT_BILL_ITEMS)
+                    .on(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID.eq(Tables.EH_PAYMENT_BILL_ITEMS.ID))
+                    .where(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID.eq(billDTO.getBillItemId()))
+                    .fetch()
+                    .forEach(r -> {
+                        BillDTO fineDTO = (BillDTO)billDTO.clone();
+                        fineDTO.setAmountReceivable(r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT));
+                        fineDTO.setAmountReceived(new BigDecimal("0"));
+                        fineDTO.setAmountOwed(r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT));
+                        dtos.add(fineDTO);
+                    });
         }
         return dtos;
     }
@@ -632,26 +630,19 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         SelectQuery<Record> query = dslContext.selectQuery();
         query.addFrom(t);
-        if(ownerType!=null){
-            query.addConditions(t.OWNER_TYPE.eq(ownerType));
-        }
-        if(ownerId!=null){
-            query.addConditions(t.OWNER_ID.eq(ownerId));
-        }
+        //必要用户参数
+        query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        query.addConditions(t.OWNER_ID.eq(ownerId));
+        query.addConditions(t.TARGET_TYPE.eq(targetType));
+        query.addConditions(t.TARGET_ID.eq(targetId));
+        //已出账单，排除了未来账单
+        query.addConditions(t.SWITCH.eq((byte)1));
 
         if(billGroupId!=null){
             query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
         }
-        query.addConditions(t.SWITCH.eq((byte)1));
         if(contractId!=null){
             query.addConditions(t.CONTRACT_ID.eq(contractId));
-        }else{
-            if(targetType!=null){
-                query.addConditions(t.TARGET_TYPE.eq(targetType));
-            }
-            if(targetId!=null){
-                query.addConditions(t.TARGET_ID.eq(targetId));
-            }
         }
         if(contractNum!=null){
             query.addConditions(t.CONTRACT_NUM.eq(contractNum));
@@ -659,7 +650,7 @@ public class AssetProviderImpl implements AssetProvider {
         if(isOwedBill==1){
             query.addConditions(t.STATUS.eq((byte)0));
         }
-        List<Object> list  = new ArrayList<>();
+//        List<Byte> list  = new ArrayList<>();
         query.fetch()
                 .map(r -> {
                     BillDetailDTO dto = new BillDetailDTO();
@@ -668,10 +659,12 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBillId(String.valueOf(r.getValue(t.ID)));
                     dto.setDateStr(r.getValue(t.DATE_STR));
 
-                    list.add(r.getValue(t.DATE_STR_DUE));
-                    list.add(r.getValue(t.DUE_DAY_DEADLINE));
-                    list.add(r.getValue(t.STATUS));
-
+//                    list.add(r.getValue(t.DATE_STR_DUE));
+//                    list.add(r.getValue(t.DUE_DAY_DEADLINE));
+//                    list.add(r.getValue(t.STATUS));
+//                    list. add(r.getValue(t.CHARGE_STATUS));
+                    dto.setChargeStatus(r.getValue(t.CHARGE_STATUS));
+                    dto.setStatus(r.getValue(t.STATUS));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
                     dto.setDeadline(r.getValue(t.DUE_DAY_DEADLINE));
@@ -680,29 +673,48 @@ public class AssetProviderImpl implements AssetProvider {
         Date today = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         for(int i = 0; i < dtos.size(); i ++){
+            //根据t.status 缴纳情况和 t.chargetStatus正常或者欠费来判定三个状态，注意，这里没有未缴状态，因为所有都是已出账单
             BillDetailDTO dto = dtos.get(i);
-            String due = (String)list.get(3*i);
-            String deadline = (String)list.get(3*i+1);
-            Byte status = (Byte)list.get(3*i+2);
-            if(status != null && status.byteValue() == (byte)1){
-                dto.setStatus((byte)1);
-                continue;
-            }
-            try{
-                if(due!=null && sdf.parse(due).compareTo(today) != 1){
-                    dto.setStatus((byte)0);
-                    //状态进阶为待缴
-                }else if(due!=null && sdf.parse(due).compareTo(today) == 1){
-                    dto.setStatus((byte)3);
-                    //未缴
-                }
-                if(deadline!=null && sdf.parse(deadline).compareTo(today)== -1){
-                    //状态进阶为欠费
+            if(dto.getChargeStatus()!=null){
+                if(dto.getStatus().byteValue() == (byte)0 && dto.getChargeStatus().byteValue() == (byte)1){
                     dto.setStatus((byte)2);
+                }else if(dto.getStatus().byteValue() == (byte)0 && dto.getChargeStatus().byteValue() == (byte)0){
+                    dto.setStatus((byte)0);
                 }
-            }catch (Exception e){
-                dto.setStatus((byte)0);
+            }else{
+                String deadline = dto.getDeadline();
+                try{
+                    Date dead = sdf.parse(deadline);
+                    if(dto.getStatus().byteValue() == (byte)0 && today.compareTo(dead) != -1){
+                        dto.setStatus((byte)2);
+                    }else if(dto.getStatus().byteValue() == (byte)0 && today.compareTo(dead) != 1){
+                        dto.setStatus((byte)0);
+                    }
+                }catch(Exception e){}
             }
+            //这是按照时间来划分状态
+//            String due = (String)list.get(3*i);
+//            String deadline = (String)list.get(3*i+1);
+//            Byte status = (Byte)list.get(3*i+2);
+//            if(status != null && status.byteValue() == (byte)1){
+//                dto.setStatus((byte)1);
+//                continue;
+//            }
+//            try{
+//                if(due!=null && sdf.parse(due).compareTo(today) != 1){
+//                    dto.setStatus((byte)0);
+//                    //状态进阶为待缴
+//                }else if(due!=null && sdf.parse(due).compareTo(today) == 1){
+//                    dto.setStatus((byte)3);
+//                    //未缴
+//                }
+//                if(deadline!=null && sdf.parse(deadline).compareTo(today)== -1){
+//                    //状态进阶为欠费
+//                    dto.setStatus((byte)2);
+//                }
+//            }catch (Exception e){
+//                dto.setStatus((byte)0);
+//            }
         }
         for(int i = 0; i < dtos.size(); i++){
             BillDetailDTO dto = dtos.get(i);
@@ -723,6 +735,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<ShowBillDetailForClientDTO> dtos = new ArrayList<>();
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
+        EhPaymentLateFine fine = Tables.EH_PAYMENT_LATE_FINE.as("fine");
 
         dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE,t.DATE_STR_BEGIN,t.DATE_STR_END)
                 .from(t)
@@ -732,6 +745,25 @@ public class AssetProviderImpl implements AssetProvider {
                     ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
                     dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
                     dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
+                    dto.setAddressName(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
+                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
+                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+                    dtos.add(dto);
+                    dateStr[0] = r.getValue(t.DATE_STR);
+                    amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
+                    amountReceivable[0] = amountReceivable[0].add(r.getValue(t.AMOUNT_RECEIVABLE));
+                    return null;
+                });
+        dslContext.select(fine.AMOUNT,fine.NAME,t.DATE_STR,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE,t.DATE_STR_BEGIN,t.DATE_STR_END)
+                .from(fine,t)
+                .where(fine.BILL_ITEM_ID.eq(t.ID))
+                .and(fine.BILL_ID.eq(billId))
+                .fetch()
+                .map(r -> {
+                    ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
+                    dto.setAmountOwed(r.getValue(fine.AMOUNT));
+                    dto.setBillItemName(r.getValue(fine.NAME));
                     dto.setAddressName(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
                     dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
@@ -1473,13 +1505,13 @@ public class AssetProviderImpl implements AssetProvider {
                 .from(Tables.EH_PAYMENT_CHARGING_ITEMS)
                 .where(Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(chargingItemId))
                 .fetchOne(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME);
-        if(itemName.equals(AssetPaymentStrings.CHARGING_ITEM_NAME_WATER) || itemName.equals(AssetPaymentStrings.CHARGING_ITEM_NAME_ELECTRICITY)) {
+        if(itemName.equals(AssetPaymentConstants.CHARGING_ITEM_NAME_WATER) || itemName.equals(AssetPaymentConstants.CHARGING_ITEM_NAME_ELECTRICITY)) {
             for( int i = 0; i < list.size(); i ++){
                 ListChargingStandardsDTO dto = list.get(i);
                 List<PaymentVariable> variables = dto.getVariables();
                 for(int j = 0; j < variables.size(); j ++){
                     PaymentVariable variable = variables.get(j);
-                    if(variable.getVariableName().equals(AssetPaymentStrings.VARIABLE_YJ)){
+                    if(variable.getVariableName().equals(AssetPaymentConstants.VARIABLE_YJ)){
                         variables.remove(j);
                         j--;
                     }
@@ -1529,28 +1561,34 @@ public class AssetProviderImpl implements AssetProvider {
             BigDecimal amountExemption = new BigDecimal("0");
             BigDecimal amountSupplement = new BigDecimal("0");
             BigDecimal amountReceivable = new BigDecimal("0");
+            BigDecimal amountChange = new BigDecimal("0");
             BigDecimal zero = new BigDecimal("0");
-
-            if(list1!=null){
-                for(int i = 0; i < list1.size() ; i++) {
-                    BillItemDTO dto = list1.get(i);
-                    context.update(t1)
-                            .set(t1.AMOUNT_RECEIVABLE,dto.getAmountReceivable()==null?new BigDecimal("0"):dto.getAmountReceivable())
-                            .set(t1.AMOUNT_OWED,dto.getAmountReceivable()==null?new BigDecimal("0"):dto.getAmountReceivable())
-                            .set(t1.UPDATE_TIME,new Timestamp(DateHelper.currentGMTTime().getTime()))
-                            .set(t1.OPERATOR_UID,UserContext.currentUserId())
-                            .where(t1.BILL_ID.in(billId))
-                            .and(t1.ID.eq(dto.getBillItemId()))
-                            .execute();
-                    amountReceivable = amountReceivable.add(dto.getAmountReceivable()==null?new BigDecimal("0"):dto.getAmountReceivable());
-                }
-            }
+//            //list1为billItem的列表
+//            if(list1!=null){
+//                for(int i = 0; i < list1.size() ; i++) {
+//                    BillItemDTO dto = list1.get(i);
+//                    context.update(t1)
+//                            .set(t1.AMOUNT_RECEIVABLE,dto.getAmountReceivable()==null?new BigDecimal("0"):dto.getAmountReceivable())
+//                            .set(t1.AMOUNT_OWED,dto.getAmountReceivable()==null?new BigDecimal("0"):dto.getAmountReceivable())
+//                            .set(t1.UPDATE_TIME,new Timestamp(DateHelper.currentGMTTime().getTime()))
+//                            .set(t1.OPERATOR_UID,UserContext.currentUserId())
+//                            .where(t1.BILL_ID.in(billId))
+//                            .and(t1.ID.eq(dto.getBillItemId()))
+//                            .execute();
+//                    amountReceivable = amountReceivable.add(dto.getAmountReceivable()==null?new BigDecimal("0"):dto.getAmountReceivable());
+//                }
+//            }
             List<com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems> exemptionItems = new ArrayList<>();
+            //减免项列表list2
+            List<Long> includeExemptionIds = new ArrayList();
+            includeExemptionIds.add(-1l);
             if(list2!=null){
                 //bill exemption
                 for(int i = 0; i < list2.size(); i++){
                     ExemptionItemDTO exemptionItemDTO = list2.get(i);
+                    //有id的
                     if(exemptionItemDTO.getExemptionId()!=null){
+                        includeExemptionIds.add(exemptionItemDTO.getExemptionId());
                         context.update(t2)
                                 .set(t2.AMOUNT,exemptionItemDTO.getAmount()==null?new BigDecimal("0"):exemptionItemDTO.getAmount())
                                 .set(t2.REMARKS,exemptionItemDTO.getRemark())
@@ -1560,6 +1598,7 @@ public class AssetProviderImpl implements AssetProvider {
                                 .and(t2.ID.eq(exemptionItemDTO.getExemptionId()))
                                 .execute();
                     }else{
+                        //没有id的，为新增的
                         long nextId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems.class));
                         PaymentExemptionItems exemptionItem = new PaymentExemptionItems();
                         BigDecimal amount = exemptionItemDTO.getAmount();
@@ -1575,29 +1614,24 @@ public class AssetProviderImpl implements AssetProvider {
                         exemptionItem.setTargetname(targetName);
                         exemptionItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                         exemptionItems.add(exemptionItem);
+                        includeExemptionIds.add(nextId);
                     }
-                    if(exemptionItemDTO.getAmount()!=null&&exemptionItemDTO.getAmount().compareTo(zero)==-1){
-                        amountExemption = amountExemption.add(exemptionItemDTO.getAmount());
-                    }else if(exemptionItemDTO.getAmount()!=null&&exemptionItemDTO.getAmount().compareTo(zero)==1){
-                        amountSupplement = amountSupplement.add(exemptionItemDTO.getAmount());
-                    }
+//                    if(exemptionItemDTO.getAmount()!=null&&exemptionItemDTO.getAmount().compareTo(zero)==-1){
+//                        //更新账单的增加项
+//                        amountExemption = amountExemption.add(exemptionItemDTO.getAmount().multiply(new BigDecimal("-1")));
+//                    }else if(exemptionItemDTO.getAmount()!=null&&exemptionItemDTO.getAmount().compareTo(zero)==1){
+//                        //更新账单的减免项
+//                        amountSupplement = amountSupplement.add(exemptionItemDTO.getAmount());
+//                    }
                 }
             }
             EhPaymentExemptionItemsDao exemptionItemsDao = new EhPaymentExemptionItemsDao(context.configuration());
             exemptionItemsDao.insert(exemptionItems);
-
-            //  缺少创造者信息，先保存在其他地方，比如持久化日志
-            amountReceivable = amountReceivable.add(amountExemption);
-            amountReceivable = amountReceivable.add(amountSupplement);
-            context.update(t)
-                    .set(t.AMOUNT_RECEIVABLE,amountReceivable)
-                    .set(t.AMOUNT_OWED,amountReceivable)
-                    .set(t.AMOUNT_SUPPLEMENT,amountSupplement)
-                    .set(t.AMOUNT_EXEMPTION,amountExemption)
-                    .set(t.UPDATE_TIME,new Timestamp(DateHelper.currentGMTTime().getTime()))
-                    .set(t.OPERATOR_UID,UserContext.currentUserId())
-                    .where(t.ID.eq(billId))
+            //删除include进来之外的增收减免
+            context.delete(t2)
+                    .where(t2.ID.notIn(includeExemptionIds))
                     .execute();
+            reCalBillById(billId);
             return null;
         });
     }
@@ -2810,7 +2844,7 @@ public class AssetProviderImpl implements AssetProvider {
 //        com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule = new PaymentBillGroupRule();
 //        if(ruleId == null){
 //            if(fetch.contains(cmd.getChargingItemId())){
-//                response.setFailCause(AssetPaymentStrings.CREATE_CHARGING_ITEM_FAIL);
+//                response.setFailCause(AssetPaymentConstants.CREATE_CHARGING_ITEM_FAIL);
 //                return response;
 //            }
 //            //新增 一条billGroupRule
@@ -2827,7 +2861,7 @@ public class AssetProviderImpl implements AssetProvider {
 //            rule.setBillItemMonthOffset(cmd.getBillItemMonthOffset());
 //            rule.setBillItemDayOffset(cmd.getBillItemDayOffset());
 //            dao.insert(rule);
-////            response.setFailCause(AssetPaymentStrings.SAVE_SUCCESS);
+////            response.setFailCause(AssetPaymentConstants.SAVE_SUCCESS);
 //        }else{
 //            //拿到正确的rule
 ////            if(cmd.getOwnerId().longValue() == cmd.getNamespaceId().longValue()){
@@ -2843,7 +2877,7 @@ public class AssetProviderImpl implements AssetProvider {
 ////            }
 //            boolean workFlag = isInWorkGroupRule(rule);
 //            if(workFlag){
-//                response.setFailCause(AssetPaymentStrings.MODIFY_GROUP_RULE_UNSAFE);
+//                response.setFailCause(AssetPaymentConstants.MODIFY_GROUP_RULE_UNSAFE);
 //                return response;
 //            }
 //            //如果没有关联则不修改
@@ -2857,7 +2891,7 @@ public class AssetProviderImpl implements AssetProvider {
 //            rule.setBillItemMonthOffset(cmd.getBillItemMonthOffset());
 //            rule.setBillItemDayOffset(cmd.getBillItemDayOffset());
 //            dao.update(rule);
-////            response.setFailCause(AssetPaymentStrings.MODIFY_SUCCESS);
+////            response.setFailCause(AssetPaymentConstants.MODIFY_SUCCESS);
 //        }
 //        Long nullId = null;
 //        writeContext.update(Tables.EH_PAYMENT_BILL_GROUPS)
@@ -2914,7 +2948,7 @@ public class AssetProviderImpl implements AssetProvider {
             rule.setBillItemDayOffset(cmd.getBillItemDayOffset());
             rule.setBrotherRuleId(brotherRuleId);
             dao.insert(rule);
-//            response.setFailCause(AssetPaymentStrings.SAVE_SUCCESS);
+//            response.setFailCause(AssetPaymentConstants.SAVE_SUCCESS);
         }else{
             //拿到正确的rule
             if(cmd.getOwnerId().longValue() == cmd.getNamespaceId().longValue() || deCouplingFlag == 1){
@@ -2944,7 +2978,7 @@ public class AssetProviderImpl implements AssetProvider {
             rule.setBillItemDayOffset(cmd.getBillItemDayOffset());
             rule.setBrotherRuleId(brotherRuleId);
             dao.update(rule);
-//            response.setFailCause(AssetPaymentStrings.MODIFY_SUCCESS);
+//            response.setFailCause(AssetPaymentConstants.MODIFY_SUCCESS);
         }
         return ruleId;
     }
@@ -3012,7 +3046,7 @@ public class AssetProviderImpl implements AssetProvider {
             com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule = findBillGroupRuleById(billGroupRuleId);
             boolean workFlag = isInWorkGroupRule(rule);
             if(workFlag){
-                response.setFailCause(AssetPaymentStrings.DELETE_GROUP_RULE_UNSAFE);
+                response.setFailCause(AssetPaymentConstants.DELETE_GROUP_RULE_UNSAFE);
                 return response;
             }
             context.delete(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
@@ -3069,7 +3103,7 @@ public class AssetProviderImpl implements AssetProvider {
             ids:for( int i = 0; i < groupIds.size(); i ++){
                 boolean workFlag = checkBillsByBillGroupId(groupIds.get(i));
                 if(workFlag){
-//                    response.setFailCause(AssetPaymentStrings.DELTE_GROUP_UNSAFE);
+//                    response.setFailCause(AssetPaymentConstants.DELTE_GROUP_UNSAFE);
 //                    return response;
                     continue ids;
                 }
@@ -3088,7 +3122,7 @@ public class AssetProviderImpl implements AssetProvider {
         }else if(deCouplingFlag == (byte)1){
             boolean workFlag = checkBillsByBillGroupId(billGroupId);
             if(workFlag) {
-                response.setFailCause(AssetPaymentStrings.DELTE_GROUP_UNSAFE);
+                response.setFailCause(AssetPaymentConstants.DELTE_GROUP_UNSAFE);
                 return response;
             }
 //             删除不用导致其他同伴解耦，先这么试试
@@ -3154,6 +3188,9 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID.eq(t1.CHARGING_ITEM_ID))
                 .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERTYPE.eq(cmd.getOwnerType()))
                 .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERID.eq(cmd.getOwnerId()))
+                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+                .and(t1.OWNER_ID.eq(cmd.getOwnerId()))
+                .and(t1.CHARGING_ITEM_ID.notEqual(AssetPaymentConstants.LATE_FINE_ID))
                 .fetchInto(PaymentChargingItemScope.class);
         for(int j = 0; j < scopes.size(); j ++){
             ListChargingItemsDTO dto = new ListChargingItemsDTO();
@@ -3472,7 +3509,7 @@ public class AssetProviderImpl implements AssetProvider {
         }
 
         if (organizationId != null) {
-            query.addConditions(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq("eh_organization"));
+            query.addConditions(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq("eh_organization"));
             query.addConditions(Tables.EH_PAYMENT_BILLS.TARGET_ID.eq(organizationId));
         }
         query.addConditions(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte) 1));
@@ -3632,6 +3669,171 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(Tables.EH_PAYMENT_SERVICE_CONFIGS.NAME.eq("物业缴费"))
                 .fetchInto(PaymentServiceConfig.class);
         return configs.get(0);
+    }
+
+    @Override
+    public List<PaymentBills> findSettledBillsByCustomer(String targetType, Long targetId) {
+        return getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.TARGET_ID.eq(targetId))
+                .and(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq(targetType))
+                .and(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte)1))
+                .fetchInto(PaymentBills.class);
+    }
+
+    @Override
+    public List<PaymentBills> findPaidBillsByIds(List<String> billIds) {
+        return getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
+                .fetchInto(PaymentBills.class);
+    }
+
+    @Override
+    public void reCalBillById(long billId) {
+//        重新计算账单
+        final BigDecimal[] amountReceivable = {new BigDecimal("0")};
+        final BigDecimal[] amountReceived = {new BigDecimal("0")};
+        final BigDecimal[] amountOwed = {new BigDecimal("0")};
+        final BigDecimal[] amountExempled = {new BigDecimal("0")};
+        final BigDecimal[] amountSupplement = {new BigDecimal("0")};
+        BigDecimal zero = new BigDecimal("0");
+        getReadOnlyContext().select(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED,Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED)
+                .from(Tables.EH_PAYMENT_BILL_ITEMS)
+                .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
+                .fetch()
+                .forEach(r -> {
+                    amountReceivable[0] = amountReceivable[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE));
+                    amountReceived[0] = amountReceived[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED));
+                    amountOwed[0] = amountOwed[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED));
+                });
+        getReadOnlyContext().select(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT)
+                .from(Tables.EH_PAYMENT_EXEMPTION_ITEMS)
+                .where(Tables.EH_PAYMENT_EXEMPTION_ITEMS.BILL_ID.in(billId))
+                .fetch()
+                .forEach(r ->{
+                    amountReceivable[0] = amountReceivable[0].add(r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT));
+                    amountOwed[0] = amountOwed[0].add(r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT));
+                    if(r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT).compareTo(zero) == 1){
+                        amountSupplement[0] = amountSupplement[0].add(r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT));
+                    }else if (r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT).compareTo(zero) == -1){
+                        amountExempled[0] = amountExempled[0].subtract(r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT));
+                    }
+                });
+        //包括滞纳金
+        getReadOnlyContext().select(Tables.EH_PAYMENT_LATE_FINE.AMOUNT)
+                .from(Tables.EH_PAYMENT_LATE_FINE)
+                .where(Tables.EH_PAYMENT_LATE_FINE.BILL_ID.eq(billId))
+                .fetch()
+                .forEach(r ->{
+                    amountOwed[0] = amountOwed[0].add(r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT));
+                });
+        getReadWriteContext().update(Tables.EH_PAYMENT_BILLS)
+                    .set(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE, amountReceivable[0])
+                    .set(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED, amountOwed[0])
+                    .set(Tables.EH_PAYMENT_BILLS.AMOUNT_SUPPLEMENT, amountSupplement[0])
+                    .set(Tables.EH_PAYMENT_BILLS.AMOUNT_EXEMPTION, amountExempled[0])
+                    .set(Tables.EH_PAYMENT_BILLS.UPDATE_TIME,new Timestamp(DateHelper.currentGMTTime().getTime()))
+                    .set(Tables.EH_PAYMENT_BILLS.OPERATOR_UID,UserContext.currentUserId())
+                    .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+                    .execute();
+
+    }
+
+    @Override
+    public SettledBillRes getSettledBills(int pageSize, long pageAnchor) {
+        Long pageOffset = (pageAnchor - 1 ) * pageSize;
+        SettledBillRes res = new SettledBillRes();
+        List<PaymentBills> paymentBills = getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte) 1))
+                .and(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte) 0))
+                .limit(pageOffset.intValue(), pageSize+1)
+                .fetchInto(PaymentBills.class);
+        if(paymentBills.size() > pageSize){
+            res.setNextPageAnchor(pageAnchor+1);
+            paymentBills.remove(paymentBills.size()-1);
+        }else{
+            res.setNextPageAnchor(null);
+        }
+        res.setBills(paymentBills);
+        return res;
+    }
+
+    @Override
+    public void changeBillToDue(Long id) {
+        getReadWriteContext().update(Tables.EH_PAYMENT_BILLS)
+                .set(Tables.EH_PAYMENT_BILLS.CHARGE_STATUS,(byte)1)
+                .where(Tables.EH_PAYMENT_BILLS.ID.eq(id))
+                .execute();
+    }
+
+    @Override
+    public List<PaymentBillItems> getBillItemsByBillIds(List<Long> overdueBillIds) {
+        return getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILL_ITEMS)
+                .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.in(overdueBillIds))
+                .fetchInto(PaymentBillItems.class);
+    }
+
+    @Override
+    public void updatePaymentItem(PaymentBillItems item) {
+        DSLContext con = getReadWriteContext();
+        EhPaymentBillItemsDao dao = new EhPaymentBillItemsDao(con.configuration());
+        dao.update(item);
+    }
+
+    @Override
+    public BigDecimal getLateFineAmountByItemId(Long id) {
+        final BigDecimal[] res = {new BigDecimal("0")};
+        getReadOnlyContext().select(Tables.EH_PAYMENT_LATE_FINE.AMOUNT)
+                .from(Tables.EH_PAYMENT_LATE_FINE)
+                .where(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID.eq(id))
+                .fetch()
+                .forEach(r -> {
+                    res[0] = res[0].add(r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT));
+                });
+        return res[0];
+    }
+
+    @Override
+    public void createLateFine(PaymentLateFine fine) {
+        DSLContext con = getReadWriteContext();
+        EhPaymentLateFineDao dao = new EhPaymentLateFineDao(con.configuration());
+        dao.update(fine);
+    }
+
+    @Override
+    public void updateBillAmountOwedDueToFine(BigDecimal fineAmount, Long billId) {
+        DSLContext context = getReadWriteContext();
+        context.update(Tables.EH_PAYMENT_BILLS)
+                .set(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED,Tables.EH_PAYMENT_BILLS.AMOUNT_OWED.add(fineAmount))
+                .set(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE.add(fineAmount))
+                .execute();
+    }
+
+    @Override
+    public List<ListLateFineStandardsDTO> listLateFineStandards(Long ownerId, String ownerType, Integer namespaceId) {
+        List<ListLateFineStandardsDTO> list = new ArrayList<>();
+        DSLContext context = getReadOnlyContext();
+        EhPaymentChargingStandardsScopes scope = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("scope");
+        EhPaymentChargingStandards std = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("std");
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(scope,std);
+        query.addConditions(scope.CHARGING_STANDARD_ID.eq(std.ID));
+        query.addConditions(scope.OWNER_ID.eq(ownerId));
+        query.addConditions(std.CHARGING_ITEMS_ID.eq(AssetPaymentConstants.LATE_FINE_ID));
+        if(ownerType!=null){
+            query.addConditions(scope.OWNER_TYPE.eq(ownerType));
+        }
+        if(namespaceId!=null){
+            query.addConditions(scope.NAMESPACE_ID.eq(namespaceId));
+        }
+        query.fetch()
+                .forEach(r -> {
+                    ListLateFineStandardsDTO dto = new ListLateFineStandardsDTO();
+                    dto.setLateFeeStandardId(r.getValue(scope.CHARGING_STANDARD_ID));
+                    dto.setLateFineStandardName(r.getValue(std.NAME));
+                    dto.setLateFineStandardFormula(r.getValue(std.FORMULA));
+                    list.add(dto);
+                });
+        return list;
     }
 
     private Map<Long,String> getGroupNames(ArrayList<Long> groupIds) {

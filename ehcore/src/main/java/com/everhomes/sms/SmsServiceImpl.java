@@ -110,6 +110,7 @@ public class SmsServiceImpl implements SmsService {
 
         ListSmsLogsResponse response = new ListSmsLogsResponse();
         response.setLogs(smsLogs.stream().map(this::toSmsLogDTO).collect(Collectors.toList()));
+        response.setNextPageAnchor(locator.getAnchor());
         return response;
     }
     

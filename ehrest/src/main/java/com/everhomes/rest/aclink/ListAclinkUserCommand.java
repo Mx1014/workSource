@@ -10,9 +10,11 @@ import com.everhomes.util.StringHelper;
  * <li>namespaceId: 域空间ID</li>
  * <li>keyword：搜索关键字，可以是手机号或昵称</li>
  * <li>organizationId： 公司ID，通过名字找公司用 /admin/org/listOrganizationByName</li>
- * <li>buildingId: 暂时不支持,因为后台没数据 </li>
- * <li>isAuth: 认证则为1, 非认证为0</li>
- * <li>buildName: /community/listBuildings </li>
+ * <li>isAuth: 用户认证认证则为1, 非认证为0</li>
+ * <li>isOpenAuth: 用户有门禁授权，则为1, 否则为 0</li>
+ * <li>buildingName: /community/listBuildings </li>
+ * <li>communityType: 小区类型 0:住宅类型小区， 1: 商用类型园区  @{link com.everhomes.rest.communityCommunityType}</li>
+ * <li>communityId: 小区 ID</li>
  * <li></li>
  * </ul>
  * 
@@ -34,11 +36,11 @@ public class ListAclinkUserCommand {
     
     private Long organizationId;
     
-    private Long buildingId;
-    
     private String buildingName;
     
     private Long communityId;
+    
+    private Byte communityType;
     
     private Byte isAuth;
     
@@ -92,14 +94,6 @@ public class ListAclinkUserCommand {
         this.organizationId = organizationId;
     }
 
-    public Long getBuildingId() {
-        return buildingId;
-    }
-
-    public void setBuildingId(Long buildingId) {
-        this.buildingId = buildingId;
-    }
-
     public Byte getIsAuth() {
         return isAuth;
     }
@@ -130,6 +124,14 @@ public class ListAclinkUserCommand {
 
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
+    }
+
+    public Byte getCommunityType() {
+        return communityType;
+    }
+
+    public void setCommunityType(Byte communityType) {
+        this.communityType = communityType;
     }
 
     @Override

@@ -13,9 +13,10 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -33,7 +34,7 @@ import java.util.*;
  *
  */
 @Component(SmsHandler.YUN_ZHI_XUN_HANDLER_NAME)
-public class YunZhiXunSmsHandler implements SmsHandler {
+public class YunZhiXunSmsHandler implements SmsHandler, ApplicationListener<ContextRefreshedEvent> {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(YunZhiXunSmsHandler.class);
 
@@ -61,8 +62,8 @@ public class YunZhiXunSmsHandler implements SmsHandler {
     private String ip;
     private String port;
 
-    @PostConstruct
-    public void init() {
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
         this.accountSid = configurationProvider.getValue(YZX_ACCOUNT_SID, "");
         this.token = configurationProvider.getValue(YZX_TOKEN, "");
         this.appId = configurationProvider.getValue(YZX_APP_ID, "");

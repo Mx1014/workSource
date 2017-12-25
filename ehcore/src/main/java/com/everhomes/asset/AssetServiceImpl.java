@@ -12,7 +12,6 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 //import com.everhomes.contract.ContractService;
-import com.everhomes.contract.ContractScheduleJob;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.customer.CustomerService;
@@ -30,9 +29,12 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.NamespaceResourceService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
@@ -40,14 +42,6 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.community.CommunityType;
 
-import com.everhomes.rest.contract.BuildingApartmentDTO;
-import com.everhomes.rest.contract.ContractDTO;
-import com.everhomes.rest.contract.FindContractCommand;
-import com.everhomes.rest.contract.ListCustomerContractsCommand;
-
-import com.everhomes.rest.contract.*;
-
-import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.SyncCustomersCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -58,6 +52,8 @@ import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
@@ -80,12 +76,6 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.sun.org.apache.regexp.internal.RE;
-import org.apache.catalina.core.ApplicationContext;
-import org.apache.commons.collections.list.AbstractLinkedList;
-
-import org.apache.commons.collections.map.HashedMap;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -100,11 +90,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
-import scala.Char;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
-import javax.swing.text.html.HTMLDocument;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -185,6 +172,9 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private SequenceProvider sequenceProvider;
 
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+
 //    @Autowired
 //    private ContractService contractService;
 
@@ -199,6 +189,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private NamespaceResourceService namespaceResourceService;
+
+    @Autowired
+    private PortalService portalService;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -240,16 +233,34 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillsResponse listBills(ListBillsCommand cmd) {
-//        Integer namespaceId = 999983;
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        //校验查看的权限
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(), PrivilegeConstants.ASSET_MANAGEMENT_VIEW);
+        ListBillsResponse response = new ListBillsResponse();
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
-        ListBillsResponse response = new ListBillsResponse();
-
         List<ListBillsDTO> list = handler.listBills(cmd.getContractNum(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),cmd.getPageAnchor(),cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus(),cmd.getTargetType(), response);
         response.setListBillsDTOS(list);
         return response;
+    }
+
+    private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId) {
+        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
+        cmd1.setActionType((byte)13);
+        cmd1.setModuleId(PrivilegeConstants.ASSET_MODULE_ID);
+        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
+        Long appId = null;
+        if(null != res && res.getServiceModuleApps().size() > 0){
+            appId = res.getServiceModuleApps().get(0).getId();
+        }
+        OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), UserContext.currentUserId(), OrganizationType.ENTERPRISE.getCode());
+        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), member.getOrganizationId(), member.getOrganizationId(),priviledgeId , appId, null,communityId )){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+
+        }
     }
 
     @Override
@@ -266,6 +277,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void selectNotice(SelectedNoticeCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_NOTICE);
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
@@ -286,17 +298,11 @@ public class AssetServiceImpl implements AssetService {
                 }
                 String[] telNOs = phoneNums.split(",");
                 List<Tuple<String, Object>> variables = new ArrayList<>();
-                smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
-                //模板改了，所以这个也要改
-//                smsProvider.addToTupleList(variables, "dateStr", noticeInfo.getDateStr());
-
-                smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
-
-//            smsProvider.addToTupleList(variables,"amount2",noticeInfo.getAmountOwed());
-                smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
+                Integer nameSpaceId = UserContext.getCurrentNamespaceId();
+                injectSmsVars(noticeInfo, variables,nameSpaceId);
                 String templateLocale = UserContext.current().getUser().getLocale();
                 //phoneNums make it fake during test
-                Integer nameSpaceId = UserContext.getCurrentNamespaceId();
+
 //                nameSpaceId = 999971;
                 smsProvider.sendSms(nameSpaceId, telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
             }
@@ -366,6 +372,24 @@ public class AssetServiceImpl implements AssetService {
             assetProvider.increaseNoticeTime(billIds);
         }
     }
+
+    private void injectSmsVars(NoticeInfo noticeInfo, List<Tuple<String, Object>> variables,Integer namespaceId) {
+        if(namespaceId == 999971){
+            smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
+            smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
+            smsProvider.addToTupleList(variables, "amount", noticeInfo.getAmountOwed().toString());
+            smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
+        }else{
+            smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
+            //模板改了，所以这个也要改
+//                smsProvider.addToTupleList(variables, "dateStr", noticeInfo.getDateStr());
+            smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
+//            smsProvider.addToTupleList(variables,"amount2",noticeInfo.getAmountOwed());
+            smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
+
+        }
+    }
+
     private void NoticeWithTextAndMessage(List<Long> billIds, List<NoticeInfo> noticeInfos) {
         List<Long> uids = new ArrayList<>();
         try {
@@ -377,11 +401,10 @@ public class AssetServiceImpl implements AssetService {
                 }
                 String[] telNOs = phoneNums.split(",");
                 List<Tuple<String, Object>> variables = new ArrayList<>();
-                smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
-                smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
-                smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
-                String templateLocale = UserContext.current().getUser().getLocale();
                 Integer nameSpaceId = UserContext.getCurrentNamespaceId();
+                injectSmsVars(noticeInfo, variables,nameSpaceId);
+                String templateLocale = UserContext.current().getUser().getLocale();
+
 //                nameSpaceId = 999971;
                 smsProvider.sendSms(nameSpaceId, telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
             }
@@ -499,6 +522,8 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void OneKeyNotice(OneKeyNoticeCommand cmd) {
+        //校验催缴的权限
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_NOTICE);
         ListBillsCommand convertedCmd = ConvertHelper.convert(cmd, ListBillsCommand.class);
         if(UserContext.getCurrentNamespaceId()!=999971){
             convertedCmd.setPageAnchor(0l);
@@ -605,6 +630,8 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd) {
+        //校验是否有查看账单统计的权限
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_STATISTICS_VIEW);
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
@@ -613,6 +640,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void modifyBillStatus(BillIdCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_CHANGE_STATUS);
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
@@ -802,11 +830,11 @@ public class AssetServiceImpl implements AssetService {
                 List<PaymentExpectancyDTO> dtos2 = new ArrayList<>();
                 ContractProperty property = var1.get(j);
                 //如果收费项目的计费周期是按照固定日期，以合同开始日为计费周期
-                if(billingCycle==AssetPaymentStrings.CONTRACT_BEGIN_DATE_AS_FIXED_DAY_OF_MONTH){
+                if(billingCycle== AssetPaymentConstants.CONTRACT_BEGIN_DATE_AS_FIXED_DAY_OF_MONTH){
                     FixedAtContractStartHandler(dtos1, rule, variableIdAndValueList, formula, chargingItemName, billDay, dtos2, property);
                 }
                 //自然月的计费方式
-                else if(billingCycle == AssetPaymentStrings.NATRUAL_MONTH){
+                else if(billingCycle == AssetPaymentConstants.NATRUAL_MONTH){
                     NaturalMonthHandler(dtos1, rule, variableIdAndValueList, formula, chargingItemName, billDay, dtos2, property);
                 }else{
                     LOGGER.info("failed to run natural mode, dtos2 length = {}",dtos2.size());
@@ -866,7 +894,7 @@ public class AssetServiceImpl implements AssetService {
                     item.setTargetName(cmd.getTargetName());
                     item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     billItemsList.add(item);
-                    if(balanceType == AssetPaymentStrings.BALANCE_ON_MONTH) {
+                    if(balanceType == AssetPaymentConstants.BALANCE_ON_MONTH) {
                         // create a new bill or update a bean according to whether the corresponding contract bill exists
                         if(map.containsKey(identity)){
                             PaymentBills bill = map.get(identity);
@@ -1168,6 +1196,8 @@ public class AssetServiceImpl implements AssetService {
                 item.setBillGroupId(group.getId());
                 item.setChargingItemName(itemScope != null ?itemScope.getProjectLevelName() == null?groupRule.getChargingItemName():itemScope.getProjectLevelName():groupRule.getChargingItemName());
                 item.setChargingItemsId(groupRule.getChargingItemId());
+                //滞纳金id关联
+                item.setLateFineStandardId(exp.getLateFineStandardId());
                 //日期
                 item.setDateStr(exp.getBillDateStr());
                 item.setDateStrBegin(sdf_dateStrD.format(exp.getDateStrBegin()));
@@ -1212,7 +1242,7 @@ public class AssetServiceImpl implements AssetService {
                     nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
                 }
                 newBill.setId(nextBillId);
-                newBill.setLateFineStandardId(exp.getLateFineStandardId());
+//                newBill.setLateFineStandardId(exp.getLateFineStandardId());
                 PaymentBillGroup group = exp.getGroup();
                 //资产,账单对应多个地址，所以不包裹
 //                newBill.setAddressId(property.getAddressId());
@@ -1350,13 +1380,13 @@ public class AssetServiceImpl implements AssetService {
 
 
         if(billItemsList.size()<1 || contractDateList.size()<1){
-            upodateBillStatusOnContractStatusChange(cmd.getContractId(),AssetPaymentStrings.CONTRACT_CANCEL);
+            upodateBillStatusOnContractStatusChange(cmd.getContractId(), AssetPaymentConstants.CONTRACT_CANCEL);
             return;
         }
 
         LOGGER.error("Asset Fee calculated！ bill list length={}，item length = {}",billList.size(),billItemsList.size());
         if(billList.size()<1 || billItemsList.size()<1 || contractDateList.size()<1){
-            upodateBillStatusOnContractStatusChange(cmd.getContractId(),AssetPaymentStrings.CONTRACT_CANCEL);
+            upodateBillStatusOnContractStatusChange(cmd.getContractId(), AssetPaymentConstants.CONTRACT_CANCEL);
             return;
         }
         this.coordinationProvider.getNamedLock(contractId.toString()).enter(() -> {
@@ -1379,6 +1409,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListAutoNoticeConfigResponse listAutoNoticeConfig(ListAutoNoticeConfigCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_NOTICE);
         ListAutoNoticeConfigResponse response = new ListAutoNoticeConfigResponse();
         response.setNoticeDays(assetProvider.listAutoNoticeConfig(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId()));
         return response;
@@ -1386,6 +1417,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void autoNoticeConfig(AutoNoticeConfigCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_NOTICE);
         checkNullProhibit("所属者类型",cmd.getOwnerType());
         checkNullProhibit("园区id",cmd.getOwnerId());
         checkNullProhibit("域空间",cmd.getNamespaceId());
@@ -1487,6 +1519,8 @@ public class AssetServiceImpl implements AssetService {
             obj.setGroupRule(groupRule);
             obj.setGroup(group);
             obj.setStandard(standard);
+            //滞纳金标准id
+            obj.setLateFineStandardId(rule.getLateFeeStandardId());
             obj.setItemScope(itemScope);
             obj.setAmountReceivable(amount);
             obj.setAmountOwed(amount);
@@ -1804,7 +1838,8 @@ public class AssetServiceImpl implements AssetService {
             obj.setGroup(group);
             obj.setStandard(standard);
             obj.setItemScope(itemScope);
-            obj.setLateFineStandardId(rule.getLateFineStandardId());
+            //滞纳金id跟着细项
+//            obj.setLateFineStandardId(rule.getLateFineStandardId());
             obj.setDateStrBegin(a.getTime());
             obj.setDateStrEnd(d2.getTime());
 
@@ -2181,9 +2216,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void upodateBillStatusOnContractStatusChange(Long contractId,String targetStatus) {
-        if(targetStatus.equals(AssetPaymentStrings.CONTRACT_SAVE)){
+        if(targetStatus.equals(AssetPaymentConstants.CONTRACT_SAVE)){
             assetProvider.changeBillStatusOnContractSaved(contractId);
-        }else if(targetStatus.equals(AssetPaymentStrings.CONTRACT_CANCEL)){
+        }else if(targetStatus.equals(AssetPaymentConstants.CONTRACT_CANCEL)){
             assetProvider.deleteContractPayment(contractId);
         }
     }
@@ -2486,6 +2521,89 @@ public class AssetServiceImpl implements AssetService {
     }
 
     /**
+     * 更新欠费状态，并计算滞纳金
+     */
+    @Scheduled(cron = "0 0 0 * * ?")
+    private void lateFineCal(){
+        /**
+         * 1. 遍历所有的账单（所有维度），更新账单的欠费状态
+         * 2. 遍历所有的账单（所有维度），拿到所有欠费的账单，拿到所有的billItem的itemd
+         * 3. 遍历所有的billItem和他们对应的滞纳规则，计算，然后新增滞纳的数据,update bill, 不用锁，一条一条走
+         */
+        //获得账单,分页一次最多10000个，防止内存不够
+        coordinationProvider.getNamedLock("update_bill_and_late_fine").tryEnter(()->{
+            int pageSize = 10000;
+            long pageAnchor = 1l;
+            Long nextPageAnchor = 0l;
+            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+            Date today = new Date();
+            while(nextPageAnchor != null){
+                List<Long> overdueBillIds = new ArrayList<>();
+                SettledBillRes res = assetProvider.getSettledBills(pageSize,pageAnchor);
+                List<PaymentBills> bills = res.getBills();
+                //更新账单
+                for(PaymentBills bill : bills){
+                    String dueDayDeadline = bill.getDueDayDeadline();
+                    try{
+                        Date deadline = yyyyMMdd.parse(dueDayDeadline);
+//                    if(bill.getChargeStatus().byteValue() == 0 && deadline.compareTo(today) != 1) {  兼容以前的没有正常欠费状态的账单
+                        if(deadline.compareTo(today) != 1) {
+                            assetProvider.changeBillToDue(bill.getId());
+                            bill.setChargeStatus((byte)1);
+                        }
+                        if(bill.getChargeStatus().byteValue() == (byte)1) overdueBillIds.add(bill.getId());
+                    } catch (ParseException e){ continue; };
+                }
+                nextPageAnchor = res.getNextPageAnchor();
+                //这10000个账单中欠费的billItem
+                List<PaymentBillItems> billItems = assetProvider.getBillItemsByBillIds(overdueBillIds);
+                for(int i = 0; i < billItems.size(); i++){
+                    PaymentBillItems item = billItems.get(i);
+                    //没有关联滞纳金标准的不计算，剔除出更新队列
+                    if(item.getLateFineStandardId() == null){
+                        billItems.remove(i--);
+                        continue;
+                    }
+                    //计算滞纳金金额
+                    //获得欠费的钱
+                    BigDecimal amountOwed = new BigDecimal("0");
+                    if(item.getAmountOwed() !=null){
+                        amountOwed = amountOwed.add(item.getAmountOwed());
+                    }else{
+                        item.setAmountOwed(new BigDecimal("0"));
+                        assetProvider.updatePaymentItem(item);
+                    }
+                    amountOwed = amountOwed.add(assetProvider.getLateFineAmountByItemId(item.getId()));
+                    List<PaymentFormula> formulas = assetProvider.getFormulas(item.getLateFineStandardId());
+                    if(formulas.size() != 1) {
+                        LOGGER.error("late fine cal error, the corresponding formula is more than one or less than one, the bill item id is "+item.getId());
+                    }
+                    String formulaJson = formulas.get(0).getFormulaJson();
+                    formulaJson = formulaJson.replace("qf",amountOwed.toString());
+                    BigDecimal fineAmount = CalculatorUtil.arithmetic(formulaJson);
+                    //开始构造一条滞纳金记录
+                    PaymentLateFine fine = new PaymentLateFine();
+                    long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentLateFine.class));
+                    fine.setId(nextPageAnchor);
+                    fine.setAmount(fineAmount);
+                    fine.setBillId(item.getBillId());
+                    fine.setBillItemId(item.getId());
+                    fine.setCommunityId(item.getOwnerId());
+                    fine.setNamespaceId(item.getNamespaceId());
+                    fine.setCustomerId(item.getTargetId());
+                    fine.setCustomerType(item.getTargetType());
+                    this.dbProvider.execute((TransactionStatus status) -> {
+                        assetProvider.createLateFine(fine);
+                        //更新这个bill
+                        assetProvider.updateBillAmountOwedDueToFine(fineAmount,item.getBillId());
+                        return status;
+                    });
+                }
+            }
+        });
+    }
+
+    /**
      * 从eh_payment_notice_config表中查询设置，每个园区数个设置，置于map中 <communityIden><configs>
      * 查询所有有设置的园区的账单，拿到最晚交付日，根据map中拿到configs，判断是否符合发送要求，符合则催缴
      */
@@ -2603,7 +2721,7 @@ public class AssetServiceImpl implements AssetService {
         }
         switch (namespaceId){
             case 999971:
-                if(cmd.getOwnerType()!=null && cmd.getOwnerType().equals(AssetPaymentStrings.EH_USER)) hasPay = 0;
+                if(cmd.getOwnerType()!=null && cmd.getOwnerType().equals(AssetPaymentConstants.EH_USER)) hasPay = 0;
                 break;
             case 999983:
                 hasContractView = 0;
@@ -2631,6 +2749,20 @@ public class AssetServiceImpl implements AssetService {
             customerService.syncIndividualCustomers(cmd);
             customerService.syncEnterpriseCustomers(cmd);
         }
+    }
+
+    @Override
+    public List<ListLateFineStandardsDTO> listLateFineStandards(OwnerIdentityCommand cmd) {
+        Long ownerId = cmd.getOwnerId();
+        String ownerType = cmd.getOwnerType();
+        Integer namespaceId = cmd.getNamespaceId();
+        checkNullProhibit("communityId",cmd.getOwnerId());
+        return assetProvider.listLateFineStandards(ownerId,ownerType,namespaceId);
+    }
+
+    @Override
+    public void activeLateFine() {
+        lateFineCal();
     }
 
 
@@ -2801,12 +2933,12 @@ public class AssetServiceImpl implements AssetService {
         // 各个：在工作的standard不能删除，不在工作的可以，并且查看是否有bro，有则干掉
         boolean safe = checkSafeDeleteId(Tables.EH_PAYMENT_CHARGING_STANDARDS.getName(),cmd.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
         if(!safe){
-            dto.setFailCause(AssetPaymentStrings.DELETE_CHARGING_STANDARD_UNSAFE);
+            dto.setFailCause(AssetPaymentConstants.DELETE_CHARGING_STANDARD_UNSAFE);
             return dto;
         }
         // 对于个体园区，删除c,s,f，对于id为standardid的，顺便查询是否有brother，有则干掉
         assetProvider.deleteChargingStandard(cmd.getChargingStandardId(),cmd.getOwnerId(),cmd.getOwnerType(),deCouplingFlag);
-//            dto.setFailCause(AssetPaymentStrings.DELETE_SUCCCESS);
+//            dto.setFailCause(AssetPaymentConstants.DELETE_SUCCCESS);
         return dto;
     }
 
@@ -3547,6 +3679,8 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public AssetBillTemplateValueDTO creatAssetBill(CreatAssetBillCommand cmd) {
+        //校验创建账单的权限
+        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(), PrivilegeConstants.ASSET_MANAGEMENT_CREATE);
         AssetBill bill = ConvertHelper.convert(cmd, AssetBill.class);
         bill.setAccountPeriod(new Timestamp(cmd.getAccountPeriod()));
         bill.setSource(AssetBillSource.MANUAL.getCode());

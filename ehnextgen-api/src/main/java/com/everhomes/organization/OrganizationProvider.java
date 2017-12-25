@@ -12,15 +12,11 @@ import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.organization.*;
- 
-import com.everhomes.rest.user.InvitationRoster;
-import com.everhomes.server.schema.tables.pojos.EhOrganizations;
-import com.everhomes.uniongroup.UniongroupMemberDetail; 
+
 import com.everhomes.userOrganization.UserOrganizations;
 
 import org.jooq.Condition;
 
-import javax.validation.constraints.Null;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
@@ -46,7 +42,7 @@ public interface OrganizationProvider {
 	List<Organization> findOrganizationByCommunityId(Long communityId);
 	List<Organization> findOrganizationByPath(String path);
 	List<Organization> listOrganizations(String organizationType,String name, Integer pageOffset,Integer pageSize);
-	List<Organization> listOrganizations(String organizationType, Long parentId, Long pageAnchor, Integer pageSize);
+	List<Organization> listOrganizations(String organizationType, Integer namespaceId, Long parentId, Long pageAnchor, Integer pageSize);
 	void createOrganizationMember(OrganizationMember organizationMember);
 	void updateOrganizationMember(OrganizationMember organizationMember);
 	void updateOrganizationMemberByOrgPaths(String path, Byte status, Long uid, Timestamp now);
@@ -476,7 +472,7 @@ public interface OrganizationProvider {
 	 */
 	List<Long> listOrganizationMemberDetailIdsInActiveStatus(Long organizationId); 
 	List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId,
-													List<Long> orgIds, String groupName, CrossShardListingLocator locator, Integer pageSize);
+													List<Long> orgIds, String groupName, Long creatorUid, CrossShardListingLocator locator, Integer pageSize);
 
 
 	List listOrganizationMembersGroupByToken();
@@ -540,4 +536,5 @@ public interface OrganizationProvider {
 	CommunityOrganizationDetailDisplay findOrganizationDetailFlag(Integer namespaceId, Long communityId);
 	void createCommunityOrganizationDetailDisplay(CommunityOrganizationDetailDisplay detailDisplay);
 	void updateCommunityOrganizationDetailDisplay(CommunityOrganizationDetailDisplay detailDisplay);
+	List checkOrgExistInOrgOrPaths(Integer namespaceId, Long organizationId, List<Long> orgIds, List<String> orgPaths);
 }

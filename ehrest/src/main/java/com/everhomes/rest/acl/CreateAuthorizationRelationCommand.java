@@ -14,6 +14,7 @@ import java.util.List;
  * <li>ownerType：范围类型，固定EhOrganizations，如果是左邻运营后台的域名可以定义一个类型, 参考{@link com.everhomes.rest.common.EntityType}</li>
  * <li>ownerId：范围具体Id，域名对应的机构id，后面需要讨论是否直接通过域名来获取当前公司, 如果是左邻后台传0即可</li>
  * <li>moduleId：业务模块id</li>
+ * <li>appId: 应用Id</li>
  * <li>allFlag：是否全部业务模块 1：是 0：否，{@link com.everhomes.rest.common.AllFlagType}</li>
  * <li>allProjectFlag：是否全部项目 1：是 0：否 ,{@link com.everhomes.rest.common.AllFlagType}</li>
  * <li>targets: 分配的对象集，参考{@link AssignmentTarget}</li>
@@ -30,6 +31,8 @@ public class CreateAuthorizationRelationCommand {
 	private Long ownerId;
 
 	private Long moduleId;
+
+	private Long appId;
 
 	private Byte allFlag;
 
@@ -113,5 +116,12 @@ public class CreateAuthorizationRelationCommand {
         return StringHelper.toJsonString(this);
     }
 
-    
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 }

@@ -1,8 +1,7 @@
 package com.everhomes.scheduler;
 
-import com.everhomes.asset.AssetPaymentStrings;
+import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetService;
-import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.contract.ContractChargingItem;
 import com.everhomes.contract.ContractChargingItemAddress;
 import com.everhomes.contract.ContractChargingItemAddressProvider;
@@ -25,15 +24,12 @@ import com.everhomes.rest.approval.MeterFormulaVariable;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.contract.ChargingVariablesDTO;
-import com.everhomes.rest.contract.ContractChargingItemDTO;
-import com.everhomes.rest.contract.PeriodUnit;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.energy.*;
 import com.everhomes.rest.organization.pm.DefaultChargingItemPropertyType;
 import com.everhomes.search.EnergyMeterTaskSearcher;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.google.gson.Gson;
@@ -45,7 +41,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -410,7 +405,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         }
 
         LOGGER.debug("paymentExpectancies_re_struct command: {}", command);
-        assetService.upodateBillStatusOnContractStatusChange(command.getContractId(),AssetPaymentStrings.CONTRACT_CANCEL);
+        assetService.upodateBillStatusOnContractStatusChange(command.getContractId(), AssetPaymentConstants.CONTRACT_CANCEL);
         assetService.paymentExpectancies_re_struct(command);
     }
 

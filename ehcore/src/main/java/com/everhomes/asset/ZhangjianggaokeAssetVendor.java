@@ -11,16 +11,9 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.BillDetailDTO;
 
-import com.everhomes.pay.order.PaymentType;
-import com.everhomes.recommend.RecommendationService;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.asset.*;
-import com.everhomes.rest.asset.BillDetailDTO;
 import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.order.PaymentParamsDTO;
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.user.User;
 
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -178,7 +171,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                         Calendar dateBegin = Calendar.getInstance();
                         dateBegin.setTime(yyyy_MM_dd.parse(dateStrBegin));
 
-                        if(targetType.equals(AssetPaymentStrings.EH_USER)){
+                        if(targetType.equals(AssetPaymentConstants.EH_USER)){
                             Calendar localPlus15 = Calendar.getInstance();
                             localPlus15.add(Calendar.DAY_OF_MONTH,15);
                             //0:待缴；payflag为0，本地时间加15天大于等于 账期所在月,本地时间小于账期
@@ -194,7 +187,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                                 // 3：未缴，payflag为0，日期大于本地时间15天以上
                                 billStatus = 3;
                             }
-                        }else if(targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+                        }else if(targetType.equals(AssetPaymentConstants.EH_ORGANIZATION)){
                             Calendar beginPlus10 = Calendar.getInstance();
                             beginPlus10.setTime(dateBegin.getTime());
                             beginPlus10.add(Calendar.DAY_OF_MONTH,10);
@@ -237,7 +230,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
 
 
 
-        if(targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+        if(targetType.equals(AssetPaymentConstants.EH_ORGANIZATION)){
 
             ContractBillsDTO dtos[] = new ContractBillsDTO[4];
             for(int i = 0; i < dtos.length; i++) {
@@ -278,7 +271,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             dto3.setPayFlag((byte)1);
             dto3.setStatus("已缴纳");
             res.add(dto3);
-        }else if(targetType.equals(AssetPaymentStrings.EH_USER)){
+        }else if(targetType.equals(AssetPaymentConstants.EH_USER)){
 
             ContractBillsDTO dtos[] = new ContractBillsDTO[4];
             for(int i = 0; i < dtos.length; i++) {
@@ -387,7 +380,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     list.add(dto);
                 }
                 if(dates.first()!=null && dates.last()!=null){
-                    result.setDatestr(yyyyMMdd.format(dates.first())+"~"+yyyyMMdd.format(dates.last()));
+                    result.setDatestr(yyyyMMdd.format(dates.first())+"至"+yyyyMMdd.format(dates.last()));
                 }
                 result.setAmountOwed(amountOwed);
                 result.setAmountReceivable(amountReceivable);
@@ -774,6 +767,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         //组装command ， 请求支付模块的下预付单
         PreOrderCommand cmd2pay = new PreOrderCommand();
 //        cmd2pay.setAmount(amountsInCents);
+        cmd2pay.setCommunityId(cmd.getCommunityId());
         cmd2pay.setAmount(1l);
         cmd2pay.setClientAppName(cmd.getClientAppName());
         cmd2pay.setExpiration(ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);

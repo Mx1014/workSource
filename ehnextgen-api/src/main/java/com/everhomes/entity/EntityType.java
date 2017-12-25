@@ -82,7 +82,9 @@ public enum EntityType {
 
     PARKING_CAR_VERIFICATION(EhParkingCarVerifications.class.getSimpleName()),
 
-    ENERGY_TASK(EhEnergyMeterTasks.class.getSimpleName());
+    ENERGY_TASK(EhEnergyMeterTasks.class.getSimpleName()),
+    RELOCATION_REQUEST(EhRelocationRequests.class.getSimpleName()),
+    RELOCATION_REQUEST_ITEM(EhRelocationRequestItems.class.getSimpleName());
 
 
 

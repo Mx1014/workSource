@@ -160,9 +160,9 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 //			contentBuffer.append(" : ");
 //			contentBuffer.append(JSON.parseObject(entpriseVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
 //		}
-		contentBuffer.append("申请类型");
-		contentBuffer.append(" : ");
-		contentBuffer.append(ga.getApprovalName());
+//		contentBuffer.append("申请类型");
+//		contentBuffer.append(" : ");
+//		contentBuffer.append(ga.getApprovalName());
 		PostApprovalFormItem sourceVal = getFormFieldDTO(GeneralFormDataSourceType.SOURCE_ID.getCode(),values);
 		Long yellowPageId = 0l;
 		if(null != sourceVal){
@@ -172,9 +172,8 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			ServiceAlliances  yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null); 
 			ServiceAllianceCategories  parentPage = yellowPageProvider.findCategoryById(yellowPage.getParentId());
 
-			contentBuffer.append("申请来源");
-			contentBuffer.append(" : ");
-			contentBuffer.append(parentPage.getName());
+			contentBuffer.append("服务名称 : ");
+			contentBuffer.append(yellowPage.getName());
 			flowCase.setTitle(parentPage.getName());
 			request.setServiceAllianceId(yellowPageId);
 			request.setType(yellowPage.getParentId());
@@ -220,53 +219,47 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		//给服务公司留的手机号推消息
 		if (yellowPageId!=0) {
 			ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(yellowPageId, null, null);
-			if (serviceOrg.getContactMemid()==null || serviceOrg.getContactMemid()==0)
-				return;
-
-			String body = "";
 			ServiceAllianceCategories category = yellowPageProvider.findCategoryById(serviceOrg.getParentId());
-			body += "收到一条"+serviceOrg.getName()+"的申请";
-
-			FlowCaseDetailActionData actionData = new FlowCaseDetailActionData();
-			actionData.setFlowCaseId(flowCase.getId());
-			actionData.setFlowUserType(FlowUserType.PROCESSOR.getCode());
-			actionData.setModuleId(flowCase.getModuleId());
-			String url = RouterBuilder.build(Router.WORKFLOW_DETAIL, actionData);
-			RouterMetaObject metaObject = new RouterMetaObject();
-            metaObject.setUrl(url);
-			Map<String, String> meta = new HashMap<>();
-			meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
-			meta.put(MessageMetaConstant.MESSAGE_SUBJECT, category.getName());
-      	    meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
-
-			OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
-
-
-			MessageDTO messageDto = createMessageDto(body,meta,member.getTargetId().toString());
-			messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-                    member.getTargetId().toString(),messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-
 			//发消息给服务联盟机构管理员
 			CrossShardListingLocator locator = new CrossShardListingLocator();
-
-
 			List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(category.getNamespaceId(), ContactType.MOBILE.getCode(), serviceOrg.getParentId(),locator, Integer.MAX_VALUE);
-			if(targets != null && targets.size() > 0) {
-				for(ServiceAllianceNotifyTargets target : targets) {
-					if(target.getStatus().byteValue() == 1) {
-						UserIdentifier contact = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), target.getContactToken());
-						if(contact != null) {
-							MessageDTO message = createMessageDto(body,meta,contact.getOwnerUid().toString());
-							messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-									contact.getOwnerUid().toString(), message, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-						}
-					}
 
+			if ((serviceOrg.getContactMemid()!=null && serviceOrg.getContactMemid()!=0) || (targets != null && targets.size() > 0)) {
+				String body = new StringBuffer().append("收到一条").append(category.getName()).append("的申请,服务名称：").append(serviceOrg.getName()).toString();
+				FlowCaseDetailActionData actionData = new FlowCaseDetailActionData();
+				actionData.setFlowCaseId(flowCase.getId());
+				actionData.setFlowUserType(FlowUserType.PROCESSOR.getCode());
+				actionData.setModuleId(flowCase.getModuleId());
+				String url = RouterBuilder.build(Router.WORKFLOW_DETAIL, actionData);
+				RouterMetaObject metaObject = new RouterMetaObject();
+				metaObject.setUrl(url);
+				Map<String, String> meta = new HashMap<>();
+				meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+				meta.put(MessageMetaConstant.MESSAGE_SUBJECT, category.getName());
+				meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
+
+				if(serviceOrg.getContactMemid()!=null && serviceOrg.getContactMemid()!=0) {
+					OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
+
+					MessageDTO messageDto = createMessageDto(body, meta, member.getTargetId().toString());
+					messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+							member.getTargetId().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+				}
+
+				if (targets != null && targets.size() > 0) {
+					for (ServiceAllianceNotifyTargets target : targets) {
+						if (target.getStatus().byteValue() == 1) {
+							UserIdentifier contact = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), target.getContactToken());
+							if (contact != null) {
+								MessageDTO message = createMessageDto(body, meta, contact.getOwnerUid().toString());
+								messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+										contact.getOwnerUid().toString(), message, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+							}
+						}
+
+					}
 				}
 			}
-
-
-
 
 		}
 	}
@@ -423,14 +416,20 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		Long yellowPageId = Long.valueOf(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
 		ServiceAlliances  yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null);
 		ServiceAllianceCategories  parentPage = null;
-		if(null != yellowPage)
+		////申请来源
+		if(null != yellowPage){
 			parentPage = yellowPageProvider.findCategoryById(yellowPage.getParentId());
-
-		//申请类型
-		e = new FlowCaseEntity(); 
-		GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(val.getApprovalId());
-
-		e.setKey("申请类型");
+			flowCase.setModuleName(parentPage.getName());
+		}
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+		e.setKey("申请来源");
+		e.setValue(parentPage==null?"未知":parentPage.getName());
+		entities.add(e);
+		
+//		GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(val.getApprovalId());
+		e = new FlowCaseEntity();
+		e.setKey("服务名称");
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
 		e.setValue(yellowPage.getName());
 		entities.add(e);

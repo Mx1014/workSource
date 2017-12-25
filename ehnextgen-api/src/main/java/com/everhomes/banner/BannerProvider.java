@@ -46,8 +46,10 @@ public interface BannerProvider {
 	 * @return			  bannerDTO集合
 	 */
 	List<BannerDTO> listBannersByOwner(Integer namespaceId, BannerScope scope, String sceneType, Long pageAnchor, Integer pageSize, ApplyPolicy applyPolicy);
-	
-	/**
+
+    List<BannerDTO> listBannersByOwnerAndScopes(Integer namespaceId, List<BannerScope> scopes, String sceneType, Long pageAnchor, Integer pageSize, ApplyPolicy applyPolicy);
+
+    /**
 	 * 查询每个场景下的banner的数量
 	 * @param namespaceId
 	 * @param scope
