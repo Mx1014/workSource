@@ -26,7 +26,7 @@ public interface SocialSecuritySettingProvider {
 
 	SocialSecuritySetting findSocialSecuritySettingByDetailIdAndItem(Long detailId, SocialSecurityItemDTO itemDTO, Byte accumOrSocial);
 
-	List<SocialSecuritySetting> listSocialSecuritySetting(Long ownerId);
+	List<SocialSecuritySetting> listSocialSecuritySetting(Long detailId);
 
 	List<SocialSecuritySetting> listSocialSecuritySetting(List<Long> detailIds);
 }

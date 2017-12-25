@@ -25,6 +25,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.apache.commons.lang.StringUtils;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -635,23 +636,79 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 		socialSecurityReportProvider.deleteSocialSecurityReports(ownerId, payments.get(0).getPayMonth());
 		List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
 		for (OrganizationMemberDetails detail : details) {
-			calculateUserSocialSecurityReport(detail, payments);
+			SocialSecurityReport report = calculateUserSocialSecurityReport(detail, payments);
 		}
 	}
-
-	private void calculateUserSocialSecurityReport(OrganizationMemberDetails detail, List<SocialSecurityPayment> payments) {
+	/**计算社保报表*/
+	private SocialSecurityReport calculateUserSocialSecurityReport(OrganizationMemberDetails detail, List<SocialSecurityPayment> payments) {
+		SocialSecurityReport report = newSocialSecurityReport(detail);
 		List<SocialSecurityPayment> userPayments = findSSpaymentsByDetail(detail.getId(), payments);
 		for (SocialSecurityPayment userPayment : userPayments) {
 			if (AccumOrSocail.ACCUM == AccumOrSocail.fromCode(userPayment.getAccumOrSocail())) {
-
-			}
-			else if (NormalFlag.YES == NormalFlag.fromCode(userPayment.getIsDefault())) {
-
-			}else{
+				report.setAccumulationFundCompanyRadix(userPayment.getCompanyRadix());
+				report.setAccumulationFundCompanyRatio(userPayment.getCompanyRatio());
+				report.setAccumulationFundEmployeeRadix(userPayment.getEmployeeRadix());
+				report.setAccumulationFundEmployeeRatio(userPayment.getEmployeeRatio());
+				report.setAccumulationFundCompanySum(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio(),
+						report.getAccumulationFundCompanySum()));
+				report.setAccumulationFundEmployeeSum(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio(),
+						report.getAccumulationFundEmployeeSum()));
+				report.setAccumulationFundSum(report.getAccumulationFundCompanySum().add(report.getAccumulationFundEmployeeSum()));
+			} else if (NormalFlag.YES == NormalFlag.fromCode(userPayment.getIsDefault())) {
+				report.setSocialSecurityCompanySum(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio()));
+				report.setSocialSecurityEmployeeSum(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio()));
+				report.setSocialSecuritySum(report.getSocialSecurityCompanySum().add(report.getSocialSecurityEmployeeSum()));
+				switch (PayItem.fromCode(userPayment.getPayItem())) {
+					
+				}
+			} else {
 
 			}
 		}
 
+		return report;
+	}
+
+	private BigDecimal calculateAmount(BigDecimal radix, Integer ratio) {
+		return calculateAmount(radix, ratio, new BigDecimal(0));
+	}
+
+	private BigDecimal calculateAmount(BigDecimal radix, Integer ratio, BigDecimal addSum) {
+
+		return radix.multiply(new BigDecimal(ratio)).divide(new BigDecimal(10000), 2, BigDecimal.ROUND_HALF_UP)
+				.add(addSum == null ? new BigDecimal(0) : addSum);
+	}
+
+	private SocialSecurityReport newSocialSecurityReport(OrganizationMemberDetails detail) {
+		SocialSecurityReport report = ConvertHelper.convert(detail, SocialSecurityReport.class);
+		report.setDetailId(detail.getId());
+		report.setUserId(detail.getTargetId());
+		report.setUserName(detail.getContactName());
+		report.setEntryDate(detail.getEndTime());
+		report.setDeptName(detail.getDepartment());
+		List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySetting(detail.getId());
+		if (null != settings) {
+			report.setHouseholdType(settings.get(0).getHouseholdType());
+			for (SocialSecuritySetting setting : settings) {
+				if (AccumOrSocail.ACCUM == AccumOrSocail.fromCode(setting.getAccumOrSocail())) {
+					report.setAccumulationFundCityId(setting.getCityId());
+					Region city = regionProvider.findRegionById(setting.getCityId());
+					if (null != city) {
+						report.setAccumulationFundCityName(city.getName());
+					}
+					report.setAccumulationFundRadix(setting.getRadix());
+				}else{
+					report.setSocialSecurityCityId(setting.getCityId());
+					Region city = regionProvider.findRegionById(setting.getCityId());
+					if (null != city) {
+						report.setSocialSecurityCityName(city.getName());
+					}
+					report.setSocialSecurityRadix(setting.getRadix());
+
+				}
+			}
+		}
+		return report;
 	}
 
 	private List<SocialSecurityPayment> findSSpaymentsByDetail(Long detailId, List<SocialSecurityPayment> payments) {
