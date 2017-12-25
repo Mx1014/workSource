@@ -186,7 +186,8 @@ public class QualityProviderImpl implements QualityProvider {
 		}
 
 		if(executeUid != null && executeUid != 0) {
-			Condition con = Tables.EH_QUALITY_INSPECTION_TASKS.OPERATOR_ID.eq(executeUid);
+			//fix bug change OPERATOR_ID  to EXECUTOR_ID
+			Condition con = Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTOR_ID.eq(executeUid);
 			con = con.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.CORRECT.getCode()));
 
 			if(standardIds != null) {
