@@ -731,7 +731,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	private Date initToWeekLastDay(Date date){
 		Calendar temp = Calendar.getInstance();
 		temp.setTime(date);
-		temp.set(Calendar.DAY_OF_WEEK_IN_MONTH,1);
+		if (temp.get(Calendar.DAY_OF_WEEK)==1)//默认周日是一周第一天
+			temp.add(Calendar.DATE,-1);
+		temp.set(Calendar.DAY_OF_WEEK,2);
 		temp.set(Calendar.HOUR_OF_DAY, 0);
 		temp.set(Calendar.MINUTE, 0);
 		temp.set(Calendar.SECOND, 0);
