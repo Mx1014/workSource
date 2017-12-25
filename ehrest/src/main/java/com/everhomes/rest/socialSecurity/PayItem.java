@@ -2,18 +2,20 @@ package com.everhomes.rest.socialSecurity;
 
 /**
  * <ul>
- * <li>SOCIALSECURITYPAY(1): 社保在缴</li>
- * <li>ACCUMULATIONFUNDPAY(2): 公积金在缴</li>
- * <li>BOTHPAY(3): 社保和公积金在缴</li>
+ * <li>PENSION("养老")</li>
+ * <li>MEDICAL("医疗")</li>
+ * <li>BIRTH("生育")</li>
+ * <li>UNEMPLOYMENT("失业")</li>
+ * <li>INJURY("工伤")</li>
  * </ul>
  */
 public enum PayItem {
 
-    YILIAO("养老"),
-    YANGLAO("医疗"),
-    SHENGYU("生育"),
-    SHIYE("失业"),
-    GONGSHANG("工伤");
+	PENSION("养老"),
+	MEDICAL("医疗"),
+	BIRTH("生育"),
+	UNEMPLOYMENT("失业"),
+	INJURY("工伤");
 
     private String code;
 
