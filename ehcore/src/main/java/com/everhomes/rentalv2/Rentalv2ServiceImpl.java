@@ -1245,7 +1245,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return "起步价第一周￥"+ priceString +"，以后￥"+initiatePriceString+"/周";
 		String tmp = ""+(isInteger(timeStep)?String.valueOf(timeStep.intValue()).equals("1")?"":String.valueOf(timeStep.intValue()):timeStep);
 		if(rentalType.equals(RentalType.HOUR.getCode()))
-			return "起步价" +tmp+"小时￥"+priceString +"，以后￥"+initiatePriceString+"/"+tmp;
+			return "起步价" +tmp+"小时￥"+priceString +"，以后￥"+initiatePriceString+"/"+tmp+"h";
 		return "";
 	}
 
