@@ -1106,6 +1106,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
             material.setOwnerType(cmd.getOwnerType());
             material.setOwnerId(cmd.getOwnerId());
+            material.setCommunityId(cmd.getCommunityId());
             material.setNamespaceId(namespaceId);
             material.setCreatorUid(userId);
             warehouseProvider.creatWarehouseMaterials(material);
