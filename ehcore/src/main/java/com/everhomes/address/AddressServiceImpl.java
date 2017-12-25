@@ -695,6 +695,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                         selectSql = selectSql.and(Tables.EH_ADDRESSES.APARTMENT_FLOOR.eq(cmd.getApartmentFloor()));
                     }
 
+                    LOGGER.debug("listApartmentsByKeywordForBusiness sql = :",selectSql.getSQL());
+                    LOGGER.debug("listApartmentsByKeywordForBusiness bindValues = :",selectSql.getBindValues());
                     selectSql.fetch().map((r) -> {
                         ApartmentDTO apartment = new ApartmentDTO();
                         apartment.setAddressId(r.getValue(Tables.EH_ADDRESSES.ID));
