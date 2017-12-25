@@ -48,6 +48,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -508,7 +509,7 @@ public class ContentServerServiceImpl implements ContentServerService {
         try {
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
             builder.addBinaryBody("upload_file", fileStream,
-                    ContentType.APPLICATION_OCTET_STREAM, fileName);
+                    ContentType.APPLICATION_OCTET_STREAM, URLEncoder.encode(fileName, "UTF-8"));
             HttpEntity multipart = builder.build();
 
             httpPost.setEntity(multipart);
