@@ -261,7 +261,7 @@ public class WorkReportCommentHandler implements CommentHandler {
 
         response.setNextPageAnchor(nextPageAnchor);
         response.setCommentDtos(comments);
-        response.setCommentCount(Long.valueOf(comments.size()));
+        response.setCommentCount(Long.valueOf(workReportValProvider.countWorkReportValComments(namespaceId, ownerTokenDto.getId())));
         return response;
     }
 

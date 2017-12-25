@@ -42,6 +42,8 @@ public interface WorkReportValProvider {
 
     List<WorkReportValComment> listWorkReportValComments(Integer namespaceId, Long reportValId, Long pageAnchor,Integer pageSize);
 
+    Integer countWorkReportValComments(Integer namespaceId, Long reportValId);
+
     void createWorkReportValCommentAttachment(WorkReportValCommentAttachment attachment);
 
     void deleteCommentAttachmentsByCommentId(Integer namespaceId, Long commentId);

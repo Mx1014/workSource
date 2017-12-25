@@ -265,13 +265,23 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENTS.STATUS.eq(WorkReportStatus.VALID.getCode()));
         if (pageAnchor != null)
             query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENTS.ID.gt(pageAnchor));
-        query.addOrderBy(Tables.EH_WORK_REPORT_VAL_COMMENTS.ID.asc());
+        query.addOrderBy(Tables.EH_WORK_REPORT_VAL_COMMENTS.CREATE_TIME.desc());
         query.addLimit(pageSize + 1);
         query.fetch().map(r -> {
             results.add(ConvertHelper.convert(r, WorkReportValComment.class));
             return null;
         });
         return results;
+    }
+
+    @Override
+    public Integer countWorkReportValComments(Integer namespaceId, Long reportValId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportValCommentsRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VAL_COMMENTS);
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENTS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENTS.REPORT_VAL_ID.eq(reportValId));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENTS.STATUS.eq(WorkReportStatus.VALID.getCode()));
+        return query.fetchCount();
     }
 
     @Override
