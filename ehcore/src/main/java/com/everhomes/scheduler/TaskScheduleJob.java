@@ -39,8 +39,8 @@ public class TaskScheduleJob extends QuartzJobBean {
         JobDataMap jobDataMap = context.getJobDetail().getJobDataMap();
         Long taskId = (Long)jobDataMap.get("taskId");
         String name = (String)jobDataMap.get("name");
-        Long status = (Long)jobDataMap.get("status");
-        String process = (String)jobDataMap.get("process");
+        Byte status = (Byte)jobDataMap.get("status");
+        Integer process = (Integer)jobDataMap.get("process");
 
         String className = (String)jobDataMap.get("className");
         String paramsStr = (String)jobDataMap.get("params");

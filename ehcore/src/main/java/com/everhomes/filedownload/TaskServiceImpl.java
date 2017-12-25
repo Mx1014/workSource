@@ -136,6 +136,7 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
         task.setClassName(className);
         task.setParams(JSONObject.toJSONString(params));
         task.setRepeatFlag(repeatFlag);
+        task.setProcess(0);
         task.setStatus(TaskStatus.WAITING.getCode());
         task.setCreateTime(new Timestamp(System.currentTimeMillis()));
         taskProvider.createTask(task);
