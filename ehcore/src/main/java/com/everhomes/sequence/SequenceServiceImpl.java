@@ -2639,6 +2639,13 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhCustomerDepartureInfos.class, Tables.EH_CUSTOMER_DEPARTURE_INFOS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_CUSTOMER_DEPARTURE_INFOS.ID.max()).from(Tables.EH_CUSTOMER_DEPARTURE_INFOS).fetchOne().value1();
         });
+        syncTableSequence(null, EhTasks.class, Tables.EH_TASKS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_TASKS.ID.max()).from(Tables.EH_TASKS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhRentalv2ItemsOrders.class, Tables.EH_RENTALV2_ITEMS_ORDERS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_RENTALV2_ITEMS_ORDERS.ID.max()).from(Tables.EH_RENTALV2_ITEMS_ORDERS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")

@@ -37,6 +37,20 @@ public class IncubatorController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /incubator/exportIncubatorApply</b>
+     * <p>导出入孵申请的记录</p>
+     */
+    @RequestMapping("exportIncubatorApply")
+    @RestReturn(value=String.class)
+    public RestResponse exportIncubatorApply(ExportIncubatorApplyCommand cmd) {
+        incubatorService.exportIncubatorApply(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /incubator/listIncubatorProjectType</b>
      * <p>获取入孵申请的项目类型</p>
      */
@@ -67,6 +81,22 @@ public class IncubatorController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /incubator/cancelIncubatorApply</b>
+     * <p>入孵申请</p>
+     */
+    @RequestMapping("cancelIncubatorApply")
+    @RestReturn(value=String.class)
+    public RestResponse cancelIncubatorApply(CancelIncubatorApplyCommand cmd) {
+
+        incubatorService.cancelIncubatorApply(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: /incubator/approveIncubatorApply</b>
@@ -91,6 +121,20 @@ public class IncubatorController extends ControllerBase {
     @RestReturn(value=IncubatorApplyDTO.class)
     public RestResponse findIncubatorApply(FindIncubatorApplyCommand cmd){
         IncubatorApplyDTO dto = incubatorService.findIncubatorApply(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /incubator/findIncubatorAppling</b>
+     * <p>获取申请中的一条记录</p>
+     */
+    @RequestMapping("findIncubatorAppling")
+    @RestReturn(value=IncubatorApplyDTO.class)
+    public RestResponse findIncubatorAppling(){
+        IncubatorApplyDTO dto = incubatorService.findIncubatorAppling();
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
