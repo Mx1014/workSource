@@ -16,13 +16,16 @@ import java.util.List;
  * <li>status: 状态，0启用 -1停用参考{@link com.everhomes.rest.rentalv2.RentalSiteStatus}</li>
  * <li>originalPrice: 原价-如果打折则有（园区客户）</li>
  * <li>price: 实际价格-打折则为折后价（园区客户）</li>
+ * <li>initiatePrice: 园区客户起步后价格</li>
  * <li>counts: 可预约数量</li>
  * <li>loopType: 循环方式 参考{@link com.everhomes.rest.rentalv2.LoopType}</li>
  * <li>beginDate: 开放日期始</li>
  * <li>endDate: 开放日期终</li>
  * <li>orgMemberOriginalPrice: 原价-如果打折则有(企业内部价)</li>
+ * <li>orgMemberInitiatePrice: 集团内部起步后价格</li>
  * <li>orgMemberPrice: 实际价格-打折则为折后价(企业内部价)</li>
  * <li>approvingUserOriginalPrice: 原价-如果打折则有（外部客户价）</li>
+ * <li>approvingUserInitiatePrice: 外部客户起步后价格</li>
  * <li>approvingUserPrice: 实际价格-打折则为折后价（外部客户价）</li>
  * <li>sitePackageId: 对应套餐id</li>
  * <li>sitePackages: 套餐价格表{@link com.everhomes.rest.rentalv2.admin.PricePackageDTO}</li>
@@ -39,6 +42,7 @@ public class UpdateRentalSiteRulesAdminCommand {
 
 	private java.math.BigDecimal originalPrice;
 	private java.math.BigDecimal price;
+	private BigDecimal initiatePrice;
 	private java.math.BigDecimal halfsitePrice;
 	private java.math.BigDecimal halfsiteOriginalPrice;
 
@@ -50,9 +54,11 @@ public class UpdateRentalSiteRulesAdminCommand {
 	private Long endDate;
 
 	private BigDecimal orgMemberOriginalPrice;
+	private BigDecimal orgMemberInitiatePrice;
 	private BigDecimal orgMemberPrice;
 
 	private BigDecimal approvingUserOriginalPrice;
+	private BigDecimal approvingUserInitiatePrice;
 	private BigDecimal approvingUserPrice;
 	
 	private Byte rentalType;
@@ -196,5 +202,29 @@ public class UpdateRentalSiteRulesAdminCommand {
 
 	public void setApprovingUserPrice(BigDecimal approvingUserPrice) {
 		this.approvingUserPrice = approvingUserPrice;
+	}
+
+	public BigDecimal getInitiatePrice() {
+		return initiatePrice;
+	}
+
+	public void setInitiatePrice(BigDecimal initiatePrice) {
+		this.initiatePrice = initiatePrice;
+	}
+
+	public BigDecimal getOrgMemberInitiatePrice() {
+		return orgMemberInitiatePrice;
+	}
+
+	public void setOrgMemberInitiatePrice(BigDecimal orgMemberInitiatePrice) {
+		this.orgMemberInitiatePrice = orgMemberInitiatePrice;
+	}
+
+	public BigDecimal getApprovingUserInitiatePrice() {
+		return approvingUserInitiatePrice;
+	}
+
+	public void setApprovingUserInitiatePrice(BigDecimal approvingUserInitiatePrice) {
+		this.approvingUserInitiatePrice = approvingUserInitiatePrice;
 	}
 }
