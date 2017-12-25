@@ -815,6 +815,7 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse raiseParkingSpaceLock(RaiseParkingSpaceLockCommand cmd) {
 
+        parkingService.raiseParkingSpaceLock(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -829,6 +830,7 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse downParkingSpaceLock(DownParkingSpaceLockCommand cmd) {
 
+        parkingService.downParkingSpaceLock(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

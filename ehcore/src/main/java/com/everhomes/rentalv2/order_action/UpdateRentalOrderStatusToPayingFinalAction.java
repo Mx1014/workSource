@@ -1,6 +1,4 @@
-package com.everhomes.rentalv2;
-
-import java.text.SimpleDateFormat;
+package com.everhomes.rentalv2.order_action;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,11 +16,9 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.rentalv2.RentalType;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
 
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)

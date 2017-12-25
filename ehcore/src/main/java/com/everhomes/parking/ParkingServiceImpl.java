@@ -22,7 +22,7 @@ import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.PayService;
 import com.everhomes.parking.handler.DefaultParkingVendorHandler;
-import com.everhomes.rentalv2.RentalUtils;
+import com.everhomes.rentalv2.utils.RentalUtils;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.order.*;

@@ -1,5 +1,7 @@
-package com.everhomes.rentalv2;
+package com.everhomes.rentalv2.order_action;
 
+import com.everhomes.rentalv2.RentalOrder;
+import com.everhomes.rentalv2.Rentalv2Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
