@@ -4,6 +4,8 @@ import com.everhomes.community.*;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.db.QueryBuilder;
 import com.everhomes.entity.EntityType;
@@ -131,6 +133,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Autowired
 	private OrganizationSearcher organizationSearcher;
+
+	private CoordinationProvider coordinationProvider;
 
 	@Override
 	public ListWebMenuResponse listWebMenu(ListWebMenuCommand cmd) {
@@ -3036,77 +3040,80 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public void createAuthorizationRelation(CreateAuthorizationRelationCommand cmd) {
-		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
-		CheckModuleManageCommand manageCommand = new CheckModuleManageCommand();
-		manageCommand.setAppId(cmd.getAppId());
-		manageCommand.setModuleId(cmd.getModuleId());
-		manageCommand.setOrganizationId(cmd.getOwnerId());
-		manageCommand.setOwnerType(cmd.getOwnerType());
-		manageCommand.setUserId(UserContext.currentUserId());
-		Byte manageFlag = serviceModuleService.checkModuleManage(manageCommand);
-		if(manageFlag == 0 || manageFlag.equals(0)){
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
-					"check privilege error");
-		}
-
-		if(null == cmd.getTargets() || cmd.getTargets().size() == 0){
-			LOGGER.error("params targets is null");
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"params targets is null.");
-		}
-
-		if(null == cmd.getAppId()){
-			LOGGER.error("params appId is null");
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"appId targets is null.");
-		}
-
-		if(null == AllFlagType.fromCode(cmd.getAllProjectFlag())){
-			LOGGER.error("params allProjectFlag is null");
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"params allProjectFlag is null.");
-		}
-
-		if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllProjectFlag()) && (null == cmd.getProjects() || cmd.getProjects().size() == 0)){
-			LOGGER.error("params projects is null");
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"params projects is null.");
-		}
-
-		if(null == AllFlagType.fromCode(cmd.getAllFlag())){
-			LOGGER.error("params allFlag is null");
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"params allFlag is null.");
-		}
-
-		if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllFlag()) && (null == cmd.getPrivilegeIds() || cmd.getPrivilegeIds().size() == 0)){
-			LOGGER.error("params privilegeIds is null");
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"params privilegeIds is null.");
-		}
-
-		User user = UserContext.current().getUser();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		dbProvider.execute((TransactionStatus status) -> {
-			AuthorizationRelation authorizationRelation = ConvertHelper.convert(cmd, AuthorizationRelation.class);
-			authorizationRelation.setCreatorUid(user.getId());
-			authorizationRelation.setOperatorUid(user.getId());
-			authorizationRelation.setNamespaceId(namespaceId);
-			authorizationRelation.setAppId(cmd.getAppId());
-			if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllProjectFlag())){
-				authorizationRelation.setProjectJson(StringHelper.toJsonString(cmd.getProjects()));
-			}
-			authorizationRelation.setTargetJson(StringHelper.toJsonString(cmd.getTargets()));
-			if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllFlag())){
-				authorizationRelation.setPrivilegeJson(StringHelper.toJsonString(cmd.getPrivilegeIds()));
+		this.coordinationProvider.getNamedLock(CoordinationLocks.AUTH_RELATION.getCode()).enter(() -> {
+			checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+			CheckModuleManageCommand manageCommand = new CheckModuleManageCommand();
+			manageCommand.setAppId(cmd.getAppId());
+			manageCommand.setModuleId(cmd.getModuleId());
+			manageCommand.setOrganizationId(cmd.getOwnerId());
+			manageCommand.setOwnerType(cmd.getOwnerType());
+			manageCommand.setUserId(UserContext.currentUserId());
+			Byte manageFlag = serviceModuleService.checkModuleManage(manageCommand);
+			if (manageFlag == 0 || manageFlag.equals(0)) {
+				throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+						"check privilege error");
 			}
 
-			//创建授权关系记录
-			authorizationProvider.createAuthorizationRelation(authorizationRelation);
+			if (null == cmd.getTargets() || cmd.getTargets().size() == 0) {
+				LOGGER.error("params targets is null");
+				throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+						"params targets is null.");
+			}
 
-			//创建授权信息和权限
-			createAuthorizationsOrAclsByRelation(user, authorizationRelation, cmd.getTargets(), cmd.getProjects(), cmd.getPrivilegeIds());
+			if (null == cmd.getAppId()) {
+				LOGGER.error("params appId is null");
+				throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+						"appId targets is null.");
+			}
 
+			if (null == AllFlagType.fromCode(cmd.getAllProjectFlag())) {
+				LOGGER.error("params allProjectFlag is null");
+				throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+						"params allProjectFlag is null.");
+			}
+
+			if (AllFlagType.NO == AllFlagType.fromCode(cmd.getAllProjectFlag()) && (null == cmd.getProjects() || cmd.getProjects().size() == 0)) {
+				LOGGER.error("params projects is null");
+				throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+						"params projects is null.");
+			}
+
+			if (null == AllFlagType.fromCode(cmd.getAllFlag())) {
+				LOGGER.error("params allFlag is null");
+				throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+						"params allFlag is null.");
+			}
+
+			if (AllFlagType.NO == AllFlagType.fromCode(cmd.getAllFlag()) && (null == cmd.getPrivilegeIds() || cmd.getPrivilegeIds().size() == 0)) {
+				LOGGER.error("params privilegeIds is null");
+				throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+						"params privilegeIds is null.");
+			}
+
+			User user = UserContext.current().getUser();
+			Integer namespaceId = UserContext.getCurrentNamespaceId();
+			dbProvider.execute((TransactionStatus status) -> {
+				AuthorizationRelation authorizationRelation = ConvertHelper.convert(cmd, AuthorizationRelation.class);
+				authorizationRelation.setCreatorUid(user.getId());
+				authorizationRelation.setOperatorUid(user.getId());
+				authorizationRelation.setNamespaceId(namespaceId);
+				authorizationRelation.setAppId(cmd.getAppId());
+				if (AllFlagType.NO == AllFlagType.fromCode(cmd.getAllProjectFlag())) {
+					authorizationRelation.setProjectJson(StringHelper.toJsonString(cmd.getProjects()));
+				}
+				authorizationRelation.setTargetJson(StringHelper.toJsonString(cmd.getTargets()));
+				if (AllFlagType.NO == AllFlagType.fromCode(cmd.getAllFlag())) {
+					authorizationRelation.setPrivilegeJson(StringHelper.toJsonString(cmd.getPrivilegeIds()));
+				}
+
+				//创建授权关系记录
+				authorizationProvider.createAuthorizationRelation(authorizationRelation);
+
+				//创建授权信息和权限
+				createAuthorizationsOrAclsByRelation(user, authorizationRelation, cmd.getTargets(), cmd.getProjects(), cmd.getPrivilegeIds());
+
+				return null;
+			});
 			return null;
 		});
 
