@@ -1,14 +1,7 @@
 package com.everhomes.rentalv2;
 
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
@@ -51,6 +44,7 @@ import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.server.schema.tables.EhRentalv2Orders;
 import com.everhomes.user.*;
+import com.everhomes.util.*;
 import net.greghaines.jesque.Job;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
@@ -120,11 +114,6 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
 import com.everhomes.techpark.rental.IncompleteUnsuccessRentalBillAction;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SignatureHelper;
-import com.everhomes.util.Tuple;
 
 @Component
 public class Rentalv2ServiceImpl implements Rentalv2Service {
@@ -5308,74 +5297,73 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 	}
 
-	@Override
-	public RentalBillDTO completeBill(CompleteBillCommand cmd) {
-		RentalOrder bill = this.rentalv2Provider.findRentalBillById(cmd.getRentalBillId());
-		if (!bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())
-				&&!bill.getStatus().equals(SiteBillStatus.OVERTIME.getCode())){
-			throw RuntimeErrorException
-			.errorWith(RentalServiceErrorCode.SCOPE,RentalServiceErrorCode.ERROR_NOT_SUCCESS, "order is not success order."); 
-		} 
-		bill.setStatus(SiteBillStatus.COMPLETE.getCode());
-		rentalv2Provider.updateRentalBill(bill);
-		// 在转换bill到dto的时候统一先convert一下  modify by wuhan 20160804
-		RentalBillDTO dto = ConvertHelper.convert(bill, RentalBillDTO.class);
-		mappingRentalBillDTO(dto, bill);
-		return dto;
-	}
+//	@Override
+//	public RentalBillDTO completeBill(CompleteBillCommand cmd) {
+//		RentalOrder bill = this.rentalv2Provider.findRentalBillById(cmd.getRentalBillId());
+//		if (!bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())
+//				&&!bill.getStatus().equals(SiteBillStatus.OVERTIME.getCode())){
+//			throw RuntimeErrorException
+//			.errorWith(RentalServiceErrorCode.SCOPE,RentalServiceErrorCode.ERROR_NOT_SUCCESS, "order is not success order.");
+//		}
+//		bill.setStatus(SiteBillStatus.COMPLETE.getCode());
+//		rentalv2Provider.updateRentalBill(bill);
+//		// 在转换bill到dto的时候统一先convert一下  modify by wuhan 20160804
+//		RentalBillDTO dto = ConvertHelper.convert(bill, RentalBillDTO.class);
+//		mappingRentalBillDTO(dto, bill);
+//		return dto;
+//	}
+
+//	@Override
+//	public RentalBillDTO incompleteBill(IncompleteBillCommand cmd) {
+//		RentalOrder bill = this.rentalv2Provider.findRentalBillById(cmd.getRentalBillId());
+//		if (!bill.getStatus().equals(SiteBillStatus.COMPLETE.getCode())){
+//			throw RuntimeErrorException
+//			.errorWith(RentalServiceErrorCode.SCOPE,RentalServiceErrorCode.ERROR_NOT_COMPLETE,"order is not complete order.");
+//		}
+////		RentalRule rule = this.rentalProvider.getRentalRule(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSiteType());
+//		RentalResource rs = this.rentalv2Provider.getRentalSiteById(bill.getRentalResourceId());
+//		java.util.Date cancelTime = new java.util.Date();
+//		if (cancelTime.before(new java.util.Date(bill.getEndTime().getTime()))) {
+//			bill.setStatus(SiteBillStatus.SUCCESS.getCode());
+//		}else{
+//			bill.setStatus(SiteBillStatus.OVERTIME.getCode());
+//		}
+//
+//		rentalv2Provider.updateRentalBill(bill);
+//		// 在转换bill到dto的时候统一先convert一下  modify by wuhan 20160804
+//		RentalBillDTO dto = ConvertHelper.convert(bill, RentalBillDTO.class);
+//		mappingRentalBillDTO(dto, bill);
+//		return dto;
+//	}
+
+//	@Override
+//	public BatchCompleteBillCommandResponse batchIncompleteBill(BatchIncompleteBillCommand cmd) {
+//		BatchCompleteBillCommandResponse response = new BatchCompleteBillCommandResponse();
+//		response.setBills(new ArrayList<>());
+//		if(null!=cmd.getRentalBillIds())
+//			for (Long billId : cmd.getRentalBillIds()){
+//				IncompleteBillCommand cmd2 = ConvertHelper.convert(cmd, IncompleteBillCommand.class);
+//				cmd2.setRentalBillId(billId);
+//				response.getBills().add(this.incompleteBill(cmd2));
+//			}
+//		return response;
+//	}
+//
+//	@Override
+//	public BatchCompleteBillCommandResponse batchCompleteBill(BatchCompleteBillCommand cmd) {
+//		BatchCompleteBillCommandResponse response = new BatchCompleteBillCommandResponse();
+//		response.setBills(new ArrayList<>());
+//		if(null!=cmd.getRentalBillIds())
+//			for (Long billId : cmd.getRentalBillIds()){
+//				CompleteBillCommand cmd2 = ConvertHelper.convert(cmd, CompleteBillCommand.class);
+//				cmd2.setRentalBillId(billId);
+//				response.getBills().add(this.completeBill(cmd2));
+//			}
+//		return response;
+//	}
 
 	@Override
-	public RentalBillDTO incompleteBill(IncompleteBillCommand cmd) {
-		RentalOrder bill = this.rentalv2Provider.findRentalBillById(cmd.getRentalBillId());
-		if (!bill.getStatus().equals(SiteBillStatus.COMPLETE.getCode())){
-			throw RuntimeErrorException
-			.errorWith(RentalServiceErrorCode.SCOPE,RentalServiceErrorCode.ERROR_NOT_COMPLETE,"order is not complete order."); 
-		} 
-//		RentalRule rule = this.rentalProvider.getRentalRule(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSiteType());
-		RentalResource rs = this.rentalv2Provider.getRentalSiteById(bill.getRentalResourceId());
-		java.util.Date cancelTime = new java.util.Date();
-		if (cancelTime.before(new java.util.Date(bill.getEndTime().getTime()))) {
-			bill.setStatus(SiteBillStatus.SUCCESS.getCode());
-		}else{
-			bill.setStatus(SiteBillStatus.OVERTIME.getCode());
-		}
-		
-		rentalv2Provider.updateRentalBill(bill);
-		// 在转换bill到dto的时候统一先convert一下  modify by wuhan 20160804
-		RentalBillDTO dto = ConvertHelper.convert(bill, RentalBillDTO.class);
-		mappingRentalBillDTO(dto, bill);
-		return dto;
-	}
-
-	@Override
-	public BatchCompleteBillCommandResponse batchIncompleteBill(BatchIncompleteBillCommand cmd) { 
-		BatchCompleteBillCommandResponse response = new BatchCompleteBillCommandResponse();
-		response.setBills(new ArrayList<>());
-		if(null!=cmd.getRentalBillIds())
-			for (Long billId : cmd.getRentalBillIds()){
-				IncompleteBillCommand cmd2 = ConvertHelper.convert(cmd, IncompleteBillCommand.class);
-				cmd2.setRentalBillId(billId);
-				response.getBills().add(this.incompleteBill(cmd2));
-			}
-		return response;
-	}
-
-	@Override
-	public BatchCompleteBillCommandResponse batchCompleteBill(BatchCompleteBillCommand cmd) {
-		BatchCompleteBillCommandResponse response = new BatchCompleteBillCommandResponse();
-		response.setBills(new ArrayList<>());
-		if(null!=cmd.getRentalBillIds())
-			for (Long billId : cmd.getRentalBillIds()){
-				CompleteBillCommand cmd2 = ConvertHelper.convert(cmd, CompleteBillCommand.class);
-				cmd2.setRentalBillId(billId);
-				response.getBills().add(this.completeBill(cmd2));
-			}
-		return response;
-	}
-
-	@Override
-	public HttpServletResponse exportRentalBills(ListRentalBillsCommand cmd,
-			HttpServletResponse response) {
+	public void exportRentalBills(ListRentalBillsCommand cmd, HttpServletResponse response) {
 
 		Integer pageSize = Integer.MAX_VALUE; 
 		List<RentalOrder> bills = rentalv2Provider.listRentalBills(cmd.getResourceTypeId(), cmd.getOrganizationId(), 
@@ -5405,60 +5393,66 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			dtos.add(dto);
 		}
 		
-		URL rootPath = Rentalv2ServiceImpl.class.getResource("/");
-		String filePath =rootPath.getPath() + downloadDir ;
-		File file = new File(filePath);
-		if(!file.exists())
-			file.mkdirs();
-		filePath = filePath + "RentalBills"+System.currentTimeMillis()+".xlsx";
+//		URL rootPath = Rentalv2ServiceImpl.class.getResource("/");
+//		String filePath =rootPath.getPath() + downloadDir ;
+//		File file = new File(filePath);
+//		if(!file.exists())
+//			file.mkdirs();
+//		filePath = filePath + "RentalBills"+System.currentTimeMillis()+".xlsx";
 		//新建了一个文件
-		this.createRentalBillsBook(filePath, dtos);
-		
-		return download(filePath,response);
+		ByteArrayOutputStream out = createRentalBillsStream(dtos);
+
+		DownloadUtils.download(out, response);
+
+//		return download(filePath,response);
 	}
 	
-	public HttpServletResponse download(String path, HttpServletResponse response) {
-        try {
-            // path是指欲下载的文件的路径。
-            File file = new File(path);
-            // 取得文件名。
-            String filename = file.getName();
-            // 取得文件的后缀名。
-            String ext = filename.substring(filename.lastIndexOf(".") + 1).toUpperCase();
-
-            // 以流的形式下载文件。
-            InputStream fis = new BufferedInputStream(new FileInputStream(path));
-            byte[] buffer = new byte[fis.available()];
-            fis.read(buffer);
-            fis.close();
-            // 清空response
-            response.reset();
-            // 设置response的Header
-            response.addHeader("Content-Disposition", "attachment;filename=" + new String(filename.getBytes()));
-            response.addHeader("Content-Length", "" + file.length());
-            OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
-            response.setContentType("application/octet-stream");
-            toClient.write(buffer);
-            toClient.flush();
-            toClient.close();
-            
-            // 读取完成删除文件
-            if (file.isFile() && file.exists()) {  
-                file.delete();  
-            } 
-        } catch (IOException ex) { 
- 			LOGGER.error(ex.getMessage());
- 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
- 					RentalServiceErrorCode.ERROR_DOWNLOAD_EXCEL,
- 					ex.getLocalizedMessage());
-     		 
-        }
-        return response;
-    }
+//	public HttpServletResponse download(String path, HttpServletResponse response) {
+//        try {
+//            // path是指欲下载的文件的路径。
+//            File file = new File(path);
+//            // 取得文件名。
+//            String filename = file.getName();
+//            // 取得文件的后缀名。
+//            String ext = filename.substring(filename.lastIndexOf(".") + 1).toUpperCase();
+//
+//            // 以流的形式下载文件。
+//            InputStream fis = new BufferedInputStream(new FileInputStream(path));
+//            byte[] buffer = new byte[fis.available()];
+//            fis.read(buffer);
+//            fis.close();
+//            // 清空response
+//            response.reset();
+//            // 设置response的Header
+//            response.addHeader("Content-Disposition", "attachment;filename=" + new String(filename.getBytes()));
+//            response.addHeader("Content-Length", "" + file.length());
+//            OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+//            response.setContentType("application/octet-stream");
+//            toClient.write(buffer);
+//            toClient.flush();
+//            toClient.close();
+//
+//            // 读取完成删除文件
+//            if (file.isFile() && file.exists()) {
+//                file.delete();
+//            }
+//        } catch (IOException ex) {
+// 			LOGGER.error(ex.getMessage());
+// 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+// 					RentalServiceErrorCode.ERROR_DOWNLOAD_EXCEL,
+// 					ex.getLocalizedMessage());
+//
+//        }
+//        return response;
+//    }
 	
-	private void createRentalBillsBook(String path,List<RentalBillDTO> dtos) {
-		if (null == dtos || dtos.size() == 0)
-			return;
+	private ByteArrayOutputStream createRentalBillsStream(List<RentalBillDTO> dtos) {
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+		if (null == dtos || dtos.isEmpty()) {
+			return out;
+		}
 		Workbook wb = new XSSFWorkbook();
 		Sheet sheet = wb.createSheet("rentalBill");
 		
@@ -5468,18 +5462,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		
 		try {
-			FileOutputStream out = new FileOutputStream(path);
-			
 			wb.write(out);
 			wb.close();
-			out.close();
-			
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_CREATE_EXCEL,
-					e.getLocalizedMessage());
+
+		} catch (IOException e) {
+			LOGGER.error("export is fail", e);
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, RentalServiceErrorCode.ERROR_CREATE_EXCEL,
+					"export is fail.");
 		}
+
+		return out;
 	}
 	
 	private void createRentalBillsBookSheetHead(Sheet sheet){
@@ -6243,25 +6235,24 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	@Override
 	public GetResourceTypeListResponse getResourceTypeList(GetResourceTypeListCommand cmd) {
-		if(null == cmd.getNamespaceId() )
+		if(null == cmd.getNamespaceId()) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid namespaceId   parameter in the command");
+					"Invalid namespaceId parameter in the command");
+		}
+
 		GetResourceTypeListResponse response = new GetResourceTypeListResponse();
 		if(cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(Long.MAX_VALUE); 
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
-		locator.setAnchor(cmd.getPageAnchor()); 
+		locator.setAnchor(cmd.getPageAnchor());
 
-		Byte status = ResourceTypeStatus.NORMAL.getCode();
-		if (null != cmd.getStatus()) {
-			status = ResourceTypeStatus.CUSTOM.getCode();
-		}
-
-		List<RentalResourceType> resourceTypes =  this.rentalv2Provider.findRentalResourceTypes(cmd.getNamespaceId(), status, locator);
-		if(null==resourceTypes)
+		List<RentalResourceType> resourceTypes =  this.rentalv2Provider.findRentalResourceTypes(cmd.getNamespaceId(),
+				cmd.getMenuType(), locator);
+		if(null == resourceTypes) {
 			return response;
+		}
 
 		Long nextPageAnchor = null;
 		if(resourceTypes.size() > pageSize) {
@@ -6270,8 +6261,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		response.setNextPageAnchor(nextPageAnchor);
 		response.setResourceTypes(new ArrayList<>());
-		resourceTypes.forEach((order)->{
-			ResourceTypeDTO dto =ConvertHelper.convert(order, ResourceTypeDTO.class);
+		resourceTypes.forEach((type)->{
+			ResourceTypeDTO dto =ConvertHelper.convert(type, ResourceTypeDTO.class);
 			dto.setIconUrl(this.contentServerService.parserUri(dto.getIconUri(),
 					EntityType.USER.getCode(), UserContext.current().getUser().getId()));
 			response.getResourceTypes().add(dto);
@@ -6279,42 +6270,42 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return response;
 	}
 
-	@Override
-	public void createResourceType(CreateResourceTypeCommand cmd) {
-		cmd.setStatus(ResourceTypeStatus.DISABLE.getCode());
-		RentalResourceType rsType = ConvertHelper.convert(cmd, RentalResourceType.class);
-		this.rentalv2Provider.createRentalResourceType(rsType);
-		
-	}
+//	@Override
+//	public void createResourceType(CreateResourceTypeCommand cmd) {
+//		cmd.setStatus(ResourceTypeStatus.DISABLE.getCode());
+//		RentalResourceType rsType = ConvertHelper.convert(cmd, RentalResourceType.class);
+//		this.rentalv2Provider.createRentalResourceType(rsType);
+//
+//	}
+//
+//	@Override
+//	public void deleteResourceType(DeleteResourceTypeCommand cmd) {
+//		// TODO 图标也要删除
+//		this.rentalv2Provider.deleteRentalResourceType(cmd.getId());
+//
+//	}
+//
+//	@Override
+//	public void updateResourceType(UpdateResourceTypeCommand cmd) {
+//		//  更新type不更新status
+//		RentalResourceType rsType = this.rentalv2Provider.getRentalResourceTypeById(cmd.getId());
+//		rsType.setIconUri(cmd.getIconUri());
+//		rsType.setName(cmd.getName());
+//		rsType.setPageType(cmd.getPageType());
+//		this.rentalv2Provider.updateRentalResourceType(rsType);
+//	}
 
-	@Override
-	public void deleteResourceType(DeleteResourceTypeCommand cmd) {
-		// TODO 图标也要删除
-		this.rentalv2Provider.deleteRentalResourceType(cmd.getId());
-		
-	}
-
-	@Override
-	public void updateResourceType(UpdateResourceTypeCommand cmd) {
-		//  更新type不更新status
-		RentalResourceType rsType = this.rentalv2Provider.getRentalResourceTypeById(cmd.getId());
-		rsType.setIconUri(cmd.getIconUri());
-		rsType.setName(cmd.getName());
-		rsType.setPageType(cmd.getPageType());
-		this.rentalv2Provider.updateRentalResourceType(rsType);
-	}
-
-	@Override
-	public void closeResourceType(CloseResourceTypeCommand cmd) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void openResourceType(OpenResourceTypeCommand cmd) {
-		// TODO Auto-generated method stub
-		
-	}
+//	@Override
+//	public void closeResourceType(CloseResourceTypeCommand cmd) {
+//		// TODO Auto-generated method stub
+//
+//	}
+//
+//	@Override
+//	public void openResourceType(OpenResourceTypeCommand cmd) {
+//		// TODO Auto-generated method stub
+//
+//	}
 
 	@Override
 	public void deleteResource(DeleteResourceCommand cmd) {
@@ -6370,21 +6361,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
         }
 	}
 
-	@Override
-	public void addCheckOperator(AddCheckOperatorCommand cmd) {
-		  
-		List<Long> privilegeIds = new ArrayList<>();
-		privilegeIds.add(PrivilegeConstants.RENTAL_CHECK);
-		rolePrivilegeService.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),cmd.getOrganizationId(),
-				EntityType.USER.getCode(),cmd.getUserId(),RentalServiceErrorCode.SCOPE,privilegeIds);
-		
-	}
-
-	@Override
-	public void deleteCheckOperator(AddCheckOperatorCommand cmd) {
-		 
-
-	}
+//	@Override
+//	public void addCheckOperator(AddCheckOperatorCommand cmd) {
+//
+//		List<Long> privilegeIds = new ArrayList<>();
+//		privilegeIds.add(PrivilegeConstants.RENTAL_CHECK);
+//		rolePrivilegeService.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),cmd.getOrganizationId(),
+//				EntityType.USER.getCode(),cmd.getUserId(),RentalServiceErrorCode.SCOPE,privilegeIds);
+//
+//	}
+//
+//	@Override
+//	public void deleteCheckOperator(AddCheckOperatorCommand cmd) {
+//
+//
+//	}
 
 	@Override
 	public void updateRentalDate(UpdateRentalDateCommand cmd){

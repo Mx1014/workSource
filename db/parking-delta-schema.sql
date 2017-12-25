@@ -31,5 +31,6 @@ CREATE TABLE `eh_parking_space_logs` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
+ALTER TABLE `eh_rentalv2_resource_types`
+ADD COLUMN `menu_type` tinyint(4) DEFAULT 1 COMMENT '1: 通用 2:公司会议室',
 

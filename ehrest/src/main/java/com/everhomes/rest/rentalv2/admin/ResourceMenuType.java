@@ -1,17 +1,17 @@
 package com.everhomes.rest.rentalv2.admin;
- 
+
 /**
  * <ul>
- * <li>NORMAL(2): 启用</li> 
- * <li>DISABLE(0):停用</li>
+ * <li>DEFAULT(1): 通用</li>
+ * <li>ENTERPRISE(2): 公司会议室</li>
  * </ul>
  */
-public enum ResourceTypeStatus {
-   
-	NORMAL((byte)2), DISABLE((byte)0);
-    
+public enum ResourceMenuType {
+
+	DEFAULT((byte)1), ENTERPRISE((byte)2) ;
+
     private byte code;
-    private ResourceTypeStatus(byte code) {
+    private ResourceMenuType(byte code) {
         this.code = code;
     }
     
@@ -19,8 +19,8 @@ public enum ResourceTypeStatus {
         return this.code;
     }
     
-    public static ResourceTypeStatus fromCode(byte code) {
-        for(ResourceTypeStatus t : ResourceTypeStatus.values()) {
+    public static ResourceMenuType fromCode(byte code) {
+        for(ResourceMenuType t : ResourceMenuType.values()) {
             if (t.code == code) {
                 return t;
             }

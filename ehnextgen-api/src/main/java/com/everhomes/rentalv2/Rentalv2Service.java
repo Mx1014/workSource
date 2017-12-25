@@ -49,17 +49,17 @@ public interface Rentalv2Service {
 	FindRentalSiteWeekStatusCommandResponse findRentalSiteWeekStatus(
 			FindRentalSiteWeekStatusCommand cmd);
 
-	RentalBillDTO completeBill(CompleteBillCommand cmd);
+//	RentalBillDTO completeBill(CompleteBillCommand cmd);
+//
+//	RentalBillDTO incompleteBill(IncompleteBillCommand cmd);
 
-	RentalBillDTO incompleteBill(IncompleteBillCommand cmd);
+//	BatchCompleteBillCommandResponse batchIncompleteBill(
+//			BatchIncompleteBillCommand cmd);
+//
+//	BatchCompleteBillCommandResponse batchCompleteBill(
+//			BatchCompleteBillCommand cmd);
 
-	BatchCompleteBillCommandResponse batchIncompleteBill(
-			BatchIncompleteBillCommand cmd);
-
-	BatchCompleteBillCommandResponse batchCompleteBill(
-			BatchCompleteBillCommand cmd);
-
-	HttpServletResponse exportRentalBills(ListRentalBillsCommand cmd,HttpServletResponse response);
+	void exportRentalBills(ListRentalBillsCommand cmd,HttpServletResponse response);
 	void mappingRentalBillDTO(RentalBillDTO dto, RentalOrder bill);
 	void addDefaultRule(AddDefaultRuleAdminCommand cmd);
 	QueryDefaultRuleAdminResponse queryDefaultRule(QueryDefaultRuleAdminCommand cmd);
@@ -87,15 +87,15 @@ public interface Rentalv2Service {
 	GetResourceTypeListResponse getResourceTypeList(
 			GetResourceTypeListCommand cmd);
 
-	void createResourceType(CreateResourceTypeCommand cmd);
-
-	void deleteResourceType(DeleteResourceTypeCommand cmd);
-
-	void updateResourceType(UpdateResourceTypeCommand cmd);
-
-	void closeResourceType(CloseResourceTypeCommand cmd);
-
-	void openResourceType(OpenResourceTypeCommand cmd);
+//	void createResourceType(CreateResourceTypeCommand cmd);
+//
+//	void deleteResourceType(DeleteResourceTypeCommand cmd);
+//
+//	void updateResourceType(UpdateResourceTypeCommand cmd);
+//
+//	void closeResourceType(CloseResourceTypeCommand cmd);
+//
+//	void openResourceType(OpenResourceTypeCommand cmd);
 
 	FindRentalSiteMonthStatusCommandResponse findRentalSiteMonthStatus(
 			FindRentalSiteMonthStatusCommand cmd);
@@ -128,10 +128,10 @@ public interface Rentalv2Service {
 			FindAutoAssignRentalSiteMonthStatusByWeekCommand cmd);
 
 
-	void addCheckOperator(AddCheckOperatorCommand cmd);
-
-
-	void deleteCheckOperator(AddCheckOperatorCommand cmd);
+//	void addCheckOperator(AddCheckOperatorCommand cmd);
+//
+//
+//	void deleteCheckOperator(AddCheckOperatorCommand cmd);
 
 
 	void onOrderSuccess(RentalOrder bill);

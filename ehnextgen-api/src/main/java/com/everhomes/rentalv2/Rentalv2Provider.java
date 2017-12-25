@@ -237,7 +237,7 @@ public interface Rentalv2Provider {
 	void updateRentalResourceType(RentalResourceType resourceType);
 
 
-	List<RentalResourceType> findRentalResourceTypes(Integer namespaceId, Byte status, ListingLocator locator);
+	List<RentalResourceType> findRentalResourceTypes(Integer namespaceId, Byte menuType, ListingLocator locator);
 
 
 	List<RentalCell> findRentalCellBetweenDates(Long rentalSiteId,
