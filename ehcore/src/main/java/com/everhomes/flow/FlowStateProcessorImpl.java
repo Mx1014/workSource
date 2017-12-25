@@ -7,6 +7,7 @@ import com.everhomes.flow.event.FlowGraphNoStepEvent;
 import com.everhomes.flow.event.FlowGraphStartEvent;
 import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.user.UserInfo;
@@ -318,10 +319,12 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 
     @Override
     public boolean allProcessorCompleteInCurrentNode(FlowCaseState ctx, FlowGraphNode currentNode, UserInfo firedUser) {
-        List<FlowEventLog> enterSteps = flowEventLogProvider.findCurrentNodeEnterLogs(currentNode.getFlowNode().getId(), ctx.getFlowCase().getId(), ctx.getFlowCase().getStepCount());
+        List<FlowEventLog> enterSteps = flowEventLogProvider.findCurrentNodeEnterLogs(currentNode.getFlowNode().getId(),
+                ctx.getFlowCase().getId(), ctx.getFlowCase().getStepCount());
         boolean allComplete = true;
         for (FlowEventLog enterStep : enterSteps) {
-            if (!Objects.equals(enterStep.getFlowUserId(), firedUser.getId()) && enterStep.getStepCount() != -1) {
+            if (!Objects.equals(enterStep.getFlowUserId(), firedUser.getId())
+                    && Objects.equals(enterStep.getEnterLogCompleteFlag(), TrueOrFalseFlag.FALSE.getCode())) {
                 allComplete = false;
                 break;
             }
