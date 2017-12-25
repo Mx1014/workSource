@@ -31,6 +31,7 @@ public class UploadFileInfoCommand {
     private String title;
     private String userToken;
     private String contentServer;
+    private Boolean readOnly;
     
     @ItemType(UploadFileInfo.class)
     private List<UploadFileInfo> infos;
@@ -97,6 +98,14 @@ public class UploadFileInfoCommand {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public Boolean getReadOnly() {
+        return readOnly;
+    }
+
+    public void setReadOnly(Boolean readOnly) {
+        this.readOnly = readOnly;
     }
 
     @Override
