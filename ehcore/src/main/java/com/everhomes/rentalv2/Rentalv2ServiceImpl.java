@@ -993,7 +993,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}
 			}
 			if(minPrice.compareTo(new BigDecimal(0)) == 0 || minPrice.intValue() == Integer.MAX_VALUE) {
-				rSiteDTO.setAvgPriceStr("免费");
+				rSiteDTO.setAvgPriceStr("最低免费");
 			}else {
 				String priceString = isInteger(minPrice)? String.valueOf(minPrice.intValue()): minPrice.toString();
 				rSiteDTO.setAvgPriceStr("￥"+priceString + " 起");
@@ -1293,7 +1293,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private String priceToString(BigDecimal price, Byte rentalType, Double timeStep) {
 		String priceString = isInteger(price)? String.valueOf(price.intValue()): price.toString() ;
 		if(price.compareTo(new BigDecimal(0)) == 0)
-			return "最低免费";
+			return "免费";
 		if(rentalType.equals(RentalType.DAY.getCode()))
 			return "￥"+ priceString +"/天";
 		if(rentalType.equals(RentalType.MONTH.getCode()))
@@ -1691,7 +1691,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate()));
 				}else if(rsr.getRentalType().equals(RentalType.MONTH.getCode())){
 					useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate()));
-				}else if (rsr.getRentalType().equals(RentalType.HALFDAY.getCode())
+				}else if(rsr.getRentalType().equals(RentalType.WEEK.getCode())){
+					useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate()));
+				} else if (rsr.getRentalType().equals(RentalType.HALFDAY.getCode())
 						|| rsr.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
 					useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate())).append(" ");
 					if(rsr.getAmorpm().equals(AmorpmFlag.AM.getCode()))
@@ -6027,7 +6029,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 								// TODO
 								changeRentalSiteRules = findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),null,null,
 										null, dateSF.get().format(new java.util.Date(start.getTimeInMillis())));
-							}
+							}else if(cmd.getRentalType().equals(RentalType.WEEK.getCode())){
+								changeRentalSiteRules = findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),null,null,
+											null, dateSF.get().format(new java.util.Date(start.getTimeInMillis())));
+								}
 							updateRSRs(changeRentalSiteRules, cmd); 
 						}
 					}
