@@ -309,6 +309,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 		//填写费用清单
 		List<GeneralFormVal> list = generalFormValProvider.queryGeneralFormVals(EntityType.PM_TASK.getCode(),task.getId());
+		
 		if (flowCase.getStatus() == FlowCaseStatus.FINISHED.getCode())
 			if (list!=null && list.size()>0){
 				e = new FlowCaseEntity();
