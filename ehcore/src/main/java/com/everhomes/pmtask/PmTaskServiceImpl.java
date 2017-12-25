@@ -196,6 +196,31 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return handler.searchTasks(cmd);
 	}
 
+	@Override
+	public SearchTasksResponse searchTasksWithoutAuth(SearchTasksCommand cmd) {
+
+		Integer namespaceId = cmd.getNamespaceId();
+		if (null == namespaceId) {
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+
+		//检查权限细化
+//		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST);
+
+
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
+
+		//TODO:为科兴与一碑对接
+		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() &&
+				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+			handle = PmTaskHandle.EBEI;
+		}
+
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+
+		return handler.searchTasks(cmd);
+	}
+
 	
 	@Override
 	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
