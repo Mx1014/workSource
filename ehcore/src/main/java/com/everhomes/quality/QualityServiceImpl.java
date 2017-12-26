@@ -4338,6 +4338,9 @@ public class QualityServiceImpl implements QualityService {
 	}
 	@Override
 	public HttpServletResponse exportSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd, HttpServletResponse httpResponse) {
+		//处理targetId  String类型的
+		processStringTargetIds(cmd);
+
 		CountScoresResponse dataResponse = countSampleTaskCommunityScores(cmd);
 		URL rootPath = QualityServiceImpl.class.getResource("/");
 		String filePath = rootPath.getPath() + this.downloadDir;
@@ -4350,6 +4353,18 @@ public class QualityServiceImpl implements QualityService {
 
 		return download(filePath, httpResponse);
 
+	}
+
+	private void processStringTargetIds(CountSampleTaskCommunityScoresCommand cmd) {
+		//解析
+		if (cmd.getTargetIdString() != null) {
+			String targetStrings[] = cmd.getTargetIdString().split(",");
+			List<Long> targetIds = new ArrayList<>();
+			for (String targetId : targetStrings) {
+				targetIds.add(Long.parseLong(targetId));
+			}
+			cmd.setTargetIds(targetIds);
+		}
 	}
 
 
