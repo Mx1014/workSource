@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.everhomes.acl.AuthorizationProvider;
 import com.everhomes.module.ServiceModuleProvider;
-import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
 import com.everhomes.server.schema.tables.EhPaymentWithdrawOrders;
 import com.everhomes.server.schema.tables.EhQuestionnaireRanges;
