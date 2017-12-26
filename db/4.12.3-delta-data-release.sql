@@ -98,6 +98,7 @@ UPDATE eh_launch_pad_items set item_label = '产品信息查询', item_name = '�
 UPDATE eh_launch_pad_items set item_label = '机构信息查询', item_name = '机构信息查询' where namespace_id = 999964 and item_name = '机构信息发布';
 DELETE from eh_launch_pad_items where namespace_id = 999964 and item_name in ('新闻快讯', '更多');
 
+UPDATE eh_incubator_applies set root_id = id  WHERE root_id is NULL;
 -- merge from incubator-1.2 by yanjun 201712252013 end
 
 
