@@ -4,6 +4,7 @@ import com.everhomes.bus.LocalEventBus;
 import com.everhomes.bus.LocalEventContext;
 import com.everhomes.bus.SystemEvent;
 import com.everhomes.entity.EntityType;
+import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.search.SearchContentConstants;
 import com.everhomes.rest.ui.user.ContentBriefDTO;
@@ -51,7 +52,7 @@ public class PostFeedbackHandler implements FeedbackHandler {
 		ntc.setForumId(ForumConstants.FEEDBACK_FORUM);
 		ntc.setCreatorTag(EntityType.USER.getCode());
 		ntc.setTargetTag(EntityType.USER.getCode());
-		ntc.setContentCategory(feedback.getContentCategory());
+		ntc.setContentCategory(CategoryConstants.CATEGORY_ID_TOPIC_COMMON);
 		ntc.setSubject(feedback.getSubject());
 		if(feedback.getProofResourceUri() == null || "".equals(feedback.getProofResourceUri()))
 			ntc.setContentType(PostContentType.TEXT.getCode());
