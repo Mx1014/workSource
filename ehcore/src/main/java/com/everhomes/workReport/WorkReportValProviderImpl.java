@@ -255,7 +255,7 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
     }
 
     @Override
-    public List<WorkReportValComment> listWorkReportValComments(Integer namespaceId, Long reportValId, Long pageAnchor, Integer pageSize) {
+    public List<WorkReportValComment> listWorkReportValComments(Integer namespaceId, Long reportValId, Integer offset, Integer pageSize) {
         List<WorkReportValComment> results = new ArrayList<>();
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -263,10 +263,8 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENTS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENTS.REPORT_VAL_ID.eq(reportValId));
         query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENTS.STATUS.eq(WorkReportStatus.VALID.getCode()));
-        if (pageAnchor != null)
-            query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENTS.ID.gt(pageAnchor));
         query.addOrderBy(Tables.EH_WORK_REPORT_VAL_COMMENTS.CREATE_TIME.desc());
-        query.addLimit(pageSize + 1);
+        query.addLimit(offset, pageSize + 1);
         query.fetch().map(r -> {
             results.add(ConvertHelper.convert(r, WorkReportValComment.class));
             return null;

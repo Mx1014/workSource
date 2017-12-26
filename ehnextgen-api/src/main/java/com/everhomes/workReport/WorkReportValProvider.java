@@ -40,7 +40,7 @@ public interface WorkReportValProvider {
 
     WorkReportValComment getWorkReportValCommentById(Long commentId);
 
-    List<WorkReportValComment> listWorkReportValComments(Integer namespaceId, Long reportValId, Long pageAnchor,Integer pageSize);
+    List<WorkReportValComment> listWorkReportValComments(Integer namespaceId, Long reportValId, Integer offset, Integer pageSize);
 
     Integer countWorkReportValComments(Integer namespaceId, Long reportValId);
 
