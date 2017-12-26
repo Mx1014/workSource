@@ -3818,7 +3818,7 @@ public class AssetProviderImpl implements AssetProvider {
         query.addFrom(scope,std);
         query.addConditions(scope.CHARGING_STANDARD_ID.eq(std.ID));
         query.addConditions(scope.OWNER_ID.eq(ownerId));
-        query.addConditions(scope.CHARGING_STANDARD_ID.eq(AssetPaymentConstants.LATE_FINE_ID));
+        query.addConditions(std.CHARGING_ITEMS_ID.eq(AssetPaymentConstants.LATE_FINE_ID));
         if(ownerType!=null){
             query.addConditions(scope.OWNER_TYPE.eq(ownerType));
         }
