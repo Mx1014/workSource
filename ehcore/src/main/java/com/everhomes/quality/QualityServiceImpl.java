@@ -3820,7 +3820,7 @@ public class QualityServiceImpl implements QualityService {
 				scoresByTarget.add(scoreGroupDto);
 			}
 		}
-		List<ScoreGroupByTargetDTO> sortedScoresByTarget = new ArrayList<>();
+		//List<ScoreGroupByTargetDTO> sortedScoresByTarget = new ArrayList<>();
 		if (scoresByTarget.size() > 0) {
 			//sort  scoreByTarget
 			/*sortedScoresByTarget = scoresByTarget.stream()
@@ -3854,7 +3854,7 @@ public class QualityServiceImpl implements QualityService {
 //		//再次按照order排序
 //		sortedScoresByTarget.sort(Comparator.comparing(ScoreGroupByTargetDTO::getOrderId));
 
-		response.setScores(sortedScoresByTarget);
+		response.setScores(scoresByTarget);
 		return response;
 	}
 
