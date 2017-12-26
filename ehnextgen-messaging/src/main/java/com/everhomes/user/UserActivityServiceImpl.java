@@ -467,19 +467,32 @@ public class UserActivityServiceImpl implements UserActivityService {
 
     @Override
     public void addFeedback(FeedbackCommand cmd) {
-    	
-    	//如果post已经被删除，则不能在举报了。 add by yanjun 20170510
-    	if(cmd.getTargetType() == FeedbackTargetType.POST.getCode()){
-    		Post post = forumProvider.findPostById(cmd.getTargetId());
-    		if(post != null && post.getStatus() != PostStatus.ACTIVE.getCode()){
-    			LOGGER.error("Forum post already deleted, " + "topicId=" + cmd.getTargetId());
-    			throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE,
-    					ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "post was deleted"); 
-    		}
-    	}
-    	
+
+
+        FeedbackHandler handler = getFeedBackHandler(cmd.getTargetType());
+
+        dbProvider.execute(status -> {
+
+            if(handler != null){
+                //业务实现
+                handler.beforeAddFeedback(cmd);
+            }
+
+            Feedback feedback = addFeedbackCommon(cmd);
+
+            if(handler != null){
+                //业务实现
+                handler.afterAddFeedback(feedback);
+            }
+
+            return null;
+        });
+
+    }
+    
+    private Feedback addFeedbackCommon(FeedbackCommand cmd){
         User user = UserContext.current().getUser();
-        
+
         Feedback feedback = ConvertHelper.convert(cmd, Feedback.class);
         feedback.setNamespaceId(UserContext.getCurrentNamespaceId());
         feedback.setStatus(Byte.parseByte("0"));
@@ -496,35 +509,17 @@ public class UserActivityServiceImpl implements UserActivityService {
         }
         feedback.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         userActivityProvider.addFeedback(feedback, feedback.getOwnerUid());
-        
-        if(cmd.getFeedbackType()== null || cmd.getFeedbackType() == 0){
-        	NewTopicCommand ntc = new NewTopicCommand();
-        	ntc.setForumId(ForumConstants.FEEDBACK_FORUM);
-        	ntc.setCreatorTag(EntityType.USER.getCode());
-        	ntc.setTargetTag(EntityType.USER.getCode());
-        	ntc.setContentCategory(feedback.getContentCategory());
-//        	ntc.setActionCategory(actionCategory);
-        	ntc.setSubject(feedback.getSubject());
-        	if(feedback.getProofResourceUri() == null || "".equals(feedback.getProofResourceUri()))
-        		ntc.setContentType(PostContentType.TEXT.getCode());
-        	else{
-        		ntc.setContentType(PostContentType.IMAGE.getCode());
-        	}
-        	ntc.setContent(feedback.getContent());
-        	ntc.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
-        	ntc.setVisibleRegionId(0L);
-        	
-        	forumService.createTopic(ntc);
-        }
+        return feedback;
     }
 
     @Override
-    public ListFeedbacksResponse ListFeedbacks(ListFeedbacksCommand cmd) {
+    public ListFeedbacksResponse listFeedbacks(ListFeedbacksCommand cmd) {
     	ListFeedbacksResponse response = new ListFeedbacksResponse();
     	CrossShardListingLocator locator = new CrossShardListingLocator();
     	locator.setAnchor(cmd.getPageAnchor());
     	int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-    	List<Feedback> results = userActivityProvider.ListFeedbacks(locator, UserContext.getCurrentNamespaceId(), FeedbackTargetType.POST.getCode(), cmd.getStatus(), pageSize + 1);
+//    	List<Feedback> results = userActivityProvider.ListFeedbacks(locator, UserContext.getCurrentNamespaceId(), FeedbackTargetType.POST.getCode(), cmd.getStatus(), pageSize + 1);
+    	List<Feedback> results = userActivityProvider.ListFeedbacks(locator, UserContext.getCurrentNamespaceId(), null, cmd.getStatus(), pageSize + 1);
     	if (null == results)
     		return response;
     	Long nextPageAnchor = null;
@@ -540,18 +535,16 @@ public class UserActivityServiceImpl implements UserActivityService {
     		if(user != null){
     			feedbackDto.setOwnerNickName(user.getNickName());
     		}
-    		//获取被举报对象的标题，默认取post，其他类型不管。
-    		if(feedbackDto.getTargetType() == FeedbackTargetType.POST.getCode()){
-    			Post post = forumProvider.findPostById(feedbackDto.getTargetId());
-        		if(post != null){
-        			feedbackDto.setTargetSubject(post.getSubject());
-        			feedbackDto.setForumId(post.getForumId());
-        			feedbackDto.setTargetStatus(post.getStatus());
-        		}
-    		}
+
     		FeedbackContentCategoryType contentCategory = FeedbackContentCategoryType.fromStatus(feedbackDto.getContentCategory().byteValue());
     		feedbackDto.setContentCategoryText(contentCategory.getText());
-    		
+
+            FeedbackHandler handler = getFeedBackHandler(feedbackDto.getTargetType());
+            if(handler != null){
+                //业务实现
+                handler.populateFeedbackDTO(feedbackDto);
+            }
+
     		feedbackDtos.add(feedbackDto);
     	});
     	response.setNextPageAnchor(nextPageAnchor); 
@@ -570,76 +563,62 @@ public class UserActivityServiceImpl implements UserActivityService {
 		feedback.setStatus((byte)1);
 		feedback.setVerifyType(cmd.getVerifyType());
 		feedback.setHandleType(cmd.getHandleType());
-		//更新自己的状态
-		userActivityProvider.updateFeedback(feedback);
-		
-		//如果处理方式是删除，将相同目标帖子举报的核实状态更新为已处理，处理方式为无
-		if(feedback.getHandleType() == FeedbackHandleType.DELETE.getCode()){
-			userActivityProvider.updateOtherFeedback(feedback.getTargetId(), feedback.getId(), feedback.getVerifyType(), FeedbackHandleType.NONE.getCode());
-		}
-		
-		//当前只对post类型的举报做实际处理，处理的方式只有删除
-		if(feedback.getTargetType() == FeedbackTargetType.POST.getCode() && feedback.getHandleType() == FeedbackHandleType.DELETE.getCode()){
-			 Post post = forumProvider.findPostById(feedback.getTargetId());
-			 if(post != null){
-				 forumService.deletePost(post.getForumId(), post.getId(), null, null, null);
-             }
-        }
+        FeedbackHandler handler = getFeedBackHandler(feedback.getTargetType());
 
-        //举报管理事件 add by yanjun 20171211
-        feedbackEvent(feedback);
-    }
+        dbProvider.execute(status -> {
 
-    private void feedbackEvent(Feedback feedback){
-        //此处只对接帖子的举报
-        if (feedback.getTargetType() != FeedbackTargetType.POST.getCode()) {
-            return;
-        }
-        if (FeedbackVerifyType.fromStatus(feedback.getVerifyType()) == FeedbackVerifyType.FALSE) {
-            return;
-        }
-        Post post = forumProvider.findPostById(feedback.getTargetId());
-        if(post == null){
-            return;
-        }
+            if(handler != null){
+                //业务实现
+                handler.beforeUpdateFeedback(cmd);
+            }
 
-        /*String eventName = null;
-        switch (ForumModuleType.fromCode(post.getModuleType())){
-            case FORUM:
-                eventName = SystemEvent.FORUM_POST_REPORT.suffix(post.getModuleCategoryId());
-                break;
-            case ACTIVITY:
-                eventName = SystemEvent.ACTIVITY_ACTIVITY_REPORT.suffix(post.getModuleCategoryId());
-                break;
-            case ANNOUNCEMENT:
-                break;
-            case CLUB:
-                break;
-            case GUILD:
-                break;
-            case FEEDBACK:
-                break;
-        }
-        if(eventName == null){
-            return;
-        }
+            //更新自己的状态
+            userActivityProvider.updateFeedback(feedback);
+            //如果处理方式是删除，将相同目标帖子举报的核实状态更新为已处理，处理方式为无
+            if(feedback.getHandleType() == FeedbackHandleType.DELETE.getCode()){
+                userActivityProvider.updateOtherFeedback(feedback.getTargetId(), feedback.getId(), feedback.getVerifyType(), FeedbackHandleType.NONE.getCode());
+            }
 
-        final String finalEventName = eventName;*/
+            if(handler != null){
+                //业务实现
+                handler.afterUpdateFeedback(feedback);
+            }
 
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-
-        LocalEventBus.publish(event -> {
-            LocalEventContext context = new LocalEventContext();
-            context.setUid(post.getCreatorUid());
-            context.setNamespaceId(namespaceId);
-            event.setContext(context);
-
-            event.setEntityType(EhForumPosts.class.getSimpleName());
-            event.setEntityId(post.getId());
-            event.setEventName(SystemEvent.FORUM_POST_REPORT.suffix(
-                    post.getContentCategory(), post.getModuleType(), post.getModuleCategoryId()));
+            return null;
         });
-    }
+
+        //事件处理（比如扣积分等）
+        if(handler != null){
+            handler.feedbackEvent(feedback);
+        }
+
+	}
+
+	private FeedbackHandler getFeedBackHandler(Byte feedbackTargetType){
+        FeedbackHandler handler = null;
+        if(feedbackTargetType != null) {
+            handler = PlatformContext.getComponent(FeedbackHandler.FEEDBACKHANDLER + feedbackTargetType);
+        }
+        return handler;
+	}
+//		//更新自己的状态
+//		userActivityProvider.updateFeedback(feedback);
+//		
+//		//如果处理方式是删除，将相同目标帖子举报的核实状态更新为已处理，处理方式为无
+//		if(feedback.getHandleType() == FeedbackHandleType.DELETE.getCode()){
+//			userActivityProvider.updateOtherFeedback(feedback.getTargetId(), feedback.getId(), feedback.getVerifyType(), FeedbackHandleType.NONE.getCode());
+//		}
+//		
+//		//当前只对post类型的举报做实际处理，处理的方式只有删除
+//		if(feedback.getTargetType() == FeedbackTargetType.POST.getCode() && feedback.getHandleType() == FeedbackHandleType.DELETE.getCode()){
+//			 Post post = forumProvider.findPostById(feedback.getTargetId());
+//			 if(post != null){
+//				 forumService.deletePost(post.getForumId(), post.getId(), null, null, null);
+//             }
+//        }
+
+       
+//    }
 	
     @Override
     public void addUserFavorite(AddUserFavoriteCommand cmd) {

@@ -1,3 +1,5 @@
+<<<<<<< HEAD:db/auth_warehouse_wentian-delta-schema.sql
+-- 4.12.1
 -- merge from forum2.6 by yanjun 201712121010 start
 
 -- added by janson
@@ -85,7 +87,7 @@ CREATE TABLE `eh_service_module_functions` (
   `module_id` BIGINT NOT NULL DEFAULT 0,
   `privilege_id` BIGINT NOT NULL DEFAULT 0,
   `explain` VARCHAR(64) NOT NULL DEFAULT 0,
-  
+
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -95,7 +97,7 @@ CREATE TABLE `eh_service_module_exclude_functions` (
   `community_id` BIGINT,
   `module_id` BIGINT NOT NULL DEFAULT 0,
   `function_id` BIGINT NOT NULL DEFAULT 0,
-  
+
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -150,7 +152,7 @@ CREATE TABLE `eh_customer_taxes` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 -- merge from customer1129 by xiongying20171212 end
-     
+
 -- 物品搬迁 add by sw 20171212
 CREATE TABLE `eh_relocation_requests` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
@@ -286,6 +288,7 @@ CREATE TABLE `eh_point_rule_categories` (
 CREATE TABLE `eh_point_rules` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `system_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_systems id',
   `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rule_categories id',
   `module_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_service_modules id',
   `display_name` VARCHAR(64) NOT NULL,
@@ -304,34 +307,16 @@ CREATE TABLE `eh_point_rules` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
--- 积分规则配置表
-DROP TABLE IF EXISTS `eh_point_rule_configs`;
-CREATE TABLE `eh_point_rule_configs` (
-  `id` BIGINT NOT NULL,
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `system_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_systems id',
-  `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rule_categories id',
-  `rule_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rules id',
-  `description` VARCHAR(64) NOT NULL,
-  `points` BIGINT NOT NULL DEFAULT 0,
-  `limit_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: times per day, 2: times',
-  `limit_data` TEXT,
-  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: disabled, 2: enabled',
-  `create_time` DATETIME(3),
-  `creator_uid` BIGINT,
-  `update_time` DATETIME(3),
-  `update_uid` BIGINT,
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
 -- 积分规则
 -- DROP TABLE IF EXISTS `eh_point_rule_to_event_mappings`;
 CREATE TABLE `eh_point_rule_to_event_mappings` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `system_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_systems id',
   `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rule_categories id',
   `rule_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rules id',
   `event_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'event name',
+  #   `binding_event_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'binding event name',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -340,6 +325,7 @@ CREATE TABLE `eh_point_rule_to_event_mappings` (
 CREATE TABLE `eh_point_actions` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `system_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_systems id',
   `action_type` VARCHAR(64),
   `owner_type` VARCHAR(64),
   `owner_id` BIGINT NOT NULL DEFAULT 0,
@@ -444,10 +430,24 @@ CREATE TABLE `eh_point_event_logs` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rule_categories id',
   `event_name` VARCHAR(128),
-  `subscription_path` VARCHAR(128),
   `event_json` TEXT,
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: waiting for process, 2: processing, 3: processed',
   `create_time` DATETIME(3),
   `creator_uid` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- end 4.12.1
+
+
+
+-- auth_warehouse_wentian
+ALTER TABLE `eh_warehouse_materials` ADD COLUMN `community_id` BIGINT DEFAULT 0 COMMENT '园区id';
+ALTER TABLE `eh_warehouses` ADD COLUMN `community_id` BIGINT DEFAULT 0 COMMENT '园区id';
+ALTER TABLE `eh_warehouse_stocks` ADD COLUMN `community_id` BIGINT DEFAULT 0 COMMENT '园区id';
+ALTER TABLE `eh_warehouse_stock_logs` ADD COLUMN `community_id` BIGINT DEFAULT 0 COMMENT '园区id';
+ALTER TABLE `eh_warehouse_request_materials` ADD COLUMN `community_id` BIGINT DEFAULT 0 COMMENT '园区id';
+ALTER TABLE `eh_warehouse_requests` ADD COLUMN `community_id` BIGINT DEFAULT 0 COMMENT '园区id';
+-- end auth_warehouse_wentian
+=======
+>>>>>>> 4.12.3:db/backup/4.12.1-delta-schema.sql

@@ -38,6 +38,30 @@ import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ **************************************************************
+ *                                                            *
+ *   .=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-.       *
+ *    |                     ______                     |      *
+ *    |                  .-"      "-.                  |      *
+ *    |                 /            \                 |      *
+ *    |     _          |              |          _     |      *
+ *    |    ( \         |,  .-.  .-.  ,|         / )    |      *
+ *    |     > "=._     | )(__/  \__)( |     _.=" <     |      *
+ *    |    (_/"=._"=._ |/     /\     \| _.="_.="\_)    |      *
+ *    |           "=._"(_     ^^     _)"_.="           |      *
+ *    |               "=\__|IIIIII|__/="               |      *
+ *    |              _.="| \IIIIII/ |"=._              |      *
+ *    |    _     _.="_.="\          /"=._"=._     _    |      *
+ *    |   ( \_.="_.="     `--------`     "=._"=._/ )   |      *
+ *    |    > _.="                            "=._ <    |      *
+ *    |   (_/                                    \_)   |      *
+ *    |                                                |      *
+ *    '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='      *
+ *                                                            *
+ *           LASCIATE OGNI SPERANZA, VOI CH'ENTRATE           *
+ **************************************************************
+ */
 @RestDoc(value = "Asset Controller", site = "core")
 @RestController
 @RequestMapping("/asset")
@@ -1072,7 +1096,6 @@ public class AssetController extends ControllerBase {
     @RequestMapping(value = "listPaymentBill")
     @RestReturn(ListPaymentBillResp.class)
     public RestResponse listPaymentBill(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
-//        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.ASSET_DEAL_VIEW);
 //        UserInfo user = (UserInfo) request.getSession().getAttribute(SessionConstants.MC_LOGIN_USER);
         ListPaymentBillResp result = paymentService.listPaymentBill(cmd);
         RestResponse response = new RestResponse(result);

@@ -61,6 +61,7 @@ import java.util.List;
  * Created by ying.xiong on 2017/8/2.
  */
 public class CreateContractCommand {
+    private Long orgId;
     private Integer namespaceId;
     private Long communityId;
     private Long parentId;
@@ -525,5 +526,13 @@ public class CreateContractCommand {
 
     public void setSignedTime(Long signedTime) {
         this.signedTime = signedTime;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
     }
 }

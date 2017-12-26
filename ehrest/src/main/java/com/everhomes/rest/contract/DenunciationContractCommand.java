@@ -19,6 +19,36 @@ public class DenunciationContractCommand {
 
     private String denunciationReason;
 
+    private Long orgId;
+
+    private Long communityId;
+
+    private Integer namespaceId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
+
     public Long getPartyAId() {
         return partyAId;
     }
