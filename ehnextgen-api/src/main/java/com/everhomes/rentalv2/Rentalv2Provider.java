@@ -107,7 +107,7 @@ public interface Rentalv2Provider {
 	List<RentalOrder> listSuccessRentalBills();
 	
 	List<RentalResource> findRentalSites(Long  resourceTypeId, String keyword, ListingLocator locator,
-			Integer pageSize,List<Byte>  status,List<Long>  siteIds,Long communityId);
+			Integer pageSize, Byte status,List<Long>  siteIds,Long communityId);
  
 
 	List<RentalOrder> listRentalBills(Long ownerId, String ownerType,

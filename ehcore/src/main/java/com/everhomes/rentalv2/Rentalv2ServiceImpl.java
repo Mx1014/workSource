@@ -4,7 +4,6 @@ package com.everhomes.rentalv2;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.sql.Date;
 import java.sql.Time;
@@ -86,7 +85,6 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
-import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
@@ -117,7 +115,6 @@ import com.everhomes.techpark.rental.IncompleteUnsuccessRentalBillAction;
 
 @Component
 public class Rentalv2ServiceImpl implements Rentalv2Service {
-	private static final String downloadDir ="\\download\\";
 
     private static final Long MILLISECONDGMT=8*3600*1000L;
 	// N分钟后取消
@@ -147,8 +144,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	private String queueName = "rentalService";
 
-	@Autowired
-	private RolePrivilegeService rolePrivilegeService;
 	@Autowired
 	private LocaleTemplateService localeTemplateService;
 	@Autowired
@@ -835,19 +830,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getAnchor());
-		if(null==cmd.getStatus() || cmd.getStatus().size() == 0){
-			cmd.setStatus(new ArrayList<>());
-			cmd.getStatus().add(RentalSiteStatus.NORMAL.getCode());
-		}
+
 		List<Long> siteIds = new ArrayList<>();
 		List<RentalSiteRange> siteOwners = this.rentalv2Provider.findRentalSiteOwnersByOwnerTypeAndId(cmd.getOwnerType(), cmd.getOwnerId());
 		if(siteOwners !=null)
-			for(RentalSiteRange siteOwner : siteOwners){
+			for(RentalSiteRange siteOwner: siteOwners){
 				siteIds.add(siteOwner.getRentalResourceId());
 			}  
 		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
 		List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(cmd.getResourceTypeId(), cmd.getKeyword(),
-				locator, pageSize,cmd.getStatus(),siteIds,cmd.getCommunityId());
+				locator, pageSize, RentalSiteStatus.NORMAL.getCode(),siteIds,cmd.getCommunityId());
 
 		if(null == rentalSites)
 			return response;
@@ -5553,7 +5545,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}   
 		}
 		List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(cmd.getResourceTypeId(), null,
-				locator, pageSize,null,siteIds,cmd.getCommunityId());
+				locator, pageSize,null, siteIds, cmd.getCommunityId());
 		if(null == rentalSites)
 			return response;
 
@@ -5611,7 +5603,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		this.dbProvider.execute((TransactionStatus status) -> {
 			RentalResource resource = ConvertHelper.convert(cmd, RentalResource.class);
 			resource.setResourceName(cmd.getSiteName());
-			resource.setStatus(RentalSiteStatus.DISABLE.getCode());
+			resource.setStatus(RentalSiteStatus.NORMAL.getCode());
 			resource.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
 			resource.setCreatorUid( UserContext.current().getUser().getId());
@@ -6312,9 +6304,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		rentalv2Provider.deleteResourceCells(cmd.getId(), null, null); 
 		RentalResource rs = rentalv2Provider.getRentalSiteById(cmd.getId());
-		if(rs == null )
-			return  ;
-		rs.setStatus(RentalSiteStatus.DISABLE.getCode());
+		if(rs == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid namespaceId parameter in the command");
+		}
+		rs.setStatus(RentalSiteStatus.DELETED.getCode());
 		rentalv2Provider.updateRentalSite(rs);
 		
 	}

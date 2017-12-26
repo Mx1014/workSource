@@ -28,8 +28,7 @@ public class FindRentalSitesCommand {
 
 	private Long anchor;
 	private Integer pageSize;
-	@ItemType(Byte.class)
-	private List<Byte> status;
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -58,12 +57,6 @@ public class FindRentalSitesCommand {
 	}
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
-	}
-	public List<Byte> getStatus() {
-		return status;
-	}
-	public void setStatus(List<Byte> status) {
-		this.status = status;
 	}
 	public Long getResourceTypeId() {
 		return resourceTypeId;

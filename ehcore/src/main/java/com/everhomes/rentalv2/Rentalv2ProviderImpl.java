@@ -1301,7 +1301,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 	@Override
 	public List<RentalResource> findRentalSites(Long  resourceTypeId, String keyword, ListingLocator locator,
-			Integer pageSize,List<Byte>  status,List<Long>  siteIds,Long communityId) {
+			Integer pageSize, Byte status,List<Long> siteIds,Long communityId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_RESOURCES);
@@ -1328,18 +1328,14 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
         if(communityId  != null)
         	condition=condition.and(Tables.EH_RENTALV2_RESOURCES.COMMUNITY_ID.eq(communityId));
-		if(null!= status&&status.size()!=0)
-			condition = condition.and(Tables.EH_RENTALV2_RESOURCES.STATUS.in(status));
-		else
-			condition = condition.and(Tables.EH_RENTALV2_RESOURCES.STATUS.ne(RentalSiteStatus.DISABLE.getCode()));
+		if(null != status) {
+			condition = condition.and(Tables.EH_RENTALV2_RESOURCES.STATUS.eq(status));
+		}else {
+			condition = condition.and(Tables.EH_RENTALV2_RESOURCES.STATUS.ne(RentalSiteStatus.DELETED.getCode()));
+		}
 
-		List<RentalResource> result = step.where(condition)
-				.orderBy(Tables.EH_RENTALV2_RESOURCES.DEFAULT_ORDER.asc()).limit(pageSize).fetch().map((r) -> {
-					return ConvertHelper.convert(r, RentalResource.class);
-				});
-		if(result.size()==0)
-			return null;
-		return result;
+		return step.where(condition).orderBy(Tables.EH_RENTALV2_RESOURCES.DEFAULT_ORDER.asc())
+				.limit(pageSize).fetch().map((r) -> ConvertHelper.convert(r, RentalResource.class));
 	}
 
 	@Override
@@ -2275,7 +2271,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 
 		if (null != menuType) {
-			condition = condition.and(Tables.EH_RENTALV2_RESOURCE_TYPES.STATUS.equal(menuType));
+			condition = condition.and(Tables.EH_RENTALV2_RESOURCE_TYPES.MENU_TYPE.equal(menuType));
 		}
 
 		step.where(condition);
