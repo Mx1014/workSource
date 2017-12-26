@@ -547,14 +547,10 @@ import com.everhomes.server.schema.tables.pojos.EhYellowPages;
 import com.everhomes.server.schema.tables.pojos.EhYzbDevices;
 import com.everhomes.server.schema.tables.pojos.EhYzxSmsLogs;
 import com.everhomes.server.schema.tables.pojos.EhZjSyncdataBackup;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.admin.GetSequenceCommand;
 import com.everhomes.rest.admin.GetSequenceDTO;
@@ -1540,6 +1536,9 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhServiceModuleAssignments.class, Tables.EH_SERVICE_MODULE_ASSIGNMENTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ID.max()).from(Tables.EH_SERVICE_MODULE_ASSIGNMENTS).fetchOne().value1();
         });
+        syncTableSequence(null, EhEquipmentModelCommunityMap.class, Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP.ID.max()).from(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP).fetchOne().value1();
+        });
         syncTableSequence(null, EhEquipmentInspectionEquipmentStandardMap.class, Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP).fetchOne().value1();
         });
@@ -1785,6 +1784,9 @@ public class SequenceServiceImpl implements SequenceService {
         });
         syncTableSequence(null, EhQualityInspectionStandardSpecificationMap.class, Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.ID.max()).from(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP).fetchOne().value1();
+        });
+        syncTableSequence(null, EhQualityInspectionModelCommunityMap.class, Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP.ID.max()).from(Tables.EH_QUALITY_INSPECTION_MODEL_COMMUNITY_MAP).fetchOne().value1();
         });
         syncTableSequence(null, EhBusinessPromotions.class, Tables.EH_BUSINESS_PROMOTIONS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_BUSINESS_PROMOTIONS.ID.max()).from(Tables.EH_BUSINESS_PROMOTIONS).fetchOne().value1();

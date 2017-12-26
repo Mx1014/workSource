@@ -3157,8 +3157,10 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	public Workbook createPunchStatisticsBook(List<PunchCountDTO> results, ListPunchCountCommand cmd) {
+		
+		XSSFWorkbook wb = new XSSFWorkbook();
 		if (null == results || results.size() == 0)
-			return null;
+			return wb;
 		int columnNo = 13;
 
 		if (null != results && results.size() > 0) {
@@ -3166,7 +3168,6 @@ public class PunchServiceImpl implements PunchService {
 				columnNo += results.get(0).getExts().size();
 			}
 		}
-		XSSFWorkbook wb = new XSSFWorkbook();
 		XSSFSheet sheet = wb.createSheet("punchStatistics");
 		sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, columnNo));
 		XSSFCellStyle style = wb.createCellStyle();

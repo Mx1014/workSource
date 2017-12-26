@@ -120,6 +120,7 @@ public class WarehouseMaterialSearcherImpl extends AbstractElasticSearch impleme
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
 
         if(cmd.getCategoryId() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
@@ -159,7 +160,7 @@ public class WarehouseMaterialSearcherImpl extends AbstractElasticSearch impleme
 
         List<WarehouseMaterialDTO> materialDTOs = new ArrayList<WarehouseMaterialDTO>();
         for(Long id : ids) {
-            WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(id, cmd.getOwnerType(), cmd.getOwnerId());
+            WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(id, cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
             WarehouseMaterialDTO dto = ConvertHelper.convert(material, WarehouseMaterialDTO.class);
 
             WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategories(dto.getCategoryId(), dto.getOwnerType(), dto.getOwnerId());
@@ -194,7 +195,7 @@ public class WarehouseMaterialSearcherImpl extends AbstractElasticSearch impleme
             b.field("materialNumber", material.getMaterialNumber());
             b.field("categoryId", material.getCategoryId());
             b.field("updateTime", material.getUpdateTime());
-
+            b.field("communityId", material.getCommunityId());
             b.endObject();
             return b;
         } catch (IOException ex) {
