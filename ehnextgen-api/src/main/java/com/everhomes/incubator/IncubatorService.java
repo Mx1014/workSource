@@ -3,8 +3,12 @@ package com.everhomes.incubator;
 
 import com.everhomes.rest.incubator.*;
 
+import java.util.List;
+
 public interface IncubatorService {
 	ListIncubatorApplyResponse listIncubatorApply(ListIncubatorApplyCommand cmd);
+
+	List<IncubatorApplyDTO> listMyTeams();
 
 	ListIncubatorProjectTypeResponse listIncubatorProjectType();
 

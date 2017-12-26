@@ -10,6 +10,10 @@ public interface IncubatorProvider {
 
     List<IncubatorApply> listIncubatorAppliesByRootId(Long rootId);
 
+    List<Long> listRootIdByUserId(Long userId);
+
+    IncubatorApply findLatestValidByRootId(Long rootId);
+
     List<IncubatorApply> listIncubatorAppling(Long applyUserId);
 
     List<IncubatorProjectType> listIncubatorProjectType();

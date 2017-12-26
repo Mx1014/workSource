@@ -113,6 +113,31 @@ public class IncubatorServiceImpl implements IncubatorService {
 		return response;
 	}
 
+
+	@Override
+	public List<IncubatorApplyDTO> listMyTeams() {
+		List<IncubatorApply> applies = new ArrayList<>();
+		List<Long> rootIds = incubatorProvider.listRootIdByUserId(UserContext.currentUserId());
+		if(rootIds != null){
+			for (Long rootId: rootIds){
+				IncubatorApply latestValidApply = incubatorProvider.findLatestValidByRootId(rootId);
+				if(latestValidApply != null){
+					applies.add(latestValidApply);
+				}
+			}
+		}
+
+		List<IncubatorApplyDTO> dtos = new ArrayList<>();
+		applies.forEach(r ->{
+			IncubatorApplyDTO dto = ConvertHelper.convert(r, IncubatorApplyDTO.class);
+			populateDto(dto);
+			dtos.add(dto);
+		});
+		return dtos;
+	}
+
+
+
 	@Override
 	public void exportIncubatorApply(ExportIncubatorApplyCommand cmd) {
 		Map<String, Object> params = new HashMap();

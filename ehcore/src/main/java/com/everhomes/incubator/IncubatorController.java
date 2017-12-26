@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestDoc(value = "Incubator Controller", site = "core")
 @RestController
 @RequestMapping("/incubator")
@@ -31,6 +33,21 @@ public class IncubatorController extends ControllerBase {
 
         ListIncubatorApplyResponse list = incubatorService.listIncubatorApply(cmd);
         RestResponse response = new RestResponse(list);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /incubator/listMyTeams</b>
+     * <p>查询入孵申请的记录</p>
+     */
+    @RequestMapping("listMyTeams")
+    @RestReturn(value=IncubatorApplyDTO.class, collection = true)
+    public RestResponse listMyTeams() {
+
+        List<IncubatorApplyDTO> dtos = incubatorService.listMyTeams();
+        RestResponse response = new RestResponse(dtos);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

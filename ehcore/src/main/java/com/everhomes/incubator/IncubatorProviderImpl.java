@@ -17,9 +17,7 @@ import com.everhomes.server.schema.tables.records.EhIncubatorApplyAttachmentsRec
 import com.everhomes.server.schema.tables.records.EhIncubatorProjectTypesRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -130,6 +128,29 @@ public class IncubatorProviderImpl implements IncubatorProvider {
         });
 
         return result;
+    }
+
+    @Override
+    public List<Long> listRootIdByUserId(Long userId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> longs = context.selectDistinct(Tables.EH_INCUBATOR_APPLIES.ROOT_ID)
+                .from(Tables.EH_INCUBATOR_APPLIES)
+                .where(Tables.EH_INCUBATOR_APPLIES.APPLY_USER_ID.eq(userId))
+                .fetchInto(Long.class);
+
+        return longs;
+    }
+
+    @Override
+    public IncubatorApply findLatestValidByRootId(Long rootId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhIncubatorAppliesRecord> query = context.selectQuery(Tables.EH_INCUBATOR_APPLIES);
+
+        query.addConditions(Tables.EH_INCUBATOR_APPLIES.ROOT_ID.eq(rootId));
+        query.addConditions(Tables.EH_INCUBATOR_APPLIES.APPROVE_STATUS.in(ApproveStatus.WAIT.getCode(), ApproveStatus.AGREE.getCode()));
+        query.addOrderBy(Tables.EH_INCUBATOR_APPLIES.ID.desc());
+        IncubatorApply incubatorApply = query.fetchAnyInto(IncubatorApply.class);
+        return incubatorApply;
     }
 
     @Override
