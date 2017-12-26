@@ -430,3 +430,5 @@ INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `modu
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999972', '30000', '', 'EhNamespaces', '999972', NULL, '2');
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999973', '30000', '', 'EhNamespaces', '999973', NULL, '2');
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999974', '30000', '', 'EhNamespaces', '999974', NULL, '2');
+
+delete from eh_service_module_scopes where module_id = 21200 and namespace_id in(999973, 999974);
