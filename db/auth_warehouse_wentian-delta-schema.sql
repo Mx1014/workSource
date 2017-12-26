@@ -1,3 +1,4 @@
+<<<<<<< HEAD:db/auth_warehouse_wentian-delta-schema.sql
 -- 4.12.1
 -- merge from forum2.6 by yanjun 201712121010 start
 
@@ -448,3 +449,5 @@ ALTER TABLE `eh_warehouse_stock_logs` ADD COLUMN `community_id` BIGINT DEFAULT 0
 ALTER TABLE `eh_warehouse_request_materials` ADD COLUMN `community_id` BIGINT DEFAULT 0 COMMENT '园区id';
 ALTER TABLE `eh_warehouse_requests` ADD COLUMN `community_id` BIGINT DEFAULT 0 COMMENT '园区id';
 -- end auth_warehouse_wentian
+=======
+>>>>>>> 4.12.3:db/backup/4.12.1-delta-schema.sql

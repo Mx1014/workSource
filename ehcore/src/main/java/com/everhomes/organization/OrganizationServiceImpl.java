@@ -884,17 +884,20 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
             dto.setId(organization.getId());
             dto.setEnterpriseName(organization.getName());
-            if(dto.getEnterpriseName() == null || com.mysql.jdbc.StringUtils.isNullOrEmpty(dto.getEnterpriseName()))
-                dto.setEnterpriseName(org.getDisplayName());
+            if(org != null) {
+                if(dto.getEnterpriseName() == null || com.mysql.jdbc.StringUtils.isNullOrEmpty(dto.getEnterpriseName()))
+                    dto.setEnterpriseName(org.getDisplayName());
+
+                dto.setAvatarUri(org.getAvatar());
+                if (!StringUtils.isEmpty(org.getAvatar()))
+                    dto.setAvatarUrl(contentServerService.parserUri(dto.getAvatarUri(), EntityType.ORGANIZATIONS.getCode(), organization.getId()));
+
+            }
 
             String pinyin = PinYinHelper.getPinYin(dto.getEnterpriseName());
             dto.setFullInitial(PinYinHelper.getFullCapitalInitial(pinyin));
             dto.setFullPinyin(pinyin.replaceAll(" ", ""));
             dto.setInitial(PinYinHelper.getCapitalInitial(dto.getFullPinyin()));
-
-            dto.setAvatarUri(org.getAvatar());
-            if (!StringUtils.isEmpty(org.getAvatar()))
-                dto.setAvatarUrl(contentServerService.parserUri(dto.getAvatarUri(), EntityType.ORGANIZATIONS.getCode(), organization.getId()));
 
             List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organization.getId());
 

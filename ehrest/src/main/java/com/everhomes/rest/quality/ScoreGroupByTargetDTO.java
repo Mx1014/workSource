@@ -10,6 +10,8 @@ import java.util.List;
  *  <li>scores: 参考 {@link com.everhomes.rest.quality.ScoreDTO}</li>
  *  <li>targetName: 项目名</li>
  *  <li>targetId: 项目id</li>
+ *  <li>orderId: </li>
+ *  <li>totalScore: </li>
  * </ul>
  */
 public class ScoreGroupByTargetDTO {
@@ -22,7 +24,7 @@ public class ScoreGroupByTargetDTO {
 	private String targetName;
 
 	//fix order
-	private  Integer OrderId;
+	private  Integer orderId;
 
 	//fix order
 	private  Double totalScore;
@@ -55,11 +57,11 @@ public class ScoreGroupByTargetDTO {
 	}
 
 	public Integer getOrderId() {
-		return OrderId;
+		return orderId;
 	}
 
 	public void setOrderId(Integer orderId) {
-		OrderId = orderId;
+		this.orderId = orderId;
 	}
 
 	public Double getTotalScore() {

@@ -3823,33 +3823,36 @@ public class QualityServiceImpl implements QualityService {
 		List<ScoreGroupByTargetDTO> sortedScoresByTarget = new ArrayList<>();
 		if (scoresByTarget.size() > 0) {
 			//sort  scoreByTarget
-			sortedScoresByTarget = scoresByTarget.stream()
-                    .sorted(Comparator.comparing(ScoreGroupByTargetDTO::getTotalScore).reversed())
-                    .collect(Collectors.toList());
-			//add orderId for  ScoresByTarget
-			Integer previousOrder = 0;
-			Double total = 0D;
-			for (int i = 0; i < sortedScoresByTarget.size(); i++) {
-				if (total.doubleValue() == sortedScoresByTarget.get(i).getTotalScore().doubleValue() && sortedScoresByTarget.get(i).getTotalScore() != 0) {
-					Double preBuildArea = (sortedScoresByTarget.get(i - 1).getBuildArea() == null) ? 0D : sortedScoresByTarget.get(i - 1).getBuildArea();
-					Double currBuildArea = (sortedScoresByTarget.get(i).getBuildArea() == null) ? 0D : sortedScoresByTarget.get(i).getBuildArea();
-					if (preBuildArea < currBuildArea) {
-						sortedScoresByTarget.get(i).setOrderId(previousOrder);
-						sortedScoresByTarget.get(i - 1).setOrderId(++previousOrder);
-					} else if (preBuildArea.doubleValue() == currBuildArea.doubleValue()) {
-						sortedScoresByTarget.get(i).setOrderId(previousOrder);
-					} else if (preBuildArea > currBuildArea) {
-						sortedScoresByTarget.get(i).setOrderId(++previousOrder);
-					}
+			/*sortedScoresByTarget = scoresByTarget.stream()
+					.sorted(Comparator.comparing(ScoreGroupByTargetDTO::getTotalScore).reversed())
+                    .collect(Collectors.toList());*/
+
+			scoresByTarget.sort((o1, o2) -> {
+				if (!o1.getTotalScore().equals(o2.getTotalScore())) {
+					return o2.getTotalScore().compareTo(o1.getTotalScore());
 				} else {
-					previousOrder++;
-					sortedScoresByTarget.get(i).setOrderId(previousOrder);
-					total = sortedScoresByTarget.get(i).getTotalScore();
+					return o2.getBuildArea().compareTo(o1.getBuildArea());
+				}
+			});
+			//add orderId for  ScoresByTarget
+			Integer previousOrder = 1;
+			for (int i = 0; i < scoresByTarget.size(); i++) {
+				if (i == 0) {
+					scoresByTarget.get(i).setOrderId(previousOrder);
+				} else {
+					if (scoresByTarget.get(i).getBuildArea().equals(scoresByTarget.get(i - 1).getBuildArea()) &&
+							scoresByTarget.get(i).getTotalScore().equals(scoresByTarget.get(i - 1).getTotalScore())) {
+						scoresByTarget.get(i).setOrderId(previousOrder);
+					} else {
+						scoresByTarget.get(i).setOrderId(++previousOrder);
+					}
+
 				}
 			}
+
 		}
-		//再次按照order排序
-		sortedScoresByTarget.sort(Comparator.comparing(ScoreGroupByTargetDTO::getOrderId));
+//		//再次按照order排序
+//		sortedScoresByTarget.sort(Comparator.comparing(ScoreGroupByTargetDTO::getOrderId));
 
 		response.setScores(sortedScoresByTarget);
 		return response;
@@ -4331,6 +4334,75 @@ public class QualityServiceImpl implements QualityService {
 		}*/
 		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, QualityConstant.QUALITY_MODULE, null, null, null,communityId);
 
+
+	}
+	@Override
+	public HttpServletResponse exportSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd, HttpServletResponse httpResponse) {
+		CountScoresResponse dataResponse = countSampleTaskCommunityScores(cmd);
+		URL rootPath = QualityServiceImpl.class.getResource("/");
+		String filePath = rootPath.getPath() + this.downloadDir;
+		File file = new File(filePath);
+		if (!file.exists())
+			file.mkdirs();
+		filePath = filePath + "qualityScores" + System.currentTimeMillis() + ".xlsx";
+		//新建了一个文件
+		this.createQualityScoreBook(filePath, dataResponse);
+
+		return download(filePath, httpResponse);
+
+	}
+
+
+	private void createQualityScoreBook(String path, CountScoresResponse dataResponse) {
+		Workbook wb = new XSSFWorkbook();
+		Sheet sheet = wb.createSheet("qualityScores");
+
+		this.createQualityScoreBookSheetHead(sheet, dataResponse.getSpecifications());
+		List<ScoreGroupByTargetDTO> scores = dataResponse.getScores();
+		for (ScoreGroupByTargetDTO dto : scores) {
+			this.setNewQualityScoreBookRow(sheet, dto);
+		}
+
+		try {
+			FileOutputStream out = new FileOutputStream(path);
+			wb.write(out);
+			wb.close();
+			out.close();
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			throw RuntimeErrorException.errorWith(QualityServiceErrorCode.SCOPE,
+					QualityServiceErrorCode.ERROR_CREATE_EXCEL,
+					e.getLocalizedMessage());
+		}
+
+	}
+
+	private void createQualityScoreBookSheetHead(Sheet sheet, List<CountScoresSpecificationDTO> specifications) {
+
+		Row row = sheet.createRow(sheet.getLastRowNum());
+		int i = -1;
+		row.createCell(++i).setCellValue("排名");
+		row.createCell(++i).setCellValue("项目名称");
+		row.createCell(++i).setCellValue("项目面积");
+		for (CountScoresSpecificationDTO score : specifications) {
+			row.createCell(++i).setCellValue(score.getSpecificationName()+score.getSpecificationWeight()*100+"%");
+		}
+		row.createCell(++i).setCellValue("加权得分");
+
+	}
+
+	private void setNewQualityScoreBookRow(Sheet sheet, ScoreGroupByTargetDTO dto) {
+		Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+		int i = -1;
+		row.createCell(++i).setCellValue(dto.getOrderId());
+		row.createCell(++i).setCellValue(dto.getTargetName());
+		row.createCell(++i).setCellValue(dto.getBuildArea());
+
+		List<ScoreDTO> scores = dto.getScores();
+		for (ScoreDTO score : scores) {
+			row.createCell(++i).setCellValue(score.getScore());
+		}
+		row.createCell(++i).setCellValue(dto.getTotalScore());
 
 	}
 }
