@@ -134,6 +134,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Autowired
 	private OrganizationSearcher organizationSearcher;
 
+	@Autowired
 	private CoordinationProvider coordinationProvider;
 
 	@Override
