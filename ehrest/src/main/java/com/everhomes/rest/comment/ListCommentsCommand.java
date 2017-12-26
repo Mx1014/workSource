@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
 public class ListCommentsCommand {
 	@NotNull
 	private String ownerToken;
-	private Integer pageAnchor;
+	private Long pageAnchor;
 	private Integer pageSize;
 
 	public String getOwnerToken() {
@@ -27,11 +27,11 @@ public class ListCommentsCommand {
 		this.ownerToken = ownerToken;
 	}
 
-	public Integer getPageAnchor() {
+	public Long getPageAnchor() {
 		return pageAnchor;
 	}
 
-	public void setPageAnchor(Integer pageAnchor) {
+	public void setPageAnchor(Long pageAnchor) {
 		this.pageAnchor = pageAnchor;
 	}
 

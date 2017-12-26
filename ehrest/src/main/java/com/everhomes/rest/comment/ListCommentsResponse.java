@@ -16,18 +16,18 @@ import java.util.List;
  */
 public class ListCommentsResponse {
 
-	private Integer nextPageAnchor;
+	private Long nextPageAnchor;
 
 	@ItemType(CommentDTO.class)
 	List<CommentDTO> commentDtos;
 
 	private Long commentCount;
 
-	public Integer getNextPageAnchor() {
+	public Long getNextPageAnchor() {
 		return nextPageAnchor;
 	}
 
-	public void setNextPageAnchor(Integer nextPageAnchor) {
+	public void setNextPageAnchor(Long nextPageAnchor) {
 		this.nextPageAnchor = nextPageAnchor;
 	}
 

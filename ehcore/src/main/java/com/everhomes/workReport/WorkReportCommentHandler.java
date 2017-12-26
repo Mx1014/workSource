@@ -260,21 +260,22 @@ public class WorkReportCommentHandler implements CommentHandler {
     public ListCommentsResponse listComments(ListCommentsCommand cmd) {
         ListCommentsResponse response = new ListCommentsResponse();
         List<CommentDTO> comments = new ArrayList<>();
-        Integer nextPageAnchor = null;
+        Long nextPageAnchor = null;
 
 
         OwnerTokenDTO ownerTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getOwnerToken(), OwnerTokenDTO.class);
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         if (cmd.getPageAnchor() == null)
-            cmd.setPageAnchor(1);
-        Integer offset = (cmd.getPageAnchor() - 1) * (cmd.getPageSize());
+            cmd.setPageAnchor(1L);
+        Integer pageOffset = cmd.getPageAnchor().intValue();
+        Integer offset = (pageOffset - 1) * (cmd.getPageSize());
 
         List<WorkReportValComment> results = workReportValProvider.listWorkReportValComments(namespaceId, ownerTokenDto.getId(), offset, cmd.getPageSize());
         if (results != null && results.size() > 0) {
 
             if (results.size() > cmd.getPageSize()) {
                 results.remove(results.size() - 1);
-                nextPageAnchor = cmd.getPageAnchor() + 1;
+                nextPageAnchor = Long.valueOf(pageOffset + 1);
             }
 
             List<Long> commentIds = results.stream().map(r -> r.getId()).collect(Collectors.toList());
