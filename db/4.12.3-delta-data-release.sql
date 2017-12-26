@@ -410,3 +410,22 @@ DELETE from eh_acls where owner_type = 'EhAll' and comment_tag1 like '%EhAuthori
 
 -- 将仓库管理改为园区控制 by wentian
 update eh_service_modules SET module_control_type = 'community_control' where `name` = '仓库管理';
+
+-- 物品分类的权限提示 by wentian
+set @module_id = 21020;
+set @p_id = 210001003;
+UPDATE `eh_acl_privileges` SET `name` = '物品维护 物品分类新增、编辑、查看、删除、导入',`description` = '物品维护 物品分类新增、编辑、查看、删除、导入' WHERE `id` = @p_id;
+UPDATE  `eh_service_module_privileges` SET `remark` = '物品分类新增、编辑、查看、删除、导入' WHERE `module_id` = @module_id AND `privilege_id` = @p_id;
+--删除物品分类和参数设置
+set @module_id = 21020;
+set @p_id = 210001004;
+DELETE FROM `eh_acl_privileges` WHERE `id` = @p_id;
+DELETE FROM `eh_service_module_privileges` WHERE `module_id` = @module_id AND `privilege_id` = @p_id;
+set @module_id = 21050;
+set @p_id = 210001011;
+DELETE FROM `eh_acl_privileges` WHERE `id` = @p_id;
+DELETE FROM `eh_service_module_privileges` WHERE `module_id` = @module_id AND `privilege_id` = @p_id;
+set @module_id = 21050;
+set @p_id = 210001012;
+DELETE FROM `eh_acl_privileges` WHERE `id` = @p_id;
+DELETE FROM `eh_service_module_privileges` WHERE `module_id` = @module_id AND `privilege_id` = @p_id;
