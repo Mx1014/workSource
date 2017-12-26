@@ -36,31 +36,31 @@ package com.everhomes.asset;
  *</ul>
  */
 public class ListLateFineStandardsDTO {
-    private long lateFineStandardId;
-    private String lateFineStandardName;
-    private String lateFineStandardFormula;
+    private long lateFeeStandardId;
+    private String lateFeeStandardName;
+    private String lateFeeStandardFormula;
 
-    public long getLateFineStandardId() {
-        return lateFineStandardId;
+    public long getLateFeeStandardId() {
+        return lateFeeStandardId;
     }
 
-    public void setLateFineStandardId(long lateFineStandardId) {
-        this.lateFineStandardId = lateFineStandardId;
+    public void setLateFeeStandardId(long lateFeeStandardId) {
+        this.lateFeeStandardId = lateFeeStandardId;
     }
 
-    public String getLateFineStandardName() {
-        return lateFineStandardName;
+    public String getLateFeeStandardName() {
+        return lateFeeStandardName;
     }
 
-    public void setLateFineStandardName(String lateFineStandardName) {
-        this.lateFineStandardName = lateFineStandardName;
+    public void setLateFeeStandardName(String lateFeeStandardName) {
+        this.lateFeeStandardName = lateFeeStandardName;
     }
 
-    public String getLateFineStandardFormula() {
-        return lateFineStandardFormula;
+    public String getLateFeeStandardFormula() {
+        return lateFeeStandardFormula;
     }
 
-    public void setLateFineStandardFormula(String lateFineStandardFormula) {
-        this.lateFineStandardFormula = lateFineStandardFormula;
+    public void setLateFeeStandardFormula(String lateFeeStandardFormula) {
+        this.lateFeeStandardFormula = lateFeeStandardFormula;
     }
 }
