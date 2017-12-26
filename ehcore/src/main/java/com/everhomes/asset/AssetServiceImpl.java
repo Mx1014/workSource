@@ -1520,7 +1520,7 @@ public class AssetServiceImpl implements AssetService {
             obj.setGroup(group);
             obj.setStandard(standard);
             //滞纳金标准id
-            obj.setLateFineStandardId(rule.getLateFineStandardId());
+            obj.setLateFineStandardId(rule.getLateFeeStandardId());
             obj.setItemScope(itemScope);
             obj.setAmountReceivable(amount);
             obj.setAmountOwed(amount);

@@ -23,14 +23,14 @@ public class FeeRules {
     private List<ContractProperty> properties;
     @ItemType(VariableIdAndValue.class)
     private List<VariableIdAndValue> variableIdAndValueList;
-    private Long lateFineStandardId;
+    private Long lateFeeStandardId;
 
-    public Long getLateFineStandardId() {
-        return lateFineStandardId;
+    public Long getLateFeeStandardId() {
+        return lateFeeStandardId;
     }
 
-    public void setLateFineStandardId(Long lateFineStandardId) {
-        this.lateFineStandardId = lateFineStandardId;
+    public void setLateFeeStandardId(Long lateFeeStandardId) {
+        this.lateFeeStandardId = lateFeeStandardId;
     }
 
     public Long getChargingItemId() {
