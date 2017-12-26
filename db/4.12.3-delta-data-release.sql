@@ -76,8 +76,8 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 
 
 -- 文件中心菜单  add by yanjun 20171220
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`)
-VALUES ('61000', '文件中心', '60000', '/60000/61000', '0', '2', '2', '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`,operator_uid,creator_uid)
+VALUES ('61000', '文件中心', '60000', '/60000/61000', '0', '2', '2', '0', UTC_TIMESTAMP(),1,1);
 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
 VALUES ('61000', '文件中心', '60000', NULL, 'react:/file-center/file-list', '0', '2', '/60000/61000', 'park', '630', '61000', '2', NULL, 'module');
