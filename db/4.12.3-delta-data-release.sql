@@ -407,3 +407,6 @@ WHERE privilege_id = 10010;
 -- 删除EhAll的权限细化记录
 DELETE from eh_acls where owner_type = 'EhAll' and comment_tag1 like '%EhAuthorizationRelations.%';
 -- auth分支结束
+
+-- 将仓库管理改为园区控制 by wentian
+update eh_service_modules SET module_control_type = 'community_control' where `name` = '仓库管理';
