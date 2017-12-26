@@ -43,6 +43,7 @@ public class QRCodeServiceImpl implements QRCodeService {
         qrcode.setStatus(QRCodeStatus.ACTIVE.getCode());
         qrcode.setViewCount(0L);
         qrcode.setCreatorUid(operatorId);
+        qrcode.setExtra(cmd.getExtra());
 
         Long expireSeconds = cmd.getExpireSeconds();
         if(expireSeconds != null) {
