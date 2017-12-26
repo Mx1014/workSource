@@ -277,11 +277,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         //  取出子表单字段值
         PostApprovalFormSubformValue postSubFormValue = JSON.parseObject(jsonVal, PostApprovalFormSubformValue.class);
         List<GeneralFormSubFormValueDTO> subForms = new ArrayList<>();
-        //  取出子表单字段初始内容
-        GeneralFormSubformDTO subFromExtra = JSON.parseObject(dto.getFieldExtra(), GeneralFormSubformDTO.class);
         //  解析子表单的值
         for (PostApprovalFormSubformItemValue itemValue : postSubFormValue.getForms()) {
-            subForms.add(processSubFormItemField(subFromExtra, itemValue, originFieldFlag));
+            subForms.add(processSubFormItemField(dto.getFieldExtra(), itemValue, originFieldFlag));
         }
         GeneralFormSubFormValue subFormValue = new GeneralFormSubFormValue();
         subFormValue.setSubForms(subForms);
@@ -289,10 +287,13 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         return formVal;
     }
 
-    private GeneralFormSubFormValueDTO processSubFormItemField(GeneralFormSubformDTO extra, PostApprovalFormSubformItemValue value, Byte originFieldFlag) {
-        //  目的是将子表单中的值解析，将得到的Value放入原有的Extra类中，并组装放入fieldValue中
-        GeneralFormSubFormValueDTO result = ConvertHelper.convert(extra, GeneralFormSubFormValueDTO.class);
+    private GeneralFormSubFormValueDTO processSubFormItemField(String extraJson, PostApprovalFormSubformItemValue value, Byte originFieldFlag) {
+        //  1.取出子表单字段初始内容
+        //  2.将子表单中的值解析
+        //  3.将得到的Value放入原有的Extra类中，并组装放入fieldValue中
+        GeneralFormSubFormValueDTO result = JSON.parseObject(extraJson, GeneralFormSubFormValueDTO.class);
         Map<String, String> fieldMap = new HashMap<>();
+
         for (PostApprovalFormItem formVal : value.getValues()) {
             switch (GeneralFormFieldType.fromCode(formVal.getFieldType())) {
                 case SINGLE_LINE_TEXT:
