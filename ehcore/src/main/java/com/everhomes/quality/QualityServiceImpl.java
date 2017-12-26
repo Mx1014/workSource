@@ -3012,7 +3012,12 @@ public class QualityServiceImpl implements QualityService {
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		}*/
-		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_STAT_SCORE,cmd.getTargetIds().get(0));
+
+		Long targetId = null;
+		if (cmd.getTargetIds() != null && cmd.getTargetIds().size() > 0)
+			targetId = cmd.getTargetIds().get(0);
+
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STAT_SCORE, targetId);
 
 		CountScoresResponse response = new CountScoresResponse();
 		//查列 add by xiongying 20170425
