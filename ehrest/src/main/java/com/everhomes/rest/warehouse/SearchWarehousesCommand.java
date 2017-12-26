@@ -27,6 +27,8 @@ public class SearchWarehousesCommand {
 
     private Integer pageSize;
 
+    private Long communityId;
+
     public Long getPageAnchor() {
         return pageAnchor;
     }
@@ -73,6 +75,14 @@ public class SearchWarehousesCommand {
 
     public String getName() {
         return name;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     @Override

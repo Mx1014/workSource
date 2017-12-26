@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>ownerType: 所属类型 eg：EhOrganizations</li>
  *     <li>ownerId: 所属类型id</li>
+ *     <li>communityId: 园区id</li>
  *     <li>reviewResult： 审阅结果 参考{@link com.everhomes.rest.warehouse.WarehouseRequestReviewResult}</li>
  *     <li>deliveryFlag: 出库状态 参考{@link com.everhomes.rest.warehouse.WarehouseMaterialDeliveryFlag}</li>
  *     <li>materialName: 物品名称</li>
@@ -37,6 +38,16 @@ public class QueryRequestCommand {
     private Long pageAnchor;
 
     private Integer pageSize;
+
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Long getRequestUid() {
         return requestUid;

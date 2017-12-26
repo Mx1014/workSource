@@ -75,90 +75,87 @@ public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
                 break;
             case APPROVE_STEP:
                 // 节点会签判断
-                boolean allProcessorComplete = true;
                 if (Objects.equals(currentNode.getFlowNode().getNeedAllProcessorComplete(), TrueOrFalseFlag.TRUE.getCode())) {
-                    allProcessorComplete = flowStateProcessor.allProcessorCompleteInCurrentNode(ctx, currentNode, firedUser);
+                    boolean allProcessorComplete = flowStateProcessor.allProcessorCompleteInCurrentNode(ctx, currentNode, firedUser);
                     if (!allProcessorComplete) {
                         //Remove the old enter logs
                         log = flowEventLogProvider.getValidEnterStep(firedUser.getId(), ctx.getFlowCase());
                         if (null != log) {
-                            log.setStepCount(-1L); // mark as invalid
+                            log.setEnterLogCompleteFlag(TrueOrFalseFlag.TRUE.getCode()); // mark as complete
                             ctx.getUpdateLogs().add(log);
                             log = null;
+                            break;
                         }
                     }
                 }
 
-                if (allProcessorComplete) {
-                    next = currentNode.getLinksOut().get(0).getToNode(ctx, this);
+                next = currentNode.getLinksOut().get(0).getToNode(ctx, this);
 
-                    boolean isConditionNode = FlowNodeType.fromCode(next.getFlowNode().getNodeType()) == FlowNodeType.CONDITION_FRONT;
-                    // 条件节点
-                    if (isConditionNode) {
-                        next.stepEnter(ctx, currentNode);
-                    } else {
-                        final FlowGraphNode tempNext = next;
-                        FlowGraphBranch thisBranch = flowGraph.getBranchByOriginalAndConvNode(flowCase.getStartNodeId(), next.getFlowNode().getId());
-                        // 先把当前分支判断是否完成
-                        if (thisBranch != null) {
-                            flowCase.setCurrentNodeId(next.getFlowNode().getId());
-                            List<FlowCase> siblingFlowCase = ctx.getSiblingFlowCase();
-                            boolean allFinish = siblingFlowCase.stream().allMatch(
+                boolean isConditionNode = FlowNodeType.fromCode(next.getFlowNode().getNodeType()) == FlowNodeType.CONDITION_FRONT;
+                // 条件节点
+                if (isConditionNode) {
+                    next.stepEnter(ctx, currentNode);
+                } else {
+                    final FlowGraphNode tempNext = next;
+                    FlowGraphBranch thisBranch = flowGraph.getBranchByOriginalAndConvNode(flowCase.getStartNodeId(), next.getFlowNode().getId());
+                    // 先把当前分支判断是否完成
+                    if (thisBranch != null) {
+                        flowCase.setCurrentNodeId(next.getFlowNode().getId());
+                        List<FlowCase> siblingFlowCase = ctx.getSiblingFlowCase();
+                        boolean allFinish = siblingFlowCase.stream().allMatch(
+                                r -> Objects.equals(r.getCurrentNodeId(), tempNext.getFlowNode().getId()));
+                        if (allFinish) {
+                            // 如果父的flowCase的结束节点也是当前节点，则一起处理掉
+                            stepParentState(ctx, next);
+                        }
+                    }
+
+                    // 再判断是否有其他的分支,这里的分支包含上面的当前分支
+                    List<FlowGraphBranch> branches = flowGraph.getBranchByConvergenceNode(next.getFlowNode().getId());
+                    if (branches != null && branches.size() > 0 && ctx.getParentState() != null) {
+                        // 再判断其他所有分支是否都已经完成
+                        int finishedBranch = 0;
+                        for (FlowGraphBranch branch : branches) {
+                            List<FlowCase> flowCaseList = ctx.getFlowCaseByBranch(branch.getFlowBranch());
+                            boolean allFinish = flowCaseList.stream().allMatch(
                                     r -> Objects.equals(r.getCurrentNodeId(), tempNext.getFlowNode().getId()));
                             if (allFinish) {
+                                finishedBranch++;
                                 // 如果父的flowCase的结束节点也是当前节点，则一起处理掉
                                 stepParentState(ctx, next);
                             }
                         }
 
-                        // 再判断是否有其他的分支,这里的分支包含上面的当前分支
-                        List<FlowGraphBranch> branches = flowGraph.getBranchByConvergenceNode(next.getFlowNode().getId());
-                        if (branches != null && branches.size() > 0 && ctx.getParentState() != null) {
-                            // 再判断其他所有分支是否都已经完成
-                            int finishedBranch = 0;
-                            for (FlowGraphBranch branch : branches) {
-                                List<FlowCase> flowCaseList = ctx.getFlowCaseByBranch(branch.getFlowBranch());
-                                boolean allFinish = flowCaseList.stream().allMatch(
-                                        r -> Objects.equals(r.getCurrentNodeId(), tempNext.getFlowNode().getId()));
-                                if (allFinish) {
-                                    finishedBranch++;
-                                    // 如果父的flowCase的结束节点也是当前节点，则一起处理掉
-                                    stepParentState(ctx, next);
-                                }
-                            }
-
-                            // 当前节点的所有分支并没有全部完成，不能进入当前节点
-                            if (finishedBranch < branches.size()) {
-                                log = flowEventLogProvider.getValidEnterStep(ctx.getOperator().getId(), ctx.getFlowCase());
-                                if (null != log) {
-                                    log.setStepCount(-1L); // mark as invalid
-                                    ctx.getUpdateLogs().add(log);
-                                    log = null;
-                                }
-                            } else {
-                                // 全部分支完成，进入汇总节点
-                                // flowCase.setCurrentLaneId(next.getFlowNode().getFlowLaneId());
-                                List<FlowCase> siblingFlowCase = ctx.getSiblingFlowCase();
-                                for (FlowCase aCase : siblingFlowCase) {
-                                    aCase.setCurrentLaneId(next.getFlowNode().getFlowLaneId());
-                                }
-                                ctx.getParentState().incrStepCount();
-                                ctx.getParentState().setNextNode(next);
-                                ctx.getParentState().setStepType(stepType);
+                        // 当前节点的所有分支并没有全部完成，不能进入当前节点
+                        if (finishedBranch < branches.size()) {
+                            log = flowEventLogProvider.getValidEnterStep(ctx.getOperator().getId(), ctx.getFlowCase());
+                            if (null != log) {
+                                log.setEnterLogCompleteFlag(TrueOrFalseFlag.TRUE.getCode());
+                                ctx.getUpdateLogs().add(log);
+                                log = null;
                             }
                         } else {
-                            // 下个节点不是分支汇总节点，正常进入
-                            ctx.setNextNode(next);
+                            // 全部分支完成，进入汇总节点
+                            // flowCase.setCurrentLaneId(next.getFlowNode().getFlowLaneId());
+                            List<FlowCase> siblingFlowCase = ctx.getSiblingFlowCase();
+                            for (FlowCase aCase : siblingFlowCase) {
+                                aCase.setCurrentLaneId(next.getFlowNode().getFlowLaneId());
+                            }
+                            ctx.getParentState().incrStepCount();
+                            ctx.getParentState().setNextNode(next);
+                            ctx.getParentState().setStepType(stepType);
                         }
-                    }
-
-                    if (next.getExpectStatus() == FlowCaseStatus.FINISHED && subject == null) {
-                        //显示任务跟踪语句
-                        subject = new FlowSubject();
+                    } else {
+                        // 下个节点不是分支汇总节点，正常进入
+                        ctx.setNextNode(next);
                     }
                     flowCase.incrStepCount();
                 }
 
+                if (next.getExpectStatus() == FlowCaseStatus.FINISHED && subject == null) {
+                    //显示任务跟踪语句
+                    subject = new FlowSubject();
+                }
                 break;
             case REJECT_STEP:
                 if (currentNode.getFlowNode().getNodeLevel() < 1) {

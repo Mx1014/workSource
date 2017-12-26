@@ -48,4 +48,5 @@ public interface ServiceModuleService {
 	List<Long> listServiceModulefunctions(ListServiceModulefunctionsCommand cmd);
 
 	Byte checkUserRelatedProjectAllFlag(ListUserRelatedProjectByModuleCommand cmd);
+
 }

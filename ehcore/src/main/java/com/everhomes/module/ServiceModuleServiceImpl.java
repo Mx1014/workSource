@@ -1130,4 +1130,5 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
         return AllFlag.NOT_ALL.getCode();
     }
+
 }

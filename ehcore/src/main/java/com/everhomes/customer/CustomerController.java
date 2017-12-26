@@ -121,6 +121,19 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("searchEnterpriseCustomer")
     @RestReturn(value = SearchEnterpriseCustomerResponse.class)
     public RestResponse searchEnterpriseCustomer(@Valid SearchEnterpriseCustomerCommand cmd) {
+        RestResponse response = new RestResponse(customerService.queryEnterpriseCustomers(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/searchEnterpriseCustomerWithoutAuth</b>
+     * <p>列出企业客户（不进行权限校验）</p>
+     */
+    @RequestMapping("searchEnterpriseCustomerWithoutAuth")
+    @RestReturn(value = SearchEnterpriseCustomerResponse.class)
+    public RestResponse searchEnterpriseCustomerWithoutAuth(@Valid SearchEnterpriseCustomerCommand cmd) {
         RestResponse response = new RestResponse(enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

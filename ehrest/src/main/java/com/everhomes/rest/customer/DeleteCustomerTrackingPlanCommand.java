@@ -17,6 +17,36 @@ public class DeleteCustomerTrackingPlanCommand {
 
     private Byte customerType;
 
+    private Integer namespaceId;
+
+    private Long communityId;
+
+    private Long orgId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
+
     public Long getCustomerId() {
         return customerId;
     }

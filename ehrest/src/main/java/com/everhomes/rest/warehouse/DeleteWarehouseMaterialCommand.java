@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>materialId: 物品id</li>
+ *     <li>communityId: 园区id</li>
  *     <li>ownerType: 物品所属类型 eg：EhOrganizations</li>
  *     <li>ownerId: 物品所属类型id</li>
  * </ul>
@@ -17,6 +18,16 @@ public class DeleteWarehouseMaterialCommand {
     private Long ownerId;
 
     private Long materialId;
+
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Long getMaterialId() {
         return materialId;

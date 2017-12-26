@@ -24,6 +24,24 @@ public class CreateCustomerTrademarkCommand {
     private Integer patentApplications;
     private Integer authorizations;
     private Integer patentAuthorizations;
+    private Long orgId;
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
 
     public Integer getApplications() {
         return applications;

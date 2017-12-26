@@ -339,7 +339,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         LOGGER.debug("checkUserPrivilege get appId = {}", appId);
         if(appId ==  null){
             throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
-                    "cannot find app for it, namespaceId = {},  moduleId = {}, customTag = {}", UserContext.getCurrentNamespaceId(), moduleId, customTag);
+                    "cannot find app for it, namespaceId = "+UserContext.getCurrentNamespaceId()+",  moduleId = "+moduleId+", customTag = "+customTag);
         }
         if(currentOrgId == null){
             OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), userId, OrganizationType.ENTERPRISE.getCode());
@@ -354,6 +354,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
             return true;
         }
     }
+
 
     @Override
     public boolean checkSuperAdmin(Long userId, Long currentOrgId){
@@ -417,18 +418,18 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
             return true;
         }
 
-        //校验全部范围下是否拥有模块的全部权限
+        //校验全部范围下是auth_warehouse_wentian-delta-data-release.sql否拥有模块的全部权限
         return checkModuleAllPrivileges(EntityType.ALL.getCode(), 0L, descriptors, privilegeId);
     }
 
 
 
-    @Override
-    public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId){
+@Override
+public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId){
         return  checkUserPrivilege(userId, ownerType, ownerId, currentOrgId, privilegeId, null, null, null);
-    }
+        }
 
-    @Override
+@Override
     public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId, Long appId, Long checkOrgId, Long checkCommunityId){
         LOGGER.debug("checkUserPrivilege start.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}, appId={}, checkOrgId={}, checkCommunityId= {}" , userId, ownerType, ownerId, currentOrgId, privilegeId, appId, checkOrgId, checkCommunityId);
 
