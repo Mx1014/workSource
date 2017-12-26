@@ -4338,6 +4338,9 @@ public class QualityServiceImpl implements QualityService {
 	}
 	@Override
 	public HttpServletResponse exportSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd, HttpServletResponse httpResponse) {
+		//处理targetId  String类型的
+		processStringTargetIds(cmd);
+
 		CountScoresResponse dataResponse = countSampleTaskCommunityScores(cmd);
 		URL rootPath = QualityServiceImpl.class.getResource("/");
 		String filePath = rootPath.getPath() + this.downloadDir;
@@ -4350,6 +4353,18 @@ public class QualityServiceImpl implements QualityService {
 
 		return download(filePath, httpResponse);
 
+	}
+
+	private void processStringTargetIds(CountSampleTaskCommunityScoresCommand cmd) {
+		//解析
+		if (cmd.getTargetIdString() != null) {
+			String targetStrings[] = cmd.getTargetIdString().split(",");
+			List<Long> targetIds = new ArrayList<>();
+			for (String targetId : targetStrings) {
+				targetIds.add(Long.parseLong(targetId));
+			}
+			cmd.setTargetIds(targetIds);
+		}
 	}
 
 
@@ -4384,11 +4399,10 @@ public class QualityServiceImpl implements QualityService {
 		row.createCell(++i).setCellValue("排名");
 		row.createCell(++i).setCellValue("项目名称");
 		row.createCell(++i).setCellValue("项目面积");
+		row.createCell(++i).setCellValue("加权得分");
 		for (CountScoresSpecificationDTO score : specifications) {
 			row.createCell(++i).setCellValue(score.getSpecificationName()+score.getSpecificationWeight()*100+"%");
 		}
-		row.createCell(++i).setCellValue("加权得分");
-
 	}
 
 	private void setNewQualityScoreBookRow(Sheet sheet, ScoreGroupByTargetDTO dto) {
@@ -4397,12 +4411,11 @@ public class QualityServiceImpl implements QualityService {
 		row.createCell(++i).setCellValue(dto.getOrderId());
 		row.createCell(++i).setCellValue(dto.getTargetName());
 		row.createCell(++i).setCellValue(dto.getBuildArea());
+		row.createCell(++i).setCellValue(dto.getTotalScore());
 
 		List<ScoreDTO> scores = dto.getScores();
 		for (ScoreDTO score : scores) {
 			row.createCell(++i).setCellValue(score.getScore());
 		}
-		row.createCell(++i).setCellValue(dto.getTotalScore());
-
 	}
 }

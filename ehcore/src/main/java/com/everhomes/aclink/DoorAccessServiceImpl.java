@@ -764,7 +764,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     }
                 });
             rlt = ConvertHelper.convert(doorAuthResult, DoorAuthDTO.class);
-            rlt.setDoorName(doorAcc.getName());
+            rlt.setDoorName(doorAcc.getDisplayNameNotEmpty());
         } else {
             if(cmd.getValidEndMs() == null || cmd.getValidFromMs() == null) {
                 throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "Invalid param error");        
@@ -797,7 +797,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             
             doorAuthProvider.createDoorAuth(doorAuth);
             rlt = ConvertHelper.convert(doorAuth, DoorAuthDTO.class);
-            rlt.setDoorName(doorAcc.getName());
+            rlt.setDoorName(doorAcc.getDisplayNameNotEmpty());
             rlt.setHardwareId(doorAcc.getHardwareId());
         }
         
@@ -1413,7 +1413,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(dto.getDoorId());
             if(doorAccess != null) {
                 dto.setHardwareId(doorAccess.getHardwareId());
-                dto.setDoorName(doorAccess.getName());
+                dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
                 dtos.add(dto);    
             }
         }
@@ -1436,7 +1436,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(dto.getDoorId());
             if(doorAccess != null && (!doorAccess.getStatus().equals(DoorAccessStatus.INVALID.getCode()))) {
                 dto.setHardwareId(doorAccess.getHardwareId());
-                dto.setDoorName(doorAccess.getName());
+                dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
                 dtos.add(dto);    
             }
         }
@@ -1486,7 +1486,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(dto.getDoorId());
             if(doorAccess != null && (!doorAccess.getStatus().equals(DoorAccessStatus.INVALID.getCode()))) {
                 dto.setHardwareId(doorAccess.getHardwareId());
-                dto.setDoorName(doorAccess.getName());
+                dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
                 dtos.add(dto);    
             }
         }
@@ -1687,7 +1687,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
             dto.setHardwareId(doorAccess.getHardwareId());
-            dto.setDoorName(doorAccess.getName());
+            dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
 //            User u = userProvider.findUserById(auth.getUserId());
 //            if(u != null) {
 //                if(u.getNickName() != null) {
@@ -1717,7 +1717,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
             dto.setHardwareId(doorAccess.getHardwareId());
-            dto.setDoorName(doorAccess.getName());
+            dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
             User u = userProvider.findUserById(auth.getApproveUserId());
             if(u != null) {
                 dto.setApproveUserName(getRealName(u));
@@ -1745,7 +1745,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
             dto.setGoFloor(auth.getCurrStorey());
             dto.setHardwareId(doorAccess.getHardwareId());
-            dto.setDoorName(doorAccess.getName());
+            dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
             dto.setPhone(auth.getPhone());
             dto.setOrganization(auth.getOrganization());
             User u = userProvider.findUserById(auth.getApproveUserId());
@@ -2073,7 +2073,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         qr.setCreateTimeMs(System.currentTimeMillis());
         qr.setCreatorUid(user.getId());
         qr.setDoorGroupId(doorAccess.getId());
-        qr.setDoorName(doorAccess.getName());
+        qr.setDoorName(doorAccess.getDisplayNameNotEmpty());
         qr.setExpireTimeMs(validTime-1000*10); //for safe to open door
         
         qr.setHardwares(hardwares);
@@ -3044,7 +3044,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
         if(doorAccess != null) {
-            resp.setDoorName(doorAccess.getName());
+            resp.setDoorName(doorAccess.getDisplayNameNotEmpty());
         }
         
         resp.setPhone(auth.getPhone());
@@ -3129,7 +3129,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
         if(doorAccess != null) {
-            resp.setDoorName(doorAccess.getName());
+            resp.setDoorName(doorAccess.getDisplayNameNotEmpty());
         }
         
         resp.setPhone(auth.getPhone());
@@ -3218,7 +3218,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
         if(doorAccess != null) {
-            resp.setDoorName(doorAccess.getName());
+            resp.setDoorName(doorAccess.getDisplayNameNotEmpty());
         }
         
         resp.setPhone(auth.getPhone());
@@ -3558,12 +3558,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 
                 DoorAccess door = doorAccessProvider.getDoorAccessById(doorAuth.getDoorId());
                 
-                if(door.getDisplayName() != null) {
-                    aclinkLog.setDoorName(door.getDisplayName());
-                } else {
-                    aclinkLog.setDoorName(door.getName());    
-                }
-                
+                aclinkLog.setDoorName(door.getDisplayNameNotEmpty());
                 
                 aclinkLog.setHardwareId(door.getHardwareId());
                 aclinkLog.setOwnerId(door.getOwnerId());
