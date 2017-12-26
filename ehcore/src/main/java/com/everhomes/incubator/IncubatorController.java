@@ -43,11 +43,15 @@ public class IncubatorController extends ControllerBase {
      * <p>查询入孵申请的记录</p>
      */
     @RequestMapping("listMyTeams")
-    @RestReturn(value=IncubatorApplyDTO.class, collection = true)
+    @RestReturn(value=ListIncubatorApplyResponse.class, collection = true)
     public RestResponse listMyTeams() {
 
         List<IncubatorApplyDTO> dtos = incubatorService.listMyTeams();
-        RestResponse response = new RestResponse(dtos);
+
+        //页面兼容，使用ListIncubatorApplyResponse返回
+        ListIncubatorApplyResponse res = new ListIncubatorApplyResponse();
+        res.setDtos(dtos);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

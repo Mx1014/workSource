@@ -42,7 +42,7 @@ ALTER TABLE `eh_incubator_applies` ADD COLUMN `parent_id`  bigint(22) NULL AFTER
 ALTER TABLE `eh_incubator_applies` ADD COLUMN `root_id`  bigint(22) NULL COMMENT 'tree root id' AFTER `parent_id`;
 ALTER TABLE `eh_incubator_applies` ADD COLUMN `organization_id`  bigint(22) NULL;
 ALTER TABLE `eh_incubator_applies` MODIFY COLUMN `approve_opinion`  varchar(1024) ;
-
+ALTER TABLE `eh_incubator_applies` MODIFY COLUMN `re_apply_id`  bigint(22) NULL DEFAULT NULL COMMENT '重新申请的Id，现已弃用该字段';
 -- 文件下载任务 add by yanjun 20171207
 CREATE TABLE `eh_tasks` (
   `id` bigint(20) NOT NULL,
