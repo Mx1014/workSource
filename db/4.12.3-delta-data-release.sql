@@ -133,29 +133,29 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 VALUES
 (@mp_id:=@mp_id+1, @module_id, '0', @p_id, '新增、编辑、删除', '0', NOW());
 
-set @module_id = 21020;
-set @p_id = 210001003;
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '物品维护 物品分类新增、编辑、删除、导入', '物品维护 物品分类新增、编辑、删除、导入', NULL);
-set @mp_id = (select MAX(id) from eh_service_module_privileges);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
-VALUES
-(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '物品分类新增、编辑、删除、导入', '0', NOW());
+-- set @module_id = 21020;
+-- set @p_id = 210001003;
+-- INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '物品维护 物品分类新增、编辑、删除、导入', '物品维护 物品分类新增、编辑、删除、导入', NULL);
+-- set @mp_id = (select MAX(id) from eh_service_module_privileges);
+-- INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+-- VALUES
+-- (@mp_id:=@mp_id+1, @module_id, '0', @p_id, '物品分类新增、编辑、删除、导入', '0', NOW());
 
 set @module_id = 21020;
 set @p_id = 210001004;
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '物品维护 物品信息新增、编辑、删除、导入', '物品维护 物品信息新增、编辑、删除、导入', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '物品维护 物品信息新增、编辑、查看、删除、导入', '物品维护 物品信息新增、编辑、查看、删除、导入', NULL);
 set @mp_id = (select MAX(id) from eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES
-(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '物品信息新增、编辑、删除、导入', '0', NOW());
+(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '物品信息新增、编辑、查看、删除、导入', '0', NOW());
 
 set @module_id = 21030;
 set @p_id = 210001005;
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '库存维护 库存查找', '库存维护 库存查找', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '库存维护 库存、日志查找', '库存维护 库存、日志查找', NULL);
 set @mp_id = (select MAX(id) from eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES
-(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '库存查询', '0', NOW());
+(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '库存、日志查询', '0', NOW());
 
 set @module_id = 21030;
 set @p_id = 210001006;
@@ -165,13 +165,13 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 VALUES
 (@mp_id:=@mp_id+1, @module_id, '0', @p_id, '入库', '0', NOW());
 
-set @module_id = 21030;
-set @p_id = 210001007;
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '库存维护 日志查找', '库存维护 日志查找', NULL);
-set @mp_id = (select MAX(id) from eh_service_module_privileges);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
-VALUES
-(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '日志查找', '0', NOW());
+-- set @module_id = 21030;
+-- set @p_id = 210001007;
+-- INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '库存维护 日志查找', '库存维护 日志查找', NULL);
+-- set @mp_id = (select MAX(id) from eh_service_module_privileges);
+-- INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+-- VALUES
+-- (@mp_id:=@mp_id+1, @module_id, '0', @p_id, '日志查找', '0', NOW());
 
 set @module_id = 21030;
 set @p_id = 210001008;
@@ -197,21 +197,21 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 VALUES
 (@mp_id:=@mp_id+1, @module_id, '0', @p_id, '领用申请', '0', NOW());
 
-set @module_id = 21050;
-set @p_id = 210001011;
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '参数配置 工作流配置', '参数配置 工作流配置', NULL);
-set @mp_id = (select MAX(id) from eh_service_module_privileges);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
-VALUES
-(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '工作流配置', '0', NOW());
-
-set @module_id = 21050;
-set @p_id = 210001012;
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '参数配置 参数配置', '参数配置 参数配置', NULL);
-set @mp_id = (select MAX(id) from eh_service_module_privileges);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
-VALUES
-(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '参数配置', '0', NOW());
+-- set @module_id = 21050;
+-- set @p_id = 210001011;
+-- INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '参数配置 工作流配置', '参数配置 工作流配置', NULL);
+-- set @mp_id = (select MAX(id) from eh_service_module_privileges);
+-- INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+-- VALUES
+-- (@mp_id:=@mp_id+1, @module_id, '0', @p_id, '工作流配置', '0', NOW());
+--
+-- set @module_id = 21050;
+-- set @p_id = 210001012;
+-- INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '参数配置 参数配置', '参数配置 参数配置', NULL);
+-- set @mp_id = (select MAX(id) from eh_service_module_privileges);
+-- INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+-- VALUES
+-- (@mp_id:=@mp_id+1, @module_id, '0', @p_id, '参数配置', '0', NOW());
 
 
 set @module_id = 21040;
@@ -410,6 +410,7 @@ DELETE from eh_acls where owner_type = 'EhAll' and comment_tag1 like '%EhAuthori
 
 -- 将仓库管理改为园区控制 by wentian
 update eh_service_modules SET module_control_type = 'community_control' where `name` = '仓库管理';
+
 
 
 -- 补数据：menu有租赁管理而service module没有租赁管理的域空间 by xiongying
