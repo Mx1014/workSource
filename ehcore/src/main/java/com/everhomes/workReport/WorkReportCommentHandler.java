@@ -160,7 +160,7 @@ public class WorkReportCommentHandler implements CommentHandler {
                 sendMessage(content, subject, applierId, reportVal.getReportId(), reportVal.getId());
             } else {
                 WorkReportValComment parentComment = workReportValProvider.getWorkReportValCommentById(parentCommentId);
-                if (parentComment.getCreatorUserId().longValue() == creatorId.longValue()) {
+                if (parentComment.getCreatorUserId().longValue() == applierId.longValue()) {
                     //  4-1) author.
                     content = getMessageContent(WorkReportNotificationTemplateCode.READER_REPLY_WORK_REPORT_VAL_FOR_AUTHOR,
                             workReportService.fixUpUserName(creatorId), null, report.getReportName());
