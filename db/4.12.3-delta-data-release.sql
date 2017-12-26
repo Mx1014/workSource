@@ -407,3 +407,28 @@ WHERE privilege_id = 10010;
 -- 删除EhAll的权限细化记录
 DELETE from eh_acls where owner_type = 'EhAll' and comment_tag1 like '%EhAuthorizationRelations.%';
 -- auth分支结束
+
+-- 将仓库管理改为园区控制 by wentian
+update eh_service_modules SET module_control_type = 'community_control' where `name` = '仓库管理';
+
+
+-- 补数据：menu有租赁管理而service module没有租赁管理的域空间 by xiongying
+SET @module_scope_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '0', '30000', '', 'EhNamespaces', '0', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999954', '30000', '', 'EhNamespaces', '999954', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999955', '30000', '', 'EhNamespaces', '999955', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999956', '30000', '', 'EhNamespaces', '999956', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999957', '30000', '', 'EhNamespaces', '999957', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999958', '30000', '', 'EhNamespaces', '999958', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999959', '30000', '', 'EhNamespaces', '999959', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999961', '30000', '', 'EhNamespaces', '999961', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999962', '30000', '', 'EhNamespaces', '999962', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999964', '30000', '', 'EhNamespaces', '999964', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999965', '30000', '', 'EhNamespaces', '999965', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999967', '30000', '', 'EhNamespaces', '999967', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999969', '30000', '', 'EhNamespaces', '999969', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999972', '30000', '', 'EhNamespaces', '999972', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999973', '30000', '', 'EhNamespaces', '999973', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999974', '30000', '', 'EhNamespaces', '999974', NULL, '2');
+
+delete from eh_service_module_scopes where module_id = 21200 and namespace_id in(999973, 999974);
