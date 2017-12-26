@@ -667,6 +667,7 @@ public class ContractServiceImpl implements ContractService {
 			FeeRules feeRule = new FeeRules();
 			feeRule.setChargingItemId(chargingItem.getChargingItemId());
 			feeRule.setChargingStandardId(chargingItem.getChargingStandardId());
+			feeRule.setLateFeeStandardId(chargingItem.getLateFeeStandardId());
 			if(chargingItem.getChargingStartTime() != null){
 				feeRule.setDateStrBegin(new Date(chargingItem.getChargingStartTime()));
 			}
