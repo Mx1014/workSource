@@ -644,6 +644,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 		SocialSecurityReport report = newSocialSecurityReport(detail);
 		List<SocialSecurityPayment> userPayments = findSSpaymentsByDetail(detail.getId(), payments);
 		for (SocialSecurityPayment userPayment : userPayments) {
+			//统计公积金
 			if (AccumOrSocail.ACCUM == AccumOrSocail.fromCode(userPayment.getAccumOrSocail())) {
 				report.setAccumulationFundCompanyRadix(userPayment.getCompanyRadix());
 				report.setAccumulationFundCompanyRatio(userPayment.getCompanyRatio());
@@ -655,14 +656,104 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 						report.getAccumulationFundEmployeeSum()));
 				report.setAccumulationFundSum(report.getAccumulationFundCompanySum().add(report.getAccumulationFundEmployeeSum()));
 			} else if (NormalFlag.YES == NormalFlag.fromCode(userPayment.getIsDefault())) {
+				//统计社保
 				report.setSocialSecurityCompanySum(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio()));
 				report.setSocialSecurityEmployeeSum(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio()));
 				report.setSocialSecuritySum(report.getSocialSecurityCompanySum().add(report.getSocialSecurityEmployeeSum()));
 				switch (PayItem.fromCode(userPayment.getPayItem())) {
-					
+				case PENSION:
+					if(NormalFlag.YES == NormalFlag.fromCode(userPayment.getAfterPayFlag())){
+
+						report.setAfterPensionCompanySum(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio(),
+								report.getPensionCompanySum()));
+						report.setAfterPensionEmployeeSum(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio(),
+								report.getPensionEmployeeSum()));
+					}else{
+						report.setPensionCompanyRadix(userPayment.getCompanyRadix());
+						report.setPensionCompanyRatio(userPayment.getCompanyRatio());
+						report.setPensionEmployeeRadix(userPayment.getEmployeeRadix());
+						report.setPensionEmployeeRatio(userPayment.getEmployeeRatio());
+						report.setPensionCompanySum(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio(),
+								report.getPensionCompanySum()));
+						report.setPensionEmployeeSum(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio(),
+								report.getPensionEmployeeSum()));
+					}
+					break;
+				case MEDICAL:
+					if(NormalFlag.YES == NormalFlag.fromCode(userPayment.getAfterPayFlag())){
+
+						report.setAfterMedicalCompanySum(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio(),
+								report.getMedicalCompanySum()));
+						report.setAfterMedicalEmployeeSum(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio(),
+								report.getMedicalEmployeeSum()));
+					}else{
+						report.setMedicalCompanyRadix(userPayment.getCompanyRadix());
+						report.setMedicalCompanyRatio(userPayment.getCompanyRatio());
+						report.setMedicalEmployeeRadix(userPayment.getEmployeeRadix());
+						report.setMedicalEmployeeRatio(userPayment.getEmployeeRatio());
+						report.setMedicalCompanySum(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio(),
+								report.getMedicalCompanySum()));
+						report.setMedicalEmployeeSum(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio(),
+								report.getMedicalEmployeeSum()));
+					}
+					break;
+				case INJURY:
+					if(NormalFlag.YES == NormalFlag.fromCode(userPayment.getAfterPayFlag())){
+
+						report.setAfterInjuryCompanySum(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio(),
+								report.getInjuryCompanySum()));
+						report.setAfterInjuryEmployeeSum(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio(),
+								report.getInjuryEmployeeSum()));
+					}else{
+						report.setInjuryCompanyRadix(userPayment.getCompanyRadix());
+						report.setInjuryCompanyRatio(userPayment.getCompanyRatio());
+						report.setInjuryEmployeeRadix(userPayment.getEmployeeRadix());
+						report.setInjuryEmployeeRatio(userPayment.getEmployeeRatio());
+						report.setInjuryCompanySum(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio(),
+								report.getInjuryCompanySum()));
+						report.setInjuryEmployeeSum(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio(),
+								report.getInjuryEmployeeSum()));
+					}
+					break;
+				case UNEMPLOYMENT:
+					if(NormalFlag.YES == NormalFlag.fromCode(userPayment.getAfterPayFlag())){
+
+						report.setAfterUnemploymentCompanySum(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio(),
+								report.getUnemploymentCompanySum()));
+						report.setAfterUnemploymentEmployeeSum(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio(),
+								report.getUnemploymentEmployeeSum()));
+					}else{
+						report.setUnemploymentCompanyRadix(userPayment.getCompanyRadix());
+						report.setUnemploymentCompanyRatio(userPayment.getCompanyRatio());
+						report.setUnemploymentEmployeeRadix(userPayment.getEmployeeRadix());
+						report.setUnemploymentEmployeeRatio(userPayment.getEmployeeRatio());
+						report.setUnemploymentCompanySum(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio(),
+								report.getUnemploymentCompanySum()));
+						report.setUnemploymentEmployeeSum(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio(),
+								report.getUnemploymentEmployeeSum()));
+					}
+					break;
+				case BIRTH:
+					if(NormalFlag.YES == NormalFlag.fromCode(userPayment.getAfterPayFlag())){
+
+						report.setAfterBirthCompanySum(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio(),
+								report.getBirthCompanySum()));
+						report.setAfterBirthEmployeeSum(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio(),
+								report.getBirthEmployeeSum()));
+					}else{
+						report.setBirthCompanyRadix(userPayment.getCompanyRadix());
+						report.setBirthCompanyRatio(userPayment.getCompanyRatio());
+						report.setBirthEmployeeRadix(userPayment.getEmployeeRadix());
+						report.setBirthEmployeeRatio(userPayment.getEmployeeRatio());
+						report.setBirthCompanySum(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio(),
+								report.getBirthCompanySum()));
+						report.setBirthEmployeeSum(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio(),
+								report.getBirthEmployeeSum()));
+					}
+					break;
 				}
 			} else {
-
+				//暂时不统计商业保险
 			}
 		}
 
