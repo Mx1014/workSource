@@ -11,9 +11,9 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>ownerType : 打印所属类型，此处为community, 参考{@link com.everhomes.rest.print.PrintOwnerType}</li>
  * <li>ownerId : 所属id</li>
- * <li>readerName : 刷卡器</li>
- * <li>privileges : 权限列表，参考 {@link com.everhomes.rest.print.PrintJobTypeType} // 暂时无用</li>
- * <li>qrcodeParam : 二维码信息</li>
+ * <li>readerName : 刷卡器(已废弃)</li>
+ * <li>privileges : 权限列表，参考 {@link com.everhomes.rest.print.PrintJobTypeType} （已废弃）</li>
+ * <li>qrid : 二维码信息</li>
  * </ul>
  *
  *  @author:dengs 2017年6月20日
@@ -24,8 +24,9 @@ public class UnlockPrinterCommand {
 	@Deprecated //废弃参数
 	private String readerName;
 	
-	private String qrcodeParam;
+	private String qrid;
 	
+	@Deprecated
 	@ItemType(Byte.class)
 	private List<Byte> privileges;
 
@@ -61,12 +62,12 @@ public class UnlockPrinterCommand {
 		this.readerName = readerName;
 	}
 	
-	public String getQrcodeParam() {
-		return qrcodeParam;
+	public String getQrid() {
+		return qrid;
 	}
 
-	public void setQrcodeParam(String qrcodeParam) {
-		this.qrcodeParam = qrcodeParam;
+	public void setQrid(String qrid) {
+		this.qrid = qrid;
 	}
 
 	@Override

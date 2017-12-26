@@ -53,6 +53,7 @@ import com.everhomes.order.PayService;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.order.CommonOrderCommand;
@@ -109,6 +110,7 @@ import com.everhomes.rest.print.UnlockPrinterCommand;
 import com.everhomes.rest.print.UnlockPrinterResponse;
 import com.everhomes.rest.print.UpdatePrintSettingCommand;
 import com.everhomes.rest.print.UpdatePrintUserEmailCommand;
+import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -188,7 +190,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	
 	@Autowired
 	private DbProvider dbProvider;
-
+	
+	@Autowired
+    private QRCodeService qrcodeService;
 	@Override
 	public GetPrintSettingResponse getPrintSetting(GetPrintSettingCommand cmd) {
 		//检查参数
@@ -589,11 +593,17 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	private UnlockPrinterResponse unlockByOauthLogin(UnlockPrinterCommand cmd) {
 		Map<String, String> params = new HashMap<>();
 		User user = UserContext.current().getUser();
+		QRCodeDTO dto = qrcodeService.getQRCodeInfoById(cmd.getQrid(), null);
+		if(dto==null){
+			LOGGER.error("QRCodeDTO is null, qrid = "+cmd.getQrid());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "QRCodeDTO is null, qrid = "+cmd.getQrid());
+		
+		}
 		String loginAccount = user.getId().toString()+PRINT_LOGON_ACCOUNT_SPLIT+cmd.getOwnerId();
 		params.put("user_name", loginAccount);
 		params.put("email", "");
 		params.put("feature", configurationProvider.getValue("print.siyin.feature","MONOPRINT;COLORPRINT;MONOCOPY;COLORCOPY;SCAN;FAX"));
-		params.put("qrcode_param", cmd.getQrcodeParam());
+		params.put("qrcode_param", dto.getExtra());
 		params.put("copy_mono_limit", String.valueOf(configurationProvider.getIntValue("print.siyin.copy_mono_limit", 50)));
 		params.put("copy_color_limit", String.valueOf(configurationProvider.getIntValue("print.siyin.copy_color_limit", 50)));
 		StringBuffer buffer = new StringBuffer();
