@@ -212,6 +212,9 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private PortalService portalService;
 
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
+
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
         List<ListOrganizationsByPmAdminDTO> dtoList = new ArrayList<>();
@@ -493,7 +496,26 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd) {
-        //app用户的权限还未判断，是否可以查看账单
+        //企业用户的话判断是否为企业管理员
+        out:{
+            if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
+                Long userId = UserContext.currentUserId();
+                ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
+                cmd1.setOrganizationId(cmd.getTargetId());
+                cmd1.setActivationFlag((byte)1);
+                cmd1.setOwnerType("EhOrganizations");
+                cmd1.setOwnerId(null);
+                List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd1);
+                for(OrganizationContactDTO dto : organizationContactDTOS){
+                    Long targetId = dto.getTargetId();
+                    if(targetId == userId){
+                        break out;
+                    }
+                }
+                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.NOT_CORP_MANAGER,
+                        "not valid corp manager");
+            }
+        }
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
@@ -2630,6 +2652,25 @@ public class AssetServiceImpl implements AssetService {
         return response;
     }
     public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
+        out:{
+            if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
+                Long userId = UserContext.currentUserId();
+                ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
+                cmd1.setOrganizationId(cmd.getTargetId());
+                cmd1.setActivationFlag((byte)1);
+                cmd1.setOwnerType("EhOrganizations");
+                cmd1.setOwnerId(null);
+                List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd1);
+                for(OrganizationContactDTO dto : organizationContactDTOS){
+                    Long targetId = dto.getTargetId();
+                    if(targetId == userId){
+                        break out;
+                    }
+                }
+                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.NOT_CORP_MANAGER,
+                        "not valid corp manager");
+            }
+        }
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
 //        AssetVendor assetVendor = checkAssetVendor(999983);
         String vendorName = assetVendor.getVendorName();
