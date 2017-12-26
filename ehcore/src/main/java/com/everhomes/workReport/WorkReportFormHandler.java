@@ -36,6 +36,11 @@ public class WorkReportFormHandler implements GeneralFormModuleHandler {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         if (cmd.getValues() != null && cmd.getValues().size() > 0) {
+            if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
+                // take care of the form's status, change it before update it.
+                form.setStatus(GeneralFormStatus.RUNNING.getCode());
+                generalFormProvider.updateGeneralForm(form);
+            }
             for (PostApprovalFormItem value : cmd.getValues()) {
                 GeneralFormVal obj = packageGeneralFormVal(namespaceId, cmd.getCurrentOrganizationId(),
                         report.getOwnerId(), report.getOwnerType(), report, reportVal, form, value);
