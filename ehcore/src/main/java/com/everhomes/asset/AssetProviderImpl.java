@@ -3829,8 +3829,8 @@ public class AssetProviderImpl implements AssetProvider {
                 .forEach(r -> {
                     ListLateFineStandardsDTO dto = new ListLateFineStandardsDTO();
                     dto.setLateFeeStandardId(r.getValue(scope.CHARGING_STANDARD_ID));
-                    dto.setLateFineStandardName(r.getValue(std.NAME));
-                    dto.setLateFineStandardFormula(r.getValue(std.FORMULA));
+                    dto.setLateFeeStandardName(r.getValue(std.NAME));
+                    dto.setLateFeeStandardFormula(r.getValue(std.FORMULA));
                     list.add(dto);
                 });
         return list;

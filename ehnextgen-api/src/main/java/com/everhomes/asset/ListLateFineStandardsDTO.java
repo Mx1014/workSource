@@ -30,15 +30,15 @@ package com.everhomes.asset;
  */
 /**
  *<ul>
- * <li>lateFineStandardId:滞纳金id</li>
- * <li>lateFineStandardName：滞纳金标准名称</li>
- * <li>lateFineStandardFormula：滞纳金展示公式</li>
+ * <li>lateFeeStandardId:滞纳金id</li>
+ * <li>lateFeeStandardName：滞纳金标准名称</li>
+ * <li>lateFeeStandardFormula：滞纳金展示公式</li>
  *</ul>
  */
 public class ListLateFineStandardsDTO {
     private long lateFeeStandardId;
-    private String lateFineStandardName;
-    private String lateFineStandardFormula;
+    private String lateFeeStandardName;
+    private String lateFeeStandardFormula;
 
     public long getLateFeeStandardId() {
         return lateFeeStandardId;
@@ -48,19 +48,19 @@ public class ListLateFineStandardsDTO {
         this.lateFeeStandardId = lateFeeStandardId;
     }
 
-    public String getLateFineStandardName() {
-        return lateFineStandardName;
+    public String getLateFeeStandardName() {
+        return lateFeeStandardName;
     }
 
-    public void setLateFineStandardName(String lateFineStandardName) {
-        this.lateFineStandardName = lateFineStandardName;
+    public void setLateFeeStandardName(String lateFeeStandardName) {
+        this.lateFeeStandardName = lateFeeStandardName;
     }
 
-    public String getLateFineStandardFormula() {
-        return lateFineStandardFormula;
+    public String getLateFeeStandardFormula() {
+        return lateFeeStandardFormula;
     }
 
-    public void setLateFineStandardFormula(String lateFineStandardFormula) {
-        this.lateFineStandardFormula = lateFineStandardFormula;
+    public void setLateFeeStandardFormula(String lateFeeStandardFormula) {
+        this.lateFeeStandardFormula = lateFeeStandardFormula;
     }
 }
