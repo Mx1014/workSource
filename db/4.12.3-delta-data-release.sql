@@ -462,3 +462,6 @@ set @eh_locale_strings_id = (select max(id) from eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id:=@eh_locale_strings_id+1), 'rental.flow', 'recommendUser', 'zh_CN', '推荐员');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id:=@eh_locale_strings_id+1), 'rental.flow', 'goodItem', 'zh_CN', '物资');
 
+-- 错误码新增 by wentian
+set @eh_locale_strings_id = (select max(id) from eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id:=@eh_locale_strings_id+1), 'assetv2', '10008', 'zh_CN', '您不是该企业的管理员，无权进行此操作');

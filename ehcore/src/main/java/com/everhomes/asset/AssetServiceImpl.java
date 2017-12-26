@@ -212,9 +212,6 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private PortalService portalService;
 
-    @Autowired
-    private RolePrivilegeService rolePrivilegeService;
-
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
         List<ListOrganizationsByPmAdminDTO> dtoList = new ArrayList<>();
