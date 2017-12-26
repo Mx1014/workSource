@@ -260,7 +260,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         }
         GeneralFormFileValue fileValue = new GeneralFormFileValue();
         fileValue.setFiles(files);
-        formVal.setFieldValue(JSON.toJSONString(fileValue));
+        formVal.setFieldValue(fileValue.toString());
         return formVal;
     }
 
@@ -285,7 +285,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         }
         GeneralFormSubFormValue subFormValue = new GeneralFormSubFormValue();
         subFormValue.setSubForms(subForms);
-        formVal.setFieldValue(JSON.toJSONString(subFormValue));
+        formVal.setFieldValue(subFormValue.toString());
         return formVal;
     }
 
