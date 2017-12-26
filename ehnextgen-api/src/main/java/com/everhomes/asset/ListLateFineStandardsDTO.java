@@ -40,6 +40,7 @@ public class ListLateFineStandardsDTO {
     private String lateFeeStandardName;
     private String lateFeeStandardFormula;
 
+
     public long getLateFeeStandardId() {
         return lateFeeStandardId;
     }
