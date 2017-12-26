@@ -5013,6 +5013,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				for (Community community : communities) {
 					EquipmentModelCommunityMap map = new EquipmentModelCommunityMap();
 					map.setModelId(template.getId());
+					map.setModelType(EquipmentModelType.TEMPLATE.getCode());
 					map.setTargetId(community.getId());
 					map.setTargetType("community");
 					equipmentProvider.createEquipmentModelCommunityMap(map);
