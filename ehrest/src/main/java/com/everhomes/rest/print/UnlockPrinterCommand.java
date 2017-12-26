@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId : 所属id</li>
  * <li>readerName : 刷卡器</li>
  * <li>privileges : 权限列表，参考 {@link com.everhomes.rest.print.PrintJobTypeType} // 暂时无用</li>
+ * <li>qrcodeParam : 二维码信息</li>
  * </ul>
  *
  *  @author:dengs 2017年6月20日
@@ -20,7 +21,10 @@ import com.everhomes.util.StringHelper;
 public class UnlockPrinterCommand {
 	private String ownerType;
 	private Long ownerId;
+	@Deprecated //废弃参数
 	private String readerName;
+	
+	private String qrcodeParam;
 	
 	@ItemType(Byte.class)
 	private List<Byte> privileges;
@@ -57,6 +61,14 @@ public class UnlockPrinterCommand {
 		this.readerName = readerName;
 	}
 	
+	public String getQrcodeParam() {
+		return qrcodeParam;
+	}
+
+	public void setQrcodeParam(String qrcodeParam) {
+		this.qrcodeParam = qrcodeParam;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

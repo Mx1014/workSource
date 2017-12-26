@@ -171,6 +171,7 @@ public class SiYinPrintController extends ControllerBase {
 	 @RequestMapping("getPrintLogonUrl")
 	 @RestReturn(value=GetPrintLogonUrlResponse.class)
 	 @RequireAuthentication(false)
+	 @Deprecated //使用司印二维码定制。，此接口废弃
 	 public RestResponse getPrintLogonUrl(GetPrintLogonUrlCommand cmd) {
 	     RestResponse response = new RestResponse(siyinPrintService.getPrintLogonUrl(cmd));
 	     response.setErrorCode(ErrorCodes.SUCCESS);
@@ -185,6 +186,7 @@ public class SiYinPrintController extends ControllerBase {
 	 @RequestMapping("logonPrint")
 	 @RestReturn(value=String.class)
 	 @RequireAuthentication(false)
+	 @Deprecated //使用司印二维码定制。，此接口废弃
 	 public  DeferredResult<RestResponse> logonPrint(@RequestParam(value="identifierToken", required=true)String identifierToken) {
 //	 public RestResponse logonPrint(LogonPrintCommand cmd) {
 		
@@ -203,6 +205,7 @@ public class SiYinPrintController extends ControllerBase {
 	  */
 	 @RequestMapping("informPrint")
 	 @RestReturn(value=InformPrintResponse.class)
+	 @Deprecated //使用司印二维码定制。，此接口废弃
 	 public RestResponse informPrint(InformPrintCommand cmd) {
 		
 	     RestResponse response = new RestResponse(siyinPrintService.informPrint(cmd));

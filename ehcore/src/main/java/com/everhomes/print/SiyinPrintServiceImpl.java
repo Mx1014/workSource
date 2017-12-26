@@ -582,9 +582,39 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		if(PrintLogonStatusType.HAVE_UNPAID_ORDER == checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId())){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "Have unpaid order");
 		}
-		return unlockPrinter(cmd,false);
+//		return unlockPrinter(cmd,false);
+		return unlockByOauthLogin(cmd);
 	}
 	
+	private UnlockPrinterResponse unlockByOauthLogin(UnlockPrinterCommand cmd) {
+		Map<String, String> params = new HashMap<>();
+		User user = UserContext.current().getUser();
+		String loginAccount = user.getId().toString()+PRINT_LOGON_ACCOUNT_SPLIT+cmd.getOwnerId();
+		params.put("user_name", loginAccount);
+		params.put("email", "");
+		params.put("feature", configurationProvider.getValue("print.siyin.feature","MONOPRINT;COLORPRINT;MONOCOPY;COLORCOPY;SCAN;FAX"));
+		params.put("qrcode_param", cmd.getQrcodeParam());
+		params.put("copy_mono_limit", String.valueOf(configurationProvider.getIntValue("print.siyin.copy_mono_limit", 50)));
+		params.put("copy_color_limit", String.valueOf(configurationProvider.getIntValue("print.siyin.copy_color_limit", 50)));
+		StringBuffer buffer = new StringBuffer();
+		String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
+
+		String url = buffer.append("http://").append(siyinUrl).append("/authagent/oauthLogin").toString();
+		try {
+			String result = HttpUtils.post(url, params, 30);
+			String siyinCode = getSiyinCode(result);
+			if(!siyinCode.equals("OK")){
+				LOGGER.error("siyin api:"+url+"request failed : "+result);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, url+" request failed, message = "+result);
+			}
+		} catch (IOException e) {
+			LOGGER.error("siyin api:"+url+" request exception : "+e.getMessage());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, url+" return exception, message = "+e.getMessage());
+		}
+		return null;
+	}
+
+
 	/**
 	 * 整个回调可能频繁发生，由于是非用户登录接口，完全可以放到后台任务中去做。
 	 */
@@ -676,6 +706,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return tuple.first();
 	}
 
+	@Deprecated //使用司印二维码定制。，此接口废弃
 	private UnlockPrinterResponse unlockPrinter(UnlockPrinterCommand cmd, boolean isDirectPrint) {
         String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
         String moduleIp = getSiyinModuleIp(siyinUrl, cmd.getReaderName());
