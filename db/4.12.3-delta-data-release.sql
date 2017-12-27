@@ -90,7 +90,7 @@ SELECT (@menu_scope_id := @menu_scope_id + 1), 61000, '', 'EhNamespaces', id, 2 
 -- “入孵申请”菜单改成“入驻申请”  add by yanjun 20171223
 UPDATE eh_web_menus set name = '入驻申请' where id = 36000 and name = '入孵申请';
 
-UPDATE eh_launch_pad_layouts set version_code = '2017121901', layout_json  = '{"versionCode":"2017121901","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"Banner","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"separatorFlag":1,"separatorHeight":16,"defaultOrder":10},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"NavigatorGroup2","cssStyleFlag":1,"paddingTop":0,"paddingBottom":0,"paddingLeft":0,"paddingRight":0,"lineSpacing":0,"columnSpacing":0},"style":"Gallery","defaultOrder":20,"separatorFlag":0,"separatorHeight":0,"columnCount":2},{"title":"园区快讯","iconUrl": "https://content-1.zuolin.com:443/image/aW1hZ2UvTVRveU5UVmtNVFpqTnpBek1URXpOREkzTkRnMU1qWTFOMlZrWVdKa1lXTTNZdw?token=XlYdOjlDVEVb4XyQO4_dd5RI37zTkV3jCKm_-XbRyLIGVUorWGnyRCwLAgMGV86baX30BnQW4nqzF9nlXGe4M0DbZxWBVTqnL019xazIDuhE6A0OXiMQwRqGX84_1HHv","groupName":"","widget":"NewsFlash","instanceConfig":{"timeWidgetStyle":"datetime","itemGroup":"Default","categoryId":2,"newsSize":3},"defaultOrder":30,"separatorFlag":0,"separatorHeight":0}]}' where namespace_id = 999964 and `name` = 'ServiceMarketLayout' and `status` = 2;
+UPDATE eh_launch_pad_layouts set version_code = '2017121901', layout_json  = '{"versionCode":"2017121901","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"Banner","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"separatorFlag":1,"separatorHeight":16,"defaultOrder":10},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs","cssStyleFlag":1,"paddingTop":0,"paddingBottom":0,"paddingLeft":0,"paddingRight":0,"lineSpacing":0,"columnSpacing":0},"style":"Gallery","defaultOrder":20,"separatorFlag":0,"separatorHeight":0,"columnCount":2},{"title":"园区快讯","iconUrl": "https://content-1.zuolin.com:443/image/aW1hZ2UvTVRveU5UVmtNVFpqTnpBek1URXpOREkzTkRnMU1qWTFOMlZrWVdKa1lXTTNZdw?token=XlYdOjlDVEVb4XyQO4_dd5RI37zTkV3jCKm_-XbRyLIGVUorWGnyRCwLAgMGV86baX30BnQW4nqzF9nlXGe4M0DbZxWBVTqnL019xazIDuhE6A0OXiMQwRqGX84_1HHv","groupName":"","widget":"NewsFlash","instanceConfig":{"timeWidgetStyle":"datetime","itemGroup":"Default","categoryId":2,"newsSize":3},"defaultOrder":30,"separatorFlag":0,"separatorHeight":0}]}' where namespace_id = 999964 and `name` = 'ServiceMarketLayout' and `status` = 2;
 UPDATE eh_launch_pad_items set display_flag = 1 where namespace_id = 999964;
 
 UPDATE eh_launch_pad_items set item_label = '入驻申请', item_name = '入驻申请' where namespace_id = 999964 and item_name = '入孵申请';
@@ -133,29 +133,29 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 VALUES
 (@mp_id:=@mp_id+1, @module_id, '0', @p_id, '新增、编辑、删除', '0', NOW());
 
-set @module_id = 21020;
-set @p_id = 210001003;
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '物品维护 物品分类新增、编辑、删除、导入', '物品维护 物品分类新增、编辑、删除、导入', NULL);
-set @mp_id = (select MAX(id) from eh_service_module_privileges);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
-VALUES
-(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '物品分类新增、编辑、删除、导入', '0', NOW());
+-- set @module_id = 21020;
+-- set @p_id = 210001003;
+-- INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '物品维护 物品分类新增、编辑、删除、导入', '物品维护 物品分类新增、编辑、删除、导入', NULL);
+-- set @mp_id = (select MAX(id) from eh_service_module_privileges);
+-- INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+-- VALUES
+-- (@mp_id:=@mp_id+1, @module_id, '0', @p_id, '物品分类新增、编辑、删除、导入', '0', NOW());
 
 set @module_id = 21020;
 set @p_id = 210001004;
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '物品维护 物品信息新增、编辑、删除、导入', '物品维护 物品信息新增、编辑、删除、导入', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '物品维护 物品信息新增、编辑、查看、删除、导入', '物品维护 物品信息新增、编辑、查看、删除、导入', NULL);
 set @mp_id = (select MAX(id) from eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES
-(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '物品信息新增、编辑、删除、导入', '0', NOW());
+(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '物品信息新增、编辑、查看、删除、导入', '0', NOW());
 
 set @module_id = 21030;
 set @p_id = 210001005;
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '库存维护 库存查找', '库存维护 库存查找', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '库存维护 库存、日志查找', '库存维护 库存、日志查找', NULL);
 set @mp_id = (select MAX(id) from eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES
-(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '库存查询', '0', NOW());
+(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '库存、日志查询', '0', NOW());
 
 set @module_id = 21030;
 set @p_id = 210001006;
@@ -165,13 +165,13 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 VALUES
 (@mp_id:=@mp_id+1, @module_id, '0', @p_id, '入库', '0', NOW());
 
-set @module_id = 21030;
-set @p_id = 210001007;
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '库存维护 日志查找', '库存维护 日志查找', NULL);
-set @mp_id = (select MAX(id) from eh_service_module_privileges);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
-VALUES
-(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '日志查找', '0', NOW());
+-- set @module_id = 21030;
+-- set @p_id = 210001007;
+-- INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '库存维护 日志查找', '库存维护 日志查找', NULL);
+-- set @mp_id = (select MAX(id) from eh_service_module_privileges);
+-- INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+-- VALUES
+-- (@mp_id:=@mp_id+1, @module_id, '0', @p_id, '日志查找', '0', NOW());
 
 set @module_id = 21030;
 set @p_id = 210001008;
@@ -197,21 +197,21 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 VALUES
 (@mp_id:=@mp_id+1, @module_id, '0', @p_id, '领用申请', '0', NOW());
 
-set @module_id = 21050;
-set @p_id = 210001011;
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '参数配置 工作流配置', '参数配置 工作流配置', NULL);
-set @mp_id = (select MAX(id) from eh_service_module_privileges);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
-VALUES
-(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '工作流配置', '0', NOW());
-
-set @module_id = 21050;
-set @p_id = 210001012;
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '参数配置 参数配置', '参数配置 参数配置', NULL);
-set @mp_id = (select MAX(id) from eh_service_module_privileges);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
-VALUES
-(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '参数配置', '0', NOW());
+-- set @module_id = 21050;
+-- set @p_id = 210001011;
+-- INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '参数配置 工作流配置', '参数配置 工作流配置', NULL);
+-- set @mp_id = (select MAX(id) from eh_service_module_privileges);
+-- INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+-- VALUES
+-- (@mp_id:=@mp_id+1, @module_id, '0', @p_id, '工作流配置', '0', NOW());
+--
+-- set @module_id = 21050;
+-- set @p_id = 210001012;
+-- INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '参数配置 参数配置', '参数配置 参数配置', NULL);
+-- set @mp_id = (select MAX(id) from eh_service_module_privileges);
+-- INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+-- VALUES
+-- (@mp_id:=@mp_id+1, @module_id, '0', @p_id, '参数配置', '0', NOW());
 
 
 set @module_id = 21040;
@@ -274,63 +274,63 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) V
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21213, '0', '合同管理 合同同步', '合同管理 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21214, '0', '合同管理 退约权限', '合同管理 业务模块权限', NULL);
 
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21110','0',21101,'客户管理 新增权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21110','0',21102,'客户管理 修改权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21110','0',21103,'客户管理 导入权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21110','0',21104,'客户管理 同步权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21110','0',21105,'客户管理 删除权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21110','0',21106,'客户管理 查看权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21110','0',21107,'客户管理 管理查看权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21110','0',21108,'客户管理 管理新增权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21110','0',21109,'客户管理 管理修改权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21110','0',21110,'客户管理 管理删除权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21110','0',21111,'客户管理 管理导入权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21110','0',21112,'客户管理 管理导出权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21120','0',21113,'客户管理 统计分析查看权限','0',NOW());
 
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21201,'合同管理 新增权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21202,'合同管理 签约、发起审批权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21203,'合同管理 修改权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21204,'合同管理 删除权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21205,'合同管理 作废权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21206,'合同管理 入场权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21207,'合同管理 查看权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21208,'合同管理 续约权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21209,'合同管理 变更权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21220','0',21210,'合同管理 合同参数查看权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'21220','0',21211,'合同管理 合同参数修改权限','0',NOW());  
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'21230','0',21212,'合同管理 合同工作流设置权限','0',NOW());   
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21213,'合同管理 合同同步','0',NOW());    
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21214,'合同管理 退约权限','0',NOW());   
-    
-    
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'21220','0',21211,'合同管理 合同参数修改权限','0',NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'21230','0',21212,'合同管理 合同工作流设置权限','0',NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21213,'合同管理 合同同步','0',NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21214,'合同管理 退约权限','0',NOW());
+
+
 
 delete from eh_reflection_service_module_apps where module_id = 49100;
 DROP PROCEDURE IF EXISTS create_app;
@@ -349,7 +349,7 @@ BEGIN
                     LEAVE read_loop;
                 END IF;
 
-        SET @app_id = (SELECT MAX(id) FROM `eh_reflection_service_module_apps`);   
+        SET @app_id = (SELECT MAX(id) FROM `eh_reflection_service_module_apps`);
         INSERT INTO `eh_reflection_service_module_apps` (`id`, `active_app_id`, `namespace_id`, `name`, `module_id`, `instance_config`, `status`, `action_type`, `action_data`, `update_time`, `module_control_type`, `multiple_flag`, `custom_tag`, `custom_path`, `menu_id`) VALUES ((@app_id := @app_id + 1), @app_id, ns, '', moduleId, NULL, '2', '13', '', NOW(), 'community_control', '0', '', NULL, moduleId);
 
   END LOOP;
@@ -358,13 +358,13 @@ END
 //
 DELIMITER ;
 CALL create_app;
-DROP PROCEDURE IF EXISTS create_app;    
-    
-update eh_reflection_service_module_apps set name = '客户管理', action_data = 'customer' where module_id = 21100;      
-update eh_reflection_service_module_apps set name = '合同管理', action_data = 'contract' where module_id = 21200;      
-update eh_reflection_service_module_apps set name = '能耗管理', action_data = '{"url":"http://core.zuolin.com/energy-management/build/index/energy-management/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' where module_id = 49100;      
--- custoemrAuth xiongying end    
-    
+DROP PROCEDURE IF EXISTS create_app;
+
+update eh_reflection_service_module_apps set name = '客户管理', action_data = 'customer' where module_id = 21100;
+update eh_reflection_service_module_apps set name = '合同管理', action_data = 'contract' where module_id = 21200;
+update eh_reflection_service_module_apps set name = '能耗管理', action_data = '{"url":"http://core.zuolin.com/energy-management/build/index/energy-management/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' where module_id = 49100;
+-- custoemrAuth xiongying end
+
 
 -- 物业巡检菜单显示不全 start  by jiarui 20171220
 
@@ -412,6 +412,7 @@ DELETE from eh_acls where owner_type = 'EhAll' and comment_tag1 like '%EhAuthori
 update eh_service_modules SET module_control_type = 'community_control' where `name` = '仓库管理';
 
 
+
 -- 补数据：menu有租赁管理而service module没有租赁管理的域空间 by xiongying
 SET @module_scope_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '0', '30000', '', 'EhNamespaces', '0', NULL, '2');
@@ -430,3 +431,37 @@ INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `modu
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999972', '30000', '', 'EhNamespaces', '999972', NULL, '2');
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999973', '30000', '', 'EhNamespaces', '999973', NULL, '2');
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999974', '30000', '', 'EhNamespaces', '999974', NULL, '2');
+
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999954', '21100', '', 'EhNamespaces', '999954', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999955', '21100', '', 'EhNamespaces', '999955', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999959', '21100', '', 'EhNamespaces', '999959', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999962', '21100', '', 'EhNamespaces', '999962', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999964', '21100', '', 'EhNamespaces', '999964', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999967', '21100', '', 'EhNamespaces', '999967', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999969', '21100', '', 'EhNamespaces', '999969', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999983', '21100', '', 'EhNamespaces', '999983', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999954', '21200', '', 'EhNamespaces', '999954', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999957', '21200', '', 'EhNamespaces', '999957', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999958', '21200', '', 'EhNamespaces', '999958', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999961', '21200', '', 'EhNamespaces', '999961', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999962', '21200', '', 'EhNamespaces', '999962', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999967', '21200', '', 'EhNamespaces', '999967', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999969', '21200', '', 'EhNamespaces', '999969', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999970', '21200', '', 'EhNamespaces', '999970', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999983', '21200', '', 'EhNamespaces', '999983', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999955', '49100', '', 'EhNamespaces', '999955', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999961', '49100', '', 'EhNamespaces', '999961', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999975', '49100', '', 'EhNamespaces', '999975', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999988', '49100', '', 'EhNamespaces', '999988', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999992', '49100', '', 'EhNamespaces', '999992', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '0', '49100', '0', 'EhNamespaces', '999974', NULL, '2');
+
+delete from eh_service_module_scopes where module_id = 21200 and namespace_id in(999973, 999974);
+
+set @eh_locale_strings_id = (select max(id) from eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id:=@eh_locale_strings_id+1), 'rental.flow', 'recommendUser', 'zh_CN', '推荐员');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id:=@eh_locale_strings_id+1), 'rental.flow', 'goodItem', 'zh_CN', '物资');
+
+-- 错误码新增 by wentian
+set @eh_locale_strings_id = (select max(id) from eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id:=@eh_locale_strings_id+1), 'assetv2', '10008', 'zh_CN', '您不是该企业的管理员，无权进行此操作');

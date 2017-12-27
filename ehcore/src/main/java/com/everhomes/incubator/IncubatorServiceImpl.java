@@ -346,7 +346,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 
 		//自己不是审核中，一个用户只允许一个审核中的，已经有的话不允许在申请
 		List<IncubatorApply> incubatorApplies = incubatorProvider.listIncubatorAppling(dto.getApplyUserId());
-		if(incubatorApplies == null && incubatorApplies.size() == 0){
+		if(incubatorApplies == null || incubatorApplies.size() == 0){
 			dto.setReApplyFlag(TrueOrFalseFlag.TRUE.getCode());
 		}else {
 			dto.setReApplyFlag(TrueOrFalseFlag.FALSE.getCode());

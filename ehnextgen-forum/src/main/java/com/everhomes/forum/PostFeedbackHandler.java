@@ -48,22 +48,22 @@ public class PostFeedbackHandler implements FeedbackHandler {
 
 	@Override
 	public void afterAddFeedback(Feedback feedback) {
-		NewTopicCommand ntc = new NewTopicCommand();
-		ntc.setForumId(ForumConstants.FEEDBACK_FORUM);
-		ntc.setCreatorTag(EntityType.USER.getCode());
-		ntc.setTargetTag(EntityType.USER.getCode());
-		ntc.setContentCategory(CategoryConstants.CATEGORY_ID_TOPIC_COMMON);
-		ntc.setSubject(feedback.getSubject());
-		if(feedback.getProofResourceUri() == null || "".equals(feedback.getProofResourceUri()))
-			ntc.setContentType(PostContentType.TEXT.getCode());
-		else{
-			ntc.setContentType(PostContentType.IMAGE.getCode());
-		}
-		ntc.setContent(feedback.getContent());
-		ntc.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
-		ntc.setVisibleRegionId(0L);
-
-		forumService.createTopic(ntc);
+//		NewTopicCommand ntc = new NewTopicCommand();
+//		ntc.setForumId(ForumConstants.FEEDBACK_FORUM);
+//		ntc.setCreatorTag(EntityType.USER.getCode());
+//		ntc.setTargetTag(EntityType.USER.getCode());
+//		ntc.setContentCategory(CategoryConstants.CATEGORY_ID_TOPIC_COMMON);
+//		ntc.setSubject(feedback.getSubject());
+//		if(feedback.getProofResourceUri() == null || "".equals(feedback.getProofResourceUri()))
+//			ntc.setContentType(PostContentType.TEXT.getCode());
+//		else{
+//			ntc.setContentType(PostContentType.IMAGE.getCode());
+//		}
+//		ntc.setContent(feedback.getContent());
+//		ntc.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
+//		ntc.setVisibleRegionId(0L);
+//
+//		forumService.createTopic(ntc);
 	}
 
 	@Override
