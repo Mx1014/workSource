@@ -26,7 +26,7 @@ INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`
 INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@tem_ip := @tem_ip + 1, 'work.report.notification', 2, 'zh_CN', '作者修改汇报', '${applierName}更新了Ta的${reportName}', 0);
 INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@tem_ip := @tem_ip + 1, 'work.report.notification', 3, 'zh_CN', '读者被作者评论', '${applierName}在Ta的${reportName}中回复了你', 0);
 INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@tem_ip := @tem_ip + 1, 'work.report.notification', 4, 'zh_CN', '作者评论汇报', '${applierName}在Ta的${reportName}中发表了评论', 0);
-INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@tem_ip := @tem_ip + 1, 'work.report.notification', 5, 'zh_CN', '作者被读者评论', '${applierName}在你的${reportName}中回复了你', 0);
+INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@tem_ip := @tem_ip + 1, 'work.report.notification', 5, 'zh_CN', '作者被读者评论', '${creatorName}在你的${reportName}中回复了你', 0);
 INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@tem_ip := @tem_ip + 1, 'work.report.notification', 6, 'zh_CN', '读者被读者评论', '${creatorName}在${applierName}的${reportName}中回复了你', 0);
 INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@tem_ip := @tem_ip + 1, 'work.report.notification', 7, 'zh_CN', '作者的汇报被评论', '${creatorName}在你的${reportName}中发表了评论', 0);
 
