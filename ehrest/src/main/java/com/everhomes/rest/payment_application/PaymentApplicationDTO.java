@@ -4,6 +4,31 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 /**
+ * <ul>
+ *     <li>id: id</li>
+ *     <li>namespaceId: 域空间id</li>
+ *     <li>contractId: 合同id</li>
+ *     <li>contractName: 合同名称</li>
+ *     <li>contractNumber: 合同编号</li>
+ *     <li>customerName: 客户名（供应商名）</li>
+ *     <li>contractAmount: 合同金额</li>
+ *     <li>requestId: 请示单id</li>
+ *     <li>requestName: 请示单名称</li>
+ *     <li>applicantUid: 申请人id</li>
+ *     <li>applicantName: 申请人名称</li>
+ *     <li>applicantOrgId: 申请人所在部门id</li>
+ *     <li>applicantOrgName: 申请人所在部门名称</li>
+ *     <li>payee: 收款单位</li>
+ *     <li>payer: 付款单位</li>
+ *     <li>dueBank: 收款银行</li>
+ *     <li>bankAccount: 银行账号</li>
+ *     <li>paymentAmount: 付款金额</li>
+ *     <li>paymentRate: 付款百分比</li>
+ *     <li>remark: 备注</li>
+ *     <li>status: 状态</li>
+ *     <li>createUid: 创建人id</li>
+ *     <li>createTime: 创建时间</li>
+ * </ul>
  * Created by ying.xiong on 2017/12/27.
  */
 public class PaymentApplicationDTO {
