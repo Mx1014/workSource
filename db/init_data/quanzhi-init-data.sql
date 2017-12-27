@@ -1204,3 +1204,17 @@ where namespace_id=999980 and name='ServiceMarketLayout';
 
 update eh_launch_pad_items set item_width='1' where id=114027;
 update eh_launch_pad_items set item_width='1' where id=114028;
+
+-- 增加云打印及云打印管理后台菜单 2017/12/27
+SET @eh_launch_pad_items_id = (SELECT MAX(id) FROM eh_launch_pad_items) ;
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+VALUES((@eh_launch_pad_items_id:= @eh_launch_pad_items_id +1),'999980','0','1','0','/home','Bizs','云打印','云打印','cs://1/image/aW1hZ2UvTVRvM09ERXpaREV5T0RNek5UWTJaVEl3T1RVMVlqQTJabVJrTlRFeE1qZG1ZZw','1','1','14','{\"url\":\"http://core.zuolin.com/cloud-print/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}','1','0','1','1','','0',NULL,NULL,NULL,'1','park_tourist','1',NULL,NULL,'0',NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+VALUES((@eh_launch_pad_items_id:= @eh_launch_pad_items_id +1),'999980','0','5','0','/home','Bizs','云打印','云打印','cs://1/image/aW1hZ2UvTVRvM09ERXpaREV5T0RNek5UWTJaVEl3T1RVMVlqQTJabVJrTlRFeE1qZG1ZZw','1','1','14','{\"url\":\"http://core.zuolin.com/cloud-print/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}','1','0','1','1','','0',NULL,NULL,NULL,'1','pm_admin','1',NULL,NULL,'0',NULL);
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41400,'', 'EhNamespaces', 999980,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41410,'', 'EhNamespaces', 999980,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41420,'', 'EhNamespaces', 999980,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41430,'', 'EhNamespaces', 999980,2);
+
+
