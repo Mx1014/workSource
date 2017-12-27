@@ -254,7 +254,7 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) V
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21113, '0', '客户管理 统计分析查看权限', '客户管理 业务模块权限', NULL);
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21201, '0', '合同管理 新增修改权限', '合同管理 业务模块权限', NULL);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21202, '0', '合同管理 签约、发起审批权限', '合同管理 业务模块权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21202, '0', '合同管理 发起审批权限', '合同管理 业务模块权限', NULL);
 -- INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21203, '0', '合同管理 修改权限', '合同管理 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21204, '0', '合同管理 删除权限', '合同管理 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21205, '0', '合同管理 作废权限', '合同管理 业务模块权限', NULL);
@@ -298,7 +298,7 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21201,'合同管理 新增修改权限','0',NOW());
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21202,'合同管理 签约、发起审批权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21202,'合同管理 发起审批权限','0',NOW());
 -- INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 --    VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21203,'合同管理 修改权限','0',NOW());
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
