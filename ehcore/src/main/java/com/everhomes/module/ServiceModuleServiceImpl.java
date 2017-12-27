@@ -1067,9 +1067,23 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     @Override
     public List<Long> listServiceModulefunctions(ListServiceModulefunctionsCommand cmd) {
         List<Long> functionIds = new ArrayList<>();
-        List<Long> privilegeIds = rolePrivilegeService.listUserPrivilegeByModuleId(cmd.getNamespaceId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), UserContext.currentUserId(), cmd.getModuleId());
-        privilegeIds.add(0L);
-        List<ServiceModuleFunction> moduleFunctions = serviceModuleProvider.listFunctions(cmd.getModuleId(), privilegeIds);
+//        List<Long> privilegeIds = rolePrivilegeService.listUserPrivilegeByModuleId(cmd.getNamespaceId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), UserContext.currentUserId(), cmd.getModuleId());
+//        privilegeIds.add(0L);
+//        List<ServiceModuleFunction> moduleFunctions = serviceModuleProvider.listFunctions(cmd.getModuleId(), privilegeIds);
+//        if(moduleFunctions != null && moduleFunctions.size() > 0) {
+//            moduleFunctions.forEach(moduleFunction -> {
+//                functionIds.add(moduleFunction.getId());
+//            });
+//        }
+//        List<ServiceModuleExcludeFunction> excludeFunctions = serviceModuleProvider.listExcludeFunctions(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleId());
+//        if (excludeFunctions != null && excludeFunctions.size() > 0) {
+//            excludeFunctions.forEach(excludeFunction -> {
+//                functionIds.remove(excludeFunction.getFunctionId());
+//            });
+//        }
+
+        //不根据权限
+        List<ServiceModuleFunction> moduleFunctions = serviceModuleProvider.listFunctions(cmd.getModuleId(), null);
         if(moduleFunctions != null && moduleFunctions.size() > 0) {
             moduleFunctions.forEach(moduleFunction -> {
                 functionIds.add(moduleFunction.getId());
