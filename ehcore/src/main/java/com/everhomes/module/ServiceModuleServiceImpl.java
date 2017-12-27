@@ -806,6 +806,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 dto.setProjectId(community.getId());
                 dto.setProjectName(community.getName());
                 dto.setProjectType(com.everhomes.entity.EntityType.COMMUNITY.getCode());
+                dto.setCommunityType(community.getCommunityType());
                 dtos.add(dto);
             }
         }
@@ -834,6 +835,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             }
             project.setProjectType(EntityType.COMMUNITY.getCode());
             project.setProjectName(community.getName());
+            project.setCommunityType(community.getCommunityType());
         } else if (EntityType.fromCode(project.getProjectType()) == EntityType.CHILD_PROJECT) {// 判断子项目
             ResourceCategory resourceCategory = this.communityProvider.findResourceCategoryById(project.getProjectId());
             if (resourceCategory == null) {

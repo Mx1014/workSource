@@ -3959,17 +3959,16 @@ public class QualityServiceImpl implements QualityService {
 			}
 		}
 		if (scoresByTarget.size() > 0) {
+			// 现网数据有很多建筑面积null
+			scoresByTarget.forEach((s) -> {
+				if (s.getBuildArea() == null)
+					s.setBuildArea(0D);
+			});
 			//sort  scoreByTarget
 			scoresByTarget.sort((o1, o2) -> {
 				if (!o1.getTotalScore().equals(o2.getTotalScore())) {
 					return o2.getTotalScore().compareTo(o1.getTotalScore());
 				} else {
-					// 现网数据有很多建筑面积null
-					if (o2.getBuildArea() == null)
-						o2.setBuildArea(0D);
-					if (o1.getBuildArea() == null)
-						o1.setBuildArea(0D);
-
 					return o2.getBuildArea().compareTo(o1.getBuildArea());
 				}
 			});
