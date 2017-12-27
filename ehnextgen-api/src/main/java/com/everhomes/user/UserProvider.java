@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.user;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.aclink.AclinkUser;
@@ -17,6 +18,7 @@ public interface UserProvider {
     void updateUser(User user);
     void deleteUser(User user);
     void deleteUser(long id);
+    void deleteUser(Integer namespaceId, List<String> namespaceUserTokens, String namespaceUserType);
     User findUserById(long id);
     User findUserByAccountName(String accountName);
     List<User> queryUsers(CrossShardListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
@@ -156,4 +158,7 @@ public interface UserProvider {
      * 用于测试缓存使用是否正常，不要用于业务使用 by lqs 20171019
      */
     void updateCacheStatus();
+
+
+    void syncUsersFromAnBangWuYe(Timestamp timestamp);
 }

@@ -1730,4 +1730,24 @@ public class UserProviderImpl implements UserProvider {
     public void updateCacheStatus() {
         // 只需要去掉缓存，使可缓存可测
     }
+
+    @Override
+    public void syncUsersFromAnBangWuYe(Timestamp timestamp) {
+        //todo visit Anbangwuye's implements
+        if(timestamp != null){
+            //todo visit
+            List<User> users = null;
+            List<String> namespaceUserToken = new ArrayList<>();
+        }
+        //todo 参数传当前时间,为增量同步，只同步上次同步拘束时间~当前时间的数据
+        //检查是否有重复/失效用户
+        //增量同步
+
+        //todo 参数为null,为全量同步,同步所有的用户
+
+        //删除所有的同步用户
+
+
+        //全部增量同步
+    }
 }
