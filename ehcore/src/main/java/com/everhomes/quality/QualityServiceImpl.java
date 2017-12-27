@@ -136,7 +136,7 @@ public class QualityServiceImpl implements QualityService {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		}*/
 
-		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_CREATE,cmd.getTargetId());
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_CREATE, cmd.getTargetId());
 
 		User user = UserContext.current().getUser();
 		RepeatSettings repeat = null;
@@ -235,7 +235,7 @@ public class QualityServiceImpl implements QualityService {
 	public QualityStandardsDTO updateQualityStandard(UpdateQualityStandardCommand cmd) {
 		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARD_UPDATE, 0L);
 		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);*/
-		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_UPDATE,cmd.getTargetId());
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_UPDATE, cmd.getTargetId());
 
 		User user = UserContext.current().getUser();
 
@@ -426,7 +426,7 @@ public class QualityServiceImpl implements QualityService {
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
 		}*/
-		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_LIST,cmd.getTargetId());
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_LIST, cmd.getTargetId());
 
 
 		Long ownerId = cmd.getOwnerId();
@@ -2204,7 +2204,7 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public HttpServletResponse exportInspectionTasks(
 			ListQualityInspectionTasksCommand cmd, HttpServletResponse response) {
-		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_TASK_LIST, 0L);
+		//Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_TASK_LIST, 0L);
 		/*if(cmd.getTargetId() == 0L) {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		} else {
@@ -3111,7 +3111,9 @@ public class QualityServiceImpl implements QualityService {
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		}*/
-		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_STAT_TASK,cmd.getTargetId());
+		//针对检查统计和任务数统计 检查统计里面没有具体的项目id
+		if (cmd.getCheckFlag() == null || !cmd.getCheckFlag().equals(true))
+			checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STAT_TASK, cmd.getTargetId());
 
 
 		CountTasksResponse response = new CountTasksResponse();
