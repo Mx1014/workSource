@@ -2,6 +2,7 @@
 package com.everhomes.socialSecurity;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.archives.ArchivesService;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.community.Community;
@@ -65,6 +66,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private BigCollectionProvider bigCollectionProvider;
     @Autowired
     private ConfigurationProvider configurationProvider;
+    @Autowired
+    private ArchivesService archivesService;
     /**
      * 处理计算的线程池,预设最大值是5
      */
@@ -247,7 +250,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     public ListSocialSecurityPaymentsResponse listSocialSecurityPayments(
             ListSocialSecurityPaymentsCommand cmd) {
         // TODO 通过组织架构拿到新增人员的detailIds
-        List<Long> detailIds = null;
+        List<Long> detailIds = archivesService.listSocialSecurityEmployees(cmd.getOwnerId(), cmd.getDeptId(), cmd.getKeywords(), cmd.getFilterItems());
 
         SsorAfPay payFlag = null;
         if (null != cmd.getFilterItems()) {
