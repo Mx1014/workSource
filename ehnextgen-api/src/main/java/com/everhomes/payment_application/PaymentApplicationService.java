@@ -8,5 +8,5 @@ import com.everhomes.rest.payment_application.*;
 public interface PaymentApplicationService {
     PaymentApplicationDTO createPaymentApplication(CreatePaymentApplicationCommand cmd);
     PaymentApplicationDTO getPaymentApplication(GetPaymentApplicationCommand cmd);
-    ListPaymentApplicationResponse listPaymentApplications(ListPaymentApplicationCommand cmd);
+    SearchPaymentApplicationResponse searchPaymentApplications(SearchPaymentApplicationCommand cmd);
 }

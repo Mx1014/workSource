@@ -31,12 +31,12 @@ public class PaymentApplicationController extends ControllerBase {
 
     /**
      * <p>付款请示单列表</p>
-     * <b>URL: /payment_application/listPaymentApplications</b>
+     * <b>URL: /payment_application/searchPaymentApplications</b>
      */
-    @RequestMapping("listPaymentApplications")
-    @RestReturn(ListPaymentApplicationResponse.class)
-    public RestResponse listPaymentApplications(ListPaymentApplicationCommand cmd){
-        return new RestResponse(paymentApplicationService.listPaymentApplications(cmd));
+    @RequestMapping("searchPaymentApplications")
+    @RestReturn(SearchPaymentApplicationResponse.class)
+    public RestResponse searchPaymentApplications(SearchPaymentApplicationCommand cmd){
+        return new RestResponse(paymentApplicationService.searchPaymentApplications(cmd));
     }
 
     /**

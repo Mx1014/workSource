@@ -1,6 +1,9 @@
 package com.everhomes.payment_application;
 
 import com.everhomes.rest.payment_application.*;
+import com.everhomes.search.PaymentApplicationSearcher;
+import com.everhomes.util.ConvertHelper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -8,22 +11,32 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class PaymentApplicationServiceImpl implements PaymentApplicationService {
+
+    @Autowired
+    private PaymentApplicationProvider paymentApplicationProvider;
+
+    @Autowired
+    private PaymentApplicationSearcher paymentApplicationSearcher;
+
     @Override
     public PaymentApplicationDTO createPaymentApplication(CreatePaymentApplicationCommand cmd) {
-        return null;
+        PaymentApplication application = ConvertHelper.convert(cmd, PaymentApplication.class);
+        paymentApplicationProvider.createPaymentApplication(application);
+        return toPaymentApplicationDTO(application);
     }
 
     @Override
     public PaymentApplicationDTO getPaymentApplication(GetPaymentApplicationCommand cmd) {
-        return null;
+        PaymentApplication application = paymentApplicationProvider.findPaymentApplication(cmd.getId());
+        return toPaymentApplicationDTO(application);
     }
 
     @Override
-    public ListPaymentApplicationResponse listPaymentApplications(ListPaymentApplicationCommand cmd) {
-        return null;
+    public SearchPaymentApplicationResponse searchPaymentApplications(SearchPaymentApplicationCommand cmd) {
+        return paymentApplicationSearcher.query(cmd);
     }
 
-    private PaymentApplicationDTO toPaymentApplicationDTO() {
+    private PaymentApplicationDTO toPaymentApplicationDTO(PaymentApplication application) {
         return null;
     }
 }

@@ -228,4 +228,6 @@ public interface PrivilegeConstants {
     long PUNCH_RULE_DELETE = 42004L;//    删除打卡规则 
     long PUNCH_STATISTIC_QUERY = 42005L;//    查看打卡记录 （细化权限，下同）
     long PUNCH_STATISTIC_EXPORT = 42006L;//    导出打卡记录
+
+    //付款管理
 }
