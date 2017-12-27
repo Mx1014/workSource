@@ -468,7 +468,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 dto.setUserName(organization.getContactName());
                 dto.setCompany(organization.getName());
                 dto.setCompanyId(organization.getId());
-                dto.setPhone(organization.getContactToken());
+                UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+                if(null != identifier){
+                    dto.setPhone(identifier.getIdentifierToken());
+                }
                 dto.setIsAuth((byte)1);
             }else{
                 UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());

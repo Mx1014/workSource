@@ -275,7 +275,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     "Invalid parameter, latitude and longitude have to be both specified or neigher");
 
         // TODO, return all communities only to test our REST response for now
-
+//        CommunityDTO testDto = ConvertHelper.convert(communityProvider.findCommunityById(240111044331051304l), CommunityDTO.class);
+//        results.add(testDto);
+        
         List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(), cmd.getLongitude(), 6);
         List<Long> communityIds = getAllCommunityIds(pointList);
 
