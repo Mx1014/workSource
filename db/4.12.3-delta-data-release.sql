@@ -496,3 +496,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 -- 投票分享链接 add by yanjun 20171227
 set @id = (SELECT MAX(id) FROM eh_configurations);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@id := @id + 1), 'poll.share.url', '/share-vote/build/index.html#/detail', 'the relative path for sharing poll', '0', NULL);
+
+-- 错误码新增 by yanjun20171227
+set @eh_locale_strings_id = (select max(id) from eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id:=@eh_locale_strings_id+1), 'incubator', '10002', 'zh_CN', '已经存在审批中的申请，请审批结束之后再申请。');
