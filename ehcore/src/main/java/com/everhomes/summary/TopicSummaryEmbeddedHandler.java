@@ -67,4 +67,11 @@ public class TopicSummaryEmbeddedHandler implements ForumEmbeddedHandler {
         return post;
     }
 
+    @Override
+    public void beforePostDelete(Post post) {
+    }
+
+    @Override
+    public void afterPostDelete(Post post) {
+    }
 }
