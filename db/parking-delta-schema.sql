@@ -62,7 +62,7 @@ CREATE TABLE `eh_rentalv2_order_rules` (
 ALTER TABLE `eh_rentalv2_default_rules`
 ADD COLUMN `source_type` varchar(255) DEFAULT NULL COMMENT 'default_rule, resource_rule',
 ADD COLUMN `source_id` bigint(20) DEFAULT NULL,
-ADD COLUMN `resource_type` varchar(64) NOT NULL COMMENT '资源类型',
+ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型',
 ADD COLUMN `holiday_open_flag` tinyint(4) DEFAULT NULL COMMENT '节假日是否开放预约: 1-是, 0-否',
 ADD COLUMN `holiday_type` tinyint(4) DEFAULT NULL COMMENT '1-普通双休, 0-同步中国节假日',
 ADD COLUMN `refund_strategy` tinyint(4) DEFAULT NULL COMMENT '1-custom, 2-full',
