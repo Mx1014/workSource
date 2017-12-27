@@ -22,23 +22,11 @@ import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.OrganizationStatus;
-import com.everhomes.rest.user.IdentifierClaimStatus;
-import com.everhomes.rest.user.InvitationRoster;
-import com.everhomes.rest.user.UserInvitationsDTO;
-import com.everhomes.rest.user.UserStatus;
+import com.everhomes.rest.user.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.pojos.EhUserCommunities;
-import com.everhomes.server.schema.tables.pojos.EhUserGroups;
-import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
-import com.everhomes.server.schema.tables.pojos.EhUserInvitationRoster;
-import com.everhomes.server.schema.tables.pojos.EhUserInvitations;
-import com.everhomes.server.schema.tables.pojos.EhUserLikes;
-import com.everhomes.server.schema.tables.pojos.EhUserNotificationSettings;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhUserLikesRecord;
 import com.everhomes.server.schema.tables.records.EhUsersRecord;
 import com.everhomes.sharding.ShardIterator;
@@ -175,7 +163,12 @@ public class UserProviderImpl implements UserProvider {
         if(user != null)
             self.deleteUser(user);
     }
-    
+
+    @Override
+    public void deleteUser(Integer namespaceId, List<String> namespaceUserTokens, String namespaceUserType) {
+
+    }
+
     @Cacheable(value = "User-Id", key="#id", unless="#result == null")
     @Override
     public User findUserById(final long id) {
@@ -184,7 +177,17 @@ public class UserProviderImpl implements UserProvider {
         EhUsers user = dao.findById(id);
         return ConvertHelper.convert(user, User.class);
     }
-    
+
+    @Override
+    public User findUserByNamespaceUserTokenAndType(String token, String type) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
+        User user = context.select().from(EH_USERS).where(EH_USERS.NAMESPACE_USER_TOKEN.eq(token))
+                .and(EH_USERS.NAMESPACE_USER_TYPE.eq(type))
+                .fetchAnyInto(User.class);
+        return user;
+    }
+
+
     @Override
     @Cacheable(value = "User-Acount", key="#accountName", unless="#result == null")
     public User findUserByAccountName(final String accountName) {
@@ -334,7 +337,12 @@ public class UserProviderImpl implements UserProvider {
             self.deleteIdentifier(userIdentifier);
         }
     }
-    
+
+    @Override
+    public void deleteIdentifier(Integer namespaceId, List<Long> uIds) {
+
+    }
+
     @Cacheable(value = "UserIdentifier-Id", key="#id", unless="#result == null")
     @Override
     public UserIdentifier findIdentifierById(final long id) {
@@ -1734,20 +1742,42 @@ public class UserProviderImpl implements UserProvider {
     @Override
     public void syncUsersFromAnBangWuYe(Timestamp timestamp) {
         //todo visit Anbangwuye's implements
-        if(timestamp != null){
+
+        if(timestamp != null){        //todo 参数传当前时间,为增量同步，只同步上次同步拘束时间~当前时间的数据
             //todo visit
             List<User> users = null;
             List<String> namespaceUserToken = new ArrayList<>();
+            //如果有之前同步过的用户，删掉重建
+            this.deleteUser(namespaceId, namespaceUserToken, NamespaceUserType.ANBANG.getCode());
+            this.deleteIdentifier(namespaceId, uIds);
+            createUsersAndUserIdentifiers(users);
+        }else{
+            //todo visit
+            //todo 参数为null,为全量同步,同步所有的用户
+            List<User> users = null;
+            List<String> namespaceUserToken = new ArrayList<>();
+
+            //删除所有的同步用户
+            this.deleteUser(namespaceId,null,NamespaceUserType.ANBANG.getCode());
+            this.deleteIdentifier(namespaceId, uIds);
+            createUsersAndUserIdentifiers(users);
         }
-        //todo 参数传当前时间,为增量同步，只同步上次同步拘束时间~当前时间的数据
-        //检查是否有重复/失效用户
-        //增量同步
 
-        //todo 参数为null,为全量同步,同步所有的用户
-
-        //删除所有的同步用户
+    }
 
 
-        //全部增量同步
+    private void createUsersAndUserIdentifiers(List<User> users){
+        for (User user : users) {
+            this.findUserByNamespaceUserTokenAndType(user.getNamespaceUserToken(), user.getNamespaceUserType());
+            this.createUser(user);
+            UserIdentifier userIdentifier = new UserIdentifier();
+            userIdentifier.setOwnerUid(user.getId());
+            userIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+            userIdentifier.setIdentifierToken(user.getIdentifierToken());
+            userIdentifier.setNamespaceId(user.getNamespaceId());
+            userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+            this.createIdentifier(userIdentifier);
+        }
+
     }
 }

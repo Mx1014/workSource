@@ -20,6 +20,7 @@ public interface UserProvider {
     void deleteUser(long id);
     void deleteUser(Integer namespaceId, List<String> namespaceUserTokens, String namespaceUserType);
     User findUserById(long id);
+    User findUserByNamespaceUserTokenAndType(String token, String type);
     User findUserByAccountName(String accountName);
     List<User> queryUsers(CrossShardListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
     
@@ -30,6 +31,7 @@ public interface UserProvider {
     void updateIdentifier(UserIdentifier userIdentifier);
     void deleteIdentifier(UserIdentifier userIdentifier);
     void deleteIdentifier(long id);
+    void deleteIdentifier(Integer namespaceId, List<Long> uIds);
     UserIdentifier findIdentifierById(long id);
     List<UserIdentifier> findClaimingIdentifierByToken(String identifierToken);
     List<UserIdentifier> findClaimedIdentifiersByToken(String identifierToken);
@@ -50,7 +52,8 @@ public interface UserProvider {
     
     void createUserLike(UserLike userLike);
     void updateUserLike(UserLike userLike);
-    void deleteUserLike(UserLike userLike);    void deleteUserLikeById(long id);
+    void deleteUserLike(UserLike userLike);
+    void deleteUserLikeById(long id);
     UserLike findUserLikeById(long id);
     UserLike findUserLike(long uid, String targetType, long targetId);
     List<UserLike> listUserLikes(long uid, String targetType);
