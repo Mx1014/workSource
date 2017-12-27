@@ -83,12 +83,13 @@ SELECT (@menu_scope_id := @menu_scope_id + 1), 61000, '', 'EhNamespaces', id, 2 
 -- “入孵申请”菜单改成“入驻申请”  add by yanjun 20171223
 UPDATE eh_web_menus set name = '入驻申请' where id = 36000 and name = '入孵申请';
 
-UPDATE eh_launch_pad_layouts set version_code = '2017121901', layout_json  = '{"versionCode":"2017121901","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"Banner","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"separatorFlag":1,"separatorHeight":16,"defaultOrder":10},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs","cssStyleFlag":1,"paddingTop":0,"paddingBottom":0,"paddingLeft":0,"paddingRight":0,"lineSpacing":0,"columnSpacing":0},"style":"Gallery","defaultOrder":20,"separatorFlag":0,"separatorHeight":0,"columnCount":2},{"title":"园区快讯","iconUrl": "https://content-1.zuolin.com:443/image/aW1hZ2UvTVRveU5UVmtNVFpqTnpBek1URXpOREkzTkRnMU1qWTFOMlZrWVdKa1lXTTNZdw?token=XlYdOjlDVEVb4XyQO4_dd5RI37zTkV3jCKm_-XbRyLIGVUorWGnyRCwLAgMGV86baX30BnQW4nqzF9nlXGe4M0DbZxWBVTqnL019xazIDuhE6A0OXiMQwRqGX84_1HHv","groupName":"","widget":"NewsFlash","instanceConfig":{"timeWidgetStyle":"datetime","itemGroup":"Default","categoryId":2,"newsSize":3},"defaultOrder":30,"separatorFlag":0,"separatorHeight":0}]}' where namespace_id = 999964 and `name` = 'ServiceMarketLayout' and `status` = 2;
+UPDATE eh_launch_pad_layouts set version_code = '2017121901', layout_json  = '{"versionCode":"2017121901","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"Banner","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"separatorFlag":1,"separatorHeight":16,"defaultOrder":10},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs","cssStyleFlag":1,"paddingTop":0,"paddingBottom":0,"paddingLeft":0,"paddingRight":0,"lineSpacing":0,"columnSpacing":0},"style":"Gallery","defaultOrder":20,"separatorFlag":0,"separatorHeight":0,"columnCount":2},{"title":"园区快讯","iconUrl": "https://content-1.zuolin.com:443/image/aW1hZ2UvTVRveU5UVmtNVFpqTnpBek1URXpOREkzTkRnMU1qWTFOMlZrWVdKa1lXTTNZdw?token=XlYdOjlDVEVb4XyQO4_dd5RI37zTkV3jCKm_-XbRyLIGVUorWGnyRCwLAgMGV86baX30BnQW4nqzF9nlXGe4M0DbZxWBVTqnL019xazIDuhE6A0OXiMQwRqGX84_1HHv","groupName":"","widget":"NewsFlash","instanceConfig":{"timeWidgetStyle":"datetime","itemGroup":"Default","categoryId":0,"newsSize":5},"defaultOrder":30,"separatorFlag":0,"separatorHeight":0}]}' where namespace_id = 999964 and `name` = 'ServiceMarketLayout' and `status` = 2;
 UPDATE eh_launch_pad_items set display_flag = 1 where namespace_id = 999964;
 
-UPDATE eh_launch_pad_items set item_label = '入驻申请', item_name = '入驻申请' where namespace_id = 999964 and item_name = '入孵申请';
-UPDATE eh_launch_pad_items set item_label = '产品信息查询', item_name = '产品信息查询' where namespace_id = 999964 and item_name = '产品信息发布';
-UPDATE eh_launch_pad_items set item_label = '机构信息查询', item_name = '机构信息查询' where namespace_id = 999964 and item_name = '机构信息发布';
+UPDATE eh_launch_pad_items set item_label = '入驻申请', item_name = '入驻申请', icon_uri = 'cs://1/image/aW1hZ2UvTVRvMVlqWmxOemhoWXpVMFpHWTJNREUwTXpKbVl6QmtNREF5WVRWaU1EQXhOUQ' where namespace_id = 999964 and item_label = '入孵申请';
+UPDATE eh_launch_pad_items set item_label = '产品信息查询', item_name = '产品信息查询', icon_uri = 'cs://1/image/aW1hZ2UvTVRvM05HVTBNall5WVdVME1USm1NakkyTkRBek5qSmhZMkkwTm1abVkyUmtPQQ' where namespace_id = 999964 and item_name = '产品信息发布';
+UPDATE eh_launch_pad_items set item_label = '机构信息查询', item_name = '机构信息查询', icon_uri = 'cs://1/image/aW1hZ2UvTVRvNE5EY3pPR1ZrTURJeU5UQm1OVGRqTW1JMlpXRTNOVEl3Tm1FMU9URXhaZw' where namespace_id = 999964 and item_name = '机构信息发布';
+UPDATE eh_launch_pad_items set item_label = '投融资信息', item_name = '投融资信息' where namespace_id = 999964 and item_name = '投融资对接';
 DELETE from eh_launch_pad_items where namespace_id = 999964 and item_name in ('新闻快讯', '更多');
 
 UPDATE eh_incubator_applies set root_id = id  WHERE root_id is NULL;
@@ -332,6 +333,11 @@ INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `commun
 INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999983', NULL, '21200', '21209');
 INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999983', NULL, '21200', '21214');
 
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999971', NULL, '21200', '21201');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999971', NULL, '21200', '21208');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999971', NULL, '21200', '21209');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999971', NULL, '21200', '21214');
+
 INSERT INTO eh_service_module_functions(id, privilege_id) SELECT privilege_id, privilege_id FROM eh_service_module_privileges WHERE privilege_type = 0 and privilege_id >= 21101 and privilege_id <=21113;
 UPDATE eh_service_module_functions SET module_id = 21100 WHERE privilege_id >= 21101 and privilege_id <=21113;
 SET @exclude_id = (SELECT MAX(id) FROM `eh_service_module_exclude_functions`);   
@@ -489,4 +495,4 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 
 -- 投票分享链接 add by yanjun 20171227
 set @id = (SELECT MAX(id) FROM eh_configurations);
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@id := @id + 1), 'poll.share.url', '/share-vote/build/index.html/#/detail', 'the relative path for sharing poll', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@id := @id + 1), 'poll.share.url', '/share-vote/build/index.html#/detail', 'the relative path for sharing poll', '0', NULL);
