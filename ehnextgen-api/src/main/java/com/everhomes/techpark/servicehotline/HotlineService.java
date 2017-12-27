@@ -1,16 +1,6 @@
 package com.everhomes.techpark.servicehotline;
 
-import com.everhomes.rest.servicehotline.AddHotlineCommand;
-import com.everhomes.rest.servicehotline.DeleteHotlineCommand;
-import com.everhomes.rest.servicehotline.GetHotlineListCommand;
-import com.everhomes.rest.servicehotline.GetHotlineListResponse;
-import com.everhomes.rest.servicehotline.GetHotlineSubjectCommand;
-import com.everhomes.rest.servicehotline.GetHotlineSubjectResponse;
-import com.everhomes.rest.servicehotline.SetHotlineSubjectCommand;
-import com.everhomes.rest.servicehotline.UpdateHotlineCommand;
-import com.everhomes.rest.servicehotline.UpdateHotlinesCommand;
-import com.everhomes.rest.user.GetUserInfoByIdCommand;
-import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.servicehotline.*;
 
 public interface HotlineService {
 
@@ -30,7 +20,7 @@ public interface HotlineService {
 
 	void updateHotlineOrder(UpdateHotlinesCommand cmd);
 
-	UserInfo getUserInfoById(GetUserInfoByIdCommand cmd);
+	GetUserInfoByIdResponse getUserInfoById(GetUserInfoByIdCommand cmd);
 
 
 }
