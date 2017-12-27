@@ -24,6 +24,6 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
     }
 
     private PaymentApplicationDTO toPaymentApplicationDTO() {
-
+        return null;
     }
 }
