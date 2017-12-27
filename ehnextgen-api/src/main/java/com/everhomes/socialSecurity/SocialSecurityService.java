@@ -3,6 +3,8 @@ package com.everhomes.socialSecurity;
 
 import com.everhomes.rest.socialSecurity.*;
 
+import java.math.BigDecimal;
+
 interface SocialSecurityService {
 
  
@@ -37,6 +39,8 @@ interface SocialSecurityService {
 
 	CalculateSocialSecurityReportsResponse calculateSocialSecurityReports(CalculateSocialSecurityReportsCommand cmd);
 
+
+	BigDecimal calculateAmount(BigDecimal radix, Integer ratio);
 
 	ListSocialSecurityReportsResponse listSocialSecurityReports(ListSocialSecurityReportsCommand cmd);
 

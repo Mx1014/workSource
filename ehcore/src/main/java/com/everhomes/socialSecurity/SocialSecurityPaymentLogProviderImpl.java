@@ -63,7 +63,16 @@ public class SocialSecurityPaymentLogProviderImpl implements SocialSecurityPayme
 				.orderBy(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SocialSecurityPaymentLog.class));
 	}
-	
+
+	@Override
+	public void deleteMonthLog(Long ownerId, String paymentMonth) {
+
+
+		getReadWriteContext().delete(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS)
+				.where(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.ORGANIZATION_ID.eq(ownerId))
+				.and(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.PAY_MONTH.eq(paymentMonth)).execute();
+	}
+
 	private EhSocialSecurityPaymentLogsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

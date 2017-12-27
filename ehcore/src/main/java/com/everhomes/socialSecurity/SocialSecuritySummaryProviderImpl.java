@@ -4,7 +4,10 @@ package com.everhomes.socialSecurity;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.listing.CrossShardListingLocator;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -63,7 +66,30 @@ public class SocialSecuritySummaryProviderImpl implements SocialSecuritySummaryP
 				.orderBy(Tables.EH_SOCIAL_SECURITY_SUMMARY.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SocialSecuritySummary.class));
 	}
-	
+
+	@Override
+	public void deleteSocialSecuritySummary(Long ownerId, String paymentMonth) {
+
+		getReadWriteContext().delete(Tables.EH_SOCIAL_SECURITY_SUMMARY)
+				.where(Tables.EH_SOCIAL_SECURITY_SUMMARY.ORGANIZATION_ID.eq(ownerId))
+				.and(Tables.EH_SOCIAL_SECURITY_SUMMARY.PAY_MONTH.eq(paymentMonth)).execute();
+	}
+
+	@Override
+	public List<SocialSecuritySummary> listSocialSecuritySummary(Long ownerId, String paymentMonth, CrossShardListingLocator locator, int pageSize) {
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_SUMMARY)
+				.where(Tables.EH_SOCIAL_SECURITY_SUMMARY.ORGANIZATION_ID.eq(ownerId));
+		if (null != paymentMonth) {
+			step = step.and(Tables.EH_SOCIAL_SECURITY_SUMMARY.PAY_MONTH.eq(paymentMonth));
+		}
+		if (null != locator && locator.getAnchor() != null) {
+			step.and(Tables.EH_SOCIAL_SECURITY_SUMMARY.ID.gt(locator.getAnchor()));
+		}
+		step.limit(pageSize);
+		return step.orderBy(Tables.EH_SOCIAL_SECURITY_SUMMARY.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, SocialSecuritySummary.class));
+	}
+
 	private EhSocialSecuritySummaryDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

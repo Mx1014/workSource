@@ -1407,7 +1407,7 @@ public class SalaryServiceImpl implements SalaryService {
 		if(null == result )
 			return response;
         Long nextPageAnchor = null;
-        if (result != null && result.size() > pageSize) {
+        if (result.size() > pageSize) {
             result.remove(result.size() - 1);
             nextPageAnchor = result.get(result.size() - 1).getId();
         }

@@ -23,7 +23,7 @@ public interface SocialSecurityPaymentProvider {
 
 	SocialSecurityPayment findSocialSecurityPayment(Long detailId, String payItem, Byte accumOrSocial);
 
-	String findPaymentMonth(Long detailId);
+	String findPaymentMonthByDetail(Long detailId);
 
 	Integer countUnFieldUsers(Long ownerId);
 
@@ -32,4 +32,6 @@ public interface SocialSecurityPaymentProvider {
 	void updateSocialSecurityPaymentFileStatus(Long ownerId);
 
 	SocialSecuritySummary calculateSocialSecuritySummary(Long ownerId, String paymentMonth);
+
+	List<Long> listDetailsByPayFlag(List<Long> detailIds, Byte accOrSocial);
 }

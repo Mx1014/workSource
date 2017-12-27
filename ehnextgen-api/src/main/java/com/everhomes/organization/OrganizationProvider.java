@@ -313,6 +313,8 @@ public interface OrganizationProvider {
 	Organization findOrganizationByNameAndNamespaceIdForJindie(String name, Integer namespaceId, String namespaceToken,
 															   String namespaceType);
 
+	List<Organization> listOrganizationByGroupTypesOrderByLevel(String superiorPath, List<String> groupTypes);
+
 	List<Organization> listOrganizationByGroupType(Long parentId, OrganizationGroupType groupType);
 
 	List<OrganizationMember> listOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator,Integer pageSize);

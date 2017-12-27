@@ -27,7 +27,7 @@ public class SocialSecurityPaymentDTO {
 	private String socialSecurityCity;
 	private String accumulationFundCity;
 	private BigDecimal socialSecurityRadix;
-	private String accumulationFundRadix;
+	private BigDecimal accumulationFundRadix;
 
 	public String getUserName() {
 		return userName;
@@ -85,11 +85,11 @@ public class SocialSecurityPaymentDTO {
 		this.socialSecurityRadix = socialSecurityRadix;
 	}
 
-	public String getAccumulationFundRadix() {
+	public BigDecimal getAccumulationFundRadix() {
 		return accumulationFundRadix;
 	}
 
-	public void setAccumulationFundRadix(String accumulationFundRadix) {
+	public void setAccumulationFundRadix(BigDecimal accumulationFundRadix) {
 		this.accumulationFundRadix = accumulationFundRadix;
 	}
 

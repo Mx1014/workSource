@@ -2356,7 +2356,33 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
 
-    @Override
+	@Override
+	public List<Organization> listOrganizationByGroupTypesOrderByLevel(String superiorPath, List<String> groupTypes) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<Organization> result = new ArrayList<Organization>();
+		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+
+		query.addConditions(Tables.EH_ORGANIZATIONS.PATH.like(superiorPath));
+
+		if (null != groupTypes && groupTypes.size() > 0)
+			query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.in(groupTypes));
+
+		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+
+		query.addOrderBy(Tables.EH_ORGANIZATIONS.LEVEL.asc(),Tables.EH_ORGANIZATIONS.ID.desc());
+
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, Organization.class));
+			return null;
+		});
+
+		return result;
+	}
+
+
+
+	@Override
     public List<Organization> listOrganizationByGroupType(Long parentId, OrganizationGroupType groupType) {
         List<String> groupTypes = new ArrayList<>();
         groupTypes.add(groupType.getCode());
@@ -5879,5 +5905,16 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		dao.update(detailDisplay);
 
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityOrganizationDetailDisplay.class, detailDisplay.getId());
+	}
+
+	@Override
+	public List<OrganizationMemberDetails> listOrganizationMemberDetails(Long ownerId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<OrganizationMemberDetails> results =  context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+				.where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(ownerId))
+				.fetchInto(OrganizationMemberDetails.class);
+		if(null == results || results.size() == 0)
+			return  null ;
+		return results;
 	}
 }
