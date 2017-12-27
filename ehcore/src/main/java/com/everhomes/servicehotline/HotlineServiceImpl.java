@@ -376,8 +376,10 @@ public class HotlineServiceImpl implements HotlineService {
 		GetUserInfoByIdResponse info=ConvertHelper.convert(queryUser, GetUserInfoByIdResponse.class);
 		info.setPhones(phones);
 
-		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getId(),cmd.getOrgId());
-		info.setContractName(member.getContactName());
+		if (cmd.getOrgId()!=null) {
+			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getId(), cmd.getOrgId());
+			info.setContractName(member.getContactName());
+		}
 		return info;
 	}
 
