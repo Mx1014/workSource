@@ -82,6 +82,12 @@ drop column day_close_time,
 drop column time_step,
 drop column cancel_time,
 drop column cancel_flag,
+drop column workday_price,
+drop column weekend_price,
+drop column org_member_workday_price,
+drop column org_member_weekend_price,
+drop column approving_user_workday_price,
+drop column approving_user_weekend_price,
 drop column exclusive_flag;
 
 ALTER TABLE `eh_rentalv2_default_rules`
@@ -93,7 +99,6 @@ ADD COLUMN `overtime_strategy` tinyint(4) DEFAULT NULL COMMENT '1-custom, 2-full
 
 ALTER TABLE `eh_rentalv2_orders`
 ADD COLUMN `resource_type` varchar(64) NOT NULL COMMENT '资源类型';
-
 
 
 
