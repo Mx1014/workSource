@@ -661,6 +661,7 @@ public class ContentServerServiceImpl implements ContentServerService {
         dto.setUserId(userId);
         dto.setUserToken(cmd.getUserToken());
         dto.setTitle(cmd.getTitle());
+        dto.setReadOnly(cmd.getReadOnly());
         
         obj = redisTemplate.opsForValue().getAndSet(key, StringHelper.toJsonString(dto));
         if(obj != null) {
@@ -766,6 +767,15 @@ public class ContentServerServiceImpl implements ContentServerService {
         UploadFileInfoDTO dto = (UploadFileInfoDTO)StringHelper.fromJsonString(str, UploadFileInfoDTO.class);
         if(dto.getComplete() != null && dto.getComplete() > 0) {
             return dto;
+        }
+        
+        if(dto.getInfos() != null) {
+            for(UploadFileInfo info : dto.getInfos()) {
+                if(info.getUri() != null && !info.getUri().isEmpty() && info.getUrl() != null && info.getUrl().isEmpty()) {
+                info.setUrl(this.parserUri(info.getUri()));    
+                }
+                
+            }
         }
         
         dto.setComplete(1l);
