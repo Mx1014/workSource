@@ -470,4 +470,4 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 
 -- 投票分享链接 add by yanjun 20171227
 set @id = (SELECT MAX(id) FROM eh_configurations);
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@id := @id + 1), 'poll.share.url', '/share-vote/build/index.html/#/detail', 'the relative path for sharing poll', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@id := @id + 1), 'poll.share.url', '/share-vote/build/index.html#/detail', 'the relative path for sharing poll', '0', NULL);
