@@ -3904,7 +3904,7 @@ public class QualityServiceImpl implements QualityService {
 				if(community != null) {
 					scoreGroupDto.setTargetName(community.getName());
 					//add for order
-					//PM换成areaSize字段 20171208
+					//换成areaSize字段 20171208
 					//scoreGroupDto.setBuildArea(community.getBuildArea());
 					scoreGroupDto.setBuildArea(community.getAreaSize());
 				}
@@ -3990,11 +3990,23 @@ public class QualityServiceImpl implements QualityService {
 			}
 
 		}
-//		//再次按照order排序
-//		sortedScoresByTarget.sort(Comparator.comparing(ScoreGroupByTargetDTO::getOrderId));
 
 		response.setScores(scoresByTarget);
+		//计算平均分 临时解决平均分的问题
+		calculateAverageScore(response);
 		return response;
+	}
+
+	private void calculateAverageScore(CountScoresResponse response) {
+		Double sum = 0D;
+		Double averageScore = 0D;
+		if (response.getScores() != null && response.getScores().size() > 0) {
+			for (ScoreGroupByTargetDTO score : response.getScores()) {
+				sum = sum + score.getTotalScore();
+			}
+			averageScore = (double) Math.round(sum / response.getScores().size());
+		}
+		response.setAverageScore(averageScore);
 	}
 
 	@Override
