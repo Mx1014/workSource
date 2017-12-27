@@ -846,6 +846,9 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhPunchTimeRules.class, Tables.EH_PUNCH_TIME_RULES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PUNCH_TIME_RULES.ID.max()).from(Tables.EH_PUNCH_TIME_RULES).fetchOne().value1();
         });
+        syncTableSequence(null, EhPunchTimeIntervals.class, Tables.EH_PUNCH_TIME_INTERVALS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PUNCH_TIME_INTERVALS.ID.max()).from(Tables.EH_PUNCH_TIME_INTERVALS).fetchOne().value1();
+        });
         syncTableSequence(null, EhPunchLocationRules.class, Tables.EH_PUNCH_LOCATION_RULES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PUNCH_LOCATION_RULES.ID.max()).from(Tables.EH_PUNCH_LOCATION_RULES).fetchOne().value1();
         });
