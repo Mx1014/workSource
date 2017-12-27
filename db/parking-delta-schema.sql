@@ -115,7 +115,6 @@ drop column contact_num,
 drop column overtime_time,
 drop column unit,
 drop column rental_step,
-drop column resource_counts,
 drop column day_open_time,
 drop column day_close_time,
 drop column time_step,
@@ -160,6 +159,7 @@ CREATE TABLE `eh_rentalv2_default_rules` (
   `open_weekday` varchar(7) DEFAULT NULL COMMENT '7位二进制，0000000每一位表示星期7123456',
   `multi_unit` tinyint(4) DEFAULT NULL COMMENT '是否允许预约多个场所: 1-是, 0-否',
   `auto_assign` tinyint(4) DEFAULT NULL COMMENT '是否动态分配: 1-是, 0-否',
+  `resource_counts` double DEFAULT NULL COMMENT '可预约个数',
 
   `refund_flag` tinyint(4) DEFAULT NULL COMMENT '是否支持退款: 1-是, 0-否',
   `refund_ratio` int(11) DEFAULT NULL COMMENT '退款比例',
@@ -178,7 +178,7 @@ CREATE TABLE `eh_rentalv2_default_rules` (
 
   --`rental_step` int(11) DEFAULT NULL COMMENT 'how many time_step must be rental every time',
 
-  --`resource_counts` double DEFAULT NULL COMMENT '可预约个数',
+
   --`day_open_time` double DEFAULT NULL,
   --`day_close_time` double DEFAULT NULL,
   --`time_step` double DEFAULT NULL COMMENT '步长，每个单元格是多少小时（半小时是0.5）',
