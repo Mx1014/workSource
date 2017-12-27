@@ -14,7 +14,13 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.organization.*;
+import com.everhomes.module.ServiceModuleService;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationJobPosition;
+import com.everhomes.organization.OrganizationJobPositionMap;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rentalv2.Rentalv2ServiceImpl;
 import com.everhomes.repeat.RepeatService;
@@ -29,8 +35,109 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.organization.*;
-import com.everhomes.rest.quality.*;
+import com.everhomes.rest.module.CheckModuleManageCommand;
+import com.everhomes.rest.organization.ListOrganizationContactByJobPositionIdCommand;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.quality.CountSampleTaskCommunityScoresCommand;
+import com.everhomes.rest.quality.CountSampleTaskScoresCommand;
+import com.everhomes.rest.quality.CountSampleTaskScoresResponse;
+import com.everhomes.rest.quality.CountSampleTaskSpecificationItemScoresCommand;
+import com.everhomes.rest.quality.CountSampleTaskSpecificationItemScoresResponse;
+import com.everhomes.rest.quality.CountSampleTasksCommand;
+import com.everhomes.rest.quality.CountSampleTasksResponse;
+import com.everhomes.rest.quality.CountScoresCommand;
+import com.everhomes.rest.quality.CountScoresResponse;
+import com.everhomes.rest.quality.CountScoresSpecificationDTO;
+import com.everhomes.rest.quality.CountTasksCommand;
+import com.everhomes.rest.quality.CountTasksResponse;
+import com.everhomes.rest.quality.CreatQualityStandardCommand;
+import com.everhomes.rest.quality.CreateQualityInspectionTaskCommand;
+import com.everhomes.rest.quality.CreateQualitySpecificationCommand;
+import com.everhomes.rest.quality.CreateSampleQualityInspectionCommand;
+import com.everhomes.rest.quality.CurrentUserInfoDTO;
+import com.everhomes.rest.quality.DeleteFactorCommand;
+import com.everhomes.rest.quality.DeleteQualityCategoryCommand;
+import com.everhomes.rest.quality.DeleteQualitySpecificationCommand;
+import com.everhomes.rest.quality.DeleteQualityStandardCommand;
+import com.everhomes.rest.quality.DeleteUserQualityInspectionTaskTemplateCommand;
+import com.everhomes.rest.quality.EvaluationDTO;
+import com.everhomes.rest.quality.ExecuteGroupAndPosition;
+import com.everhomes.rest.quality.FactorsDTO;
+import com.everhomes.rest.quality.FindQualityInspectionTaskCommand;
+import com.everhomes.rest.quality.FindSampleQualityInspectionCommand;
+import com.everhomes.rest.quality.GetQualitySpecificationCommand;
+import com.everhomes.rest.quality.GroupUserDTO;
+import com.everhomes.rest.quality.ListEvaluationsCommand;
+import com.everhomes.rest.quality.ListEvaluationsResponse;
+import com.everhomes.rest.quality.ListFactorsCommand;
+import com.everhomes.rest.quality.ListFactorsResponse;
+import com.everhomes.rest.quality.ListQualityCategoriesCommand;
+import com.everhomes.rest.quality.ListQualityCategoriesResponse;
+import com.everhomes.rest.quality.ListQualityInspectionLogsCommand;
+import com.everhomes.rest.quality.ListQualityInspectionLogsResponse;
+import com.everhomes.rest.quality.ListQualityInspectionTasksCommand;
+import com.everhomes.rest.quality.ListQualityInspectionTasksResponse;
+import com.everhomes.rest.quality.ListQualitySpecificationsCommand;
+import com.everhomes.rest.quality.ListQualitySpecificationsResponse;
+import com.everhomes.rest.quality.ListQualityStandardsCommand;
+import com.everhomes.rest.quality.ListQualityStandardsResponse;
+import com.everhomes.rest.quality.ListRecordsByTaskIdCommand;
+import com.everhomes.rest.quality.ListSampleQualityInspectionCommand;
+import com.everhomes.rest.quality.ListSampleQualityInspectionResponse;
+import com.everhomes.rest.quality.ListSampleQualityInspectionTasksCommand;
+import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
+import com.everhomes.rest.quality.ListUserQualityInspectionTaskTemplatesCommand;
+import com.everhomes.rest.quality.OwnerType;
+import com.everhomes.rest.quality.ProcessType;
+import com.everhomes.rest.quality.QualityCategoriesDTO;
+import com.everhomes.rest.quality.QualityGroupType;
+import com.everhomes.rest.quality.QualityInspectionCategoryStatus;
+import com.everhomes.rest.quality.QualityInspectionLogDTO;
+import com.everhomes.rest.quality.QualityInspectionLogProcessType;
+import com.everhomes.rest.quality.QualityInspectionLogType;
+import com.everhomes.rest.quality.QualityInspectionSpecificationDTO;
+import com.everhomes.rest.quality.QualityInspectionSpecificationItemResultsDTO;
+import com.everhomes.rest.quality.QualityInspectionTaskAttachmentDTO;
+import com.everhomes.rest.quality.QualityInspectionTaskDTO;
+import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
+import com.everhomes.rest.quality.QualityInspectionTaskResult;
+import com.everhomes.rest.quality.QualityInspectionTaskReviewResult;
+import com.everhomes.rest.quality.QualityInspectionTaskStatus;
+import com.everhomes.rest.quality.QualityModelType;
+import com.everhomes.rest.quality.QualityNotificationTemplateCode;
+import com.everhomes.rest.quality.QualityServiceErrorCode;
+import com.everhomes.rest.quality.QualityStandardStatus;
+import com.everhomes.rest.quality.QualityStandardsDTO;
+import com.everhomes.rest.quality.QualityTaskType;
+import com.everhomes.rest.quality.ReportRectifyResultCommand;
+import com.everhomes.rest.quality.ReportSpecificationItemResultsDTO;
+import com.everhomes.rest.quality.ReportVerificationResultCommand;
+import com.everhomes.rest.quality.ReviewReviewQualityStandardCommand;
+import com.everhomes.rest.quality.ReviewVerificationResultCommand;
+import com.everhomes.rest.quality.SampleCommunity;
+import com.everhomes.rest.quality.SampleCommunitySpecification;
+import com.everhomes.rest.quality.SampleGroupDTO;
+import com.everhomes.rest.quality.SampleQualityInspectionDTO;
+import com.everhomes.rest.quality.SampleTaskScoreDTO;
+import com.everhomes.rest.quality.ScoreDTO;
+import com.everhomes.rest.quality.ScoreGroupByTargetDTO;
+import com.everhomes.rest.quality.SearchQualityTasksCommand;
+import com.everhomes.rest.quality.SpecificationApplyPolicy;
+import com.everhomes.rest.quality.SpecificationInspectionType;
+import com.everhomes.rest.quality.SpecificationItemScores;
+import com.everhomes.rest.quality.SpecificationScopeCode;
+import com.everhomes.rest.quality.StandardGroupDTO;
+import com.everhomes.rest.quality.TaskCountDTO;
+import com.everhomes.rest.quality.UpdateFactorCommand;
+import com.everhomes.rest.quality.UpdateQualityCategoryCommand;
+import com.everhomes.rest.quality.UpdateQualitySpecificationCommand;
+import com.everhomes.rest.quality.UpdateQualityStandardCommand;
+import com.everhomes.rest.quality.UpdateSampleQualityInspectionCommand;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.rest.user.MessageChannelType;
@@ -56,13 +163,30 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -126,6 +250,9 @@ public class QualityServiceImpl implements QualityService {
 
 	@Autowired
 	private PortalService portalService;
+
+	@Autowired
+	private ServiceModuleService serviceModuleService;
 
 	@Override
 	public QualityStandardsDTO creatQualityStandard(CreatQualityStandardCommand cmd) {
@@ -3358,6 +3485,9 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public SampleQualityInspectionDTO createSampleQualityInspection(CreateSampleQualityInspectionCommand cmd) {
+
+		checkManager(cmd.getOwnerId(), cmd.getOwnerType());
+
 		QualityInspectionSamples sample = ConvertHelper.convert(cmd, QualityInspectionSamples.class);
 		Long uid = UserContext.current().getUser().getId();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -3396,6 +3526,9 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public void deleteSampleQualityInspection(FindSampleQualityInspectionCommand cmd) {
+
+		checkManager(cmd.getOwnerId(), cmd.getOwnerType());
+
 		List<QualityInspectionTasks> tasks = qualityProvider.listTaskByParentId(cmd.getId());
 		if(tasks != null && tasks.size() > 0) {
 			LOGGER.error("the sample which id="+cmd.getId()+" has generate tasks!");
@@ -3771,7 +3904,7 @@ public class QualityServiceImpl implements QualityService {
 				if(community != null) {
 					scoreGroupDto.setTargetName(community.getName());
 					//add for order
-					//PM换成areaSize字段 20171208
+					//换成areaSize字段 20171208
 					//scoreGroupDto.setBuildArea(community.getBuildArea());
 					scoreGroupDto.setBuildArea(community.getAreaSize());
 				}
@@ -3826,17 +3959,16 @@ public class QualityServiceImpl implements QualityService {
 			}
 		}
 		if (scoresByTarget.size() > 0) {
+			// 现网数据有很多建筑面积null
+			scoresByTarget.forEach((s) -> {
+				if (s.getBuildArea() == null)
+					s.setBuildArea(0D);
+			});
 			//sort  scoreByTarget
 			scoresByTarget.sort((o1, o2) -> {
 				if (!o1.getTotalScore().equals(o2.getTotalScore())) {
 					return o2.getTotalScore().compareTo(o1.getTotalScore());
 				} else {
-					// 现网数据有很多建筑面积null
-					if (o2.getBuildArea() == null)
-						o2.setBuildArea(0D);
-					if (o1.getBuildArea() == null)
-						o1.setBuildArea(0D);
-
 					return o2.getBuildArea().compareTo(o1.getBuildArea());
 				}
 			});
@@ -3857,11 +3989,23 @@ public class QualityServiceImpl implements QualityService {
 			}
 
 		}
-//		//再次按照order排序
-//		sortedScoresByTarget.sort(Comparator.comparing(ScoreGroupByTargetDTO::getOrderId));
 
 		response.setScores(scoresByTarget);
+		//计算平均分 临时解决平均分的问题
+		calculateAverageScore(response);
 		return response;
+	}
+
+	private void calculateAverageScore(CountScoresResponse response) {
+		Double sum = 0D;
+		Double averageScore = 0D;
+		if (response.getScores() != null && response.getScores().size() > 0) {
+			for (ScoreGroupByTargetDTO score : response.getScores()) {
+				sum = sum + score.getTotalScore();
+			}
+			averageScore = (double) Math.round(sum / response.getScores().size());
+		}
+		response.setAverageScore(averageScore);
 	}
 
 	@Override
@@ -4341,6 +4485,26 @@ public class QualityServiceImpl implements QualityService {
 		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, QualityConstant.QUALITY_MODULE, null, null, null,communityId);
 
 
+	}
+
+	private void checkManager(Long ownerId, String ownerType) {
+		ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+		listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+		listServiceModuleAppsCommand.setModuleId(QualityConstant.QUALITY_MODULE);
+		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+		CheckModuleManageCommand checkModuleManageCommand = new CheckModuleManageCommand();
+		checkModuleManageCommand.setModuleId(QualityConstant.QUALITY_MODULE);
+		checkModuleManageCommand.setOrganizationId(ownerId);
+		checkModuleManageCommand.setOwnerType(ownerType);
+		checkModuleManageCommand.setUserId(UserContext.currentUserId());
+		if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+			checkModuleManageCommand.setAppId(apps.getServiceModuleApps().get(0).getId());
+		}
+		if (serviceModuleService.checkModuleManage(checkModuleManageCommand) == 0) {
+			LOGGER.error("Permission is denied, namespaceId={}, orgId={},", UserContext.getCurrentNamespaceId(), ownerId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+					"权限不足");
+		}
 	}
 	@Override
 	public HttpServletResponse exportSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd, HttpServletResponse httpResponse) {
