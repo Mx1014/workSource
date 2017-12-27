@@ -2363,7 +2363,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             log.setErrorLog("Employee employeeType is empty.");
             log.setCode(ArchivesServiceErrorCode.ERROR_EMPLOYEE_TYPE_IS_EMPTY);
             return false;
-        }else
+        } else
             return true;
     }
 
@@ -2396,7 +2396,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         int weekDay = c.get(Calendar.DAY_OF_WEEK);
         List<ArchivesNotifications> results = archivesProvider.listArchivesNotificationsByWeek(weekDay);
         if (results != null && results.size() > 0) {
-        //  2.按照时间归类，来启动对应时间点的定时器
+            //  2.按照时间归类，来启动对应时间点的定时器
             Map<Integer, List<ArchivesNotifications>> notifyMap = results.stream().collect(Collectors.groupingBy
                     (ArchivesNotifications::getNotifyHour));
             for (Integer hour : notifyMap.keySet()) {
@@ -2405,7 +2405,33 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
     }
 
-    private void sendEmails(List<ArchivesNotifications> notifyLists){
+    private void sendEmails(List<ArchivesNotifications> notifyLists) {
 
     }
+
+    @Override
+    public List<Long> listSocialSecurityEmployees(Long organizationId, Long departmentId, String keywords, List<Byte> socialSecurityItem) {
+        List<Long> result = new ArrayList<>();
+
+        ListOrganizationContactCommand orgCommand = new ListOrganizationContactCommand();
+        orgCommand.setOrganizationId(organizationId);
+        orgCommand.setKeywords(keywords);
+        if (departmentId != null) {
+            orgCommand.setOrganizationId(departmentId);
+            List<String> groupTypes = new ArrayList<>();
+            groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+            groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+            orgCommand.setTargetTypes(groupTypes);
+        }
+        orgCommand.setPageSize(1000000);
+        orgCommand.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CHILD_ENTERPRISE.getCode()));
+        ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
+
+        if (members.getMembers() != null && members.getMembers().size() > 0)
+            members.getMembers().forEach(r -> {
+                result.add(r.getDetailId());
+            });
+        return result;
+    }
+
 }
