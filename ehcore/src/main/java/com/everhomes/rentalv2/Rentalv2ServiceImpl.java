@@ -644,6 +644,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if (null == cmd.getRentalStartTimeFlag()) {
 			cmd.setRentalStartTimeFlag(NormalFlag.NONEED.getCode());
 		}
+		if (NormalFlag.NONEED.getCode() == cmd.getNeedPay()) {
+			cmd.setPriceRules(buildDefaultPriceRule(cmd.getRentalTypes()));
+		}
 
 		RentalDefaultRule defaultRule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getResourceTypeId());
