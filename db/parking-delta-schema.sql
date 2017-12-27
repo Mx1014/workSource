@@ -60,7 +60,6 @@ CREATE TABLE `eh_rentalv2_order_rules` (
 
 
 ALTER TABLE `eh_rentalv2_default_rules`
-ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型',
 ADD COLUMN `source_type` varchar(255) DEFAULT NULL COMMENT 'default_rule, resource_rule',
 ADD COLUMN `source_id` bigint(20) DEFAULT NULL,
 ADD COLUMN `resource_type` varchar(64) NOT NULL COMMENT '资源类型',
