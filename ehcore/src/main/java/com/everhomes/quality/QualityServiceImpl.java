@@ -136,7 +136,7 @@ public class QualityServiceImpl implements QualityService {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		}*/
 
-		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_CREATE,cmd.getTargetId());
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_CREATE, cmd.getTargetId());
 
 		User user = UserContext.current().getUser();
 		RepeatSettings repeat = null;
@@ -235,7 +235,7 @@ public class QualityServiceImpl implements QualityService {
 	public QualityStandardsDTO updateQualityStandard(UpdateQualityStandardCommand cmd) {
 		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARD_UPDATE, 0L);
 		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);*/
-		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_UPDATE,cmd.getTargetId());
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_UPDATE, cmd.getTargetId());
 
 		User user = UserContext.current().getUser();
 
@@ -426,7 +426,7 @@ public class QualityServiceImpl implements QualityService {
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
 		}*/
-		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_LIST,cmd.getTargetId());
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_LIST, cmd.getTargetId());
 
 
 		Long ownerId = cmd.getOwnerId();
@@ -2204,7 +2204,7 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public HttpServletResponse exportInspectionTasks(
 			ListQualityInspectionTasksCommand cmd, HttpServletResponse response) {
-		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_TASK_LIST, 0L);
+		//Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_TASK_LIST, 0L);
 		/*if(cmd.getTargetId() == 0L) {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		} else {
@@ -3111,7 +3111,9 @@ public class QualityServiceImpl implements QualityService {
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		}*/
-		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_STAT_TASK,cmd.getTargetId());
+		//针对检查统计和任务数统计 检查统计里面没有具体的项目id
+		if (cmd.getCheckFlag() == null || !cmd.getCheckFlag().equals(true))
+			checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STAT_TASK, cmd.getTargetId());
 
 
 		CountTasksResponse response = new CountTasksResponse();
@@ -3812,6 +3814,9 @@ public class QualityServiceImpl implements QualityService {
 					Double totalScore = 0D;
 					if (scores.size() > 0) {
 						for (ScoreDTO score : scores) {
+							if (score.getScore() == null) {
+								score.setScore(0D);
+							}
 							totalScore = totalScore + score.getScore();
 						}
 						scoreGroupDto.setTotalScore(totalScore);
@@ -3820,17 +3825,18 @@ public class QualityServiceImpl implements QualityService {
 				scoresByTarget.add(scoreGroupDto);
 			}
 		}
-		//List<ScoreGroupByTargetDTO> sortedScoresByTarget = new ArrayList<>();
 		if (scoresByTarget.size() > 0) {
 			//sort  scoreByTarget
-			/*sortedScoresByTarget = scoresByTarget.stream()
-					.sorted(Comparator.comparing(ScoreGroupByTargetDTO::getTotalScore).reversed())
-                    .collect(Collectors.toList());*/
-
 			scoresByTarget.sort((o1, o2) -> {
 				if (!o1.getTotalScore().equals(o2.getTotalScore())) {
 					return o2.getTotalScore().compareTo(o1.getTotalScore());
 				} else {
+					// 现网数据有很多建筑面积null
+					if (o2.getBuildArea() == null)
+						o2.setBuildArea(0D);
+					if (o1.getBuildArea() == null)
+						o1.setBuildArea(0D);
+
 					return o2.getBuildArea().compareTo(o1.getBuildArea());
 				}
 			});
@@ -4399,11 +4405,10 @@ public class QualityServiceImpl implements QualityService {
 		row.createCell(++i).setCellValue("排名");
 		row.createCell(++i).setCellValue("项目名称");
 		row.createCell(++i).setCellValue("项目面积");
+		row.createCell(++i).setCellValue("加权得分");
 		for (CountScoresSpecificationDTO score : specifications) {
 			row.createCell(++i).setCellValue(score.getSpecificationName()+score.getSpecificationWeight()*100+"%");
 		}
-		row.createCell(++i).setCellValue("加权得分");
-
 	}
 
 	private void setNewQualityScoreBookRow(Sheet sheet, ScoreGroupByTargetDTO dto) {
@@ -4412,12 +4417,11 @@ public class QualityServiceImpl implements QualityService {
 		row.createCell(++i).setCellValue(dto.getOrderId());
 		row.createCell(++i).setCellValue(dto.getTargetName());
 		row.createCell(++i).setCellValue(dto.getBuildArea());
+		row.createCell(++i).setCellValue(dto.getTotalScore());
 
 		List<ScoreDTO> scores = dto.getScores();
 		for (ScoreDTO score : scores) {
 			row.createCell(++i).setCellValue(score.getScore());
 		}
-		row.createCell(++i).setCellValue(dto.getTotalScore());
-
 	}
 }

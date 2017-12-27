@@ -9,9 +9,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.everhomes.community.Community;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.region.Region;
 import com.everhomes.rest.servicehotline.*;
-import com.everhomes.rest.user.GetUserInfoByIdCommand;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.*;
 import org.aspectj.internal.lang.annotation.ajcDeclareAnnotation;
@@ -29,7 +30,6 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.techpark.servicehotline.HotlineService;
 import com.everhomes.techpark.servicehotline.ServiceConfiguration;
@@ -62,6 +62,9 @@ public class HotlineServiceImpl implements HotlineService {
 	
 	@Autowired
 	private DbProvider dbProvider;
+
+	@Autowired
+	private OrganizationProvider organizationProvider;
 
 	@Override
 	public GetHotlineSubjectResponse getHotlineSubject(
@@ -167,6 +170,8 @@ public class HotlineServiceImpl implements HotlineService {
 				User user = this.userProvider.findUserById(r.getUserId());
 				if (null != user)
 					dto.setAvatar(populateUserAvatar ( user,user.getAvatar()));
+				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+				dto.setPhone(userIdentifier.getIdentifierToken());
 			}
 			hotlines.add(dto);
 		});
@@ -360,7 +365,7 @@ public class HotlineServiceImpl implements HotlineService {
 	}
 
 	@Override
-	public UserInfo getUserInfoById(GetUserInfoByIdCommand cmd) {
+	public GetUserInfoByIdResponse getUserInfoById(GetUserInfoByIdCommand cmd) {
 		User queryUser = userProvider.findUserById(cmd.getId());
 		if(queryUser == null){
 			return null;
@@ -368,8 +373,13 @@ public class HotlineServiceImpl implements HotlineService {
 		List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(queryUser.getId());
 		List<String> phones = identifiers.stream().filter((r)-> { return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.MOBILE; })
 				.map(r->r.getIdentifierToken()).collect(Collectors.toList());
-		UserInfo info=ConvertHelper.convert(queryUser, UserInfo.class);
+		GetUserInfoByIdResponse info=ConvertHelper.convert(queryUser, GetUserInfoByIdResponse.class);
 		info.setPhones(phones);
+
+		if (cmd.getOrgId()!=null) {
+			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getId(), cmd.getOrgId());
+			info.setContractName(member.getContactName());
+		}
 		return info;
 	}
 
