@@ -73,6 +73,15 @@ public class SocialSecurityPaymentLogProviderImpl implements SocialSecurityPayme
 				.and(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.PAY_MONTH.eq(paymentMonth)).execute();
 	}
 
+	@Override
+	public SocialSecurityPaymentLog findAnyOneSocialSecurityPaymentLog(Long ownerId, String paymentMonth) {
+		return getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS)
+				.where(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.ORGANIZATION_ID.eq(ownerId))
+				.and(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.PAY_MONTH.eq(paymentMonth))
+				.orderBy(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.ID.asc())
+				.fetchAny().map(r -> ConvertHelper.convert(r, SocialSecurityPaymentLog.class));
+	}
+
 	private EhSocialSecurityPaymentLogsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
