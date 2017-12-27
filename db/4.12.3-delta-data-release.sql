@@ -332,6 +332,11 @@ INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `commun
 INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999983', NULL, '21200', '21209');
 INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999983', NULL, '21200', '21214');
 
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999971', NULL, '21200', '21201');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999971', NULL, '21200', '21208');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999971', NULL, '21200', '21209');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999971', NULL, '21200', '21214');
+
 INSERT INTO eh_service_module_functions(id, privilege_id) SELECT privilege_id, privilege_id FROM eh_service_module_privileges WHERE privilege_type = 0 and privilege_id >= 21101 and privilege_id <=21113;
 UPDATE eh_service_module_functions SET module_id = 21100 WHERE privilege_id >= 21101 and privilege_id <=21113;
 SET @exclude_id = (SELECT MAX(id) FROM `eh_service_module_exclude_functions`);   
