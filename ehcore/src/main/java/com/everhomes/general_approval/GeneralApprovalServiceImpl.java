@@ -542,6 +542,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		//  删除与表单相关控件组
 		this.generalFormProvider.deleteGeneralFormGroupsByFormOriginId(cmd.getFormOriginId());
 
+        /***    更改与表单相关业务的状态    ***/
+        //  流程审批
+        disableApprovalByFormOriginId(cmd.getFormOriginId(), 52000L, "any-module");
     }
 
     @Override
@@ -1133,5 +1136,10 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 LOGGER.error("close error", e);
             }
         }
+    }
+
+    @Override
+    public void disableApprovalByFormOriginId(Long formOriginId, Long moduleId, String moduleType){
+        generalApprovalProvider.disableApprovalByFormOriginId(formOriginId, moduleId, moduleType);
     }
 }
