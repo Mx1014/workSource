@@ -3814,6 +3814,9 @@ public class QualityServiceImpl implements QualityService {
 					Double totalScore = 0D;
 					if (scores.size() > 0) {
 						for (ScoreDTO score : scores) {
+							if (score.getScore() == null) {
+								score.setScore(0D);
+							}
 							totalScore = totalScore + score.getScore();
 						}
 						scoreGroupDto.setTotalScore(totalScore);
@@ -3822,13 +3825,8 @@ public class QualityServiceImpl implements QualityService {
 				scoresByTarget.add(scoreGroupDto);
 			}
 		}
-		//List<ScoreGroupByTargetDTO> sortedScoresByTarget = new ArrayList<>();
 		if (scoresByTarget.size() > 0) {
 			//sort  scoreByTarget
-			/*sortedScoresByTarget = scoresByTarget.stream()
-					.sorted(Comparator.comparing(ScoreGroupByTargetDTO::getTotalScore).reversed())
-                    .collect(Collectors.toList());*/
-
 			scoresByTarget.sort((o1, o2) -> {
 				if (!o1.getTotalScore().equals(o2.getTotalScore())) {
 					return o2.getTotalScore().compareTo(o1.getTotalScore());
