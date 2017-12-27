@@ -1028,7 +1028,7 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public ContractDetailDTO updateContract(UpdateContractCommand cmd) {
-		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
+		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_CREATE, cmd.getOrgId(), cmd.getCommunityId());
 		Contract exist = checkContract(cmd.getId());
 		Contract contract = ConvertHelper.convert(cmd, Contract.class);
 		Contract existContract = contractProvider.findActiveContractByContractNumber(cmd.getNamespaceId(), cmd.getContractNumber());

@@ -4402,7 +4402,11 @@ public class ForumServiceImpl implements ForumService {
                             wechatSignup = activity.getWechatSignup();
                         }
                         post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup);
-                	} else {
+                	} else if(post.getCategoryId() != null && post.getCategoryId() == CategoryConstants.CATEGORY_ID_TOPIC_POLLING) {
+                        //投票帖子用自己的分享链接 modified by yanjun 220171227
+                        relativeUrl = configProvider.getValue(ConfigConstants.POLL_SHARE_URL, "");
+                	    post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId());
+                    }else {
                 		post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId());
                 	}
                 }

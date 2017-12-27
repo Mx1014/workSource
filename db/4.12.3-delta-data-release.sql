@@ -30,13 +30,6 @@ INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'enterprise_customer', 'trackingUid', '������', 'Long', '19', '/19/', '1', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
 
 
--- fix 20310
-INSERT INTO eh_service_module_functions(id, module_id, privilege_id) SELECT privilege_id, module_id, privilege_id FROM eh_service_module_privileges WHERE privilege_type = 0 and module_id = 21210;
-SET @exclude_id = (SELECT MAX(id) FROM `eh_service_module_exclude_functions`);   
-INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999983', NULL, '21210', '21201');
-INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999983', NULL, '21210', '21208');
-INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999983', NULL, '21210', '21209');
-INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999983', NULL, '21210', '21214');
 
 -- 服务热线1.3 by st.zheng
 set @eh_service_configurations_id = (select max(id) from eh_service_configurations);
@@ -259,9 +252,9 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) V
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21112, '0', '客户管理 管理导出权限', '客户管理 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21113, '0', '客户管理 统计分析查看权限', '客户管理 业务模块权限', NULL);
 
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21201, '0', '合同管理 新增权限', '合同管理 业务模块权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21201, '0', '合同管理 新增修改权限', '合同管理 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21202, '0', '合同管理 签约、发起审批权限', '合同管理 业务模块权限', NULL);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21203, '0', '合同管理 修改权限', '合同管理 业务模块权限', NULL);
+-- INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21203, '0', '合同管理 修改权限', '合同管理 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21204, '0', '合同管理 删除权限', '合同管理 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21205, '0', '合同管理 作废权限', '合同管理 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21206, '0', '合同管理 入场权限', '合同管理 业务模块权限', NULL);
@@ -302,11 +295,11 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21120','0',21113,'客户管理 统计分析查看权限','0',NOW());
 
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21201,'合同管理 新增权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21201,'合同管理 新增修改权限','0',NOW());
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21202,'合同管理 签约、发起审批权限','0',NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21203,'合同管理 修改权限','0',NOW());
+-- INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+--    VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21203,'合同管理 修改权限','0',NOW());
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21204,'合同管理 删除权限','0',NOW());
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
@@ -330,6 +323,20 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'21210','0',21214,'合同管理 退约权限','0',NOW());
 
+-- fix 20310
+INSERT INTO eh_service_module_functions(id, privilege_id) SELECT privilege_id, privilege_id FROM eh_service_module_privileges WHERE privilege_type = 0 and privilege_id >= 21201 and privilege_id <=21214;
+UPDATE eh_service_module_functions SET module_id = 21200 WHERE privilege_id >= 21201 and privilege_id <=21214;
+SET @exclude_id = (SELECT MAX(id) FROM `eh_service_module_exclude_functions`);   
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999983', NULL, '21200', '21201');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999983', NULL, '21200', '21208');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999983', NULL, '21200', '21209');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999983', NULL, '21200', '21214');
+
+INSERT INTO eh_service_module_functions(id, privilege_id) SELECT privilege_id, privilege_id FROM eh_service_module_privileges WHERE privilege_type = 0 and privilege_id >= 21101 and privilege_id <=21113;
+UPDATE eh_service_module_functions SET module_id = 21100 WHERE privilege_id >= 21101 and privilege_id <=21113;
+SET @exclude_id = (SELECT MAX(id) FROM `eh_service_module_exclude_functions`);   
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999971', NULL, '21100', '21101');
+INSERT INTO `eh_service_module_exclude_functions` (`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES ((@exclude_id := @exclude_id + 1), '999971', NULL, '21100', '21103');
 
 
 delete from eh_reflection_service_module_apps where module_id = 49100;
@@ -465,3 +472,9 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 -- 错误码新增 by wentian
 set @eh_locale_strings_id = (select max(id) from eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id:=@eh_locale_strings_id+1), 'assetv2', '10008', 'zh_CN', '您不是该企业的管理员，无权进行此操作');
+
+
+
+-- 投票分享链接 add by yanjun 20171227
+set @id = (SELECT MAX(id) FROM eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@id := @id + 1), 'poll.share.url', '/share-vote/build/index.html/#/detail', 'the relative path for sharing poll', '0', NULL);
