@@ -58,16 +58,16 @@ CREATE TABLE `eh_rentalv2_order_rules` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
-ALTER TABLE `eh_rentalv2_resources`
-drop column unit,
-drop column day_open_time,
-drop column day_close_time,
-drop column time_step,
-drop column cancel_time,
-drop column cancel_flag,
-drop column exclusive_flag;
 
-
+ALTER TABLE `eh_rentalv2_default_rules`
+ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型',
+ADD COLUMN `source_type` varchar(255) DEFAULT NULL COMMENT 'default_rule, resource_rule',
+ADD COLUMN `source_id` bigint(20) DEFAULT NULL,
+ADD COLUMN `resource_type` varchar(64) NOT NULL COMMENT '资源类型',
+ADD COLUMN `holiday_open_flag` tinyint(4) DEFAULT NULL COMMENT '节假日是否开放预约: 1-是, 0-否',
+ADD COLUMN `holiday_type` tinyint(4) DEFAULT NULL COMMENT '1-普通双休, 0-同步中国节假日',
+ADD COLUMN `refund_strategy` tinyint(4) DEFAULT NULL COMMENT '1-custom, 2-full',
+ADD COLUMN `overtime_strategy` tinyint(4) DEFAULT NULL COMMENT '1-custom, 2-full';
 
 ALTER TABLE `eh_rentalv2_default_rules`
 drop column pay_start_time,
@@ -88,17 +88,42 @@ drop column org_member_workday_price,
 drop column org_member_weekend_price,
 drop column approving_user_workday_price,
 drop column approving_user_weekend_price,
+drop column rental_type,
 drop column exclusive_flag;
 
-ALTER TABLE `eh_rentalv2_default_rules`
-ADD COLUMN `resource_type` varchar(64) NOT NULL COMMENT '资源类型',
-ADD COLUMN `holiday_open_flag` tinyint(4) DEFAULT NULL COMMENT '节假日是否开放预约: 1-是, 0-否',
-ADD COLUMN `holiday_type` tinyint(4) DEFAULT NULL COMMENT '1-普通双休, 0-同步中国节假日',
-ADD COLUMN `refund_strategy` tinyint(4) DEFAULT NULL COMMENT '1-custom, 2-full',
-ADD COLUMN `overtime_strategy` tinyint(4) DEFAULT NULL COMMENT '1-custom, 2-full';
+-- 资源表中规则信息迁移到规则表中
+INSERT INTO `eh_rentalv2_default_rules` (`id`, `owner_type`, `owner_id`, `resource_type_id`, `rental_start_time`, `rental_end_time`, `refund_flag`, `refund_ratio`, `creator_uid`, `create_time`, `auto_assign`, `multi_unit`, `multi_time_interval`, `need_pay`, `resource_counts`, `begin_date`, `end_date`, `open_weekday`, `rental_start_time_flag`, `rental_end_time_flag`, `source_type`, `source_id`)
+SELECT (@id := @id + 1), 'organization', organization_id, resource_type_id, rental_start_time, rental_end_time, refund_flag, refund_ratio, creator_uid, create_time, auto_assign, multi_unit, multi_time_interval, need_pay, resource_counts, begin_date, end_date, open_weekday, rental_start_time_flag, rental_end_time_flag, 'resource_rule', id  from eh_rentalv2_resources;
+
+
+ALTER TABLE `eh_rentalv2_resources`
+drop column unit,
+drop column day_open_time,
+drop column day_close_time,
+drop column time_step,
+drop column cancel_time,
+drop column cancel_flag,
+drop column exclusive_flag;
+
+-- 资源表中规则信息迁移到规则表中
+ALTER TABLE `eh_rentalv2_resources`
+drop column rental_start_time_flag,
+drop column rental_end_time_flag,
+drop column resource_counts,
+drop column open_weekday,
+drop column begin_date,
+drop column end_date,
+drop column rental_start_time,
+drop column rental_end_time,
+drop column refund_flag,
+drop column refund_ratio,
+drop column auto_assign,
+drop column multi_unit,
+drop column multi_time_interval,
+drop column need_pay;
 
 ALTER TABLE `eh_rentalv2_orders`
-ADD COLUMN `resource_type` varchar(64) NOT NULL COMMENT '资源类型';
+ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
 
 
 
