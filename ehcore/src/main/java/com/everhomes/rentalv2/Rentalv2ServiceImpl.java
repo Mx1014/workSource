@@ -348,6 +348,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Rentalv2PriceRule rentalv2PriceRule = ConvertHelper.convert(priceRule, Rentalv2PriceRule.class);
 		rentalv2PriceRule.setOwnerType(priceRuleType.getCode());
 		rentalv2PriceRule.setOwnerId(ruleId);
+		//默认按时长收费
+		if (rentalv2PriceRule.getPriceType()==null)
+			rentalv2PriceRule.setPriceType(RentalPriceType.LINEARITY.getCode());
 		rentalv2PriceRuleProvider.createRentalv2PriceRule(rentalv2PriceRule);
 	}
 
@@ -355,6 +358,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Rentalv2PricePackage rentalv2PricePackage = ConvertHelper.convert(pricePackage,Rentalv2PricePackage.class);
 		rentalv2PricePackage.setOwnerType(priceRuleType.getCode());
 		rentalv2PricePackage.setOwnerId(ruleId);
+		//默认按时长收费
+		if (rentalv2PricePackage.getPriceType()==null)
+			rentalv2PricePackage.setPriceType(RentalPriceType.LINEARITY.getCode());
 		rentalv2PricePackageProvider.createRentalv2PricePackage(rentalv2PricePackage);
 	}
 
