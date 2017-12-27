@@ -80,6 +80,8 @@ CREATE TABLE `eh_social_security_payments` (
   `create_time` DATETIME,
   `operator_uid` BIGINT,
   `update_time` DATETIME,
+  `file_uid` BIGINT (20) COMMENT '归档人',
+  `file_time` DATETIME COMMENT '归档时间',
   PRIMARY KEY (`id`),
   KEY `i_eh_user_detail_id` (`detail_id`),
   KEY `i_eh_organization_id` (`organization_id`)
@@ -110,6 +112,8 @@ CREATE TABLE `eh_social_security_payment_logs` (
   `create_time` DATETIME,
   `operator_uid` BIGINT,
   `update_time` DATETIME,
+  `file_uid` BIGINT (20) COMMENT '归档人',
+  `file_time` DATETIME COMMENT '归档时间',
   PRIMARY KEY (`id`),
   KEY `i_eh_user_detail_id` (`detail_id`),
   KEY `i_eh_organization_id` (`organization_id`)
@@ -292,7 +296,7 @@ CREATE TABLE `eh_social_security_report` (
   KEY `i_eh_organization_id` (`organization_id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
--- 社保报表
+-- 社保增减员报表
 -- drop table eh_social_security_inout_report;
 CREATE TABLE `eh_social_security_inout_report` (
   `id` BIGINT,
