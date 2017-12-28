@@ -3842,7 +3842,7 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = getReadWriteContext();
         EhPaymentLateFineDao dao = new EhPaymentLateFineDao(context.configuration());
         this.dbProvider.execute((TransactionStatus status) -> {
-            dao.update(fine);
+            dao.insert(fine);
             context.update(Tables.EH_PAYMENT_BILLS)
                     .set(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED,Tables.EH_PAYMENT_BILLS.AMOUNT_OWED.add(fineAmount))
                     .set(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE.add(fineAmount))

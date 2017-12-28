@@ -2594,6 +2594,7 @@ public class AssetServiceImpl implements AssetService {
                     fine.setNamespaceId(item.getNamespaceId());
                     fine.setCustomerId(item.getTargetId());
                     fine.setCustomerType(item.getTargetType());
+                    fine.setUpateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId());
                 }
             }
