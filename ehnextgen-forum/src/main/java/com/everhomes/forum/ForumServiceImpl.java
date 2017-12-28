@@ -6413,8 +6413,14 @@ public class ForumServiceImpl implements ForumService {
 				String content = highlightText(highlight.get("content").getFragments());
 				dto.setContent(content);
 			}
-        	
-        	PostDTO postDto =  getTopicById(dto.getId(), null, true, true);
+
+			//查询真身帖
+            Post post = forumProvider.findPostById(dto.getId());
+            if(post.getRealPostId() != null){
+                dto.setId(post.getRealPostId());
+            }
+
+            PostDTO postDto =  getTopicById(dto.getId(), null, true, true);
         	if(postDto != null && postDto.getAttachments() != null && postDto.getAttachments().size() > 0) {
         		postDto.getAttachments();
         		postDto.getAttachments().get(0);
