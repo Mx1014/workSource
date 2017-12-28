@@ -494,25 +494,28 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd) {
         //企业用户的话判断是否为企业管理员
-        out:{
-            if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
-                Long userId = UserContext.currentUserId();
-                ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
-                cmd1.setOrganizationId(cmd.getTargetId());
-                cmd1.setActivationFlag((byte)1);
-                cmd1.setOwnerType("EhOrganizations");
-                cmd1.setOwnerId(null);
-                List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd1);
-                for(OrganizationContactDTO dto : organizationContactDTOS){
-                    Long targetId = dto.getTargetId();
-                    if(targetId == userId){
-                        break out;
-                    }
-                }
-                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.NOT_CORP_MANAGER,
-                        "not valid corp manager");
-            }
-        }
+//        out:{
+//            if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
+//                Long userId = UserContext.currentUserId();
+//                ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
+//                cmd1.setOrganizationId(cmd.getTargetId());
+//                cmd1.setActivationFlag((byte)1);
+//                cmd1.setOwnerType("EhOrganizations");
+//                cmd1.setOwnerId(null);
+//                LOGGER.info("organization manager check for bill display, cmd = "+ cmd1.toString());
+//                List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd1);
+//                LOGGER.info("organization manager check for bill display, orgContactsDTOs are = "+ organizationContactDTOS.toString());
+//                LOGGER.info("organization manager check for bill display, userId = "+ userId);
+//                for(OrganizationContactDTO dto : organizationContactDTOS){
+//                    Long targetId = dto.getTargetId();
+//                    if(targetId == userId){
+//                        break out;
+//                    }
+//                }
+//                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.NOT_CORP_MANAGER,
+//                        "not valid corp manager");
+//            }
+//        }
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
@@ -2649,28 +2652,28 @@ public class AssetServiceImpl implements AssetService {
         return response;
     }
     public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
-        out:{
-            if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
-                Long userId = UserContext.currentUserId();
-                ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
-                cmd1.setOrganizationId(cmd.getTargetId());
-                cmd1.setActivationFlag((byte)1);
-                cmd1.setOwnerType("EhOrganizations");
-                cmd1.setOwnerId(null);
-                LOGGER.info("organization manager check for bill display, cmd = "+ cmd1.toString());
-                List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd1);
-                LOGGER.info("organization manager check for bill display, orgContactsDTOs are = "+ organizationContactDTOS.toString());
-                LOGGER.info("organization manager check for bill display, userId = "+ userId);
-                for(OrganizationContactDTO dto : organizationContactDTOS){
-                    Long targetId = dto.getTargetId();
-                    if(targetId == userId){
-                        break out;
-                    }
-                }
-                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.NOT_CORP_MANAGER,
-                        "not valid corp manager");
-            }
-        }
+//        out:{
+//            if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
+//                Long userId = UserContext.currentUserId();
+//                ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
+//                cmd1.setOrganizationId(cmd.getTargetId());
+//                cmd1.setActivationFlag((byte)1);
+//                cmd1.setOwnerType("EhOrganizations");
+//                cmd1.setOwnerId(null);
+//                LOGGER.info("organization manager check for bill display, cmd = "+ cmd1.toString());
+//                List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd1);
+//                LOGGER.info("organization manager check for bill display, orgContactsDTOs are = "+ organizationContactDTOS.toString());
+//                LOGGER.info("organization manager check for bill display, userId = "+ userId);
+//                for(OrganizationContactDTO dto : organizationContactDTOS){
+//                    Long targetId = dto.getTargetId();
+//                    if(targetId == userId){
+//                        break out;
+//                    }
+//                }
+//                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.NOT_CORP_MANAGER,
+//                        "not valid corp manager");
+//            }
+//        }
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
 //        AssetVendor assetVendor = checkAssetVendor(999983);
         String vendorName = assetVendor.getVendorName();
