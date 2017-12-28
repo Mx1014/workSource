@@ -8,6 +8,8 @@ import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.*;
@@ -74,6 +76,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private ArchivesService archivesService;
     @Autowired
     private SequenceProvider sequenceProvider;
+    @Autowired
+    private CoordinationProvider coordinationProvider;
     /**
      * 处理计算的线程池,预设最大值是5
      */
@@ -126,7 +130,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         List<HouseholdTypesDTO> hTs = socialSecurityBaseProvider.listHouseholdTypesByCity(cityId);
         addNewSocialSecuritySettings(cityId, hTs.get(0).getHouseholdTypeName(), ownerId);
         String paymentMonth = monthSF.get().format(DateHelper.currentGMTTime());
-        addNewMonthPayments(paymentMonth,ownerId);
+        addNewMonthPayments(paymentMonth, ownerId);
     }
 
     private void addNewMonthPayments(String paymentMonth, Long ownerId) {
@@ -168,7 +172,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySettings.class));
         List<EhSocialSecuritySettings> settings = new ArrayList<>();
         for (OrganizationMemberDetails detail : details) {
-            id = saveSocialSecuritySettings(ssBases, cityId, ownerId, detail.getTargetId(), detail.getId(), detail.getNamespaceId(),id,settings);
+            id = saveSocialSecuritySettings(ssBases, cityId, ownerId, detail.getTargetId(), detail.getId(), detail.getNamespaceId(), id, settings);
             id = saveSocialSecuritySettings(afBases, cityId, ownerId, detail.getTargetId(), detail.getId(), detail.getNamespaceId(), id, settings);
         }
         sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySettings.class), settings.size());
@@ -271,12 +275,17 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     @Override
     public ListSocialSecurityPaymentsResponse listSocialSecurityPayments(
             ListSocialSecurityPaymentsCommand cmd) {
+
         // TODO 通过组织架构拿到新增人员的detailIds
-        String month = socialSecurityPaymentProvider.findPaymentMonthByOwnerId(cmd.getOwnerId());
-        if (null == month) {
-            //如果没有payments数据,增加一个
-            addSocialSecurity(cmd.getOwnerId());
-        }
+        this.coordinationProvider.getNamedLock(CoordinationLocks.SOCIAL_SECURITY_LIST_PAYMENTS.getCode() + cmd.getOwnerId()).enter(() -> {
+            String month = socialSecurityPaymentProvider.findPaymentMonthByOwnerId(cmd.getOwnerId());
+            if (null == month) {
+                //如果没有payments数据,增加一个
+                addSocialSecurity(cmd.getOwnerId());
+            }
+            return null;
+
+        });
         List<Long> detailIds = archivesService.listSocialSecurityEmployees(cmd.getOwnerId(), cmd.getDeptId(), cmd.getKeywords(), cmd.getFilterItems());
 
         SsorAfPay payFlag = null;
@@ -320,7 +329,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
         }
         if (null != payFlag) {
-            if (SsorAfPay.BOTHPAY == payFlag || SsorAfPay.SOCIALSECURITYPAY== payFlag) {
+            if (SsorAfPay.BOTHPAY == payFlag || SsorAfPay.SOCIALSECURITYPAY == payFlag) {
                 detailIds = socialSecurityPaymentProvider.listDetailsByPayFlag(detailIds, AccumOrSocail.SOCAIL.getCode());
             }
 
@@ -383,7 +392,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 Region city = regionProvider.findRegionById(accSetting.getCityId());
                 if (null != city) dto.setAccumulationFundCity(city.getName());
             }
-        }else{
+        } else {
             dto.setUserName("找不到这个人");
         }
         return dto;
@@ -738,8 +747,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 try {
                     calculateReports(cmd.getOwnerId());
                 } catch (Exception e) {
-                    LOGGER.error("calculate reports error!! cmd is  :"+cmd,e);
-                }finally {
+                    LOGGER.error("calculate reports error!! cmd is  :" + cmd, e);
+                } finally {
                     //处理完成删除key,表示这个key已经完成了
                     deleteValueOperations(key);
                 }
@@ -1021,6 +1030,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
         return report;
     }
+
     @Override
     public BigDecimal calculateAmount(BigDecimal radix, Integer ratio) {
         return calculateAmount(radix, ratio, new BigDecimal(0));
@@ -1108,8 +1118,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         List<SocialSecurityReport> result = socialSecurityReportProvider.listSocialSecurityReport(cmd.getOwnerId(),
-                cmd.getPaymentMonth(),locator,pageSize+1);
-        if(null == result)
+                cmd.getPaymentMonth(), locator, pageSize + 1);
+        if (null == result)
             return response;
         Long nextPageAnchor = null;
         if (result != null && result.size() > pageSize) {
@@ -1142,8 +1152,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         List<SocialSecurityDepartmentSummary> result = socialSecurityDepartmentSummaryProvider.listSocialSecurityDepartmentSummary(cmd.getOwnerId(),
-                cmd.getPaymentMonth(),locator,pageSize+1);
-        if(null == result)
+                cmd.getPaymentMonth(), locator, pageSize + 1);
+        if (null == result)
             return response;
         Long nextPageAnchor = null;
         if (result != null && result.size() > pageSize) {
@@ -1177,8 +1187,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         List<SocialSecurityInoutReport> result = socialSecurityInoutReportProvider.listSocialSecurityInoutReport(cmd.getOwnerId(),
-                cmd.getPaymentMonth(),locator,pageSize+1);
-        if(null == result)
+                cmd.getPaymentMonth(), locator, pageSize + 1);
+        if (null == result)
             return response;
         Long nextPageAnchor = null;
         if (result != null && result.size() > pageSize) {
@@ -1239,8 +1249,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         List<SocialSecuritySummary> result = socialSecuritySummaryProvider.listSocialSecuritySummary(cmd.getOwnerId(),
-                cmd.getPaymentMonth(),locator,pageSize+1);
-        if(null == result)
+                cmd.getPaymentMonth(), locator, pageSize + 1);
+        if (null == result)
             return response;
         Long nextPageAnchor = null;
         if (result != null && result.size() > pageSize) {
