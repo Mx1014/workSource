@@ -99,7 +99,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 month.setTime(monthSF.get().parse(paymentMonth));
                 month.add(Calendar.MONTH, 1);
                 paymentMonth = monthSF.get().format(month.getTime());
-                addNewMonthPayments(paymentMonth);
+                addNewMonthPayments(paymentMonth, ownerId);
             } catch (ParseException e) {
                 e.printStackTrace();
                 LOGGER.error("payment month is wrong  " + paymentMonth, e);
@@ -120,13 +120,18 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         List<HouseholdTypesDTO> hTs = socialSecurityBaseProvider.listHouseholdTypesByCity(cityId);
         addNewSocialSecuritySettings(cityId, hTs.get(0).getHouseholdTypeName(), ownerId);
         String paymentMonth = monthSF.get().format(DateHelper.currentGMTTime());
-        addNewMonthPayments(paymentMonth);
+        addNewMonthPayments(paymentMonth,ownerId);
     }
 
-    private void addNewMonthPayments(String paymentMonth) {
+    private void addNewMonthPayments(String paymentMonth, Long ownerId) {
         //把属于该公司的所有要交社保的setting取出来
+        //todo : 本月要交社保的人
         List<Long> detailIds = null;
-
+        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
+        if (null == details) {
+            return;
+        }
+        detailIds = details.stream().map(r -> r.getId()).collect(Collectors.toList());
         List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySetting(detailIds);
         for (SocialSecuritySetting setting : settings) {
             SocialSecurityPayment payment = processSocialSecurityPayment(setting, paymentMonth, NormalFlag.NO.getCode());
