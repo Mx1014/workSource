@@ -2656,6 +2656,10 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhIncubatorApplyAttachments.class, Tables.EH_INCUBATOR_APPLY_ATTACHMENTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_INCUBATOR_APPLY_ATTACHMENTS.ID.max()).from(Tables.EH_INCUBATOR_APPLY_ATTACHMENTS).fetchOne().value1();
         });
+
+        syncTableSequence(null, EhReflectionServiceModuleApps.class, Tables.EH_REFLECTION_SERVICE_MODULE_APPS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ID.max()).from(Tables.EH_REFLECTION_SERVICE_MODULE_APPS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
