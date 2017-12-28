@@ -1266,7 +1266,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
             if (category != null) {
                 //项目里删全部的 实质是解除关联关系
-                if(category.getCommunityId() == null && cmd.getCommunityId() != null) {
+                if((category.getCommunityId() == null || category.getCommunityId() == 0L) && cmd.getCommunityId() != null) {
                     EnergyMeter meter = meterProvider.findAnyByCategoryId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), category.getId());
                     if (meter != null) {
                         LOGGER.info("Energy meter category has been reference, categoryId = {}", category.getId());
@@ -2309,7 +2309,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
             if (formula != null) {
                 //项目里删全部的 实质是解除关联关系
-                if(formula.getCommunityId() == null && cmd.getCommunityId() != null) {
+                if((formula.getCommunityId() == null || formula.getCommunityId() == 0L) && cmd.getCommunityId() != null) {
                     EnergyMeterSettingLog settingLog = meterSettingLogProvider.findAnySettingByFormulaId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), formula.getId());
                     if (settingLog != null) {
                         LOGGER.info("The formula has been reference, formula id = {}", formula.getId());
