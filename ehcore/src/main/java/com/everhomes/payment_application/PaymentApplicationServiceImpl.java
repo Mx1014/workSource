@@ -1,16 +1,37 @@
 package com.everhomes.payment_application;
 
+import com.everhomes.entity.EntityType;
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowService;
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractProvider;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowConstants;
+import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.payment_application.*;
 import com.everhomes.search.PaymentApplicationSearcher;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.sql.Timestamp;
 
 /**
  * Created by ying.xiong on 2017/12/27.
  */
 @Component
 public class PaymentApplicationServiceImpl implements PaymentApplicationService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PaymentApplicationServiceImpl.class);
 
     @Autowired
     private PaymentApplicationProvider paymentApplicationProvider;
@@ -18,10 +39,23 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
     @Autowired
     private PaymentApplicationSearcher paymentApplicationSearcher;
 
+    @Autowired
+    private ContractProvider contractProvider;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private FlowService flowService;
+
+    @Autowired
+    private LocaleStringService localeStringService;
+
     @Override
     public PaymentApplicationDTO createPaymentApplication(CreatePaymentApplicationCommand cmd) {
         PaymentApplication application = ConvertHelper.convert(cmd, PaymentApplication.class);
         paymentApplicationProvider.createPaymentApplication(application);
+        addToFlowCase(application);
         return toPaymentApplicationDTO(application);
     }
 
@@ -37,6 +71,51 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
     }
 
     private PaymentApplicationDTO toPaymentApplicationDTO(PaymentApplication application) {
-        return null;
+        PaymentApplicationDTO dto = ConvertHelper.convert(application, PaymentApplicationDTO.class);
+
+        Contract contract = contractProvider.findContractById(application.getContractId());
+        if (contract != null) {
+            dto.setContractName(contract.getName());
+            dto.setContractNumber(contract.getContractNumber());
+            dto.setContractAmount(contract.getRent());
+//            contract.getCustomerId()
+        }
+
+        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(application.getApplicantUid(), application.getApplicantOrgId());
+        if(member != null) {
+            dto.setApplicantName(member.getContactName());
+        }
+
+        Organization org = organizationProvider.findOrganizationById(application.getApplicantOrgId());
+        if(org != null) {
+            dto.setApplicantOrgName(org.getName());
+        }
+        return dto;
+    }
+
+    private void addToFlowCase(PaymentApplication application) {
+        Flow flow = flowService.getEnabledFlow(application.getNamespaceId(), FlowConstants.PAYMENT_APPLICATION_MODULE,
+                FlowModuleType.NO_MODULE.getCode(), application.getId(), FlowOwnerType.PAYMENT_APPLICATION.getCode());
+        if(null == flow) {
+            LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.CONTRACT_MODULE);
+            throw RuntimeErrorException.errorWith(PaymentApplicationErrorCode.SCOPE, PaymentApplicationErrorCode.ERROR_ENABLE_FLOW,
+                    localeStringService.getLocalizedString(String.valueOf(PaymentApplicationErrorCode.SCOPE),
+                            String.valueOf(PaymentApplicationErrorCode.ERROR_ENABLE_FLOW),
+                            UserContext.current().getUser().getLocale(),"Enable request flow not found."));
+        }
+        CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
+        createFlowCaseCommand.setCurrentOrganizationId(application.get);
+        createFlowCaseCommand.setTitle(application.getName() + "付款申请");
+        createFlowCaseCommand.setApplyUserId(application.getCreateUid());
+        createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
+        createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
+        createFlowCaseCommand.setReferId(application.getId());
+        createFlowCaseCommand.setReferType(EntityType.CONTRACT.getCode());
+        createFlowCaseCommand.setContent(application.getRemark());
+        createFlowCaseCommand.setServiceType("付款申请");
+        createFlowCaseCommand.setProjectId(application.getCommunityId());
+        createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
+
+        flowService.createFlowCase(createFlowCaseCommand);
     }
 }
