@@ -404,18 +404,7 @@ UPDATE eh_service_modules
 SET `status` = 2
 WHERE id = 20670;
 
-DELETE FROM  eh_acl_privileges
-WHERE  id = 30062;
-
-DELETE FROM  eh_acl_privileges
-WHERE  id = 30063;
-
-DELETE FROM  eh_acl_privileges
-WHERE  id = 30064;
-
-DELETE FROM  eh_acl_privileges
-WHERE  id = 30065;
-
+-- 删除绩效考核的权限项
 DELETE FROM  eh_service_module_privileges
 WHERE  module_id  = 20655;
 
