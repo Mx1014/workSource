@@ -195,6 +195,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                         detailId, namespaceId);
 //                socialSecuritySettingProvider.createSocialSecuritySetting(setting);
                 setting.setId(id++);
+                setting.setRadix(setting.getCompanyRadix());
                 settings.add(setting);
             }
         }
