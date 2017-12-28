@@ -905,6 +905,9 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         
         // 域空间条件
         FilterBuilder namespaceFilter = null;
+        if(cmd.getNamespaceId() == null){
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        }
         if(cmd.getNamespaceId() != null) {
             namespaceFilter = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
         }
