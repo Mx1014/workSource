@@ -9,6 +9,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.*;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
@@ -17,6 +18,9 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.socialSecurity.*;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
+import com.everhomes.server.schema.tables.pojos.EhSocialSecuritySettings;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -68,6 +72,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private ConfigurationProvider configurationProvider;
     @Autowired
     private ArchivesService archivesService;
+    @Autowired
+    private SequenceProvider sequenceProvider;
     /**
      * 处理计算的线程池,预设最大值是5
      */
@@ -133,10 +139,14 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }
         detailIds = details.stream().map(r -> r.getId()).collect(Collectors.toList());
         List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySetting(detailIds);
+        List<EhSocialSecurityPayments> payments = new ArrayList<>();
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPayments.class));
         for (SocialSecuritySetting setting : settings) {
-            SocialSecurityPayment payment = processSocialSecurityPayment(setting, paymentMonth, NormalFlag.NO.getCode());
-            socialSecurityPaymentProvider.createSocialSecurityPayment(payment);
+            EhSocialSecurityPayments payment = processSocialSecurityPayment(setting, paymentMonth, NormalFlag.NO.getCode());
+            payment.setId(id++);
         }
+        sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPayments.class), payments.size());
+        socialSecurityPaymentProvider.batchCreateSocialSecurityPayment(payments);
     }
 
     private Long getZuolinNamespaceCityId(Long cityId) {
@@ -156,21 +166,28 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 null, AccumOrSocail.ACCUM.getCode());
         List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
         for (OrganizationMemberDetails detail : details) {
-            saveSocialSecuritySettings(ssBases, cityId, ownerId, detail.getTargetId(), detail.getId(), detail.getNamespaceId());
-            saveSocialSecuritySettings(afBases, cityId, ownerId, detail.getTargetId(), detail.getId(), detail.getNamespaceId());
+            Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySettings.class));
+            List<EhSocialSecuritySettings> settings = new ArrayList<>();
+            id = saveSocialSecuritySettings(ssBases, cityId, ownerId, detail.getTargetId(), detail.getId(), detail.getNamespaceId(),id,settings);
+            id = saveSocialSecuritySettings(afBases, cityId, ownerId, detail.getTargetId(), detail.getId(), detail.getNamespaceId(), id, settings);
+            sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySettings.class), settings.size());
+            socialSecuritySettingProvider.batchCreateSocialSecuritySetting(settings);
         }
 
     }
 
-    private void saveSocialSecuritySettings(List<SocialSecurityBase> bases, Long cityId, Long orgId, Long userId,
-                                            Long detailId, Integer namespaceId) {
+    private Long saveSocialSecuritySettings(List<SocialSecurityBase> bases, Long cityId, Long orgId, Long userId,
+                                            Long detailId, Integer namespaceId, Long id, List<EhSocialSecuritySettings> settings) {
         if (null != bases) {
             for (SocialSecurityBase base : bases) {
-                SocialSecuritySetting setting = processSocialSecuritySetting(base, cityId, orgId, userId,
+                EhSocialSecuritySettings setting = processSocialSecuritySetting(base, cityId, orgId, userId,
                         detailId, namespaceId);
-                socialSecuritySettingProvider.createSocialSecuritySetting(setting);
+//                socialSecuritySettingProvider.createSocialSecuritySetting(setting);
+                setting.setId(id++);
+                settings.add(setting);
             }
         }
+        return id;
     }
 
     /**

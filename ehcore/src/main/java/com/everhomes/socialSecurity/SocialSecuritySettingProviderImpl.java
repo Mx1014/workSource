@@ -141,6 +141,12 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
         return null;
     }
 
+    @Override
+    public void batchCreateSocialSecuritySetting(List<EhSocialSecuritySettings> settings) {
+        getReadWriteDao().insert(settings);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhSocialSecuritySettings.class, null);
+    }
+
     private EhSocialSecuritySettingsDao getReadWriteDao() {
         return getDao(getReadWriteContext());
     }

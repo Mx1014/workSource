@@ -4,6 +4,7 @@ package com.everhomes.socialSecurity;
 import com.everhomes.rest.socialSecurity.AccumOrSocail;
 import com.everhomes.rest.socialSecurity.SocialSecurityItemDTO;
 import com.everhomes.rest.socialSecurity.SsorAfPay;
+import com.everhomes.server.schema.tables.pojos.EhSocialSecuritySettings;
 
 import java.util.List;
 
@@ -32,4 +33,6 @@ public interface SocialSecuritySettingProvider {
 	List<Long> listDetailsByCityId(List<Long> detailIds, Long socialSecurityCityId, byte code);
 
 	SocialSecuritySetting findSocialSecuritySettingByDetailIdAndAOS(Long detailId, AccumOrSocail socail);
+
+	void batchCreateSocialSecuritySetting(List<EhSocialSecuritySettings> settings);
 }

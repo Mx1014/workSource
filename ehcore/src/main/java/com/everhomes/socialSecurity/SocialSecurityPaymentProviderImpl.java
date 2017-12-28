@@ -192,6 +192,12 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
                 .fetch().map(Record1::value1);
     }
 
+    @Override
+    public void batchCreateSocialSecurityPayment(List<EhSocialSecurityPayments> payments) {
+        getReadWriteDao().insert(payments);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhSocialSecurityPayments.class, null);
+    }
+
 
     private EhSocialSecurityPaymentsDao getReadWriteDao() {
         return getDao(getReadWriteContext());

@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.socialSecurity;
 
+import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
+
 import java.util.List;
 
 public interface SocialSecurityPaymentProvider {
@@ -34,4 +36,6 @@ public interface SocialSecurityPaymentProvider {
 	SocialSecuritySummary calculateSocialSecuritySummary(Long ownerId, String paymentMonth);
 
 	List<Long> listDetailsByPayFlag(List<Long> detailIds, Byte accOrSocial);
+
+	void batchCreateSocialSecurityPayment(List<EhSocialSecurityPayments> payments);
 }
