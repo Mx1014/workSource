@@ -139,11 +139,15 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
 
     @Override
     public SocialSecuritySetting findSocialSecuritySettingByDetailIdAndAOS(Long detailId, AccumOrSocail socail) {
-        return getReadOnlyContext().selectDistinct(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID).from(Tables.EH_SOCIAL_SECURITY_SETTINGS)
+        List<SocialSecuritySetting> results = getReadOnlyContext().selectDistinct(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID).from(Tables.EH_SOCIAL_SECURITY_SETTINGS)
                 .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID.eq(detailId))
                 .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.ACCUM_OR_SOCAIL.eq(socail.getCode()))
                 .orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc())
-                .fetchAny().map(r -> ConvertHelper.convert(r, SocialSecuritySetting.class));
+                .fetch().map(r -> ConvertHelper.convert(r, SocialSecuritySetting.class));
+        if (null == results || results.size() == 0) {
+            return null;
+        }
+        return results.get(0);
     }
 
     @Override
