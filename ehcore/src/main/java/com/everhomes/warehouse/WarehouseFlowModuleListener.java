@@ -1,10 +1,7 @@
 package com.everhomes.warehouse;
 
 import com.everhomes.flow.*;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowModuleDTO;
-import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.warehouse.ReviewResult;
 import com.everhomes.search.WarehouseRequestMaterialSearcher;
 import com.everhomes.user.UserProvider;
@@ -16,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by ying.xiong on 2017/5/17.
@@ -30,6 +29,20 @@ public class WarehouseFlowModuleListener implements FlowModuleListener {
 
     @Autowired
     private UserProvider userProvider;
+
+    @Override
+    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
+        List<FlowServiceTypeDTO> list = new ArrayList<>();
+        FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+        Set<Long> namespaceIds = warehouseProvider.findWarehouseNamespace();
+        if(namespaceIds.contains(namespaceId)){
+            dto.setNamespaceId(namespaceId);
+            dto.setId(null);
+            dto.setServiceName(warehouseProvider.findWarehouseMenuName());
+            list.add(dto);
+        }
+        return list;
+    }
 
     @Autowired
     private WarehouseProvider warehouseProvider;
