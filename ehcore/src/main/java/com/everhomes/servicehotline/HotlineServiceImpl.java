@@ -378,7 +378,8 @@ public class HotlineServiceImpl implements HotlineService {
 
 		if (cmd.getOrgId()!=null) {
 			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getId(), cmd.getOrgId());
-			info.setContractName(member.getContactName());
+			if (member!=null)
+				info.setContractName(member.getContactName());
 		}
 		return info;
 	}
