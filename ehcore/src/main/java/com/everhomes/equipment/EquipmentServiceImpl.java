@@ -4914,7 +4914,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			reviewGroup = new ArrayList<>();
 
 			for(StandardGroupDTO group : groupList) {
-				EquipmentInspectionPlanGroupMap map = new EquipmentInspectionStandardGroupMap();
+				EquipmentInspectionPlanGroupMap map = new EquipmentInspectionPlanGroupMap();
 				map.setPlanId(createdPlan.getId());
 				map.setGroupType(group.getGroupType());
 				map.setGroupId(group.getGroupId());
