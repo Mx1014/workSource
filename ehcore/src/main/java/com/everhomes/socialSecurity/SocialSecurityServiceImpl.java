@@ -165,14 +165,14 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         List<SocialSecurityBase> afBases = socialSecurityBaseProvider.listSocialSecurityBase(cityId,
                 null, AccumOrSocail.ACCUM.getCode());
         List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySettings.class));
+        List<EhSocialSecuritySettings> settings = new ArrayList<>();
         for (OrganizationMemberDetails detail : details) {
-            Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySettings.class));
-            List<EhSocialSecuritySettings> settings = new ArrayList<>();
             id = saveSocialSecuritySettings(ssBases, cityId, ownerId, detail.getTargetId(), detail.getId(), detail.getNamespaceId(),id,settings);
             id = saveSocialSecuritySettings(afBases, cityId, ownerId, detail.getTargetId(), detail.getId(), detail.getNamespaceId(), id, settings);
-            sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySettings.class), settings.size());
-            socialSecuritySettingProvider.batchCreateSocialSecuritySetting(settings);
         }
+        sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySettings.class), settings.size());
+        socialSecuritySettingProvider.batchCreateSocialSecuritySetting(settings);
 
     }
 
