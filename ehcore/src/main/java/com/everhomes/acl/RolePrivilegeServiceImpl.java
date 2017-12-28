@@ -3353,6 +3353,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			//给对象分配模块的全部权限
 			//这里用的是EntityType.SERVICE_MODULE，但是relation那边用的是EntityType.SERVICE_MODULE_APP,这是一个坑
 			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, moduleId, null, tag);
+//			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, privilegeIds, tag);
 		}else{
 			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, privilegeIds, tag);
 		}
