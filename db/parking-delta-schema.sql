@@ -76,8 +76,6 @@ drop column contact_num,
 drop column overtime_time,
 drop column unit,
 drop column rental_step,
-drop column day_open_time,
-drop column day_close_time,
 drop column time_step,
 drop column cancel_time,
 drop column cancel_flag,
@@ -97,8 +95,6 @@ SELECT (@id := @id + 1), 'organization', organization_id, resource_type_id, rent
 
 ALTER TABLE `eh_rentalv2_resources`
 drop column unit,
-drop column day_open_time,
-drop column day_close_time,
 drop column time_step,
 drop column cancel_time,
 drop column cancel_flag,
@@ -119,6 +115,8 @@ drop column refund_ratio,
 drop column auto_assign,
 drop column multi_unit,
 drop column multi_time_interval,
+drop column day_open_time,
+drop column day_close_time,
 drop column need_pay;
 
 ALTER TABLE `eh_rentalv2_resources`
