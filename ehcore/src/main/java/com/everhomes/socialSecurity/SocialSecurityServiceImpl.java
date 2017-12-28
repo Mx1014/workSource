@@ -503,7 +503,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private SocialSecurityPaymentDetailDTO processSocialSecurityPaymentDetailDTO(List<SocialSecurityPayment> payments) {
         SocialSecurityPaymentDetailDTO dto = new SocialSecurityPaymentDetailDTO();
-        dto.setCityId(dto.getCityId());
+        dto.setCityId(payments.get(0).getCityId());
         Region city = regionProvider.findRegionById(dto.getCityId());
         if (null != city) dto.setCityName(city.getName());
         dto.setHouseholdType(payments.get(0).getHouseholdType());
