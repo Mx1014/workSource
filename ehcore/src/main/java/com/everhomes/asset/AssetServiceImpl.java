@@ -2531,12 +2531,12 @@ public class AssetServiceImpl implements AssetService {
          * 3. 遍历所有的billItem和他们对应的滞纳规则，计算，然后新增滞纳的数据,update bill, 不用锁，一条一条走
          */
         //获得账单,分页一次最多10000个，防止内存不够
+        int pageSize = 10000;
+        long pageAnchor = 1l;
+        SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+        Date today = new Date();
         coordinationProvider.getNamedLock("update_bill_and_late_fine").tryEnter(()->{
-            int pageSize = 10000;
-            long pageAnchor = 1l;
             Long nextPageAnchor = 0l;
-            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
-            Date today = new Date();
             while(nextPageAnchor != null){
                 List<Long> overdueBillIds = new ArrayList<>();
                 SettledBillRes res = assetProvider.getSettledBills(pageSize,pageAnchor);
@@ -2552,7 +2552,7 @@ public class AssetServiceImpl implements AssetService {
                             bill.setChargeStatus((byte)1);
                         }
                         if(bill.getChargeStatus().byteValue() == (byte)1) overdueBillIds.add(bill.getId());
-                    } catch (ParseException e){ continue; };
+                    } catch (Exception e){ continue; };
                 }
                 nextPageAnchor = res.getNextPageAnchor();
                 //这10000个账单中欠费的billItem
@@ -2584,7 +2584,9 @@ public class AssetServiceImpl implements AssetService {
                     //开始构造一条滞纳金记录
                     PaymentLateFine fine = new PaymentLateFine();
                     long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentLateFine.class));
-                    fine.setId(nextPageAnchor);
+                    fine.setId(nextSequence);
+                    fine.setName(item.getChargingItemName() + "滞纳金");
+                    fine.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     fine.setAmount(fineAmount);
                     fine.setBillId(item.getBillId());
                     fine.setBillItemId(item.getId());
@@ -2592,12 +2594,7 @@ public class AssetServiceImpl implements AssetService {
                     fine.setNamespaceId(item.getNamespaceId());
                     fine.setCustomerId(item.getTargetId());
                     fine.setCustomerType(item.getTargetType());
-                    this.dbProvider.execute((TransactionStatus status) -> {
-                        assetProvider.createLateFine(fine);
-                        //更新这个bill
-                        assetProvider.updateBillAmountOwedDueToFine(fineAmount,item.getBillId());
-                        return status;
-                    });
+                    assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId());
                 }
             }
         });

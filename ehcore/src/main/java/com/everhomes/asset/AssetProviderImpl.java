@@ -3805,6 +3805,7 @@ public class AssetProviderImpl implements AssetProvider {
         context.update(Tables.EH_PAYMENT_BILLS)
                 .set(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED,Tables.EH_PAYMENT_BILLS.AMOUNT_OWED.add(fineAmount))
                 .set(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE.add(fineAmount))
+                .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
                 .execute();
     }
 
@@ -3834,6 +3835,21 @@ public class AssetProviderImpl implements AssetProvider {
                     list.add(dto);
                 });
         return list;
+    }
+
+    @Override
+    public void updateLateFineAndBill(PaymentLateFine fine, BigDecimal fineAmount, Long billId) {
+        DSLContext context = getReadWriteContext();
+        EhPaymentLateFineDao dao = new EhPaymentLateFineDao(context.configuration());
+        this.dbProvider.execute((TransactionStatus status) -> {
+            dao.update(fine);
+            context.update(Tables.EH_PAYMENT_BILLS)
+                    .set(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED,Tables.EH_PAYMENT_BILLS.AMOUNT_OWED.add(fineAmount))
+                    .set(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE.add(fineAmount))
+                    .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+                    .execute();
+            return status;
+        });
     }
 
     private Map<Long,String> getGroupNames(ArrayList<Long> groupIds) {
