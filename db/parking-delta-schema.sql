@@ -121,6 +121,9 @@ drop column multi_unit,
 drop column multi_time_interval,
 drop column need_pay;
 
+ALTER TABLE `eh_rentalv2_resources`
+ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
+
 
 -- 资源单元格表
 ALTER TABLE `eh_rentalv2_cells`
