@@ -391,23 +391,22 @@ public class EquipmentServiceImpl implements EquipmentService {
 		return standardDto;
 	}
 	
-	private void processStandardGroups(List<StandardGroupDTO> groupList, EquipmentInspectionPlans plan) {
+	private void processStandardGroups(List<StandardGroupDTO> groupList, EquipmentInspectionStandards standard) {
         
         List<EquipmentInspectionStandardGroupMap> executiveGroup = null;
 		List<EquipmentInspectionStandardGroupMap> reviewGroup = null;
-        //this.equipmentProvider.deleteEquipmentInspectionStandardGroupMapByStandardId(plan.getId());
-        this.equipmentProvider.deleteEquipmentInspectionStandardGroupMapByStandardId(plan.getId());
+        this.equipmentProvider.deleteEquipmentInspectionStandardGroupMapByStandardId(standard.getId());
 
 		if(LOGGER.isInfoEnabled()) {
-			LOGGER.info("processStandardGroups: deleteEquipmentInspectionPlanGroupMapByPlanId, planId=" + plan.getId()
+			LOGGER.info("processStandardGroups: deleteEquipmentInspectionStandardGroupMapByStandardId, standardId=" + standard.getId()
 			+ "userId = " + UserContext.current().getUser().getId() + "time = " + DateHelper.currentGMTTime()
 			+ "new standard groupList = {}" + groupList);
 		}
-        
+
         if(groupList != null && groupList.size() >0) {
-        	executiveGroup = new ArrayList<>();
-    		reviewGroup = new ArrayList<>();
-    		
+        	executiveGroup = new ArrayList<EquipmentInspectionStandardGroupMap>();
+    		reviewGroup = new ArrayList<EquipmentInspectionStandardGroupMap>();
+
 			for(StandardGroupDTO group : groupList) {
 				EquipmentInspectionStandardGroupMap map = new EquipmentInspectionStandardGroupMap();
 				 map.setStandardId(standard.getId());
@@ -422,7 +421,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 					 reviewGroup.add(map);
 				 }
 			}
-			
+
 			standard.setExecutiveGroup(executiveGroup);
 			standard.setReviewGroup(reviewGroup);
 		}
@@ -4893,9 +4892,42 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 			createdPlan.setEquipmentStandardRelations(equipmentStandardRelation);
 		List<StandardGroupDTO> groupList = cmd.getGroupList();
-		processStandardGroups(groupList, createdPlan);
+		//processStandardGroups(groupList, standard);
+		processPlanGroups(groupList, createdPlan);
 
 		return ConvertHelper.convert(createdPlan, EquipmentInspectionPlanDTO.class);
+	}
+
+	private void processPlanGroups(List<StandardGroupDTO> groupList, EquipmentInspectionPlans createdPlan) {
+		List<EquipmentInspectionPlanGroupMap> executiveGroup = null;
+		List<EquipmentInspectionPlanGroupMap> reviewGroup = null;
+		this.equipmentProvider.deleteEquipmentInspectionStandardGroupMapByStandardId(createdPlan.getId());
+
+		if(LOGGER.isInfoEnabled()) {
+			LOGGER.info("processStandardGroups: deleteEquipmentInspectionStandardGroupMapByStandardId, standardId=" + createdPlan.getId()
+					+ "userId = " + UserContext.current().getUser().getId() + "time = " + DateHelper.currentGMTTime()
+					+ "new standard groupList = {}" + groupList);
+		}
+
+		if(groupList != null && groupList.size() >0) {
+			executiveGroup = new ArrayList<>();
+			reviewGroup = new ArrayList<>();
+
+			for(StandardGroupDTO group : groupList) {
+				EquipmentInspectionPlanGroupMap map = new EquipmentInspectionStandardGroupMap();
+				map.setPlanId(createdPlan.getId());
+				map.setGroupType(group.getGroupType());
+				map.setGroupId(group.getGroupId());
+				map.setPositionId(group.getPositionId());
+				equipmentProvider.createEquipmentInspectionStandardGroupMap(map);
+				if(QualityGroupType.EXECUTIVE_GROUP.equals(map.getGroupType())) {
+					executiveGroup.add(map);
+				}
+				if(QualityGroupType.REVIEW_GROUP.equals(map.getGroupType())) {
+					reviewGroup.add(map);
+				}
+			}
+		}
 	}
 
 	@Override

@@ -47,7 +47,7 @@ CREATE TABLE `eh_equipment_inspection_equipment_plan_map` (
 CREATE TABLE `eh_equipment_inspection_plan_group_map` (
   `id` bigint(20) NOT NULL COMMENT 'id',
   `group_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: none, 1: executive group, 2: review group',
-  `standard_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_equipment_inspection_plans',
+  `plan_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_equipment_inspection_plans',
   `group_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_organizations',
   `position_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_organization_job_positions',
   `create_time` datetime DEFAULT NULL,
