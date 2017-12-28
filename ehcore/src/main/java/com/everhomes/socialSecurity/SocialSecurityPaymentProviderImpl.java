@@ -72,9 +72,13 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
 
     @Override
     public String findPaymentMonthByOwnerId(Long ownerId) {
-        return getReadOnlyContext().selectDistinct(Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_MONTH).from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
+        Record1<String> result = getReadOnlyContext().selectDistinct(Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_MONTH).from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
                 .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ORGANIZATION_ID.eq(ownerId))
-                .fetchAny().value1();
+                .fetchAny();
+        if (null == result) {
+            return null;
+        }
+        else return result.value1();
     }
 
     @Override
