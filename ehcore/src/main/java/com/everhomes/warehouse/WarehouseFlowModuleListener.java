@@ -35,11 +35,11 @@ public class WarehouseFlowModuleListener implements FlowModuleListener {
         List<FlowServiceTypeDTO> list = new ArrayList<>();
         FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
         Set<Long> namespaceIds = warehouseProvider.findWarehouseNamespace();
-        if(namespaceIds.contains(namespaceId)){
-            dto.setNamespaceId(namespaceId);
-            dto.setId(null);
-            dto.setServiceName(warehouseProvider.findWarehouseMenuName());
-            list.add(dto);
+            if(namespaceIds.contains(Long.valueOf(namespaceId))){
+                dto.setNamespaceId(namespaceId);
+                dto.setId(null);
+                dto.setServiceName(warehouseProvider.findWarehouseMenuName());
+                list.add(dto);
         }
         return list;
     }
