@@ -3,6 +3,7 @@ package com.everhomes.socialSecurity;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 
 import com.everhomes.rest.socialSecurity.AccumOrSocail;
 import com.everhomes.rest.socialSecurity.SocialSecurityItemDTO;
@@ -117,7 +118,7 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
     }
 
     @Override
-    public List<SocialSecuritySetting> listSocialSecuritySetting(List<Long> detailIds) {
+    public List<SocialSecuritySetting> listSocialSecuritySetting(Set<Long> detailIds) {
         return getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_SETTINGS)
                 .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID.in(detailIds))
                 .orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc())

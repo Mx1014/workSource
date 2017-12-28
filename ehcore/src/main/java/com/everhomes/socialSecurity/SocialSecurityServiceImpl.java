@@ -136,19 +136,19 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private void addNewMonthPayments(String paymentMonth, Long ownerId) {
         //把属于该公司的所有要交社保的setting取出来
         //todo : 本月要交社保的人
-        List<Long> detailIds = null;
+        Set<Long> detailIds = null;
         List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
         if (null == details) {
             return;
         }
-        detailIds = details.stream().map(r -> r.getId()).collect(Collectors.toList());
+        detailIds = details.stream().map(r -> r.getId()).collect(Collectors.toSet());
         List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySetting(detailIds);
         List<EhSocialSecurityPayments> payments = new ArrayList<>();
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPayments.class));
         for (SocialSecuritySetting setting : settings) {
             EhSocialSecurityPayments payment = processSocialSecurityPayment(setting, paymentMonth, NormalFlag.NO.getCode());
             payment.setId(id++);
-            payments.add(payment); 
+            payments.add(payment);
         }
         sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPayments.class), payments.size());
         socialSecurityPaymentProvider.batchCreateSocialSecurityPayment(payments);
@@ -167,14 +167,20 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
         List<SocialSecurityBase> ssBases = socialSecurityBaseProvider.listSocialSecurityBase(cityId,
                 householdTypeName, AccumOrSocail.SOCAIL.getCode());
+        if (null == ssBases) {
+            ssBases = new ArrayList<>();
+        }
         List<SocialSecurityBase> afBases = socialSecurityBaseProvider.listSocialSecurityBase(cityId,
                 null, AccumOrSocail.ACCUM.getCode());
+        if (null != afBases) {
+            ssBases.addAll(afBases);
+        }
         List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySettings.class));
         List<EhSocialSecuritySettings> settings = new ArrayList<>();
         for (OrganizationMemberDetails detail : details) {
             id = saveSocialSecuritySettings(ssBases, cityId, ownerId, detail.getTargetId(), detail.getId(), detail.getNamespaceId(), id, settings);
-            id = saveSocialSecuritySettings(afBases, cityId, ownerId, detail.getTargetId(), detail.getId(), detail.getNamespaceId(), id, settings);
+//            id = saveSocialSecuritySettings(afBases, cityId, ownerId, detail.getTargetId(), detail.getId(), detail.getNamespaceId(), id, settings);
         }
         sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySettings.class), settings.size());
         socialSecuritySettingProvider.batchCreateSocialSecuritySetting(settings);
