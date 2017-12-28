@@ -148,6 +148,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         for (SocialSecuritySetting setting : settings) {
             EhSocialSecurityPayments payment = processSocialSecurityPayment(setting, paymentMonth, NormalFlag.NO.getCode());
             payment.setId(id++);
+            payments.add(payment); 
         }
         sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPayments.class), payments.size());
         socialSecurityPaymentProvider.batchCreateSocialSecurityPayment(payments);
