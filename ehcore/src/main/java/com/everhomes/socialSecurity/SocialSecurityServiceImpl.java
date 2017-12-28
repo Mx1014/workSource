@@ -250,6 +250,11 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     public ListSocialSecurityPaymentsResponse listSocialSecurityPayments(
             ListSocialSecurityPaymentsCommand cmd) {
         // TODO 通过组织架构拿到新增人员的detailIds
+        String month = socialSecurityPaymentProvider.findPaymentMonthByOwnerId(cmd.getOwnerId());
+        if (null == month) {
+            //如果没有payments数据,增加一个
+            addSocialSecurity(cmd.getOwnerId());
+        }
         List<Long> detailIds = archivesService.listSocialSecurityEmployees(cmd.getOwnerId(), cmd.getDeptId(), cmd.getKeywords(), cmd.getFilterItems());
 
         SsorAfPay payFlag = null;
