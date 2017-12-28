@@ -295,33 +295,33 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         });
         List<Long> detailIds = archivesService.listSocialSecurityEmployees(cmd.getOwnerId(), cmd.getDeptId(), cmd.getKeywords(), cmd.getFilterItems());
 
-        SsorAfPay payFlag = null;
-        if (null != cmd.getFilterItems()) {
-            for (Byte filterItem : cmd.getFilterItems()) {
-                if (null == filterItem) {
-                    continue;
-                }
-                SocialSecurityItem item = SocialSecurityItem.fromCode(filterItem);
-                switch (item) {
-                    case SOCIALSECURITYPAY:
-                        if (payFlag != null && payFlag == SsorAfPay.ACCUMULATIONFUNDPAY) {
-                            payFlag = SsorAfPay.BOTHPAY;
-                        } else {
-                            payFlag = SsorAfPay.SOCIALSECURITYPAY;
-                        }
-                        break;
-
-                    case ACCUMULATIONFUNDPAY:
-                        if (payFlag != null && payFlag == SsorAfPay.SOCIALSECURITYPAY) {
-                            payFlag = SsorAfPay.BOTHPAY;
-                        } else {
-                            payFlag = SsorAfPay.ACCUMULATIONFUNDPAY;
-                        }
-                        break;
-                    //todo : 等楠哥接口出来看这里怎么写
-                }
-            }
-        }
+//        SsorAfPay payFlag = null;
+//        if (null != cmd.getFilterItems()) {
+//            for (Byte filterItem : cmd.getFilterItems()) {
+//                if (null == filterItem) {
+//                    continue;
+//                }
+//                SocialSecurityItem item = SocialSecurityItem.fromCode(filterItem);
+//                switch (item) {
+//                    case SOCIALSECURITYPAY:
+//                        if (payFlag != null && payFlag == SsorAfPay.ACCUMULATIONFUNDPAY) {
+//                            payFlag = SsorAfPay.BOTHPAY;
+//                        } else {
+//                            payFlag = SsorAfPay.SOCIALSECURITYPAY;
+//                        }
+//                        break;
+//
+//                    case ACCUMULATIONFUNDPAY:
+//                        if (payFlag != null && payFlag == SsorAfPay.SOCIALSECURITYPAY) {
+//                            payFlag = SsorAfPay.BOTHPAY;
+//                        } else {
+//                            payFlag = SsorAfPay.ACCUMULATIONFUNDPAY;
+//                        }
+//                        break;
+//                    //todo : 等楠哥接口出来看这里怎么写
+//                }
+//            }
+//        }
         if (cmd.getPageAnchor() == null)
             cmd.setPageAnchor(0L);
         int pageSize = cmd.getPageSize() == null ? 10 : cmd.getPageSize();
@@ -335,15 +335,15 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             detailIds = socialSecuritySettingProvider.listDetailsByCityId(detailIds, cmd.getAccumulationFundCityId(), AccumOrSocail.ACCUM.getCode());
 
         }
-        if (null != payFlag) {
-            if (SsorAfPay.BOTHPAY == payFlag || SsorAfPay.SOCIALSECURITYPAY == payFlag) {
-                detailIds = socialSecurityPaymentProvider.listDetailsByPayFlag(detailIds, AccumOrSocail.SOCAIL.getCode());
-            }
-
-            if (SsorAfPay.BOTHPAY == payFlag || SsorAfPay.ACCUMULATIONFUNDPAY == payFlag) {
-                detailIds = socialSecurityPaymentProvider.listDetailsByPayFlag(detailIds, AccumOrSocail.ACCUM.getCode());
-            }
-        }
+//        if (null != payFlag) {
+//            if (SsorAfPay.BOTHPAY == payFlag || SsorAfPay.SOCIALSECURITYPAY == payFlag) {
+//                detailIds = socialSecurityPaymentProvider.listDetailsByPayFlag(detailIds, AccumOrSocail.SOCAIL.getCode());
+//            }
+//
+//            if (SsorAfPay.BOTHPAY == payFlag || SsorAfPay.ACCUMULATIONFUNDPAY == payFlag) {
+//                detailIds = socialSecurityPaymentProvider.listDetailsByPayFlag(detailIds, AccumOrSocail.ACCUM.getCode());
+//            }
+//        }
 
 //        List<SocialSecurityPaymentDTO> results = socialSecuritySettingProvider.listSocialSecuritySetting(
 //                         cmd.getDeptId(), cmd.getKeywords(),
