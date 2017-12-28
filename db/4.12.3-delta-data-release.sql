@@ -416,6 +416,10 @@ WHERE  id = 30064;
 DELETE FROM  eh_acl_privileges
 WHERE  id = 30065;
 
+DELETE FROM  eh_service_module_privileges
+WHERE  module_id  = 20655;
+
+
 -- 物业巡检菜单显示不全 end  by jiarui 20171220
 
 -- 删除旧数据 管理员权限start by jiarui 20171220
