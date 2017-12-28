@@ -1799,19 +1799,20 @@ public class PortalServiceImpl implements PortalService {
 
 		for(NamespaceInfoDTO dto: namespaceInfoDTOS){
 			//一个个域空间同步
-			dbProvider.execute((status -> {
-				try {
-					LOGGER.info("syncLaunchPadData namespaceId={}  start", dto.getId());
+			try {
+
+				LOGGER.info("syncLaunchPadData namespaceId={}  start", dto.getId());
+				dbProvider.execute((status -> {
 					for (Tuple<String, String> t: list) {
 						syncLayout(dto.getId(), t.first(), t.second());
 					}
-					LOGGER.info("syncLaunchPadData namespaceId={}  end", dto.getId());
-				} catch (Exception e) {
-					LOGGER.error("syncLaunchPadData namespaceId=" + dto.getId() + "  end", e);
-				}
-				return null;
-			}));
+					return null;
+				}));
+				LOGGER.info("syncLaunchPadData namespaceId={}  end", dto.getId());
 
+			} catch (Exception e) {
+				LOGGER.error("syncLaunchPadData namespaceId=" + dto.getId() + "  end", e);
+			}
 		}
 
 	}
