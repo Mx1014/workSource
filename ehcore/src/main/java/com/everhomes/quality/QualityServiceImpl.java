@@ -4003,9 +4003,10 @@ public class QualityServiceImpl implements QualityService {
 			for (ScoreGroupByTargetDTO score : response.getScores()) {
 				sum = sum + score.getTotalScore();
 			}
-			averageScore = (double) Math.round(sum / response.getScores().size());
+			averageScore = sum / response.getScores().size();
 		}
-		response.setAverageScore(averageScore);
+
+		response.setAverageScore((double) Math.round(1.00*averageScore*100)/100);
 	}
 
 	@Override
