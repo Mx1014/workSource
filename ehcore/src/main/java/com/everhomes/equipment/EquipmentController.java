@@ -379,7 +379,7 @@ public class EquipmentController extends ControllerBase {
 
     /**
      * <b>URL: /equipment/createEquipmentInspectionPlan</b>
-     * <p>创建巡检计划 V3.0.2</p>
+     * <p>创建巡检计划 V3.0.3</p>
      */
     @RequestMapping("createEquipmentInspectionPlan")
     @RestReturn(value = EquipmentInspectionPlanDTO.class)
