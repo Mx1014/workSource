@@ -3184,6 +3184,7 @@ public class QualityServiceImpl implements QualityService {
 				Community community = communityProvider.findCommunityById(target);
 				if(community != null) {
 					scoreGroupDto.setTargetName(community.getName());
+					scoreGroupDto.setBuildArea(community.getAreaSize());
 				}
 
 				if(specificationTree != null && specificationTree.size() > 0) {
