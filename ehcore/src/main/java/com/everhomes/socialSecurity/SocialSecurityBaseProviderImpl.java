@@ -97,11 +97,11 @@ public class SocialSecurityBaseProviderImpl implements SocialSecurityBaseProvide
                 .where(Tables.EH_SOCIAL_SECURITY_BASES.ACCUM_OR_SOCAIL.eq(accumOrSocial))
                 .and(Tables.EH_SOCIAL_SECURITY_BASES.CITY_ID.eq(cityId));
         if (payItem != null) {
-            step = step.and(Tables.EH_SOCIAL_SECURITY_BASES.PAY_ITEM.eq(payItem))
+            step = step.and(Tables.EH_SOCIAL_SECURITY_BASES.PAY_ITEM.eq(payItem));
 
         }
         if (householdType != null) {
-            step = step.and(Tables.EH_SOCIAL_SECURITY_BASES.HOUSEHOLD_TYPE.eq(householdType))
+            step = step.and(Tables.EH_SOCIAL_SECURITY_BASES.HOUSEHOLD_TYPE.eq(householdType));
 
         }
         return step.orderBy(Tables.EH_SOCIAL_SECURITY_BASES.ID.asc()).fetchAny().map(r -> ConvertHelper.convert(r, SocialSecurityBase.class));
