@@ -2169,7 +2169,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 //        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_STAT_BY_YOY);
         checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_STAT_BY_YOY, cmd.getOrganizationId(),  cmd.getCommunityId());
         List<EnergyYoyStatistic> stats = this.energyYoyStatisticProvider.listenergyYoyStatistics(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()),
-                monthSF.get().format(new Date(cmd.getStatDate())));
+                monthSF.get().format(new Date(cmd.getStatDate())), cmd.getCommunityId());
         if(null == stats)
             return null;
 
