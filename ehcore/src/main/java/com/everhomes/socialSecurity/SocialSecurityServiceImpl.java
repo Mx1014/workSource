@@ -356,12 +356,16 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //            dto.setEntryDate(detail.get);
             SocialSecuritySetting accSetting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndAOS(detailId, AccumOrSocail.ACCUM);
             SocialSecuritySetting socSetting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndAOS(detailId, AccumOrSocail.SOCAIL);
-            dto.setSocialSecurityRadix(socSetting.getRadix());
-            Region city = regionProvider.findRegionById(socSetting.getCityId());
-            if (null != city) dto.setSocialSecurityCity(city.getName());
-            dto.setAccumulationFundRadix(accSetting.getRadix());
-            city = regionProvider.findRegionById(accSetting.getCityId());
-            if (null != city) dto.setAccumulationFundCity(city.getName());
+            if (null != socSetting) {
+                dto.setSocialSecurityRadix(socSetting.getRadix());
+                Region city = regionProvider.findRegionById(socSetting.getCityId());
+                if (null != city) dto.setSocialSecurityCity(city.getName());
+            }
+            if (null != accSetting) {
+                dto.setAccumulationFundRadix(accSetting.getRadix());
+                Region city = regionProvider.findRegionById(accSetting.getCityId());
+                if (null != city) dto.setAccumulationFundCity(city.getName());
+            }
         }else{
             dto.setUserName("找不到这个人");
         }

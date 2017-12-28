@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.socialSecurity.AccumOrSocail;
 import com.everhomes.rest.socialSecurity.HouseholdTypesDTO;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -108,6 +109,7 @@ public class SocialSecurityBaseProviderImpl implements SocialSecurityBaseProvide
     public List<HouseholdTypesDTO> listHouseholdTypesByCity(Long cityId) {
         return  getReadOnlyContext().selectDistinct(Tables.EH_SOCIAL_SECURITY_BASES.HOUSEHOLD_TYPE).from(Tables.EH_SOCIAL_SECURITY_BASES)
                 .where(Tables.EH_SOCIAL_SECURITY_BASES.CITY_ID.eq(cityId))
+                .and(Tables.EH_SOCIAL_SECURITY_BASES.ACCUM_OR_SOCAIL.eq(AccumOrSocail.SOCAIL.getCode()))
                 .orderBy(Tables.EH_SOCIAL_SECURITY_BASES.ID.asc())
                 .fetch().map(r -> {
                     HouseholdTypesDTO dto = new HouseholdTypesDTO();
