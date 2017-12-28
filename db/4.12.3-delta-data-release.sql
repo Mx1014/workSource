@@ -404,19 +404,14 @@ UPDATE eh_service_modules
 SET `status` = 2
 WHERE id = 20670;
 
-DELETE FROM  eh_acl_privileges
-WHERE  id = 30062;
-
-DELETE FROM  eh_acl_privileges
-WHERE  id = 30063;
-
-DELETE FROM  eh_acl_privileges
-WHERE  id = 30064;
-
-DELETE FROM  eh_acl_privileges
-WHERE  id = 30065;
-
 -- 物业巡检菜单显示不全 end  by jiarui 20171220
+
+-- 删除绩效考核的权限项 start by jiarui 20171228
+
+DELETE FROM eh_service_module_privileges
+WHERE module_id = 20655;
+
+-- 删除绩效考核的权限项 end by jiarui 20171228
 
 -- 删除旧数据 管理员权限start by jiarui 20171220
 
