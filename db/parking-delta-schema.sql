@@ -117,6 +117,8 @@ drop column multi_unit,
 drop column multi_time_interval,
 drop column day_open_time,
 drop column day_close_time,
+drop column day_begin_time,
+drop column day_end_time,
 drop column need_pay;
 
 ALTER TABLE `eh_rentalv2_resources`
