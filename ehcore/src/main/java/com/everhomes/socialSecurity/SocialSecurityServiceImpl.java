@@ -255,6 +255,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         SsorAfPay payFlag = null;
         if (null != cmd.getFilterItems()) {
             for (Byte filterItem : cmd.getFilterItems()) {
+                if (null == filterItem) {
+                    continue;
+                }
                 SocialSecurityItem item = SocialSecurityItem.fromCode(filterItem);
                 switch (item) {
                     case SOCIALSECURITYPAY:
@@ -272,7 +275,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                             payFlag = SsorAfPay.ACCUMULATIONFUNDPAY;
                         }
                         break;
-                  //todo : 等楠哥接口出来看这里怎么写
+                    //todo : 等楠哥接口出来看这里怎么写
                 }
             }
         }
