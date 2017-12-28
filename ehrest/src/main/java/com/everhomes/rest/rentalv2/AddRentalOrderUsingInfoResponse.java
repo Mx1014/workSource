@@ -3,7 +3,10 @@ package com.everhomes.rest.rentalv2;
 import com.everhomes.rest.order.CommonOrderDTO;
 
 /**
- * @author sw on 2017/12/28.
+ * <ul>
+ * <li>orderDTO: orderDTO {@link com.everhomes.rest.order.CommonOrderDTO}</li>
+ * <li>flowCaseUrl: flowCaseUrl</li>
+ * </ul>
  */
 public class AddRentalOrderUsingInfoResponse {
     private CommonOrderDTO orderDTO;

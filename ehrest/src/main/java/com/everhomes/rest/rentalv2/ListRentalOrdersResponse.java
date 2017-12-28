@@ -6,32 +6,37 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 /**
- * <ul> 
- * <li>rentalBills：订单列表</li>
- * <li>nextPageAnchor：下页锚点</li>
+ * <ul>
+ * <li>nextPageAnchor: 下页锚点</li>
+ * <li>rentalBills: 订单列表 {@link com.everhomes.rest.rentalv2.RentalBriefOrderDTO}</li>
  * </ul>
  */
 public class ListRentalOrdersResponse {
 
 	private Long nextPageAnchor;
-    @ItemType(RentalBillDTO.class)
-	private List<RentalBillDTO> rentalBills; 
-	@Override
-    public String toString() {
+	@ItemType(RentalBriefOrderDTO.class)
+	private List<RentalBriefOrderDTO> rentalBills;
 
-		
-        return StringHelper.toJsonString(this);
-    }
-	public List<RentalBillDTO> getRentalBills() {
+	@Override
+	public String toString() {
+
+
+		return StringHelper.toJsonString(this);
+	}
+
+	public List<RentalBriefOrderDTO> getRentalBills() {
 		return rentalBills;
 	}
-	public void setRentalBills(List<RentalBillDTO> rentalBills) {
+
+	public void setRentalBills(List<RentalBriefOrderDTO> rentalBills) {
 		this.rentalBills = rentalBills;
 	}
+
 	public Long getNextPageAnchor() {
 		return nextPageAnchor;
 	}
+
 	public void setNextPageAnchor(Long nextPageAnchor) {
 		this.nextPageAnchor = nextPageAnchor;
-	} 
+	}
 }

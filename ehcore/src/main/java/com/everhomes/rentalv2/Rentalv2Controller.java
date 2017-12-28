@@ -523,4 +523,19 @@ public class Rentalv2Controller extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /rental/getRentalOrderDetail</b>
+	 * <p>
+	 * 查询单个订单
+	 * </p>
+	 */
+	@RequestMapping("getRentalOrderDetail")
+	@RestReturn(value = RentalOrderDTO.class)
+	public RestResponse getRentalOrderDetail(GetRentalOrderDetailCommand cmd) {
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

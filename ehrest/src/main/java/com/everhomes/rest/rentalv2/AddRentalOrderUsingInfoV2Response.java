@@ -3,7 +3,10 @@ package com.everhomes.rest.rentalv2;
 import com.everhomes.rest.order.PreOrderDTO;
 
 /**
- * @author sw on 2017/12/28.
+ * <ul>
+ * <li>preOrderDTO: preOrderDTO {@link com.everhomes.rest.order.PreOrderDTO}</li>
+ * <li>flowCaseUrl: flowCaseUrl</li>
+ * </ul>
  */
 public class AddRentalOrderUsingInfoV2Response {
     private PreOrderDTO preOrderDTO;

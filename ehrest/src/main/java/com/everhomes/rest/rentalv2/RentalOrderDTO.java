@@ -1,42 +1,36 @@
 package com.everhomes.rest.rentalv2;
 
-import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * <ul>
- * 订单DTO
- * <li>rentalBillId：订单id</li>
- * <li>orderNo：订单编号</li>
- * <li>startTime：开始时间</li>
- * <li>endTime：结束时间</li> 
- * <li>reserveTime:预订时间</li> 
- * <li>payTime：支付时间</li>
- * <li>cancelTime：取消时间</li> 
- * <li>payDeadLineTime：最后支付时间</li> 
- * <li>sitePrice：场所总价</li>
- * <li>totalPrice：全部总价包含物品</li>
- * <li>reservePrice：订金</li>
- * <li>paidPrice：已付金额</li>
- * <li>unPayPrice：未付金额</li>
- * <li>status：订单状态  0待付订金1已付定金2已付清 3待付全款 4已取消 参考{@link SiteBillStatus}</li>
- * <li>rentalCount：场所预定数量</li>
- * <li>useDetail：使用详情</li>
- * <li>refundFlag：是否退款 0-否 1-是</li>
- * <li>refundRatio：退款比例 百分比 </li>
- * <li>cancelFlag：是否允许取消,永远为1</li>
- * <li>vendorType：支付方式,10001-支付宝，10002-微信</li>
- * <li>resourceTypeId：广场图标id</li>
- * <li>siteItems：场所商品</li>
- * <li>rentalSiteRules：场所时间段</li>
- * <li>billAttachments：订单附加信息</li>
- * <li>unpayCancelTime：未支付取消时间</li>
- * <li>confirmationPrompt: 确认提示(非必填)</li>
- * <li>doorAuthTime: 门禁二维码有效期</li>
- * <li>packageName: 套餐名称</li>
+ * <li>resourceType: resourceType {@link com.everhomes.rest.rentalv2.RentalResourceType}</li>
+ * <li>resourceTypeId: 资源类型id</li>
+ * <li>rentalBillId: 订单id</li>
+ * <li>orderNo: 订单编号</li>
+ * <li>siteName: 资源名称</li>
+ * <li>userEnterpriseId: 预约人公司id</li>
+ * <li>userEnterpriseName: 预约人公司名称</li>
+ * <li>userPhone: 预约人手机号</li>
+ * <li>userName: 预约人名称</li>
+ * <li>addressId: 预约人门牌id</li>
+ * <li>address: 门牌地址</li>
+ * <li>vendorType: 支付方式, 10001-支付宝，10002-微信 {@link com.everhomes.rest.organization.VendorType}</li>
+ * <li>startTime: 开始时间</li>
+ * <li>endTime: 结束时间</li>
+ * <li>actualStartTime: 实际开始时间</li>
+ * <li>actualEndTime: 实际结束时间</li>
+ * <li>createTime: 订单创建时间</li>
+ * <li>payTime: 支付时间</li>
+ * <li>overTime: 超时时间 单位分钟</li>
+ * <li>totalAmount: 总金额</li>
+ * <li>paidAmount: 已支付金额</li>
+ * <li>unPayAmount: 欠费金额</li>
+ * <li>refundAmount: 退款金额</li>
+ * <li>status: 订单状态  参考{@link SiteBillStatus}</li>
+ * <li>customObject: 业务数据 各个资源类型不一样 {@link com.everhomes.rest.rentalv2.VipParkingUseInfoDTO}</li>
  * </ul>
  */
 public class RentalOrderDTO {
@@ -65,7 +59,7 @@ public class RentalOrderDTO {
 	private Long createTime;
 	private Long payTime;
 	private Long overTime;
-	private BigDecimal  totalAmount;
+	private BigDecimal totalAmount;
 	private BigDecimal paidAmount;
 	private BigDecimal unPayAmount;
 	private BigDecimal refundAmount;
@@ -75,9 +69,9 @@ public class RentalOrderDTO {
 	private String customObject;
 
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 
 	public Long getActualStartTime() {
 		return actualStartTime;

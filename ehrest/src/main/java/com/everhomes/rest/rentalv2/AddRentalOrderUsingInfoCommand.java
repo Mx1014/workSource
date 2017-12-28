@@ -4,7 +4,18 @@ package com.everhomes.rest.rentalv2;
 import javax.validation.constraints.NotNull;
 
 /**
- * @author sw on 2017/12/28.
+ * <ul>
+ * <li>rentalBillId: 订单id</li>
+ * <li>resourceType: resourceType {@link com.everhomes.rest.rentalv2.RentalResourceType}</li>
+ * <li>customObject: 业务数据 各个资源类型不一样 {@link com.everhomes.rest.rentalv2.VipParkingUseInfoDTO}</li>
+ * <li>clientAppName: clientAppName</li>
+ * <li>paymentType: paymentType</li>
+ * <li>userEnterpriseId: 预约人公司id</li>
+ * <li>userEnterpriseName: 预约人公司名称</li>
+ * <li>userPhone: 预约人手机号</li>
+ * <li>userName: 预约人名称</li>
+ * <li>addressId: 预约人门牌id</li>
+ * </ul>
  */
 public class AddRentalOrderUsingInfoCommand {
 

@@ -3,7 +3,16 @@ package com.everhomes.rest.rentalv2;
 import com.everhomes.util.StringHelper;
 
 /**
- * @author sw on 2017/12/28.
+ * <ul>
+ * <li>parkingLotId: 停车场id</li>
+ * <li>parkingLotName: 停车场名称</li>
+ * <li>plateNumber: 车牌</li>
+ * <li>plateOwnerName: 车主姓名</li>
+ * <li>plateOwnerPhone: 车主手机号</li>
+ * <li>priceStr: 价格字符串</li>
+ * <li>spaceNo: 车位编号</li>
+ * <li>spaceAddress: 车位地址</li>
+ * </ul>
  */
 public class VipParkingUseInfoDTO {
     private Long parkingLotId;
