@@ -3530,122 +3530,7 @@ public class FlowServiceImpl implements FlowService {
     }
 
     public List<Long> resolvUserSelections(FlowCaseState ctx, Map<String, Long> processedEntities, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections, int loopCnt) {
-        return resolvUserSelections(ctx, processedEntities, entityType, entityId, selections, loopCnt, 10000);
-    }
-
-    /**
-     * <ul>此函数需要关注三个问题：
-     * <li> 1. 变量引用，不能循环引用。 </li>
-     * <li> 2. 不能过深的循环 </li>
-     * <li> 3. 很多情况只需要求得部分值，不需要求得全部值 </li>
-     * </ul>
-     * @param ctx 当前工作流上下文
-     * @param processedEntities 已经处理过的对象
-     * @param entityType
-     * @param entityId
-     * @param selections
-     * @param loopCnt
-     * @param maxCount
-     * @return
-     *
-     */
-    private List<Long> resolvUserSelections(FlowCaseState ctx, Map<String, Long> processedEntities, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections, int loopCnt, int maxCount) {
-        List<Long> users = new ArrayList<>();
-
-        //判断是否调用层次过深，避免让服务器崩溃
-        if (selections == null || loopCnt >= 5) {
-            return users;
-        }
-
-        Flow flow = ctx.getFlowGraph().getFlow();
-        Long orgId = flow.getOrganizationId();
-
-        for (FlowUserSelection sel : selections) {
-            if (users.size() >= maxCount) {
-                //为了加快处理的速度，有的情况不需要拿太多用户
-                break;
-            }
-
-            if (sel.getId() != null) {
-                //判断是否已经处理过，避免循环引用。如果直接是用户选择，则不需要判断
-                String key = "sel:" + sel.getId();
-                if (processedEntities.containsKey(key)) {
-                    continue;
-                }
-                processedEntities.put(key, 1L);
-            }
-
-            if (FlowUserSourceType.SOURCE_USER.getCode().equals(sel.getSourceTypeA())) {
-                users.add(sel.getSourceIdA());
-            } else if (FlowUserSelectionType.POSITION.getCode().equals(sel.getSelectType())) {
-                //sourceA is position, sourceB is department
-                Long parentOrgId = orgId;
-                if (sel.getOrganizationId() != null) {
-                    parentOrgId = sel.getOrganizationId();
-                }
-                Long departmentId = parentOrgId;
-                if (sel.getSourceIdB() != null) {
-                    if (FlowUserSourceType.SOURCE_DUTY_DEPARTMENT.getCode().equals(sel.getSourceTypeB())) {
-                        FlowCase flowCase = ctx.getFlowCase();
-                        List<Long> tmp = flowUserSelectionService.findUsersByDudy(parentOrgId, flowCase.getModuleId(), flowCase.getProjectType(), flowCase.getProjectId(), sel.getSourceIdA());
-                        users.addAll(tmp);
-                        continue;
-                    }
-
-                    if (!sel.getSourceIdB().equals(0L)
-                            && FlowUserSourceType.SOURCE_DEPARTMENT.getCode().equals(sel.getSourceTypeB())) {
-                        departmentId = sel.getSourceIdB();
-                    }
-                }
-
-//				LOGGER.error("position selId= " + sel.getId() + " positionId= " + sel.getSourceIdA() + " departmentId= " + departmentId);
-                if (FlowUserSourceType.SOURCE_POSITION.getCode().equals(sel.getSourceTypeA())) {
-                    List<Long> tmp = flowUserSelectionService.findUsersByJobPositionId(parentOrgId, sel.getSourceIdA(), departmentId);
-                    if (tmp != null) {
-                        users.addAll(tmp);
-                    }
-                } else {
-                    LOGGER.error("resolvUser selId= " + sel.getId() + " position parse error!");
-                }
-
-            } else if (FlowUserSelectionType.MANAGER.getCode().equals(sel.getSelectType())) {
-                Long parentOrgId = orgId;
-                if (sel.getOrganizationId() != null) {
-                    parentOrgId = sel.getOrganizationId();
-                }
-
-                Long departmentId = parentOrgId;
-                if (sel.getSourceTypeA() == null
-                        || FlowUserSourceType.SOURCE_DEPARTMENT.getCode().equals(sel.getSourceTypeA())) {
-                    if (null != sel.getSourceIdA() && !sel.getSourceIdA().equals(0L)) {
-                        departmentId = sel.getSourceIdA();
-                    }
-
-                    List<Long> tmp = flowUserSelectionService.findManagersByDepartmentId(parentOrgId, departmentId, ctx.getFlowGraph().getFlow());
-                    users.addAll(tmp);
-                } else if (FlowUserSourceType.SOURCE_DUTY_MANAGER.getCode().equals(sel.getSourceTypeA())) {
-                    List<Long> idList = flowUserSelectionService.findModuleDutyManagers(departmentId, flow.getModuleId(), flow.getProjectType(), flow.getProjectId());
-                    users.addAll(idList);
-                } else {
-                    LOGGER.error("resolvUser selId= " + sel.getId() + " manager parse error!");
-                }
-            } else if (FlowUserSelectionType.VARIABLE.getCode().equals(sel.getSelectType())) {
-                if (sel.getSourceIdA() != null) {
-                    FlowVariable variable = flowVariableProvider.getFlowVariableById(sel.getSourceIdA());
-//					variable.getScriptCls();
-                    FlowVariableUserResolver ftr = PlatformContext.getComponent(variable.getScriptCls());
-                    if (ftr != null) {
-                        List<Long> tmp = ftr.variableUserResolve(ctx, processedEntities, entityType, entityId, sel, loopCnt + 1);
-                        if (null != tmp) {
-                            users.addAll(tmp);
-                        }
-                    }
-                } else {
-                    LOGGER.error("user params error selId= " + sel.getId() + " variable error!");
-                }
-            }
-        }
-        return users.stream().distinct().collect(Collectors.toList());
+        return flowUserSelectionService.resolveUserSelections(ctx, processedEntities, entityType, entityId, selections, loopCnt, 10000);
     }
 
     @Override
@@ -4567,7 +4452,7 @@ public class FlowServiceImpl implements FlowService {
         if (selections == null || selections.size() == 0) {
             return userSels;
         }
-        List<Long> users = resolvUserSelections(ctx, new HashMap<String, Long>(), FlowEntityType.FLOW_NODE
+        List<Long> users = flowUserSelectionService.resolveUserSelections(ctx, new HashMap<>(), FlowEntityType.FLOW_NODE
                 , nodeId, selections, 1, 3);
         for (Long u : users) {
             UserInfo ui = userService.getUserSnapshotInfoWithPhone(u);

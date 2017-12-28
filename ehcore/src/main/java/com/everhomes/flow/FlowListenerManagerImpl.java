@@ -260,6 +260,9 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
                 try {
                     List<FlowServiceTypeDTO> types = listener.listServiceTypes(namespaceId, ownerType, ownerId);
                     if (types != null) {
+                        for (FlowServiceTypeDTO type : types) {
+                            type.setModuleId(moduleId);
+                        }
                         serviceTypes.addAll(types);
                     }
                 } catch (Exception e) {
@@ -272,6 +275,9 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
                 try {
                     List<FlowServiceTypeDTO> types = listener.listServiceTypes(namespaceId, ownerType, ownerId);
                     if (types != null) {
+                        for (FlowServiceTypeDTO type : types) {
+                            type.setModuleId(k);
+                        }
                         serviceTypes.addAll(types);
                     }
                 } catch (Exception e) {
