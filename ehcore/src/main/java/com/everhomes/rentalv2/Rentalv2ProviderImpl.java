@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.persistence.criteria.CriteriaBuilder.Case;
 
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
+import com.everhomes.user.UserContext;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -104,11 +105,14 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
  
 
 	@Override
-	public Long createRentalSite(RentalResource rentalsite) {
+	public void createRentalSite(RentalResource rentalsite) {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhRentalv2Resources.class));
 		rentalsite.setId(id);
 		rentalsite.setDefaultOrder(id);
+		rentalsite.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		rentalsite.setCreatorUid(UserContext.currentUserId());
+
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhRentalv2ResourcesRecord record = ConvertHelper.convert(rentalsite,
 				EhRentalv2ResourcesRecord.class);
@@ -118,7 +122,6 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		query.execute();
 
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2Resources.class, null);
-		return id;
 	}
 
 	@Override
@@ -1697,6 +1700,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhRentalv2DefaultRules.class));
 		defaultRule.setId(id);
+		defaultRule.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		defaultRule.setCreatorUid(UserContext.currentUserId());
+
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhRentalv2DefaultRulesRecord record = ConvertHelper.convert(defaultRule,
 				EhRentalv2DefaultRulesRecord.class);
@@ -1771,17 +1777,34 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public RentalDefaultRule getRentalDefaultRule(String ownerType,
-			Long ownerId, Long resourceTypeId) {
+	public RentalDefaultRule getRentalDefaultRule(String ownerType, Long ownerId, String resourceType,
+												  Long resourceTypeId, String sourceType, Long sourceId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_DEFAULT_RULES);
-		Condition condition = Tables.EH_RENTALV2_DEFAULT_RULES.OWNER_ID
-				.equal(ownerId);
-		condition = condition.and(Tables.EH_RENTALV2_DEFAULT_RULES.OWNER_TYPE
-				.equal(ownerType));
-		condition = condition.and(Tables.EH_RENTALV2_DEFAULT_RULES.RESOURCE_TYPE_ID
-				.equal(resourceTypeId));
+		Condition condition = Tables.EH_RENTALV2_DEFAULT_RULES.RESOURCE_TYPE_ID
+				.equal(resourceTypeId);
+		if (StringUtils.isNotBlank(ownerType)) {
+			condition = condition.and(Tables.EH_RENTALV2_DEFAULT_RULES.OWNER_TYPE
+					.equal(ownerType));
+		}
+		if (null != ownerId) {
+			condition = condition.and(Tables.EH_RENTALV2_DEFAULT_RULES.OWNER_ID
+					.equal(ownerId));
+		}
+		if (StringUtils.isNotBlank(resourceType)) {
+			condition = condition.and(Tables.EH_RENTALV2_DEFAULT_RULES.RESOURCE_TYPE
+					.equal(resourceType));
+		}
+		if (StringUtils.isNotBlank(sourceType)) {
+			condition = condition.and(Tables.EH_RENTALV2_DEFAULT_RULES.SOURCE_TYPE
+					.equal(sourceType));
+		}
+		if (null != sourceId) {
+			condition = condition.and(Tables.EH_RENTALV2_DEFAULT_RULES.SOURCE_ID
+					.equal(sourceId));
+		}
+
 		step.where(condition);
 		List<RentalDefaultRule> result = step
 				.orderBy(Tables.EH_RENTALV2_DEFAULT_RULES.ID.desc()).fetch().map((r) -> {

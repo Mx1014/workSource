@@ -61,7 +61,7 @@ public interface Rentalv2Service {
 
 	void exportRentalBills(ListRentalBillsCommand cmd,HttpServletResponse response);
 	void mappingRentalBillDTO(RentalBillDTO dto, RentalOrder bill);
-	void addDefaultRule(AddDefaultRuleAdminCommand cmd);
+	void addRule(AddDefaultRuleAdminCommand cmd);
 	QueryDefaultRuleAdminResponse queryDefaultRule(QueryDefaultRuleAdminCommand cmd);
 	GetResourceListAdminResponse getResourceList(GetResourceListAdminCommand cmd);
 	void addResource(AddResourceAdminCommand cmd);

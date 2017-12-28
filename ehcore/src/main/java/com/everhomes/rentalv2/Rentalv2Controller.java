@@ -473,4 +473,54 @@ public class Rentalv2Controller extends ControllerBase {
 		rentalService.rentalSchedule();
 		return null;
 	}
+
+	/*--------------------------------start ---------------------------*/
+
+	/**
+	 * <b>URL: /rental/addRentalOrderUsingInfo</b>
+	 * <p>
+	 * 添加订单使用信息
+	 * </p>
+	 */
+	@RequestMapping("addRentalOrderUsingInfo")
+	@RestReturn(value = AddRentalOrderUsingInfoResponse.class)
+	public RestResponse addRentalOrderUsingInfo(AddRentalOrderUsingInfoCommand cmd) {
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/addRentalOrderUsingInfoV2</b>
+	 * <p>
+	 * 添加订单使用信息
+	 * </p>
+	 */
+	@RequestMapping("addRentalOrderUsingInfoV2")
+	@RestReturn(value = AddRentalOrderUsingInfoV2Response.class)
+	public RestResponse addRentalOrderUsingInfoV2(AddRentalOrderUsingInfoCommand cmd) {
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/listRentalOrders</b>
+	 * <p>
+	 * 查询订单
+	 * </p>
+	 */
+	@RequestMapping("listRentalOrders")
+	@RestReturn(value = ListRentalOrdersResponse.class)
+	public RestResponse listRentalOrders(ListRentalOrdersCommand cmd) {
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

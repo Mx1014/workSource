@@ -52,10 +52,16 @@ public class AddDefaultRuleAdminCommand {
 	private String ownerType;
 	@NotNull
 	private Long ownerId;
+
+	private String resourceType;
+
+	private String sourceType;
+	private Long sourceId;
+
 	@NotNull
 	private Long resourceTypeId;
-	private Byte exclusiveFlag;
-	private Double unit;
+//	private Byte exclusiveFlag;
+//	private Double unit;
 	private Byte autoAssign;
 	private Byte multiUnit;
 	private Byte needPay;
@@ -64,7 +70,7 @@ public class AddDefaultRuleAdminCommand {
 	private List<AttachmentConfigDTO> attachments;
 	private Long rentalEndTime;
 	private Long rentalStartTime;
-	private Double timeStep;
+//	private Double timeStep;
 	@ItemType(TimeIntervalDTO.class)
 	private List<TimeIntervalDTO> timeIntervals;
 	private Long beginDate;
@@ -75,9 +81,9 @@ public class AddDefaultRuleAdminCommand {
 	@ItemType(Long.class)
 	private List<Long> closeDates;
 	private Double siteCounts;
-//	@ItemType(String.class)
-//	private List<String> siteNumbers;
-	private Long cancelTime;
+	@ItemType(SiteNumberDTO.class)
+	private List<SiteNumberDTO> siteNumbers;
+//	private Long cancelTime;
 	private Byte refundFlag;
 	private Integer refundRatio;
 
@@ -89,29 +95,64 @@ public class AddDefaultRuleAdminCommand {
 	@ItemType(PriceRuleDTO.class)
 	private List<PriceRuleDTO> priceRules;
 
-	@Deprecated
-	private Byte rentalType;
-	@Deprecated
-	private BigDecimal workdayPrice;
-	@Deprecated
-	private BigDecimal weekendPrice;
-	@Deprecated
-	private BigDecimal orgMemberWorkdayPrice;
-	@Deprecated
-	private BigDecimal orgMemberWeekendPrice;
-	@Deprecated
-	private BigDecimal approvingUserWorkdayPrice;
-	@Deprecated
-	private BigDecimal approvingUserWeekendPrice;
+	@ItemType(PricePackageDTO.class)
+	private List<PricePackageDTO> pricePackages;
 
 	@ItemType(TimeIntervalDTO.class)
 	private List<TimeIntervalDTO> halfDayTimeIntervals;
+
+//	@Deprecated
+//	private Byte rentalType;
+//	@Deprecated
+//	private BigDecimal workdayPrice;
+//	@Deprecated
+//	private BigDecimal weekendPrice;
+//	@Deprecated
+//	private BigDecimal orgMemberWorkdayPrice;
+//	@Deprecated
+//	private BigDecimal orgMemberWeekendPrice;
+//	@Deprecated
+//	private BigDecimal approvingUserWorkdayPrice;
+//	@Deprecated
+//	private BigDecimal approvingUserWeekendPrice;
 
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-	
+
+	public List<PricePackageDTO> getPricePackages() {
+		return pricePackages;
+	}
+
+	public void setPricePackages(List<PricePackageDTO> pricePackages) {
+		this.pricePackages = pricePackages;
+	}
+
+	public String getSourceType() {
+		return sourceType;
+	}
+
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
+	}
+
+	public Long getSourceId() {
+		return sourceId;
+	}
+
+	public void setSourceId(Long sourceId) {
+		this.sourceId = sourceId;
+	}
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
+
 	public List<Byte> getRentalTypes() {
 		return rentalTypes;
 	}
@@ -150,22 +191,6 @@ public class AddDefaultRuleAdminCommand {
 
 	public void setResourceTypeId(Long resourceTypeId) {
 		this.resourceTypeId = resourceTypeId;
-	}
-
-	public Byte getExclusiveFlag() {
-		return exclusiveFlag;
-	}
-
-	public void setExclusiveFlag(Byte exclusiveFlag) {
-		this.exclusiveFlag = exclusiveFlag;
-	}
-
-	public Double getUnit() {
-		return unit;
-	}
-
-	public void setUnit(Double unit) {
-		this.unit = unit;
 	}
 
 	public Byte getAutoAssign() {
@@ -208,14 +233,6 @@ public class AddDefaultRuleAdminCommand {
 		this.attachments = attachments;
 	}
 
-	public Byte getRentalType() {
-		return rentalType;
-	}
-
-	public void setRentalType(Byte rentalType) {
-		this.rentalType = rentalType;
-	}
-
 	public Long getRentalEndTime() {
 		return rentalEndTime;
 	}
@@ -231,14 +248,7 @@ public class AddDefaultRuleAdminCommand {
 	public void setRentalStartTime(Long rentalStartTime) {
 		this.rentalStartTime = rentalStartTime;
 	}
- 
-	
-	public Double getTimeStep() {
-		return timeStep;
-	}
-	public void setTimeStep(Double timeStep) {
-		this.timeStep = timeStep;
-	}
+
 	public List<TimeIntervalDTO> getTimeIntervals() {
 		return timeIntervals;
 	}
@@ -277,36 +287,12 @@ public class AddDefaultRuleAdminCommand {
 		this.closeDates = closeDates;
 	}
 
-	public BigDecimal getWorkdayPrice() {
-		return workdayPrice;
-	}
-
-	public void setWorkdayPrice(BigDecimal workdayPrice) {
-		this.workdayPrice = workdayPrice;
-	}
-
-	public BigDecimal getWeekendPrice() {
-		return weekendPrice;
-	}
-
-	public void setWeekendPrice(BigDecimal weekendPrice) {
-		this.weekendPrice = weekendPrice;
-	}
-
 	public Double getSiteCounts() {
 		return siteCounts;
 	}
 
 	public void setSiteCounts(Double siteCounts) {
 		this.siteCounts = siteCounts;
-	}
-
-	public Long getCancelTime() {
-		return cancelTime;
-	}
-
-	public void setCancelTime(Long cancelTime) {
-		this.cancelTime = cancelTime;
 	}
 
 	public Byte getRefundFlag() {
@@ -324,12 +310,14 @@ public class AddDefaultRuleAdminCommand {
 	public void setRefundRatio(Integer refundRatio) {
 		this.refundRatio = refundRatio;
 	}
-//	public List<String> getSiteNumbers() {
-//		return siteNumbers;
-//	}
-//	public void setSiteNumbers(List<String> siteNumbers) {
-//		this.siteNumbers = siteNumbers;
-//	}
+
+	public List<SiteNumberDTO> getSiteNumbers() {
+		return siteNumbers;
+	}
+
+	public void setSiteNumbers(List<SiteNumberDTO> siteNumbers) {
+		this.siteNumbers = siteNumbers;
+	}
 
 	public Byte getRentalStartTimeFlag() {
 		return rentalStartTimeFlag;
@@ -345,38 +333,6 @@ public class AddDefaultRuleAdminCommand {
 
 	public void setRentalEndTimeFlag(Byte rentalEndTimeFlag) {
 		this.rentalEndTimeFlag = rentalEndTimeFlag;
-	}
-
-	public BigDecimal getOrgMemberWorkdayPrice() {
-		return orgMemberWorkdayPrice;
-	}
-
-	public void setOrgMemberWorkdayPrice(BigDecimal orgMemberWorkdayPrice) {
-		this.orgMemberWorkdayPrice = orgMemberWorkdayPrice;
-	}
-
-	public BigDecimal getOrgMemberWeekendPrice() {
-		return orgMemberWeekendPrice;
-	}
-
-	public void setOrgMemberWeekendPrice(BigDecimal orgMemberWeekendPrice) {
-		this.orgMemberWeekendPrice = orgMemberWeekendPrice;
-	}
-
-	public BigDecimal getApprovingUserWorkdayPrice() {
-		return approvingUserWorkdayPrice;
-	}
-
-	public void setApprovingUserWorkdayPrice(BigDecimal approvingUserWorkdayPrice) {
-		this.approvingUserWorkdayPrice = approvingUserWorkdayPrice;
-	}
-
-	public BigDecimal getApprovingUserWeekendPrice() {
-		return approvingUserWeekendPrice;
-	}
-
-	public void setApprovingUserWeekendPrice(BigDecimal approvingUserWeekendPrice) {
-		this.approvingUserWeekendPrice = approvingUserWeekendPrice;
 	}
 
 	public List<TimeIntervalDTO> getHalfDayTimeIntervals() {

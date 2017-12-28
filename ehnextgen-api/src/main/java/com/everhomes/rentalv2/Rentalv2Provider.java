@@ -11,11 +11,8 @@ import com.everhomes.rest.rentalv2.MaxMinPrice;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 
 public interface Rentalv2Provider {
- 
- 
 
-	Long createRentalSite(RentalResource rentalsite);
- 
+	void createRentalSite(RentalResource rentalsite);
 
 	List<RentalItem> findRentalSiteItems(Long rentalSiteId);
 
@@ -40,7 +37,6 @@ public interface Rentalv2Provider {
 
 	Integer deleteResourceCells(Long rentalSiteId, Long beginDate, Long endDate);
 
-	 
 	RentalResource getRentalSiteById(Long rentalSiteId);
 
 	Integer getSumSitePrice(Long rentalBillId);
@@ -138,8 +134,8 @@ public interface Rentalv2Provider {
 	void createRentalConfigAttachment(RentalConfigAttachment rca);
 
 
-	RentalDefaultRule getRentalDefaultRule(String ownerType, Long ownerId,
-			Long resourceTypeId);
+	RentalDefaultRule getRentalDefaultRule(String ownerType, Long ownerId, String resourceType, Long resourceTypeId,
+										   String sourceType, Long sourceId);
 
 
 	List<RentalTimeInterval> queryRentalTimeIntervalByOwner(String ownerType,

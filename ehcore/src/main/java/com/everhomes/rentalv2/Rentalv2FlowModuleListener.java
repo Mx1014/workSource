@@ -267,16 +267,16 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			entities.add(e);
 		}
 
-		RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
-		if (rs != null && NormalFlag.NONEED.getCode() == rs.getExclusiveFlag()
-				&& NormalFlag.NONEED.getCode() == rs.getAutoAssign()) {
+//		RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
+//		if (rs != null && NormalFlag.NONEED.getCode() == rs.getExclusiveFlag()
+//				&& NormalFlag.NONEED.getCode() == rs.getAutoAssign()) {
 			e = new FlowCaseEntity();
 			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
 					"count", RentalNotificationTemplateCode.locale, ""));
 			e.setValue(order.getRentalCount() + "");
 			entities.add(e);
-		}
+//		}
 
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());

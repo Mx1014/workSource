@@ -21,10 +21,21 @@ public class QueryDefaultRuleAdminCommand {
 	@NotNull
 	private Long resourceTypeId;
 
+	private String resourceType;
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
+
 	public String getOwnerType() {
 		return ownerType;
 	}
