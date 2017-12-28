@@ -111,13 +111,13 @@ VALUES
 (@reflect_id:=@reflect_id+1, @app_id:=@app_id+1, '999992', '仓库管理', '21000', NULL, '2', 13, NULL, NOW(), 'community-control', '0', '', '', '21000');
 
 -- privilege
-set @module_id = 21010;
-set @p_id = 210001001;
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '仓库维护 查找', '仓库维护 查找', NULL);
-set @mp_id = (select MAX(id) from eh_service_module_privileges);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
-VALUES
-(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '查看', '0', NOW());
+-- set @module_id = 21010;
+-- set @p_id = 210001001;
+-- INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '仓库维护 查找', '仓库维护 查找', NULL);
+-- set @mp_id = (select MAX(id) from eh_service_module_privileges);
+-- INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+-- VALUES
+-- (@mp_id:=@mp_id+1, @module_id, '0', @p_id, '查看', '0', NOW());
 
 set @module_id = 21010;
 set @p_id = 210001002;
