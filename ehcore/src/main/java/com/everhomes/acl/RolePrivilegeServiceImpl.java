@@ -1668,12 +1668,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			//把子模块的权限加入
 			ListServiceModulesCommand cmd = new ListServiceModulesCommand();
 			cmd.setParentId(moduleId);
-			cmd.setPageAnchor(0L);
+			cmd.setPageAnchor(null);
 			cmd.setPageSize(1000);
 			ListServiceModulesResponse res = serviceModuleService.listAllServiceModules(cmd);
 			if(res.getDtos() != null && res.getDtos().size() > 0){
 				res.getDtos().forEach(r->{
 					moduleIds.add(r.getId());
+					LOGGER.debug("ListServiceModulesResponse.childModuleId = {}", r.getId());
 				});
 			}
 		}
@@ -3351,7 +3352,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		if(AllFlagType.fromCode(allFlag) == AllFlagType.YES){
 			//给对象分配模块的全部权限
 			//这里用的是EntityType.SERVICE_MODULE，但是relation那边用的是EntityType.SERVICE_MODULE_APP,这是一个坑
-			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, moduleId, null, tag );
+			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, moduleId, null, tag);
 		}else{
 			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, privilegeIds, tag);
 		}
