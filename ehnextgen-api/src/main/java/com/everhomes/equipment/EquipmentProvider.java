@@ -121,8 +121,10 @@ public interface EquipmentProvider {
 	List<Long> listEquipmentInspectionStandardGroupMapByGroup(List<Long> groupIds, Byte groupType);
 	List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByGroupAndPosition(List<ExecuteGroupAndPosition> reviewGroups, Byte groupType );
 	List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByStandardIdAndGroupType(Long standardId, Byte groupType);
-	void populateStandardsGroups(final List<EquipmentInspectionStandards> standards);
-	void populateStandardGroups(EquipmentInspectionStandards standard);
+//	void populateStandardsGroups(final List<EquipmentInspectionStandards> standards);
+//	void populateStandardGroups(EquipmentInspectionStandards standard);
+	void populatePlansGroups(final List<EquipmentInspectionPlans> plans);
+	void populatePlanGroups(EquipmentInspectionPlans plan);
 
 	List<EquipmentInspectionTasks> listTodayEquipmentInspectionTasks(Long startTime, Long endTime, Byte groupType);
 	EquipmentInspectionTasks findLastestEquipmentInspectionTask(Long startTime);
@@ -175,4 +177,12 @@ public interface EquipmentProvider {
 	List<EquipmentInspectionEquipmentPlanMap> listPlanMapByEquipmentId(Long equipmentId);
 
 	List<EquipmentInspectionTasks> listTaskByPlanMaps(List<EquipmentInspectionEquipmentPlanMap> planMaps, Timestamp startTime, Timestamp endTime, ListingLocator locator,int pageSize);
+
+    void deleteEquipmentInspectionPlanGroupMapByPlanId(Long id);
+
+	void createEquipmentInspectionPlanGroupMap(EquipmentInspectionPlanGroupMap map);
+
+    List<EquipmentInspectionPlanGroupMap> listEquipmentInspectionPlanGroupMapByPlanIdAndGroupType(Long planId, byte groupType);
+
+    List<EquipmentInspectionPlanGroupMap> listEquipmentInspectionPlanGroupMapByGroupAndPosition(List<ExecuteGroupAndPosition> groupDtos, List<ExecuteGroupAndPosition> reviewGroups);
 }

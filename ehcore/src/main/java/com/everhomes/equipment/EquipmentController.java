@@ -75,7 +75,6 @@ public class EquipmentController extends ControllerBase {
         return getRestResponse(standard);
     }
 
-
     /**
      * <b>URL: /equipment/findEquipmentStandard</b>
      * <p>根据id查询巡检标准</p>
@@ -354,7 +353,6 @@ public class EquipmentController extends ControllerBase {
 	 */
 	@RequestMapping("exportEquipmentAccessories")
 	public HttpServletResponse exportEquipmentAccessories(@Valid SearchEquipmentAccessoriesCommand cmd,HttpServletResponse response) {
-
 		  return  equipmentService.exportEquipmentAccessories(cmd, response);
 	}
 	
@@ -365,7 +363,6 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("importEquipmentAccessories")
     @RestReturn(value = ImportDataResponse.class)
     public RestResponse importEquipmentAccessories(ImportOwnerCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
-
         Long userId = UserContext.current().getUser().getId();
         if (null == files || null == files[0]) {
             LOGGER.error("files is null。userId=" + userId);
@@ -384,9 +381,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("createEquipmentInspectionPlan")
     @RestReturn(value = EquipmentInspectionPlanDTO.class)
     public RestResponse createEquipmentInspectionPlan(UpdateEquipmentPlanCommand cmd) {
-
         EquipmentInspectionPlanDTO equipmentInspectionPlansDTO = equipmentService.createEquipmentsInspectionPlan(cmd);
-
         return getRestResponse(equipmentInspectionPlansDTO);
     }
 
@@ -397,9 +392,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("updateEquipmentInspectionPlan")
     @RestReturn(value = String.class)
     public RestResponse updateEquipmentInspectionPlan(UpdateEquipmentPlanCommand cmd) {
-
         EquipmentInspectionPlanDTO equipmentInspectionPlansDTO = equipmentService.updateEquipmentInspectionPlan(cmd);
-
         return getRestResponse(equipmentInspectionPlansDTO);
     }
 
@@ -410,9 +403,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("getEquipmentInspectionPlan")
     @RestReturn(value = EquipmentInspectionPlanDTO.class)
     public RestResponse getEquipmentInspectionPlan(DeleteEquipmentPlanCommand cmd) {
-
         EquipmentInspectionPlanDTO equipmentInspectionPlans = equipmentService.getEquipmmentInspectionPlanById(cmd);
-
         return getRestResponse(equipmentInspectionPlans);
     }
 
@@ -434,10 +425,19 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("searchEquipmentInspectionPlans")
     @RestReturn(value = searchEquipmentInspectionPlansResponse.class)
     public RestResponse searchEquipmentInspectionPlans(searchEquipmentInspectionPlansCommand cmd) {
-
         searchEquipmentInspectionPlansResponse equipmentInspectionPlansResponse = equipmentPlanSearcher.query(cmd);
-
         return getRestResponse(equipmentInspectionPlansResponse);
+    }
+
+    /**
+     * <b>URL: /equipment/reviewEquipmentInspectionplan</b>
+     * <p>巡检计划审批</p>
+     */
+    @RequestMapping("reviewEquipmentInspectionplan")
+    @RestReturn(value = String.class)
+    public RestResponse reviewEquipmentInspectionplan(ReviewEquipmentPlanCommand cmd) {
+        equipmentService.reviewEquipmentInspectionplan(cmd);
+        return getSuccessResponse();
     }
 
     /**
@@ -446,7 +446,6 @@ public class EquipmentController extends ControllerBase {
      */
     @RequestMapping("exportEquipmentInspectionPlans")
     public RestResponse exportEquipmentInspectionPlans(searchEquipmentInspectionPlansCommand cmd, HttpServletResponse response) {
-
         equipmentService.exportInspectionPlans(cmd, response);
         return getSuccessResponse();
     }
@@ -508,9 +507,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("listTasksByEquipmentId")
     @RestReturn(value = ListEquipmentTasksResponse.class)
     public RestResponse listTasksByEquipmentId(ListTasksByEquipmentIdCommand cmd) {
-
         ListEquipmentTasksResponse tasks = equipmentService.listTasksByEquipmentId(cmd);
-
         return getRestResponse(tasks);
     }
 
@@ -521,9 +518,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("listTaskById")
     @RestReturn(value = EquipmentTaskDTO.class)
     public RestResponse listTaskById(ListTaskByIdCommand cmd) {
-
         EquipmentTaskDTO task = equipmentService.listTaskById(cmd);
-
         return getRestResponse(task);
     }
 
@@ -534,9 +529,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("listEquipmentStandardRelationsByTaskId")
     @RestReturn(value = EquipmentStandardRelationDTO.class, collection = true)
     public RestResponse listEquipmentStandardRelationsByTaskId(ListTaskByIdCommand cmd) {
-
         List<EquipmentStandardRelationDTO> equipments = null;
-
         return getRestResponse(equipments);
     }
 
@@ -579,32 +572,32 @@ public class EquipmentController extends ControllerBase {
         return getRestResponse(dto);
     }
 
-//    /**
-//     * <b>URL: /equipment/reviewEquipmentTask</b>
-//     * <p>任务审阅</p>
-//     */
-//    @RequestMapping("reviewEquipmentTask")
-//    @RestReturn(value = String.class)
-//    public RestResponse reviewEquipmentTask(ReviewEquipmentTaskCommand cmd) {
-//
-//        equipmentService.reviewEquipmentTask(cmd);
-//
-//        return getSuccessResponse();
-//    }
-//
-//    /**
-//     * <b>URL: /equipment/reviewEquipmentTasks</b>
-//     * <p>任务批量审阅</p>
-//     */
-//    @RequestMapping("reviewEquipmentTasks")
-//    @RestReturn(value = String.class)
-//    public RestResponse reviewEquipmentTasks(ReviewEquipmentTasksCommand cmd) {
-//
-//        equipmentService.reviewEquipmentTasks(cmd);
-//
-//        return getSuccessResponse();
-//    }
-//
+    /**
+     * <b>URL: /equipment/reviewEquipmentTask</b>
+     * <p>任务审阅</p>
+     */
+    @RequestMapping("reviewEquipmentTask")
+    @RestReturn(value = String.class)
+    public RestResponse reviewEquipmentTask(ReviewEquipmentTaskCommand cmd) {
+
+        equipmentService.reviewEquipmentTask(cmd);
+
+        return getSuccessResponse();
+    }
+
+    /**
+     * <b>URL: /equipment/reviewEquipmentTasks</b>
+     * <p>任务批量审阅</p>
+     */
+    @RequestMapping("reviewEquipmentTasks")
+    @RestReturn(value = String.class)
+    public RestResponse reviewEquipmentTasks(ReviewEquipmentTasksCommand cmd) {
+
+        equipmentService.reviewEquipmentTasks(cmd);
+
+        return getSuccessResponse();
+    }
+
 //    /**
 //     * <b>URL: /equipment/createEquipmentTask</b>
 //     * <p>创建某设备的任务</p>

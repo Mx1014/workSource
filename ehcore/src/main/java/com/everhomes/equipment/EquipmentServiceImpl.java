@@ -21,7 +21,13 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.organization.*;
+import com.everhomes.organization.ImportFileService;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationJobPosition;
+import com.everhomes.organization.OrganizationJobPositionMap;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.pmNotify.PmNotifyConfigurations;
 import com.everhomes.pmNotify.PmNotifyProvider;
 import com.everhomes.pmNotify.PmNotifyRecord;
@@ -38,15 +44,134 @@ import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.equipment.AdminFlag;
+import com.everhomes.rest.equipment.CreateEquipmentCategoryCommand;
+import com.everhomes.rest.equipment.CreateInspectionTemplateCommand;
+import com.everhomes.rest.equipment.DeleteEquipmentAccessoriesCommand;
+import com.everhomes.rest.equipment.DeleteEquipmentCategoryCommand;
+import com.everhomes.rest.equipment.DeleteEquipmentPlanCommand;
+import com.everhomes.rest.equipment.DeleteEquipmentStandardCommand;
+import com.everhomes.rest.equipment.DeleteEquipmentStandardRelationsCommand;
+import com.everhomes.rest.equipment.DeleteEquipmentsCommand;
+import com.everhomes.rest.equipment.DeleteInspectionTemplateCommand;
+import com.everhomes.rest.equipment.EquipmentAccessoriesDTO;
+import com.everhomes.rest.equipment.EquipmentAccessoryMapDTO;
+import com.everhomes.rest.equipment.EquipmentAttachmentDTO;
+import com.everhomes.rest.equipment.EquipmentCategories;
+import com.everhomes.rest.equipment.EquipmentInspectionCategoryDTO;
+import com.everhomes.rest.equipment.EquipmentInspectionPlanDTO;
+import com.everhomes.rest.equipment.EquipmentNotificationTemplateCode;
+import com.everhomes.rest.equipment.EquipmentParameterDTO;
+import com.everhomes.rest.equipment.EquipmentPlanStatus;
+import com.everhomes.rest.equipment.EquipmentReviewStatus;
+import com.everhomes.rest.equipment.EquipmentServiceErrorCode;
+import com.everhomes.rest.equipment.EquipmentStandardMapDTO;
+import com.everhomes.rest.equipment.EquipmentStandardRelationDTO;
+import com.everhomes.rest.equipment.EquipmentStandardStatus;
+import com.everhomes.rest.equipment.EquipmentStandardsDTO;
+import com.everhomes.rest.equipment.EquipmentStatus;
+import com.everhomes.rest.equipment.EquipmentTaskAttachmentDTO;
+import com.everhomes.rest.equipment.EquipmentTaskDTO;
+import com.everhomes.rest.equipment.EquipmentTaskLogsDTO;
+import com.everhomes.rest.equipment.EquipmentTaskProcessResult;
+import com.everhomes.rest.equipment.EquipmentTaskProcessType;
+import com.everhomes.rest.equipment.EquipmentTaskResult;
+import com.everhomes.rest.equipment.EquipmentTaskStatus;
+import com.everhomes.rest.equipment.EquipmentsDTO;
+import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
+import com.everhomes.rest.equipment.ExportEquipmentData;
+import com.everhomes.rest.equipment.ExportEquipmentsCardCommand;
+import com.everhomes.rest.equipment.GetInspectionObjectByQRCodeCommand;
+import com.everhomes.rest.equipment.ImportDataType;
+import com.everhomes.rest.equipment.ImportOwnerCommand;
+import com.everhomes.rest.equipment.InspectionItemDTO;
+import com.everhomes.rest.equipment.InspectionItemResult;
+import com.everhomes.rest.equipment.InspectionStandardMapTargetType;
+import com.everhomes.rest.equipment.InspectionTemplateDTO;
+import com.everhomes.rest.equipment.ItemResultStat;
+import com.everhomes.rest.equipment.ListAbnormalTasksCommand;
+import com.everhomes.rest.equipment.ListAttachmentsByEquipmentIdCommand;
+import com.everhomes.rest.equipment.ListEquipmentInspectionCategoriesCommand;
+import com.everhomes.rest.equipment.ListEquipmentTasksCommand;
+import com.everhomes.rest.equipment.ListEquipmentTasksResponse;
+import com.everhomes.rest.equipment.ListInspectionTemplatesCommand;
+import com.everhomes.rest.equipment.ListLogsByTaskIdCommand;
+import com.everhomes.rest.equipment.ListLogsByTaskIdResponse;
+import com.everhomes.rest.equipment.ListParametersByStandardIdCommand;
+import com.everhomes.rest.equipment.ListRelatedOrgGroupsCommand;
+import com.everhomes.rest.equipment.ListTaskByIdCommand;
+import com.everhomes.rest.equipment.ListTasksByEquipmentIdCommand;
+import com.everhomes.rest.equipment.ListTasksByTokenCommand;
+import com.everhomes.rest.equipment.ListUserHistoryTasksCommand;
+import com.everhomes.rest.equipment.QRCodeFlag;
+import com.everhomes.rest.equipment.ReportEquipmentTaskCommand;
+import com.everhomes.rest.equipment.ReviewEquipmentPlanCommand;
+import com.everhomes.rest.equipment.ReviewEquipmentStandardRelationsCommand;
+import com.everhomes.rest.equipment.ReviewEquipmentTaskCommand;
+import com.everhomes.rest.equipment.ReviewEquipmentTasksCommand;
+import com.everhomes.rest.equipment.ReviewResult;
+import com.everhomes.rest.equipment.ReviewedTaskStat;
+import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
+import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
+import com.everhomes.rest.equipment.SearchEquipmentStandardsCommand;
+import com.everhomes.rest.equipment.SearchEquipmentStandardsResponse;
+import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
+import com.everhomes.rest.equipment.SearchEquipmentsCommand;
+import com.everhomes.rest.equipment.SearchEquipmentsResponse;
+import com.everhomes.rest.equipment.StandardAndStatus;
+import com.everhomes.rest.equipment.StandardGroupDTO;
+import com.everhomes.rest.equipment.StandardRepeatType;
+import com.everhomes.rest.equipment.StandardType;
+import com.everhomes.rest.equipment.StatEquipmentTasksCommand;
+import com.everhomes.rest.equipment.StatEquipmentTasksResponse;
+import com.everhomes.rest.equipment.StatIntervalAllEquipmentTasksCommand;
+import com.everhomes.rest.equipment.StatIntervalAllEquipmentTasksResponse;
+import com.everhomes.rest.equipment.StatItemResultsInEquipmentTasksCommand;
+import com.everhomes.rest.equipment.StatItemResultsInEquipmentTasksResponse;
+import com.everhomes.rest.equipment.StatLastDaysEquipmentTasksCommand;
+import com.everhomes.rest.equipment.StatLastDaysEquipmentTasksResponse;
+import com.everhomes.rest.equipment.StatTodayEquipmentTasksCommand;
+import com.everhomes.rest.equipment.StatTodayEquipmentTasksResponse;
+import com.everhomes.rest.equipment.Status;
+import com.everhomes.rest.equipment.TaskCountDTO;
+import com.everhomes.rest.equipment.TasksStatData;
+import com.everhomes.rest.equipment.UpdateEquipmentAccessoriesCommand;
+import com.everhomes.rest.equipment.UpdateEquipmentCategoryCommand;
+import com.everhomes.rest.equipment.UpdateEquipmentPlanCommand;
+import com.everhomes.rest.equipment.UpdateEquipmentStandardCommand;
+import com.everhomes.rest.equipment.UpdateEquipmentsCommand;
+import com.everhomes.rest.equipment.UpdateInspectionTemplateCommand;
+import com.everhomes.rest.equipment.VerifyEquipmentLocationCommand;
+import com.everhomes.rest.equipment.VerifyEquipmentLocationResponse;
+import com.everhomes.rest.equipment.findScopeFieldItemCommand;
+import com.everhomes.rest.equipment.searchEquipmentInspectionPlansCommand;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.organization.*;
+import com.everhomes.rest.organization.ListOrganizationContactByJobPositionIdCommand;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.ListOrganizationPersonnelByRoleIdsCommand;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationNaviFlag;
 import com.everhomes.rest.parking.ParkingLocalStringCode;
-import com.everhomes.rest.pmNotify.*;
+import com.everhomes.rest.pmNotify.DeletePmNotifyParamsCommand;
+import com.everhomes.rest.pmNotify.ListPmNotifyParamsCommand;
+import com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus;
+import com.everhomes.rest.pmNotify.PmNotifyParamDTO;
+import com.everhomes.rest.pmNotify.PmNotifyParams;
+import com.everhomes.rest.pmNotify.PmNotifyReceiver;
+import com.everhomes.rest.pmNotify.PmNotifyReceiverDTO;
+import com.everhomes.rest.pmNotify.PmNotifyReceiverList;
+import com.everhomes.rest.pmNotify.PmNotifyReceiverType;
+import com.everhomes.rest.pmNotify.PmNotifyScopeType;
+import com.everhomes.rest.pmNotify.PmNotifyType;
+import com.everhomes.rest.pmNotify.ReceiverName;
+import com.everhomes.rest.pmNotify.SetPmNotifyParamsCommand;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityGroupType;
@@ -59,14 +184,30 @@ import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
-import com.everhomes.search.*;
+import com.everhomes.search.EquipmentAccessoriesSearcher;
+import com.everhomes.search.EquipmentPlanSearcher;
+import com.everhomes.search.EquipmentSearcher;
+import com.everhomes.search.EquipmentStandardMapSearcher;
+import com.everhomes.search.EquipmentStandardSearcher;
+import com.everhomes.search.EquipmentTasksSearcher;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentPlanMap;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandards;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.techpark.rental.RentalServiceImpl;
-import com.everhomes.user.*;
-import com.everhomes.util.*;
+import com.everhomes.user.OSType;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.DateUtils;
+import com.everhomes.util.DownloadUtils;
+import com.everhomes.util.QRCodeConfig;
+import com.everhomes.util.QRCodeEncoder;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.doc.DocUtil;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
@@ -94,7 +235,15 @@ import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -105,7 +254,17 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -133,7 +292,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	
 	@Autowired
 	private EquipmentProvider equipmentProvider;
-	
+
 	@Autowired
 	private ConfigurationProvider configProvider;
 	
@@ -737,19 +896,18 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 		
 	}
-	
 	private List<Long> getEquipmentManagerIds(EquipmentInspectionEquipments equipment) {
-		
+
 		List<Long> uIds = new ArrayList<Long>();
-		
+
 		List<Long> roles = new ArrayList<Long>();
 		roles.add(RoleConstants.EQUIPMENT_MANAGER);
-		
+
 		ListOrganizationPersonnelByRoleIdsCommand cmd = new ListOrganizationPersonnelByRoleIdsCommand();
-		
+
 		cmd.setRoleIds(roles);
 		cmd.setOrganizationId(equipment.getTargetId());
-		
+
 		ListOrganizationMemberCommandResponse resp = organizationService.listOrganizationPersonnelsByRoleIds(cmd);
 		List<OrganizationMemberDTO> members = resp.getMembers();
 		if(members != null && members.size() > 0) {
@@ -757,10 +915,29 @@ public class EquipmentServiceImpl implements EquipmentService {
 				uIds.add(member.getTargetId());
 			}
 		}
-		
+
 		return uIds;
 	}
-	
+
+	@Override
+	public void reviewEquipmentInspectionplan(ReviewEquipmentPlanCommand cmd) {
+		User user = UserContext.current().getUser();
+		//TODO:新增功能应该需要加上权限细化中的 下版本再搞
+
+		EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(cmd.getId());
+		if (plan == null || EquipmentPlanStatus.INACTIVE.equals(EquipmentPlanStatus.fromStatus(plan.getStatus()))) {
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_PLAN_ALREADY_DELETED,
+					"计划不存在或已失效");
+		}
+
+		if (EquipmentPlanStatus.WATTING_FOR_APPOVING.equals(EquipmentPlanStatus.fromStatus(plan.getStatus()))) {
+			plan.setStatus(cmd.getReviewResult());
+			equipmentProvider.updateEquipmentInspectionPlan(plan);
+			equipmentPlanSearcher.feedDoc(plan);
+		}
+	}
+
 	@Override
 	public void deleteEquipmentStandardRelations(
 			DeleteEquipmentStandardRelationsCommand cmd) {
@@ -2078,121 +2255,121 @@ public class EquipmentServiceImpl implements EquipmentService {
 	
 	@Override
 	public void creatTaskByStandard(EquipmentInspectionEquipments equipment, EquipmentInspectionStandards standard) {
-		equipmentProvider.populateStandardGroups(standard);
-		EquipmentStandardsDTO standardDto = converStandardToDto(standard);
-		EquipmentInspectionTasks task = new EquipmentInspectionTasks();
-		task.setOwnerType(equipment.getOwnerType());
-		task.setOwnerId(equipment.getOwnerId());
-		task.setNamespaceId(equipment.getNamespaceId());
-		task.setTargetId(equipment.getTargetId());
-		task.setTargetType(equipment.getTargetType());
-		task.setInspectionCategoryId(equipment.getInspectionCategoryId());
-		task.setStandardId(standardDto.getId());
-		task.setEquipmentId(equipment.getId());
-		task.setTaskNumber(standardDto.getStandardNumber());
-		task.setStandardType(standardDto.getStandardType());
-//		task.setExecutiveGroupType(equipment.getTargetType());
-//		task.setExecutiveGroupId(equipment.getTargetId());
-		task.setStatus(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
-		task.setResult(EquipmentTaskResult.NONE.getCode());
-		task.setReviewResult(ReviewResult.NONE.getCode());
-		
-		StandardType type = StandardType.fromStatus(standardDto.getStandardType());
-		
-		List<TimeRangeDTO> timeRanges = repeatService.analyzeTimeRange(standardDto.getRepeat().getTimeRanges());
-//		for(StandardGroupDTO executiveGroup : standardDto.getExecutiveGroup()) {
+//		equipmentProvider.populateStandardGroups(standard);
+//		EquipmentStandardsDTO standardDto = converStandardToDto(standard);
+//		EquipmentInspectionTasks task = new EquipmentInspectionTasks();
+//		task.setOwnerType(equipment.getOwnerType());
+//		task.setOwnerId(equipment.getOwnerId());
+//		task.setNamespaceId(equipment.getNamespaceId());
+//		task.setTargetId(equipment.getTargetId());
+//		task.setTargetType(equipment.getTargetType());
+//		task.setInspectionCategoryId(equipment.getInspectionCategoryId());
+//		task.setStandardId(standardDto.getId());
+//		task.setEquipmentId(equipment.getId());
+//		task.setTaskNumber(standardDto.getStandardNumber());
+//		task.setStandardType(standardDto.getStandardType());
+////		task.setExecutiveGroupType(equipment.getTargetType());
+////		task.setExecutiveGroupId(equipment.getTargetId());
+//		task.setStatus(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
+//		task.setResult(EquipmentTaskResult.NONE.getCode());
+//		task.setReviewResult(ReviewResult.NONE.getCode());
 //
-//			task.setExecutiveGroupId(executiveGroup.getGroupId());
-//			task.setPositionId(executiveGroup.getPositionId());
-				
-		if(timeRanges != null && timeRanges.size() > 0) {
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("creatTaskByStandard, timeRanges = " + timeRanges);
-			}
-			long current = System.currentTimeMillis();
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-			String day = sdf.format(current);
-			int i = 0;
-			for (TimeRangeDTO timeRange : timeRanges) {
-				i++;
-
-				String duration = timeRange.getDuration();
-				String start = timeRange.getStartTime();
-				String str = day + " " + start;
-				Timestamp startTime = strToTimestamp(str);
-				Timestamp expiredTime = repeatService.getEndTimeByAnalyzeDuration(startTime, duration);
-				task.setExecutiveStartTime(startTime);
-				task.setExecutiveExpireTime(expiredTime);
-				long now = System.currentTimeMillis();
-				//标准名称+巡检/保养+当日日期6位(年的后两位+月份+天)+两位序号（系统从01开始生成）
-				//改为：设备名称+巡检/保养+当日日期6位(年的后两位+月份+天)+两位序号（系统从01开始生成）by xiongying20170927
-				if (i < 10) {
-
-					String taskName = equipment.getName() + type.getName() +
-							timestampToStr(new Timestamp(now)).substring(2) + "0" + i;
-					task.setTaskName(taskName);
-				} else {
-					String taskName = equipment.getName() + type.getName() +
-							timestampToStr(new Timestamp(now)).substring(2) + i;
-					task.setTaskName(taskName);
-				}
-				equipmentProvider.creatEquipmentTask(task);
-				equipmentTasksSearcher.feedDoc(task);
-
-//				启动提醒
-				ListPmNotifyParamsCommand command = new ListPmNotifyParamsCommand();
-				command.setCommunityId(task.getTargetId());
-				command.setNamespaceId(task.getNamespaceId());
-				List<PmNotifyParamDTO> paramDTOs = listPmNotifyParams(command);
-				if(paramDTOs != null && paramDTOs.size() > 0) {
-					for (PmNotifyParamDTO notifyParamDTO : paramDTOs) {
-						List<PmNotifyReceiverDTO> receivers = notifyParamDTO.getReceivers();
-						if(receivers != null && receivers.size() > 0) {
-							PmNotifyRecord record = ConvertHelper.convert(notifyParamDTO, PmNotifyRecord.class);
-							PmNotifyReceiverList receiverList = new PmNotifyReceiverList();
-							List<PmNotifyReceiver> pmNotifyReceivers = new ArrayList<>();
-							receivers.forEach(receiver -> {
-								PmNotifyReceiver pmNotifyReceiver = new PmNotifyReceiver();
-								if(receiver != null) {
-									pmNotifyReceiver.setReceiverType(receiver.getReceiverType());
-									if(receiver.getReceivers() != null) {
-										List<Long> ids = receiver.getReceivers().stream().map(receiverName -> {
-											return receiverName.getId();
-										}).collect(Collectors.toList());
-										pmNotifyReceiver.setReceiverIds(ids);
-									}
-									pmNotifyReceivers.add(pmNotifyReceiver);
-								}
-							});
-							receiverList.setReceivers(pmNotifyReceivers);
-							record.setReceiverJson(receiverList.toString());
-							record.setOwnerType(EntityType.EQUIPMENT_TASK.getCode());
-							record.setOwnerId(task.getId());
-
-							//notify_time
-							PmNotifyType notify = PmNotifyType.fromCode(record.getNotifyType());
-							switch (notify) {
-								case BEFORE_START:
-									Timestamp starttime = minusMinutes(task.getExecutiveStartTime(), notifyParamDTO.getNotifyTickMinutes());
-									record.setNotifyTime(starttime);
-									break;
-								case BEFORE_DELAY:
-									Timestamp delaytime = minusMinutes(task.getExecutiveExpireTime(), notifyParamDTO.getNotifyTickMinutes());
-									record.setNotifyTime(delaytime);
-									break;
-								case AFTER_DELAY:
-									record.setNotifyTime(task.getExecutiveExpireTime());
-									break;
-								default:
-									break;
-							}
-							pmNotifyService.pushPmNotifyRecord(record);
-						}
-
-					}
-				}
-			}
-		}
+//		StandardType type = StandardType.fromStatus(standardDto.getStandardType());
+//
+//		List<TimeRangeDTO> timeRanges = repeatService.analyzeTimeRange(standardDto.getRepeat().getTimeRanges());
+////		for(StandardGroupDTO executiveGroup : standardDto.getExecutiveGroup()) {
+////
+////			task.setExecutiveGroupId(executiveGroup.getGroupId());
+////			task.setPositionId(executiveGroup.getPositionId());
+//
+//		if(timeRanges != null && timeRanges.size() > 0) {
+//			if (LOGGER.isInfoEnabled()) {
+//				LOGGER.info("creatTaskByStandard, timeRanges = " + timeRanges);
+//			}
+//			long current = System.currentTimeMillis();
+//			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+//			String day = sdf.format(current);
+//			int i = 0;
+//			for (TimeRangeDTO timeRange : timeRanges) {
+//				i++;
+//
+//				String duration = timeRange.getDuration();
+//				String start = timeRange.getStartTime();
+//				String str = day + " " + start;
+//				Timestamp startTime = strToTimestamp(str);
+//				Timestamp expiredTime = repeatService.getEndTimeByAnalyzeDuration(startTime, duration);
+//				task.setExecutiveStartTime(startTime);
+//				task.setExecutiveExpireTime(expiredTime);
+//				long now = System.currentTimeMillis();
+//				//标准名称+巡检/保养+当日日期6位(年的后两位+月份+天)+两位序号（系统从01开始生成）
+//				//改为：设备名称+巡检/保养+当日日期6位(年的后两位+月份+天)+两位序号（系统从01开始生成）by xiongying20170927
+//				if (i < 10) {
+//
+//					String taskName = equipment.getName() + type.getName() +
+//							timestampToStr(new Timestamp(now)).substring(2) + "0" + i;
+//					task.setTaskName(taskName);
+//				} else {
+//					String taskName = equipment.getName() + type.getName() +
+//							timestampToStr(new Timestamp(now)).substring(2) + i;
+//					task.setTaskName(taskName);
+//				}
+//				equipmentProvider.creatEquipmentTask(task);
+//				equipmentTasksSearcher.feedDoc(task);
+//
+////				启动提醒
+//				ListPmNotifyParamsCommand command = new ListPmNotifyParamsCommand();
+//				command.setCommunityId(task.getTargetId());
+//				command.setNamespaceId(task.getNamespaceId());
+//				List<PmNotifyParamDTO> paramDTOs = listPmNotifyParams(command);
+//				if(paramDTOs != null && paramDTOs.size() > 0) {
+//					for (PmNotifyParamDTO notifyParamDTO : paramDTOs) {
+//						List<PmNotifyReceiverDTO> receivers = notifyParamDTO.getReceivers();
+//						if(receivers != null && receivers.size() > 0) {
+//							PmNotifyRecord record = ConvertHelper.convert(notifyParamDTO, PmNotifyRecord.class);
+//							PmNotifyReceiverList receiverList = new PmNotifyReceiverList();
+//							List<PmNotifyReceiver> pmNotifyReceivers = new ArrayList<>();
+//							receivers.forEach(receiver -> {
+//								PmNotifyReceiver pmNotifyReceiver = new PmNotifyReceiver();
+//								if(receiver != null) {
+//									pmNotifyReceiver.setReceiverType(receiver.getReceiverType());
+//									if(receiver.getReceivers() != null) {
+//										List<Long> ids = receiver.getReceivers().stream().map(receiverName -> {
+//											return receiverName.getId();
+//										}).collect(Collectors.toList());
+//										pmNotifyReceiver.setReceiverIds(ids);
+//									}
+//									pmNotifyReceivers.add(pmNotifyReceiver);
+//								}
+//							});
+//							receiverList.setReceivers(pmNotifyReceivers);
+//							record.setReceiverJson(receiverList.toString());
+//							record.setOwnerType(EntityType.EQUIPMENT_TASK.getCode());
+//							record.setOwnerId(task.getId());
+//
+//							//notify_time
+//							PmNotifyType notify = PmNotifyType.fromCode(record.getNotifyType());
+//							switch (notify) {
+//								case BEFORE_START:
+//									Timestamp starttime = minusMinutes(task.getExecutiveStartTime(), notifyParamDTO.getNotifyTickMinutes());
+//									record.setNotifyTime(starttime);
+//									break;
+//								case BEFORE_DELAY:
+//									Timestamp delaytime = minusMinutes(task.getExecutiveExpireTime(), notifyParamDTO.getNotifyTickMinutes());
+//									record.setNotifyTime(delaytime);
+//									break;
+//								case AFTER_DELAY:
+//									record.setNotifyTime(task.getExecutiveExpireTime());
+//									break;
+//								default:
+//									break;
+//							}
+//							pmNotifyService.pushPmNotifyRecord(record);
+//						}
+//
+//					}
+//				}
+//			}
+//		}
 	}
 
 	private Timestamp minusMinutes(Timestamp startTime, int minus) {
@@ -3346,15 +3523,17 @@ public class EquipmentServiceImpl implements EquipmentService {
 			List<Long> executeStandardIds = new ArrayList<>();
 			List<Long> reviewStandardIds = new ArrayList<>();
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
-			List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, null);
+			//List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, null);
+			//这里换成从计划表中拿执行组和审批组人员
+			List<EquipmentInspectionPlanGroupMap> maps = equipmentProvider.listEquipmentInspectionPlanGroupMapByGroupAndPosition(groupDtos, null);
 			if (maps != null && maps.size() > 0) {
 
-				for (EquipmentInspectionStandardGroupMap r : maps) {
+				for (EquipmentInspectionPlanGroupMap r : maps) {
 					if (QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
-						reviewStandardIds.add(r.getStandardId());
+						reviewStandardIds.add(r.getPlanId());
 					}
 					if (QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
-						executeStandardIds.add(r.getStandardId());
+						executeStandardIds.add(r.getPlanId());
 					}
 				}
 			}
@@ -3393,34 +3572,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 
 			return null;
-		}).filter(r -> r != null).collect(Collectors.toList());
+		}).filter(Objects::nonNull).collect(Collectors.toList());
 
-
-		long startTime2 = System.currentTimeMillis();
-		Set<Long> taskEquipmentIds = tasks.stream().map(r -> {
-			return r.getEquipmentId();
-		}).filter(r -> r != null).collect(Collectors.toSet());
-
-
-		Map<Long, EquipmentInspectionEquipments> equipmentsMap = equipmentProvider.listEquipmentsById(taskEquipmentIds);
-		List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
-			EquipmentTaskDTO dto = ConvertHelper.convert(r, EquipmentTaskDTO.class);
-			EquipmentInspectionEquipments equipment = equipmentsMap.get(dto.getEquipmentId());
-//			EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(r.getEquipmentId());
-			if (equipment != null) {
-				dto.setEquipmentLocation(equipment.getLocation());
-				dto.setQrCodeFlag(equipment.getQrCodeFlag());
-				dto.setEquipmentName(equipment.getName());
-			}
-
-			return dto;
-		}).filter(r -> r != null).collect(Collectors.toList());
+		List<EquipmentTaskDTO> dtos = tasks.stream().map((r) ->
+				ConvertHelper.convert(r, EquipmentTaskDTO.class))
+				.collect(Collectors.toList());
 
 		response.setTasks(dtos);
 
-		long endTime = System.currentTimeMillis();
-		LOGGER.debug("TrackUserRelatedCost: listEquipmentTasks total elapse:{}, convertEquipmentTaskDTO resultSize:{}, convert time:{}",
-				(endTime - startTime), tasks.size(), (endTime - startTime2));
 		return response;
 
 	}
@@ -4814,9 +4973,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public Set<Long> getTaskGroupUsers(Long taskId, byte groupType) {
+		//这里从原来标准和人员组关系变更为计划和人员组关系  -- V3.0.3
 		EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(taskId);
-		List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByStandardIdAndGroupType(task.getStandardId(), groupType);
-		if(maps != null && maps.size() > 0) {
+		//List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByStandardIdAndGroupType(task.getStandardId(), groupType);
+		List<EquipmentInspectionPlanGroupMap> maps = equipmentProvider.listEquipmentInspectionPlanGroupMapByPlanIdAndGroupType(task.getPlanId(), groupType);
+		if (maps != null && maps.size() > 0) {
 			Set<Long> userIds = new HashSet<>();
 			maps.forEach(map -> {
 				if(map.getPositionId() == null || map.getPositionId() == 0L) {
@@ -4848,7 +5009,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 	public  FieldItemDTO findScopeFieldItemByFieldItemId(findScopeFieldItemCommand cmd) {
 		 return  ConvertHelper.convert(fieldProvider.findScopeFieldItemByBusinessValue(cmd.getNamespaceId(),cmd.getCommunityId(),cmd.getModuleName(),cmd.getFieldId(),cmd.getBusinessValue()),FieldItemDTO.class);
 	}
-
 
 	@Override
 	public EquipmentInspectionPlanDTO createEquipmentsInspectionPlan(UpdateEquipmentPlanCommand cmd) {
@@ -4892,7 +5052,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 			createdPlan.setEquipmentStandardRelations(equipmentStandardRelation);
 		List<StandardGroupDTO> groupList = cmd.getGroupList();
-		//processStandardGroups(groupList, standard);
+
+		//巡检计划增加审批和执行人员
 		processPlanGroups(groupList, createdPlan);
 
 		return ConvertHelper.convert(createdPlan, EquipmentInspectionPlanDTO.class);
@@ -4901,12 +5062,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 	private void processPlanGroups(List<StandardGroupDTO> groupList, EquipmentInspectionPlans createdPlan) {
 		List<EquipmentInspectionPlanGroupMap> executiveGroup = null;
 		List<EquipmentInspectionPlanGroupMap> reviewGroup = null;
-		this.equipmentProvider.deleteEquipmentInspectionStandardGroupMapByStandardId(createdPlan.getId());
+		this.equipmentProvider.deleteEquipmentInspectionPlanGroupMapByPlanId(createdPlan.getId());
 
 		if(LOGGER.isInfoEnabled()) {
-			LOGGER.info("processStandardGroups: deleteEquipmentInspectionStandardGroupMapByStandardId, standardId=" + createdPlan.getId()
+			LOGGER.info("processPlanGroups: deleteEquipmentInspectionPlanGroupMapByStandardId, planId=" + createdPlan.getId()
 					+ "userId = " + UserContext.current().getUser().getId() + "time = " + DateHelper.currentGMTTime()
-					+ "new standard groupList = {}" + groupList);
+					+ "new plan groupList = {}" + groupList);
 		}
 
 		if(groupList != null && groupList.size() >0) {
@@ -4919,11 +5080,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 				map.setGroupType(group.getGroupType());
 				map.setGroupId(group.getGroupId());
 				map.setPositionId(group.getPositionId());
-				equipmentProvider.createEquipmentInspectionStandardGroupMap(map);
-				if(QualityGroupType.EXECUTIVE_GROUP.equals(map.getGroupType())) {
+				equipmentProvider.createEquipmentInspectionPlanGroupMap(map);
+				if(QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
 					executiveGroup.add(map);
 				}
-				if(QualityGroupType.REVIEW_GROUP.equals(map.getGroupType())) {
+				if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
 					reviewGroup.add(map);
 				}
 			}
@@ -4956,19 +5117,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if (exist.getPlanMainId() == null) {
 			//mainId为空则创建副本 副本最多只有一份
 			plan.setPlanMainId(cmd.getId());
-			plan.setCreatorUid(UserContext.currentUserId());
-			exist.setPlanVersion(2L);//version为2表示已经有副本
-			dbProvider.execute((TransactionStatus status)->{
-				equipmentProvider.updateEquipmentInspectionPlan(exist);
-				equipmentProvider.createEquipmentInspectionPlans(plan);
-				return  null;
-			});
+			plan.setOperatorUid(UserContext.currentUserId());
+			equipmentProvider.createEquipmentInspectionPlans(plan);
 
 		} else {
 			plan.setOperatorUid(UserContext.currentUserId());
 			plan.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			equipmentProvider.updateEquipmentInspectionPlan(plan);
-			equipmentProvider.deleteEquipmentInspectionPlanMap(plan.getId());
 			repeatService.deleteRepeatSettingsById(cmd.getRepeatSettings().getId());
 		}
 		updatePlan = plan;
@@ -4992,11 +5147,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 			equipmentStandardRelation.add(relation);
 		}
 		updatePlan.setEquipmentStandardRelations(equipmentStandardRelation);
-
-		//创建flowcase
-		if(plan.getStatus()==EquipmentPlanStatus.WATTING_FOR_APPOVING.getCode()){
-			//TODO: workFlow
-		}
 
 		return ConvertHelper.convert(updatePlan,EquipmentInspectionPlanDTO.class);
 	}
@@ -5073,7 +5223,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				task.setExecutiveStartTime(startTime);
 				task.setExecutiveExpireTime(expiredTime);
 				long now = System.currentTimeMillis();
-				//改为：计划名称+巡检/保养+当日日期6位(年的后两位+月份+天)+两位序号（系统从01开始生成）by xiongying20170927
+				//计划名称+巡检/保养+当日日期6位(年的后两位+月份+天)+两位序号（系统从01开始生成）by xiongying20170927
 				if (i < 10) {
 
 					String taskName = plan.getName() +plan.getPlanType()+
@@ -5087,7 +5237,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipmentProvider.creatEquipmentTask(task);
 				equipmentTasksSearcher.feedDoc(task);
 
- 				// 启动提醒 此处需要集成工作流 从执行节点拿到执行人员
+ 				// 启动提醒 此处需要集成工作流 从执行节点拿到执行人员  (暂时取消工作流)
 				ListPmNotifyParamsCommand command = new ListPmNotifyParamsCommand();
 				command.setCommunityId(task.getTargetId());
 				command.setNamespaceId(task.getNamespaceId());
@@ -5105,9 +5255,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 								if(receiver != null) {
 									pmNotifyReceiver.setReceiverType(receiver.getReceiverType());
 									if(receiver.getReceivers() != null) {
-										List<Long> ids = receiver.getReceivers().stream().map(receiverName -> {
-											return receiverName.getId();
-										}).collect(Collectors.toList());
+										List<Long> ids = receiver.getReceivers()
+												.stream().map(ReceiverName::getId)
+												.collect(Collectors.toList());
 										pmNotifyReceiver.setReceiverIds(ids);
 									}
 									pmNotifyReceivers.add(pmNotifyReceiver);
@@ -5188,8 +5338,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	private EquipmentInspectionPlanDTO toExportPlans(EquipmentInspectionPlanDTO plan) {
-		plan.setStringPlanType(StandardType.fromStatus(plan.getPlanType()).getName());
-		plan.setStringPlanType(EquipmentPlanStatus.fromStatus(plan.getStatus()).getName());
+		StandardType planType = StandardType.fromStatus(plan.getPlanType());
+		if (planType != null)
+			plan.setStringPlanType(planType.getName());
+		StandardType statuType = StandardType.fromStatus(plan.getPlanType());
+		if (statuType != null)
+			plan.setStringStatus(statuType.getName());
 		return plan;
 	}
 }

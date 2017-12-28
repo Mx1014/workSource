@@ -98,4 +98,6 @@ public interface EquipmentService {
     void createEquipmentTaskByPlan(EquipmentInspectionPlans plan);
 
 	void exportInspectionPlans(searchEquipmentInspectionPlansCommand cmd, HttpServletResponse response);
+
+    void reviewEquipmentInspectionplan(ReviewEquipmentPlanCommand cmd);
 }

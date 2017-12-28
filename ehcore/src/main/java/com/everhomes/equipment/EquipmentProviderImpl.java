@@ -2079,36 +2079,72 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         return dtos;
     }
 
+//    @Override
+//    public void populateStandardsGroups(List<EquipmentInspectionStandards> standards) {
+//        if (standards == null || standards.size() == 0) {
+//            return;
+//        }
+//
+//        final List<Long> standardIds = new ArrayList<Long>();
+//        final Map<Long, EquipmentInspectionStandards> mapStandards = new HashMap<Long, EquipmentInspectionStandards>();
+//
+//        for (EquipmentInspectionStandards standard : standards) {
+//            standardIds.add(standard.getId());
+//            standard.setExecutiveGroup(new ArrayList<EquipmentInspectionStandardGroupMap>());
+//            standard.setReviewGroup(new ArrayList<EquipmentInspectionStandardGroupMap>());
+//            mapStandards.put(standard.getId(), standard);
+//        }
+//
+//        List<Integer> shards = this.shardingProvider.getContentShards(EhEquipmentInspectionStandards.class, standardIds);
+//        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhEquipmentInspectionTasks.class), null, (DSLContext context, Object reducingContext) -> {
+//            SelectQuery<EhEquipmentInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP);
+//            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.STANDARD_ID.in(standardIds));
+//            query.fetch().map((EhEquipmentInspectionStandardGroupMapRecord record) -> {
+//                EquipmentInspectionStandards standard = mapStandards.get(record.getStandardId());
+//
+//                assert (standard != null);
+//                if (QualityGroupType.EXECUTIVE_GROUP.getCode() == record.getGroupType()) {
+//                    standard.getExecutiveGroup().add(ConvertHelper.convert(record, EquipmentInspectionStandardGroupMap.class));
+//                }
+//                if (record.getGroupType() == QualityGroupType.REVIEW_GROUP.getCode()) {
+//                    standard.getReviewGroup().add(ConvertHelper.convert(record, EquipmentInspectionStandardGroupMap.class));
+//                }
+//
+//                return null;
+//            });
+//            return true;
+//        });
+//
+//    }
     @Override
-    public void populateStandardsGroups(
-            List<EquipmentInspectionStandards> standards) {
-        if (standards == null || standards.size() == 0) {
+    public void populatePlansGroups(List<EquipmentInspectionPlans> plans) {
+        if (plans == null || plans.size() == 0) {
             return;
         }
 
-        final List<Long> standardIds = new ArrayList<Long>();
-        final Map<Long, EquipmentInspectionStandards> mapStandards = new HashMap<Long, EquipmentInspectionStandards>();
+        final List<Long> planIds = new ArrayList<>();
+        final Map<Long, EquipmentInspectionPlans> mapPlans = new HashMap<>();
 
-        for (EquipmentInspectionStandards standard : standards) {
-            standardIds.add(standard.getId());
-            standard.setExecutiveGroup(new ArrayList<EquipmentInspectionStandardGroupMap>());
-            standard.setReviewGroup(new ArrayList<EquipmentInspectionStandardGroupMap>());
-            mapStandards.put(standard.getId(), standard);
+        for (EquipmentInspectionPlans plan : plans) {
+            planIds.add(plan.getId());
+            plan.setExecutiveGroup(new ArrayList<EquipmentInspectionPlanGroupMap>());
+            plan.setReviewGroup(new ArrayList<EquipmentInspectionPlanGroupMap>());
+            mapPlans.put(plan.getId(), plan);
         }
 
-        List<Integer> shards = this.shardingProvider.getContentShards(EhEquipmentInspectionStandards.class, standardIds);
+        List<Integer> shards = this.shardingProvider.getContentShards(EhEquipmentInspectionStandards.class, planIds);
         this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhEquipmentInspectionTasks.class), null, (DSLContext context, Object reducingContext) -> {
-            SelectQuery<EhEquipmentInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP);
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.STANDARD_ID.in(standardIds));
-            query.fetch().map((EhEquipmentInspectionStandardGroupMapRecord record) -> {
-                EquipmentInspectionStandards standard = mapStandards.get(record.getStandardId());
+            SelectQuery<EhEquipmentInspectionPlanGroupMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP);
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP.PLAN_ID.in(planIds));
+            query.fetch().map((EhEquipmentInspectionPlanGroupMapRecord record) -> {
+                EquipmentInspectionPlans plan = mapPlans.get(record.getPlanId());
 
-                assert (standard != null);
+                assert (plan != null);
                 if (QualityGroupType.EXECUTIVE_GROUP.getCode() == record.getGroupType()) {
-                    standard.getExecutiveGroup().add(ConvertHelper.convert(record, EquipmentInspectionStandardGroupMap.class));
+                    plan.getExecutiveGroup().add(ConvertHelper.convert(record, EquipmentInspectionPlanGroupMap.class));
                 }
                 if (record.getGroupType() == QualityGroupType.REVIEW_GROUP.getCode()) {
-                    standard.getReviewGroup().add(ConvertHelper.convert(record, EquipmentInspectionStandardGroupMap.class));
+                    plan.getReviewGroup().add(ConvertHelper.convert(record, EquipmentInspectionPlanGroupMap.class));
                 }
 
                 return null;
@@ -2118,17 +2154,26 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     }
 
+//    @Override
+//    public void populateStandardGroups(EquipmentInspectionStandards standard) {
+//        if (standard == null) {
+//            return;
+//        } else {
+//            List<EquipmentInspectionStandards> standards = new ArrayList<EquipmentInspectionStandards>();
+//            standards.add(standard);
+//
+//            populateStandardsGroups(standards);
+//        }
+//
+//    }
+
     @Override
-    public void populateStandardGroups(EquipmentInspectionStandards standard) {
-        if (standard == null) {
-            return;
-        } else {
-            List<EquipmentInspectionStandards> standards = new ArrayList<EquipmentInspectionStandards>();
-            standards.add(standard);
-
-            populateStandardsGroups(standards);
+    public void populatePlanGroups(EquipmentInspectionPlans plan) {
+        if (plan != null) {
+            List<EquipmentInspectionPlans> plans = new ArrayList<>();
+            plans.add(plan);
+            populatePlansGroups(plans);
         }
-
     }
 
     @Override
@@ -2739,5 +2784,80 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         });
 
         return results;
+    }
+
+    @Override
+    public void deleteEquipmentInspectionPlanGroupMapByPlanId(Long planId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP)
+                .where(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP.PLAN_ID.eq(planId))
+                .execute();
+    }
+
+    @Override
+    public void createEquipmentInspectionPlanGroupMap(EquipmentInspectionPlanGroupMap map) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhEquipmentInspectionPlanGroupMapDao dao = new EhEquipmentInspectionPlanGroupMapDao(context.configuration());
+        dao.insert(map);
+    }
+
+    @Override
+    public List<EquipmentInspectionPlanGroupMap> listEquipmentInspectionPlanGroupMapByPlanIdAndGroupType(Long planId, byte groupType) {
+        final List<EquipmentInspectionPlanGroupMap> maps = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectQuery<EhEquipmentInspectionPlanGroupMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP);
+
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP.PLAN_ID.eq(planId));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP.GROUP_TYPE.eq(groupType));
+        query.fetch().map((r) -> {
+            maps.add(ConvertHelper.convert(r, EquipmentInspectionPlanGroupMap.class));
+            return null;
+        });
+
+        return maps;
+    }
+
+    @Override
+    public List<EquipmentInspectionPlanGroupMap> listEquipmentInspectionPlanGroupMapByGroupAndPosition(
+            List<ExecuteGroupAndPosition> groupDtos, List<ExecuteGroupAndPosition> reviewGroups) {
+        long startTime = System.currentTimeMillis();
+        final List<EquipmentInspectionPlanGroupMap> maps = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectQuery<EhEquipmentInspectionPlanGroupMapRecord> query = context
+                .selectQuery(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP);
+
+        Condition con = null;
+        if (reviewGroups != null) {
+            Condition con5 = null;
+            for (ExecuteGroupAndPosition executiveGroup : reviewGroups) {
+                Condition con4 = null;
+                con4 = Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP.GROUP_ID.eq(executiveGroup.getGroupId());
+                con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP.POSITION_ID.eq(executiveGroup.getPositionId()));
+                if (con5 == null) {
+                    con5 = con4;
+                } else {
+                    con5 = con5.or(con4);
+                }
+            }
+            con = con5;
+        }
+        query.addConditions(con);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listEquipmentInspectionPlanGroupMapByGroupAndPosition, sql=" + query.getSQL());
+            LOGGER.debug("listEquipmentInspectionPlanGroupMapByGroupAndPosition, bindValues=" + query.getBindValues());
+        }
+        query.fetch().map((r) -> {
+            maps.add(ConvertHelper.convert(r, EquipmentInspectionPlanGroupMap.class));
+            return null;
+        });
+
+        long endTime = System.currentTimeMillis();
+        LOGGER.debug("TrackUserRelatedCost: listEquipmentInspectionPlanGroupMapByGroupAndPosition resultSize = " + maps.size()
+                + ", elapse=" + (endTime - startTime));
+
+        return maps;
     }
 }

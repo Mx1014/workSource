@@ -61,7 +61,6 @@ public class EquipmentInspectionPlanDTO {
 
     private String limitTime;
 
-
     @ItemType(EquipmentStandardRelationDTO.class)
     private List<EquipmentStandardRelationDTO> equipmentStandardRelations;
 

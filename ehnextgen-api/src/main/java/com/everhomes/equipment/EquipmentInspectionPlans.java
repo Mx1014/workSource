@@ -1,5 +1,6 @@
 package com.everhomes.equipment;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.equipment.EquipmentStandardRelationDTO;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionPlans;
@@ -23,6 +24,12 @@ public class EquipmentInspectionPlans  extends EhEquipmentInspectionPlans{
     private String limitTime;
 
     private List<EquipmentStandardRelationDTO> equipmentStandardRelations;
+
+    @ItemType(EquipmentInspectionPlanGroupMap.class)
+    private List<EquipmentInspectionPlanGroupMap> executiveGroup;
+
+    @ItemType(EquipmentInspectionPlanGroupMap.class)
+    private List<EquipmentInspectionPlanGroupMap> reviewGroup;
 
     public RepeatSettings getRepeatSettings() {
         return repeatSettings;
@@ -62,6 +69,22 @@ public class EquipmentInspectionPlans  extends EhEquipmentInspectionPlans{
 
     public void setLimitTime(String limitTime) {
         this.limitTime = limitTime;
+    }
+
+    public List<EquipmentInspectionPlanGroupMap> getExecutiveGroup() {
+        return executiveGroup;
+    }
+
+    public void setExecutiveGroup(List<EquipmentInspectionPlanGroupMap> executiveGroup) {
+        this.executiveGroup = executiveGroup;
+    }
+
+    public List<EquipmentInspectionPlanGroupMap> getReviewGroup() {
+        return reviewGroup;
+    }
+
+    public void setReviewGroup(List<EquipmentInspectionPlanGroupMap> reviewGroup) {
+        this.reviewGroup = reviewGroup;
     }
 
     @Override

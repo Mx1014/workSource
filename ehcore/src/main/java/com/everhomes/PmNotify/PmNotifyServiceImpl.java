@@ -169,7 +169,7 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
         if(receiverList != null) {
             //处理通知参数设置中的执行人和审批人的信息  这里改为从工作流节点拿审批人 执行人用户信息
             /**
-             * TODO：这里改为从工作流节点拿审批人 执行人用户信息
+             * TODO：这里改为从工作流节点拿审批人 执行人用户信息 （暂时取消工作流 从巡检计划中拿到人员信息）
              */
             Set<Long> notifyUsers = resolveUserSelection(receiverList.getReceivers(), record.getOwnerType(), record.getOwnerId());
             String taskName = "";

@@ -2,11 +2,12 @@ package com.everhomes.scheduler;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
-import com.everhomes.equipment.*;
+import com.everhomes.equipment.EquipmentInspectionPlans;
+import com.everhomes.equipment.EquipmentProvider;
+import com.everhomes.equipment.EquipmentService;
+import com.everhomes.equipment.EquipmentStandardMap;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.repeat.RepeatService;
-import com.everhomes.rest.equipment.EquipmentStandardStatus;
-import com.everhomes.rest.equipment.EquipmentStatus;
 import com.everhomes.util.DateHelper;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -21,7 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.List;
 
 @Component
 @Scope("prototype")
@@ -95,86 +96,85 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		boolean isRepeat = repeatService.isRepeatSettingActive(plan.getRepeatSettingId());
 		LOGGER.info("checkPlanRepeat: plans  id = " + plan.getId()
 				+ "repeat setting id = "+ plan.getRepeatSettingId() + "is repeat setting active: " + isRepeat);
-
 		return isRepeat;
 	}
 
-	private void createTask() {
-		if(LOGGER.isInfoEnabled()) {
-			LOGGER.info("EquipmentInspectionScheduleJob: createTask");
-		}
-		List<EquipmentStandardMap> maps = equipmentProvider.listQualifiedEquipmentStandardMap(null);
+//	private void createTask() {
+//		if(LOGGER.isInfoEnabled()) {
+//			LOGGER.info("EquipmentInspectionScheduleJob: createTask");
+//		}
+//		List<EquipmentStandardMap> maps = equipmentProvider.listQualifiedEquipmentStandardMap(null);
+//
+//
+//		Map<Long, Set<EquipmentStandardMap>> standardEquipmentMap = new HashMap<>();
+//
+//		if(maps != null && maps.size() > 0) {
+//			for(EquipmentStandardMap map : maps) {
+//				Set<EquipmentStandardMap> equipmentStandardMaps = standardEquipmentMap.get(map.getStandardId());
+//				if(equipmentStandardMaps == null) {
+//					equipmentStandardMaps = new HashSet<EquipmentStandardMap>();
+//				}
+//				equipmentStandardMaps.add(map);
+//
+//				standardEquipmentMap.put(map.getStandardId(), equipmentStandardMaps);
+//			}
+//		}
+//
+//
+//		for (Map.Entry<Long, Set<EquipmentStandardMap>> entry : standardEquipmentMap.entrySet()) {
+//			EquipmentInspectionStandards standard = equipmentProvider.findStandardById(entry.getKey());
+//			if(checkStandard(standard)) {
+//				Set<EquipmentStandardMap> equipmentStandardMaps = entry.getValue();
+//				if(equipmentStandardMaps != null && equipmentStandardMaps.size() > 0) {
+//					for(EquipmentStandardMap equipmentStandardMap : equipmentStandardMaps) {
+//
+//						dbProvider.execute((TransactionStatus status) -> {
+//							if(checkTaskAlreadyCreated(equipmentStandardMap)) {
+//								EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(equipmentStandardMap.getTargetId());
+//								if (checkEquipment(equipment)) {
+//									equipmentService.creatTaskByStandard(equipment, standard);
+//
+//									equipmentStandardMap.setLastCreateTaskTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//									equipmentProvider.updateEquipmentStandardMap(equipmentStandardMap);
+//								}
+//
+//								LOGGER.info("equipmentStandardMap: {} ", equipmentStandardMap);
+//							}
+//							return null;
+//						});
+//
+//					}
+//
+//				}
+//
+//			}
+//
+//		}
+//	}
+//
+//
+//	private boolean checkStandard(EquipmentInspectionStandards standard) {
+//		if(standard == null || standard.getStatus() == null
+//						|| !EquipmentStandardStatus.ACTIVE.equals(EquipmentStandardStatus.fromStatus(standard.getStatus()))) {
+//			LOGGER.info("checkStandard: standard is not exist or active! standardId = " + standard.getId());
+//			return false;
+//		}
+//
+//		boolean isRepeat = repeatService.isRepeatSettingActive(standard.getRepeatSettingId());
+//		LOGGER.info("checkStandard: standard id = " + standard.getId()
+//				+ "repeat setting id = "+ standard.getRepeatSettingId() + "is repeat setting active: " + isRepeat);
+//
+//		return isRepeat;
+//	}
 
-
-		Map<Long, Set<EquipmentStandardMap>> standardEquipmentMap = new HashMap<>();
-
-		if(maps != null && maps.size() > 0) {
-			for(EquipmentStandardMap map : maps) {
-				Set<EquipmentStandardMap> equipmentStandardMaps = standardEquipmentMap.get(map.getStandardId());
-				if(equipmentStandardMaps == null) {
-					equipmentStandardMaps = new HashSet<EquipmentStandardMap>();
-				}
-				equipmentStandardMaps.add(map);
-
-				standardEquipmentMap.put(map.getStandardId(), equipmentStandardMaps);
-			}
-		}
-
-
-		for (Map.Entry<Long, Set<EquipmentStandardMap>> entry : standardEquipmentMap.entrySet()) {
-			EquipmentInspectionStandards standard = equipmentProvider.findStandardById(entry.getKey());
-			if(checkStandard(standard)) {
-				Set<EquipmentStandardMap> equipmentStandardMaps = entry.getValue();
-				if(equipmentStandardMaps != null && equipmentStandardMaps.size() > 0) {
-					for(EquipmentStandardMap equipmentStandardMap : equipmentStandardMaps) {
-
-						dbProvider.execute((TransactionStatus status) -> {
-							if(checkTaskAlreadyCreated(equipmentStandardMap)) {
-								EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(equipmentStandardMap.getTargetId());
-								if (checkEquipment(equipment)) {
-									equipmentService.creatTaskByStandard(equipment, standard);
-
-									equipmentStandardMap.setLastCreateTaskTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-									equipmentProvider.updateEquipmentStandardMap(equipmentStandardMap);
-								}
-
-								LOGGER.info("equipmentStandardMap: {} ", equipmentStandardMap);
-							}
-							return null;
-						});
-
-					}
-
-				}
-
-			}
-
-		}
-	}
-
-
-	private boolean checkStandard(EquipmentInspectionStandards standard) {
-		if(standard == null || standard.getStatus() == null
-						|| !EquipmentStandardStatus.ACTIVE.equals(EquipmentStandardStatus.fromStatus(standard.getStatus()))) {
-			LOGGER.info("checkStandard: standard is not exist or active! standardId = " + standard.getId());
-			return false;
-		}
-
-		boolean isRepeat = repeatService.isRepeatSettingActive(standard.getRepeatSettingId());
-		LOGGER.info("checkStandard: standard id = " + standard.getId()
-				+ "repeat setting id = "+ standard.getRepeatSettingId() + "is repeat setting active: " + isRepeat);
-
-		return isRepeat;
-	}
-
-	private boolean checkEquipment(EquipmentInspectionEquipments equipment) {
-		if(equipment == null || !EquipmentStatus.IN_USE.equals(EquipmentStatus.fromStatus(equipment.getStatus()))) {
-			LOGGER.info("equipment is not exist or active! equipmentId = " + equipment.getId());
-			return false;
-		}
-
-		return true;
-	}
+//	private boolean checkEquipment(EquipmentInspectionEquipments equipment) {
+//		if(equipment == null || !EquipmentStatus.IN_USE.equals(EquipmentStatus.fromStatus(equipment.getStatus()))) {
+//			LOGGER.info("equipment is not exist or active! equipmentId = " + equipment.getId());
+//			return false;
+//		}
+//
+//		return true;
+//	}
 
 	private boolean checkTaskAlreadyCreated(EquipmentStandardMap equipmentStandardMap) {
 		//只有一台指定的服务器会生成任务 所以不需要再做判断了 
