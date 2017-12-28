@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.rest.forum.*;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -58,13 +59,6 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.community.GetNearbyCommunitiesByIdCommand;
 import com.everhomes.rest.family.FamilyDTO;
-import com.everhomes.rest.forum.ForumConstants;
-import com.everhomes.rest.forum.ListPostCommandResponse;
-import com.everhomes.rest.forum.PostDTO;
-import com.everhomes.rest.forum.PostSearchFlag;
-import com.everhomes.rest.forum.PostStatus;
-import com.everhomes.rest.forum.SearchByMultiForumAndCmntyCommand;
-import com.everhomes.rest.forum.SearchTopicCommand;
 import com.everhomes.rest.group.GroupDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.search.SearchContentType;
@@ -164,6 +158,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             b.field("visibleRegionId", post.getVisibleRegionId());
             b.field("parentPostId", post.getParentPostId());
             b.field("embeddedAppId", post.getEmbeddedAppId());
+            b.field("cloneFlag", post.getCloneFlag());
             Forum forum = forumProvider.findForumById(post.getForumId());
             Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
             if(forum != null) {
@@ -303,20 +298,33 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
                 nearCmd.setId(cmd.getCommunityId());
                 Community community = communityProvider.findCommunityById(cmd.getCommunityId());
                 Long forumId = ForumConstants.SYSTEM_FORUM;
+                List<Long> comIds = new ArrayList<Long>();
                 if(community != null) {
                     forumId = community.getDefaultForumId();
+                    comIds.add(community.getId());
                 }
-                List<CommunityDTO> coms = communityService.getNearbyCommunityById(nearCmd);
-                List<Long> comIds = new ArrayList<Long>();
-                for(CommunityDTO cDTO : coms) {
-                    comIds.add(cDTO.getId());
-                    }
-                
+//                List<CommunityDTO> coms = communityService.getNearbyCommunityById(nearCmd);
+//                List<Long> comIds = new ArrayList<Long>();
+//                for(CommunityDTO cDTO : coms) {
+//                    comIds.add(cDTO.getId());
+//                    }
+
+                //加入了全部范围的帖子
+                FilterBuilder allFilterType =FilterBuilders.termFilter("visibleRegionType", (long)VisibleRegionType.ALL.getCode());
+                FilterBuilder allCloneFlag = FilterBuilders.termFilter("cloneFlag", (long) PostCloneFlag.NORMAL.getCode());
+                FilterBuilder allForum = FilterBuilders.termFilter("forumId", forumId);
+                FilterBuilder allFilter = FilterBuilders.boolFilter().must(allFilterType, allCloneFlag, allForum);
+
                 if(comIds.size() > 0) {
                     FilterBuilder comIn = boolInFilter("visibleRegionId", comIds);
                     FilterBuilder comType = FilterBuilders.termFilter("visibleRegionType", (long)VisibleRegionType.COMMUNITY.getCode());
                     FilterBuilder comForum = FilterBuilders.termFilter("forumId", forumId);
                     comFilter = FilterBuilders.boolFilter().must(comIn, comType, comForum);
+
+                    //加入了全部范围的帖子
+                    comFilter = FilterBuilders.boolFilter().should(comFilter, allFilter);
+
+
                 }
                 
                 //覆盖当前小区的所有机构（含各级上级机构），不管是发给这些机构的帖还是这些机构发的帖都满足要求 by xiongying 20161019
@@ -326,7 +334,13 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
                 	FilterBuilder orgType = FilterBuilders.termFilter("visibleRegionType", (long)VisibleRegionType.REGION.getCode());
                 	FilterBuilder orgForum = FilterBuilders.termFilter("forumId", forumId);
                 	FilterBuilder orgFilter = FilterBuilders.boolFilter().must(orgIn, orgType, orgForum);
+
+                    //加入了全部范围的帖子
+                    orgFilter = FilterBuilders.boolFilter().should(orgFilter, allFilter);
+
                 	comFilter = FilterBuilders.boolFilter().should(comFilter, orgFilter);
+
+
                 }
             }
             
@@ -855,12 +869,21 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
                 
             } 
         }
+
+
+
+        //加入了全部范围的帖子
+        FilterBuilder allFilter =FilterBuilders.termFilter("visibleRegionType", (long)VisibleRegionType.ALL.getCode());
+
         // 社区论坛里符合小区的过滤条件
         FilterBuilder cmntyFilter = null;
         if(cmd.getCommunityIds() != null && cmd.getCommunityIds().size() > 0) {
             FilterBuilder comIn = boolInFilter("visibleRegionId", cmd.getCommunityIds());
             FilterBuilder comType = FilterBuilders.termFilter("visibleRegionType", (long)VisibleRegionType.COMMUNITY.getCode());
-            cmntyFilter = FilterBuilders.boolFilter().must(comIn, comType);
+            FilterBuilder cloneFlag = FilterBuilders.termFilter("cloneFlag", (long) PostCloneFlag.NORMAL.getCode());
+            cmntyFilter = FilterBuilders.boolFilter().must(comIn, comType, cloneFlag);
+
+            cmntyFilter = FilterBuilders.boolFilter().should(cmntyFilter, allFilter);
         }
         
         // 社区论坛里符合片区的过滤条件
@@ -868,7 +891,10 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         if(cmd.getRegionIds() != null && cmd.getRegionIds().size() > 0) {
             FilterBuilder comIn = boolInFilter("visibleRegionId", cmd.getRegionIds());
             FilterBuilder comType = FilterBuilders.termFilter("visibleRegionType", (long)VisibleRegionType.REGION.getCode());
-            regionFilter = FilterBuilders.boolFilter().must(comIn, comType);
+            FilterBuilder cloneFlag = FilterBuilders.termFilter("cloneFlag", (long) PostCloneFlag.NORMAL.getCode());
+            regionFilter = FilterBuilders.boolFilter().must(comIn, comType, cloneFlag);
+
+            regionFilter = FilterBuilders.boolFilter().should(regionFilter, allFilter);
         }
         
         // 其它论坛的过滤条件
@@ -882,7 +908,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         if(cmd.getNamespaceId() != null) {
             namespaceFilter = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
         }
-        
+
         // 对于一家公司，其全部可见帖的范围为：1. 本公司及所有子公司的多个论坛，2. 本公司的社区圈里所有管辖的小区及公司对应的片区
         FilterBuilder resultFilter = cmntyFilter;
         if(resultFilter == null) {
@@ -926,7 +952,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
 
         return rsp;
     }
-    
+
 	@Override
 	public ListPostCommandResponse queryByMultiForumAndCmnty(SearchByMultiForumAndCmntyCommand cmd) {
 		SearchResponse rsp = getQueryByMultiForumAndCmnty(cmd);
