@@ -1982,7 +1982,6 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
                     return true;
                 });
-
     }
 
     @Override

@@ -24,6 +24,7 @@ import java.util.List;
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
  *  <li>repeatSettings: 执行周期 参考{@link com.everhomes.rest.repeat.RepeatSettingsDTO}</li>
  *  <li>equipmentStandardRelations: 设备标准关系 参考{@link com.everhomes.rest.equipment.EquipmentStandardRelationDTO}</li>
+ *  <li>groupList: {@link com.everhomes.rest.equipment.StandardGroupDTO}</li>
  *  </ul>
  */
 public class UpdateEquipmentPlanCommand {
@@ -51,6 +52,9 @@ public class UpdateEquipmentPlanCommand {
 
     @ItemType(EquipmentStandardRelationDTO.class)
     private List<EquipmentStandardRelationDTO> equipmentStandardRelations;
+
+    @ItemType(StandardGroupDTO.class)
+    private List<StandardGroupDTO> groupList;
 
     public Long getId() {
         return id;
@@ -146,6 +150,14 @@ public class UpdateEquipmentPlanCommand {
 
     public void setEquipmentStandardRelations(List<EquipmentStandardRelationDTO> equipmentStandardRelations) {
         this.equipmentStandardRelations = equipmentStandardRelations;
+    }
+
+    public List<StandardGroupDTO> getGroupList() {
+        return groupList;
+    }
+
+    public void setGroupList(List<StandardGroupDTO> groupList) {
+        this.groupList = groupList;
     }
 
     @Override

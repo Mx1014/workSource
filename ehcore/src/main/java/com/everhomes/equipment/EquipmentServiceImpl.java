@@ -391,21 +391,22 @@ public class EquipmentServiceImpl implements EquipmentService {
 		return standardDto;
 	}
 	
-	private void processStandardGroups(List<StandardGroupDTO> groupList, EquipmentInspectionStandards standard) {
+	private void processStandardGroups(List<StandardGroupDTO> groupList, EquipmentInspectionPlans plan) {
         
         List<EquipmentInspectionStandardGroupMap> executiveGroup = null;
 		List<EquipmentInspectionStandardGroupMap> reviewGroup = null;
-        this.equipmentProvider.deleteEquipmentInspectionStandardGroupMapByStandardId(standard.getId());
+        //this.equipmentProvider.deleteEquipmentInspectionStandardGroupMapByStandardId(plan.getId());
+        this.equipmentProvider.deleteEquipmentInspectionStandardGroupMapByStandardId(plan.getId());
 
 		if(LOGGER.isInfoEnabled()) {
-			LOGGER.info("processStandardGroups: deleteEquipmentInspectionStandardGroupMapByStandardId, standardId=" + standard.getId()
+			LOGGER.info("processStandardGroups: deleteEquipmentInspectionPlanGroupMapByPlanId, planId=" + plan.getId()
 			+ "userId = " + UserContext.current().getUser().getId() + "time = " + DateHelper.currentGMTTime()
 			+ "new standard groupList = {}" + groupList);
 		}
         
         if(groupList != null && groupList.size() >0) {
-        	executiveGroup = new ArrayList<EquipmentInspectionStandardGroupMap>();
-    		reviewGroup = new ArrayList<EquipmentInspectionStandardGroupMap>();
+        	executiveGroup = new ArrayList<>();
+    		reviewGroup = new ArrayList<>();
     		
 			for(StandardGroupDTO group : groupList) {
 				EquipmentInspectionStandardGroupMap map = new EquipmentInspectionStandardGroupMap();
@@ -4871,6 +4872,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		plan.setRepeatSettingId(repeatSettings.getId());
 		plan.setPlanVersion(1L);
 		EquipmentInspectionPlans createdPlan = equipmentProvider.createEquipmentInspectionPlans(plan);
+		equipmentPlanSearcher.feedDoc(plan);
 		//创建计划巡检对象标准关联
 		List<EquipmentStandardRelationDTO> equipmentStandardRelation = new ArrayList<>();
 
@@ -4889,12 +4891,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 			equipmentProvider.createEquipmentPlanMaps(equipmentPlanMap);
 			equipmentStandardRelation.add(relation);
 		}
-		//创建flowcase
-		if(plan.getStatus()==EquipmentPlanStatus.WATTING_FOR_APPOVING.getCode()){
-			//TODO: workFlow
-		}
-
 			createdPlan.setEquipmentStandardRelations(equipmentStandardRelation);
+		List<StandardGroupDTO> groupList = cmd.getGroupList();
+		processStandardGroups(groupList, createdPlan);
 
 		return ConvertHelper.convert(createdPlan, EquipmentInspectionPlanDTO.class);
 	}

@@ -43,6 +43,18 @@ CREATE TABLE `eh_equipment_inspection_equipment_plan_map` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 巡检计划 执行组审批组 关联表 start   by jiarui
+CREATE TABLE `eh_equipment_inspection_plan_group_map` (
+  `id` bigint(20) NOT NULL COMMENT 'id',
+  `group_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: none, 1: executive group, 2: review group',
+  `standard_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_equipment_inspection_plans',
+  `group_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_organizations',
+  `position_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_organization_job_positions',
+  `create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- 巡检计划 执行组审批组 关联表 end  by jiarui
+
 -- eh_equipment_inspection_tasks 增加plan_id字段 用于关联task和equipments
 ALTER TABLE `ehcore`.`eh_equipment_inspection_tasks`
 ADD COLUMN `plan_id`  bigint(20) NOT NULL ;
