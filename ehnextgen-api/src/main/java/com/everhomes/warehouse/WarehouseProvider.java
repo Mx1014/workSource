@@ -3,6 +3,7 @@ package com.everhomes.warehouse;
 import com.everhomes.listing.CrossShardListingLocator;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by ying.xiong on 2017/5/10.
@@ -62,4 +63,8 @@ public interface WarehouseProvider {
     List<WarehouseRequestMaterials> listWarehouseRequestMaterials(List<Long> ids, String ownerType, Long ownerId,Long communityId);
 
     List<WarehouseStocks> listMaterialStocks(Long materialId, String ownerType, Long ownerId);
+
+    Set<Long> findWarehouseNamespace();
+
+    String findWarehouseMenuName();
 }

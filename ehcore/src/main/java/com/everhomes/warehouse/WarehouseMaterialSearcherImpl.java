@@ -1,7 +1,13 @@
 package com.everhomes.warehouse;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.warehouse.SearchWarehouseMaterialsCommand;
 import com.everhomes.rest.warehouse.SearchWarehouseMaterialsResponse;
 import com.everhomes.rest.warehouse.WarehouseMaterialDTO;
@@ -10,7 +16,9 @@ import com.everhomes.search.SearchUtils;
 import com.everhomes.search.WarehouseMaterialSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -45,6 +53,12 @@ public class WarehouseMaterialSearcherImpl extends AbstractElasticSearch impleme
 
     @Autowired
     private ConfigurationProvider configProvider;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+
+    @Autowired
+    private PortalService portalService;
 
     @Override
     public void deleteById(Long id) {
@@ -102,6 +116,7 @@ public class WarehouseMaterialSearcherImpl extends AbstractElasticSearch impleme
 
     @Override
     public SearchWarehouseMaterialsResponse query(SearchWarehouseMaterialsCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_MATERIAL_INFO_ALL,cmd.getOwnerId());
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
         if(cmd.getName() == null || cmd.getName().isEmpty()) {
@@ -201,6 +216,18 @@ public class WarehouseMaterialSearcherImpl extends AbstractElasticSearch impleme
         } catch (IOException ex) {
             LOGGER.error("Create warehouse material " + material.getId() + " error");
             return null;
+        }
+    }
+    private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId, Long OrganizationId) {
+        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
+        cmd1.setActionType((byte)13);
+        cmd1.setModuleId(PrivilegeConstants.WAREHOUSE_MODULE_ID);
+        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
+        Long appId = res.getServiceModuleApps().get(0).getId();
+        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), OrganizationId, OrganizationId,priviledgeId , appId, null,communityId )){
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                    "check app privilege error");
         }
     }
 }
