@@ -38,6 +38,7 @@ CREATE TABLE `eh_contract_payment_plans` (
 CREATE TABLE `eh_payment_applications` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
+  `community_id` BIGINT COMMENT '园区id',
   `contract_id` BIGINT NOT NULL COMMENT 'id of eh_contracts',
   `request_id` BIGINT,
   `applicant_uid` BIGINT NOT NULL COMMENT '申请人id',

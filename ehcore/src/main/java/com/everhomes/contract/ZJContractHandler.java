@@ -505,6 +505,20 @@ public class ZJContractHandler implements ContractService{
     }
 
     @Override
+    public PaymentContractDetailDTO createPaymentContract(CreatePaymentContractCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler createPaymentContract");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public PaymentContractDetailDTO updatePaymentContract(UpdatePaymentContractCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler updatePaymentContract");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
     public String generateContractNumber() {
         return null;
     }

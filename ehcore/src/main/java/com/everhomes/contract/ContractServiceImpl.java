@@ -557,6 +557,16 @@ public class ContractServiceImpl implements ContractService {
 		return contractDetailDTO;
 	}
 
+	@Override
+	public PaymentContractDetailDTO createPaymentContract(CreatePaymentContractCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public PaymentContractDetailDTO updatePaymentContract(UpdatePaymentContractCommand cmd) {
+		return null;
+	}
+
 	private void generatePaymentExpectancies(Contract contract, List<ContractChargingItemDTO> chargingItems, List<ContractChargingChangeDTO> adjusts, List<ContractChargingChangeDTO> frees) {
 		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentStrings.CONTRACT_CANCEL);
 

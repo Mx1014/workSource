@@ -40,4 +40,7 @@ public interface ContractService {
 
 	String generateContractNumber();
 	void syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd);
+
+	PaymentContractDetailDTO updatePaymentContract(UpdatePaymentContractCommand cmd);
+	PaymentContractDetailDTO createPaymentContract(CreatePaymentContractCommand cmd);
 }

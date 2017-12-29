@@ -39,7 +39,7 @@ public class PaymentContractController extends ControllerBase {
     @RequestMapping("createPaymentContract")
     @RestReturn(PaymentContractDetailDTO.class)
     public RestResponse createPaymentContract(CreatePaymentContractCommand cmd){
-        return new RestResponse(getContractService().createContract(cmd));
+        return new RestResponse(getContractService().createPaymentContract(cmd));
     }
 
     /**
@@ -49,7 +49,7 @@ public class PaymentContractController extends ControllerBase {
     @RequestMapping("updatePaymentContract")
     @RestReturn(PaymentContractDetailDTO.class)
     public RestResponse updatePaymentContract(UpdatePaymentContractCommand cmd){
-        return new RestResponse(getContractService().updateContract(cmd));
+        return new RestResponse(getContractService().updatePaymentContract(cmd));
     }
 
     /**
