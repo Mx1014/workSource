@@ -38,9 +38,9 @@ public class SocialSecurityDepartmentSummaryProviderImpl implements SocialSecuri
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityDepartmentSummary.class));
 		socialSecurityDepartmentSummary.setId(id);
 		socialSecurityDepartmentSummary.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		socialSecurityDepartmentSummary.setCreatorUid(UserContext.current().getUser().getId());
+//		socialSecurityDepartmentSummary.setCreatorUid(UserContext.current().getUser().getId());
 		socialSecurityDepartmentSummary.setUpdateTime(socialSecurityDepartmentSummary.getCreateTime());
-		socialSecurityDepartmentSummary.setOperatorUid(socialSecurityDepartmentSummary.getCreatorUid());
+//		socialSecurityDepartmentSummary.setOperatorUid(socialSecurityDepartmentSummary.getCreatorUid());
 		getReadWriteDao().insert(socialSecurityDepartmentSummary);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSocialSecurityDepartmentSummary.class, null);
 	}

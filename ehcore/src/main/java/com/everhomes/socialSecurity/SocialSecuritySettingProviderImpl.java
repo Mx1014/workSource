@@ -3,6 +3,7 @@ package com.everhomes.socialSecurity;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 
 import com.everhomes.rest.socialSecurity.AccumOrSocail;
 import com.everhomes.rest.socialSecurity.SocialSecurityItemDTO;
@@ -109,15 +110,15 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
     }
 
     @Override
-    public List<SocialSecuritySetting> listSocialSecuritySetting(Long ownerId) {
+    public List<SocialSecuritySetting> listSocialSecuritySetting(Long detailId) {
         return getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_SETTINGS)
-                .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.ORGANIZATION_ID.eq(ownerId))
+                .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID.eq(detailId))
                 .orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc())
                 .fetch().map(r -> ConvertHelper.convert(r, SocialSecuritySetting.class));
     }
 
     @Override
-    public List<SocialSecuritySetting> listSocialSecuritySetting(List<Long> detailIds) {
+    public List<SocialSecuritySetting> listSocialSecuritySetting(Set<Long> detailIds) {
         return getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_SETTINGS)
                 .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID.in(detailIds))
                 .orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc())
@@ -138,7 +139,21 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
 
     @Override
     public SocialSecuritySetting findSocialSecuritySettingByDetailIdAndAOS(Long detailId, AccumOrSocail socail) {
-        return null;
+        List<SocialSecuritySetting> results = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_SETTINGS)
+                .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID.eq(detailId))
+                .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.ACCUM_OR_SOCAIL.eq(socail.getCode()))
+                .orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc())
+                .fetch().map(r -> ConvertHelper.convert(r, SocialSecuritySetting.class));
+        if (null == results || results.size() == 0) {
+            return null;
+        }
+        return results.get(0);
+    }
+
+    @Override
+    public void batchCreateSocialSecuritySetting(List<EhSocialSecuritySettings> settings) {
+        getReadWriteDao().insert(settings);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhSocialSecuritySettings.class, null);
     }
 
     private EhSocialSecuritySettingsDao getReadWriteDao() {

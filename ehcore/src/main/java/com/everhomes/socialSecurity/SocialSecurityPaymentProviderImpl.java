@@ -66,13 +66,16 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
     @Override
     public List<SocialSecurityPayment> listSocialSecurityPayment(Long ownerId, Long detailId) {
         return getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
+                .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ORGANIZATION_ID.eq(ownerId))
+                .and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.DETAIL_ID.eq(detailId))
                 .orderBy(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ID.asc())
                 .fetch().map(r -> ConvertHelper.convert(r, SocialSecurityPayment.class));
     }
 
     @Override
     public String findPaymentMonthByOwnerId(Long ownerId) {
-        Record1<String> result = getReadOnlyContext().selectDistinct(Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_MONTH).from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
+        Record1<String> result = getReadOnlyContext().selectDistinct(Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_MONTH)
+                .from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
                 .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ORGANIZATION_ID.eq(ownerId))
                 .fetchAny();
         if (null == result) {
@@ -190,6 +193,12 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
         }
         return step.orderBy(Tables.EH_SOCIAL_SECURITY_PAYMENTS.DETAIL_ID.asc())
                 .fetch().map(Record1::value1);
+    }
+
+    @Override
+    public void batchCreateSocialSecurityPayment(List<EhSocialSecurityPayments> payments) {
+        getReadWriteDao().insert(payments);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhSocialSecurityPayments.class, null);
     }
 
 

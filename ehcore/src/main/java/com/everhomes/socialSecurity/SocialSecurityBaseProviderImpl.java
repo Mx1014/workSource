@@ -5,11 +5,9 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.socialSecurity.AccumOrSocail;
 import com.everhomes.rest.socialSecurity.HouseholdTypesDTO;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.SelectConditionStep;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -95,19 +93,25 @@ public class SocialSecurityBaseProviderImpl implements SocialSecurityBaseProvide
 
     @Override
     public SocialSecurityBase findSocialSecurityBaseByCondition(Long cityId, String householdType, Byte accumOrSocial, String payItem) {
-        return getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_BASES)
+        SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_BASES)
                 .where(Tables.EH_SOCIAL_SECURITY_BASES.ACCUM_OR_SOCAIL.eq(accumOrSocial))
-                .and(Tables.EH_SOCIAL_SECURITY_BASES.CITY_ID.eq(cityId))
-                .and(Tables.EH_SOCIAL_SECURITY_BASES.HOUSEHOLD_TYPE.eq(householdType))
-                .and(Tables.EH_SOCIAL_SECURITY_BASES.PAY_ITEM.eq(payItem))
-                .orderBy(Tables.EH_SOCIAL_SECURITY_BASES.ID.asc())
-                .fetchAny().map(r -> ConvertHelper.convert(r, SocialSecurityBase.class));
+                .and(Tables.EH_SOCIAL_SECURITY_BASES.CITY_ID.eq(cityId));
+        if (payItem != null) {
+            step = step.and(Tables.EH_SOCIAL_SECURITY_BASES.PAY_ITEM.eq(payItem));
+
+        }
+        if (householdType != null) {
+            step = step.and(Tables.EH_SOCIAL_SECURITY_BASES.HOUSEHOLD_TYPE.eq(householdType));
+
+        }
+        return step.orderBy(Tables.EH_SOCIAL_SECURITY_BASES.ID.asc()).fetchAny().map(r -> ConvertHelper.convert(r, SocialSecurityBase.class));
     }
 
     @Override
     public List<HouseholdTypesDTO> listHouseholdTypesByCity(Long cityId) {
-        return  getReadOnlyContext().selectDistinct(Tables.EH_SOCIAL_SECURITY_BASES.HOUSEHOLD_TYPE).from(Tables.EH_SOCIAL_SECURITY_BASES)
+        return getReadOnlyContext().selectDistinct(Tables.EH_SOCIAL_SECURITY_BASES.HOUSEHOLD_TYPE).from(Tables.EH_SOCIAL_SECURITY_BASES)
                 .where(Tables.EH_SOCIAL_SECURITY_BASES.CITY_ID.eq(cityId))
+                .and(Tables.EH_SOCIAL_SECURITY_BASES.ACCUM_OR_SOCAIL.eq(AccumOrSocail.SOCAIL.getCode()))
                 .orderBy(Tables.EH_SOCIAL_SECURITY_BASES.ID.asc())
                 .fetch().map(r -> {
                     HouseholdTypesDTO dto = new HouseholdTypesDTO();
