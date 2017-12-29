@@ -843,7 +843,10 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     private SocialSecurityDepartmentSummary processSocialSecurityDepartmentSummary(Organization dpt, List<Long> detailIds, String month) {
-        SocialSecurityDepartmentSummary summary = socialSecurityReportProvider.calculateSocialSecurityDepartmentSummary(detailIds, month);
+        SocialSecurityDepartmentSummary summary = new SocialSecurityDepartmentSummary();
+        if (detailIds != null && detailIds.size() > 0) {
+            summary = socialSecurityReportProvider.calculateSocialSecurityDepartmentSummary(detailIds, month);
+        }
         summary.setNamespaceId(dpt.getNamespaceId());
         summary.setDeptId(dpt.getId());
         summary.setDeptName(processOrgPathName(dpt.getPath()));
