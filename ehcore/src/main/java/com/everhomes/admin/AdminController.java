@@ -966,7 +966,7 @@ public class AdminController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /user/syncUsersFromAnBangWuYe</b>
+     * <b>URL: /syncUsersFromAnBangWuYe</b>
      * <p>同步用户</p>
      */
     @RequestMapping("syncUsersFromAnBangWuYe")
