@@ -813,7 +813,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
 
     private void calculateSocialSecurityDptReports(Long ownerId) {
-        String month = socialSecurityPaymentProvider.findPaymentMonthByDetail(ownerId);
+        String month = socialSecurityPaymentProvider.findPaymentMonthByOwnerId(ownerId);
         socialSecurityDepartmentSummaryProvider.deleteSocialSecurityDptReports(ownerId, month);
         List<Organization> orgs = findOrganizationDpts(ownerId);
         for (Organization dpt : orgs) {
