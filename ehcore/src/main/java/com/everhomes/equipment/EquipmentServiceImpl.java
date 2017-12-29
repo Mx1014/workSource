@@ -455,14 +455,16 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		List<EquipmentInspectionItems> items = new ArrayList<>();
 		List<InspectionItemDTO> itemDTOS = cmd.getItems();
-		for (InspectionItemDTO itemDTO : itemDTOS) {
-			EquipmentInspectionItems item = ConvertHelper.convert(itemDTO, EquipmentInspectionItems.class);
-			Long itemId = equipmentProvider.createEquipmentInspectionItems(item);
-			items.add(item);
-
-			templateItemMap.setItemId(itemId);
-			templateItemMap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			equipmentProvider.createEquipmentInspectionTemplateItemMap(templateItemMap);
+		if (itemDTOS != null && itemDTOS.size() > 0) {
+			for (InspectionItemDTO itemDTO : itemDTOS) {
+				EquipmentInspectionItems item = ConvertHelper.convert(itemDTO, EquipmentInspectionItems.class);
+				Long itemId = equipmentProvider.createEquipmentInspectionItems(item);
+				items.add(item);
+				// create item template map
+				templateItemMap.setItemId(itemId);
+				templateItemMap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				equipmentProvider.createEquipmentInspectionTemplateItemMap(templateItemMap);
+			}
 		}
 		standards.setItems(items);
 	}
@@ -622,7 +624,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		equipmentStandardSearcher.feedDoc(standard);
 
 		/**
-		 * TODO:删除相关巡检计划  处理方式：删除单条巡检条目
+		 * TODO:删除相关巡检计划  处理方式：删除单条巡检条目r
 		 */
 		//inActive与删除标准相关的所有任务和计划  不需要删除计划 计划是通过planId关联巡检对象列表
 		equipmentProvider.inActiveEquipmentPlansMapByStandardId(standard.getId());
@@ -789,7 +791,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 		processEquipmentsCount(standard);
 		//填充执行周期repeat
 		//processRepeatSetting(standard);
-
 		//equipmentProvider.populateStandardGroups(standard);
 		//填充标准中的设备列表
 		equipmentProvider.populateEquipments(standard);
@@ -810,13 +811,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 	private void processEquipmentsCount(EquipmentInspectionStandards standard) {
 		List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
 		int count = 0;
-		if(maps != null) {
+		if (maps != null) {
 				/*if(EquipmentReviewStatus.REVIEWED.equals(EquipmentReviewStatus.fromStatus(map.getReviewStatus())) &&
 						ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(map.getReviewResult()))) {
 					count++;
 				}*/
-				//count++;
-				standard.setEquipmentsCount(maps.size());
+			//count++;
+			count = maps.size();
 		}
 		
 		standard.setEquipmentsCount(count);
@@ -5066,12 +5067,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 		List<EquipmentInspectionPlanGroupMap> executiveGroup = null;
 		List<EquipmentInspectionPlanGroupMap> reviewGroup = null;
 		this.equipmentProvider.deleteEquipmentInspectionPlanGroupMapByPlanId(plan.getId());
-
-		if (LOGGER.isInfoEnabled()) {
-			LOGGER.info("processPlanGroups: deleteEquipmentInspectionPlanGroupMapByStandardId, planId=" + plan.getId()
-					+ "userId = " + UserContext.current().getUser().getId() + "time = " + DateHelper.currentGMTTime()
-					+ "new plan groupList = {}" + groupList);
-		}
 
 		if (groupList != null && groupList.size() > 0) {
 			executiveGroup = new ArrayList<>();
