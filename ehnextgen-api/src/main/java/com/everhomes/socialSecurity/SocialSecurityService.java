@@ -78,4 +78,6 @@ interface SocialSecurityService {
 	GetSocialSecurityReportStatusResponse getSocialSecurityReportStatus(GetSocialSecurityReportStatusCommand cmd);
 
 	GetSocialSecurityReportsHeadResponse getSocialSecurityReportsHead(GetSocialSecurityReportsHeadCommand cmd);
+
+	SocialSecurityEmployeesCountResponse getSocialSecurityEmployeesCount(Long organizationId, Long month);
 }

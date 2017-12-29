@@ -1341,4 +1341,14 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return response;
     }
 
+    public SocialSecurityEmployeesCountResponse getSocialSecurityEmployeesCount(Long organizationId, Long month){
+        SocialSecurityEmployeesCountResponse response = new SocialSecurityEmployeesCountResponse();
+        response.setSocialSecurity(2);
+        response.setAccumulationFund(3);
+        response.setGrowth(0);
+        response.setReduce(0);
+        response.setCheckIn(9);
+        response.setDismiss(7);
+        return response;
+    }
 }
