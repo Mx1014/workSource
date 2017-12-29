@@ -348,7 +348,7 @@ CREATE TABLE `eh_social_security_inout_month` (
   `organization_id` BIGINT,
   `user_id` BIGINT,
   `detail_id` BIGINT,
-  `data_type` VARCHAR(64) NOT NULL COMMENT 'SOCIAL,ACCUMULATION',
+  `time_type` VARCHAR(64) NOT NULL COMMENT 'SOCIAL,ACCUMULATION',
   `start_time` TIMESTAMP COMMENT 'the start month',
   `end_time` TIMESTAMP COMMENT 'the end month',
   `creator_uid` BIGINT  DEFAULT '0',
