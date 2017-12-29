@@ -967,9 +967,9 @@ public class AdminController extends ControllerBase {
 
     /**
      * <b>URL: /user/syncUsersFromAnBangWuYe</b>
-     * <p>用于检查一些关键组件的状态，比如是否有内存可创建对象、是否可以正常连接redis，是否可以正常连接数据库等；</p>
+     * <p>同步用户</p>
      */
-    @RequestMapping("checkCpnStatus")
+    @RequestMapping("syncUsersFromAnBangWuYe")
     @RestReturn(value = String.class )
     @RequireAuthentication(false)
     public RestResponse syncUsersFromAnBangWuYe(SyncUsersFromAnBangWuYeCommand cmd) {
