@@ -76,7 +76,7 @@ public class Rentalv2Controller extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
+/*-------------------------------------- start ---------------------------------------------------*/
 	/**
 	 * <b>URL: /rental/findRentalSiteWeekStatus</b>
 	 * <p>
@@ -242,6 +242,8 @@ public class Rentalv2Controller extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/*-------------------------------------- end---------------------------------------------------*/
 
 	/**
 	 * <b>URL: /rental/addRentalBill</b>

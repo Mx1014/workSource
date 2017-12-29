@@ -37,9 +37,12 @@ public class PriceRuleDTO {
 	private Byte priceType;
 	private BigDecimal workdayPrice;
 	private BigDecimal initiatePrice;
+	private BigDecimal weekendPrice;
 	private BigDecimal orgMemberWorkdayPrice;
+	private BigDecimal orgMemberWeekendPrice;
 	private BigDecimal orgMemberInitiatePrice;
 	private BigDecimal approvingUserWorkdayPrice;
+	private BigDecimal approvingUserWeekendPrice;
 	private BigDecimal approvingUserInitiatePrice;
 	private Byte discountType;
 	private BigDecimal fullPrice;
@@ -104,7 +107,6 @@ public class PriceRuleDTO {
 		this.workdayPrice = workdayPrice;
 	}
 
-
 	public BigDecimal getOrgMemberWorkdayPrice() {
 		return orgMemberWorkdayPrice;
 	}
@@ -112,7 +114,6 @@ public class PriceRuleDTO {
 	public void setOrgMemberWorkdayPrice(BigDecimal orgMemberWorkdayPrice) {
 		this.orgMemberWorkdayPrice = orgMemberWorkdayPrice;
 	}
-
 
 	public BigDecimal getApprovingUserWorkdayPrice() {
 		return approvingUserWorkdayPrice;
@@ -245,5 +246,29 @@ public class PriceRuleDTO {
 
 	public void setApprovingUserDiscountRatio(Double approvingUserDiscountRatio) {
 		this.approvingUserDiscountRatio = approvingUserDiscountRatio;
+	}
+
+	public BigDecimal getWeekendPrice() {
+		return weekendPrice;
+	}
+
+	public void setWeekendPrice(BigDecimal weekendPrice) {
+		this.weekendPrice = weekendPrice;
+	}
+
+	public BigDecimal getOrgMemberWeekendPrice() {
+		return orgMemberWeekendPrice;
+	}
+
+	public void setOrgMemberWeekendPrice(BigDecimal orgMemberWeekendPrice) {
+		this.orgMemberWeekendPrice = orgMemberWeekendPrice;
+	}
+
+	public BigDecimal getApprovingUserWeekendPrice() {
+		return approvingUserWeekendPrice;
+	}
+
+	public void setApprovingUserWeekendPrice(BigDecimal approvingUserWeekendPrice) {
+		this.approvingUserWeekendPrice = approvingUserWeekendPrice;
 	}
 }

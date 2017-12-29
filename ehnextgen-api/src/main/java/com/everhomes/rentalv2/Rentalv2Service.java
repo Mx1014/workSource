@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -73,8 +72,8 @@ public interface Rentalv2Service {
 			FindAutoAssignRentalSiteWeekStatusCommand cmd);
 	FindAutoAssignRentalSiteDayStatusResponse findAutoAssignRentalSiteDayStatus(
 			FindAutoAssignRentalSiteDayStatusCommand cmd);
-	void updateRentalSiteSimpleRules(UpdateRentalSiteRulesAdminCommand cmd);
-	void valiRentalBill(List<RentalBillRuleDTO> ruleDTOs);
+	void updateRentalSiteCellRule(UpdateRentalSiteCellRuleAdminCommand cmd);
+	void validateRentalBill(List<RentalBillRuleDTO> ruleDTOs);
 
 	void updateDefaultRule(UpdateDefaultRuleAdminCommand cmd);
 

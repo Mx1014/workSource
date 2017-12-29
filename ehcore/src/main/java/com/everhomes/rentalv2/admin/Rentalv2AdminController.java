@@ -15,14 +15,9 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rentalv2.Rentalv2Service;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.rentalv2.AddItemAdminCommand;
-import com.everhomes.rest.rentalv2.BatchCompleteBillCommand;
-import com.everhomes.rest.rentalv2.BatchCompleteBillCommandResponse;
-import com.everhomes.rest.rentalv2.BatchIncompleteBillCommand;
-import com.everhomes.rest.rentalv2.CompleteBillCommand;
 import com.everhomes.rest.rentalv2.DeleteItemAdminCommand;
 import com.everhomes.rest.rentalv2.GetItemListAdminCommand;
 import com.everhomes.rest.rentalv2.GetItemListCommandResponse;
-import com.everhomes.rest.rentalv2.IncompleteBillCommand;
 import com.everhomes.rest.rentalv2.ListRentalBillsCommand;
 import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
@@ -403,7 +398,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	/**
 	 * <b>URL: /rental/admin/addRentalSiteRules</b>
 	 * <p>
-	 * 添加具体资源的规则
+	 * 更新具体资源的规则
 	 * </p>
 	 */
 
@@ -461,8 +456,8 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	@RequestMapping("updateRentalSiteRules")
 	@RestReturn(value = String.class)
-	public RestResponse updateRentalSiteSimpleRules(@Valid  UpdateRentalSiteRulesAdminCommand cmd) {
-		rentalService.updateRentalSiteSimpleRules(cmd);
+	public RestResponse updateRentalSiteCellRule(@Valid UpdateRentalSiteCellRuleAdminCommand cmd) {
+		rentalService.updateRentalSiteCellRule(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
