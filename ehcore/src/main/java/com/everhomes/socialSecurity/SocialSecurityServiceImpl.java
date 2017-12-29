@@ -832,7 +832,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             orgIds.add(o.getId());
         }
         List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(null, orgIds,
-                null, null, locator, Integer.MAX_VALUE - 1);
+                OrganizationMemberStatus.ACTIVE.getCode(), null, locator, Integer.MAX_VALUE - 1);
         List<Long> detailIds = new ArrayList<>();
         if (null != organizationMembers) {
             for (OrganizationMember member : organizationMembers) {
