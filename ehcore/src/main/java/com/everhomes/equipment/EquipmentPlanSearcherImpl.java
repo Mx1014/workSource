@@ -182,13 +182,15 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
             plan.setExecuteStartTime(repeatService.getExecuteStartTime(repeatSetting));
             plan.setExecutionFrequency(repeatService.getExecutionFrequency(repeatSetting));
             plan.setLimitTime(repeatService.getlimitTime(repeatSetting));
-            //过滤掉planVersion ==2 的表示已经有副本
-            if(plan.getPlanVersion()!=2L) {
-                plans.add(ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class));
+
+            List<Long> oldVersionPlanIds = new ArrayList<>();
+            if (plan.getPlanMainId() != null && plan.getPlanMainId() != 0L) {
+                oldVersionPlanIds.add(plan.getPlanMainId());
             }
+            plans.add(ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class));
 
         }
-        response.setEquipmentInspectionPlans(plans);
+        response.setEquipmentInspectionPlans(plans.removeIf((p)->));
 
         return response;
     }

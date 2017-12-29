@@ -64,6 +64,12 @@ public class EquipmentInspectionPlanDTO {
     @ItemType(EquipmentStandardRelationDTO.class)
     private List<EquipmentStandardRelationDTO> equipmentStandardRelations;
 
+    @ItemType(StandardGroupDTO.class)
+    private List<StandardGroupDTO> executiveGroup;
+
+    @ItemType(StandardGroupDTO.class)
+    private List<StandardGroupDTO> reviewGroup;
+
     public Long getId() {
         return id;
     }
@@ -206,6 +212,22 @@ public class EquipmentInspectionPlanDTO {
 
     public void setStringStatus(String stringStatus) {
         this.stringStatus = stringStatus;
+    }
+
+    public List<StandardGroupDTO> getExecutiveGroup() {
+        return executiveGroup;
+    }
+
+    public void setExecutiveGroup(List<StandardGroupDTO> executiveGroup) {
+        this.executiveGroup = executiveGroup;
+    }
+
+    public List<StandardGroupDTO> getReviewGroup() {
+        return reviewGroup;
+    }
+
+    public void setReviewGroup(List<StandardGroupDTO> reviewGroup) {
+        this.reviewGroup = reviewGroup;
     }
 
     @Override

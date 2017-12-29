@@ -387,7 +387,7 @@ public class EquipmentController extends ControllerBase {
 
     /**
      * <b>URL: /equipment/updateEquipmentInspectionPlan</b>
-     * <p>更新巡检计划 V3.0.2</p>
+     * <p>更新巡检计划 V3.0.3</p>
      */
     @RequestMapping("updateEquipmentInspectionPlan")
     @RestReturn(value = String.class)

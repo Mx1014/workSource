@@ -5059,36 +5059,38 @@ public class EquipmentServiceImpl implements EquipmentService {
 		return ConvertHelper.convert(createdPlan, EquipmentInspectionPlanDTO.class);
 	}
 
-	private void processPlanGroups(List<StandardGroupDTO> groupList, EquipmentInspectionPlans createdPlan) {
+	private void processPlanGroups(List<StandardGroupDTO> groupList, EquipmentInspectionPlans plan) {
 		List<EquipmentInspectionPlanGroupMap> executiveGroup = null;
 		List<EquipmentInspectionPlanGroupMap> reviewGroup = null;
-		this.equipmentProvider.deleteEquipmentInspectionPlanGroupMapByPlanId(createdPlan.getId());
+		this.equipmentProvider.deleteEquipmentInspectionPlanGroupMapByPlanId(plan.getId());
 
-		if(LOGGER.isInfoEnabled()) {
-			LOGGER.info("processPlanGroups: deleteEquipmentInspectionPlanGroupMapByStandardId, planId=" + createdPlan.getId()
+		if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("processPlanGroups: deleteEquipmentInspectionPlanGroupMapByStandardId, planId=" + plan.getId()
 					+ "userId = " + UserContext.current().getUser().getId() + "time = " + DateHelper.currentGMTTime()
 					+ "new plan groupList = {}" + groupList);
 		}
 
-		if(groupList != null && groupList.size() >0) {
+		if (groupList != null && groupList.size() > 0) {
 			executiveGroup = new ArrayList<>();
 			reviewGroup = new ArrayList<>();
 
-			for(StandardGroupDTO group : groupList) {
+			for (StandardGroupDTO group : groupList) {
 				EquipmentInspectionPlanGroupMap map = new EquipmentInspectionPlanGroupMap();
-				map.setPlanId(createdPlan.getId());
+				map.setPlanId(plan.getId());
 				map.setGroupType(group.getGroupType());
 				map.setGroupId(group.getGroupId());
 				map.setPositionId(group.getPositionId());
 				equipmentProvider.createEquipmentInspectionPlanGroupMap(map);
-				if(QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
+				if (QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
 					executiveGroup.add(map);
 				}
-				if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
+				if (QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
 					reviewGroup.add(map);
 				}
 			}
 		}
+		plan.setExecutiveGroup(executiveGroup);
+		plan.setReviewGroup(reviewGroup);
 	}
 
 	@Override
@@ -5123,6 +5125,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		} else {
 			plan.setOperatorUid(UserContext.currentUserId());
 			plan.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			plan.setPlanMainId(exist.getPlanMainId());
 			equipmentProvider.updateEquipmentInspectionPlan(plan);
 			repeatService.deleteRepeatSettingsById(cmd.getRepeatSettings().getId());
 		}
@@ -5146,6 +5149,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 			equipmentProvider.createEquipmentPlanMaps(equipmentPlanMap);
 			equipmentStandardRelation.add(relation);
 		}
+		//巡检计划增加审批和执行人员
+		processPlanGroups(cmd.getGroupList(), plan);
 		updatePlan.setEquipmentStandardRelations(equipmentStandardRelation);
 
 		return ConvertHelper.convert(updatePlan,EquipmentInspectionPlanDTO.class);
@@ -5169,6 +5174,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		EquipmentInspectionPlans equipmentInspectionPlan = equipmentProvider.getEquipmmentInspectionPlanById(cmd.getId());
 		//填充巡检计划相关的巡检对象(需排序)
 		processEquipmentInspectionObjectsByPlanId(cmd.getId(),equipmentInspectionPlan);
+		//填充计划的执行组审批组
+		equipmentProvider.populatePlanGroups(equipmentInspectionPlan);
 		//填充计划的执行周期
 		equipmentInspectionPlan.setRepeatSettings(repeatService.findRepeatSettingById(cmd.getId()));
 
@@ -5185,7 +5192,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 		equipmentProvider.deleteEquipmentInspectionPlanById(exist);
 		//刪除巡检计划巡检对象关联
 		equipmentProvider.deleteEquipmentInspectionPlanMap(cmd.getId());
+		// 删除巡检计划关联审批检查组
+		equipmentProvider.deleteEquipmentInspectionPlanGroupMapByPlanId(exist.getId());
 		//删除repeatSetting  不删也可
+		repeatService.deleteRepeatSettingsById(exist.getRepeatSettingId());
 	}
 
 	@Override
