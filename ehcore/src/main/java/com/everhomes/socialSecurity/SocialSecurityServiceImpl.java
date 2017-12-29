@@ -858,14 +858,16 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         StringBuilder sb = null;
         String[] orgArray = path.split("/");
         for (String orgId : orgArray) {
-            Organization org = organizationProvider.findOrganizationById(Long.valueOf(orgId));
-            if (null != org) {
-                if (null == sb) {
-                    sb = new StringBuilder();
-                } else {
-                    sb.append("/");
+            if (StringUtils.isNotEmpty(orgId)) {
+                Organization org = organizationProvider.findOrganizationById(Long.valueOf(orgId));
+                if (null != org) {
+                    if (null == sb) {
+                        sb = new StringBuilder();
+                    } else {
+                        sb.append("/");
+                    }
+                    sb.append(org.getName());
                 }
-                sb.append(org.getName());
             }
         }
 
