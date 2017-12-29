@@ -905,6 +905,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private SocialSecurityReport calculateUserSocialSecurityReport(OrganizationMemberDetails detail, List<SocialSecurityPayment> payments) {
         SocialSecurityReport report = newSocialSecurityReport(detail);
         List<SocialSecurityPayment> userPayments = findSSpaymentsByDetail(detail.getId(), payments);
+        report.setPayMonth(userPayments.get(0).getPayMonth());
         report.setCreatorUid(userPayments.get(0).getCreatorUid());
         report.setCreateTime(userPayments.get(0).getCreateTime());
         report.setFileUid(userPayments.get(0).getFileUid());
