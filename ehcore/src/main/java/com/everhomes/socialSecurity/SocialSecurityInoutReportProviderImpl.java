@@ -38,7 +38,7 @@ public class SocialSecurityInoutReportProviderImpl implements SocialSecurityInou
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityInoutReport.class));
 		socialSecurityInoutReport.setId(id);
 		socialSecurityInoutReport.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		socialSecurityInoutReport.setCreatorUid(UserContext.current().getUser().getId());
+//		socialSecurityInoutReport.setCreatorUid(UserContext.current().getUser().getId());
 		socialSecurityInoutReport.setUpdateTime(socialSecurityInoutReport.getCreateTime());
 		socialSecurityInoutReport.setOperatorUid(socialSecurityInoutReport.getCreatorUid());
 		getReadWriteDao().insert(socialSecurityInoutReport);

@@ -39,7 +39,7 @@ public class SocialSecurityReportProviderImpl implements SocialSecurityReportPro
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityReport.class));
 		socialSecurityReport.setId(id);
 		socialSecurityReport.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		socialSecurityReport.setCreatorUid(UserContext.current().getUser().getId());
+//		socialSecurityReport.setCreatorUid(UserContext.current().getUser().getId());
 		socialSecurityReport.setUpdateTime(socialSecurityReport.getCreateTime());
 		socialSecurityReport.setOperatorUid(socialSecurityReport.getCreatorUid());
 		getReadWriteDao().insert(socialSecurityReport);
