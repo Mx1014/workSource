@@ -15,6 +15,8 @@ public class BulletinsInstanceConfig implements Serializable  {
 
 	private Integer rowCount;
 
+	private Integer noticeCount;
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -39,5 +41,13 @@ public class BulletinsInstanceConfig implements Serializable  {
 
 	public void setRowCount(Integer rowCount) {
 		this.rowCount = rowCount;
+	}
+
+	public Integer getNoticeCount() {
+		return noticeCount;
+	}
+
+	public void setNoticeCount(Integer noticeCount) {
+		this.noticeCount = noticeCount;
 	}
 }

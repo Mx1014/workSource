@@ -457,6 +457,12 @@ public class ForumServiceImpl implements ForumService {
 			setActivitySchedule(post.getEmbeddedId());
 		}
 
+		//公告模块要
+		if(ForumModuleType.fromCode(cmd.getModuleType()) == ForumModuleType.ANNOUNCEMENT){
+
+        }
+
+
         PostDTO postDto = ConvertHelper.convert(post, PostDTO.class);
 
         long endTime = System.currentTimeMillis();
@@ -6830,4 +6836,13 @@ public class ForumServiceImpl implements ForumService {
         res.setFlag(TrueOrFalseFlag.FALSE.getCode());
         return res;
     }
+
+    private void scheduleAnnouncement(Post post){
+
+
+    }
+
+
+
+
 }
