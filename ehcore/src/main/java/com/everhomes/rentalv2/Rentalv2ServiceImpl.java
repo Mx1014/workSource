@@ -125,23 +125,17 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	private String queueName = "rentalService";
 
-	private ThreadLocal<SimpleDateFormat> timeSF = new ThreadLocal<SimpleDateFormat>() {
-		@Override
-		protected SimpleDateFormat initialValue() {
-			return 	new SimpleDateFormat("HH:mm:ss");
-		}
-	};
-	private ThreadLocal<SimpleDateFormat> dateSF = new ThreadLocal<SimpleDateFormat>() {
-		@Override
-		protected SimpleDateFormat initialValue() {
-			return 	new SimpleDateFormat("yyyy-MM-dd");
-		}
-	};
-	private ThreadLocal<SimpleDateFormat> datetimeSF = new ThreadLocal<SimpleDateFormat>() {
-		@Override
-		protected SimpleDateFormat initialValue() {
-			return 	new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		}
+	private ThreadLocal<SimpleDateFormat> timeSF = ThreadLocal.withInitial(() -> new SimpleDateFormat("HH:mm:ss"));
+	private ThreadLocal<SimpleDateFormat> dateSF = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd"));
+	private ThreadLocal<SimpleDateFormat> datetimeSF = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+
+	/**cellList : 当前线程用到的单元格 */
+	private static ThreadLocal<List<RentalCell>> cellList = ThreadLocal.withInitial(ArrayList::new);
+	/**seqNum : 计数-申请id用 */
+	private static ThreadLocal<Long> seqNum = ThreadLocal.withInitial(() -> 0L);
+	/**currentId : 当前id*/
+	private static ThreadLocal<Long> currentId = new ThreadLocal<Long>() {
+
 	};
 
 	@Autowired
@@ -199,22 +193,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Autowired
 	private DoorAccessProvider doorAccessProvider;
 
-	/**cellList : 当前线程用到的单元格 */
-	private static ThreadLocal<List<RentalCell>> cellList = new ThreadLocal<List<RentalCell>>() {
-		public List<RentalCell> initialValue() {
-			return new ArrayList<>();
-		}
-	};
-	/**seqNum : 计数-申请id用 */
-	private static ThreadLocal<Long> seqNum = new ThreadLocal<Long>() {
-		public Long initialValue() {
-			return 0L;
-		}
-	};
-	/**currentId : 当前id*/
-	private static ThreadLocal<Long> currentId = new ThreadLocal<Long>() {
-
-	};
 	private ExecutorService executorPool =  Executors.newFixedThreadPool(5);
 	private Time convertTime(Long TimeLong) {
 		if (null != TimeLong) {
@@ -371,16 +349,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return "0000000";
 
 		int openWorkdayInt = 0;
-		String openWorkday;
+		StringBuilder openWorkday;
 		//list的数字:1234567代表从星期天到星期六,经过-1作为10的次方放到7位字符串内
 		for(Integer weekdayInteger : openWeekdays) {
 			openWorkdayInt += Math.pow(10, weekdayInteger - 1);
 		}
-		openWorkday = String.valueOf(openWorkdayInt);
+		openWorkday = new StringBuilder(String.valueOf(openWorkdayInt));
 		for( ;openWorkday.length() < 7; ){
-			openWorkday = "0" + openWorkday;
+			openWorkday.insert(0, "0");
 		}
-		return openWorkday;
+		return openWorkday.toString();
 	}
 
 	private List<Integer> resolveOpenWeekday(String openWeekday) {
@@ -515,7 +493,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
         AttachmentConfigDTO attachment = new AttachmentConfigDTO();
 		attachment.setAttachmentType(AttachmentType.ATTACHMENT.getCode());
 		attachment.setMustOptions(NormalFlag.NONEED.getCode());
-		addCmd.setAttachments(Arrays.asList(attachment));
+		addCmd.setAttachments(Collections.singletonList(attachment));
 		//设置每周开放日期
 		addCmd.setOpenWeekday(Arrays.asList(1, 2, 3, 4));
         //设置关闭日期
@@ -537,8 +515,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		priceRuleDTO.setApprovingUserInitiatePrice(new BigDecimal(0));
 		priceRuleDTO.setOrgMemberWorkdayPrice(new BigDecimal(0));
 		priceRuleDTO.setOrgMemberInitiatePrice(new BigDecimal(0));
-		addCmd.setPriceRules(Arrays.asList(priceRuleDTO));
-		addCmd.setRentalTypes(Arrays.asList(RentalType.DAY.getCode()));
+		addCmd.setPriceRules(Collections.singletonList(priceRuleDTO));
+		addCmd.setRentalTypes(Collections.singletonList(RentalType.DAY.getCode()));
 		
 		this.addRule(addCmd);
 
@@ -1084,8 +1062,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rSiteDTO.setAvgPriceStr(sitePriceRuleDTOs.get(0).getPriceStr());
 		}else {
 			BigDecimal minPrice = new BigDecimal(Integer.MAX_VALUE);
-			for(int i = 0; i < sitePriceRuleDTOs.size(); i++) {
-				SitePriceRuleDTO sitePriceRuleDTO = sitePriceRuleDTOs.get(i);
+			for (SitePriceRuleDTO sitePriceRuleDTO : sitePriceRuleDTOs) {
 				if (sitePriceRuleDTO.getMinPrice() != null && sitePriceRuleDTO.getMinPrice().compareTo(minPrice) < 0) {
 					minPrice = sitePriceRuleDTO.getMinPrice();
 				}
@@ -1379,11 +1356,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	private boolean isInteger(BigDecimal b){
-		if(new BigDecimal(b.intValue()).compareTo(b)==0){
-			return true;
-		}else{
-			return false;
-		}
+		return new BigDecimal(b.intValue()).compareTo(b) == 0;
 	}
 	private boolean isInteger(double d){
 		double eps = 0.0001;
@@ -1492,7 +1465,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				if (null == rentalSiteRule)
 					continue;
 				if (cmd.getPackageName()!=null){ //有套餐的情况下 使用套餐价格
-					Rentalv2PricePackage pricePackage =null;
+					Rentalv2PricePackage pricePackage;
 					if (rentalSiteRule.getPricePackageId()==null){
 						pricePackage = resourcePackages.get(0);
 					}else {
@@ -2058,45 +2031,42 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						continue;
 					}
 					//剩下的用线程池处理flowcase状态和发短信
-					executorPool.execute(new Runnable() {
-						@Override
-						public void run() {
-							//其他订单置为失败工作流设置为终止
-							FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(otherOrder.getId(),REFER_TYPE,Rentalv2Controller.moduleId);
-							otherOrder.setStatus(SiteBillStatus.FAIL.getCode());
-							rentalv2Provider.updateRentalBill(otherOrder);
+					executorPool.execute(() -> {
+                        //其他订单置为失败工作流设置为终止
+                        FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(otherOrder.getId(),REFER_TYPE,Rentalv2Controller.moduleId);
+                        otherOrder.setStatus(SiteBillStatus.FAIL.getCode());
+                        rentalv2Provider.updateRentalBill(otherOrder);
 
-							FlowAutoStepDTO dto = new FlowAutoStepDTO();
-							dto.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
-							dto.setFlowCaseId(flowcase.getId());
-							dto.setFlowMainId(flowcase.getFlowMainId());
-							dto.setFlowNodeId(flowcase.getCurrentNodeId());
-							dto.setFlowVersion(flowcase.getFlowVersion());
-							dto.setStepCount(flowcase.getStepCount());
-							flowService.processAutoStep(dto);
+                        FlowAutoStepDTO dto = new FlowAutoStepDTO();
+                        dto.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
+                        dto.setFlowCaseId(flowcase.getId());
+                        dto.setFlowMainId(flowcase.getFlowMainId());
+                        dto.setFlowNodeId(flowcase.getCurrentNodeId());
+                        dto.setFlowVersion(flowcase.getFlowVersion());
+                        dto.setStepCount(flowcase.getStepCount());
+                        flowService.processAutoStep(dto);
 
-							//发短信和消息
-							Map<String, String> map = new HashMap<>();
-							map.put("useTime", order.getUseDetail());
-							map.put("resourceName", order.getResourceName());
-							sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
-									RentalNotificationTemplateCode.RENTAL_CANCEL_CODE);
+                        //发短信和消息
+                        Map<String, String> map = new HashMap<>();
+                        map.put("useTime", order.getUseDetail());
+                        map.put("resourceName", order.getResourceName());
+                        sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
+                                RentalNotificationTemplateCode.RENTAL_CANCEL_CODE);
 
-							String templateScope = SmsTemplateCode.SCOPE;
-							int templateId = SmsTemplateCode.RENTAL_CANCEL_CODE;
-							String templateLocale = RentalNotificationTemplateCode.locale;
+                        String templateScope = SmsTemplateCode.SCOPE;
+                        int templateId = SmsTemplateCode.RENTAL_CANCEL_CODE;
+                        String templateLocale = RentalNotificationTemplateCode.locale;
 
-							List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", otherOrder.getUseDetail());
-							smsProvider.addToTupleList(variables, "resourceName", otherOrder.getResourceName());
+                        List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", otherOrder.getUseDetail());
+                        smsProvider.addToTupleList(variables, "resourceName", otherOrder.getResourceName());
 
-							UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(otherOrder.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
-							if(null == userIdentifier){
-								LOGGER.debug("userIdentifier is null...userId = " + otherOrder.getRentalUid());
-							}else{
-								smsProvider.sendSms(otherOrder.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
-							}
-						}
-					});
+                        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(otherOrder.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
+                        if(null == userIdentifier){
+                            LOGGER.debug("userIdentifier is null...userId = " + otherOrder.getRentalUid());
+                        }else{
+                            smsProvider.sendSms(otherOrder.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
+                        }
+                    });
 				}
 			}
 		}
@@ -2207,7 +2177,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					//超期未确认的置为超时
 					final Job job1 = new Job(
 							IncompleteUnsuccessRentalBillAction.class.getName(),
-							new Object[] { String.valueOf(order.getId()) });
+							String.valueOf(order.getId()));
 
 					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
 							orderEndTimeLong); 
@@ -2331,13 +2301,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return response;
 		response.setRentalBills(new ArrayList<>());
 		for (RentalOrder bill : billList) {
-			RentalBillDTO dto = proccessOrderDTO(bill);
+			RentalBillDTO dto = processOrderDTO(bill);
 			  
 			response.getRentalBills().add(dto);
 		}
 		return response;
 	}
-	private RentalBillDTO proccessOrderDTO(RentalOrder bill) {
+	private RentalBillDTO processOrderDTO(RentalOrder bill) {
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(bill.getRentalResourceId());
 		// 在转换bill到dto的时候统一先convert一下  modify by wuhan 20160804
 		RentalBillDTO dto = ConvertHelper.convert(bill, RentalBillDTO.class);
@@ -3575,7 +3545,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 					// n分钟后，取消未成功的订单
 					final Job job1 = new Job(CancelUnsuccessRentalOrderAction.class.getName(),
-							new Object[] {String.valueOf(bill.getId())});
+							String.valueOf(bill.getId()));
 
 					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
 							bill.getReserveTime().getTime() + cancelTime);
@@ -5718,9 +5688,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			User user = UserContext.current().getUser();
 			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
 		}
-		RentalSiteDTO dto = convertRentalSite2DTO(rentalSite, sceneTokenDTO, true);
 
-		return dto;
+		return convertRentalSite2DTO(rentalSite, sceneTokenDTO, true);
 	}
 
 	@Override
@@ -6122,7 +6091,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			List<RentalCell> changeRentalSiteRules= null;
 			if (RentalType.fromCode(cmd.getRentalType()) == RentalType.MONTH ||
 					RentalType.fromCode(cmd.getRentalType()) == RentalType.WEEK) {
-				updateRSRs(Arrays.asList(choseRSR), cmd);
+				updateRSRs(Collections.singletonList(choseRSR), cmd);
 			}else {
 				if(cmd.getLoopType().equals(LoopType.ONLYTHEDAY.getCode())){
 					//当天的
@@ -6380,7 +6349,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter : bill id can not find bill");
 		}
 
-		return proccessOrderDTO(bill);
+		return processOrderDTO(bill);
 	}
 
 	@Override
