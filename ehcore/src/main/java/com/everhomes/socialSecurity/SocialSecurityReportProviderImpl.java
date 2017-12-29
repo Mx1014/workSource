@@ -112,7 +112,7 @@ public class SocialSecurityReportProviderImpl implements SocialSecurityReportPro
 						Tables.EH_SOCIAL_SECURITY_REPORT.FILE_UID,
 						Tables.EH_SOCIAL_SECURITY_REPORT.FILE_TIME,
 						Tables.EH_SOCIAL_SECURITY_REPORT.ORGANIZATION_ID);
-		LOGGER.debug("sql is " + step.toString());
+//		LOGGER.debug("sql is " + step.toString());
 		return step.fetchAny().map(r -> {
 			SocialSecurityDepartmentSummary summary = new SocialSecurityDepartmentSummary();
 			summary.setPayMonth(month);

@@ -26,6 +26,7 @@ import com.everhomes.server.schema.tables.pojos.EhSocialSecuritySettings;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import org.apache.commons.logging.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -831,7 +832,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             orgIds.add(o.getId());
         }
         List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(null, orgIds,
-                OrganizationMemberStatus.ACTIVE.getCode(), ContactSignUpStatus.SIGNEDUP.getCode(), locator, Integer.MAX_VALUE - 1);
+                null, null, locator, Integer.MAX_VALUE - 1);
         List<Long> detailIds = new ArrayList<>();
         if (null != organizationMembers) {
             for (OrganizationMember member : organizationMembers) {
@@ -840,6 +841,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 }
             }
         }
+        LOGGER.debug(String.format("开始计算部门-{} 的数据,\n下辖部门id {},\n人员id{}"), dpt.getName(), orgIds, detailIds);
         SocialSecurityDepartmentSummary summary = processSocialSecurityDepartmentSummary(dpt, detailIds, month);
         socialSecurityDepartmentSummaryProvider.createSocialSecurityDepartmentSummary(summary);
     }
