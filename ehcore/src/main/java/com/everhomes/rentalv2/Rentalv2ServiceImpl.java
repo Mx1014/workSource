@@ -1497,7 +1497,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				siteRuleIds.add(siteRule.getRuleId());
 				if(siteRule.getRentalCount()==null||siteRule.getRuleId() == null )
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter siteRule");
+		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter siteRule");
 				//非独占资源，也不是场所编号的，就要有数量
 //				if(rs.getAutoAssign().equals(NormalFlag.NONEED.getCode())&&
 //						rs.getExclusiveFlag().equals(NormalFlag.NONEED.getCode()))
@@ -1728,75 +1728,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//修改 by sw 点击下一步时，初始化订单状态，点击立即预约才进去各个模式流程  PayMode
 		rentalBill.setStatus(SiteBillStatus.INACTIVE.getCode());
 
-		SimpleDateFormat bigentimeSF = new SimpleDateFormat("MM-dd HH:mm");
-		SimpleDateFormat bigenDateSF = new SimpleDateFormat("MM-dd");
-		SimpleDateFormat endtimeSF = new SimpleDateFormat("HH:mm");
-		//拼装使用详情
-		StringBuilder useDetailSB = new StringBuilder();
-		Collections.sort(siteRuleIds);
+		rentalBill.setUseDetail(getUseDetailStr(siteRuleIds, rentalBill.getRentalType(), rule));
 
-		if(cmd.getRentalType().equals(RentalType.HOUR.getCode())){
-
-			int size = siteRuleIds.size();
-			RentalCell firstRsr = findRentalSiteRuleById(siteRuleIds.get(0));
-			RentalCell lastRsr = findRentalSiteRuleById(siteRuleIds.get(size - 1));
-
-			useDetailSB.append(bigentimeSF.format(firstRsr.getBeginTime()));
-			useDetailSB.append("-");
-			useDetailSB.append(endtimeSF.format(lastRsr.getEndTime()));
-			/*if(rs.getExclusiveFlag().equals(NormalFlag.NEED.getCode())){
-			}else */if(rule.getAutoAssign().equals(NormalFlag.NONEED.getCode())){
-			}else {
-				// 资源编号
-				useDetailSB.append("\n");
-				useDetailSB.append(" ");
-				useDetailSB.append(firstRsr.getResourceNumber());
-			}
-
-		}else {
-			// 循环存site订单
-			for (Long siteRuleId : siteRuleIds) {
-				RentalCell rsr = findRentalSiteRuleById(siteRuleId);
-				if (null == rsr) {
-					continue;
-				}
-				if(useDetailSB.length()>1)
-					useDetailSB.append("\n");
-				if(rsr.getRentalType().equals(RentalType.DAY.getCode())){
-					useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate()));
-				}else if(rsr.getRentalType().equals(RentalType.MONTH.getCode())){
-					useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate()));
-				}else if(rsr.getRentalType().equals(RentalType.WEEK.getCode())){
-					useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate()));
-				} else if (rsr.getRentalType().equals(RentalType.HALFDAY.getCode())
-						|| rsr.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
-					useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate())).append(" ");
-					if(rsr.getAmorpm().equals(AmorpmFlag.AM.getCode()))
-						useDetailSB.append(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
-								""+AmorpmFlag.AM.getCode(), RentalNotificationTemplateCode.locale, "morning"));
-					if(rsr.getAmorpm().equals(AmorpmFlag.PM.getCode()))
-						useDetailSB.append(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
-								""+AmorpmFlag.PM.getCode(), RentalNotificationTemplateCode.locale, "afternoon"));
-					if(rsr.getAmorpm().equals(AmorpmFlag.NIGHT.getCode()))
-						useDetailSB.append(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
-								""+AmorpmFlag.NIGHT.getCode(), RentalNotificationTemplateCode.locale, "night"));
-				}
-				/*if(rs.getExclusiveFlag().equals(NormalFlag.NEED.getCode())){
-					//独占资源 只有时间
-				}else */if(rule.getAutoAssign().equals(NormalFlag.NONEED.getCode())){
-
-				}else {
-					// 资源编号
-					useDetailSB.append(" ");
-					useDetailSB.append(rsr.getResourceNumber());
-				}
-			}
-		}
-
-		rentalBill.setUseDetail(useDetailSB.toString());
-		rentalBill.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-				.getTime()));
-		rentalBill.setCreatorUid(userId);
 		rentalBill.setVisibleFlag(VisibleFlag.VISIBLE.getCode());
 
 		Long orderNo = onlinePayService.createBillId(DateHelper.currentGMTTime().getTime());
@@ -1884,6 +1817,72 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		cellList.get().clear();
 		return billDTO;
+	}
+
+	private String getUseDetailStr(List<Long> siteRuleIds, Byte rentalType, RentalDefaultRule rule) {
+		//拼装使用详情
+
+		SimpleDateFormat beginTimeSF = new SimpleDateFormat("MM-dd HH:mm");
+		SimpleDateFormat beginDateSF = new SimpleDateFormat("MM-dd");
+		SimpleDateFormat endTimeSF = new SimpleDateFormat("HH:mm");
+
+		StringBuilder useDetailSB = new StringBuilder();
+		Collections.sort(siteRuleIds);
+
+		if(rentalType == RentalType.HOUR.getCode()){
+			//按小时模式，拼接预约时间
+			int size = siteRuleIds.size();
+			RentalCell firstRsr = findRentalSiteRuleById(siteRuleIds.get(0));
+			RentalCell lastRsr = findRentalSiteRuleById(siteRuleIds.get(size - 1));
+			if (null != firstRsr && null != lastRsr) {
+				useDetailSB.append(beginTimeSF.format(firstRsr.getBeginTime()));
+				useDetailSB.append("-");
+				useDetailSB.append(endTimeSF.format(lastRsr.getEndTime()));
+
+				if(rule.getAutoAssign() == NormalFlag.NEED.getCode()){
+					// 资源编号
+					useDetailSB.append("\n");
+					useDetailSB.append(" ");
+					useDetailSB.append(firstRsr.getResourceNumber());
+				}
+			}
+		}else {
+			// 循环存site订单
+			for (Long siteRuleId : siteRuleIds) {
+				RentalCell rsr = findRentalSiteRuleById(siteRuleId);
+				if (null == rsr) {
+					continue;
+				}
+				if(useDetailSB.length()>1)
+					useDetailSB.append("\n");
+				if(rsr.getRentalType().equals(RentalType.DAY.getCode())){
+					useDetailSB.append(beginDateSF.format(rsr.getResourceRentalDate()));
+				}else if(rsr.getRentalType().equals(RentalType.MONTH.getCode())){
+					useDetailSB.append(beginDateSF.format(rsr.getResourceRentalDate()));
+				}else if(rsr.getRentalType().equals(RentalType.WEEK.getCode())){
+					useDetailSB.append(beginDateSF.format(rsr.getResourceRentalDate()));
+				} else if (rsr.getRentalType().equals(RentalType.HALFDAY.getCode())
+						|| rsr.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
+					useDetailSB.append(beginDateSF.format(rsr.getResourceRentalDate())).append(" ");
+					if(rsr.getAmorpm().equals(AmorpmFlag.AM.getCode()))
+						useDetailSB.append(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
+								""+AmorpmFlag.AM.getCode(), RentalNotificationTemplateCode.locale, "morning"));
+					if(rsr.getAmorpm().equals(AmorpmFlag.PM.getCode()))
+						useDetailSB.append(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
+								""+AmorpmFlag.PM.getCode(), RentalNotificationTemplateCode.locale, "afternoon"));
+					if(rsr.getAmorpm().equals(AmorpmFlag.NIGHT.getCode()))
+						useDetailSB.append(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
+								""+AmorpmFlag.NIGHT.getCode(), RentalNotificationTemplateCode.locale, "night"));
+				}
+				if(rule.getAutoAssign() == NormalFlag.NEED.getCode()){
+					// 资源编号
+					useDetailSB.append(" ");
+					useDetailSB.append(rsr.getResourceNumber());
+				}
+			}
+		}
+
+		return useDetailSB.toString();
 	}
 
 	private Long resolveOrganizationId(SceneTokenDTO sceneTokenDTO) {
