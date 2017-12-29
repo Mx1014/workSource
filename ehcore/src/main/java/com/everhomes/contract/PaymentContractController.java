@@ -58,7 +58,7 @@ public class PaymentContractController extends ControllerBase {
      */
     @RequestMapping("deletePaymentContract")
     @RestReturn(String.class)
-    public RestResponse deletePaymentContract(DeletePaymentContractCommand cmd){
+    public RestResponse deletePaymentContract(DeleteContractCommand cmd){
         getContractService().deleteContract(cmd);
         return new RestResponse();
     }
