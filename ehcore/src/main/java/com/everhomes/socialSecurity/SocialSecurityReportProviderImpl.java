@@ -102,15 +102,15 @@ public class SocialSecurityReportProviderImpl implements SocialSecurityReportPro
                 Tables.EH_SOCIAL_SECURITY_REPORT.ACCUMULATION_FUND_SUM.sum(), Tables.EH_SOCIAL_SECURITY_REPORT.ACCUMULATION_FUND_COMPANY_SUM.sum(),
                 Tables.EH_SOCIAL_SECURITY_REPORT.ACCUMULATION_FUND_EMPLOYEE_SUM.sum(), Tables.EH_SOCIAL_SECURITY_REPORT.AFTER_ACCUMULATION_FUND_COMPANY_SUM.sum(),
                 Tables.EH_SOCIAL_SECURITY_REPORT.AFTER_ACCUMULATION_FUND_EMPLOYEE_SUM.sum(), Tables.EH_SOCIAL_SECURITY_REPORT.CREATOR_UID,
-                Tables.EH_SOCIAL_SECURITY_REPORT.CREATE_TIME, Tables.EH_SOCIAL_SECURITY_REPORT.FILE_UID, Tables.EH_SOCIAL_SECURITY_REPORT.FILE_TIME,
+                Tables.EH_SOCIAL_SECURITY_REPORT.CREATE_TIME.max(), Tables.EH_SOCIAL_SECURITY_REPORT.FILE_UID, Tables.EH_SOCIAL_SECURITY_REPORT.FILE_TIME.max(),
                 Tables.EH_SOCIAL_SECURITY_REPORT.ORGANIZATION_ID,
                 Tables.EH_SOCIAL_SECURITY_REPORT.DETAIL_ID.countDistinct()
         ).from(Tables.EH_SOCIAL_SECURITY_REPORT).where(Tables.EH_SOCIAL_SECURITY_REPORT.DETAIL_ID.in(detailIds))
                 .and(Tables.EH_SOCIAL_SECURITY_REPORT.PAY_MONTH.eq(month)).groupBy(
                         Tables.EH_SOCIAL_SECURITY_REPORT.CREATOR_UID,
-                        Tables.EH_SOCIAL_SECURITY_REPORT.CREATE_TIME,
+//                        Tables.EH_SOCIAL_SECURITY_REPORT.CREATE_TIME,
                         Tables.EH_SOCIAL_SECURITY_REPORT.FILE_UID,
-                        Tables.EH_SOCIAL_SECURITY_REPORT.FILE_TIME,
+//                        Tables.EH_SOCIAL_SECURITY_REPORT.FILE_TIME,
                         Tables.EH_SOCIAL_SECURITY_REPORT.ORGANIZATION_ID);
 //		LOGGER.debug("sql is " + step.toString());
         Record result = step.fetchAny();
